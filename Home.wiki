@@ -1,35 +1,19 @@
 == Jummp ==
 
-Just a Model Management Platform
+Just a Model Management Platform (Jummp) will be a modular software infrastructure for the collaborative development and management of biochemical models.
 
-=== Wiki features ===
+== Development ==
+Community developed project, initially undertaken by the European Bioinformatics Institute (EBI) and The German Cancer Research Center (DKFZ).
 
-This wiki uses the [[http://www.wikicreole.org/|Creole]] syntax, and is fully compatible with the 1.0 specification.
+== Expected features ==
+* storage (and retrieval) of all model revisions
+* private secured access to the curation and annotation pipeline for the models you submitted
+* collaboration: possibility to share models and work together with your colleagues
+* reviewers’ access to models
+* easy deployment, reuse and extension
+* accurate search, with ranked results
+* fast
+* flexible
 
-The wiki itself is actually a hg repository, which means you can clone it, edit it locally/offline, add images or any other file type, and push it back to us. It will be live immediately.
 
-Go ahead and try:
 
-{{{
-$ hg clone http://bitbucket.org/jummp/jummp/wiki
-}}}
-
-Wiki pages are normal files, with the .wiki extension. You can edit them locally, as well as creating new ones.
-
-=== Syntax highlighting ===
-
-You can also highlight snippets of text, we use the excellent [[http://www.pygments.org/|Pygments]] library.
-
-Here's an example of some Python code:
-
-{{{
-#!python
-
-def wiki_rocks(text):
-	formatter = lambda t: "funky"+t
-	return formatter(text)
-}}}
-
-You can check out the source of this page to see how that's done, and make sure to bookmark [[http://pygments.org/docs/lexers/|the vast library of Pygment lexers]], we accept the 'short name' or the 'mimetype' of anything in there.
-
-Have fun!
