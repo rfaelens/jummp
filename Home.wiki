@@ -12,7 +12,7 @@
 * Roadmap
 
 == Bugs and Feature Requests ==
-Please use the Bitbucket issue tracker (above tab) to submit bugs and feature requests. See the [[develop|developers wiki]] for details on contributing patches or other work.
+Please use the Bitbucket issue tracker (above tab) to submit bugs and feature requests. See the [[Develop|developers wiki]] for details on contributing patches or other work.
 
 Before submitting new bugs, please consult the open open bug list and fixed bugs for the list of bugs fixed since the last stable release.
 
@@ -22,7 +22,7 @@ To be completed soon...
 == Contribution and Development ==
 Community developed project, initially undertaken by the European Bioinformatics Institute (EBI) and The German Cancer Research Center (DKFZ).
 
-For details on contributing, please visit the developers wiki.
+For details on contributing, please visit the [[Develop|developers wiki]].
 
 == Expected features ==
 * storage (and retrieval) of all model revisions
