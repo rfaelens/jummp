@@ -164,3 +164,18 @@ All these rights are revoked from the previous owner.
 
 === Ownership ===
 The transfer of ownership is only handled via the access control list. The actual linked owner from revision and model are unchanged. The process of transferring ownership can only be reverted by a new transfer from new owner to previous owner.
+
+== Begin Curation ==
+An owner of the model must be able to start the curation process. The curators of the running instance have to be informed and have to gain the right to upload new revisions to the model.
+
+=== Prerequisites ===
+The owner of the model has the right to begin the collaboration and the model is not in state "under curation" or "published". There has to be at least one user in the instance who is a curator.
+
+=== Access Control ===
+The begin of curation requires changes to the ACL of the model. Read access to future revisions of the model and write access (upload new model revision) has to be revoked for each user of the model. The right to delete revisions or the complete model has to be revoked from all users. This implicitly ends collaboration on write access. The right to read future revisions and write to the model has to be passed to the group of curators.
+
+=== Curation ===
+The begin of curation sets the model state "under curation". The access control has to be altered as described above. The start of curation cannot be reverted by a user (only by a curator by rejecting the curation).
+
+=== Notification ===
+The curators need to be informed that a model has been set under curation. See Requirement specification on Notification.
