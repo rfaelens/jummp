@@ -146,3 +146,21 @@ An owner is only able to revoke read access for future revisions. The right to r
 
 ==== Revoking write access ====
 An owner is able to revoke write access to the model. Existing revisions uploaded by the collaborator are not affected by revoking the right as the collaborator still has read access. The user must have the right to write revisions to revoke that right.
+
+== Transferring Ownership of Model ==
+In case that the owner of a model ends his work on the model before the curation process started he should be allowed to transfer the complete ownership to a collaborator of the model in question.
+
+=== Prerequisite ===
+The user is owner of the model and the model state is not "under curation" or "published". The user the ownership should be transferred to has to be a collaborator of the model.
+
+=== Access Control ===
+Transferring the ownership means moving access rights from the owner to the new "owner". This includes
+* Write access (if not already granted to the new owner)
+* Delete model
+* Start curation
+* Invite other users for collaboration
+
+All these rights are revoked from the previous owner.
+
+=== Ownership ===
+The transfer of ownership is only handled via the access control list. The actual linked owner from revision and model are unchanged. The process of transferring ownership can only be reverted by a new transfer from new owner to previous owner.
