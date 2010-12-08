@@ -12,9 +12,9 @@
 * Roadmap
 
 == Bugs and Feature Requests ==
-Please use the Bitbucket issue tracker (above tab) to submit bugs and feature requests. See developers wiki for details on contributing patches or other work.
+Please use the Bitbucket issue tracker (above tab) to submit bugs and feature requests. See the [[develop|developers wiki]] for details on contributing patches or other work.
 
-Before submitting new bugs, please consult the open open bug list and FixedBugs for the list of bugs fixed since the last stable release.
+Before submitting new bugs, please consult the open open bug list and fixed bugs for the list of bugs fixed since the last stable release.
 
 == Mailing Lists ==
 To be completed soon...
