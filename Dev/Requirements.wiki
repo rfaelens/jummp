@@ -68,3 +68,31 @@ During upload the access control has to be set for the new model. The user becom
 * Read future revisions of the model
 
 Additionally the user becomes the owner of the revision. He receives permanent read access to the revision.
+
+= Uploading a Model Revision =
+It has to be possible to upload a new revision to an existing model. The new revision replaces the old revision depending on the users rights to access the revision.
+
+== Prerequisites ==
+To upload a new model revision the model must exist in the database. Only logged-in users are in general allowed to upload new revisions. The user must have the right to upload new revisions for the model. Uploading a new model revision is done by uploading a new model file to an existing model.
+
+The user has to specify a comment when uploading a new revision.
+
+=== Validation ===
+The model file is validated before it is stored as a new revision. It is checked whether the file is a model file at all and can be parsed. Basic checks must be performed to ensure that the new model file is related to the existing previous revision.
+
+== Storing a Revision ==
+The new model file replaces the existing file in the VCS. The absolute path can be constructed from information in the model (e.g. filename) and the file will locally be overwritten and committed to the VCS system, e.g. //svn ci//. The comment specified during the upload is used as the commit message.
+
+=== Creating the Revision ==
+A new DOM object has to be added for the VCS revision. The same fields as described in the Requirement Upload Model have to be set. The new revision object has to be added to the existing DOM object representing the model.
+
+== Access Control ==
+Users get read access depending on their right to read future revisions of the model. If a user has such a right on the model he receives read access to the revision. The user who uploads the revision becomes the owner of the revision and has the right to delete this revision as long as there is no newer revision.
+
+== Annotation ==
+The annotations of each new model file have to be extracted using a library for the specific format. This task can be performed in the background after the file has been saved to the VCS. The annotations are described in more detail in the annotation requirements specification.
+
+== Concurrent Access ==
+It is possible that two collaborating users are uploading a new model revision at the same time. This can result in a race condition when user B updates the file in the filesystem before user A's changes are committed. The commit of user A would commit user B's changes and user B's commit would fail (nothing to commit). User A's changes are completely lost. To prevent such a problem the service method must lock write access either to a model or to the complete VCS. No two parallel threads may change the VCS.
+
+In general each commit must include only the model file. E.g. in case of Subversion a //svn ci// without a specified changeset would commit all currently added or changed files. This is implementation specific but present for all VCS's.
