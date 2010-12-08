@@ -96,3 +96,33 @@ The annotations of each new model file have to be extracted using a library for 
 It is possible that two collaborating users are uploading a new model revision at the same time. This can result in a race condition when user B updates the file in the filesystem before user A's changes are committed. The commit of user A would commit user B's changes and user B's commit would fail (nothing to commit). User A's changes are completely lost. To prevent such a problem the service method must lock write access either to a model or to the complete VCS. No two parallel threads may change the VCS.
 
 In general each commit must include only the model file. E.g. in case of Subversion a //svn ci// without a specified changeset would commit all currently added or changed files. This is implementation specific but present for all VCS's.
+
+== Delete Model Revision ==
+It should be possible to delete the latest revision of a model.
+
+=== Limitations ===
+VCS systems do not allow to delete revisions. A common practice is to revert a commit which simulates a deletion. The revision itself is still present in the revision history of the VCS. Deleting a revision would mean changing the history of the VCS and directly manipulating the database. Modern VCS such as git do not allow at all to delete a commit as that would rewrite the history of the repository and by that change the commit hash of each and every commit afterwards.
+
+This means a revision cannot be deleted physically. A file once uploaded will always be at least visible to the administrators of the database.
+
+=== Prerequisites ===
+The user who wants to delete a revision is logged-in and has the right to delete the latest revision of the model. It is not possible to delete revisions, which are not the latest revision as the changes are also present in the latest revision.
+
+=== Deletion ===
+Due to the limitations of the VCS, it is not possible to really delete a model revision. Therefore it is not required to delete the DOM object. It is sufficient to set a flag "deleted" and to ignore all such flagged revisions in the service layer. If the model does not contain any other revision, the model itself is also flagged as "deleted" as it is not possible to have a model without revisions. For the same reasons as discussed above a model is also not deleted from the VCS.
+
+An administrator is able to restore a revision and a model by removing the deleted flag.
+
+== Delete Model ==
+The owner (submitter) of a model should be able to delete the complete model.
+
+=== Limitations ===
+For deleting a complete model the same limitations apply as illustrated in the requirement for deleting a model revision.
+
+=== Prerequisite ===
+Only an owner is allowed to delete a complete model if and only if he has deletion right on the model. The right to delete a complete model is revoked as soon as the curation process begins.
+
+=== Deletion ===
+The deletion is performed in the same way as deleting all model revisions. The only difference is that also model revisions the user has not the right to delete, are deleted. The right to delete a model has preference over the right to delete a model revision.
+
+An administrator is able to restore a deleted model by removing the deleted flag.
