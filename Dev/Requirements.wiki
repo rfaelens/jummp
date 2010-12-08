@@ -1,1 +1,70 @@
-== Requirements ==
+= Requirements =
+
+== Uploading a Model ==
+A user can upload a model file (e.g. SBML) to the BioModels Repository. The model ﬁle will be stored in a VCS and meta-data will be extracted and stored in a relational database. The user becomes the owner of the model. The owner is able to view and download the uploaded model. He can upload new revisions of the model which will replace the version shown to the users.
+
+=== Prerequisites ===
+Only a logged-in user can upload a model ﬁle as a new model. If a user is not yet logged-in, he has to login ﬁrst (see Requirement user). The user has to upload the SBML ﬁle via a web form and can enter additional information:
+* Links to Publications
+* Author information of Publications
+* Name of the Model (can also be extracted from uploaded ﬁle)
+
+==== Validation ====
+The model ﬁle is validated before the model is created (see Requirement for Uploading a Model Revision). Only for a valid model ﬁle a new model is created.
+
+=== Storing a Model ===
+The model ﬁle has to be added to the version control system (VCS), e.g. svn add $file followed by svn commit and an initial Revision has to be created for this ﬁle.
+
+The ﬁlename used in the VCS has to be unique to prevent name clashes. Because of that it is not possible to use the name of the uploaded ﬁle. A possible pattern could be:
+
+UID_AUTHOR_ORIGFILENAME.SBML
+
+==== Creating the Revision ====
+This is very similar to the requirement of uploading a new Model Revision. If the ﬁle
+could be added to the VCS a DOM object for the Revision has to be created. The
+Revision DOM object represents information provided by the VCS system to be used
+in the application. This includes:
+
+* **Revision number of VCS** (e.g. 1234 in SVN, or SHA1-sum in git)
+* **Link to the user** who uploaded the revision. Rational: the interaction with VCS is done with the system user running the application instance. A user in the application does not refer to a user in the VCS. Therefore it has to be stored separately who uploaded a revision.
+* **Date** of the upload, that is current date
+* **A comment** which is used as the commit message (e.g. //Initial Import//)
+* **State**
+* **Format**
+* **Minor Revision**
+
+=== Creating the Model ===
+The DOM object which has to be created for the new Model has to be linked to the created VCS revision. It is not allowed to have a Model without associated revisions. The Model receives several meta information:
+
+* **Name** specified by the user or taken from uploaded file
+* **Original filename** the filename of the uploaded file
+* **Filename** the filename used in the VCS
+
+
+The DOM object for model and revision should be stored in one transaction as they depend on each other (revision requires model, model requires at least one revision).
+
+=== Publications ===
+The model might be linked to one or more publications. During the upload the user can specify the Pubmed ID which is used to fetch additional information from a publicly available webservice. In case the webservice fails the user could specify the author information. For each publication some meta information is set:
+* **Type**
+* **Journal**
+* **Title**
+* **Authors**
+* **Affiliation**
+* **Abstract**
+
+Each Publication has to be added to the Model and stored.
+
+=== Thoughts on Transaction ===
+The complete process of storing a new model should be transactional. That is either the model is uploaded to both VCS and Database or neither in the one, nor in the other. This is rather difficult as two storage solutions are used. To get the revision number the file has to be added and committed to the VCS which would be before the DB stored the model. At that point the DB transaction could fail, leaving the complete system in an inconsistent state. Most VCS systems do not support rollbacks, it is modeled in general as another commit doing the opposite of the commit which has to be rolled back.
+
+To achieve a transactional behavior the commit needs to be reverted in the VCS whenever the database fails. Assuming that VCS operations are always performed before the DB is altered, no additional requirements to the DB are needed.
+
+== ACL ==
+During upload the access control has to be set for the new model. The user becomes the owner of the model. He is allowed to:
+* Upload a new model revision
+* Delete the model
+* Start curation of model
+* Invite other users for collaboration
+* Read future revisions of the model
+
+Additionally the user becomes the owner of the revision. He receives permanent read access to the revision.
