@@ -193,3 +193,17 @@ The right to read and write to the model is revoked from the curator group.
 
 === Rejecting ===
 The model state is set back from "under curation" to "unpublished" and the ACL is altered as described above. The curator has to state a reason why he is rejecting the curation. This reason has to be passed to the owner of the model in a notification.
+
+== Publish Model ==
+A curator can publish a model he has write access to (curation has been started by the owner). The model becomes publicly available. The curator is still able to upload new revisions of the model which are not shown to the user. The curator has to explicitly publish such a revision again.
+
+=== Prerequisite ===
+The curation of model has been started and the model has not yet been published. The process is performed by a member of the curator group.
+
+=== Publish ===
+The state of the model is set to "published". The rights to the model are unchanged, that is the curators keep their rights on the model. The latest revision becomes publicly readable by setting the appropriate rights. Future revisions will not become publicly available automatically.
+
+If a curator wants to publish a future created revision, he has to publish that revision.
+
+=== Access Control ===
+The right to read is added for all users (role user and role anonymous) to the latest revision of the model. This makes the model implicitly available to search, download, etc.
