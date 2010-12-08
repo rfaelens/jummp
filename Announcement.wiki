@@ -1,0 +1,19 @@
+= JUMMP: Just a Modeling Management Platform =
+== Common announcement of EBI and DKFZ ==
+
+To provide the world-wide community with a modern model database, the Eils and le Novère groups are announcing the JUMMP project.
+
+The functionality of JUMMP will consist of what is provided by the Biomodels database plus enhancements.
+BioModels database is a resource for storing, searching and retrieving published mathematical models of biological interests. The BioModels database has been developed in the group of Nicolas Le Novère and is hosted at the EBI.
+
+The development of BioModels database has a long-standing tradition. Although the BioModels software is written in Java, the underlying architecture has substantial limitations, making it difficult to extend the software, reusability is also an issue. As in many other prominent software projects, a complete redesign of the software architecture is sometimes supportive or even recommended.
+
+The implementation of JUMMP is planned as a multi-step process. For several months the participating EBI and DKFZ groups have been preparing the project by defining requirements. Documents defining these requirements and use case descriptions as well as software strategies will be hosted together with the source code which will be publicly available for community development of the software. The plan for this collaborative project has been presented for the first time during the last SBML meeting (Combine 2010) in Edinburgh in October 2010.
+
+In the first step core functionality will be provided. This includes the complete management of model data and user management in order to provide secure access to all models. Only a rudimentary web access to model revisions will be provided. The deliverables of the first step are a simple log-in, upload of new model revision, secure access to the latest model revision, download of this model revision and basic visualization of model SBML structure in the user interface.
+
+Web access to the core functionality will be added in the second step. This allows more detailed viewing and changing the revisions of a model. The deliverables are user-visible version control with secure access to revisions, registration of users, updates and deletion of model revision, improved visualization of model SBML structure in the user interface and a first basic web service.
+
+Further enhancements are being considered on a conceptual level and will be described in more detail later during the development process.
+
+We will start the implementation immediately, are open for further contribution from -and collaboration with- the global BioModels community and plan the completion of the first two steps within the next half year. Delivery of a first stable release is intended for the end of 2011.

@@ -6,7 +6,7 @@
 2010-12-07: project created
 
 == Documentation ==
-* Announcement
+* [[Announcement|Announcement]]
 * [[Dev/UseCases|Use Cases]]
 * [[Dev/Requirements|Requirements]]
 * [[Dev/ModularFramework|Specifications of the modular framework]]
