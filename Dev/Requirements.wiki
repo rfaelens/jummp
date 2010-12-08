@@ -179,3 +179,17 @@ The begin of curation sets the model state "under curation". The access control 
 
 === Notification ===
 The curators need to be informed that a model has been set under curation. See Requirement specification on Notification.
+
+== Rejecting Curation ==
+A curator has to be able to reject a model for curation. The owner needs to be informed and needs to get back write access, so that he can upload a new version and start the curation process again.
+
+=== Prerequisites ===
+The curation process has been started by the owner of a model and no curator has uploaded a new revision of the model.
+
+=== Access Control ===
+The altering of the ACL which has been performed for starting the curation process has to reverted where possible. The information who had write access to the model is not known anymore so write access can only be given to the owner (identified by the right to start curation) of the model. Read access to future revisions is also only passed to the owner. If the owner wants other users to collaborate on the model again, he has to grant the rights.
+
+The right to read and write to the model is revoked from the curator group.
+
+=== Rejecting ===
+The model state is set back from "under curation" to "unpublished" and the ACL is altered as described above. The curator has to state a reason why he is rejecting the curation. This reason has to be passed to the owner of the model in a notification.
