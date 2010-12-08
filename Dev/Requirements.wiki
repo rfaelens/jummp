@@ -126,3 +126,23 @@ Only an owner is allowed to delete a complete model if and only if he has deleti
 The deletion is performed in the same way as deleting all model revisions. The only difference is that also model revisions the user has not the right to delete, are deleted. The right to delete a model has preference over the right to delete a model revision.
 
 An administrator is able to restore a deleted model by removing the deleted flag.
+
+== Collaboration ==
+An owner of a model might grant read and write access to another user (collaborator). This collaborator is also able to view and download the model. If the owner granted write access, the collaborator is also allowed to upload new revisions of the model.
+
+=== Prerequisites ===
+The owner of a model has the right to invite other users to read or write the model. The level of what can be granted to other users depends on the level of right the user currently has on the model. Rational: if the user does not have write access to the model (e.g. it is under curation) the user cannot grant write access to another user.
+
+=== Granting Rights ===
+==== Granting read access ====
+The user can grant read access to single revisions, to all revisions or to all revisions including future revisions. A read right to a revision cannot be revoked as the user had once read access to it and by that might have collected all relevant information. The right to read future revisions can be revoked and is for example implicitly revoked by starting the curation.
+
+==== Granting write access ====
+The user can grant write access to the model. This means the collaborator gains the right to upload new model revisions. If the collaborator uploads a new revision he gains the normal rights on the revision as described in the Requirement to upload model revisions.
+
+=== Revoking Rights ===
+==== Revoking read access ====
+An owner is only able to revoke read access for future revisions. The right to read existing revisions cannot be revoked as illustrated in the discussion on Granting read access. The user must have the right to read future revisions to revoke that right.
+
+==== Revoking write access ====
+An owner is able to revoke write access to the model. Existing revisions uploaded by the collaborator are not affected by revoking the right as the collaborator still has read access. The user must have the right to write revisions to revoke that right.
