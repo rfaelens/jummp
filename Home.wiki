@@ -1,4 +1,4 @@
-Just a Model Management Platform (Jummp) will be a modular software infrastructure for the collaborative development and management of biochemical models.
+**Just a Model Management Platform** (Jummp) will be a modular software infrastructure for the collaborative development and management of biochemical models.
 
 == News ==
 2010-12-07: project created
