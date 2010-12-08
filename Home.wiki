@@ -1,9 +1,28 @@
-== Jummp ==
-
 Just a Model Management Platform (Jummp) will be a modular software infrastructure for the collaborative development and management of biochemical models.
 
-== Development ==
+== News ==
+2010-12-07: project created
+
+== Documentation ==
+* Announcement
+* Use cases
+* Requirements
+* Specifications of the modular framework
+* Risks contingency plans
+* Roadmap
+
+== Bugs and Feature Requests ==
+Please use the Bitbucket issue tracker (above tab) to submit bugs and feature requests. See developers wiki for details on contributing patches or other work.
+
+Before submitting new bugs, please consult the open open bug list and FixedBugs for the list of bugs fixed since the last stable release.
+
+== Mailing Lists ==
+To be completed soon...
+
+== Contribution and Development ==
 Community developed project, initially undertaken by the European Bioinformatics Institute (EBI) and The German Cancer Research Center (DKFZ).
+
+For details on contributing, please visit the developers wiki.
 
 == Expected features ==
 * storage (and retrieval) of all model revisions
