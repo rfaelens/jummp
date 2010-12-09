@@ -10,14 +10,16 @@ To make life easier please get in touch with the Jummp Developer Team before sta
 == Coding Style Conventions ==
 A consistent coding style makes development much easier and the code much more readable. Because of that the Jummp development follows a very strict coding style. There are many existing code style guidelines and it does not make sense to add yet another one, therefore we just point to an existing one and add our additions.
 
-Jummp follows the Java Coding Style as described by [[http://geosoft.no/development/javastyle.html|geosoft]] with the following additions and corrections:
+Jummp follows the Java Coding Style as described by [[http://geosoft.no/development/javastyle.html|geosoft]] with the following corrections and additions:
 
-* (8) "Private class variables should have underscore suffix": this rule can be relax, as if we follow the encapsulation paradigm, most of the variables would have this "_" in their name...
+* (8) "Private class variables should have underscore suffix": this rule can be relax, as if we follow the encapsulation paradigm, most of the variables would have this "_" in their name... Cf. rule (46): "Class variables should never be declared public".
 * (9) "Generic variables should have the same name as their type": this rule can be relaxed in some cases (when it makes the method clearer)
-* Indentation are four whitespaces, no tabs. Rationale: whitespaces are easier to read when using a terminal for viewing code diffs as it happens with Mercurial.
-* Braces after each if/for/while statement. It is:
+* (34) "File content must be kept within 80 columns": please welcome the 21th century (and its wide screens) and drop this stupid rule!
+* (61) Indentation are 4 whitespaces, no tabs. Rationale: whitespaces are easier to read when using a terminal for viewing code diffs as it happens with Mercurial.
+* (61) Braces should be used after each if/for/while statement. It is:
 {{{
-if (foo) {
+if (foo)
+{
     bar()
 }
 }}}
@@ -26,7 +28,7 @@ and not
 if (foo)
    bar()
 }}}
-Rationale: If in future it is required to extend the code block formatting changes have to be added to a changeset. This is undesired. Furthermore it is easy to get the if statement wrong if it is not in a block.
+Rationale: if in future it is required to extend the code block formatting changes have to be added to a changeset. This is undesired. Furthermore it is easy to get the if statement wrong if it is not in a block.
 * Newline at end of file is required. Rationale: that makes version control systems happy.
 * Line breaks in Unix style. Rationale: most development tools like hg diff are Unix centric. Windows line break results in ugly markers. If you are on Windows or Mac OS X use the [[http://mercurial.selenic.com/wiki/EolExtension|EOL Extension]]
 
