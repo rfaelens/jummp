@@ -7,11 +7,11 @@ Here we describe the roles a user assumes in documented use cases (see below for
 Anyone who accesses the system without being logged in is a **visitor**.
 
 Possible actions:
-* accesses a specific model without prior knowledge of its identifier
-* retrieves specific models from the repository
-* gains more knowledge about a given model
-* downloads a given model in a specific format
-* runs simulations on a model using specific basic parameters
+* [[#!list-models|accesses a specific model without prior knowledge of its identifier]]
+* [[#!search-models|retrieves specific models from the repository]]
+* [[#!show-model|gains more knowledge about a given model]]
+* [[#!download-model|downloads a given model in a specific format]]
+* [[#!simulate-model|runs simulations on a model using specific basic parameters]]
 
 === Submitter ===
 
@@ -79,6 +79,7 @@ Some explanations:
 
 Please break down the use cases such that all conditions and the resulting steps become clear. For instance, if model is invalid, error page is displayed, postcondition is unchanged, etc.
 
+
 === welcome-user ===
 
 |=name   |=**welcome-user**
@@ -90,7 +91,19 @@ Please break down the use cases such that all conditions and the resulting steps
 |post    | n/a
 |ui      | click on buttons to **search-models**, **login-user**, **submit-model**
 
-\\
+
+=== list-models ===
+
+|=name   |=**list-models**
+|summary | lists all the models a user have access
+|actors  | all
+|pre     | n/a
+|input   | n/a
+|output  | provides a list of models
+|post    | n/a
+|ui      | each model has a hyperlink which allow access to the "show-model" action
+
+
 === login-user ===
 
 |=name   |=**login-user**
@@ -102,7 +115,7 @@ Please break down the use cases such that all conditions and the resulting steps
 |post    | session stores user and authorisations
 |ui      | type in account, password\\ click on button to continue\\ password recovery option
 
-\\
+
 === search-models ===
 
 |=name   |=**search-models**
@@ -114,7 +127,7 @@ Please break down the use cases such that all conditions and the resulting steps
 |post    | n/a
 |ui      | click on table header to sort table\\ sort by latest update (default), name, model id, first author\\ click on model name, model id to **show-model**\\ click on text input to change search criteria\\ click on button to **search-models**
 
-\\
+
 === show-model ===
 
 |=name   |=**show-model**
@@ -126,7 +139,29 @@ Please break down the use cases such that all conditions and the resulting steps
 |post    | n/a
 |ui      | click on tab to show it
 
-\\
+
+=== download-model ===
+
+|=name   |=**download-model**
+|summary | allows the download of a given model
+|actors  | all
+|pre     | n/a
+|input   | model id, format 
+|output  | downloadable file of the requested model in the requested format
+|post    | n/a
+|ui      | browser window asking whether to open or save the file
+
+
+=== simulate-model ===
+|=name   |=**simulate-model**
+|summary | simulate a given model
+|actors  | all
+|pre     | n/a
+|input   | model id, basic parameters
+|output  | reaction graph (picture), raw data
+|post    | n/a
+|ui      | selection of the species to simulate and basic parameters
+
 === submit-model ===
 
 |=name   |=**submit-model**
@@ -138,7 +173,7 @@ Please break down the use cases such that all conditions and the resulting steps
 |post    | DB and RCS store new model DOMs and file
 |ui      | click on text fields to enter:\\ - publication info: pmid, doi or url (optional, c.f. work-in-progress models)\\ - use service like Citexplore to retrieve all publication details (provide a\\ form in case of failure)\\ - model details\\ give feedback to user if a check fails, e.g. model is not valid
 
-\\
+
 === update-model ===
 
 |=name   |=**update-model**
@@ -150,7 +185,7 @@ Please break down the use cases such that all conditions and the resulting steps
 |post    | same as **submit-model**
 |ui      | click on text field to enter comments\\ click on button to update
 
-\\
+
 === delete-model ===
 
 |=name   |=**delete-model**
@@ -162,7 +197,8 @@ Please break down the use cases such that all conditions and the resulting steps
 |post    | DB and RCS still contain the model for a limited time, but it is not visible\\ to the user; only the administrator can see it (and possibly undo the deletion)
 |ui      | |
 
-\\
+
+=== curate-model ===
 
 |=name   |=**curate-model**
 |summary | curates a model
@@ -173,7 +209,8 @@ Please break down the use cases such that all conditions and the resulting steps
 |post    | model consistency test (provided by libSBML or similar)
 |ui      | convert model to newest format\\ add simulation results (comments, screenshots, simulator files)
 
-\\
+
+=== register-user ===
 
 |=name   |=**register-user**
 |summary | creates an user account
@@ -184,7 +221,8 @@ Please break down the use cases such that all conditions and the resulting steps
 |post    | details in DB
 |ui      | |
 
-\\
+
+=== publish-model ===
 
 |=name   |=**publish-model**
 |summary | make a model publicly available
@@ -195,7 +233,8 @@ Please break down the use cases such that all conditions and the resulting steps
 |post    | model is public\\ can occur in search results of visitor
 |ui      | |
 
-\\
+
+=== release-models ===
 
 |=name   |=**release-models**
 |summary | release public model as a downloadable archive
