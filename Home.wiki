@@ -25,7 +25,7 @@ To be completed soon...
 == Contribution and Development ==
 Community developed project, initially undertaken by the European Bioinformatics Institute (EBI) and The German Cancer Research Center (DKFZ).
 
-For details on contributing, please visit the [[develop|developers wiki]].
+For details on contributing, please visit the [[Develop|developers wiki]].
 
 == Expected features ==
 * storage (and retrieval) of all model revisions
