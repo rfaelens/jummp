@@ -6,9 +6,10 @@
 
 * The user will be able to log in to the system.
 * The user will be able to upload new model revisions.
-* The user will be able to securely access the latest revision of a model (he has access to).
+* The user will be able to securely access the latest revision of a model (he/she has access to).
 * The user will be able to download the latest revision of a model.
-* The user interface will have a basic visualization ("model" tab, c.f. current BioModels software) of the model SBML structure.
+* The user interface will have a basic visualisation ("model" tab, c.f. current BioModels Database software) of the model SBML structure.
+
 
 === Basic version ===
 
