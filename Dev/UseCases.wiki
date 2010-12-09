@@ -1,10 +1,10 @@
 == Actors ==
 
-Actors describe the roles a user assumes in documented use cases (see below for their in-depth description).
+Here we describe the roles a user assumes in documented use cases (see below for their in-depth description).
 
 === Visitor ===
 
-Anyone who accesses BioModels without being logged in is a **visitor**.
+Anyone who accesses Jummp without being logged in is a **visitor**.
 
 * accesses a specific model without prior knowledge of its identifier
 * retrieves specific models from the repository
