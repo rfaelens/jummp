@@ -10,8 +10,10 @@ To make life easier please get in touch with the Jummp Developer Team before sta
 == Coding Style Conventions ==
 A consistent coding style makes development much easier and the code much more readable. Because of that the Jummp development follows a very strict coding style. There are many existing code style guidelines and it does not make sense to add yet another one, therefore we just point to an existing one and add our additions.
 
-Jummp follows the Java Coding Style as described by [[http://geosoft.no/development/javastyle.html|geosoft]] with the following additions:
+Jummp follows the Java Coding Style as described by [[http://geosoft.no/development/javastyle.html|geosoft]] with the following additions and corrections:
 
+* (8) "Private class variables should have underscore suffix": this rule can be relax, as if we follow the encapsulation paradigm, most of the variables would have this "_" in their name...
+* (9) "Generic variables should have the same name as their type": this rule can be relaxed in some cases (when it makes the method clearer)
 * Indentation are four whitespaces, no tabs. Rationale: whitespaces are easier to read when using a terminal for viewing code diffs as it happens with Mercurial.
 * Braces after each if/for/while statement. It is:
 {{{
