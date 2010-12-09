@@ -4,8 +4,9 @@ Here we describe the roles a user assumes in documented use cases (see below for
 
 === Visitor ===
 
-Anyone who accesses Jummp without being logged in is a **visitor**.
+Anyone who accesses the system without being logged in is a **visitor**.
 
+Possible actions:
 * accesses a specific model without prior knowledge of its identifier
 * retrieves specific models from the repository
 * gains more knowledge about a given model
@@ -78,7 +79,7 @@ Some explanations:
 
 Please break down the use cases such that all conditions and the resulting steps become clear. For instance, if model is invalid, error page is displayed, postcondition is unchanged, etc.
 
-\\
+=== welcome-user ===
 
 |=name   |=**welcome-user**
 |summary | shows summary information depending on user
@@ -90,6 +91,7 @@ Please break down the use cases such that all conditions and the resulting steps
 |ui      | click on buttons to **search-models**, **login-user**, **submit-model**
 
 \\
+=== login-user ===
 
 |=name   |=**login-user**
 |summary | user logs in to be authorised, i.e. granted access to models and web pages
@@ -101,6 +103,7 @@ Please break down the use cases such that all conditions and the resulting steps
 |ui      | type in account, password\\ click on button to continue\\ password recovery option
 
 \\
+=== search-models ===
 
 |=name   |=**search-models**
 |summary | search and list all models the current user has access to
@@ -112,6 +115,7 @@ Please break down the use cases such that all conditions and the resulting steps
 |ui      | click on table header to sort table\\ sort by latest update (default), name, model id, first author\\ click on model name, model id to **show-model**\\ click on text input to change search criteria\\ click on button to **search-models**
 
 \\
+=== show-model ===
 
 |=name   |=**show-model**
 |summary | show model in tabbed view to visualise its content
@@ -123,6 +127,7 @@ Please break down the use cases such that all conditions and the resulting steps
 |ui      | click on tab to show it
 
 \\
+=== submit-model ===
 
 |=name   |=**submit-model**
 |summary | user uploads a model from local filesystem to repository
@@ -134,6 +139,7 @@ Please break down the use cases such that all conditions and the resulting steps
 |ui      | click on text fields to enter:\\ - publication info: pmid, doi or url (optional, c.f. work-in-progress models)\\ - use service like Citexplore to retrieve all publication details (provide a\\ form in case of failure)\\ - model details\\ give feedback to user if a check fails, e.g. model is not valid
 
 \\
+=== update-model ===
 
 |=name   |=**update-model**
 |summary | replaces a model with a newer version
@@ -145,6 +151,7 @@ Please break down the use cases such that all conditions and the resulting steps
 |ui      | click on text field to enter comments\\ click on button to update
 
 \\
+=== delete-model ===
 
 |=name   |=**delete-model**
 |summary | deletes a model
