@@ -7,11 +7,11 @@ Here we describe the roles a user assumes in documented use cases (see below for
 Anyone who accesses the system without being logged in is a **visitor**.
 
 Possible actions:
-* [[#!list-models|accesses a specific model without prior knowledge of its identifier]]
-* [[#!search-models|retrieves specific models from the repository]]
-* [[#!show-model|gains more knowledge about a given model]]
-* [[#!download-model|downloads a given model in a specific format]]
-* [[#!simulate-model|runs simulations on a model using specific basic parameters]]
+* [[dev/UseCases#!list-models|accesses a specific model without prior knowledge of its identifier]]
+* [[dev/UseCases#!search-models|retrieves specific models from the repository]]
+* [[dev/UseCases#!show-model|gains more knowledge about a given model]]
+* [[dev/UseCases#!download-model|downloads a given model in a specific format]]
+* [[dev/UseCases#!simulate-model|runs simulations on a model using specific basic parameters]]
 
 === Submitter ===
 
