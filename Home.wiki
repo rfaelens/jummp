@@ -8,9 +8,9 @@
 == Documentation ==
 * [[Announcement|Announcement]]
 * [[Deliverables|Deliverables]]
-* [[Dev/UseCases|Use Cases]]
-* [[Dev/Requirements|Requirements]]
-* [[Dev/ModularFramework|Specifications of the modular framework]]
+* [[dev/UseCases|Use Cases]]
+* [[dev/Requirements|Requirements]]
+* [[dev/ModularFramework|Specifications of the modular framework]]
 * Risks contingency plans
 * [[Roadmap|Roadmap]]
 
@@ -25,7 +25,7 @@ To be completed soon...
 == Contribution and Development ==
 Community developed project, initially undertaken by the European Bioinformatics Institute (EBI) and The German Cancer Research Center (DKFZ).
 
-For details on contributing, please visit the [[Develop|developers wiki]].
+For details on contributing, please visit the [[develop|developers wiki]].
 
 == Expected features ==
 * storage (and retrieval) of all model revisions
