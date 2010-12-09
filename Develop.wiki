@@ -1,7 +1,9 @@
 = Jummp Developers Wiki =
 
 == How to Contribute ==
-Jummp uses Mercurial as the version control system and the main repository is hosted at Bitbucket. The easiest way to get started is to fork the repository on Bitbucket and work on your private clone till you have something ready. As soon as your feature is ready you can do a pull request to ask the Jummp Developer Team to merge your changes. The code change will be peer-reviewed and it will be checked if the change complies with the development principles and goals of Jummp.
+Jummp uses [[http://mercurial.selenic.com/|Mercurial]] as the source revision control system and the main repository is hosted on [[https://bitbucket.org/jummp/jummp/|Bitbucket]].
+
+The easiest way to get started is to clone the repository on Bitbucket and work on your private copy till you have something ready. As soon as your feature is ready, you can do a pull request to ask the Jummp Developer Team to merge your changes. The code change will be peer-reviewed and it will be checked if the change complies with the development principles and goals of Jummp.
 
 To make life easier please get in touch with the Jummp Developer Team before starting to work on a feature to make sure that nobody else is working on it.
 
