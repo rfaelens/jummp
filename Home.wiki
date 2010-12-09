@@ -7,6 +7,7 @@
 
 == Documentation ==
 * [[Announcement|Announcement]]
+* [[Deliverables|Deliverables]]
 * [[Dev/UseCases|Use Cases]]
 * [[Dev/Requirements|Requirements]]
 * [[Dev/ModularFramework|Specifications of the modular framework]]
