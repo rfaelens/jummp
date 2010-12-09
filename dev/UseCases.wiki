@@ -17,7 +17,8 @@ Possible actions:
 
 Anyone who submits a model is considered a **submitter** of this particular model. Login required.
 
-* uploads a model to the repository
+Possible actions:
+* [[dev/UseCases#!update-model|uploads a model to the repository]]
 * invites collaborators
 * hands his model over to curation process
 * checks the state of the curation (under curation, published)
@@ -26,7 +27,8 @@ Anyone who submits a model is considered a **submitter** of this particular mode
 
 Anyone who is given access to an unpublished/non-public/private model is a **collatorator**. Login required.
 
-* uploads a new version of a model submitted by someone else
+Possible actions:
+* [[dev/UseCases#!update-model|uploads a new version of a model submitted by someone else]]
 * curates/annotates a model of someone else
 
 === Contributor ===
