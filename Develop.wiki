@@ -29,11 +29,11 @@ if (foo)
    bar()
 }}}
 Rationale: if in future it is required to extend the code block formatting changes have to be added to a changeset. This is undesired. Furthermore it is easy to get the if statement wrong if it is not in a block.
-Moreover, the braces should be alone on the line. Rationale: that greatly increases code readability.
 * (74) "Method names can be followed by a white space when it is followed by another name": no white space after a method's name.
 * (74) "Methods should be separated by three blank lines": 2 blank lines is sufficient.
 * Newline at end of file is required. Rationale: that makes version control systems happy.
 * Line breaks in Unix style. Rationale: most development tools like hg diff are Unix centric. Windows line break results in ugly markers. If you are on Windows or Mac OS X use the [[http://mercurial.selenic.com/wiki/EolExtension|EOL Extension]]
+* Preferred indentation style [[http://en.wikipedia.org/wiki/Indent_style#K.26R_style|K&R style]]: this mainly means that the braces should be alone on the line. Rationale: this greatly increases code readability.
 
 === Groovy Additions ===
 Jummp uses the [[http://www.grails.org/|Grails framework]] which uses [[http://groovy.codehaus.org/|Groovy]]. Groovy is a dynamic programming language inspired by Java and compiled into Java Bytecode. It adds useful additions to the language, but some additions are not helpful at all and make it harder to read the code. Therefore the following Groovy coding style conventions are defined:
