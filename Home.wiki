@@ -7,12 +7,12 @@
 
 == Documentation ==
 * [[Announcement|Announcement]]
-* [[Deliverables|Deliverables]]
+* [[Roadmap|Roadmap]]
 * [[dev/UseCases|Use Cases]]
 * [[dev/Requirements|Requirements]]
 * [[dev/ModularFramework|Specifications of the modular framework]]
 * Risks contingency plans
-* [[Roadmap|Roadmap]]
+
 
 == Bugs and Feature Requests ==
 Please use the Bitbucket issue tracker (above tab) to submit bugs and feature requests. See the [[Develop|developers wiki]] for details on contributing patches or other work.
