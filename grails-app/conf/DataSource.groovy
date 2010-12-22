@@ -8,6 +8,7 @@ try {
     databaseProperties.setProperty("jummp.database.url", "jdbc:mysql://${server}:${port}/${database}")
     databaseProperties.setProperty("jummp.database.pooled", "true")
     databaseProperties.setProperty("jummp.database.dbCreate", "update")
+    databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.MySQLInnoDBDialect")
 } catch (Exception e) {
     // no database configured yet, use hsqldb
     databaseProperties.setProperty("jummp.database.driver", "org.hsqldb.jdbcDriver")
@@ -16,6 +17,7 @@ try {
     databaseProperties.setProperty("jummp.database.url", "jdbc:hsqldb:mem:devDB")
     databaseProperties.setProperty("jummp.database.pooled", "false")
     databaseProperties.setProperty("jummp.database.dbCreate", "create")
+    databaseProperties.setProperty("jummp.database.dialect", "")
 }
 def databaseConfig = new ConfigSlurper().parse(databaseProperties)
 
@@ -24,6 +26,7 @@ dataSource {
     driverClassName = databaseConfig.jummp.database.driver
     username = databaseConfig.jummp.database.username
     password = databaseConfig.jummp.database.password
+    dialect  = databaseConfig.jummp.database.dialect
 }
 hibernate {
     cache.use_second_level_cache = true
