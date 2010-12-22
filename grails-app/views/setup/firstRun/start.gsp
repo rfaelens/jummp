@@ -24,7 +24,7 @@
                         %{--TODO hide in LDAP setup--}%
                             <tr class='prop'>
                                 <td  class='name'><label>Password:</label></td>
-                                <td  class='value'><input type="password" name='password'/></td>
+                                <td  class='value'><input type="password" name='passwd'/></td>
                             </tr>
 
                             <tr class='prop'>
