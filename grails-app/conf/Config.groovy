@@ -136,7 +136,8 @@ if (!Boolean.parseBoolean(jummpConfig.jummp.security.ldap.enabled)) {
     grails.plugins.springsecurity.ldap.search.filter             = jummpConfig.jummp.security.ldap.search.filter
 
     // static options
-    grails.plugins.springsecurity.ldap.authorities.retrieveGroupRoles = false
+    grails.plugins.springsecurity.ldap.authorities.ignorePartialResultException = true
+    grails.plugins.springsecurity.ldap.authorities.retrieveGroupRoles = true
     grails.plugins.springsecurity.ldap.authorities.retrieveDatabaseRoles = true
 }
 
