@@ -57,6 +57,13 @@ grails.logging.jul.usebridge = true
 // packages to include in Spring bean scanning
 grails.spring.bean.packages = []
 
+grails.views.javascript.library="jquery"
+// JQuery config needed to fix broken version number in plugin version 1.4.4
+jquery {
+    sources = 'jquery' // Holds the value where to store jQuery-js files /web-app/js/
+    version = '1.4.4' // The jQuery version in use
+}
+
 // set per-environment serverURL stem for creating absolute links
 environments {
     production {
@@ -99,6 +106,21 @@ log4j = {
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'net.biomodels.jummp.security.User'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'net.biomodels.jummp.security.UserRole'
 grails.plugins.springsecurity.authority.className = 'net.biomodels.jummp.security.Role'
+
+grails.plugins.springsecurity.controllerAnnotations.staticRules = [
+        // protect the springsecurity ui plugin controllers
+        '/aclclass/**':          ['ROLE_ADMIN'],
+        '/aclentry/**':          ['ROLE_ADMIN'],
+        '/aclobjectidentity/**': ['ROLE_ADMIN'],
+        '/aclsid/**':            ['ROLE_ADMIN'],
+        '/persistentlogin/**':   ['ROLE_ADMIN'],
+        '/register/**':          ['ROLE_ADMIN'],
+        '/registrationcode/**':  ['ROLE_ADMIN'],
+        '/requestmap/**':        ['ROLE_ADMIN'],
+        '/role/**':              ['ROLE_ADMIN'],
+        '/securityinfo/**':      ['ROLE_ADMIN'],
+        '/user/**':              ['ROLE_ADMIN']
+]
 
 // ldap
 if (!Boolean.parseBoolean(jummpConfig.jummp.security.ldap.enabled)) {
