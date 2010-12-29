@@ -1,0 +1,234 @@
+package net.biomodels.jummp.plugins.git
+
+import grails.test.GrailsUnitTestCase
+import net.biomodels.jummp.core.vcs.*
+import org.apache.commons.io.FileUtils
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.errors.MissingObjectException
+import org.eclipse.jgit.lib.Constants
+import org.eclipse.jgit.lib.ObjectId
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.revwalk.RevWalk
+import org.eclipse.jgit.revwalk.RevCommit
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+
+class GitManagerTests extends GrailsUnitTestCase {
+    private File clone
+    private File exchangeDirectory
+    private GitManager gitManager
+    private Git git
+    private Repository repository
+
+    protected void setUp() {
+        super.setUp()
+        clone = new File("target/vcs/clone")
+        clone.mkdirs()
+        exchangeDirectory = new File("target/vcs/exchange")
+        exchangeDirectory.mkdirs()
+        File repositoryFile = new File("target/vcs/git")
+        gitManager = new GitManager()
+        FileRepositoryBuilder builder = new FileRepositoryBuilder()
+        repository = builder.setWorkTree(clone)
+        .readEnvironment() // scan environment GIT_* variables
+        .findGitDir() // scan up the file system tree
+        .build()
+        git = new Git(repository)
+        git.init().setDirectory(clone).call()
+    }
+
+    protected void tearDown() {
+        super.tearDown()
+        FileUtils.deleteDirectory(new File("target/vcs/"))
+    }
+
+    void testInit() {
+        shouldFail(VcsException) {
+            // test that we cannot init into a file
+            File noDirectory = new File("target/vcs/tmp")
+            FileUtils.touch(noDirectory)
+            gitManager.init(noDirectory, exchangeDirectory)
+        }
+        shouldFail(VcsException) {
+            // test that we cannot init into a non-existing directory
+            gitManager.init(new File("target/vcs/tmp2"), exchangeDirectory)
+        }
+        shouldFail(VcsException) {
+            // test that exchange directory is not a file
+            gitManager.init(clone, new File("target/vcs/tmp"))
+        }
+        shouldFail(VcsException) {
+            // test that exchange directory exists
+            gitManager.init(clone, new File("target/vcs/tmp3"))
+        }
+        // init should work now
+        gitManager.init(clone, exchangeDirectory)
+        shouldFail(VcsAlreadyInitedException) {
+            // test that we cannot init the checkout twice
+            gitManager.init(clone, exchangeDirectory)
+        }
+    }
+
+    void testImport() {
+        // not yet inited, so it should fail
+        shouldFail(VcsNotInitedException) {
+            gitManager.importFile(new File("/tmp"), "tmp")
+        }
+        gitManager.init(clone, exchangeDirectory)
+        shouldFail(VcsException) {
+            // non existing file
+            gitManager.importFile(new File("target/vcs/tmp"), "test")
+        }
+        shouldFail(VcsException) {
+            // directory instead of file
+            File directory = new File("target/vcs/tmp")
+            directory.mkdirs()
+            gitManager.importFile(directory, "test")
+        }
+        File importFile = new File("target/vcs/tmp/test")
+        FileUtils.touch(importFile)
+        shouldFail(FileAlreadyVersionedException) {
+            // test whether the file already exists in the directory
+            FileUtils.touch(new File(clone.absolutePath + File.separator + "test"))
+            gitManager.importFile(importFile, "test")
+        }
+        File importedFile = new File(clone.absolutePath + File.separator + "test")
+        // created the temp file in previous step - ensure it is deleted again
+        importedFile.delete()
+        String revision = gitManager.importFile(importFile, "test")
+        assertTrue(importedFile.exists())
+        assertTrue(importedFile.isFile())
+        ObjectId commit = repository.resolve(Constants.HEAD)
+        RevWalk revWalk = new RevWalk(repository)
+        RevCommit revCommit = revWalk.parseCommit(commit)
+        assertEquals(commit.getName(), revision)
+        assertEquals("Import of test", revCommit.getShortMessage())
+        assertEquals("Import of test", revCommit.getFullMessage())
+        shouldFail(FileAlreadyVersionedException) {
+            gitManager.importFile(importFile, "test")
+        }
+        // import a second file with custom commit message
+        revision = gitManager.importFile(importFile, "test2", "Custom commit message")
+        FileRepositoryBuilder builder = new FileRepositoryBuilder()
+        Repository repository = builder.setWorkTree(clone)
+        .readEnvironment() // scan environment GIT_* variables
+        .findGitDir() // scan up the file system tree
+        .build()
+        commit = repository.resolve(Constants.HEAD)
+        revWalk = new RevWalk(repository)
+        revCommit = revWalk.parseCommit(commit)
+        assertEquals(commit.getName(), revision)
+        assertEquals("Custom commit message", revCommit.getShortMessage())
+        assertEquals("Custom commit message", revCommit.getFullMessage())
+    }
+
+    void testUpdate() {
+        shouldFail(VcsNotInitedException) {
+            gitManager.updateFile(new File("/tmp"), "tmp")
+        }
+        gitManager.init(clone, exchangeDirectory)
+        shouldFail(VcsException) {
+            // non existing file
+            gitManager.updateFile(new File("target/vcs/tmp"), "test")
+        }
+        shouldFail(VcsException) {
+            // directory instead of file
+            File directory = new File("target/vcs/tmp")
+            directory.mkdirs()
+            gitManager.updateFile(directory, "test")
+        }
+        File importFile = new File("target/vcs/tmp/test")
+        FileUtils.touch(importFile)
+        shouldFail(FileNotVersionedException) {
+            gitManager.updateFile(importFile, "test")
+        }
+        // import the file
+        gitManager.importFile(importFile, "test")
+        ObjectId commit = repository.resolve(Constants.HEAD)
+        RevWalk revWalk = new RevWalk(repository)
+        RevCommit revCommit = revWalk.parseCommit(commit)
+        String prevCommit = revCommit.getName()
+        // now update it
+        importFile.append("Some test text\n")
+        // verify commit message
+        String revision = gitManager.updateFile(importFile, "test")
+        FileRepositoryBuilder builder = new FileRepositoryBuilder()
+        Repository repository = builder.setWorkTree(clone)
+        .readEnvironment() // scan environment GIT_* variables
+        .findGitDir() // scan up the file system tree
+        .build()
+        commit = repository.resolve(Constants.HEAD)
+        revWalk = new RevWalk(repository)
+        revCommit = revWalk.parseCommit(commit)
+        assertTrue(prevCommit != commit.getName())
+        assertEquals(commit.getName(), revision)
+        assertEquals("Update of test", revCommit.getShortMessage())
+        assertEquals("Update of test", revCommit.getFullMessage())
+        // custom commit message
+        importFile.append("Some more text")
+        revision = gitManager.updateFile(importFile, "test", "Test commit message")
+        repository = builder.setWorkTree(clone)
+        .readEnvironment() // scan environment GIT_* variables
+        .findGitDir() // scan up the file system tree
+        .build()
+        commit = repository.resolve(Constants.HEAD)
+        revWalk = new RevWalk(repository)
+        revCommit = revWalk.parseCommit(commit)
+        assertEquals(commit.getName(), revision)
+        assertEquals("Test commit message", revCommit.getShortMessage())
+        assertEquals("Test commit message", revCommit.getFullMessage())
+    }
+
+    void testRetrieveFile() {
+        shouldFail(VcsNotInitedException) {
+            gitManager.retrieveFile("/tmp")
+        }
+        gitManager.init(clone, exchangeDirectory)
+        shouldFail(FileNotVersionedException) {
+            gitManager.retrieveFile("test")
+        }
+        File importFile = new File("target/vcs/tmp/test")
+        FileUtils.touch(importFile)
+        // import the file
+        String importRevision = gitManager.importFile(importFile, "test")
+        // now update it
+        importFile.append("Some test text\n")
+        String updateRevision = gitManager.updateFile(importFile, "test")
+        // retrieve the file
+        File retrievedFile = gitManager.retrieveFile("test")
+        String path = retrievedFile.absolutePath
+        assertTrue(retrievedFile.exists())
+        assertTrue(retrievedFile.isFile())
+        List<String> lines = retrievedFile.readLines()
+        assertEquals(1, lines.size())
+        assertEquals("Some test text", lines[0])
+        // passing invalid revision should fail
+        shouldFail(VcsException) {
+            retrievedFile = gitManager.retrieveFile("test", "not a number")
+        }
+        shouldFailWithCause(MissingObjectException) {
+            // some random sha1 sum should faild
+            retrievedFile = gitManager.retrieveFile("test", "780f5fb1e98c9fb8fa96570bdafac121ddb0fd03")
+        }
+        retrievedFile = gitManager.retrieveFile("test", importRevision)
+        assertTrue("Retrieved files have same path, but each retrieved file should have a unique identifier", path != retrievedFile.absolutePath)
+        assertEquals(0, retrievedFile.readBytes().length)
+        // clone has to be on HEAD again
+        FileRepositoryBuilder builder = new FileRepositoryBuilder()
+        Repository repository = builder.setWorkTree(clone)
+        .readEnvironment() // scan environment GIT_* variables
+        .findGitDir() // scan up the file system tree
+        .build()
+        ObjectId commit = repository.resolve(Constants.HEAD)
+        RevWalk revWalk = new RevWalk(repository)
+        RevCommit revCommit = revWalk.parseCommit(commit)
+        assertEquals(updateRevision, revCommit.name())
+    }
+
+    void testUpdateWorkingCopy() {
+        shouldFail(VcsNotInitedException) {
+            gitManager.updateWorkingCopy()
+        }
+        gitManager.init(clone, exchangeDirectory)
+        // TODO: write suited test case
+    }
+}
