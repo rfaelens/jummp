@@ -2,6 +2,8 @@
 syntax: glob
 
 *~
+*.orig
 target/*
+build/*
 .*
-
+stacktrace.log
