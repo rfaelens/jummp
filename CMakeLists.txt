@@ -12,6 +12,7 @@ ${JUMMP_PLUGIN_LIB_SRC_DIR}/vcs/FileNotVersionedException.java
 ${JUMMP_PLUGIN_LIB_SRC_DIR}/vcs/VcsAlreadyInitedException.java
 ${JUMMP_PLUGIN_LIB_SRC_DIR}/vcs/VcsNotInitedException.java
 ${JUMMP_PLUGIN_LIB_SRC_DIR}/vcs/VcsManager.java
+${JUMMP_PLUGIN_LIB_SRC_DIR}/vcs/Vcs.java
 )
 
 # cmake builds class files with wrong package path - adjust

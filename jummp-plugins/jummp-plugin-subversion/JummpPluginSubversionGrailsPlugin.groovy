@@ -1,3 +1,6 @@
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.codehaus.groovy.grails.exceptions.GrailsRuntimeException
+
 class JummpPluginSubversionGrailsPlugin {
     // the plugin version
     def version = "0.1"

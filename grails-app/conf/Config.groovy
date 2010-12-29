@@ -141,6 +141,31 @@ if (!Boolean.parseBoolean(jummpConfig.jummp.security.ldap.enabled)) {
     grails.plugins.springsecurity.ldap.authorities.retrieveDatabaseRoles = true
 }
 
+// version control backend
+if (jummpConfig.jummp.vcs.exchangeDirectory) {
+    jummp.vcs.exchangeDirectory = jummpConfig.jummp.vcs.exchangeDirectory
+}
+if (jummpConfig.jummp.vcs.workingDirectory) {
+    jummp.vcs.workingDirectory = jummpConfig.jummp.vcs.workingDirectory
+}
+switch (jummpConfig.jummp.vcs.plugin) {
+case "subversion":
+    println("using subversion as vcs backend")
+    jummp.vcs.pluginServiceName = "svnService"
+    jummp.plugins.subversion.enabled = true
+    // TODO: configuration should be handled in the plugins
+    jummp.plugins.subversion.localRepository = jummpConfig.jummp.plugins.subversion.localRepository
+    break
+case "git":
+    println("using git as vcs backend")
+    jummp.vcs.pluginServiceName = "gitService"
+    jummp.plugins.git.enabled = true
+    break
+default:
+    // nothing
+    break
+}
+
 if (pluginsToExclude) {
     grails.plugin.exclude = pluginsToExclude
 }
