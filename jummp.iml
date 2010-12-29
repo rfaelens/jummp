@@ -50,6 +50,8 @@
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="jummp-grailsPlugins" />
+    <orderEntry type="module" module-name="jummp-grailsPlugin-jummp-plugin-subversion" />
+    <orderEntry type="module" module-name="jummp-grailsPlugin-jummp-plugin-git" />
   </component>
 </module>
 

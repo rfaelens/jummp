@@ -29,3 +29,5 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.5'
     }
 }
+grails.plugin.location.'jummp-plugin-subversion' = "jummp-plugins/jummp-plugin-subversion"
+grails.plugin.location.'jummp-plugin-git' = "jummp-plugins/jummp-plugin-git"

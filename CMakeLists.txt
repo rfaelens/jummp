@@ -30,25 +30,6 @@ ${JUMMP_PLUGIN_LIB_BUILD_DIR}
 add_library(jummp-plugin-lib ${JUMMP_PLUGIN_LIB_SRC})
 add_subdirectory(jummp-plugins)
 
-# install the generated plugins
-# TODO: has to become a macro
-# name of generated zip file is stored in a global property - pass it to a variable
-get_property(JUMMP_GIT_PLUGIN GLOBAL PROPERTY JUMMP_GIT_PLUGIN)
-get_property(JUMMP_SUBVERSION_PLUGIN GLOBAL PROPERTY JUMMP_SUBVERSION_PLUGIN)
-# grails install-plugin
-add_custom_command(OUTPUT grails-plugins
-COMMAND grails install-plugin ${JUMMP_GIT_PLUGIN} && grails install-plugin ${JUMMP_SUBVERSION_PLUGIN}
-WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-# add target so that install plugin is executed
-add_custom_target(
-grails-plugins
-ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/grails-plugins)
-
-# Make sure the source is generated before the executable builds.
-ADD_DEPENDENCIES(grails-plugins jummp-git-plugin jummp-subversion-plugin)
-
 # build war
 # TODO: out of source war command to not run into the issue of compile errors in jummp-plugins
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/jummp.war
