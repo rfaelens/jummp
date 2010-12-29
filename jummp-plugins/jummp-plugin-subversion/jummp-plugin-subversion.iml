@@ -44,6 +44,7 @@
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="jummp-plugin-subversion-grailsPlugins" />
+    <orderEntry type="library" name="jummp-plugin-lib" level="project" />
   </component>
 </module>
 
