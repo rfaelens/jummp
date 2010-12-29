@@ -7,6 +7,7 @@ import net.biomodels.jummp.core.vcs.Vcs
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 import net.biomodels.jummp.core.vcs.VcsManager
+import org.apache.commons.io.FileUtils
 
 class SvnService implements InitializingBean, Vcs {
     static transactional = true
@@ -33,6 +34,11 @@ class SvnService implements InitializingBean, Vcs {
             exchangeDirectory = new File(ServletContextHolder.servletContext.getRealPath("/resource/exchangeDir"))
         }
         try {
+            FileUtils.deleteDirectory(workingDirectory)
+            workingDirectory.mkdirs()
+            if (!exchangeDirectory.exists()) {
+                exchangeDirectory.mkdirs()
+            }
             svn = new SvnManager(localRepository)
             svn.init(workingDirectory, exchangeDirectory)
         } catch (VcsException e) {
