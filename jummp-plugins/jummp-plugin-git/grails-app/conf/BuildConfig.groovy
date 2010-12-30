@@ -29,3 +29,4 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.5'
     }
 }
+grails.plugin.location.'jummp-plugin-core-api' = "../jummp-plugin-core-api"

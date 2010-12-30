@@ -1,28 +1,25 @@
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import org.codehaus.groovy.grails.exceptions.GrailsRuntimeException
-
-class JummpPluginSubversionGrailsPlugin {
+class JummpPluginCoreApiGrailsPlugin {
     // the plugin version
     def version = "0.1"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.5 > *"
     // the other plugins this plugin depends on
-    def dependsOn = ["jummp-plugin-core-api": "0.1"]
+    def dependsOn = [:]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"
     ]
 
-    // TODO Fill in these fields
-    def author = "Your name"
-    def authorEmail = ""
-    def title = "Plugin summary/headline"
+    def author = "Martin Gräßlin"
+    def authorEmail = "m.graesslin@dkfz.de"
+    def title = "JUMMP Plugin Core API"
     def description = '''\\
-Brief description of the plugin.
+This plugin provides the API for the JUMMP core plugins.
+All other plugins providing core functionality depend on this plugin and the core itself depnds on it. 
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/jummp-plugin-subversion"
+    def documentation = "https://bitbucket.org/jummp/jummp/wiki"
 
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional), this event occurs before 

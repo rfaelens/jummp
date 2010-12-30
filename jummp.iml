@@ -52,6 +52,7 @@
     <orderEntry type="module" module-name="jummp-grailsPlugins" />
     <orderEntry type="module" module-name="jummp-grailsPlugin-jummp-plugin-subversion" />
     <orderEntry type="module" module-name="jummp-grailsPlugin-jummp-plugin-git" />
+    <orderEntry type="module" module-name="jummp-plugin-core-api" />
   </component>
 </module>
 
