@@ -18,7 +18,13 @@ class GitService implements InitializingBean, Vcs {
             log.debug("Git service not enabled")
             return
         }
-        File workingDirectory = new File(config.jummp.vcs.workingDirectory)
+        File workingDirectory
+        if (config.jummp.vcs.workingDirectory) {
+            workingDirectory = new File(config.jummp.vcs.workingDirectory)
+        } else {
+            log.error("No working directory set, cannot enable git")
+            return
+        }
         File exchangeDirectory
         if (config.jummp.vcs.exchangeDirectory) {
             exchangeDirectory = new File(config.jummp.vcs.exchangeDirectory)
@@ -32,6 +38,7 @@ class GitService implements InitializingBean, Vcs {
             git = new GitManager()
             git.init(workingDirectory, exchangeDirectory)
         } catch (VcsException e) {
+            git = null
             log.error(e.getMessage())
             e.printStackTrace()
         }
@@ -41,7 +48,7 @@ class GitService implements InitializingBean, Vcs {
         if (git) {
             return git
         } else {
-            throw new VcsNotInitedException("No GitManager is setup")
+            throw new VcsNotInitedException()
         }
     }
 }

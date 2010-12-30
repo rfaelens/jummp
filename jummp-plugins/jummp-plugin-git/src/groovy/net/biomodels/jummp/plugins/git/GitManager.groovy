@@ -67,6 +67,9 @@ class GitManager implements VcsManager {
 
             String branchName
             String fullBranch = repository.getFullBranch()
+            if (!fullBranch) {
+                throw new VcsException("Working directory is not a valid git repository")
+            }
             branchName = fullBranch.substring(Constants.R_HEADS.length())
             Config repoConfig = repository.getConfig()
             final String remote = repoConfig.getString(
