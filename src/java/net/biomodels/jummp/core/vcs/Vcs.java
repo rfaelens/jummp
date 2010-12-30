@@ -18,4 +18,10 @@ public interface Vcs {
      * @throws VcsNotInitedException If the vcs could not be inited.
      */
     VcsManager vcsManager() throws VcsNotInitedException;
+
+    /**
+     * Returns whether the version control system is configured properly.
+     * @return @c true if the Vcs is configured properly, @c false otherwise.
+     */
+    boolean isValid();
 }

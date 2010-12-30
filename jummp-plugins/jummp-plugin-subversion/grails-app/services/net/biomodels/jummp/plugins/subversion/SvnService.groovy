@@ -59,4 +59,8 @@ class SvnService implements InitializingBean, Vcs {
             throw new VcsNotInitedException()
         }
     }
+
+    boolean isValid() {
+        return (svn != null)
+    }
 }

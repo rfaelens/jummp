@@ -51,4 +51,8 @@ class GitService implements InitializingBean, Vcs {
             throw new VcsNotInitedException()
         }
     }
+
+    boolean isValid() {
+        return (git != null)
+    }
 }

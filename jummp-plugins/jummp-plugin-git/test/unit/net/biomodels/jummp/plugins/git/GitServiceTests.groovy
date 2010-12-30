@@ -28,6 +28,7 @@ class GitServiceTests extends GrailsUnitTestCase {
         mockConfig("")
         GitService git = new GitService()
         git.afterPropertiesSet()
+        assertFalse(git.isValid())
         shouldFail(VcsNotInitedException) {
             git.vcsManager()
         }
@@ -35,6 +36,7 @@ class GitServiceTests extends GrailsUnitTestCase {
         mockConfig("jummp.plugins.git.enabled=false")
         git = new GitService()
         git.afterPropertiesSet()
+        assertFalse(git.isValid())
         shouldFail(VcsNotInitedException) {
             git.vcsManager()
         }
@@ -47,6 +49,7 @@ class GitServiceTests extends GrailsUnitTestCase {
         ''')
         GitService git = new GitService()
         git.afterPropertiesSet()
+        assertFalse(git.isValid())
         shouldFail(VcsNotInitedException) {
             git.vcsManager()
         }
@@ -68,6 +71,7 @@ class GitServiceTests extends GrailsUnitTestCase {
         assertTrue(exchangeDirectory.exists())
         assertTrue(exchangeDirectory.isDirectory())
         assertLength(0, exchangeDirectory.list())
+        assertFalse(git.isValid())
         shouldFail(VcsNotInitedException) {
             git.vcsManager()
         }
@@ -90,6 +94,7 @@ class GitServiceTests extends GrailsUnitTestCase {
         git.afterPropertiesSet()
         assertTrue(resourceDirectory.exists())
         assertTrue(resourceDirectory.isDirectory())
+        assertFalse(git.isValid())
         contextControl.verify()
         shouldFail(VcsNotInitedException) {
             git.vcsManager()
@@ -126,6 +131,7 @@ class GitServiceTests extends GrailsUnitTestCase {
         assertTrue(resourceDirectory.isDirectory())
         contextControl.verify()
         VcsManager manager = service.vcsManager()
+        assertTrue(service.isValid())
         assertNotNull(manager)
         assertTrue(manager instanceof GitManager)
 
@@ -142,6 +148,7 @@ class GitServiceTests extends GrailsUnitTestCase {
         assertTrue(exchangeDirectory.exists())
         assertTrue(exchangeDirectory.isDirectory())
         manager = service.vcsManager()
+        assertTrue(service.isValid())
         assertNotNull(manager)
         assertTrue(manager instanceof GitManager)
     }

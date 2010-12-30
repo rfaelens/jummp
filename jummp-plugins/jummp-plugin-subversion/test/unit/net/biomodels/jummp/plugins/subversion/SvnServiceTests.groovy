@@ -27,6 +27,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         mockConfig("")
         SvnService svn = new SvnService()
         svn.afterPropertiesSet()
+        assertFalse(svn.isValid())
         shouldFail(VcsNotInitedException) {
             svn.vcsManager()
         }
@@ -34,6 +35,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         mockConfig("jummp.plugins.subversion.enabled=false")
         svn = new SvnService()
         svn.afterPropertiesSet()
+        assertFalse(svn.isValid())
         shouldFail(VcsNotInitedException) {
             svn.vcsManager()
         }
@@ -41,6 +43,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         mockConfig('''jummp.plugins.subversion.enabled=true''')
         svn = new SvnService()
         svn.afterPropertiesSet()
+        assertFalse(svn.isValid())
         shouldFail(VcsNotInitedException) {
             svn.vcsManager()
         }
@@ -68,6 +71,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertTrue(exchangeDirectory.isDirectory())
         assertTrue(workingDirectory.exists())
         assertTrue(workingDirectory.isDirectory())
+        assertFalse(svn.isValid())
         shouldFail(VcsNotInitedException) {
             svn.vcsManager()
         }
@@ -77,6 +81,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         svn = new SvnService()
         svn.afterPropertiesSet()
         assertLength(0, workingDirectory.list())
+        assertFalse(svn.isValid())
         shouldFail(VcsNotInitedException) {
             svn.vcsManager()
         }
@@ -109,6 +114,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertTrue(workingDirectory.exists())
         assertTrue(workingDirectory.isDirectory())
         assertFalse(resourceWorkingDirectory.exists())
+        assertFalse(svn.isValid())
         shouldFail(VcsNotInitedException) {
             svn.vcsManager()
         }
@@ -119,6 +125,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         svn.afterPropertiesSet()
         assertLength(0, workingDirectory.list())
         assertFalse(resourceWorkingDirectory.exists())
+        assertFalse(svn.isValid())
         shouldFail(VcsNotInitedException) {
             svn.vcsManager()
         }
@@ -138,6 +145,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertTrue(exchangeDirectory.isDirectory())
         assertTrue(resourceWorkingDirectory.exists())
         assertTrue(resourceWorkingDirectory.isDirectory())
+        assertFalse(svn.isValid())
         shouldFail(VcsNotInitedException) {
             svn.vcsManager()
         }
@@ -147,6 +155,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         svn = new SvnService()
         svn.afterPropertiesSet()
         assertLength(0, resourceWorkingDirectory.list())
+        assertFalse(svn.isValid())
         shouldFail(VcsNotInitedException) {
             svn.vcsManager()
         }
@@ -172,6 +181,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertFalse(resourceExchangeDirectory.exists())
         assertTrue(exchangeDirectory.exists())
         assertTrue(workingDirectory.exists())
+        assertFalse(svn.isValid())
         shouldFail(VcsNotInitedException) {
             svn.vcsManager()
         }
@@ -181,6 +191,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         svn = new SvnService()
         svn.afterPropertiesSet()
         assertLength(0, workingDirectory.list())
+        assertFalse(svn.isValid())
         shouldFail(VcsNotInitedException) {
             svn.vcsManager()
         }
@@ -205,6 +216,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         svn.afterPropertiesSet()
         VcsManager manager = svn.vcsManager()
         assertNotNull(manager)
+        assertTrue(svn.isValid())
         assertTrue(manager instanceof SvnManager)
         assertTrue(resourceWorkingDirectory.exists())
         assertLength(1, resourceWorkingDirectory.list())
@@ -222,6 +234,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         svn.afterPropertiesSet()
         manager = svn.vcsManager()
         assertNotNull(manager)
+        assertTrue(svn.isValid())
         assertTrue(manager instanceof SvnManager)
         assertTrue(workingDirectory.exists())
         assertLength(1, workingDirectory.list())
