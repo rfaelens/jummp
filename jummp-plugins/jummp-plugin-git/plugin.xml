@@ -10,6 +10,7 @@ Brief description of the plugin.
     <resource>Config</resource>
     <resource>DataSource</resource>
     <resource>UrlMappings</resource>
+    <resource>net.biomodels.jummp.plugins.git.GitService</resource>
   </resources>
   <dependencies />
   <behavior />
