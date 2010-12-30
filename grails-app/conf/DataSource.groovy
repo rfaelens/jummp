@@ -9,6 +9,11 @@ try {
     databaseProperties.setProperty("jummp.database.pooled", "true")
     databaseProperties.setProperty("jummp.database.dbCreate", "update")
     databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.MySQLInnoDBDialect")
+    environments {
+        test {
+            throw new Exception("Test system")
+        }
+    }
 } catch (Exception e) {
     // no database configured yet, use hsqldb
     databaseProperties.setProperty("jummp.database.driver", "org.hsqldb.jdbcDriver")
@@ -42,6 +47,10 @@ environments {
         }
     }
     test {
+        hibernate {
+            cache.use_second_level_cache = false
+            cache.use_query_cache = false
+        }
         dataSource {
             dbCreate = "update"
             url = "jdbc:hsqldb:mem:testDb"

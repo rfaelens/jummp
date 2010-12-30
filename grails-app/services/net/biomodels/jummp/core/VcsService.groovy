@@ -3,6 +3,7 @@ package net.biomodels.jummp.core
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.context.ApplicationContext
 import net.biomodels.jummp.core.vcs.Vcs
 import net.biomodels.jummp.core.vcs.VcsManager
@@ -28,14 +29,32 @@ class VcsService implements InitializingBean {
         String pluginServiceName = ConfigurationHolder.config.jummp.vcs.pluginServiceName
         if (pluginServiceName) {
             ApplicationContext ctx = (ApplicationContext)ApplicationHolder.getApplication().getMainContext()
-            Vcs vcs = (Vcs)ctx.getBean(pluginServiceName)
             try {
-                vcsManager = vcs.vcsManager()
+                Vcs vcs = (Vcs)ctx.getBean(pluginServiceName)
+                if (vcs.isValid()) {
+                    vcsManager = vcs.vcsManager()
+                } else {
+                    log.error("Vcs service ${pluginServiceName} is not valid, disabling VcsService")
+                }
+            } catch(NoSuchBeanDefinitionException e) {
+                log.error(e.getMessage())
+                e.printStackTrace()
             } catch (VcsNotInitedException e) {
+                vcsManager = null
                 log.error(e.getMessage())
                 e.printStackTrace()
             }
+        } else {
+            log.error("No vcs plugin service specified")
         }
+    }
+
+    /**
+     * Checks whether the Version Control System is configured properly
+     * @return @c true if the vcs system is configured properly, @c false otherwise
+     */
+    boolean isValid() {
+        return (vcsManager != null)
     }
 
     // TODO: implement required methods
