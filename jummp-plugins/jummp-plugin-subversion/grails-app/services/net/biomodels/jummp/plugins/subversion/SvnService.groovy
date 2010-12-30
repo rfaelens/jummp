@@ -19,6 +19,10 @@ class SvnService implements InitializingBean, Vcs {
             log.debug("Subversion service not enabled")
             return
         }
+        if (!config.jummp.plugins.subversion.localRepository) {
+            log.debug("No checkout repository set - Subversion service not enabled")
+            return
+        }
         File localRepository = new File(config.jummp.plugins.subversion.localRepository)
         File workingDirectory
         if (config.jummp.vcs.workingDirectory) {
@@ -42,6 +46,7 @@ class SvnService implements InitializingBean, Vcs {
             svn = new SvnManager(localRepository)
             svn.init(workingDirectory, exchangeDirectory)
         } catch (VcsException e) {
+            svn = null
             log.error(e.getMessage())
             e.printStackTrace()
         }
@@ -51,7 +56,7 @@ class SvnService implements InitializingBean, Vcs {
         if (svn) {
             return svn
         } else {
-            throw new VcsNotInitedException("No SvnManager is setup")
+            throw new VcsNotInitedException()
         }
     }
 }
