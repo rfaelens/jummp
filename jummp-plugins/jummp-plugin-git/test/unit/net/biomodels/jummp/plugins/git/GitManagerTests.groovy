@@ -25,7 +25,6 @@ class GitManagerTests extends GrailsUnitTestCase {
         clone.mkdirs()
         exchangeDirectory = new File("target/vcs/exchange")
         exchangeDirectory.mkdirs()
-        File repositoryFile = new File("target/vcs/git")
         gitManager = new GitManager()
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         repository = builder.setWorkTree(clone)
