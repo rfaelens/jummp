@@ -56,7 +56,7 @@ class SetupController {
         }
 
         git {
-            on("next").to("validateGit")
+            on("next").to("firstRun")
         }
 
         firstRun {
@@ -126,15 +126,6 @@ class SetupController {
             on("svn").to("svn")
             on("git").to("git")
             on("error").to("vcs")
-        }
-
-        validateGit {
-            action {
-                // git does not (yet) provide any configuration
-                next()
-            }
-            on("next").to("firstRun")
-            on("error").to("git")
         }
 
         validateFirstRun {
