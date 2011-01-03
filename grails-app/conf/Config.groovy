@@ -169,3 +169,13 @@ default:
 if (pluginsToExclude) {
     grails.plugin.exclude = pluginsToExclude
 }
+
+// Codenarc settings
+codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
+                             'jummp-plugins/*/grails-app/controllers',
+                             'jummp-plugins/*/grails-app/domain',
+                             'jummp-plugins/*/grails-app/services',
+                             'jummp-plugins/*/grails-app/taglib',
+                             'jummp-plugins/*/grails-app/utils',
+                             'jummp-plugins/*/test/unit',
+                             'jummp-plugins/*/test/integration']

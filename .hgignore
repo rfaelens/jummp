@@ -10,3 +10,4 @@ build/*
 stacktrace.log
 jummp-plugins/jummp-plugin-git/out/*
 out/*
+CodeNarcReport.html
