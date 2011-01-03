@@ -60,7 +60,14 @@ class SetupController {
         }
 
         firstRun {
-            on("next").to("validateFirstRun")
+            on("next") { FirstRunCommand cmd ->
+                flow.firstRun = cmd
+                if (flow.firstRun.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("save")
         }
 
         validateDatabase {
@@ -128,14 +135,6 @@ class SetupController {
             on("error").to("vcs")
         }
 
-        validateFirstRun {
-            action {
-                flow.firstRun = params.firstRun
-                next()
-            }
-            on("next").to("save")
-        }
-
         save {
             action {
                 Properties props = new Properties()
@@ -156,7 +155,7 @@ class SetupController {
                 } else {
                     props.setProperty("jummp.security.ldap.enabled", "false")
                 }
-                props.setProperty("jummp.firstRun", flow.firstRun)
+                props.setProperty("jummp.firstRun", flow.firstRun.firstRun)
                 props.setProperty("jummp.vcs.plugin", flow.vcs)
                 props.setProperty("jummp.vcs.exchangeDirectory", flow.vcsExchangeDirectory)
                 props.setProperty("jummp.vcs.workingDirectory", flow.vcsWorkingDirectory)
@@ -270,5 +269,22 @@ class SvnCommand implements Serializable {
                             // TODO: test whether the directory is an svn repository
                             return (directory.exists() && directory.isDirectory())
                         })
+    }
+}
+
+/**
+ * Command Object for validating firstRun choice.
+ * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ */
+class FirstRunCommand implements Serializable {
+    String firstRun
+
+    static constraints = {
+        firstRun(blank: false,
+                nullable: false,
+                validator: { firstRun, cmd ->
+                    return (firstRun == "true" || firstRun == "false")
+                }
+        )
     }
 }
