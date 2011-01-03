@@ -37,7 +37,14 @@ class SetupController {
         }
 
         ldap {
-            on("next").to("validateLdap")
+            on("next") { LdapCommand cmd ->
+                flow.ldap = cmd
+                if (flow.ldap.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("vcs")
         }
 
         vcs {
@@ -99,19 +106,6 @@ class SetupController {
             on("error").to("authenticationBackend")
         }
 
-        validateLdap {
-            action {
-                flow.ldapServer          = params.ldapServer
-                flow.ldapManagerDn       = params.ldapManagerDn
-                flow.ldapManagerPassword = params.ldapManagerPassword
-                flow.ldapSearchBase      = params.ldapSearchBase
-                flow.ldapSearchFilter    = params.ldapSearchFilter
-                flow.ldapSearchSubtree   = params.ldapSearchSubtree ? "true" : "false"
-                next()
-            }
-            on("next").to("vcs")
-        }
-
         validateVcs {
             action { VcsCommand cmd ->
                 flow.vcs = cmd
@@ -139,12 +133,12 @@ class SetupController {
                 props.setProperty("jummp.security.authenticationBackend", flow.authenticationBackend)
                 if (flow.authenticationBackend == "ldap") {
                     props.setProperty("jummp.security.ldap.enabled", "true")
-                    props.setProperty("jummp.security.ldap.server", flow.ldapServer)
-                    props.setProperty("jummp.security.ldap.managerDn", flow.ldapManagerDn)
-                    props.setProperty("jummp.security.ldap.managerPw", flow.ldapManagerPassword)
-                    props.setProperty("jummp.security.ldap.search.base", flow.ldapSearchBase)
-                    props.setProperty("jummp.security.ldap.search.filter", flow.ldapSearchFilter)
-                    props.setProperty("jummp.security.ldap.search.subTree", flow.ldapSearchSubtree)
+                    props.setProperty("jummp.security.ldap.server", flow.ldap.ldapServer)
+                    props.setProperty("jummp.security.ldap.managerDn", flow.ldap.ldapManagerDn)
+                    props.setProperty("jummp.security.ldap.managerPw", flow.ldap.ldapManagerPassword)
+                    props.setProperty("jummp.security.ldap.search.base", flow.ldap.ldapSearchBase)
+                    props.setProperty("jummp.security.ldap.search.filter", flow.ldap.ldapSearchFilter)
+                    props.setProperty("jummp.security.ldap.search.subTree", flow.ldap.ldapSearchSubtree)
                 } else {
                     props.setProperty("jummp.security.ldap.enabled", "false")
                 }
@@ -245,6 +239,28 @@ class SetupController {
         }
         UserRole.create(user, userRole, true)
         return true
+    }
+}
+
+/**
+ * Command Object for validating LDAP settings.
+ * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ */
+class LdapCommand implements Serializable {
+    String ldapServer
+    String ldapManagerDn
+    String ldapManagerPassword
+    String ldapSearchBase
+    String ldapSearchFilter
+    Boolean ldapSearchSubtree
+
+    static constraints = {
+        ldapServer(nullable: false, blank: false)
+        ldapManagerDn(nullable: false, blank: false)
+        ldapManagerPassword(nullable: false, blank: false)
+        ldapSearchBase(nullable: false, blank: true)
+        ldapSearchFilter(nullable: false, blank: true)
+        ldapSearchSubtree(nullable: false)
     }
 }
 

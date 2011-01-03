@@ -13,6 +13,58 @@ class SetupControllerTests extends ControllerUnitTestCase {
         super.tearDown()
     }
 
+    void testLdapCommand() {
+        mockForConstraintsTests(LdapCommand)
+        // null should fail
+        LdapCommand cmd = new LdapCommand()
+        assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["ldapServer"])
+        assertEquals("nullable", cmd.errors["ldapManagerDn"])
+        assertEquals("nullable", cmd.errors["ldapManagerPassword"])
+        assertEquals("nullable", cmd.errors["ldapSearchBase"])
+        assertEquals("nullable", cmd.errors["ldapSearchFilter"])
+        assertEquals("nullable", cmd.errors["ldapSearchSubtree"])
+        // blank should fail some
+        cmd = new LdapCommand()
+        cmd.ldapServer = ""
+        cmd.ldapManagerDn = ""
+        cmd.ldapManagerPassword = ""
+        // allowed
+        cmd.ldapSearchBase = ""
+        cmd.ldapSearchFilter = ""
+        assertFalse(cmd.validate())
+        assertEquals("blank", cmd.errors["ldapServer"])
+        assertEquals("blank", cmd.errors["ldapManagerDn"])
+        assertEquals("blank", cmd.errors["ldapManagerPassword"])
+        assertNull(cmd.errors["ldapSearchBase"])
+        assertNull(cmd.errors["ldapSearchFilter"])
+        assertEquals("nullable", cmd.errors["ldapSearchSubtree"])
+        // TODO: test for a LDAP URL
+        // setting all fields except the boolean should only fail the boolean
+        cmd = new LdapCommand()
+        cmd.ldapServer = "foo"
+        cmd.ldapManagerDn = "bar"
+        cmd.ldapManagerPassword = "baz"
+        cmd.ldapSearchBase = "foobar"
+        cmd.ldapSearchFilter = "foobarbaz"
+        assertFalse(cmd.validate())
+        assertNull(cmd.errors["ldapServer"])
+        assertNull(cmd.errors["ldapManagerDn"])
+        assertNull(cmd.errors["ldapManagerPassword"])
+        assertNull(cmd.errors["ldapSearchBase"])
+        assertNull(cmd.errors["ldapSearchFilter"])
+        assertEquals("nullable", cmd.errors["ldapSearchSubtree"])
+        // last but not least - a successful test
+        cmd = new LdapCommand()
+        cmd.ldapServer = "foo"
+        cmd.ldapManagerDn = "bar"
+        cmd.ldapManagerPassword = "baz"
+        cmd.ldapSearchBase = "foobar"
+        cmd.ldapSearchFilter = "foobarbaz"
+        cmd.ldapSearchSubtree = true
+        assertTrue(cmd.validate())
+    }
+
     void testVcsCommand() {
         mockForConstraintsTests(VcsCommand)
         // test vcs system
