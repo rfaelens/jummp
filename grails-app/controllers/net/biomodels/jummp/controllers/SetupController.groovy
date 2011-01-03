@@ -45,7 +45,14 @@ class SetupController {
         }
 
         svn {
-            on("next").to("validateSvn")
+            on("next") { SvnCommand cmd ->
+                flow.svn = cmd
+                if (flow.svn.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("firstRun")
         }
 
         git {
@@ -103,11 +110,13 @@ class SetupController {
                 flow.vcsExchangeDirectory = params.exchangeDirectory
                 flow.vcsWorkingDirectory = params.workingDirectory
                 if (params.vcs == "svn") {
+                    flow.vcs = "subversion"
                     svn()
                 } else if (params.vcs == "git") {
                     if (!params.workingDirectory) {
                         error()
                     } else {
+                        flow.vcs = "git"
                         git()
                     }
                 } else {
@@ -119,23 +128,8 @@ class SetupController {
             on("error").to("vcs")
         }
 
-        validateSvn {
-            action {
-                flow.vcs = "subversion"
-                if (params.localRepository) {
-                    flow.svnLocalRepository = params.localRepository
-                    next()
-                } else {
-                    error()
-                }
-            }
-            on("next").to("firstRun")
-            on("error").to("svn")
-        }
-
         validateGit {
             action {
-                flow.vcs = "git"
                 // git does not (yet) provide any configuration
                 next()
             }
@@ -177,7 +171,7 @@ class SetupController {
                 props.setProperty("jummp.vcs.workingDirectory", flow.vcsWorkingDirectory)
                 switch (flow.vcs) {
                 case "subversion":
-                    props.setProperty("jummp.plugins.subversion.localRepository", flow.svnLocalRepository)
+                    props.setProperty("jummp.plugins.subversion.localRepository", flow.svn.localRepository)
                     break
                 case "git":
                     break
@@ -268,5 +262,22 @@ class SetupController {
         }
         UserRole.create(user, userRole, true)
         return true
+    }
+}
+
+/**
+ * Command Object for validating subversion settings.
+ * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ */
+class SvnCommand implements Serializable {
+    String localRepository
+
+    static constraints = {
+        localRepository(blank: false,
+                        validator: { repository, cmd ->
+                            File directory = new File((String)repository)
+                            // TODO: test whether the directory is an svn repository
+                            return (directory.exists() && directory.isDirectory())
+                        })
     }
 }

@@ -5,6 +5,11 @@
         <title>Setup</title>
     </head>
     <body>
+        <g:hasErrors bean="${svn}">
+            <div class="errors">
+                <g:renderErrors bean="${svn}"/>
+            </div>
+        </g:hasErrors>
         <div id="remote" class="body">
             <h1>Version Control System - Subversion</h1>
             <p>The Subversion backend only provides checking out from a local repository.</p>
@@ -13,8 +18,9 @@
                     <table class="formtable">
                         <tbody>
                             <tr class="prop">
-                                <td class="name"><label for="localRepository">Local Repository Path (The repository to checkout from and commit to):</label></td>
-                                <td class="value"><input type="text" name="localRepository" id="localRepository"/></td>
+                                <td class="name"><label for="localRepository" title="The repository to checkout from and commit to">Local Repository Path:</label></td>
+                                <td class="value ${hasErrors(bean: svn, field: 'localRepository', 'errors')}">
+                                    <input type="text" name="localRepository" id="localRepository" title="Local Repository Path - The repository to checkout from and commit to"/></td>
                             </tr>
                         </tbody>
                     </table>
