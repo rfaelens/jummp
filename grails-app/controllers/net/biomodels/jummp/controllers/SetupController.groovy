@@ -40,6 +40,18 @@ class SetupController {
             on("next").to("validateLdap")
         }
 
+        vcs {
+            on("next").to("validateVcs")
+        }
+
+        svn {
+            on("next").to("validateSvn")
+        }
+
+        git {
+            on("next").to("validateGit")
+        }
+
         firstRun {
             on("next").to("validateFirstRun")
         }
@@ -69,7 +81,7 @@ class SetupController {
                     database()
                 }
             }
-            on("database").to("firstRun")
+            on("database").to("vcs")
             on("ldap").to("ldap")
         }
 
@@ -83,7 +95,52 @@ class SetupController {
                 flow.ldapSearchSubtree   = params.ldapSearchSubtree ? "true" : "false"
                 next()
             }
+            on("next").to("vcs")
+        }
+
+        validateVcs {
+            action {
+                flow.vcsExchangeDirectory = params.exchangeDirectory
+                flow.vcsWorkingDirectory = params.workingDirectory
+                if (params.vcs == "svn") {
+                    svn()
+                } else if (params.vcs == "git") {
+                    if (!params.workingDirectory) {
+                        error()
+                    } else {
+                        git()
+                    }
+                } else {
+                    error()
+                }
+            }
+            on("svn").to("svn")
+            on("git").to("git")
+            on("error").to("vcs")
+        }
+
+        validateSvn {
+            action {
+                flow.vcs = "subversion"
+                if (params.localRepository) {
+                    flow.svnLocalRepository = params.localRepository
+                    next()
+                } else {
+                    error()
+                }
+            }
             on("next").to("firstRun")
+            on("error").to("svn")
+        }
+
+        validateGit {
+            action {
+                flow.vcs = "git"
+                // git does not (yet) provide any configuration
+                next()
+            }
+            on("next").to("firstRun")
+            on("error").to("git")
         }
 
         validateFirstRun {
@@ -115,6 +172,19 @@ class SetupController {
                     props.setProperty("jummp.security.ldap.enabled", "false")
                 }
                 props.setProperty("jummp.firstRun", flow.firstRun)
+                props.setProperty("jummp.vcs.plugin", flow.vcs)
+                props.setProperty("jummp.vcs.exchangeDirectory", flow.vcsExchangeDirectory)
+                props.setProperty("jummp.vcs.workingDirectory", flow.vcsWorkingDirectory)
+                switch (flow.vcs) {
+                case "subversion":
+                    props.setProperty("jummp.plugins.subversion.localRepository", flow.svnLocalRepository)
+                    break
+                case "git":
+                    break
+                default:
+                    // should never happen
+                    break
+                }
                 File file = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
                 FileOutputStream out = new FileOutputStream(file)
                 props.store(out, "Jummp Configuration")
