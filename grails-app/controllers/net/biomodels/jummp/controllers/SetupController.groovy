@@ -113,21 +113,14 @@ class SetupController {
         }
 
         validateVcs {
-            action {
-                flow.vcsExchangeDirectory = params.exchangeDirectory
-                flow.vcsWorkingDirectory = params.workingDirectory
-                if (params.vcs == "svn") {
-                    flow.vcs = "subversion"
-                    svn()
-                } else if (params.vcs == "git") {
-                    if (!params.workingDirectory) {
-                        error()
-                    } else {
-                        flow.vcs = "git"
-                        git()
-                    }
-                } else {
+            action { VcsCommand cmd ->
+                flow.vcs = cmd
+                if (flow.vcs.hasErrors()) {
                     error()
+                } else if (flow.vcs.isGit()) {
+                    git()
+                } else if (flow.vcs.isSvn()) {
+                    svn()
                 }
             }
             on("svn").to("svn")
@@ -156,9 +149,9 @@ class SetupController {
                     props.setProperty("jummp.security.ldap.enabled", "false")
                 }
                 props.setProperty("jummp.firstRun", flow.firstRun.firstRun)
-                props.setProperty("jummp.vcs.plugin", flow.vcs)
-                props.setProperty("jummp.vcs.exchangeDirectory", flow.vcsExchangeDirectory)
-                props.setProperty("jummp.vcs.workingDirectory", flow.vcsWorkingDirectory)
+                props.setProperty("jummp.vcs.plugin", flow.vcs.pluginName())
+                props.setProperty("jummp.vcs.exchangeDirectory", flow.vcs.exchangeDirectory)
+                props.setProperty("jummp.vcs.workingDirectory", flow.vcs.workingDirectory)
                 switch (flow.vcs) {
                 case "subversion":
                     props.setProperty("jummp.plugins.subversion.localRepository", flow.svn.localRepository)
@@ -252,6 +245,73 @@ class SetupController {
         }
         UserRole.create(user, userRole, true)
         return true
+    }
+}
+
+/**
+ * Command Object for validating version control system settings.
+ * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ */
+class VcsCommand implements Serializable {
+    String vcs
+    String workingDirectory
+    String exchangeDirectory
+
+    static constraints = {
+        vcs(blank: false,
+            validator: { vcs, cmd ->
+                return (vcs == "svn" || vcs == "git")
+            })
+        workingDirectory(blank: true,
+                validator: { workingDirectory, cmd ->
+                    if (!workingDirectory.isEmpty()) {
+                        // if it is not empty it has to be a directory
+                        File directory = new File((String)workingDirectory)
+                        if (!directory.exists() || !directory.isDirectory()) {
+                            return false
+                        }
+                        if (workingDirectory == cmd.exchangeDirectory) {
+                            return false
+                        }
+                    }
+                    if (cmd.vcs == "git") {
+                        // TODO: verify that workingDirectory is a git directory
+                        return !workingDirectory.isEmpty()
+                    }
+                    return true
+                })
+        exchangeDirectory(blank: true,
+                validator: { exchangeDirectory, cmd ->
+                    if (!exchangeDirectory.isEmpty()) {
+                        // if it is not empty it has to be a directory
+                        File directory = new File((String)exchangeDirectory)
+                        if (!directory.exists() || !directory.isDirectory()) {
+                            return false
+                        }
+                        if (exchangeDirectory == cmd.workingDirectory) {
+                            return false
+                        }
+                    }
+                    return true
+                })
+    }
+
+    boolean isGit() {
+        return vcs == "git"
+    }
+
+    boolean isSvn() {
+        return vcs == "svn"
+    }
+
+    String pluginName() {
+        if (isGit()) {
+            return "git"
+        }
+        if (isSvn()) {
+            return "subversion"
+        }
+        return ""
     }
 }
 
