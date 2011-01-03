@@ -91,12 +91,12 @@ class SetupController {
                     flow.authenticationBackend = "ldap"
                     ldap()
                 } else {
-                    // for safety - use database
-                    database()
+                    error()
                 }
             }
             on("database").to("vcs")
             on("ldap").to("ldap")
+            on("error").to("authenticationBackend")
         }
 
         validateLdap {
