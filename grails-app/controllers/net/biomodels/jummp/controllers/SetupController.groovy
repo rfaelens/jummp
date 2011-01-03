@@ -259,10 +259,12 @@ class VcsCommand implements Serializable {
 
     static constraints = {
         vcs(blank: false,
+            nullable: false,
             validator: { vcs, cmd ->
                 return (vcs == "svn" || vcs == "git")
             })
         workingDirectory(blank: true,
+                nullable: false,
                 validator: { workingDirectory, cmd ->
                     if (!workingDirectory.isEmpty()) {
                         // if it is not empty it has to be a directory
@@ -281,6 +283,7 @@ class VcsCommand implements Serializable {
                     return true
                 })
         exchangeDirectory(blank: true,
+                nullable: false,
                 validator: { exchangeDirectory, cmd ->
                     if (!exchangeDirectory.isEmpty()) {
                         // if it is not empty it has to be a directory
@@ -296,14 +299,23 @@ class VcsCommand implements Serializable {
                 })
     }
 
+    /**
+     * @return @c true if object is for git, @c false otherwise
+     */
     boolean isGit() {
         return vcs == "git"
     }
 
+    /**
+     * @return @c true if object is for subversion, @c false otherwise
+     */
     boolean isSvn() {
         return vcs == "svn"
     }
 
+    /**
+     * @return @c git for git, @c subversion for svn and empty string for incorrect value
+     */
     String pluginName() {
         if (isGit()) {
             return "git"
@@ -324,6 +336,7 @@ class SvnCommand implements Serializable {
 
     static constraints = {
         localRepository(blank: false,
+                        nullable: false,
                         validator: { repository, cmd ->
                             File directory = new File((String)repository)
                             // TODO: test whether the directory is an svn repository
