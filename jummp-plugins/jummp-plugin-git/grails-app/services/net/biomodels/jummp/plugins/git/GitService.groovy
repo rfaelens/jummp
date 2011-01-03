@@ -10,6 +10,7 @@ import net.biomodels.jummp.core.vcs.VcsNotInitedException
 
 class GitService implements InitializingBean, Vcs {
     static transactional = true
+    @SuppressWarnings('GrailsStatelessService')
     GitManager git
 
     void afterPropertiesSet() {

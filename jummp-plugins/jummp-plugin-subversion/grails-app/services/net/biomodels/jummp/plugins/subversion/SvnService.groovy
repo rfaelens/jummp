@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils
 
 class SvnService implements InitializingBean, Vcs {
     static transactional = true
+    @SuppressWarnings('GrailsStatelessService')
     SvnManager svn
 
     void afterPropertiesSet() {

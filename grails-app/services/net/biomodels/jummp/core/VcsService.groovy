@@ -22,7 +22,9 @@ import net.biomodels.jummp.core.vcs.VcsNotInitedException
  */
 class VcsService implements InitializingBean {
     static transactional = true
+    @SuppressWarnings('GrailsStatelessService')
     private VcsManager vcsManager = null
+    @SuppressWarnings('GrailsStatelessService')
     def grailsApplication
 
     void afterPropertiesSet() {
