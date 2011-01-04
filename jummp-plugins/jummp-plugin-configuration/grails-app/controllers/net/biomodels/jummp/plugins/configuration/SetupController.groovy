@@ -1,4 +1,4 @@
-package net.biomodels.jummp.controllers
+package net.biomodels.jummp.plugins.configuration
 
 import net.biomodels.jummp.security.User
 import net.biomodels.jummp.security.Role

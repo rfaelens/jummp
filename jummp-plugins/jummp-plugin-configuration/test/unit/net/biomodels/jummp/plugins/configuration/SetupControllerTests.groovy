@@ -1,4 +1,4 @@
-package net.biomodels.jummp.controllers
+package net.biomodels.jummp.plugins.configuration
 
 import grails.test.*
 import org.apache.commons.io.FileUtils

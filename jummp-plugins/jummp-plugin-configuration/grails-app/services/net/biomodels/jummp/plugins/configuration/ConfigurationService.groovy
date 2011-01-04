@@ -1,11 +1,6 @@
 package net.biomodels.jummp.plugins.configuration
 
 import java.util.concurrent.locks.ReentrantLock
-import net.biomodels.jummp.controllers.FirstRunCommand
-import net.biomodels.jummp.controllers.LdapCommand
-import net.biomodels.jummp.controllers.MysqlCommand
-import net.biomodels.jummp.controllers.SvnCommand
-import net.biomodels.jummp.controllers.VcsCommand
 import org.springframework.beans.factory.InitializingBean
 
 /**
