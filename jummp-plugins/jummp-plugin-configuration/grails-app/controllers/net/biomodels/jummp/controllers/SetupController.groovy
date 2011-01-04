@@ -121,7 +121,7 @@ class SetupController {
             action {
                 Properties props = new Properties()
                 props.setProperty("jummp.database.server", flow.mysql.server)
-                props.setProperty("jummp.database.port", flow.mysql.port)
+                props.setProperty("jummp.database.port", flow.mysql.port.toString())
                 props.setProperty("jummp.database.database", flow.mysql.database)
                 props.setProperty("jummp.database.username", flow.mysql.username)
                 props.setProperty("jummp.database.password", flow.mysql.password)
