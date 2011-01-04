@@ -35,7 +35,11 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
     void testBasicOrdering() {
         startFlow()
         assertCurrentStateEquals("start")
-        // TODO: here we need check for database settings
+        setupController.params.server = 'localhost'
+        setupController.params.port = '3306'
+        setupController.params.username = 'jummp'
+        setupController.params.database = 'jummp'
+        setupController.params.password = ''
         signalEvent("next")
         assertCurrentStateEquals("authenticationBackend")
         // incorrect authentication backend

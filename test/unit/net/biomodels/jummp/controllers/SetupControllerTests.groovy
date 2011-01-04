@@ -13,6 +13,55 @@ class SetupControllerTests extends ControllerUnitTestCase {
         super.tearDown()
     }
 
+    void testMysqlCommand() {
+        mockForConstraintsTests(MysqlCommand)
+        // null should fail
+        MysqlCommand cmd = new MysqlCommand()
+        assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["server"])
+        assertEquals("nullable", cmd.errors["port"])
+        assertEquals("nullable", cmd.errors["database"])
+        assertEquals("nullable", cmd.errors["username"])
+        assertEquals("nullable", cmd.errors["password"])
+        // test for blanks
+        cmd = new MysqlCommand()
+        cmd.server = ''
+        cmd.database = ''
+        cmd.username = ''
+        cmd.password = ''
+        assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["port"])
+        assertEquals("blank", cmd.errors["server"])
+        assertEquals("blank", cmd.errors["database"])
+        assertEquals("blank", cmd.errors["username"])
+        assertNull(cmd.errors["password"])
+        // port in range 0 to 65535
+        cmd = new MysqlCommand()
+        cmd.port = -1
+        assertFalse(cmd.validate())
+        assertEquals("range", cmd.errors["port"])
+        cmd = new MysqlCommand()
+        cmd.port = 65536
+        assertFalse(cmd.validate())
+        assertEquals("range", cmd.errors["port"])
+        cmd = new MysqlCommand()
+        cmd.port = 0
+        assertFalse(cmd.validate())
+        assertNull(cmd.errors["port"])
+        cmd = new MysqlCommand()
+        cmd.port = 65535
+        assertFalse(cmd.validate())
+        assertNull(cmd.errors["port"])
+        // and one test that should work
+        cmd = new MysqlCommand()
+        cmd.server = 'localhost'
+        cmd.database = 'jummp'
+        cmd.username = 'jummp'
+        cmd.password = 'jummp'
+        cmd.port = 3306
+        assertTrue(cmd.validate())
+    }
+
     void testLdapCommand() {
         mockForConstraintsTests(LdapCommand)
         // null should fail

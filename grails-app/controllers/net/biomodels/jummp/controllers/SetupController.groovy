@@ -29,7 +29,14 @@ class SetupController {
 
     def setupFlow = {
         start {
-            on("next").to("validateDatabase")
+            on("next") { MysqlCommand cmd ->
+                flow.mysql = cmd
+                if (flow.mysql.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("authenticationBackend")
         }
 
         authenticationBackend {
@@ -77,18 +84,6 @@ class SetupController {
             }.to("save")
         }
 
-        validateDatabase {
-            action {
-                flow.mysqlUsername = params.mysqlUsername
-                flow.mysqlPassword = params.mysqlPassword
-                flow.mysqlServer   = params.mysqlServer
-                flow.mysqlPort     = params.mysqlPort
-                flow.mysqlDatabase = params.mysqlDatabase
-                next()
-            }
-            on("next").to("authenticationBackend")
-        }
-
         validateAuthenticationBackend {
             action {
                 if (params.authenticationBackend == "database") {
@@ -125,11 +120,11 @@ class SetupController {
         save {
             action {
                 Properties props = new Properties()
-                props.setProperty("jummp.database.server", flow.mysqlServer)
-                props.setProperty("jummp.database.port", flow.mysqlPort)
-                props.setProperty("jummp.database.database", flow.mysqlDatabase)
-                props.setProperty("jummp.database.username", flow.mysqlUsername)
-                props.setProperty("jummp.database.password", flow.mysqlPassword)
+                props.setProperty("jummp.database.server", flow.mysql.server)
+                props.setProperty("jummp.database.port", flow.mysql.port)
+                props.setProperty("jummp.database.database", flow.mysql.database)
+                props.setProperty("jummp.database.username", flow.mysql.username)
+                props.setProperty("jummp.database.password", flow.mysql.password)
                 props.setProperty("jummp.security.authenticationBackend", flow.authenticationBackend)
                 if (flow.authenticationBackend == "ldap") {
                     props.setProperty("jummp.security.ldap.enabled", "true")
@@ -239,6 +234,27 @@ class SetupController {
         }
         UserRole.create(user, userRole, true)
         return true
+    }
+}
+
+/**
+ * Command Object for validating MySQL settings.
+ * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ */
+class MysqlCommand implements Serializable {
+    String username
+    String password
+    String server
+    Integer port
+    String database
+
+    static constraints = {
+        username(nullable: false, blank: false)
+        password(nullable: false, blank: true)
+        // TODO: add constraints for a fqdn or IP address
+        server(nullable: false, blank: false)
+        port(nullable: false, range: 0..65535)
+        database(nullable: false, blank: false)
     }
 }
 
