@@ -21,6 +21,7 @@ import org.springframework.transaction.TransactionStatus
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class SetupController {
+    def configurationService
     def springSecurityService
 
     def index = {
@@ -79,9 +80,10 @@ class SetupController {
                 if (flow.firstRun.hasErrors()) {
                     return error()
                 } else {
+                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun)
                     return success()
                 }
-            }.to("save")
+            }.to("finish")
         }
 
         validateAuthenticationBackend {
@@ -115,48 +117,6 @@ class SetupController {
             on("svn").to("svn")
             on("git").to("git")
             on("error").to("vcs")
-        }
-
-        save {
-            action {
-                Properties props = new Properties()
-                props.setProperty("jummp.database.server", flow.mysql.server)
-                props.setProperty("jummp.database.port", flow.mysql.port.toString())
-                props.setProperty("jummp.database.database", flow.mysql.database)
-                props.setProperty("jummp.database.username", flow.mysql.username)
-                props.setProperty("jummp.database.password", flow.mysql.password)
-                props.setProperty("jummp.security.authenticationBackend", flow.authenticationBackend)
-                if (flow.authenticationBackend == "ldap") {
-                    props.setProperty("jummp.security.ldap.enabled", "true")
-                    props.setProperty("jummp.security.ldap.server", flow.ldap.ldapServer)
-                    props.setProperty("jummp.security.ldap.managerDn", flow.ldap.ldapManagerDn)
-                    props.setProperty("jummp.security.ldap.managerPw", flow.ldap.ldapManagerPassword)
-                    props.setProperty("jummp.security.ldap.search.base", flow.ldap.ldapSearchBase)
-                    props.setProperty("jummp.security.ldap.search.filter", flow.ldap.ldapSearchFilter)
-                    props.setProperty("jummp.security.ldap.search.subTree", flow.ldap.ldapSearchSubtree)
-                } else {
-                    props.setProperty("jummp.security.ldap.enabled", "false")
-                }
-                props.setProperty("jummp.firstRun", flow.firstRun.firstRun)
-                props.setProperty("jummp.vcs.plugin", flow.vcs.pluginName())
-                props.setProperty("jummp.vcs.exchangeDirectory", flow.vcs.exchangeDirectory)
-                props.setProperty("jummp.vcs.workingDirectory", flow.vcs.workingDirectory)
-                switch (flow.vcs) {
-                case "subversion":
-                    props.setProperty("jummp.plugins.subversion.localRepository", flow.svn.localRepository)
-                    break
-                case "git":
-                    break
-                default:
-                    // should never happen
-                    break
-                }
-                File file = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
-                FileOutputStream out = new FileOutputStream(file)
-                props.store(out, "Jummp Configuration")
-                next()
-            }
-            on("next").to("finish")
         }
 
         finish {
