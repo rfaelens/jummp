@@ -355,4 +355,248 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("database",  properties.getProperty("jummp.security.authenticationBackend"))
         assertEquals("false",     properties.getProperty("jummp.security.ldap.enabled"))
     }
+
+    void testLoadStoreMysqlConfiguration() {
+        ConfigurationService service = new ConfigurationService()
+        mockForConstraintsTests(FirstRunCommand)
+        mockForConstraintsTests(LdapCommand)
+        mockForConstraintsTests(MysqlCommand)
+        mockForConstraintsTests(SvnCommand)
+        mockForConstraintsTests(VcsCommand)
+        populateProperties(service)
+
+        // now load the data from the service
+        MysqlCommand mysql = service.loadMysqlConfiguration()
+        assertEquals("jummp",     mysql.database)
+        assertEquals("localhost", mysql.server)
+        assertEquals(3306,        mysql.port)
+        assertEquals("user",      mysql.username)
+        assertEquals("pass",      mysql.password)
+
+        // store a new configuration
+        mysql = new MysqlCommand()
+        mysql.database = "database"
+        mysql.server   = "server"
+        mysql.port     = 1234
+        mysql.username = "name"
+        mysql.password = "secret"
+        service.saveMysqlConfiguration(mysql)
+        // verify the configuration
+        MysqlCommand config = service.loadMysqlConfiguration()
+        assertEquals("database", config.database)
+        assertEquals("server",   config.server)
+        assertEquals(1234,       config.port)
+        assertEquals("name",     config.username)
+        assertEquals("secret",   config.password)
+        // verify that other config options are unchanged
+        Properties properties = new Properties()
+        properties.load(new FileInputStream("target/immunoblotProperties"))
+        assertEquals(18, properties.size())
+        assertEquals("false", properties.getProperty("jummp.firstRun"))
+        assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
+        assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
+        assertEquals("",           properties.getProperty("jummp.vcs.exchangeDirectory"))
+        assertEquals("subversion", properties.getProperty("jummp.vcs.plugin"))
+        assertEquals("ldap",     properties.getProperty("jummp.security.authenticationBackend"))
+        assertEquals("true",     properties.getProperty("jummp.security.ldap.enabled"))
+        assertEquals("true",     properties.getProperty("jummp.security.ldap.search.subTree"))
+        assertEquals("filter",   properties.getProperty("jummp.security.ldap.search.filter"))
+        assertEquals("search",   properties.getProperty("jummp.security.ldap.search.base"))
+        assertEquals("password", properties.getProperty("jummp.security.ldap.managerPw"))
+        assertEquals("manager",  properties.getProperty("jummp.security.ldap.managerDn"))
+        assertEquals("server",   properties.getProperty("jummp.security.ldap.server"))
+    }
+
+    void testLoadStoreLdapConfiguration() {
+        ConfigurationService service = new ConfigurationService()
+        mockForConstraintsTests(FirstRunCommand)
+        mockForConstraintsTests(LdapCommand)
+        mockForConstraintsTests(MysqlCommand)
+        mockForConstraintsTests(SvnCommand)
+        mockForConstraintsTests(VcsCommand)
+        populateProperties(service)
+        // Load the data from properties
+        LdapCommand ldap = service.loadLdapConfiguration()
+        assertTrue(ldap.ldapSearchSubtree)
+        assertEquals("filter",   ldap.ldapSearchFilter)
+        assertEquals("search",   ldap.ldapSearchBase)
+        assertEquals("password", ldap.ldapManagerPassword)
+        assertEquals("manager",  ldap.ldapManagerDn)
+        assertEquals("server",   ldap.ldapServer)
+        // store a new configuration
+        ldap = new LdapCommand()
+        ldap.ldapSearchSubtree = false
+        ldap.ldapSearchFilter = "*"
+        ldap.ldapSearchBase = "base"
+        ldap.ldapManagerPassword = "secure"
+        ldap.ldapManagerDn = "cn"
+        ldap.ldapServer = "localhost"
+        service.saveLdapConfiguration(ldap)
+        // verify new configuration
+        LdapCommand ldap2 = service.loadLdapConfiguration()
+        assertFalse(ldap2.ldapSearchSubtree)
+        assertEquals("*",         ldap2.ldapSearchFilter)
+        assertEquals("base",      ldap2.ldapSearchBase)
+        assertEquals("secure",    ldap2.ldapManagerPassword)
+        assertEquals("cn",        ldap2.ldapManagerDn)
+        assertEquals("localhost", ldap2.ldapServer)
+        // verify that other config options are unchanged
+        Properties properties = new Properties()
+        properties.load(new FileInputStream("target/immunoblotProperties"))
+        assertEquals(18, properties.size())
+        assertEquals("false", properties.getProperty("jummp.firstRun"))
+        assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
+        assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
+        assertEquals("",           properties.getProperty("jummp.vcs.exchangeDirectory"))
+        assertEquals("subversion", properties.getProperty("jummp.vcs.plugin"))
+        assertEquals("ldap",     properties.getProperty("jummp.security.authenticationBackend"))
+        assertEquals("jummp",     properties.getProperty("jummp.database.database"))
+        assertEquals("localhost", properties.getProperty("jummp.database.server"))
+        assertEquals("3306",      properties.getProperty("jummp.database.port"))
+        assertEquals("user",      properties.getProperty("jummp.database.username"))
+        assertEquals("pass",      properties.getProperty("jummp.database.password"))
+    }
+
+    void testLoadStoreSvnConfiguration() {
+        ConfigurationService service = new ConfigurationService()
+        mockForConstraintsTests(FirstRunCommand)
+        mockForConstraintsTests(LdapCommand)
+        mockForConstraintsTests(MysqlCommand)
+        mockForConstraintsTests(SvnCommand)
+        mockForConstraintsTests(VcsCommand)
+        populateProperties(service)
+        // verify svn configuration
+        SvnCommand svn = service.loadSvnConfiguration()
+        assertEquals("target", svn.localRepository)
+        // set new configuration
+        svn = new SvnCommand()
+        svn.localRepository = "/tmp"
+        service.saveSvnConfiguration(svn)
+        // verify new configuration
+        SvnCommand svn2 = service.loadSvnConfiguration()
+        assertEquals("/tmp", svn2.localRepository)
+        // verify that other config options are unchanged
+        Properties properties = new Properties()
+        properties.load(new FileInputStream("target/immunoblotProperties"))
+        assertEquals(18, properties.size())
+        assertEquals("false", properties.getProperty("jummp.firstRun"))
+        assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
+        assertEquals("",           properties.getProperty("jummp.vcs.exchangeDirectory"))
+        assertEquals("subversion", properties.getProperty("jummp.vcs.plugin"))
+        assertEquals("ldap",     properties.getProperty("jummp.security.authenticationBackend"))
+        assertEquals("true",     properties.getProperty("jummp.security.ldap.enabled"))
+        assertEquals("true",     properties.getProperty("jummp.security.ldap.search.subTree"))
+        assertEquals("filter",   properties.getProperty("jummp.security.ldap.search.filter"))
+        assertEquals("search",   properties.getProperty("jummp.security.ldap.search.base"))
+        assertEquals("password", properties.getProperty("jummp.security.ldap.managerPw"))
+        assertEquals("manager",  properties.getProperty("jummp.security.ldap.managerDn"))
+        assertEquals("server",   properties.getProperty("jummp.security.ldap.server"))
+        assertEquals("jummp",     properties.getProperty("jummp.database.database"))
+        assertEquals("localhost", properties.getProperty("jummp.database.server"))
+        assertEquals("3306",      properties.getProperty("jummp.database.port"))
+        assertEquals("user",      properties.getProperty("jummp.database.username"))
+        assertEquals("pass",      properties.getProperty("jummp.database.password"))
+    }
+
+    void testLoadStoreVcsConfiguration() {
+        ConfigurationService service = new ConfigurationService()
+        mockForConstraintsTests(FirstRunCommand)
+        mockForConstraintsTests(LdapCommand)
+        mockForConstraintsTests(MysqlCommand)
+        mockForConstraintsTests(SvnCommand)
+        mockForConstraintsTests(VcsCommand)
+        populateProperties(service)
+        // verify the configuration
+        VcsCommand vcs = service.loadVcsConfiguration()
+        assertEquals("svn", vcs.vcs)
+        assertEquals("", vcs.exchangeDirectory)
+        assertEquals("", vcs.workingDirectory)
+        // set new configuration
+        vcs = new VcsCommand()
+        vcs.vcs = "git"
+        vcs.exchangeDirectory = "/tmp"
+        vcs.workingDirectory = "target"
+        service.saveVcsConfiguration(vcs)
+        // verify new configuration
+        VcsCommand vcs2 = service.loadVcsConfiguration()
+        assertEquals("git", vcs2.vcs)
+        assertEquals("/tmp", vcs2.exchangeDirectory)
+        assertEquals("target", vcs2.workingDirectory)
+        // verify that other config options are unchanged
+        Properties properties = new Properties()
+        properties.load(new FileInputStream("target/immunoblotProperties"))
+        assertEquals(18, properties.size())
+        assertEquals("false", properties.getProperty("jummp.firstRun"))
+        assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
+        assertEquals("ldap",     properties.getProperty("jummp.security.authenticationBackend"))
+        assertEquals("true",     properties.getProperty("jummp.security.ldap.enabled"))
+        assertEquals("true",     properties.getProperty("jummp.security.ldap.search.subTree"))
+        assertEquals("filter",   properties.getProperty("jummp.security.ldap.search.filter"))
+        assertEquals("search",   properties.getProperty("jummp.security.ldap.search.base"))
+        assertEquals("password", properties.getProperty("jummp.security.ldap.managerPw"))
+        assertEquals("manager",  properties.getProperty("jummp.security.ldap.managerDn"))
+        assertEquals("server",   properties.getProperty("jummp.security.ldap.server"))
+        assertEquals("jummp",     properties.getProperty("jummp.database.database"))
+        assertEquals("localhost", properties.getProperty("jummp.database.server"))
+        assertEquals("3306",      properties.getProperty("jummp.database.port"))
+        assertEquals("user",      properties.getProperty("jummp.database.username"))
+        assertEquals("pass",      properties.getProperty("jummp.database.password"))
+    }
+
+    private void populateProperties(ConfigurationService service) {
+        service.configurationFile = new File("target/immunoblotProperties")
+        service.configurationFile.delete()
+        service.afterPropertiesSet()
+        assertEquals(new File("target/immunoblotProperties"), service.configurationFile)
+        MysqlCommand mysql = new MysqlCommand()
+        mysql.database = "jummp"
+        mysql.server   = "localhost"
+        mysql.port     = 3306
+        mysql.username = "user"
+        mysql.password = "pass"
+        assertTrue(mysql.validate())
+        LdapCommand ldap = new LdapCommand()
+        ldap.ldapManagerDn       = "manager"
+        ldap.ldapManagerPassword = "password"
+        ldap.ldapSearchBase      = "search"
+        ldap.ldapSearchFilter    = "filter"
+        ldap.ldapSearchSubtree   = true
+        ldap.ldapServer          = "server"
+        assertTrue(ldap.validate())
+        FirstRunCommand firstRun = new FirstRunCommand()
+        firstRun.firstRun = "false"
+        assertTrue(firstRun.validate())
+        SvnCommand svn = new SvnCommand()
+        svn.localRepository = "target"
+        assertTrue(svn.validate())
+        VcsCommand vcs = new VcsCommand()
+        vcs.exchangeDirectory = ""
+        vcs.workingDirectory = ""
+        vcs.vcs = "svn"
+        assertTrue(vcs.validate())
+
+        // everything should be written to the properties file
+        service.storeConfiguration(mysql, ldap, vcs, svn, firstRun)
+        Properties properties = new Properties()
+        properties.load(new FileInputStream("target/immunoblotProperties"))
+        assertEquals(18, properties.size())
+        assertEquals("false", properties.getProperty("jummp.firstRun"))
+        assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
+        assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
+        assertEquals("",           properties.getProperty("jummp.vcs.exchangeDirectory"))
+        assertEquals("subversion", properties.getProperty("jummp.vcs.plugin"))
+        assertEquals("ldap",     properties.getProperty("jummp.security.authenticationBackend"))
+        assertEquals("true",     properties.getProperty("jummp.security.ldap.enabled"))
+        assertEquals("true",     properties.getProperty("jummp.security.ldap.search.subTree"))
+        assertEquals("filter",   properties.getProperty("jummp.security.ldap.search.filter"))
+        assertEquals("search",   properties.getProperty("jummp.security.ldap.search.base"))
+        assertEquals("password", properties.getProperty("jummp.security.ldap.managerPw"))
+        assertEquals("manager",  properties.getProperty("jummp.security.ldap.managerDn"))
+        assertEquals("server",   properties.getProperty("jummp.security.ldap.server"))
+        assertEquals("jummp",     properties.getProperty("jummp.database.database"))
+        assertEquals("localhost", properties.getProperty("jummp.database.server"))
+        assertEquals("3306",      properties.getProperty("jummp.database.port"))
+        assertEquals("user",      properties.getProperty("jummp.database.username"))
+        assertEquals("pass",      properties.getProperty("jummp.database.password"))
+    }
 }

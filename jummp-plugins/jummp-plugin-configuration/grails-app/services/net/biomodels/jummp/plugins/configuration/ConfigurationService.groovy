@@ -53,14 +53,114 @@ class ConfigurationService implements InitializingBean {
         } else {
             properties.setProperty("jummp.security.authenticationBackend", "database")
         }
-        // and save - needs to be thread safe
-        lock.lock()
-        try {
-            FileOutputStream out = new FileOutputStream(configurationFile)
-            properties.store(out, "Jummp Configuration")
-        } finally {
-            lock.unlock()
-        }
+        saveProperties(properties)
+    }
+
+    /**
+     * Loads the current MySql Configuration.
+     * @return A command object encapsulating the current MySql configuration
+     */
+    public MysqlCommand loadMysqlConfiguration() {
+        Properties properties = loadProperties()
+        MysqlCommand mysql = new MysqlCommand()
+        mysql.server   = properties.getProperty("jummp.database.server")
+        mysql.port     = Integer.parseInt(properties.getProperty("jummp.database.port"))
+        mysql.database = properties.getProperty("jummp.database.database")
+        mysql.username = properties.getProperty("jummp.database.username")
+        mysql.password = properties.getProperty("jummp.database.password")
+        return mysql
+    }
+
+    /**
+     * Loads the current LDAP Configuration.
+     * @return A command object encapsulating the current LDAP configuration
+     */
+    public LdapCommand loadLdapConfiguration() {
+        Properties properties = loadProperties()
+        LdapCommand ldap = new LdapCommand()
+        ldap.ldapServer          = properties.getProperty("jummp.security.ldap.server")
+        ldap.ldapManagerDn       = properties.getProperty("jummp.security.ldap.managerDn")
+        ldap.ldapManagerPassword = properties.getProperty("jummp.security.ldap.managerPw")
+        ldap.ldapSearchBase      = properties.getProperty("jummp.security.ldap.search.base")
+        ldap.ldapSearchFilter    = properties.getProperty("jummp.security.ldap.search.filter")
+        ldap.ldapSearchSubtree   = Boolean.parseBoolean(properties.getProperty("jummp.security.ldap.search.subTree"))
+        return ldap
+    }
+
+    /**
+     * Loads the current Version Control System Configuration.
+     * @return A command object encapsulating the current VCS configuration
+     */
+    public VcsCommand loadVcsConfiguration() {
+        Properties properties = loadProperties()
+        VcsCommand vcs = new VcsCommand()
+        vcs.vcs = properties.getProperty("jummp.vcs.plugin") == "subversion" ? "svn" : "git"
+        vcs.exchangeDirectory = properties.getProperty("jummp.vcs.exchangeDirectory")
+        vcs.workingDirectory  = properties.getProperty("jummp.vcs.workingDirectory")
+        return vcs
+    }
+
+    /**
+     * Loads the current Subversion Configuration.
+     * @return A command object encapsulating the current SVN configuration
+     */
+    public SvnCommand loadSvnConfiguration() {
+        Properties properties = loadProperties()
+        SvnCommand svn = new SvnCommand()
+        svn.localRepository = properties.getProperty("jummp.plugins.subversion.localRepository")
+        return svn
+    }
+
+    /**
+     * Updates the MySQL configuration stored in the properties file.
+     * Other settings are not changed!
+     * It is important to remember that the settings will only be activated after
+     * a restart of the application!
+     * @param mysql The new MySQL configuration
+     */
+    public void saveMysqlConfiguration(MysqlCommand mysql) {
+        Properties properties = loadProperties()
+        updateMysqlConfiguration(properties, mysql)
+        saveProperties(properties)
+    }
+
+    /**
+     * Updates the LDAP configuration stored in the properties file.
+     * Other settings are not changed!
+     * It is important to remember that the settings will only be activated after
+     * a restart of the application!
+     * @param ldap The new LDAP configuration
+     */
+    public void saveLdapConfiguration(LdapCommand ldap) {
+        Properties properties = loadProperties()
+        updateLdapConfiguration(properties, ldap)
+        saveProperties(properties)
+    }
+
+    /**
+     * Updates the Version Control System configuration stored in the properties file.
+     * Other settings are not changed!
+     * It is important to remember that the settings will only be activated after
+     * a restart of the application!
+     * @param vcs The new VCS configuration
+     */
+    public void saveVcsConfiguration(VcsCommand vcs) {
+        Properties properties = loadProperties()
+        updateVcsConfiguration(properties, vcs)
+        saveProperties(properties)
+    }
+
+    /**
+     * Updates the Subversion configuration stored in the properties file.
+     * Other settings are not changed!
+     * It is important to remember that the settings will only be activated after
+     * a restart of the application!
+     * @param svn The new Svn configuration
+     */
+    public void saveSvnConfiguration(SvnCommand svn) {
+        Properties properties = loadProperties()
+        updateSvnConfiguration(properties, svn)
+        saveProperties(properties)
     }
 
     /**
@@ -148,5 +248,31 @@ class ConfigurationService implements InitializingBean {
             return
         }
         properties.setProperty("jummp.firstRun", firstRun.firstRun)
+    }
+
+
+    /**
+     * Loads the properties from the configuration file
+     * @return The Jummp Configuration Properties
+     */
+    private Properties loadProperties() {
+        Properties properties = new Properties()
+        properties.load(new FileInputStream(configurationFile))
+        return properties
+    }
+
+
+     /**
+     * Stores the @p properties to the configuration file in a thread safe manner.
+     * @param properties The new properties
+     */
+    private void saveProperties(Properties properties) {
+        lock.lock()
+        try {
+            FileOutputStream out = new FileOutputStream(configurationFile)
+            properties.store(out, "Jummp Configuration")
+        } finally {
+            lock.unlock()
+        }
     }
 }
