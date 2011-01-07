@@ -34,7 +34,7 @@
             <tr class="prop">
                 <td class="name"><label for="ldapSearchSubtree">Search Subtree:</label></td>
                 <td class="value ${hasErrors(bean: ldap, field: 'ldapSearchSubtree', 'errors')}">
-                    <input type="checkbox" name="ldapSearchSubtree" id="ldapSearchSubtree" ${ldap?.ldapSearchSubtree ? 'checked="checked"' : ''}/>
+                    <g:checkBox name="ldapSearchSubtree" id="ldapSearchSubtree" value="${ldap?.ldapSearchSubtree}"/>
                 </td>
             </tr>
         </tbody>
