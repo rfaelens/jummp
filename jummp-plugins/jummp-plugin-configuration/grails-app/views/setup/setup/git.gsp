@@ -10,6 +10,7 @@
             <p>Git does not yet provide any configurations. Please ensure that the working directory specified in the previous step is a local git clone.</p>
             <g:form name="git" action="setup">
                 <div class="buttons">
+                    <g:submitButton name="back" value="Back"/>
                     <g:submitButton name="next" value="Next"/>
                 </div>
             </g:form>

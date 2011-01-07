@@ -143,4 +143,116 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         signalEvent("next")
         assertCurrentStateEquals("git")
     }
+
+    void testSimpleBackTransitions() {
+        // tests that all non-branching states work correctly
+        setCurrentState("server")
+        assertCurrentStateEquals("server")
+        // go back to firstRun
+        signalEvent("back")
+        assertCurrentStateEquals("firstRun")
+        // first Run has a branching - jump to state git
+        setCurrentState("git")
+        assertCurrentStateEquals("git")
+        // go back to vcs
+        signalEvent("back")
+        assertCurrentStateEquals("vcs")
+        // go to svn to test back
+        setCurrentState("svn")
+        assertCurrentStateEquals("svn")
+        // go back to vcs
+        signalEvent("back")
+        assertCurrentStateEquals("vcs")
+        // vcs is after a branching - jump to state ldap
+        setCurrentState("ldap")
+        assertCurrentStateEquals("ldap")
+        // go back to authenticationBackend
+        signalEvent("back")
+        assertCurrentStateEquals("authenticationBackend")
+        // go back to start
+        signalEvent("back")
+        assertCurrentStateEquals("start")
+    }
+
+    void testVcsGoBack() {
+        // tests that we end up in the correct state when going back from vcs
+        // first navigate to the vcs
+        setCurrentState("authenticationBackend")
+        assertCurrentStateEquals("authenticationBackend")
+        setupController.params.authenticationBackend = "database"
+        signalEvent("next")
+        assertCurrentStateEquals("vcs")
+        // going back should be in authenticationBackend
+        signalEvent("back")
+        assertCurrentStateEquals("authenticationBackend")
+        // try going over ldap
+        setupController.params.authenticationBackend = "ldap"
+        signalEvent("next")
+        assertCurrentStateEquals("ldap")
+        setupController.params.ldapServer = "server"
+        setupController.params.ldapManagerDn = "manager"
+        setupController.params.ldapManagerPassword = "password"
+        setupController.params.ldapSearchBase = "search"
+        setupController.params.ldapSearchFilter = "filter"
+        setupController.params.ldapSearchSubtree = "true"
+        signalEvent("next")
+        assertCurrentStateEquals("vcs")
+        // going back should end in ldap
+        signalEvent("back")
+        assertCurrentStateEquals("ldap")
+        // let's go back to authentication backend and use database
+        signalEvent("back")
+        assertCurrentStateEquals("authenticationBackend")
+        setupController.params.authenticationBackend = "database"
+        signalEvent("next")
+        assertCurrentStateEquals("vcs")
+        // now going back should end again in authenticationBackend
+        signalEvent("back")
+        assertCurrentStateEquals("authenticationBackend")
+    }
+
+    void testFirstRunGoBack() {
+        // tests that we end up in the correct state when going back from first Run
+        // first navigate to first Run
+        setCurrentState("vcs")
+        assertCurrentStateEquals("vcs")
+        // go to svn
+        setupController.params.vcs = "svn"
+        setupController.params.exchangeDirectory = ""
+        setupController.params.workingDirectory = ""
+        signalEvent("next")
+        assertCurrentStateEquals("svn")
+        // go to first run
+        setupController.params.localRepository = "target"
+        signalEvent("next")
+        assertCurrentStateEquals("firstRun")
+        // going back should end in svn
+        signalEvent("back")
+        assertCurrentStateEquals("svn")
+        // going back and choose git
+        signalEvent("back")
+        assertCurrentStateEquals("vcs")
+        setupController.params.vcs = "git"
+        setupController.params.workingDirectory = "target"
+        signalEvent("next")
+        assertCurrentStateEquals("git")
+        signalEvent("next")
+        assertCurrentStateEquals("firstRun")
+        // going back should end in git
+        signalEvent("back")
+        assertCurrentStateEquals("git")
+        // going back again and test going through svn
+        signalEvent("back")
+        assertCurrentStateEquals("vcs")
+        setupController.params.vcs = "svn"
+        signalEvent("next")
+        assertCurrentStateEquals("svn")
+        // go to first run
+        setupController.params.localRepository = "target"
+        signalEvent("next")
+        assertCurrentStateEquals("firstRun")
+        // and one last to ensure we are in svn
+        signalEvent("back")
+        assertCurrentStateEquals("svn")
+    }
 }

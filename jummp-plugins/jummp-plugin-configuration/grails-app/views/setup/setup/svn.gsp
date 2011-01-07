@@ -16,6 +16,7 @@
             <g:form name="svn" action="setup">
                 <g:render template="/templates/configuration/svn"/>
                 <div class="buttons">
+                    <g:submitButton name="back" value="Back"/>
                     <g:submitButton name="next" value="Next"/>
                 </div>
             </g:form>

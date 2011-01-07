@@ -16,6 +16,7 @@
             <g:form name="firstRun" action="setup">
                 <g:render template="/templates/configuration/firstRun"/>
                 <div class="buttons">
+                    <g:submitButton name="back" value="Back"/>
                     <g:submitButton name="next" value="Next"/>
                 </div>
             </g:form>

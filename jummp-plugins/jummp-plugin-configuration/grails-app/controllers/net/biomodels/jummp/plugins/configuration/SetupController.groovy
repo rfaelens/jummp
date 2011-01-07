@@ -42,6 +42,7 @@ class SetupController {
 
         authenticationBackend {
             on("next").to("validateAuthenticationBackend")
+            on("back").to("start")
         }
 
         ldap {
@@ -53,10 +54,12 @@ class SetupController {
                     return success()
                 }
             }.to("vcs")
+            on("back").to("authenticationBackend")
         }
 
         vcs {
             on("next").to("validateVcs")
+            on("back").to("decideBackFromVcs")
         }
 
         svn {
@@ -68,10 +71,12 @@ class SetupController {
                     return success()
                 }
             }.to("firstRun")
+            on("back").to("vcs")
         }
 
         git {
             on("next").to("firstRun")
+            on("back").to("vcs")
         }
 
         firstRun {
@@ -83,6 +88,7 @@ class SetupController {
                     return success()
                 }
             }.to("server")
+            on("back").to("decideBackFromFirstRun")
         }
 
         server {
@@ -95,6 +101,7 @@ class SetupController {
                     return success()
                 }
             }.to("finish")
+            on("back").to("firstRun")
         }
 
         validateAuthenticationBackend {
@@ -128,6 +135,34 @@ class SetupController {
             on("svn").to("svn")
             on("git").to("git")
             on("error").to("vcs")
+        }
+
+        decideBackFromVcs {
+            action {
+                if (flow.authenticationBackend == "ldap") {
+                    ldap()
+                } else {
+                    authenticationBackend()
+                }
+            }
+            on("ldap").to("ldap")
+            on("authenticationBackend").to("authenticationBackend")
+        }
+
+        decideBackFromFirstRun {
+            action {
+                if (flow.vcs.isGit()) {
+                    git()
+                } else if (flow.vcs.isSvn()) {
+                    svn()
+                } else {
+                    // just for safety
+                    error()
+                }
+            }
+            on("git").to("git")
+            on("svn").to("svn")
+            on("error").to("firstRun")
         }
 
         finish {

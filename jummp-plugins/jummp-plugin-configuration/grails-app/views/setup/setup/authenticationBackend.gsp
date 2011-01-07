@@ -11,6 +11,7 @@
             <g:form name="authenticationBackend" action="setup">
                 <g:render template="/templates/configuration/authenticationBackend"/>
                 <div class="buttons">
+                    <g:submitButton name="back" value="Back"/>
                     <g:submitButton name="next" value="Next"/>
                 </div>
             </g:form>
