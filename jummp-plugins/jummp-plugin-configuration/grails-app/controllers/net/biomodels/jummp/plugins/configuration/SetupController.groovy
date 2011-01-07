@@ -151,7 +151,7 @@ class SetupController {
                         props.store(out, "Jummp Configuration")
                         next()
                     } else {
-                        log.debug("Serious error occurred")
+                        log.error("The initial user could not be created in the database. Is the database configured properly?")
                         error()
                     }
                 } else {
