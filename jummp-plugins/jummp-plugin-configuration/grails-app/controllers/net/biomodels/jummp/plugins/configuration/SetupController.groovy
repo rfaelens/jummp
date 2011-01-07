@@ -80,7 +80,18 @@ class SetupController {
                 if (flow.firstRun.hasErrors()) {
                     return error()
                 } else {
-                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun)
+                    return success()
+                }
+            }.to("server")
+        }
+
+        server {
+            on("next") { ServerCommand cmd ->
+                flow.server = cmd
+                if (flow.server.hasErrors()) {
+                    return error()
+                } else {
+                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server)
                     return success()
                 }
             }.to("finish")

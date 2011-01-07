@@ -40,14 +40,16 @@ class ConfigurationService implements InitializingBean {
      * @param vcs The Version Control System configuration
      * @param svn The Subversion configuration, may be @c null
      * @param firstRun The First run configuration
+     * @server server The Server configuration
      */
-    public void storeConfiguration(MysqlCommand mysql, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun) {
+    public void storeConfiguration(MysqlCommand mysql, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun, ServerCommand server) {
         Properties properties = new Properties()
         updateMysqlConfiguration(properties, mysql)
         updateLdapConfiguration(properties, ldap)
         updateVcsConfiguration(properties, vcs)
         updateSvnConfiguration(properties, svn)
         updateFirstRunConfiguration(properties, firstRun)
+        updateServerConfiguration(properties, server)
         if (ldap) {
             properties.setProperty("jummp.security.authenticationBackend", "ldap")
         } else {
@@ -112,6 +114,17 @@ class ConfigurationService implements InitializingBean {
     }
 
     /**
+     * Loads the current Server Configuration.
+     * @return A command object encapsulating the current server configuration
+     */
+    public ServerCommand loadServerConfiguration() {
+        Properties properties = loadProperties()
+        ServerCommand server = new ServerCommand()
+        server.url = properties.getProperty("jummp.server.url")
+        return server
+    }
+
+    /**
      * Updates the MySQL configuration stored in the properties file.
      * Other settings are not changed!
      * It is important to remember that the settings will only be activated after
@@ -160,6 +173,19 @@ class ConfigurationService implements InitializingBean {
     public void saveSvnConfiguration(SvnCommand svn) {
         Properties properties = loadProperties()
         updateSvnConfiguration(properties, svn)
+        saveProperties(properties)
+    }
+
+    /**
+     * Updates the Server configuration stored in the properties file.
+     * Other settings are not changed!
+     * It is important to remember that the settings will only be activated after
+     * a restart of the application!
+     * @param svn The new Svn configuration
+     */
+    public void saveServerConfiguration(ServerCommand server) {
+        Properties properties = loadProperties()
+        updateServerConfiguration(properties, server)
         saveProperties(properties)
     }
 
@@ -250,6 +276,17 @@ class ConfigurationService implements InitializingBean {
         properties.setProperty("jummp.firstRun", firstRun.firstRun)
     }
 
+    /**
+     * Updates the @p properties with the settings from @p server.
+     * @param properties The existing properties
+     * @param firstRun The new server settings
+     */
+    private void updateServerConfiguration(Properties properties, ServerCommand server) {
+        if (!server.validate()) {
+            return
+        }
+        properties.setProperty("jummp.server.url", server.url)
+    }
 
     /**
      * Loads the properties from the configuration file

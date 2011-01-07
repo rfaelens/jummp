@@ -270,4 +270,29 @@ class SetupControllerTests extends ControllerUnitTestCase {
         cmd.firstRun = "false"
         assertTrue(cmd.validate())
     }
+
+    void testServerCommand() {
+        mockForConstraintsTests(ServerCommand)
+        // test for null
+        ServerCommand cmd = new ServerCommand()
+        cmd.url = null
+        assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["url"])
+        // test for blank
+        cmd = new ServerCommand()
+        cmd.url = ""
+        assertFalse(cmd.validate())
+        assertEquals("blank", cmd.errors["url"])
+        // test for not a url
+        cmd = new ServerCommand()
+        cmd.url = "test"
+        assertFalse(cmd.validate())
+        assertEquals("url", cmd.errors["url"])
+        // test with proper settings
+        // url fails for localhost, that's why 127.0.0.1 is used
+        cmd = new ServerCommand()
+        cmd.url = "http://127.0.0.1:8080/jummp/"
+        assertTrue(cmd.validate())
+
+    }
 }

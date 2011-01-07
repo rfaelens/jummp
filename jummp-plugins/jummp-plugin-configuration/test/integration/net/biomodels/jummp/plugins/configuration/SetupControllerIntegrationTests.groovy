@@ -77,10 +77,18 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         signalEvent("next")
         assertCurrentStateEquals("firstRun")
         assertTrue(getFlowScope().firstRun.hasErrors())
+        // correct value should transit to server
+        setupController.params.firstRun = "true"
+        signalEvent("next")
+        assertCurrentStateEquals("server")
+        // incorrect value should fail
+        setupController.params.url = "test"
+        signalEvent("next")
+        assertCurrentStateEquals("server")
+        assertTrue(getFlowScope().server.hasErrors())
         assertFlowExecutionActive()
         // correct value should end the flow
-        // currently fails due to missing data
-        setupController.params.firstRun = "true"
+        setupController.params.url = "http://127.0.0.1:8080/jummp/"
         signalEvent("next")
         assertFlowExecutionEnded()
         assertFlowExecutionOutcomeEquals("finish")

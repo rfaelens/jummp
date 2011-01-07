@@ -63,4 +63,17 @@ class ConfigurationController {
             render(view: "saved", model: [module: "Subversion"])
         }
     }
+
+    def server = {
+        render(view: 'configuration', model: [server: configurationService.loadServerConfiguration(), title: "Server", action: "saveServer", template: "server"])
+    }
+
+    def saveServer = { ServerCommand server ->
+        if (server.hasErrors()) {
+            render(view: 'configuration', model: [server: server, title: "Server", action: "saveServer", template: "server"])
+        } else {
+            configurationService.saveServerConfiguration(server)
+            render(view: "saved", model: [module: "Server"])
+        }
+    }
 }

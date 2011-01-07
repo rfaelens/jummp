@@ -13,6 +13,7 @@
                     <li><a href="${createLink(action: 'ldap')}">LDAP</a></li>
                     <li><a href="${createLink(action: 'svn')}">Subversion</a></li>
                     <li><a href="${createLink(action: 'vcs')}">Version Control System</a></li>
+                    <li><a href="${createLink(action: 'server')}">Server</a></li>
                 </ul>
             </p>
         </div>

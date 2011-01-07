@@ -5,18 +5,17 @@
         <title>Setup</title>
     </head>
     <body>
-        <g:hasErrors bean="${firstRun}">
+        <g:hasErrors bean="${server}">
             <div class="errors">
-                <g:renderErrors bean="${firstRun}"/>
+                <g:renderErrors bean="${server}"/>
             </div>
         </g:hasErrors>
         <div id="remote" class="body">
-            <h1>Create Admin</h1>
-            <p>At the next startup of the web application an admin user can be created. If the database already contains an admin user, there is no need for it.</p>
+            <h1>Server Settings</h1>
             <g:form name="firstRun" action="setup">
-                <g:render template="/templates/configuration/firstRun"/>
+                <g:render template="/templates/configuration/server"/>
                 <div class="buttons">
-                    <g:submitButton name="next" value="Next"/>
+                    <g:submitButton name="next" value="Finish"/>
                 </div>
             </g:form>
         </div>
