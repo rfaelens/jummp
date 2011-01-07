@@ -80,10 +80,10 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         assertFlowExecutionActive()
         // correct value should end the flow
         // currently fails due to missing data
-        /*setupController.params.firstRun = "true"
+        setupController.params.firstRun = "true"
         signalEvent("next")
         assertFlowExecutionEnded()
-        assertFlowExecutionOutcomeEquals("finish")*/
+        assertFlowExecutionOutcomeEquals("finish")
     }
 
     void testAuthenticationBackendTransition() {
