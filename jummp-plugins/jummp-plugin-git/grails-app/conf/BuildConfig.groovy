@@ -37,7 +37,6 @@ if (path.tokenize(File.separatorChar).last() == "jummp") {
     path = path + File.separator + "jummp-plugins"
 } else {
     // are in plugin directory
-    File parent = new File("..")
-    path = parent.getCanonicalPath()
+    path = ".."
 }
 grails.plugin.location.'jummp-plugin-core-api' = path + File.separator + "jummp-plugin-core-api"
