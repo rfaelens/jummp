@@ -26,11 +26,6 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
-        // runtime 'mysql:mysql-connector-java:5.1.5'
+        // runtime 'mysql:mysql-connector-java:5.1.13'
     }
 }
-grails.plugin.location.'jummp-plugin-subversion' = "jummp-plugins/jummp-plugin-subversion"
-grails.plugin.location.'jummp-plugin-git' = "jummp-plugins/jummp-plugin-git"
-grails.plugin.location.'jummp-plugin-configuration' = "jummp-plugins/jummp-plugin-configuration"
-grails.plugin.location.'jummp-plugin-core-api' = "jummp-plugins/jummp-plugin-core-api"
-grails.plugin.location.'jummp-plugin-security' = "jummp-plugins/jummp-plugin-security"

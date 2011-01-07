@@ -1,4 +1,4 @@
-package net.biomodels.jummp.security
+package net.biomodels.jummp.plugins.security
 
 import org.apache.commons.lang.builder.HashCodeBuilder
 

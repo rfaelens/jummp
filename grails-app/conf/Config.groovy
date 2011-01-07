@@ -103,9 +103,9 @@ log4j = {
 }
 
 // Added by the Spring Security Core plugin:
-grails.plugins.springsecurity.userLookup.userDomainClassName = 'net.biomodels.jummp.security.User'
-grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'net.biomodels.jummp.security.UserRole'
-grails.plugins.springsecurity.authority.className = 'net.biomodels.jummp.security.Role'
+grails.plugins.springsecurity.userLookup.userDomainClassName = 'net.biomodels.jummp.plugins.security.User'
+grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'net.biomodels.jummp.plugins.security.UserRole'
+grails.plugins.springsecurity.authority.className = 'net.biomodels.jummp.plugins.security.Role'
 
 grails.plugins.springsecurity.controllerAnnotations.staticRules = [
         // protect the springsecurity ui plugin controllers
