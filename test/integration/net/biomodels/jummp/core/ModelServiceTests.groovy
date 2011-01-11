@@ -16,9 +16,12 @@ import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.acls.domain.BasePermission
+import org.springframework.security.access.AccessDeniedException
 
 class ModelServiceTests extends GrailsUnitTestCase {
     def authenticationManager
+    def aclService
+    def objectIdentityRetrievalStrategy
     def aclUtilService
     def springSecurityService
     def modelService
@@ -482,6 +485,96 @@ class ModelServiceTests extends GrailsUnitTestCase {
         testResults = modelService.getAllRevisions(model2)
         assertEquals(1, testResults.size())
         assertSame(revision2, testResults[0])
+    }
+
+    void testGrantReadAccess() {
+        // create a model with some revisions
+        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        Revision rev1 = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision rev2 = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision rev3 = new Revision(model: model, vcsId: "3", revisionNumber: 3, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision rev4 = new Revision(model: model, vcsId: "4", revisionNumber: 4, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision rev5 = new Revision(model: model, vcsId: "5", revisionNumber: 5, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        assertTrue(rev1.validate())
+        assertTrue(rev2.validate())
+        assertTrue(rev3.validate())
+        assertTrue(rev4.validate())
+        assertTrue(rev5.validate())
+        model.addToRevisions(rev1)
+        model.addToRevisions(rev2)
+        model.addToRevisions(rev3)
+        model.addToRevisions(rev4)
+        model.addToRevisions(rev5)
+        assertTrue(model.validate())
+        model.save()
+        // verify that user cannot access the revisions
+        modelAdminUser(false)
+        authenticate("testuser", "secret")
+        assertEquals(0, modelService.getAllRevisions(model).size())
+
+        // grant read access to the model as admin
+        modelAdminUser(true)
+        authenticate("admin", "1234")
+        modelService.grantReadAccess(model, User.findByUsername("testuser"))
+        // user should now see all revisions
+        modelAdminUser(false)
+        def auth = authenticate("testuser", "secret")
+        List<Revision> testResults = modelService.getAllRevisions(model)
+        assertEquals(5, testResults.size())
+        assertSame(rev1, testResults[0])
+        assertSame(rev2, testResults[1])
+        assertSame(rev3, testResults[2])
+        assertSame(rev4, testResults[3])
+        assertSame(rev5, testResults[4])
+        // adding one new Revision to the model
+        Revision rev6 = new Revision(model: model, vcsId: "6", revisionNumber: 6, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        assertTrue(rev6.validate())
+        model.addToRevisions(rev6)
+        assertTrue(model.validate())
+        assertNotNull(model.save(flush: true))
+        // verify that testuser does not have access to this revision
+        testResults = modelService.getAllRevisions(Model.get(model.id))
+        assertEquals(5, testResults.size())
+        assertSame(rev1, testResults[0])
+        assertSame(rev2, testResults[1])
+        assertSame(rev3, testResults[2])
+        assertSame(rev4, testResults[3])
+        assertSame(rev5, testResults[4])
+        // verify that user is not seeing the revisions
+        authenticate("user", "verysecret")
+        assertEquals(0, modelService.getAllRevisions(model).size())
+        // try granting read permission to user - should not change anything
+        authenticate("testuser", "secret")
+        shouldFail(AccessDeniedException) {
+            modelService.grantReadAccess(model, User.findByUsername("user"))
+        }
+        authenticate("user", "verysecret")
+        assertEquals(0, modelService.getAllRevisions(model).size())
+        // give admin right to the testuser - this should allow user to grant read access
+        modelAdminUser(true)
+        authenticate("admin", "1234")
+        aclUtilService.addPermission(model, "testuser", BasePermission.READ)
+        aclUtilService.addPermission(model, "testuser", BasePermission.ADMINISTRATION)
+        // if the administration right is not set, the framework throws an exception
+        aclUtilService.addPermission(rev1, "testuser", BasePermission.ADMINISTRATION)
+        aclUtilService.addPermission(rev2, "testuser", BasePermission.ADMINISTRATION)
+        aclUtilService.addPermission(rev3, "testuser", BasePermission.ADMINISTRATION)
+        aclUtilService.addPermission(rev4, "testuser", BasePermission.ADMINISTRATION)
+        aclUtilService.addPermission(rev5, "testuser", BasePermission.ADMINISTRATION)
+        modelAdminUser(false)
+        // grant read permission to user
+        authenticate("testuser", "secret")
+        modelService.grantReadAccess(Model.get(model.id), User.findByUsername("user"))
+        // user should see same revisions as testuser
+        authenticate("user", "verysecret")
+        testResults = modelService.getAllRevisions(model)
+        assertEquals(5, testResults.size())
+        assertSame(rev1, testResults[0])
+        assertSame(rev2, testResults[1])
+        assertSame(rev3, testResults[2])
+        assertSame(rev4, testResults[3])
+        assertSame(rev5, testResults[4])
+
     }
 
     private void createUserAndRoles() {

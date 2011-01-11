@@ -216,9 +216,11 @@ class ModelService {
         // Read access is modeled by adding read access to the model (user will get read access for future revisions)
         // and by adding read access to all revisions the user has access to
         aclUtilService.addPermission(model, collaborator.username, BasePermission.READ)
-        List<Revision> revisions = getAllRevisions(model)
-        revisions.each { revision ->
-            aclUtilService.addPermission(revision, collaborator.username, BasePermission.READ)
+        Set<Revision> revisions = model.revisions
+        for (Revision revision in revisions) {
+            if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+                aclUtilService.addPermission(revision, collaborator.username, BasePermission.READ)
+            }
         }
     }
 
