@@ -577,6 +577,42 @@ class ModelServiceTests extends GrailsUnitTestCase {
 
     }
 
+    void testGrantWriteAccess() {
+        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        Revision rev1 = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        assertTrue(rev1.validate())
+        model.addToRevisions(rev1)
+        assertTrue(model.validate())
+        model.save()
+        // testuser does not have Write permission on model
+        def auth = authenticate("testuser", "secret")
+        assertFalse(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
+        modelAdminUser(true)
+        authenticate("admin", "1234")
+        // grant write access
+        modelService.grantWriteAccess(model, User.findByUsername("testuser"))
+        assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
+        // testuser is not admin to the model, he should not be allowed to grant write permission
+        modelAdminUser(false)
+        authenticate("testuser", "secret")
+        shouldFail(AccessDeniedException) {
+            modelService.grantWriteAccess(model, User.findByUsername("user"))
+        }
+        // grant admin right to testuser
+        modelAdminUser(true)
+        authenticate("admin", "1234")
+        aclUtilService.addPermission(model, "testuser", BasePermission.ADMINISTRATION)
+        // verify that user hoes not have the right to write on model
+        modelAdminUser(false)
+        auth = authenticate("user", "verysecret")
+        assertFalse(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
+        // grant write right to user
+        authenticate("testuser", "secret")
+        modelService.grantWriteAccess(model, User.findByUsername("user"))
+        assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
+        // TODO: add checks to verify that uploading a new model revision is allowed
+    }
+
     private void createUserAndRoles() {
         User user = new User(username: "testuser",
                 password: springSecurityService.encodePassword("secret"),
