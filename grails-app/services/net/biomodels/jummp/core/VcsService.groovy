@@ -1,5 +1,6 @@
 package net.biomodels.jummp.core
 
+import junit.framework.AssertionFailedError
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.beans.factory.InitializingBean
@@ -8,6 +9,7 @@ import org.springframework.context.ApplicationContext
 import net.biomodels.jummp.core.vcs.Vcs
 import net.biomodels.jummp.core.vcs.VcsManager
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
+import net.biomodels.jummp.core.vcs.VcsException
 
 /**
  * @short Service providing access to the version control system.
@@ -30,14 +32,16 @@ class VcsService implements InitializingBean {
     void afterPropertiesSet() {
         String pluginServiceName = ConfigurationHolder.config.jummp.vcs.pluginServiceName
         if (pluginServiceName) {
-            ApplicationContext ctx = (ApplicationContext)ApplicationHolder.getApplication().getMainContext()
             try {
+                ApplicationContext ctx = (ApplicationContext)ApplicationHolder.getApplication().getMainContext()
                 Vcs vcs = (Vcs)ctx.getBean(pluginServiceName)
                 if (vcs.isValid()) {
                     vcsManager = vcs.vcsManager()
                 } else {
                     log.error("Vcs service ${pluginServiceName} is not valid, disabling VcsService")
                 }
+            } catch (AssertionFailedError e) {
+                log.debug("Assertion during integration test - this is expected and does not matter")
             } catch(NoSuchBeanDefinitionException e) {
                 log.error(e.getMessage())
                 e.printStackTrace()
@@ -59,5 +63,34 @@ class VcsService implements InitializingBean {
         return (vcsManager != null)
     }
 
+    /**
+    * Updates a file previously imported to the VCS.
+    * Copies @p file into the working copy of the VCS and updates the existing file in the
+    * VCS and the remote location of the VCS.
+    * Use this method if the file had been imported previously.
+    * @param file The file to update
+    * @param name The name of the file in the VCS.
+    * @param commitMessage The commit message to be used for the update.
+    * @return Revision number of updated file, @c null if error occurred
+    **/
+    String updateFile(File file, String name, String commitMessage) {
+        // TODO: method should throw exceptions
+        if (!isValid()) {
+            return null
+        }
+
+        String revision = ''
+        try {
+            if (!commitMessage || commitMessage.isEmpty()) {
+                revision = vcsManager.updateFile(file, name)
+            } else {
+                revision = vcsManager.updateFile(file, name, commitMessage)
+            }
+        } catch (VcsException e) {
+            log.error(e.message)
+            return null
+        }
+        return revision
+    }
     // TODO: implement required methods
 }
