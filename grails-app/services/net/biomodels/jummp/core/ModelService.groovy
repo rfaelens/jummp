@@ -285,19 +285,28 @@ class ModelService {
     * himself and has the right to grant/revoke write rights on the model
     * @param model The Model for which write access should be revoked
     * @param collaborator The User whose write access should be revoked
+    * @return @c true if the right has been revoked, @c false otherwise
     * @todo Might be better in a CollaborationService?
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
-    public void revokeWriteAccess(Model model, User collaborator) {
+    public boolean revokeWriteAccess(Model model, User collaborator) {
         if (collaborator.username == springSecurityService.authentication.name) {
             // the user cannot revoke his own rights
-            return
+            return false
         }
         // check whether the collaborator is admin of the model
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(collaborator.username, "invalid")
-        if (!aclUtilService.hasPermission(authentication, model, BasePermission.ADMINISTRATION)) {
-            aclUtilService.deletePermission(model, collaborator.username, BasePermission.WRITE)
+        Acl acl = aclUtilService.readAcl(model)
+        boolean adminToModel = false
+        acl.entries.each { ace ->
+            if (ace.sid.principal == collaborator.username && ace.permission == BasePermission.ADMINISTRATION) {
+                adminToModel = true
+            }
         }
+        if (adminToModel) {
+            return false
+        }
+        aclUtilService.deletePermission(model, collaborator.username, BasePermission.WRITE)
+        return true
     }
 
     /**
