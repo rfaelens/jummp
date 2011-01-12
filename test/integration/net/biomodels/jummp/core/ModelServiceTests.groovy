@@ -613,6 +613,51 @@ class ModelServiceTests extends GrailsUnitTestCase {
         // TODO: add checks to verify that uploading a new model revision is allowed
     }
 
+    void testRevokeReadAccess() {
+        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        Revision rev1 = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        assertTrue(rev1.validate())
+        model.addToRevisions(rev1)
+        assertTrue(model.validate())
+        model.save()
+        // user has no right on the model - he is not allowed to revoke read access
+        modelAdminUser(false)
+        def auth = authenticate("testuser", "secret")
+        shouldFail(AccessDeniedException) {
+            modelService.revokeReadAccess(model, User.findByUsername("user"))
+        }
+        // add rights to testuser
+        aclUtilService.addPermission(model, "testuser", BasePermission.ADMINISTRATION)
+        aclUtilService.addPermission(model, "testuser", BasePermission.READ)
+        // let's try revoking our own right - should not be possible
+        assertFalse(modelService.revokeReadAccess(model, User.findByUsername("testuser")))
+        assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.READ))
+        // grant read right to user
+        modelService.grantReadAccess(model, User.findByUsername("user"))
+        def auth2 = authenticate("user", "verysecret")
+        assertTrue(aclUtilService.hasPermission(auth2, model, BasePermission.READ))
+        // and revoke again
+        authenticate("testuser", "secret")
+        assertTrue(modelService.revokeReadAccess(model, User.findByUsername("user")))
+        assertFalse(aclUtilService.hasPermission(auth2, model, BasePermission.READ))
+        // test the same as admin user
+        modelAdminUser(true)
+        authenticate("admin", "1234")
+        // testuser is still admin to the model - right should not be revoked
+        assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.READ))
+        assertFalse(modelService.revokeReadAccess(model, User.findByUsername("testuser")))
+        assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.READ))
+        // remove the admin right and add write right
+        aclUtilService.deletePermission(model, "testuser", BasePermission.ADMINISTRATION)
+        aclUtilService.addPermission(model, "testuser", BasePermission.WRITE)
+        assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.READ))
+        assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
+        // revoke right, should remove both read and write
+        assertTrue(modelService.revokeReadAccess(model, User.findByUsername("testuser")))
+        assertFalse(aclUtilService.hasPermission(auth, model, BasePermission.READ))
+        assertFalse(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
+    }
+
     private void createUserAndRoles() {
         User user = new User(username: "testuser",
                 password: springSecurityService.encodePassword("secret"),

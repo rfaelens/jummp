@@ -8,6 +8,7 @@ import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.springframework.security.acls.model.Acl
 
 /**
  * @short Service class for managing Models
@@ -251,22 +252,29 @@ class ModelService {
     * if the user is an administrator of the model.
     * @param model The Model for which read access should be revoked
     * @param collaborator The User whose read access should be revoked
+    * @return @c true if the right has been revoked, @c false otherwise
     * @todo Might be better in a CollaborationService?
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
-    public void revokeReadAccess(Model model, User collaborator) {
+    public boolean revokeReadAccess(Model model, User collaborator) {
         if (collaborator.username == springSecurityService.authentication.name) {
             // the user cannot revoke his own rights
-            return
+            return false
         }
         // check whether the collaborator is admin of the model
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(collaborator.username, "invalid")
-        if (!aclUtilService.hasPermission(authentication, model, BasePermission.ADMINISTRATION)) {
-            aclUtilService.deletePermission(model, collaborator.username, BasePermission.READ)
-            if (aclUtilService.hasPermission(authentication, model, BasePermission.WRITE)) {
-                aclUtilService.deletePermission(model, collaborator.username, BasePermission.WRITE)
+        Acl acl = aclUtilService.readAcl(model)
+        boolean adminToModel = false
+        acl.entries.each { ace ->
+            if (ace.sid.principal == collaborator.username && ace.permission == BasePermission.ADMINISTRATION) {
+                adminToModel = true
             }
         }
+        if (adminToModel) {
+            return false
+        }
+        aclUtilService.deletePermission(model, collaborator.username, BasePermission.READ)
+        aclUtilService.deletePermission(model, collaborator.username, BasePermission.WRITE)
+        return true
     }
 
     /**
