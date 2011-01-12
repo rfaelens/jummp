@@ -34,7 +34,7 @@ grails.project.dependency.resolution = {
 File directory = new File(".")
 String path = directory.getCanonicalPath()
 if (path.tokenize(File.separatorChar).last() == "jummp") {
-    path = path + File.separator + "jummp-plugins"
+    path = "../../jummp-plugins"
 } else {
     // are in plugin directory
     path = ".."
