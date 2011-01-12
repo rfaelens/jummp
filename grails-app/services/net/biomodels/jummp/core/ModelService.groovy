@@ -9,6 +9,7 @@ import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.acls.model.Acl
+import org.springframework.security.acls.domain.PrincipalSid
 
 /**
  * @short Service class for managing Models
@@ -208,6 +209,13 @@ class ModelService {
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.READ)
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.DELETE)
+            // grant read access to all users having read access to the model
+            Acl acl = aclUtilService.readAcl(model)
+            for (ace in acl.entries) {
+                if (ace.sid instanceof PrincipalSid && ace.permission == BasePermission.READ) {
+                    aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.READ)
+                }
+            }
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()

@@ -505,6 +505,7 @@ class ModelServiceTests extends GrailsUnitTestCase {
         // give user the right to write to the model
         modelAdminUser(true)
         authenticate("admin", "1234")
+        modelService.grantReadAccess(model, User.findByUsername("testuser"))
         modelService.grantWriteAccess(model, User.findByUsername("testuser"))
         // model may not be null - test as admin as otherwise will throw AccessDeniedException
         shouldFail(NullPointerException) {
@@ -562,13 +563,56 @@ class ModelServiceTests extends GrailsUnitTestCase {
         gitService.vcsManager().importFile(importFile, "test.xml")
         // test the real update
         File updateFile = new File("target/vcs/exchange/update.xml")
+        updateFile.append("Test\n")
         FileUtils.touch(updateFile)
         Revision rev = modelService.addRevision(model, updateFile, "")
         assertEquals(2, rev.revisionNumber)
         assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.ADMINISTRATION))
         assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.READ))
         assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.DELETE))
-        // TODO: implement further checks
+        File gitFile = new File("target/vcs/git/test.xml")
+        List<String> lines = gitFile.readLines()
+        assertEquals(1, lines.size())
+        assertEquals("Test", lines[0])
+        // user should not have received a read right on the revision
+        def auth2 = authenticate("user", "verysecret")
+        assertFalse(aclUtilService.hasPermission(auth2, rev, BasePermission.READ))
+        // grant read access to the user - he should than get right to read the next revision
+        modelAdminUser(true)
+        authenticate("admin", "1234")
+        modelService.grantReadAccess(model, User.findByUsername("user"))
+        assertTrue(aclUtilService.hasPermission(auth2, model, BasePermission.READ))
+        modelAdminUser(false)
+        authenticate("testuser", "secret")
+        updateFile.append("Further Test\n")
+        Revision rev2 = modelService.addRevision(model, updateFile, "")
+        assertEquals(3, rev2.revisionNumber)
+        assertFalse(rev2.vcsId == rev.vcsId)
+        assertTrue(aclUtilService.hasPermission(auth, rev2, BasePermission.ADMINISTRATION))
+        assertTrue(aclUtilService.hasPermission(auth, rev2, BasePermission.READ))
+        assertTrue(aclUtilService.hasPermission(auth, rev2, BasePermission.DELETE))
+        assertTrue(aclUtilService.hasPermission(auth2, rev2, BasePermission.READ))
+        lines = gitFile.readLines()
+        assertEquals(2, lines.size())
+        assertEquals("Test", lines[0])
+        assertEquals("Further Test", lines[1])
+        // admin should also be able to import updates
+        modelAdminUser(true)
+        def adminAuth = authenticate("admin", "1234")
+        updateFile.append("Admin Test\n")
+        Revision rev3 = modelService.addRevision(model, updateFile, "")
+        assertEquals(4, rev3.revisionNumber)
+        assertFalse(rev3.vcsId == rev2.vcsId)
+        assertTrue(aclUtilService.hasPermission(adminAuth, rev3, BasePermission.ADMINISTRATION))
+        assertTrue(aclUtilService.hasPermission(adminAuth, rev3, BasePermission.READ))
+        assertTrue(aclUtilService.hasPermission(adminAuth, rev3, BasePermission.DELETE))
+        assertTrue(aclUtilService.hasPermission(auth, rev3, BasePermission.READ))
+        assertTrue(aclUtilService.hasPermission(auth2, rev3, BasePermission.READ))
+        lines = gitFile.readLines()
+        assertEquals(3, lines.size())
+        assertEquals("Test", lines[0])
+        assertEquals("Further Test", lines[1])
+        assertEquals("Admin Test", lines[2])
     }
 
     void testGrantReadAccess() {
