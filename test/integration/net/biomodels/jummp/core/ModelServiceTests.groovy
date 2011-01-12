@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.access.AccessDeniedException
+import net.biomodels.jummp.plugins.git.GitService
 
 class ModelServiceTests extends GrailsUnitTestCase {
     def authenticationManager
@@ -45,8 +46,8 @@ class ModelServiceTests extends GrailsUnitTestCase {
 
     protected void tearDown() {
         super.tearDown()
-        /*FileUtils.deleteDirectory(new File("target/vcs/git"))
-        FileUtils.deleteDirectory(new File("target/vcs/exchange"))*/
+        FileUtils.deleteDirectory(new File("target/vcs/git"))
+        FileUtils.deleteDirectory(new File("target/vcs/exchange"))
     }
 
     void testGetAllModelsSecurity() {
@@ -485,6 +486,89 @@ class ModelServiceTests extends GrailsUnitTestCase {
         testResults = modelService.getAllRevisions(model2)
         assertEquals(1, testResults.size())
         assertSame(revision2, testResults[0])
+    }
+
+    void testAddRevision() {
+        // create one model with one revision and no acl
+        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        assertTrue(revision.validate())
+        model.addToRevisions(revision)
+        assertTrue(model.validate())
+        model.save()
+        // authenticate as testuser, as there is no ACL he is not allowed to add a revision
+        modelAdminUser(false)
+        authenticate("testuser", "secret")
+        shouldFail(AccessDeniedException) {
+            modelService.addRevision(model, new File("target/test"), null)
+        }
+        // give user the right to write to the model
+        modelAdminUser(true)
+        authenticate("admin", "1234")
+        modelService.grantWriteAccess(model, User.findByUsername("testuser"))
+        // model may not be null - test as admin as otherwise will throw AccessDeniedException
+        shouldFail(NullPointerException) {
+            modelService.addRevision(null, new File("target/test"), "")
+        }
+        // vcs is not yet setup, adding a revision should fail
+        modelAdminUser(false)
+        def auth = authenticate("testuser", "secret")
+        // model may not be null - as a user this throws an AccessDeniedException
+        shouldFail(AccessDeniedException) {
+            modelService.addRevision(null, new File("target/test"), "")
+        }
+        // file may not be null
+        shouldFail(NullPointerException) {
+            modelService.addRevision(model, null, "")
+        }
+        // comment may not be null
+        shouldFail(NullPointerException) {
+            modelService.addRevision(model, new File("target/test"), null)
+        }
+        // file must exist
+        shouldFail(FileNotFoundException) {
+            modelService.addRevision(model, new File("target/test"), "")
+        }
+        // file may not be a directory
+        File exchangeDirectory = new File("target/vcs/exchange")
+        exchangeDirectory.mkdirs()
+        shouldFail(FileNotFoundException) {
+            modelService.addRevision(model, exchangeDirectory, "")
+        }
+        File importFile = new File("target/vcs/exchange/test.xml")
+        FileUtils.touch(importFile)
+        assertNull(modelService.addRevision(model, importFile, ""))
+        // setup VCS
+        File clone = new File("target/vcs/git")
+        clone.mkdirs()
+        FileRepositoryBuilder builder = new FileRepositoryBuilder()
+        Repository repository = builder.setWorkTree(clone)
+        .readEnvironment() // scan environment GIT_* variables
+        .findGitDir() // scan up the file system tree
+        .build()
+        Git git = new Git(repository)
+        git.init().setDirectory(clone).call()
+        GitService gitService = new GitService()
+        mockConfig('''
+            jummp.plugins.git.enabled=true
+            jummp.vcs.workingDirectory="target/vcs/git"
+            jummp.vcs.exchangeDirectory="target/vcs/exchange"
+            ''')
+        gitService.afterPropertiesSet()
+        assertTrue(gitService.isValid())
+        modelService.vcsService.vcsManager = gitService.vcsManager()
+        assertTrue(modelService.vcsService.isValid())
+        // import a file to the git repository, to make future updates possible
+        gitService.vcsManager().importFile(importFile, "test.xml")
+        // test the real update
+        File updateFile = new File("target/vcs/exchange/update.xml")
+        FileUtils.touch(updateFile)
+        Revision rev = modelService.addRevision(model, updateFile, "")
+        assertEquals(2, rev.revisionNumber)
+        assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.ADMINISTRATION))
+        assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.READ))
+        assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.DELETE))
+        // TODO: implement further checks
     }
 
     void testGrantReadAccess() {

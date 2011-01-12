@@ -170,12 +170,26 @@ class ModelService {
     * @param file The model file to be stored in the VCS as a new revision
     * @param comment The commit message for the new revision
     * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
+    * @throws NullPointerException If either @p model, @p file or @p comment are null
+    * @throws FileNotFoundException If the file does not exist
     **/
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
-    public Revision addRevision(Model model, File file, String comment) {
+    public Revision addRevision(Model model, File file, String comment) throws NullPointerException, FileNotFoundException {
         // TODO: the method should throw exceptions in error cases
         // TODO: the method should be thread safe, add a lock
         // TODO: validate the file
+        if (!model) {
+            throw new NullPointerException("Model may not be null")
+        }
+        if (comment == null) {
+            throw new NullPointerException("Comment may not be null, empty comment is allowed")
+        }
+        if (!file) {
+            throw new NullPointerException("File may not be null")
+        }
+        if (!file.exists() || file.isDirectory()) {
+            throw new FileNotFoundException("The file ${file.path} does not exist or is a directory")
+        }
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
         Revision revision = new Revision(model: model, comment: comment, uploadDate: new Date(), owner: currentUser, minorRevision: false)
         // save the new file in the database
@@ -190,10 +204,12 @@ class ModelService {
 
         if (revision.validate()) {
             model.addToRevisions(revision)
+            model.save(flush: true)
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.READ)
-            aclUtilService.addPermission(revision, currentUser.username, BasePermission.WRITE)
+            aclUtilService.addPermission(revision, currentUser.username, BasePermission.DELETE)
         } else {
+            // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
             revision = null
         }
