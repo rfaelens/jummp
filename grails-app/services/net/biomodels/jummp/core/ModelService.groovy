@@ -194,7 +194,7 @@ class ModelService {
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
         Revision revision = new Revision(model: model, comment: comment, uploadDate: new Date(), owner: currentUser, minorRevision: false)
         // save the new file in the database
-        String vcsId = vcsService.updateFile(file, model.vcsIdentifier, comment)
+        String vcsId = vcsService.updateFile(model, file, comment)
         if (!vcsId) {
             revision.discard()
             return null

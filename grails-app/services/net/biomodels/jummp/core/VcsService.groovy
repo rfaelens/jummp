@@ -10,6 +10,8 @@ import net.biomodels.jummp.core.vcs.Vcs
 import net.biomodels.jummp.core.vcs.VcsManager
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 import net.biomodels.jummp.core.vcs.VcsException
+import org.springframework.security.access.prepost.PreAuthorize
+import net.biomodels.jummp.model.Model
 
 /**
  * @short Service providing access to the version control system.
@@ -64,16 +66,17 @@ class VcsService implements InitializingBean {
     }
 
     /**
-    * Updates a file previously imported to the VCS.
+    * Updates a Model file previously imported to the VCS.
     * Copies @p file into the working copy of the VCS and updates the existing file in the
     * VCS and the remote location of the VCS.
     * Use this method if the file had been imported previously.
+    * @param model The Model representing the file in the VCS.
     * @param file The file to update
-    * @param name The name of the file in the VCS.
     * @param commitMessage The commit message to be used for the update.
     * @return Revision number of updated file, @c null if error occurred
     **/
-    String updateFile(File file, String name, String commitMessage) {
+    @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
+    String updateFile(Model model, File file, String commitMessage) {
         // TODO: method should throw exceptions
         if (!isValid()) {
             return null
@@ -82,9 +85,9 @@ class VcsService implements InitializingBean {
         String revision = ''
         try {
             if (!commitMessage || commitMessage.isEmpty()) {
-                revision = vcsManager.updateFile(file, name)
+                revision = vcsManager.updateFile(file, model.vcsIdentifier)
             } else {
-                revision = vcsManager.updateFile(file, name, commitMessage)
+                revision = vcsManager.updateFile(file, model.vcsIdentifier, commitMessage)
             }
         } catch (VcsException e) {
             log.error(e.message)
