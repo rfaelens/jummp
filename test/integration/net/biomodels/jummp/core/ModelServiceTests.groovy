@@ -262,6 +262,7 @@ class ModelServiceTests extends GrailsUnitTestCase {
         assertSame(rev6, modelService.getLatestRevision(model))
     }
 
+    @SuppressWarnings('UnusedVariable')
     void testGetAllModels() {
         for (int i=0; i<30; i++) {
             // create thirty models
@@ -342,6 +343,7 @@ class ModelServiceTests extends GrailsUnitTestCase {
         assertSame(Model.findByName("${29}"), testElements.last())
     }
 
+    @SuppressWarnings('UnusedVariable')
     void testGetAllRevisions() {
         // create one model with one revision and no acl
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
@@ -646,7 +648,7 @@ class ModelServiceTests extends GrailsUnitTestCase {
         modelService.grantReadAccess(model, User.findByUsername("testuser"))
         // user should now see all revisions
         modelAdminUser(false)
-        def auth = authenticate("testuser", "secret")
+        authenticate("testuser", "secret")
         List<Revision> testResults = modelService.getAllRevisions(model)
         assertEquals(5, testResults.size())
         assertSame(rev1, testResults[0])
