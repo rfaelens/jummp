@@ -11,6 +11,7 @@ class PublicationTests extends GrailsUnitTestCase {
         super.tearDown()
     }
 
+    @SuppressWarnings('UnusedVariable')
     void testConstraints() {
         mockForConstraintsTests(Publication)
         // test for nullable

@@ -12,6 +12,7 @@ class RevisionTests extends GrailsUnitTestCase {
         super.tearDown()
     }
 
+    @SuppressWarnings('UnusedVariable')
     void testConstraints() {
         Model model = new Model(vcsIdentifier: "test", name: "test")
         User owner = new User(username: "testUser", password: "secret", userRealName: "Test User", email: "test@user.org", enabled: true, accountExpired: false, accountLocked: false, passwordExpired: false)
