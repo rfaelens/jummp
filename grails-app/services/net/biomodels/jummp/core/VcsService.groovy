@@ -74,24 +74,19 @@ class VcsService implements InitializingBean {
     * @param file The file to update
     * @param commitMessage The commit message to be used for the update.
     * @return Revision number of updated file, @c null if error occurred
+    * @throws VcsException passes along the VcsException thrown by VcsManager
     **/
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
-    String updateFile(Model model, File file, String commitMessage) {
-        // TODO: method should throw exceptions
+    String updateFile(Model model, File file, String commitMessage) throws VcsException {
         if (!isValid()) {
-            return null
+            throw new VcsException("Version Control System is not valid")
         }
 
         String revision = ''
-        try {
-            if (!commitMessage || commitMessage.isEmpty()) {
-                revision = vcsManager.updateFile(file, model.vcsIdentifier)
-            } else {
-                revision = vcsManager.updateFile(file, model.vcsIdentifier, commitMessage)
-            }
-        } catch (VcsException e) {
-            log.error(e.message)
-            return null
+        if (!commitMessage || commitMessage.isEmpty()) {
+            revision = vcsManager.updateFile(file, model.vcsIdentifier)
+        } else {
+            revision = vcsManager.updateFile(file, model.vcsIdentifier, commitMessage)
         }
         return revision
     }

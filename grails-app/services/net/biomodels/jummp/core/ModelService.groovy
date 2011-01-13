@@ -9,6 +9,7 @@ import org.springframework.security.acls.domain.BasePermission
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.acls.domain.PrincipalSid
+import net.biomodels.jummp.core.vcs.VcsException
 
 /**
  * @short Service class for managing Models
@@ -170,35 +171,35 @@ class ModelService {
     * @param file The model file to be stored in the VCS as a new revision
     * @param comment The commit message for the new revision
     * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
-    * @throws NullPointerException If either @p model, @p file or @p comment are null
-    * @throws FileNotFoundException If the file does not exist
+    * @throws ModelException If either @p model, @p file or @p comment are null or if the file does not exists or is a directory
     **/
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
-    public Revision addRevision(Model model, File file, String comment) throws NullPointerException, FileNotFoundException {
-        // TODO: the method should throw exceptions in error cases
+    public Revision addRevision(Model model, File file, String comment) throws ModelException {
         // TODO: the method should be thread safe, add a lock
         // TODO: validate the file
         if (!model) {
-            throw new NullPointerException("Model may not be null")
+            throw new ModelException(model, "Model may not be null")
         }
         if (comment == null) {
-            throw new NullPointerException("Comment may not be null, empty comment is allowed")
+            throw new ModelException(model, "Comment may not be null, empty comment is allowed")
         }
         if (!file) {
-            throw new NullPointerException("File may not be null")
+            throw new ModelException(model, "File may not be null")
         }
         if (!file.exists() || file.isDirectory()) {
-            throw new FileNotFoundException("The file ${file.path} does not exist or is a directory")
+            throw new ModelException(model, "The file ${file.path} does not exist or is a directory")
         }
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
         Revision revision = new Revision(model: model, comment: comment, uploadDate: new Date(), owner: currentUser, minorRevision: false)
         // save the new file in the database
-        String vcsId = vcsService.updateFile(model, file, comment)
-        if (!vcsId) {
+        try {
+            String vcsId = vcsService.updateFile(model, file, comment)
+            revision.vcsId = vcsId
+        } catch (VcsException e) {
             revision.discard()
-            return null
+            log.error("Exception occurred during uploading a new Model Revision to VCS: ${e.getMessage()}")
+            throw new ModelException(model, "Could not store new Model Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} in VCS", e)
         }
-        revision.vcsId = vcsId
         // calculate the new revision number - accessing the revisions directly to circumvent ACL
         revision.revisionNumber = model.revisions.sort {it.revisionNumber}.last().revisionNumber + 1
 
@@ -218,7 +219,8 @@ class ModelService {
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
-            revision = null
+            log.error("New Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")
+            throw new ModelException(model, "Revision stored in VCS, but not in database")
         }
         return revision
     }

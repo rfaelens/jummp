@@ -510,7 +510,7 @@ class ModelServiceTests extends GrailsUnitTestCase {
         modelService.grantReadAccess(model, User.findByUsername("testuser"))
         modelService.grantWriteAccess(model, User.findByUsername("testuser"))
         // model may not be null - test as admin as otherwise will throw AccessDeniedException
-        shouldFail(NullPointerException) {
+        shouldFail(ModelException) {
             modelService.addRevision(null, new File("target/test"), "")
         }
         // vcs is not yet setup, adding a revision should fail
@@ -521,26 +521,28 @@ class ModelServiceTests extends GrailsUnitTestCase {
             modelService.addRevision(null, new File("target/test"), "")
         }
         // file may not be null
-        shouldFail(NullPointerException) {
+        shouldFail(ModelException) {
             modelService.addRevision(model, null, "")
         }
         // comment may not be null
-        shouldFail(NullPointerException) {
+        shouldFail(ModelException) {
             modelService.addRevision(model, new File("target/test"), null)
         }
         // file must exist
-        shouldFail(FileNotFoundException) {
+        shouldFail(ModelException) {
             modelService.addRevision(model, new File("target/test"), "")
         }
         // file may not be a directory
         File exchangeDirectory = new File("target/vcs/exchange")
         exchangeDirectory.mkdirs()
-        shouldFail(FileNotFoundException) {
+        shouldFail(ModelException) {
             modelService.addRevision(model, exchangeDirectory, "")
         }
         File importFile = new File("target/vcs/exchange/test.xml")
         FileUtils.touch(importFile)
-        assertNull(modelService.addRevision(model, importFile, ""))
+        shouldFail(ModelException) {
+            modelService.addRevision(model, importFile, "")
+        }
         // setup VCS
         File clone = new File("target/vcs/git")
         clone.mkdirs()
