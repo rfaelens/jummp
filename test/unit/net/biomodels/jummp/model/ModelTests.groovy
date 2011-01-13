@@ -37,7 +37,7 @@ class ModelTests extends GrailsUnitTestCase {
         assertEquals("nullable", model.errors["revisions"])
         // test for the Revisions being empty
         model = new Model()
-        model.revisions = new HashSet()
+        model.revisions = []
         assertFalse(model.validate())
         assertEquals("nullable", model.errors["vcsIdentifier"])
         assertEquals("nullable", model.errors["name"])
@@ -46,7 +46,7 @@ class ModelTests extends GrailsUnitTestCase {
         model = new Model()
         Revision revision = new Revision()
         mockDomain(Revision, [revision])
-        model.revisions = [revision]
+        model.revisions = [revision] as Set
         model.name = "Model"
         model.vcsIdentifier = "1234"
         assertTrue(model.validate())
