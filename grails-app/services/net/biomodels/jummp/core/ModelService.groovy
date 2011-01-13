@@ -6,7 +6,6 @@ import org.springframework.security.access.prepost.PostFilter
 import org.springframework.security.access.prepost.PreAuthorize
 import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.acls.domain.PrincipalSid
