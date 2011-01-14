@@ -1,6 +1,5 @@
 package net.biomodels.jummp.core
 
-import junit.framework.AssertionFailedError
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.beans.factory.InitializingBean
@@ -43,8 +42,6 @@ class VcsService implements InitializingBean {
                 } else {
                     log.error("Vcs service ${pluginServiceName} is not valid, disabling VcsService")
                 }
-            } catch (AssertionFailedError e) {
-                log.debug("Assertion during integration test - this is expected and does not matter")
             } catch(NoSuchBeanDefinitionException e) {
                 log.error(e.getMessage())
                 e.printStackTrace()
