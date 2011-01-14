@@ -3,28 +3,20 @@ package net.biomodels.jummp.core
 import grails.test.*
 
 import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.plugins.security.Role
-import net.biomodels.jummp.plugins.security.UserRole
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.lib.Repository
 import org.apache.commons.io.FileUtils
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.plugins.git.GitService
 
-class ModelServiceTests extends GrailsUnitTestCase {
-    def authenticationManager
+class ModelServiceTests extends JummpIntegrationTestCase {
     def aclService
     def objectIdentityRetrievalStrategy
     def aclUtilService
-    def springSecurityService
     def modelService
     protected void setUp() {
         super.setUp()
@@ -839,59 +831,5 @@ class ModelServiceTests extends GrailsUnitTestCase {
         assertTrue(modelService.revokeWriteAccess(model, User.findByUsername("testuser")))
         assertFalse(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.READ))
-    }
-
-    private void createUserAndRoles() {
-        User user = new User(username: "testuser",
-                password: springSecurityService.encodePassword("secret"),
-                userRealName: "Test",
-                email: "test@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(user.save())
-        assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
-        User user2 = new User(username: "user",
-                password: springSecurityService.encodePassword("verysecret"),
-                userRealName: "Test2",
-                email: "test2@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(user2.save())
-        assertNotNull(new AclSid(sid: user2.username, principal: true).save(flush: true))
-        User admin = new User(username: "admin",
-                password: springSecurityService.encodePassword("1234"),
-                userRealName: "Administrator",
-                email: "admin@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(admin.save())
-        assertNotNull(new AclSid(sid: admin.username, principal: true).save(flush: true))
-        Role userRole = new Role(authority: "ROLE_USER")
-        assertNotNull(userRole.save())
-        UserRole.create(user, userRole, false)
-        UserRole.create(user2, userRole, false)
-        UserRole.create(admin, userRole, false)
-        Role adminRole = new Role(authority: "ROLE_ADMIN")
-        assertNotNull(adminRole.save())
-        UserRole.create(admin, adminRole, false)
-    }
-
-    private def authenticate(String username, String password) {
-        def authToken = new UsernamePasswordAuthenticationToken(username, password)
-        def auth = authenticationManager.authenticate(authToken)
-        SecurityContextHolder.getContext().setAuthentication(auth)
-        return auth
-    }
-
-    private void modelAdminUser(boolean admin) {
-        SpringSecurityUtils.metaClass.'static'.ifAnyGranted = { String parameter ->
-            return admin
-        }
     }
 }
