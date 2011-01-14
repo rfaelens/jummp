@@ -8,7 +8,6 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.context.ApplicationContext
 import net.biomodels.jummp.core.vcs.Vcs
 import net.biomodels.jummp.core.vcs.VcsManager
-import net.biomodels.jummp.core.vcs.VcsNotInitedException
 import net.biomodels.jummp.core.vcs.VcsException
 import org.springframework.security.access.prepost.PreAuthorize
 import net.biomodels.jummp.model.Model
