@@ -32,6 +32,12 @@ class VcsServiceTests extends GrailsUnitTestCase {
         assertFalse(service.isValid())
         service.afterPropertiesSet()
         assertFalse(service.isValid())
+        // verifies that the service is not valid, when config option is empty
+        mockConfig('''jummp.vcs.pluginServiceName=""''')
+        service = new VcsService()
+        assertFalse(service.isValid())
+        service.afterPropertiesSet()
+        assertFalse(service.isValid())
         // verifies that the service is not valid, if not existing plugin is specified
         mockConfig('''jummp.vcs.pluginServiceName="novcs"''')
         service = new VcsService()

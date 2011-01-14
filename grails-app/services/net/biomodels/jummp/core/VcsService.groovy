@@ -32,8 +32,10 @@ class VcsService implements InitializingBean {
     def grailsApplication
 
     void afterPropertiesSet() {
-        String pluginServiceName = ConfigurationHolder.config.jummp.vcs.pluginServiceName
-        if (pluginServiceName) {
+        // config option is a map in case it is not defined and a String if it is defined
+        // because of that we need to use a def and do an instance of test
+        def pluginServiceName = ConfigurationHolder.config.jummp.vcs.pluginServiceName
+        if (pluginServiceName instanceof String && !pluginServiceName.isEmpty()) {
             try {
                 ApplicationContext ctx = (ApplicationContext)ApplicationHolder.getApplication().getMainContext()
                 Vcs vcs = (Vcs)ctx.getBean(pluginServiceName)
