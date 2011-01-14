@@ -14,26 +14,13 @@ import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.plugins.git.GitService
 
 class ModelServiceTests extends JummpIntegrationTestCase {
-    def aclService
-    def objectIdentityRetrievalStrategy
     def aclUtilService
     def modelService
+
     protected void setUp() {
         super.setUp()
         mockLogging(VcsService, true)
         createUserAndRoles()
-
-        /*File clone = new File("target/vcs/git")
-        clone.mkdirs()
-        File exchangeDirectory = new File("target/vcs/exchange")
-        exchangeDirectory.mkdirs()
-        FileRepositoryBuilder builder = new FileRepositoryBuilder()
-        Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
-        .build()
-        Git git = new Git(repository)
-        git.init().setDirectory(clone).call()*/
     }
 
     protected void tearDown() {
@@ -50,20 +37,16 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // testUser should not see the model
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertTrue(modelService.getAllModels().isEmpty())
         assertEquals(0, modelService.getModelCount())
         // admin should see one model
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         assertFalse(modelService.getAllModels().isEmpty())
         assertSame(model, modelService.getAllModels().first())
         assertEquals(1, modelService.getModelCount())
         // user 2 should not see the model
-        authenticate("user", "verysecret")
-        // is no admin
-        modelAdminUser(false)
+        authenticateAsUser()
         assertTrue(modelService.getAllModels().isEmpty())
         assertEquals(0, modelService.getModelCount())
         // adding an acl for user 2
@@ -76,13 +59,11 @@ class ModelServiceTests extends JummpIntegrationTestCase {
 
     void testModelCount() {
         // no models, should return 0 for all users
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertEquals(0, modelService.getModelCount())
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertEquals(0, modelService.getModelCount())
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         assertEquals(0, modelService.getModelCount())
         // create one model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
@@ -92,25 +73,21 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // no auth is set, only admin should see it
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertEquals(0, modelService.getModelCount())
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertEquals(0, modelService.getModelCount())
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         assertEquals(1, modelService.getModelCount())
         // adding read permission for all users should render one model for all
         aclUtilService.addPermission(revision, "testuser", BasePermission.READ)
         aclUtilService.addPermission(revision, "user", BasePermission.READ)
         aclUtilService.addPermission(revision, "admin", BasePermission.READ)
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertEquals(1, modelService.getModelCount())
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertEquals(1, modelService.getModelCount())
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         assertEquals(1, modelService.getModelCount())
         // admin user should also see it if he is not modelled as admin
         modelAdminUser(false)
@@ -122,13 +99,11 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         model.addToRevisions(revision2)
         assertTrue(model.validate())
         model.save()
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertEquals(1, modelService.getModelCount())
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertEquals(1, modelService.getModelCount())
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         assertEquals(1, modelService.getModelCount())
         // admin user should also see it if he is not modelled as admin
         modelAdminUser(false)
@@ -144,14 +119,12 @@ class ModelServiceTests extends JummpIntegrationTestCase {
             m.save()
         }
         // admin should see all 11 models
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         assertEquals(11, modelService.getModelCount())
         // there are no permissions set yet - users should only see one model
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertEquals(1, modelService.getModelCount())
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertEquals(1, modelService.getModelCount())
         // user 1 gets first three models, user 2 gets next three and both get next four models, last not assigned
         aclUtilService.addPermission(Revision, revision2.id + 1, "testuser", BasePermission.READ)
@@ -164,14 +137,12 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         aclUtilService.addPermission(Revision, revision2.id + 8, "ROLE_USER",     BasePermission.READ)
         aclUtilService.addPermission(Revision, revision2.id + 9, "ROLE_USER",     BasePermission.READ)
         // admin should see all 11 models
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         assertEquals(11, modelService.getModelCount())
         // both users should get seven models
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertEquals(7, modelService.getModelCount())
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertEquals(7, modelService.getModelCount())
     }
 
@@ -184,28 +155,24 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // only admin should see the revision
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertNull(modelService.getLatestRevision(model))
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertNull(modelService.getLatestRevision(model))
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         assertNotNull(modelService.getLatestRevision(model))
         assertSame(revision, modelService.getLatestRevision(model))
         // adding permission for the users
         aclUtilService.addPermission(revision, "user", BasePermission.READ)
         aclUtilService.addPermission(revision, "testuser", BasePermission.READ)
         // now our users should see the revision
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertNotNull(modelService.getLatestRevision(model))
         assertSame(revision, modelService.getLatestRevision(model))
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertNotNull(modelService.getLatestRevision(model))
         assertSame(revision, modelService.getLatestRevision(model))
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         assertNotNull(modelService.getLatestRevision(model))
         assertSame(revision, modelService.getLatestRevision(model))
         // add some more revisions
@@ -227,30 +194,26 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // no acl set for these new revisions, user should still see previous revision, admin should see rev6
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertSame(revision, modelService.getLatestRevision(model))
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertSame(revision, modelService.getLatestRevision(model))
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         assertSame(rev6, modelService.getLatestRevision(model))
         // let's add some ACL
         aclUtilService.addPermission(rev3, "testuser", BasePermission.READ)
         aclUtilService.addPermission(rev6, "user", BasePermission.READ)
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertSame(rev3, modelService.getLatestRevision(model))
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertSame(rev6, modelService.getLatestRevision(model))
         // allow rev5 for all users
         aclUtilService.addPermission(rev5, "ROLE_USER", BasePermission.READ)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertSame(rev5, modelService.getLatestRevision(model))
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertSame(rev6, modelService.getLatestRevision(model))
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         assertSame(rev6, modelService.getLatestRevision(model))
     }
 
@@ -266,8 +229,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
             m.save()
         }
         // change to admin
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         // just using getAllModels without parameters should return first ten elements
         List<Model> testElements = modelService.getAllModels()
         assertEquals(10, testElements.size())
@@ -292,8 +254,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         for (int i=0; i<15; i++) {
             aclUtilService.addPermission(Revision.findByVcsId("rev${i*2}"), "ROLE_USER", BasePermission.READ)
         }
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         // get first ten elements
         testElements = modelService.getAllModels()
         assertEquals(10, testElements.size())
@@ -327,8 +288,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertSame(Model.findByName("${13*2}"), testElements.first())
         assertSame(Model.findByName("${14*2}"), testElements.last())
         // same as admin user
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         testElements = modelService.getAllModels(28, 5)
         assertEquals(2, testElements.size())
         assertSame(Model.findByName("${28}"), testElements.first())
@@ -345,26 +305,22 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // only admin should see the revision
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertEquals(0, modelService.getAllRevisions(model).size())
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertEquals(0, modelService.getAllRevisions(model).size())
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         assertEquals(1, modelService.getAllRevisions(model).size())
         assertSame(revision, modelService.getAllRevisions(model).first())
         // adding permission should user make see it
         aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertEquals(1, modelService.getAllRevisions(model).size())
         assertSame(revision, modelService.getAllRevisions(model).first())
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertEquals(1, modelService.getAllRevisions(model).size())
         assertSame(revision, modelService.getAllRevisions(model).first())
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         assertEquals(1, modelService.getAllRevisions(model).size())
         assertSame(revision, modelService.getAllRevisions(model).first())
         // add some more revisions without ACL
@@ -386,15 +342,13 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // admin should see all revisions, users the previous ones
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertEquals(1, modelService.getAllRevisions(model).size())
         assertSame(revision, modelService.getAllRevisions(model).first())
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertEquals(1, modelService.getAllRevisions(model).size())
         assertSame(revision, modelService.getAllRevisions(model).first())
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         List<Revision> testResults = modelService.getAllRevisions(model)
         assertEquals(6, testResults.size())
         for (int i=0; i<6; i++) {
@@ -408,15 +362,14 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         aclUtilService.addPermission(rev4, "user", BasePermission.READ)
         aclUtilService.addPermission(rev5, "ROLE_USER", BasePermission.READ)
         // verify that users see the revision
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         testResults = modelService.getAllRevisions(model)
         assertEquals(4, testResults.size())
         assertSame(revision, testResults[0])
         assertSame(rev1, testResults[1])
         assertSame(rev3, testResults[2])
         assertSame(rev5, testResults[3])
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         testResults = modelService.getAllRevisions(model)
         assertEquals(5, testResults.size())
         assertSame(revision, testResults[0])
@@ -425,8 +378,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertSame(rev4, testResults[3])
         assertSame(rev5, testResults[4])
         // unchanged for admin
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         testResults = modelService.getAllRevisions(model)
         assertEquals(6, testResults.size())
         for (int i=0; i<6; i++) {
@@ -441,15 +393,14 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         model2.save()
         aclUtilService.addPermission(revision2, "ROLE_USER", BasePermission.READ)
         // nothing should have changed...
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         testResults = modelService.getAllRevisions(model)
         assertEquals(4, testResults.size())
         assertSame(revision, testResults[0])
         assertSame(rev1, testResults[1])
         assertSame(rev3, testResults[2])
         assertSame(rev5, testResults[3])
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         testResults = modelService.getAllRevisions(model)
         assertEquals(5, testResults.size())
         assertSame(revision, testResults[0])
@@ -458,25 +409,22 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertSame(rev4, testResults[3])
         assertSame(rev5, testResults[4])
         // unchanged for admin
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         testResults = modelService.getAllRevisions(model)
         assertEquals(6, testResults.size())
         for (int i=0; i<6; i++) {
             assertSame(Revision.findByRevisionNumber(i+1), testResults[i])
         }
         // lets' see if we all get the revision for model2
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         testResults = modelService.getAllRevisions(model2)
         assertEquals(1, testResults.size())
         assertSame(revision2, testResults[0])
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         testResults = modelService.getAllRevisions(model2)
         assertEquals(1, testResults.size())
         assertSame(revision2, testResults[0])
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         testResults = modelService.getAllRevisions(model2)
         assertEquals(1, testResults.size())
         assertSame(revision2, testResults[0])
@@ -491,14 +439,12 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // authenticate as testuser, as there is no ACL he is not allowed to add a revision
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        def auth = authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
             modelService.addRevision(model, new File("target/test"), null)
         }
         // give user the right to write to the model
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         modelService.grantReadAccess(model, User.findByUsername("testuser"))
         modelService.grantWriteAccess(model, User.findByUsername("testuser"))
         // model may not be null - test as admin as otherwise will throw AccessDeniedException
@@ -506,8 +452,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
             modelService.addRevision(null, new File("target/test"), "")
         }
         // vcs is not yet setup, adding a revision should fail
-        modelAdminUser(false)
-        def auth = authenticate("testuser", "secret")
+        authenticateAsTestUser()
         // model may not be null - as a user this throws an AccessDeniedException
         shouldFail(AccessDeniedException) {
             modelService.addRevision(null, new File("target/test"), "")
@@ -571,15 +516,13 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertEquals(1, lines.size())
         assertEquals("Test", lines[0])
         // user should not have received a read right on the revision
-        def auth2 = authenticate("user", "verysecret")
+        def auth2 = authenticateAsUser()
         assertFalse(aclUtilService.hasPermission(auth2, rev, BasePermission.READ))
         // grant read access to the user - he should than get right to read the next revision
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         modelService.grantReadAccess(model, User.findByUsername("user"))
         assertTrue(aclUtilService.hasPermission(auth2, model, BasePermission.READ))
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         updateFile.append("Further Test\n")
         Revision rev2 = modelService.addRevision(model, updateFile, "")
         assertEquals(3, rev2.revisionNumber)
@@ -593,8 +536,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertEquals("Test", lines[0])
         assertEquals("Further Test", lines[1])
         // admin should also be able to import updates
-        modelAdminUser(true)
-        def adminAuth = authenticate("admin", "1234")
+        def adminAuth = authenticateAsAdmin()
         updateFile.append("Admin Test\n")
         Revision rev3 = modelService.addRevision(model, updateFile, "")
         assertEquals(4, rev3.revisionNumber)
@@ -632,17 +574,14 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // verify that user cannot access the revisions
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertEquals(0, modelService.getAllRevisions(model).size())
 
         // grant read access to the model as admin
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         modelService.grantReadAccess(model, User.findByUsername("testuser"))
         // user should now see all revisions
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         List<Revision> testResults = modelService.getAllRevisions(model)
         assertEquals(5, testResults.size())
         assertSame(rev1, testResults[0])
@@ -665,18 +604,17 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertSame(rev4, testResults[3])
         assertSame(rev5, testResults[4])
         // verify that user is not seeing the revisions
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertEquals(0, modelService.getAllRevisions(model).size())
         // try granting read permission to user - should not change anything
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
             modelService.grantReadAccess(model, User.findByUsername("user"))
         }
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         assertEquals(0, modelService.getAllRevisions(model).size())
         // give admin right to the testuser - this should allow user to grant read access
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         aclUtilService.addPermission(model, "testuser", BasePermission.READ)
         aclUtilService.addPermission(model, "testuser", BasePermission.ADMINISTRATION)
         // if the administration right is not set, the framework throws an exception
@@ -685,12 +623,11 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         aclUtilService.addPermission(rev3, "testuser", BasePermission.ADMINISTRATION)
         aclUtilService.addPermission(rev4, "testuser", BasePermission.ADMINISTRATION)
         aclUtilService.addPermission(rev5, "testuser", BasePermission.ADMINISTRATION)
-        modelAdminUser(false)
         // grant read permission to user
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         modelService.grantReadAccess(Model.get(model.id), User.findByUsername("user"))
         // user should see same revisions as testuser
-        authenticate("user", "verysecret")
+        authenticateAsUser()
         testResults = modelService.getAllRevisions(model)
         assertEquals(5, testResults.size())
         assertSame(rev1, testResults[0])
@@ -709,29 +646,25 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // testuser does not have Write permission on model
-        def auth = authenticate("testuser", "secret")
+        def auth = authenticateAsTestUser()
         assertFalse(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         // grant write access
         modelService.grantWriteAccess(model, User.findByUsername("testuser"))
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
         // testuser is not admin to the model, he should not be allowed to grant write permission
-        modelAdminUser(false)
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
             modelService.grantWriteAccess(model, User.findByUsername("user"))
         }
         // grant admin right to testuser
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         aclUtilService.addPermission(model, "testuser", BasePermission.ADMINISTRATION)
         // verify that user hoes not have the right to write on model
-        modelAdminUser(false)
-        auth = authenticate("user", "verysecret")
+        auth = authenticateAsUser()
         assertFalse(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
         // grant write right to user
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         modelService.grantWriteAccess(model, User.findByUsername("user"))
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
         // TODO: add checks to verify that uploading a new model revision is allowed
@@ -745,8 +678,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // user has no right on the model - he is not allowed to revoke read access
-        modelAdminUser(false)
-        def auth = authenticate("testuser", "secret")
+        def auth = authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
             modelService.revokeReadAccess(model, User.findByUsername("user"))
         }
@@ -758,15 +690,14 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.READ))
         // grant read right to user
         modelService.grantReadAccess(model, User.findByUsername("user"))
-        def auth2 = authenticate("user", "verysecret")
+        def auth2 = authenticateAsUser()
         assertTrue(aclUtilService.hasPermission(auth2, model, BasePermission.READ))
         // and revoke again
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertTrue(modelService.revokeReadAccess(model, User.findByUsername("user")))
         assertFalse(aclUtilService.hasPermission(auth2, model, BasePermission.READ))
         // test the same as admin user
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         // testuser is still admin to the model - right should not be revoked
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.READ))
         assertFalse(modelService.revokeReadAccess(model, User.findByUsername("testuser")))
@@ -790,8 +721,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // user has no right on the model - he is not allowed to revoke write access
-        modelAdminUser(false)
-        def auth = authenticate("testuser", "secret")
+        def auth = authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
             modelService.revokeReadAccess(model, User.findByUsername("user"))
         }
@@ -805,16 +735,15 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         // grant write right to user
         modelService.grantReadAccess(model, User.findByUsername("user"))
         modelService.grantWriteAccess(model, User.findByUsername("user"))
-        def auth2 = authenticate("user", "verysecret")
+        def auth2 = authenticateAsUser()
         assertTrue(aclUtilService.hasPermission(auth2, model, BasePermission.READ))
         assertTrue(aclUtilService.hasPermission(auth2, model, BasePermission.WRITE))
         // and revoke again
-        authenticate("testuser", "secret")
+        authenticateAsTestUser()
         assertTrue(modelService.revokeWriteAccess(model, User.findByUsername("user")))
         assertFalse(aclUtilService.hasPermission(auth2, model, BasePermission.WRITE))
         // test the same as admin user
-        modelAdminUser(true)
-        authenticate("admin", "1234")
+        authenticateAsAdmin()
         // testuser is still admin to the model - right should not be revoked
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
         assertFalse(modelService.revokeWriteAccess(model, User.findByUsername("testuser")))
