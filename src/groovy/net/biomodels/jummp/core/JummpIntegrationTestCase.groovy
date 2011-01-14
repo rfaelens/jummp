@@ -8,6 +8,8 @@ import net.biomodels.jummp.plugins.security.UserRole
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.springframework.security.authentication.AnonymousAuthenticationToken
+import org.springframework.security.core.authority.GrantedAuthorityImpl
 
 /**
  * Base class for Integration tests providing useful methods for creating users and authentication.
@@ -112,5 +114,16 @@ class JummpIntegrationTestCase  extends GrailsUnitTestCase {
     protected def authenticateAsAdmin() {
         modelAdminUser(true)
         return authenticate("admin", "1234")
+    }
+
+     /**
+     * Sets an anonymous authentication and does not model as admin user.
+     * @return The anonymous authentication
+     */
+    protected def authenticateAnonymous() {
+        modelAdminUser(false)
+        def auth = new AnonymousAuthenticationToken("test", "Anonymous", [ new GrantedAuthorityImpl("ROLE_ANONYMOUS")])
+        SecurityContextHolder.getContext().setAuthentication(auth)
+        return auth
     }
 }
