@@ -26,6 +26,10 @@ class Model {
      * The name of the corresponding file in the Version Control System.
      */
     String vcsIdentifier
+    /**
+     * The state of the Model, by default UNPUBLISHED
+     */
+    ModelState state = ModelState.UNPUBLISHED
     // TODO: unique Identifier for the model? UML diagram lists an "accessionNumber"?
 
     static constraints = {
@@ -34,5 +38,6 @@ class Model {
         revisions(nullable: false, validator: { revs ->
             return !revs.isEmpty()
         })
+        state(nullable: false)
     }
 }
