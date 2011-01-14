@@ -49,10 +49,6 @@ class VcsService implements InitializingBean {
             } catch(NoSuchBeanDefinitionException e) {
                 log.error(e.getMessage())
                 e.printStackTrace()
-            } catch (VcsNotInitedException e) {
-                vcsManager = null
-                log.error(e.getMessage())
-                e.printStackTrace()
             }
         } else {
             log.error("No vcs plugin service specified")
