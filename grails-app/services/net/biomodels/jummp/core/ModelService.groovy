@@ -10,6 +10,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.acls.domain.PrincipalSid
 import net.biomodels.jummp.core.vcs.VcsException
+import net.biomodels.jummp.model.ModelState
 
 /**
  * @short Service class for managing Models
@@ -57,6 +58,9 @@ class ModelService {
         int index = 0
         while (skipCounter < offset && index < allModels.size()) {
             Model model = allModels[index++]
+            if (model.state == ModelState.DELETED) {
+                continue
+            }
             // admin has access to all models
             if (getLatestRevision(model) || SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
                 skipCounter++
@@ -66,6 +70,9 @@ class ModelService {
         List<Model> returnList = []
         while (returnList.size() < count && index < allModels.size()) {
             Model model = allModels[index++]
+            if (model.state == ModelState.DELETED) {
+                continue
+            }
             if (getLatestRevision(model) || SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
                 returnList << model
             }
@@ -102,7 +109,10 @@ class ModelService {
         // TODO: implement better by going down to database
         List<Model> models = Model.list()
         int count = 0
-        models.each { model ->
+        for (model in models) {
+            if (model.state == ModelState.DELETED) {
+                continue
+            }
             if (getLatestRevision(model) || SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
                 count++
             }
@@ -117,6 +127,10 @@ class ModelService {
     **/
     public Revision getLatestRevision(Model model) {
         // TODO: maybe querying the database directly is more efficient?
+        if (model.state == ModelState.DELETED) {
+            // exclude deleted models
+            return null
+        }
         // we cannot call getAllRevisions as filtering does not work when calling methods directly
         List<Revision> revisions = []
         boolean admin = SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")
@@ -142,6 +156,9 @@ class ModelService {
     **/
     @PostFilter("hasPermission(filterObject, read) or hasRole('ROLE_ADMIN')")
     public List<Revision> getAllRevisions(Model model) {
+        if (model.state == ModelState.DELETED) {
+            return []
+        }
         return model.revisions.toList().sort {it.revisionNumber}
     }
 
@@ -179,6 +196,9 @@ class ModelService {
         // TODO: validate the file
         if (!model) {
             throw new ModelException(model, "Model may not be null")
+        }
+        if (model.state == ModelState.DELETED) {
+            throw new ModelException(model, "A new Revision cannot be added to a deleted model")
         }
         if (comment == null) {
             throw new ModelException(model, "Comment may not be null, empty comment is allowed")
@@ -366,24 +386,35 @@ class ModelService {
     * Deletion of @p model is only possible if the model is neither under curation nor published.
     * @param model The Model to be deleted
     * @return @c true in case the Model has been deleted, @c false otherwise.
-    * @see restore
+    * @see restoreModel
     **/
-    @PreAuthorize("hasPermission(#model, delete)")
-    public boolean delete(Model model) {
-        // TODO: implement me
-        return false;
+    @PreAuthorize("hasPermission(#model, delete) or hasRole('ROLE_ADMIN')")
+    public boolean deleteModel(Model model) {
+        if (model.state != ModelState.UNPUBLISHED) {
+            return false
+        }
+        model.state = ModelState.DELETED
+        model.save(flush: true)
+        return model.state == ModelState.DELETED
     }
 
     /**
-    * Restores the deleted @p model including all Revisions.
+    * Restores the deleted @p model.
     *
     * Removes the deleted flag from the model and all its Revisions.
     * @param model The deleted Model to restore
-    * @see delete
+    * @return @c true, whether the state was restored, @c false otherwise.
+    * @see deleteModel
     * @todo might belong in an administration service?
     **/
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void restore(Model model) {
-        // TODO: implement me
+    public boolean restoreModel(Model model) {
+        if (model.state == ModelState.DELETED) {
+            model.state = ModelState.UNPUBLISHED
+            model.save(flush: true)
+            return model.state == ModelState.UNPUBLISHED
+        } else {
+            return false
+        }
     }
 }

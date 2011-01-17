@@ -4,6 +4,7 @@ import grails.test.*
 
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.ModelState
 import net.biomodels.jummp.model.Revision
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
@@ -144,6 +145,15 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertEquals(7, modelService.getModelCount())
         authenticateAsUser()
         assertEquals(7, modelService.getModelCount())
+        // let's delete the very first model
+        authenticateAsAdmin()
+        assertTrue(modelService.deleteModel(model))
+        assertEquals(10, modelService.getModelCount())
+        // both users should get six models
+        authenticateAsTestUser()
+        assertEquals(6, modelService.getModelCount())
+        authenticateAsUser()
+        assertEquals(6, modelService.getModelCount())
     }
 
     void testGetLatestRevision() {
@@ -215,6 +225,15 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertSame(rev6, modelService.getLatestRevision(model))
         authenticateAsAdmin()
         assertSame(rev6, modelService.getLatestRevision(model))
+        // let's delete the model
+        authenticateAsAdmin()
+        assertTrue(modelService.deleteModel(model))
+        assertNull(modelService.getLatestRevision(model))
+        // both users should get six models
+        authenticateAsTestUser()
+        assertNull(modelService.getLatestRevision(model))
+        authenticateAsUser()
+        assertNull(modelService.getLatestRevision(model))
     }
 
     @SuppressWarnings('UnusedVariable')
@@ -293,6 +312,15 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertEquals(2, testElements.size())
         assertSame(Model.findByName("${28}"), testElements.first())
         assertSame(Model.findByName("${29}"), testElements.last())
+        // delete the very first model
+        modelService.deleteModel(Model.findByName("0"))
+        testElements = modelService.getAllModels()
+        assertEquals(10, testElements.size())
+        assertSame(Model.findByName("1"), testElements.first())
+        authenticateAsTestUser()
+        testElements = modelService.getAllModels()
+        assertEquals(10, testElements.size())
+        assertSame(Model.findByName("2"), testElements.first())
     }
 
     @SuppressWarnings('UnusedVariable')
@@ -428,6 +456,13 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         testResults = modelService.getAllRevisions(model2)
         assertEquals(1, testResults.size())
         assertSame(revision2, testResults[0])
+        // let's delete Model 2
+        modelService.deleteModel(model2)
+        assertTrue(modelService.getAllRevisions(model2).isEmpty())
+        authenticateAsTestUser()
+        assertTrue(modelService.getAllRevisions(model2).isEmpty())
+        authenticateAsUser()
+        assertTrue(modelService.getAllRevisions(model2).isEmpty())
     }
 
     void testAddRevision() {
@@ -551,6 +586,109 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertEquals("Test", lines[0])
         assertEquals("Further Test", lines[1])
         assertEquals("Admin Test", lines[2])
+        // delete the Model - any further updates should end in a ModelException
+        modelService.deleteModel(model)
+        shouldFail(ModelException) {
+            modelService.addRevision(model, updateFile, "")
+        }
+    }
+
+    void testDeleteRestoreModel() {
+        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        Revision rev1 = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        assertTrue(rev1.validate())
+        model.addToRevisions(rev1)
+        assertTrue(model.validate())
+        model.save()
+        // Model is not yet deleted
+        assertEquals(ModelState.UNPUBLISHED, model.state)
+        // try to delete as anonymous
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            modelService.deleteModel(model)
+        }
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            modelService.deleteModel(model)
+        }
+        authenticateAsTestUser()
+        shouldFail(AccessDeniedException) {
+            modelService.deleteModel(model)
+        }
+        // admin is allowed to delete
+        authenticateAsAdmin()
+        assertTrue(modelService.deleteModel(model))
+        assertEquals(ModelState.DELETED, model.state)
+        // no user is allowed to restore
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            modelService.restoreModel(model)
+        }
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            modelService.restoreModel(model)
+        }
+        authenticateAsTestUser()
+        shouldFail(AccessDeniedException) {
+            modelService.restoreModel(model)
+        }
+        // admin can restore the model
+        authenticateAsAdmin()
+        assertTrue(modelService.restoreModel(model))
+        assertEquals(ModelState.UNPUBLISHED, model.state)
+        // let's try to restore again
+        assertFalse(modelService.restoreModel(model))
+        assertEquals(ModelState.UNPUBLISHED, model.state)
+        // let's grant some rights on the model
+        aclUtilService.addPermission(model, "testuser", BasePermission.READ)
+        aclUtilService.addPermission(model, "testuser", BasePermission.WRITE)
+        aclUtilService.addPermission(model, "testuser", BasePermission.DELETE)
+        aclUtilService.addPermission(model, "testuser", BasePermission.ADMINISTRATION)
+        // user get's all rights except delete
+        aclUtilService.addPermission(model, "user", BasePermission.READ)
+        aclUtilService.addPermission(model, "user", BasePermission.WRITE)
+        aclUtilService.addPermission(model, "user", BasePermission.ADMINISTRATION)
+        // user is still not allowed to delete
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            modelService.deleteModel(model)
+        }
+        // testuser is allowed to delete
+        authenticateAsTestUser()
+        assertTrue(modelService.deleteModel(model))
+        assertEquals(ModelState.DELETED, model.state)
+        // further delete should not work
+        assertFalse(modelService.deleteModel(model))
+        assertEquals(ModelState.DELETED, model.state)
+        // testuser is not allowed to restore
+        shouldFail(AccessDeniedException) {
+            modelService.restoreModel(model)
+        }
+        // also user is not allowed to restore
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            modelService.restoreModel(model)
+        }
+        // admin is allowed to restore
+        authenticateAsAdmin()
+        assertTrue(modelService.restoreModel(model))
+        assertEquals(ModelState.UNPUBLISHED, model.state)
+        // let's change the model state
+        model.state = ModelState.UNDER_CURATION
+        assertFalse(modelService.deleteModel(model))
+        assertEquals(ModelState.UNDER_CURATION, model.state)
+        assertFalse(modelService.restoreModel(model))
+        assertEquals(ModelState.UNDER_CURATION, model.state)
+        model.state = ModelState.PUBLISHED
+        assertFalse(modelService.deleteModel(model))
+        assertEquals(ModelState.PUBLISHED, model.state)
+        assertFalse(modelService.restoreModel(model))
+        assertEquals(ModelState.PUBLISHED, model.state)
+        model.state = ModelState.RELEASED
+        assertFalse(modelService.deleteModel(model))
+        assertEquals(ModelState.RELEASED, model.state)
+        assertFalse(modelService.restoreModel(model))
+        assertEquals(ModelState.RELEASED, model.state)
     }
 
     void testGrantReadAccess() {
