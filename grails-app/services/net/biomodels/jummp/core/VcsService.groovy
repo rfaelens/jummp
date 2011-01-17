@@ -10,6 +10,7 @@ import net.biomodels.jummp.core.vcs.VcsManager
 import net.biomodels.jummp.core.vcs.VcsException
 import org.springframework.security.access.prepost.PreAuthorize
 import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.Revision
 
 /**
  * @short Service providing access to the version control system.
@@ -98,6 +99,22 @@ class VcsService implements InitializingBean {
         }
 
         return vcsManager.importFile(file, model.vcsIdentifier)
+    }
+
+    /**
+     * Retrieves Model File from VCS.
+     * @param revision The Revision for which the Model file should be retrieved
+     * @return File Handler to the retrieved file in the exchange directory.
+     * It's the responsibility of the caller to delete the file when it is not needed any more.
+     * @throws VcsException passes along the VcsException thrown by VcsManager
+     */
+    @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
+    File retrieveFile(final Revision revision) throws VcsException {
+        if (!isValid()) {
+            throw new VcsException("Version Control System is not valid")
+        }
+
+        return vcsManager.retrieveFile(revision.model.vcsIdentifier, revision.vcsId)
     }
     // TODO: implement required methods
 }

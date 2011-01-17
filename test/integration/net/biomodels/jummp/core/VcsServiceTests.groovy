@@ -336,4 +336,72 @@ class VcsServiceTests extends JummpIntegrationTestCase {
             vcsService.updateFile(model, updateFile, "Commit Message")
         }
     }
+
+    void testRetrieveFile() {
+        // TODO: implement tests
+        assertFalse(vcsService.isValid())
+        // first create a model
+        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        assertTrue(revision.validate())
+        model.addToRevisions(revision)
+        assertTrue(model.validate())
+        model.save()
+        // without authentication it should fail
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            vcsService.retrieveFile(revision)
+        }
+        // as user it should fail - no ACL yet
+        authenticateAsTestUser()
+        shouldFail(AccessDeniedException) {
+            vcsService.retrieveFile(revision)
+        }
+        // as admin it should fail with a VcsException cause the VCS is not yet valid
+        authenticateAsAdmin()
+        shouldFail(VcsException) {
+            vcsService.retrieveFile(revision)
+        }
+        modelService.grantReadAccess(model, User.findByUsername("testuser"))
+        // as testuser it should fail now with a VcsException instead of AccessDeniedException
+        authenticateAsTestUser()
+        shouldFail(VcsException) {
+            vcsService.retrieveFile(revision)
+        }
+        // create a git repository
+        File importFile = new File("target/vcs/exchange/test.xml")
+        FileUtils.touch(importFile)
+        importFile.append("Test\n")
+        // setup VCS
+        File clone = new File("target/vcs/git")
+        clone.mkdirs()
+        FileRepositoryBuilder builder = new FileRepositoryBuilder()
+        Repository repository = builder.setWorkTree(clone)
+        .readEnvironment() // scan environment GIT_* variables
+        .findGitDir() // scan up the file system tree
+        .build()
+        Git git = new Git(repository)
+        git.init().setDirectory(clone).call()
+        GitService gitService = new GitService()
+        mockConfig('''
+            jummp.plugins.git.enabled=true
+            jummp.vcs.workingDirectory="target/vcs/git"
+            jummp.vcs.exchangeDirectory="target/vcs/exchange"
+            ''')
+        gitService.afterPropertiesSet()
+        assertTrue(gitService.isValid())
+        vcsService.vcsManager = gitService.vcsManager()
+        assertTrue(vcsService.isValid())
+        // git is valid, but file does not yet exist
+        shouldFail(VcsException) {
+            vcsService.retrieveFile(revision)
+        }
+        revision.vcsId = vcsService.importFile(model, importFile)
+        revision.save(flush: true)
+        File exchangeFile = vcsService.retrieveFile(revision)
+        assertNotSame(exchangeFile, importFile)
+        List<String> lines = exchangeFile.readLines()
+        assertEquals(1, lines.size())
+        assertEquals("Test", lines.first())
+    }
 }
