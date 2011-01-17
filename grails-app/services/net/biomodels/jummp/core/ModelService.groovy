@@ -2,6 +2,7 @@ package net.biomodels.jummp.core
 
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
+import org.apache.commons.io.FileUtils
 import org.springframework.security.access.prepost.PostFilter
 import org.springframework.security.access.prepost.PreAuthorize
 import net.biomodels.jummp.plugins.security.User
@@ -298,6 +299,26 @@ class ModelService {
             throw new ModelException(model, "Revision stored in VCS, but not in database")
         }
         return revision
+    }
+
+    /**
+     * Retrieves the model file for the @p revision.
+     * @param revision The Model Revision for which the file should be retrieved.
+     * @return Byte Array of the content of the Model file for the revision.
+     * @throws ModelException In case retrieving from VCS fails.
+     */
+    @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
+    byte[] retrieveModelFile(final Revision revision) throws ModelException {
+        File file;
+        try {
+            file = vcsService.retrieveFile(revision)
+        } catch (VcsException e) {
+            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.model.name} from VCS failed.")
+            throw new ModelException(revision.model, "Retrieving Revision ${revision.vcsId} from VCS failed.")
+        }
+        byte[] bytes = file.getBytes()
+        FileUtils.forceDelete(file)
+        return bytes
     }
 
     /**

@@ -779,6 +779,63 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         // the only solution were to modify comment to make the revision non-validate, but in future it will be a command object which validates
     }
 
+    void testRetrieveModelFile() {
+        // first create the VCS
+        File clone = new File("target/vcs/git")
+        clone.mkdirs()
+        FileRepositoryBuilder builder = new FileRepositoryBuilder()
+        Repository repository = builder.setWorkTree(clone)
+        .readEnvironment() // scan environment GIT_* variables
+        .findGitDir() // scan up the file system tree
+        .build()
+        Git git = new Git(repository)
+        git.init().setDirectory(clone).call()
+        GitService gitService = new GitService()
+        mockConfig('''
+            jummp.plugins.git.enabled=true
+            jummp.vcs.workingDirectory="target/vcs/git"
+            jummp.vcs.exchangeDirectory="target/vcs/exchange"
+            ''')
+        gitService.afterPropertiesSet()
+        assertTrue(gitService.isValid())
+        modelService.vcsService.vcsManager = gitService.vcsManager()
+        assertTrue(modelService.vcsService.isValid())
+        // import a file
+        authenticateAsTestUser()
+        def meta = [comment: "Test Comment", name: "test"]
+        File importFile = new File("target/vcs/exchange/import.xml")
+        FileUtils.touch(importFile)
+        importFile.append("Test\n")
+        Model model = modelService.uploadModel(importFile, meta)
+        Revision revision = modelService.getLatestRevision(model)
+        // Anonymous user should not be allowed to download the revision
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            modelService.retrieveModelFile(revision)
+        }
+        // User should not be allowed to download the revision
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            modelService.retrieveModelFile(revision)
+        }
+        // as admin we should get a byte array
+        authenticateAsAdmin()
+        byte[] bytes = modelService.retrieveModelFile(revision)
+        assertEquals("Test\n", new String(bytes))
+        // as testuser we should also get the byte array
+        authenticateAsTestUser()
+        bytes = modelService.retrieveModelFile(revision)
+        assertEquals("Test\n", new String(bytes))
+        // create a random revision
+        Revision rev = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        model.addToRevisions(rev)
+        model.save(flush: true)
+        aclUtilService.addPermission(rev, "testuser", BasePermission.READ)
+        shouldFail(ModelException) {
+            modelService.retrieveModelFile(rev)
+        }
+    }
+
     void testGrantReadAccess() {
         // create a model with some revisions
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
