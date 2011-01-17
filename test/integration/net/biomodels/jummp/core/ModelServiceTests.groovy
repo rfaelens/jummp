@@ -13,6 +13,10 @@ import org.apache.commons.io.FileUtils
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.plugins.git.GitService
+import org.eclipse.jgit.revwalk.RevCommit
+import org.eclipse.jgit.revwalk.RevWalk
+import org.eclipse.jgit.lib.ObjectId
+import org.eclipse.jgit.lib.Constants
 
 class ModelServiceTests extends JummpIntegrationTestCase {
     def aclUtilService
@@ -28,6 +32,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         super.tearDown()
         FileUtils.deleteDirectory(new File("target/vcs/git"))
         FileUtils.deleteDirectory(new File("target/vcs/exchange"))
+        modelService.vcsService.vcsManager = null
     }
 
     void testGetAllModelsSecurity() {
@@ -689,6 +694,89 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertEquals(ModelState.RELEASED, model.state)
         assertFalse(modelService.restoreModel(model))
         assertEquals(ModelState.RELEASED, model.state)
+    }
+
+    void testUploadModel() {
+        // anonymous user is not allowed to invoke method
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            modelService.uploadModel(null, null)
+        }
+        // try importing with null file - should fail
+        def auth = authenticateAsTestUser()
+        def meta = [comment: "Test Comment", name: "test"]
+        shouldFail(ModelException) {
+            modelService.uploadModel(null, meta)
+        }
+        File importFile = new File("target/vcs/exchange/import.xml")
+        // file does not yet exists = it should fail
+        shouldFail(ModelException) {
+            modelService.uploadModel(importFile, meta)
+        }
+        FileUtils.touch(importFile)
+        importFile.append("Test\n")
+        // also for directory it should fail
+        shouldFail(ModelException) {
+            modelService.uploadModel(new File("target/vcs/exchange/"), meta)
+        }
+        // VCS system should not be valid - so it should fail
+        shouldFail(ModelException) {
+            modelService.uploadModel(importFile, meta)
+        }
+        // now let's create the VCS
+        File clone = new File("target/vcs/git")
+        clone.mkdirs()
+        FileRepositoryBuilder builder = new FileRepositoryBuilder()
+        Repository repository = builder.setWorkTree(clone)
+        .readEnvironment() // scan environment GIT_* variables
+        .findGitDir() // scan up the file system tree
+        .build()
+        Git git = new Git(repository)
+        git.init().setDirectory(clone).call()
+        GitService gitService = new GitService()
+        mockConfig('''
+            jummp.plugins.git.enabled=true
+            jummp.vcs.workingDirectory="target/vcs/git"
+            jummp.vcs.exchangeDirectory="target/vcs/exchange"
+            ''')
+        gitService.afterPropertiesSet()
+        assertTrue(gitService.isValid())
+        modelService.vcsService.vcsManager = gitService.vcsManager()
+        assertTrue(modelService.vcsService.isValid())
+        // import should work now
+        Model model = modelService.uploadModel(importFile, meta)
+        assertTrue(model.validate())
+        // complete name cannot be tested, as it uses a generated date and we do not know the date
+        assertTrue(model.vcsIdentifier.endsWith("test"))
+        File gitFile = new File("target/vcs/git/${model.vcsIdentifier}")
+        List<String> lines = gitFile.readLines()
+        assertEquals(1, lines.size())
+        assertEquals("Test", lines[0])
+        // ensure the revision and commit message is correct
+        ObjectId commit = repository.resolve(Constants.HEAD)
+        RevWalk revWalk = new RevWalk(repository)
+        RevCommit revCommit = revWalk.parseCommit(commit)
+        assertEquals(commit.getName(), model.revisions.toList().first().vcsId)
+        assertEquals(1, model.revisions.size())
+        // we did not specify a commit message, so default should be used
+        assertEquals("Import of ${model.vcsIdentifier}", revCommit.getShortMessage())
+        assertEquals("Import of ${model.vcsIdentifier}", revCommit.getFullMessage())
+        // verify set permissions
+        assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.READ))
+        assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.ADMINISTRATION))
+        assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
+        assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.DELETE))
+        Revision revision = model.revisions.toList().first()
+        assertTrue(aclUtilService.hasPermission(auth, revision, BasePermission.READ))
+        assertTrue(aclUtilService.hasPermission(auth, revision, BasePermission.ADMINISTRATION))
+        assertTrue(aclUtilService.hasPermission(auth, revision, BasePermission.DELETE))
+        assertFalse(aclUtilService.hasPermission(auth, revision, BasePermission.WRITE))
+        // importing a model with same name should not be possible
+        shouldFail(ModelException) {
+            modelService.uploadModel(importFile, meta)
+        }
+        // TODO: somehow we need to test the failing cases, which is non-trivial
+        // the only solution were to modify comment to make the revision non-validate, but in future it will be a command object which validates
     }
 
     void testGrantReadAccess() {

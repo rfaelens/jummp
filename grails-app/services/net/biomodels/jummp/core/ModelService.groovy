@@ -163,7 +163,7 @@ class ModelService {
     }
 
     /**
-    * Stores a new Model in the VCS.
+    * Creates a new Model and stores it in the VCS.
     *
     * Stores the @p modelFile as a new file in the VCS and creates a Model for it.
     * The Model will have one Revision attached to it. The MetaInformation for this
@@ -172,11 +172,66 @@ class ModelService {
     * @param modelFile The model file to be stored in the VCS.
     * @param meta Meta Information to be added to the model
     * @return The new created Model, or null if the model could not be created
+    * @throws ModelException If Model File is not valid or the Model could not be stored in VCS
     **/
     @PreAuthorize("hasRole('ROLE_USER')")
-    public Model uploadModel(File modelFile, /*MetaInformationCommand*/def meta) {
-        // TODO: implement me
-        return null
+    public Model uploadModel(final File modelFile, /*MetaInformationCommand*/def meta) throws ModelException {
+        // TODO: validate file
+        // TODO: to support anonymous submissions this method has to be changed
+        if (Model.findByName(meta.name)) {
+            throw new ModelException(Model.findByName(meta.name), "There is already a Model with name ${meta.name}")
+        }
+        Model model = new Model(name: meta.name)
+        if (!modelFile) {
+            throw new ModelException(model, "File may not be null")
+        }
+        if (!modelFile.exists() || modelFile.isDirectory()) {
+            throw new ModelException(model, "The file ${modelFile.path} does not exist or is a directory")
+        }
+        Revision revision = new Revision(model: model,
+                revisionNumber: 1,
+                owner: User.findByUsername(springSecurityService.authentication.name),
+                minorRevision: false,
+                comment: meta.comment,
+                uploadDate: new Date())
+        // vcs identifier is upload date + name - this should by all means be unique
+        model.vcsIdentifier = revision.uploadDate.format("yyyy-MM-dd'T'HH:mm:ss:SSS") + "_" + model.name
+        try {
+            revision.vcsId = vcsService.importFile(model, modelFile)
+        } catch (VcsException e) {
+            revision.discard()
+            model.discard()
+            log.error("Exception occurred during importing a new Model to VCS: ${e.getMessage()}")
+            throw new ModelException(model, "Could not store new Model ${model.name} in VCS", e)
+        }
+
+        if (revision.validate()) {
+            model.addToRevisions(revision)
+            if (!model.validate()) {
+                // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
+                revision.discard()
+                model.discard()
+                log.error("New Model does not validate")
+                throw new ModelException(model, "Model does not validate")
+            }
+            model.save(flush: true)
+            // let's add the required rights
+            final String username = revision.owner.username
+            aclUtilService.addPermission(model, username, BasePermission.ADMINISTRATION)
+            aclUtilService.addPermission(model, username, BasePermission.DELETE)
+            aclUtilService.addPermission(model, username, BasePermission.READ)
+            aclUtilService.addPermission(model, username, BasePermission.WRITE)
+            aclUtilService.addPermission(revision, username, BasePermission.ADMINISTRATION)
+            aclUtilService.addPermission(revision, username, BasePermission.DELETE)
+            aclUtilService.addPermission(revision, username, BasePermission.READ)
+        } else {
+            // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
+            revision.discard()
+            model.discard()
+            log.error("New Model Revision does not validate")
+            throw new ModelException(model, "New Model Revision does not validate")
+        }
+        return model
     }
 
     /**
