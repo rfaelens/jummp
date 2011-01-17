@@ -130,6 +130,75 @@ class VcsServiceTests extends JummpIntegrationTestCase {
         assertTrue(service.isValid())
     }
 
+    void testImportFile() {
+        assertFalse(vcsService.isValid())
+        // first create a model
+        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        assertTrue(revision.validate())
+        model.addToRevisions(revision)
+        assertTrue(model.validate())
+        model.save()
+        // without authentication it should fail
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            vcsService.importFile(model, null)
+        }
+        // as user we should get a VcsException as the service is not valid
+        authenticateAsUser()
+        shouldFail(VcsException) {
+            vcsService.importFile(model, null)
+        }
+        // same of course for admin
+        authenticateAsAdmin()
+        shouldFail(VcsException) {
+            vcsService.importFile(model, null)
+        }
+        // create a git repository
+        File importFile = new File("target/vcs/exchange/test.xml")
+        FileUtils.touch(importFile)
+        importFile.append("Test\n")
+        // setup VCS
+        File clone = new File("target/vcs/git")
+        clone.mkdirs()
+        FileRepositoryBuilder builder = new FileRepositoryBuilder()
+        Repository repository = builder.setWorkTree(clone)
+        .readEnvironment() // scan environment GIT_* variables
+        .findGitDir() // scan up the file system tree
+        .build()
+        Git git = new Git(repository)
+        git.init().setDirectory(clone).call()
+        GitService gitService = new GitService()
+        mockConfig('''
+            jummp.plugins.git.enabled=true
+            jummp.vcs.workingDirectory="target/vcs/git"
+            jummp.vcs.exchangeDirectory="target/vcs/exchange"
+            ''')
+        gitService.afterPropertiesSet()
+        assertTrue(gitService.isValid())
+        vcsService.vcsManager = gitService.vcsManager()
+        assertTrue(vcsService.isValid())
+        // now as user we should be able to import
+        authenticateAsTestUser()
+        String rev = vcsService.importFile(model, importFile)
+        File gitFile = new File("target/vcs/git/test.xml")
+        List<String> lines = gitFile.readLines()
+        assertEquals(1, lines.size())
+        assertEquals("Test", lines[0])
+        // ensure the revision and commit message is correct
+        ObjectId commit = repository.resolve(Constants.HEAD)
+        RevWalk revWalk = new RevWalk(repository)
+        RevCommit revCommit = revWalk.parseCommit(commit)
+        assertEquals(commit.getName(), rev)
+        // we did not specify a commit message, so default should be used
+        assertEquals("Import of test.xml", revCommit.getShortMessage())
+        assertEquals("Import of test.xml", revCommit.getFullMessage())
+        // importing again should fail
+        shouldFail(VcsException) {
+            vcsService.importFile(model, importFile)
+        }
+    }
+
     void testUpdateFile() {
         assertFalse(vcsService.isValid())
         // first create a model

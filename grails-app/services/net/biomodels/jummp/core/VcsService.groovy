@@ -67,7 +67,7 @@ class VcsService implements InitializingBean {
     * @param model The Model representing the file in the VCS.
     * @param file The file to update
     * @param commitMessage The commit message to be used for the update.
-    * @return Revision number of updated file, @c null if error occurred
+    * @return Revision number of updated file.
     * @throws VcsException passes along the VcsException thrown by VcsManager
     **/
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
@@ -81,6 +81,23 @@ class VcsService implements InitializingBean {
         } else {
             return vcsManager.updateFile(file, model.vcsIdentifier, commitMessage)
         }
+    }
+    /**
+     * Imports a new Model file into the VCS.
+     * Copies @p file into the working copy of the VCS and performs an initial import.
+     * Use this method if the file has not been imported previously.
+     * @param model The Model representing the new file in the VCS
+     * @param file The file to import
+     * @return Revision number of imported file.
+     * @throws VcsException passes along the VcsException thrown by VcsManager
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    String importFile(final Model model, final File file) throws VcsException {
+        if (!isValid()) {
+            throw new VcsException("Version Control System is not valid")
+        }
+
+        return vcsManager.importFile(file, model.vcsIdentifier)
     }
     // TODO: implement required methods
 }
