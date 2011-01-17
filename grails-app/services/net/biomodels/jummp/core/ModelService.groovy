@@ -1,17 +1,17 @@
 package net.biomodels.jummp.core
 
-import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.model.Revision
 import org.apache.commons.io.FileUtils
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PostFilter
 import org.springframework.security.access.prepost.PreAuthorize
-import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.acls.domain.BasePermission
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import org.springframework.security.acls.model.Acl
 import org.springframework.security.acls.domain.PrincipalSid
+import org.springframework.security.acls.model.Acl
 import net.biomodels.jummp.core.vcs.VcsException
+import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelState
+import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.plugins.security.User
 
 /**
  * @short Service class for managing Models

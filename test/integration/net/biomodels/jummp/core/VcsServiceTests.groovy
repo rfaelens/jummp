@@ -338,7 +338,6 @@ class VcsServiceTests extends JummpIntegrationTestCase {
     }
 
     void testRetrieveFile() {
-        // TODO: implement tests
         assertFalse(vcsService.isValid())
         // first create a model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
