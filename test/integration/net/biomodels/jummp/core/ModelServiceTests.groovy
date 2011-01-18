@@ -17,15 +17,27 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.lib.ObjectId
 import org.eclipse.jgit.lib.Constants
+import net.biomodels.jummp.core.model.ModelFormat
 
 class ModelServiceTests extends JummpIntegrationTestCase {
     def aclUtilService
     def modelService
+    def origMethod
 
     protected void setUp() {
         super.setUp()
         mockLogging(VcsService, true)
         createUserAndRoles()
+        origMethod = modelService.modelFileFormatService.metaClass.methods.findAll { it.name == "validate" }.first()
+        println origMethod
+        modelService.modelFileFormatService.metaClass.validate = { File file, ModelFormat format ->
+            if (format == ModelFormat.UNKNOWN) {
+                // for unknown format we model true to make all tests pass
+                return true
+            } else {
+                return modelService.modelFileFormatService.sbmlService.validate(file)
+            }
+        }
     }
 
     protected void tearDown() {
@@ -33,6 +45,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         FileUtils.deleteDirectory(new File("target/vcs/git"))
         FileUtils.deleteDirectory(new File("target/vcs/exchange"))
         modelService.vcsService.vcsManager = null
+        modelService.modelFileFormatService.metaClass.validate = origMethod
     }
 
     void testGetAllModelsSecurity() {
@@ -591,6 +604,14 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertEquals("Test", lines[0])
         assertEquals("Further Test", lines[1])
         assertEquals("Admin Test", lines[2])
+        // try adding a revision with invalid sbml file - should not be possible
+        rev3.format = ModelFormat.SBML
+        File sbmlFile = new File("target/sbml/addRevisionSbmlFile")
+        FileUtils.deleteQuietly(sbmlFile)
+        FileUtils.touch(sbmlFile)
+        shouldFail(ModelException) {
+            modelService.addRevision(model, sbmlFile, "")
+        }
         // delete the Model - any further updates should end in a ModelException
         modelService.deleteModel(model)
         shouldFail(ModelException) {
@@ -704,7 +725,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         }
         // try importing with null file - should fail
         def auth = authenticateAsTestUser()
-        def meta = [comment: "Test Comment", name: "test"]
+        def meta = [comment: "Test Comment", name: "test", format: ModelFormat.UNKNOWN]
         shouldFail(ModelException) {
             modelService.uploadModel(null, meta)
         }
@@ -775,6 +796,15 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         shouldFail(ModelException) {
             modelService.uploadModel(importFile, meta)
         }
+        // importing with invalid model file should not be possible
+        meta.name = "test2"
+        meta.format = ModelFormat.SBML
+        File sbmlFile = new File("target/sbml/sbmlTestFile")
+        FileUtils.deleteQuietly(sbmlFile)
+        FileUtils.touch(sbmlFile)
+        shouldFail(ModelException) {
+            modelService.uploadModel(sbmlFile, meta)
+        }
         // TODO: somehow we need to test the failing cases, which is non-trivial
         // the only solution were to modify comment to make the revision non-validate, but in future it will be a command object which validates
     }
@@ -802,7 +832,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(modelService.vcsService.isValid())
         // import a file
         authenticateAsTestUser()
-        def meta = [comment: "Test Comment", name: "test"]
+        def meta = [comment: "Test Comment", name: "test", format: ModelFormat.UNKNOWN]
         File importFile = new File("target/vcs/exchange/import.xml")
         FileUtils.touch(importFile)
         importFile.append("Test\n")

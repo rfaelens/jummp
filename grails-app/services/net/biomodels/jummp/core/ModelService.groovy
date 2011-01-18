@@ -37,6 +37,10 @@ class ModelService {
      * Dependency Injection of VcsService
      */
     def vcsService
+    /**
+     * Dependency Injection of ModelFileFormatService
+     */
+    def modelFileFormatService
 
     static transactional = true
 
@@ -177,7 +181,6 @@ class ModelService {
     **/
     @PreAuthorize("hasRole('ROLE_USER')")
     public Model uploadModel(final File modelFile, /*MetaInformationCommand*/def meta) throws ModelException {
-        // TODO: validate file
         // TODO: to support anonymous submissions this method has to be changed
         if (Model.findByName(meta.name)) {
             throw new ModelException(Model.findByName(meta.name), "There is already a Model with name ${meta.name}")
@@ -188,6 +191,9 @@ class ModelService {
         }
         if (!modelFile.exists() || modelFile.isDirectory()) {
             throw new ModelException(model, "The file ${modelFile.path} does not exist or is a directory")
+        }
+        if (!modelFileFormatService.validate(modelFile, meta.format)) {
+            throw new ModelException(model, "The file ${modelFile.path} is not a valid ${meta.format} file")
         }
         Revision revision = new Revision(model: model,
                 revisionNumber: 1,
@@ -249,7 +255,6 @@ class ModelService {
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
     public Revision addRevision(Model model, File file, String comment) throws ModelException {
         // TODO: the method should be thread safe, add a lock
-        // TODO: validate the file
         if (!model) {
             throw new ModelException(model, "Model may not be null")
         }
@@ -264,6 +269,10 @@ class ModelService {
         }
         if (!file.exists() || file.isDirectory()) {
             throw new ModelException(model, "The file ${file.path} does not exist or is a directory")
+        }
+        // TODO: we need to pass the format in as a parameter
+        if (!modelFileFormatService.validate(file, getLatestRevision(model).format)) {
+            throw new ModelException(model, "The file ${file.path} is not a valid ${getLatestRevision(model).format} file")
         }
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
         Revision revision = new Revision(model: model, comment: comment, uploadDate: new Date(), owner: currentUser, minorRevision: false)
