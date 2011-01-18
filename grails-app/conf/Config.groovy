@@ -166,6 +166,15 @@ default:
     break
 }
 
+environments {
+    test {
+        // need to disable the plugins or tests may fail
+        // if needed in the tests, mockConfig should be used
+        jummp.plugins.subversion.enabled = false
+        jummp.plugins.git.enabled = false
+    }
+}
+
 if (pluginsToExclude) {
     grails.plugin.exclude = pluginsToExclude
 }
