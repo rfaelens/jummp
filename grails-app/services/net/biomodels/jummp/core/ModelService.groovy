@@ -12,6 +12,7 @@ import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelState
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.core.model.ModelFormat
 
 /**
  * @short Service class for managing Models
@@ -200,7 +201,8 @@ class ModelService {
                 owner: User.findByUsername(springSecurityService.authentication.name),
                 minorRevision: false,
                 comment: meta.comment,
-                uploadDate: new Date())
+                uploadDate: new Date(),
+                format: meta.format)
         // vcs identifier is upload date + name - this should by all means be unique
         model.vcsIdentifier = revision.uploadDate.format("yyyy-MM-dd'T'HH:mm:ss:SSS") + "_" + model.name
         try {
@@ -248,12 +250,13 @@ class ModelService {
     * A new Revision will be created and appended to the list of Revisions of the @p model.
     * @param model The Model the revision should be added
     * @param file The model file to be stored in the VCS as a new revision
+    * @param format The format of the model file
     * @param comment The commit message for the new revision
     * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
     * @throws ModelException If either @p model, @p file or @p comment are null or if the file does not exists or is a directory
     **/
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
-    public Revision addRevision(Model model, File file, String comment) throws ModelException {
+    public Revision addRevision(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
         // TODO: the method should be thread safe, add a lock
         if (!model) {
             throw new ModelException(model, "Model may not be null")
@@ -271,11 +274,11 @@ class ModelService {
             throw new ModelException(model, "The file ${file.path} does not exist or is a directory")
         }
         // TODO: we need to pass the format in as a parameter
-        if (!modelFileFormatService.validate(file, getLatestRevision(model).format)) {
-            throw new ModelException(model, "The file ${file.path} is not a valid ${getLatestRevision(model).format} file")
+        if (!modelFileFormatService.validate(file, format)) {
+            throw new ModelException(model, "The file ${file.path} is not a valid ${format} file")
         }
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
-        Revision revision = new Revision(model: model, comment: comment, uploadDate: new Date(), owner: currentUser, minorRevision: false)
+        Revision revision = new Revision(model: model, comment: comment, uploadDate: new Date(), owner: currentUser, minorRevision: false, format: format)
         // save the new file in the database
         try {
             String vcsId = vcsService.updateFile(model, file, comment)

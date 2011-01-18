@@ -494,7 +494,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         // authenticate as testuser, as there is no ACL he is not allowed to add a revision
         def auth = authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
-            modelService.addRevision(model, new File("target/test"), null)
+            modelService.addRevision(model, new File("target/test"), ModelFormat.UNKNOWN, null)
         }
         // give user the right to write to the model
         authenticateAsAdmin()
@@ -502,36 +502,36 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         modelService.grantWriteAccess(model, User.findByUsername("testuser"))
         // model may not be null - test as admin as otherwise will throw AccessDeniedException
         shouldFail(ModelException) {
-            modelService.addRevision(null, new File("target/test"), "")
+            modelService.addRevision(null, new File("target/test"), ModelFormat.UNKNOWN, "")
         }
         // vcs is not yet setup, adding a revision should fail
         authenticateAsTestUser()
         // model may not be null - as a user this throws an AccessDeniedException
         shouldFail(AccessDeniedException) {
-            modelService.addRevision(null, new File("target/test"), "")
+            modelService.addRevision(null, new File("target/test"), ModelFormat.UNKNOWN, "")
         }
         // file may not be null
         shouldFail(ModelException) {
-            modelService.addRevision(model, null, "")
+            modelService.addRevision(model, null, ModelFormat.UNKNOWN, "")
         }
         // comment may not be null
         shouldFail(ModelException) {
-            modelService.addRevision(model, new File("target/test"), null)
+            modelService.addRevision(model, new File("target/test"), ModelFormat.UNKNOWN, null)
         }
         // file must exist
         shouldFail(ModelException) {
-            modelService.addRevision(model, new File("target/test"), "")
+            modelService.addRevision(model, new File("target/test"), ModelFormat.UNKNOWN, "")
         }
         // file may not be a directory
         File exchangeDirectory = new File("target/vcs/exchange")
         exchangeDirectory.mkdirs()
         shouldFail(ModelException) {
-            modelService.addRevision(model, exchangeDirectory, "")
+            modelService.addRevision(model, exchangeDirectory, ModelFormat.UNKNOWN, "")
         }
         File importFile = new File("target/vcs/exchange/test.xml")
         FileUtils.touch(importFile)
         shouldFail(ModelException) {
-            modelService.addRevision(model, importFile, "")
+            modelService.addRevision(model, importFile, ModelFormat.UNKNOWN, "")
         }
         // setup VCS
         File clone = new File("target/vcs/git")
@@ -559,7 +559,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         File updateFile = new File("target/vcs/exchange/update.xml")
         updateFile.append("Test\n")
         FileUtils.touch(updateFile)
-        Revision rev = modelService.addRevision(model, updateFile, "")
+        Revision rev = modelService.addRevision(model, updateFile, ModelFormat.UNKNOWN, "")
         assertEquals(2, rev.revisionNumber)
         assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.ADMINISTRATION))
         assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.READ))
@@ -577,7 +577,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(aclUtilService.hasPermission(auth2, model, BasePermission.READ))
         authenticateAsTestUser()
         updateFile.append("Further Test\n")
-        Revision rev2 = modelService.addRevision(model, updateFile, "")
+        Revision rev2 = modelService.addRevision(model, updateFile, ModelFormat.UNKNOWN, "")
         assertEquals(3, rev2.revisionNumber)
         assertFalse(rev2.vcsId == rev.vcsId)
         assertTrue(aclUtilService.hasPermission(auth, rev2, BasePermission.ADMINISTRATION))
@@ -591,7 +591,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         // admin should also be able to import updates
         def adminAuth = authenticateAsAdmin()
         updateFile.append("Admin Test\n")
-        Revision rev3 = modelService.addRevision(model, updateFile, "")
+        Revision rev3 = modelService.addRevision(model, updateFile, ModelFormat.UNKNOWN, "")
         assertEquals(4, rev3.revisionNumber)
         assertFalse(rev3.vcsId == rev2.vcsId)
         assertTrue(aclUtilService.hasPermission(adminAuth, rev3, BasePermission.ADMINISTRATION))
@@ -605,17 +605,44 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertEquals("Further Test", lines[1])
         assertEquals("Admin Test", lines[2])
         // try adding a revision with invalid sbml file - should not be possible
-        rev3.format = ModelFormat.SBML
         File sbmlFile = new File("target/sbml/addRevisionSbmlFile")
         FileUtils.deleteQuietly(sbmlFile)
         FileUtils.touch(sbmlFile)
         shouldFail(ModelException) {
-            modelService.addRevision(model, sbmlFile, "")
+            modelService.addRevision(model, sbmlFile, ModelFormat.SBML, "")
         }
+        // with a valid sbml file it should be possible
+        sbmlFile = new File("target/sbml/addRevisionValidSbmlFile")
+        FileUtils.deleteQuietly(sbmlFile)
+        FileUtils.touch(sbmlFile)
+        sbmlFile.append('''<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
+  <model>
+    <listOfCompartments>
+      <compartment name="x"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <specie name="y" compartment="x" initialAmount="1"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction name="r">
+        <listOfReactants>
+          <specieReference specie="y"/>
+        </listOfReactants>
+        <listOfProducts>
+          <specieReference specie="y"/>
+        </listOfProducts>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>''')
+        Revision rev4 = modelService.addRevision(model, sbmlFile, ModelFormat.SBML, "")
+        assertEquals(5, rev4.revisionNumber)
+        assertEquals(ModelFormat.SBML, rev4.format)
         // delete the Model - any further updates should end in a ModelException
         modelService.deleteModel(model)
         shouldFail(ModelException) {
-            modelService.addRevision(model, updateFile, "")
+            modelService.addRevision(model, updateFile, ModelFormat.UNKNOWN, "")
         }
     }
 
@@ -767,6 +794,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         // import should work now
         Model model = modelService.uploadModel(importFile, meta)
         assertTrue(model.validate())
+        assertEquals(ModelFormat.UNKNOWN, model.revisions.toList().first().format)
         // complete name cannot be tested, as it uses a generated date and we do not know the date
         assertTrue(model.vcsIdentifier.endsWith("test"))
         File gitFile = new File("target/vcs/git/${model.vcsIdentifier}")
@@ -805,6 +833,34 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         shouldFail(ModelException) {
             modelService.uploadModel(sbmlFile, meta)
         }
+        // importing with valid model file should be possible
+        sbmlFile = new File("target/sbml/uploadModelValidSbmlFile")
+        FileUtils.deleteQuietly(sbmlFile)
+        FileUtils.touch(sbmlFile)
+        sbmlFile.append('''<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
+  <model>
+    <listOfCompartments>
+      <compartment name="x"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <specie name="y" compartment="x" initialAmount="1"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction name="r">
+        <listOfReactants>
+          <specieReference specie="y"/>
+        </listOfReactants>
+        <listOfProducts>
+          <specieReference specie="y"/>
+        </listOfProducts>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>''')
+        model = modelService.uploadModel(sbmlFile, meta)
+        assertTrue(model.validate())
+        assertEquals(ModelFormat.SBML, model.revisions.toList().first().format)
         // TODO: somehow we need to test the failing cases, which is non-trivial
         // the only solution were to modify comment to make the revision non-validate, but in future it will be a command object which validates
     }
