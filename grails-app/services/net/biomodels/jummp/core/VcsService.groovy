@@ -37,6 +37,9 @@ class VcsService implements InitializingBean {
         if (pluginServiceName instanceof String && !pluginServiceName.isEmpty()) {
             try {
                 ApplicationContext ctx = (ApplicationContext)ApplicationHolder.getApplication().getMainContext()
+                if (ctx == null) {
+                    return
+                }
                 Vcs vcs = (Vcs)ctx.getBean(pluginServiceName)
                 if (vcs.isValid()) {
                     vcsManager = vcs.vcsManager()
