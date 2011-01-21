@@ -11,7 +11,7 @@ package net.biomodels.jummp.model
  * @see Publication
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class Model {
+class Model implements Serializable {
     /**
      * A Model has many Revision and many Publication
      * IMPORTANT: never access revisions directly as this circumvents the ACL!
