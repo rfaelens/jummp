@@ -10,6 +10,10 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.access.AccessDeniedException
+import net.biomodels.jummp.plugins.security.SerializableGrailsUser
+import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
+import org.springframework.security.authentication.AbstractAuthenticationToken
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -52,9 +56,22 @@ class JmsAdapterService {
     def authenticate(def message) {
         if (message instanceof Authentication) {
             try {
-                return authenticationManager.authenticate(message)
+                Authentication auth = authenticationManager.authenticate(message)
+                // The authentication is propagated with an GrailsUser as principal
+                // Unfortunately the GrailsUser class is not serializable.
+                // Because of that a new Authentication is created using an own implementation of a serializable GrailsUser
+                return new UsernamePasswordAuthenticationToken(SerializableGrailsUser.fromGrailsUser((GrailsUser)auth.principal),
+                        auth.getCredentials(), auth.getAuthorities())
             } catch (AuthenticationException e) {
-                return e
+                // extraInformation is also a GrailsUser, so if it is set we need to create a new AuthenticationException
+                // with a SerializableGrailsUser instead of the GrailsUser as extraInformation
+                if (e.extraInformation) {
+                    AuthenticationException exception = e.class.newInstance(e.message, SerializableGrailsUser.fromGrailsUser((GrailsUser)e.extraInformation))
+                    exception.setAuthentication(e.authentication)
+                    return exception
+                } else {
+                    return e
+                }
             }
         }
         return new IllegalArgumentException("Did not receive an authentication")
