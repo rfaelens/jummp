@@ -2,6 +2,7 @@ package net.biomodels.jummp.model
 
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.core.model.ModelFormat
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 /**
  * @short A Revision represents one version of a Model file.
@@ -65,5 +66,17 @@ class Revision implements Serializable {
         uploadDate(nullable: false)
         comment(nullable: false, blank: true, maxSize: 1000)
         format(nullable: false)
+    }
+
+    RevisionTransportCommand toCommandObject() {
+        return new RevisionTransportCommand(
+                id: id,
+                revisionNumber: revisionNumber,
+                owner: owner.userRealName,
+                minorRevision: minorRevision,
+                comment: comment,
+                uploadDate: uploadDate,
+                format: format,
+                model: model.toCommandObject())
     }
 }

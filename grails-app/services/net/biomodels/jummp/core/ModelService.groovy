@@ -9,10 +9,11 @@ import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.model.ModelState
+import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.core.model.ModelFormat
+import net.biomodels.jummp.core.model.ModelTransportCommand
 
 /**
  * @short Service class for managing Models
@@ -181,7 +182,7 @@ class ModelService {
     * @throws ModelException If Model File is not valid or the Model could not be stored in VCS
     **/
     @PreAuthorize("hasRole('ROLE_USER')")
-    public Model uploadModel(final File modelFile, /*MetaInformationCommand*/def meta) throws ModelException {
+    public Model uploadModel(final File modelFile, ModelTransportCommand meta) throws ModelException {
         // TODO: to support anonymous submissions this method has to be changed
         if (Model.findByName(meta.name)) {
             throw new ModelException(Model.findByName(meta.name), "There is already a Model with name ${meta.name}")

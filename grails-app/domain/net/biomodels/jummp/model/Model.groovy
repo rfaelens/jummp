@@ -1,5 +1,8 @@
 package net.biomodels.jummp.model
 
+import net.biomodels.jummp.core.model.ModelState
+import net.biomodels.jummp.core.model.ModelTransportCommand
+
 /**
  * @short Representation of one Model.
  * This class is the representation of one Model. It contains the reference
@@ -39,5 +42,9 @@ class Model implements Serializable {
             return !revs.isEmpty()
         })
         state(nullable: false)
+    }
+
+    ModelTransportCommand toCommandObject() {
+        return new ModelTransportCommand(id: id, name: name, state: state)
     }
 }

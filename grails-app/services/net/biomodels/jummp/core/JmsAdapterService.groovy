@@ -14,6 +14,8 @@ import net.biomodels.jummp.plugins.security.SerializableGrailsUser
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -80,7 +82,7 @@ class JmsAdapterService {
     /**
      * Wrapper for ModelService.getAllModels
      * @param message List with first element the Authentication, further arguments as required
-     * @return List of Models or IllegalArgumentException for incorrect arguments
+     * @return List of ModelTransportCommands or IllegalArgumentException for incorrect arguments
      */
     @Queue
     def getAllModels(def message) {
@@ -90,19 +92,20 @@ class JmsAdapterService {
             return new IllegalArgumentException("Invalid arguments passed to method. Allowed is Authentication or Authentication, Integer, Integer or Authentication, Integer, Integer, Boolean")
         }
         List arguments = (List)message
-        List<Model> returnList = []
+        List<Model> modelList = []
+        List<ModelTransportCommand> returnList = []
         // set authentication
         try {
             setAuthentication((Authentication)arguments[0])
             switch (arguments.size()) {
             case 1:
-                returnList = modelService.getAllModels()
+                modelList = modelService.getAllModels()
                 break
             case 3:
-                returnList = modelService.getAllModels((Integer)arguments[1], (Integer)arguments[2])
+                modelList = modelService.getAllModels((Integer)arguments[1], (Integer)arguments[2])
                 break
             case 4:
-                returnList = modelService.getAllModels((Integer)arguments[1], (Integer)arguments[2], (Boolean)arguments[3])
+                modelList = modelService.getAllModels((Integer)arguments[1], (Integer)arguments[2], (Boolean)arguments[3])
                 break
             default:
                 // nothing
@@ -110,6 +113,9 @@ class JmsAdapterService {
             }
         } finally {
             restoreAuthentication()
+        }
+        modelList.each {
+            returnList << it.toCommandObject()
         }
         return returnList
     }
@@ -136,18 +142,18 @@ class JmsAdapterService {
 
     /**
      * Wrapper around ModelService.getLatestRevision
-     * @param message List consisting of Authentication and Model
-     * @return The Revision or IllegalArgumentException or AccessDeniedException if user does not have access to any Revision.
+     * @param message List consisting of Authentication and ModelTransportCommand
+     * @return A RevisionTransportCommand or IllegalArgumentException or AccessDeniedException if user does not have access to any Revision.
      */
     @Queue
     def getLatestRevision(def message) {
-        if (!verifyMessage(message, [Authentication, Model])) {
+        if (!verifyMessage(message, [Authentication, ModelTransportCommand])) {
             return new IllegalArgumentException("Authentication and Model as arguments expected")
         }
         Revision revision = null
         try {
             setAuthentication((Authentication)message[0])
-            revision = modelService.getLatestRevision((Model)message[1])
+            revision = modelService.getLatestRevision(Model.get(message[1].id))
         } finally {
             restoreAuthentication()
         }
@@ -155,26 +161,30 @@ class JmsAdapterService {
         if (revision == null) {
             return new AccessDeniedException("No access to any revision of Model ${message[1].id}")
         } else {
-            return revision
+            return revision.toCommandObject()
         }
     }
 
     /**
      * Wrapper around ModelService.getAllRevisions
      * @param message List consisting of Authentication and Model
-     * @return List of Revisions or IllegalArgumentException
+     * @return List of Revisions wrapped in RevisionTransportCommand or IllegalArgumentException
      */
     @Queue
     def getAllRevisions(def message) {
-        if (!verifyMessage(message, [Authentication, Model])) {
+        if (!verifyMessage(message, [Authentication, ModelTransportCommand])) {
             return new IllegalArgumentException("Authentication and Model as arguments expected")
         }
         List<Revision> result = []
         try {
             setAuthentication((Authentication)message[0])
-            result = modelService.getAllRevisions((Model)message[1])
+            result = modelService.getAllRevisions(Model.get(message[1].id))
         } finally {
             restoreAuthentication()
+        }
+        List<RevisionTransportCommand> revisions = []
+        result.each {
+            revisions << it.toCommandObject()
         }
         return result
     }
@@ -182,12 +192,12 @@ class JmsAdapterService {
     /**
      * Wrapper around ModelService.uploadModel
      * @param message List consisting of Authentication, content of file and command object
-     * @return New created Model, InvalidArgumentException, AccessDeniedException or ModelException
+     * @return New created Model as ModelTransportCommand, InvalidArgumentException, AccessDeniedException or ModelException
      */
     @Queue
     def uploadModel(def message) {
         // TODO: replace Map by the proper type
-        if (!verifyMessage(message, [Authentication, byte[], Map])) {
+        if (!verifyMessage(message, [Authentication, byte[], ModelTransportCommand])) {
             return new IllegalArgumentException("Authentication, Byte Array and CommandObject as arguments excepted")
         }
         def result
@@ -196,7 +206,7 @@ class JmsAdapterService {
             setAuthentication((Authentication)message[0])
             File file = File.createTempFile("jummpJms", null)
             file.append(message[1])
-            result = modelService.uploadModel(file, message[2])
+            result = modelService.uploadModel(file, (ModelTransportCommand)message[2]).toCommandObject()
             FileUtils.deleteQuietly(file)
         } catch (AccessDeniedException e) {
             result = e
@@ -211,12 +221,12 @@ class JmsAdapterService {
 
     /**
      * Wrapper around ModelService.addRevision
-     * @param message List consisting of Authentication, content of file as Byte Array, ModelFormat and String
-     * @return New created Revision, InvalidArgumentException, AccessDeniedException or ModelException
+     * @param message List consisting of Authentication, ModelTransportCommand, content of file as Byte Array, ModelFormat and String
+     * @return New created Revision as RevisionTransportCommand, InvalidArgumentException, AccessDeniedException or ModelException
      */
     @Queue
     def addRevision(def message) {
-        if (!verifyMessage(message, [Authentication, Model, byte[], ModelFormat, String])) {
+        if (!verifyMessage(message, [Authentication, ModelTransportCommand, byte[], ModelFormat, String])) {
             return new IllegalArgumentException("Authentication, Model, Byte Array, ModelFormat and String as arguments expected")
         }
         def result
@@ -225,7 +235,7 @@ class JmsAdapterService {
             setAuthentication((Authentication)message[0])
             File file = File.createTempFile("jummpJms", null)
             file.append(message[2])
-            result = modelService.addRevision((Model)message[1], file, (ModelFormat)message[3], (String)message[4])
+            result = modelService.addRevision(Model.get((message[1]).id), file, (ModelFormat)message[3], (String)message[4]).toCommandObject()
             FileUtils.deleteQuietly(file)
         } catch (AccessDeniedException e) {
             result = e
@@ -245,14 +255,14 @@ class JmsAdapterService {
      */
     @Queue
     def retrieveModelFile(def message) {
-        if (!verifyMessage(message, [Authentication, Revision])) {
+        if (!verifyMessage(message, [Authentication, RevisionTransportCommand])) {
             return new IllegalArgumentException("Authentication and Revision as arguments expected")
         }
 
         def result
         try {
             setAuthentication((Authentication)message[0])
-            result = modelService.retrieveModelFile(message[1])
+            result = modelService.retrieveModelFile(Revision.get(message[1].id))
         } catch (AccessDeniedException e) {
             result = e
         } catch (ModelException e) {
@@ -270,7 +280,7 @@ class JmsAdapterService {
      */
     @Queue
     def grantReadAccess(def message) {
-        if (!verifyMessage(message, [Authentication, Model, User])) {
+        if (!verifyMessage(message, [Authentication, ModelTransportCommand, User])) {
             return new IllegalArgumentException("Authentication, Model and User as arguments expected")
         }
 
@@ -294,14 +304,14 @@ class JmsAdapterService {
      */
     @Queue
     def grantWriteAccess(def message) {
-        if (!verifyMessage(message, [Authentication, Model, User])) {
+        if (!verifyMessage(message, [Authentication, ModelTransportCommand, User])) {
             return new IllegalArgumentException("Authentication, Model and User as arguments expected")
         }
 
         def result
         try {
             setAuthentication((Authentication)message[0])
-            modelService.grantWriteAccess(message[1], message[2])
+            modelService.grantWriteAccess(Model.get(message[1].id), message[2])
             result = true
         } catch (AccessDeniedException e) {
             result = e
@@ -318,14 +328,14 @@ class JmsAdapterService {
      */
     @Queue
     def revokeReadAccess(def message) {
-        if (!verifyMessage(message, [Authentication, Model, User])) {
+        if (!verifyMessage(message, [Authentication, ModelTransportCommand, User])) {
             return new IllegalArgumentException("Authentication, Model and User as arguments expected")
         }
 
         def result
         try {
             setAuthentication((Authentication)message[0])
-            result = modelService.revokeReadAccess(message[1], message[2])
+            result = modelService.revokeReadAccess(Model.get(message[1].id), message[2])
         } catch (AccessDeniedException e) {
             result = e
         } finally {
@@ -341,14 +351,14 @@ class JmsAdapterService {
      */
     @Queue
     def revokeWriteAccess(def message) {
-        if (!verifyMessage(message, [Authentication, Model, User])) {
+        if (!verifyMessage(message, [Authentication, ModelTransportCommand, User])) {
             return new IllegalArgumentException("Authentication, Model and User as arguments expected")
         }
 
         def result
         try {
             setAuthentication((Authentication)message[0])
-            result = modelService.revokeWriteAccess(message[1], message[2])
+            result = modelService.revokeWriteAccess(Model.get(message[1].id), message[2])
         } catch (AccessDeniedException e) {
             result = e
         } finally {
@@ -364,7 +374,7 @@ class JmsAdapterService {
      */
     @Queue
     def deleteModel(def message) {
-        if (!verifyMessage(message, [Authentication, Model])) {
+        if (!verifyMessage(message, [Authentication, ModelTransportCommand])) {
             return new IllegalArgumentException("Authentication and Model as arguments expected")
         }
 
@@ -387,7 +397,7 @@ class JmsAdapterService {
      */
     @Queue
     def restoreModel(def message) {
-        if (!verifyMessage(message, [Authentication, Model])) {
+        if (!verifyMessage(message, [Authentication, ModelTransportCommand])) {
             return new IllegalArgumentException("Authentication and Model as arguments expected")
         }
 

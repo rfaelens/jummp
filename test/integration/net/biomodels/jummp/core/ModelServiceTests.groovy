@@ -1,10 +1,8 @@
 package net.biomodels.jummp.core
 
-import grails.test.*
-
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.model.ModelState
+import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.model.Revision
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
@@ -18,6 +16,7 @@ import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.lib.ObjectId
 import org.eclipse.jgit.lib.Constants
 import net.biomodels.jummp.core.model.ModelFormat
+import net.biomodels.jummp.core.model.ModelTransportCommand
 
 class ModelServiceTests extends JummpIntegrationTestCase {
     def aclUtilService
@@ -752,7 +751,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         }
         // try importing with null file - should fail
         def auth = authenticateAsTestUser()
-        def meta = [comment: "Test Comment", name: "test", format: ModelFormat.UNKNOWN]
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "test", format: ModelFormat.UNKNOWN)
         shouldFail(ModelException) {
             modelService.uploadModel(null, meta)
         }
@@ -888,7 +887,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(modelService.vcsService.isValid())
         // import a file
         authenticateAsTestUser()
-        def meta = [comment: "Test Comment", name: "test", format: ModelFormat.UNKNOWN]
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "test", format: ModelFormat.UNKNOWN)
         File importFile = new File("target/vcs/exchange/import.xml")
         FileUtils.touch(importFile)
         importFile.append("Test\n")

@@ -2,7 +2,7 @@ package net.biomodels.jummp.core
 
 import net.biomodels.jummp.core.model.ModelFormat
 import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.model.ModelState
+import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.git.GitService
 import net.biomodels.jummp.plugins.security.User
@@ -18,6 +18,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.authority.GrantedAuthorityImpl
+import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 /**
  * Note: the tests fail when executed together with other integration tests
@@ -97,18 +99,18 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         returnList = send("getAllModels", [auth2])
         assertTrue(returnList instanceof List)
         assertFalse(returnList.isEmpty())
-        assertTrue(returnList[0] instanceof Model)
+        assertTrue(returnList[0] instanceof ModelTransportCommand)
         assertEquals(model.id, returnList[0].id)
         // let's try the different variants of getAllModels
         returnList = send("getAllModels", [auth2, 0, 10])
         assertTrue(returnList instanceof List)
         assertFalse(returnList.isEmpty())
-        assertTrue(returnList[0] instanceof Model)
+        assertTrue(returnList[0] instanceof ModelTransportCommand)
         assertEquals(model.id, returnList[0].id)
         returnList = send("getAllModels", [auth2, 0, 10, false])
         assertTrue(returnList instanceof List)
         assertFalse(returnList.isEmpty())
-        assertTrue(returnList[0] instanceof Model)
+        assertTrue(returnList[0] instanceof ModelTransportCommand)
         assertEquals(model.id, returnList[0].id)
         // switch to user
         def auth3 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
@@ -175,22 +177,22 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // testuser should get an AccessDeniedException
-        assertTrue(send("getLatestRevision", [auth, model]) instanceof AccessDeniedException)
+        assertTrue(send("getLatestRevision", [auth, model.toCommandObject()]) instanceof AccessDeniedException)
         // add permission to Revision
         authenticateAsUser()
         aclUtilService.addPermission(revision, "testuser", BasePermission.READ)
         authenticateAnonymous()
         // now the testuser should see the revision
-        def result = send("getLatestRevision", [auth, model])
-        assertTrue(result instanceof Revision)
+        def result = send("getLatestRevision", [auth, model.toCommandObject()])
+        assertTrue(result instanceof RevisionTransportCommand)
         assertEquals(revision.id, result.id)
         // some IllegalArgumentExceptions
         assertTrue(send("getLatestRevision", [auth]) instanceof IllegalArgumentException)
         assertTrue(send("getLatestRevision", [auth, "test"]) instanceof IllegalArgumentException)
-        assertTrue(send("getLatestRevision", [auth, model, "test"]) instanceof IllegalArgumentException)
+        assertTrue(send("getLatestRevision", [auth, model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
         // user should get an AccessDeniedException
         def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
-        assertTrue(send("getLatestRevision", [auth2, model]) instanceof AccessDeniedException)
+        assertTrue(send("getLatestRevision", [auth2, model.toCommandObject()]) instanceof AccessDeniedException)
     }
 
     void testGetAllRevisions() {
@@ -207,14 +209,14 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // testuser should get an empty list
-        def result = send("getAllRevisions", [auth, model])
+        def result = send("getAllRevisions", [auth, model.toCommandObject()])
         assertTrue(result instanceof List)
         assertTrue(result.isEmpty())
         // add permission to Revision
         authenticateAsUser()
         aclUtilService.addPermission(revision, "testuser", BasePermission.READ)
         authenticateAnonymous()
-        result = send("getAllRevisions", [auth, model])
+        result = send("getAllRevisions", [auth, model.toCommandObject()])
         assertTrue(result instanceof List)
         assertFalse(result.isEmpty())
         assertEquals(1, result.size())
@@ -222,10 +224,10 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // some invalid argument exceptions
         assertTrue(send("getAllRevisions", [auth]) instanceof IllegalArgumentException)
         assertTrue(send("getAllRevisions", [auth, "test"]) instanceof IllegalArgumentException)
-        assertTrue(send("getAllRevisions", [auth, model, "test"]) instanceof IllegalArgumentException)
+        assertTrue(send("getAllRevisions", [auth, model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
         // user should get an empty List
         def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
-        result = send("getAllRevisions", [auth2, model])
+        result = send("getAllRevisions", [auth2, model.toCommandObject()])
         assertTrue(result instanceof List)
         assertTrue(result.isEmpty())
     }
@@ -260,9 +262,9 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // create an authentication
         def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
-        def meta = [comment: "Test Comment", name: "upload", format: ModelFormat.SBML]
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "upload", format: ModelFormat.SBML)
         def result = send("uploadModel", [auth, modelSource.bytes, meta])
-        assertTrue(result instanceof Model)
+        assertTrue(result instanceof ModelTransportCommand)
         // uploading the same again should render a ModelException
         assertTrue(send("uploadModel", [auth, modelSource.bytes, meta]) instanceof ModelException)
         // test illegal argument exceptions
@@ -279,7 +281,9 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         modelAdminUser(true)
         authenticateAsAdmin()
         aclUtilService.deletePermission(Model, result.id, "testuser", BasePermission.READ)
-        aclUtilService.deletePermission(result.revisions.toList().first(), "testuser", BasePermission.READ)
+        def revision = send("getLatestRevision", [auth, result])
+        assertTrue(revision instanceof RevisionTransportCommand)
+        aclUtilService.deletePermission(Revision, revision.id, "testuser", BasePermission.READ)
         authenticateAnonymous()
         modelAdminUser(false)
     }
@@ -314,12 +318,12 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // create an authentication
         def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
-        def meta = [comment: "Test Comment", name: "addRevision", format: ModelFormat.SBML]
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "addRevision", format: ModelFormat.SBML)
         def model = send("uploadModel", [auth, modelSource.bytes, meta])
-        assertTrue(model instanceof Model)
+        assertTrue(model instanceof ModelTransportCommand)
         // test uploading a new Revision
         def result = send("addRevision", [auth, model, modelSource.bytes, ModelFormat.SBML, "Comment"])
-        assertTrue(result instanceof Revision)
+        assertTrue(result instanceof RevisionTransportCommand)
         // other user should get an AccessDeniedException
         def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
         assertTrue(send("addRevision", [auth2, model, modelSource.bytes, ModelFormat.SBML, "Comment"]) instanceof AccessDeniedException)
@@ -371,33 +375,37 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // create an authentication
         def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
-        def meta = [comment: "Test Comment", name: "retrieveFile", format: ModelFormat.SBML]
+        // upload the model
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "retrieveFile", format: ModelFormat.SBML)
         def model = send("uploadModel", [auth, modelSource.bytes, meta])
-        assertTrue(model instanceof Model)
+        assertTrue(model instanceof ModelTransportCommand)
+        // get the latest revision
+        def revision = send("getLatestRevision", [auth, model])
+        assertTrue(revision instanceof RevisionTransportCommand)
         // get the file
-        def result = send("retrieveModelFile", [auth, model.revisions.toList().first()])
+        def result = send("retrieveModelFile", [auth, revision])
         assertTrue(result instanceof byte[])
         assertEquals(modelSource.bytes, result)
         // other user should get an AccessDeniedException
         def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
-        assertTrue(send("retrieveModelFile", [auth2, model.revisions.toList().first()]) instanceof AccessDeniedException)
+        assertTrue(send("retrieveModelFile", [auth2, revision]) instanceof AccessDeniedException)
         // create a random revision
-        Revision rev = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
-        model.refresh().addToRevisions(rev)
-        model.save(flush: true)
+        Revision rev = new Revision(model: Model.get(model.id), vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Model.get(model.id).refresh().addToRevisions(rev)
+        Model.get(model.id).save(flush: true)
         aclUtilService.addPermission(rev, "testuser", BasePermission.READ)
-        assertTrue(send("retrieveModelFile", [auth, rev]) instanceof ModelException)
+        assertTrue(send("retrieveModelFile", [auth, rev.toCommandObject()]) instanceof ModelException)
 
         // test illegal argument exceptions
         assertTrue(send("retrieveModelFile", [auth]) instanceof IllegalArgumentException)
         assertTrue(send("retrieveModelFile", [auth, model]) instanceof IllegalArgumentException)
-        assertTrue(send("retrieveModelFile", [auth, model.revisions.toList().first(), "Test"]) instanceof IllegalArgumentException)
+        assertTrue(send("retrieveModelFile", [auth, revision, "Test"]) instanceof IllegalArgumentException)
 
         // need to delete the ACL or following tests will fail
         modelAdminUser(true)
         authenticateAsAdmin()
         aclUtilService.deletePermission(Model, model.id, "testuser", BasePermission.READ)
-        aclUtilService.deletePermission(model.revisions.toList().first(), "testuser", BasePermission.READ)
+        aclUtilService.deletePermission(Revision, revision.id, "testuser", BasePermission.READ)
         authenticateAnonymous()
         modelAdminUser(false)
     }
@@ -421,7 +429,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         def adminAuth = send("authenticate", new UsernamePasswordAuthenticationToken("admin", "1234"))
         assertTrue(adminAuth.isAuthenticated())
         modelAdminUser(true)
-        def result = send("grantReadAccess", [adminAuth, model, User.findByUsername("testuser")])
+        def result = send("grantReadAccess", [adminAuth, model.toCommandObject(), User.findByUsername("testuser")])
         assertTrue(result instanceof Boolean)
         assertTrue(result)
         modelAdminUser(false)
@@ -429,11 +437,11 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertEquals(1, send("getModelCount", auth))
         // test some illegal argument  exceptions
         assertTrue(send("grantReadAccess", [auth]) instanceof IllegalArgumentException)
-        assertTrue(send("grantReadAccess", [auth, model]) instanceof IllegalArgumentException)
-        assertTrue(send("grantReadAccess", [auth, model, "test"]) instanceof IllegalArgumentException)
-        assertTrue(send("grantReadAccess", [auth, model, User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
+        assertTrue(send("grantReadAccess", [auth, model.toCommandObject()]) instanceof IllegalArgumentException)
+        assertTrue(send("grantReadAccess", [auth, model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
+        assertTrue(send("grantReadAccess", [auth, model.toCommandObject(), User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
         // test access denied exception
-        assertTrue(send("grantReadAccess", [auth, model, User.findByUsername("user")]) instanceof AccessDeniedException)
+        assertTrue(send("grantReadAccess", [auth, model.toCommandObject(), User.findByUsername("user")]) instanceof AccessDeniedException)
         // user should not have access to it
         def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
         assertEquals(0, send("getModelCount", auth2))
@@ -457,7 +465,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(adminAuth.isAuthenticated())
         modelAdminUser(true)
         // grant the right
-        def result = send("grantWriteAccess", [adminAuth, model, User.findByUsername("testuser")])
+        def result = send("grantWriteAccess", [adminAuth, model.toCommandObject(), User.findByUsername("testuser")])
         assertTrue(result instanceof Boolean)
         assertTrue(result)
         modelAdminUser(false)
@@ -465,15 +473,15 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // TODO: do an actual test by trying to upload
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
         // user should not be allowed to grant right
-        assertTrue(send("grantWriteAccess", [auth, model, User.findByUsername("user")]) instanceof AccessDeniedException)
+        assertTrue(send("grantWriteAccess", [auth, model.toCommandObject(), User.findByUsername("user")]) instanceof AccessDeniedException)
         // test some illegal argument  exceptions
         assertTrue(send("grantWriteAccess", [auth]) instanceof IllegalArgumentException)
-        assertTrue(send("grantWriteAccess", [auth, model]) instanceof IllegalArgumentException)
-        assertTrue(send("grantWriteAccess", [auth, model, "test"]) instanceof IllegalArgumentException)
-        assertTrue(send("grantWriteAccess", [auth, model, User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
+        assertTrue(send("grantWriteAccess", [auth, model.toCommandObject()]) instanceof IllegalArgumentException)
+        assertTrue(send("grantWriteAccess", [auth, model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
+        assertTrue(send("grantWriteAccess", [auth, model.toCommandObject(), User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
         // user should not have access to it
         def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
-        result = send("addRevision", [auth2, model, new byte[0], ModelFormat.UNKNOWN, "no test"])
+        result = send("addRevision", [auth2, model.toCommandObject(), new byte[0], ModelFormat.UNKNOWN, "no test"])
         assertTrue(result instanceof AccessDeniedException)
     }
 
@@ -501,18 +509,18 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(adminAuth.isAuthenticated())
         modelAdminUser(true)
         // revoke the right
-        def result = send("revokeReadAccess", [adminAuth, model, User.findByUsername("testuser")])
+        def result = send("revokeReadAccess", [adminAuth, model.toCommandObject(), User.findByUsername("testuser")])
         assertTrue(result instanceof Boolean)
         assertTrue(result)
         modelAdminUser(false)
         // user should not see the model any more
         assertFalse(aclUtilService.hasPermission(auth, model, BasePermission.READ))
         assertTrue(send("revokeReadAccess", [auth]) instanceof IllegalArgumentException)
-        assertTrue(send("revokeReadAccess", [auth, model]) instanceof IllegalArgumentException)
-        assertTrue(send("revokeReadAccess", [auth, model, "test"]) instanceof IllegalArgumentException)
-        assertTrue(send("revokeReadAccess", [auth, model, User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
+        assertTrue(send("revokeReadAccess", [auth, model.toCommandObject()]) instanceof IllegalArgumentException)
+        assertTrue(send("revokeReadAccess", [auth, model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
+        assertTrue(send("revokeReadAccess", [auth, model.toCommandObject(), User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
         // revoking read access is not allowed for testuser
-        assertTrue(send("revokeReadAccess", [auth, model, User.findByUsername("user")]) instanceof AccessDeniedException)
+        assertTrue(send("revokeReadAccess", [auth, model.toCommandObject(), User.findByUsername("user")]) instanceof AccessDeniedException)
     }
 
     void testRevokeWriteAccess() {
@@ -540,18 +548,18 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(adminAuth.isAuthenticated())
         modelAdminUser(true)
         // revoke the right
-        def result = send("revokeWriteAccess", [adminAuth, model, User.findByUsername("testuser")])
+        def result = send("revokeWriteAccess", [adminAuth, model.toCommandObject(), User.findByUsername("testuser")])
         assertTrue(result instanceof Boolean)
         assertTrue(result)
         modelAdminUser(false)
         // user should not have write access any more
         assertFalse(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
         assertTrue(send("revokeWriteAccess", [auth]) instanceof IllegalArgumentException)
-        assertTrue(send("revokeWriteAccess", [auth, model]) instanceof IllegalArgumentException)
-        assertTrue(send("revokeWriteAccess", [auth, model, "test"]) instanceof IllegalArgumentException)
-        assertTrue(send("revokeWriteAccess", [auth, model, User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
+        assertTrue(send("revokeWriteAccess", [auth, model.toCommandObject()]) instanceof IllegalArgumentException)
+        assertTrue(send("revokeWriteAccess", [auth, model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
+        assertTrue(send("revokeWriteAccess", [auth, model.toCommandObject(), User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
         // revoking write access is not allowed for testuser
-        assertTrue(send("revokeWriteAccess", [auth, model, User.findByUsername("user")]) instanceof AccessDeniedException)
+        assertTrue(send("revokeWriteAccess", [auth, model.toCommandObject(), User.findByUsername("user")]) instanceof AccessDeniedException)
     }
 
     void testDeleteRestoreModel() {
@@ -570,36 +578,36 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(adminAuth.isAuthenticated())
         modelAdminUser(true)
         // delete the model
-        def result = send("deleteModel", [adminAuth, model])
+        def result = send("deleteModel", [adminAuth, model.toCommandObject()])
         assertTrue(result instanceof Boolean)
         assertTrue(result)
         assertEquals(ModelState.DELETED, model.refresh().state)
         // delete again should not work
-        result = send("deleteModel", [adminAuth, model])
+        result = send("deleteModel", [adminAuth, model.toCommandObject()])
         assertTrue(result instanceof Boolean)
         assertFalse(result)
         // restore
-        result = send("restoreModel", [adminAuth, model])
+        result = send("restoreModel", [adminAuth, model.toCommandObject()])
         assertTrue(result instanceof Boolean)
         assertTrue(result)
         assertEquals(ModelState.UNPUBLISHED, model.refresh().state)
         // restore again should not work
-        result = send("restoreModel", [adminAuth, model])
+        result = send("restoreModel", [adminAuth, model.toCommandObject()])
         assertTrue(result instanceof Boolean)
         assertFalse(result)
         modelAdminUser(false)
         // create an authentication
         def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         // user should not be able to delete/restore Model
-        assertTrue(send("deleteModel", [auth, model]) instanceof AccessDeniedException)
-        assertTrue(send("restoreModel", [auth, model]) instanceof AccessDeniedException)
+        assertTrue(send("deleteModel", [auth, model.toCommandObject()]) instanceof AccessDeniedException)
+        assertTrue(send("restoreModel", [auth, model.toCommandObject()]) instanceof AccessDeniedException)
         // try illegal arguments
         assertTrue(send("deleteModel", [adminAuth]) instanceof IllegalArgumentException)
         assertTrue(send("deleteModel", [adminAuth, "test"]) instanceof IllegalArgumentException)
-        assertTrue(send("deleteModel", [adminAuth, model, "test"]) instanceof IllegalArgumentException)
+        assertTrue(send("deleteModel", [adminAuth, model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
         assertTrue(send("restoreModel", [adminAuth]) instanceof IllegalArgumentException)
         assertTrue(send("restoreModel", [adminAuth, "test"]) instanceof IllegalArgumentException)
-        assertTrue(send("restoreModel", [adminAuth, model, "test"]) instanceof IllegalArgumentException)
+        assertTrue(send("restoreModel", [adminAuth, model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
 
     }
 

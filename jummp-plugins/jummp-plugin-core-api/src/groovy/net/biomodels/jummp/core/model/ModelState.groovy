@@ -1,4 +1,4 @@
-package net.biomodels.jummp.model
+package net.biomodels.jummp.core.model
 
 /**
  * The states a Model can have.
