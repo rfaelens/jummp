@@ -72,7 +72,6 @@ target(main: "Bootstraps a test server with some test users") {
     adminRole.save()
     userRoleClass.create(admin, adminRole, false)
     setupVcs()
-    println org.codehaus.groovy.grails.commons.ConfigurationHolder.config
     // and execute
     watchContext()
 }
