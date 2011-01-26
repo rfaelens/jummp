@@ -186,7 +186,7 @@ class JmsAdapterService {
         result.each {
             revisions << it.toCommandObject()
         }
-        return result
+        return revisions
     }
 
     /**
