@@ -260,7 +260,7 @@ class ModelService {
     public Revision addRevision(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
         // TODO: the method should be thread safe, add a lock
         if (!model) {
-            throw new ModelException(model.toCommandObject(), "Model may not be null")
+            throw new ModelException(null, "Model may not be null")
         }
         if (model.state == ModelState.DELETED) {
             throw new ModelException(model.toCommandObject(), "A new Revision cannot be added to a deleted model")
