@@ -11,6 +11,10 @@
 import org.springframework.orm.hibernate3.SessionFactoryUtils
 import org.springframework.orm.hibernate3.SessionHolder
 import org.springframework.transaction.support.TransactionSynchronizationManager
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.api.Git
+import org.apache.commons.io.FileUtils
 // this script needs to be run in the test environment
 scriptEnv = "test"
 
@@ -67,8 +71,30 @@ target(main: "Bootstraps a test server with some test users") {
     def adminRole = roleClass.newInstance(authority: "ROLE_ADMIN")
     adminRole.save()
     userRoleClass.create(admin, adminRole, false)
+    setupVcs()
+    println org.codehaus.groovy.grails.commons.ConfigurationHolder.config
     // and execute
     watchContext()
 }
+
+    private void setupVcs() {
+        File clone = new File("target/vcs/git")
+        FileUtils.deleteDirectory(clone)
+        clone.mkdirs()
+        FileRepositoryBuilder builder = new FileRepositoryBuilder()
+        Repository repository = builder.setWorkTree(clone)
+        .readEnvironment() // scan environment GIT_* variables
+        .findGitDir() // scan up the file system tree
+        .build()
+        Git git = new Git(repository)
+        git.init().setDirectory(clone).call()
+        def config = org.codehaus.groovy.grails.commons.ConfigurationHolder.config
+        config.jummp.plugins.git.enabled = true
+        config.jummp.plugins.svn.enabled = false
+        config.jummp.vcs.workingDirectory="target/vcs/git"
+        config.jummp.vcs.exchangeDirectory="target/vcs/exchange"
+        config.jummp.vcs.pluginServiceName="gitService"
+        appCtx.getBean("vcsService").afterPropertiesSet()
+    }
 
 setDefaultTarget(main)
