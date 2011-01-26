@@ -185,17 +185,17 @@ class ModelService {
     public Model uploadModel(final File modelFile, ModelTransportCommand meta) throws ModelException {
         // TODO: to support anonymous submissions this method has to be changed
         if (Model.findByName(meta.name)) {
-            throw new ModelException(Model.findByName(meta.name), "There is already a Model with name ${meta.name}")
+            throw new ModelException(Model.findByName(meta.name).toCommandObject(), "There is already a Model with name ${meta.name}")
         }
         Model model = new Model(name: meta.name)
         if (!modelFile) {
-            throw new ModelException(model, "File may not be null")
+            throw new ModelException(model.toCommandObject(), "File may not be null")
         }
         if (!modelFile.exists() || modelFile.isDirectory()) {
-            throw new ModelException(model, "The file ${modelFile.path} does not exist or is a directory")
+            throw new ModelException(model.toCommandObject(), "The file ${modelFile.path} does not exist or is a directory")
         }
         if (!modelFileFormatService.validate(modelFile, meta.format)) {
-            throw new ModelException(model, "The file ${modelFile.path} is not a valid ${meta.format} file")
+            throw new ModelException(model.toCommandObject(), "The file ${modelFile.path} is not a valid ${meta.format} file")
         }
         Revision revision = new Revision(model: model,
                 revisionNumber: 1,
@@ -212,7 +212,7 @@ class ModelService {
             revision.discard()
             model.discard()
             log.error("Exception occurred during importing a new Model to VCS: ${e.getMessage()}")
-            throw new ModelException(model, "Could not store new Model ${model.name} in VCS", e)
+            throw new ModelException(model.toCommandObject(), "Could not store new Model ${model.name} in VCS", e)
         }
 
         if (revision.validate()) {
@@ -222,7 +222,7 @@ class ModelService {
                 revision.discard()
                 model.discard()
                 log.error("New Model does not validate")
-                throw new ModelException(model, "Model does not validate")
+                throw new ModelException(model.toCommandObject(), "Model does not validate")
             }
             model.save(flush: true)
             // let's add the required rights
@@ -239,7 +239,7 @@ class ModelService {
             revision.discard()
             model.discard()
             log.error("New Model Revision does not validate")
-            throw new ModelException(model, "New Model Revision does not validate")
+            throw new ModelException(model.toCommandObject(), "New Model Revision does not validate")
         }
         return model
     }
@@ -260,23 +260,23 @@ class ModelService {
     public Revision addRevision(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
         // TODO: the method should be thread safe, add a lock
         if (!model) {
-            throw new ModelException(model, "Model may not be null")
+            throw new ModelException(model.toCommandObject(), "Model may not be null")
         }
         if (model.state == ModelState.DELETED) {
-            throw new ModelException(model, "A new Revision cannot be added to a deleted model")
+            throw new ModelException(model.toCommandObject(), "A new Revision cannot be added to a deleted model")
         }
         if (comment == null) {
-            throw new ModelException(model, "Comment may not be null, empty comment is allowed")
+            throw new ModelException(model.toCommandObject(), "Comment may not be null, empty comment is allowed")
         }
         if (!file) {
-            throw new ModelException(model, "File may not be null")
+            throw new ModelException(model.toCommandObject(), "File may not be null")
         }
         if (!file.exists() || file.isDirectory()) {
-            throw new ModelException(model, "The file ${file.path} does not exist or is a directory")
+            throw new ModelException(model.toCommandObject(), "The file ${file.path} does not exist or is a directory")
         }
         // TODO: we need to pass the format in as a parameter
         if (!modelFileFormatService.validate(file, format)) {
-            throw new ModelException(model, "The file ${file.path} is not a valid ${format} file")
+            throw new ModelException(model.toCommandObject(), "The file ${file.path} is not a valid ${format} file")
         }
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
         Revision revision = new Revision(model: model, comment: comment, uploadDate: new Date(), owner: currentUser, minorRevision: false, format: format)
@@ -287,7 +287,7 @@ class ModelService {
         } catch (VcsException e) {
             revision.discard()
             log.error("Exception occurred during uploading a new Model Revision to VCS: ${e.getMessage()}")
-            throw new ModelException(model, "Could not store new Model Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} in VCS", e)
+            throw new ModelException(model.toCommandObject(), "Could not store new Model Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} in VCS", e)
         }
         // calculate the new revision number - accessing the revisions directly to circumvent ACL
         revision.revisionNumber = model.revisions.sort {it.revisionNumber}.last().revisionNumber + 1
@@ -309,7 +309,7 @@ class ModelService {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
             log.error("New Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")
-            throw new ModelException(model, "Revision stored in VCS, but not in database")
+            throw new ModelException(model.toCommandObject(), "Revision stored in VCS, but not in database")
         }
         return revision
     }
@@ -327,7 +327,7 @@ class ModelService {
             file = vcsService.retrieveFile(revision)
         } catch (VcsException e) {
             log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.model.name} from VCS failed.")
-            throw new ModelException(revision.model, "Retrieving Revision ${revision.vcsId} from VCS failed.")
+            throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.")
         }
         byte[] bytes = file.getBytes()
         FileUtils.forceDelete(file)
@@ -479,6 +479,7 @@ class ModelService {
     **/
     @PreAuthorize("hasPermission(#model, delete) or hasRole('ROLE_ADMIN')")
     public boolean deleteModel(Model model) {
+        // TODO: the code does not check whether the model exists
         if (model.state != ModelState.UNPUBLISHED) {
             return false
         }
@@ -498,6 +499,7 @@ class ModelService {
     **/
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public boolean restoreModel(Model model) {
+        // TODO: the code does not check whether the model exists
         if (model.state == ModelState.DELETED) {
             model.state = ModelState.UNPUBLISHED
             model.save(flush: true)
