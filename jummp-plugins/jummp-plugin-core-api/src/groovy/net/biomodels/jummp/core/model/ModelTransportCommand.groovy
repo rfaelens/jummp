@@ -13,6 +13,7 @@ package net.biomodels.jummp.core.model
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class ModelTransportCommand implements Serializable {
+    private static final long serialVersionUID = 1L
     Long id
     String name
     ModelState state

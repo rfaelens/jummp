@@ -11,6 +11,7 @@ package net.biomodels.jummp.core.model
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class RevisionTransportCommand implements Serializable {
+    private static final long serialVersionUID = 1L
     Long id
     /**
      * Revision number in reference to the Model and not to the VCS.
