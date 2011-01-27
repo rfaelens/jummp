@@ -10,6 +10,7 @@
         </classpath>
     </taskdef>
 
+<!-- Target to execute the testing of one plugin. Used by antcall from test-plugins -->
     <target name="test-plugin">
         <echo message="Running tests for Plugin ${plugin}"/>
         <grails command="test-app" args="-xml ${coverage}" cwd="${basedir}/jummp-plugins/jummp-plugin-${plugin}"/>
@@ -20,6 +21,7 @@
         </copy>
     </target>
 
+<!-- Runs test-app in all plugins (except JMS) -->
     <target name="test-plugins">
         <antcall target="test-plugin">
             <param name="plugin" value="configuration"/>
@@ -42,10 +44,12 @@
 <!-- Do not test jms plugin as it requires an instance of jummp running   -->
     </target>
 
+<!-- Runs test-app in the core application -->
     <target name="test-core">
         <grails command="test-app" args="-xml ${coverage}" cwd="${basedir}"/>
     </target>
 
+<!-- Generates the test reports for all tests -->
     <target name="generate-report">
         <junitreport todir="${basedir}/target/test-reports">
             <fileset dir="${basedir}/target/test-reports">
@@ -55,17 +59,21 @@
         </junitreport>
     </target>
 
+<!-- Sets the required properties for normal test runs -->
     <target name="prepare-test-app">
         <property name="coverage" value=""/>
     </target>
 
+<!-- Runs all tests (without code coverage)  -->
     <target name="test-app" depends="prepare-test-app, test-core, test-plugins, generate-report">
     </target>
 
+<!-- Sets the required properties for code coverage generation -->
     <target name="prepare-coverage">
         <property name="coverage" value="-coverage"/>
     </target>
 
+<!-- Runs all tests with code coverage -->
     <target name="coverage" depends="prepare-coverage, test-core, test-plugins, generate-report">
         <grails command="coverage-report" cwd="${basedir}"/>
     </target>
