@@ -188,3 +188,5 @@ codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
                              'jummp-plugins/*/grails-app/utils',
                              'jummp-plugins/*/test/unit',
                              'jummp-plugins/*/test/integration']
+// fails the ant test script
+grails.enable.native2ascii=false
