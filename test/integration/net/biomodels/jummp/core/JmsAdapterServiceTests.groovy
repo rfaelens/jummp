@@ -21,9 +21,6 @@ import org.springframework.security.core.authority.GrantedAuthorityImpl
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
-/**
- * Note: the tests fail when executed together with other integration tests
- */
 class JmsAdapterServiceTests extends JummpIntegrationTestCase {
     def aclUtilService
     def modelService

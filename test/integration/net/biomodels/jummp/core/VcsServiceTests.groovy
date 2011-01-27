@@ -4,11 +4,12 @@ import grails.test.*
 import net.biomodels.jummp.plugins.git.GitService
 import net.biomodels.jummp.plugins.subversion.SvnService
 import org.apache.commons.io.FileUtils
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory
+import org.springframework.context.ApplicationContextAware
+import org.springframework.context.ApplicationContext
 import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
@@ -20,15 +21,24 @@ import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.lib.Constants
 
-class VcsServiceTests extends JummpIntegrationTestCase {
+class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationContextAware {
     /**
-     * Need a dependency injection for the tests using security
+     * Dependency injection of the service we want to test
      */
     def vcsService
     /**
      * Dependency injection of ModelService for easier manipulation
      */
     def modelService
+    /**
+     * Dependency infection of application context
+     */
+    def appCtx
+
+    void setApplicationContext(ApplicationContext applicationContext) {
+        appCtx = applicationContext
+    }
+
     protected void setUp() {
         super.setUp()
         createUserAndRoles()
@@ -44,6 +54,7 @@ class VcsServiceTests extends JummpIntegrationTestCase {
         FileUtils.deleteDirectory(new File("target/vcs/repository"))
         FileUtils.deleteDirectory(new File("target/vcs/exchange"))
         vcsService.vcsManager = null
+        appCtx.getBean("gitService").git = null
     }
 
     void testNotConfigured() {
@@ -96,17 +107,10 @@ class VcsServiceTests extends JummpIntegrationTestCase {
         .build()
         Git git = new Git(repository)
         git.init().setDirectory(gitDirectory).call()
-        def contextControl = mockFor(org.springframework.context.ApplicationContext)
-        contextControl.demand.getBean(1..1) {bean ->
-            GitService gitService = new GitService()
-            gitService.afterPropertiesSet()
-            return gitService
-        }
-        ApplicationHolder.getApplication().mainContext = contextControl.createMock()
-        VcsService service = new VcsService()
-        assertFalse(service.isValid())
-        service.afterPropertiesSet()
-        assertTrue(service.isValid())
+        assertFalse(vcsService.isValid())
+        appCtx.getBean("gitService").afterPropertiesSet()
+        vcsService.afterPropertiesSet()
+        assertTrue(vcsService.isValid())
     }
 
     void testSvn() {
@@ -117,17 +121,10 @@ class VcsServiceTests extends JummpIntegrationTestCase {
             jummp.plugins.subversion.localRepository="target/vcs/repository"
         ''')
         SVNRepositoryFactory.createLocalRepository(new File("target/vcs/repository"), true, false)
-        def contextControl = mockFor(org.springframework.context.ApplicationContext)
-        contextControl.demand.getBean(1..1) {bean ->
-            SvnService svnService = new SvnService()
-            svnService.afterPropertiesSet()
-            return svnService
-        }
-        ApplicationHolder.getApplication().mainContext = contextControl.createMock()
-        VcsService service = new VcsService()
-        assertFalse(service.isValid())
-        service.afterPropertiesSet()
-        assertTrue(service.isValid())
+        assertFalse(vcsService.isValid())
+        appCtx.getBean("svnService").afterPropertiesSet()
+        vcsService.afterPropertiesSet()
+        assertTrue(vcsService.isValid())
     }
 
     void testImportFile() {
