@@ -36,3 +36,10 @@ grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
 grails.plugin.location.'jummp-plugin-core-api' = "jummp-plugins/jummp-plugin-core-api"
 grails.plugin.location.'jummp-plugin-security' = "jummp-plugins/jummp-plugin-security"
 grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
+
+// Remove libraries not needed in productive mode
+grails.war.resources = { stagingDir ->
+  delete(file:"${stagingDir}/WEB-INF/lib/CodeNarc-0.11.jar")
+  delete(file:"${stagingDir}/WEB-INF/lib/cobertura-1.9.4.1.jar")
+  delete(file:"${stagingDir}/WEB-INF/lib/hsqldb-1.8.0.10.jar")
+}
