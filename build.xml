@@ -2,14 +2,6 @@
     <property environment="env"/>
     <import file="${env.GRAILS_HOME}/src/grails/grails-macros.xml" />
 
-    <!-- Sets the gant environment -->
-    <taskdef name="gant" classname="org.codehaus.gant.ant.Gant">
-        <classpath>
-            <pathelement location="${env.GRAILS_HOME}/lib/gant_groovy1.7-1.9.2.jar"/>
-            <pathelement location="${env.GRAILS_HOME}/lib/groovy-all-1.7.5.jar"/>
-        </classpath>
-    </taskdef>
-
 <!-- Target to execute the testing of one plugin. Used by antcall from test-plugins -->
     <target name="test-plugin">
         <echo message="Running tests for Plugin ${plugin}"/>
