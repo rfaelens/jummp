@@ -1,3 +1,5 @@
+import org.codehaus.groovy.grails.compiler.GrailsClassLoader
+
 // locations to search for config files that get merged into the main config
 // config files can either be Java properties files or ConfigSlurper scripts
 
@@ -148,22 +150,30 @@ if (jummpConfig.jummp.vcs.exchangeDirectory) {
 if (jummpConfig.jummp.vcs.workingDirectory) {
     jummp.vcs.workingDirectory = jummpConfig.jummp.vcs.workingDirectory
 }
-switch (jummpConfig.jummp.vcs.plugin) {
-case "subversion":
-    println("using subversion as vcs backend")
-    jummp.vcs.pluginServiceName = "svnService"
-    jummp.plugins.subversion.enabled = true
-    // TODO: configuration should be handled in the plugins
-    jummp.plugins.subversion.localRepository = jummpConfig.jummp.plugins.subversion.localRepository
-    break
-case "git":
-    println("using git as vcs backend")
-    jummp.vcs.pluginServiceName = "gitService"
-    jummp.plugins.git.enabled = true
-    break
-default:
-    // nothing
-    break
+
+// get all Plugin Configurations
+// the list of available plugins is read from the BuildConfig's plugin location
+// for each plugin it is assumed that it has a JummpPluginConfig class in the package
+// net.biomodels.jummp.plugins.${short-name-of-plugin}. "short-name-of-plugin" is the
+// part of the plugin name without "jummp-plugin-". The JummpPluginConfig class needs
+// to provide a closure configure with takes two ConfigObjects as arguments. The first
+// is the ConfigObject which is just constructed, that is "jummp", the second is the
+// ConfigObject containing the externalized configuration.
+GrailsClassLoader classLoader = new GrailsClassLoader()
+ConfigSlurper slurper = new ConfigSlurper()
+ConfigObject buildConfig = slurper.parse(classLoader.loadClass("BuildConfig"))
+buildConfig.grails.plugin.location.each { key, value ->
+    String pluginName = key.minus("jummp-plugin-")
+    try {
+        def pluginConfigClass = classLoader.loadClass("net.biomodels.jummp.plugins.${pluginName}.JummpPluginConfig")
+        try {
+            pluginConfigClass.configure(jummp, jummpConfig)
+        } catch (MissingMethodException e) {
+            println "Plugin ${pluginName} does not provide the configure closure"
+        }
+    } catch (ClassNotFoundException e) {
+        println "Plugin ${pluginName} does not provide a configuration"
+    }
 }
 
 environments {
