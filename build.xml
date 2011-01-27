@@ -9,17 +9,17 @@
             <pathelement location="${env.GRAILS_HOME}/lib/groovy-all-1.7.5.jar"/>
         </classpath>
     </taskdef>
-    
+
     <target name="test-plugin">
         <echo message="Running tests for Plugin ${plugin}"/>
-        <grails command="test-app" args="-xml" cwd="${basedir}/jummp-plugins/jummp-plugin-${plugin}"/>
+        <grails command="test-app" args="-xml ${coverage}" cwd="${basedir}/jummp-plugins/jummp-plugin-${plugin}"/>
         <copy todir="${basedir}/target/test-reports">
             <fileset dir="${basedir}/jummp-plugins/jummp-plugin-${plugin}/target/test-reports">
                 <include name="TEST-*.xml"/>
             </fileset>
         </copy>
     </target>
-    
+
     <target name="test-plugins">
         <antcall target="test-plugin">
             <param name="plugin" value="configuration"/>
@@ -41,17 +41,32 @@
         </antcall>
 <!-- Do not test jms plugin as it requires an instance of jummp running   -->
     </target>
-    
+
     <target name="test-core">
-        <grails command="test-app" args="-xml" cwd="${basedir}"/>
+        <grails command="test-app" args="-xml ${coverage}" cwd="${basedir}"/>
     </target>
 
-    <target name="test-app" depends="test-core, test-plugins">
+    <target name="generate-report">
         <junitreport todir="${basedir}/target/test-reports">
             <fileset dir="${basedir}/target/test-reports">
                 <include name="TEST-*.xml"/>
             </fileset>
             <report format="frames" todir="${basedir}/target/test-reports/html"/>
         </junitreport>
+    </target>
+
+    <target name="prepare-test-app">
+        <property name="coverage" value=""/>
+    </target>
+
+    <target name="test-app" depends="prepare-test-app, test-core, test-plugins, generate-report">
+    </target>
+
+    <target name="prepare-coverage">
+        <property name="coverage" value="-coverage"/>
+    </target>
+
+    <target name="coverage" depends="prepare-coverage, test-core, test-plugins, generate-report">
+        <grails command="coverage-report" cwd="${basedir}"/>
     </target>
 </project>
