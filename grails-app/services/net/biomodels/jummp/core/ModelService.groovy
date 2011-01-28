@@ -274,7 +274,6 @@ class ModelService {
         if (!file.exists() || file.isDirectory()) {
             throw new ModelException(model.toCommandObject(), "The file ${file.path} does not exist or is a directory")
         }
-        // TODO: we need to pass the format in as a parameter
         if (!modelFileFormatService.validate(file, format)) {
             throw new ModelException(model.toCommandObject(), "The file ${file.path} is not a valid ${format} file")
         }
