@@ -12,7 +12,7 @@ import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.core.model.ModelFormat
+import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.ModelTransportCommand
 
 /**
@@ -194,7 +194,7 @@ class ModelService {
         if (!modelFile.exists() || modelFile.isDirectory()) {
             throw new ModelException(model.toCommandObject(), "The file ${modelFile.path} does not exist or is a directory")
         }
-        if (!modelFileFormatService.validate(modelFile, meta.format)) {
+        if (!modelFileFormatService.validate(modelFile, ModelFormat.findByIdentifier(meta.format.identifier))) {
             throw new ModelException(model.toCommandObject(), "The file ${modelFile.path} is not a valid ${meta.format} file")
         }
         Revision revision = new Revision(model: model,
@@ -203,7 +203,7 @@ class ModelService {
                 minorRevision: false,
                 comment: meta.comment,
                 uploadDate: new Date(),
-                format: meta.format)
+                format: ModelFormat.findByIdentifier(meta.format.identifier))
         // vcs identifier is upload date + name - this should by all means be unique
         model.vcsIdentifier = revision.uploadDate.format("yyyy-MM-dd'T'HH:mm:ss:SSS") + "_" + model.name
         try {

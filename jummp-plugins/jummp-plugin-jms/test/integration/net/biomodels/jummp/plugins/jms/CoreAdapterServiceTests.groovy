@@ -8,7 +8,7 @@ import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import net.biomodels.jummp.core.JummpException
 import net.biomodels.jummp.core.ModelException
-import net.biomodels.jummp.core.model.ModelFormat
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
@@ -61,7 +61,7 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
         List result = coreAdapterService.getAllModels()
         assertTrue(result.isEmpty())
         // upload one model
-        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetAllModels", format: ModelFormat.SBML, comment: "test")
+        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetAllModels", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
         String modelSource = '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>
@@ -106,7 +106,7 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
         Integer result = coreAdapterService.getModelCount()
         assertEquals(0, result)
         // upload one model
-        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetModelCount", format: ModelFormat.SBML, comment: "test")
+        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetModelCount", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
         String modelSource = '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>
@@ -146,7 +146,7 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
         Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
         // upload one model
-        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetLatestRevision", format: ModelFormat.SBML, comment: "test")
+        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetLatestRevision", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
         String modelSource = '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>
@@ -188,7 +188,7 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
         Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
         // upload one model
-        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetAllRevisions", format: ModelFormat.SBML, comment: "test")
+        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetAllRevisions", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
         String modelSource = '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>
@@ -230,7 +230,7 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
         // first authenticate
         Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
-        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetAllRevisions", format: ModelFormat.UNKNOWN, comment: "test")
+        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetAllRevisions", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"), comment: "test")
         String modelSource = '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>
@@ -262,7 +262,7 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
         Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
         // upload one model
-        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestAddRevision", format: ModelFormat.SBML, comment: "test")
+        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestAddRevision", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
         String modelSource = '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>
@@ -309,21 +309,21 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
     </listOfReactions>
   </model>
 </sbml>'''
-        RevisionTransportCommand revision = coreAdapterService.addRevision(model, modelSource.bytes, ModelFormat.SBML, "Add Revision")
+        RevisionTransportCommand revision = coreAdapterService.addRevision(model, modelSource.bytes, new ModelFormatTransportCommand(identifier: "SBML"), "Add Revision")
         assertNotNull(revision)
         assertEquals(model.id, revision.model.id)
         assertEquals(2, coreAdapterService.getAllRevisions(model).size())
         assertEquals(revision.id, coreAdapterService.getLatestRevision(model).id)
         // create a model exception
         shouldFail(ModelException) {
-            coreAdapterService.addRevision(model, modelSource.bytes, ModelFormat.UNKNOWN, "Add Revision")
+            coreAdapterService.addRevision(model, modelSource.bytes, new ModelFormatTransportCommand(identifier: "UNKNOWN"), "Add Revision")
         }
         // different user should not see it
         Authentication auth2 = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
         SecurityContextHolder.context.authentication = auth2
         assertTrue(coreAdapterService.getAllRevisions(model).isEmpty())
         shouldFail(AccessDeniedException) {
-            coreAdapterService.addRevision(model, "Test".bytes, ModelFormat.UNKNOWN, "Test")
+            coreAdapterService.addRevision(model, "Test".bytes, new ModelFormatTransportCommand(identifier: "UNKNOWN"), "Test")
         }
         // for cleaning up: delete
         SecurityContextHolder.context.authentication = auth
@@ -335,7 +335,7 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
         Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
         // upload one model
-        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestRetrieveModelFile", format: ModelFormat.SBML, comment: "test")
+        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestRetrieveModelFile", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
         String modelSource = '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>
@@ -378,7 +378,7 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
         Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
         // upload one model
-        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestDeleteModel", format: ModelFormat.SBML, comment: "test")
+        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestDeleteModel", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
         String modelSource = '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>
@@ -423,7 +423,7 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
         Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
         // upload one model
-        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestRestoreModel", format: ModelFormat.SBML, comment: "test")
+        ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestRestoreModel", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
         String modelSource = '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>

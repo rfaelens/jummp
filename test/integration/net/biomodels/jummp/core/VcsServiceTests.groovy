@@ -20,6 +20,7 @@ import org.eclipse.jgit.lib.ObjectId
 import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.lib.Constants
+import net.biomodels.jummp.model.ModelFormat
 
 class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationContextAware {
     /**
@@ -131,7 +132,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         assertFalse(vcsService.isValid())
         // first create a model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())
@@ -200,7 +201,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         assertFalse(vcsService.isValid())
         // first create a model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())
@@ -338,7 +339,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         assertFalse(vcsService.isValid())
         // first create a model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())

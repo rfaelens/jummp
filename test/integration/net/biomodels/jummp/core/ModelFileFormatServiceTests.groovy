@@ -1,7 +1,7 @@
 package net.biomodels.jummp.core
 
 import grails.test.*
-import net.biomodels.jummp.core.model.ModelFormat
+import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.plugins.sbml.SbmlService
 import net.biomodels.jummp.core.model.FileFormatService
 import org.apache.commons.io.FileUtils
@@ -18,9 +18,13 @@ class ModelFileFormatServiceTests extends JummpIntegrationTestCase {
 
     void testServiceForFormat() {
         // unknown format should return null
-        assertNull(modelFileFormatService.serviceForFormat(ModelFormat.UNKNOWN))
+        ModelFormat format = ModelFormat.findByIdentifier("SBML")
+        println "modelFormat: ${format}"
+        println "unknown format: ${ModelFormat.findByIdentifier("UNKNOWN")}"
+        assertNull(modelFileFormatService.serviceForFormat(ModelFormat.findByIdentifier("UNKNOWN")))
         // for sbml it needs to be a SbmlService
-        def formatService = modelFileFormatService.serviceForFormat(ModelFormat.SBML)
+        def formatService = modelFileFormatService.serviceForFormat(ModelFormat.findByIdentifier("SBML"))
+        println formatService
         assertNotNull(formatService)
         assertTrue(formatService instanceof FileFormatService)
         assertTrue(formatService instanceof SbmlService)
@@ -28,7 +32,7 @@ class ModelFileFormatServiceTests extends JummpIntegrationTestCase {
 
     void testValidate() {
         // for unknown file type this should evaluate to false
-        assertFalse(modelFileFormatService.validate(null, ModelFormat.UNKNOWN))
+        assertFalse(modelFileFormatService.validate(null, ModelFormat.findByIdentifier("UNKNOWN")))
         // for an invalid sbml file it should also evaluate to false
         File invalidSbml = new File("target/sbml/unknown")
         FileUtils.deleteQuietly(invalidSbml)
@@ -37,7 +41,7 @@ class ModelFileFormatServiceTests extends JummpIntegrationTestCase {
 <sbml level="99" version="1">
   <model/>
 </sbml>''')
-        assertFalse(modelFileFormatService.validate(invalidSbml, ModelFormat.SBML))
+        assertFalse(modelFileFormatService.validate(invalidSbml, ModelFormat.findByIdentifier("SBML")))
         // and for a valid SBML file it should be true
         File validSbml = new File("target/sbml/validSbml")
         FileUtils.deleteQuietly(validSbml)
@@ -63,12 +67,12 @@ class ModelFileFormatServiceTests extends JummpIntegrationTestCase {
     </listOfReactions>
   </model>
 </sbml>''')
-        assertTrue(modelFileFormatService.validate(validSbml, ModelFormat.SBML))
+        assertTrue(modelFileFormatService.validate(validSbml, ModelFormat.findByIdentifier("SBML")))
     }
 
     void testExtractName() {
         // for unknown format it's empty
-        assertEquals("", modelFileFormatService.extractName(null, ModelFormat.UNKNOWN))
+        assertEquals("", modelFileFormatService.extractName(null, ModelFormat.findByIdentifier("UNKNOWN")))
         // TODO: in sbmlService it's not yet implemented and needs a test file
     }
 }

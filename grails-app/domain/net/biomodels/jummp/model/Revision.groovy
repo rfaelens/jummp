@@ -1,7 +1,6 @@
 package net.biomodels.jummp.model
 
 import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.core.model.ModelFormat
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 /**
@@ -54,7 +53,7 @@ class Revision implements Serializable {
      * The format of the file in the VCS.
      * Kept in the Revision and not in the Model to make it possible to upload a new Revision in a different format.
      */
-    ModelFormat format = ModelFormat.UNKNOWN
+    ModelFormat format
     // TODO: UML diagram lists a "format" and a "state". Do these belong here? What is the type of them?
 
     static constraints = {
@@ -76,7 +75,7 @@ class Revision implements Serializable {
                 minorRevision: minorRevision,
                 comment: comment,
                 uploadDate: uploadDate,
-                format: format,
+                format: format.toCommandObject(),
                 model: model.toCommandObject())
     }
 }

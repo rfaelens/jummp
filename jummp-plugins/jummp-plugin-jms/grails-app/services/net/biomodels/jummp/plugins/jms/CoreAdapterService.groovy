@@ -4,7 +4,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import net.biomodels.jummp.core.JummpException
-import net.biomodels.jummp.core.model.ModelFormat
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
@@ -142,7 +142,7 @@ class CoreAdapterService {
     * @param comment The commit message for the new revision
     * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
     **/
-    public RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormat format, String comment) {
+    public RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) {
         def retVal = send("addRevision", [model, bytes, format, comment])
         validateReturnValue(retVal, RevisionTransportCommand)
         return (RevisionTransportCommand)retVal

@@ -1,7 +1,7 @@
 package net.biomodels.jummp.core
 
 import grails.plugin.jms.Queue
-import net.biomodels.jummp.core.model.ModelFormat
+import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -221,13 +222,13 @@ class JmsAdapterService {
 
     /**
      * Wrapper around ModelService.addRevision
-     * @param message List consisting of Authentication, ModelTransportCommand, content of file as Byte Array, ModelFormat and String
+     * @param message List consisting of Authentication, ModelTransportCommand, content of file as Byte Array, ModelFormatTransportCommand and String
      * @return New created Revision as RevisionTransportCommand, InvalidArgumentException, AccessDeniedException or ModelException
      */
     @Queue
     def addRevision(def message) {
-        if (!verifyMessage(message, [Authentication, ModelTransportCommand, byte[], ModelFormat, String])) {
-            return new IllegalArgumentException("Authentication, Model, Byte Array, ModelFormat and String as arguments expected")
+        if (!verifyMessage(message, [Authentication, ModelTransportCommand, byte[], ModelFormatTransportCommand, String])) {
+            return new IllegalArgumentException("Authentication, Model, Byte Array, ModelFormatTransportCommand and String as arguments expected")
         }
         def result
 
@@ -235,7 +236,7 @@ class JmsAdapterService {
             setAuthentication((Authentication)message[0])
             File file = File.createTempFile("jummpJms", null)
             file.append(message[2])
-            result = modelService.addRevision(Model.get((message[1]).id), file, (ModelFormat)message[3], (String)message[4]).toCommandObject()
+            result = modelService.addRevision(Model.get((message[1]).id), file, ModelFormat.findByIdentifier(((ModelFormatTransportCommand)message[3]).identifier), (String)message[4]).toCommandObject()
             FileUtils.deleteQuietly(file)
         } catch (AccessDeniedException e) {
             result = e

@@ -9,6 +9,7 @@ Brief description of the plugin.
     <resource>BuildConfig</resource>
     <resource>Config</resource>
     <resource>DataSource</resource>
+    <resource>JummpPluginConfig</resource>
     <resource>UrlMappings</resource>
     <resource>net.biomodels.jummp.plugins.git.GitService</resource>
   </resources>

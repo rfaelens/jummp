@@ -1,6 +1,6 @@
 package net.biomodels.jummp.core
 
-import net.biomodels.jummp.core.model.ModelFormat
+import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.model.Revision
@@ -20,6 +20,7 @@ import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.authority.GrantedAuthorityImpl
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 
 class JmsAdapterServiceTests extends JummpIntegrationTestCase {
     def aclUtilService
@@ -74,7 +75,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(returnList.isEmpty())
         // create a model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())
@@ -137,7 +138,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertEquals(0, result)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())
@@ -168,7 +169,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         modelAdminUser(false)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())
@@ -200,7 +201,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         modelAdminUser(false)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())
@@ -259,7 +260,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // create an authentication
         def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
-        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "upload", format: ModelFormat.SBML)
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "upload", format: new ModelFormatTransportCommand(identifier: "SBML"))
         def result = send("uploadModel", [auth, modelSource.bytes, meta])
         assertTrue(result instanceof ModelTransportCommand)
         // uploading the same again should render a ModelException
@@ -315,24 +316,24 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // create an authentication
         def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
-        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "addRevision", format: ModelFormat.SBML)
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "addRevision", format: new ModelFormatTransportCommand(identifier: "SBML"))
         def model = send("uploadModel", [auth, modelSource.bytes, meta])
         assertTrue(model instanceof ModelTransportCommand)
         // test uploading a new Revision
-        def result = send("addRevision", [auth, model, modelSource.bytes, ModelFormat.SBML, "Comment"])
+        def result = send("addRevision", [auth, model, modelSource.bytes, new ModelFormatTransportCommand(identifier: "SBML"), "Comment"])
         assertTrue(result instanceof RevisionTransportCommand)
         // other user should get an AccessDeniedException
         def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
-        assertTrue(send("addRevision", [auth2, model, modelSource.bytes, ModelFormat.SBML, "Comment"]) instanceof AccessDeniedException)
+        assertTrue(send("addRevision", [auth2, model, modelSource.bytes, new ModelFormatTransportCommand(identifier: "SBML"), "Comment"]) instanceof AccessDeniedException)
         // a deleted model has to end in ModelException
         send("deleteModel", [auth, model])
-        assertTrue(send("addRevision", [auth, model, modelSource.bytes, ModelFormat.SBML, "Comment"]) instanceof ModelException)
+        assertTrue(send("addRevision", [auth, model, modelSource.bytes, new ModelFormatTransportCommand(identifier: "SBML"), "Comment"]) instanceof ModelException)
         // illegal arguments exceptions
         assertTrue(send("addRevision", [auth]) instanceof IllegalArgumentException)
         assertTrue(send("addRevision", [auth, model]) instanceof IllegalArgumentException)
         assertTrue(send("addRevision", [auth, model, modelSource.bytes]) instanceof IllegalArgumentException)
-        assertTrue(send("addRevision", [auth, model, modelSource.bytes, ModelFormat.SBML]) instanceof IllegalArgumentException)
-        assertTrue(send("addRevision", [auth, model, modelSource.bytes, ModelFormat.SBML, "Comment", "Test"]) instanceof IllegalArgumentException)
+        assertTrue(send("addRevision", [auth, model, modelSource.bytes, new ModelFormatTransportCommand(identifier: "SBML")]) instanceof IllegalArgumentException)
+        assertTrue(send("addRevision", [auth, model, modelSource.bytes, new ModelFormatTransportCommand(identifier: "SBML"), "Comment", "Test"]) instanceof IllegalArgumentException)
 
         // need to delete the ACL or following tests will fail
         modelAdminUser(true)
@@ -373,7 +374,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
         // upload the model
-        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "retrieveFile", format: ModelFormat.SBML)
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "retrieveFile", format: new ModelFormatTransportCommand(identifier: "SBML"))
         def model = send("uploadModel", [auth, modelSource.bytes, meta])
         assertTrue(model instanceof ModelTransportCommand)
         // get the latest revision
@@ -387,7 +388,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
         assertTrue(send("retrieveModelFile", [auth2, revision]) instanceof AccessDeniedException)
         // create a random revision
-        Revision rev = new Revision(model: Model.get(model.id), vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision rev = new Revision(model: Model.get(model.id), vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         Model.get(model.id).refresh().addToRevisions(rev)
         Model.get(model.id).save(flush: true)
         aclUtilService.addPermission(rev, "testuser", BasePermission.READ)
@@ -415,7 +416,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         modelAdminUser(false)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())
@@ -452,7 +453,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         modelAdminUser(false)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())
@@ -478,7 +479,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(send("grantWriteAccess", [auth, model.toCommandObject(), User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
         // user should not have access to it
         def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
-        result = send("addRevision", [auth2, model.toCommandObject(), new byte[0], ModelFormat.UNKNOWN, "no test"])
+        result = send("addRevision", [auth2, model.toCommandObject(), new byte[0], new ModelFormatTransportCommand(identifier: "UNKNOWN"), "no test"])
         assertTrue(result instanceof AccessDeniedException)
     }
 
@@ -490,7 +491,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         modelAdminUser(false)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())
@@ -528,7 +529,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         modelAdminUser(false)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())
@@ -565,7 +566,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(send("restoreModel", "test") instanceof IllegalArgumentException)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date())
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())

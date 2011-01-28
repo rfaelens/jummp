@@ -1,3 +1,5 @@
+import org.springframework.beans.factory.NoSuchBeanDefinitionException
+
 class JummpPluginSbmlGrailsPlugin {
     // the plugin version
     def version = "0.1"
@@ -34,7 +36,13 @@ Brief description of the plugin.
     }
 
     def doWithApplicationContext = { applicationContext ->
-        // TODO Implement post initialization spring config (optional)
+        try {
+            def service = applicationContext.getBean("modelFileFormatService")
+            def modelFormat = service.registerModelFormat("SBML", "SBML")
+            service.handleModelFormat(modelFormat, "sbmlService")
+        } catch(NoSuchBeanDefinitionException e) {
+            println("ModelFileFormatService is not available!")
+        }
     }
 
     def onChange = { event ->

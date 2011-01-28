@@ -36,7 +36,7 @@ class RevisionTransportCommand implements Serializable {
     /**
      * The format of the file in the VCS.
      */
-    ModelFormat format
+    ModelFormatTransportCommand format
     /**
      * The model the revision belongs to
      */

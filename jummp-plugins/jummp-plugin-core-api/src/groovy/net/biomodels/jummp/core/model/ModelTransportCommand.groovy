@@ -20,7 +20,7 @@ class ModelTransportCommand implements Serializable {
     /**
      * Only needed to upload new Models. When retrieving Models it is unset.
      */
-    ModelFormat format = null
+    ModelFormatTransportCommand format = null
     /**
      * Only needed to upload new Models. When retrieving Models it is unset.
      */
