@@ -29,17 +29,25 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.5'
     }
 }
-grails.plugin.location.'jummp-plugin-subversion' = "jummp-plugins/jummp-plugin-subversion"
-grails.plugin.location.'jummp-plugin-git' = "jummp-plugins/jummp-plugin-git"
-grails.plugin.location.'jummp-plugin-configuration' = "jummp-plugins/jummp-plugin-configuration"
-grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
+if (new File("jummp-plugins/jummp-plugin-subversion").exists()) {
+    grails.plugin.location.'jummp-plugin-subversion' = "jummp-plugins/jummp-plugin-subversion"
+}
+if (new File("jummp-plugins/jummp-plugin-git").exists()) {
+    grails.plugin.location.'jummp-plugin-git' = "jummp-plugins/jummp-plugin-git"
+}
+if (new File("jummp-plugins/jummp-plugin-configuration").exists()) {
+    grails.plugin.location.'jummp-plugin-configuration' = "jummp-plugins/jummp-plugin-configuration"
+}
+if (new File("jummp-plugins/jummp-plugin-sbml").exists()) {
+    grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
+}
 grails.plugin.location.'jummp-plugin-core-api' = "jummp-plugins/jummp-plugin-core-api"
 grails.plugin.location.'jummp-plugin-security' = "jummp-plugins/jummp-plugin-security"
-grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
+if (new File("jummp-plugins/jummp-plugin-jms").exists()) {
+    grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
+}
 
 // Remove libraries not needed in productive mode
 grails.war.resources = { stagingDir ->
-  delete(file:"${stagingDir}/WEB-INF/lib/CodeNarc-0.11.jar")
-  delete(file:"${stagingDir}/WEB-INF/lib/cobertura-1.9.4.1.jar")
   delete(file:"${stagingDir}/WEB-INF/lib/hsqldb-1.8.0.10.jar")
 }
