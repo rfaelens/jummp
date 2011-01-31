@@ -60,11 +60,6 @@ grails.logging.jul.usebridge = true
 grails.spring.bean.packages = []
 
 grails.views.javascript.library="jquery"
-// JQuery config needed to fix broken version number in plugin version 1.4.4
-jquery {
-    sources = 'jquery' // Holds the value where to store jQuery-js files /web-app/js/
-    version = '1.4.4' // The jQuery version in use
-}
 
 // set per-environment serverURL stem for creating absolute links
 environments {
