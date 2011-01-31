@@ -93,6 +93,7 @@
                 <exclude name="jummp-plugins/**/grails-app/views/error.gsp"/>
                 <exclude name="jummp-plugins/**/grails-app/views/layouts/"/>
                 <exclude name="jummp-plugins/**/web-app/"/>
+                <exclude name="jummp-web-application/"/>
                 <exclude name="**/*.iml"/>
                 <exclude name="**/cobertura.ser"/>
                 <exclude name="**/*.orig"/>
