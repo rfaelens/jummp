@@ -196,7 +196,7 @@ th.desc a {
 
 /* PAGINATION */
 
-.paginateButtons {
+.paginateButtons, .paging_full_numbers {
     background: #fff url(../images/skin/shadow.jpg) bottom repeat-x;
     border: 1px solid #ccc;
     border-top: 0;
@@ -205,7 +205,7 @@ th.desc a {
     overflow: hidden;
     padding: 10px 3px;
 }
-.paginateButtons a {
+.paginateButtons a, .paging_full_numbers .paginate_button {
     background: #fff;
     border: 1px solid #ccc;
     border-color: #ccc #aaa #aaa #ccc;
@@ -213,7 +213,7 @@ th.desc a {
     margin: 0 3px;
     padding: 2px 6px;
 }
-.paginateButtons span {
+.paginateButtons span, .paging_full_numbers span {
     padding: 2px 3px;
 }
 
