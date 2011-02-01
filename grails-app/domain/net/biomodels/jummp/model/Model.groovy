@@ -45,6 +45,7 @@ class Model implements Serializable {
     }
 
     ModelTransportCommand toCommandObject() {
-        return new ModelTransportCommand(id: id, name: name, state: state)
+        // TODO: is it correct to show the latest upload date as the lastModifiedDate or does it need ACL restrictions?
+        return new ModelTransportCommand(id: id, name: name, state: state, lastModifiedDate: revisions.sort{ it.revisionNumber }.last().uploadDate)
     }
 }

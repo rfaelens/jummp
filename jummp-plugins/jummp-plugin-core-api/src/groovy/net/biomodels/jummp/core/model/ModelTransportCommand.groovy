@@ -25,4 +25,8 @@ class ModelTransportCommand implements Serializable {
      * Only needed to upload new Models. When retrieving Models it is unset.
      */
     String comment = null
+    /**
+     * The date of the latest revision the user has access to.
+     */
+    Date lastModifiedDate
 }
