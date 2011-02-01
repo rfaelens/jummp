@@ -26,7 +26,13 @@ target(main: "Bootstraps a test server with some test users") {
     // bind a Hibernate Session to avoid lazy initialization exceptions
     TransactionSynchronizationManager.bindResource(appCtx.sessionFactory,
         new SessionHolder(SessionFactoryUtils.getSession(appCtx.sessionFactory, true)))
+    createUsers()
+    setupVcs()
+    // and execute
+    watchContext()
+}
 
+target(createUsers: "Creates some test users") {
     def userClass = grailsApp.classLoader.loadClass("net.biomodels.jummp.plugins.security.User")
     def roleClass = grailsApp.classLoader.loadClass("net.biomodels.jummp.plugins.security.Role")
     def userRoleClass = grailsApp.classLoader.loadClass("net.biomodels.jummp.plugins.security.UserRole")
@@ -71,29 +77,26 @@ target(main: "Bootstraps a test server with some test users") {
     def adminRole = roleClass.newInstance(authority: "ROLE_ADMIN")
     adminRole.save()
     userRoleClass.create(admin, adminRole, false)
-    setupVcs()
-    // and execute
-    watchContext()
 }
 
-    private void setupVcs() {
-        File clone = new File("target/vcs/git")
-        FileUtils.deleteDirectory(clone)
-        clone.mkdirs()
-        FileRepositoryBuilder builder = new FileRepositoryBuilder()
-        Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
-        .build()
-        Git git = new Git(repository)
-        git.init().setDirectory(clone).call()
-        def config = org.codehaus.groovy.grails.commons.ConfigurationHolder.config
-        config.jummp.plugins.git.enabled = true
-        config.jummp.plugins.svn.enabled = false
-        config.jummp.vcs.workingDirectory="target/vcs/git"
-        config.jummp.vcs.exchangeDirectory="target/vcs/exchange"
-        config.jummp.vcs.pluginServiceName="gitService"
-        appCtx.getBean("vcsService").afterPropertiesSet()
-    }
+target(setupVcs: "Creates a VCS repository") {
+    File clone = new File("target/vcs/git")
+    FileUtils.deleteDirectory(clone)
+    clone.mkdirs()
+    FileRepositoryBuilder builder = new FileRepositoryBuilder()
+    Repository repository = builder.setWorkTree(clone)
+    .readEnvironment() // scan environment GIT_* variables
+    .findGitDir() // scan up the file system tree
+    .build()
+    Git git = new Git(repository)
+    git.init().setDirectory(clone).call()
+    def config = org.codehaus.groovy.grails.commons.ConfigurationHolder.config
+    config.jummp.plugins.git.enabled = true
+    config.jummp.plugins.svn.enabled = false
+    config.jummp.vcs.workingDirectory="target/vcs/git"
+    config.jummp.vcs.exchangeDirectory="target/vcs/exchange"
+    config.jummp.vcs.pluginServiceName="gitService"
+    appCtx.getBean("vcsService").afterPropertiesSet()
+}
 
 setDefaultTarget(main)
