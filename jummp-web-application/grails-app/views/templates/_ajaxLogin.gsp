@@ -24,17 +24,6 @@
     </form>
 </div>
 <g:javascript>
-function authAjax() {
-    $.post(createURI("j_spring_security_check"), $("#ajaxLoginForm").serialize(), function(data) {
-        if (data.success) {
-            $("#ajaxLoginDialog").dialog('close');
-            $(document).trigger("login", data.username)
-        } else if (data.error) {
-            $("#ajaxLoginStatus").html(data.error);
-            $("#ajaxLoginStatus").show();
-        }
-    });
-}
 $(document).ready(function() {
     $("#ajaxLoginDialog").dialog({
         autoOpen: false,

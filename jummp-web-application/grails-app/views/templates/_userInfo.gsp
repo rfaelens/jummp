@@ -7,15 +7,6 @@
     </div>
 </div>
 
-<g:javascript>
-function logout() {
-    $.ajax({ url: createURI("logout"),
-        success: function(data, textStatus, jqXHR) {
-            $(document).trigger("logout");
-        }
-    });
-}
-</g:javascript>
 <sec:ifLoggedIn>
     <g:javascript>
     $(document).ready(function() {

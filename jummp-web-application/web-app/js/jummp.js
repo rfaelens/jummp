@@ -27,12 +27,41 @@ function showLoginDialog() {
 }
 
 /**
+ * Performs authentication through AJAX by serializing the ajaxLoginForm.
+ * On success the login dialog is closed and the login event is fired.
+ * On failure the error message is displayed.
+ */
+function authAjax() {
+    $.post(createURI("j_spring_security_check"), $("#ajaxLoginForm").serialize(), function(data) {
+        if (data.success) {
+            $("#ajaxLoginDialog").dialog('close');
+            $(document).trigger("login", data.username)
+        } else if (data.error) {
+            $("#ajaxLoginStatus").html(data.error);
+            $("#ajaxLoginStatus").show();
+        }
+    });
+}
+
+/**
+ * Performs logout through AJAX.
+ * On success the logout event is fired.
+ */
+function logout() {
+    $.ajax({ url: createURI("logout"),
+        success: function(data, textStatus, jqXHR) {
+            $(document).trigger("logout");
+        }
+    });
+}
+
+/**
  * Creates a URI to be used in a href or src HTML attribute.
  * @param path The path
  */
 function createURI(path) {
     return "/" + $.appName + "/" + path;
-};
+}
 
 /**
  * Global document initialization.
