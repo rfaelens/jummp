@@ -6,6 +6,7 @@
         <g:javascript library="jquery" plugin="jquery"/>
         <jqui:resources />
         <g:layoutHead />
+        <g:javascript src="jummp.js"/>
     </head>
     <body>
         <div id="spinner" class="spinner" style="display:none;">

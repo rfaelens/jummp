@@ -11,7 +11,7 @@
 function logout() {
     $.ajax({ url: "${g.createLink(controller: 'logout')}",
         success: function(data, textStatus, jqXHR) {
-            switchUserInformation(false);
+            $(document).trigger("logout");
         }
     });
 }

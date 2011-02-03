@@ -40,6 +40,9 @@
                         sZeroRecords:  "${g.message(code: 'jquery.dataTables.noFilterResults')}"
                     }
                 });
+                $(document).bind("login", function(event) {
+                    $('#modelTable').dataTable().fnDraw();
+                });
             });
         </g:javascript>
     </head>
