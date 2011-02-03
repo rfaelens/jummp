@@ -12,9 +12,7 @@
             <img src="${resource(dir:'images',file:'spinner.gif')}" alt="${message(code:'spinner.alt',default:'Loading...')}" />
         </div>
         <g:render template="/templates/ajaxLogin"/>
-        <div id="userInfo">
-            <a href="#" onclick="showLoginDialog()">Login</a>
-        </div>
+        <g:render template="/templates/userInfo"/>
         <div id="grailsLogo"><a href="http://grails.org"><img src="${resource(dir:'images',file:'grails_logo.png')}" alt="Grails" border="0" /></a></div>
         <g:layoutBody />
     </body>

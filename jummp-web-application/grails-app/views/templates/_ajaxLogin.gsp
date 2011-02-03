@@ -28,6 +28,7 @@ function authAjax() {
     $.post("${g.createLink(controller: 'j_spring_security_check')}", $("#ajaxLoginForm").serialize(), function(data) {
         if (data.success) {
             $("#ajaxLoginDialog").dialog('close');
+            switchUserInformation(true, data.username);
         } else if (data.error) {
             $("#ajaxLoginStatus").html(data.error);
             $("#ajaxLoginStatus").show();
