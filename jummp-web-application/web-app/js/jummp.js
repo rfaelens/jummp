@@ -27,6 +27,14 @@ function showLoginDialog() {
 }
 
 /**
+ * Creates a URI to be used in a href or src HTML attribute.
+ * @param path The path
+ */
+function createURI(path) {
+    return "/" + $.appName + "/" + path;
+};
+
+/**
  * Global document initialization.
  * Connects all the global events like login/logout.
  */

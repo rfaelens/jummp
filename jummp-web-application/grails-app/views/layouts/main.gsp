@@ -6,6 +6,9 @@
         <g:javascript library="jquery" plugin="jquery"/>
         <jqui:resources />
         <g:layoutHead />
+        <g:javascript>
+        $.appName = "${grailsApplication.metadata["app.name"]}";
+        </g:javascript>
         <g:javascript src="jummp.js"/>
     </head>
     <body>

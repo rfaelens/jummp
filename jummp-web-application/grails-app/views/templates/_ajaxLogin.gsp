@@ -25,7 +25,7 @@
 </div>
 <g:javascript>
 function authAjax() {
-    $.post("${g.createLink(controller: 'j_spring_security_check')}", $("#ajaxLoginForm").serialize(), function(data) {
+    $.post(createURI("j_spring_security_check"), $("#ajaxLoginForm").serialize(), function(data) {
         if (data.success) {
             $("#ajaxLoginDialog").dialog('close');
             $(document).trigger("login", data.username)

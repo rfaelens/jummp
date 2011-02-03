@@ -9,7 +9,7 @@
 
 <g:javascript>
 function logout() {
-    $.ajax({ url: "${g.createLink(controller: 'logout')}",
+    $.ajax({ url: createURI("logout"),
         success: function(data, textStatus, jqXHR) {
             $(document).trigger("logout");
         }
