@@ -12,6 +12,7 @@
                     bFilter: false,
                     bProcessing: true,
                     bServerSide: true,
+                    bJQueryUI: true,
                     sPaginationType: "full_numbers",
                     // TODO: generate links without grails interaction
                     sAjaxSource: "${g.createLink(action: 'dataTableSource')}",
