@@ -43,10 +43,4 @@ $(document).ready(function() {
         buttons: {"${g.message(code: 'login.authenticate')}": authAjax, "${g.message(code: 'login.cancel')}": function() { $(this).dialog("close")}}
     });
 });
-function showLoginDialog() {
-    $("#ajax_j_username").val("");
-    $("#ajax_j_password").val("");
-    $("#ajaxLoginStatus").hide();
-    $('#ajaxLoginDialog').dialog('open');
-}
 </g:javascript>

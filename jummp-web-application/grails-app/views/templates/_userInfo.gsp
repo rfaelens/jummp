@@ -15,19 +15,6 @@ function logout() {
         }
     });
 }
-
-function switchUserInformation(logedIn, userName) {
-    if (logedIn) {
-        if (userName) {
-            $("#userInformationLogedIn span").first().text(userName);
-        }
-        $("#userInformationLogedIn").show();
-        $("#userInformationLogedOut").hide();
-    } else {
-        $("#userInformationLogedIn").hide();
-        $("#userInformationLogedOut").show();
-    }
-}
 </g:javascript>
 <sec:ifLoggedIn>
     <g:javascript>
