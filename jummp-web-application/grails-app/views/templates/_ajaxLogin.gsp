@@ -1,4 +1,4 @@
-<div id="ajaxLoginDialog">
+<div id="ajaxLoginDialog" style="display: none">
     <form action="" id="ajaxLoginForm">
         <div id="ajaxLoginStatus" class="ui-state-error" style="display: none"></div>
         <table>
