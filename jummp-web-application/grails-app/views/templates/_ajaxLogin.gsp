@@ -23,22 +23,3 @@
         </table>
     </form>
 </div>
-<g:javascript>
-$(document).ready(function() {
-    $("#ajaxLoginDialog").dialog({
-        autoOpen: false,
-        width: 400, // need a slightly larger dialog
-        title: i18n.login.authenticate,
-        buttons: [
-            {
-                text: i18n.login.authenticate,
-                click: authAjax
-            },
-            {
-                text: i18n.login.cancel,
-                click: function() { $(this).dialog("close")}
-            }
-        ]
-    });
-});
-</g:javascript>
