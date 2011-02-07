@@ -14,12 +14,11 @@
                     bServerSide: true,
                     bJQueryUI: true,
                     sPaginationType: "full_numbers",
-                    // TODO: generate links without grails interaction
-                    sAjaxSource: "${g.createLink(action: 'dataTableSource')}",
+                    sAjaxSource: createLink('model', 'dataTableSource'),
                     // TODO: move function into an own method
                     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
                         // first column is link to model
-                        $('td:eq(0)', nRow).html( '<a href="${g.createLink(action: 'show')}/' + aData[0] + '">' + aData[0] + '</a>' );
+                        $('td:eq(0)', nRow).html( '<a href="' + createLink("model", "show", aData[0]) + '">' + aData[0] + '</a>' );
                         return nRow;
                     },
                     // i18n
