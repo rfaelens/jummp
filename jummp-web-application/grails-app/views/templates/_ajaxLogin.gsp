@@ -28,8 +28,17 @@ $(document).ready(function() {
     $("#ajaxLoginDialog").dialog({
         autoOpen: false,
         width: 400, // need a slightly larger dialog
-        title: "${g.message(code: 'login.authenticate')}",
-        buttons: {"${g.message(code: 'login.authenticate')}": authAjax, "${g.message(code: 'login.cancel')}": function() { $(this).dialog("close")}}
+        title: i18n.login.authenticate,
+        buttons: [
+            {
+                text: i18n.login.authenticate,
+                click: authAjax
+            },
+            {
+                text: i18n.login.cancel,
+                click: function() { $(this).dialog("close")}
+            }
+        ]
     });
 });
 </g:javascript>

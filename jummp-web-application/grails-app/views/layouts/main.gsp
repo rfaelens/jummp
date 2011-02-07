@@ -3,6 +3,7 @@
     <head>
         <title><g:layoutTitle default="Grails" /></title>
         <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
+        <g:render template="/templates/i18n"/>
         <g:javascript library="jquery" plugin="jquery"/>
         <jqui:resources />
         <g:layoutHead />

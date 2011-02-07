@@ -22,22 +22,22 @@
                         $('td:eq(0)', nRow).html( '<a href="${g.createLink(action: 'show')}/' + aData[0] + '">' + aData[0] + '</a>' );
                         return nRow;
                     },
-                    // i18n passed to grails
+                    // i18n
                     oLanguage: {
                         oPaginate: {
-                            sFirst:    "${g.message(code: 'jquery.dataTables.paginate.first')}",
-                            sLast:     "${g.message(code: 'jquery.dataTables.paginate.last')}",
-                            sNext:     "${g.message(code: 'jquery.dataTables.paginate.next')}",
-                            sPrevious: "${g.message(code: 'jquery.dataTables.paginate.previous')}"
+                            sFirst:    i18n.dataTables.paginate.first,
+                            sLast:     i18n.dataTables.paginate.last,
+                            sNext:     i18n.dataTables.paginate.next,
+                            sPrevious: i18n.dataTables.paginate.previous
                         },
-                        sEmptyTable:   "${g.message(code: 'jquery.dataTables.empty')}",
-                        sInfo:         "${g.message(code: 'jquery.dataTables.info', args: ["_START_", "_END_", "_TOTAL_"])}",
-                        sInfoEmpty:    "${g.message(code: 'jquery.dataTables.infoEmpty')}",
-                        sInfoFiltered: "${g.message(code: 'jquery.dataTables.infoFiltered', args: ["_MAX_"])}",
-                        sLengthMenu:   "${g.message(code: 'jquery.dataTables.lengthMenu', args: ["_MENU_"])}",
-                        sProcessing:   "${g.message(code: 'jquery.dataTables.processing')}",
-                        sSearch:       "${g.message(code: 'jquery.dataTables.search')}",
-                        sZeroRecords:  "${g.message(code: 'jquery.dataTables.noFilterResults')}"
+                        sEmptyTable:   i18n.dataTables.empty,
+                        sInfo:         i18n.dataTables.info,
+                        sInfoEmpty:    i18n.dataTables.infoEmpty,
+                        sInfoFiltered: i18n.dataTables.infoFiltered,
+                        sLengthMenu:   i18n.dataTables.lengthMenu,
+                        sProcessing:   i18n.dataTables.processing,
+                        sSearch:       i18n.dataTables.search,
+                        sZeroRecords:  i18n.dataTables.noFilterResults
                     }
                 });
                 $(document).bind("login", function(event) {
