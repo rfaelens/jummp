@@ -81,6 +81,50 @@ function createLink(controller, action, id) {
 }
 
 /**
+ * Creates the data table used in the model overview page.
+ */
+function createModelDataTable() {
+    if ($('#modelTable').length == 0) {
+        return;
+    }
+    $('#modelTable').dataTable({
+        // TODO: in future it might be interesting to allow filtering
+        bFilter: false,
+        bProcessing: true,
+        bServerSide: true,
+        bJQueryUI: true,
+        sPaginationType: "full_numbers",
+        sAjaxSource: createLink('model', 'dataTableSource'),
+        // TODO: move function into an own method
+        "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+            // first column is link to model
+            $('td:eq(0)', nRow).html( '<a href="' + createLink("model", "show", aData[0]) + '">' + aData[0] + '</a>' );
+            return nRow;
+        },
+        // i18n
+        oLanguage: {
+            oPaginate: {
+                sFirst:    i18n.dataTables.paginate.first,
+                sLast:     i18n.dataTables.paginate.last,
+                sNext:     i18n.dataTables.paginate.next,
+                sPrevious: i18n.dataTables.paginate.previous
+            },
+            sEmptyTable:   i18n.dataTables.empty,
+            sInfo:         i18n.dataTables.info,
+            sInfoEmpty:    i18n.dataTables.infoEmpty,
+            sInfoFiltered: i18n.dataTables.infoFiltered,
+            sLengthMenu:   i18n.dataTables.lengthMenu,
+            sProcessing:   i18n.dataTables.processing,
+            sSearch:       i18n.dataTables.search,
+            sZeroRecords:  i18n.dataTables.noFilterResults
+        }
+    });
+    $(document).bind("login", function(event) {
+        $('#modelTable').dataTable().fnDraw();
+    });
+}
+
+/**
  * Global document initialization.
  * Connects all the global events like login/logout.
  */
@@ -108,4 +152,5 @@ $(document).ready(function() {
             }
         ]
     });
+    createModelDataTable();
 });
