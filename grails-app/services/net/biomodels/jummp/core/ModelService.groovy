@@ -14,6 +14,7 @@ import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.ModelListSorting
 
 /**
  * @short Service class for managing Models
@@ -55,11 +56,31 @@ class ModelService {
     * @param offset Offset in the list
     * @param count Number of models to return
     * @param sortOrder @c true for ascending, @c false for descending
+    * @param sortColumn the column which should be sorted
     * @return List of Models
     **/
-    public List<Model> getAllModels(int offset, int count, boolean sortOrder) {
+    public List<Model> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn) {
         // TODO: implement better by going down to database
-        List<Model> allModels = Model.list([sort: 'id', order: sortOrder ? 'asc' : 'desc'])
+        String sorting = sortOrder ? 'asc' : 'desc'
+        def criteria = Model.createCriteria()
+        def allModels = criteria.list {
+            switch (sortColumn) {
+            case ModelListSorting.NAME:
+                order("name", sorting)
+                break
+            case ModelListSorting.LAST_MODIFIED:
+                revisions {
+                    order("uploadDate", sorting)
+                }
+                break
+            case ModelListSorting.PUBLICATION:
+                // TODO: implement, fall through to default
+            case ModelListSorting.ID: // Id is the default
+            default:
+                order("id", sorting)
+                break
+            }
+        }
         // first skip all models till offset
         int skipCounter = 0
         int index = 0
@@ -88,23 +109,54 @@ class ModelService {
     }
 
     /**
-    * Convenient method for ascending sorting.
+    * Convenient method for sorting by the id column.
     *
     * @return List of Models sorted ascending
     * @see getAllModels(int offset, int count, boolean sortOrder)
     **/
+    public List<Model> getAllModels(int offset, int count, boolean sortOrder) {
+        getAllModels(offset, count, sortOrder, ModelListSorting.ID)
+    }
+
+    /**
+    * Convenient method for ascending sorting.
+    *
+    * @return List of Models sorted ascending by @p sortColumn
+    * @see getAllModels(int offset, int count, boolean sortOrder)
+    **/
+    public List<Model> getAllModels(int offset, int count, ModelListSorting sortColumn) {
+        return getAllModels(offset, count, true, sortColumn)
+    }
+
+    /**
+    * Convenient method for ascending sorting by id.
+    *
+    * @return List of Models sorted ascending by id
+    * @see getAllModels(int offset, int count, boolean sortOrder)
+    **/
     public List<Model> getAllModels(int offset, int count) {
-        return getAllModels(offset, count, true)
+        return getAllModels(offset, count, ModelListSorting.ID)
     }
 
     /**
     * Convenient method for ascending sorting of first ten models.
     *
-    * @return List of first 10 Models sorted ascending
+    * @param sortColumn the column which should be sorted
+    * @return List of first 10 Models sorted ascending by @p sortColumn
+    * @see getAllModels(int offset, int count, boolean sortOrder)
+    **/
+    public List<Model> getAllModels(ModelListSorting sortColumn) {
+        return getAllModels(0, 10, true, sortColumn)
+    }
+
+    /**
+    * Convenient method for ascending sorting of first ten models by id.
+    *
+    * @return List of first 10 Models sorted ascending by id
     * @see getAllModels(int offset, int count, boolean sortOrder)
     **/
     public List<Model> getAllModels() {
-        return getAllModels(0, 10, true)
+        return getAllModels(ModelListSorting.ID)
     }
 
     /**

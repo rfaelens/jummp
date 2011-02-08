@@ -7,6 +7,7 @@ import net.biomodels.jummp.core.JummpException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ModelListSorting
 
 /**
  * @short Service connecting to the core via synchronous JMS.
@@ -52,8 +53,19 @@ class CoreAdapterService {
     * @param offset Offset in the list
     * @param count Number of models to return
     * @param sortOrder @c true for ascending, @c false for descending
+    * @param sort The column to use for sorting
     * @return List of Models
     **/
+    public List<ModelTransportCommand> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sort) {
+        def retVal = send("getAllModels", [offset, count, sortOrder, sort])
+        validateReturnValue(retVal, List)
+        return (List)retVal
+    }
+
+    /**
+     * Convenient method for specifying the sort order.
+     * @return List of Models
+     */
     public List<ModelTransportCommand> getAllModels(int offset, int count, boolean sortOrder) {
         def retVal = send("getAllModels", [offset, count, sortOrder])
         validateReturnValue(retVal, List)
@@ -66,18 +78,44 @@ class CoreAdapterService {
     * @return List of Models sorted ascending
     * @see getAllModels(int offset, int count, boolean sortOrder)
     **/
-    public List<ModelTransportCommand> getAllModels(int offset, int count) {
-        return getAllModels(offset, count, true)
+    public List<ModelTransportCommand> getAllModels(int offset, int count, ModelListSorting sort) {
+        def retVal = send("getAllModels", [offset, count, sort])
+        validateReturnValue(retVal, List)
+        return (List)retVal
     }
 
     /**
-    * Convenient method for ascending sorting of first ten models.
+    * Convenient method for ascending sorting by id.
     *
-    * @return List of first 10 Models sorted ascending
+    * @return List of Models sorted ascending by id
+    * @see getAllModels(int offset, int count, boolean sortOrder)
+    **/
+    public List<ModelTransportCommand> getAllModels(int offset, int count) {
+        def retVal = send("getAllModels", [offset, count])
+        validateReturnValue(retVal, List)
+        return (List)retVal
+    }
+
+    /**
+    * Convenient method for ascending sorting of first ten models
+    *
+    * @return List of first 10 Models sorted ascending by id
+    * @see getAllModels(int offset, int count, boolean sortOrder)
+    **/
+    public List<ModelTransportCommand> getAllModels(ModelListSorting sort) {
+        def retVal = send("getAllModels", [sort])
+        validateReturnValue(retVal, List)
+        return (List)retVal
+    }
+
+    /**
+    * Convenient method for ascending sorting of first ten models ordered by Id column.
+    *
+    * @return List of first 10 Models sorted ascending by id
     * @see getAllModels(int offset, int count, boolean sortOrder)
     **/
     public List<ModelTransportCommand> getAllModels() {
-        return getAllModels(0, 10, true)
+        return getAllModels(ModelListSorting.ID)
     }
 
     /**

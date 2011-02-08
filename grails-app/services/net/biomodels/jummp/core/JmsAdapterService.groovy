@@ -17,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.core.model.ModelListSorting
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -88,8 +89,11 @@ class JmsAdapterService {
     @Queue
     def getAllModels(def message) {
         if (!verifyMessage(message, [Authentication.class]) &&
+                !verifyMessage(message, [Authentication.class, ModelListSorting.class]) &&
                 !verifyMessage(message, [Authentication.class, Integer.class, Integer.class]) &&
-                !verifyMessage(message, [Authentication.class, Integer.class, Integer.class, Boolean.class])) {
+                !verifyMessage(message, [Authentication.class, Integer.class, Integer.class, Boolean.class]) &&
+                !verifyMessage(message, [Authentication.class, Integer.class, Integer.class, ModelListSorting.class]) &&
+                !verifyMessage(message, [Authentication.class, Integer.class, Integer.class, Boolean.class, ModelListSorting.class])) {
             return new IllegalArgumentException("Invalid arguments passed to method. Allowed is Authentication or Authentication, Integer, Integer or Authentication, Integer, Integer, Boolean")
         }
         List arguments = (List)message
@@ -102,11 +106,21 @@ class JmsAdapterService {
             case 1:
                 modelList = modelService.getAllModels()
                 break
+            case 2:
+                modelList = modelService.getAllModels((ModelListSorting)arguments[1])
+                break
             case 3:
                 modelList = modelService.getAllModels((Integer)arguments[1], (Integer)arguments[2])
                 break
             case 4:
-                modelList = modelService.getAllModels((Integer)arguments[1], (Integer)arguments[2], (Boolean)arguments[3])
+                if (arguments[3] instanceof ModelListSorting) {
+                    modelList = modelService.getAllModels((Integer)arguments[1], (Integer)arguments[2], (ModelListSorting)arguments[3])
+                } else {
+                    modelList = modelService.getAllModels((Integer)arguments[1], (Integer)arguments[2], (Boolean)arguments[3])
+                }
+                break
+            case 5:
+                modelList = modelService.getAllModels((Integer)arguments[1], (Integer)arguments[2], (Boolean)arguments[3], (ModelListSorting)arguments[4])
                 break
             default:
                 // nothing

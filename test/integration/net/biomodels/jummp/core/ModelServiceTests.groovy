@@ -861,6 +861,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         model = modelService.uploadModel(sbmlFile, meta)
         assertTrue(model.validate())
         assertEquals(ModelFormat.findByIdentifier("SBML"), model.revisions.toList().first().format)
+        assertNotNull(model.revisions.toList().first().uploadDate)
         // TODO: somehow we need to test the failing cases, which is non-trivial
         // the only solution were to modify comment to make the revision non-validate, but in future it will be a command object which validates
     }

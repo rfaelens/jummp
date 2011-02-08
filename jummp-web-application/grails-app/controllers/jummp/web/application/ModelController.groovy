@@ -1,6 +1,7 @@
 package jummp.web.application
 
 import grails.converters.JSON
+import net.biomodels.jummp.core.model.ModelListSorting
 
 /**
  * @short Controller providing basic access to Models.
@@ -41,8 +42,23 @@ class ModelController {
         dataToRender.iTotalRecords = coreAdapterService.getModelCount()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        // TODO: we need to sort by columns
-        List models = coreAdapterService.getAllModels(start, length)
+        ModelListSorting sort
+        switch (params.iSortCol_0 as int) {
+        case 1:
+            sort = ModelListSorting.NAME
+            break
+        case 2:
+            sort = ModelListSorting.PUBLICATION
+            break
+        case 3:
+            sort = ModelListSorting.LAST_MODIFIED
+            break
+        case 0: // id column is the default
+        default:
+            sort = ModelListSorting.ID
+            break
+        }
+        List models = coreAdapterService.getAllModels(start, length, params.sSortDir_0 == "asc", sort)
         models.each { model ->
             // TODO: add the publication data
             dataToRender.aaData << [model.id, model.name, "TODO", model.lastModifiedDate]
