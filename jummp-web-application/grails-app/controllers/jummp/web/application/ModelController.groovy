@@ -66,4 +66,15 @@ class ModelController {
         }
         render dataToRender as JSON
     }
+
+    /**
+     * File download of the model file for a model by id
+     */
+    def download = {
+        byte[] bytes = coreAdapterService.retrieveModelFile(new ModelTransportCommand(id: params.id as int))
+        response.setContentType("application/xml")
+        // TODO: set a proper name for the model
+        response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")
+        response.outputStream << new ByteArrayInputStream(bytes)
+    }
 }
