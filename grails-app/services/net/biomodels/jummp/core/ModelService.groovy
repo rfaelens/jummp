@@ -187,6 +187,9 @@ class ModelService {
     **/
     public Revision getLatestRevision(Model model) {
         // TODO: maybe querying the database directly is more efficient?
+        if (!model) {
+            return null
+        }
         if (model.state == ModelState.DELETED) {
             // exclude deleted models
             return null
