@@ -74,6 +74,11 @@ class ModelService {
                     order("uploadDate", sorting)
                 }
                 break
+            case ModelListSorting.FORMAT:
+                revisions {
+                    order("format", sorting)
+                }
+                break
             case ModelListSorting.PUBLICATION:
                 // TODO: implement, fall through to default
             case ModelListSorting.ID: // Id is the default

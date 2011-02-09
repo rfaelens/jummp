@@ -12,5 +12,6 @@ public enum ModelListSorting {
     ID, ///< sort by the Model.id column in numerical order
     NAME, ///< sort by Model.name in alphanumerical order
     PUBLICATION, ///< sort by the Model's publication, TODO: what to sort on directly
-    LAST_MODIFIED ///< sort by the last modification date, that is latest revision
+    LAST_MODIFIED, ///< sort by the last modification date, that is latest revision
+    FORMAT ///< sort by the name of the format
 }
