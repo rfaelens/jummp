@@ -2,6 +2,7 @@ package jummp.web.application
 
 import grails.converters.JSON
 import net.biomodels.jummp.core.model.ModelListSorting
+import net.biomodels.jummp.core.model.ModelTransportCommand
 
 /**
  * @short Controller providing basic access to Models.
@@ -61,7 +62,7 @@ class ModelController {
         List models = coreAdapterService.getAllModels(start, length, params.sSortDir_0 == "asc", sort)
         models.each { model ->
             // TODO: add the publication data
-            dataToRender.aaData << [model.id, model.name, "TODO", model.lastModifiedDate]
+            dataToRender.aaData << [model.id, model.name, "TODO", model.lastModifiedDate, model.format.name]
         }
         render dataToRender as JSON
     }
