@@ -54,6 +54,9 @@ class ModelController {
         case 3:
             sort = ModelListSorting.LAST_MODIFIED
             break
+        case 4:
+            sort = ModelListSorting.FORMAT
+            break
         case 0: // id column is the default
         default:
             sort = ModelListSorting.ID
