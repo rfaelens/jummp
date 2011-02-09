@@ -18,7 +18,7 @@ class ModelTransportCommand implements Serializable {
     String name
     ModelState state
     /**
-     * Only needed to upload new Models. When retrieving Models it is unset.
+     * Only needed to upload new Models. When retrieving Models set to format of latest revision.
      */
     ModelFormatTransportCommand format = null
     /**
