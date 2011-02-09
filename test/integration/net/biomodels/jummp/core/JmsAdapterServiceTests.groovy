@@ -396,7 +396,6 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
 
         // test illegal argument exceptions
         assertTrue(send("retrieveModelFile", [auth]) instanceof IllegalArgumentException)
-        assertTrue(send("retrieveModelFile", [auth, model]) instanceof IllegalArgumentException)
         assertTrue(send("retrieveModelFile", [auth, revision, "Test"]) instanceof IllegalArgumentException)
 
         // need to delete the ACL or following tests will fail

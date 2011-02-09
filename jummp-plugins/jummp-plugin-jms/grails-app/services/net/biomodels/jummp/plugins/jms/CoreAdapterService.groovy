@@ -199,6 +199,19 @@ class CoreAdapterService {
         return (byte[])retVal
     }
 
+    /**
+     * Retrieves the model file for the latest revision of the @p model
+     * @param model The Model for which the file should be retrieved
+     * @return Byte Array of the content of the Model file.
+     * @throws ModelException In case retrieving from VCS fails.
+     */
+    public byte[] retrieveModelFile(ModelTransportCommand model) {
+        // TODO: verify closely because of byte[]
+        def retVal = send("retrieveModelFile", model)
+        validateReturnValue(retVal, byte[].class)
+        return (byte[])retVal
+    }
+
     // TODO: how to handle grant/revoke rights from the webapplication? Which users to show?
     /**
     * Deletes the @p model including all Revisions.

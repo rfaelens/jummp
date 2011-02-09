@@ -270,14 +270,19 @@ class JmsAdapterService {
      */
     @Queue
     def retrieveModelFile(def message) {
-        if (!verifyMessage(message, [Authentication, RevisionTransportCommand])) {
-            return new IllegalArgumentException("Authentication and Revision as arguments expected")
+        if (!verifyMessage(message, [Authentication, RevisionTransportCommand]) &&
+            !verifyMessage(message, [Authentication, ModelTransportCommand])) {
+            return new IllegalArgumentException("Authentication and Revision or Model as arguments expected")
         }
 
         def result
         try {
             setAuthentication((Authentication)message[0])
-            result = modelService.retrieveModelFile(Revision.get(message[1].id))
+            if (message[1] instanceof RevisionTransportCommand) {
+                result = modelService.retrieveModelFile(Revision.get(message[1].id))
+            } else {
+                result = modelService.retrieveModelFile(Model.get(message[1].id))
+            }
         } catch (AccessDeniedException e) {
             result = e
         } catch (ModelException e) {

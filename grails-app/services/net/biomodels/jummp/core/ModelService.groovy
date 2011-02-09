@@ -15,6 +15,7 @@ import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
+import org.springframework.security.access.AccessDeniedException
 
 /**
  * @short Service class for managing Models
@@ -383,6 +384,20 @@ class ModelService {
         byte[] bytes = file.getBytes()
         FileUtils.forceDelete(file)
         return bytes
+    }
+
+    /**
+     * Retrieves the model file for the latest revision of the @p model
+     * @param model The Model for which the file should be retrieved
+     * @return Byte Array of the content of the Model file.
+     * @throws ModelException In case retrieving from VCS fails.
+     */
+    byte[] retrieveModelFile(final Model model) throws ModelException {
+        final Revision revision = getLatestRevision(model)
+        if (!revision) {
+            throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
+        }
+        return retrieveModelFile(revision)
     }
 
     /**
