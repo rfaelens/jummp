@@ -20,6 +20,11 @@ var i18n = {
         processing:      "${g.message(code: 'jquery.dataTables.processing')}",
         search:          "${g.message(code: 'jquery.dataTables.search')}",
         noFilterResults: "${g.message(code: 'jquery.dataTables.noFilterResults')}"
+    },
+    model: {
+        list: {
+            download: "${g.message(code: 'model.list.table.download')}"
+        }
     }
 };
 </g:javascript>

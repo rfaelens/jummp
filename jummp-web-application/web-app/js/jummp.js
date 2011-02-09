@@ -99,6 +99,8 @@ function createModelDataTable() {
         "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
             // first column is link to model
             $('td:eq(0)', nRow).html( '<a href="' + createLink("model", "show", aData[0]) + '">' + aData[0] + '</a>' );
+            // fifth column contains a download link
+            $('td:eq(4)', nRow).html(aData[4] + '&nbsp;<a href="' + createLink('model', 'download', aData[0]) + '">' + i18n.model.list.download + '</a>');
             return nRow;
         },
         // i18n
