@@ -46,6 +46,7 @@ grails.plugin.location.'jummp-plugin-security' = "jummp-plugins/jummp-plugin-sec
 if (new File("jummp-plugins/jummp-plugin-jms").exists()) {
     grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
 }
+grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plugin-simple-logging"
 
 // Remove libraries not needed in productive mode
 grails.war.resources = { stagingDir ->
