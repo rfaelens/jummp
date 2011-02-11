@@ -19,6 +19,7 @@ import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.ModelCreatedEvent
+import net.biomodels.jummp.core.events.RevisionCreatedEvent
 
 /**
  * @short Service class for managing Models
@@ -385,6 +386,7 @@ class ModelService {
                     aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.READ)
                 }
             }
+            grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), file))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
