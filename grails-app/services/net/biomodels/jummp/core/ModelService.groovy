@@ -18,6 +18,7 @@ import net.biomodels.jummp.core.model.ModelListSorting
 import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.events.LoggingEventType
+import net.biomodels.jummp.core.events.ModelCreatedEvent
 
 /**
  * @short Service class for managing Models
@@ -47,6 +48,10 @@ class ModelService {
      * Dependency Injection of ModelFileFormatService
      */
     def modelFileFormatService
+    /**
+     * Dependency Injection for GrailsApplication
+     */
+    def grailsApplication
 
     static transactional = true
 
@@ -307,6 +312,8 @@ class ModelService {
             aclUtilService.addPermission(revision, username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, username, BasePermission.DELETE)
             aclUtilService.addPermission(revision, username, BasePermission.READ)
+            // broadcast event
+            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFile))
         } else {
             // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
