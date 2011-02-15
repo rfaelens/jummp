@@ -95,13 +95,31 @@ function createModelDataTable() {
         bJQueryUI: true,
         sPaginationType: "full_numbers",
         sAjaxSource: createLink('model', 'dataTableSource'),
-        // TODO: move function into an own method
-        "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-            // first column is link to model
-            $('td:eq(0)', nRow).html( '<a href="' + createLink("model", "show", aData[0]) + '">' + aData[0] + '</a>' );
-            // fifth column contains a download link
-            $('td:eq(4)', nRow).html(aData[4] + '&nbsp;<a href="' + createLink('model', 'download', aData[0]) + '">' + i18n.model.list.download + '</a>');
-            return nRow;
+        // TODO: move function into an own method,
+        "fnServerData": function(sSource, aoData, fnCallback) {
+            $.getJSON(sSource, aoData, function(json) {
+                for (var i=0; i<json.aaData.length; i++) {
+                    var rowData = json.aaData[i];
+                    var id = rowData[0];
+                    if (rowData[2] != null) {
+                        var publication = rowData[2];
+                        var html = "";
+                        if (publication.linkProvider.name == "PUBMED") {
+                            html = createPubMedLink(publication);
+                        } else if (publication.linkProvider.name == "DOI") {
+                            html = createDoiLink(publication);
+                        }
+                        html += createPublicationTooltip(publication);
+                        rowData[2] = html;
+                    }
+                    // id column
+                    rowData[0] = '<a href="' + createLink("model", "show", id) + '">' + id + '</a>';
+                    // the format/download column
+                    rowData[4] = rowData[4] + '&nbsp;<a href="' + createLink('model', 'download', id) + '">' + i18n.model.list.download + '</a>';
+                }
+                fnCallback(json);
+                $('a.tooltip').cluetip({local: true, width: 550});
+            });
         },
         // i18n
         oLanguage: {
@@ -124,6 +142,161 @@ function createModelDataTable() {
     $(document).bind("login", function(event) {
         $('#modelTable').dataTable().fnDraw();
     });
+}
+
+/**
+ * Creates HTML markup for a tooltip describing a publication.
+ * The tooltip is a table embedded in a div element with id "publication-tooltip-${id}".
+ * The ${id} is the PubMed ID or DOI ID.
+ * The following information from the JSON structure is used:
+ * @li link: The PubMed ID or DOI ID
+ * @li linkProvider: subsection "name" either "PUBMED" or "DOI"
+ * @li authors: list of author objects containing fields firstName, lastName and initials (optional)
+ * @li journal: The name of the Journal (optional)
+ * @li issue: The Journal issue (optional)
+ * @li year: The year of the publication (optional)
+ * @li month: The month of the publication (optional)
+ * @li day: The day of month of the publication (optional)
+ * @li volume: The volume of the journal issue (optional)
+ * @li pages: The pages in the journal (optional)
+ * @li affiliation: The affiliation of the authors (optional)
+ * @li synopsis: The abstract of the publication (optional)
+ * @param publication JSON object describing the publication
+ */
+function createPublicationTooltip(publication) {
+    var tooltip = "";
+    if (publication.link && publication.linkProvider.name == "PUBMED") {
+        tooltip += "<tr><td><strong>" + i18n.publication.pubmedid + ":</strong></td><td>" + publication.link + "</td></tr>";
+    }
+    if (publication.link && publication.linkProvider.name == "DOI") {
+        tooltip += "<tr><td><strong>" + i18n.publication.doi + ":</strong></td><td>" + publication.link + "</td></tr>";
+    }
+    if (publication.authors && publication.authors.length > 0) {
+        var authors = "";
+        for (var i=0; i < publication.authors.length; i++) {
+            var author = publication.authors[i];
+            if (i > 0) {
+                authors += ", ";
+            }
+            if (author.initials) {
+                authors += author.initials + " ";
+            }
+            authors += author.lastName;
+        }
+        tooltip += "<tr><td><strong>" + i18n.publication.authors + ":</strong></td><td>" + authors + "</td></tr>";
+    }
+    if (publication.journal) {
+        tooltip += "<tr><td><strong>" + i18n.publication.journal + ":</strong></td><td>" + publication.journal + "</td></tr>";
+    }
+    if (publication.issue) {
+        tooltip += "<tr><td><strong>" + i18n.publication.issue + ":</strong></td><td>" + publication.issue + "</td></tr>";
+    }
+    if (publication.volume) {
+        tooltip += "<tr><td><strong>" + i18n.publication.volume + ":</strong></td><td>" + publication.volume + "</td></tr>";
+    }
+    if (publication.pages) {
+        tooltip += "<tr><td><strong>" + i18n.publication.pages + ":</strong></td><td>" + publication.pages + "</td></tr>";
+    }
+    if (publication.year) {
+        tooltip += "<tr><td><strong>" + i18n.publication.date + ":</strong></td><td>" + publication.year;
+        if (publication.month) {
+            tooltip += " " + publication.month;
+            if (publication.day) {
+                tooltip += " " + publication.day;
+            }
+        }
+        tooltip += "</td></tr>";
+    }
+    if (publication.affiliation) {
+        tooltip += "<tr><td><strong>" + i18n.publication.affiliation + ":</strong></td><td>" + publication.affiliation + "</td></tr>";
+    }
+    if (publication.synopsis) {
+        tooltip += "<tr><td><strong>" + i18n.publication.synopsis + ":</strong></td><td>&nbsp;</td></tr><tr><td colspan='2'>" + publication.synopsis + "</td></tr>";
+    }
+    return '<div id="' + publicationTooltipId(publication.link) + '" style="display: none"><table><thead/><tbody>' + tooltip + '</tbody></table></div>';
+}
+
+/**
+ * Creates HTML markup for a hyperlink to citexplore referencing a PubMed Id.
+ * The hyperlink has a class "tooltip", a title and rel attribute referencing a tooltip.
+ * The following information from the JSON structure is used:
+ * @li link: The PubMed ID
+ * @li title: The title of the publication
+ * @li journal: The name of the Journal (optional)
+ * @li year: The year of the publication (optional)
+ * @li month: The month of the publication (optional)
+ * @li issue: The Journal issue (optional)
+ * @li volume: The volume of the journal issue (optional)
+ * @li pages: The pages in the journal (optional)
+ * @param publication JSON object describing the publication
+ */
+function createPubMedLink(publication) {
+    return '<a class="tooltip" href="http://www.ebi.ac.uk/citexplore/citationDetails.do?dataSource=MED&externalId=' + publication.link + '" title="' + publication.title + '" rel="#' + publicationTooltipId(publication.link) + '">' + createPublicationLinkTitle(publication) + '</a>';
+}
+
+/**
+ * Creates HTML markup for a hyperlink to a DOI resource.
+ * The hyperlink has a class "tooltip", a title and rel attribute referencing a tooltip.
+ * The following information from the JSON structure is used:
+ * @li link: The DOI link
+ * @li title: The title of the publication
+ * @li journal: The name of the Journal (optional)
+ * @li year: The year of the publication (optional)
+ * @li month: The month of the publication (optional)
+ * @li issue: The Journal issue (optional)
+ * @li volume: The volume of the journal issue (optional)
+ * @li pages: The pages in the journal (optional)
+ * @param publication JSON object describing the publication
+ */
+function createDoiLink(publication) {
+    return '<a class="tooltip" href="http://dx.doi.org/' + publication.link + '" title="' + publication.title + '" rel="#' + publicationTooltipId(publication.link) + '">' + createPublicationLinkTitle(publication) + '</a>';
+}
+
+/**
+ * Creates an id for a publication tooltip from the PubMed or DOI id.
+ * @param id The PubMed or DOI id.
+ */
+function publicationTooltipId(id) {
+    var linkId = id.replace('.', '');
+    linkId = linkId.replace('/', '');
+    linkId = linkId.replace('(', '');
+    linkId = linkId.replace(')', '');
+    return "publication-tooltip-" + linkId;
+}
+
+/**
+ * Creates the visible title for a publication link.
+ * The following information from the JSON structure is used:
+ * @li title: The title of the publication
+ * @li journal: The name of the Journal (optional)
+ * @li year: The year of the publication (optional)
+ * @li month: The month of the publication (optional)
+ * @li issue: The Journal issue (optional)
+ * @li volume: The volume of the journal issue (optional)
+ * @li pages: The pages in the journal (optional)
+ * @param publication JSON object describing the publication
+ */
+function createPublicationLinkTitle(publication) {
+    var title = "";
+    if (publication.journal) {
+        title += publication.journal;
+    }
+    if (publication.year) {
+        title += " " + publication.year;
+        if (publication.month) {
+            title += " " + publication.month;
+        }
+    }
+    if (publication.volume) {
+        title += ";" + publication.volume;
+    }
+    if (publication.issue) {
+        title += "(" + publication.issue + ")";
+    }
+    if (publication.pages) {
+        title += ": " + publication.pages;
+    }
+    return title
 }
 
 /**

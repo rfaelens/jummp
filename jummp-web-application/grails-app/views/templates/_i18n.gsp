@@ -25,6 +25,18 @@ var i18n = {
         list: {
             download: "${g.message(code: 'model.list.table.download')}"
         }
+    },
+    publication: {
+        pubmedid:    "${g.message(code: 'publication.pubmedid')}",
+        doi:         "${g.message(code: 'publication.doi')}",
+        journal:     "${g.message(code: 'publication.journal')}",
+        issue:       "${g.message(code: 'publication.issue')}",
+        volume:      "${g.message(code: 'publication.volume')}",
+        pages:       "${g.message(code: 'publication.pages')}",
+        date:        "${g.message(code: 'publication.date')}",
+        affiliation: "${g.message(code: 'publication.affiliation')}",
+        synopsis:    "${g.message(code: 'publication.abstract')}",
+        authors:     "${g.message(code: 'publication.authors')}"
     }
 };
 </g:javascript>

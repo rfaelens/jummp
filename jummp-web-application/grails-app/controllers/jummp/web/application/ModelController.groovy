@@ -64,8 +64,7 @@ class ModelController {
         }
         List models = coreAdapterService.getAllModels(start, length, params.sSortDir_0 == "asc", sort)
         models.each { model ->
-            // TODO: add the publication data
-            dataToRender.aaData << [model.id, model.name, "TODO", model.lastModifiedDate, model.format.name]
+            dataToRender.aaData << [model.id, model.name, model.publication, model.lastModifiedDate, model.format.name]
         }
         render dataToRender as JSON
     }
