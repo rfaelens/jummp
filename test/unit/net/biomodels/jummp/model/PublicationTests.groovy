@@ -19,15 +19,13 @@ class PublicationTests extends GrailsUnitTestCase {
         assertFalse(publication.validate())
         assertEquals("nullable", publication.errors["journal"])
         assertEquals("nullable", publication.errors["title"])
-        assertEquals("nullable", publication.errors["authors"])
         assertEquals("nullable", publication.errors["affiliation"])
         assertEquals("nullable", publication.errors["synopsis"])
         // test for blank
-        publication = new Publication(journal: "", title: "", authors: "", affiliation: "", synopsis: "")
+        publication = new Publication(journal: "", title: "", affiliation: "", synopsis: "")
         assertFalse(publication.validate())
         assertEquals("blank", publication.errors["journal"])
         assertEquals("blank", publication.errors["title"])
-        assertEquals("blank", publication.errors["authors"])
         assertEquals("blank", publication.errors["affiliation"])
         assertNull(publication.errors["synopsis"])
         // test for max size of synopsis
@@ -39,7 +37,7 @@ class PublicationTests extends GrailsUnitTestCase {
         assertFalse(publication.validate())
         assertEquals("maxSize", publication.errors["synopsis"])
         // test for allowed values
-        publication = new Publication(journal: "journal", title: "title", authors: "Authors", affiliation: "Affiliation", model: new Model())
+        publication = new Publication(journal: "journal", title: "title", affiliation: "Affiliation")
         synopsis = ""
         for (int i=1; i<1000; i++) {
             synopsis += "1"

@@ -29,4 +29,8 @@ class ModelTransportCommand implements Serializable {
      * The date of the latest revision the user has access to.
      */
     Date lastModifiedDate
+    /**
+     * Information about the Publication.
+     */
+    PublicationTransportCommand publication
 }

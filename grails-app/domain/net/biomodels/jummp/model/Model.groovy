@@ -16,11 +16,11 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
  */
 class Model implements Serializable {
     /**
-     * A Model has many Revision and many Publication
+     * A Model has many Revision
      * IMPORTANT: never access revisions directly as this circumvents the ACL!
      * Use ModelService.getAllRevisions()
      */
-    static hasMany = [revisions: Revision, publications: Publication]
+    static hasMany = [revisions: Revision]
     /**
      * The name of the Model
      */
@@ -33,6 +33,10 @@ class Model implements Serializable {
      * The state of the Model, by default UNPUBLISHED
      */
     ModelState state = ModelState.UNPUBLISHED
+    /**
+     * The Publication the model has been described in
+     */
+    Publication publication
     // TODO: unique Identifier for the model? UML diagram lists an "accessionNumber"?
 
     static constraints = {
@@ -42,12 +46,14 @@ class Model implements Serializable {
             return !revs.isEmpty()
         })
         state(nullable: false)
+        publication(nullable: true)
     }
 
     ModelTransportCommand toCommandObject() {
         // TODO: is it correct to show the latest upload date as the lastModifiedDate or does it need ACL restrictions?
         return new ModelTransportCommand(id: id, name: name, state: state,
                 lastModifiedDate: revisions ? revisions.sort{ it.revisionNumber }.last().uploadDate : null,
-                format: revisions ? revisions.sort{ it.revisionNumber }.last().format.toCommandObject() : null)
+                format: revisions ? revisions.sort{ it.revisionNumber }.last().format.toCommandObject() : null,
+                publication: publication ? publication.toCommandObject() : null)
     }
 }

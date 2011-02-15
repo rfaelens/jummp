@@ -20,6 +20,8 @@ import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.ModelCreatedEvent
 import net.biomodels.jummp.core.events.RevisionCreatedEvent
+import net.biomodels.jummp.core.model.PublicationLinkProvider
+import net.biomodels.jummp.model.Publication
 
 /**
  * @short Service class for managing Models
@@ -53,6 +55,10 @@ class ModelService {
      * Dependency Injection for GrailsApplication
      */
     def grailsApplication
+    /**
+     * Dependency Injection for PubMedService
+     */
+    def pubMedService
 
     static transactional = true
 
@@ -296,6 +302,11 @@ class ModelService {
 
         if (revision.validate()) {
             model.addToRevisions(revision)
+            if (meta.publication && meta.publication.linkProvider == PublicationLinkProvider.PUBMED) {
+                model.publication = pubMedService.getPublication(meta.publication.link)
+            } else if (meta.publication && meta.publication.linkProvider == PublicationLinkProvider.DOI) {
+                model.publication = Publication.fromCommandObject(meta.publication)
+            }
             if (!model.validate()) {
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
                 revision.discard()
