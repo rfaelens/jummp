@@ -3,8 +3,10 @@
     <head>
         <title><g:layoutTitle default="Grails" /></title>
         <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
+        <link rel="stylesheet" href="${resource(dir:'css', file:'jquery.cluetip.css')}" type="text/css" />
         <g:render template="/templates/i18n"/>
         <g:javascript library="jquery" plugin="jquery"/>
+        <g:javascript src="jquery/jquery.cluetip.js"/>
         <jqui:resources />
         <g:layoutHead />
         <g:javascript>
