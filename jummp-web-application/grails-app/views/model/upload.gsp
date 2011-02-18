@@ -27,11 +27,11 @@
                     </tr>
                     <tr>
                         <td><input type="radio" id="model-upload-publication-pubmed" name="publicationType" value="PUBMED"/><label for="model-upload-publication-pubmed"><g:message code="model.upload.pubmed"/>:</label></td>
-                        <td><input type="text" id="model-upload-pubmed" name="pubmed"></td>
+                        <td><input type="text" id="model-upload-pubmed" name="pubmed"> (<a href="http://www.ebi.ac.uk/citexplore/" target="_blank"><g:message code="publication.search.pubmed"/></a>)</td>
                     </tr>
                     <tr>
                         <td><input type="radio" id="model-upload-publication-doi" name="publicationType" value="DOI"/><label for="model-upload-publication-doi"><g:message code="model.upload.doi"/>:</label></td>
-                        <td><input type="text" id="model-upload-doi" name="doi"></td>
+                        <td><input type="text" id="model-upload-doi" name="doi"> (<a href="http://www.doi.org/" target="_blank"><g:message code="publication.search.doi"/></a>)</td>
                     </tr>
                     <tr>
                         <td><input type="radio" id="model-upload-publication-url" name="publicationType" value="URL"/><label for="model-upload-publication-url"><g:message code="model.upload.url"/>:</label></td>
