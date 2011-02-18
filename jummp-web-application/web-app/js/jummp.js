@@ -379,12 +379,7 @@ function uploadModel() {
         }
         if (data.error) {
             clearErrorMessages();
-            showErrorMessage(data.model);
-            showErrorMessage(data.name);
-            showErrorMessage(data.comment);
-            showErrorMessage(data.pubmed);
-            showErrorMessage(data.doi);
-            showErrorMessage(data.url);
+            showErrorMessage([data.model, data.name, data.comment, data.pubmed, data.doi, data.url]);
             setErrorState("#model-upload-file", data.model);
             setErrorState("#model-upload-name", data.name);
             setErrorState("#model-upload-comment", data.comment);
@@ -437,56 +432,72 @@ function clearErrorMessages() {
 
 /**
  * Adds @p message to the site info message div and shows it.
- * @param message The message to show
+ * @param messages The message to show, String or Array of Strings
  * @param timeout Time in msec until the message is automatically removed. If not specified the message does not get removed.
  */
-function showInfoMessage(message, timeout) {
-    showMessage(message, timeout, $("#site-info-messages"));
+function showInfoMessage(messages, timeout) {
+    showMessage(messages, timeout, $("#site-info-messages"));
 }
 
 /**
  * Adds an error message to the site error message div and shows it.
- * @param message The message to show
+ * @param messages The message to show, String or Array of Strings
  * @param timeout Time in msec until the message is automatically removed. If not specified the message does not get removed.
  */
-function showErrorMessage(message, timeout) {
-    showMessage(message, timeout, $("#site-error-messages"));
+function showErrorMessage(messages, timeout) {
+    showMessage(messages, timeout, $("#site-error-messages"));
 }
 
 /**
  * Adds @p message to the @p container and shows the @p container.
- * @param message The message to show
+ * @param messages The message to show, String or Array of Strings
  * @param timeout Time in msec until the message is automatically removed. If not specified the message does not get removed.
  * @param container A jQuery object identifying the container, e.g. the site-error-messages or site-info-messages
  */
-function showMessage(message, timeout, container) {
-    if (!message) {
+function showMessage(messages, timeout, container) {
+    if (!messages) {
         return;
     }
-    var error = $("<li>" + message + "</li>");
-    // add close button to the error message
-    var close = $("<a href=\"#\"></a>").button({text: false});
-    close.button("option", "icons", {primary:'ui-icon-closethick'});
-    error.append(close);
-    // close button removes the error and if it was the last one hides the container
-    close.click(function() {
-        error.remove();
-        if ($("ul", container).html() == "") {
-            container.hide();
-        } else {
-            $("span.ui-icon-alert", container).position({my: "left", at: "left", of: container});
+    if (!(messages instanceof Array)) {
+        messages = new Array(messages);
+    }
+    for (var i=0; i<messages.length; i++) {
+        var message = messages[i];
+        if (!message) {
+            continue;
         }
-    });
-    if (timeout) {
-        setTimeout(function() {close.trigger("click");}, timeout);
+        var error = $("<li>" + message + "</li>");
+        // add close button to the error message
+        var close = $("<a href=\"#\"></a>").button({text: false});
+        close.button("option", "icons", {primary:'ui-icon-closethick'});
+        error.append(close);
+        // close button removes the error and if it was the last one hides the container
+        close.click(function() {
+            var parent = $(this).parent();
+            parent.fadeOut("fast", function() {
+                parent.remove();
+                $("span[rel=icon]", container).position({my: "left", at: "left", of: container});
+            });
+            if ($("ul li", container).length == 1) {
+                container.fadeOut("fast");
+            }
+        });
+        if (timeout) {
+            setTimeout(function() {close.trigger("click");}, timeout);
+        }
+        $("ul", container).append(error);
+        close.hide();
     }
 
-    // show the error
-    $("ul", container).append(error);
-    container.show();
-    // perform positioning
-    close.position({my: "right", at: "right", of: error, collision: "flip"});
+    // show the errors
+    container.fadeIn("fast");
     $("span[rel=icon]", container).position({my: "left", at: "left", of: container});
+    var closeButtons = $("ul li a", container);
+    for (i=0; i<closeButtons.length; i++) {
+        var button = $(closeButtons[i]);
+        button.show();
+        button.position({my: "right", at: "right", of: $(closeButtons[i]).parent(), collision: "flip"});
+    }
 }
 
 /**
