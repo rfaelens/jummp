@@ -7,6 +7,8 @@
         <g:render template="/templates/i18n"/>
         <g:javascript library="jquery" plugin="jquery"/>
         <g:javascript src="jquery/jquery.cluetip.js"/>
+        <g:javascript src="jquery/jquery.blockUI.js"/>
+        <g:javascript src="jquery/jquery.form.js"/>
         <jqui:resources />
         <g:layoutHead />
         <g:javascript>
@@ -20,6 +22,10 @@
         </div>
         <g:render template="/templates/ajaxLogin"/>
         <g:render template="/templates/userInfo"/>
+        <div id="site-error-messages" class="ui-state-error ui-corner-all" style="display:none;">
+            <span class="ui-icon ui-icon-alert"></span>
+            <ul></ul>
+        </div>
         <div id="grailsLogo"><a href="http://grails.org"><img src="${resource(dir:'images',file:'grails_logo.png')}" alt="Grails" border="0" /></a></div>
         <g:layoutBody />
     </body>

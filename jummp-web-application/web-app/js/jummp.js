@@ -300,6 +300,148 @@ function createPublicationLinkTitle(publication) {
 }
 
 /**
+ * Change listener for the upload model view.
+ * It gets called whenever the Publication type radio button changes.
+ * It adjusts the view to show/hide fields and enable/disable fields.
+ */
+function uploadModelPublicationChangeListener() {
+    var value = $("input:radio[name=publicationType]:checked").val();
+    switch (value) {
+    case "PUBMED":
+        enableElement("#model-upload-pubmed", true);
+        enableElement("#model-upload-doi", false);
+        enableElement("#model-upload-url", false);
+        $("#model-upload-publication-table").hide();
+        break;
+    case "DOI":
+        enableElement("#model-upload-pubmed", false);
+        enableElement("#model-upload-doi", true);
+        enableElement("#model-upload-url", false);
+        $("#model-upload-publication-table").show();
+        break;
+    case "URL":
+        enableElement("#model-upload-pubmed", false);
+        enableElement("#model-upload-doi", false);
+        enableElement("#model-upload-url", true);
+        $("#model-upload-publication-table").show();
+        break;
+    case "UNPUBLISHED":
+        enableElement("#model-upload-pubmed", false);
+        enableElement("#model-upload-doi", false);
+        enableElement("#model-upload-url", false);
+        $("#model-upload-publication-table").hide();
+        break;
+    }
+}
+
+/**
+ * Enable/Disable DOM element(s).
+ * Adds/Removes the disabled attribute and sets appropriate CSS classes.
+ * @param selector The selector string to identify the element(s)
+ * @param enable @c true to enable it, @c false to disable it.
+ */
+function enableElement(selector, enable) {
+    var element = $(selector);
+    element.attr("disabled", !enable);
+    if (enable) {
+        element.removeClass("ui-state-disabled");
+    } else {
+        element.addClass("ui-state-disabled");
+    }
+}
+
+/**
+ * Callback when model upload form needs to be submitted.
+ */
+function uploadModel() {
+    $("#model-upload-form").block();
+    var data = $("#model-upload-form");
+    $("#model-upload-form").ajaxSubmit({type: 'POST',
+        url: createLink("model", "save"),
+        // needs to be an iframe as we send a file
+        iframe: true,
+        dataType: 'json',
+        success: function(data) {
+        $("#model-upload-form").unblock();
+        if (data.error) {
+            clearErrorMessages();
+            showErrorMessage(data.model);
+            showErrorMessage(data.name);
+            showErrorMessage(data.comment);
+            showErrorMessage(data.pubmed);
+            showErrorMessage(data.doi);
+            showErrorMessage(data.url);
+            setErrorState("#model-upload-file", data.model);
+            setErrorState("#model-upload-name", data.name);
+            setErrorState("#model-upload-comment", data.comment);
+            setErrorState("#model-upload-pubmed", data.pubmed);
+        } else if (data.success) {
+            // TODO: change to Model view?
+        }
+    }});
+}
+
+/**
+ * Sets the state of widgets to error or removes the error state.
+ * @param selector Selector string to identify the widget(s)
+ * @param error @c true to set to error, @c false to remove error state
+ */
+function setErrorState(selector, error) {
+    if (error) {
+        $(selector).addClass("ui-state-error");
+        if (selector[0] == '#') {
+            $("label[for=\"" + selector.substring(1) + "\"]").addClass("ui-state-error-text");
+        }
+    } else {
+        $(selector).removeClass("ui-state-error");
+        if (selector[0] == '#') {
+            $("label[for=\"" + selector.substring(1) + "\"]").removeClass("ui-state-error-text");
+        }
+    }
+}
+
+/**
+ * Removes all shown error messages of the site error message div and hides it.
+ * This method can be used to clear the current state before adding new error
+ * messages with showErrorMessage().
+ */
+function clearErrorMessages() {
+    $("#site-error-messages ul li").remove();
+    $("#site-error-messages").hide();
+}
+
+/**
+ * Adds an error message to the site error message div and shows it.
+ * @param message The message to show
+ */
+function showErrorMessage(message) {
+    if (!message) {
+        return;
+    }
+    var error = $("<li>" + message + "</li>");
+    // add close button to the error message
+    var close = $("<a href=\"#\"></a>").button({text: false});
+    close.button("option", "icons", {primary:'ui-icon-closethick'});
+    error.append(close);
+    // close button removes the error and if it was the last one hides the container
+    close.click(function() {
+        error.remove();
+        if ($("#site-error-messages ul").html() == "") {
+            $("#site-error-messages").hide();
+        } else {
+            $("#site-error-messages span.ui-icon-alert").position({my: "left", at: "left", of: $("#site-error-messages")});
+        }
+    });
+
+    // show the error
+    $("#site-error-messages ul").append(error);
+    $("#site-error-messages").show();
+    // perform positioning
+    close.position({my: "right", at: "right", of: error, collision: "flip"});
+    $("#site-error-messages span.ui-icon-alert").position({my: "left", at: "left", of: $("#site-error-messages")});
+}
+
+/**
  * Global document initialization.
  * Connects all the global events like login/logout.
  */
@@ -328,4 +470,6 @@ $(document).ready(function() {
         ]
     });
     createModelDataTable();
+    $("#model-upload-form").ajaxForm();
+    $("input:radio[name=publicationType]").change(uploadModelPublicationChangeListener);
 });
