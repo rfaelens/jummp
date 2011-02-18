@@ -97,30 +97,40 @@ function createModelDataTable() {
         sAjaxSource: createLink('model', 'dataTableSource'),
         // TODO: move function into an own method,
         "fnServerData": function(sSource, aoData, fnCallback) {
-            $.getJSON(sSource, aoData, function(json) {
-                for (var i=0; i<json.aaData.length; i++) {
-                    var rowData = json.aaData[i];
-                    var id = rowData[0];
-                    if (rowData[2] != null) {
-                        var publication = rowData[2];
-                        var html = "";
-                        if (publication.linkProvider.name == "PUBMED") {
-                            html = createPubMedLink(publication);
-                        } else if (publication.linkProvider.name == "DOI") {
-                            html = createDoiLink(publication);
+            $.ajax({
+                "dataType": 'json',
+                "type": "POST",
+                "url": sSource,
+                "data": aoData,
+                "error": function(jqXHR, textStatus, errorThrown) {
+                    handleError($.parseJSON(jqXHR.responseText));
+                    // clear the table
+                    fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
+                },
+                "success": function(json) {
+                    for (var i=0; i<json.aaData.length; i++) {
+                        var rowData = json.aaData[i];
+                        var id = rowData[0];
+                        if (rowData[2] != null) {
+                            var publication = rowData[2];
+                            var html = "";
+                            if (publication.linkProvider.name == "PUBMED") {
+                                html = createPubMedLink(publication);
+                            } else if (publication.linkProvider.name == "DOI") {
+                                html = createDoiLink(publication);
+                            }
+                            html += createPublicationTooltip(publication);
+                            rowData[2] = html;
                         }
-                        html += createPublicationTooltip(publication);
-                        rowData[2] = html;
+                        // id column
+                        rowData[0] = '<a href="' + createLink("model", "show", id) + '">' + id + '</a>';
+                        // the format/download column
+                        rowData[4] = rowData[4] + '&nbsp;<a href="' + createLink('model', 'download', id) + '">' + i18n.model.list.download + '</a>';
                     }
-                    // id column
-                    rowData[0] = '<a href="' + createLink("model", "show", id) + '">' + id + '</a>';
-                    // the format/download column
-                    rowData[4] = rowData[4] + '&nbsp;<a href="' + createLink('model', 'download', id) + '">' + i18n.model.list.download + '</a>';
-                }
-                fnCallback(json);
-                $('a.tooltip').cluetip({local: true, width: 550});
-            });
-        },
+                    fnCallback(json);
+                    $('a.tooltip').cluetip({local: true, width: 550});
+                }});
+            },
         // i18n
         oLanguage: {
             oPaginate: {
