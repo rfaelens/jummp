@@ -438,25 +438,28 @@ function clearErrorMessages() {
 /**
  * Adds @p message to the site info message div and shows it.
  * @param message The message to show
+ * @param timeout Time in msec until the message is automatically removed. If not specified the message does not get removed.
  */
-function showInfoMessage(message) {
-    showMessage(message, $("#site-info-messages"));
+function showInfoMessage(message, timeout) {
+    showMessage(message, timeout, $("#site-info-messages"));
 }
 
 /**
  * Adds an error message to the site error message div and shows it.
  * @param message The message to show
+ * @param timeout Time in msec until the message is automatically removed. If not specified the message does not get removed.
  */
-function showErrorMessage(message) {
-    showMessage(message, $("#site-error-messages"));
+function showErrorMessage(message, timeout) {
+    showMessage(message, timeout, $("#site-error-messages"));
 }
 
 /**
  * Adds @p message to the @p container and shows the @p container.
  * @param message The message to show
+ * @param timeout Time in msec until the message is automatically removed. If not specified the message does not get removed.
  * @param container A jQuery object identifying the container, e.g. the site-error-messages or site-info-messages
  */
-function showMessage(message, container) {
+function showMessage(message, timeout, container) {
     if (!message) {
         return;
     }
@@ -474,6 +477,9 @@ function showMessage(message, container) {
             $("span.ui-icon-alert", container).position({my: "left", at: "left", of: container});
         }
     });
+    if (timeout) {
+        setTimeout(function() {close.trigger("click");}, timeout);
+    }
 
     // show the error
     $("ul", container).append(error);
@@ -505,11 +511,11 @@ function handleError(data) {
  */
 $(document).ready(function() {
     $(document).bind("logout", function() {
-        showInfoMessage(i18n.logout.successful);
+        showInfoMessage(i18n.logout.successful, 20000);
         switchUserInformation(false);
     });
     $(document).bind("login", function(event, username) {
-        showInfoMessage(i18n.login.successful);
+        showInfoMessage(i18n.login.successful, 20000);
         switchUserInformation(true, username);
     });
     // create Ajax Login Dialog
