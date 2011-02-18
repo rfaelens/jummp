@@ -89,6 +89,11 @@ $(document).ready(function() {
     $("input:radio[name=publicationType]")[0].checked = true;
     $("#model-upload-form div input:button").button();
     uploadModelPublicationChangeListener();
+    // disable items as long as the functionality is not implemented
+    enableElement("#model-upload-publication-doi", false);
+    enableElement("label[for=model-upload-publication-doi]", false);
+    enableElement("#model-upload-publication-url", false);
+    enableElement("label[for=model-upload-publication-url]", false);
 });
     </g:javascript>
     </body>
