@@ -23,7 +23,11 @@
         <g:render template="/templates/ajaxLogin"/>
         <g:render template="/templates/userInfo"/>
         <div id="site-error-messages" class="ui-state-error ui-corner-all" style="display:none;">
-            <span class="ui-icon ui-icon-alert"></span>
+            <span class="ui-icon ui-icon-alert" rel="icon"></span>
+            <ul></ul>
+        </div>
+        <div id="site-info-messages" class="ui-state-highlight ui-corner-all" style="display:none;">
+            <span class="ui-icon ui-icon-info" rel="icon"></span>
             <ul></ul>
         </div>
         <div id="grailsLogo"><a href="http://grails.org"><img src="${resource(dir:'images',file:'grails_logo.png')}" alt="Grails" border="0" /></a></div>

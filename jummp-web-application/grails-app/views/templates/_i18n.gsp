@@ -3,7 +3,11 @@
 var i18n = {
     login: {
         authenticate: "${g.message(code: 'login.authenticate')}",
-        cancel:       "${g.message(code: 'login.cancel')}"
+        cancel:       "${g.message(code: 'login.cancel')}",
+        successful:   "${g.message(code: 'login.successful')}"
+    },
+    logout: {
+        successful: "${g.message(code: 'logout.successful')}"
     },
     dataTables: {
         paginate: {

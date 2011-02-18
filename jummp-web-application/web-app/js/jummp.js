@@ -436,10 +436,27 @@ function clearErrorMessages() {
 }
 
 /**
+ * Adds @p message to the site info message div and shows it.
+ * @param message The message to show
+ */
+function showInfoMessage(message) {
+    showMessage(message, $("#site-info-messages"));
+}
+
+/**
  * Adds an error message to the site error message div and shows it.
  * @param message The message to show
  */
 function showErrorMessage(message) {
+    showMessage(message, $("#site-error-messages"));
+}
+
+/**
+ * Adds @p message to the @p container and shows the @p container.
+ * @param message The message to show
+ * @param container A jQuery object identifying the container, e.g. the site-error-messages or site-info-messages
+ */
+function showMessage(message, container) {
     if (!message) {
         return;
     }
@@ -451,19 +468,19 @@ function showErrorMessage(message) {
     // close button removes the error and if it was the last one hides the container
     close.click(function() {
         error.remove();
-        if ($("#site-error-messages ul").html() == "") {
-            $("#site-error-messages").hide();
+        if ($("ul", container).html() == "") {
+            container.hide();
         } else {
-            $("#site-error-messages span.ui-icon-alert").position({my: "left", at: "left", of: $("#site-error-messages")});
+            $("span.ui-icon-alert", container).position({my: "left", at: "left", of: container});
         }
     });
 
     // show the error
-    $("#site-error-messages ul").append(error);
-    $("#site-error-messages").show();
+    $("ul", container).append(error);
+    container.show();
     // perform positioning
     close.position({my: "right", at: "right", of: error, collision: "flip"});
-    $("#site-error-messages span.ui-icon-alert").position({my: "left", at: "left", of: $("#site-error-messages")});
+    $("span[rel=icon]", container).position({my: "left", at: "left", of: container});
 }
 
 /**
@@ -488,9 +505,11 @@ function handleError(data) {
  */
 $(document).ready(function() {
     $(document).bind("logout", function() {
+        showInfoMessage(i18n.logout.successful);
         switchUserInformation(false);
     });
     $(document).bind("login", function(event, username) {
+        showInfoMessage(i18n.login.successful);
         switchUserInformation(true, username);
     });
     // create Ajax Login Dialog
