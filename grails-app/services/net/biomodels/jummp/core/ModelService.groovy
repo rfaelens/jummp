@@ -303,7 +303,13 @@ class ModelService {
         if (revision.validate()) {
             model.addToRevisions(revision)
             if (meta.publication && meta.publication.linkProvider == PublicationLinkProvider.PUBMED) {
-                model.publication = pubMedService.getPublication(meta.publication.link)
+                try {
+                    model.publication = pubMedService.getPublication(meta.publication.link)
+                } catch (JummpException e) {
+                    revision.discard()
+                    model.discard()
+                    throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data", e)
+                }
             } else if (meta.publication && meta.publication.linkProvider == PublicationLinkProvider.DOI) {
                 model.publication = Publication.fromCommandObject(meta.publication)
             }

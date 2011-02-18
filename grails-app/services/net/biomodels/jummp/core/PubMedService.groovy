@@ -17,7 +17,7 @@ class PubMedService {
 
     static transactional = true
 
-    Publication getPublication(String id) {
+    Publication getPublication(String id) throws JummpException {
         Publication publication = Publication.findByLinkProviderAndLink(PublicationLinkProvider.PUBMED, id)
         if (publication) {
             return publication
@@ -31,7 +31,7 @@ class PubMedService {
      * @param id The PubMed Identifier
      * @return A fully populated Publication
      */
-    private Publication fetchPublicationData(String id) {
+    private Publication fetchPublicationData(String id) throws JummpException {
         URL url
         try {
             url = new URL("http://www.ebi.ac.uk/citexplore/viewXML.do?externalId=${id}&dataSource=MED")
@@ -80,9 +80,16 @@ class PubMedService {
         }
         if (slurper.Article.Abstract.AbstractText.size() == 1) {
             publication.synopsis = slurper.Article.Abstract.AbstractText.text()
+            if (publication.synopsis.length() > 1000) {
+                publication.synopsis = publication.synopsis.substring(0, 999) + "…"
+            }
         }
 
         parseAuthors(slurper, publication)
+
+        if (!publication.validate()) {
+            throw new JummpException("Retrieved PubMed Publication ${id} does not create a valid Publication")
+        }
 
         return publication
     }
