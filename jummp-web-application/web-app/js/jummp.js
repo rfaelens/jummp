@@ -321,25 +321,25 @@ function uploadModelPublicationChangeListener() {
         enableElement("#model-upload-pubmed", true);
         enableElement("#model-upload-doi", false);
         enableElement("#model-upload-url", false);
-        $("#model-upload-publication-table").hide();
+        $("#model-upload-publication-table").fadeOut("fast");
         break;
     case "DOI":
         enableElement("#model-upload-pubmed", false);
         enableElement("#model-upload-doi", true);
         enableElement("#model-upload-url", false);
-        $("#model-upload-publication-table").show();
+        $("#model-upload-publication-table").fadeIn("fast");
         break;
     case "URL":
         enableElement("#model-upload-pubmed", false);
         enableElement("#model-upload-doi", false);
         enableElement("#model-upload-url", true);
-        $("#model-upload-publication-table").show();
+        $("#model-upload-publication-table").fadeIn("fast");
         break;
     case "UNPUBLISHED":
         enableElement("#model-upload-pubmed", false);
         enableElement("#model-upload-doi", false);
         enableElement("#model-upload-url", false);
-        $("#model-upload-publication-table").hide();
+        $("#model-upload-publication-table").fadeOut("fast");
         break;
     }
 }
