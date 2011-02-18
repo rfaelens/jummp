@@ -37,6 +37,9 @@ var i18n = {
         affiliation: "${g.message(code: 'publication.affiliation')}",
         synopsis:    "${g.message(code: 'publication.abstract')}",
         authors:     "${g.message(code: 'publication.authors')}"
+    },
+    error: {
+        unexpected: "${g.message(code: 'error.500.explanation', args: ['_CODE_'])}"
     }
 };
 </g:javascript>

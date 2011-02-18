@@ -363,6 +363,10 @@ function uploadModel() {
         dataType: 'json',
         success: function(data) {
         $("#model-upload-form").unblock();
+        if (handleError(data)) {
+            // TODO: with jquery 1.5 should be handled by status code function
+            return;
+        }
         if (data.error) {
             clearErrorMessages();
             showErrorMessage(data.model);
@@ -378,7 +382,18 @@ function uploadModel() {
         } else if (data.success) {
             // TODO: change to Model view?
         }
-    }});
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            $("#model-upload-form").unblock();
+            // the form is not submitted as AJAX (file upload) because of that we receive an html page
+            // we need to extract the status code and error code from the html
+            // and construct a proper object to pass to handleError()
+            var response = $(jqXHR.responseText);
+            var errorCode = $("#error-code", response).text();
+            var statusCode = parseInt($("#status-code", response).text());
+            handleError({error: statusCode, code: errorCode});
+        }
+    });
 }
 
 /**
@@ -439,6 +454,22 @@ function showErrorMessage(message) {
     // perform positioning
     close.position({my: "right", at: "right", of: error, collision: "flip"});
     $("#site-error-messages span.ui-icon-alert").position({my: "left", at: "left", of: $("#site-error-messages")});
+}
+
+/**
+ * This method checks whether the passed in @p data describes a returned
+ * error. If that is the case it will show an error message and return @c true.
+ * @param data The JSON object
+ * @returns @c true if the request contains an error, @c false otherwise
+ * @todo With JQuery 1.5 we should use the statusCode property
+ */
+function handleError(data) {
+    if (data.error && typeof(data.error) == "number") {
+        clearErrorMessages();
+        showErrorMessage(i18n.error.unexpected.replace(/_CODE_/, data.code));
+        return true;
+    }
+    return false;
 }
 
 /**
