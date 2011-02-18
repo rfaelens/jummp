@@ -385,6 +385,8 @@ function uploadModel() {
             setErrorState("#model-upload-comment", data.comment);
             setErrorState("#model-upload-pubmed", data.pubmed);
         } else if (data.success) {
+            clearErrorMessages();
+            showInfoMessage(i18n.model.upload.success.replace(/_ID_/, data.model.id), 20000);
             // TODO: change to Model view?
         }
         },

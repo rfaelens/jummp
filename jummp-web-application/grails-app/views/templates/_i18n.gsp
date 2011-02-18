@@ -28,6 +28,9 @@ var i18n = {
     model: {
         list: {
             download: "${g.message(code: 'model.list.table.download')}"
+        },
+        upload: {
+            success: "${g.message(code: 'model.upload.success', args: ['_ID_'])}"
         }
     },
     publication: {

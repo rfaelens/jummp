@@ -145,9 +145,8 @@ class ModelController {
             // need to wrap JSON in a textarea to work with iframe used by jquery form plugin
             render "<textarea>" + (errors as JSON) + "</textarea>"
         } else {
-            // TODO: pass more useful information around
-            coreAdapterService.uploadModel(cmd.model.bytes, cmd.toModelCommand())
-            render "<textarea>" + ([success: true] as JSON) + "</textarea>"
+            ModelTransportCommand model = coreAdapterService.uploadModel(cmd.model.bytes, cmd.toModelCommand())
+            render "<textarea>" + ([success: true, model: model] as JSON) + "</textarea>"
         }
     }
 
