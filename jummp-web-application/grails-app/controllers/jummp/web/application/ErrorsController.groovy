@@ -18,7 +18,8 @@ class ErrorsController {
         }
         digest = digest.encodeAsMD5()
         if (springSecurityService.isAjax(request)) {
-            render ([error: 500, code: digest]) as JSON
+            def data = [error: 500, code: digest]
+            render data as JSON
             return
         } else {
             [code: digest]
