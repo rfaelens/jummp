@@ -33,8 +33,8 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 class GitManager implements VcsManager {
     private static final ReentrantLock lock = new ReentrantLock()
     private static final AtomicInteger uid = new AtomicInteger(0)
-    private final File clone
-    private final File exchangeDirectory
+    private File clone
+    private File exchangeDirectory
     private boolean inited = false
     private Repository repository
     private Git git
