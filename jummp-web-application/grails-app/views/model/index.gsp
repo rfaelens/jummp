@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta name="layout" content="main"/>
-        <jq:plugin name="dataTables"/>
+        <jqDT:resources jqueryUi="true"/>
         <title><g:message code="model.list.title"/></title>
     </head>
     <body>
