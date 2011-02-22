@@ -78,8 +78,14 @@ class PubMedService {
         if (slurper.Article.Affiliation.size() == 1) {
             publication.affiliation = slurper.Article.Affiliation.text()
         }
-        if (slurper.Article.Abstract.AbstractText.size() == 1) {
-            publication.synopsis = slurper.Article.Abstract.AbstractText.text()
+        if (slurper.Article.Abstract.AbstractText.size() > 0) {
+            publication.synopsis = ''
+            slurper.Article.Abstract.AbstractText.each {
+                if (it.@Label.size() == 1) {
+                    publication.synopsis += it.@Label.text() + "\n"
+                }
+                publication.synopsis += it.text()
+            }
             if (publication.synopsis.length() > 1000) {
                 publication.synopsis = publication.synopsis.substring(0, 999) + "…"
             }
