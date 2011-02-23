@@ -8,6 +8,7 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
+import net.biomodels.jummp.core.model.PublicationTransportCommand
 
 /**
  * @short Service connecting to the core via synchronous JMS.
@@ -150,6 +151,17 @@ class CoreAdapterService {
         def retVal = send("getAllRevisions", model)
         validateReturnValue(retVal, List)
         return (List<RevisionTransportCommand>)retVal
+    }
+
+    /**
+     * Returns the reference publication of this @p model.
+     * @param model The Model for which the reference publication should be returned.
+     * @return The reference publication
+     */
+    public PublicationTransportCommand getPublication(final ModelTransportCommand model) {
+        def retVal = send("getPublication", model)
+        validateReturnValue(retVal, PublicationTransportCommand)
+        return (PublicationTransportCommand)retVal
     }
 
     /**

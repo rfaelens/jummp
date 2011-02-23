@@ -254,6 +254,24 @@ class ModelService {
     }
 
     /**
+     * Returns the reference publication of this @p model.
+     * @param model The Model for which the reference publication should be returned.
+     * @return The reference publication
+     * @throws IllegalArgumentException if @p model is null
+     * @throws AccessDeniedException if the current user is not allowed to access at least one Model Revision
+     */
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    public Publication getPublication(final Model model) throws AccessDeniedException, IllegalArgumentException {
+        if (!model) {
+            throw new IllegalArgumentException("Model may not be null")
+        }
+        if (!getLatestRevision(model)) {
+            throw new AccessDeniedException("You are not allowed to view Model with id ${model.id}")
+        }
+        return model.publication
+    }
+
+    /**
     * Creates a new Model and stores it in the VCS.
     *
     * Stores the @p modelFile as a new file in the VCS and creates a Model for it.

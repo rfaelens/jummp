@@ -18,6 +18,8 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
+import net.biomodels.jummp.model.Publication
+import net.biomodels.jummp.core.model.PublicationTransportCommand
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -202,6 +204,35 @@ class JmsAdapterService {
             revisions << it.toCommandObject()
         }
         return revisions
+    }
+
+    /**
+     * Wrapper around ModelService.getPublication
+     * @param message List consisting of Authentication and Model
+     * @return PublicationTransportCommand or IllegalArgumentException or AccessDeniedException
+     */
+    @Queue
+    def getPublication(def message) {
+        if (!verifyMessage(message, [Authentication, ModelTransportCommand])) {
+            return new IllegalArgumentException("Authentication and Model as arguments expected")
+        }
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            Publication publication = modelService.getPublication(Model.get(message[1].id))
+            if (publication) {
+                result = publication.toCommandObject()
+            } else {
+                result = new PublicationTransportCommand()
+            }
+        } catch (AccessDeniedException e) {
+            result = e
+        } catch (IllegalArgumentException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
     }
 
     /**
