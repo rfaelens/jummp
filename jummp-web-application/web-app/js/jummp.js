@@ -123,7 +123,7 @@ function createModelDataTable() {
                             rowData[2] = html;
                         }
                         // id column
-                        rowData[0] = '<a href="' + createLink("model", "show", id) + '">' + id + '</a>';
+                        rowData[0] = '<a href="#" onclick="showModel(\'' + id + '\');">' + id + '</a>';
                         // the format/download column
                         rowData[4] = rowData[4] + '&nbsp;<a href="' + createLink('model', 'download', id) + '">' + i18n.model.list.download + '</a>';
                     }
@@ -151,6 +151,20 @@ function createModelDataTable() {
     });
     $(document).bind("login", function(event) {
         $('#modelTable').dataTable().fnDraw();
+    });
+}
+
+/**
+ * Loads the view to show a Model and replaces.
+ * @param id The id of the Model to show
+ */
+function showModel(id) {
+    $("#body").block();
+    $.get(createLink("model", "show", id), function(data) {
+        $("#body").html(data);
+        $("#modelTabs").tabs({disabled: [1, 2, 3, 4, 5]});
+        $("#modelTabs").show();
+        $("#body").unblock();
     });
 }
 
