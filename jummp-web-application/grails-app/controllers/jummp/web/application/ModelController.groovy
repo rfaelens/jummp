@@ -5,6 +5,7 @@ import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import grails.plugins.springsecurity.Secured
 import org.springframework.web.multipart.MultipartFile
+import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.PublicationLinkProvider
@@ -145,8 +146,14 @@ class ModelController {
             // need to wrap JSON in a textarea to work with iframe used by jquery form plugin
             render "<textarea>" + (errors as JSON) + "</textarea>"
         } else {
-            ModelTransportCommand model = coreAdapterService.uploadModel(cmd.model.bytes, cmd.toModelCommand())
-            render "<textarea>" + ([success: true, model: model] as JSON) + "</textarea>"
+            try {
+                ModelTransportCommand model = coreAdapterService.uploadModel(cmd.model.bytes, cmd.toModelCommand())
+                render "<textarea>" + ([success: true, model: model] as JSON) + "</textarea>"
+            } catch (ModelException e) {
+                Map errors = [error: true]
+                errors.put("model", e.getMessage())
+                render "<textarea>" + (errors as JSON) + "</textarea>"
+            }
         }
     }
 
