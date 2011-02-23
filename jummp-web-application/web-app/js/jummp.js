@@ -155,6 +155,18 @@ function createModelDataTable() {
 }
 
 /**
+ * Loads the view to show a list of models.
+ */
+function showModelList() {
+    $("#body").block();
+    $.get(createLink("model", "index"), function(data) {
+        $("#body").html(data);
+        createModelDataTable();
+        $("#body").unblock();
+    });
+}
+
+/**
  * Loads the view to show a Model and replaces.
  * @param id The id of the Model to show
  */
@@ -562,7 +574,7 @@ $(document).ready(function() {
             }
         ]
     });
-    createModelDataTable();
+    showModelList();
     $("#model-upload-form").ajaxForm();
     $("input:radio[name=publicationType]").change(uploadModelPublicationChangeListener);
 });

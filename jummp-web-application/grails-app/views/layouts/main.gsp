@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="${resource(dir:'css', file:'jquery.cluetip.css')}" type="text/css" />
         <g:render template="/templates/i18n"/>
         <g:javascript library="jquery" plugin="jquery"/>
+        <jqDT:resources jqueryUi="true"/>
         <g:javascript src="jquery/jquery.cluetip.js"/>
         <g:javascript src="jquery/jquery.blockUI.js"/>
         <g:javascript src="jquery/jquery.form.js"/>
