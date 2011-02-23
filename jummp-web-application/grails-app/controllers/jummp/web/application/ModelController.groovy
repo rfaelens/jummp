@@ -9,6 +9,7 @@ import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.PublicationLinkProvider
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 /**
  * @short Controller providing basic access to Models.
@@ -28,6 +29,18 @@ class ModelController {
      */
     def index = { }
 
+    def show = {
+        ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
+        RevisionTransportCommand rev = coreAdapterService.getLatestRevision(model)
+        [revision: rev]
+    }
+
+    def summary = {
+        ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
+        RevisionTransportCommand rev = coreAdapterService.getLatestRevision(model)
+        PublicationTransportCommand publication = coreAdapterService.getPublication(model)
+        [publication: publication, revision: rev]
+    }
     /**
      * AJAX action to get all Models from the core the current user has access to.
      * Returns a JSON data structure for consumption by a jQuery DataTables. 
