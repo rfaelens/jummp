@@ -31,6 +31,9 @@ var i18n = {
         },
         upload: {
             success: "${g.message(code: 'model.upload.success', args: ['_ID_'])}"
+        },
+        summary: {
+            referencePublication: "${g.message(code: 'model.summary.reference-publication')}"
         }
     },
     publication: {

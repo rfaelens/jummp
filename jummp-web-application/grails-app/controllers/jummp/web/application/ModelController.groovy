@@ -57,6 +57,16 @@ class ModelController {
             [publication: publication, revision: rev]
         }
     }
+
+    /**
+     * Renders html snippet with Publication information for the current Model identified by the id.
+     */
+    def publication = {
+        ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
+        PublicationTransportCommand publication = coreAdapterService.getPublication(model)
+        render(template: "/templates/publication", model: [publication: publication])
+    }
+
     /**
      * AJAX action to get all Models from the core the current user has access to.
      * Returns a JSON data structure for consumption by a jQuery DataTables. 
