@@ -174,7 +174,6 @@ function showModel(id) {
     $("#body").block();
     $.ajax({url: createLink("model", "show", id),
         success: function(data) {
-            console.log("called");
             $("#body").html(data);
             $("#modelTabs").tabs({disabled: [1, 2, 3, 4, 5]});
             $("#modelTabs").show();
