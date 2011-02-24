@@ -128,7 +128,7 @@ function createModelDataTable() {
                         rowData[4] = rowData[4] + '&nbsp;<a href="' + createLink('model', 'download', id) + '">' + i18n.model.list.download + '</a>';
                     }
                     fnCallback(json);
-                    $('a.tooltip').cluetip({local: true, width: 550});
+                    $('a.tooltip').cluetip({local: true, width: 550, clickThrough: true});
                 }});
             },
         // i18n
@@ -272,7 +272,7 @@ function createPublicationTooltip(publication) {
  * @param publication JSON object describing the publication
  */
 function createPubMedLink(publication) {
-    return '<a class="tooltip" href="http://www.ebi.ac.uk/citexplore/citationDetails.do?dataSource=MED&externalId=' + publication.link + '" title="' + publication.title + '" rel="#' + publicationTooltipId(publication.link) + '">' + createPublicationLinkTitle(publication) + '</a>';
+    return '<a class="tooltip" target="_blank" href="http://www.ebi.ac.uk/citexplore/citationDetails.do?dataSource=MED&externalId=' + publication.link + '" title="' + publication.title + '" rel="#' + publicationTooltipId(publication.link) + '">' + createPublicationLinkTitle(publication) + '</a>';
 }
 
 /**
@@ -290,7 +290,7 @@ function createPubMedLink(publication) {
  * @param publication JSON object describing the publication
  */
 function createDoiLink(publication) {
-    return '<a class="tooltip" href="http://dx.doi.org/' + publication.link + '" title="' + publication.title + '" rel="#' + publicationTooltipId(publication.link) + '">' + createPublicationLinkTitle(publication) + '</a>';
+    return '<a class="tooltip" target="_blank" href="http://dx.doi.org/' + publication.link + '" title="' + publication.title + '" rel="#' + publicationTooltipId(publication.link) + '">' + createPublicationLinkTitle(publication) + '</a>';
 }
 
 /**
