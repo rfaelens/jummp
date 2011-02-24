@@ -176,7 +176,12 @@ function showModel(id) {
     $.ajax({url: createLink("model", "show", id),
         success: function(data) {
             $("#body").html(data);
-            $("#modelTabs").tabs({disabled: [1, 2, 3, 4, 5]});
+            $("#modelTabs").tabs({disabled: [1, 2, 3, 4, 5],
+                ajaxOptions: {error: function(jqXHR) {
+                    $("#body").unblock();
+                    handleError($.parseJSON(jqXHR.responseText));
+                }}
+            });
             $("#modelTabs").show();
             $("#body").unblock();
         },
