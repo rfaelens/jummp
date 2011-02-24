@@ -1,5 +1,6 @@
 <%@ page import="net.biomodels.jummp.core.model.PublicationLinkProvider" %>
 <div id="model-reference-publication">
+    <g:if test="${publication.link && publication.linkProvider}">
     <h2><g:message code="model.summary.reference-publication"/></h2>
     <table>
         <thead></thead>
@@ -90,4 +91,8 @@
         </g:if>
         </tbody>
     </table>
+    </g:if>
+    <g:else>
+        <h2><g:message code="model.summary.reference-publication-unpublished"/></h2>
+    </g:else>
 </div>

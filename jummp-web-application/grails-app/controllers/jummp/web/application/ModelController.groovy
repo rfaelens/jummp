@@ -23,11 +23,19 @@ class ModelController {
      * Dependency injection of coreAdapterService
      */
     def coreAdapterService
+    /**
+     * Dependency injection of springSecurityService
+     */
+    def springSecurityService
 
     /**
      * Default action showing a list view
      */
-    def index = { }
+    def index = {
+        if (!springSecurityService.isAjax(request)) {
+            redirect(url: "/" + grailsApplication.metadata["app.name"])
+        }
+    }
 
     def show = {
         ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
