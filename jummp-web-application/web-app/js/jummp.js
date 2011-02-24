@@ -237,41 +237,6 @@ function publicationTooltipId(id) {
 }
 
 /**
- * Creates the visible title for a publication link.
- * The following information from the JSON structure is used:
- * @li title: The title of the publication
- * @li journal: The name of the Journal (optional)
- * @li year: The year of the publication (optional)
- * @li month: The month of the publication (optional)
- * @li issue: The Journal issue (optional)
- * @li volume: The volume of the journal issue (optional)
- * @li pages: The pages in the journal (optional)
- * @param publication JSON object describing the publication
- */
-function createPublicationLinkTitle(publication) {
-    var title = "";
-    if (publication.journal) {
-        title += publication.journal;
-    }
-    if (publication.year) {
-        title += " " + publication.year;
-        if (publication.month) {
-            title += " " + publication.month;
-        }
-    }
-    if (publication.volume) {
-        title += ";" + publication.volume;
-    }
-    if (publication.issue) {
-        title += "(" + publication.issue + ")";
-    }
-    if (publication.pages) {
-        title += ": " + publication.pages;
-    }
-    return title
-}
-
-/**
  * Change listener for the upload model view.
  * It gets called whenever the Publication type radio button changes.
  * It adjusts the view to show/hide fields and enable/disable fields.
