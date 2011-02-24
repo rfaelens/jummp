@@ -33,21 +33,29 @@ class ModelController {
      */
     def index = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(url: "/" + grailsApplication.metadata["app.name"])
+            redirect(controller: "home", params: [redirect: "MODELLIST"])
         }
     }
 
     def show = {
-        ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
-        RevisionTransportCommand rev = coreAdapterService.getLatestRevision(model)
-        [revision: rev]
+        if (!springSecurityService.isAjax(request)) {
+            redirect(controller: "home", params: [redirect: "SHOWMODEL", id: params.id])
+        } else {
+            ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
+            RevisionTransportCommand rev = coreAdapterService.getLatestRevision(model)
+            [revision: rev]
+        }
     }
 
     def summary = {
-        ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
-        RevisionTransportCommand rev = coreAdapterService.getLatestRevision(model)
-        PublicationTransportCommand publication = coreAdapterService.getPublication(model)
-        [publication: publication, revision: rev]
+        if (!springSecurityService.isAjax(request)) {
+            redirect(controller: "home", params: [redirect: "SHOWMODEL", id: params.id])
+        } else {
+            ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
+            RevisionTransportCommand rev = coreAdapterService.getLatestRevision(model)
+            PublicationTransportCommand publication = coreAdapterService.getPublication(model)
+            [publication: publication, revision: rev]
+        }
     }
     /**
      * AJAX action to get all Models from the core the current user has access to.
