@@ -213,18 +213,6 @@ function createDoiLink(publication, model) {
 }
 
 /**
- * Creates an id for a publication tooltip from the PubMed or DOI id.
- * @param id The PubMed or DOI id.
- */
-function publicationTooltipId(id) {
-    var linkId = id.replace('.', '');
-    linkId = linkId.replace('/', '');
-    linkId = linkId.replace('(', '');
-    linkId = linkId.replace(')', '');
-    return "publication-tooltip-" + linkId;
-}
-
-/**
  * Change listener for the upload model view.
  * It gets called whenever the Publication type radio button changes.
  * It adjusts the view to show/hide fields and enable/disable fields.
