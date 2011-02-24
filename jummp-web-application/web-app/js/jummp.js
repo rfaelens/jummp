@@ -172,12 +172,18 @@ function showModelList() {
  */
 function showModel(id) {
     $("#body").block();
-    $.get(createLink("model", "show", id), function(data) {
-        $("#body").html(data);
-        $("#modelTabs").tabs({disabled: [1, 2, 3, 4, 5]});
-        $("#modelTabs").show();
-        $("#body").unblock();
-    });
+    $.ajax({url: createLink("model", "show", id),
+        success: function(data) {
+            console.log("called");
+            $("#body").html(data);
+            $("#modelTabs").tabs({disabled: [1, 2, 3, 4, 5]});
+            $("#modelTabs").show();
+            $("#body").unblock();
+        },
+        error: function(jqXHR) {
+            $("#body").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }});
 }
 
 /**
@@ -538,7 +544,20 @@ function showMessage(messages, timeout, container) {
 function handleError(data) {
     if (data.error && typeof(data.error) == "number") {
         clearErrorMessages();
-        showErrorMessage(i18n.error.unexpected.replace(/_CODE_/, data.code));
+        var errorMessage = "";
+        switch (data.error) {
+            case 403:
+                errorMessage = i18n.error.denied;
+                if (data.authenticated != undefined && data.authenticated == false) {
+                    switchUserInformation(false);
+                    showLoginDialog();
+                }
+                break;
+            case 500:
+                errorMessage = i18n.error.unexpected.replace(/_CODE_/, data.code);
+                break;
+        }
+        showErrorMessage(errorMessage);
         return true;
     }
     return false;

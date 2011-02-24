@@ -5,6 +5,16 @@ import grails.converters.JSON
 class ErrorsController {
     def springSecurityService
 
+    def error403 = {
+        if (springSecurityService.isAjax(request)) {
+            def data = [error: 403, authenticated: springSecurityService.isLoggedIn()]
+            render data as JSON
+            return
+        } else {
+            [authenticated: springSecurityService.isLoggedIn()]
+        }
+    }
+
     def error500 = {
         def exception = request.getAttribute('exception')
         String digest = ''

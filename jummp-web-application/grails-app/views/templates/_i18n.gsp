@@ -46,7 +46,8 @@ var i18n = {
         authors:     "${g.message(code: 'publication.authors')}"
     },
     error: {
-        unexpected: "${g.message(code: 'error.500.explanation', args: ['_CODE_'])}"
+        unexpected: "${g.message(code: 'error.500.explanation', args: ['_CODE_'])}",
+        denied:     "${g.message(code: 'error.403.explanation')}"
     }
 };
 </g:javascript>
