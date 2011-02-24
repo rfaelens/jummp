@@ -114,9 +114,9 @@ function createModelDataTable() {
                         if (rowData[2] != null) {
                             var publication = rowData[2];
                             var html = "";
-                            if (publication.linkProvider.name == "PUBMED") {
+                            if (publication.linkProvider == "PUBMED") {
                                 html = createPubMedLink(publication, id);
-                            } else if (publication.linkProvider.name == "DOI") {
+                            } else if (publication.linkProvider == "DOI") {
                                 html = createDoiLink(publication, id);
                             }
                             rowData[2] = html;
@@ -202,7 +202,7 @@ function showModel(id) {
  * @param model The id of the model
  */
 function createPubMedLink(publication, model) {
-    return '<a class="tooltip" target="_blank" href="http://www.ebi.ac.uk/citexplore/citationDetails.do?dataSource=MED&externalId=' + publication.link + '" title="' + i18n.model.summary.referencePublication + '" rel="' + createLink('model', 'publication', model) + '">' + createPublicationLinkTitle(publication) + '</a>';
+    return '<a class="tooltip" target="_blank" href="http://www.ebi.ac.uk/citexplore/citationDetails.do?dataSource=MED&externalId=' + publication.link + '" title="' + i18n.model.summary.referencePublication + '" rel="' + createLink('model', 'publication', model) + '">' + publication.compactTitle + '</a>';
 }
 
 /**
@@ -221,7 +221,7 @@ function createPubMedLink(publication, model) {
  * @param model The id of the model
  */
 function createDoiLink(publication, model) {
-    return '<a class="tooltip" target="_blank" href="http://dx.doi.org/' + publication.link + '" title="' + i18n.model.summary.referencePublication + '" rel="' + createLink('model', 'publication', model) + '">' + createPublicationLinkTitle(publication) + '</a>';
+    return '<a class="tooltip" target="_blank" href="http://dx.doi.org/' + publication.link + '" title="' + i18n.model.summary.referencePublication + '" rel="' + createLink('model', 'publication', model) + '">' + publication.compactTitle + '</a>';
 }
 
 /**

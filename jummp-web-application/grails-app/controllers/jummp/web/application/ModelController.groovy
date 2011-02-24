@@ -109,7 +109,13 @@ class ModelController {
         }
         List models = coreAdapterService.getAllModels(start, length, params.sSortDir_0 == "asc", sort)
         models.each { model ->
-            dataToRender.aaData << [model.id, model.name, model.publication, model.lastModifiedDate, model.format.name]
+            Map publication = [:]
+            if (model.publication) {
+                publication.put("link", model.publication.link)
+                publication.put("linkProvider", model.publication.linkProvider.toString())
+                publication.put("compactTitle", jummp.compactPublicationTitle(publication: model.publication))
+            }
+            dataToRender.aaData << [model.id, model.name, publication, model.lastModifiedDate, model.format.name]
         }
         render dataToRender as JSON
     }

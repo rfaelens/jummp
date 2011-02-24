@@ -20,27 +20,7 @@
     </g:if>
     <tr>
         <td><strong><g:message code="publication.journal"/></strong></td>
-        <td>
-<%
-String publicationSummary = publication.journal
-if (publication.year) {
-    publicationSummary += " " + publication.year
-    if (publication.month) {
-        publicationSummary += " " + publication.month
-    }
-}
-if (publication.volume) {
-    publicationSummary += "; " + publication.volume
-}
-if (publication.issue) {
-    publicationSummary += "(" + publication.issue + ")"
-}
-if (publication.pages) {
-    publicationSummary += ": " + publication.pages
-}
-%>
-            ${publicationSummary}
-        </td>
+        <td><jummp:compactPublicationTitle publication="${publication}"/></td>
     </tr>
     <tr>
         <td><strong><g:message code="publication.title"/></strong></td>
