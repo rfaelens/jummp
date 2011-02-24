@@ -191,13 +191,7 @@ function showModel(id) {
  * The hyperlink has a class "tooltip", a title and rel attribute referencing a tooltip.
  * The following information from the JSON structure is used:
  * @li link: The PubMed ID
- * @li title: The title of the publication
- * @li journal: The name of the Journal (optional)
- * @li year: The year of the publication (optional)
- * @li month: The month of the publication (optional)
- * @li issue: The Journal issue (optional)
- * @li volume: The volume of the journal issue (optional)
- * @li pages: The pages in the journal (optional)
+ * @li compactTitle: The title of the publication
  * @param publication JSON object describing the publication
  * @param model The id of the model
  */
@@ -210,13 +204,7 @@ function createPubMedLink(publication, model) {
  * The hyperlink has a class "tooltip", a title and rel attribute referencing a tooltip.
  * The following information from the JSON structure is used:
  * @li link: The DOI link
- * @li title: The title of the publication
- * @li journal: The name of the Journal (optional)
- * @li year: The year of the publication (optional)
- * @li month: The month of the publication (optional)
- * @li issue: The Journal issue (optional)
- * @li volume: The volume of the journal issue (optional)
- * @li pages: The pages in the journal (optional)
+ * @li compactTitle: The title of the publication
  * @param publication JSON object describing the publication
  * @param model The id of the model
  */
