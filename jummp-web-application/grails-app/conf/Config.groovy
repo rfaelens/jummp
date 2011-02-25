@@ -126,3 +126,4 @@ log4j = {
 }
 
 grails.plugins.springsecurity.providerNames = ['jmsAuthenticationProvider', 'anonymousAuthenticationProvider', 'rememberMeAuthenticationProvider']
+grails.plugins.springsecurity.successHandler.alwaysUseDefault = true
