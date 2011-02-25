@@ -192,6 +192,34 @@ function showModel(id) {
 }
 
 /**
+ * Loads the view to upload a model
+ */
+function showUploadModel() {
+    $("#body").block();
+    $.ajax({
+        url: createLink("model", "upload"),
+        dataType: "html",
+        success: function(data) {
+            $("#body").html(data);
+            clearErrorMessages();
+            $("input:radio[name=publicationType]")[0].checked = true;
+            $("#model-upload-form div input:button").button();
+            uploadModelPublicationChangeListener();
+            // disable items as long as the functionality is not implemented
+            enableElement("#model-upload-publication-doi", false);
+            enableElement("label[for=model-upload-publication-doi]", false);
+            enableElement("#model-upload-publication-url", false);
+            enableElement("label[for=model-upload-publication-url]", false);
+            $("#body").unblock();
+        },
+        error: function(jqXHR) {
+            $("#body").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
  * Creates HTML markup for a hyperlink to citexplore referencing a PubMed Id.
  * The hyperlink has a class "tooltip", a title and rel attribute referencing a tooltip.
  * The following information from the JSON structure is used:

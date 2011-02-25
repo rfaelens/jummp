@@ -17,12 +17,17 @@
            showModel("${params.id}");
 <%
         break
+    case "UPLOADMODEL":
+%>
+           showUploadModel();
+<%
+        break
     }
 %>
         });
         </g:javascript>
     </head>
     <body>
-        <div id="body"></div>
+        <div id="body" class="ui-widget"></div>
     </body>
 </html>

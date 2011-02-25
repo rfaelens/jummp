@@ -122,6 +122,9 @@ class ModelController {
 
     @Secured('ROLE_USER')
     def upload = {
+        if (!springSecurityService.isAjax(request)) {
+            redirect(controller: "home", params: [redirect: "UPLOADMODEL"])
+        }
     }
 
     @Secured('ROLE_USER')
