@@ -295,7 +295,7 @@ function uploadModel() {
         } else if (data.success) {
             clearErrorMessages();
             showInfoMessage(i18n.model.upload.success.replace(/_ID_/, data.model.id), 20000);
-            // TODO: change to Model view?
+            showModel(data.model.id);
         }
         },
         error: function(jqXHR, textStatus, errorThrown) {
