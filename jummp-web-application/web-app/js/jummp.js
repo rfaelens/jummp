@@ -469,7 +469,6 @@ $(document).ready(function() {
             }
         ]
     });
-    showModelList();
     $("#model-upload-form").ajaxForm();
     $("input:radio[name=publicationType]").change(uploadModelPublicationChangeListener);
 });
