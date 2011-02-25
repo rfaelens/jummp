@@ -4,6 +4,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import net.biomodels.jummp.core.JummpException
+import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
@@ -188,7 +189,7 @@ class CoreAdapterService {
     * @return The new created Model as a ModelTransportCommand
     **/
     @Profiled(tag="coreAdapterService.uploadModel")
-    public ModelTransportCommand uploadModel(byte[] bytes, ModelTransportCommand meta) {
+    public ModelTransportCommand uploadModel(byte[] bytes, ModelTransportCommand meta) throws ModelException {
         def retVal = send("uploadModel", [bytes, meta])
         validateReturnValue(retVal, ModelTransportCommand)
         return (ModelTransportCommand)retVal
