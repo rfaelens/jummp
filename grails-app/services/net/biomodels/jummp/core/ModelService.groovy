@@ -15,6 +15,7 @@ import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
+import org.perf4j.aop.Profiled
 import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.events.LoggingEventType
@@ -75,6 +76,7 @@ class ModelService {
     * @return List of Models
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getAllModels")
     public List<Model> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn) {
         // TODO: implement better by going down to database
         String sorting = sortOrder ? 'asc' : 'desc'
@@ -136,6 +138,7 @@ class ModelService {
     * @see getAllModels(int offset, int count, boolean sortOrder)
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getAllModels")
     public List<Model> getAllModels(int offset, int count, boolean sortOrder) {
         getAllModels(offset, count, sortOrder, ModelListSorting.ID)
     }
@@ -147,6 +150,7 @@ class ModelService {
     * @see getAllModels(int offset, int count, boolean sortOrder)
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getAllModels")
     public List<Model> getAllModels(int offset, int count, ModelListSorting sortColumn) {
         return getAllModels(offset, count, true, sortColumn)
     }
@@ -158,6 +162,7 @@ class ModelService {
     * @see getAllModels(int offset, int count, boolean sortOrder)
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getAllModels")
     public List<Model> getAllModels(int offset, int count) {
         return getAllModels(offset, count, ModelListSorting.ID)
     }
@@ -170,6 +175,7 @@ class ModelService {
     * @see getAllModels(int offset, int count, boolean sortOrder)
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getAllModels")
     public List<Model> getAllModels(ModelListSorting sortColumn) {
         return getAllModels(0, 10, true, sortColumn)
     }
@@ -181,6 +187,7 @@ class ModelService {
     * @see getAllModels(int offset, int count, boolean sortOrder)
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getAllModels")
     public List<Model> getAllModels() {
         return getAllModels(ModelListSorting.ID)
     }
@@ -191,6 +198,7 @@ class ModelService {
     * @see getAllModels
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getModelCount")
     public Integer getModelCount() {
         // TODO: implement better by going down to database
         List<Model> models = Model.list()
@@ -212,6 +220,7 @@ class ModelService {
     * @return Latest Revision the current user has read access to. If there is no such revision null is returned
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getLatestRevision")
     public Revision getLatestRevision(Model model) {
         // TODO: maybe querying the database directly is more efficient?
         if (!model) {
@@ -246,6 +255,7 @@ class ModelService {
     **/
     @PostFilter("hasPermission(filterObject, read) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getAllRevisions")
     public List<Revision> getAllRevisions(Model model) {
         if (model.state == ModelState.DELETED) {
             return []
@@ -261,6 +271,7 @@ class ModelService {
      * @throws AccessDeniedException if the current user is not allowed to access at least one Model Revision
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getPublication")
     public Publication getPublication(final Model model) throws AccessDeniedException, IllegalArgumentException {
         if (!model) {
             throw new IllegalArgumentException("Model may not be null")
@@ -285,6 +296,7 @@ class ModelService {
     **/
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostLogging(LoggingEventType.CREATION)
+    @Profiled(tag="modelService.uploadModel")
     public Model uploadModel(final File modelFile, ModelTransportCommand meta) throws ModelException {
         // TODO: to support anonymous submissions this method has to be changed
         if (Model.findByName(meta.name)) {
@@ -374,6 +386,7 @@ class ModelService {
     **/
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.addRevision")
     public Revision addRevision(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
         // TODO: the method should be thread safe, add a lock
         if (!model) {
@@ -439,6 +452,7 @@ class ModelService {
      */
     @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.retrieveModelFile")
     byte[] retrieveModelFile(final Revision revision) throws ModelException {
         File file;
         try {
@@ -459,6 +473,7 @@ class ModelService {
      * @throws ModelException In case retrieving from VCS fails.
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.retrieveModelFile")
     byte[] retrieveModelFile(final Model model) throws ModelException {
         final Revision revision = getLatestRevision(model)
         if (!revision) {
@@ -481,6 +496,7 @@ class ModelService {
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.grantReadAccess")
     public void grantReadAccess(Model model, User collaborator) {
         // Read access is modeled by adding read access to the model (user will get read access for future revisions)
         // and by adding read access to all revisions the user has access to
@@ -506,6 +522,7 @@ class ModelService {
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.grantWriteAccess")
     public void grantWriteAccess(Model model, User collaborator) {
         aclUtilService.addPermission(model, collaborator.username, BasePermission.WRITE)
     }
@@ -526,6 +543,7 @@ class ModelService {
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.revokeReadAccess")
     public boolean revokeReadAccess(Model model, User collaborator) {
         if (collaborator.username == springSecurityService.authentication.name) {
             // the user cannot revoke his own rights
@@ -560,6 +578,7 @@ class ModelService {
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.revokeWriteAccess")
     public boolean revokeWriteAccess(Model model, User collaborator) {
         if (collaborator.username == springSecurityService.authentication.name) {
             // the user cannot revoke his own rights
@@ -599,6 +618,7 @@ class ModelService {
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.transferOwnerShip")
     public void transferOwnerShip(Model model, User collaborator) {
         // TODO: implement me
     }
@@ -617,6 +637,7 @@ class ModelService {
     **/
     @PreAuthorize("hasPermission(#model, delete) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.DELETION)
+    @Profiled(tag="modelService.deleteModel")
     public boolean deleteModel(Model model) {
         // TODO: the code does not check whether the model exists
         if (model.state != ModelState.UNPUBLISHED) {
@@ -638,6 +659,7 @@ class ModelService {
     **/
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.restoreModel")
     public boolean restoreModel(Model model) {
         // TODO: the code does not check whether the model exists
         if (model.state == ModelState.DELETED) {

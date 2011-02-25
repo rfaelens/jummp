@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.plugins.security.SerializableGrailsUser
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
+import org.perf4j.aop.Profiled
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -59,6 +60,7 @@ class JmsAdapterService {
      * @return A fully propagated Authentication or an AuthenticationException or an IllegalArgumentException if @p message is not an Authentication
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.authenticate")
     def authenticate(def message) {
         if (message instanceof Authentication) {
             try {
@@ -89,6 +91,7 @@ class JmsAdapterService {
      * @return List of ModelTransportCommands or IllegalArgumentException for incorrect arguments
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.getAllModels")
     def getAllModels(def message) {
         if (!verifyMessage(message, [Authentication.class]) &&
                 !verifyMessage(message, [Authentication.class, ModelListSorting.class]) &&
@@ -143,6 +146,7 @@ class JmsAdapterService {
      * @return Number of Models or IllegalArgumentException for missing Authentication
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.getModelCount")
     def getModelCount(def message) {
         if (!(message instanceof Authentication)) {
             return new IllegalArgumentException("Authentication as argument expected")
@@ -163,6 +167,7 @@ class JmsAdapterService {
      * @return A RevisionTransportCommand or IllegalArgumentException or AccessDeniedException if user does not have access to any Revision.
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.getLatestRevision")
     def getLatestRevision(def message) {
         if (!verifyMessage(message, [Authentication, ModelTransportCommand])) {
             return new IllegalArgumentException("Authentication and Model as arguments expected")
@@ -188,6 +193,7 @@ class JmsAdapterService {
      * @return List of Revisions wrapped in RevisionTransportCommand or IllegalArgumentException
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.getAllRevisions")
     def getAllRevisions(def message) {
         if (!verifyMessage(message, [Authentication, ModelTransportCommand])) {
             return new IllegalArgumentException("Authentication and Model as arguments expected")
@@ -212,6 +218,7 @@ class JmsAdapterService {
      * @return PublicationTransportCommand or IllegalArgumentException or AccessDeniedException
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.getPublication")
     def getPublication(def message) {
         if (!verifyMessage(message, [Authentication, ModelTransportCommand])) {
             return new IllegalArgumentException("Authentication and Model as arguments expected")
@@ -241,6 +248,7 @@ class JmsAdapterService {
      * @return New created Model as ModelTransportCommand, InvalidArgumentException, AccessDeniedException or ModelException
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.uploadModel")
     def uploadModel(def message) {
         // TODO: replace Map by the proper type
         if (!verifyMessage(message, [Authentication, byte[], ModelTransportCommand])) {
@@ -271,6 +279,7 @@ class JmsAdapterService {
      * @return New created Revision as RevisionTransportCommand, InvalidArgumentException, AccessDeniedException or ModelException
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.addRevision")
     def addRevision(def message) {
         if (!verifyMessage(message, [Authentication, ModelTransportCommand, byte[], ModelFormatTransportCommand, String])) {
             return new IllegalArgumentException("Authentication, Model, Byte Array, ModelFormatTransportCommand and String as arguments expected")
@@ -300,6 +309,7 @@ class JmsAdapterService {
      * @return Byte Array, InvalidArgumentException, AccessDeniedException or ModelException
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.retrieveModelFile")
     def retrieveModelFile(def message) {
         if (!verifyMessage(message, [Authentication, RevisionTransportCommand]) &&
             !verifyMessage(message, [Authentication, ModelTransportCommand])) {
@@ -330,6 +340,7 @@ class JmsAdapterService {
      * @return @c true if successfully updated, InvalidArgumentException or AccessDeniedException
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.grantReadAccess")
     def grantReadAccess(def message) {
         if (!verifyMessage(message, [Authentication, ModelTransportCommand, User])) {
             return new IllegalArgumentException("Authentication, Model and User as arguments expected")
@@ -354,6 +365,7 @@ class JmsAdapterService {
      * @return @c true if successfully updated, InvalidArgumentException or AccessDeniedException
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.grantWriteAccess")
     def grantWriteAccess(def message) {
         if (!verifyMessage(message, [Authentication, ModelTransportCommand, User])) {
             return new IllegalArgumentException("Authentication, Model and User as arguments expected")
@@ -378,6 +390,7 @@ class JmsAdapterService {
      * @return @c true if successfully updated, @c false otherwise, InvalidArgumentException or AccessDeniedException
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.revokeReadAccess")
     def revokeReadAccess(def message) {
         if (!verifyMessage(message, [Authentication, ModelTransportCommand, User])) {
             return new IllegalArgumentException("Authentication, Model and User as arguments expected")
@@ -401,6 +414,7 @@ class JmsAdapterService {
      * @return @c true if successfully updated, @c false otherwise, InvalidArgumentException or AccessDeniedException
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.revokeWriteAccess")
     def revokeWriteAccess(def message) {
         if (!verifyMessage(message, [Authentication, ModelTransportCommand, User])) {
             return new IllegalArgumentException("Authentication, Model and User as arguments expected")
@@ -424,6 +438,7 @@ class JmsAdapterService {
      * @return @c true if successfully deleted, @c false otherwise, InvalidArgumentException or AccessDeniedException
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.deleteModel")
     def deleteModel(def message) {
         if (!verifyMessage(message, [Authentication, ModelTransportCommand])) {
             return new IllegalArgumentException("Authentication and Model as arguments expected")
@@ -447,6 +462,7 @@ class JmsAdapterService {
      * @return @c true if successfully deleted, @c false otherwise, InvalidArgumentException or AccessDeniedException
      */
     @Queue
+    @Profiled(tag="jmsAdapterService.restoreModel")
     def restoreModel(def message) {
         if (!verifyMessage(message, [Authentication, ModelTransportCommand])) {
             return new IllegalArgumentException("Authentication and Model as arguments expected")

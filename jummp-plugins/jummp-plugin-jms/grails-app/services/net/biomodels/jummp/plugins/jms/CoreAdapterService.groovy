@@ -9,6 +9,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.PublicationTransportCommand
+import org.perf4j.aop.Profiled
 
 /**
  * @short Service connecting to the core via synchronous JMS.
@@ -39,6 +40,7 @@ class CoreAdapterService {
      * @throws AuthenticationException If the Authentication is not valid
      * @throws JummpException If an error occurred
      */
+    @Profiled(tag="coreAdapterService.authenticate")
     Authentication authenticate(Authentication authentication) throws AuthenticationException, JummpException {
         def retVal = send("authenticate", authentication, false)
         validateReturnValue(retVal, Authentication)
@@ -57,6 +59,7 @@ class CoreAdapterService {
     * @param sort The column to use for sorting
     * @return List of Models
     **/
+    @Profiled(tag="coreAdapterService.getAllModels")
     public List<ModelTransportCommand> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sort) {
         def retVal = send("getAllModels", [offset, count, sortOrder, sort])
         validateReturnValue(retVal, List)
@@ -67,6 +70,7 @@ class CoreAdapterService {
      * Convenient method for specifying the sort order.
      * @return List of Models
      */
+    @Profiled(tag="coreAdapterService.getAllModels")
     public List<ModelTransportCommand> getAllModels(int offset, int count, boolean sortOrder) {
         def retVal = send("getAllModels", [offset, count, sortOrder])
         validateReturnValue(retVal, List)
@@ -79,6 +83,7 @@ class CoreAdapterService {
     * @return List of Models sorted ascending
     * @see getAllModels(int offset, int count, boolean sortOrder)
     **/
+    @Profiled(tag="coreAdapterService.getAllModels")
     public List<ModelTransportCommand> getAllModels(int offset, int count, ModelListSorting sort) {
         def retVal = send("getAllModels", [offset, count, sort])
         validateReturnValue(retVal, List)
@@ -91,6 +96,7 @@ class CoreAdapterService {
     * @return List of Models sorted ascending by id
     * @see getAllModels(int offset, int count, boolean sortOrder)
     **/
+    @Profiled(tag="coreAdapterService.getAllModels")
     public List<ModelTransportCommand> getAllModels(int offset, int count) {
         def retVal = send("getAllModels", [offset, count])
         validateReturnValue(retVal, List)
@@ -103,6 +109,7 @@ class CoreAdapterService {
     * @return List of first 10 Models sorted ascending by id
     * @see getAllModels(int offset, int count, boolean sortOrder)
     **/
+    @Profiled(tag="coreAdapterService.getAllModels")
     public List<ModelTransportCommand> getAllModels(ModelListSorting sort) {
         def retVal = send("getAllModels", [sort])
         validateReturnValue(retVal, List)
@@ -115,6 +122,7 @@ class CoreAdapterService {
     * @return List of first 10 Models sorted ascending by id
     * @see getAllModels(int offset, int count, boolean sortOrder)
     **/
+    @Profiled(tag="coreAdapterService.getAllModels")
     public List<ModelTransportCommand> getAllModels() {
         return getAllModels(ModelListSorting.ID)
     }
@@ -124,6 +132,7 @@ class CoreAdapterService {
     *
     * @see getAllModels
     **/
+    @Profiled(tag="coreAdapterService.getModelCount")
     public Integer getModelCount() {
         def retVal = send("getModelCount")
         validateReturnValue(retVal, Integer)
@@ -135,6 +144,7 @@ class CoreAdapterService {
     * @param model The Model for which the latest revision should be retrieved.
     * @return Latest Revision the current user has read access to. 
     **/
+    @Profiled(tag="coreAdapterService.getLatestRevision")
     public RevisionTransportCommand getLatestRevision(ModelTransportCommand model) {
         def retVal = send("getLatestRevision", model)
         validateReturnValue(retVal, RevisionTransportCommand)
@@ -147,6 +157,7 @@ class CoreAdapterService {
     * @param model The Model for which all revisions should be retrieved
     * @return List of Revisions ordered by revision numbers of underlying VCS. If the user has no access to any revision an empty list is returned
     **/
+    @Profiled(tag="coreAdapterService.getAllRevisions")
     public List<RevisionTransportCommand> getAllRevisions(ModelTransportCommand model) {
         def retVal = send("getAllRevisions", model)
         validateReturnValue(retVal, List)
@@ -158,6 +169,7 @@ class CoreAdapterService {
      * @param model The Model for which the reference publication should be returned.
      * @return The reference publication
      */
+    @Profiled(tag="coreAdapterService.getPublication")
     public PublicationTransportCommand getPublication(final ModelTransportCommand model) {
         def retVal = send("getPublication", model)
         validateReturnValue(retVal, PublicationTransportCommand)
@@ -175,6 +187,7 @@ class CoreAdapterService {
     * @param meta Meta Information to be added to the model
     * @return The new created Model as a ModelTransportCommand
     **/
+    @Profiled(tag="coreAdapterService.uploadModel")
     public ModelTransportCommand uploadModel(byte[] bytes, ModelTransportCommand meta) {
         def retVal = send("uploadModel", [bytes, meta])
         validateReturnValue(retVal, ModelTransportCommand)
@@ -192,6 +205,7 @@ class CoreAdapterService {
     * @param comment The commit message for the new revision
     * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
     **/
+    @Profiled(tag="coreAdapterService.addRevision")
     public RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) {
         def retVal = send("addRevision", [model, bytes, format, comment])
         validateReturnValue(retVal, RevisionTransportCommand)
@@ -204,6 +218,7 @@ class CoreAdapterService {
      * @return Byte Array of the content of the Model file for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
+    @Profiled(tag="coreAdapterService.retrieveModelFile")
     public byte[] retrieveModelFile(RevisionTransportCommand revision) {
         // TODO: verify closely because of byte[]
         def retVal = send("retrieveModelFile", revision)
@@ -217,6 +232,7 @@ class CoreAdapterService {
      * @return Byte Array of the content of the Model file.
      * @throws ModelException In case retrieving from VCS fails.
      */
+    @Profiled(tag="coreAdapterService.retrieveModelFile")
     public byte[] retrieveModelFile(ModelTransportCommand model) {
         // TODO: verify closely because of byte[]
         def retVal = send("retrieveModelFile", model)
@@ -237,6 +253,7 @@ class CoreAdapterService {
     * @return @c true in case the Model has been deleted, @c false otherwise.
     * @see restoreModel
     **/
+    @Profiled(tag="coreAdapterService.deleteModel")
     public Boolean deleteModel(ModelTransportCommand model) {
         def retVal = send("deleteModel", model)
         validateReturnValue(retVal, Boolean)
@@ -251,6 +268,7 @@ class CoreAdapterService {
     * @return @c true, whether the state was restored, @c false otherwise.
     * @see deleteModel
     **/
+    @Profiled(tag="coreAdapterService.restoreModel")
     public Boolean restoreModel(ModelTransportCommand model) {
         def retVal = send("restoreModel", model)
         validateReturnValue(retVal, Boolean)

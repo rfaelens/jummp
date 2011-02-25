@@ -18,4 +18,6 @@ beans = {
             brokerURL = 'tcp://localhost:61616'
         }
     }
+
+    timingAspect(org.perf4j.log4j.aop.TimingAspect)
 }
