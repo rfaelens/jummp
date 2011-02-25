@@ -2,7 +2,6 @@ package net.biomodels.jummp.core
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
@@ -23,14 +22,14 @@ import net.biomodels.jummp.model.Revision
  * @see Vcs
  * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class VcsService implements InitializingBean {
+class VcsService {
     static transactional = true
     @SuppressWarnings('GrailsStatelessService')
     private VcsManager vcsManager = null
     @SuppressWarnings('GrailsStatelessService')
     def grailsApplication
 
-    void afterPropertiesSet() {
+    void init() {
         // config option is a map in case it is not defined and a String if it is defined
         // because of that we need to use a def and do an instance of test
         def pluginServiceName = ConfigurationHolder.config.jummp.vcs.pluginServiceName

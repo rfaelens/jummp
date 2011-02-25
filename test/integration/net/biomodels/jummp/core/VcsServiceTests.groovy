@@ -63,19 +63,19 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         mockConfig("")
         VcsService service = new VcsService()
         assertFalse(service.isValid())
-        service.afterPropertiesSet()
+        service.init()
         assertFalse(service.isValid())
         // verifies that the service is not valid, when config option is empty
         mockConfig('''jummp.vcs.pluginServiceName=""''')
         service = new VcsService()
         assertFalse(service.isValid())
-        service.afterPropertiesSet()
+        service.init()
         assertFalse(service.isValid())
         // verifies that the service is not valid, if not existing plugin is specified
         mockConfig('''jummp.vcs.pluginServiceName="novcs"''')
         service = new VcsService()
         assertFalse(service.isValid())
-        service.afterPropertiesSet()
+        service.init()
         assertFalse(service.isValid())
     }
 
@@ -84,12 +84,12 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         mockConfig('''jummp.vcs.pluginServiceName="svnService"''')
         VcsService service = new VcsService()
         assertFalse(service.isValid())
-        service.afterPropertiesSet()
+        service.init()
         assertFalse(service.isValid())
         mockConfig('''jummp.vcs.pluginServiceName="gitService"''')
         service = new VcsService()
         assertFalse(service.isValid())
-        service.afterPropertiesSet()
+        service.init()
         assertFalse(service.isValid())
     }
 
@@ -110,7 +110,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         git.init().setDirectory(gitDirectory).call()
         assertFalse(vcsService.isValid())
         appCtx.getBean("gitService").afterPropertiesSet()
-        vcsService.afterPropertiesSet()
+        vcsService.init()
         assertTrue(vcsService.isValid())
     }
 
@@ -124,7 +124,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         SVNRepositoryFactory.createLocalRepository(new File("target/vcs/repository"), true, false)
         assertFalse(vcsService.isValid())
         appCtx.getBean("svnService").afterPropertiesSet()
-        vcsService.afterPropertiesSet()
+        vcsService.init()
         assertTrue(vcsService.isValid())
     }
 
