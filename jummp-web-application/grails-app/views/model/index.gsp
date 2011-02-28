@@ -1,4 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<div id="navigationButtons">
+    <a href="#" onclick="showUploadModel()"><g:message code="model.upload.goto"/></a>
+</div>
 <table id="modelTable">
     <thead>
        <tr>

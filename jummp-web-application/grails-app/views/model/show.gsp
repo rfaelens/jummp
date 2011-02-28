@@ -1,6 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <h1><g:message code="model.view.header" args="[revision.model.id, revision.model.name]"/></h1>
-<a href="#" onclick="showModelList()">Back to Model List</a>
+<div id="navigationButtons">
+    <a href="#" onclick="showModelList()"><g:message code="model.list.goto"/></a>
+    <a href="#" onclick="showUploadModel()"><g:message code="model.upload.goto"/></a>
+</div>
 <div id="modelTabs" style="display: none">
     <ul>
         <li><a href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Model</a></li>

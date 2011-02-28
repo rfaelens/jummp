@@ -162,6 +162,7 @@ function showModelList() {
     $("#body").block();
     $.get(createLink("model", "index"), function(data) {
         $("#body").html(data);
+        $("#navigationButtons a").button();
         createModelDataTable();
         $("#body").unblock();
     });
@@ -176,6 +177,7 @@ function showModel(id) {
     $.ajax({url: createLink("model", "show", id),
         success: function(data) {
             $("#body").html(data);
+            $("#navigationButtons a").button();
             $("#modelTabs").tabs({disabled: [1, 2, 3, 4, 5],
                 ajaxOptions: {error: function(jqXHR) {
                     $("#body").unblock();
@@ -201,6 +203,7 @@ function showUploadModel() {
         dataType: "html",
         success: function(data) {
             $("#body").html(data);
+            $("#navigationButtons a").button();
             clearErrorMessages();
             $("input:radio[name=publicationType]")[0].checked = true;
             $("#model-upload-form div input:button").button();
