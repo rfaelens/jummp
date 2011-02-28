@@ -144,7 +144,7 @@ class ModelController {
         if (cmd.hasErrors()) {
             Map errors = [error: true]
             if (cmd.errors.getFieldError("model")) {
-                errors.put("model", cmd.errors.getFieldError("model").code)
+                errors.put("model", g.message(code: "model.upload.error.file"))
             }
             if (cmd.errors.getFieldError("name")) {
                 switch (cmd.errors.getFieldError("name").code) {
@@ -277,7 +277,10 @@ class UploadCommand implements Serializable {
     String url
 
     static constraints = {
-        model(nullable: false)
+        model(nullable: false,
+                validator: { model ->
+                    return !model.isEmpty()
+                })
         name(nullable: false, blank: false)
         comment(nullable: false, blank: false)
         publicationType(nullable: false, inList: ["PUBMED", "DOI", "URL", "UNPUBLISHED"])
