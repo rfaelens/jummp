@@ -34,6 +34,11 @@ var i18n = {
         },
         summary: {
             referencePublication: "${g.message(code: 'model.summary.reference-publication')}"
+        },
+        revision: {
+            upload: {
+                success: "${g.message(code: 'model.revision.upload.success', args: ['_NAME_'])}"
+            }
         }
     },
     publication: {

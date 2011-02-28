@@ -207,7 +207,7 @@ class CoreAdapterService {
     * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
     **/
     @Profiled(tag="coreAdapterService.addRevision")
-    public RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) {
+    public RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException {
         def retVal = send("addRevision", [model, bytes, format, comment])
         validateReturnValue(retVal, RevisionTransportCommand)
         return (RevisionTransportCommand)retVal

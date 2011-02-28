@@ -3,6 +3,7 @@
 <div id="navigationButtons">
     <a href="#" onclick="showModelList()"><g:message code="model.list.goto"/></a>
     <a href="#" onclick="showUploadModel()"><g:message code="model.upload.goto"/></a>
+    <a href="#" onclick="showNewRevision('${params.id}')"><g:message code="model.revision.upload.goto"/></a>
 </div>
 <div id="modelTabs" style="display: none">
     <ul>

@@ -59,6 +59,18 @@ class ModelController {
     }
 
     /**
+     * View for uploading a new Model Revision.
+     */
+    def newRevision = {
+        if (!springSecurityService.isAjax(request)) {
+            redirect(controller: "home", params: [redirect: "ADDREVISION", id: params.id])
+        } else {
+            // TODO: verify that user has write access to the Model
+            [params: params]
+        }
+    }
+
+    /**
      * Renders html snippet with Publication information for the current Model identified by the id.
      */
     def publication = {
@@ -206,6 +218,41 @@ class ModelController {
     }
 
     /**
+     * Action for uploading a new Model Revision.
+     * The security is with access control, so there is no need to have an @Secured annotation.
+     */
+    def saveNewRevision = { RevisionUploadCommand cmd ->
+        if (cmd.hasErrors()) {
+            Map errors = [error: true]
+            if (cmd.errors.getFieldError("model")) {
+                errors.put("model", g.message(code: "model.upload.error.file"))
+            }
+            if (cmd.errors.getFieldError("comment")) {
+                switch (cmd.errors.getFieldError("comment").code) {
+                case "blank":
+                    errors.put("comment", g.message(code: "model.upload.error.comment.blank"))
+                    break
+                default:
+                    errors.put("comment", g.message(code: "error.unknown", args: ["the Comment"]))
+                    break
+                }
+            }
+            // need to wrap JSON in a textarea to work with iframe used by jquery form plugin
+            render "<textarea>" + (errors as JSON) + "</textarea>"
+        } else {
+            try {
+                ModelTransportCommand model = new ModelTransportCommand(id: cmd.modelId)
+                RevisionTransportCommand revision = coreAdapterService.addRevision(model, cmd.model.bytes, new ModelFormatTransportCommand(identifier: "SBML"), cmd.comment)
+                render "<textarea>" + ([success: true, revision: revision] as JSON) + "</textarea>"
+            } catch (ModelException e) {
+                Map errors = [error: true]
+                errors.put("model", e.getMessage())
+                render "<textarea>" + (errors as JSON) + "</textarea>"
+            }
+        }
+    }
+
+    /**
      * File download of the model file for a model by id
      */
     def download = {
@@ -275,5 +322,23 @@ class UploadCommand implements Serializable {
                 format: new ModelFormatTransportCommand(identifier: "SBML"),
                 comment: comment,
                 publication: publication)
+    }
+}
+
+/**
+ * Command Object used by saveNewRevision action
+ */
+class RevisionUploadCommand implements Serializable {
+    Long modelId
+    MultipartFile model
+    String comment
+
+    static constraints = {
+        modelId(nullable: false)
+        model(nullable: false,
+                validator: { model ->
+                    return !model.isEmpty()
+                })
+        comment(nullable: false, blank: false)
     }
 }

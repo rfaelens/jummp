@@ -22,6 +22,11 @@
            showUploadModel();
 <%
         break
+    case "ADDREVISION":
+%>
+            showNewRevision("${params.id}");
+<%
+        break
     }
 %>
         });

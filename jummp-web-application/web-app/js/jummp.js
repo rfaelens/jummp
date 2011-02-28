@@ -194,6 +194,27 @@ function showModel(id) {
 }
 
 /**
+ * Loads the view to upload a new Revision to a Model.
+ * @param id The id of the Model for which a new Revision should be added
+ */
+function showNewRevision(id) {
+    $("#body").block();
+    $.ajax({url: createLink("model", "newRevision", id),
+        success: function(data) {
+            $("#body").html(data);
+            clearErrorMessages();
+            $("#navigationButtons a").button();
+            $("#revision-upload-form div input:button").button();
+            $("#body").unblock();
+        },
+        error: function(jqXHR) {
+            $("#body").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
  * Loads the view to upload a model
  */
 function showUploadModel() {
@@ -331,6 +352,47 @@ function uploadModel() {
         },
         error: function(jqXHR, textStatus, errorThrown) {
             $("#model-upload-form").unblock();
+            // the form is not submitted as AJAX (file upload) because of that we receive an html page
+            // we need to extract the status code and error code from the html
+            // and construct a proper object to pass to handleError()
+            var response = $(jqXHR.responseText);
+            var errorCode = $("#error-code", response).text();
+            var statusCode = parseInt($("#status-code", response).text());
+            handleError({error: statusCode, code: errorCode});
+        }
+    });
+}
+
+/**
+ * Callback when revision upload form needs to be submitted.
+ */
+function uploadRevision() {
+    $("#revision-upload-form").block();
+    var data = $("#revision-upload-form");
+    $("#revision-upload-form").ajaxSubmit({
+        type: 'POST',
+        url: createLink("model", "saveNewRevision"),
+        iframe: true,
+        dataType: 'json',
+        success: function(data) {
+            $("#revision-upload-form").unblock();
+            if (handleError(data)) {
+                // TODO: with jquery 1.5 should be handled by status code function
+                return;
+            }
+            if (data.error) {
+                clearErrorMessages();
+                showErrorMessage([data.model, data.comment]);
+                setErrorState("#revision-upload-file", data.model);
+                setErrorState("#revision-upload-comment", data.comment);
+            } else if (data.success) {
+                clearErrorMessages();
+                showInfoMessage(i18n.model.revision.upload.success.replace(/_NAME_/, data.revision.model.name), 20000);
+                showModel(data.revision.model.id);
+            }
+        },
+        error: function(jqXHR, textStatus) {
+            $("#revision-upload-form").unblock();
             // the form is not submitted as AJAX (file upload) because of that we receive an html page
             // we need to extract the status code and error code from the html
             // and construct a proper object to pass to handleError()
