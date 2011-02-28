@@ -33,4 +33,12 @@ class ModelTransportCommand implements Serializable {
      * Information about the Publication.
      */
     PublicationTransportCommand publication
+    /**
+     * The original submitter of the first revision.
+     */
+    String submitter
+    /**
+     * The date when the Model was uploaded first to the instance.
+     */
+    Date submissionDate
 }

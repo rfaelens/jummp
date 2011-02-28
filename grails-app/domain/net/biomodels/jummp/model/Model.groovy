@@ -2,6 +2,7 @@ package net.biomodels.jummp.model
 
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.AuthorTransportCommand
 
 /**
  * @short Representation of one Model.
@@ -54,6 +55,9 @@ class Model implements Serializable {
         return new ModelTransportCommand(id: id, name: name, state: state,
                 lastModifiedDate: revisions ? revisions.sort{ it.revisionNumber }.last().uploadDate : null,
                 format: revisions ? revisions.sort{ it.revisionNumber }.last().format.toCommandObject() : null,
-                publication: publication ? publication.toCommandObject() : null)
+                publication: publication ? publication.toCommandObject() : null,
+                submitter: revisions ? revisions.sort{ it.revisionNumber }.first().owner.userRealName : null,
+                submissionDate: revisions ? revisions.sort{ it.revisionNumber }.first().uploadDate : null
+        )
     }
 }
