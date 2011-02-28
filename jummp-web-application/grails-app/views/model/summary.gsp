@@ -38,11 +38,16 @@
         <tr>
             <td><strong><g:message code="model.summary.model.creators"/></strong></td>
             <td>
-                <ul>
-                    <g:each in="${revision.model.creators}">
-                        <li>${it}</li>
-                    </g:each>
-                </ul>
+                <g:if test="${revision.model.creators.size() == 1}">
+                    ${revision.model.creators.toList().first()}
+                </g:if>
+                <g:else>
+                    <ul>
+                        <g:each in="${revision.model.creators}">
+                            <li>${it}</li>
+                        </g:each>
+                    </ul>
+                </g:else>
             </td>
         </tr>
         </tbody>
