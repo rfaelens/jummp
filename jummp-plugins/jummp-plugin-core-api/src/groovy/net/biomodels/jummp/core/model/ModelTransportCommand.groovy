@@ -41,4 +41,8 @@ class ModelTransportCommand implements Serializable {
      * The date when the Model was uploaded first to the instance.
      */
     Date submissionDate
+    /**
+     * The names of all users who have worked on this Model.
+     */
+    Set<String> creators
 }

@@ -52,12 +52,19 @@ class Model implements Serializable {
 
     ModelTransportCommand toCommandObject() {
         // TODO: is it correct to show the latest upload date as the lastModifiedDate or does it need ACL restrictions?
+        Set<String> creators = []
+        if (revisions) {
+            revisions.each { revision ->
+                creators.add(revision.owner.userRealName)
+            }
+        }
         return new ModelTransportCommand(id: id, name: name, state: state,
                 lastModifiedDate: revisions ? revisions.sort{ it.revisionNumber }.last().uploadDate : null,
                 format: revisions ? revisions.sort{ it.revisionNumber }.last().format.toCommandObject() : null,
                 publication: publication ? publication.toCommandObject() : null,
                 submitter: revisions ? revisions.sort{ it.revisionNumber }.first().owner.userRealName : null,
-                submissionDate: revisions ? revisions.sort{ it.revisionNumber }.first().uploadDate : null
+                submissionDate: revisions ? revisions.sort{ it.revisionNumber }.first().uploadDate : null,
+                creators: creators
         )
     }
 }
