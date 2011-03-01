@@ -340,6 +340,8 @@ function uploadModel() {
             setErrorState("#model-upload-name", data.name);
             setErrorState("#model-upload-comment", data.comment);
             setErrorState("#model-upload-pubmed", data.pubmed);
+            setErrorState("#model-upload-doi", data.doi);
+            setErrorState("#model-upload-url", data.url);
             setErrorState("#model-upload-publication-title", data.publicationTitle);
             setErrorState("#model-upload-publication-journal", data.publicationJournal);
             setErrorState("#model-upload-publication-affiliation", data.publicationAffiliation);
