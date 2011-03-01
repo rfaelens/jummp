@@ -79,7 +79,7 @@
     }
 %>
                 </select>
-                <select name="publicationMonth" id="model-publication-month">
+                <select name="publicationMonth" id="model-upload-publication-month">
                     <option value="">Select Month (optional)</option>
                     <option value="Jan">Jan</option>
                     <option value="Feb">Feb</option>
@@ -94,7 +94,7 @@
                     <option value="Nov">Nov</option>
                     <option value="Dec">Dec</option>
                 </select>
-                <select name="publicationDay" id="model-publication-day">
+                <select name="publicationDay" id="model-upload-publication-day">
                     <option value="">Select Day (optional)</option>
 <%
     for (int i=1; i<=31; i++) {
