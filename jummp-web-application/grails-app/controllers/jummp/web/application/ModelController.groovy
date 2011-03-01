@@ -146,62 +146,11 @@ class ModelController {
             if (cmd.errors.getFieldError("model")) {
                 errors.put("model", g.message(code: "model.upload.error.file"))
             }
-            if (cmd.errors.getFieldError("name")) {
-                switch (cmd.errors.getFieldError("name").code) {
-                case "blank":
-                    errors.put("name", g.message(code: "model.upload.error.name.blank"))
-                    break
-                default:
-                    errors.put("name", g.message(code: "error.unknown", args: ["the Name of the Model"]))
-                    break
-                }
-            }
-            if (cmd.errors.getFieldError("comment")) {
-                switch (cmd.errors.getFieldError("comment").code) {
-                case "blank":
-                    errors.put("comment", g.message(code: "model.upload.error.comment.blank"))
-                    break
-                default:
-                    errors.put("comment", g.message(code: "error.unknown", args: ["the Comment"]))
-                    break
-                }
-            }
-            if (cmd.errors.getFieldError("pubmed")) {
-                switch (cmd.errors.getFieldError("pubmed").code) {
-                case "validator.invalid":
-                    errors.put("pubmed", g.message(code: "model.upload.error.pubmed.blank"))
-                    break
-                case "typeMismatch":
-                    errors.put("pubmed", g.message(code: "model.upload.error.pubmed.numeric"))
-                    break
-                default:
-                    errors.put("pubmed", g.message(code: "error.unknown", args: ["PubMed ID"]))
-                    break
-                }
-            }
-            if (cmd.errors.getFieldError("doi")) {
-                switch (cmd.errors.getFieldError("doi").code) {
-                case "validator.invalid":
-                    errors.put("doi", g.message(code: "model.upload.error.doi.blank"))
-                    break
-                default:
-                    errors.put("doi", g.message(code: "error.unknown", args: ["DOI"]))
-                    break
-                }
-            }
-            if (cmd.errors.getFieldError("url")) {
-                switch (cmd.errors.getFieldError("url").code) {
-                case "validator.invalid":
-                    errors.put("url", g.message(code: "model.upload.error.url.blank"))
-                    break
-                case "url.invalid":
-                    errors.put("url", g.message(code: "model.upload.error.url.invalid"))
-                    break
-                default:
-                    errors.put("url", g.message(code: "error.unknown", args: ["Publication URL"]))
-                    break
-                }
-            }
+            errors.put("name",    resolveErrorMessage(cmd, "name",    "the Name of the Model"))
+            errors.put("comment", resolveErrorMessage(cmd, "comment", "the Comment"))
+            errors.put("pubmed",  resolveErrorMessage(cmd, "pubmed",  "PubMed ID"))
+            errors.put("doi",     resolveErrorMessage(cmd, "doi",     "DOI"))
+            errors.put("url",     resolveErrorMessage(cmd, "url",     "Publication URL"))
             errors.put("publicationType", cmd.errors.getFieldError("publicationType")?.code)
             // publications
             errors.put("publicationTitle", resolveErrorMessage(cmd, "publicationTitle", "Publication Title"))
@@ -288,10 +237,14 @@ class ModelController {
     private String resolveErrorMessage(UploadCommand cmd, String field, String description) {
         if (cmd.errors.getFieldError(field)) {
             switch (cmd.errors.getFieldError(field).code) {
+            case "blank":
+                return g.message(code: "model.upload.error.${field}.blank")
             case "validator.invalid":
                 return g.message(code: "model.upload.error.${field}.blank")
             case "url.invalid":
                 return g.message(code: "model.upload.error.${field}.invalid")
+            case "typeMismatch":
+                return g.message(code: "model.upload.error.${field}.numeric")
             default:
                 return g.message(code: "error.unknown", args: [description])
             }
