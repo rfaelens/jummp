@@ -159,6 +159,7 @@ class ModelController {
             errors.put("publicationAbstract", resolveErrorMessage(cmd, "publicationAbstract", "Publication Abstract"))
             errors.put("publicationYear", resolveErrorMessage(cmd, "publicationYear", "Publication Year"))
             errors.put("publicationMonth", resolveErrorMessage(cmd, "publicationMonth", "Publication Month"))
+            errors.put("publicationDay", resolveErrorMessage(cmd, "publicationDay", "Publication Day"))
             // need to wrap JSON in a textarea to work with iframe used by jquery form plugin
             render "<textarea>" + (errors as JSON) + "</textarea>"
         } else {
@@ -343,7 +344,58 @@ class UploadCommand implements Serializable {
             }
         })
         publicationMonth(nullable: true, inList: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])
-        publicationDay(nullable: true)
+        publicationDay(nullable: true, range: 1..31, validator: { publicationDay, cmd ->
+            if (cmd.publicationYear && cmd.publicationMonth && publicationDay) {
+                int month
+                switch (cmd.publicationMonth) {
+                case "Jan":
+                    month = 0
+                    break
+                case "Feb":
+                    month = 1
+                    break
+                case "Mar":
+                    month = 2
+                    break
+                case "Apr":
+                    month = 3
+                    break
+                case "May":
+                    month = 4
+                    break
+                case "Jun":
+                    month = 5
+                    break
+                case "Jul":
+                    month = 6
+                    break
+                case "Aug":
+                    month = 7
+                    break
+                case "Sep":
+                    month = 8
+                    break
+                case "Oct":
+                    month = 9
+                    break
+                case "Nov":
+                    month = 10
+                    break
+                case "Dec":
+                    month = 11
+                    break
+                default:
+                    // incorrect month value
+                    return false
+                }
+                GregorianCalendar cal = new GregorianCalendar(cmd.publicationYear, month, 1)
+                return publicationDay >= 1 && publicationDay <= cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+            } else if (cmd.publicationYear && !cmd.publicationMonth && publicationDay) {
+                return false
+            } else {
+                return true
+            }
+        })
     }
 
     ModelTransportCommand toModelCommand() {
