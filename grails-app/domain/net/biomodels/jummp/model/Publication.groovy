@@ -107,6 +107,16 @@ class Publication {
     }
 
     static Publication fromCommandObject(PublicationTransportCommand cmd) {
+        List<Author> authors = []
+        cmd.authors.each {
+            Author current = new Author(initials: it.initials, firstName: it.firstName, lastName: it.lastName)
+            Author foundAuthor = Author.find(current)
+            if (foundAuthor) {
+                authors << foundAuthor
+            } else {
+                authors << current
+            }
+        }
         return new Publication(journal: cmd.journal,
                 title: cmd.title,
                 affiliation: cmd.affiliation,
@@ -118,9 +128,8 @@ class Publication {
                 issue: cmd.issue,
                 pages: cmd.pages,
                 linkProvider: cmd.linkProvider,
-                link: cmd.link
-                // TODO: authors
+                link: cmd.link,
+                authors: authors
                 )
-
     }
 }
