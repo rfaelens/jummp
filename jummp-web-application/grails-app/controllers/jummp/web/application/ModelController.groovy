@@ -246,6 +246,10 @@ class ModelController {
                 return g.message(code: "model.upload.error.${field}.invalid")
             case "typeMismatch":
                 return g.message(code: "model.upload.error.${field}.numeric")
+            case "range.toobig":
+                return g.message(code: "model.upload.error.${field}.range")
+            case "range.toosmall":
+                return g.message(code: "model.upload.error.${field}.range")
             default:
                 return g.message(code: "error.unknown", args: [description])
             }
@@ -327,7 +331,8 @@ class UploadCommand implements Serializable {
         publicationIssue(nullable: true)
         publicationVolume(nullable: true)
         publicationPages(nullable: true)
-        publicationYear(nullable: true, validator: { publicationYear, cmd ->
+        publicationYear(nullable: true, range: 1980..(new GregorianCalendar().get(Calendar.YEAR)),
+                validator: { publicationYear, cmd ->
             if (cmd.publicationType == "DOI" || cmd.publicationType == "URL") {
                 return publicationYear != null
             } else {
