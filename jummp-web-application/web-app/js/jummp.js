@@ -118,6 +118,8 @@ function createModelDataTable() {
                                 html = createPubMedLink(publication, id);
                             } else if (publication.linkProvider == "DOI") {
                                 html = createDoiLink(publication, id);
+                            } else if (publication.linkProvider == "URL") {
+                                html = createPublicationLink(publication, id, publication.link);
                             }
                             rowData[2] = html;
                         }
@@ -249,7 +251,7 @@ function showUploadModel() {
  * @param model The id of the model
  */
 function createPubMedLink(publication, model) {
-    return '<a class="tooltip" target="_blank" href="http://www.ebi.ac.uk/citexplore/citationDetails.do?dataSource=MED&externalId=' + publication.link + '" title="' + i18n.model.summary.referencePublication + '" rel="' + createLink('model', 'publication', model) + '">' + publication.compactTitle + '</a>';
+    return createPublicationLink(publication, model, 'http://www.ebi.ac.uk/citexplore/citationDetails.do?dataSource=MED&externalId=' + publication.link);
 }
 
 /**
@@ -262,7 +264,21 @@ function createPubMedLink(publication, model) {
  * @param model The id of the model
  */
 function createDoiLink(publication, model) {
-    return '<a class="tooltip" target="_blank" href="http://dx.doi.org/' + publication.link + '" title="' + i18n.model.summary.referencePublication + '" rel="' + createLink('model', 'publication', model) + '">' + publication.compactTitle + '</a>';
+    return createPublicationLink(publication, model, 'http://dx.doi.org/' + publication.link);
+}
+
+/**
+ * Creates HTML markup for a hyperlink referencing a publication.
+ * The hyperlink has a class "tooltip", a title and rel attribute referencing a tooltip.
+ * The following information from the JSON structure is used:
+ * @li link: The PubMed ID
+ * @li compactTitle: The title of the publication
+ * @param publication JSON object describing the publication
+ * @param model The id of the model
+ * @param target The link target
+ */
+function createPublicationLink(publication, model, target) {
+    return '<a class="tooltip" target="_blank" href="' + target + '" title="' + i18n.model.summary.referencePublication + '" rel="' + createLink('model', 'publication', model) + '">' + publication.compactTitle + '</a>';
 }
 
 /**
