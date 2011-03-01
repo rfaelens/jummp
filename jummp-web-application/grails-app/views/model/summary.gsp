@@ -32,8 +32,7 @@
         </tr>
         <tr>
             <td><strong><g:message code="model.summary.model.format"/></strong></td>
-            %{--TODO: download should be for revision and not for model!--}%
-            <td>${revision.format.name} <a href="${g.createLink(controller: 'model', action: 'download', id: revision.model.id)}"><g:message code="model.summary.model.download"/></a></td>
+            <td>${revision.format.name} <a href="${g.createLink(controller: 'model', action: 'downloadModelRevision', id: revision.id)}"><g:message code="model.summary.model.download"/></a></td>
         </tr>
         <tr>
             <td><strong><g:message code="model.summary.model.creators"/></strong></td>
