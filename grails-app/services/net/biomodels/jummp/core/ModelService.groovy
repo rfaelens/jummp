@@ -340,7 +340,8 @@ class ModelService {
                     model.discard()
                     throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data", e)
                 }
-            } else if (meta.publication && meta.publication.linkProvider == PublicationLinkProvider.DOI) {
+            } else if (meta.publication &&
+                    (meta.publication.linkProvider == PublicationLinkProvider.DOI || meta.publication.linkProvider == PublicationLinkProvider.URL)) {
                 model.publication = Publication.fromCommandObject(meta.publication)
             }
             if (!model.validate()) {
