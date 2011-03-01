@@ -110,6 +110,22 @@
             <td><label for="model-upload-publication-abstract">Publication Abstract:</label></td>
             <td><textarea rows="4" cols="20" maxlength="1000" id="model-upload-publication-abstract" name="publicationAbstract"></textarea></td>
         </tr>
+        <tr>
+            <td colspan="2">Authors</td>
+        </tr>
+        <tr>
+            <td><label for="model-upload-publication-author-initials">Initials:</label></td>
+            <td><input type="text" id="model-upload-publication-author-initials" name="authorInitials" size="5" maxlength="5"/></td>
+        </tr>
+        <tr>
+            %{--TODO preset fields with users data --}%
+            <td><label for="model-upload-publication-author-firstname">First Name:</label></td>
+            <td><input type="text" id="model-upload-publication-author-firstname" name="authorFirstName"/></td>
+        </tr>
+        <tr>
+            <td><label for="model-upload-publication-author-lastname">Last Name:</label></td>
+            <td><input type="text" id="model-upload-publication-author-lastname" name="authorLastName"/></td>
+        </tr>
         </tbody>
     </table>
     <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">

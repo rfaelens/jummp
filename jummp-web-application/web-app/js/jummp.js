@@ -371,7 +371,7 @@ function uploadModel() {
         }
         if (data.error) {
             clearErrorMessages();
-            showErrorMessage([data.model, data.name, data.comment, data.pubmed, data.doi, data.url, data.publicationTitle, data.publicationJournal, data.publicationAffiliation, data.publicationAbstract, data.publicationYear, data.publicationMonth, data.publicationDay]);
+            showErrorMessage([data.model, data.name, data.comment, data.pubmed, data.doi, data.url, data.publicationTitle, data.publicationJournal, data.publicationAffiliation, data.publicationAbstract, data.publicationYear, data.publicationMonth, data.publicationDay, data.authorInitials, data.authorFirstName, data.authorLastName]);
             setErrorState("#model-upload-file", data.model);
             setErrorState("#model-upload-name", data.name);
             setErrorState("#model-upload-comment", data.comment);
@@ -385,6 +385,9 @@ function uploadModel() {
             setErrorState("#model-upload-publication-year", data.publicationYear);
             setErrorState("#model-upload-publication-month", data.publicationMonth);
             setErrorState("#model-upload-publication-day", data.publicationDay);
+            setErrorState("#model-upload-publication-author-initials", data.authorInitials);
+            setErrorState("#model-upload-publication-author-firstname", data.authorFirstName);
+            setErrorState("#model-upload-publication-author-lastname", data.authorLastName);
         } else if (data.success) {
             clearErrorMessages();
             showInfoMessage(i18n.model.upload.success.replace(/_ID_/, data.model.id), 20000);

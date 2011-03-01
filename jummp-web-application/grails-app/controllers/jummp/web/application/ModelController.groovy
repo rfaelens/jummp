@@ -10,6 +10,7 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.AuthorTransportCommand
 
 /**
  * @short Controller providing basic access to Models.
@@ -160,6 +161,9 @@ class ModelController {
             errors.put("publicationYear", resolveErrorMessage(cmd, "publicationYear", "Publication Year"))
             errors.put("publicationMonth", resolveErrorMessage(cmd, "publicationMonth", "Publication Month"))
             errors.put("publicationDay", resolveErrorMessage(cmd, "publicationDay", "Publication Day"))
+            errors.put("authorInitials", resolveErrorMessage(cmd, "authorInitials", "Initials"))
+            errors.put("authorFirstName", resolveErrorMessage(cmd, "authorFirstName", "First Name"))
+            errors.put("authorLastName", resolveErrorMessage(cmd, "authorLastName", "Last Name"))
             // need to wrap JSON in a textarea to work with iframe used by jquery form plugin
             render "<textarea>" + (errors as JSON) + "</textarea>"
         } else {
@@ -287,6 +291,9 @@ class UploadCommand implements Serializable {
     Integer publicationYear
     String publicationMonth
     Integer publicationDay
+    String authorInitials
+    String authorFirstName
+    String authorLastName
 
     static constraints = {
         model(nullable: false,
@@ -398,6 +405,27 @@ class UploadCommand implements Serializable {
                 return true
             }
         })
+        authorInitials(nullable: true, validator: { authorInitials, cmd ->
+            if (cmd.publicationType == "DOI" || cmd.publicationType == "URL") {
+                return authorInitials != null && authorInitials.size() > 0
+            } else {
+                return true
+            }
+        })
+        authorFirstName(nullable: true, validator: { authorFirstName, cmd ->
+            if (cmd.publicationType == "DOI" || cmd.publicationType == "URL") {
+                return authorFirstName != null && authorFirstName.size() > 0
+            } else {
+                return true
+            }
+        })
+        authorLastName(nullable: true, validator: { authorLastName, cmd ->
+            if (cmd.publicationType == "DOI" || cmd.publicationType == "URL") {
+                return authorLastName != null && authorLastName.size() > 0
+            } else {
+                return true
+            }
+        })
     }
 
     ModelTransportCommand toModelCommand() {
@@ -434,6 +462,9 @@ class UploadCommand implements Serializable {
             publication.year        = publicationYear
             publication.month       = publicationMonth
             publication.day         = publicationDay
+            AuthorTransportCommand author = new AuthorTransportCommand(initials: authorInitials, firstName: authorFirstName, lastName: authorLastName)
+            publication.authors = []
+            publication.authors << author
         }
         return new ModelTransportCommand(name: name,
                 format: new ModelFormatTransportCommand(identifier: "SBML"),
