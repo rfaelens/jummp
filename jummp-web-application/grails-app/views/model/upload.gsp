@@ -108,7 +108,7 @@
         </tr>
         <tr>
             <td><label for="model-upload-publication-abstract">Publication Abstract:</label></td>
-            <td><textarea rows="4" cols="20" id="model-upload-publication-abstract" name="publicationAbstract"></textarea></td>
+            <td><textarea rows="4" cols="20" maxlength="1000" id="model-upload-publication-abstract" name="publicationAbstract"></textarea></td>
         </tr>
         </tbody>
     </table>

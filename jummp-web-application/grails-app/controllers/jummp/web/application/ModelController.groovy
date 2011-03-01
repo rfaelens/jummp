@@ -254,6 +254,8 @@ class ModelController {
                 return g.message(code: "model.upload.error.${field}.range")
             case "not.inList":
                 return g.message(code: "model.upload.error.${field}.inList")
+            case "maxSize.exceeded":
+                return  g.message(code: "model.upload.error.${field}.maxSize")
             default:
                 return g.message(code: "error.unknown", args: [description])
             }
@@ -325,7 +327,7 @@ class UploadCommand implements Serializable {
                 return true
             }
         })
-        publicationAbstract(nullable: true, validator: { publicationAbstract, cmd ->
+        publicationAbstract(nullable: true, maxSize: 1000, validator: { publicationAbstract, cmd ->
             if (cmd.publicationType == "DOI" || cmd.publicationType == "URL") {
                 return publicationAbstract != null && publicationAbstract.size() > 0
             } else {
