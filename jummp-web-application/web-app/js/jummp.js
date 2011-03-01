@@ -231,6 +231,26 @@ function showUploadModel() {
             $("input:radio[name=publicationType]")[0].checked = true;
             $("#model-upload-form div input:button").button();
             $("input:radio[name=publicationType]").change(uploadModelPublicationChangeListener);
+            enableElement("#model-upload-publication-month", false);
+            enableElement("#model-upload-publication-day", false);
+            $("#model-upload-publication-year").change(function() {
+                if ($("#model-upload-publication-year").val() == "") {
+                    $("#model-upload-publication-month").val("");
+                    $("#model-upload-publication-day").val("");
+                    enableElement("#model-upload-publication-month", false);
+                    enableElement("#model-upload-publication-day", false);
+                } else {
+                    enableElement("#model-upload-publication-month", true);
+                }
+            });
+            $("#model-upload-publication-month").change(function() {
+                if ($("#model-upload-publication-month").val() == "") {
+                    $("#model-upload-publication-day").val("");
+                    enableElement("#model-upload-publication-day", false);
+                } else {
+                    enableElement("#model-upload-publication-day", true);
+                }
+            });
             uploadModelPublicationChangeListener();
             $("#body").unblock();
         },
