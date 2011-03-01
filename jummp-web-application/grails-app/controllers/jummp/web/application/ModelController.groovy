@@ -157,6 +157,7 @@ class ModelController {
             errors.put("publicationJournal", resolveErrorMessage(cmd, "publicationJournal", "Publication Journal"))
             errors.put("publicationAffiliation", resolveErrorMessage(cmd, "publicationAffiliation", "Publication Affiliation"))
             errors.put("publicationAbstract", resolveErrorMessage(cmd, "publicationAbstract", "Publication Abstract"))
+            errors.put("publicationYear", resolveErrorMessage(cmd, "publicationYear", "Publication Year"))
             // need to wrap JSON in a textarea to work with iframe used by jquery form plugin
             render "<textarea>" + (errors as JSON) + "</textarea>"
         } else {
@@ -272,6 +273,10 @@ class UploadCommand implements Serializable {
     String publicationPages
     String publicationAffiliation
     String publicationAbstract
+    // publication date
+    Integer publicationYear
+    String publicationMonth
+    Integer publicationDay
 
     static constraints = {
         model(nullable: false,
@@ -322,6 +327,15 @@ class UploadCommand implements Serializable {
         publicationIssue(nullable: true)
         publicationVolume(nullable: true)
         publicationPages(nullable: true)
+        publicationYear(nullable: true, validator: { publicationYear, cmd ->
+            if (cmd.publicationType == "DOI" || cmd.publicationType == "URL") {
+                return publicationYear != null
+            } else {
+                return true
+            }
+        })
+        publicationMonth(nullable: true)
+        publicationDay(nullable: true)
     }
 
     ModelTransportCommand toModelCommand() {
@@ -355,6 +369,9 @@ class UploadCommand implements Serializable {
             publication.issue       = publicationIssue
             publication.volume      = publicationVolume
             publication.pages       = publicationPages
+            publication.year        = publicationYear
+            publication.month       = publicationMonth
+            publication.day         = publicationDay
         }
         return new ModelTransportCommand(name: name,
                 format: new ModelFormatTransportCommand(identifier: "SBML"),

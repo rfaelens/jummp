@@ -69,8 +69,41 @@
         <tr>
             <td><label for="model-upload-publication-year">Publication Date:</label></td>
             <td>
-                %{--TODO: calendar object--}%
-                <input type="text" id="model-upload-publication-year" size="4" maxlength="4" name="publicationYear"/>
+                <select name="publicationYear" id="model-upload-publication-year">
+                    <option value="">Select Year</option>
+<%
+    for (int i=new GregorianCalendar().get(Calendar.YEAR); i>=1980; i--) {
+%>
+                    <option value="${i}">${i}</option>
+<%
+    }
+%>
+                </select>
+                <select name="publicationMonth" id="model-publication-month">
+                    <option value="">Select Month (optional)</option>
+                    <option value="Jan">Jan</option>
+                    <option value="Feb">Feb</option>
+                    <option value="Mar">Mar</option>
+                    <option value="Apr">Apr</option>
+                    <option value="May">May</option>
+                    <option value="Jun">Jun</option>
+                    <option value="Jul">Jul</option>
+                    <option value="Aug">Aug</option>
+                    <option value="Sep">Sep</option>
+                    <option value="Oct">Oct</option>
+                    <option value="Nov">Nov</option>
+                    <option value="Dec">Dec</option>
+                </select>
+                <select name="publicationDay" id="model-publication-day">
+                    <option value="">Select Day (optional)</option>
+<%
+    for (int i=1; i<=31; i++) {
+%>
+                    <option value="${i}">${i}</option>
+<%
+    }
+%>
+                </select>
             </td>
         </tr>
         <tr>
