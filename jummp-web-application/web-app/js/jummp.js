@@ -228,12 +228,8 @@ function showUploadModel() {
             clearErrorMessages();
             $("input:radio[name=publicationType]")[0].checked = true;
             $("#model-upload-form div input:button").button();
+            $("input:radio[name=publicationType]").change(uploadModelPublicationChangeListener);
             uploadModelPublicationChangeListener();
-            // disable items as long as the functionality is not implemented
-            enableElement("#model-upload-publication-doi", false);
-            enableElement("label[for=model-upload-publication-doi]", false);
-            enableElement("#model-upload-publication-url", false);
-            enableElement("label[for=model-upload-publication-url]", false);
             $("#body").unblock();
         },
         error: function(jqXHR) {
@@ -339,11 +335,15 @@ function uploadModel() {
         }
         if (data.error) {
             clearErrorMessages();
-            showErrorMessage([data.model, data.name, data.comment, data.pubmed, data.doi, data.url]);
+            showErrorMessage([data.model, data.name, data.comment, data.pubmed, data.doi, data.url, data.publicationTitle, data.publicationJournal, data.publicationAffiliation, data.publicationAbstract]);
             setErrorState("#model-upload-file", data.model);
             setErrorState("#model-upload-name", data.name);
             setErrorState("#model-upload-comment", data.comment);
             setErrorState("#model-upload-pubmed", data.pubmed);
+            setErrorState("#model-upload-publication-title", data.publicationTitle);
+            setErrorState("#model-upload-publication-journal", data.publicationJournal);
+            setErrorState("#model-upload-publication-affiliation", data.publicationAffiliation);
+            setErrorState("#model-upload-publication-abstract", data.publicationAbstract);
         } else if (data.success) {
             clearErrorMessages();
             showInfoMessage(i18n.model.upload.success.replace(/_ID_/, data.model.id), 20000);
@@ -563,5 +563,4 @@ $(document).ready(function() {
         ]
     });
     $("#model-upload-form").ajaxForm();
-    $("input:radio[name=publicationType]").change(uploadModelPublicationChangeListener);
 });

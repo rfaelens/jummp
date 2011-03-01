@@ -44,34 +44,38 @@
         <tbody>
         <tr>
             <td><label for="model-upload-publication-title">Publication Title:</label></td>
-            <td><input type="text" id="model-upload-publication-title" name="publication-title"/></td>
+            <td><input type="text" id="model-upload-publication-title" name="publicationTitle"/></td>
         </tr>
         <tr>
             <td><label for="model-upload-publication-journal">Publication Journal:</label></td>
-            <td><input type="text" id="model-upload-publication-journal" name="publication-journal"/></td>
+            <td><input type="text" id="model-upload-publication-journal" name="publicationJournal"/></td>
         </tr>
         <tr>
             <td><label for="model-upload-publication-issue">Publication Issue:</label></td>
-            <td><input type="text" id="model-upload-publication-issue" name="publication-issue"/></td>
+            <td><input type="text" id="model-upload-publication-issue" name="publicationIssue"/></td>
         </tr>
         <tr>
             <td><label for="model-upload-publication-volume">Publication Volume:</label></td>
-            <td><input type="text" id="model-upload-publication-volume" name="publication-volume"/></td>
+            <td><input type="text" id="model-upload-publication-volume" name="publicationVolume"/></td>
         </tr>
         <tr>
             <td><label for="model-upload-publication-pages">Publication Pages:</label></td>
-            <td><input type="text" id="model-upload-publication-pages" name="publication-pages"/></td>
+            <td><input type="text" id="model-upload-publication-pages" name="publicationPages"/></td>
         </tr>
         <tr>
             <td><label for="model-upload-publication-affiliation">Publication Affiliation:</label></td>
-            <td><input type="text" id="model-upload-publication-affiliation" name="publication-affiliation"/></td>
+            <td><input type="text" id="model-upload-publication-affiliation" name="publicationAffiliation"/></td>
         </tr>
         <tr>
             <td><label for="model-upload-publication-year">Publication Date:</label></td>
             <td>
                 %{--TODO: calendar object--}%
-                <input type="text" id="model-upload-publication-year" size="4" maxlength="4" name="publication-journal"/>
+                <input type="text" id="model-upload-publication-year" size="4" maxlength="4" name="publicationYear"/>
             </td>
+        </tr>
+        <tr>
+            <td><label for="model-upload-publication-abstract">Publication Abstract:</label></td>
+            <td><textarea rows="4" cols="20" id="model-upload-publication-abstract" name="publicationAbstract"></textarea></td>
         </tr>
         </tbody>
     </table>

@@ -198,11 +198,16 @@ class ModelController {
                     errors.put("url", g.message(code: "model.upload.error.url.invalid"))
                     break
                 default:
-                    errors.put("doi", g.message(code: "error.unknown", args: ["Publication URL"]))
+                    errors.put("url", g.message(code: "error.unknown", args: ["Publication URL"]))
                     break
                 }
             }
             errors.put("publicationType", cmd.errors.getFieldError("publicationType")?.code)
+            // publications
+            errors.put("publicationTitle", resolveErrorMessage(cmd, "publicationTitle", "Publication Title"))
+            errors.put("publicationJournal", resolveErrorMessage(cmd, "publicationJournal", "Publication Journal"))
+            errors.put("publicationAffiliation", resolveErrorMessage(cmd, "publicationAffiliation", "Publication Affiliation"))
+            errors.put("publicationAbstract", resolveErrorMessage(cmd, "publicationAbstract", "Publication Abstract"))
             // need to wrap JSON in a textarea to work with iframe used by jquery form plugin
             render "<textarea>" + (errors as JSON) + "</textarea>"
         } else {
@@ -272,6 +277,27 @@ class ModelController {
         response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")
         response.outputStream << new ByteArrayInputStream(bytes)
     }
+
+    /**
+     * Resolves the error message for a field error
+     * @param cmd The UploadCommand for resolving the errors
+     * @param field The field to be tested
+     * @param description A descriptive name of the field to be passed to unknown errors
+     * @return The resolved error message or @c null if there is no error
+     */
+    private String resolveErrorMessage(UploadCommand cmd, String field, String description) {
+        if (cmd.errors.getFieldError(field)) {
+            switch (cmd.errors.getFieldError(field).code) {
+            case "validator.invalid":
+                return g.message(code: "model.upload.error.${field}.blank")
+            case "url.invalid":
+                return g.message(code: "model.upload.error.${field}.invalid")
+            default:
+                return g.message(code: "error.unknown", args: [description])
+            }
+        }
+        return null
+    }
 }
 
 /**
@@ -285,6 +311,14 @@ class UploadCommand implements Serializable {
     Integer pubmed
     String doi
     String url
+    // publication
+    String publicationTitle
+    String publicationJournal
+    Integer publicationIssue
+    Integer publicationVolume
+    String publicationPages
+    String publicationAffiliation
+    String publicationAbstract
 
     static constraints = {
         model(nullable: false,
@@ -303,6 +337,38 @@ class UploadCommand implements Serializable {
         url(nullable: true, url: true, validator: { url, cmd ->
             return (cmd.publicationType == "URL" && url != null) || cmd.publicationType != "URL"
         })
+        // publication
+        publicationTitle(nullable: true, validator: { publicationTitle, cmd ->
+            if (cmd.publicationType == "DOI" || cmd.publicationType == "URL") {
+                return publicationTitle != null && publicationTitle.size() > 0
+            } else {
+                return true
+            }
+        })
+        publicationJournal(nullable: true, validator: { publicationJournal, cmd ->
+            if (cmd.publicationType == "DOI" || cmd.publicationType == "URL") {
+                return publicationJournal != null && publicationJournal.size() > 0
+            } else {
+                return true
+            }
+        })
+        publicationAffiliation(nullable: true, validator: { publicationAffiliation, cmd ->
+            if (cmd.publicationType == "DOI" || cmd.publicationType == "URL") {
+                return publicationAffiliation != null && publicationAffiliation.size() > 0
+            } else {
+                return true
+            }
+        })
+        publicationAbstract(nullable: true, validator: { publicationAbstract, cmd ->
+            if (cmd.publicationType == "DOI" || cmd.publicationType == "URL") {
+                return publicationAbstract != null && publicationAbstract.size() > 0
+            } else {
+                return true
+            }
+        })
+        publicationIssue(nullable: true)
+        publicationVolume(nullable: true)
+        publicationPages(nullable: true)
     }
 
     ModelTransportCommand toModelCommand() {
@@ -329,7 +395,13 @@ class UploadCommand implements Serializable {
             break
         }
         if (populatePublicationData) {
-            // TODO: populate the publication data
+            publication.affiliation = publicationAffiliation
+            publication.title       = publicationTitle
+            publication.journal     = publicationJournal
+            publication.synopsis    = publicationAbstract
+            publication.issue       = publicationIssue
+            publication.volume      = publicationVolume
+            publication.pages       = publicationPages
         }
         return new ModelTransportCommand(name: name,
                 format: new ModelFormatTransportCommand(identifier: "SBML"),
