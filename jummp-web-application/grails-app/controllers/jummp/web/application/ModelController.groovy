@@ -158,6 +158,7 @@ class ModelController {
             errors.put("publicationAffiliation", resolveErrorMessage(cmd, "publicationAffiliation", "Publication Affiliation"))
             errors.put("publicationAbstract", resolveErrorMessage(cmd, "publicationAbstract", "Publication Abstract"))
             errors.put("publicationYear", resolveErrorMessage(cmd, "publicationYear", "Publication Year"))
+            errors.put("publicationMonth", resolveErrorMessage(cmd, "publicationMonth", "Publication Month"))
             // need to wrap JSON in a textarea to work with iframe used by jquery form plugin
             render "<textarea>" + (errors as JSON) + "</textarea>"
         } else {
@@ -250,6 +251,8 @@ class ModelController {
                 return g.message(code: "model.upload.error.${field}.range")
             case "range.toosmall":
                 return g.message(code: "model.upload.error.${field}.range")
+            case "not.inList":
+                return g.message(code: "model.upload.error.${field}.inList")
             default:
                 return g.message(code: "error.unknown", args: [description])
             }
@@ -339,7 +342,7 @@ class UploadCommand implements Serializable {
                 return true
             }
         })
-        publicationMonth(nullable: true)
+        publicationMonth(nullable: true, inList: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])
         publicationDay(nullable: true)
     }
 
