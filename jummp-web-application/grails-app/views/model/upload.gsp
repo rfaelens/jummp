@@ -131,6 +131,6 @@
     <input type="hidden" id="model-upload-author-count" value="0" name="authorCount"/>
     <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
         <input type="reset" value="${g.message(code: 'ui.button.cancel')}"/>
-        <input type="button" value="${g.message(code: 'model.upload.ui.upload')}" onclick="uploadModel()"/>
+        <input type="button" value="${g.message(code: 'ui.button.upload')}" onclick="uploadModel()"/>
     </div>
 </form>
