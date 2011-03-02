@@ -214,6 +214,18 @@ class CoreAdapterService {
     }
 
     /**
+     * Returns whether the current user has the right to add a revision to the model.
+     * @param model The model to check
+     * @return @c true if the user has write permission on the revision or is an admin user, @c false otherwise.
+     */
+    @Profiled(tag="coreAdapterService.canAddRevision")
+    public Boolean canAddRevision(final ModelTransportCommand model) {
+        def retVal = send("canAddRevision", model)
+        validateReturnValue(retVal, Boolean)
+        return (Boolean)retVal
+    }
+
+    /**
      * Retrieves the model file for the @p revision.
      * @param revision The Model Revision for which the file should be retrieved.
      * @return Byte Array of the content of the Model file for the revision.

@@ -304,6 +304,28 @@ class JmsAdapterService {
     }
 
     /**
+     * Wrapper around ModelService.canAddRevision
+     * @param message List consisting of Authentication and ModelTransportCommand
+     * @return Boolean or IllegalArgumentException
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.canAddRevision")
+    def canAddRevision(def message) {
+        if (!verifyMessage(message, [Authentication, ModelTransportCommand])) {
+            return new IllegalArgumentException("Authentication and Model as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            result = modelService.canAddRevision(Model.get((message[1]).id))
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
      * Wrapper around ModelService.retrieveModelFile
      * @param message List consisting of Authentication and Revision
      * @return Byte Array, InvalidArgumentException, AccessDeniedException or ModelException

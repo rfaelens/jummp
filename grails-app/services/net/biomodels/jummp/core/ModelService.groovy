@@ -446,6 +446,17 @@ class ModelService {
     }
 
     /**
+     * Returns whether the current user has the right to add a revision to the model.
+     * @param model The model to check
+     * @return @c true if the user has write permission on the revision or is an admin user, @c false otherwise.
+     */
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.canAddRevision")
+    public Boolean canAddRevision(final Model model) {
+        return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.WRITE))
+    }
+
+    /**
      * Retrieves the model file for the @p revision.
      * @param revision The Model Revision for which the file should be retrieved.
      * @return Byte Array of the content of the Model file for the revision.
