@@ -505,7 +505,7 @@ function setErrorState(selector, error) {
         if (selector[0] == '#') {
             $("label[for=\"" + selector.substring(1) + "\"]").addClass("ui-state-error-text");
         }
-        var icon = $(selector).next("span.ui-icon");
+        var icon = $(selector).next("span.ui-icon-alert");
         if (icon) {
             icon.attr("title", error);
             icon.show();
@@ -515,7 +515,7 @@ function setErrorState(selector, error) {
         if (selector[0] == '#') {
             $("label[for=\"" + selector.substring(1) + "\"]").removeClass("ui-state-error-text");
         }
-        $(selector).next("span.ui-icon").hide();
+        $(selector).next("span.ui-icon-alert").hide();
     }
 }
 
