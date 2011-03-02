@@ -6,11 +6,11 @@
         <tbody>
         <tr>
             <td><label for="revision-upload-file"><g:message code="model.upload.file"/>:</label></td>
-            <td><input type="file" id="revision-upload-file" name="model"/></td>
+            <td><span><input type="file" id="revision-upload-file" name="model"/><jummp:errorField/></span></td>
         </tr>
         <tr>
             <td><label for="revision-upload-comment"><g:message code="model.upload.comment"/>:</label></td>
-            <td><input type="text" id="revision-upload-comment" name="comment"></td>
+            <td><span><input type="text" id="revision-upload-comment" name="comment"><jummp:errorField/></span></td>
         </tr>
         </tbody>
     </table>
