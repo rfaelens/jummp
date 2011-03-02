@@ -44,7 +44,7 @@ class ModelController {
         } else {
             ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
             RevisionTransportCommand rev = coreAdapterService.getLatestRevision(model)
-            [revision: rev]
+            [revision: rev, addRevision: coreAdapterService.canAddRevision(model)]
         }
     }
 

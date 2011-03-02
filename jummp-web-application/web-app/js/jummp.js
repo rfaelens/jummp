@@ -181,8 +181,9 @@ function showModelList() {
 /**
  * Loads the view to show a Model and replaces.
  * @param id The id of the Model to show
+ * @param tabIndex Optional tab index to switch to after the tab view has been loaded
  */
-function showModel(id) {
+function showModel(id, tabIndex) {
     $("#body").block();
     $.ajax({url: createLink("model", "show", id),
         success: function(data) {
@@ -192,36 +193,29 @@ function showModel(id) {
                 ajaxOptions: {error: function(jqXHR) {
                     $("#body").unblock();
                     handleError($.parseJSON(jqXHR.responseText));
-                }}
+                }},
+                load: function(event, ui) {
+                    console.log(event);
+                    console.log(ui);
+                    // ui has index
+                    switch (ui.index) {
+                    case 6:
+                        // add revision tab
+                        $("#revision-upload-form div input:button").button();
+                        break;
+                    }
+                }
             });
             $("#modelTabs").show();
+            if (tabIndex) {
+                $("#modelTabs").tabs("select", tabIndex);
+            }
             $("#body").unblock();
         },
         error: function(jqXHR) {
             $("#body").unblock();
             handleError($.parseJSON(jqXHR.responseText));
         }});
-}
-
-/**
- * Loads the view to upload a new Revision to a Model.
- * @param id The id of the Model for which a new Revision should be added
- */
-function showNewRevision(id) {
-    $("#body").block();
-    $.ajax({url: createLink("model", "newRevision", id),
-        success: function(data) {
-            $("#body").html(data);
-            clearErrorMessages();
-            $("#navigationButtons a").button();
-            $("#revision-upload-form div input:button").button();
-            $("#body").unblock();
-        },
-        error: function(jqXHR) {
-            $("#body").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }
-    });
 }
 
 /**
@@ -484,7 +478,7 @@ function uploadRevision() {
             } else if (data.success) {
                 clearErrorMessages();
                 showInfoMessage(i18n.model.revision.upload.success.replace(/_NAME_/, data.revision.model.name), 20000);
-                showModel(data.revision.model.id);
+                $("#modelTabs").tabs("select", 0);
             }
         },
         error: function(jqXHR, textStatus) {

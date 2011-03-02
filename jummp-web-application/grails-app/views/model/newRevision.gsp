@@ -1,9 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<div id="navigationButtons">
-    <a href="#" onclick="showModelList()"><g:message code="model.list.goto"/></a>
-    <a href="#" onclick="showModel('${params.id}')"><g:message code="model.show.back"/></a>
-</div>
-<form action="saveNewRevision" method="post" id="revision-upload-form" class="ui-widget-content" enctype="multipart/form-data">
+<form action="saveNewRevision" method="post" id="revision-upload-form" enctype="multipart/form-data">
     <input type="hidden" name="modelId" value="${params?.id}">
     <table>
         <thead></thead>
