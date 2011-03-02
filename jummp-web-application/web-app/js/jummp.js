@@ -494,8 +494,10 @@ function uploadRevision() {
 
 /**
  * Sets the state of widgets to error or removes the error state.
+ * If the widget is next to a span element with an alert icon, the alert icon is
+ * shown and the @p error is used as the title element.
  * @param selector Selector string to identify the widget(s)
- * @param error @c true to set to error, @c false to remove error state
+ * @param error Error message, if @c null, the error state is withdrawn.
  */
 function setErrorState(selector, error) {
     if (error) {
