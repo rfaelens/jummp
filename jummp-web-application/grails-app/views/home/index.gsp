@@ -24,7 +24,7 @@
         break
     case "ADDREVISION":
 %>
-            showModel("${params.id}", 6);
+            showModel("${params.id}", "#modelTabs-addRevision");
 <%
         break
     }

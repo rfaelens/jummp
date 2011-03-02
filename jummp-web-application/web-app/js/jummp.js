@@ -181,7 +181,7 @@ function showModelList() {
 /**
  * Loads the view to show a Model and replaces.
  * @param id The id of the Model to show
- * @param tabIndex Optional tab index to switch to after the tab view has been loaded
+ * @param tabIndex Optional selector for tab index to switch to after the tab view has been loaded
  */
 function showModel(id, tabIndex) {
     $("#body").block();
@@ -206,7 +206,7 @@ function showModel(id, tabIndex) {
             });
             $("#modelTabs").show();
             if (tabIndex) {
-                $("#modelTabs").tabs("select", tabIndex);
+                $("#modelTabs").tabs("select", $(tabIndex).attr("href"));
             }
             $("#body").unblock();
         },
