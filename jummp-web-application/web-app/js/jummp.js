@@ -282,6 +282,9 @@ function showUploadModel() {
                 $("#model-upload-publication-table tbody").append(initialsRow);
                 $("#model-upload-publication-table tbody").append(firstNameRow);
                 $("#model-upload-publication-table tbody").append(lastNameRow);
+                setErrorState("#" + initialsId);
+                setErrorState("#" + firstNameId);
+                setErrorState("#" + lastNameId);
                 // connect the remove button
                 var removeButton = $("td input[type=button]", initialsRow).button();
                 removeButton.click(function() {
