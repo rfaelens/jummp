@@ -6,14 +6,14 @@
 </div>
 <div id="modelTabs" style="display: none">
     <ul>
-        <li><a href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Model</a></li>
+        <li><a id="modelTabs-model" href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Model</a></li>
         <li><a href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Overview</a></li>
         <li><a href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Math</a></li>
         <li><a href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Physical Entities</a></li>
         <li><a href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Parameters</a></li>
         <li><a href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Curation</a></li>
         <g:if test="${addRevision}">
-            <li><a href="${g.createLink(controller: 'model', action: 'newRevision', id: params.id)}"><g:message code="model.revision.upload.goto"/></a></li>
+            <li><a id="modelTabs-addRevision" href="${g.createLink(controller: 'model', action: 'newRevision', id: params.id)}"><g:message code="model.revision.upload.goto"/></a></li>
         </g:if>
     </ul>
 </div>

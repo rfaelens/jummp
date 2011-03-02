@@ -195,11 +195,9 @@ function showModel(id, tabIndex) {
                     handleError($.parseJSON(jqXHR.responseText));
                 }},
                 load: function(event, ui) {
-                    console.log(event);
-                    console.log(ui);
                     // ui has index
-                    switch (ui.index) {
-                    case 6:
+                    switch ($(ui.tab).attr("id")) {
+                    case "modelTabs-addRevision":
                         // add revision tab
                         $("#revision-upload-form div.ui-dialog-buttonpane input").button()
                         break;
