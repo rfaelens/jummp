@@ -43,34 +43,34 @@
         <thead></thead>
         <tbody>
         <tr>
-            <td><label for="model-upload-publication-title">Publication Title:</label></td>
+            <td><label for="model-upload-publication-title"><g:message code="publication.title"/>:</label></td>
             <td><input type="text" id="model-upload-publication-title" name="publicationTitle"/></td>
         </tr>
         <tr>
-            <td><label for="model-upload-publication-journal">Publication Journal:</label></td>
+            <td><label for="model-upload-publication-journal"><g:message code="publication.journal"/>:</label></td>
             <td><input type="text" id="model-upload-publication-journal" name="publicationJournal"/></td>
         </tr>
         <tr>
-            <td><label for="model-upload-publication-issue">Publication Issue:</label></td>
+            <td><label for="model-upload-publication-issue"><g:message code="publication.issue"/>:</label></td>
             <td><input type="text" id="model-upload-publication-issue" name="publicationIssue"/></td>
         </tr>
         <tr>
-            <td><label for="model-upload-publication-volume">Publication Volume:</label></td>
+            <td><label for="model-upload-publication-volume"><g:message code="publication.volume"/>:</label></td>
             <td><input type="text" id="model-upload-publication-volume" name="publicationVolume"/></td>
         </tr>
         <tr>
-            <td><label for="model-upload-publication-pages">Publication Pages:</label></td>
+            <td><label for="model-upload-publication-pages"><g:message code="publication.pages"/>:</label></td>
             <td><input type="text" id="model-upload-publication-pages" name="publicationPages"/></td>
         </tr>
         <tr>
-            <td><label for="model-upload-publication-affiliation">Publication Affiliation:</label></td>
+            <td><label for="model-upload-publication-affiliation"><g:message code="publication.affiliation"/>:</label></td>
             <td><input type="text" id="model-upload-publication-affiliation" name="publicationAffiliation"/></td>
         </tr>
         <tr>
-            <td><label for="model-upload-publication-year">Publication Date:</label></td>
+            <td><label for="model-upload-publication-year"><g:message code="publication.date"/>:</label></td>
             <td>
                 <select name="publicationYear" id="model-upload-publication-year">
-                    <option value="">Select Year</option>
+                    <option value=""><g:message code="publication.upload.year"/></option>
 <%
     for (int i=new GregorianCalendar().get(Calendar.YEAR); i>=1980; i--) {
 %>
@@ -80,22 +80,22 @@
 %>
                 </select>
                 <select name="publicationMonth" id="model-upload-publication-month">
-                    <option value="">Select Month (optional)</option>
-                    <option value="Jan">Jan</option>
-                    <option value="Feb">Feb</option>
-                    <option value="Mar">Mar</option>
-                    <option value="Apr">Apr</option>
-                    <option value="May">May</option>
-                    <option value="Jun">Jun</option>
-                    <option value="Jul">Jul</option>
-                    <option value="Aug">Aug</option>
-                    <option value="Sep">Sep</option>
-                    <option value="Oct">Oct</option>
-                    <option value="Nov">Nov</option>
-                    <option value="Dec">Dec</option>
+                    <option value=""><g:message code="publication.upload.month"/></option>
+                    <option value="Jan"><g:message code="date.month.january"/></option>
+                    <option value="Feb"><g:message code="date.month.february"/></option>
+                    <option value="Mar"><g:message code="date.month.march"/></option>
+                    <option value="Apr"><g:message code="date.month.april"/></option>
+                    <option value="May"><g:message code="date.month.may"/></option>
+                    <option value="Jun"><g:message code="date.month.june"/></option>
+                    <option value="Jul"><g:message code="date.month.july"/></option>
+                    <option value="Aug"><g:message code="date.month.august"/></option>
+                    <option value="Sep"><g:message code="date.month.september"/></option>
+                    <option value="Oct"><g:message code="date.month.october"/></option>
+                    <option value="Nov"><g:message code="date.month.november"/></option>
+                    <option value="Dec"><g:message code="date.month.december"/></option>
                 </select>
                 <select name="publicationDay" id="model-upload-publication-day">
-                    <option value="">Select Day (optional)</option>
+                    <option value=""><g:message code="publication.upload.day"/></option>
 <%
     for (int i=1; i<=31; i++) {
 %>
@@ -107,29 +107,29 @@
             </td>
         </tr>
         <tr>
-            <td><label for="model-upload-publication-abstract">Publication Abstract:</label></td>
+            <td><label for="model-upload-publication-abstract"><g:message code="publication.abstract"/>:</label></td>
             <td><textarea rows="4" cols="20" maxlength="1000" id="model-upload-publication-abstract" name="publicationAbstract"></textarea></td>
         </tr>
         <tr>
-            <td colspan="2">Authors <input id="model-upload-publication-author-add" type="button" value="Add Author"/></td>
+            <td colspan="2"><g:message code="publication.upload.authors"/><input id="model-upload-publication-author-add" type="button" value="${g.message(code: 'publication.upload.ui.addAuthor')}"/></td>
         </tr>
         <tr id="model-upload-publication-author-initials-row">
-            <td><label for="model-upload-publication-author-initials">Initials:</label></td>
-            <td><input type="text" id="model-upload-publication-author-initials" name="authorInitials" size="5" maxlength="5"/><input type="button" style="display:none" value="Remove Author"/></td>
+            <td><label for="model-upload-publication-author-initials"><g:message code="publication.upload.author.initials"/>:</label></td>
+            <td><input type="text" id="model-upload-publication-author-initials" name="authorInitials" size="5" maxlength="5"/><input type="button" style="display:none" value="${g.message(code: 'publication.upload.ui.removeAuthor')}"/></td>
         </tr>
         <tr id="model-upload-publication-author-firstname-row">
             %{--TODO preset fields with users data --}%
-            <td><label for="model-upload-publication-author-firstname">First Name:</label></td>
+            <td><label for="model-upload-publication-author-firstname"><g:message code="publication.upload.author.firstName"/>:</label></td>
             <td><input type="text" id="model-upload-publication-author-firstname" name="authorFirstName"/></td>
         </tr>
         <tr id="model-upload-publication-author-lastname-row">
-            <td><label for="model-upload-publication-author-lastname">Last Name:</label></td>
+            <td><label for="model-upload-publication-author-lastname"><g:message code="publication.upload.author.lastName"/>:</label></td>
             <td><input type="text" id="model-upload-publication-author-lastname" name="authorLastName"/></td>
         </tr>
         </tbody>
     </table>
     <input type="hidden" id="model-upload-author-count" value="0" name="authorCount"/>
     <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
-        <input type="button" value="Upload" onclick="uploadModel()"/>
+        <input type="button" value="${g.message(code: 'model.upload.ui.upload')}" onclick="uploadModel()"/>
     </div>
 </form>
