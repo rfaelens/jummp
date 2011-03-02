@@ -1,0 +1,3 @@
+#body form input[type=text], #body form input[type=file], #body form textarea, #body form select {
+    float: left;
+}

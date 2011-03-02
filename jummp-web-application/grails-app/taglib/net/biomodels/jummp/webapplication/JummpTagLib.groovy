@@ -33,4 +33,11 @@ class JummpTagLib {
         }
         out << publicationSummary
     }
+
+    /**
+     * Renders a span element with an alert icon and initially hidden.
+     */
+    def errorField = { attrs ->
+        out << "<span class=\"ui-icon ui-icon-alert\" style=\"display: none\"></span>"
+    }
 }
