@@ -168,7 +168,22 @@ class ModelController {
             render "<textarea>" + (errors as JSON) + "</textarea>"
         } else {
             try {
-                ModelTransportCommand model = coreAdapterService.uploadModel(cmd.model.bytes, cmd.toModelCommand())
+                ModelTransportCommand uploadModel = cmd.toModelCommand()
+                for (int i=0; i<(params.authorCount as int); i++) {
+                    String initialsField = "authorInitials" + i
+                    String firstNameField = "authorFirstName" + i
+                    String lastNameField = "authorLastName" + i
+                    if (params.containsKey(initialsField) && params.containsKey(firstNameField) && params.containsKey(lastNameField)) {
+                        AuthorTransportCommand author = new AuthorTransportCommand(initials: params.get(initialsField),
+                                firstName: params.get(firstNameField),
+                                lastName: params.get(lastNameField))
+                        println author.lastName
+                        if (author.lastName != "") {
+                            uploadModel.publication.authors << author
+                        }
+                    }
+                }
+                ModelTransportCommand model = coreAdapterService.uploadModel(cmd.model.bytes, uploadModel)
                 render "<textarea>" + ([success: true, model: model] as JSON) + "</textarea>"
             } catch (ModelException e) {
                 Map errors = [error: true]

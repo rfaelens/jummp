@@ -111,23 +111,24 @@
             <td><textarea rows="4" cols="20" maxlength="1000" id="model-upload-publication-abstract" name="publicationAbstract"></textarea></td>
         </tr>
         <tr>
-            <td colspan="2">Authors</td>
+            <td colspan="2">Authors <input id="model-upload-publication-author-add" type="button" value="Add Author"/></td>
         </tr>
-        <tr>
+        <tr id="model-upload-publication-author-initials-row">
             <td><label for="model-upload-publication-author-initials">Initials:</label></td>
-            <td><input type="text" id="model-upload-publication-author-initials" name="authorInitials" size="5" maxlength="5"/></td>
+            <td><input type="text" id="model-upload-publication-author-initials" name="authorInitials" size="5" maxlength="5"/><input type="button" style="display:none" value="Remove Author"/></td>
         </tr>
-        <tr>
+        <tr id="model-upload-publication-author-firstname-row">
             %{--TODO preset fields with users data --}%
             <td><label for="model-upload-publication-author-firstname">First Name:</label></td>
             <td><input type="text" id="model-upload-publication-author-firstname" name="authorFirstName"/></td>
         </tr>
-        <tr>
+        <tr id="model-upload-publication-author-lastname-row">
             <td><label for="model-upload-publication-author-lastname">Last Name:</label></td>
             <td><input type="text" id="model-upload-publication-author-lastname" name="authorLastName"/></td>
         </tr>
         </tbody>
     </table>
+    <input type="hidden" id="model-upload-author-count" value="0" name="authorCount"/>
     <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
         <input type="button" value="Upload" onclick="uploadModel()"/>
     </div>

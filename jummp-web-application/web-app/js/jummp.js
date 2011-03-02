@@ -251,6 +251,47 @@ function showUploadModel() {
                     enableElement("#model-upload-publication-day", true);
                 }
             });
+            $("#model-upload-publication-author-add").button();
+            $("#model-upload-publication-author-add").click(function() {
+                // initials
+                var initialsRow = $("#model-upload-publication-author-initials-row").clone();
+                var counter = $("#model-upload-author-count").val();
+                var initialsId = $("td label", initialsRow).attr("for") + counter;
+                initialsRow.attr("id", initialsRow.attr("id") + counter);
+                $("td label", initialsRow).attr("for", initialsId);
+                $("td input", initialsRow).attr("id", initialsId);
+                $("td input", initialsRow).attr("name", $("td input", initialsRow).attr("name") + counter);
+                $("td input[type=text]", initialsRow).val("");
+                // first name
+                var firstNameRow = $("#model-upload-publication-author-firstname-row").clone();
+                var firstNameId = $("td label", firstNameRow).attr("for") + counter;
+                firstNameRow.attr("id", firstNameRow.attr("id") + counter);
+                $("td label", firstNameRow).attr("for", firstNameId);
+                $("td input", firstNameRow).attr("id", firstNameId);
+                $("td input", firstNameRow).attr("name", $("td input", firstNameRow).attr("name") + counter);
+                $("td input[type=text]", firstNameRow).val("");
+                // last name
+                var lastNameRow = $("#model-upload-publication-author-lastname-row").clone();
+                var lastNameId = $("td label", lastNameRow).attr("for") + counter;
+                lastNameRow.attr("id", lastNameRow.attr("id") + counter);
+                $("td label", lastNameRow).attr("for", lastNameId);
+                $("td input", lastNameRow).attr("id", lastNameId);
+                $("td input", lastNameRow).attr("name", $("td input", lastNameRow).attr("name") + counter);
+                $("td input[type=text]", lastNameRow).val("");
+                // add to table
+                $("#model-upload-publication-table tbody").append(initialsRow);
+                $("#model-upload-publication-table tbody").append(firstNameRow);
+                $("#model-upload-publication-table tbody").append(lastNameRow);
+                // connect the remove button
+                var removeButton = $("td input[type=button]", initialsRow).button();
+                removeButton.click(function() {
+                    initialsRow.remove();
+                    firstNameRow.remove();
+                    lastNameRow.remove();
+                });
+                removeButton.show();
+                $("#model-upload-author-count").val(parseInt(counter) + 1);
+            });
             uploadModelPublicationChangeListener();
             $("#body").unblock();
         },
