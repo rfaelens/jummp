@@ -73,7 +73,9 @@ target(models: "Creates some models to be used in the application") {
     modelService.uploadModel(modelFile, modelTransportCommandClass.newInstance(format: modelFormatClass.newInstance(identifier: "SBML"), comment: "Test", name: "10th model"))
     modelService.uploadModel(modelFile, modelTransportCommandClass.newInstance(format: modelFormatClass.newInstance(identifier: "SBML"), comment: "Test", name: "11th model"))
     modelService.uploadModel(modelFile, modelTransportCommandClass.newInstance(format: modelFormatClass.newInstance(identifier: "SBML"), comment: "Test", name: "12th model"))
-    modelService.uploadModel(modelFile, modelTransportCommandClass.newInstance(format: modelFormatClass.newInstance(identifier: "SBML"), comment: "Test", name: "13th model"))
+    def model = modelService.uploadModel(modelFile, modelTransportCommandClass.newInstance(format: modelFormatClass.newInstance(identifier: "SBML"), comment: "Test", name: "13th model"))
+    def userClass = grailsApp.classLoader.loadClass("net.biomodels.jummp.plugins.security.User")
+    modelService.grantReadAccess(model, userClass.findByUsername("user"))
 }
 
 setDefaultTarget(main)
