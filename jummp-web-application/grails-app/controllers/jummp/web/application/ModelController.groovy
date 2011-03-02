@@ -54,8 +54,7 @@ class ModelController {
         } else {
             ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
             RevisionTransportCommand rev = coreAdapterService.getLatestRevision(model)
-            PublicationTransportCommand publication = coreAdapterService.getPublication(model)
-            [publication: publication, revision: rev]
+            [publication: rev.model.publication, revision: rev]
         }
     }
 
