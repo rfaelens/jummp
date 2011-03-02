@@ -32,13 +32,21 @@ function showLoginDialog() {
  * On failure the error message is displayed.
  */
 function authAjax() {
-    $.post(createURI("j_spring_security_check"), $("#ajaxLoginForm").serialize(), function(data) {
-        if (data.success) {
-            $("#ajaxLoginDialog").dialog('close');
-            $(document).trigger("login", data.username)
-        } else if (data.error) {
-            $("#ajaxLoginStatus").html(data.error);
-            $("#ajaxLoginStatus").show();
+    $.ajax({
+        url: createURI("j_spring_security_check"),
+        type: 'POST',
+        data: $("#ajaxLoginForm").serialize(),
+        success: function(data) {
+            if (data.success) {
+                $("#ajaxLoginDialog").dialog('close');
+                $(document).trigger("login", data.username)
+            } else if (data.error) {
+                $("#ajaxLoginStatus").html(data.error);
+                $("#ajaxLoginStatus").show();
+            }
+        },
+        error: function(jqXHR) {
+            handleError($.parseJSON(jqXHR.responseText));
         }
     });
 }
