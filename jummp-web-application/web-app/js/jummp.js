@@ -201,7 +201,7 @@ function showModel(id, tabIndex) {
                     switch (ui.index) {
                     case 6:
                         // add revision tab
-                        $("#revision-upload-form div input:button").button();
+                        $("#revision-upload-form div.ui-dialog-buttonpane input").button()
                         break;
                     }
                 }
@@ -231,7 +231,7 @@ function showUploadModel() {
             $("#navigationButtons a").button();
             clearErrorMessages();
             $("input:radio[name=publicationType]")[0].checked = true;
-            $("#model-upload-form div input:button").button();
+            $("#model-upload-form div.ui-dialog-buttonpane input").button();
             $("input:radio[name=publicationType]").change(uploadModelPublicationChangeListener);
             enableElement("#model-upload-publication-month", false);
             enableElement("#model-upload-publication-day", false);
