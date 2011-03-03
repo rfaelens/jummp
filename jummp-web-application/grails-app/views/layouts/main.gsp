@@ -1,3 +1,4 @@
+<%@ page import="org.codehaus.groovy.grails.web.context.ServletContextHolder" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -11,7 +12,18 @@
         <g:javascript src="jquery/jquery.cluetip.js"/>
         <g:javascript src="jquery/jquery.blockUI.js"/>
         <g:javascript src="jquery/jquery.form.js"/>
-        <jqui:resources />
+<%
+String themeName = null
+if (params.theme) {
+    themeName = params.theme
+} else if (grailsApplication.metadata["jummp.theme"]) {
+    themeName = grailsApplication.metadata["jummp.theme"]
+}
+if (!themeName || !(new File(ServletContextHolder.servletContext.getRealPath("jquery-ui/${themeName}/${themeName}.css"))).exists()) {
+    themeName = "smoothness"
+}
+%>
+        <jqui:resources themeCss="${resource(dir: 'jquery-ui/' + themeName, file: themeName + '.css')}"/>
         <g:layoutHead />
         <g:javascript>
         $.appName = "${grailsApplication.metadata["app.name"]}";
