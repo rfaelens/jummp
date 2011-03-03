@@ -43,6 +43,8 @@
 </head>
 
 <body>
+    <div id="status-code" style="display: none">403</div>
+    <div id="authenticated" style="display: none">false</div
     <div id='login'>
         <div class='inner'>
             <g:if test='${flash.message}'>
