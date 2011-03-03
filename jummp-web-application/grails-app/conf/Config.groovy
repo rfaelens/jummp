@@ -127,3 +127,17 @@ log4j = {
 
 grails.plugins.springsecurity.providerNames = ['jmsAuthenticationProvider', 'anonymousAuthenticationProvider', 'rememberMeAuthenticationProvider']
 grails.plugins.springsecurity.successHandler.alwaysUseDefault = true
+
+// theme name loaded from external configuration file
+Properties jummpProperties = new Properties()
+try {
+    jummpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"))
+} catch (Exception e) {
+    // ignore
+}
+if (jummpProperties.containsKey("jummp.theme")) {
+    net.biomodels.jummp.webapp.theme = jummpProperties.getProperty("jummp.theme")
+    // TODO: verify if it exists
+} else {
+    net.biomodels.jummp.webapp.theme = "smoothness"
+}

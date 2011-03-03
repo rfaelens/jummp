@@ -1,4 +1,4 @@
-<%@ page import="org.codehaus.groovy.grails.web.context.ServletContextHolder" %>
+<%@ page import="org.codehaus.groovy.grails.commons.ConfigurationHolder; org.codehaus.groovy.grails.web.context.ServletContextHolder" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -16,11 +16,9 @@
 String themeName = null
 if (params.theme) {
     themeName = params.theme
-} else if (grailsApplication.metadata["jummp.theme"]) {
-    themeName = grailsApplication.metadata["jummp.theme"]
 }
 if (!themeName || !(new File(ServletContextHolder.servletContext.getRealPath("jquery-ui/${themeName}/${themeName}.css"))).exists()) {
-    themeName = "smoothness"
+    themeName = ConfigurationHolder.config.net.biomodels.jummp.webapp.theme
 }
 %>
         <jqui:resources themeCss="${resource(dir: 'jquery-ui/' + themeName, file: themeName + '.css')}"/>
