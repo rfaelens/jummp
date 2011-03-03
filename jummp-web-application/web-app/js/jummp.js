@@ -306,6 +306,57 @@ function showUploadModel() {
 }
 
 /**
+ * Loads the admin view to select a theme.
+ */
+function showThemeSelection() {
+    $("#body").block();
+    $.ajax({
+        url: createLink("themeing", "themes"),
+        dataType: "html",
+        success: function(data) {
+            $("#body").html(data);
+            clearErrorMessages();
+        },
+        error: function(jqXHR) {
+            $("#body").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
+ * Callback to change the application theme.
+ */
+function changeTheme() {
+    $("#change-theme-form").block();
+    var data = $("#change-theme-form");
+    $("#change-theme-form").ajaxSubmit({
+        type: 'POST',
+        url: createLink("themeing", "save"),
+        dataType: 'json',
+        success: function(data) {
+            $("#change-theme-form").unblock();
+            if (handleError(data)) {
+                // TODO: with jquery 1.5 should be handled by status code function
+                return;
+            }
+            if (data.error) {
+                clearErrorMessages();
+                showErrorMessage(data.theme);
+                setErrorState("#change-theme-themes", data.theme);
+            } else if (data.success) {
+                clearErrorMessages();
+                showInfoMessage(i18n.theme.success.replace(/_CODE_/, data.theme), 20000);
+            }
+        },
+        error: function(jqXHR) {
+            $("#change-theme-form").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
  * Creates HTML markup for a hyperlink to citexplore referencing a PubMed Id.
  * The hyperlink has a class "tooltip", a title and rel attribute referencing a tooltip.
  * The following information from the JSON structure is used:

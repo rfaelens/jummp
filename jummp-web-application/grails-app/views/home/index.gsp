@@ -27,6 +27,11 @@
             showModel("${params.id}", "#modelTabs-addRevision");
 <%
         break
+    case "THEMES":
+%>
+            showThemeSelection();
+<%
+        break
     }
 %>
         });

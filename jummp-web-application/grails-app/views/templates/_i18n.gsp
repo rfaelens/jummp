@@ -56,6 +56,9 @@ var i18n = {
     error: {
         unexpected: "${g.message(code: 'error.500.explanation', args: ['_CODE_'])}",
         denied:     "${g.message(code: 'error.403.explanation')}"
+    },
+    theme: {
+        success: "${g.message(code: 'theme.change.success', args: ['_CODE_'])}"
     }
 };
 </g:javascript>
