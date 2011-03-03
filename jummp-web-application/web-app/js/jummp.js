@@ -544,7 +544,12 @@ function uploadRevision() {
             var response = $(jqXHR.responseText);
             var errorCode = $("#error-code", response).text();
             var statusCode = parseInt($("#status-code", response).text());
-            handleError({error: statusCode, code: errorCode});
+            var authenticated = ($("#authenticated", response).text() == "true");
+            if (isNaN(statusCode) && jqXHR.responseXML) {
+                statusCode = parseInt($("#status-code", $(jqXHR.responseXML)).text());
+                authenticated = ($("#authenticated", $(jqXHR.responseXML)).text() == "true");
+            }
+            handleError({error: statusCode, code: errorCode, authenticated: authenticated});
         }
     });
 }
