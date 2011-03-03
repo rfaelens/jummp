@@ -670,6 +670,9 @@ function handleError(data) {
                     showLoginDialog();
                 }
                 break;
+            case 404:
+                errorMessage = i18n.error.notFound.replace(/_CODE_/, data.resource);
+                break;
             case 500:
                 errorMessage = i18n.error.unexpected.replace(/_CODE_/, data.code);
                 break;

@@ -55,6 +55,7 @@ var i18n = {
     },
     error: {
         unexpected: "${g.message(code: 'error.500.explanation', args: ['_CODE_'])}",
+        notFound:   "${g.message(code: 'error.404.explanation', args: ['_CODE_'])}",
         denied:     "${g.message(code: 'error.403.explanation')}"
     },
     theme: {

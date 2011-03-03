@@ -15,6 +15,16 @@ class ErrorsController {
         }
     }
 
+    def error404 = {
+        if (springSecurityService.isAjax(request)) {
+            def data = [error: 404, resource: request.forwardURI]
+            render data as JSON
+            return
+        } else {
+            [resource: request.forwardURI]
+        }
+    }
+
     def error500 = {
         def exception = request.getAttribute('exception')
         String digest = ''
