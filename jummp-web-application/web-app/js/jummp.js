@@ -315,6 +315,7 @@ function showThemeSelection() {
         dataType: "html",
         success: function(data) {
             $("#body").html(data);
+            $("#change-theme-form input:button").button();
             clearErrorMessages();
         },
         error: function(jqXHR) {
