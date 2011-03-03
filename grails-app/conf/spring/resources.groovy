@@ -1,5 +1,6 @@
 import org.apache.activemq.ActiveMQConnectionFactory
 import org.springframework.jms.connection.SingleConnectionFactory
+import grails.util.Environment
 
 // Place your Spring DSL code here
 beans = {
@@ -19,5 +20,7 @@ beans = {
         }
     }
 
-    timingAspect(org.perf4j.log4j.aop.TimingAspect)
+    if (Environment.getCurrent() == Environment.DEVELOPMENT) {
+        timingAspect(org.perf4j.log4j.aop.TimingAspect)
+    }
 }
