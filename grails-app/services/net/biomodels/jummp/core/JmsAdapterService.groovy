@@ -21,6 +21,7 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.core.model.PublicationTransportCommand
+import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -65,6 +66,9 @@ class JmsAdapterService {
         if (message instanceof Authentication) {
             try {
                 Authentication auth = authenticationManager.authenticate(message)
+                if (auth.principal instanceof LdapUserDetailsImpl) {
+                    return auth
+                }
                 // The authentication is propagated with an GrailsUser as principal
                 // Unfortunately the GrailsUser class is not serializable.
                 // Because of that a new Authentication is created using an own implementation of a serializable GrailsUser
