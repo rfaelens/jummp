@@ -6,7 +6,7 @@
 function switchUserInformation(logedIn, userName) {
     if (logedIn) {
         if (userName) {
-            $("#userInformationLogedIn span").first().text(userName);
+            $("#userInformationLogedIn span").first().html("<a href=\"#\" onclick=\"showUserInfo()\">" + userName + "</a>");
         }
         $("#userInformationLogedIn").show();
         $("#userInformationLogedOut").hide();
