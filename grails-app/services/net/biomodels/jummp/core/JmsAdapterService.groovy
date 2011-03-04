@@ -613,6 +613,30 @@ class JmsAdapterService {
     }
 
     /**
+     * Wrapper around UserService.getAllUsers
+     * @param message List consisting of Authentication, Integer and Integer
+     * @return List of Users, IllegalArgumentException of AccessDeniedException
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.getAllUser")
+    def getAllUsers(def message) {
+        if (!verifyMessage(message, [Authentication, Integer, Integer])) {
+            return new IllegalArgumentException("Authentication, Integer and Integer as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            result = userService.getAllUsers((Integer)message[1], (Integer)message[2])
+        } catch (AccessDeniedException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
      * Helper function to verify that @p message has correct structure.
      * @param message The message to verify
      * @param classes The structure as List of Class types.

@@ -83,4 +83,18 @@ class UserService {
         }
         return user.sanitizedUser()
     }
+
+    /**
+     * Retrieves list of users.
+     * This method is only for administrative purpose. It does not sanitize the
+     * returned Users, that is it includes all (also security relevant) elements.
+     * The method only exists in a paginated version
+     * @param offset Offset in the list
+     * @param count Number of Users to return, Maximum is 100
+     * @return List of Users ordered by Id
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    List<User> getAllUsers(Integer offset, Integer count) {
+        return User.list([offset: offset, max: Math.min(count, 100)])
+    }
 }

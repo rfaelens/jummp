@@ -76,4 +76,19 @@ class UserServiceTests extends JummpIntegrationTestCase {
             userService.getUser("noSuchUser")
         }
     }
+
+    void testGetAllUsers() {
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            userService.getAllUsers(0, 0)
+        }
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            userService.getAllUsers(0, 0)
+        }
+        authenticateAsAdmin()
+        List<User> users = userService.getAllUsers(0, 10)
+        assertEquals(3, users.size())
+        // TODO: add tests for the size - requires creation of more users
+    }
 }

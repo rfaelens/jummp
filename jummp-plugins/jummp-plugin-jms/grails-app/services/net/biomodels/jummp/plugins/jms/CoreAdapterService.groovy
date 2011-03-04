@@ -336,6 +336,22 @@ class CoreAdapterService {
     }
 
     /**
+     * Retrieves list of users.
+     * This method is only for administrative purpose. It does not sanitize the
+     * returned Users, that is it includes all (also security relevant) elements.
+     * The method only exists in a paginated version
+     * @param offset Offset in the list
+     * @param count Number of Users to return, Maximum is 100
+     * @return List of Users ordered by Id
+     */
+    @Profiled(tag="coreAdapterService.getUser")
+    public List<User> getAllUsers(Integer offset, Integer count) {
+        def retVal = send("getAllUsers", [offset, count])
+        validateReturnValue(retVal, List)
+        return (List<User>)retVal
+    }
+
+    /**
      * Validates the @p retVal. In case of a @c null value an JummpException is thrown, in case the
      * value is an Exception itself, the Exception gets re-thrown, in case the value is not an instance
      * of @p expectedType an JummpException is thrown.
