@@ -11,6 +11,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import org.perf4j.aop.Profiled
+import org.springframework.security.authentication.BadCredentialsException
 
 /**
  * @short Service connecting to the core via synchronous JMS.
@@ -286,6 +287,18 @@ class CoreAdapterService {
         def retVal = send("restoreModel", model)
         validateReturnValue(retVal, Boolean)
         return (Boolean)retVal
+    }
+
+    /**
+     * Changes the password of the currently logged in user.
+     * @param oldPassword The old password for verification
+     * @param newPassword The new password to be used
+     * @throws BadCredentialsException if @p oldPassword is incorrect
+     * @todo Maybe better in an own service?
+     */
+    @Profiled(tag="coreAdapterService.changePassword")
+    public void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {
+        validateReturnValue(send("changePassword", [oldPassword, newPassword]), Boolean)
     }
 
     /**

@@ -60,6 +60,9 @@ var i18n = {
     },
     theme: {
         success: "${g.message(code: 'theme.change.success', args: ['_CODE_'])}"
+    },
+    user: {
+        passwordChanged: "${g.message(code: 'user.change.password.success')}"
     }
 };
 </g:javascript>

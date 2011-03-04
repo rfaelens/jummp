@@ -358,6 +358,64 @@ function changeTheme() {
 }
 
 /**
+ * Loads the show user information page
+ */
+function showUserInfo() {
+    $("#body").block();
+    $.ajax({
+        url: createLink("user", "index"),
+        dataType: "html",
+        success: function(data) {
+            $("#body").html(data);
+            $("#body div.ui-dialog-buttonpane input").button();
+            clearErrorMessages();
+        },
+        error: function(jqXHR) {
+            $("#body").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
+ * Callback for changing the user's password.
+ */
+function changePassword() {
+    $("#change-password-form").block();
+    var data = $("#change-password-form");
+    $("#change-password-form").ajaxSubmit({
+        type: 'POST',
+        url: createLink("user", "changePassword"),
+        dataType: 'json',
+        success: function(data) {
+            $("#change-password-form").unblock();
+            if (handleError(data)) {
+                // TODO: with jquery 1.5 should be handled by status code function
+                return;
+            }
+            if (data.error) {
+                clearErrorMessages();
+                showErrorMessage([data.oldPassword, data.newPassword, data.verifyPassword]);
+                setErrorState("#change-password-old", data.oldPassword);
+                setErrorState("#change-password-new", data.newPassword);
+                setErrorState("#change-password-verify", data.verifyPassword);
+            } else if (data.success) {
+                clearErrorMessages();
+                showInfoMessage(i18n.user.passwordChanged, 20000);
+                setErrorState("#change-password-old");
+                setErrorState("#change-password-new");
+                setErrorState("#change-password-verify");
+                $("#change-password-form input:password").val("");
+            }
+        },
+        error: function(jqXHR) {
+            $("#change-password-form").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
  * Creates HTML markup for a hyperlink to citexplore referencing a PubMed Id.
  * The hyperlink has a class "tooltip", a title and rel attribute referencing a tooltip.
  * The following information from the JSON structure is used:
