@@ -15,11 +15,15 @@ import org.springframework.security.authentication.BadCredentialsException
 @Secured('ROLE_USER')
 class UserController {
     def coreAdapterService
+    def springSecurityService
 
     /**
      * Standard Action rendering default view
      */
     def index = {
+        if (!springSecurityService.isAjax(request)) {
+            redirect(controller: "home", params: [redirect: "USER"])
+        }
     }
 
     /**

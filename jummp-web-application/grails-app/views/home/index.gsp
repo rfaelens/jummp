@@ -32,6 +32,11 @@
             showThemeSelection();
 <%
         break
+    case "USER":
+%>
+            showUserInfo();
+<%
+        break
     }
 %>
         });
