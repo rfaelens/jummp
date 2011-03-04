@@ -22,6 +22,7 @@ import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
+import org.springframework.security.authentication.BadCredentialsException
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -54,6 +55,10 @@ class JmsAdapterService {
      * Dependency injection of ModelService
      */
     def modelService
+    /**
+     * Dependency injection of UserService
+     */
+    def userService
 
     /**
      * Performs an Authentication.
@@ -499,6 +504,31 @@ class JmsAdapterService {
             setAuthentication((Authentication)message[0])
             result = modelService.restoreModel(Model.get(message[1].id))
         } catch (AccessDeniedException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
+     * Wraper around UserService.changePassword
+     * @param message List consisting of Authentication, oldPassword and newPassword
+     * @return @c true if password changed, InvalidArgumentException of BadCredentialsException if old password is incorrect
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.changePassword")
+    def changePassword(def message) {
+        if (!verifyMessage(message, [Authentication, String, String])) {
+            return new IllegalArgumentException("Authentication, String and String as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            userService.changePassword(message[1], message[2])
+            result = true
+        } catch (BadCredentialsException e) {
             result = e
         } finally {
             restoreAuthentication()
