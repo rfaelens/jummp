@@ -5,15 +5,16 @@ package net.biomodels.jummp.plugins.security
  * See http://burtbeckwith.github.com/grails-spring-security-core/
  */
 class User implements Serializable {
+    private static final long serialVersionUID = 1L
 
     String username
     String password
     String userRealName
     String email
-    boolean enabled
-    boolean accountExpired
-    boolean accountLocked
-    boolean passwordExpired
+    Boolean enabled
+    Boolean accountExpired
+    Boolean accountLocked
+    Boolean passwordExpired
 
     static constraints = {
         username(blank: false, unique: true)
@@ -28,5 +29,13 @@ class User implements Serializable {
 
     Set<Role> getAuthorities() {
         UserRole.findAllByUser(this).collect { it.role } as Set
+    }
+
+    /**
+     *
+     * @return User without any security relevant information.
+     */
+    User sanitizedUser() {
+        return new User(id: this.id, username: this.username, userRealName: this.userRealName, email: this.email)
     }
 }

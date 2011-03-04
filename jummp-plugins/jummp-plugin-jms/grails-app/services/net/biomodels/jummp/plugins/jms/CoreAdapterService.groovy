@@ -10,6 +10,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.PublicationTransportCommand
+import net.biomodels.jummp.plugins.security.User
 import org.perf4j.aop.Profiled
 import org.springframework.security.authentication.BadCredentialsException
 
@@ -299,6 +300,39 @@ class CoreAdapterService {
     @Profiled(tag="coreAdapterService.changePassword")
     public void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {
         validateReturnValue(send("changePassword", [oldPassword, newPassword]), Boolean)
+    }
+
+    /**
+     * Edit the non-security related parts of a user.
+     * @param user The User with the updated fields
+     */
+    @Profiled(tag="coreAdapterService.editUser")
+    public void editUser(User user) {
+        validateReturnValue(send("editUser", user), Boolean)
+    }
+
+    /**
+     *
+     * @return The current (security sanitized) user
+     */
+    @Profiled(tag="coreAdapterService.getCurrentUser")
+    public User getCurrentUser() {
+        def retVal = send("getCurrentUser")
+        validateReturnValue(retVal, User)
+        return (User)retVal
+    }
+
+    /**
+     * Retrieves a User object for the given @p username.
+     * @param username The login identifier of the user to be retrieved
+     * @returnThe (security sanitized) user
+     * @throws IllegalArgumentException Thrown if there is no User for @p username
+     */
+    @Profiled(tag="coreAdapterService.getUser")
+    public User getUser(String username) throws IllegalArgumentException {
+        def retVal = send("getUser", username)
+        validateReturnValue(retVal, User)
+        return (User)retVal
     }
 
     /**

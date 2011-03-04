@@ -537,6 +537,82 @@ class JmsAdapterService {
     }
 
     /**
+     * Wrapper around UserService.editUser
+     * @param message List consisting of Authentication and User
+     * @return @c true if user was changed, IllegalArgumentException or AccessDeniedException
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.editUser")
+    def editUser(def message) {
+        if (!verifyMessage(message, [Authentication, User])) {
+            return new IllegalArgumentException("Authentication and User as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            userService.editUser((User)message[1])
+            result = true
+        } catch (AccessDeniedException e) {
+            result = e
+        } catch (IllegalArgumentException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
+     * Wrapper around UserService.getCurrentUser
+     * @param message Authentication
+     * @return The User, IllegalArgumentException or AccessDeniedException
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.getCurrentUser")
+    def getCurrentUser(def message) {
+        if (!(message instanceof Authentication)) {
+            return new IllegalArgumentException("Authentication as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message)
+            result = userService.getCurrentUser()
+        } catch (AccessDeniedException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
+     * Wrapper around UserService.getUser
+     * @param message List consisting of Authentication and Username
+     * @return The User, IllegalArgumentException or AccessDeniedException
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.getUser")
+    def getUser(def message) {
+        if (!verifyMessage(message, [Authentication, String])) {
+            return new IllegalArgumentException("Authentication and String as arguments expected")
+        }
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            result = userService.getUser(message[1])
+        } catch (AccessDeniedException e) {
+            result = e
+        } catch (IllegalArgumentException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
      * Helper function to verify that @p message has correct structure.
      * @param message The message to verify
      * @param classes The structure as List of Class types.

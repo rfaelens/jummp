@@ -2,6 +2,7 @@ package net.biomodels.jummp.core
 
 import org.springframework.security.authentication.BadCredentialsException
 import net.biomodels.jummp.plugins.security.User
+import org.springframework.security.access.prepost.PreAuthorize
 
 /**
  * @short Service for User administration.
@@ -38,5 +39,48 @@ class UserService {
         user.passwordExpired = false
         user.save()
         springSecurityService.reauthenticate(user.username, newPassword)
+    }
+
+    /**
+     * Edit the non-security related parts of a user.
+     *
+     * This method might be used by an administrator or by the user itself to change the
+     * parts of the user object which are not security related.
+     * @param user The User with the updated fields
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.name==#user.username")
+    void editUser(User user) {
+        User origUser = User.findByUsername(user.username)
+        origUser.userRealName = user.userRealName
+        origUser.email = user.email
+        if (!origUser.validate()) {
+            throw new IllegalArgumentException("User does not validate")
+        }
+        origUser.save(flush: true)
+    }
+
+    /**
+     *
+     * @return The current (security sanitized) user
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    User getCurrentUser() {
+        return ((User)springSecurityService.getCurrentUser()).sanitizedUser()
+    }
+
+    /**
+     * Retrieves a User object for the given @p username.
+     * The returned object is sanitized to not include any security relevant data.
+     * @param username The login identifier of the user to be retrieved
+     * @return The (security sanitized) user
+     * @throws IllegalArgumentException Thrown if there is no User for @p username
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.name==#username")
+    User getUser(String username) {
+        User user = User.findByUsername(username)
+        if (!user) {
+            throw new IllegalArgumentException("No user for given username")
+        }
+        return user.sanitizedUser()
     }
 }
