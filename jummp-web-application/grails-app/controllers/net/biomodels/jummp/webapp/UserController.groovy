@@ -2,6 +2,7 @@ package net.biomodels.jummp.webapp
 
 import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
+import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.authentication.BadCredentialsException
 
 /**
@@ -24,6 +25,7 @@ class UserController {
         if (!springSecurityService.isAjax(request)) {
             redirect(controller: "home", params: [redirect: "USER"])
         }
+        [user: coreAdapterService.getCurrentUser()]
     }
 
     /**
@@ -49,6 +51,23 @@ class UserController {
     }
 
     /**
+     * Action for editing non-security relevant user information.
+     */
+    def editUser = { EditUserCommand cmd ->
+        Map data = [:]
+        if (cmd.hasErrors()) {
+            data.put("error", true)
+            data.put("username", resolveErrorMessage(cmd, "username", "Username"))
+            data.put("userRealName", resolveErrorMessage(cmd, "userRealName", "Name"))
+            data.put("email", resolveErrorMessage(cmd, "email", "Email"))
+        } else {
+            coreAdapterService.editUser(cmd.toUser())
+            data.put("success", true)
+        }
+        render data as JSON
+    }
+
+    /**
      * Resolves the error message for a field error
      * @param cmd The ChangePasswordCommand for resolving the errors
      * @param field The field to be tested
@@ -62,6 +81,20 @@ class UserController {
                 return g.message(code: "user.change.${field}.blank")
             case "validator.invalid":
                 return g.message(code: "user.change.${field}.invalid")
+            default:
+                return g.message(code: "error.unknown", args: [description])
+            }
+        }
+        return null
+    }
+
+    private String resolveErrorMessage(EditUserCommand cmd, String field, String description) {
+        if (cmd.errors.getFieldError(field)) {
+            switch (cmd.errors.getFieldError(field).code) {
+            case "blank":
+                return g.message(code: "user.edit.${field}.blank")
+            case "email.invalid":
+                return g.message(code: "user.edit.${field}.invalid")
             default:
                 return g.message(code: "error.unknown", args: [description])
             }
@@ -84,5 +117,28 @@ class ChangePasswordCommand implements Serializable {
         verifyPassword(validator: { verifyPassword, cmd ->
             return (verifyPassword == cmd.newPassword)
         })
+    }
+}
+
+/**
+ * @short Command Object to validate the user before editing.
+ */
+class EditUserCommand implements Serializable {
+    String username
+    String userRealName
+    String email
+
+    static constraints = {
+        username(nullable: false, blank: false)
+        userRealName(nullable: false, blank: false)
+        email(nullable: false, blank: false, email: true)
+    }
+
+    /**
+     *
+     * @return The command object as a User
+     */
+    User toUser() {
+        return new User(username: this.username, userRealName: this.userRealName, email: this.email)
     }
 }

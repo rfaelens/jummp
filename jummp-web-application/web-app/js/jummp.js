@@ -416,6 +416,43 @@ function changePassword() {
 }
 
 /**
+ * Callback for editing the user.
+ */
+function editUser() {
+    $("#edit-user-form").block();
+    var data = $("#edit-user-form");
+    $("#edit-user-form").ajaxSubmit({
+        type: 'POST',
+        url: createLink("user", "editUser"),
+        dataType: 'json',
+        success: function(data) {
+            $("#edit-user-form").unblock();
+            if (handleError(data)) {
+                // TODO: with jquery 1.5 should be handled by status code function
+                return;
+            }
+            if (data.error) {
+                clearErrorMessages();
+                showErrorMessage([data.username, data.userRealName, data.email]);
+                setErrorState("#edit-user-username", data.username);
+                setErrorState("#edit-user-userrealname", data.userRealName);
+                setErrorState("#edit-user-email", data.email);
+            } else if (data.success) {
+                clearErrorMessages();
+                showInfoMessage(i18n.user.editSuccess, 20000);
+                setErrorState("#edit-user-username");
+                setErrorState("#edit-user-userrealname");
+                setErrorState("#edit-user-email");
+            }
+        },
+        error: function(jqXHR) {
+            $("#edit-user-form").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
  * Creates HTML markup for a hyperlink to citexplore referencing a PubMed Id.
  * The hyperlink has a class "tooltip", a title and rel attribute referencing a tooltip.
  * The following information from the JSON structure is used:
