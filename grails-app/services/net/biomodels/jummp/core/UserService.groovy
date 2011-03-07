@@ -119,4 +119,70 @@ class UserService {
             return false
         }
     }
+
+    /**
+     * (Un)Locks the account for user identified by @p userId
+     * @param userId The unique id of the user
+     * @param lock if @c true the account is locked, if @c false the account is unlocked
+     * @return @c true, if the account locked state was changed, @c false if the user was already in @p lock state
+     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    Boolean lockAccount(Long userId, Boolean lock) throws IllegalArgumentException {
+        User user = User.get(userId)
+        if (!user) {
+            throw new IllegalArgumentException("No user for given id")
+        }
+        if (user.accountLocked != lock) {
+            user.accountLocked = lock
+            user.save(flush: true)
+            return (User.get(userId).accountLocked == lock)
+        } else {
+            return false
+        }
+    }
+
+    /**
+     * (Un)Expires the account for user identified by @p userId
+     * @param userId The unique id of the user
+     * @param expire if @c true the account is expired, if @c false the account is un-expired
+     * @return @c true, if the account expired state was changed, @c false if the user was already in @p expire state
+     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    Boolean expireAccount(Long userId, Boolean expire) throws IllegalArgumentException {
+        User user = User.get(userId)
+        if (!user) {
+            throw new IllegalArgumentException("No user for given id")
+        }
+        if (user.accountExpired != expire) {
+            user.accountExpired = expire
+            user.save(flush: true)
+            return (User.get(userId).accountExpired == expire)
+        } else {
+            return false
+        }
+    }
+
+    /**
+     * (Un)Expires the password for user identified by @p userId
+     * @param userId The unique id of the user
+     * @param expire if @c true the password is expired, if @c false the password is un-expired
+     * @return @c true, if the password expired state was changed, @c false if the password was already in @p expire state
+     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    Boolean expirePassword(Long userId, Boolean expire) throws IllegalArgumentException {
+        User user = User.get(userId)
+        if (!user) {
+            throw new IllegalArgumentException("No user for given id")
+        }
+        if (user.passwordExpired != expire) {
+            user.passwordExpired = expire
+            user.save(flush: true)
+            return (User.get(userId).passwordExpired == expire)
+        } else {
+            return false
+        }
+    }
 }

@@ -663,6 +663,84 @@ class JmsAdapterService {
     }
 
     /**
+     * Wrapper around UserService.lockAccount
+     * @param message List consisting of Authentication, Long and Boolean
+     * @return Boolean, AccessDeniedException or IllegalArgumentException
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.lockAccount")
+    def lockAccount(def message) {
+        if (!verifyMessage(message, [Authentication, Long, Boolean])) {
+            return new IllegalArgumentException("Authentication, Long and Boolean as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            result = userService.lockAccount((Long)message[1], (Boolean)message[2])
+        } catch (AccessDeniedException e) {
+            result = e
+        } catch (IllegalArgumentException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
+     * Wrapper around UserService.expireAccount
+     * @param message List consisting of Authentication, Long and Boolean
+     * @return Boolean, AccessDeniedException or IllegalArgumentException
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.expireAccount")
+    def expireAccount(def message) {
+        if (!verifyMessage(message, [Authentication, Long, Boolean])) {
+            return new IllegalArgumentException("Authentication, Long and Boolean as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            result = userService.expireAccount((Long)message[1], (Boolean)message[2])
+        } catch (AccessDeniedException e) {
+            result = e
+        } catch (IllegalArgumentException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
+     * Wrapper around UserService.expirePassword
+     * @param message List consisting of Authentication, Long and Boolean
+     * @return Boolean, AccessDeniedException or IllegalArgumentException
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.expirePassword")
+    def expirePassword(def message) {
+        if (!verifyMessage(message, [Authentication, Long, Boolean])) {
+            return new IllegalArgumentException("Authentication, Long and Boolean as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            result = userService.expirePassword((Long)message[1], (Boolean)message[2])
+        } catch (AccessDeniedException e) {
+            result = e
+        } catch (IllegalArgumentException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
      * Helper function to verify that @p message has correct structure.
      * @param message The message to verify
      * @param classes The structure as List of Class types.

@@ -108,4 +108,55 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertFalse(userService.enableUser(User.findByUsername("testuser").id, true))
         assertTrue(userService.enableUser(User.findByUsername("testuser").id, false))
     }
+
+    void testLockAccount() {
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            userService.lockAccount(1, true)
+        }
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            userService.lockAccount(1, true)
+        }
+        authenticateAsAdmin()
+        shouldFail(IllegalArgumentException) {
+            userService.lockAccount(0, true)
+        }
+        assertFalse(userService.lockAccount(User.findByUsername("testuser").id, false))
+        assertTrue(userService.lockAccount(User.findByUsername("testuser").id, true))
+    }
+
+    void testExpireAccount() {
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            userService.expireAccount(1, true)
+        }
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            userService.expireAccount(1, true)
+        }
+        authenticateAsAdmin()
+        shouldFail(IllegalArgumentException) {
+            userService.expireAccount(0, true)
+        }
+        assertFalse(userService.expireAccount(User.findByUsername("testuser").id, false))
+        assertTrue(userService.expireAccount(User.findByUsername("testuser").id, true))
+    }
+
+    void testExpirePassword() {
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            userService.expirePassword(1, true)
+        }
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            userService.expirePassword(1, true)
+        }
+        authenticateAsAdmin()
+        shouldFail(IllegalArgumentException) {
+            userService.expirePassword(0, true)
+        }
+        assertFalse(userService.expirePassword(User.findByUsername("testuser").id, false))
+        assertTrue(userService.expirePassword(User.findByUsername("testuser").id, true))
+    }
 }

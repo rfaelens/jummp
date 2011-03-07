@@ -366,6 +366,48 @@ class CoreAdapterService {
     }
 
     /**
+     * (Un)Locks the account for user identified by @p userId
+     * @param userId The unique id of the user
+     * @param lock if @c true the account is locked, if @c false the account is unlocked
+     * @return @c true, if the account locked state was changed, @c false if the user was already in @p lock state
+     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     */
+    @Profiled(tag="coreAdapterService.lockAccount")
+    Boolean lockAccount(Long userId, Boolean lock) throws IllegalArgumentException {
+        def retVal = send("lockAccount", [userId, lock])
+        validateReturnValue(retVal, Boolean)
+        return (Boolean)retVal
+    }
+
+    /**
+     * (Un)Expires the account for user identified by @p userId
+     * @param userId The unique id of the user
+     * @param expire if @c true the account is expired, if @c false the account is un-expired
+     * @return @c true, if the account expired state was changed, @c false if the user was already in @p expire state
+     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     */
+    @Profiled(tag="coreAdapterService.expireAccount")
+    Boolean expireAccount(Long userId, Boolean expire) throws IllegalArgumentException {
+        def retVal = send("expireAccount", [userId, expire])
+        validateReturnValue(retVal, Boolean)
+        return (Boolean)retVal
+    }
+
+    /**
+     * (Un)Expires the password for user identified by @p userId
+     * @param userId The unique id of the user
+     * @param expire if @c true the password is expired, if @c false the password is un-expired
+     * @return @c true, if the password expired state was changed, @c false if the password was already in @p expire state
+     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     */
+    @Profiled(tag="coreAdapterService.expirePassword")
+    Boolean expirePassword(Long userId, Boolean expire) throws IllegalArgumentException {
+        def retVal = send("expirePassword", [userId, expire])
+        validateReturnValue(retVal, Boolean)
+        return (Boolean)retVal
+    }
+
+    /**
      * Validates the @p retVal. In case of a @c null value an JummpException is thrown, in case the
      * value is an Exception itself, the Exception gets re-thrown, in case the value is not an instance
      * of @p expectedType an JummpException is thrown.
