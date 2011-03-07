@@ -453,6 +453,119 @@ function editUser() {
 }
 
 /**
+ * Loads the view to show a list of users.
+ */
+function showUserList() {
+    $("#body").block();
+    $.ajax({
+        url: createLink("userAdministration", "index"),
+        dataType: "html",
+        success: function(data) {
+            var createUserChangeMarkup = function(id, target, enabled) {
+                var checkboxId = "user-change-" + id + "-" + target;
+                var html = '<input type="checkbox" id="' + checkboxId + '" ';
+                if (enabled) {
+                    html += 'checked="checked"';
+                }
+                html += '/><input type="button" value="' + i18n.ui.button.update + '" onclick="changeUser(' + id + ', \'' + checkboxId + '\', \'' + target + '\')"/>';
+                return html;
+            };
+            $("#body").html(data);
+            clearErrorMessages();
+            // TODO: merge the datatables as far as possible
+            $('#userTable').dataTable({
+                // TODO: in future it might be interesting to allow filtering
+                bFilter: false,
+                bProcessing: true,
+                bServerSide: true,
+                bJQueryUI: true,
+                sPaginationType: "full_numbers",
+                sAjaxSource: createLink('userAdministration', 'dataTableSource'),
+                // TODO: move function into an own method,
+                "fnServerData": function(sSource, aoData, fnCallback) {
+                    $.ajax({
+                        "dataType": 'json',
+                        "type": "POST",
+                        "url": sSource,
+                        "data": aoData,
+                        "error": function(jqXHR, textStatus, errorThrown) {
+                            handleError($.parseJSON(jqXHR.responseText));
+                            // clear the table
+                            fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
+                        },
+                        "success": function(json) {
+                            for (var i=0; i<json.aaData.length; i++) {
+                                var rowData = json.aaData[i];
+                                var id = rowData[0];
+                                rowData[4] = createUserChangeMarkup(id, 'enable', rowData[4]);
+                                rowData[5] = createUserChangeMarkup(id, 'accountExpired', rowData[5]);
+                                rowData[6] = createUserChangeMarkup(id, 'accountLocked', rowData[6]);
+                                rowData[7] = createUserChangeMarkup(id, 'passwordExpired', rowData[7]);
+                            }
+                            fnCallback(json);
+                            $("#userTable tr input:button").button();
+                        }
+                    });
+                },
+                // i18n
+                oLanguage: {
+                    oPaginate: {
+                        sFirst:    i18n.dataTables.paginate.first,
+                        sLast:     i18n.dataTables.paginate.last,
+                        sNext:     i18n.dataTables.paginate.next,
+                        sPrevious: i18n.dataTables.paginate.previous
+                    },
+                    sEmptyTable:   i18n.dataTables.empty,
+                    sInfo:         i18n.dataTables.info,
+                    sInfoEmpty:    i18n.dataTables.infoEmpty,
+                    sInfoFiltered: i18n.dataTables.infoFiltered,
+                    sLengthMenu:   i18n.dataTables.lengthMenu,
+                    sProcessing:   i18n.dataTables.processing,
+                    sSearch:       i18n.dataTables.search,
+                    sZeroRecords:  i18n.dataTables.noFilterResults
+                }
+            });
+        },
+        error: function(jqXHR) {
+            $("#body").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
+ * Callback for changing a boolean attribute in the User Table
+ * @param userId The User Id
+ * @param field The id of the checkbox
+ * @param target The URL target for the AJAX call.
+ */
+function changeUser(userId, field, target) {
+    $("#userTable").block();
+    $.ajax({
+        url: createLink("userAdministration", target, userId),
+        dataType: 'json',
+        data: {value: $("#" + field).attr("checked")},
+        success: function(data) {
+            $("#userTable").unblock();
+            clearErrorMessages();
+            if (data.success) {
+                showInfoMessage(i18n.user.editSuccess, 20000);
+            } else if (data.error) {
+                showErrorMessage(data.message);
+            } else {
+                showInfoMessage(i18n.user.unchanged, 20000);
+            }
+            // redraw the dataTable to reset all changes
+            $('#userTable').dataTable().fnDraw();
+        },
+        error: function(jqXHR) {
+            $("#userTable").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
  * Creates HTML markup for a hyperlink to citexplore referencing a PubMed Id.
  * The hyperlink has a class "tooltip", a title and rel attribute referencing a tooltip.
  * The following information from the JSON structure is used:

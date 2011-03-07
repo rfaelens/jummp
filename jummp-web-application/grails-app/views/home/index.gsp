@@ -37,6 +37,11 @@
             showUserInfo();
 <%
         break
+    case "USERADMINLIST":
+%>
+            showUserList();
+<%
+        break
     }
 %>
         });

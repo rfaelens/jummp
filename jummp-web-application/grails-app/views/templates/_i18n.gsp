@@ -63,7 +63,16 @@ var i18n = {
     },
     user: {
         passwordChanged: "${g.message(code: 'user.change.password.success')}",
-        editSuccess: "${g.message(code: 'user.edit.success')}"
+        editSuccess: "${g.message(code: 'user.edit.success')}",
+        unchanged: "${g.message(code: 'user.edit.unchanged')}"
+    },
+    ui: {
+        button: {
+            cancel: "${g.message(code: 'ui.button.cancel')}",
+            save: "${g.message(code: 'ui.button.save')}",
+            upload: "${g.message(code: 'ui.button.upload')}",
+            update: "${g.message(code: 'ui.button.update')}"
+        }
     }
 };
 </g:javascript>
