@@ -637,6 +637,32 @@ class JmsAdapterService {
     }
 
     /**
+     * Wrapper around UserService.enableUser
+     * @param message List consisting of Authentication, Long and Boolean
+     * @return Boolean, AccessDeniedException or IllegalArgumentException
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.enableUser")
+    def enableUser(def message) {
+        if (!verifyMessage(message, [Authentication, Long, Boolean])) {
+            return new IllegalArgumentException("Authentication, Long and Boolean as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            result = userService.enableUser((Long)message[1], (Boolean)message[2])
+        } catch (AccessDeniedException e) {
+            result = e
+        } catch (IllegalArgumentException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
      * Helper function to verify that @p message has correct structure.
      * @param message The message to verify
      * @param classes The structure as List of Class types.

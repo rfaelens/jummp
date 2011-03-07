@@ -91,4 +91,21 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertEquals(3, users.size())
         // TODO: add tests for the size - requires creation of more users
     }
+
+    void testEnableUser() {
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            userService.enableUser(1, true)
+        }
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            userService.enableUser(1, true)
+        }
+        authenticateAsAdmin()
+        shouldFail(IllegalArgumentException) {
+            userService.enableUser(0, true)
+        }
+        assertFalse(userService.enableUser(User.findByUsername("testuser").id, true))
+        assertTrue(userService.enableUser(User.findByUsername("testuser").id, false))
+    }
 }

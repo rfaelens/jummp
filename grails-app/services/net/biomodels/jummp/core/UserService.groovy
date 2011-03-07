@@ -97,4 +97,26 @@ class UserService {
     List<User> getAllUsers(Integer offset, Integer count) {
         return User.list([offset: offset, max: Math.min(count, 100)])
     }
+
+    /**
+     * Enables/Disables the user identified by @p userId
+     * @param userId The unique id of the user
+     * @param enable if @c true the user is enabled, if @c false the user is disabled
+     * @return @c true, if the enable state was changed, @c false if the user was already in @p enable state
+     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    Boolean enableUser(Long userId, Boolean enable) throws IllegalArgumentException {
+        User user = User.get(userId)
+        if (!user) {
+            throw new IllegalArgumentException("No user for given id")
+        }
+        if (user.enabled != enable) {
+            user.enabled = enable
+            user.save(flush: true)
+            return (User.get(userId).enabled == enable)
+        } else {
+            return false
+        }
+    }
 }

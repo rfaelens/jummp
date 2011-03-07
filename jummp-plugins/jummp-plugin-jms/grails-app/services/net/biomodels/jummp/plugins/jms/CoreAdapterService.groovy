@@ -352,6 +352,20 @@ class CoreAdapterService {
     }
 
     /**
+     * Enables/Disables the user identified by @p userId
+     * @param userId The unique id of the user
+     * @param enable if @c true the user is enabled, if @c false the user is disabled
+     * @return @c true, if the enable state was changed, @c false if the user was already in @p enable state
+     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     */
+    @Profiled(tag="coreAdapterService.enableUser")
+    Boolean enableUser(Long userId, Boolean enable) throws IllegalArgumentException {
+        def retVal = send("enableUser", [userId, enable])
+        validateReturnValue(retVal, Boolean)
+        return (Boolean)retVal
+    }
+
+    /**
      * Validates the @p retVal. In case of a @c null value an JummpException is thrown, in case the
      * value is an Exception itself, the Exception gets re-thrown, in case the value is not an instance
      * of @p expectedType an JummpException is thrown.
