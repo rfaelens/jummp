@@ -70,4 +70,43 @@ class UserAdministrationController {
             render data as JSON
         }
     }
+
+    /**
+     * Action to (un)lock a given user
+     */
+    def lockAccount = {
+        try {
+            def data = [success: coreAdapterService.lockAccount(params.id as Long, Boolean.parseBoolean(params.value))]
+            render data as JSON
+        } catch (IllegalArgumentException e) {
+            def data = [error: true, message: e.message]
+            render data as JSON
+        }
+    }
+
+    /**
+     * Action to (un)expire a given user
+     */
+    def expireAccount = {
+        try {
+            def data = [success: coreAdapterService.expireAccount(params.id as Long, Boolean.parseBoolean(params.value))]
+            render data as JSON
+        } catch (IllegalArgumentException e) {
+            def data = [error: true, message: e.message]
+            render data as JSON
+        }
+    }
+
+    /**
+     * Action to (un)expire the password of a given user 
+     */
+    def expirePassword = {
+        try {
+            def data = [success: coreAdapterService.expirePassword(params.id as Long, Boolean.parseBoolean(params.value))]
+            render data as JSON
+        } catch (IllegalArgumentException e) {
+            def data = [error: true, message: e.message]
+            render data as JSON
+        }
+    }
 }

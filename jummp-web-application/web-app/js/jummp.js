@@ -498,9 +498,9 @@ function showUserList() {
                                 var rowData = json.aaData[i];
                                 var id = rowData[0];
                                 rowData[4] = createUserChangeMarkup(id, 'enable', rowData[4]);
-                                rowData[5] = createUserChangeMarkup(id, 'accountExpired', rowData[5]);
-                                rowData[6] = createUserChangeMarkup(id, 'accountLocked', rowData[6]);
-                                rowData[7] = createUserChangeMarkup(id, 'passwordExpired', rowData[7]);
+                                rowData[5] = createUserChangeMarkup(id, 'expireAccount', rowData[5]);
+                                rowData[6] = createUserChangeMarkup(id, 'lockAccount', rowData[6]);
+                                rowData[7] = createUserChangeMarkup(id, 'expirePassword', rowData[7]);
                             }
                             fnCallback(json);
                             $("#userTable tr input:button").button();
