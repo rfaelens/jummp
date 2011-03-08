@@ -24,6 +24,10 @@ class UserService {
      */
     def springSecurityService
     /**
+     * Dependency injection of mail Service provided by the Mail plugin
+     */
+    def mailService
+    /**
      * Random number generator for creating user validation ids.
      */
     private final Random random = new Random(System.currentTimeMillis())
@@ -246,6 +250,23 @@ class UserService {
         newUser.registrationInvalidation = registrationInvalidation.getTime()
         newUser.save(flush: true)
         UserRole.create(newUser, Role.findByAuthority("ROLE_USER"), true)
-        // TODO: send out registration validation mail
+        // send out notification mail
+        if (ConfigurationHolder.config.jummp.security.registration.email.send) {
+            String recipient = newUser.email
+            if (ConfigurationHolder.config.jummp.security.registration.email.sendToAdmin) {
+                recipient = ConfigurationHolder.config.jummp.security.registration.email.adminAddress
+            }
+            String url = ConfigurationHolder.config.jummp.security.registration.verificationURL
+            url = url.replace("{{CODE}}", newUser.registrationCode)
+            String emailBody = ConfigurationHolder.config.jummp.security.registration.email.body
+            emailBody = emailBody.replace("{{NAME}}", newUser.userRealName)
+            emailBody = emailBody.replace("{{URL}}", url)
+            mailService.sendMail {
+                to recipient
+                from ConfigurationHolder.config.jummp.security.registration.email.sender
+                subject ConfigurationHolder.config.jummp.security.registration.email.subject
+                body emailBody
+            }
+        }
     }
 }

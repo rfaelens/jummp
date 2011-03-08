@@ -10,6 +10,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.security.core.Authentication
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 // this script needs to be run in the test environment
 scriptEnv = "test"
 includeTargets << grailsScript("Init")
@@ -76,6 +77,7 @@ target(models: "Creates some models to be used in the application") {
     def model = modelService.uploadModel(modelFile, modelTransportCommandClass.newInstance(format: modelFormatClass.newInstance(identifier: "SBML"), comment: "Test", name: "13th model"))
     def userClass = grailsApp.classLoader.loadClass("net.biomodels.jummp.plugins.security.User")
     modelService.grantReadAccess(model, userClass.findByUsername("user"))
+    ConfigurationHolder.config.jummp.security.registration.email.send = true
 }
 
 setDefaultTarget(main)

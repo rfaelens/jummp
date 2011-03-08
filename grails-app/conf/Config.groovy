@@ -17,6 +17,7 @@ try {
     jummpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"))
 } catch (Exception e) {
     jummpProperties.setProperty("jummp.security.ldap.enabled", "false")
+    jummpProperties.setProperty("jummp.security.registration.email.send", "false")
 }
 def jummpConfig = new ConfigSlurper().parse(jummpProperties)
 List pluginsToExclude = []
@@ -186,6 +187,19 @@ if (jummpConfig.jummp.vcs.workingDirectory) {
     jummp.vcs.workingDirectory = jummpConfig.jummp.vcs.workingDirectory
 }
 
+// registration settings
+if (Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.send)) {
+    jummp.security.registration.email.send         = Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.send)
+    jummp.security.registration.email.sender       = jummpConfig.jummp.security.registration.email.sender
+    jummp.security.registration.email.sendToAdmin  = Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.sendToAdmin)
+    jummp.security.registration.email.adminAddress = jummpConfig.jummp.security.registration.email.adminAddress
+    jummp.security.registration.email.subject      = jummpConfig.jummp.security.registration.email.subject
+    jummp.security.registration.email.body         = jummpConfig.jummp.security.registration.email.body
+    jummp.security.registration.verificationURL    = jummpConfig.jummp.security.registration.verificationURL
+} else {
+    jummp.security.registration.email.send = false
+}
+
 // get all Plugin Configurations
 // the list of available plugins is read from the BuildConfig's plugin location
 // for each plugin it is assumed that it has a JummpPluginConfig class in the package
@@ -217,6 +231,8 @@ environments {
         // if needed in the tests, mockConfig should be used
         jummp.plugins.subversion.enabled = false
         jummp.plugins.git.enabled = false
+        // disable registration mail sending
+        jummp.security.registration.email.send = false
     }
 }
 
