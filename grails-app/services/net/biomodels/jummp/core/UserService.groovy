@@ -1,6 +1,8 @@
 package net.biomodels.jummp.core
 
+import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.UserRole
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PreAuthorize
@@ -243,6 +245,7 @@ class UserService {
         registrationInvalidation.add(GregorianCalendar.DAY_OF_MONTH, 1)
         newUser.registrationInvalidation = registrationInvalidation.getTime()
         newUser.save(flush: true)
+        UserRole.create(newUser, Role.findByAuthority("ROLE_USER"), true)
         // TODO: send out registration validation mail
     }
 }
