@@ -72,6 +72,10 @@ class JmsAdapterService {
             try {
                 Authentication auth = authenticationManager.authenticate(message)
                 if (auth.principal instanceof LdapUserDetailsImpl) {
+                    // verify that we have a user with same name in database
+                    if (!User.findByUsername(auth.principal.getUsername())) {
+                        throw new BadCredentialsException("User does not have an account in the database")
+                    }
                     return auth
                 }
                 // The authentication is propagated with an GrailsUser as principal
