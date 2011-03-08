@@ -47,6 +47,11 @@
             showRegisterView();
 <%
         break
+    case "VALIDATE":
+%>
+            showValidateRegistrationView("${params.id}");
+<%
+        break
     }
 %>
         });

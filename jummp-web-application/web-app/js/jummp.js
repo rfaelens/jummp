@@ -133,6 +133,48 @@ function register() {
 }
 
 /**
+ * Loads the view to validate the registration
+ */
+function showValidateRegistrationView(code) {
+    $("#body").block();
+    $.get(createLink("register", "validate", code), function(data) {
+        $("#body").html(data);
+        $("#validate-registration-from div input").button();
+        $("#body").unblock();
+    });
+}
+
+/**
+ * Callback for validating a user registration
+ */
+function validateRegistration() {
+    $("#validate-registration-from").block();
+    $("#validate-registration-from").ajaxSubmit({
+        type: 'POST',
+        url: createLink("register", "validateRegistration"),
+        dataType: 'json',
+        success: function(data) {
+            $("#validate-registration-from").unblock();
+            if (handleError(data)) {
+                // TODO: with jquery 1.5 should be handled by status code function
+                return;
+            }
+            if (data.error) {
+                clearErrorMessages();
+                showErrorMessage(data.error);
+            } else if (data.success) {
+                clearErrorMessages();
+                $("#body").html("<p>" + i18n.user.register.validate.success + "</p>");
+            }
+        },
+        error: function(jqXHR) {
+            $("#validate-registration-from").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
  * Creates a URI to be used in a href or src HTML attribute.
  * @param path The path
  */

@@ -58,6 +58,27 @@ class RegisterController {
     }
 
     /**
+     * Action rendering the markup for account validation.
+     */
+    def validate = {
+        if (!springSecurityService.isAjax(request)) {
+            redirect(controller: "home", params: [redirect: "VALIDATE", id: params.id])
+        }
+        [code: params.id]
+    }
+
+    def validateRegistration = {
+        def data = [:]
+        try {
+            coreAdapterService.validateRegistration(params.username, params.code)
+            data.put("success", true)
+        } catch (JummpException e) {
+            data.put("error", e.message)
+        }
+        render data as JSON
+    }
+
+    /**
      * Resolves the error message for a field error
      * @param cmd The RegistrationCommand for resolving the errors
      * @param field The field to be tested

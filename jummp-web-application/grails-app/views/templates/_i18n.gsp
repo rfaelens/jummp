@@ -67,7 +67,10 @@ var i18n = {
         unchanged: "${g.message(code: 'user.edit.unchanged')}",
         register: {
             title: "${g.message(code: 'user.register.ui.title')}",
-            success: "${g.message(code: 'user.register.success')}"
+            success: "${g.message(code: 'user.register.success')}",
+            validate: {
+                success: "${g.message(code: 'user.register.validate.success')}"
+            }
         }
     },
     ui: {
