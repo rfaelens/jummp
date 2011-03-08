@@ -768,6 +768,33 @@ class JmsAdapterService {
     }
 
     /**
+     * Wrapper around UserService.validateRegistration
+     * @param message List consisting of Authentication, String and String
+     * @return Boolean, AccessDeniedException, JummpException or IllegalArgumentException
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.validateRegistration")
+    def validateRegistration(def message) {
+        if (!verifyMessage(message, [Authentication, String, String])) {
+            return new IllegalArgumentException("Authentication, String and String as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            userService.validateRegistration((String)message[1], (String)message[2])
+            result = true
+        } catch (AccessDeniedException e) {
+            result = e
+        } catch (JummpException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
      * Helper function to verify that @p message has correct structure.
      * @param message The message to verify
      * @param classes The structure as List of Class types.

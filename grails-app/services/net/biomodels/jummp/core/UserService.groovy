@@ -209,6 +209,7 @@ class UserService {
      * password ("*") is stored in the database.
      * @param user The new User to register
      * @throws JummpException In case a user with same name already exists
+     * @see validateRegistration
      * @todo more specific Exception
      * @todo send out notification mail
      * @todo include some settings to decide whether anonymous registration is allowed
@@ -268,5 +269,37 @@ class UserService {
                 body emailBody
             }
         }
+    }
+
+    /**
+     * Validates the registration code of a new user.
+     * This method validates the validation Code and enables the user identified by @p username.
+     * The registration code is invalidated at the same time.
+     * In case the validation is not correct an exception is thrown
+     * @param username The name of the new user
+     * @param code The validation code
+     * @throws JummpException Thrown in case that the validation cannot be performed
+     * @see register
+     * @todo more specific Exception
+     */
+    @PreAuthorize("isAnonymous()")
+    void validateRegistration(String username, String code) throws JummpException {
+        User user = User.findByUsername(username)
+        if (!user) {
+            throw new JummpException("User not found")
+        }
+        if (user.enabled) {
+            throw new JummpException("User already enabled")
+        }
+        if (user.registrationCode != code) {
+            throw new JummpException("Registration code not valid")
+        }
+        if (!user.registrationInvalidation || user.registrationInvalidation.before(new Date())) {
+            throw new JummpException("Registration code is not valid any more")
+        }
+        user.enabled = true
+        user.registrationCode = null
+        user.registrationInvalidation = null
+        user.save(flush: true)
     }
 }

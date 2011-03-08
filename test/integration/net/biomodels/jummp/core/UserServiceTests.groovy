@@ -197,4 +197,46 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertEquals(adminRegisteredUser.password, "*")
         assertFalse(registeredUser.registrationCode == adminRegisteredUser.registrationCode)
     }
+
+    void testValidateRegistration() {
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            userService.validateRegistration("user", "1234")
+        }
+        authenticateAnonymous()
+        shouldFail(JummpException) {
+            userService.validateRegistration("notExistingUser", "1234")
+        }
+        // first register a user
+        User user = new User(username: "register", password: "test", userRealName: "Test Name", email: "test@example.com")
+        userService.register(user)
+        User registeredUser = User.findByUsername("register")
+        // exception with wrong registration code
+        shouldFail(JummpException) {
+            userService.validateRegistration("register", "1234")
+        }
+        // change the registrationInvalidation to be in the past
+        GregorianCalendar validateCal = new GregorianCalendar()
+        validateCal.setTime(registeredUser.registrationInvalidation)
+        validateCal.add(GregorianCalendar.DAY_OF_MONTH, -1)
+        registeredUser.registrationInvalidation = validateCal.getTime()
+        registeredUser.save(flush: true)
+        shouldFail(JummpException) {
+            userService.validateRegistration("register", registeredUser.registrationCode)
+        }
+        validateCal.add(GregorianCalendar.DAY_OF_MONTH, 1)
+        registeredUser.registrationInvalidation = validateCal.getTime()
+        registeredUser.save(flush: true)
+        // with correct validation code it should work
+        userService.validateRegistration("register", registeredUser.registrationCode)
+        // refresh
+        registeredUser = User.get(registeredUser.id)
+        assertTrue(registeredUser.enabled)
+        assertNull(registeredUser.registrationCode)
+        assertNull(registeredUser.registrationInvalidation)
+        // trying to validate again should fail
+        shouldFail(JummpException) {
+            userService.validateRegistration("register", registeredUser.registrationCode)
+        }
+    }
 }
