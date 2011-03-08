@@ -159,4 +159,42 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertFalse(userService.expirePassword(User.findByUsername("testuser").id, false))
         assertTrue(userService.expirePassword(User.findByUsername("testuser").id, true))
     }
+
+    void testRegister() {
+        User user = new User(username: "register", password: "test", userRealName: "Test Name", email: "test@example.com")
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            userService.register(user)
+        }
+        authenticateAnonymous()
+        userService.register(user)
+        shouldFail(JummpException) {
+            userService.register(user)
+        }
+        User registeredUser = User.findByUsername("register")
+        assertFalse(registeredUser.enabled)
+        assertFalse(registeredUser.accountLocked)
+        assertFalse(registeredUser.accountExpired)
+        assertFalse(registeredUser.passwordExpired)
+        assertNotNull(registeredUser.registrationCode)
+        assertNotNull(registeredUser.registrationInvalidation)
+        GregorianCalendar calendar = new GregorianCalendar()
+        calendar.add(GregorianCalendar.DAY_OF_MONTH, 1)
+        GregorianCalendar validateCal = new GregorianCalendar()
+        validateCal.setTime(registeredUser.registrationInvalidation)
+        assertEquals(calendar.get(GregorianCalendar.DAY_OF_MONTH), validateCal.get(GregorianCalendar.DAY_OF_MONTH))
+        // try another user as amdin
+        authenticateAsAdmin()
+        user.username = "register2"
+        userService.register(user)
+        User adminRegisteredUser = User.findByUsername("register2")
+        assertTrue(adminRegisteredUser.enabled)
+        assertFalse(adminRegisteredUser.accountLocked)
+        assertFalse(adminRegisteredUser.accountExpired)
+        assertTrue(adminRegisteredUser.passwordExpired)
+        assertNotNull(adminRegisteredUser.registrationCode)
+        assertNotNull(adminRegisteredUser.registrationInvalidation)
+        assertEquals(adminRegisteredUser.password, "*")
+        assertFalse(registeredUser.registrationCode == adminRegisteredUser.registrationCode)
+    }
 }

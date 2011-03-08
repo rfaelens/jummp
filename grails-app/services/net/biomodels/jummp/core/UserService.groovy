@@ -1,8 +1,10 @@
 package net.biomodels.jummp.core
 
-import org.springframework.security.authentication.BadCredentialsException
 import net.biomodels.jummp.plugins.security.User
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.authentication.BadCredentialsException
 
 /**
  * @short Service for User administration.
@@ -19,6 +21,10 @@ class UserService {
      * Dependency injection of springSecurityService
      */
     def springSecurityService
+    /**
+     * Random number generator for creating user validation ids.
+     */
+    private final Random random = new Random(System.currentTimeMillis())
 
     /**
      * Changes the password of the currently logged in user.
@@ -184,5 +190,59 @@ class UserService {
         } else {
             return false
         }
+    }
+
+    /**
+     * Registers a new user.
+     * If a new user registers himself the account will be initially disabled. A verification mail is
+     * sent to either the new user or to a specific administration mail address. After navigating to the verification
+     * URL the account will be enabled.
+     * If an administrator creates the account the account will be enabled, but the password is expired as
+     * an administrator cannot set the password. The user will be able to create a password after verification.
+     * In case LDAP is used as an authentication backend, it is not possible to save a password, that is an invalid
+     * password ("*") is stored in the database.
+     * @param user The new User to register
+     * @throws JummpException In case a user with same name already exists
+     * @todo more specific Exception
+     * @todo send out notification mail
+     * @todo include some settings to decide whether anonymous registration is allowed
+     */
+    @PreAuthorize("isAnonymous() or hasRole('ROLE_ADMIN')")
+    void register(User user) throws JummpException {
+        if (User.findByUsername(user.username)) {
+            throw new JummpException("User with same name already exists")
+        }
+        User newUser = user.sanitizedUser()
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            // admin user cannot set the password and creates the account enabled, but with expired password
+            newUser.password = "*"
+            newUser.enabled = true
+            newUser.passwordExpired = true
+        } else {
+            if (ConfigurationHolder.config.jummp.security.ldap.enabled) {
+                // disable password for ldap
+                newUser.password = "*"
+            } else {
+                // TODO: validate the password length?
+                newUser.password = springSecurityService.encodePassword(user.password, null)
+            }
+            // user disabled after registration
+            newUser.enabled = false
+            newUser.passwordExpired = false
+        }
+
+        newUser.accountLocked = false
+        newUser.accountExpired = false
+        newUser.id = null
+        if (!newUser.validate()) {
+            throw new JummpException("User does not validate")
+        }
+        String registrationCode = String.valueOf(random.nextInt()) + user.username
+        newUser.registrationCode = registrationCode.encodeAsMD5()
+        GregorianCalendar registrationInvalidation = new GregorianCalendar()
+        registrationInvalidation.add(GregorianCalendar.DAY_OF_MONTH, 1)
+        newUser.registrationInvalidation = registrationInvalidation.getTime()
+        newUser.save(flush: true)
+        // TODO: send out registration validation mail
     }
 }

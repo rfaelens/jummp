@@ -159,10 +159,12 @@ grails.plugins.springsecurity.controllerAnnotations.staticRules = [
 
 // ldap
 if (!Boolean.parseBoolean(jummpConfig.jummp.security.ldap.enabled)) {
+    jummp.security.ldap.enabled = false
     println("Excluding ldap")
     pluginsToExclude << "spring-security-ldap"
 } else {
     println("using ldap")
+    jummp.security.ldap.enabled = true
     grails.plugins.springsecurity.ldap.context.managerDn         = jummpConfig.jummp.security.ldap.managerDn
     grails.plugins.springsecurity.ldap.context.managerPassword   = jummpConfig.jummp.security.ldap.managerPw
     grails.plugins.springsecurity.ldap.context.server            = jummpConfig.jummp.security.ldap.server

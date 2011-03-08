@@ -408,6 +408,16 @@ class CoreAdapterService {
     }
 
     /**
+     * Registers a new User.
+     * @param user The new User to register
+     * @throws JummpException Thrown in case the user could not be registered
+     */
+    @Profiled(tag="coreAdapterService.register")
+    void register(User user) throws JummpException {
+        validateReturnValue(send("register", user), Boolean)
+    }
+
+    /**
      * Validates the @p retVal. In case of a @c null value an JummpException is thrown, in case the
      * value is an Exception itself, the Exception gets re-thrown, in case the value is not an instance
      * of @p expectedType an JummpException is thrown.

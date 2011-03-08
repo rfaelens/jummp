@@ -16,11 +16,23 @@ class User implements Serializable {
     Boolean accountLocked
     Boolean passwordExpired
 
+    // custom additions
+    /**
+     * The code with which a new user can validate the registration
+     */
+    String registrationCode
+    /**
+     * The date when the registration code becomes invalid.
+     */
+    Date registrationInvalidation
+
     static constraints = {
         username(blank: false, unique: true)
         password(blank: false)
         userRealName(blank: false)
         email(email: true)
+        registrationCode(nullable: true)
+        registrationInvalidation(nullable: true)
     }
 
     static mapping = {
