@@ -64,14 +64,19 @@ var i18n = {
     user: {
         passwordChanged: "${g.message(code: 'user.change.password.success')}",
         editSuccess: "${g.message(code: 'user.edit.success')}",
-        unchanged: "${g.message(code: 'user.edit.unchanged')}"
+        unchanged: "${g.message(code: 'user.edit.unchanged')}",
+        register: {
+            title: "${g.message(code: 'user.register.ui.title')}",
+            success: "${g.message(code: 'user.register.success')}"
+        }
     },
     ui: {
         button: {
             cancel: "${g.message(code: 'ui.button.cancel')}",
             save: "${g.message(code: 'ui.button.save')}",
             upload: "${g.message(code: 'ui.button.upload')}",
-            update: "${g.message(code: 'ui.button.update')}"
+            update: "${g.message(code: 'ui.button.update')}",
+            register: "${g.message(code: 'ui.button.register')}"
         }
     }
 };

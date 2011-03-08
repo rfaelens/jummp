@@ -42,6 +42,11 @@
             showUserList();
 <%
         break
+    case "REGISTER":
+%>
+            showRegisterView();
+<%
+        break
     }
 %>
         });
