@@ -159,7 +159,7 @@ grails.plugins.springsecurity.controllerAnnotations.staticRules = [
 ]
 
 // ldap
-if (!Boolean.parseBoolean(jummpConfig.jummp.security.ldap.enabled)) {
+if ((jummpConfig.jummp.security.ldap.enabled instanceof ConfigObject) || !Boolean.parseBoolean(jummpConfig.jummp.security.ldap.enabled)) {
     jummp.security.ldap.enabled = false
     println("Excluding ldap")
     pluginsToExclude << "spring-security-ldap"
@@ -188,10 +188,14 @@ if (jummpConfig.jummp.vcs.workingDirectory) {
 }
 
 // registration settings
-if (Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.send)) {
+if (!(jummpConfig.jummp.security.registration.email.send instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.send)) {
     jummp.security.registration.email.send         = Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.send)
     jummp.security.registration.email.sender       = jummpConfig.jummp.security.registration.email.sender
-    jummp.security.registration.email.sendToAdmin  = Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.sendToAdmin)
+    if (!(jummpConfig.jummp.security.registration.email.sendToAdmin instanceof ConfigObject)) {
+        jummp.security.registration.email.sendToAdmin = Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.sendToAdmin)
+    } else {
+        jummp.security.registration.email.sendToAdmin = false
+    }
     jummp.security.registration.email.adminAddress = jummpConfig.jummp.security.registration.email.adminAddress
     jummp.security.registration.email.subject      = jummpConfig.jummp.security.registration.email.subject
     jummp.security.registration.email.body         = jummpConfig.jummp.security.registration.email.body
