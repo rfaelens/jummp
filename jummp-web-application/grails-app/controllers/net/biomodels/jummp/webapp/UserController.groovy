@@ -26,7 +26,7 @@ class UserController {
         if (!springSecurityService.isAjax(request)) {
             redirect(controller: "home", params: [redirect: "USER"])
         }
-        [user: coreAdapterService.getCurrentUser(), changePassword: ConfigurationHolder.config.jummpCore.security.changePassword]
+        [user: coreAdapterService.getCurrentUser(), changePassword: ConfigurationHolder.config.jummpCore.security.ui.changePassword]
     }
 
     /**
@@ -34,7 +34,7 @@ class UserController {
      */
     def changePassword = { ChangePasswordCommand cmd ->
         Map data = [:]
-        if (!ConfigurationHolder.config.jummpCore.security.changePassword) {
+        if (!ConfigurationHolder.config.jummpCore.security.ui.changePassword) {
             data.put("error", g.message(code: 'user.change.password.disabled'))
             render data as JSON
             return
