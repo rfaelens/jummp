@@ -5,6 +5,7 @@ import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.core.JummpException
 import grails.converters.JSON
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.springframework.security.access.AccessDeniedException
 
 /**
  * @short Controller for registering new user.
@@ -29,6 +30,10 @@ class RegisterController {
     def index = {
         if (!springSecurityService.isAjax(request)) {
             redirect(controller: "home", params: [redirect: "REGISTER"])
+            return
+        }
+        if (!ConfigurationHolder.config.jummpCore.security.anonymousRegistration) {
+            throw new AccessDeniedException(g.message(code: "user.register.disabled"))
         }
         [password: ConfigurationHolder.config.jummpCore.security.registration.ui.userPassword]
     }
@@ -39,6 +44,11 @@ class RegisterController {
      */
     def register = { RegistrationCommand cmd ->
         def data = [:]
+        if (!ConfigurationHolder.config.jummpCore.security.anonymousRegistration) {
+            data.put("error", g.message(code: "user.register.disabled"))
+            render data as JSON
+            return
+        }
         if (cmd.hasErrors()) {
             data.put("error", true)
             data.put("username", resolveErrorMessage(cmd, "username", "User Name"))

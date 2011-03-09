@@ -220,6 +220,15 @@ if (jummp.security.ldap.enabled) {
 // In case of LDAP there is no need to allow users to register with a password as we cannot (yet) add anything to the LDAP
 jummp.security.registration.ui.userPassword = !jummp.security.ldap.enabled
 
+// whether users are allowed to register themselves or not.
+// if not only an administrator can create a new user account
+// default to users can register themselves
+if (!(jummpConfig.jummp.security.anonymousRegistration instanceof ConfigObject)) {
+    jummp.security.anonymousRegistration = Boolean.parseBoolean(jummpConfig.jummp.security.anonymousRegistration)
+} else {
+    jummp.security.anonymousRegistration = true
+}
+
 // get all Plugin Configurations
 // the list of available plugins is read from the BuildConfig's plugin location
 // for each plugin it is assumed that it has a JummpPluginConfig class in the package

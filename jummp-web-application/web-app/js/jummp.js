@@ -114,6 +114,9 @@ function register() {
             } else if (data.error) {
                 $("#registerStatus ul li", dialog).remove();
                 var errorContainer = $("#registerStatus", dialog);
+                if (data.error != true) {
+                    showMessage(data.error, null, errorContainer);
+                }
                 showMessage(data.username, null, errorContainer);
                 showMessage(data.password, null, errorContainer);
                 showMessage(data.verifyPassword, null, errorContainer);

@@ -5,6 +5,7 @@ import org.springframework.security.core.AuthenticationException
 import org.springframework.security.authentication.BadCredentialsException
 import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.access.AccessDeniedException
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class UserServiceTests extends JummpIntegrationTestCase {
     def userService
@@ -166,7 +167,13 @@ class UserServiceTests extends JummpIntegrationTestCase {
         shouldFail(AccessDeniedException) {
             userService.register(user)
         }
+        boolean anonymousRegistration = ConfigurationHolder.config.jummp.security.anonymousRegistration
+        ConfigurationHolder.config.jummp.security.anonymousRegistration = false
         authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            userService.register(user)
+        }
+        ConfigurationHolder.config.jummp.security.anonymousRegistration = true
         userService.register(user)
         shouldFail(JummpException) {
             userService.register(user)
@@ -185,6 +192,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertEquals(calendar.get(GregorianCalendar.DAY_OF_MONTH), validateCal.get(GregorianCalendar.DAY_OF_MONTH))
         // try another user as amdin
         authenticateAsAdmin()
+        ConfigurationHolder.config.jummp.security.anonymousRegistration = false
         user.username = "register2"
         userService.register(user)
         User adminRegisteredUser = User.findByUsername("register2")
@@ -196,6 +204,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertNotNull(adminRegisteredUser.registrationInvalidation)
         assertEquals(adminRegisteredUser.password, "*")
         assertFalse(registeredUser.registrationCode == adminRegisteredUser.registrationCode)
+        ConfigurationHolder.config.jummp.security.anonymousRegistration = anonymousRegistration
     }
 
     void testValidateRegistration() {

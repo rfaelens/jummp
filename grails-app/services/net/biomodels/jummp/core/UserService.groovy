@@ -6,6 +6,8 @@ import net.biomodels.jummp.plugins.security.UserRole
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.authentication.BadCredentialsException
 
 /**
@@ -212,10 +214,13 @@ class UserService {
      * @see validateRegistration
      * @todo more specific Exception
      * @todo send out notification mail
-     * @todo include some settings to decide whether anonymous registration is allowed
      */
     @PreAuthorize("isAnonymous() or hasRole('ROLE_ADMIN')")
     void register(User user) throws JummpException {
+        if (springSecurityService.authentication instanceof AnonymousAuthenticationToken &&
+                !ConfigurationHolder.config.jummp.security.anonymousRegistration) {
+            throw new AccessDeniedException("Registration disabled for anonymous users")
+        }
         if (User.findByUsername(user.username)) {
             throw new JummpException("User with same name already exists")
         }
