@@ -1,3 +1,4 @@
+<%@ page import="org.codehaus.groovy.grails.commons.ConfigurationHolder" %>
 <div id="ajaxLoginDialog" style="display: none">
     <form action="" id="ajaxLoginForm">
         <div id="ajaxLoginStatus" class="ui-state-error" style="display: none"></div>
@@ -21,5 +22,8 @@
             </tr>
             </tbody>
         </table>
+        <g:if test="${ConfigurationHolder.config.jummpCore.security.anonymousRegistration}">
+        <p><g:message code="login.register" args="['$(\'#ajaxLoginDialog\').dialog(\'close\');showRegisterView()']"/></p>
+        </g:if>
     </form>
 </div>
