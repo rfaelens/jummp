@@ -4,6 +4,7 @@ import grails.plugins.springsecurity.Secured
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.core.JummpException
 import grails.converters.JSON
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
  * @short Controller for registering new user.
@@ -29,6 +30,7 @@ class RegisterController {
         if (!springSecurityService.isAjax(request)) {
             redirect(controller: "home", params: [redirect: "REGISTER"])
         }
+        [password: ConfigurationHolder.config.jummpCore.security.registration.ui.userPassword]
     }
 
     /**
@@ -114,8 +116,14 @@ class RegistrationCommand implements Serializable {
 
     static constraints = {
         username(nullable: false, blank: false)
-        password(nullable: false, blank: false)
-        verifyPassword(nullable: false, validator: { verifyPassword, cmd ->
+        password(nullable: true, blank: false, validator: { password ->
+            if (ConfigurationHolder.config.jummpCore.security.registration.ui.userPassword) {
+                return password != null
+            } else {
+                return password == null
+            }
+        })
+        verifyPassword(nullable: true, validator: { verifyPassword, cmd ->
             return cmd.password == verifyPassword
         })
         email(nullable: false, blank: false, email: true)
