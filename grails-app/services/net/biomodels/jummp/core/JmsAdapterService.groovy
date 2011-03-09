@@ -23,6 +23,7 @@ import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
 import org.springframework.security.authentication.BadCredentialsException
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -59,6 +60,18 @@ class JmsAdapterService {
      * Dependency injection of UserService
      */
     def userService
+
+    /**
+     * Retrieves the externalized Jummp configuration.
+     * @param appToken A unique token to verify that the remote application is allowed to retrieve the configuration.
+     * @return ConfigObject for jummp config
+     * @todo Implement appToken verification
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.getJummpConfig")
+    def getJummpConfig(String appToken) {
+        return ConfigurationHolder.config.jummp
+    }
 
     /**
      * Performs an Authentication.

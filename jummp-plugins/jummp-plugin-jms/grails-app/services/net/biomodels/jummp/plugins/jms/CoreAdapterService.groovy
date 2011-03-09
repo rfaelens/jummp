@@ -37,6 +37,15 @@ class CoreAdapterService {
     static transactional = false
 
     /**
+     * Retrieves the externalized configuration of the core application.
+     * @param appToken The unique application token
+     * @return The core's configuration
+     */
+    ConfigObject getJummpConfig(String appToken) {
+        return (ConfigObject)jmsSynchronousService.send([app: "jummp", service: "jmsAdapter", method: "getJummpConfig"], appToken, [service: "jmsAdapter", method: "getJummpConfig.response"])
+    }
+
+    /**
      * Tries to authenticate the given @p Authentication in the core.
      * @param authentication The Authentication to test. In most cases a UsernamePasswordAuthenticationToken
      * @return An authenticated user
