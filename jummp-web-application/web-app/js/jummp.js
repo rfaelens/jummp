@@ -506,7 +506,11 @@ function changePassword() {
             }
             if (data.error) {
                 clearErrorMessages();
-                showErrorMessage([data.oldPassword, data.newPassword, data.verifyPassword]);
+                if (data.error != true) {
+                    showErrorMessage(data.error);
+                } else {
+                    showErrorMessage([data.oldPassword, data.newPassword, data.verifyPassword]);
+                }
                 setErrorState("#change-password-old", data.oldPassword);
                 setErrorState("#change-password-new", data.newPassword);
                 setErrorState("#change-password-verify", data.verifyPassword);

@@ -204,6 +204,19 @@ if (!(jummpConfig.jummp.security.registration.email.send instanceof ConfigObject
     jummp.security.registration.email.send = false
 }
 
+// whether a user is allowed to change the password depends on the setting an if LDAP is used
+// in case of LDAP changing the password is not (yet) possible in the application
+if (!(jummpConfig.jummp.security.changePassword instanceof ConfigObject)) {
+    jummp.security.changePassword = Boolean.parseBoolean(jummpConfig.jummp.security.changePassword)
+} else {
+    // default to true
+    jummp.security.changePassword = true
+}
+if (jummp.security.ldap.enabled) {
+    // as long as our LDAP implementation does not support changing passwords we need to disable
+    jummp.security.changePassword = false
+}
+
 // get all Plugin Configurations
 // the list of available plugins is read from the BuildConfig's plugin location
 // for each plugin it is assumed that it has a JummpPluginConfig class in the package

@@ -4,6 +4,7 @@ import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
 import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.authentication.BadCredentialsException
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
  * @short Controller for editing user information.
@@ -25,7 +26,7 @@ class UserController {
         if (!springSecurityService.isAjax(request)) {
             redirect(controller: "home", params: [redirect: "USER"])
         }
-        [user: coreAdapterService.getCurrentUser()]
+        [user: coreAdapterService.getCurrentUser(), changePassword: ConfigurationHolder.config.jummpCore.security.changePassword]
     }
 
     /**
@@ -33,6 +34,11 @@ class UserController {
      */
     def changePassword = { ChangePasswordCommand cmd ->
         Map data = [:]
+        if (!ConfigurationHolder.config.jummpCore.security.changePassword) {
+            data.put("error", g.message(code: 'user.change.password.disabled'))
+            render data as JSON
+            return
+        }
         if (cmd.hasErrors()) {
             data.put("error", true)
             data.put("oldPassword", resolveErrorMessage(cmd, "oldPassword", "Old Password"))

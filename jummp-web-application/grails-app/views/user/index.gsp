@@ -22,6 +22,7 @@
         <input type="button" value="${g.message(code: 'ui.button.save')}" onclick="editUser()"/>
     </div>
 </form>
+<g:if test="${changePassword}">
 <h2><g:message code="user.change.ui.heading.password"/></h2>
 <form id="change-password-form" action="changePassword" method="POST">
     <table>
@@ -46,3 +47,4 @@
         <input type="button" value="${g.message(code: 'user.change.ui.changePassword')}" onclick="changePassword()"/>
     </div>
 </form>
+</g:if>
