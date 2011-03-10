@@ -19,7 +19,7 @@
     </table>
     <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
         <input type="reset" value="${g.message(code: 'ui.button.cancel')}"/>
-        <input type="button" value="${g.message(code: 'ui.button.save')}" onclick="editUser()"/>
+        <input type="button" value="${g.message(code: 'ui.button.save')}"/>
     </div>
 </form>
 <g:if test="${changePassword}">
@@ -44,7 +44,7 @@
     </table>
     <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
         <input type="reset" value="${g.message(code: 'ui.button.cancel')}"/>
-        <input type="button" value="${g.message(code: 'user.change.ui.changePassword')}" onclick="changePassword()"/>
+        <input type="button" value="${g.message(code: 'user.change.ui.changePassword')}"/>
     </div>
 </form>
 </g:if>

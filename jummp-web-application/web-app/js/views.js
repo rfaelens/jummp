@@ -3,6 +3,7 @@
  */
 function loadPasswordForgottenCallback() {
     $("#password-forgotten-form div input").button();
+    $("#password-forgotten-form div input:button").click(requestPassword);
 }
 
 /**
@@ -10,6 +11,9 @@ function loadPasswordForgottenCallback() {
  */
 function loadModelListCallback() {
     $("#navigationButtons a").button();
+    $("#navigationButtons a").click(function() {
+        loadView(createLink('model', 'upload'), loadUploadModelCallback);
+    });
     createModelDataTable();
 }
 
@@ -20,6 +24,12 @@ function loadModelListCallback() {
  */
 function loadModelTabCallback(data, tabIndex) {
     $("#navigationButtons a").button();
+    $("#navigationButtons a:eq(0)").click(function() {
+        loadView(createLink('model', 'index'), loadModelListCallback);
+    });
+    $("#navigationButtons a:eq(1)").click(function() {
+        loadView(createLink('model', 'upload'), loadUploadModelCallback);
+    });
     $("#modelTabs").tabs({disabled: [1, 2, 3, 4, 5],
         ajaxOptions: {error: function(jqXHR) {
             $("#body").unblock();
@@ -31,6 +41,7 @@ function loadModelTabCallback(data, tabIndex) {
             case "modelTabs-addRevision":
                 // add revision tab
                 $("#revision-upload-form div.ui-dialog-buttonpane input").button();
+                $("#revision-upload-form div.ui-dialog-buttonpane input:button").click(uploadRevision);
                 break;
             }
         }
@@ -46,8 +57,12 @@ function loadModelTabCallback(data, tabIndex) {
  */
 function loadUploadModelCallback() {
     $("#navigationButtons a").button();
+    $("#navigationButtons a").click(function() {
+        loadView(createLink('model', 'index'), loadModelListCallback);
+    });
     $("input:radio[name=publicationType]")[0].checked = true;
     $("#model-upload-form div.ui-dialog-buttonpane input").button();
+    $("#model-upload-form div.ui-dialog-buttonpane input:button").click(uploadModel);
     $("input:radio[name=publicationType]").change(uploadModelPublicationChangeListener);
     enableElement("#model-upload-publication-month", false);
     enableElement("#model-upload-publication-day", false);
@@ -121,6 +136,7 @@ function loadUploadModelCallback() {
  */
 function loadThemeSelectionCallback() {
     $("#change-theme-form input:button").button();
+    $("#change-theme-form input:button").click(changeTheme);
 }
 
 /**
@@ -128,6 +144,8 @@ function loadThemeSelectionCallback() {
  */
 function loadShowUserInfoCallback() {
     $("#body div.ui-dialog-buttonpane input").button();
+    $("#edit-user-form div.ui-dialog-buttonpane input:button").click(editUser);
+    $("#change-password-form div input:button").click(changePassword);
 }
 
 /**
@@ -135,6 +153,7 @@ function loadShowUserInfoCallback() {
  */
 function loadValidateRegistrationCallback() {
     $("#validate-registration-form div input").button();
+    $("#validate-registration-form div input:button").click(validateRegistration);
 }
 
 /**
@@ -142,6 +161,7 @@ function loadValidateRegistrationCallback() {
  */
 function loadResetPasswordCallback() {
     $("#reset-password-form div input").button();
+    $("#reset-password-form div input:button").click(resetPassword);
 }
 
 /**

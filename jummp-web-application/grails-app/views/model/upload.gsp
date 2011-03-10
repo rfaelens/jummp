@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <div id="navigationButtons">
-    <a href="#" onclick="loadView('${g.createLink(controller: 'model', action: 'index')}', loadModelListCallback)"><g:message code="model.list.goto"/></a>
+    <a href="#"><g:message code="model.list.goto"/></a>
 </div>
 <form action="save" method="post" id="model-upload-form" class="ui-widget-content" enctype="multipart/form-data">
     <table>
@@ -64,7 +64,7 @@
         </tr>
         <tr>
             <td><label for="model-upload-publication-affiliation"><g:message code="publication.affiliation"/>:</label></td>
-            <td><span></span><input type="text" id="model-upload-publication-affiliation" name="publicationAffiliation"/><jummp:errorField/></span></td>
+            <td><span><input type="text" id="model-upload-publication-affiliation" name="publicationAffiliation"/><jummp:errorField/></span></td>
         </tr>
         <tr>
             <td><label for="model-upload-publication-year"><g:message code="publication.date"/>:</label></td>
@@ -131,6 +131,6 @@
     <input type="hidden" id="model-upload-author-count" value="0" name="authorCount"/>
     <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
         <input type="reset" value="${g.message(code: 'ui.button.cancel')}"/>
-        <input type="button" value="${g.message(code: 'ui.button.upload')}" onclick="uploadModel()"/>
+        <input type="button" value="${g.message(code: 'ui.button.upload')}"/>
     </div>
 </form>

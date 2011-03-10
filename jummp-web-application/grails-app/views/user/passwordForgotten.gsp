@@ -11,6 +11,6 @@
     </table>
     <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
         <input type="reset" value="${g.message(code: 'ui.button.cancel')}"/>
-        <input type="button" value="${g.message(code: 'user.resetPassword.ui.requestPassword')}" onclick="requestPassword()"/>
+        <input type="button" value="${g.message(code: 'user.resetPassword.ui.requestPassword')}"/>
     </div>
 </form>
