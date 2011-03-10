@@ -438,6 +438,28 @@ class CoreAdapterService {
     }
 
     /**
+     * Request a new password for user identified by @p username.
+     * @param username The login id of the user whose password should be reset.
+     * @throws JummpException Thrown if there is no user with @p username
+     */
+    @Profiled(tag="coreAdapterService.requestPassword")
+    void requestPassword(String username) throws JummpException {
+        validateReturnValue(send("requestPassword", username), Boolean)
+    }
+
+    /**
+     * Resets the Password of the user.
+     * @param code The Password Reset Code
+     * @param username The Login Id of the User
+     * @param password The new Password
+     * @throws JummpException Thrown in case user is not found or the code is not valid
+     */
+    @Profiled(tag="coreAdapterService.resetPassword")
+    void resetPassword(String code, String username, String password) throws JummpException {
+        validateReturnValue(send("resetPassword", [code, username, password]), Boolean)
+    }
+
+    /**
      * Validates the @p retVal. In case of a @c null value an JummpException is thrown, in case the
      * value is an Exception itself, the Exception gets re-thrown, in case the value is not an instance
      * of @p expectedType an JummpException is thrown.

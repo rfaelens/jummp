@@ -812,6 +812,60 @@ class JmsAdapterService {
     }
 
     /**
+     * Wrapper around UserSerivce.requestPassword
+     * @param message List consisting of Authentication and String
+     * @return Boolean, AccessDeniedException, JummpException of IllegalArgumentException
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.requestPassword")
+    def requestPassword(def message) {
+        if (!verifyMessage(message, [Authentication, String])) {
+            return new IllegalArgumentException("Authentication and String as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            userService.requestPassword((String)message[1])
+            result = true
+        } catch (AccessDeniedException e) {
+            result = e
+        } catch (JummpException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
+     * Wrapper around UserSerivce.resetPassword
+     * @param message List consisting of Authentication, String, String and String
+     * @return Boolean, AccessDeniedException, JummpException of IllegalArgumentException
+     */
+    @Queue
+    @Profiled(tag="jmsAdapterService.resetPassword")
+    def resetPassword(def message) {
+        if (!verifyMessage(message, [Authentication, String, String, String])) {
+            return new IllegalArgumentException("Authentication, String, String and String as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            userService.resetPassword((String)message[1], (String)message[2], (String)message[3])
+            result = true
+        } catch (AccessDeniedException e) {
+            result = e
+        } catch (JummpException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
      * Helper function to verify that @p message has correct structure.
      * @param message The message to verify
      * @param classes The structure as List of Class types.

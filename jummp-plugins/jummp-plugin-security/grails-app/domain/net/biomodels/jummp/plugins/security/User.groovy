@@ -25,6 +25,14 @@ class User implements Serializable {
      * The date when the registration code becomes invalid.
      */
     Date registrationInvalidation
+    /**
+     * The code with which a user can reset a password
+     */
+    String passwordForgottenCode
+    /**
+     * The date when the password forgotten code becomes invalid.
+     */
+    Date passwordForgottenInvalidation
 
     static constraints = {
         username(blank: false, unique: true)
@@ -33,6 +41,8 @@ class User implements Serializable {
         email(email: true)
         registrationCode(nullable: true)
         registrationInvalidation(nullable: true)
+        passwordForgottenCode(nullable: true)
+        passwordForgottenInvalidation(nullable: true)
     }
 
     static mapping = {

@@ -78,6 +78,7 @@ target(models: "Creates some models to be used in the application") {
     def userClass = grailsApp.classLoader.loadClass("net.biomodels.jummp.plugins.security.User")
     modelService.grantReadAccess(model, userClass.findByUsername("user"))
     ConfigurationHolder.config.jummp.security.registration.email.send = true
+    ConfigurationHolder.config.jummp.security.resetPassword.email.send = true
 }
 
 setDefaultTarget(main)

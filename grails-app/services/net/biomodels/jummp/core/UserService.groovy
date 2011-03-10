@@ -307,4 +307,70 @@ class UserService {
         user.registrationInvalidation = null
         user.save(flush: true)
     }
+
+    /**
+     * Request a new password for user identified by @p username.
+     * This method generates a unique token to reset the password and sends it to
+     * the user's email address.
+     * The password itself is unchanged and not reset.
+     * @param username The login id of the user whose password should be reset.
+     * @throws JummpException Thrown if there is no user with @p username
+     */
+    @PreAuthorize("isAnonymous()")
+    void requestPassword(String username) throws JummpException {
+        User user = User.findByUsername(username)
+        if (!user) {
+            throw new JummpException("User not found")
+        }
+        String passwordCode = String.valueOf(random.nextInt()) + user.username
+        user.passwordForgottenCode = passwordCode.encodeAsMD5()
+        GregorianCalendar codeInvalidation = new GregorianCalendar()
+        codeInvalidation.add(GregorianCalendar.DAY_OF_MONTH, 1)
+        user.passwordForgottenInvalidation = codeInvalidation.getTime()
+        user.save(flush: true)
+        // send out notification mail
+        if (ConfigurationHolder.config.jummp.security.resetPassword.email.send) {
+            String recipient = user.email
+            String url = ConfigurationHolder.config.jummp.security.resetPassword.url
+            url = url.replace("{{CODE}}", user.passwordForgottenCode)
+            String emailBody = ConfigurationHolder.config.jummp.security.resetPassword.email.body
+            emailBody = emailBody.replace("{{NAME}}", user.userRealName)
+            emailBody = emailBody.replace("{{URL}}", url)
+            mailService.sendMail {
+                to recipient
+                from ConfigurationHolder.config.jummp.security.resetPassword.email.sender
+                subject ConfigurationHolder.config.jummp.security.resetPassword.email.subject
+                body emailBody
+            }
+        }
+    }
+
+    /**
+     * Resets the password of user identified by @p username with @p password in case the @p code is valid.
+     * In case the password was expired prior to the reset, the password will no longer be expired
+     * @param code The Password Reset Code
+     * @param username The Login Id of the User
+     * @param password The new Password
+     * @throws JummpException Thrown in case user is not found or the code is not valid
+     */
+    @PreAuthorize("isAnonymous()")
+    void resetPassword(String code, String username, String password) throws JummpException {
+        User user = User.findByUsername(username)
+        if (!user) {
+            throw new JummpException("User not found")
+        }
+        if (user.passwordForgottenCode != code) {
+            throw new JummpException("Password Reset code not valid")
+        }
+        if (!user.passwordForgottenInvalidation || user.passwordForgottenInvalidation.before(new Date())) {
+            throw new JummpException("Password Reset code is not valid any more")
+        }
+        // TODO: in case of LDAP we should not change the password
+        user.passwordForgottenCode = null
+        user.passwordForgottenInvalidation = null
+        user.password = springSecurityService.encodePassword(password, null)
+        // reset password expired state
+        user.passwordExpired = false
+        user.save(flush: true)
+    }
 }
