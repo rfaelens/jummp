@@ -71,6 +71,10 @@ var i18n = {
             validate: {
                 success: "${g.message(code: 'user.register.validate.success')}"
             }
+        },
+        resetPassword: {
+            passwordRequested: "${g.message(code: 'user.resetPassword.ui.requested')}",
+            success: "${g.message(code: 'user.resetPassword.ui.success')}"
         }
     },
     ui: {

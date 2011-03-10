@@ -5,6 +5,7 @@ import grails.plugins.springsecurity.Secured
 import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.authentication.BadCredentialsException
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import net.biomodels.jummp.core.JummpException
 
 /**
  * @short Controller for editing user information.
@@ -74,6 +75,65 @@ class UserController {
     }
 
     /**
+     * Action to show the view to request a new password.
+     */
+    @Secured('isAnonymous()')
+    def passwordForgotten = {
+        if (!springSecurityService.isAjax(request)) {
+            redirect(controller: "home", params: [redirect: "PASSWORDFORGOTTEN"])
+        }
+    }
+
+    /**
+     * Action for requesting a new password
+     */
+    @Secured('isAnonymous()')
+    def requestPassword = {
+        def data = [:]
+        try {
+            coreAdapterService.requestPassword(params.username)
+            data.put("success", true)
+        } catch (JummpException e) {
+            data.put("error", g.message(code: "user.resetPassword.error.userNotFound"))
+        }
+        render data as JSON
+    }
+
+    /**
+     * Action to show the view to reset a new password.
+     */
+    @Secured('isAnonymous()')
+    def resetPassword = {
+        if (!springSecurityService.isAjax(request)) {
+            redirect(controller: "home", params: [redirect: "RESETPASSWORD", id: params.id])
+        }
+        [code: params.id]
+    }
+
+    /**
+     * Action to change the password with the code.
+     */
+    @Secured('isAnonymous()')
+    def performResetPassword = { ResetPasswordCommand cmd ->
+        def data = [:]
+        if (cmd.hasErrors()) {
+            data.put("error", true)
+            data.put("username", resolveErrorMessage(cmd, "username", "User Name"))
+            data.put("password", resolveErrorMessage(cmd, "password", "Password"))
+            data.put("verifyPassword", resolveErrorMessage(cmd, "verifyPassword", "Password Verification"))
+            data.put("code", resolveErrorMessage(cmd, "code", "Reset Password Code"))
+        } else {
+            try {
+                coreAdapterService.resetPassword(cmd.code, cmd.username, cmd.password)
+                data.put("success", true)
+            } catch (JummpException e) {
+                data.put("error", e.message)
+            }
+        }
+        render data as JSON
+    }
+
+    /**
      * Resolves the error message for a field error
      * @param cmd The ChangePasswordCommand for resolving the errors
      * @param field The field to be tested
@@ -101,6 +161,21 @@ class UserController {
                 return g.message(code: "user.edit.${field}.blank")
             case "email.invalid":
                 return g.message(code: "user.edit.${field}.invalid")
+            default:
+                return g.message(code: "error.unknown", args: [description])
+            }
+        }
+        return null
+    }
+
+    private String resolveErrorMessage(ResetPasswordCommand cmd, String field, String description) {
+        if (cmd.errors.getFieldError(field)) {
+            switch (cmd.errors.getFieldError(field).code) {
+            case "blank":
+                return g.message(code: "user.resetPassword.error.${field}.blank")
+            case "validator.invalid":
+                // validator invalid only for password verification - reuse change password message
+                return g.message(code: "user.change.${field}.invalid")
             default:
                 return g.message(code: "error.unknown", args: [description])
             }
@@ -146,5 +221,24 @@ class EditUserCommand implements Serializable {
      */
     User toUser() {
         return new User(username: this.username, userRealName: this.userRealName, email: this.email)
+    }
+}
+
+/**
+ * @short Command Object for resetting a password.
+ */
+class ResetPasswordCommand implements Serializable {
+    String code
+    String username
+    String password
+    String verifyPassword
+
+    static constraints = {
+        code(nullable: false, blank: false)
+        username(nullable: false, blank: false)
+        password(nullable: false, blank: false)
+        verifyPassword(validator: { verifyPassword, cmd ->
+            return (verifyPassword == cmd.password)
+        })
     }
 }

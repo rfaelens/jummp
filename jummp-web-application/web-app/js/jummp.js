@@ -178,6 +178,120 @@ function validateRegistration() {
 }
 
 /**
+ * Loads the view to request a new password
+ */
+function showPasswordForgottenView() {
+    $("#body").block();
+    $.ajax({url: createLink("user", "passwordForgotten"),
+        dataType: 'HTML',
+        type: 'GET',
+        success: function(data) {
+            $("#body").unblock();
+            if (handleError(data)) {
+                // TODO: with jquery 1.5 should be handled by status code function
+                return;
+            }
+            $("#body").html(data);
+            $("#password-forgotten-form div input").button();
+        },
+        error: function(jqXHR) {
+            $("#body").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
+ * Callback to request a new password
+ */
+function requestPassword() {
+    $("#password-forgotten-form").block();
+    $("#password-forgotten-form").ajaxSubmit({
+        type: 'POST',
+        url: createLink("user", "requestPassword"),
+        dataType: 'json',
+        success: function(data) {
+            $("#password-forgotten-form").unblock();
+            if (handleError(data)) {
+                // TODO: with jquery 1.5 should be handled by status code function
+                return;
+            }
+            if (data.error) {
+                clearErrorMessages();
+                showErrorMessage(data.error);
+            } else if (data.success) {
+                clearErrorMessages();
+                $("#body").html("<p>" + i18n.user.resetPassword.passwordRequested + "</p>");
+            }
+        },
+        error: function(jqXHR) {
+            $("#password-forgotten-form").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
+ * Loads the view to reset the password based on the previously requested code.
+ */
+function showResetPasswordView(id) {
+    $("#body").block();
+    $.ajax({url: createLink("user", "resetPassword", id),
+        dataType: 'HTML',
+        type: 'GET',
+        success: function(data) {
+            $("#body").unblock();
+            if (handleError(data)) {
+                // TODO: with jquery 1.5 should be handled by status code function
+                return;
+            }
+            $("#body").html(data);
+            $("#reset-password-form div input").button();
+        },
+        error: function(jqXHR) {
+            $("#body").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
+ * Callback for password reset
+ */
+function resetPassword() {
+    $("#reset-password-form").block();
+    $("#reset-password-form").ajaxSubmit({
+        type: 'POST',
+        url: createLink("user", "performResetPassword"),
+        dataType: 'json',
+        success: function(data) {
+            $("#reset-password-form").unblock();
+            if (handleError(data)) {
+                // TODO: with jquery 1.5 should be handled by status code function
+                return;
+            }
+            if (data.error) {
+                clearErrorMessages();
+                if (data.error != true) {
+                    showErrorMessage(data.error);
+                }
+                showErrorMessage([data.username, data.password, data.verifyPassword, data.code]);
+                setErrorState("#reset-password-form-username", data.username);
+                setErrorState("#reset-password-form-password", data.password);
+                setErrorState("#reset-password-form-verifyPassword", data.verifyPassword);
+            } else if (data.success) {
+                clearErrorMessages();
+                showInfoMessage(i18n.user.resetPassword.success, 20000);
+            }
+        },
+        error: function(jqXHR) {
+            $("#reset-password-form").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
  * Creates a URI to be used in a href or src HTML attribute.
  * @param path The path
  */

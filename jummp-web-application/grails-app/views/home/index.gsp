@@ -52,6 +52,11 @@
             showValidateRegistrationView("${params.id}");
 <%
         break
+    case "RESETPASSWORD":
+%>
+            showResetPasswordView("${params.id}");
+<%
+        break
     }
 %>
         });

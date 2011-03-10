@@ -22,6 +22,9 @@
             </tr>
             </tbody>
         </table>
+        <p>
+            <a href="#" onclick="$('#ajaxLoginDialog').dialog('close');showPasswordForgottenView()"><g:message code="login.passwordForgotten"/></a>
+        </p>
         <g:if test="${ConfigurationHolder.config.jummpCore.security.anonymousRegistration}">
         <p><g:message code="login.register" args="['$(\'#ajaxLoginDialog\').dialog(\'close\');showRegisterView()']"/></p>
         </g:if>
