@@ -130,6 +130,6 @@ class LoginController {
      * The Ajax denied redirect url.
      */
     def ajaxDenied = {
-        render([error: 'access denied'] as JSON)
+        render([error: 403] as JSON)
     }
 }
