@@ -9,37 +9,37 @@
     switch (params.redirect) {
     case "MODELLIST":
 %>
-            showModelList();
+            loadView("${g.createLink(controller: 'model', action: 'index')}", loadModelListCallback);
 <%
         break
     case "SHOWMODEL":
 %>
-           showModel("${params.id}");
+           loadView("${g.createLink(controller: 'model', action: 'show', id: params.id)}", loadModelTabCallback);
 <%
         break
     case "UPLOADMODEL":
 %>
-           showUploadModel();
+           loadView("${g.createLink(controller: 'model', action: 'upload')}", loadUploadModelCallback);
 <%
         break
     case "ADDREVISION":
 %>
-            showModel("${params.id}", "#modelTabs-addRevision");
+            loadView("${g.createLink(controller: 'model', action: 'show', id: params.id)}", loadModelTabCallback, "#modelTabs-addRevision");
 <%
         break
     case "THEMES":
 %>
-            showThemeSelection();
+            loadView("${g.createLink(controller: 'themeing', action: 'themes')}", loadThemeSelectionCallback);
 <%
         break
     case "USER":
 %>
-            showUserInfo();
+            loadView("${g.createLink(controller: 'user', action: 'index')}", loadShowUserInfoCallback);
 <%
         break
     case "USERADMINLIST":
 %>
-            showUserList();
+            loadView("${g.createLink(controller: 'userAdministration', action: 'index')}", loadUserListCallback);
 <%
         break
     case "REGISTER":
@@ -49,12 +49,17 @@
         break
     case "VALIDATE":
 %>
-            showValidateRegistrationView("${params.id}");
+            loadView("${g.createLink(controller: 'register', action: 'validate', id: params.id)}", loadValidateRegistrationCallback);
 <%
         break
     case "RESETPASSWORD":
 %>
-            showResetPasswordView("${params.id}");
+            loadView("${g.createLink(controller: 'user', action: 'resetPassword', id: params.id)}", loadResetPasswordCallback);
+<%
+        break
+    case "PASSWORDFORGOTTEN":
+%>
+            loadView("${g.createLink(controller: 'user', action: 'passwordForgotten')}", loadPasswordForgottenCallback);
 <%
         break
     }

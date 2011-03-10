@@ -1,4 +1,39 @@
 /**
+ * Loads a new view for the #body element through AJAX.
+ * @param url The URL from where to load the view
+ * @param loadCallback A callback to execute after successfully updating the view.
+ * @param callbackData Additional data to be passed to the callback
+ */
+function loadView(url, loadCallback, callbackData) {
+    $("#body").block();
+    $.ajax({
+        url: url,
+        dataType: 'HTML',
+        type: 'GET',
+        success: function(data) {
+            $("#body").unblock();
+            clearErrorMessages();
+            var json = null;
+            try {
+                json = $.parseJSON(data);
+            } catch (e) {
+                // ignore - this is expected for the case that HTML is retrieved
+            }
+            if (handleError(json)) {
+                // TODO: with jquery 1.5 should be handled by status code function
+                return;
+            }
+            $("#body").html(data);
+            loadCallback(data, callbackData);
+        },
+        error: function(jqXHR) {
+            $("#body").unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
  * Updates the user information panel to hide/show login/logout data.
  * @param logedIn @c true if the user logged in, @c false if he logged out
  * @param userName The name of the user when logged in, field is optional
@@ -6,7 +41,8 @@
 function switchUserInformation(logedIn, userName) {
     if (logedIn) {
         if (userName) {
-            $("#userInformationLogedIn span").first().html("<a href=\"#\" onclick=\"showUserInfo()\">" + userName + "</a>");
+            var url = createLink('user', 'index');
+            $("#userInformationLogedIn span").first().html("<a href=\"#\" onclick=\"loadView('" + url + "', loadShowUserInfoCallback)\">" + userName + "</a>");
         }
         $("#userInformationLogedIn").show();
         $("#userInformationLogedOut").hide();
@@ -136,18 +172,6 @@ function register() {
 }
 
 /**
- * Loads the view to validate the registration
- */
-function showValidateRegistrationView(code) {
-    $("#body").block();
-    $.get(createLink("register", "validate", code), function(data) {
-        $("#body").html(data);
-        $("#validate-registration-from div input").button();
-        $("#body").unblock();
-    });
-}
-
-/**
  * Callback for validating a user registration
  */
 function validateRegistration() {
@@ -178,30 +202,6 @@ function validateRegistration() {
 }
 
 /**
- * Loads the view to request a new password
- */
-function showPasswordForgottenView() {
-    $("#body").block();
-    $.ajax({url: createLink("user", "passwordForgotten"),
-        dataType: 'HTML',
-        type: 'GET',
-        success: function(data) {
-            $("#body").unblock();
-            if (handleError(data)) {
-                // TODO: with jquery 1.5 should be handled by status code function
-                return;
-            }
-            $("#body").html(data);
-            $("#password-forgotten-form div input").button();
-        },
-        error: function(jqXHR) {
-            $("#body").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }
-    });
-}
-
-/**
  * Callback to request a new password
  */
 function requestPassword() {
@@ -226,30 +226,6 @@ function requestPassword() {
         },
         error: function(jqXHR) {
             $("#password-forgotten-form").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }
-    });
-}
-
-/**
- * Loads the view to reset the password based on the previously requested code.
- */
-function showResetPasswordView(id) {
-    $("#body").block();
-    $.ajax({url: createLink("user", "resetPassword", id),
-        dataType: 'HTML',
-        type: 'GET',
-        success: function(data) {
-            $("#body").unblock();
-            if (handleError(data)) {
-                // TODO: with jquery 1.5 should be handled by status code function
-                return;
-            }
-            $("#body").html(data);
-            $("#reset-password-form div input").button();
-        },
-        error: function(jqXHR) {
-            $("#body").unblock();
             handleError($.parseJSON(jqXHR.responseText));
         }
     });
@@ -394,163 +370,12 @@ function createModelDataTable() {
 }
 
 /**
- * Loads the view to show a list of models.
- */
-function showModelList() {
-    $("#body").block();
-    $.get(createLink("model", "index"), function(data) {
-        $("#body").html(data);
-        $("#navigationButtons a").button();
-        createModelDataTable();
-        $("#body").unblock();
-    });
-}
-
-/**
  * Loads the view to show a Model and replaces.
  * @param id The id of the Model to show
  * @param tabIndex Optional selector for tab index to switch to after the tab view has been loaded
  */
 function showModel(id, tabIndex) {
-    $("#body").block();
-    $.ajax({url: createLink("model", "show", id),
-        success: function(data) {
-            $("#body").html(data);
-            $("#navigationButtons a").button();
-            $("#modelTabs").tabs({disabled: [1, 2, 3, 4, 5],
-                ajaxOptions: {error: function(jqXHR) {
-                    $("#body").unblock();
-                    handleError($.parseJSON(jqXHR.responseText));
-                }},
-                load: function(event, ui) {
-                    // ui has index
-                    switch ($(ui.tab).attr("id")) {
-                    case "modelTabs-addRevision":
-                        // add revision tab
-                        $("#revision-upload-form div.ui-dialog-buttonpane input").button()
-                        break;
-                    }
-                }
-            });
-            $("#modelTabs").show();
-            if (tabIndex) {
-                $("#modelTabs").tabs("select", $(tabIndex).attr("href"));
-            }
-            $("#body").unblock();
-        },
-        error: function(jqXHR) {
-            $("#body").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }});
-}
-
-/**
- * Loads the view to upload a model
- */
-function showUploadModel() {
-    $("#body").block();
-    $.ajax({
-        url: createLink("model", "upload"),
-        dataType: "html",
-        success: function(data) {
-            $("#body").html(data);
-            $("#navigationButtons a").button();
-            clearErrorMessages();
-            $("input:radio[name=publicationType]")[0].checked = true;
-            $("#model-upload-form div.ui-dialog-buttonpane input").button();
-            $("input:radio[name=publicationType]").change(uploadModelPublicationChangeListener);
-            enableElement("#model-upload-publication-month", false);
-            enableElement("#model-upload-publication-day", false);
-            $("#model-upload-publication-year").change(function() {
-                if ($("#model-upload-publication-year").val() == "") {
-                    $("#model-upload-publication-month").val("");
-                    $("#model-upload-publication-day").val("");
-                    enableElement("#model-upload-publication-month", false);
-                    enableElement("#model-upload-publication-day", false);
-                } else {
-                    enableElement("#model-upload-publication-month", true);
-                }
-            });
-            $("#model-upload-publication-month").change(function() {
-                if ($("#model-upload-publication-month").val() == "") {
-                    $("#model-upload-publication-day").val("");
-                    enableElement("#model-upload-publication-day", false);
-                } else {
-                    enableElement("#model-upload-publication-day", true);
-                }
-            });
-            $("#model-upload-publication-author-add").button();
-            $("#model-upload-publication-author-add").click(function() {
-                // initials
-                var initialsRow = $("#model-upload-publication-author-initials-row").clone();
-                var counter = $("#model-upload-author-count").val();
-                var initialsId = $("td label", initialsRow).attr("for") + counter;
-                initialsRow.attr("id", initialsRow.attr("id") + counter);
-                $("td label", initialsRow).attr("for", initialsId);
-                $("td input", initialsRow).attr("id", initialsId);
-                $("td input", initialsRow).attr("name", $("td input", initialsRow).attr("name") + counter);
-                $("td input[type=text]", initialsRow).val("");
-                // first name
-                var firstNameRow = $("#model-upload-publication-author-firstname-row").clone();
-                var firstNameId = $("td label", firstNameRow).attr("for") + counter;
-                firstNameRow.attr("id", firstNameRow.attr("id") + counter);
-                $("td label", firstNameRow).attr("for", firstNameId);
-                $("td input", firstNameRow).attr("id", firstNameId);
-                $("td input", firstNameRow).attr("name", $("td input", firstNameRow).attr("name") + counter);
-                $("td input[type=text]", firstNameRow).val("");
-                // last name
-                var lastNameRow = $("#model-upload-publication-author-lastname-row").clone();
-                var lastNameId = $("td label", lastNameRow).attr("for") + counter;
-                lastNameRow.attr("id", lastNameRow.attr("id") + counter);
-                $("td label", lastNameRow).attr("for", lastNameId);
-                $("td input", lastNameRow).attr("id", lastNameId);
-                $("td input", lastNameRow).attr("name", $("td input", lastNameRow).attr("name") + counter);
-                $("td input[type=text]", lastNameRow).val("");
-                // add to table
-                $("#model-upload-publication-table tbody").append(initialsRow);
-                $("#model-upload-publication-table tbody").append(firstNameRow);
-                $("#model-upload-publication-table tbody").append(lastNameRow);
-                setErrorState("#" + initialsId);
-                setErrorState("#" + firstNameId);
-                setErrorState("#" + lastNameId);
-                // connect the remove button
-                var removeButton = $("td input[type=button]", initialsRow).button();
-                removeButton.click(function() {
-                    initialsRow.remove();
-                    firstNameRow.remove();
-                    lastNameRow.remove();
-                });
-                removeButton.show();
-                $("#model-upload-author-count").val(parseInt(counter) + 1);
-            });
-            uploadModelPublicationChangeListener();
-            $("#body").unblock();
-        },
-        error: function(jqXHR) {
-            $("#body").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }
-    });
-}
-
-/**
- * Loads the admin view to select a theme.
- */
-function showThemeSelection() {
-    $("#body").block();
-    $.ajax({
-        url: createLink("themeing", "themes"),
-        dataType: "html",
-        success: function(data) {
-            $("#body").html(data);
-            $("#change-theme-form input:button").button();
-            clearErrorMessages();
-        },
-        error: function(jqXHR) {
-            $("#body").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }
-    });
+    loadView(createLink("model", "show", id), loadModelTabCallback, tabIndex);
 }
 
 /**
@@ -580,26 +405,6 @@ function changeTheme() {
         },
         error: function(jqXHR) {
             $("#change-theme-form").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }
-    });
-}
-
-/**
- * Loads the show user information page
- */
-function showUserInfo() {
-    $("#body").block();
-    $.ajax({
-        url: createLink("user", "index"),
-        dataType: "html",
-        success: function(data) {
-            $("#body").html(data);
-            $("#body div.ui-dialog-buttonpane input").button();
-            clearErrorMessages();
-        },
-        error: function(jqXHR) {
-            $("#body").unblock();
             handleError($.parseJSON(jqXHR.responseText));
         }
     });
@@ -679,87 +484,6 @@ function editUser() {
         },
         error: function(jqXHR) {
             $("#edit-user-form").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }
-    });
-}
-
-/**
- * Loads the view to show a list of users.
- */
-function showUserList() {
-    $("#body").block();
-    $.ajax({
-        url: createLink("userAdministration", "index"),
-        dataType: "html",
-        success: function(data) {
-            var createUserChangeMarkup = function(id, target, enabled) {
-                var checkboxId = "user-change-" + id + "-" + target;
-                var html = '<input type="checkbox" id="' + checkboxId + '" ';
-                if (enabled) {
-                    html += 'checked="checked"';
-                }
-                html += '/><input type="button" value="' + i18n.ui.button.update + '" onclick="changeUser(' + id + ', \'' + checkboxId + '\', \'' + target + '\')"/>';
-                return html;
-            };
-            $("#body").html(data);
-            clearErrorMessages();
-            // TODO: merge the datatables as far as possible
-            $('#userTable').dataTable({
-                // TODO: in future it might be interesting to allow filtering
-                bFilter: false,
-                bProcessing: true,
-                bServerSide: true,
-                bJQueryUI: true,
-                sPaginationType: "full_numbers",
-                sAjaxSource: createLink('userAdministration', 'dataTableSource'),
-                // TODO: move function into an own method,
-                "fnServerData": function(sSource, aoData, fnCallback) {
-                    $.ajax({
-                        "dataType": 'json',
-                        "type": "POST",
-                        "url": sSource,
-                        "data": aoData,
-                        "error": function(jqXHR, textStatus, errorThrown) {
-                            handleError($.parseJSON(jqXHR.responseText));
-                            // clear the table
-                            fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
-                        },
-                        "success": function(json) {
-                            for (var i=0; i<json.aaData.length; i++) {
-                                var rowData = json.aaData[i];
-                                var id = rowData[0];
-                                rowData[4] = createUserChangeMarkup(id, 'enable', rowData[4]);
-                                rowData[5] = createUserChangeMarkup(id, 'expireAccount', rowData[5]);
-                                rowData[6] = createUserChangeMarkup(id, 'lockAccount', rowData[6]);
-                                rowData[7] = createUserChangeMarkup(id, 'expirePassword', rowData[7]);
-                            }
-                            fnCallback(json);
-                            $("#userTable tr input:button").button();
-                        }
-                    });
-                },
-                // i18n
-                oLanguage: {
-                    oPaginate: {
-                        sFirst:    i18n.dataTables.paginate.first,
-                        sLast:     i18n.dataTables.paginate.last,
-                        sNext:     i18n.dataTables.paginate.next,
-                        sPrevious: i18n.dataTables.paginate.previous
-                    },
-                    sEmptyTable:   i18n.dataTables.empty,
-                    sInfo:         i18n.dataTables.info,
-                    sInfoEmpty:    i18n.dataTables.infoEmpty,
-                    sInfoFiltered: i18n.dataTables.infoFiltered,
-                    sLengthMenu:   i18n.dataTables.lengthMenu,
-                    sProcessing:   i18n.dataTables.processing,
-                    sSearch:       i18n.dataTables.search,
-                    sZeroRecords:  i18n.dataTables.noFilterResults
-                }
-            });
-        },
-        error: function(jqXHR) {
-            $("#body").unblock();
             handleError($.parseJSON(jqXHR.responseText));
         }
     });
@@ -1109,6 +833,9 @@ function showMessage(messages, timeout, container) {
  * @todo With JQuery 1.5 we should use the statusCode property
  */
 function handleError(data) {
+    if (data == null) {
+        return false;
+    }
     if (data.error && typeof(data.error) == "number") {
         clearErrorMessages();
         var errorMessage = "";

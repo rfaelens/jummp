@@ -1,8 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <h1><g:message code="model.view.header" args="[revision.model.id, revision.model.name]"/></h1>
 <div id="navigationButtons">
-    <a href="#" onclick="showModelList()"><g:message code="model.list.goto"/></a>
-    <a href="#" onclick="showUploadModel()"><g:message code="model.upload.goto"/></a>
+    <a href="#" onclick="loadView('${g.createLink(controller: 'model', action: 'index')}', loadModelListCallback)"><g:message code="model.list.goto"/></a>
+    <a href="#" onclick="loadView('${g.createLink(controller: 'model', action: 'upload')}', loadUploadModelCallback)"><g:message code="model.upload.goto"/></a>
 </div>
 <div id="modelTabs" style="display: none">
     <ul>

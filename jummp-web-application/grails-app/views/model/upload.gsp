@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <div id="navigationButtons">
-    <a href="#" onclick="showModelList()"><g:message code="model.list.goto"/></a>
+    <a href="#" onclick="loadView('${g.createLink(controller: 'model', action: 'index')}', loadModelListCallback)"><g:message code="model.list.goto"/></a>
 </div>
 <form action="save" method="post" id="model-upload-form" class="ui-widget-content" enctype="multipart/form-data">
     <table>

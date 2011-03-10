@@ -27,6 +27,7 @@ if (!themeName || !(new File(ServletContextHolder.servletContext.getRealPath("jq
         $.appName = "${grailsApplication.metadata["app.name"]}";
         </g:javascript>
         <g:javascript src="jummp.js"/>
+        <g:javascript src="views.js"/>
     </head>
     <body>
         <div id="spinner" class="spinner" style="display:none;">
