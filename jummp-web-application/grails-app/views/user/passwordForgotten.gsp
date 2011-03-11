@@ -1,11 +1,11 @@
 <p><g:message code="user.resetPassword.ui.explanation"/></p>
-<form action="requestPasswordReset" id="password-forgotten-form">
+<form action="requestPasswordReset" id="password-forgotten-form" class="ui-widget-content">
     <table>
         <thead></thead>
         <tbody>
         <tr>
             <td><label for="password-forgotten-form-username"><g:message code="login.username"/></label></td>
-            <td><input type="text" name="username" id="password-forgotten-form-username"></td>
+            <td><span><input type="text" name="username" id="password-forgotten-form-username"><jummp:errorField/></span></td>
         </tr>
         </tbody>
     </table>
