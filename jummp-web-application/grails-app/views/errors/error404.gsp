@@ -5,15 +5,14 @@
         <title><g:message code="error.404.title"/></title>
     </head>
     <body>
-        <div class="body">
+        <div id="body" class="ui-widget">
             <div id="status-code" style="display: none">404</div>
             <div id="resource" style="display: none">${resource}</div>
-            <div class="commenthead">
-                <g:message code="error.404.title"/>
-            </div>
-            <div class="commentbody">
-                <g:message code="error.404.explanation" args="[resource]"/>
-            </div>
+            <g:javascript>
+            $(document).ready(function() {
+                showErrorMessage(i18n.error.notFound.replace(/_CODE_/, "${resource}"));
+            });
+            </g:javascript>
         </div>
   </body>
 </html>
