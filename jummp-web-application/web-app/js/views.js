@@ -61,6 +61,35 @@ function loadModelTabCallback(data, tabIndex) {
  * View logic for /model/upload/
  */
 function loadUploadModelCallback() {
+    var uploadModelPublicationChangeListener = function() {
+        var value = $("input:radio[name=publicationType]:checked").val();
+        switch (value) {
+        case "PUBMED":
+            enableElement("#model-upload-pubmed", true);
+            enableElement("#model-upload-doi", false);
+            enableElement("#model-upload-url", false);
+            $("#model-upload-publication-table").fadeOut("fast");
+            break;
+        case "DOI":
+            enableElement("#model-upload-pubmed", false);
+            enableElement("#model-upload-doi", true);
+            enableElement("#model-upload-url", false);
+            $("#model-upload-publication-table").fadeIn("fast");
+            break;
+        case "URL":
+            enableElement("#model-upload-pubmed", false);
+            enableElement("#model-upload-doi", false);
+            enableElement("#model-upload-url", true);
+            $("#model-upload-publication-table").fadeIn("fast");
+            break;
+        case "UNPUBLISHED":
+            enableElement("#model-upload-pubmed", false);
+            enableElement("#model-upload-doi", false);
+            enableElement("#model-upload-url", false);
+            $("#model-upload-publication-table").fadeOut("fast");
+            break;
+        }
+    };
     $("#navigationButtons a").button();
     $("#navigationButtons a").click(function() {
         loadView(createLink('model', 'index'), loadModelListCallback);

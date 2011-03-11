@@ -562,41 +562,6 @@ function createPublicationLink(publication, model, target) {
 }
 
 /**
- * Change listener for the upload model view.
- * It gets called whenever the Publication type radio button changes.
- * It adjusts the view to show/hide fields and enable/disable fields.
- */
-function uploadModelPublicationChangeListener() {
-    var value = $("input:radio[name=publicationType]:checked").val();
-    switch (value) {
-    case "PUBMED":
-        enableElement("#model-upload-pubmed", true);
-        enableElement("#model-upload-doi", false);
-        enableElement("#model-upload-url", false);
-        $("#model-upload-publication-table").fadeOut("fast");
-        break;
-    case "DOI":
-        enableElement("#model-upload-pubmed", false);
-        enableElement("#model-upload-doi", true);
-        enableElement("#model-upload-url", false);
-        $("#model-upload-publication-table").fadeIn("fast");
-        break;
-    case "URL":
-        enableElement("#model-upload-pubmed", false);
-        enableElement("#model-upload-doi", false);
-        enableElement("#model-upload-url", true);
-        $("#model-upload-publication-table").fadeIn("fast");
-        break;
-    case "UNPUBLISHED":
-        enableElement("#model-upload-pubmed", false);
-        enableElement("#model-upload-doi", false);
-        enableElement("#model-upload-url", false);
-        $("#model-upload-publication-table").fadeOut("fast");
-        break;
-    }
-}
-
-/**
  * Enable/Disable DOM element(s).
  * Adds/Removes the disabled attribute and sets appropriate CSS classes.
  * @param selector The selector string to identify the element(s)
