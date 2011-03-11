@@ -4,6 +4,11 @@
 function loadPasswordForgottenCallback() {
     $("#password-forgotten-form div input").button();
     $("#password-forgotten-form div input:button").click(requestPassword);
+    $("#password-forgotten-form table input").keyup(function(event) {
+        if (event.keyCode == 13) {
+            requestPassword();
+        }
+    });
 }
 
 /**
@@ -63,6 +68,11 @@ function loadUploadModelCallback() {
     $("input:radio[name=publicationType]")[0].checked = true;
     $("#model-upload-form div.ui-dialog-buttonpane input").button();
     $("#model-upload-form div.ui-dialog-buttonpane input:button").click(uploadModel);
+    $("#model-upload-form table input").keyup(function(event) {
+        if (event.keyCode == 13) {
+            uploadModel();
+        }
+    });
     $("input:radio[name=publicationType]").change(uploadModelPublicationChangeListener);
     enableElement("#model-upload-publication-month", false);
     enableElement("#model-upload-publication-day", false);
@@ -145,7 +155,17 @@ function loadThemeSelectionCallback() {
 function loadShowUserInfoCallback() {
     $("#body div.ui-dialog-buttonpane input").button();
     $("#edit-user-form div.ui-dialog-buttonpane input:button").click(editUser);
+    $("#edit-user-form table input").keyup(function(event) {
+        if (event.keyCode == 13) {
+            editUser();
+        }
+    });
     $("#change-password-form div input:button").click(changePassword);
+    $("#change-password-form table input").keyup(function(event) {
+        if (event.keyCode == 13) {
+            changePassword();
+        }
+    });
 }
 
 /**
@@ -154,6 +174,11 @@ function loadShowUserInfoCallback() {
 function loadValidateRegistrationCallback() {
     $("#validate-registration-form div input").button();
     $("#validate-registration-form div input:button").click(validateRegistration);
+    $("#validate-registration-form table input").keyup(function(event) {
+        if (event.keyCode == 13) {
+            validateRegistration();
+        }
+    });
 }
 
 /**
@@ -162,6 +187,11 @@ function loadValidateRegistrationCallback() {
 function loadResetPasswordCallback() {
     $("#reset-password-form div input").button();
     $("#reset-password-form div input:button").click(resetPassword);
+    $("#reset-password-form table input").keyup(function(event) {
+        if (event.keyCode == 13) {
+            resetPassword();
+        }
+    });
 }
 
 /**

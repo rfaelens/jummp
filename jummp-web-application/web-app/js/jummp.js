@@ -890,5 +890,10 @@ $(document).ready(function() {
             }
         ]
     });
+    $("#ajaxLoginForm table input").keyup(function(event) {
+        if (event.keyCode == 13) {
+            authAjax();
+        }
+    });
     $("#model-upload-form").ajaxForm();
 });
