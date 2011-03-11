@@ -113,7 +113,9 @@ function loadModelTabCallback(data, tabIndex) {
             case "modelTabs-addRevision":
                 // add revision tab
                 $("#revision-upload-form div.ui-dialog-buttonpane input").button();
-                $("#revision-upload-form div.ui-dialog-buttonpane input:button").click(uploadRevision);
+                $("#revision-upload-form div.ui-dialog-buttonpane input:button").click(function() {
+                    submitFormWithFile($("#revision-upload-form"), createLink("model", "saveNewRevision"), uploadRevisionCallback);
+                });
                 break;
             }
         }
@@ -121,6 +123,21 @@ function loadModelTabCallback(data, tabIndex) {
     $("#modelTabs").show();
     if (tabIndex) {
         $("#modelTabs").tabs("select", $(tabIndex).attr("href"));
+    }
+}
+
+/**
+ * Callback for successful form submission to /model/saveNewRevision/
+ * @param data JSON object returned by server
+ */
+function uploadRevisionCallback(data) {
+    if (data.error) {
+        showErrorMessage([data.model, data.comment]);
+        setErrorState("#revision-upload-file", data.model);
+        setErrorState("#revision-upload-comment", data.comment);
+    } else if (data.success) {
+        showInfoMessage(i18n.model.revision.upload.success.replace(/_NAME_/, data.revision.model.name), 20000);
+        $("#modelTabs").tabs("select", 0);
     }
 }
 
@@ -163,10 +180,12 @@ function loadUploadModelCallback() {
     });
     $("input:radio[name=publicationType]")[0].checked = true;
     $("#model-upload-form div.ui-dialog-buttonpane input").button();
-    $("#model-upload-form div.ui-dialog-buttonpane input:button").click(uploadModel);
+    $("#model-upload-form div.ui-dialog-buttonpane input:button").click(function() {
+        submitFormWithFile($("#model-upload-form"), createLink("model", "save"), uploadModelCallback);
+    });
     $("#model-upload-form table input").keyup(function(event) {
         if (event.keyCode == 13) {
-            uploadModel();
+            submitFormWithFile($("#model-upload-form"), createLink("model", "save"), uploadModelCallback);
         }
     });
     $("#model-upload-form").submit(function() { return false; });
@@ -236,6 +255,35 @@ function loadUploadModelCallback() {
         $("#model-upload-author-count").val(parseInt(counter) + 1);
     });
     uploadModelPublicationChangeListener();
+}
+
+/**
+ * Callback for successful form submission to /model/save/
+ * @param data JSON object returned by server
+ */
+function uploadModelCallback(data) {
+    if (data.error) {
+        showErrorMessage([data.model, data.name, data.comment, data.pubmed, data.doi, data.url, data.publicationTitle, data.publicationJournal, data.publicationAffiliation, data.publicationAbstract, data.publicationYear, data.publicationMonth, data.publicationDay, data.authorInitials, data.authorFirstName, data.authorLastName]);
+        setErrorState("#model-upload-file", data.model);
+        setErrorState("#model-upload-name", data.name);
+        setErrorState("#model-upload-comment", data.comment);
+        setErrorState("#model-upload-pubmed", data.pubmed);
+        setErrorState("#model-upload-doi", data.doi);
+        setErrorState("#model-upload-url", data.url);
+        setErrorState("#model-upload-publication-title", data.publicationTitle);
+        setErrorState("#model-upload-publication-journal", data.publicationJournal);
+        setErrorState("#model-upload-publication-affiliation", data.publicationAffiliation);
+        setErrorState("#model-upload-publication-abstract", data.publicationAbstract);
+        setErrorState("#model-upload-publication-year", data.publicationYear);
+        setErrorState("#model-upload-publication-month", data.publicationMonth);
+        setErrorState("#model-upload-publication-day", data.publicationDay);
+        setErrorState("#model-upload-publication-author-initials", data.authorInitials);
+        setErrorState("#model-upload-publication-author-firstname", data.authorFirstName);
+        setErrorState("#model-upload-publication-author-lastname", data.authorLastName);
+    } else if (data.success) {
+        showInfoMessage(i18n.model.upload.success.replace(/_ID_/, data.model.id), 20000);
+        showModel(data.model.id);
+    }
 }
 
 /**

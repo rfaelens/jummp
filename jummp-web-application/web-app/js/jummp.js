@@ -83,6 +83,51 @@ function submitForm(form, url, callback) {
 }
 
 /**
+ * Submits the @p form to the @p url via AJAX.
+ * The method is like @link submitForm with the difference that it can handle file uploads.
+ * Therefore the iframe option is used which causes the server to think it is not an AJAX request.
+ * The server needs to wrap the JSON response in a textarea. In case of errors like 403 a web page
+ * is returned wich is parsed correctly and ensuring the correct functionality.
+ * @param form JQuery object identifying the form to submit
+ * @param url The URL where to submit to
+ * @param callback The callback object to invoke
+ */
+function submitFormWithFile(form, url, callback) {
+    form.block();
+    form.ajaxSubmit({
+        type: 'POST',
+        url: url,
+        // needs to be an iframe as we send a file
+        iframe: true,
+        dataType: 'json',
+        success: function(data) {
+            form.unblock();
+            if (handleError(data)) {
+                // TODO: with jquery 1.5 should be handled by status code function
+                return;
+            }
+            clearErrorMessages();
+            callback(data);
+        },
+        error: function(jqXHR) {
+            form.unblock();
+            // the form is not submitted as AJAX (file upload) because of that we receive an html page
+            // we need to extract the status code and error code from the html
+            // and construct a proper object to pass to handleError()
+            var response = $(jqXHR.responseText);
+            var errorCode = $("#error-code", response).text();
+            var statusCode = parseInt($("#status-code", response).text());
+            var authenticated = ($("#authenticated", response).text() == "true");
+            if (isNaN(statusCode) && jqXHR.responseXML) {
+                statusCode = parseInt($("#status-code", $(jqXHR.responseXML)).text());
+                authenticated = ($("#authenticated", $(jqXHR.responseXML)).text() == "true");
+            }
+            handleError({error: statusCode, code: errorCode, authenticated: authenticated});
+        }
+    });
+}
+
+/**
  * Updates the user information panel to hide/show login/logout data.
  * @param logedIn @c true if the user logged in, @c false if he logged out
  * @param userName The name of the user when logged in, field is optional
@@ -340,112 +385,6 @@ function enableElement(selector, enable) {
     } else {
         element.addClass("ui-state-disabled");
     }
-}
-
-/**
- * Callback when model upload form needs to be submitted.
- */
-function uploadModel() {
-    $("#model-upload-form").block();
-    var data = $("#model-upload-form");
-    $("#model-upload-form").ajaxSubmit({type: 'POST',
-        url: createLink("model", "save"),
-        // needs to be an iframe as we send a file
-        iframe: true,
-        dataType: 'json',
-        success: function(data) {
-        $("#model-upload-form").unblock();
-        if (handleError(data)) {
-            // TODO: with jquery 1.5 should be handled by status code function
-            return;
-        }
-        if (data.error) {
-            clearErrorMessages();
-            showErrorMessage([data.model, data.name, data.comment, data.pubmed, data.doi, data.url, data.publicationTitle, data.publicationJournal, data.publicationAffiliation, data.publicationAbstract, data.publicationYear, data.publicationMonth, data.publicationDay, data.authorInitials, data.authorFirstName, data.authorLastName]);
-            setErrorState("#model-upload-file", data.model);
-            setErrorState("#model-upload-name", data.name);
-            setErrorState("#model-upload-comment", data.comment);
-            setErrorState("#model-upload-pubmed", data.pubmed);
-            setErrorState("#model-upload-doi", data.doi);
-            setErrorState("#model-upload-url", data.url);
-            setErrorState("#model-upload-publication-title", data.publicationTitle);
-            setErrorState("#model-upload-publication-journal", data.publicationJournal);
-            setErrorState("#model-upload-publication-affiliation", data.publicationAffiliation);
-            setErrorState("#model-upload-publication-abstract", data.publicationAbstract);
-            setErrorState("#model-upload-publication-year", data.publicationYear);
-            setErrorState("#model-upload-publication-month", data.publicationMonth);
-            setErrorState("#model-upload-publication-day", data.publicationDay);
-            setErrorState("#model-upload-publication-author-initials", data.authorInitials);
-            setErrorState("#model-upload-publication-author-firstname", data.authorFirstName);
-            setErrorState("#model-upload-publication-author-lastname", data.authorLastName);
-        } else if (data.success) {
-            clearErrorMessages();
-            showInfoMessage(i18n.model.upload.success.replace(/_ID_/, data.model.id), 20000);
-            showModel(data.model.id);
-        }
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            $("#model-upload-form").unblock();
-            // the form is not submitted as AJAX (file upload) because of that we receive an html page
-            // we need to extract the status code and error code from the html
-            // and construct a proper object to pass to handleError()
-            var response = $(jqXHR.responseText);
-            var errorCode = $("#error-code", response).text();
-            var statusCode = parseInt($("#status-code", response).text());
-            var authenticated = ($("#authenticated", response).text() == "true");
-            if (isNaN(statusCode) && jqXHR.responseXML) {
-                statusCode = parseInt($("#status-code", $(jqXHR.responseXML)).text());
-                authenticated = ($("#authenticated", $(jqXHR.responseXML)).text() == "true");
-            }
-            handleError({error: statusCode, code: errorCode, authenticated: authenticated});
-        }
-    });
-}
-
-/**
- * Callback when revision upload form needs to be submitted.
- */
-function uploadRevision() {
-    $("#revision-upload-form").block();
-    var data = $("#revision-upload-form");
-    $("#revision-upload-form").ajaxSubmit({
-        type: 'POST',
-        url: createLink("model", "saveNewRevision"),
-        iframe: true,
-        dataType: 'json',
-        success: function(data) {
-            $("#revision-upload-form").unblock();
-            if (handleError(data)) {
-                // TODO: with jquery 1.5 should be handled by status code function
-                return;
-            }
-            if (data.error) {
-                clearErrorMessages();
-                showErrorMessage([data.model, data.comment]);
-                setErrorState("#revision-upload-file", data.model);
-                setErrorState("#revision-upload-comment", data.comment);
-            } else if (data.success) {
-                clearErrorMessages();
-                showInfoMessage(i18n.model.revision.upload.success.replace(/_NAME_/, data.revision.model.name), 20000);
-                $("#modelTabs").tabs("select", 0);
-            }
-        },
-        error: function(jqXHR, textStatus) {
-            $("#revision-upload-form").unblock();
-            // the form is not submitted as AJAX (file upload) because of that we receive an html page
-            // we need to extract the status code and error code from the html
-            // and construct a proper object to pass to handleError()
-            var response = $(jqXHR.responseText);
-            var errorCode = $("#error-code", response).text();
-            var statusCode = parseInt($("#status-code", response).text());
-            var authenticated = ($("#authenticated", response).text() == "true");
-            if (isNaN(statusCode) && jqXHR.responseXML) {
-                statusCode = parseInt($("#status-code", $(jqXHR.responseXML)).text());
-                authenticated = ($("#authenticated", $(jqXHR.responseXML)).text() == "true");
-            }
-            handleError({error: statusCode, code: errorCode, authenticated: authenticated});
-        }
-    });
 }
 
 /**
