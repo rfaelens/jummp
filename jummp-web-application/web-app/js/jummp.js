@@ -54,6 +54,35 @@ function loadView(url, loadCallback, callbackData) {
 }
 
 /**
+ * Submits the @p form to the @p url via AJAX.
+ * If the call is successful the @p callback is invoked with the retrieved json data as parameter.
+ * @param form JQuery object identifying the form to submit
+ * @param url The URL where to submit to
+ * @param callback The callback object to invoke
+ */
+function submitForm(form, url, callback) {
+    form.block();
+    form.ajaxSubmit({
+        type: 'POST',
+        url: url,
+        dataType: 'json',
+        success: function (data) {
+            form.unblock();
+            if (handleError(data)) {
+                // TODO: with jquery 1.5 should be handled by status code function
+                return;
+            }
+            clearErrorMessages();
+            callback(data);
+        },
+        error: function(jqXHR) {
+            form.unblock();
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
  * Updates the user information panel to hide/show login/logout data.
  * @param logedIn @c true if the user logged in, @c false if he logged out
  * @param userName The name of the user when logged in, field is optional
@@ -192,102 +221,6 @@ function register() {
 }
 
 /**
- * Callback for validating a user registration
- */
-function validateRegistration() {
-    $("#validate-registration-form").block();
-    $("#validate-registration-form").ajaxSubmit({
-        type: 'POST',
-        url: createLink("register", "validateRegistration"),
-        dataType: 'json',
-        success: function(data) {
-            $("#validate-registration-form").unblock();
-            if (handleError(data)) {
-                // TODO: with jquery 1.5 should be handled by status code function
-                return;
-            }
-            if (data.error) {
-                clearErrorMessages();
-                showErrorMessage(data.error);
-            } else if (data.success) {
-                clearErrorMessages();
-                $("#body").html("<p>" + i18n.user.register.validate.success + "</p>");
-            }
-        },
-        error: function(jqXHR) {
-            $("#validate-registration-form").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }
-    });
-}
-
-/**
- * Callback to request a new password
- */
-function requestPassword() {
-    $("#password-forgotten-form").block();
-    $("#password-forgotten-form").ajaxSubmit({
-        type: 'POST',
-        url: createLink("user", "requestPassword"),
-        dataType: 'json',
-        success: function(data) {
-            $("#password-forgotten-form").unblock();
-            if (handleError(data)) {
-                // TODO: with jquery 1.5 should be handled by status code function
-                return;
-            }
-            if (data.error) {
-                clearErrorMessages();
-                showErrorMessage(data.error);
-            } else if (data.success) {
-                clearErrorMessages();
-                $("#body").html("<p>" + i18n.user.resetPassword.passwordRequested + "</p>");
-            }
-        },
-        error: function(jqXHR) {
-            $("#password-forgotten-form").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }
-    });
-}
-
-/**
- * Callback for password reset
- */
-function resetPassword() {
-    $("#reset-password-form").block();
-    $("#reset-password-form").ajaxSubmit({
-        type: 'POST',
-        url: createLink("user", "performResetPassword"),
-        dataType: 'json',
-        success: function(data) {
-            $("#reset-password-form").unblock();
-            if (handleError(data)) {
-                // TODO: with jquery 1.5 should be handled by status code function
-                return;
-            }
-            if (data.error) {
-                clearErrorMessages();
-                if (data.error != true) {
-                    showErrorMessage(data.error);
-                }
-                showErrorMessage([data.username, data.password, data.verifyPassword, data.code]);
-                setErrorState("#reset-password-form-username", data.username);
-                setErrorState("#reset-password-form-password", data.password);
-                setErrorState("#reset-password-form-verifyPassword", data.verifyPassword);
-            } else if (data.success) {
-                clearErrorMessages();
-                showInfoMessage(i18n.user.resetPassword.success, 20000);
-            }
-        },
-        error: function(jqXHR) {
-            $("#reset-password-form").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }
-    });
-}
-
-/**
  * Creates a URI to be used in a href or src HTML attribute.
  * @param path The path
  */
@@ -319,117 +252,6 @@ function createLink(controller, action, id) {
  */
 function showModel(id, tabIndex) {
     loadView(createLink("model", "show", id), loadModelTabCallback, tabIndex);
-}
-
-/**
- * Callback to change the application theme.
- */
-function changeTheme() {
-    $("#change-theme-form").block();
-    var data = $("#change-theme-form");
-    $("#change-theme-form").ajaxSubmit({
-        type: 'POST',
-        url: createLink("themeing", "save"),
-        dataType: 'json',
-        success: function(data) {
-            $("#change-theme-form").unblock();
-            if (handleError(data)) {
-                // TODO: with jquery 1.5 should be handled by status code function
-                return;
-            }
-            if (data.error) {
-                clearErrorMessages();
-                showErrorMessage(data.theme);
-                setErrorState("#change-theme-themes", data.theme);
-            } else if (data.success) {
-                clearErrorMessages();
-                showInfoMessage(i18n.theme.success.replace(/_CODE_/, data.theme), 20000);
-            }
-        },
-        error: function(jqXHR) {
-            $("#change-theme-form").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }
-    });
-}
-
-/**
- * Callback for changing the user's password.
- */
-function changePassword() {
-    $("#change-password-form").block();
-    var data = $("#change-password-form");
-    $("#change-password-form").ajaxSubmit({
-        type: 'POST',
-        url: createLink("user", "changePassword"),
-        dataType: 'json',
-        success: function(data) {
-            $("#change-password-form").unblock();
-            if (handleError(data)) {
-                // TODO: with jquery 1.5 should be handled by status code function
-                return;
-            }
-            if (data.error) {
-                clearErrorMessages();
-                if (data.error != true) {
-                    showErrorMessage(data.error);
-                } else {
-                    showErrorMessage([data.oldPassword, data.newPassword, data.verifyPassword]);
-                }
-                setErrorState("#change-password-old", data.oldPassword);
-                setErrorState("#change-password-new", data.newPassword);
-                setErrorState("#change-password-verify", data.verifyPassword);
-            } else if (data.success) {
-                clearErrorMessages();
-                showInfoMessage(i18n.user.passwordChanged, 20000);
-                setErrorState("#change-password-old");
-                setErrorState("#change-password-new");
-                setErrorState("#change-password-verify");
-                $("#change-password-form input:password").val("");
-            }
-        },
-        error: function(jqXHR) {
-            $("#change-password-form").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }
-    });
-}
-
-/**
- * Callback for editing the user.
- */
-function editUser() {
-    $("#edit-user-form").block();
-    var data = $("#edit-user-form");
-    $("#edit-user-form").ajaxSubmit({
-        type: 'POST',
-        url: createLink("user", "editUser"),
-        dataType: 'json',
-        success: function(data) {
-            $("#edit-user-form").unblock();
-            if (handleError(data)) {
-                // TODO: with jquery 1.5 should be handled by status code function
-                return;
-            }
-            if (data.error) {
-                clearErrorMessages();
-                showErrorMessage([data.username, data.userRealName, data.email]);
-                setErrorState("#edit-user-username", data.username);
-                setErrorState("#edit-user-userrealname", data.userRealName);
-                setErrorState("#edit-user-email", data.email);
-            } else if (data.success) {
-                clearErrorMessages();
-                showInfoMessage(i18n.user.editSuccess, 20000);
-                setErrorState("#edit-user-username");
-                setErrorState("#edit-user-userrealname");
-                setErrorState("#edit-user-email");
-            }
-        },
-        error: function(jqXHR) {
-            $("#edit-user-form").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
-        }
-    });
 }
 
 /**

@@ -3,13 +3,27 @@
  */
 function loadPasswordForgottenCallback() {
     $("#password-forgotten-form div input").button();
-    $("#password-forgotten-form div input:button").click(requestPassword);
+    $("#password-forgotten-form div input:button").click(function() {
+        submitForm($("#password-forgotten-form"), createLink("user", "requestPassword"), requestPasswordCallback);
+    });
     $("#password-forgotten-form table input").keyup(function(event) {
         if (event.keyCode == 13) {
-            requestPassword();
+            submitForm($("#password-forgotten-form"), createLink("user", "requestPassword"), requestPasswordCallback);
         }
     });
     $("#password-forgotten-form").submit(function() { return false; });
+}
+
+/**
+ * Callback for successful form submission to /user/requestPassword/
+ * @param data JSON object returned by server
+ */
+function requestPasswordCallback(data) {
+    if (data.error) {
+        showErrorMessage(data.error);
+    } else if (data.success) {
+        $("#body").html("<p>" + i18n.user.resetPassword.passwordRequested + "</p>");
+    }
 }
 
 /**
@@ -229,8 +243,23 @@ function loadUploadModelCallback() {
  */
 function loadThemeSelectionCallback() {
     $("#change-theme-form input:button").button();
-    $("#change-theme-form input:button").click(changeTheme);
+    $("#change-theme-form input:button").click(function() {
+        submitForm($("#change-theme-form"), createLink("themeing", "save"), changeThemeCallback);
+    });
     $("#change-theme-form").submit(function() { return false; });
+}
+
+/**
+ * Callback for successful form submission to /themeing/save/
+ * @param data JSON object returned by server
+ */
+function changeThemeCallback(data) {
+    if (data.error) {
+        showErrorMessage(data.theme);
+        setErrorState("#change-theme-themes", data.theme);
+    } else if (data.success) {
+        showInfoMessage(i18n.theme.success.replace(/_CODE_/, data.theme), 20000);
+    }
 }
 
 /**
@@ -238,20 +267,65 @@ function loadThemeSelectionCallback() {
  */
 function loadShowUserInfoCallback() {
     $("#body div.ui-dialog-buttonpane input").button();
-    $("#edit-user-form div.ui-dialog-buttonpane input:button").click(editUser);
+    $("#edit-user-form div.ui-dialog-buttonpane input:button").click(function() {
+        submitForm($("#edit-user-form"), createLink("user", "editUser"), editUserInfoCallback);
+    });
     $("#edit-user-form table input").keyup(function(event) {
         if (event.keyCode == 13) {
-            editUser();
+            submitForm($("#edit-user-form"), createLink("user", "editUser"), editUserInfoCallback);
         }
     });
     $("#edit-user-form").submit(function() { return false; });
-    $("#change-password-form div input:button").click(changePassword);
+    $("#change-password-form div input:button").click(function() {
+        submitForm($("#change-password-form"), createLink("user", "changePassword"), changePasswordCallback);
+    });
     $("#change-password-form table input").keyup(function(event) {
         if (event.keyCode == 13) {
-            changePassword();
+            submitForm($("#change-password-form"), createLink("user", "changePassword"), changePasswordCallback);
         }
     });
     $("#change-password-form").submit(function() { return false; });
+}
+
+/**
+ * Callback for successful form submission to /user/editUser/
+ * @param data JSON object returned by server
+ */
+function editUserInfoCallback(data) {
+    if (data.error) {
+        showErrorMessage([data.username, data.userRealName, data.email]);
+        setErrorState("#edit-user-username", data.username);
+        setErrorState("#edit-user-userrealname", data.userRealName);
+        setErrorState("#edit-user-email", data.email);
+    } else if (data.success) {
+        showInfoMessage(i18n.user.editSuccess, 20000);
+        setErrorState("#edit-user-username");
+        setErrorState("#edit-user-userrealname");
+        setErrorState("#edit-user-email");
+    }
+}
+
+/**
+ * Callback for successful form submission to /user/changePassword/
+ * @param data JSON object returned by server
+ */
+function changePasswordCallback(data) {
+    if (data.error) {
+        if (data.error != true) {
+            showErrorMessage(data.error);
+        } else {
+            showErrorMessage([data.oldPassword, data.newPassword, data.verifyPassword]);
+        }
+        setErrorState("#change-password-old", data.oldPassword);
+        setErrorState("#change-password-new", data.newPassword);
+        setErrorState("#change-password-verify", data.verifyPassword);
+    } else if (data.success) {
+        showInfoMessage(i18n.user.passwordChanged, 20000);
+        setErrorState("#change-password-old");
+        setErrorState("#change-password-new");
+        setErrorState("#change-password-verify");
+        $("#change-password-form input:password").val("");
+    }
 }
 
 /**
@@ -259,13 +333,27 @@ function loadShowUserInfoCallback() {
  */
 function loadValidateRegistrationCallback() {
     $("#validate-registration-form div input").button();
-    $("#validate-registration-form div input:button").click(validateRegistration);
+    $("#validate-registration-form div input:button").click(function() {
+        submitForm($("#validate-registration-form"), createLink("register", "validateRegistration"), validateRegistrationCallback);
+    });
     $("#validate-registration-form table input").keyup(function(event) {
         if (event.keyCode == 13) {
-            validateRegistration();
+            submitForm($("#validate-registration-form"), createLink("register", "validateRegistration"), validateRegistrationCallback);
         }
     });
     $("#validate-registration-form").submit(function() { return false; });
+}
+
+/**
+ * Callback for successful form submission to /register/validateRegistration/
+ * @param data JSON object returned by server
+ */
+function validateRegistrationCallback(data) {
+    if (data.error) {
+        showErrorMessage(data.error);
+    } else if (data.success) {
+        $("#body").html("<p>" + i18n.user.register.validate.success + "</p>");
+    }
 }
 
 /**
@@ -273,13 +361,33 @@ function loadValidateRegistrationCallback() {
  */
 function loadResetPasswordCallback() {
     $("#reset-password-form div input").button();
-    $("#reset-password-form div input:button").click(resetPassword);
+    $("#reset-password-form div input:button").click(function() {
+        submitForm($("#reset-password-form"), createLink('user', 'performResetPassword'), resetPasswordCallback);
+    });
     $("#reset-password-form table input").keyup(function(event) {
         if (event.keyCode == 13) {
-            resetPassword();
+            submitForm($("#reset-password-form"), createLink('user', 'performResetPassword'), resetPasswordCallback);
         }
     });
     $("#reset-password-form").submit(function() { return false; });
+}
+
+/**
+ * Callback after sending reset-password-form to /user/performResetPassword/
+ * @param data JSON object returned by server
+ */
+function resetPasswordCallback(data) {
+    if (data.error) {
+        if (data.error != true) {
+            showErrorMessage(data.error);
+        }
+        showErrorMessage([data.username, data.password, data.verifyPassword, data.code]);
+        setErrorState("#reset-password-form-username", data.username);
+        setErrorState("#reset-password-form-password", data.password);
+        setErrorState("#reset-password-form-verifyPassword", data.verifyPassword);
+    } else if (data.success) {
+        showInfoMessage(i18n.user.resetPassword.success, 20000);
+    }
 }
 
 /**
