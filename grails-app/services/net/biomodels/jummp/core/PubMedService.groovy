@@ -4,6 +4,7 @@ import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.model.Author
 import org.xml.sax.SAXParseException
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * @short Service for fetching Publication Information for PubMed resources.
@@ -31,6 +32,7 @@ class PubMedService {
      * @param id The PubMed Identifier
      * @return A fully populated Publication
      */
+    @Transactional
     private Publication fetchPublicationData(String id) throws JummpException {
         URL url
         try {
@@ -111,7 +113,7 @@ class PubMedService {
             author.lastName = authorXml.LastName[0].text()
             author.firstName = authorXml.ForeName[0].text()
             author.initials = authorXml.Initials[0].text()
-            // TODO: try fetching from database
+            author.save()
             publication.addToAuthors(author)
         }
     }
