@@ -1,3 +1,23 @@
+$.jummp = {
+    i18n: {
+        dataTables: {
+            oPaginate: {
+                sFirst:    i18n.dataTables.paginate.first,
+                sLast:     i18n.dataTables.paginate.last,
+                sNext:     i18n.dataTables.paginate.next,
+                sPrevious: i18n.dataTables.paginate.previous
+            },
+            sEmptyTable:   i18n.dataTables.empty,
+            sInfo:         i18n.dataTables.info,
+            sInfoEmpty:    i18n.dataTables.infoEmpty,
+            sInfoFiltered: i18n.dataTables.infoFiltered,
+            sLengthMenu:   i18n.dataTables.lengthMenu,
+            sProcessing:   i18n.dataTables.processing,
+            sSearch:       i18n.dataTables.search,
+            sZeroRecords:  i18n.dataTables.noFilterResults
+        }
+    }
+};
 /**
  * Loads a new view for the #body element through AJAX.
  * @param url The URL from where to load the view

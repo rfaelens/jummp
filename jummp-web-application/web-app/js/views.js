@@ -68,22 +68,7 @@ function loadModelListCallback() {
                 }});
             },
         // i18n
-        oLanguage: {
-            oPaginate: {
-                sFirst:    i18n.dataTables.paginate.first,
-                sLast:     i18n.dataTables.paginate.last,
-                sNext:     i18n.dataTables.paginate.next,
-                sPrevious: i18n.dataTables.paginate.previous
-            },
-            sEmptyTable:   i18n.dataTables.empty,
-            sInfo:         i18n.dataTables.info,
-            sInfoEmpty:    i18n.dataTables.infoEmpty,
-            sInfoFiltered: i18n.dataTables.infoFiltered,
-            sLengthMenu:   i18n.dataTables.lengthMenu,
-            sProcessing:   i18n.dataTables.processing,
-            sSearch:       i18n.dataTables.search,
-            sZeroRecords:  i18n.dataTables.noFilterResults
-        }
+        oLanguage: $.jummp.i18n.dataTables
     });
     $(document).bind("login", function(event) {
         $('#modelTable').dataTable().fnDraw();
@@ -346,21 +331,6 @@ function loadUserListCallback() {
             });
         },
         // i18n
-        oLanguage: {
-            oPaginate: {
-                sFirst:    i18n.dataTables.paginate.first,
-                sLast:     i18n.dataTables.paginate.last,
-                sNext:     i18n.dataTables.paginate.next,
-                sPrevious: i18n.dataTables.paginate.previous
-            },
-            sEmptyTable:   i18n.dataTables.empty,
-            sInfo:         i18n.dataTables.info,
-            sInfoEmpty:    i18n.dataTables.infoEmpty,
-            sInfoFiltered: i18n.dataTables.infoFiltered,
-            sLengthMenu:   i18n.dataTables.lengthMenu,
-            sProcessing:   i18n.dataTables.processing,
-            sSearch:       i18n.dataTables.search,
-            sZeroRecords:  i18n.dataTables.noFilterResults
-        }
+        oLanguage: $.jummp.i18n.dataTables
     });
 }
