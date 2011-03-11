@@ -565,5 +565,4 @@ $(document).ready(function() {
         }
     });
     $("#ajaxLoginForm").submit(function() { return false; });
-    $("#model-upload-form").ajaxForm();
 });
