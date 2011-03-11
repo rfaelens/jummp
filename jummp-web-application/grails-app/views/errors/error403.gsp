@@ -5,15 +5,18 @@
         <title><g:message code="error.403.title"/></title>
     </head>
     <body>
-        <div class="body">
+        <div id="body" class="ui-widget">
             <div id="status-code" style="display: none">403</div>
             <div id="authenticated" style="display: none">${authenticated}</div>
-            <div class="commenthead">
-                <g:message code="error.403.title"/>
-            </div>
-            <div class="commentbody">
-                <g:message code="error.403.explanation"/> 
-            </div>
+            <g:javascript>
+            $(document).ready(function() {
+                showErrorMessage(i18n.error.denied);
+                <g:if test="${!authenticated}">
+                    switchUserInformation(false);
+                    showLoginDialog();
+                </g:if>
+            })
+            </g:javascript>
         </div>
   </body>
 </html>
