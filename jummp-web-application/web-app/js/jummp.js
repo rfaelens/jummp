@@ -783,5 +783,6 @@ $(document).ready(function() {
             authAjax();
         }
     });
+    $("#ajaxLoginForm").submit(function() { return false; });
     $("#model-upload-form").ajaxForm();
 });

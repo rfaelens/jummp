@@ -9,6 +9,7 @@ function loadPasswordForgottenCallback() {
             requestPassword();
         }
     });
+    $("#password-forgotten-form").submit(function() { return false; });
 }
 
 /**
@@ -169,6 +170,7 @@ function loadUploadModelCallback() {
             uploadModel();
         }
     });
+    $("#model-upload-form").submit(function() { return false; });
     $("input:radio[name=publicationType]").change(uploadModelPublicationChangeListener);
     enableElement("#model-upload-publication-month", false);
     enableElement("#model-upload-publication-day", false);
@@ -243,6 +245,7 @@ function loadUploadModelCallback() {
 function loadThemeSelectionCallback() {
     $("#change-theme-form input:button").button();
     $("#change-theme-form input:button").click(changeTheme);
+    $("#change-theme-form").submit(function() { return false; });
 }
 
 /**
@@ -256,12 +259,14 @@ function loadShowUserInfoCallback() {
             editUser();
         }
     });
+    $("#edit-user-form").submit(function() { return false; });
     $("#change-password-form div input:button").click(changePassword);
     $("#change-password-form table input").keyup(function(event) {
         if (event.keyCode == 13) {
             changePassword();
         }
     });
+    $("#change-password-form").submit(function() { return false; });
 }
 
 /**
@@ -275,6 +280,7 @@ function loadValidateRegistrationCallback() {
             validateRegistration();
         }
     });
+    $("#validate-registration-form").submit(function() { return false; });
 }
 
 /**
@@ -288,6 +294,7 @@ function loadResetPasswordCallback() {
             resetPassword();
         }
     });
+    $("#reset-password-form").submit(function() { return false; });
 }
 
 /**
