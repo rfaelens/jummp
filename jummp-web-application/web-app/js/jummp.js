@@ -175,13 +175,13 @@ function register() {
  * Callback for validating a user registration
  */
 function validateRegistration() {
-    $("#validate-registration-from").block();
-    $("#validate-registration-from").ajaxSubmit({
+    $("#validate-registration-form").block();
+    $("#validate-registration-form").ajaxSubmit({
         type: 'POST',
         url: createLink("register", "validateRegistration"),
         dataType: 'json',
         success: function(data) {
-            $("#validate-registration-from").unblock();
+            $("#validate-registration-form").unblock();
             if (handleError(data)) {
                 // TODO: with jquery 1.5 should be handled by status code function
                 return;
@@ -195,7 +195,7 @@ function validateRegistration() {
             }
         },
         error: function(jqXHR) {
-            $("#validate-registration-from").unblock();
+            $("#validate-registration-form").unblock();
             handleError($.parseJSON(jqXHR.responseText));
         }
     });

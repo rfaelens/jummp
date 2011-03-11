@@ -1,6 +1,6 @@
 <h2><g:message code="user.register.validate.ui.title"/></h2>
 <p><g:message code="user.register.validate.ui.explanation"/></p>
-<form action="validateRegistration" method="POST" id="validate-registration-from">
+<form action="validateRegistration" method="POST" id="validate-registration-form" class="ui-widget-content">
     <table>
         <thead></thead>
         <tbody>
