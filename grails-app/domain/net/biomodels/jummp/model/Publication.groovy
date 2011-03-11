@@ -110,12 +110,7 @@ class Publication {
         List<Author> authors = []
         cmd.authors.each {
             Author current = new Author(initials: it.initials, firstName: it.firstName, lastName: it.lastName)
-            Author foundAuthor = Author.find(current)
-            if (foundAuthor) {
-                authors << foundAuthor
-            } else {
-                authors << current
-            }
+            authors << current
         }
         return new Publication(journal: cmd.journal,
                 title: cmd.title,
