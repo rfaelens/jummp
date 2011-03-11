@@ -88,7 +88,7 @@ class Publication {
 
     PublicationTransportCommand toCommandObject() {
         List<AuthorTransportCommand> authorCmds = []
-        authors.each { author ->
+        authors.toList().sort{it.id}.each { author ->
             authorCmds << author.toCommandObject()
         }
         return new PublicationTransportCommand(journal: journal,
