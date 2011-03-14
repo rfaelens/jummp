@@ -30,6 +30,7 @@ function loadView(url, loadCallback, callbackData) {
         url: url,
         dataType: 'HTML',
         type: 'GET',
+        cache: 'false',
         success: function(data) {
             $("#body").unblock();
             clearErrorMessages();
@@ -66,6 +67,7 @@ function submitForm(form, url, callback) {
         type: 'POST',
         url: url,
         dataType: 'json',
+        cache: 'false',
         success: function (data) {
             form.unblock();
             if (handleError(data)) {
@@ -100,6 +102,7 @@ function submitFormWithFile(form, url, callback) {
         // needs to be an iframe as we send a file
         iframe: true,
         dataType: 'json',
+        cache: 'false',
         success: function(data) {
             form.unblock();
             if (handleError(data)) {
@@ -166,6 +169,7 @@ function authAjax() {
         url: createURI("j_spring_security_check"),
         type: 'POST',
         data: $("#ajaxLoginForm").serialize(),
+        cache: 'false',
         success: function(data) {
             if (data.success) {
                 $("#ajaxLoginDialog").dialog('close');
@@ -200,6 +204,7 @@ function showRegisterView() {
     $.ajax({
         url: createLink("register", "index"),
         dataType: "html",
+        cache: 'false',
         success: function(data) {
             $(data).dialog({
                 width: 600, // need a slightly larger dialog
@@ -237,6 +242,7 @@ function register() {
         url: createLink("register", "register"),
         type: 'POST',
         data: $("#registerForm").serialize(),
+        cache: 'false',
         success: function(data) {
             if (data.success) {
                 showInfoMessage(i18n.user.register.success, 20000);
@@ -311,6 +317,7 @@ function changeUser(userId, field, target) {
         url: createLink("userAdministration", target, userId),
         dataType: 'json',
         data: {value: $("#" + field).attr("checked")},
+        cache: 'false',
         success: function(data) {
             $("#userTable").unblock();
             clearErrorMessages();
