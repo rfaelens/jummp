@@ -357,4 +357,51 @@ class SetupControllerTests extends ControllerUnitTestCase {
         cmd.adminAddress = "admin@example.com"
         assertTrue(cmd.validate())
     }
+
+    void testChangePasswordCommand() {
+        mockForConstraintsTests(ChangePasswordCommand)
+        // test for null
+        ChangePasswordCommand cmd = new ChangePasswordCommand()
+        cmd.changePassword = null
+        cmd.resetPassword  = null
+        cmd.senderAddress  = null
+        cmd.subject        = null
+        cmd.body           = null
+        cmd.url            = null
+        assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["senderAddress"])
+        assertEquals("nullable", cmd.errors["subject"])
+        assertEquals("nullable", cmd.errors["body"])
+        assertEquals("nullable", cmd.errors["url"])
+        // now set a minimum for validation
+        cmd.changePassword = true
+        cmd.resetPassword = true
+        cmd.subject = ""
+        cmd.body = ""
+        cmd.url = "test"
+        cmd.senderAddress = "test"
+        // test email and url constraint
+        assertFalse(cmd.validate())
+        assertEquals("email", cmd.errors["senderAddress"])
+        assertEquals("url", cmd.errors["url"])
+        // subject and body should be invalid as they are empty
+        assertEquals("validator", cmd.errors["subject"])
+        assertEquals("validator", cmd.errors["body"])
+        // test validator for email and url
+        cmd.senderAddress = ""
+        cmd.url = ""
+        assertFalse(cmd.validate())
+        assertEquals("validator", cmd.errors["senderAddress"])
+        assertEquals("validator", cmd.errors["url"])
+        // disabling sendEmail should pass validation
+        cmd.resetPassword = false
+        assertTrue(cmd.validate())
+        // enabling so that it validates
+        cmd.changePassword = true
+        cmd.senderAddress = "test@example.com"
+        cmd.subject = "Test"
+        cmd.url = "http://www.example.com"
+        cmd.body = "Body Test"
+        assertTrue(cmd.validate())
+    }
 }

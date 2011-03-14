@@ -42,8 +42,10 @@ class ConfigurationService implements InitializingBean {
      * @param firstRun The First run configuration
      * @param server The Server configuration
      * @param userRegistration the user registration configuration
+     * @param changePassword the change/reset password configuration
      */
-    public void storeConfiguration(MysqlCommand mysql, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun, ServerCommand server, UserRegistrationCommand userRegistration) {
+    public void storeConfiguration(MysqlCommand mysql, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun,
+                                   ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword) {
         Properties properties = new Properties()
         updateMysqlConfiguration(properties, mysql)
         updateLdapConfiguration(properties, ldap)
@@ -52,6 +54,7 @@ class ConfigurationService implements InitializingBean {
         updateFirstRunConfiguration(properties, firstRun)
         updateServerConfiguration(properties, server)
         updateUserRegistrationConfiguration(properties, userRegistration)
+        updateChangePasswordConfiguration(properties, changePassword)
         if (ldap) {
             properties.setProperty("jummp.security.authenticationBackend", "ldap")
         } else {
@@ -145,6 +148,22 @@ class ConfigurationService implements InitializingBean {
     }
 
     /**
+     * Loads the current change/reset password Configuration
+     * @return A command object encapsulating the current change/reset password configuration
+     */
+    public ChangePasswordCommand loadChangePasswordConfiguration() {
+        Properties properties = loadProperties()
+        ChangePasswordCommand cmd = new ChangePasswordCommand()
+        cmd.changePassword = Boolean.parseBoolean(properties.getProperty("jummp.security.ui.changePassword"))
+        cmd.resetPassword  = Boolean.parseBoolean(properties.getProperty("jummp.security.resetPassword.email.send"))
+        cmd.senderAddress  = properties.getProperty("jummp.security.resetPassword.email.sender")
+        cmd.subject        = properties.getProperty("jummp.security.resetPassword.email.subject")
+        cmd.body           = properties.getProperty("jummp.security.resetPassword.email.body")
+        cmd.url            = properties.getProperty("jummp.security.resetPassword.url")
+        return cmd
+    }
+
+    /**
      * Updates the MySQL configuration stored in the properties file.
      * Other settings are not changed!
      * It is important to remember that the settings will only be activated after
@@ -219,6 +238,19 @@ class ConfigurationService implements InitializingBean {
     public void saveUserRegistrationConfiguration(UserRegistrationCommand cmd) {
         Properties properties = loadProperties()
         updateUserRegistrationConfiguration(properties, cmd)
+        saveProperties(properties)
+    }
+
+    /**
+     * Updates the change/reset password settings stored in the properties file.
+     * Other settings are not changed!
+     * It is important to remember that the settings will only be activated after
+     * a restart of the application!
+     * @param cmd The new change/reset password settings
+     */
+    public void saveChangePasswordConfiguration(ChangePasswordCommand cmd) {
+        Properties properties = loadProperties()
+        updateChangePasswordConfiguration(properties, cmd)
         saveProperties(properties)
     }
 
@@ -342,6 +374,27 @@ class ConfigurationService implements InitializingBean {
         properties.setProperty("jummp.security.registration.email.subject", cmd.subject)
         properties.setProperty("jummp.security.registration.email.body", cmd.body)
         properties.setProperty("jummp.security.registration.verificationURL", cmd.url)
+    }
+
+    /**
+     * Updates the @p properties with the settings from @p cmd
+     * @param properties The existing properties
+     * @param cmd The new change/reset password settings
+     */
+    private void updateChangePasswordConfiguration(Properties properties, ChangePasswordCommand cmd) {
+        if (!cmd.validate()) {
+            return
+        }
+        if (!cmd.url.endsWith("/")) {
+            cmd.url = cmd.url + "/"
+        }
+        cmd.url = cmd.url + "user/resetPassword/{{CODE}}"
+        properties.setProperty("jummp.security.ui.changePassword",           cmd.changePassword ? "true" : "false")
+        properties.setProperty("jummp.security.resetPassword.email.send",    cmd.resetPassword ? "true" : "false")
+        properties.setProperty("jummp.security.resetPassword.email.sender",  cmd.senderAddress)
+        properties.setProperty("jummp.security.resetPassword.email.subject", cmd.subject)
+        properties.setProperty("jummp.security.resetPassword.email.body",    cmd.body)
+        properties.setProperty("jummp.security.resetPassword.url",           cmd.url)
     }
 
     /**

@@ -99,8 +99,20 @@ class SetupController {
                 } else {
                     return success()
                 }
-            }.to("server")
+            }.to("changePassword")
             on("back").to("firstRun")
+        }
+
+        changePassword {
+            on("next") { ChangePasswordCommand cmd ->
+                flow.changePassword = cmd
+                if (flow.changePassword.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("server")
+            on("back").to("userRegistration")
         }
 
         server {
@@ -109,11 +121,11 @@ class SetupController {
                 if (flow.server.hasErrors()) {
                     return error()
                 } else {
-                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration)
+                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword)
                     return success()
                 }
             }.to("finish")
-            on("back").to("userRegistration")
+            on("back").to("changePassword")
         }
 
         validateAuthenticationBackend {

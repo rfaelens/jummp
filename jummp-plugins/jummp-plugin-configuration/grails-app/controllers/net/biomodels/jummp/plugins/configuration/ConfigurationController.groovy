@@ -87,9 +87,23 @@ class ConfigurationController {
         if (cmd.hasErrors()) {
             render(view: 'configuration', model: [userRegistration: cmd, title: "User Registration", action: "saveUserRegistration", template: "userRegistration"])
         } else {
-            // TODO: save
             configurationService.saveUserRegistrationConfiguration(cmd)
             render(view: "saved", model: [module: "User Registration"])
+        }
+    }
+
+    def changePassword = {
+        ChangePasswordCommand cmd = configurationService.loadChangePasswordConfiguration()
+        cmd.url = cmd.url.replace("user/resetPassword/{{CODE}}", "")
+        render(view: 'configuration', model: [changePassword: cmd, title: "Change/Reset Password", action: "saveChangePassword", template: "changePassword"])
+    }
+
+    def saveChangePassword = { ChangePasswordCommand cmd ->
+        if (cmd.hasErrors()) {
+            render(view: 'configuration', model: [changePassword: cmd, title: "Change/Reset Password", action: "saveChangePassword", template: "changePassword"])
+        } else {
+            configurationService.saveChangePasswordConfiguration(cmd)
+            render(view: "saved", model: [module: "Change/Reset Password"])
         }
     }
 }

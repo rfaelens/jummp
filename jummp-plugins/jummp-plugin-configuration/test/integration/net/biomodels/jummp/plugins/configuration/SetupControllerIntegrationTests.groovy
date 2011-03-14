@@ -87,7 +87,7 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         signalEvent("next")
         assertCurrentStateEquals("userRegistration")
         assertTrue(getFlowScope().userRegistration.hasErrors())
-        // correct values should transit to server state
+        // correct values should transit to changePassword state
         setupController.params.registration = "false"
         setupController.params.sendEmail = "false"
         setupController.params.subject = ""
@@ -97,6 +97,21 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         setupController.params.adminAddress = ""
         signalEvent("next")
         assertFalse(getFlowScope().userRegistration.hasErrors())
+        assertCurrentStateEquals("changePassword")
+        // incorrect value should fail
+        setupController.params.changePassword = "true"
+        setupController.params.resetPassword = "true"
+        signalEvent("next")
+        assertCurrentStateEquals("changePassword")
+        assertTrue(getFlowScope().changePassword.hasErrors())
+        // correct values should transit to server state
+        setupController.params.changePassword = "false"
+        setupController.params.resetPassword = "false"
+        setupController.params.subject = ""
+        setupController.params.url = ""
+        setupController.params.body = ""
+        setupController.params.senderAddress = ""
+        signalEvent("next")
         assertCurrentStateEquals("server")
         // incorrect value should fail
         setupController.params.url = "test"
@@ -165,6 +180,9 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         // tests that all non-branching states work correctly
         setCurrentState("server")
         assertCurrentStateEquals("server")
+        // go back to changePassword
+        signalEvent("back")
+        assertCurrentStateEquals("changePassword")
         // go back to userRegistration
         signalEvent("back")
         assertCurrentStateEquals("userRegistration")
