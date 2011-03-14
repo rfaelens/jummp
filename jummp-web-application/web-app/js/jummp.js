@@ -157,6 +157,7 @@ function showLoginDialog() {
     $("#ajax_j_password").val("");
     $("#ajaxLoginStatus").hide();
     $('#ajaxLoginDialog').dialog('open');
+    $("#ajax_j_username").focus();
 }
 
 /**
