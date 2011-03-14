@@ -188,6 +188,7 @@ class UserController {
  * @short Command Object to validate the change password fields.
  */
 class ChangePasswordCommand implements Serializable {
+    private static final long serialVersionUID = 1L
     String oldPassword
     String newPassword
     String verifyPassword
@@ -205,6 +206,7 @@ class ChangePasswordCommand implements Serializable {
  * @short Command Object to validate the user before editing.
  */
 class EditUserCommand implements Serializable {
+    private static final long serialVersionUID = 1L
     String username
     String userRealName
     String email
@@ -228,6 +230,7 @@ class EditUserCommand implements Serializable {
  * @short Command Object for resetting a password.
  */
 class ResetPasswordCommand implements Serializable {
+    private static final long serialVersionUID = 1L
     String code
     String username
     String password

@@ -118,6 +118,7 @@ class RegisterController {
  * Command Object to be used in the register action.
  */
 class RegistrationCommand implements Serializable {
+    private static final long serialVersionUID = 1L
     String username
     String password
     String verifyPassword

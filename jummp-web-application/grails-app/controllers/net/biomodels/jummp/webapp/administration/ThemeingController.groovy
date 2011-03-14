@@ -80,6 +80,7 @@ class ThemeingController {
  * Command object for the controller's save action.
  */
 class ThemeSaveCommand implements Serializable {
+    private static final long serialVersionUID = 1L
     String theme
 
     static constraints = {

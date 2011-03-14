@@ -286,6 +286,7 @@ class ModelController {
  * Command Object used by save action
  */
 class UploadCommand implements Serializable {
+    private static final long serialVersionUID = 1L
     MultipartFile model
     String name
     String comment
@@ -491,6 +492,7 @@ class UploadCommand implements Serializable {
  * Command Object used by saveNewRevision action
  */
 class RevisionUploadCommand implements Serializable {
+    private static final long serialVersionUID = 1L
     Long modelId
     MultipartFile model
     String comment
