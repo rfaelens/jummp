@@ -88,13 +88,17 @@ class UserController {
      * Action for requesting a new password
      */
     @Secured('isAnonymous()')
-    def requestPassword = {
+    def requestPassword = { RequestPasswordCommand cmd ->
         def data = [:]
-        try {
-            coreAdapterService.requestPassword(params.username)
-            data.put("success", true)
-        } catch (JummpException e) {
-            data.put("error", g.message(code: "user.resetPassword.error.userNotFound"))
+        if (cmd.hasErrors()) {
+            data.put("error", g.message(code: "user.resetPassword.error.username.blank"))
+        } else {
+            try {
+                coreAdapterService.requestPassword(params.username)
+                data.put("success", true)
+            } catch (JummpException e) {
+                data.put("error", g.message(code: "user.resetPassword.error.userNotFound"))
+            }
         }
         render data as JSON
     }
@@ -223,6 +227,17 @@ class EditUserCommand implements Serializable {
      */
     User toUser() {
         return new User(username: this.username, userRealName: this.userRealName, email: this.email)
+    }
+}
+
+/**
+ * @short Command object for requesting a password
+ */
+class RequestPasswordCommand implements Serializable {
+    String username
+
+    static constraints = {
+        username(nullable: false, blank: false)
     }
 }
 
