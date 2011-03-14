@@ -5,6 +5,7 @@ package net.biomodels.jummp.plugins.configuration
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class LdapCommand implements Serializable {
+    private static final long serialVersionUID = 1L
     String ldapServer
     String ldapManagerDn
     String ldapManagerPassword

@@ -5,6 +5,7 @@ package net.biomodels.jummp.plugins.configuration
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class ServerCommand implements Serializable {
+    private static final long serialVersionUID = 1L
     /**
      *  The server url. It may not be localhost, this fails the validation, though
      * the IP address 127.0.0.1 validates

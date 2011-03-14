@@ -5,6 +5,7 @@ package net.biomodels.jummp.plugins.configuration
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class FirstRunCommand implements Serializable {
+    private static final long serialVersionUID = 1L
     String firstRun
 
     static constraints = {

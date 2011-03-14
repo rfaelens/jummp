@@ -14,6 +14,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class Revision implements Serializable {
+    private static final long serialVersionUID = 1L
     /**
      * The revision belongs to one Model
      */

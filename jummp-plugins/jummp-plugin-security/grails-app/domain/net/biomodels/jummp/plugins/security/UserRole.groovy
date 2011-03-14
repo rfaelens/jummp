@@ -7,6 +7,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder
  * See http://burtbeckwith.github.com/grails-spring-security-core/
  */
 class UserRole implements Serializable {
+    private static final long serialVersionUID = 1L
 
     User user
     Role role
