@@ -28,20 +28,20 @@ class ThemeingController {
     def themes = {
         if (!springSecurityService.isAjax(request)) {
             redirect(controller: "home", params: [redirect: "THEMES"])
-        } else {
-            List<String> themeNames = []
-            File themeDir = new File(ServletContextHolder.servletContext.getRealPath("jquery-ui"))
-            themeDir.listFiles().each { file ->
-                if (file.isDirectory()) {
-                    themeNames << file.name
-                }
-            }
-            String selectedTheme = null
-            if (ConfigurationHolder.config.net.biomodels.jummp.webapp.theme) {
-                selectedTheme = ConfigurationHolder.config.net.biomodels.jummp.webapp.theme
-            }
-            [themes: themeNames, selected: selectedTheme]
+            return
         }
+        List<String> themeNames = []
+        File themeDir = new File(ServletContextHolder.servletContext.getRealPath("jquery-ui"))
+        themeDir.listFiles().each { file ->
+            if (file.isDirectory()) {
+                themeNames << file.name
+            }
+        }
+        String selectedTheme = null
+        if (ConfigurationHolder.config.net.biomodels.jummp.webapp.theme) {
+            selectedTheme = ConfigurationHolder.config.net.biomodels.jummp.webapp.theme
+        }
+        [themes: themeNames, selected: selectedTheme]
     }
 
     /**

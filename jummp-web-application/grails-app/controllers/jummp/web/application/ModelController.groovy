@@ -41,21 +41,21 @@ class ModelController {
     def show = {
         if (!springSecurityService.isAjax(request)) {
             redirect(controller: "home", params: [redirect: "SHOWMODEL", id: params.id])
-        } else {
-            ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
-            RevisionTransportCommand rev = coreAdapterService.getLatestRevision(model)
-            [revision: rev, addRevision: coreAdapterService.canAddRevision(model)]
+            return
         }
+        ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
+        RevisionTransportCommand rev = coreAdapterService.getLatestRevision(model)
+        [revision: rev, addRevision: coreAdapterService.canAddRevision(model)]
     }
 
     def summary = {
         if (!springSecurityService.isAjax(request)) {
             redirect(controller: "home", params: [redirect: "SHOWMODEL", id: params.id])
-        } else {
-            ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
-            RevisionTransportCommand rev = coreAdapterService.getLatestRevision(model)
-            [publication: rev.model.publication, revision: rev]
+            return
         }
+        ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
+        RevisionTransportCommand rev = coreAdapterService.getLatestRevision(model)
+        [publication: rev.model.publication, revision: rev]
     }
 
     /**
@@ -64,10 +64,10 @@ class ModelController {
     def newRevision = {
         if (!springSecurityService.isAjax(request)) {
             redirect(controller: "home", params: [redirect: "ADDREVISION", id: params.id])
-        } else {
-            // TODO: verify that user has write access to the Model
-            [params: params]
+            return
         }
+        // TODO: verify that user has write access to the Model
+        [params: params]
     }
 
     /**
