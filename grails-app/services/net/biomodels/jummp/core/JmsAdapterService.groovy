@@ -13,7 +13,6 @@ import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.plugins.security.SerializableGrailsUser
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
 import org.perf4j.aop.Profiled
-import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand

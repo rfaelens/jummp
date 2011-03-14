@@ -1,7 +1,6 @@
 package net.biomodels.jummp.core
 
 import grails.test.*
-import org.springframework.security.core.AuthenticationException
 import org.springframework.security.authentication.BadCredentialsException
 import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.access.AccessDeniedException

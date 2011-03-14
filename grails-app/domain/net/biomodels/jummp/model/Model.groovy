@@ -2,7 +2,6 @@ package net.biomodels.jummp.model
 
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.core.model.ModelTransportCommand
-import net.biomodels.jummp.core.model.AuthorTransportCommand
 
 /**
  * @short Representation of one Model.
