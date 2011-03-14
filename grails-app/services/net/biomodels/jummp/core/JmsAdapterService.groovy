@@ -44,12 +44,15 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
  */
 class JmsAdapterService {
 
+    @SuppressWarnings("GrailsStatelessService")
     static exposes = ['jms']
+    @SuppressWarnings("GrailsStatelessService")
     static destination = "jummpJms"
     static transactional = false
     /**
      * Dependency injection of authentication Manager
      */
+    @SuppressWarnings("GrailsStatelessService")
     def authenticationManager
     /**
      * Dependency injection of ModelService

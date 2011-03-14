@@ -21,6 +21,7 @@ class JmsSynchronousService {
     static final DEFAULT_JMS_TEMPLATE_BEAN_NAME = "standard"
 
     def jmsService
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
     def send(destination, message, callback) {

@@ -55,6 +55,7 @@ class ModelService {
     /**
      * Dependency Injection for GrailsApplication
      */
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
     /**
      * Dependency Injection for PubMedService
