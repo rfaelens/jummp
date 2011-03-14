@@ -40,9 +40,10 @@ class ConfigurationService implements InitializingBean {
      * @param vcs The Version Control System configuration
      * @param svn The Subversion configuration, may be @c null
      * @param firstRun The First run configuration
-     * @server server The Server configuration
+     * @param server The Server configuration
+     * @param userRegistration the user registration configuration
      */
-    public void storeConfiguration(MysqlCommand mysql, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun, ServerCommand server) {
+    public void storeConfiguration(MysqlCommand mysql, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun, ServerCommand server, UserRegistrationCommand userRegistration) {
         Properties properties = new Properties()
         updateMysqlConfiguration(properties, mysql)
         updateLdapConfiguration(properties, ldap)
@@ -50,6 +51,7 @@ class ConfigurationService implements InitializingBean {
         updateSvnConfiguration(properties, svn)
         updateFirstRunConfiguration(properties, firstRun)
         updateServerConfiguration(properties, server)
+        updateUserRegistrationConfiguration(properties, userRegistration)
         if (ldap) {
             properties.setProperty("jummp.security.authenticationBackend", "ldap")
         } else {
@@ -125,6 +127,24 @@ class ConfigurationService implements InitializingBean {
     }
 
     /**
+     * Loads the current user registration Configuration
+     * @return A command object encapsulating the current user registration configuration
+     */
+    public UserRegistrationCommand loadUserRegistrationConfiguration() {
+        Properties properties = loadProperties()
+        UserRegistrationCommand cmd = new UserRegistrationCommand()
+        cmd.registration  = Boolean.parseBoolean(properties.getProperty("jummp.security.anonymousRegistration"))
+        cmd.sendEmail     = Boolean.parseBoolean(properties.getProperty("jummp.security.registration.email.send"))
+        cmd.sendToAdmin   = Boolean.parseBoolean(properties.getProperty("jummp.security.registration.email.sendToAdmin"))
+        cmd.subject       = properties.getProperty("jummp.security.registration.email.subject")
+        cmd.body          = properties.getProperty("jummp.security.registration.email.body")
+        cmd.url           = properties.getProperty("jummp.security.registration.verificationURL")
+        cmd.senderAddress = properties.getProperty("jummp.security.registration.email.sender")
+        cmd.adminAddress  = properties.getProperty("jummp.security.registration.email.adminAddress")
+        return cmd
+    }
+
+    /**
      * Updates the MySQL configuration stored in the properties file.
      * Other settings are not changed!
      * It is important to remember that the settings will only be activated after
@@ -186,6 +206,19 @@ class ConfigurationService implements InitializingBean {
     public void saveServerConfiguration(ServerCommand server) {
         Properties properties = loadProperties()
         updateServerConfiguration(properties, server)
+        saveProperties(properties)
+    }
+
+    /**
+     * Updates the User registration settings stored in the properties file.
+     * Other settings are not changed!
+     * It is important to remember that the settings will only be activated after
+     * a restart of the application!
+     * @param cmd The new User Registration settings
+     */
+    public void saveUserRegistrationConfiguration(UserRegistrationCommand cmd) {
+        Properties properties = loadProperties()
+        updateUserRegistrationConfiguration(properties, cmd)
         saveProperties(properties)
     }
 
@@ -286,6 +319,29 @@ class ConfigurationService implements InitializingBean {
             return
         }
         properties.setProperty("jummp.server.url", server.url)
+    }
+
+    /**
+     * Updates the @p properties with the settings from @p cmd
+     * @param properties The existing properties
+     * @param cmd The new user registration settings
+     */
+    private void updateUserRegistrationConfiguration(Properties properties, UserRegistrationCommand cmd) {
+        if (!cmd.validate()) {
+            return
+        }
+        if (!cmd.url.endsWith("/")) {
+            cmd.url = cmd.url + "/"
+        }
+        cmd.url = cmd.url + "register/validate/{{CODE}}"
+        properties.setProperty("jummp.security.anonymousRegistration", cmd.registration ? "true" : "false")
+        properties.setProperty("jummp.security.registration.email.send", cmd.sendEmail ? "true" : "false")
+        properties.setProperty("jummp.security.registration.email.sendToAdmin", cmd.sendToAdmin ? "true" : "false")
+        properties.setProperty("jummp.security.registration.email.sender", cmd.senderAddress)
+        properties.setProperty("jummp.security.registration.email.adminAddress", cmd.adminAddress)
+        properties.setProperty("jummp.security.registration.email.subject", cmd.subject)
+        properties.setProperty("jummp.security.registration.email.body", cmd.body)
+        properties.setProperty("jummp.security.registration.verificationURL", cmd.url)
     }
 
     /**

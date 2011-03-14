@@ -295,4 +295,66 @@ class SetupControllerTests extends ControllerUnitTestCase {
         assertTrue(cmd.validate())
 
     }
+
+    void testUserRegistrationCommand() {
+        mockForConstraintsTests(UserRegistrationCommand)
+        // test for null
+        UserRegistrationCommand cmd = new UserRegistrationCommand()
+        cmd.registration  = null
+        cmd.sendEmail     = null
+        cmd.sendToAdmin   = null
+        cmd.senderAddress = null
+        cmd.adminAddress  = null
+        cmd.subject       = null
+        cmd.body          = null
+        cmd.url           = null
+        assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["senderAddress"])
+        assertEquals("nullable", cmd.errors["adminAddress"])
+        assertEquals("nullable", cmd.errors["subject"])
+        assertEquals("nullable", cmd.errors["body"])
+        assertEquals("nullable", cmd.errors["url"])
+        // now set a minimum for validation
+        cmd.registration = true
+        cmd.sendEmail = true
+        cmd.sendToAdmin = true
+        cmd.subject = ""
+        cmd.body = ""
+        cmd.url = "test"
+        cmd.senderAddress = "test"
+        cmd.adminAddress = "test"
+        // test email and url constraint
+        assertFalse(cmd.validate())
+        assertEquals("email", cmd.errors["senderAddress"])
+        assertEquals("email", cmd.errors["adminAddress"])
+        assertEquals("url", cmd.errors["url"])
+        // subject and body should be invalid as they are empty
+        assertEquals("validator", cmd.errors["subject"])
+        assertEquals("validator", cmd.errors["body"])
+        // test validator for email and url
+        cmd.senderAddress = ""
+        cmd.adminAddress = ""
+        cmd.url = ""
+        assertFalse(cmd.validate())
+        assertEquals("validator", cmd.errors["senderAddress"])
+        assertEquals("validator", cmd.errors["adminAddress"])
+        assertEquals("validator", cmd.errors["url"])
+        // disabling sendEmail should pass validation
+        cmd.sendEmail = false
+        assertTrue(cmd.validate())
+        // enabling sendEmail but disabling sendToAdmin should ignore adminAddress
+        cmd.sendEmail = true
+        cmd.sendToAdmin = false
+        cmd.senderAddress = "test@example.com"
+        cmd.subject = "Test"
+        cmd.url = "http://www.example.com"
+        cmd.body = "Body Test"
+        assertTrue(cmd.validate())
+        // just to be sure
+        cmd.sendToAdmin = true
+        assertFalse(cmd.validate())
+        // set the admin address
+        cmd.adminAddress = "admin@example.com"
+        assertTrue(cmd.validate())
+    }
 }

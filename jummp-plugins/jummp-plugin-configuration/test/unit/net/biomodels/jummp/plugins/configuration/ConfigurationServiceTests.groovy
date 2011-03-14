@@ -309,6 +309,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         mockForConstraintsTests(SvnCommand)
         mockForConstraintsTests(VcsCommand)
         mockForConstraintsTests(ServerCommand)
+        mockForConstraintsTests(UserRegistrationCommand)
         // set a file to use
         service.configurationFile = new File("target/jummpProperties")
         service.configurationFile.delete()
@@ -343,12 +344,22 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         ServerCommand server = new ServerCommand()
         server.url = "http://127.0.0.1:8080/jummp/"
         assertTrue(server.validate())
+        UserRegistrationCommand userRegistration = new UserRegistrationCommand()
+        userRegistration.registration = true
+        userRegistration.sendEmail = true
+        userRegistration.sendToAdmin = true
+        userRegistration.senderAddress = "test@example.com"
+        userRegistration.adminAddress = "admin@example.com"
+        userRegistration.url = "http://www.example.com"
+        userRegistration.body = "This is the mail body"
+        userRegistration.subject = "This is the subject"
+        assertTrue(userRegistration.validate())
 
         // everything should be written to the properties file
-        service.storeConfiguration(mysql, ldap, vcs, svn, firstRun, server)
+        service.storeConfiguration(mysql, ldap, vcs, svn, firstRun, server, userRegistration)
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(19, properties.size())
+        assertEquals(27, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -379,7 +390,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         vcs.vcs = "git"
         assertTrue(vcs.validate())
 
-        service.storeConfiguration(mysql, null, vcs, null, firstRun, server)
+        service.storeConfiguration(mysql, null, vcs, null, firstRun, server, userRegistration)
         properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
         assertEquals(12, properties.size())
@@ -405,6 +416,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         mockForConstraintsTests(SvnCommand)
         mockForConstraintsTests(VcsCommand)
         mockForConstraintsTests(ServerCommand)
+        mockForConstraintsTests(UserRegistrationCommand)
         populateProperties(service)
 
         // now load the data from the service
@@ -433,7 +445,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(19, properties.size())
+        assertEquals(27, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -458,6 +470,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         mockForConstraintsTests(SvnCommand)
         mockForConstraintsTests(VcsCommand)
         mockForConstraintsTests(ServerCommand)
+        mockForConstraintsTests(UserRegistrationCommand)
         populateProperties(service)
         // Load the data from properties
         LdapCommand ldap = service.loadLdapConfiguration()
@@ -487,7 +500,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(19, properties.size())
+        assertEquals(27, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -510,6 +523,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         mockForConstraintsTests(SvnCommand)
         mockForConstraintsTests(VcsCommand)
         mockForConstraintsTests(ServerCommand)
+        mockForConstraintsTests(UserRegistrationCommand)
         populateProperties(service)
         // verify svn configuration
         SvnCommand svn = service.loadSvnConfiguration()
@@ -524,7 +538,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(19, properties.size())
+        assertEquals(27, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
         assertEquals("",           properties.getProperty("jummp.vcs.exchangeDirectory"))
@@ -553,6 +567,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         mockForConstraintsTests(SvnCommand)
         mockForConstraintsTests(VcsCommand)
         mockForConstraintsTests(ServerCommand)
+        mockForConstraintsTests(UserRegistrationCommand)
         populateProperties(service)
         // verify the configuration
         VcsCommand vcs = service.loadVcsConfiguration()
@@ -573,7 +588,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(19, properties.size())
+        assertEquals(27, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("ldap",     properties.getProperty("jummp.security.authenticationBackend"))
@@ -600,6 +615,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         mockForConstraintsTests(SvnCommand)
         mockForConstraintsTests(VcsCommand)
         mockForConstraintsTests(ServerCommand)
+        mockForConstraintsTests(UserRegistrationCommand)
         populateProperties(service)
         // verify the configuration
         ServerCommand server = service.loadServerConfiguration()
@@ -614,7 +630,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // verify that other configuration options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(19, properties.size())
+        assertEquals(27, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -669,12 +685,22 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         ServerCommand server = new ServerCommand()
         server.url = "http://127.0.0.1:8080/jummp/"
         assertTrue(server.validate())
+        UserRegistrationCommand userRegistration = new UserRegistrationCommand()
+        userRegistration.registration = true
+        userRegistration.sendEmail = true
+        userRegistration.sendToAdmin = true
+        userRegistration.senderAddress = "test@example.com"
+        userRegistration.adminAddress = "admin@example.com"
+        userRegistration.url = "http://www.example.com"
+        userRegistration.body = "This is the mail body"
+        userRegistration.subject = "This is the subject"
+        assertTrue(userRegistration.validate())
 
         // everything should be written to the properties file
-        service.storeConfiguration(mysql, ldap, vcs, svn, firstRun, server)
+        service.storeConfiguration(mysql, ldap, vcs, svn, firstRun, server, userRegistration)
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(19, properties.size())
+        assertEquals(27, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -694,5 +720,13 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("user",      properties.getProperty("jummp.database.username"))
         assertEquals("pass",      properties.getProperty("jummp.database.password"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
+        assertEquals("true",                  properties.getProperty("jummp.security.anonymousRegistration"))
+        assertEquals("true",                  properties.getProperty("jummp.security.registration.email.send"))
+        assertEquals("true",                  properties.getProperty("jummp.security.registration.email.sendToAdmin"))
+        assertEquals("test@example.com",      properties.getProperty("jummp.security.registration.email.sender"))
+        assertEquals("admin@example.com",     properties.getProperty("jummp.security.registration.email.adminAddress"))
+        assertEquals("This is the mail body", properties.getProperty("jummp.security.registration.email.body"))
+        assertEquals("This is the subject",   properties.getProperty("jummp.security.registration.email.subject"))
+        assertEquals("http://www.example.com/register/validate/{{CODE}}", properties.getProperty("jummp.security.registration.verificationURL"))
     }
 }

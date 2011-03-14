@@ -87,8 +87,20 @@ class SetupController {
                 } else {
                     return success()
                 }
-            }.to("server")
+            }.to("userRegistration")
             on("back").to("decideBackFromFirstRun")
+        }
+
+        userRegistration {
+            on("next") { UserRegistrationCommand cmd ->
+                flow.userRegistration = cmd
+                if (flow.userRegistration.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("server")
+            on("back").to("firstRun")
         }
 
         server {
@@ -97,11 +109,11 @@ class SetupController {
                 if (flow.server.hasErrors()) {
                     return error()
                 } else {
-                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server)
+                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration)
                     return success()
                 }
             }.to("finish")
-            on("back").to("firstRun")
+            on("back").to("userRegistration")
         }
 
         validateAuthenticationBackend {

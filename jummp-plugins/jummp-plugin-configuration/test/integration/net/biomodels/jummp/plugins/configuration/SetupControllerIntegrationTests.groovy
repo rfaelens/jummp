@@ -77,9 +77,26 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         signalEvent("next")
         assertCurrentStateEquals("firstRun")
         assertTrue(getFlowScope().firstRun.hasErrors())
-        // correct value should transit to server
+        // correct value should transit to userRegistration
         setupController.params.firstRun = "true"
         signalEvent("next")
+        assertCurrentStateEquals("userRegistration")
+        // incorrect value should fail
+        setupController.params.sendEmail = "true"
+        setupController.params.senderAddress = "test"
+        signalEvent("next")
+        assertCurrentStateEquals("userRegistration")
+        assertTrue(getFlowScope().userRegistration.hasErrors())
+        // correct values should transit to server state
+        setupController.params.registration = "false"
+        setupController.params.sendEmail = "false"
+        setupController.params.subject = ""
+        setupController.params.url = ""
+        setupController.params.body = ""
+        setupController.params.senderAddress = ""
+        setupController.params.adminAddress = ""
+        signalEvent("next")
+        assertFalse(getFlowScope().userRegistration.hasErrors())
         assertCurrentStateEquals("server")
         // incorrect value should fail
         setupController.params.url = "test"
@@ -148,6 +165,9 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         // tests that all non-branching states work correctly
         setCurrentState("server")
         assertCurrentStateEquals("server")
+        // go back to userRegistration
+        signalEvent("back")
+        assertCurrentStateEquals("userRegistration")
         // go back to firstRun
         signalEvent("back")
         assertCurrentStateEquals("firstRun")

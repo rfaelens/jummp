@@ -76,4 +76,20 @@ class ConfigurationController {
             render(view: "saved", model: [module: "Server"])
         }
     }
+
+    def userRegistration = {
+        UserRegistrationCommand cmd = configurationService.loadUserRegistrationConfiguration()
+        cmd.url = cmd.url.replace("register/validate/{{CODE}}", "")
+        render(view: 'configuration', model: [userRegistration: cmd, title: "User Registration", action: "saveUserRegistration", template: "userRegistration"])
+    }
+
+    def saveUserRegistration = { UserRegistrationCommand cmd ->
+        if (cmd.hasErrors()) {
+            render(view: 'configuration', model: [userRegistration: cmd, title: "User Registration", action: "saveUserRegistration", template: "userRegistration"])
+        } else {
+            // TODO: save
+            configurationService.saveUserRegistrationConfiguration(cmd)
+            render(view: "saved", model: [module: "User Registration"])
+        }
+    }
 }
