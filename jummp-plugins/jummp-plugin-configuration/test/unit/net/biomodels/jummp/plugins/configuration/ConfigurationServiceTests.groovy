@@ -310,10 +310,10 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         mockForConstraintsTests(VcsCommand)
         mockForConstraintsTests(ServerCommand)
         // set a file to use
-        service.configurationFile = new File("target/immunoblotProperties")
+        service.configurationFile = new File("target/jummpProperties")
         service.configurationFile.delete()
         service.afterPropertiesSet()
-        assertEquals(new File("target/immunoblotProperties"), service.configurationFile)
+        assertEquals(new File("target/jummpProperties"), service.configurationFile)
         MysqlCommand mysql = new MysqlCommand()
         mysql.database = "jummp"
         mysql.server   = "localhost"
@@ -347,7 +347,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // everything should be written to the properties file
         service.storeConfiguration(mysql, ldap, vcs, svn, firstRun, server)
         Properties properties = new Properties()
-        properties.load(new FileInputStream("target/immunoblotProperties"))
+        properties.load(new FileInputStream("target/jummpProperties"))
         assertEquals(19, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
@@ -381,7 +381,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
 
         service.storeConfiguration(mysql, null, vcs, null, firstRun, server)
         properties = new Properties()
-        properties.load(new FileInputStream("target/immunoblotProperties"))
+        properties.load(new FileInputStream("target/jummpProperties"))
         assertEquals(12, properties.size())
         assertEquals("true",      properties.getProperty("jummp.firstRun"))
         assertEquals("target",    properties.getProperty("jummp.vcs.workingDirectory"))
@@ -432,7 +432,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("secret",   config.password)
         // verify that other config options are unchanged
         Properties properties = new Properties()
-        properties.load(new FileInputStream("target/immunoblotProperties"))
+        properties.load(new FileInputStream("target/jummpProperties"))
         assertEquals(19, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
@@ -486,7 +486,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("localhost", ldap2.ldapServer)
         // verify that other config options are unchanged
         Properties properties = new Properties()
-        properties.load(new FileInputStream("target/immunoblotProperties"))
+        properties.load(new FileInputStream("target/jummpProperties"))
         assertEquals(19, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
@@ -523,7 +523,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("/tmp", svn2.localRepository)
         // verify that other config options are unchanged
         Properties properties = new Properties()
-        properties.load(new FileInputStream("target/immunoblotProperties"))
+        properties.load(new FileInputStream("target/jummpProperties"))
         assertEquals(19, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -572,7 +572,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("target", vcs2.workingDirectory)
         // verify that other config options are unchanged
         Properties properties = new Properties()
-        properties.load(new FileInputStream("target/immunoblotProperties"))
+        properties.load(new FileInputStream("target/jummpProperties"))
         assertEquals(19, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
@@ -613,7 +613,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("https://www.example.com/", server2.url)
         // verify that other configuration options are unchanged
         Properties properties = new Properties()
-        properties.load(new FileInputStream("target/immunoblotProperties"))
+        properties.load(new FileInputStream("target/jummpProperties"))
         assertEquals(19, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
@@ -636,10 +636,10 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
     }
 
     private void populateProperties(ConfigurationService service) {
-        service.configurationFile = new File("target/immunoblotProperties")
+        service.configurationFile = new File("target/jummpProperties")
         service.configurationFile.delete()
         service.afterPropertiesSet()
-        assertEquals(new File("target/immunoblotProperties"), service.configurationFile)
+        assertEquals(new File("target/jummpProperties"), service.configurationFile)
         MysqlCommand mysql = new MysqlCommand()
         mysql.database = "jummp"
         mysql.server   = "localhost"
@@ -673,7 +673,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // everything should be written to the properties file
         service.storeConfiguration(mysql, ldap, vcs, svn, firstRun, server)
         Properties properties = new Properties()
-        properties.load(new FileInputStream("target/immunoblotProperties"))
+        properties.load(new FileInputStream("target/jummpProperties"))
         assertEquals(19, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
