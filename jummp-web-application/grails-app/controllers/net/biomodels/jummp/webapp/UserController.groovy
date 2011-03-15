@@ -17,7 +17,7 @@ import net.biomodels.jummp.core.JummpException
  */
 @Secured('ROLE_USER')
 class UserController {
-    def coreAdapterService
+    def userAdapterService
     def springSecurityService
 
     /**
@@ -27,7 +27,7 @@ class UserController {
         if (!springSecurityService.isAjax(request)) {
             redirect(controller: "home", params: [redirect: "USER"])
         }
-        [user: coreAdapterService.getCurrentUser(), changePassword: ConfigurationHolder.config.jummpCore.security.ui.changePassword]
+        [user: userAdapterService.getCurrentUser(), changePassword: ConfigurationHolder.config.jummpCore.security.ui.changePassword]
     }
 
     /**
@@ -47,7 +47,7 @@ class UserController {
             data.put("verifyPassword", resolveErrorMessage(cmd, "verifyPassword", "Password Verification"))
         } else {
             try {
-                coreAdapterService.changePassword(cmd.oldPassword, cmd.newPassword)
+                userAdapterService.changePassword(cmd.oldPassword, cmd.newPassword)
                 data.put("success", true)
             } catch (BadCredentialsException e) {
                 data.put("error", true)
@@ -68,7 +68,7 @@ class UserController {
             data.put("userRealName", resolveErrorMessage(cmd, "userRealName", "Name"))
             data.put("email", resolveErrorMessage(cmd, "email", "Email"))
         } else {
-            coreAdapterService.editUser(cmd.toUser())
+            userAdapterService.editUser(cmd.toUser())
             data.put("success", true)
         }
         render data as JSON
@@ -94,7 +94,7 @@ class UserController {
             data.put("error", g.message(code: "user.resetPassword.error.username.blank"))
         } else {
             try {
-                coreAdapterService.requestPassword(params.username)
+                userAdapterService.requestPassword(params.username)
                 data.put("success", true)
             } catch (JummpException e) {
                 data.put("error", g.message(code: "user.resetPassword.error.userNotFound"))
@@ -128,7 +128,7 @@ class UserController {
             data.put("code", resolveErrorMessage(cmd, "code", "Reset Password Code"))
         } else {
             try {
-                coreAdapterService.resetPassword(cmd.code, cmd.username, cmd.password)
+                userAdapterService.resetPassword(cmd.code, cmd.username, cmd.password)
                 data.put("success", true)
             } catch (JummpException e) {
                 data.put("error", e.message)

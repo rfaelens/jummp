@@ -16,9 +16,9 @@ import org.springframework.security.access.AccessDeniedException
 @Secured(["isAnonymous()"])
 class RegisterController {
     /**
-     * Dependency injection of core adapter Service
+     * Dependency injection of user adapter Service
      */
-    def coreAdapterService
+    def userAdapterService
     /**
      * Dependency injection of spring security service
      */
@@ -58,7 +58,7 @@ class RegisterController {
             data.put("userRealName", resolveErrorMessage(cmd, "userRealName", "Name"))
         } else {
             try {
-                coreAdapterService.register(cmd.toUser())
+                userAdapterService.register(cmd.toUser())
                 data.put("success", true)
             } catch (JummpException e) {
                 data.clear()
@@ -82,7 +82,7 @@ class RegisterController {
     def validateRegistration = {
         def data = [:]
         try {
-            coreAdapterService.validateRegistration(params.username, params.code)
+            userAdapterService.validateRegistration(params.username, params.code)
             data.put("success", true)
         } catch (JummpException e) {
             data.put("error", e.message)

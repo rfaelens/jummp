@@ -1,5 +1,6 @@
 package net.biomodels.jummp.plugins.jms
 
+import org.springframework.beans.factory.InitializingBean
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
@@ -10,9 +11,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.PublicationTransportCommand
-import net.biomodels.jummp.plugins.security.User
 import org.perf4j.aop.Profiled
-import org.springframework.security.authentication.BadCredentialsException
 
 /**
  * @short Service connecting to the core via synchronous JMS.
@@ -31,10 +30,15 @@ import org.springframework.security.authentication.BadCredentialsException
  * business logic is used).
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class CoreAdapterService {
+class CoreAdapterService implements InitializingBean {
     def jmsSynchronousService
 
     static transactional = false
+    protected String adapterServiceName = null
+
+    void afterPropertiesSet() {
+        adapterServiceName = "jmsAdapter"
+    }
 
     /**
      * Retrieves the externalized configuration of the core application.
@@ -300,166 +304,6 @@ class CoreAdapterService {
     }
 
     /**
-     * Changes the password of the currently logged in user.
-     * @param oldPassword The old password for verification
-     * @param newPassword The new password to be used
-     * @throws BadCredentialsException if @p oldPassword is incorrect
-     * @todo Maybe better in an own service?
-     */
-    @Profiled(tag="coreAdapterService.changePassword")
-    public void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {
-        validateReturnValue(send("changePassword", [oldPassword, newPassword]), Boolean)
-    }
-
-    /**
-     * Edit the non-security related parts of a user.
-     * @param user The User with the updated fields
-     */
-    @Profiled(tag="coreAdapterService.editUser")
-    public void editUser(User user) {
-        validateReturnValue(send("editUser", user), Boolean)
-    }
-
-    /**
-     *
-     * @return The current (security sanitized) user
-     */
-    @Profiled(tag="coreAdapterService.getCurrentUser")
-    public User getCurrentUser() {
-        def retVal = send("getCurrentUser")
-        validateReturnValue(retVal, User)
-        return (User)retVal
-    }
-
-    /**
-     * Retrieves a User object for the given @p username.
-     * @param username The login identifier of the user to be retrieved
-     * @returnThe (security sanitized) user
-     * @throws IllegalArgumentException Thrown if there is no User for @p username
-     */
-    @Profiled(tag="coreAdapterService.getUser")
-    public User getUser(String username) throws IllegalArgumentException {
-        def retVal = send("getUser", username)
-        validateReturnValue(retVal, User)
-        return (User)retVal
-    }
-
-    /**
-     * Retrieves list of users.
-     * This method is only for administrative purpose. It does not sanitize the
-     * returned Users, that is it includes all (also security relevant) elements.
-     * The method only exists in a paginated version
-     * @param offset Offset in the list
-     * @param count Number of Users to return, Maximum is 100
-     * @return List of Users ordered by Id
-     */
-    @Profiled(tag="coreAdapterService.getUser")
-    public List<User> getAllUsers(Integer offset, Integer count) {
-        def retVal = send("getAllUsers", [offset, count])
-        validateReturnValue(retVal, List)
-        return (List<User>)retVal
-    }
-
-    /**
-     * Enables/Disables the user identified by @p userId
-     * @param userId The unique id of the user
-     * @param enable if @c true the user is enabled, if @c false the user is disabled
-     * @return @c true, if the enable state was changed, @c false if the user was already in @p enable state
-     * @throws IllegalArgumentException If the user specified by @p userId does not exist
-     */
-    @Profiled(tag="coreAdapterService.enableUser")
-    Boolean enableUser(Long userId, Boolean enable) throws IllegalArgumentException {
-        def retVal = send("enableUser", [userId, enable])
-        validateReturnValue(retVal, Boolean)
-        return (Boolean)retVal
-    }
-
-    /**
-     * (Un)Locks the account for user identified by @p userId
-     * @param userId The unique id of the user
-     * @param lock if @c true the account is locked, if @c false the account is unlocked
-     * @return @c true, if the account locked state was changed, @c false if the user was already in @p lock state
-     * @throws IllegalArgumentException If the user specified by @p userId does not exist
-     */
-    @Profiled(tag="coreAdapterService.lockAccount")
-    Boolean lockAccount(Long userId, Boolean lock) throws IllegalArgumentException {
-        def retVal = send("lockAccount", [userId, lock])
-        validateReturnValue(retVal, Boolean)
-        return (Boolean)retVal
-    }
-
-    /**
-     * (Un)Expires the account for user identified by @p userId
-     * @param userId The unique id of the user
-     * @param expire if @c true the account is expired, if @c false the account is un-expired
-     * @return @c true, if the account expired state was changed, @c false if the user was already in @p expire state
-     * @throws IllegalArgumentException If the user specified by @p userId does not exist
-     */
-    @Profiled(tag="coreAdapterService.expireAccount")
-    Boolean expireAccount(Long userId, Boolean expire) throws IllegalArgumentException {
-        def retVal = send("expireAccount", [userId, expire])
-        validateReturnValue(retVal, Boolean)
-        return (Boolean)retVal
-    }
-
-    /**
-     * (Un)Expires the password for user identified by @p userId
-     * @param userId The unique id of the user
-     * @param expire if @c true the password is expired, if @c false the password is un-expired
-     * @return @c true, if the password expired state was changed, @c false if the password was already in @p expire state
-     * @throws IllegalArgumentException If the user specified by @p userId does not exist
-     */
-    @Profiled(tag="coreAdapterService.expirePassword")
-    Boolean expirePassword(Long userId, Boolean expire) throws IllegalArgumentException {
-        def retVal = send("expirePassword", [userId, expire])
-        validateReturnValue(retVal, Boolean)
-        return (Boolean)retVal
-    }
-
-    /**
-     * Registers a new User.
-     * @param user The new User to register
-     * @throws JummpException Thrown in case the user could not be registered
-     */
-    @Profiled(tag="coreAdapterService.register")
-    void register(User user) throws JummpException {
-        validateReturnValue(send("register", user), Boolean)
-    }
-
-    /**
-     * Validates the registration code of a new user.
-     * @param username The name of the new user
-     * @param code The validation code
-     * @throws JummpException Thrown in case that the validation cannot be performed
-     */
-    @Profiled(tag="coreAdapterService.register")
-    void validateRegistration(String username, String code) throws JummpException {
-        validateReturnValue(send("validateRegistration", [username, code]), Boolean)
-    }
-
-    /**
-     * Request a new password for user identified by @p username.
-     * @param username The login id of the user whose password should be reset.
-     * @throws JummpException Thrown if there is no user with @p username
-     */
-    @Profiled(tag="coreAdapterService.requestPassword")
-    void requestPassword(String username) throws JummpException {
-        validateReturnValue(send("requestPassword", username), Boolean)
-    }
-
-    /**
-     * Resets the Password of the user.
-     * @param code The Password Reset Code
-     * @param username The Login Id of the User
-     * @param password The new Password
-     * @throws JummpException Thrown in case user is not found or the code is not valid
-     */
-    @Profiled(tag="coreAdapterService.resetPassword")
-    void resetPassword(String code, String username, String password) throws JummpException {
-        validateReturnValue(send("resetPassword", [code, username, password]), Boolean)
-    }
-
-    /**
      * Validates the @p retVal. In case of a @c null value an JummpException is thrown, in case the
      * value is an Exception itself, the Exception gets re-thrown, in case the value is not an instance
      * of @p expectedType an JummpException is thrown.
@@ -467,7 +311,7 @@ class CoreAdapterService {
      * @param expectedType The expected type of the value
      * @throws JummpException In case of @p retVal being @c null or not the expected type
      */
-    private void validateReturnValue(def retVal, Class expectedType) throws JummpException {
+    protected void validateReturnValue(def retVal, Class expectedType) throws JummpException {
         if (retVal == null) {
             log.error("Received null value from core.")
             throw new JummpException("Received a null value from core")
@@ -485,7 +329,7 @@ class CoreAdapterService {
      * @param method  The name of the method to invoke
      * @return Whatever the core returns
      */
-    private def send(String method) {
+    protected def send(String method) {
         return send(method, null, true)
     }
 
@@ -495,7 +339,7 @@ class CoreAdapterService {
      * @param message The arguments which are expected
      * @return Whatever the core returns
      */
-    private def send(String method, def message) {
+    protected def send(String method, def message) {
         return send(method, message, true)
     }
 
@@ -506,7 +350,7 @@ class CoreAdapterService {
      * @param authenticated Whether the Authentication should be prepended to the message
      * @return Whatever the core returns
      */
-    private def send(String method, def message, boolean authenticated) {
+    protected def send(String method, def message, boolean authenticated) {
         if (authenticated && message) {
             Authentication auth = SecurityContextHolder.context.authentication
             if (message instanceof List) {
@@ -517,6 +361,6 @@ class CoreAdapterService {
         } else if (authenticated && !message) {
             message = SecurityContextHolder.context.authentication
         }
-        return jmsSynchronousService.send([app: "jummp", service: "jmsAdapter", method: method],message, [service: "jmsAdapter", method: "${method}.response"])
+        return jmsSynchronousService.send([app: "jummp", service: adapterServiceName, method: method],message, [service: adapterServiceName, method: "${method}.response"])
     }
 }
