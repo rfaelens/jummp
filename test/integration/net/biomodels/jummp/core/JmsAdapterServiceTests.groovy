@@ -44,21 +44,21 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
 
     void testAuthenticate() {
         // test wrong parameter
-        def illegalArgumentException = send("authenticate", "test")
+        def illegalArgumentException = send2("authenticate", "test")
         assertNotNull(illegalArgumentException)
         assertTrue(illegalArgumentException instanceof IllegalArgumentException)
         // test an invalid authentication
-        def exception = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "wrongpassword"))
+        def exception = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "wrongpassword"))
         assertNotNull(exception)
         assertTrue(exception instanceof AuthenticationException)
         assertTrue(exception instanceof BadCredentialsException)
         // test not existing user
-        def exception2 = send("authenticate", new UsernamePasswordAuthenticationToken("foo", ""))
+        def exception2 = send2("authenticate", new UsernamePasswordAuthenticationToken("foo", ""))
         assertNotNull(exception2)
         assertTrue(exception2 instanceof AuthenticationException)
         assertTrue(exception2 instanceof BadCredentialsException)
         // test a valid authentication
-        def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        def auth = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         assertNotNull(auth)
         assertTrue(auth instanceof Authentication)
         assertTrue(auth.isAuthenticated())
@@ -89,7 +89,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(returnList instanceof List)
         assertTrue(returnList.isEmpty())
         // authenticate as testuser
-        def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         assertNotNull(auth2)
         assertTrue(auth2 instanceof Authentication)
         assertTrue(auth2.isAuthenticated())
@@ -111,7 +111,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(returnList[0] instanceof ModelTransportCommand)
         assertEquals(model.id, returnList[0].id)
         // switch to user
-        def auth3 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth3 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
         assertNotNull(auth3)
         assertTrue(auth3 instanceof Authentication)
         assertTrue(auth3.isAuthenticated())
@@ -131,7 +131,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // first test without authentication
         assertTrue(send("getModelCount", "test") instanceof IllegalArgumentException)
         // create an authentication
-        def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        def auth = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
         def result = send("getModelCount", auth)
         assertTrue(result instanceof Integer)
@@ -155,7 +155,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         result = send("getModelCount", auth)
         assertTrue(result instanceof Integer)
         assertEquals(1, result)
-        auth = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        auth = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
         result = send("getModelCount", auth)
         assertTrue(result instanceof Integer)
         assertEquals(0, result)
@@ -165,7 +165,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // first test a completely invalid variant
         assertTrue(send("getLatestRevision", "test") instanceof IllegalArgumentException)
         // create an authentication
-        def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        def auth = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
@@ -189,7 +189,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(send("getLatestRevision", [auth, "test"]) instanceof IllegalArgumentException)
         assertTrue(send("getLatestRevision", [auth, model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
         // user should get an AccessDeniedException
-        def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
         assertTrue(send("getLatestRevision", [auth2, model.toCommandObject()]) instanceof AccessDeniedException)
     }
 
@@ -197,7 +197,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // first test a completely invalid variant
         assertTrue(send("getAllRevisions", "test") instanceof IllegalArgumentException)
         // create an authentication
-        def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        def auth = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
@@ -224,7 +224,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(send("getAllRevisions", [auth, "test"]) instanceof IllegalArgumentException)
         assertTrue(send("getAllRevisions", [auth, model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
         // user should get an empty List
-        def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
         result = send("getAllRevisions", [auth2, model.toCommandObject()])
         assertTrue(result instanceof List)
         assertTrue(result.isEmpty())
@@ -258,7 +258,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
   </model>
 </sbml>'''
         // create an authentication
-        def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        def auth = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
         ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "upload", format: new ModelFormatTransportCommand(identifier: "SBML"))
         def result = send("uploadModel", [auth, modelSource.bytes, meta])
@@ -314,7 +314,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
   </model>
 </sbml>'''
         // create an authentication
-        def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        def auth = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
         ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "addRevision", format: new ModelFormatTransportCommand(identifier: "SBML"))
         def model = send("uploadModel", [auth, modelSource.bytes, meta])
@@ -323,7 +323,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         def result = send("addRevision", [auth, model, modelSource.bytes, new ModelFormatTransportCommand(identifier: "SBML"), "Comment"])
         assertTrue(result instanceof RevisionTransportCommand)
         // other user should get an AccessDeniedException
-        def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
         assertTrue(send("addRevision", [auth2, model, modelSource.bytes, new ModelFormatTransportCommand(identifier: "SBML"), "Comment"]) instanceof AccessDeniedException)
         // a deleted model has to end in ModelException
         send("deleteModel", [auth, model])
@@ -371,7 +371,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
   </model>
 </sbml>'''
         // create an authentication
-        def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        def auth = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
         // upload the model
         ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "retrieveFile", format: new ModelFormatTransportCommand(identifier: "SBML"))
@@ -385,7 +385,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(result instanceof byte[])
         assertEquals(modelSource.bytes, result)
         // other user should get an AccessDeniedException
-        def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
         assertTrue(send("retrieveModelFile", [auth2, revision]) instanceof AccessDeniedException)
         // create a random revision
         Revision rev = new Revision(model: Model.get(model.id), vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -411,7 +411,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // first test a completely invalid variant
         assertTrue(send("grantReadAccess", "test") instanceof IllegalArgumentException)
         // create an authentication
-        def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        def auth = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
@@ -423,7 +423,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // testuser does not have access to any models
         assertEquals(0, send("getModelCount", auth))
         // create an admin Authentication
-        def adminAuth = send("authenticate", new UsernamePasswordAuthenticationToken("admin", "1234"))
+        def adminAuth = send2("authenticate", new UsernamePasswordAuthenticationToken("admin", "1234"))
         assertTrue(adminAuth.isAuthenticated())
         modelAdminUser(true)
         def result = send("grantReadAccess", [adminAuth, model.toCommandObject(), User.findByUsername("testuser")])
@@ -440,7 +440,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // test access denied exception
         assertTrue(send("grantReadAccess", [auth, model.toCommandObject(), User.findByUsername("user")]) instanceof AccessDeniedException)
         // user should not have access to it
-        def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
         assertEquals(0, send("getModelCount", auth2))
     }
 
@@ -448,7 +448,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // first test a completely invalid variant
         assertTrue(send("grantWriteAccess", "test") instanceof IllegalArgumentException)
         // create an authentication
-        def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        def auth = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
@@ -458,7 +458,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // create an admin Authentication
-        def adminAuth = send("authenticate", new UsernamePasswordAuthenticationToken("admin", "1234"))
+        def adminAuth = send2("authenticate", new UsernamePasswordAuthenticationToken("admin", "1234"))
         assertTrue(adminAuth.isAuthenticated())
         modelAdminUser(true)
         // grant the right
@@ -477,7 +477,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(send("grantWriteAccess", [auth, model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
         assertTrue(send("grantWriteAccess", [auth, model.toCommandObject(), User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
         // user should not have access to it
-        def auth2 = send("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
         result = send("addRevision", [auth2, model.toCommandObject(), new byte[0], new ModelFormatTransportCommand(identifier: "UNKNOWN"), "no test"])
         assertTrue(result instanceof AccessDeniedException)
     }
@@ -486,7 +486,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // first test a completely invalid variant
         assertTrue(send("revokeReadAccess", "test") instanceof IllegalArgumentException)
         // create an authentication
-        def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        def auth = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
@@ -502,7 +502,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         authenticateAnonymous()
         assertEquals(1, send("getModelCount", auth))
         // create an admin Authentication
-        def adminAuth = send("authenticate", new UsernamePasswordAuthenticationToken("admin", "1234"))
+        def adminAuth = send2("authenticate", new UsernamePasswordAuthenticationToken("admin", "1234"))
         assertTrue(adminAuth.isAuthenticated())
         modelAdminUser(true)
         // revoke the right
@@ -524,7 +524,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // first test a completely invalid variant
         assertTrue(send("revokeWriteAccess", "test") instanceof IllegalArgumentException)
         // create an authentication
-        def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        def auth = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         modelAdminUser(false)
         // create a Model
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
@@ -541,7 +541,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         authenticateAnonymous()
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
         // create an admin Authentication
-        def adminAuth = send("authenticate", new UsernamePasswordAuthenticationToken("admin", "1234"))
+        def adminAuth = send2("authenticate", new UsernamePasswordAuthenticationToken("admin", "1234"))
         assertTrue(adminAuth.isAuthenticated())
         modelAdminUser(true)
         // revoke the right
@@ -571,7 +571,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         model.save()
         // create admin authentication
-        def adminAuth = send("authenticate", new UsernamePasswordAuthenticationToken("admin", "1234"))
+        def adminAuth = send2("authenticate", new UsernamePasswordAuthenticationToken("admin", "1234"))
         assertTrue(adminAuth.isAuthenticated())
         modelAdminUser(true)
         // delete the model
@@ -594,7 +594,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertFalse(result)
         modelAdminUser(false)
         // create an authentication
-        def auth = send("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        def auth = send2("authenticate", new UsernamePasswordAuthenticationToken("testuser", "secret"))
         // user should not be able to delete/restore Model
         assertTrue(send("deleteModel", [auth, model.toCommandObject()]) instanceof AccessDeniedException)
         assertTrue(send("restoreModel", [auth, model.toCommandObject()]) instanceof AccessDeniedException)
@@ -608,8 +608,12 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
 
     }
 
-    private def send(String method, def message) {
+    private def send2(String method, def message) {
         return jmsSynchronousService.send([service: "jmsAdapter", method: method],message, [service: "jmsAdapter", method: "${method}.response"])
+    }
+
+    private def send(String method, def message) {
+        return jmsSynchronousService.send([service: "modelJmsAdapter", method: method],message, [service: "modelJmsAdapter", method: "${method}.response"])
     }
 
     private void setupVcs() {
