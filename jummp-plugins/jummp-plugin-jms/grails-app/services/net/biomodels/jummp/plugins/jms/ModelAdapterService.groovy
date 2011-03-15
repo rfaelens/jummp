@@ -1,6 +1,5 @@
 package net.biomodels.jummp.plugins.jms
 
-import org.springframework.beans.factory.InitializingBean
 import org.perf4j.aop.Profiled
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
@@ -20,12 +19,13 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
  * it uses JMS internally is completely transparent to the users of this service.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class ModelAdapterService extends CoreAdapterService implements InitializingBean {
+class ModelAdapterService extends CoreAdapterService {
 
     static transactional = false
+    private static final String ADAPTER_SERVICE_NAME = "modelJmsAdapter"
 
-    void afterPropertiesSet() {
-        adapterServiceName = "modelJmsAdapter"
+    protected String getAdapterServiceName() {
+        return ADAPTER_SERVICE_NAME
     }
 
     /**

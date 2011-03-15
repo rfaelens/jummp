@@ -1,61 +1,34 @@
 package net.biomodels.jummp.plugins.jms
 
-import org.springframework.beans.factory.InitializingBean
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import net.biomodels.jummp.core.JummpException
-import org.perf4j.aop.Profiled
 
 /**
- * @short Service connecting to the core via synchronous JMS.
+ * @short Base class for services delegating to the core through synchronous JMS.
  *
- * This service can be used to connect to the core web application through JMS from
- * a different component such as the entry-point web application or web services.
+ * A service class extending this abstract class can be used to connect to the core
+ * web application through JMS from a different component such as the entry-point web application or web services.
  *
- * All methods are executed with synchronous JMS and it's taken care of the special situations.
- * This means the current Authentication is wrapped into each call and the return value is verified.
+ * This class provides methods to send messages with synchronous JMS and validate the return value.
+ * All exported methods are executed with synchronous JMS and the implementing class should taken care
+ * of the special situations. This means the current Authentication is wrapped into each call and the
+ * return value is verified.
  * If an unexpected null value or an Exception is returned, an Exception will be re-thrown to be handled
  * by the application.
  *
- * The service provides access to all methods exported by the cores JmsAdapterService. All returned objects
- * are de-coupled from the database and any changes to the objects are not stored in the database. The appropriate
- * methods of this adapter have to be called to update objects in the database (and by that ensuring that the
- * business logic is used).
+ * All returned objects from the core are de-coupled from the database and any changes to the objects are not
+ * stored in the database. The appropriate methods of the implementing adapter services have to be called to
+ * update objects in the database (and by that ensuring that the business logic is used).
+ *
+ * An implementing class needs to provide the adapter service name which is used to send all methods to.
+ *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class CoreAdapterService implements InitializingBean {
+abstract class CoreAdapterService {
     def jmsSynchronousService
 
     static transactional = false
-    protected String adapterServiceName = null
-
-    void afterPropertiesSet() {
-        adapterServiceName = "jmsAdapter"
-    }
-
-    /**
-     * Retrieves the externalized configuration of the core application.
-     * @param appToken The unique application token
-     * @return The core's configuration
-     */
-    ConfigObject getJummpConfig(String appToken) {
-        return (ConfigObject)jmsSynchronousService.send([app: "jummp", service: "jmsAdapter", method: "getJummpConfig"], appToken, [service: "jmsAdapter", method: "getJummpConfig.response"])
-    }
-
-    /**
-     * Tries to authenticate the given @p Authentication in the core.
-     * @param authentication The Authentication to test. In most cases a UsernamePasswordAuthenticationToken
-     * @return An authenticated user
-     * @throws AuthenticationException If the Authentication is not valid
-     * @throws JummpException If an error occurred
-     */
-    @Profiled(tag="coreAdapterService.authenticate")
-    Authentication authenticate(Authentication authentication) throws AuthenticationException, JummpException {
-        def retVal = send("authenticate", authentication, false)
-        validateReturnValue(retVal, Authentication)
-        return (Authentication)retVal
-    }
 
     /**
      * Validates the @p retVal. In case of a @c null value an JummpException is thrown, in case the
@@ -115,6 +88,12 @@ class CoreAdapterService implements InitializingBean {
         } else if (authenticated && !message) {
             message = SecurityContextHolder.context.authentication
         }
-        return jmsSynchronousService.send([app: "jummp", service: adapterServiceName, method: method],message, [service: adapterServiceName, method: "${method}.response"])
+        return jmsSynchronousService.send([app: "jummp", service: getAdapterServiceName(), method: method],message, [service: getAdapterServiceName(), method: "${method}.response"])
     }
+
+    /**
+     *
+     * @return Name of the service in core to send messages to
+     */
+    abstract protected String getAdapterServiceName();
 }

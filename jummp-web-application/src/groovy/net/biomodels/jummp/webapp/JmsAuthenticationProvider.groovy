@@ -16,12 +16,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
  */
 class JmsAuthenticationProvider implements AuthenticationProvider {
     /**
-     * Dependency injection of the core adapter service
+     * Dependency injection of the jummpApplicationAdapterService
      */
-    def coreAdapterService
+    def jummpApplicationAdapterService
 
     Authentication authenticate(Authentication authentication) {
-        return coreAdapterService.authenticate(authentication)
+        return jummpApplicationAdapterService.authenticate(authentication)
     }
 
     boolean supports(Class<? extends Object> aClass) {

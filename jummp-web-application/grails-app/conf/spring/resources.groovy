@@ -5,7 +5,7 @@ import grails.util.Environment
 // Place your Spring DSL code here
 beans = {
     jmsAuthenticationProvider(net.biomodels.jummp.webapp.JmsAuthenticationProvider) {
-        coreAdapterService = ref("coreAdapterService")
+        jummpApplicationAdapterService = ref("jummpApplicationAdapterService")
     }
     jmsConnectionFactory(SingleConnectionFactory) {
         targetConnectionFactory = { ActiveMQConnectionFactory cf ->

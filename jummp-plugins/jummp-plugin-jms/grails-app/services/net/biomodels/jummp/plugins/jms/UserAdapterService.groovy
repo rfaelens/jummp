@@ -1,6 +1,5 @@
 package net.biomodels.jummp.plugins.jms
 
-import org.springframework.beans.factory.InitializingBean
 import org.perf4j.aop.Profiled
 import org.springframework.security.authentication.BadCredentialsException
 import net.biomodels.jummp.plugins.security.User
@@ -17,13 +16,15 @@ import net.biomodels.jummp.core.JummpException
  * it uses JMS internally is completely transparent to the users of this service.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class UserAdapterService extends CoreAdapterService implements InitializingBean {
+class UserAdapterService extends CoreAdapterService  {
 
     static transactional = false
+    private static final String ADAPTER_SERVICE_NAME = "userJmsAdapter"
 
-    void afterPropertiesSet() {
-        adapterServiceName = "userJmsAdapter"
+    protected String getAdapterServiceName() {
+        return ADAPTER_SERVICE_NAME
     }
+
     /**
      * Changes the password of the currently logged in user.
      * @param oldPassword The old password for verification

@@ -2,13 +2,13 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class BootStrap {
     /**
-     * Dependency injection of core adapter service
+     * Dependency injection of jummpApplicationAdapterService
      */
-    def coreAdapterService
+    def jummpApplicationAdapterService
 
     def init = { servletContext ->
         // TODO: proper app token
-        ConfigurationHolder.config.jummpCore = coreAdapterService.getJummpConfig("web application")
+        ConfigurationHolder.config.jummpCore = jummpApplicationAdapterService.getJummpConfig("web application")
     }
     def destroy = {
     }
