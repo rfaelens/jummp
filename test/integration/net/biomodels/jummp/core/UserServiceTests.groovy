@@ -5,6 +5,10 @@ import org.springframework.security.authentication.BadCredentialsException
 import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.access.AccessDeniedException
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import net.biomodels.jummp.core.user.RegistrationException
+import net.biomodels.jummp.core.user.UserCodeExpiredException
+import net.biomodels.jummp.core.user.UserCodeInvalidException
+import net.biomodels.jummp.core.user.UserNotFoundException
 
 class UserServiceTests extends JummpIntegrationTestCase {
     def userService
@@ -72,7 +76,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertNull(user.passwordExpired)
         authenticateAsAdmin()
         userService.getUser("user")
-        shouldFail(IllegalArgumentException) {
+        shouldFail(UserNotFoundException) {
             userService.getUser("noSuchUser")
         }
     }
@@ -102,7 +106,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
             userService.enableUser(1, true)
         }
         authenticateAsAdmin()
-        shouldFail(IllegalArgumentException) {
+        shouldFail(UserNotFoundException) {
             userService.enableUser(0, true)
         }
         assertFalse(userService.enableUser(User.findByUsername("testuser").id, true))
@@ -119,7 +123,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
             userService.lockAccount(1, true)
         }
         authenticateAsAdmin()
-        shouldFail(IllegalArgumentException) {
+        shouldFail(UserNotFoundException) {
             userService.lockAccount(0, true)
         }
         assertFalse(userService.lockAccount(User.findByUsername("testuser").id, false))
@@ -136,7 +140,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
             userService.expireAccount(1, true)
         }
         authenticateAsAdmin()
-        shouldFail(IllegalArgumentException) {
+        shouldFail(UserNotFoundException) {
             userService.expireAccount(0, true)
         }
         assertFalse(userService.expireAccount(User.findByUsername("testuser").id, false))
@@ -153,7 +157,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
             userService.expirePassword(1, true)
         }
         authenticateAsAdmin()
-        shouldFail(IllegalArgumentException) {
+        shouldFail(UserNotFoundException) {
             userService.expirePassword(0, true)
         }
         assertFalse(userService.expirePassword(User.findByUsername("testuser").id, false))
@@ -174,7 +178,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         }
         ConfigurationHolder.config.jummp.security.anonymousRegistration = true
         userService.register(user)
-        shouldFail(JummpException) {
+        shouldFail(RegistrationException) {
             userService.register(user)
         }
         User registeredUser = User.findByUsername("register")
@@ -212,7 +216,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
             userService.validateRegistration("user", "1234")
         }
         authenticateAnonymous()
-        shouldFail(JummpException) {
+        shouldFail(UserNotFoundException) {
             userService.validateRegistration("notExistingUser", "1234")
         }
         // first register a user
@@ -220,7 +224,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         userService.register(user)
         User registeredUser = User.findByUsername("register")
         // exception with wrong registration code
-        shouldFail(JummpException) {
+        shouldFail(UserCodeInvalidException) {
             userService.validateRegistration("register", "1234")
         }
         // change the registrationInvalidation to be in the past
@@ -229,7 +233,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         validateCal.add(GregorianCalendar.DAY_OF_MONTH, -1)
         registeredUser.registrationInvalidation = validateCal.getTime()
         registeredUser.save(flush: true)
-        shouldFail(JummpException) {
+        shouldFail(UserCodeExpiredException) {
             userService.validateRegistration("register", registeredUser.registrationCode)
         }
         validateCal.add(GregorianCalendar.DAY_OF_MONTH, 1)
@@ -243,7 +247,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertNull(registeredUser.registrationCode)
         assertNull(registeredUser.registrationInvalidation)
         // trying to validate again should fail
-        shouldFail(JummpException) {
+        shouldFail(RegistrationException) {
             userService.validateRegistration("register", registeredUser.registrationCode)
         }
     }

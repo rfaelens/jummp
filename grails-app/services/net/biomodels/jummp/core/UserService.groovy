@@ -9,6 +9,12 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.authentication.BadCredentialsException
+import net.biomodels.jummp.core.user.UserNotFoundException
+import net.biomodels.jummp.core.user.UserInvalidException
+import net.biomodels.jummp.core.user.UserCodeInvalidException
+import net.biomodels.jummp.core.user.UserCodeExpiredException
+import net.biomodels.jummp.core.user.RegistrationException
+import net.biomodels.jummp.core.user.UserManagementException
 
 /**
  * @short Service for User administration.
@@ -61,14 +67,15 @@ class UserService {
      * This method might be used by an administrator or by the user itself to change the
      * parts of the user object which are not security related.
      * @param user The User with the updated fields
+     * @throws UserInvalidException If the modified user does not validate
      */
     @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.name==#user.username")
-    void editUser(User user) {
+    void editUser(User user) throws UserInvalidException {
         User origUser = User.findByUsername(user.username)
         origUser.userRealName = user.userRealName
         origUser.email = user.email
         if (!origUser.validate()) {
-            throw new IllegalArgumentException("User does not validate")
+            throw new UserInvalidException(user.username)
         }
         origUser.save(flush: true)
     }
@@ -87,13 +94,13 @@ class UserService {
      * The returned object is sanitized to not include any security relevant data.
      * @param username The login identifier of the user to be retrieved
      * @return The (security sanitized) user
-     * @throws IllegalArgumentException Thrown if there is no User for @p username
+     * @throws UserNotFoundException Thrown if there is no User for @p username
      */
     @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.name==#username")
-    User getUser(String username) {
+    User getUser(String username) throws UserNotFoundException {
         User user = User.findByUsername(username)
         if (!user) {
-            throw new IllegalArgumentException("No user for given username")
+            throw new UserNotFoundException(username)
         }
         return user.sanitizedUser()
     }
@@ -117,13 +124,13 @@ class UserService {
      * @param userId The unique id of the user
      * @param enable if @c true the user is enabled, if @c false the user is disabled
      * @return @c true, if the enable state was changed, @c false if the user was already in @p enable state
-     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     * @throws UserNotFoundException If the user specified by @p userId does not exist
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    Boolean enableUser(Long userId, Boolean enable) throws IllegalArgumentException {
+    Boolean enableUser(Long userId, Boolean enable) throws UserNotFoundException {
         User user = User.get(userId)
         if (!user) {
-            throw new IllegalArgumentException("No user for given id")
+            throw new UserNotFoundException(userId)
         }
         if (user.enabled != enable) {
             user.enabled = enable
@@ -139,13 +146,13 @@ class UserService {
      * @param userId The unique id of the user
      * @param lock if @c true the account is locked, if @c false the account is unlocked
      * @return @c true, if the account locked state was changed, @c false if the user was already in @p lock state
-     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     * @throws UserNotFoundException If the user specified by @p userId does not exist
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    Boolean lockAccount(Long userId, Boolean lock) throws IllegalArgumentException {
+    Boolean lockAccount(Long userId, Boolean lock) throws UserNotFoundException {
         User user = User.get(userId)
         if (!user) {
-            throw new IllegalArgumentException("No user for given id")
+            throw new UserNotFoundException(userId)
         }
         if (user.accountLocked != lock) {
             user.accountLocked = lock
@@ -161,13 +168,13 @@ class UserService {
      * @param userId The unique id of the user
      * @param expire if @c true the account is expired, if @c false the account is un-expired
      * @return @c true, if the account expired state was changed, @c false if the user was already in @p expire state
-     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     * @throws UserNotFoundException If the user specified by @p userId does not exist
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    Boolean expireAccount(Long userId, Boolean expire) throws IllegalArgumentException {
+    Boolean expireAccount(Long userId, Boolean expire) throws UserNotFoundException {
         User user = User.get(userId)
         if (!user) {
-            throw new IllegalArgumentException("No user for given id")
+            throw new UserNotFoundException(userId)
         }
         if (user.accountExpired != expire) {
             user.accountExpired = expire
@@ -183,13 +190,13 @@ class UserService {
      * @param userId The unique id of the user
      * @param expire if @c true the password is expired, if @c false the password is un-expired
      * @return @c true, if the password expired state was changed, @c false if the password was already in @p expire state
-     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     * @throws UserNotFoundException If the user specified by @p userId does not exist
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    Boolean expirePassword(Long userId, Boolean expire) throws IllegalArgumentException {
+    Boolean expirePassword(Long userId, Boolean expire) throws UserNotFoundException {
         User user = User.get(userId)
         if (!user) {
-            throw new IllegalArgumentException("No user for given id")
+            throw new UserNotFoundException(userId)
         }
         if (user.passwordExpired != expire) {
             user.passwordExpired = expire
@@ -210,19 +217,18 @@ class UserService {
      * In case LDAP is used as an authentication backend, it is not possible to save a password, that is an invalid
      * password ("*") is stored in the database.
      * @param user The new User to register
-     * @throws JummpException In case a user with same name already exists
+     * @throws RegistrationException In case a user with same name already exists
+     * @throws UserManagementException In case the new user does not validate
      * @see validateRegistration
-     * @todo more specific Exception
-     * @todo send out notification mail
      */
     @PreAuthorize("isAnonymous() or hasRole('ROLE_ADMIN')")
-    void register(User user) throws JummpException {
+    void register(User user) throws RegistrationException, UserInvalidException {
         if (springSecurityService.authentication instanceof AnonymousAuthenticationToken &&
                 !ConfigurationHolder.config.jummp.security.anonymousRegistration) {
             throw new AccessDeniedException("Registration disabled for anonymous users")
         }
         if (User.findByUsername(user.username)) {
-            throw new JummpException("User with same name already exists")
+            throw new RegistrationException("User with same name already exists", user.username)
         }
         User newUser = user.sanitizedUser()
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
@@ -247,7 +253,7 @@ class UserService {
         newUser.accountExpired = false
         newUser.id = null
         if (!newUser.validate()) {
-            throw new JummpException("User does not validate")
+            throw new UserInvalidException(user.username)
         }
         String registrationCode = String.valueOf(random.nextInt()) + user.username
         newUser.registrationCode = registrationCode.encodeAsMD5()
@@ -283,24 +289,23 @@ class UserService {
      * In case the validation is not correct an exception is thrown
      * @param username The name of the new user
      * @param code The validation code
-     * @throws JummpException Thrown in case that the validation cannot be performed
+     * @throws UserManagementException Thrown in case that the validation cannot be performed
      * @see register
-     * @todo more specific Exception
      */
     @PreAuthorize("isAnonymous()")
-    void validateRegistration(String username, String code) throws JummpException {
+    void validateRegistration(String username, String code) throws UserManagementException {
         User user = User.findByUsername(username)
         if (!user) {
-            throw new JummpException("User not found")
+            throw new UserNotFoundException(username)
         }
         if (user.enabled) {
-            throw new JummpException("User already enabled")
+            throw new RegistrationException("User already enabled", username)
         }
         if (user.registrationCode != code) {
-            throw new JummpException("Registration code not valid")
+            throw new UserCodeInvalidException(username, user.id, code)
         }
         if (!user.registrationInvalidation || user.registrationInvalidation.before(new Date())) {
-            throw new JummpException("Registration code is not valid any more")
+            throw new UserCodeExpiredException(username, user.id)
         }
         user.enabled = true
         user.registrationCode = null
@@ -314,13 +319,13 @@ class UserService {
      * the user's email address.
      * The password itself is unchanged and not reset.
      * @param username The login id of the user whose password should be reset.
-     * @throws JummpException Thrown if there is no user with @p username
+     * @throws UserNotFoundException Thrown if there is no user with @p username
      */
     @PreAuthorize("isAnonymous()")
-    void requestPassword(String username) throws JummpException {
+    void requestPassword(String username) throws UserNotFoundException {
         User user = User.findByUsername(username)
         if (!user) {
-            throw new JummpException("User not found")
+            throw new UserNotFoundException(username)
         }
         String passwordCode = String.valueOf(random.nextInt()) + user.username
         user.passwordForgottenCode = passwordCode.encodeAsMD5()
@@ -351,19 +356,19 @@ class UserService {
      * @param code The Password Reset Code
      * @param username The Login Id of the User
      * @param password The new Password
-     * @throws JummpException Thrown in case user is not found or the code is not valid
+     * @throws UserManagementException Thrown in case user is not found or the code is not valid
      */
     @PreAuthorize("isAnonymous()")
-    void resetPassword(String code, String username, String password) throws JummpException {
+    void resetPassword(String code, String username, String password) throws UserManagementException {
         User user = User.findByUsername(username)
         if (!user) {
-            throw new JummpException("User not found")
+            throw new UserNotFoundException(username)
         }
         if (user.passwordForgottenCode != code) {
-            throw new JummpException("Password Reset code not valid")
+            throw new UserCodeInvalidException(username, user.id, code)
         }
         if (!user.passwordForgottenInvalidation || user.passwordForgottenInvalidation.before(new Date())) {
-            throw new JummpException("Password Reset code is not valid any more")
+            throw new UserCodeExpiredException(username, user.id)
         }
         // TODO: in case of LDAP we should not change the password
         user.passwordForgottenCode = null
