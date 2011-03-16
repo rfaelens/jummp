@@ -4,6 +4,9 @@ import org.perf4j.aop.Profiled
 import org.springframework.security.authentication.BadCredentialsException
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.core.JummpException
+import net.biomodels.jummp.plugins.security.Role
+import net.biomodels.jummp.core.user.UserNotFoundException
+import net.biomodels.jummp.core.user.RoleNotFoundException
 
 /**
  * @short Service delegating to UserService of the core via synchronous JMS
@@ -60,12 +63,25 @@ class UserAdapterService extends CoreAdapterService  {
     /**
      * Retrieves a User object for the given @p username.
      * @param username The login identifier of the user to be retrieved
-     * @returnThe (security sanitized) user
+     * @return The (security sanitized) user
      * @throws IllegalArgumentException Thrown if there is no User for @p username
      */
     @Profiled(tag="userAdapterService.getUser")
     public User getUser(String username) throws IllegalArgumentException {
         def retVal = send("getUser", username)
+        validateReturnValue(retVal, User)
+        return (User)retVal
+    }
+
+    /**
+     * Retrieves a User object for the given @p username.
+     * @param id The user Id
+     * @return The (security sanitized) user
+     * @throws UserNotFoundException Thrown if there is no User for @p username
+     */
+    @Profiled(tag="userAdapterService.getUser")
+    public User getUser(Long id) throws UserNotFoundException {
+        def retVal = send("getUser", id)
         validateReturnValue(retVal, User)
         return (User)retVal
     }
@@ -183,5 +199,59 @@ class UserAdapterService extends CoreAdapterService  {
     @Profiled(tag="userAdapterService.resetPassword")
     void resetPassword(String code, String username, String password) throws JummpException {
         validateReturnValue(send("resetPassword", [code, username, password]), Boolean)
+    }
+
+    /**
+     * Retrieves all available roles from the Core Jummp Instance.
+     * As this is an admin method it does not provide a paginated version
+     * @return List of all Roles
+     */
+    @Profiled(tag="userAdapterService.getAllRoles")
+    List<Role> getAllRoles() {
+        def retVal = send("getAllRoles")
+        validateReturnValue(retVal, List)
+        return (List<Role>)retVal
+    }
+
+    /**
+     * Retrieves the Roles for the User identified by @p id.
+     *
+     * In case there is no user with @p id an empty list is returned.
+     * @param id The user id
+     * @return List of Roles assigned to the user
+     */
+    @Profiled(tag="userAdapterService.getRolesForUser")
+    List<Role> getRolesForUser(Long id) {
+        def retVal = send("getRolesForUser", id)
+        validateReturnValue(retVal, List)
+        return (List<Role>)retVal
+    }
+
+    /**
+     * Adds a Role to the user.
+     * If the user already has the role, the user is not changed and no feedback for this situation is
+     * provided. The method only ensures that the user has the role after execution.
+     * @param userId The id of the user who should receive a new role
+     * @param roleId The id or the role to be added to the user
+     * @throws UserNotFoundException In case there is no user with @p userId
+     * @throws RoleNotFoundException In case there is no role with @p roleId
+     */
+    @Profiled(tag="userAdapterService.addRoleToUser")
+    void addRoleToUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException {
+        validateReturnValue(send("addRoleToUser", [userId, roleId]), Boolean)
+    }
+
+    /**
+     * Removes a Role from the user.
+     * If the user does not have the role, the user is not changed and no feedback for this situation is
+     * provided. The method only ensures that the user does not have the role after execution.
+     * @param userId The id of the user from whom the role should be removed
+     * @param roleId The id or the role to be removed from the user
+     * @throws UserNotFoundException In case there is no user with @p userId
+     * @throws RoleNotFoundException In case there is no role with @p roleId
+     */
+    @Profiled(tag="userAdapterService.removeRoleFromUser")
+    void removeRoleFromUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException {
+        validateReturnValue(send("removeRoleFromUser", [userId, roleId]), Boolean)
     }
 }

@@ -15,6 +15,7 @@ import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserCodeExpiredException
 import net.biomodels.jummp.core.user.RegistrationException
 import net.biomodels.jummp.core.user.UserManagementException
+import net.biomodels.jummp.core.user.RoleNotFoundException
 
 /**
  * @short Service for User administration.
@@ -103,6 +104,23 @@ class UserService {
             throw new UserNotFoundException(username)
         }
         return user.sanitizedUser()
+    }
+
+    /**
+     * Retrieves a User object for the given @p username.
+     * The returned object is not sanitized and includes any security relevant data.
+     * This method is only for admin purpose.
+     * @param username The login identifier of the user to be retrieved
+     * @return The user
+     * @throws UserNotFoundException Thrown if there is no User for @p username
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    User getUser(Long id) throws UserNotFoundException {
+        User user = User.get(id)
+        if (!user) {
+            throw new UserNotFoundException(id)
+        }
+        return user
     }
 
     /**
@@ -377,5 +395,71 @@ class UserService {
         // reset password expired state
         user.passwordExpired = false
         user.save(flush: true)
+    }
+
+    /**
+     * Retrieves all available roles in this Jummp Instance.
+     * As this is an admin method it does not provide a paginated version
+     * @return List of all Roles
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    List<Role> getAllRoles() {
+        return Role.listOrderById()
+    }
+
+    /**
+     * Retrieves the Roles for the User identified by @p id.
+     *
+     * In case there is no user with @p id an empty list is returned.
+     * @param id The user id
+     * @return List of Roles assigned to the user
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    List<Role> getRolesForUser(Long id) {
+        return Role.executeQuery("SELECT role FROM UserRole AS userRole JOIN userRole.role AS role JOIN userRole.user AS user WHERE user.id=:id ORDER BY role.id", [id: id])
+    }
+
+    /**
+     * Adds a Role to the user.
+     * If the user already has the role, the user is not changed and no feedback for this situation is
+     * provided. The method only ensures that the user has the role after execution.
+     * @param userId The id of the user who should receive a new role
+     * @param roleId The id or the role to be added to the user
+     * @throws UserNotFoundException In case there is no user with @p userId
+     * @throws RoleNotFoundException In case there is no role with @p roleId
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    void addRoleToUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException {
+        User user = User.get(userId)
+        if (!user) {
+            throw new UserNotFoundException(userId)
+        }
+        Role role = Role.get(roleId)
+        if (!role) {
+            throw new RoleNotFoundException(roleId)
+        }
+        UserRole.create(user, role, true)
+    }
+
+    /**
+     * Removes a Role from the user.
+     * If the user does not have the role, the user is not changed and no feedback for this situation is
+     * provided. The method only ensures that the user does not have the role after execution.
+     * @param userId The id of the user from whom the role should be removed
+     * @param roleId The id or the role to be removed from the user
+     * @throws UserNotFoundException In case there is no user with @p userId
+     * @throws RoleNotFoundException In case there is no role with @p roleId
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    void removeRoleFromUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException {
+        User user = User.get(userId)
+        if (!user) {
+            throw new UserNotFoundException(userId)
+        }
+        Role role = Role.get(roleId)
+        if (!role) {
+            throw new RoleNotFoundException(roleId)
+        }
+        UserRole.remove(user, role, true)
     }
 }

@@ -8,6 +8,8 @@ import org.perf4j.aop.Profiled
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.Authentication
+import net.biomodels.jummp.core.user.UserNotFoundException
+import net.biomodels.jummp.core.user.RoleNotFoundException
 
 /**
  * @short Wrapper class around the UserService exposed to JMS.
@@ -107,19 +109,23 @@ class UserJmsAdapterService extends JmsAdapterService {
 
     /**
      * Wrapper around UserService.getUser
-     * @param message List consisting of Authentication and Username
+     * @param message List consisting of Authentication and Username or Id
      * @return The User, IllegalArgumentException or AccessDeniedException
      */
     @Queue
     @Profiled(tag="userJmsAdapterService.getUser")
     def getUser(def message) {
-        if (!verifyMessage(message, [Authentication, String])) {
-            return new IllegalArgumentException("Authentication and String as arguments expected")
+        if (!verifyMessage(message, [Authentication, String]) && !verifyMessage(message, [Authentication, Long])) {
+            return new IllegalArgumentException("Authentication and String or Long as arguments expected")
         }
         def result
         try {
             setAuthentication((Authentication)message[0])
-            result = userService.getUser(message[1])
+            if (message[1] instanceof Long) {
+                result = userService.getUser((Long)message[1])
+            } else {
+                result = userService.getUser((String)message[1])
+            }
         } catch (AccessDeniedException e) {
             result = e
         } catch (IllegalArgumentException e) {
@@ -359,6 +365,112 @@ class UserJmsAdapterService extends JmsAdapterService {
         } catch (AccessDeniedException e) {
             result = e
         } catch (JummpException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
+     * Wrapper around UserService.getAllRoles
+     * @param message Authentication
+     * @return List<Role>, AccessDeniedException or IllegalArgumentException
+     */
+    @Queue
+    @Profiled(tag="userJmsAdapterService.getAllRoles")
+    def getAllRoles(def message) {
+        if (!(message instanceof Authentication)) {
+            return new IllegalArgumentException("Authentication as argument expected")
+        }
+
+        def result
+        try {
+            setAuthentication(message)
+            result = userService.getAllRoles()
+        } catch (AccessDeniedException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
+     * Wrapper around UserService.getRolesForUser
+     * @param message List consisting of Authentication and Long
+     * @return List<Role>, AccessDeniedException or IllegalArgumentException
+     */
+    @Queue
+    @Profiled(tag="userJmsAdapterService.getRolesForUser")
+    def getRolesForUser(def message) {
+        if (!verifyMessage(message, [Authentication, Long])) {
+            return new IllegalArgumentException("Authentication and Long as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            result = userService.getRolesForUser((Long)message[1])
+        } catch (AccessDeniedException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
+     * Wrapper around UserService.addRoleToUser
+     * @param message List consisting of Authentication, Long and Long
+     * @return Boolean, AccessDeniedException, UserNotFoundException, RoleNotFoundException or IllegalArgumentException
+     */
+    @Queue
+    @Profiled(tag="userJmsAdapterService.addRoleToUser")
+    def addRoleToUser(def message) {
+        if (!verifyMessage(message, [Authentication, Long, Long])) {
+            return new IllegalArgumentException("Authentication, Long and Long as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            userService.addRoleToUser((Long)message[1], (Long)message[2])
+            result = true
+        } catch (AccessDeniedException e) {
+            result = e
+        } catch (UserNotFoundException e) {
+            result = e
+        } catch (RoleNotFoundException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
+     * Wrapper around UserService.addRoleToUser
+     * @param message List consisting of Authentication, Long and Long
+     * @return Boolean, AccessDeniedException, UserNotFoundException, RoleNotFoundException or IllegalArgumentException
+     */
+    @Queue
+    @Profiled(tag="userJmsAdapterService.removeRoleFromUser")
+    def removeRoleFromUser(def message) {
+        if (!verifyMessage(message, [Authentication, Long, Long])) {
+            return new IllegalArgumentException("Authentication, Long and Long as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            userService.removeRoleFromUser((Long)message[1], (Long)message[2])
+            result = true
+        } catch (AccessDeniedException e) {
+            result = e
+        } catch (UserNotFoundException e) {
+            result = e
+        } catch (RoleNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
