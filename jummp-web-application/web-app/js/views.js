@@ -479,6 +479,7 @@ function loadUserListCallback() {
                     for (var i=0; i<json.aaData.length; i++) {
                         var rowData = json.aaData[i];
                         var id = rowData[0];
+                        rowData[0] = "<a href=\"#\">" + id + "</a>";
                         rowData[4] = createUserChangeMarkup(id, 'enable', rowData[4]);
                         rowData[5] = createUserChangeMarkup(id, 'expireAccount', rowData[5]);
                         rowData[6] = createUserChangeMarkup(id, 'lockAccount', rowData[6]);
@@ -486,10 +487,81 @@ function loadUserListCallback() {
                     }
                     fnCallback(json);
                     $("#userTable tr input:button").button();
+                    $("#userTable tr td a").click(function() {
+                        loadView(createLink('userAdministration', 'show', $(this).text()), loadAdminUserCallback);
+                    })
                 }
             });
         },
         // i18n
         oLanguage: $.jummp.i18n.dataTables
     });
+}
+
+/**
+ * View logic for /userAdministration/show
+ */
+function loadAdminUserCallback() {
+    var positionAreas = function () {
+        // TODO: this seems not the best solution - the view receives a horizontal scrollbar
+        $("#availableRoles").position({
+            my: "top",
+            at: "left top",
+            of: "#userRoles",
+            collision: "flip flip"
+        });
+    };
+    $("#body div.ui-dialog-buttonpane input").button();
+    $("#user-role-management table tr a").button();
+    $("#user-role-management table tr a").click(function() {
+        $("#body").block();
+        var link = $(this);
+        var id = link.prev().val();
+        var container = link.parents("div")[0];
+        var userId = $($("input", container)[0]).val();
+        var action = $($("input", container)[1]).val();
+        $.ajax({
+            type: 'GET',
+            url: createLink("userAdministration", action, id) + "?userId=" + userId,
+            dataType: 'json',
+            cache: 'false',
+            success: function (data) {
+                if (handleError(data)) {
+                    // TODO: with jquery 1.5 should be handled by status code function
+                    return;
+                }
+                clearErrorMessages();
+                if (data.error) {
+                    showErrorMessage(data.error);
+                } else if (data.success) {
+                    showInfoMessage(i18n.userAdministration.success, 20000);
+                    var linkText = "";
+                    var divInsertId = "";
+                    if (action == "addRole") {
+                        linkText = i18n.userAdministration.ui.removeRole;
+                        divInsertId = "#userRoles";
+                    } else if (action == "removeRole") {
+                        linkText = i18n.userAdministration.ui.addRole;
+                        divInsertId = "#availableRoles";
+                    }
+                    $("span", link).text(linkText);
+                    var tableRow = link.parents("tr");
+                    tableRow.detach();
+                    tableRow.appendTo($("table tbody", $(divInsertId)));
+                    positionAreas();
+                }
+                $("#body").unblock();
+            },
+            error: function(jqXHR) {
+                $("#body").unblock();
+                handleError($.parseJSON(jqXHR.responseText));
+            }
+        });
+        createLink("userAdministration", "addRole", id)
+    });
+    $("#edit-user-form div.ui-dialog-buttonpane input:button").click(function() {
+        // yes it is intended to submit to the user controller - the action works for admin users, too
+        submitForm($("#edit-user-form"), createLink("user", "editUser"), editUserInfoCallback);
+    });
+    positionAreas();
 }

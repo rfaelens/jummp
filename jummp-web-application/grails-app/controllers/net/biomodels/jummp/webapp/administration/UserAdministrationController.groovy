@@ -2,6 +2,8 @@ package net.biomodels.jummp.webapp.administration
 
 import grails.plugins.springsecurity.Secured
 import grails.converters.JSON
+import net.biomodels.jummp.core.user.UserNotFoundException
+import net.biomodels.jummp.core.user.RoleNotFoundException
 
 /**
  * @short Controller for user management.
@@ -108,5 +110,69 @@ class UserAdministrationController {
             def data = [error: true, message: e.message]
             render data as JSON
         }
+    }
+
+    /**
+     * Action to edit an user
+     */
+    def show = {
+        if (!springSecurityService.isAjax(request)) {
+            redirect(controller: "home", params: [redirect: "USERADMINSHOW", id: params.id])
+            return
+        }
+        [user: userAdapterService.getUser(params.id as Long), roles: userAdapterService.getAllRoles(), userRoles: userAdapterService.getRolesForUser(params.id as Long)]
+    }
+
+    /**
+     * Action to add a role to a user
+     */
+    def addRole = { AddRemoveRoleCommand cmd ->
+        Map data = [:]
+        if (cmd.hasErrors()) {
+            data.put("error", g.message(code: "user.administration.userRole.error.general"))
+        } else {
+            try {
+                userAdapterService.addRoleToUser(cmd.userId, cmd.id)
+                data.put("success", "true")
+            } catch (UserNotFoundException e) {
+                data.put("error", g.message(code: "user.administration.userRole.error.userNotFound"))
+            } catch (RoleNotFoundException e) {
+                data.put("error", g.message(code: "user.administration.userRole.error.roleNotFound"))
+            }
+        }
+        render data as JSON
+    }
+
+    /**
+     * Action to remove a role from a user
+     */
+    def removeRole = { AddRemoveRoleCommand cmd ->
+        Map data = [:]
+        if (cmd.hasErrors()) {
+            data.put("error", g.message(code: "user.administration.userRole.error.general"))
+        } else {
+            try {
+                userAdapterService.removeRoleFromUser(cmd.userId, cmd.id)
+                data.put("success", "true")
+            } catch (UserNotFoundException e) {
+                data.put("error", g.message(code: "user.administration.userRole.error.userNotFound"))
+            } catch (RoleNotFoundException e) {
+                data.put("error", g.message(code: "user.administration.userRole.error.roleNotFound"))
+            }
+        }
+        render data as JSON
+    }
+}
+
+/**
+ * @short Command Object for add/remove role actions
+ */
+class AddRemoveRoleCommand {
+    Long id
+    Long userId
+
+    static constraints = {
+        id(nullable: false)
+        userId(nullable: false)
     }
 }

@@ -77,6 +77,13 @@ var i18n = {
             success: "${g.message(code: 'user.resetPassword.ui.success')}"
         }
     },
+    userAdministration: {
+        success: "${g.message(code: 'user.administration.userRole.success')}",
+        ui: {
+            addRole: "${g.message(code: 'user.administration.userRole.ui.addRole')}",
+            removeRole: "${g.message(code: 'user.administration.userRole.ui.removeRole')}"
+        }
+    },
     ui: {
         button: {
             cancel: "${g.message(code: 'ui.button.cancel')}",

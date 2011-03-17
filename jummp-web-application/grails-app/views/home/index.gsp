@@ -42,6 +42,11 @@
             loadView("${g.createLink(controller: 'userAdministration', action: 'index')}", loadUserListCallback);
 <%
         break
+    case "USERADMINSHOW":
+%>
+            loadView("${g.createLink(controller: 'userAdministration', action: 'show', id: params.id)}", loadAdminUserCallback);
+<%
+        break
     case "REGISTER":
 %>
             showRegisterView();
