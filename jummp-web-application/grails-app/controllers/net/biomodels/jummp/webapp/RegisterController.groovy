@@ -6,6 +6,7 @@ import net.biomodels.jummp.core.JummpException
 import grails.converters.JSON
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.security.access.AccessDeniedException
+import net.biomodels.jummp.core.user.UserManagementException
 
 /**
  * @short Controller for registering new user.
@@ -84,7 +85,7 @@ class RegisterController {
         try {
             userAdapterService.validateRegistration(params.username, params.code)
             data.put("success", true)
-        } catch (JummpException e) {
+        } catch (UserManagementException e) {
             data.put("error", e.message)
         }
         render data as JSON

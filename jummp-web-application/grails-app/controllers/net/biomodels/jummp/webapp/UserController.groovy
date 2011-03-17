@@ -6,6 +6,8 @@ import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.authentication.BadCredentialsException
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import net.biomodels.jummp.core.JummpException
+import net.biomodels.jummp.core.user.UserNotFoundException
+import net.biomodels.jummp.core.user.UserManagementException
 
 /**
  * @short Controller for editing user information.
@@ -96,7 +98,7 @@ class UserController {
             try {
                 userAdapterService.requestPassword(params.username)
                 data.put("success", true)
-            } catch (JummpException e) {
+            } catch (UserNotFoundException e) {
                 data.put("error", g.message(code: "user.resetPassword.error.userNotFound"))
             }
         }
@@ -130,7 +132,7 @@ class UserController {
             try {
                 userAdapterService.resetPassword(cmd.code, cmd.username, cmd.password)
                 data.put("success", true)
-            } catch (JummpException e) {
+            } catch (UserManagementException e) {
                 data.put("error", e.message)
             }
         }

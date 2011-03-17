@@ -236,7 +236,7 @@ class UserService {
      * password ("*") is stored in the database.
      * @param user The new User to register
      * @throws RegistrationException In case a user with same name already exists
-     * @throws UserManagementException In case the new user does not validate
+     * @throws UserInvalidException In case the new user does not validate
      * @see validateRegistration
      */
     @PreAuthorize("isAnonymous() or hasRole('ROLE_ADMIN')")

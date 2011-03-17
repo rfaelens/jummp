@@ -7,6 +7,9 @@ import net.biomodels.jummp.core.JummpException
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.core.user.RoleNotFoundException
+import net.biomodels.jummp.core.user.UserInvalidException
+import net.biomodels.jummp.core.user.RegistrationException
+import net.biomodels.jummp.core.user.UserManagementException
 
 /**
  * @short Service delegating to UserService of the core via synchronous JMS
@@ -43,9 +46,10 @@ class UserAdapterService extends CoreAdapterService  {
     /**
      * Edit the non-security related parts of a user.
      * @param user The User with the updated fields
+     * @throws UserInvalidException If the modified user does not validate
      */
     @Profiled(tag="userAdapterService.editUser")
-    public void editUser(User user) {
+    public void editUser(User user) throws UserInvalidException {
         validateReturnValue(send("editUser", user), Boolean)
     }
 
@@ -64,10 +68,10 @@ class UserAdapterService extends CoreAdapterService  {
      * Retrieves a User object for the given @p username.
      * @param username The login identifier of the user to be retrieved
      * @return The (security sanitized) user
-     * @throws IllegalArgumentException Thrown if there is no User for @p username
+     * @throws UserNotFoundException Thrown if there is no User for @p username
      */
     @Profiled(tag="userAdapterService.getUser")
-    public User getUser(String username) throws IllegalArgumentException {
+    public User getUser(String username) throws UserNotFoundException {
         def retVal = send("getUser", username)
         validateReturnValue(retVal, User)
         return (User)retVal
@@ -107,10 +111,10 @@ class UserAdapterService extends CoreAdapterService  {
      * @param userId The unique id of the user
      * @param enable if @c true the user is enabled, if @c false the user is disabled
      * @return @c true, if the enable state was changed, @c false if the user was already in @p enable state
-     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     * @throws UserNotFoundException If the user specified by @p userId does not exist
      */
     @Profiled(tag="userAdapterService.enableUser")
-    Boolean enableUser(Long userId, Boolean enable) throws IllegalArgumentException {
+    Boolean enableUser(Long userId, Boolean enable) throws UserNotFoundException {
         def retVal = send("enableUser", [userId, enable])
         validateReturnValue(retVal, Boolean)
         return (Boolean)retVal
@@ -121,10 +125,10 @@ class UserAdapterService extends CoreAdapterService  {
      * @param userId The unique id of the user
      * @param lock if @c true the account is locked, if @c false the account is unlocked
      * @return @c true, if the account locked state was changed, @c false if the user was already in @p lock state
-     * @throws IllegalArgumentException If the user specified by @p userId does not exist
+     * @throws UserNotFoundException If the user specified by @p userId does not exist
      */
     @Profiled(tag="userAdapterService.lockAccount")
-    Boolean lockAccount(Long userId, Boolean lock) throws IllegalArgumentException {
+    Boolean lockAccount(Long userId, Boolean lock) throws UserNotFoundException {
         def retVal = send("lockAccount", [userId, lock])
         validateReturnValue(retVal, Boolean)
         return (Boolean)retVal
@@ -138,7 +142,7 @@ class UserAdapterService extends CoreAdapterService  {
      * @throws IllegalArgumentException If the user specified by @p userId does not exist
      */
     @Profiled(tag="userAdapterService.expireAccount")
-    Boolean expireAccount(Long userId, Boolean expire) throws IllegalArgumentException {
+    Boolean expireAccount(Long userId, Boolean expire) throws UserNotFoundException {
         def retVal = send("expireAccount", [userId, expire])
         validateReturnValue(retVal, Boolean)
         return (Boolean)retVal
@@ -152,7 +156,7 @@ class UserAdapterService extends CoreAdapterService  {
      * @throws IllegalArgumentException If the user specified by @p userId does not exist
      */
     @Profiled(tag="userAdapterService.expirePassword")
-    Boolean expirePassword(Long userId, Boolean expire) throws IllegalArgumentException {
+    Boolean expirePassword(Long userId, Boolean expire) throws UserNotFoundException {
         def retVal = send("expirePassword", [userId, expire])
         validateReturnValue(retVal, Boolean)
         return (Boolean)retVal
@@ -161,10 +165,11 @@ class UserAdapterService extends CoreAdapterService  {
     /**
      * Registers a new User.
      * @param user The new User to register
-     * @throws JummpException Thrown in case the user could not be registered
+     * @throws RegistrationException In case a user with same name already exists
+     * @throws UserInvalidException In case the new user does not validate
      */
     @Profiled(tag="userAdapterService.register")
-    void register(User user) throws JummpException {
+    void register(User user) throws RegistrationException, UserInvalidException {
         validateReturnValue(send("register", user), Boolean)
     }
 
@@ -172,20 +177,20 @@ class UserAdapterService extends CoreAdapterService  {
      * Validates the registration code of a new user.
      * @param username The name of the new user
      * @param code The validation code
-     * @throws JummpException Thrown in case that the validation cannot be performed
+     * @throws UserManagementException Thrown in case that the validation cannot be performed
      */
     @Profiled(tag="userAdapterService.register")
-    void validateRegistration(String username, String code) throws JummpException {
+    void validateRegistration(String username, String code) throws UserManagementException {
         validateReturnValue(send("validateRegistration", [username, code]), Boolean)
     }
 
     /**
      * Request a new password for user identified by @p username.
      * @param username The login id of the user whose password should be reset.
-     * @throws JummpException Thrown if there is no user with @p username
+     * @throws UserNotFoundException Thrown if there is no user with @p username
      */
     @Profiled(tag="userAdapterService.requestPassword")
-    void requestPassword(String username) throws JummpException {
+    void requestPassword(String username) throws UserNotFoundException {
         validateReturnValue(send("requestPassword", username), Boolean)
     }
 
@@ -194,10 +199,10 @@ class UserAdapterService extends CoreAdapterService  {
      * @param code The Password Reset Code
      * @param username The Login Id of the User
      * @param password The new Password
-     * @throws JummpException Thrown in case user is not found or the code is not valid
+     * @throws UserManagementException Thrown in case user is not found or the code is not valid
      */
     @Profiled(tag="userAdapterService.resetPassword")
-    void resetPassword(String code, String username, String password) throws JummpException {
+    void resetPassword(String code, String username, String password) throws UserManagementException {
         validateReturnValue(send("resetPassword", [code, username, password]), Boolean)
     }
 

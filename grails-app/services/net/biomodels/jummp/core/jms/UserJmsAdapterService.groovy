@@ -8,8 +8,11 @@ import org.perf4j.aop.Profiled
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.Authentication
-import net.biomodels.jummp.core.user.UserNotFoundException
+import net.biomodels.jummp.core.user.RegistrationException
 import net.biomodels.jummp.core.user.RoleNotFoundException
+import net.biomodels.jummp.core.user.UserInvalidException
+import net.biomodels.jummp.core.user.UserManagementException
+import net.biomodels.jummp.core.user.UserNotFoundException
 
 /**
  * @short Wrapper class around the UserService exposed to JMS.
@@ -75,7 +78,7 @@ class UserJmsAdapterService extends JmsAdapterService {
             result = true
         } catch (AccessDeniedException e) {
             result = e
-        } catch (IllegalArgumentException e) {
+        } catch (UserInvalidException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -128,7 +131,7 @@ class UserJmsAdapterService extends JmsAdapterService {
             }
         } catch (AccessDeniedException e) {
             result = e
-        } catch (IllegalArgumentException e) {
+        } catch (UserNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -178,7 +181,7 @@ class UserJmsAdapterService extends JmsAdapterService {
             result = userService.enableUser((Long)message[1], (Boolean)message[2])
         } catch (AccessDeniedException e) {
             result = e
-        } catch (IllegalArgumentException e) {
+        } catch (UserNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -204,7 +207,7 @@ class UserJmsAdapterService extends JmsAdapterService {
             result = userService.lockAccount((Long)message[1], (Boolean)message[2])
         } catch (AccessDeniedException e) {
             result = e
-        } catch (IllegalArgumentException e) {
+        } catch (UserNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -230,7 +233,7 @@ class UserJmsAdapterService extends JmsAdapterService {
             result = userService.expireAccount((Long)message[1], (Boolean)message[2])
         } catch (AccessDeniedException e) {
             result = e
-        } catch (IllegalArgumentException e) {
+        } catch (UserNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -256,7 +259,7 @@ class UserJmsAdapterService extends JmsAdapterService {
             result = userService.expirePassword((Long)message[1], (Boolean)message[2])
         } catch (AccessDeniedException e) {
             result = e
-        } catch (IllegalArgumentException e) {
+        } catch (UserNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -283,7 +286,9 @@ class UserJmsAdapterService extends JmsAdapterService {
             result = true
         } catch (AccessDeniedException e) {
             result = e
-        } catch (JummpException e) {
+        } catch (RegistrationException e) {
+            result = e
+        } catch (UserInvalidException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -310,7 +315,7 @@ class UserJmsAdapterService extends JmsAdapterService {
             result = true
         } catch (AccessDeniedException e) {
             result = e
-        } catch (JummpException e) {
+        } catch (UserManagementException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -337,7 +342,7 @@ class UserJmsAdapterService extends JmsAdapterService {
             result = true
         } catch (AccessDeniedException e) {
             result = e
-        } catch (JummpException e) {
+        } catch (UserNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -364,7 +369,7 @@ class UserJmsAdapterService extends JmsAdapterService {
             result = true
         } catch (AccessDeniedException e) {
             result = e
-        } catch (JummpException e) {
+        } catch (UserManagementException e) {
             result = e
         } finally {
             restoreAuthentication()
