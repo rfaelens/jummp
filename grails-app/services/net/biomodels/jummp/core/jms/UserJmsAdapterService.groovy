@@ -282,8 +282,7 @@ class UserJmsAdapterService extends JmsAdapterService {
         def result
         try {
             setAuthentication((Authentication)message[0])
-            userService.register((User)message[1])
-            result = true
+            result = userService.register((User)message[1])
         } catch (AccessDeniedException e) {
             result = e
         } catch (RegistrationException e) {

@@ -180,11 +180,12 @@ class UserServiceTests extends JummpIntegrationTestCase {
             userService.register(user)
         }
         ConfigurationHolder.config.jummp.security.anonymousRegistration = true
-        userService.register(user)
+        Long id = userService.register(user)
         shouldFail(RegistrationException) {
             userService.register(user)
         }
         User registeredUser = User.findByUsername("register")
+        assertEquals(registeredUser.id, id)
         assertFalse(registeredUser.enabled)
         assertFalse(registeredUser.accountLocked)
         assertFalse(registeredUser.accountExpired)
@@ -200,8 +201,9 @@ class UserServiceTests extends JummpIntegrationTestCase {
         authenticateAsAdmin()
         ConfigurationHolder.config.jummp.security.anonymousRegistration = false
         user.username = "register2"
-        userService.register(user)
+        id = userService.register(user)
         User adminRegisteredUser = User.findByUsername("register2")
+        assertEquals(adminRegisteredUser.id, id)
         assertTrue(adminRegisteredUser.enabled)
         assertFalse(adminRegisteredUser.accountLocked)
         assertFalse(adminRegisteredUser.accountExpired)

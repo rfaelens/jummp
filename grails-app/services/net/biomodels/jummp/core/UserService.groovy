@@ -235,12 +235,13 @@ class UserService {
      * In case LDAP is used as an authentication backend, it is not possible to save a password, that is an invalid
      * password ("*") is stored in the database.
      * @param user The new User to register
+     * @return Id of new created user
      * @throws RegistrationException In case a user with same name already exists
      * @throws UserInvalidException In case the new user does not validate
      * @see validateRegistration
      */
     @PreAuthorize("isAnonymous() or hasRole('ROLE_ADMIN')")
-    void register(User user) throws RegistrationException, UserInvalidException {
+    Long register(User user) throws RegistrationException, UserInvalidException {
         if (springSecurityService.authentication instanceof AnonymousAuthenticationToken &&
                 !ConfigurationHolder.config.jummp.security.anonymousRegistration) {
             throw new AccessDeniedException("Registration disabled for anonymous users")
@@ -298,6 +299,7 @@ class UserService {
                 body emailBody
             }
         }
+        return User.findByUsername(user.username).id
     }
 
     /**

@@ -165,12 +165,15 @@ class UserAdapterService extends CoreAdapterService  {
     /**
      * Registers a new User.
      * @param user The new User to register
+     * @return Id of new created user
      * @throws RegistrationException In case a user with same name already exists
      * @throws UserInvalidException In case the new user does not validate
      */
     @Profiled(tag="userAdapterService.register")
-    void register(User user) throws RegistrationException, UserInvalidException {
-        validateReturnValue(send("register", user), Boolean)
+    Long register(User user) throws RegistrationException, UserInvalidException {
+        def retVal = send("register", user)
+        validateReturnValue(retVal, Long)
+        return (Long)retVal
     }
 
     /**
