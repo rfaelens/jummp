@@ -34,13 +34,14 @@ class ModelController {
      */
     def index = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "MODELLIST"])
+            render(template: "/templates/page", model: [link: g.createLink(action: "index"), callback: "loadModelListCallback"])
+            return
         }
     }
 
     def show = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "SHOWMODEL", id: params.id])
+            render(template: "/templates/page", model: [link: g.createLink(action: "show", id: params.id), callback: "loadModelTabCallback"])
             return
         }
         ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
@@ -50,7 +51,7 @@ class ModelController {
 
     def summary = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "SHOWMODEL", id: params.id])
+            render(template: "/templates/page", model: [link: g.createLink(action: "show", id: params.id), callback: "loadModelTabCallback"])
             return
         }
         ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
@@ -63,7 +64,7 @@ class ModelController {
      */
     def newRevision = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "ADDREVISION", id: params.id])
+            render(template: "/templates/page", model: [link: g.createLink(action: "show", id: params.id), callback: "loadModelTabCallback", data: "#modelTabs-addRevision"])
             return
         }
         // TODO: verify that user has write access to the Model
@@ -135,7 +136,8 @@ class ModelController {
     @Secured('ROLE_USER')
     def upload = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "UPLOADMODEL"])
+            render(template: "/templates/page", model: [link: g.createLink(action: "upload"), callback: "loadUploadModelCallback"])
+            return
         }
     }
 

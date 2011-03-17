@@ -27,7 +27,7 @@ class ThemeingController {
      */
     def themes = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "THEMES"])
+            render(template: "/templates/page", model: [link: g.createLink(action: "themes"), callback: "loadThemeSelectionCallback"])
             return
         }
         List<String> themeNames = []

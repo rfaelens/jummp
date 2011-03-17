@@ -30,7 +30,8 @@ class RegisterController {
      */
     def index = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "REGISTER"])
+            // TODO: this is currently broken as the callback does not yet exist
+            render(template: "/templates/page", model: [link: g.createLink(action: "index"), callback: "loadRegisterCallback"])
             return
         }
         if (!ConfigurationHolder.config.jummpCore.security.anonymousRegistration) {
@@ -75,7 +76,8 @@ class RegisterController {
      */
     def validate = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "VALIDATE", id: params.id])
+            render(template: "/templates/page", model: [link: g.createLink(action: "validate", id: params.id), callback: "loadValidateRegistrationCallback"])
+            return
         }
         [code: params.id]
     }
@@ -96,7 +98,8 @@ class RegisterController {
      */
     def confirmRegistration = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "CONFIRMREGISTRATION", id: params.id])
+            render(template: "/templates/page", model: [link: g.createLink(action: "confirmRegistration", id: params.id), callback: "loadConfirmRegistrationCallback"])
+            return
         }
         [code: params.id, password: ConfigurationHolder.config.jummpCore.security.registration.ui.userPassword]
     }

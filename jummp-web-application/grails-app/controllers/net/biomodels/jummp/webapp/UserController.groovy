@@ -27,7 +27,8 @@ class UserController {
      */
     def index = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "USER"])
+            render(template: "/templates/page", model: [link: g.createLink(action: "index"), callback: "loadShowUserInfoCallback"])
+            return
         }
         [user: userAdapterService.getCurrentUser(), changePassword: ConfigurationHolder.config.jummpCore.security.ui.changePassword]
     }
@@ -82,7 +83,8 @@ class UserController {
     @Secured('isAnonymous()')
     def passwordForgotten = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "PASSWORDFORGOTTEN"])
+            render(template: "/templates/page", model: [link: g.createLink(action: "passwordForgotten"), callback: "loadPasswordForgottenCallback"])
+            return
         }
     }
 
@@ -111,7 +113,8 @@ class UserController {
     @Secured('isAnonymous()')
     def resetPassword = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "RESETPASSWORD", id: params.id])
+            render(template: "/templates/page", model: [link: g.createLink(action: "resetPassword", id: params.id), callback: "loadResetPasswordCallback"])
+            return
         }
         [code: params.id]
     }

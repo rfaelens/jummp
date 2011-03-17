@@ -32,7 +32,8 @@ class UserAdministrationController {
      */
     def index = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "USERADMINLIST"])
+            render(template: "/templates/page", model: [link: g.createLink(action: "index"), callback: "loadUserListCallback"])
+            return
         }
     }
 
@@ -119,7 +120,7 @@ class UserAdministrationController {
      */
     def show = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "USERADMINSHOW", id: params.id])
+            render(template: "/templates/page", model: [link: g.createLink(action: "show", id: params.id), callback: "loadAdminUserCallback"])
             return
         }
         [user: userAdapterService.getUser(params.id as Long), roles: userAdapterService.getAllRoles(), userRoles: userAdapterService.getRolesForUser(params.id as Long)]
@@ -170,7 +171,7 @@ class UserAdministrationController {
      */
     def register = {
         if (!springSecurityService.isAjax(request)) {
-            redirect(controller: "home", params: [redirect: "USERADMINREGISTER", id: params.id])
+            render(template: "/templates/page", model: [link: g.createLink(action: "register", id: params.id), callback: "loadAdminRegisterCallback"])
             return
         }
         [password: false]
