@@ -592,3 +592,28 @@ function adminRegisterCallback(data) {
         loadView(createLink("userAdministration", "show", data.user), loadAdminUserCallback);
     }
 }
+
+/**
+ * View logic for /register/confirmRegistration
+ */
+function loadConfirmRegistrationCallback() {
+    $("#body form div input").button();
+    $("#body form div input").click(function() {
+       submitForm($("#confirm-registration-form"), createLink("register", "performConfirmRegistration"), confirmRegistrationCallback);
+    });
+}
+
+/**
+ * Callback for successful form submission to /register/performConfirmRegistration.
+ * @param data JSON object returned by server
+ */
+function confirmRegistrationCallback(data) {
+    if (data.error) {
+        showErrorMessage([data.code, data.username, data.password, data.verifyPassword]);
+        setErrorState("#confirm-registration-form-username", data.username);
+        setErrorState("#confirm-registration-form-password", data.password);
+        setErrorState("#confirm-registration-form-verifyPassword", data.verifyPassword);
+    } else if (data.success) {
+        $("#body").html("<p>" + i18n.user.register.validate.success + "</p>");
+    }
+}

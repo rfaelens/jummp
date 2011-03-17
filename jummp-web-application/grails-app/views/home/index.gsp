@@ -62,6 +62,11 @@
             loadView("${g.createLink(controller: 'register', action: 'validate', id: params.id)}", loadValidateRegistrationCallback);
 <%
         break
+    case "CONFIRMREGISTRATION":
+%>
+            loadView("${g.createLink(controller: 'register', action: 'confirmRegistration', id: params.id)}", loadConfirmRegistrationCallback);
+<%
+        break
     case "RESETPASSWORD":
 %>
             loadView("${g.createLink(controller: 'user', action: 'resetPassword', id: params.id)}", loadResetPasswordCallback);

@@ -92,6 +92,43 @@ class RegisterController {
     }
 
     /**
+     * Action rendering the markup for account confirmation after registration by admin
+     */
+    def confirmRegistration = {
+        if (!springSecurityService.isAjax(request)) {
+            redirect(controller: "home", params: [redirect: "CONFIRMREGISTRATION", id: params.id])
+        }
+        [code: params.id, password: ConfigurationHolder.config.jummpCore.security.registration.ui.userPassword]
+    }
+
+    /**
+     * Action for performing the actual account confirmation after registration by admin
+     */
+    def performConfirmRegistration = { ConfirmRegistrationCommand cmd ->
+        def data = [:]
+        if (cmd.hasErrors()) {
+            data.put("error", true)
+            data.put("username", resolveErrorMessage(cmd, "username", "Username"))
+            data.put("code", resolveErrorMessage(cmd, "code", "Confirmation Code"))
+            data.put("password", resolveErrorMessage(cmd, "password", "Password"))
+            data.put("verifyPassword", resolveErrorMessage(cmd, "verifyPassword", "Password Verification"))
+        } else {
+            try {
+                if (cmd.password) {
+                    userAdapterService.validateAdminRegistration(cmd.username, cmd.code, cmd.password)
+                } else {
+                    userAdapterService.validateAdminRegistration(cmd.username, cmd.code)
+                }
+                data.put("success", true)
+            } catch (UserManagementException e) {
+                data.clear()
+                data.put("error", e.message)
+            }
+        }
+        render data as JSON
+    }
+
+    /**
      * Resolves the error message for a field error
      * @param cmd The RegistrationCommand for resolving the errors
      * @param field The field to be tested
@@ -107,6 +144,20 @@ class RegisterController {
                 return g.message(code: "user.register.error.${field}.invalid")
             case "email.invalid":
                 return g.message(code: "user.register.error.${field}.invalid")
+            default:
+                return g.message(code: "error.unknown", args: [description])
+            }
+        }
+        return null
+    }
+
+    private String resolveErrorMessage(ConfirmRegistrationCommand cmd, String field, String description) {
+        if (cmd.errors.getFieldError(field)) {
+            switch (cmd.errors.getFieldError(field).code) {
+            case "blank":
+                return g.message(code: "user.register.confirm.error.${field}.blank")
+            case "validator.invalid":
+                return g.message(code: "user.register.confirm.error.${field}.invalid")
             default:
                 return g.message(code: "error.unknown", args: [description])
             }
@@ -147,5 +198,32 @@ class RegistrationCommand implements Serializable {
                 password: this.password,
                 email: this.email,
                 userRealName: this.userRealName)
+    }
+}
+
+/**
+ * @short Command object for performConfirmRegistration action.
+ */
+class ConfirmRegistrationCommand implements Serializable {
+    private static final long serialVersionUID = 1L
+    String username
+    String code
+    String password
+    String verifyPassword
+
+
+    static constraints = {
+        username(nullable: false, blank: false)
+        code(nullable: false, blank: false)
+        password(nullable: true, blank: false, validator: { password ->
+            if (ConfigurationHolder.config.jummpCore.security.registration.ui.userPassword) {
+                return password != null
+            } else {
+                return password == null
+            }
+        })
+        verifyPassword(nullable: true, validator: { verifyPassword, cmd ->
+            return cmd.password == verifyPassword
+        })
     }
 }
