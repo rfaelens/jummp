@@ -334,6 +334,53 @@ class UserService {
     }
 
     /**
+     * Validates the registration code of a new user registered by an administrator.
+     * In opposite to @link validateAdministration the user's account is already enabled but
+     * does not yet have a valid password and the password is set to expired.
+     * This method allows the registered user to set himself a password (in case LDAP is not used).
+     * The expiration of the password is removed.
+     * @param username The name of the new user
+     * @param code The validation code
+     * @param password The new password, may be @c null in that case an invalid password is set
+     * @throws UserManagementException Thrown in case that the validation cannot be performed
+     */
+    @PreAuthorize("isAnonymous()")
+    void validateAdminRegistration(String username, String code, String password) throws UserManagementException {
+        User user = User.findByUsername(username)
+        if (!user) {
+            throw new UserNotFoundException(username)
+        }
+        if (user.registrationCode != code) {
+            throw new UserCodeInvalidException(username, user.id, code)
+        }
+        if (!user.registrationInvalidation || user.registrationInvalidation.before(new Date())) {
+            throw new UserCodeExpiredException(username, user.id)
+        }
+        if (!ConfigurationHolder.config.jummp.security.ldap.enabled) {
+            if (password) {
+                user.password = springSecurityService.encodePassword(password, null)
+            } else {
+                user.password = "*"
+            }
+        }
+        user.passwordExpired = false
+        user.registrationCode = null
+        user.registrationInvalidation = null
+        user.save(flush: true)
+    }
+
+    /**
+     * Overloaded method for convenience for not setting a password.
+     * @param username The name of the new user
+     * @param code The validation code
+     * @throws UserManagementException Thrown in case that the validation cannot be performed
+     */
+    @PreAuthorize("isAnonymous()")
+    void validateAdminRegistration(String username, String code) throws UserManagementException {
+        this.validateAdminRegistration(username, code, null)
+    }
+
+    /**
      * Request a new password for user identified by @p username.
      * This method generates a unique token to reset the password and sends it to
      * the user's email address.

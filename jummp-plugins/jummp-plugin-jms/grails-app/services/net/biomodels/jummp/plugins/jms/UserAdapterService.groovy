@@ -188,6 +188,29 @@ class UserAdapterService extends CoreAdapterService  {
     }
 
     /**
+     * Validates the registration code of a new user registered by an admin.
+     * @param username The name of the new user
+     * @param code The validation code
+     * @throws UserManagementException Thrown in case that the validation cannot be performed
+     */
+    @Profiled(tag="userAdapterService.validateAdminRegistration")
+    void validateAdminRegistration(String username, String code) throws UserManagementException {
+        validateReturnValue(send("validateAdminRegistration", [username, code]), Boolean)
+    }
+
+    /**
+     * Validates the registration code of a new user registered by an admin.
+     * @param username The name of the new user
+     * @param code The validation code
+     * @param password The user's new password
+     * @throws UserManagementException Thrown in case that the validation cannot be performed
+     */
+    @Profiled(tag="userAdapterService.validateAdminRegistration")
+    void validateAdminRegistration(String username, String code, String password) throws UserManagementException {
+        validateReturnValue(send("validateAdminRegistration", [username, code, password]), Boolean)
+    }
+
+    /**
      * Request a new password for user identified by @p username.
      * @param username The login id of the user whose password should be reset.
      * @throws UserNotFoundException Thrown if there is no user with @p username

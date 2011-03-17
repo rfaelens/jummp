@@ -323,6 +323,38 @@ class UserJmsAdapterService extends JmsAdapterService {
     }
 
     /**
+     * Wrapper around UserService.validateAdminRegistration
+     * @param message List consisting of Authentication, String and String or Authentication, String, String and String
+     * @return Boolean, AccessDeniedException, UserManagementException or IllegalArgumentException
+     */
+    @Queue
+    @Profiled(tag="userJmsAdapterService.validateAdminRegistration")
+    def validateAdminRegistration(def message) {
+        if (!verifyMessage(message, [Authentication, String, String]) &&
+                !verifyMessage(message, [Authentication, String, String, String])) {
+            return new IllegalArgumentException("Authentication, String and String or Authentication, String, String and String as arguments expected")
+        }
+
+        def result
+        try {
+            setAuthentication((Authentication)message[0])
+            if (message.size() == 3) {
+                userService.validateAdminRegistration((String)message[1], (String)message[2])
+            } else {
+                userService.validateAdminRegistration((String)message[1], (String)message[2], (String)message[3])
+            }
+            result = true
+        } catch (AccessDeniedException e) {
+            result = e
+        } catch (UserManagementException e) {
+            result = e
+        } finally {
+            restoreAuthentication()
+        }
+        return result
+    }
+
+    /**
      * Wrapper around UserSerivce.requestPassword
      * @param message List consisting of Authentication and String
      * @return Boolean, AccessDeniedException, JummpException of IllegalArgumentException
