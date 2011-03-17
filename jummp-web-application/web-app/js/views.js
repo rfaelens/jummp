@@ -565,3 +565,30 @@ function loadAdminUserCallback() {
     });
     positionAreas();
 }
+
+/**
+ * View logic for /userAdministration/register
+ */
+function loadAdminRegisterCallback() {
+    $("#body form div input").button();
+    $("#body form div input:button").click(function() {
+        submitForm($("#registerForm"), createLink("userAdministration", "performRegistration"), adminRegisterCallback);
+    })
+}
+
+/**
+ * Callback for successful form submission to /userAdministration/performRegistration.
+ * In success case the edit user view is loaded.
+ * @param data JSON object returned by server
+ */
+function adminRegisterCallback(data) {
+    if (data.error) {
+        showErrorMessage([data.username, data.email, data.userRealName]);
+        setErrorState("#register-form-username", data.username);
+        setErrorState("#register-form-email", data.email);
+        setErrorState("#register-form-name", data.userRealName);
+    } else if (data.success) {
+        showInfoMessage(i18n.userAdministration.register.success.replace(/_CODE_/, data.user), 20000);
+        loadView(createLink("userAdministration", "show", data.user), loadAdminUserCallback);
+    }
+}

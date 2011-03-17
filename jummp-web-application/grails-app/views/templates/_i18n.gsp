@@ -79,6 +79,9 @@ var i18n = {
     },
     userAdministration: {
         success: "${g.message(code: 'user.administration.userRole.success')}",
+        register: {
+            success: "${g.message(code: 'user.administration.register.success', args: ['_CODE_'])}"
+        },
         ui: {
             addRole: "${g.message(code: 'user.administration.userRole.ui.addRole')}",
             removeRole: "${g.message(code: 'user.administration.userRole.ui.removeRole')}"

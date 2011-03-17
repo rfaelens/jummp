@@ -2,8 +2,10 @@ package net.biomodels.jummp.webapp.administration
 
 import grails.plugins.springsecurity.Secured
 import grails.converters.JSON
+import net.biomodels.jummp.core.JummpException
 import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.core.user.RoleNotFoundException
+import net.biomodels.jummp.plugins.security.User
 
 /**
  * @short Controller for user management.
@@ -162,6 +164,63 @@ class UserAdministrationController {
         }
         render data as JSON
     }
+
+    /**
+     * Action to render the view to register a new user as admin
+     */
+    def register = {
+        if (!springSecurityService.isAjax(request)) {
+            redirect(controller: "home", params: [redirect: "USERADMINREGISTER", id: params.id])
+            return
+        }
+        [password: false]
+    }
+
+    /**
+     * Action to perform the registration of a new user as admin
+     */
+    def performRegistration = { RegistrationCommand cmd ->
+        def data = [:]
+        if (cmd.hasErrors()) {
+            data.put("error", true)
+            data.put("username", resolveErrorMessage(cmd, "username", "User Name"))
+            data.put("email", resolveErrorMessage(cmd, "email", "Email"))
+            data.put("userRealName", resolveErrorMessage(cmd, "userRealName", "Name"))
+        } else {
+            try {
+                data.put("user", userAdapterService.register(cmd.toUser()))
+                data.put("success", true)
+            } catch (JummpException e) {
+                data.clear()
+                data.put("error", true)
+                data.put("username", e.message)
+            }
+        }
+        render data as JSON
+    }
+
+    /**
+     * Resolves the error message for a field error
+     * @param cmd The RegistrationCommand for resolving the errors
+     * @param field The field to be tested
+     * @param description A descriptive name of the field to be passed to unknown errors
+     * @return The resolved error message or @c null if there is no error
+     */
+    private String resolveErrorMessage(RegistrationCommand cmd, String field, String description) {
+        if (cmd.errors.getFieldError(field)) {
+            switch (cmd.errors.getFieldError(field).code) {
+            case "blank":
+                return g.message(code: "user.administration.register.error.${field}.blank")
+            case "validator.invalid":
+                return g.message(code: "user.administration.register.error.${field}.invalid")
+            case "email.invalid":
+                return g.message(code: "user.administration.register.error.${field}.invalid")
+            default:
+                return g.message(code: "error.unknown", args: [description])
+            }
+        }
+        return null
+    }
 }
 
 /**
@@ -174,5 +233,24 @@ class AddRemoveRoleCommand {
     static constraints = {
         id(nullable: false)
         userId(nullable: false)
+    }
+}
+
+/**
+ * @short Command object for User registration
+ */
+class RegistrationCommand {
+    String username
+    String email
+    String userRealName
+
+    static constraints = {
+        username(nullable: false, blank: false)
+        email(nullable: false, email: true, blank: false)
+        userRealName(nullable: false, blank: false)
+    }
+
+    User toUser() {
+        return new User(username: this.username, email: this.email, userRealName: this.userRealName)
     }
 }
