@@ -438,7 +438,9 @@ class UserService {
         if (!role) {
             throw new RoleNotFoundException(roleId)
         }
-        UserRole.create(user, role, true)
+        if (!UserRole.get(userId, roleId)) {
+            UserRole.create(user, role, true)
+        }
     }
 
     /**

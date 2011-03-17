@@ -2,10 +2,13 @@ package net.biomodels.jummp.core
 
 import grails.test.*
 import org.springframework.security.authentication.BadCredentialsException
+import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.UserRole
 import org.springframework.security.access.AccessDeniedException
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import net.biomodels.jummp.core.user.RegistrationException
+import net.biomodels.jummp.core.user.RoleNotFoundException
 import net.biomodels.jummp.core.user.UserCodeExpiredException
 import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserNotFoundException
@@ -250,5 +253,99 @@ class UserServiceTests extends JummpIntegrationTestCase {
         shouldFail(RegistrationException) {
             userService.validateRegistration("register", registeredUser.registrationCode)
         }
+    }
+
+    void testGetAllRoles() {
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            userService.getAllRoles()
+        }
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            userService.getAllRoles()
+        }
+        authenticateAsAdmin()
+        List<Role> roles = userService.getAllRoles()
+        assertArrayEquals([Role.findByAuthority("ROLE_USER"), Role.findByAuthority("ROLE_ADMIN")].toArray(), roles.toArray())
+    }
+
+    void testGetRolesForUser() {
+        User user = User.findByUsername("testuser")
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            userService.getRolesForUser(user.id)
+        }
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            userService.getRolesForUser(user.id)
+        }
+        authenticateAsAdmin()
+        assertTrue(userService.getRolesForUser(0).isEmpty())
+        assertArrayEquals([Role.findByAuthority("ROLE_USER")].toArray(), userService.getRolesForUser(user.id).toArray())
+        User admin = User.findByUsername("admin")
+        assertArrayEquals([Role.findByAuthority("ROLE_USER"), Role.findByAuthority("ROLE_ADMIN")].toArray(), userService.getRolesForUser(admin.id).toArray())
+    }
+
+    void testAddRoleToUser() {
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            userService.addRoleToUser(0, 0)
+        }
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            userService.addRoleToUser(0, 0)
+        }
+        authenticateAsAdmin()
+        shouldFail(UserNotFoundException) {
+            userService.addRoleToUser(0, 0)
+        }
+        User user = User.findByUsername("testuser")
+        shouldFail(RoleNotFoundException) {
+            userService.addRoleToUser(user.id, 0)
+        }
+        Role role = Role.findByAuthority("ROLE_USER")
+        Role adminRole = Role.findByAuthority("ROLE_ADMIN")
+        // adding a role to a user who already has the role should not change anything
+        assertNotNull(UserRole.get(user.id, role.id))
+        userService.addRoleToUser(user.id, role.id)
+        assertNotNull(UserRole.get(user.id, role.id))
+        // adding a role not yet added to the user should change it
+        assertNull(UserRole.get(user.id, adminRole.id))
+        userService.addRoleToUser(user.id, adminRole.id)
+        assertNotNull(UserRole.get(user.id, adminRole.id))
+    }
+
+    void testRemoveRoleFromUser() {
+        authenticateAnonymous()
+        shouldFail(AccessDeniedException) {
+            userService.removeRoleFromUser(0, 0)
+        }
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            userService.removeRoleFromUser(0, 0)
+        }
+        authenticateAsAdmin()
+        shouldFail(UserNotFoundException) {
+            userService.removeRoleFromUser(0, 0)
+        }
+        User user = User.findByUsername("testuser")
+        shouldFail(RoleNotFoundException) {
+            userService.removeRoleFromUser(user.id, 0)
+        }
+        Role role = Role.findByAuthority("ROLE_USER")
+        Role adminRole = Role.findByAuthority("ROLE_ADMIN")
+        // removing a role from a user who does not have the role should not change anything
+        assertNull(UserRole.get(user.id, adminRole.id))
+        userService.removeRoleFromUser(user.id, adminRole.id)
+        assertNull(UserRole.get(user.id, adminRole.id))
+        // removing a role the user has should change it
+        assertNotNull(UserRole.get(user.id, role.id))
+        userService.removeRoleFromUser(user.id, role.id)
+        assertNull(UserRole.get(user.id, role.id))
+        // just once - add it and remove it
+        userService.addRoleToUser(user.id, role.id)
+        assertNotNull(UserRole.get(user.id, role.id))
+        userService.removeRoleFromUser(user.id, role.id)
+        assertNull(UserRole.get(user.id, role.id))
     }
 }
