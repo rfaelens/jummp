@@ -617,3 +617,40 @@ function confirmRegistrationCallback(data) {
         $("#body").html("<p>" + i18n.user.register.validate.success + "</p>");
     }
 }
+
+/**
+ * Wrapper around loadView register
+ */
+function showRegisterView() {
+    loadView(createLink("register", "index"), loadRegistrationCallback);
+}
+
+/**
+ * View logic for /register/
+ */
+function loadRegistrationCallback() {
+    $("#body form div input").button();
+    $("#body form div input").click(function() {
+        submitForm($("#registerForm"), createLink("register", "register"), registrationCallback);
+    });
+}
+
+/**
+ * Callback for successful for submission to /register/register.
+ * @param data JSON object returned by server
+ */
+function registrationCallback(data) {
+    if (data.success) {
+        showInfoMessage(i18n.user.register.success, 20000);
+    } else if (data.error) {
+        if (data.error != true) {
+            showErrorMessage(data.error);
+        }
+        showErrorMessage([data.username, data.password,  data.verifyPassword, data.email, data.userRealName]);
+        setErrorState("#register-form-username", data.username);
+        setErrorState("#register-form-password", data.password);
+        setErrorState("#register-form-verifyPassword", data.verifyPassword);
+        setErrorState("#register-form-email", data.email);
+        setErrorState("#register-form-name", data.userRealName);
+    }
+}

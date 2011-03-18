@@ -30,8 +30,7 @@ class RegisterController {
      */
     def index = {
         if (!springSecurityService.isAjax(request)) {
-            // TODO: this is currently broken as the callback does not yet exist
-            render(template: "/templates/page", model: [link: g.createLink(action: "index"), callback: "loadRegisterCallback"])
+            render(template: "/templates/page", model: [link: g.createLink(action: "index"), callback: "loadRegistrationCallback"])
             return
         }
         if (!ConfigurationHolder.config.jummpCore.security.anonymousRegistration) {
