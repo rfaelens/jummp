@@ -96,7 +96,7 @@ class UserService {
     @Profiled(tag="userService.getCurrentUser")
     @PreAuthorize("hasRole('ROLE_USER')")
     User getCurrentUser() {
-        return ((User)springSecurityService.getCurrentUser()).sanitizedUser()
+        return User.findByUsername(springSecurityService.authentication.principal.username).sanitizedUser()
     }
 
     /**
