@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <menu>
     <menuItem>
         <name>Models</name>
@@ -21,9 +22,6 @@
     </menuItem>
     <menuItem>
         <name>Your Account</name>
-        <visibleTo>
-            <role>ROLE_USER</role>
-        </visibleTo>
         <subMenu>
             <menuItem>
                 <name>Settings</name>
@@ -36,12 +34,12 @@
                 <javaScript>logout()</javaScript>
             </menuItem>
         </subMenu>
+        <visibleTo>
+            <role>ROLE_USER</role>
+        </visibleTo>
     </menuItem>
     <menuItem>
         <name>Administration</name>
-        <visibleTo>
-            <role>ROLE_ADMIN</role>
-        </visibleTo>
         <subMenu>
             <menuItem>
                 <name>User Administration</name>
@@ -62,12 +60,12 @@
                 <viewCallback>loadThemeSelectionCallback</viewCallback>
             </menuItem>
         </subMenu>
+        <visibleTo>
+            <role>ROLE_ADMIN</role>
+        </visibleTo>
     </menuItem>
     <menuItem>
         <name>Login</name>
-        <visibleTo>
-            <role>ROLE_ANONYMOUS</role>
-        </visibleTo>
         <subMenu>
             <menuItem>
                 <name>Login</name>
@@ -86,5 +84,8 @@
                 <viewCallback>loadRegistrationCallback</viewCallback>
             </menuItem>
         </subMenu>
+        <visibleTo>
+            <role>ROLE_ANONYMOUS</role>
+        </visibleTo>
     </menuItem>
 </menu>
