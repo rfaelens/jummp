@@ -464,17 +464,50 @@ function handleError(data) {
 }
 
 /**
+ * Reloads the main menu from /menu/
+ */
+function reloadMenu() {
+    $.ajax({
+        url: createLink("menu", "index"),
+        dataType: 'HTML',
+        type: 'GET',
+        cache: 'false',
+        success: function(data) {
+            clearErrorMessages();
+            var json = null;
+            try {
+                json = $.parseJSON(data);
+            } catch (e) {
+                // ignore - this is expected for the case that HTML is retrieved
+            }
+            if (handleError(json)) {
+                // TODO: with jquery 1.5 should be handled by status code function
+                return;
+            }
+            $("#menu").html($("ul.jd_menu", $(data)));
+            $("#menu ul.jd_menu").jdMenu();
+        },
+        error: function(jqXHR) {
+            handleError($.parseJSON(jqXHR.responseText));
+        }
+    });
+}
+
+/**
  * Global document initialization.
  * Connects all the global events like login/logout.
  */
 $(document).ready(function() {
+    $("#menu ul.jd_menu").jdMenu();
     $(document).bind("logout", function() {
         showInfoMessage(i18n.logout.successful, 20000);
         switchUserInformation(false);
+        reloadMenu();
     });
     $(document).bind("login", function(event, username) {
         showInfoMessage(i18n.login.successful, 20000);
         switchUserInformation(true, username);
+        reloadMenu();
     });
     // create Ajax Login Dialog
     // TODO: maybe delay till first time used?

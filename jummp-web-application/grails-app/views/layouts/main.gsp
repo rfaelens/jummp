@@ -5,6 +5,7 @@
         <title><g:layoutTitle default="Grails" /></title>
         <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
         <link rel="stylesheet" href="${resource(dir:'css', file:'jquery.cluetip.css')}" type="text/css" />
+        <link rel="stylesheet" href="${resource(dir:'css', file:'jquery.jdMenu.css')}" type="text/css" />
         <link rel="stylesheet" href="${resource(dir:'css', file:'jummp.css')}" type="text/css"/>
         <g:render template="/templates/i18n"/>
         <g:javascript library="jquery" plugin="jquery"/>
@@ -12,6 +13,11 @@
         <g:javascript src="jquery/jquery.cluetip.js"/>
         <g:javascript src="jquery/jquery.blockUI.js"/>
         <g:javascript src="jquery/jquery.form.js"/>
+        %{--Required for jdMenu--}%
+        <g:javascript src="jquery/jquery.dimensions.js"/>
+        <g:javascript src="jquery/jquery.positionBy.js"/>
+        <g:javascript src="jquery/jquery.bgiframe.js"/>
+        <g:javascript src="jquery/jquery.jdMenu.js"/>
 <%
 String themeName = null
 if (params.theme) {
@@ -43,6 +49,7 @@ if (!themeName || !(new File(ServletContextHolder.servletContext.getRealPath("jq
             <span class="ui-icon ui-icon-info" rel="icon"></span>
             <ul></ul>
         </div>
+        <jummp:menu/>
         <g:layoutBody />
     </body>
 </html>
