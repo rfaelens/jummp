@@ -5,6 +5,7 @@ import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.plugins.security.UserRole
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.perf4j.aop.Profiled
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.AnonymousAuthenticationToken
@@ -53,6 +54,7 @@ class UserService {
      * @throws BadCredentialsException if @p oldPassword is incorrect
      */
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.changePassword")
     void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {
         User user = (User)springSecurityService.getCurrentUser()
         if (user.password != springSecurityService.encodePassword(oldPassword, null)) {
@@ -74,6 +76,7 @@ class UserService {
      * @throws UserInvalidException If the modified user does not validate
      */
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.editUser")
     @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.name==#user.username")
     void editUser(User user) throws UserInvalidException {
         User origUser = User.findByUsername(user.username)
@@ -90,6 +93,7 @@ class UserService {
      * @return The current (security sanitized) user
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="userService.getCurrentUser")
     @PreAuthorize("hasRole('ROLE_USER')")
     User getCurrentUser() {
         return ((User)springSecurityService.getCurrentUser()).sanitizedUser()
@@ -103,6 +107,7 @@ class UserService {
      * @throws UserNotFoundException Thrown if there is no User for @p username
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="userService.getUser")
     @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.name==#username")
     User getUser(String username) throws UserNotFoundException {
         User user = User.findByUsername(username)
@@ -121,6 +126,7 @@ class UserService {
      * @throws UserNotFoundException Thrown if there is no User for @p username
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="userService.getUser")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     User getUser(Long id) throws UserNotFoundException {
         User user = User.get(id)
@@ -140,6 +146,7 @@ class UserService {
      * @return List of Users ordered by Id
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="userService.getAllUsers")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<User> getAllUsers(Integer offset, Integer count) {
         return User.list([offset: offset, max: Math.min(count, 100)])
@@ -153,6 +160,7 @@ class UserService {
      * @throws UserNotFoundException If the user specified by @p userId does not exist
      */
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.enableUser")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     Boolean enableUser(Long userId, Boolean enable) throws UserNotFoundException {
         User user = User.get(userId)
@@ -176,6 +184,7 @@ class UserService {
      * @throws UserNotFoundException If the user specified by @p userId does not exist
      */
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.lockAccount")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     Boolean lockAccount(Long userId, Boolean lock) throws UserNotFoundException {
         User user = User.get(userId)
@@ -199,6 +208,7 @@ class UserService {
      * @throws UserNotFoundException If the user specified by @p userId does not exist
      */
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.expireAccount")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     Boolean expireAccount(Long userId, Boolean expire) throws UserNotFoundException {
         User user = User.get(userId)
@@ -222,6 +232,7 @@ class UserService {
      * @throws UserNotFoundException If the user specified by @p userId does not exist
      */
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.expirePassword")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     Boolean expirePassword(Long userId, Boolean expire) throws UserNotFoundException {
         User user = User.get(userId)
@@ -253,6 +264,7 @@ class UserService {
      * @see validateRegistration
      */
     @PostLogging(LoggingEventType.CREATION)
+    @Profiled(tag="userService.register")
     @PreAuthorize("isAnonymous() or hasRole('ROLE_ADMIN')")
     Long register(User user) throws RegistrationException, UserInvalidException {
         if (springSecurityService.authentication instanceof AnonymousAuthenticationToken &&
@@ -326,6 +338,7 @@ class UserService {
      * @see register
      */
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.validateRegistration")
     @PreAuthorize("isAnonymous()")
     void validateRegistration(String username, String code) throws UserManagementException {
         User user = User.findByUsername(username)
@@ -359,6 +372,7 @@ class UserService {
      * @throws UserManagementException Thrown in case that the validation cannot be performed
      */
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.validateAdminRegistration")
     @PreAuthorize("isAnonymous()")
     void validateAdminRegistration(String username, String code, String password) throws UserManagementException {
         User user = User.findByUsername(username)
@@ -391,6 +405,7 @@ class UserService {
      * @throws UserManagementException Thrown in case that the validation cannot be performed
      */
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.validateAdminRegistration")
     @PreAuthorize("isAnonymous()")
     void validateAdminRegistration(String username, String code) throws UserManagementException {
         this.validateAdminRegistration(username, code, null)
@@ -405,6 +420,7 @@ class UserService {
      * @throws UserNotFoundException Thrown if there is no user with @p username
      */
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.requestPassword")
     @PreAuthorize("isAnonymous()")
     void requestPassword(String username) throws UserNotFoundException {
         User user = User.findByUsername(username)
@@ -443,6 +459,7 @@ class UserService {
      * @throws UserManagementException Thrown in case user is not found or the code is not valid
      */
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.resetPassword")
     @PreAuthorize("isAnonymous()")
     void resetPassword(String code, String username, String password) throws UserManagementException {
         User user = User.findByUsername(username)
@@ -470,6 +487,7 @@ class UserService {
      * @return List of all Roles
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="userService.getAllRoles")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<Role> getAllRoles() {
         return Role.listOrderById()
@@ -483,6 +501,7 @@ class UserService {
      * @return List of Roles assigned to the user
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="userService.getRolesForUser")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<Role> getRolesForUser(Long id) {
         return Role.executeQuery("SELECT role FROM UserRole AS userRole JOIN userRole.role AS role JOIN userRole.user AS user WHERE user.id=:id ORDER BY role.id", [id: id])
@@ -498,6 +517,7 @@ class UserService {
      * @throws RoleNotFoundException In case there is no role with @p roleId
      */
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.addRoleToUser")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void addRoleToUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException {
         User user = User.get(userId)
@@ -523,6 +543,7 @@ class UserService {
      * @throws RoleNotFoundException In case there is no role with @p roleId
      */
     @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.removeRoleFromUser")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void removeRoleFromUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException {
         User user = User.get(userId)
