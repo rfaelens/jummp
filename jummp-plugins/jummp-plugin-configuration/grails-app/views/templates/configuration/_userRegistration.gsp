@@ -49,6 +49,27 @@
                     <input type="text" name="url" id="url" value="${userRegistration?.url}"/><span>register/validate/{{CODE}}</span>
                 </td>
             </tr>
+            <tr class="prop">
+                <td colspan="2">The following Config Options are for account verification if an Administrator registers a new user account.</td>
+            </tr>
+            <tr class="prop">
+                <td class="name"><label for="activationSubject">Subject for Activation:</label></td>
+                <td class="value ${hasErrors(bean: userRegistration, field: 'activationSubject', 'errors')}">
+                    <input type="text" name="activationSubject" id="activationSubject" value="${userRegistration?.activationSubject}"/>
+                </td>
+            </tr>
+            <tr class="prop">
+                <td class="name"><label for="activationBody">Body for Account Verification:</label></td>
+                <td class="value ${hasErrors(bean: userRegistration, field: 'activationBody', 'errors')}">
+                    <textarea id="activationBody" rows="20" cols="100" name="activationBody">${userRegistration?.activationBody}</textarea>
+                </td>
+            </tr>
+            <tr class="prop">
+                <td class="name"><label for="activationUrl">URL for Account Activation:</label></td>
+                <td class="value ${hasErrors(bean: userRegistration, field: 'activationUrl', 'errors')}">
+                    <input type="text" name="activationUrl" id="activationUrl" value="${userRegistration?.activationUrl}"/><span>register/confirmRegistration/{{CODE}}</span>
+                </td>
+            </tr>
         </tbody>
     </table>
 </div>

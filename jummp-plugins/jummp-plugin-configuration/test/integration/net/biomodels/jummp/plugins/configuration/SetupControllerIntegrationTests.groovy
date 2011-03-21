@@ -95,6 +95,9 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         setupController.params.body = ""
         setupController.params.senderAddress = ""
         setupController.params.adminAddress = ""
+        setupController.params.activationBody = ""
+        setupController.params.activationSubject = ""
+        setupController.params.activationUrl = ""
         signalEvent("next")
         assertFalse(getFlowScope().userRegistration.hasErrors())
         assertCurrentStateEquals("changePassword")

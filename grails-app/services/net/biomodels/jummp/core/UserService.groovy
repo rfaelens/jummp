@@ -275,11 +275,13 @@ class UserService {
             throw new RegistrationException("User with same name already exists", user.username)
         }
         User newUser = user.sanitizedUser()
+        boolean adminRegistration = false
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
             // admin user cannot set the password and creates the account enabled, but with expired password
             newUser.password = "*"
             newUser.enabled = true
             newUser.passwordExpired = true
+            adminRegistration = true
         } else {
             if (ConfigurationHolder.config.jummp.security.ldap.enabled) {
                 // disable password for ldap
@@ -313,14 +315,21 @@ class UserService {
                 recipient = ConfigurationHolder.config.jummp.security.registration.email.adminAddress
             }
             String url = ConfigurationHolder.config.jummp.security.registration.verificationURL
-            url = url.replace("{{CODE}}", newUser.registrationCode)
             String emailBody = ConfigurationHolder.config.jummp.security.registration.email.body
+            String emailSubject = ConfigurationHolder.config.jummp.security.registration.email.subject
+            if (adminRegistration) {
+                url = ConfigurationHolder.config.jummp.security.activation.activationURL
+                emailSubject = ConfigurationHolder.config.jummp.security.activation.email.subject
+                emailBody = ConfigurationHolder.config.jummp.security.activation.email.body
+                emailBody = emailBody.replace("{{USERNAME}}", newUser.username)
+            }
+            url = url.replace("{{CODE}}", newUser.registrationCode)
             emailBody = emailBody.replace("{{NAME}}", newUser.userRealName)
             emailBody = emailBody.replace("{{URL}}", url)
             mailService.sendMail {
                 to recipient
                 from ConfigurationHolder.config.jummp.security.registration.email.sender
-                subject ConfigurationHolder.config.jummp.security.registration.email.subject
+                subject emailSubject
                 body emailBody
             }
         }

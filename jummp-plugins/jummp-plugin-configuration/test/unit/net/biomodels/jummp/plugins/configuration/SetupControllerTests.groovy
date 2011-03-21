@@ -308,12 +308,17 @@ class SetupControllerTests extends ControllerUnitTestCase {
         cmd.subject       = null
         cmd.body          = null
         cmd.url           = null
+        cmd.activationSubject = null
+        cmd.activationBody    = null
+        cmd.activationUrl     = null
         assertFalse(cmd.validate())
         assertEquals("nullable", cmd.errors["senderAddress"])
         assertEquals("nullable", cmd.errors["adminAddress"])
         assertEquals("nullable", cmd.errors["subject"])
         assertEquals("nullable", cmd.errors["body"])
-        assertEquals("nullable", cmd.errors["url"])
+        assertEquals("nullable", cmd.errors["activationSubject"])
+        assertEquals("nullable", cmd.errors["activationBody"])
+        assertEquals("nullable", cmd.errors["activationUrl"])
         // now set a minimum for validation
         cmd.registration = true
         cmd.sendEmail = true
@@ -321,6 +326,9 @@ class SetupControllerTests extends ControllerUnitTestCase {
         cmd.subject = ""
         cmd.body = ""
         cmd.url = "test"
+        cmd.activationBody = ""
+        cmd.activationSubject = ""
+        cmd.activationUrl = "foo"
         cmd.senderAddress = "test"
         cmd.adminAddress = "test"
         // test email and url constraint
@@ -328,6 +336,7 @@ class SetupControllerTests extends ControllerUnitTestCase {
         assertEquals("email", cmd.errors["senderAddress"])
         assertEquals("email", cmd.errors["adminAddress"])
         assertEquals("url", cmd.errors["url"])
+        assertEquals("url", cmd.errors["activationUrl"])
         // subject and body should be invalid as they are empty
         assertEquals("validator", cmd.errors["subject"])
         assertEquals("validator", cmd.errors["body"])
@@ -335,10 +344,12 @@ class SetupControllerTests extends ControllerUnitTestCase {
         cmd.senderAddress = ""
         cmd.adminAddress = ""
         cmd.url = ""
+        cmd.activationUrl = ""
         assertFalse(cmd.validate())
         assertEquals("validator", cmd.errors["senderAddress"])
         assertEquals("validator", cmd.errors["adminAddress"])
         assertEquals("validator", cmd.errors["url"])
+        assertEquals("validator", cmd.errors["activationUrl"])
         // disabling sendEmail should pass validation
         cmd.sendEmail = false
         assertTrue(cmd.validate())
@@ -349,6 +360,9 @@ class SetupControllerTests extends ControllerUnitTestCase {
         cmd.subject = "Test"
         cmd.url = "http://www.example.com"
         cmd.body = "Body Test"
+        cmd.activationBody = "Activation Body"
+        cmd.activationSubject = "Activation"
+        cmd.activationUrl = "http://www.example.org"
         assertTrue(cmd.validate())
         // just to be sure
         cmd.sendToAdmin = true

@@ -80,6 +80,9 @@ class ConfigurationController {
     def userRegistration = {
         UserRegistrationCommand cmd = configurationService.loadUserRegistrationConfiguration()
         cmd.url = cmd.url.replace("register/validate/{{CODE}}", "")
+        if (cmd.activationUrl) {
+            cmd.activationUrl = cmd.activationUrl.replace("register/confirmRegistration/{{CODE}}", "")
+        }
         render(view: 'configuration', model: [userRegistration: cmd, title: "User Registration", action: "saveUserRegistration", template: "userRegistration"])
     }
 

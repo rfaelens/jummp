@@ -14,6 +14,9 @@ class UserRegistrationCommand implements Serializable {
     String subject
     String body
     String url
+    String activationSubject
+    String activationBody
+    String activationUrl
 
     static constraints = {
         registration(nullable: true)
@@ -50,6 +53,27 @@ class UserRegistrationCommand implements Serializable {
         url(nullable: false, url: true, validator: { url, cmd ->
             if (cmd.sendEmail) {
                 return (url && !url.isEmpty())
+            } else {
+                return true
+            }
+        })
+        activationSubject(nullable: false, validator: { activationSubject, cmd ->
+            if (cmd.sendEmail) {
+                return (activationSubject && !activationSubject.isEmpty())
+            } else {
+                return true
+            }
+        })
+        activationBody(nullable: false, validator: { activationBody, cmd ->
+            if (cmd.sendEmail) {
+                return (activationBody && !activationBody.isEmpty())
+            } else {
+                return true
+            }
+        })
+        activationUrl(nullable: false, url: true, validator: { activationUrl, cmd ->
+            if (cmd.sendEmail) {
+                return (activationUrl && !activationUrl.isEmpty())
             } else {
                 return true
             }

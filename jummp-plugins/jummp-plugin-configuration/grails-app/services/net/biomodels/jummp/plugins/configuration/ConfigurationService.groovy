@@ -144,6 +144,9 @@ class ConfigurationService implements InitializingBean {
         cmd.url           = properties.getProperty("jummp.security.registration.verificationURL")
         cmd.senderAddress = properties.getProperty("jummp.security.registration.email.sender")
         cmd.adminAddress  = properties.getProperty("jummp.security.registration.email.adminAddress")
+        cmd.activationBody    = properties.getProperty("jummp.security.activation.email.body")
+        cmd.activationSubject = properties.getProperty("jummp.security.activation.email.subject")
+        cmd.activationUrl     = properties.getProperty("jummp.security.activation.activationURL")
         return cmd
     }
 
@@ -366,6 +369,10 @@ class ConfigurationService implements InitializingBean {
             cmd.url = cmd.url + "/"
         }
         cmd.url = cmd.url + "register/validate/{{CODE}}"
+        if (!cmd.activationUrl.endsWith("/")) {
+            cmd.activationUrl = cmd.activationUrl + "/"
+        }
+        cmd.activationUrl = cmd.activationUrl + "register/confirmRegistration/{{CODE}}"
         properties.setProperty("jummp.security.anonymousRegistration", cmd.registration ? "true" : "false")
         properties.setProperty("jummp.security.registration.email.send", cmd.sendEmail ? "true" : "false")
         properties.setProperty("jummp.security.registration.email.sendToAdmin", cmd.sendToAdmin ? "true" : "false")
@@ -374,6 +381,9 @@ class ConfigurationService implements InitializingBean {
         properties.setProperty("jummp.security.registration.email.subject", cmd.subject)
         properties.setProperty("jummp.security.registration.email.body", cmd.body)
         properties.setProperty("jummp.security.registration.verificationURL", cmd.url)
+        properties.setProperty("jummp.security.activation.email.body", cmd.activationBody)
+        properties.setProperty("jummp.security.activation.email.subject", cmd.activationSubject)
+        properties.setProperty("jummp.security.activation.activationURL", cmd.activationUrl)
     }
 
     /**

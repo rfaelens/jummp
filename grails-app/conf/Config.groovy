@@ -200,6 +200,9 @@ if (!(jummpConfig.jummp.security.registration.email.send instanceof ConfigObject
     jummp.security.registration.email.subject      = jummpConfig.jummp.security.registration.email.subject
     jummp.security.registration.email.body         = jummpConfig.jummp.security.registration.email.body
     jummp.security.registration.verificationURL    = jummpConfig.jummp.security.registration.verificationURL
+    jummp.security.activation.email.subject        = jummpConfig.jummp.security.activation.email.subject
+    jummp.security.activation.email.body           = jummpConfig.jummp.security.activation.email.body
+    jummp.security.activation.activationURL        = jummpConfig.jummp.security.activation.activationURL
 } else {
     jummp.security.registration.email.send = false
 }
