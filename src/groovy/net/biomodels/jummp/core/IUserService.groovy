@@ -29,7 +29,8 @@ public interface IUserService {
      * @param newPassword The new password to be used
      * @throws BadCredentialsException if @p oldPassword is incorrect
      */
-    void changePassword(String oldPassword, String newPassword) throws BadCredentialsException    /**
+    void changePassword(String oldPassword, String newPassword) throws BadCredentialsException
+    /**
      * Edit the non-security related parts of a user.
      *
      * This method might be used by an administrator or by the user itself to change the
