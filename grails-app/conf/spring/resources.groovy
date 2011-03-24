@@ -20,6 +20,21 @@ beans = {
         }
     }
 
+    // for DBus
+    dbusManager(net.biomodels.jummp.dbus.DBusManagerImpl)
+    userDBusAdapter(net.biomodels.jummp.dbus.UserDBusAdapterImpl) {
+        userService = ref("userService")
+        dbusManager = dbusManager
+        authenticationHashService = ref("authenticationHashService")
+        objectName = "/User"
+    }
+    applicationDBusAdapter(net.biomodels.jummp.dbus.ApplicationDBusAdapterImpl) {
+        dbusManager = dbusManager
+        authenticationManager = ref("authenticationManager")
+        authenticationHashService = ref("authenticationHashService")
+        objectName = "/Application"
+    }
+
     if (Environment.getCurrent() == Environment.DEVELOPMENT) {
         timingAspect(org.perf4j.log4j.aop.TimingAspect)
     }
