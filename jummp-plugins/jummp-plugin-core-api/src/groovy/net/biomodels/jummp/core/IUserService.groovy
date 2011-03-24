@@ -38,12 +38,12 @@ public interface IUserService {
      * @param user The User with the updated fields
      * @throws net.biomodels.jummp.core.user.UserInvalidException If the modified user does not validate
      */
-    void editUser(User user) throws UserInvalidException
+    void editUser(net.biomodels.jummp.plugins.security.User user) throws UserInvalidException
     /**
      *
      * @return The current (security sanitized) user
      */
-    User getCurrentUser()
+    net.biomodels.jummp.plugins.security.User getCurrentUser()
     /**
      * Retrieves a User object for the given @p username.
      * The returned object is not sanitized and includes any security relevant data.
@@ -52,7 +52,7 @@ public interface IUserService {
      * @return The user
      * @throws UserNotFoundException Thrown if there is no User for @p username
      */
-    User getUser(Long id) throws UserNotFoundException
+    net.biomodels.jummp.plugins.security.User getUser(Long id) throws UserNotFoundException
     /**
      * Retrieves a User object for the given @p username.
      * The returned object is sanitized to not include any security relevant data.
@@ -60,7 +60,7 @@ public interface IUserService {
      * @return The (security sanitized) user
      * @throws UserNotFoundException Thrown if there is no User for @p username
      */
-    User getUser(String username) throws UserNotFoundException
+    net.biomodels.jummp.plugins.security.User getUser(String username) throws UserNotFoundException
     /**
      * Retrieves list of users.
      * This method is only for administrative purpose. It does not sanitize the
@@ -70,7 +70,7 @@ public interface IUserService {
      * @param count Number of Users to return, Maximum is 100
      * @return List of Users ordered by Id
      */
-    List<User> getAllUsers(Integer offset, Integer count)
+    List<net.biomodels.jummp.plugins.security.User> getAllUsers(Integer offset, Integer count)
     /**
      * Enables/Disables the user identified by @p userId
      * @param userId The unique id of the user
@@ -118,7 +118,7 @@ public interface IUserService {
      * @throws UserInvalidException In case the new user does not validate
      * @see validateRegistration
      */
-    Long register(User user) throws RegistrationException, UserInvalidException
+    Long register(net.biomodels.jummp.plugins.security.User user) throws RegistrationException, UserInvalidException
     /**
      * Validates the registration code of a new user.
      * This method validates the validation Code and enables the user identified by @p username.
@@ -172,7 +172,7 @@ public interface IUserService {
      * As this is an admin method it does not provide a paginated version
      * @return List of all Roles
      */
-    List<Role> getAllRoles()
+    List<net.biomodels.jummp.plugins.security.Role> getAllRoles()
     /**
      * Retrieves the Roles for the User identified by @p id.
      *
@@ -180,7 +180,7 @@ public interface IUserService {
      * @param id The user id
      * @return List of Roles assigned to the user
      */
-    List<Role> getRolesForUser(Long id)
+    List<net.biomodels.jummp.plugins.security.Role> getRolesForUser(Long id)
     /**
      * Adds a Role to the user.
      * If the user already has the role, the user is not changed and no feedback for this situation is
