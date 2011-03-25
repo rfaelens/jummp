@@ -1,6 +1,7 @@
 package net.biomodels.jummp.dbus
 
 import org.freedesktop.dbus.DBusSerializable
+import net.biomodels.jummp.plugins.security.User
 
 /**
  * @short Wrapper around User for DBus.
@@ -10,7 +11,7 @@ import org.freedesktop.dbus.DBusSerializable
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @see net.biomodels.jummp.plugins.security.User
  */
-class User implements DBusSerializable {
+class DBusUser implements DBusSerializable {
     Long id
     String username
     String password
@@ -21,7 +22,7 @@ class User implements DBusSerializable {
     Boolean accountLocked
     Boolean passwordExpired
 
-    public User(Long id, String username, String password, String userRealName, String email, Boolean enabled, Boolean accountExpired, Boolean accountLocked, Boolean passwordExpired) {
+    public DBusUser(Long id, String username, String password, String userRealName, String email, Boolean enabled, Boolean accountExpired, Boolean accountLocked, Boolean passwordExpired) {
         this.id = id
         this.username = username
         this.password = password
@@ -33,7 +34,7 @@ class User implements DBusSerializable {
         this.passwordExpired = passwordExpired
     }
 
-    public User () {}
+    public DBusUser () {}
 
     public void deserialize(Long id, String username, String password, String userRealName, String email, Boolean enabled, Boolean accountExpired, Boolean accountLocked, Boolean passwordExpired) {
         this.id = id
@@ -64,8 +65,8 @@ class User implements DBusSerializable {
      * Creates a User from this Wrapper
      * @return A security User
      */
-    public net.biomodels.jummp.plugins.security.User toUser() {
-        net.biomodels.jummp.plugins.security.User user = new net.biomodels.jummp.plugins.security.User()
+    public User toUser() {
+        User user = new User()
         user.id = this.id
         user.username = this.username
         user.password = this.password
@@ -83,8 +84,8 @@ class User implements DBusSerializable {
      * @param u The User to be wrapped
      * @return A DBusSerializable wrapper
      */
-    public static User fromUser(net.biomodels.jummp.plugins.security.User u) {
-        User user = new User()
+    public static DBusUser fromUser(User u) {
+        DBusUser user = new DBusUser()
         user.id = u.id
         user.username = u.username
         user.password = u.password

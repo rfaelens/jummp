@@ -41,6 +41,7 @@ if (new File("jummp-plugins/jummp-plugin-configuration").exists()) {
 if (new File("jummp-plugins/jummp-plugin-sbml").exists()) {
     grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
 }
+grails.plugin.location.'jummp-plugin-dbus' = "jummp-plugins/jummp-plugin-dbus"
 grails.plugin.location.'jummp-plugin-core-api' = "jummp-plugins/jummp-plugin-core-api"
 grails.plugin.location.'jummp-plugin-security' = "jummp-plugins/jummp-plugin-security"
 if (new File("jummp-plugins/jummp-plugin-jms").exists()) {

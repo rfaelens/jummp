@@ -27,8 +27,8 @@ import java.util.List;
 @DBusInterfaceName("net.biomodels.jummp.user")
 public interface UserDBusAdapter extends DBusInterface {
     void changePassword(String authenticationHash, String oldPassword, String newPassword) throws AuthenticationHashNotFoundDBusException;
-    void editUser(String authenticationHash, User user) throws AuthenticationHashNotFoundDBusException;
-    User getCurrentUser(String authenticationHash) throws AuthenticationHashNotFoundDBusException;
+    void editUser(String authenticationHash, DBusUser user) throws AuthenticationHashNotFoundDBusException;
+    DBusUser getCurrentUser(String authenticationHash) throws AuthenticationHashNotFoundDBusException;
 
     /**
      * Wrapper for getAllUsers. Returns List of ids wrapped in a string list.
@@ -43,7 +43,7 @@ public interface UserDBusAdapter extends DBusInterface {
     boolean lockAccount(String authenticationHash, Long userId, boolean lock) throws AuthenticationHashNotFoundDBusException;
     boolean expireAccount(String authenticationHash, Long userId, boolean expire) throws AuthenticationHashNotFoundDBusException;
     boolean expirePassword(String authenticationHash, Long userId, boolean expire) throws AuthenticationHashNotFoundDBusException;
-    Long register(User user);
+    Long register(DBusUser user);
     void validateRegistration(String username, String code);
     void validateAdminRegistration(String username, String code, String password);
     void requestPassword(String username);
@@ -56,7 +56,7 @@ public interface UserDBusAdapter extends DBusInterface {
      * @throws AuthenticationHashNotFoundDBusException if authenticationHash is invalid
      * @throws UserManagementDBusException If user not found
      */
-    public User getUserById(String authenticationHash, Long id) throws AuthenticationHashNotFoundDBusException, UserManagementDBusException;
+    public DBusUser getUserById(String authenticationHash, Long id) throws AuthenticationHashNotFoundDBusException, UserManagementDBusException;
     /**
      * Wrapper around getUser. Needed as DBus does not support method overloading.
      * @param authenticationHash
@@ -65,5 +65,5 @@ public interface UserDBusAdapter extends DBusInterface {
      * @throws AuthenticationHashNotFoundDBusException if authenticationHash is invalid
      * @throws UserManagementDBusException If user not found
      */
-    public User getUserByName(String authenticationHash, String username) throws AuthenticationHashNotFoundDBusException, UserManagementDBusException;
+    public DBusUser getUserByName(String authenticationHash, String username) throws AuthenticationHashNotFoundDBusException, UserManagementDBusException;
 }

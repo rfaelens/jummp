@@ -40,6 +40,9 @@ public class ApplicationDBusAdapterImpl extends AbstractDBusAdapter implements A
             throw new LockedDBusException(e.getMessage());
         } catch (AuthenticationException e) {
             throw new AuthenticationDBusException(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
     }
 

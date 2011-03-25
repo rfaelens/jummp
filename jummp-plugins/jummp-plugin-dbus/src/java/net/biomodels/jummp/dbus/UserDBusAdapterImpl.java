@@ -9,6 +9,7 @@ import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException;
 import net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException;
 import net.biomodels.jummp.dbus.authentication.BadCredentialsDBusException;
 import net.biomodels.jummp.dbus.user.UserManagementDBusException;
+import net.biomodels.jummp.plugins.security.User;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 
@@ -42,7 +43,7 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         }
     }
 
-    public void editUser(String authenticationHash, User user) throws AuthenticationHashNotFoundDBusException {
+    public void editUser(String authenticationHash, DBusUser user) throws AuthenticationHashNotFoundDBusException {
         try {
             setAuthentication(authenticationHash);
             userService.editUser(user.toUser());
@@ -55,10 +56,10 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         }
     }
 
-    public User getCurrentUser(String authenticationHash) throws AuthenticationHashNotFoundDBusException {
+    public DBusUser getCurrentUser(String authenticationHash) throws AuthenticationHashNotFoundDBusException {
         try {
             setAuthentication(authenticationHash);
-            return User.fromUser(userService.getCurrentUser());
+            return DBusUser.fromUser(userService.getCurrentUser());
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } finally {
@@ -70,8 +71,8 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         try {
             setAuthentication(authenticationHash);
             List<String> userNames = new ArrayList<String>();
-            for (net.biomodels.jummp.plugins.security.User u : userService.getAllUsers(offset, count)) {
-                userNames.add(u.getId().toString());
+            for (User u : userService.getAllUsers(offset, count)) {
+                userNames.add(u.domainId().toString());
             }
             return userNames;
         } catch (AccessDeniedException e) {
@@ -133,7 +134,7 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         }
     }
 
-    public Long register(User user) {
+    public Long register(DBusUser user) {
         try {
             setAnonymousAuthentication();
             return userService.register(user.toUser());
@@ -187,11 +188,11 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         }
     }
 
-    public User getUserById(String authenticationHash, Long id) throws AuthenticationHashNotFoundDBusException, UserManagementDBusException {
-        User user = null;
+    public DBusUser getUserById(String authenticationHash, Long id) throws AuthenticationHashNotFoundDBusException, UserManagementDBusException {
+        DBusUser user = null;
         try {
             setAuthentication(authenticationHash);
-            user = User.fromUser(userService.getUser(id));
+            user = DBusUser.fromUser(userService.getUser(id));
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (UserNotFoundException e) {
@@ -202,11 +203,11 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         return user;
     }
 
-    public User getUserByName(String authenticationHash, String username) throws AuthenticationHashNotFoundDBusException, UserManagementDBusException {
-        User user = null;
+    public DBusUser getUserByName(String authenticationHash, String username) throws AuthenticationHashNotFoundDBusException, UserManagementDBusException {
+        DBusUser user = null;
         try {
             setAuthentication(authenticationHash);
-            user = User.fromUser(userService.getUser(username));
+            user = DBusUser.fromUser(userService.getUser(username));
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (UserNotFoundException e) {
