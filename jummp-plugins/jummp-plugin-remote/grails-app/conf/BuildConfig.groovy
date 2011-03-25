@@ -29,7 +29,15 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.13'
     }
 }
-grails.plugin.location.'jummp-plugin-jms' = "../jummp-plugins/jummp-plugin-jms"
-grails.plugin.location.'jummp-plugin-remote' = "../jummp-plugins/jummp-plugin-remote"
-grails.plugin.location.'jummp-plugin-security' = "../jummp-plugins/jummp-plugin-security"
-grails.plugin.location.'jummp-plugin-core-api' = "../jummp-plugins/jummp-plugin-core-api"
+
+// depending on whether a war is generated or test-app is executed the path to the dependency plugin differs
+File directory = new File(".")
+String path = directory.getCanonicalPath()
+if (path.tokenize(File.separatorChar).last() == "jummp") {
+    path = "../../jummp-plugins"
+} else {
+    // are in plugin directory
+    path = ".."
+}
+grails.plugin.location.'jummp-plugin-core-api' = path + File.separator + "jummp-plugin-core-api"
+grails.plugin.location.'jummp-plugin-security' = path + File.separator + "jummp-plugin-security"
