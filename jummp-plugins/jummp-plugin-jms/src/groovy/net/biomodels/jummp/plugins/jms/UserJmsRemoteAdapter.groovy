@@ -39,7 +39,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @throws org.springframework.security.authentication.BadCredentialsException if @p oldPassword is incorrect
      * @todo Maybe better in an own service?
      */
-    @Profiled(tag="userAdapterService.changePassword")
+    @Profiled(tag="UserJmsRemoteAdapter.changePassword")
     public void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {
         validateReturnValue(send("changePassword", [oldPassword, newPassword]), Boolean)
     }
@@ -49,7 +49,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @param user The User with the updated fields
      * @throws UserInvalidException If the modified user does not validate
      */
-    @Profiled(tag="userAdapterService.editUser")
+    @Profiled(tag="UserJmsRemoteAdapter.editUser")
     public void editUser(User user) throws UserInvalidException {
         validateReturnValue(send("editUser", user), Boolean)
     }
@@ -58,7 +58,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      *
      * @return The current (security sanitized) user
      */
-    @Profiled(tag="userAdapterService.getCurrentUser")
+    @Profiled(tag="UserJmsRemoteAdapter.getCurrentUser")
     public User getCurrentUser() {
         def retVal = send("getCurrentUser")
         validateReturnValue(retVal, User)
@@ -71,7 +71,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @return The (security sanitized) user
      * @throws UserNotFoundException Thrown if there is no User for @p username
      */
-    @Profiled(tag="userAdapterService.getUser")
+    @Profiled(tag="UserJmsRemoteAdapter.getUser")
     public User getUser(String username) throws UserNotFoundException {
         def retVal = send("getUser", username)
         validateReturnValue(retVal, User)
@@ -84,7 +84,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @return The (security sanitized) user
      * @throws UserNotFoundException Thrown if there is no User for @p username
      */
-    @Profiled(tag="userAdapterService.getUser")
+    @Profiled(tag="UserJmsRemoteAdapter.getUser")
     public User getUser(Long id) throws UserNotFoundException {
         def retVal = send("getUser", id)
         validateReturnValue(retVal, User)
@@ -100,7 +100,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @param count Number of Users to return, Maximum is 100
      * @return List of Users ordered by Id
      */
-    @Profiled(tag="userAdapterService.getUser")
+    @Profiled(tag="UserJmsRemoteAdapter.getUser")
     public List<User> getAllUsers(Integer offset, Integer count) {
         def retVal = send("getAllUsers", [offset, count])
         validateReturnValue(retVal, List)
@@ -114,7 +114,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @return @c true, if the enable state was changed, @c false if the user was already in @p enable state
      * @throws UserNotFoundException If the user specified by @p userId does not exist
      */
-    @Profiled(tag="userAdapterService.enableUser")
+    @Profiled(tag="UserJmsRemoteAdapter.enableUser")
     Boolean enableUser(Long userId, Boolean enable) throws UserNotFoundException {
         def retVal = send("enableUser", [userId, enable])
         validateReturnValue(retVal, Boolean)
@@ -128,7 +128,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @return @c true, if the account locked state was changed, @c false if the user was already in @p lock state
      * @throws UserNotFoundException If the user specified by @p userId does not exist
      */
-    @Profiled(tag="userAdapterService.lockAccount")
+    @Profiled(tag="UserJmsRemoteAdapter.lockAccount")
     Boolean lockAccount(Long userId, Boolean lock) throws UserNotFoundException {
         def retVal = send("lockAccount", [userId, lock])
         validateReturnValue(retVal, Boolean)
@@ -142,7 +142,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @return @c true, if the account expired state was changed, @c false if the user was already in @p expire state
      * @throws IllegalArgumentException If the user specified by @p userId does not exist
      */
-    @Profiled(tag="userAdapterService.expireAccount")
+    @Profiled(tag="UserJmsRemoteAdapter.expireAccount")
     Boolean expireAccount(Long userId, Boolean expire) throws UserNotFoundException {
         def retVal = send("expireAccount", [userId, expire])
         validateReturnValue(retVal, Boolean)
@@ -156,7 +156,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @return @c true, if the password expired state was changed, @c false if the password was already in @p expire state
      * @throws IllegalArgumentException If the user specified by @p userId does not exist
      */
-    @Profiled(tag="userAdapterService.expirePassword")
+    @Profiled(tag="UserJmsRemoteAdapter.expirePassword")
     Boolean expirePassword(Long userId, Boolean expire) throws UserNotFoundException {
         def retVal = send("expirePassword", [userId, expire])
         validateReturnValue(retVal, Boolean)
@@ -170,7 +170,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @throws RegistrationException In case a user with same name already exists
      * @throws UserInvalidException In case the new user does not validate
      */
-    @Profiled(tag="userAdapterService.register")
+    @Profiled(tag="UserJmsRemoteAdapter.register")
     Long register(User user) throws RegistrationException, UserInvalidException {
         def retVal = send("register", user)
         validateReturnValue(retVal, Long)
@@ -183,7 +183,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @param code The validation code
      * @throws UserManagementException Thrown in case that the validation cannot be performed
      */
-    @Profiled(tag="userAdapterService.register")
+    @Profiled(tag="UserJmsRemoteAdapter.register")
     void validateRegistration(String username, String code) throws UserManagementException {
         validateReturnValue(send("validateRegistration", [username, code]), Boolean)
     }
@@ -194,7 +194,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @param code The validation code
      * @throws UserManagementException Thrown in case that the validation cannot be performed
      */
-    @Profiled(tag="userAdapterService.validateAdminRegistration")
+    @Profiled(tag="UserJmsRemoteAdapter.validateAdminRegistration")
     void validateAdminRegistration(String username, String code) throws UserManagementException {
         validateReturnValue(send("validateAdminRegistration", [username, code]), Boolean)
     }
@@ -206,7 +206,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @param password The user's new password
      * @throws UserManagementException Thrown in case that the validation cannot be performed
      */
-    @Profiled(tag="userAdapterService.validateAdminRegistration")
+    @Profiled(tag="UserJmsRemoteAdapter.validateAdminRegistration")
     void validateAdminRegistration(String username, String code, String password) throws UserManagementException {
         validateReturnValue(send("validateAdminRegistration", [username, code, password]), Boolean)
     }
@@ -216,7 +216,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @param username The login id of the user whose password should be reset.
      * @throws UserNotFoundException Thrown if there is no user with @p username
      */
-    @Profiled(tag="userAdapterService.requestPassword")
+    @Profiled(tag="UserJmsRemoteAdapter.requestPassword")
     void requestPassword(String username) throws UserNotFoundException {
         validateReturnValue(send("requestPassword", username), Boolean)
     }
@@ -228,7 +228,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @param password The new Password
      * @throws UserManagementException Thrown in case user is not found or the code is not valid
      */
-    @Profiled(tag="userAdapterService.resetPassword")
+    @Profiled(tag="UserJmsRemoteAdapter.resetPassword")
     void resetPassword(String code, String username, String password) throws UserManagementException {
         validateReturnValue(send("resetPassword", [code, username, password]), Boolean)
     }
@@ -238,7 +238,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * As this is an admin method it does not provide a paginated version
      * @return List of all Roles
      */
-    @Profiled(tag="userAdapterService.getAllRoles")
+    @Profiled(tag="UserJmsRemoteAdapter.getAllRoles")
     List<Role> getAllRoles() {
         def retVal = send("getAllRoles")
         validateReturnValue(retVal, List)
@@ -252,7 +252,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @param id The user id
      * @return List of Roles assigned to the user
      */
-    @Profiled(tag="userAdapterService.getRolesForUser")
+    @Profiled(tag="UserJmsRemoteAdapter.getRolesForUser")
     List<Role> getRolesForUser(Long id) {
         def retVal = send("getRolesForUser", id)
         validateReturnValue(retVal, List)
@@ -268,7 +268,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @throws UserNotFoundException In case there is no user with @p userId
      * @throws RoleNotFoundException In case there is no role with @p roleId
      */
-    @Profiled(tag="userAdapterService.addRoleToUser")
+    @Profiled(tag="UserJmsRemoteAdapter.addRoleToUser")
     void addRoleToUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException {
         validateReturnValue(send("addRoleToUser", [userId, roleId]), Boolean)
     }
@@ -282,7 +282,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @throws UserNotFoundException In case there is no user with @p userId
      * @throws RoleNotFoundException In case there is no role with @p roleId
      */
-    @Profiled(tag="userAdapterService.removeRoleFromUser")
+    @Profiled(tag="UserJmsRemoteAdapter.removeRoleFromUser")
     void removeRoleFromUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException {
         validateReturnValue(send("removeRoleFromUser", [userId, roleId]), Boolean)
     }
