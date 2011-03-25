@@ -20,6 +20,7 @@ import org.springframework.security.core.authority.GrantedAuthorityImpl
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class DBusAuthentication implements DBusSerializable, Authentication {
+    private static final long serialVersionUID = 1L
     String username
     String hash
     List<String> roles = []
