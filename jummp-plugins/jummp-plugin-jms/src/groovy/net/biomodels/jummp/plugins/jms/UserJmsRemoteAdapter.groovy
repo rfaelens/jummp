@@ -23,7 +23,7 @@ import net.biomodels.jummp.remote.RemoteUserAdapter
  * it uses JMS internally is completely transparent to the users of this service.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class UserAdapterService extends AbstractJmsRemoteAdapter implements RemoteUserAdapter {
+class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUserAdapter {
 
     static transactional = false
     private static final String ADAPTER_SERVICE_NAME = "userJmsAdapter"
