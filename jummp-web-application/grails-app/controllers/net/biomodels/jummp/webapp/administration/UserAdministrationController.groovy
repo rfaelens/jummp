@@ -19,9 +19,9 @@ import net.biomodels.jummp.plugins.security.User
 @Secured('ROLE_ADMIN')
 class UserAdministrationController {
     /**
-     * Dependency Injection of UserAdapterService
+     * Dependency Injection of RemoteUserService
      */
-    def userAdapterService
+    def remoteUserService
     /**
      * Dependency Injection of SpringSecurityService
      */
@@ -56,7 +56,7 @@ class UserAdministrationController {
         dataToRender.iTotalRecords = 10 // TODO: real value from core
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        List users = userAdapterService.getAllUsers(start, length)
+        List users = remoteUserService.getAllUsers(start, length)
         users.each { user ->
             dataToRender.aaData << [user.id, user.username, user.userRealName, user.email, user.enabled, user.accountExpired, user.accountLocked, user.passwordExpired]
         }
@@ -68,7 +68,7 @@ class UserAdministrationController {
      */
     def enable = {
         try {
-            def data = [success: userAdapterService.enableUser(params.id as Long, Boolean.parseBoolean(params.value))]
+            def data = [success: remoteUserService.enableUser(params.id as Long, Boolean.parseBoolean(params.value))]
             render data as JSON
         } catch (IllegalArgumentException e) {
             def data = [error: true, message: e.message]
@@ -81,7 +81,7 @@ class UserAdministrationController {
      */
     def lockAccount = {
         try {
-            def data = [success: userAdapterService.lockAccount(params.id as Long, Boolean.parseBoolean(params.value))]
+            def data = [success: remoteUserService.lockAccount(params.id as Long, Boolean.parseBoolean(params.value))]
             render data as JSON
         } catch (IllegalArgumentException e) {
             def data = [error: true, message: e.message]
@@ -94,7 +94,7 @@ class UserAdministrationController {
      */
     def expireAccount = {
         try {
-            def data = [success: userAdapterService.expireAccount(params.id as Long, Boolean.parseBoolean(params.value))]
+            def data = [success: remoteUserService.expireAccount(params.id as Long, Boolean.parseBoolean(params.value))]
             render data as JSON
         } catch (IllegalArgumentException e) {
             def data = [error: true, message: e.message]
@@ -107,7 +107,7 @@ class UserAdministrationController {
      */
     def expirePassword = {
         try {
-            def data = [success: userAdapterService.expirePassword(params.id as Long, Boolean.parseBoolean(params.value))]
+            def data = [success: remoteUserService.expirePassword(params.id as Long, Boolean.parseBoolean(params.value))]
             render data as JSON
         } catch (IllegalArgumentException e) {
             def data = [error: true, message: e.message]
@@ -123,7 +123,7 @@ class UserAdministrationController {
             render(template: "/templates/page", model: [link: g.createLink(action: "show", id: params.id), callback: "loadAdminUserCallback"])
             return
         }
-        [user: userAdapterService.getUser(params.id as Long), roles: userAdapterService.getAllRoles(), userRoles: userAdapterService.getRolesForUser(params.id as Long)]
+        [user: remoteUserService.getUser(params.id as Long), roles: remoteUserService.getAllRoles(), userRoles: remoteUserService.getRolesForUser(params.id as Long)]
     }
 
     /**
@@ -135,7 +135,7 @@ class UserAdministrationController {
             data.put("error", g.message(code: "user.administration.userRole.error.general"))
         } else {
             try {
-                userAdapterService.addRoleToUser(cmd.userId, cmd.id)
+                remoteUserService.addRoleToUser(cmd.userId, cmd.id)
                 data.put("success", "true")
             } catch (UserNotFoundException e) {
                 data.put("error", g.message(code: "user.administration.userRole.error.userNotFound"))
@@ -155,7 +155,7 @@ class UserAdministrationController {
             data.put("error", g.message(code: "user.administration.userRole.error.general"))
         } else {
             try {
-                userAdapterService.removeRoleFromUser(cmd.userId, cmd.id)
+                remoteUserService.removeRoleFromUser(cmd.userId, cmd.id)
                 data.put("success", "true")
             } catch (UserNotFoundException e) {
                 data.put("error", g.message(code: "user.administration.userRole.error.userNotFound"))
@@ -189,7 +189,7 @@ class UserAdministrationController {
             data.put("userRealName", resolveErrorMessage(cmd, "userRealName", "Name"))
         } else {
             try {
-                data.put("user", userAdapterService.register(cmd.toUser()))
+                data.put("user", remoteUserService.register(cmd.toUser()))
                 data.put("success", true)
             } catch (JummpException e) {
                 data.clear()

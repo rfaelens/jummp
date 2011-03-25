@@ -19,7 +19,7 @@ import net.biomodels.jummp.core.user.UserManagementException
  */
 @Secured('ROLE_USER')
 class UserController {
-    def userAdapterService
+    def remoteUserService
     def springSecurityService
 
     /**
@@ -30,7 +30,7 @@ class UserController {
             render(template: "/templates/page", model: [link: g.createLink(action: "index"), callback: "loadShowUserInfoCallback"])
             return
         }
-        [user: userAdapterService.getCurrentUser(), changePassword: ConfigurationHolder.config.jummpCore.security.ui.changePassword]
+        [user: remoteUserService.getCurrentUser(), changePassword: ConfigurationHolder.config.jummpCore.security.ui.changePassword]
     }
 
     /**
@@ -50,7 +50,7 @@ class UserController {
             data.put("verifyPassword", resolveErrorMessage(cmd, "verifyPassword", "Password Verification"))
         } else {
             try {
-                userAdapterService.changePassword(cmd.oldPassword, cmd.newPassword)
+                remoteUserService.changePassword(cmd.oldPassword, cmd.newPassword)
                 data.put("success", true)
             } catch (BadCredentialsException e) {
                 data.put("error", true)
@@ -71,7 +71,7 @@ class UserController {
             data.put("userRealName", resolveErrorMessage(cmd, "userRealName", "Name"))
             data.put("email", resolveErrorMessage(cmd, "email", "Email"))
         } else {
-            userAdapterService.editUser(cmd.toUser())
+            remoteUserService.editUser(cmd.toUser())
             data.put("success", true)
         }
         render data as JSON
@@ -98,7 +98,7 @@ class UserController {
             data.put("error", g.message(code: "user.resetPassword.error.username.blank"))
         } else {
             try {
-                userAdapterService.requestPassword(params.username)
+                remoteUserService.requestPassword(params.username)
                 data.put("success", true)
             } catch (UserNotFoundException e) {
                 data.put("error", g.message(code: "user.resetPassword.error.userNotFound"))
@@ -133,7 +133,7 @@ class UserController {
             data.put("code", resolveErrorMessage(cmd, "code", "Reset Password Code"))
         } else {
             try {
-                userAdapterService.resetPassword(cmd.code, cmd.username, cmd.password)
+                remoteUserService.resetPassword(cmd.code, cmd.username, cmd.password)
                 data.put("success", true)
             } catch (UserManagementException e) {
                 data.put("error", e.message)

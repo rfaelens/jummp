@@ -17,9 +17,9 @@ import net.biomodels.jummp.core.user.UserManagementException
 @Secured(["isAnonymous()"])
 class RegisterController {
     /**
-     * Dependency injection of user adapter Service
+     * Dependency injection of RemoteUserService
      */
-    def userAdapterService
+    def remoteUserService
     /**
      * Dependency injection of spring security service
      */
@@ -59,7 +59,7 @@ class RegisterController {
             data.put("userRealName", resolveErrorMessage(cmd, "userRealName", "Name"))
         } else {
             try {
-                userAdapterService.register(cmd.toUser())
+                remoteUserService.register(cmd.toUser())
                 data.put("success", true)
             } catch (JummpException e) {
                 data.clear()
@@ -84,7 +84,7 @@ class RegisterController {
     def validateRegistration = {
         def data = [:]
         try {
-            userAdapterService.validateRegistration(params.username, params.code)
+            remoteUserService.validateRegistration(params.username, params.code)
             data.put("success", true)
         } catch (UserManagementException e) {
             data.put("error", e.message)
@@ -117,9 +117,9 @@ class RegisterController {
         } else {
             try {
                 if (cmd.password) {
-                    userAdapterService.validateAdminRegistration(cmd.username, cmd.code, cmd.password)
+                    remoteUserService.validateAdminRegistration(cmd.username, cmd.code, cmd.password)
                 } else {
-                    userAdapterService.validateAdminRegistration(cmd.username, cmd.code)
+                    remoteUserService.validateAdminRegistration(cmd.username, cmd.code)
                 }
                 data.put("success", true)
             } catch (UserManagementException e) {
