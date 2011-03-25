@@ -16,8 +16,4 @@ public class JummpException extends Exception {
     public JummpException(String message, Throwable cause) {
         super(message, cause);
     }
-
-    public JummpException(Throwable cause) {
-        super("unknown", cause);
-    }
 }

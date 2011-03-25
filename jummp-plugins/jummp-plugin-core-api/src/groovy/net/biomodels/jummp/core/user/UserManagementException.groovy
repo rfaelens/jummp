@@ -21,8 +21,8 @@ abstract class UserManagementException extends JummpException implements Seriali
         this.userName = userName
     }
 
-    protected UserManagementException(Long id) {
-        this("Unknown eror while managing user with id ${id}".toString())
+    protected UserManagementException(long id) {
+        this("Unknown eror while managing user with id ${id}".toString(), id)
     }
 
     protected UserManagementException(String message, Long id) {
