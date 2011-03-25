@@ -29,6 +29,7 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.13'
     }
 }
+grails.plugin.location.'jummp-plugin-dbus' = "../jummp-plugins/jummp-plugin-dbus"
 grails.plugin.location.'jummp-plugin-jms' = "../jummp-plugins/jummp-plugin-jms"
 grails.plugin.location.'jummp-plugin-remote' = "../jummp-plugins/jummp-plugin-remote"
 grails.plugin.location.'jummp-plugin-security' = "../jummp-plugins/jummp-plugin-security"

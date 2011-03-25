@@ -4,12 +4,14 @@ import grails.util.Environment
 import net.biomodels.jummp.plugins.jms.UserJmsRemoteAdapter
 import net.biomodels.jummp.webapp.remote.RemoteUserService
 import net.biomodels.jummp.plugins.jms.JummpApplicationJmsRemoteAdapter
+import net.biomodels.jummp.dbus.remote.JummpApplicationDBusRemoteAdapter
 
 // Place your Spring DSL code here
 beans = {
     jummpApplicationJmsRemoteAdapter(JummpApplicationJmsRemoteAdapter) {
         jmsSynchronousService = ref("jmsSynchronousService")
     }
+    jummpApplicationDBusRemoteAdapter(JummpApplicationDBusRemoteAdapter)
     jmsAuthenticationProvider(net.biomodels.jummp.webapp.JmsAuthenticationProvider) {
         remoteJummpApplicationAdapter = jummpApplicationJmsRemoteAdapter
     }
