@@ -17,7 +17,7 @@ import org.perf4j.aop.Profiled
  * 
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class JummpApplicationDBusRemoteAdapter implements RemoteJummpApplicationAdapter, InitializingBean {
+class RemoteJummpApplicationAdapterDBusImpl implements RemoteJummpApplicationAdapter, InitializingBean {
     private DBusConnection connection
     private ApplicationDBusAdapter applicationDBusAdapter
 
@@ -26,7 +26,7 @@ class JummpApplicationDBusRemoteAdapter implements RemoteJummpApplicationAdapter
         applicationDBusAdapter = (ApplicationDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/Application", ApplicationDBusAdapter.class)
     }
 
-    @Profiled(tag="JummpApplicationDBusRemoteAdapter.authenticate")
+    @Profiled(tag="RemoteJummpApplicationAdapterDBusImpl.authenticate")
     Authentication authenticate(Authentication authentication) throws AuthenticationException, JummpException {
         return applicationDBusAdapter.authenticate((String)authentication.principal, (String)authentication.credentials)
     }
