@@ -4,11 +4,11 @@ class BootStrap {
     /**
      * Dependency injection of jummpApplicationAdapterService
      */
-    def jummpApplicationAdapterService
+    def jummpApplicationJmsRemoteAdapter
 
     def init = { servletContext ->
         // TODO: proper app token
-        ConfigurationHolder.config.jummpCore = jummpApplicationAdapterService.getJummpConfig("web application")
+        ConfigurationHolder.config.jummpCore = jummpApplicationJmsRemoteAdapter.getJummpConfig("web application")
     }
     def destroy = {
     }

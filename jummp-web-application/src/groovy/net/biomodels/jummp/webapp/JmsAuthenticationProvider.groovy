@@ -3,6 +3,7 @@ package net.biomodels.jummp.webapp
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.core.Authentication
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import net.biomodels.jummp.remote.RemoteJummpApplicationAdapter
 
 /**
  * @short AuthenticationProvider authenticating against the core application.
@@ -16,12 +17,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
  */
 class JmsAuthenticationProvider implements AuthenticationProvider {
     /**
-     * Dependency injection of the jummpApplicationAdapterService
+     * Dependency injection of the RemoteJummpApplicationAdapter
      */
-    def jummpApplicationAdapterService
+    RemoteJummpApplicationAdapter remoteJummpApplicationAdapter
 
     Authentication authenticate(Authentication authentication) {
-        return jummpApplicationAdapterService.authenticate(authentication)
+        return remoteJummpApplicationAdapter.authenticate(authentication)
     }
 
     boolean supports(Class<? extends Object> aClass) {

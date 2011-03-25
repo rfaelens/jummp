@@ -4,6 +4,7 @@ import net.biomodels.jummp.core.JummpException
 import org.perf4j.aop.Profiled
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
+import net.biomodels.jummp.remote.RemoteJummpApplicationAdapter
 
 /**
  * @short Service delegating to Application specific methods of the core via synchronous JMS
@@ -19,9 +20,8 @@ import org.springframework.security.core.AuthenticationException
  * as retrieving the configuration or authenticating a user.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class JummpApplicationAdapterService extends AbstractJmsRemoteAdapter {
+class JummpApplicationJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteJummpApplicationAdapter {
 
-    static transactional = false
     private static final String ADAPTER_SERVICE_NAME = "jmsAdapter"
 
     protected String getAdapterServiceName() {
@@ -33,7 +33,7 @@ class JummpApplicationAdapterService extends AbstractJmsRemoteAdapter {
      * @param appToken The unique application token
      * @return The core's configuration
      */
-    @Profiled(tag="jummpApplicationAdapterService.getJummpConfig")
+    @Profiled(tag="JummpApplicationJmsRemoteAdapter.getJummpConfig")
     ConfigObject getJummpConfig(String appToken) {
         return (ConfigObject)jmsSynchronousService.send([app: "jummp", service: "jmsAdapter", method: "getJummpConfig"], appToken, [service: "jmsAdapter", method: "getJummpConfig.response"])
     }
@@ -45,7 +45,7 @@ class JummpApplicationAdapterService extends AbstractJmsRemoteAdapter {
      * @throws AuthenticationException If the Authentication is not valid
      * @throws JummpException If an error occurred
      */
-    @Profiled(tag="jummpApplicationAdapterService.authenticate")
+    @Profiled(tag="JummpApplicationJmsRemoteAdapter.authenticate")
     Authentication authenticate(Authentication authentication) throws AuthenticationException, JummpException {
         def retVal = send("authenticate", authentication, false)
         validateReturnValue(retVal, Authentication)

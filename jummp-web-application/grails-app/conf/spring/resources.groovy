@@ -3,11 +3,15 @@ import org.springframework.jms.connection.SingleConnectionFactory
 import grails.util.Environment
 import net.biomodels.jummp.plugins.jms.UserJmsRemoteAdapter
 import net.biomodels.jummp.webapp.remote.RemoteUserService
+import net.biomodels.jummp.plugins.jms.JummpApplicationJmsRemoteAdapter
 
 // Place your Spring DSL code here
 beans = {
+    jummpApplicationJmsRemoteAdapter(JummpApplicationJmsRemoteAdapter) {
+        jmsSynchronousService = ref("jmsSynchronousService")
+    }
     jmsAuthenticationProvider(net.biomodels.jummp.webapp.JmsAuthenticationProvider) {
-        jummpApplicationAdapterService = ref("jummpApplicationAdapterService")
+        remoteJummpApplicationAdapter = jummpApplicationJmsRemoteAdapter
     }
     jmsConnectionFactory(SingleConnectionFactory) {
         targetConnectionFactory = { ActiveMQConnectionFactory cf ->
