@@ -125,7 +125,7 @@ log4j = {
     info   performanceStatsAppender: 'org.perf4j.TimingLogger'
 }
 
-grails.plugins.springsecurity.providerNames = ['jmsAuthenticationProvider', 'anonymousAuthenticationProvider', 'rememberMeAuthenticationProvider']
+grails.plugins.springsecurity.providerNames = ['remoteAuthenticationProvider', 'anonymousAuthenticationProvider', 'rememberMeAuthenticationProvider']
 grails.plugins.springsecurity.successHandler.alwaysUseDefault = true
 
 // theme name loaded from external configuration file

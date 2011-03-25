@@ -9,13 +9,13 @@ import net.biomodels.jummp.remote.RemoteJummpApplicationAdapter
  * @short AuthenticationProvider authenticating against the core application.
  *
  * This AuthenticationProvider is able to authenticate a UsernamePasswordAuthenticationToken by
- * passing it to the core through JMS. If it receives back a fully populated Authentication this
+ * passing it to the core through a remote plugin. If it receives back a fully populated Authentication this
  * can be used by Spring Security. If an exception is thrown the core signals that the credentials
  * are not valid.
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de> 
  */
-class JmsAuthenticationProvider implements AuthenticationProvider {
+class RemoteAuthenticationProvider implements AuthenticationProvider {
     /**
      * Dependency injection of the RemoteJummpApplicationAdapter
      */

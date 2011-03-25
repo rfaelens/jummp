@@ -13,7 +13,7 @@ beans = {
     if (grailsApplication.config.net.biomodels.jummp.webapp.remote == "dbus") {
         println("Using DBus")
         jummpApplicationDBusRemoteAdapter(net.biomodels.jummp.dbus.remote.JummpApplicationDBusRemoteAdapter)
-        jmsAuthenticationProvider(net.biomodels.jummp.webapp.JmsAuthenticationProvider) {
+        remoteAuthenticationProvider(net.biomodels.jummp.webapp.RemoteAuthenticationProvider) {
             remoteJummpApplicationAdapter = jummpApplicationDBusRemoteAdapter
         }
         remoteUserAdapterDBusImpl(net.biomodels.jummp.dbus.remote.RemoteUserAdapterDBusImpl)
@@ -22,7 +22,7 @@ beans = {
         }
     } else {
         println("Using JMS")
-        jmsAuthenticationProvider(net.biomodels.jummp.webapp.JmsAuthenticationProvider) {
+        remoteAuthenticationProvider(net.biomodels.jummp.webapp.RemoteAuthenticationProvider) {
             remoteJummpApplicationAdapter = jummpApplicationJmsRemoteAdapter
         }
         userJmsRemoteAdapter(net.biomodels.jummp.plugins.jms.UserJmsRemoteAdapter) {
