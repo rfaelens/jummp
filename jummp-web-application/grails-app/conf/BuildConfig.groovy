@@ -30,5 +30,5 @@ grails.project.dependency.resolution = {
     }
 }
 grails.plugin.location.'jummp-plugin-jms' = "../jummp-plugins/jummp-plugin-jms"
-grails.plugin.location.'jummp-plugin-securite' = "../jummp-plugins/jummp-plugin-security"
+grails.plugin.location.'jummp-plugin-security' = "../jummp-plugins/jummp-plugin-security"
 grails.plugin.location.'jummp-plugin-core-api' = "../jummp-plugins/jummp-plugin-core-api"
