@@ -141,3 +141,9 @@ if (jummpProperties.containsKey("jummp.theme")) {
 } else {
     net.biomodels.jummp.webapp.theme = "smoothness"
 }
+
+if (jummpProperties.containsKey("jummp.remote")) {
+    net.biomodels.jummp.webapp.remote = jummpProperties.getProperty("jummp.remote")
+} else {
+    net.biomodels.jummp.webapp.remote = "jms"
+}
