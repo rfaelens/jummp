@@ -25,10 +25,8 @@ import net.biomodels.jummp.core.JummpException
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-abstract class CoreAdapterService {
+abstract class AbstractJmsRemoteAdapter {
     def jmsSynchronousService
-
-    static transactional = false
 
     /**
      * Validates the @p retVal. In case of a @c null value an JummpException is thrown, in case the

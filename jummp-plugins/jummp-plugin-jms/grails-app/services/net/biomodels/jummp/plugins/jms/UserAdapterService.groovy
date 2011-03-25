@@ -3,7 +3,7 @@ package net.biomodels.jummp.plugins.jms
 import org.perf4j.aop.Profiled
 import org.springframework.security.authentication.BadCredentialsException
 import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.core.JummpException
+
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.core.user.RoleNotFoundException
@@ -22,7 +22,7 @@ import net.biomodels.jummp.core.user.UserManagementException
  * it uses JMS internally is completely transparent to the users of this service.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class UserAdapterService extends CoreAdapterService  {
+class UserAdapterService extends AbstractJmsRemoteAdapter  {
 
     static transactional = false
     private static final String ADAPTER_SERVICE_NAME = "userJmsAdapter"

@@ -19,7 +19,7 @@ import org.springframework.security.core.AuthenticationException
  * as retrieving the configuration or authenticating a user.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class JummpApplicationAdapterService extends CoreAdapterService {
+class JummpApplicationAdapterService extends AbstractJmsRemoteAdapter {
 
     static transactional = false
     private static final String ADAPTER_SERVICE_NAME = "jmsAdapter"
