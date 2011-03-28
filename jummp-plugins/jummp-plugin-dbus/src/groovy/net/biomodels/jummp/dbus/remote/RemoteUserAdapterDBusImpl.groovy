@@ -18,7 +18,6 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
-import net.biomodels.jummp.dbus.DBusRole
 
 /**
  * @short DBus Implementation of the RemoteUserAdapter.
