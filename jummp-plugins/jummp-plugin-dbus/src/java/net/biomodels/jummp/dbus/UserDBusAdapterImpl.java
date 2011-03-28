@@ -5,10 +5,7 @@ import net.biomodels.jummp.core.user.*;
 import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException;
 import net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException;
 import net.biomodels.jummp.dbus.authentication.BadCredentialsDBusException;
-import net.biomodels.jummp.dbus.user.RoleNotFoundDBusException;
-import net.biomodels.jummp.dbus.user.UserInvalidDBusException;
-import net.biomodels.jummp.dbus.user.UserManagementDBusException;
-import net.biomodels.jummp.dbus.user.UserNotFoundDBusException;
+import net.biomodels.jummp.dbus.user.*;
 import net.biomodels.jummp.plugins.security.Role;
 import net.biomodels.jummp.plugins.security.User;
 import org.springframework.security.access.AccessDeniedException;
@@ -329,6 +326,26 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
             restoreAuthentication();
         }
     }
+
+    public void resetPassword(String code, String username, String password) throws UserNotFoundDBusException, UserCodeInvalidDBusException, UserCodeExpiredDBusException {
+        try {
+            setAnonymousAuthentication();
+            userService.resetPassword(code, username, password);
+        } catch (UserCodeInvalidException e) {
+            throw new UserCodeInvalidDBusException(e.getCode());
+        } catch (UserCodeExpiredException e) {
+            throw new UserCodeExpiredDBusException(e.getUserName());
+        } catch (UserNotFoundException e) {
+            if (e.getUserName() != null) {
+                throw new UserNotFoundDBusException(e.getUserName());
+            } else {
+                throw new UserNotFoundDBusException(e.getId().toString());
+            }
+        } finally {
+            restoreAuthentication();
+        }
+    }
+
     /**
      * Setter for Dependency Injection of UserService.
      * @param userService

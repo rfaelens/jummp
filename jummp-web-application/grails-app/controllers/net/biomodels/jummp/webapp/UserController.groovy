@@ -8,6 +8,8 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import net.biomodels.jummp.core.JummpException
 import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.core.user.UserManagementException
+import net.biomodels.jummp.core.user.UserCodeInvalidException
+import net.biomodels.jummp.core.user.UserCodeExpiredException
 
 /**
  * @short Controller for editing user information.
@@ -135,7 +137,11 @@ class UserController {
             try {
                 remoteUserService.resetPassword(cmd.code, cmd.username, cmd.password)
                 data.put("success", true)
-            } catch (UserManagementException e) {
+            } catch (UserCodeInvalidException e) {
+                data.put("error", e.message)
+            } catch (UserCodeExpiredException e) {
+                data.put("error", e.message)
+            } catch (UserNotFoundException e) {
                 data.put("error", e.message)
             }
         }

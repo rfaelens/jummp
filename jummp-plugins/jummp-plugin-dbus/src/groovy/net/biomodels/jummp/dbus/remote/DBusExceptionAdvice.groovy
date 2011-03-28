@@ -12,6 +12,8 @@ import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.core.user.UserInvalidException
+import net.biomodels.jummp.core.user.UserCodeInvalidException
+import net.biomodels.jummp.core.user.UserCodeExpiredException
 
 /**
  * @short Advice to map DBusExecutionException to appropriate type.
@@ -45,6 +47,10 @@ class DBusExceptionAdvice implements ThrowsAdvice {
             }
         case "net.biomodels.jummp.dbus.user.UserInvalidDBusException":
             throw new UserInvalidException(e.message)
+        case "net.biomodels.jummp.dbus.user.UserCodeInvalidDBusException":
+            throw new UserCodeInvalidException("", null, e.message)
+        case "net.biomodels.jummp.dbus.user.UserCodeExpiredDBusException":
+            throw new UserCodeExpiredException(e.message, null)
         default:
             throw new JummpException(e.message, e)
         }

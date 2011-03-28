@@ -11,6 +11,8 @@ import net.biomodels.jummp.remote.RemoteUserAdapter
 
 import org.perf4j.aop.Profiled
 import org.springframework.security.authentication.BadCredentialsException
+import net.biomodels.jummp.core.user.UserCodeInvalidException
+import net.biomodels.jummp.core.user.UserCodeExpiredException
 
 /**
  * @short Service delegating to RemoteUserAdapter.
@@ -97,7 +99,7 @@ class RemoteUserService implements RemoteUserAdapter {
     }
 
     @Profiled(tag="RemoteUserService.resetPassword")
-    void resetPassword(String code, String username, String password) throws UserManagementException {
+    void resetPassword(String code, String username, String password) throws UserNotFoundException, UserCodeInvalidException, UserCodeExpiredException {
         remoteUserAdapter.resetPassword code, username, password
     }
 

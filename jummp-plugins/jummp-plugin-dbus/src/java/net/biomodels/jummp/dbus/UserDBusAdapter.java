@@ -1,9 +1,7 @@
 package net.biomodels.jummp.dbus;
 
 import net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException;
-import net.biomodels.jummp.dbus.user.RoleNotFoundDBusException;
-import net.biomodels.jummp.dbus.user.UserManagementDBusException;
-import net.biomodels.jummp.dbus.user.UserNotFoundDBusException;
+import net.biomodels.jummp.dbus.user.*;
 import org.freedesktop.dbus.DBusInterface;
 import org.freedesktop.dbus.DBusInterfaceName;
 
@@ -49,6 +47,7 @@ public interface UserDBusAdapter extends DBusInterface {
     void validateRegistration(String username, String code);
     void validateAdminRegistration(String username, String code, String password);
     void requestPassword(String username);
+    void resetPassword(String code, String username, String password) throws UserNotFoundDBusException, UserCodeInvalidDBusException, UserCodeExpiredDBusException;
 
     /**
      * Wrapper around getUser. Needed as DBus does not support method overloading.

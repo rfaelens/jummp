@@ -339,7 +339,7 @@ class UserService implements IUserService {
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="userService.resetPassword")
     @PreAuthorize("isAnonymous()")
-    void resetPassword(String code, String username, String password) throws UserManagementException {
+    void resetPassword(String code, String username, String password) throws UserNotFoundException, UserCodeInvalidException, UserCodeExpiredException {
         User user = User.findByUsername(username)
         if (!user) {
             throw new UserNotFoundException(username)

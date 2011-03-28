@@ -18,6 +18,8 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import net.biomodels.jummp.core.user.UserCodeInvalidException
+import net.biomodels.jummp.core.user.UserCodeExpiredException
 
 /**
  * @short DBus Implementation of the RemoteUserAdapter.
@@ -120,8 +122,8 @@ class RemoteUserAdapterDBusImpl implements RemoteUserAdapter, InitializingBean {
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.resetPassword")
-    void resetPassword(String code, String username, String password) throws UserNotFoundException {
-        // TODO: implement me
+    void resetPassword(String code, String username, String password) throws UserNotFoundException, UserCodeInvalidException, UserCodeExpiredException {
+        userDBusAdapter.resetPassword(code, username, password)
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.getAllRoles")

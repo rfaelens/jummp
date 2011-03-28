@@ -11,6 +11,8 @@ import net.biomodels.jummp.core.user.UserInvalidException
 import net.biomodels.jummp.core.user.RegistrationException
 import net.biomodels.jummp.core.user.UserManagementException
 import net.biomodels.jummp.remote.RemoteUserAdapter
+import net.biomodels.jummp.core.user.UserCodeInvalidException
+import net.biomodels.jummp.core.user.UserCodeExpiredException
 
 /**
  * @short Service delegating to UserService of the core via synchronous JMS
@@ -229,7 +231,7 @@ class UserJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteUse
      * @throws UserManagementException Thrown in case user is not found or the code is not valid
      */
     @Profiled(tag="UserJmsRemoteAdapter.resetPassword")
-    void resetPassword(String code, String username, String password) throws UserManagementException {
+    void resetPassword(String code, String username, String password) throws UserNotFoundException, UserCodeInvalidException, UserCodeExpiredException {
         validateReturnValue(send("resetPassword", [code, username, password]), Boolean)
     }
 

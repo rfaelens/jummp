@@ -8,6 +8,8 @@ import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.authentication.BadCredentialsException
+import net.biomodels.jummp.core.user.UserCodeInvalidException
+import net.biomodels.jummp.core.user.UserCodeExpiredException
 
 /**
  * @short Interface describing how to access the remote User Service.
@@ -137,9 +139,11 @@ public interface RemoteUserAdapter {
      * @param code The Password Reset Code
      * @param username The Login Id of the User
      * @param password The new Password
-     * @throws UserManagementException Thrown in case user is not found or the code is not valid
+     * @throws UserNotFoundException Thrown in case user is not found
+     * @throws UserCodeInvalidException Thrown in case code is not valid
+     * @throws UserCodeExpiredException Thrown in case code expired
      */
-    public void resetPassword(String code, String username, String password) throws UserManagementException
+    public void resetPassword(String code, String username, String password) throws UserNotFoundException, UserCodeInvalidException, UserCodeExpiredException
     /**
      * Retrieves all available roles from the Core Jummp Instance.
      * As this is an admin method it does not provide a paginated version
