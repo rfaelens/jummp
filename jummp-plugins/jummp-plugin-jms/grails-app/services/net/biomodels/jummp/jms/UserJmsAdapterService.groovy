@@ -1,7 +1,6 @@
-package net.biomodels.jummp.core.jms
+package net.biomodels.jummp.jms
 
 import grails.plugin.jms.Queue
-import net.biomodels.jummp.core.JmsAdapterService
 import net.biomodels.jummp.core.JummpException
 import net.biomodels.jummp.plugins.security.User
 import org.perf4j.aop.Profiled
@@ -13,6 +12,8 @@ import net.biomodels.jummp.core.user.RoleNotFoundException
 import net.biomodels.jummp.core.user.UserInvalidException
 import net.biomodels.jummp.core.user.UserManagementException
 import net.biomodels.jummp.core.user.UserNotFoundException
+import net.biomodels.jummp.core.IUserService
+import net.biomodels.jummp.jms.AbstractJmsAdapter
 
 /**
  * @short Wrapper class around the UserService exposed to JMS.
@@ -22,7 +23,7 @@ import net.biomodels.jummp.core.user.UserNotFoundException
  * 
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class UserJmsAdapterService extends JmsAdapterService {
+class UserJmsAdapterService extends AbstractJmsAdapter {
 
     @SuppressWarnings("GrailsStatelessService")
     static exposes = ['jms']
@@ -32,14 +33,14 @@ class UserJmsAdapterService extends JmsAdapterService {
     /**
      * Dependency injection of UserService
      */
-    def userService
+    IUserService userService
 
     /**
      * Wraper around UserService.changePassword
      * @param message List consisting of Authentication, oldPassword and newPassword
      * @return @c true if password changed, InvalidArgumentException of BadCredentialsException if old password is incorrect
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.changePassword")
     def changePassword(def message) {
         if (!verifyMessage(message, [Authentication, String, String])) {
@@ -64,7 +65,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication and User
      * @return @c true if user was changed, IllegalArgumentException or AccessDeniedException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.editUser")
     def editUser(def message) {
         if (!verifyMessage(message, [Authentication, User])) {
@@ -91,7 +92,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message Authentication
      * @return The User, IllegalArgumentException or AccessDeniedException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.getCurrentUser")
     def getCurrentUser(def message) {
         if (!(message instanceof Authentication)) {
@@ -115,7 +116,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication and Username or Id
      * @return The User, IllegalArgumentException or AccessDeniedException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.getUser")
     def getUser(def message) {
         if (!verifyMessage(message, [Authentication, String]) && !verifyMessage(message, [Authentication, Long])) {
@@ -144,7 +145,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication, Integer and Integer
      * @return List of Users, IllegalArgumentException of AccessDeniedException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.getAllUser")
     def getAllUsers(def message) {
         if (!verifyMessage(message, [Authentication, Integer, Integer])) {
@@ -168,7 +169,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication, Long and Boolean
      * @return Boolean, AccessDeniedException or IllegalArgumentException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.enableUser")
     def enableUser(def message) {
         if (!verifyMessage(message, [Authentication, Long, Boolean])) {
@@ -194,7 +195,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication, Long and Boolean
      * @return Boolean, AccessDeniedException or IllegalArgumentException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.lockAccount")
     def lockAccount(def message) {
         if (!verifyMessage(message, [Authentication, Long, Boolean])) {
@@ -220,7 +221,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication, Long and Boolean
      * @return Boolean, AccessDeniedException or IllegalArgumentException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.expireAccount")
     def expireAccount(def message) {
         if (!verifyMessage(message, [Authentication, Long, Boolean])) {
@@ -246,7 +247,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication, Long and Boolean
      * @return Boolean, AccessDeniedException or IllegalArgumentException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.expirePassword")
     def expirePassword(def message) {
         if (!verifyMessage(message, [Authentication, Long, Boolean])) {
@@ -272,7 +273,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication and User
      * @return Boolean, AccessDeniedException, JummpException or IllegalArgumentException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.register")
     def register(def message) {
         if (!verifyMessage(message, [Authentication, User])) {
@@ -300,7 +301,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication, String and String
      * @return Boolean, AccessDeniedException, JummpException or IllegalArgumentException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.validateRegistration")
     def validateRegistration(def message) {
         if (!verifyMessage(message, [Authentication, String, String])) {
@@ -327,7 +328,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication, String and String or Authentication, String, String and String
      * @return Boolean, AccessDeniedException, UserManagementException or IllegalArgumentException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.validateAdminRegistration")
     def validateAdminRegistration(def message) {
         if (!verifyMessage(message, [Authentication, String, String]) &&
@@ -359,7 +360,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication and String
      * @return Boolean, AccessDeniedException, JummpException of IllegalArgumentException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.requestPassword")
     def requestPassword(def message) {
         if (!verifyMessage(message, [Authentication, String])) {
@@ -386,7 +387,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication, String, String and String
      * @return Boolean, AccessDeniedException, JummpException of IllegalArgumentException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.resetPassword")
     def resetPassword(def message) {
         if (!verifyMessage(message, [Authentication, String, String, String])) {
@@ -413,7 +414,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message Authentication
      * @return List<Role>, AccessDeniedException or IllegalArgumentException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.getAllRoles")
     def getAllRoles(def message) {
         if (!(message instanceof Authentication)) {
@@ -437,7 +438,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication and Long
      * @return List<Role>, AccessDeniedException or IllegalArgumentException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.getRolesForUser")
     def getRolesForUser(def message) {
         if (!verifyMessage(message, [Authentication, Long])) {
@@ -461,7 +462,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication, Long and Long
      * @return Boolean, AccessDeniedException, UserNotFoundException, RoleNotFoundException or IllegalArgumentException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.addRoleToUser")
     def addRoleToUser(def message) {
         if (!verifyMessage(message, [Authentication, Long, Long])) {
@@ -490,7 +491,7 @@ class UserJmsAdapterService extends JmsAdapterService {
      * @param message List consisting of Authentication, Long and Long
      * @return Boolean, AccessDeniedException, UserNotFoundException, RoleNotFoundException or IllegalArgumentException
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="userJmsAdapterService.removeRoleFromUser")
     def removeRoleFromUser(def message) {
         if (!verifyMessage(message, [Authentication, Long, Long])) {

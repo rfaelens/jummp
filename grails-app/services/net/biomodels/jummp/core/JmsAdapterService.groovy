@@ -4,7 +4,6 @@ import grails.plugin.jms.Queue
 import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.context.SecurityContextHolder
 import net.biomodels.jummp.plugins.security.SerializableGrailsUser
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
 import org.perf4j.aop.Profiled
@@ -12,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
 import org.springframework.security.authentication.BadCredentialsException
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import net.biomodels.jummp.jms.AbstractJmsAdapter
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -31,7 +31,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
  * In case a method is invoked with the wrong number of arguments an IllegalArgumentException is returned.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class JmsAdapterService {
+class JmsAdapterService extends AbstractJmsAdapter {
 
     @SuppressWarnings("GrailsStatelessService")
     static exposes = ['jms']
@@ -92,43 +92,5 @@ class JmsAdapterService {
             }
         }
         return new IllegalArgumentException("Did not receive an authentication")
-    }
-
-    /**
-     * Helper function to verify that @p message has correct structure.
-     * @param message The message to verify
-     * @param classes The structure as List of Class types.
-     * @return @c true, if the message structure is valid, @c false otherwise
-     */
-    protected boolean verifyMessage(def message, List<Class<?>> classes) {
-        if (!(message instanceof List)) {
-            return false
-        }
-        if (message.size() != classes.size()) {
-            return false
-        }
-        for (int i=0; i<classes.size(); i++) {
-            Class clazz = classes[i]
-            if (!clazz.isInstance(message[i])) {
-                return false
-            }
-        }
-        return true
-    }
-
-    /**
-     * Helper function to set the Authentication in the current thread
-     * @param authentication
-     */
-    protected void setAuthentication(Authentication authentication) {
-        SecurityContextHolder.clearContext()
-        SecurityContextHolder.context.setAuthentication(authentication)
-    }
-
-    /**
-     * Helper function to remove the Authentication from current thread.
-     */
-    protected void restoreAuthentication() {
-        SecurityContextHolder.clearContext()
     }
 }

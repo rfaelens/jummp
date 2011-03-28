@@ -22,6 +22,10 @@ beans = {
         }
     }
 
+    userJmsAdapterService(net.biomodels.jummp.jms.UserJmsAdapterService) {
+        userService = ref("userService")
+    }
+
     // for DBus
     if (grailsApplication.config.jummp.export.dbus == true) {
         dbusManager(net.biomodels.jummp.dbus.DBusManagerImpl)
