@@ -5,6 +5,7 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 // Place your Spring DSL code here
 beans = {
+    xmlns aop: "http://www.springframework.org/schema/aop"
     def grailsApplication = ApplicationHolder.application
     // TODO: move the JummpApplicationJmsRemoteAdapter to the JMS part
     jummpApplicationJmsRemoteAdapter(net.biomodels.jummp.plugins.jms.JummpApplicationJmsRemoteAdapter) {
@@ -20,6 +21,11 @@ beans = {
         remoteUserService(net.biomodels.jummp.webapp.remote.RemoteUserService) {
             remoteUserAdapter = remoteUserAdapterDBusImpl
         }
+        aop.config {
+            pointcut(id: "dbusExceptionPointcut", expression: "execution(public * net.biomodels.jummp.dbus.remote.*.*(..))")
+            advisor('pointcut-ref': "dbusExceptionPointcut", 'advice-ref': "dbusExceptionAdvice")
+        }
+        dbusExceptionAdvice(net.biomodels.jummp.dbus.remote.DBusExceptionAdvice)
     } else {
         println("Using JMS")
         remoteAuthenticationProvider(net.biomodels.jummp.webapp.RemoteAuthenticationProvider) {

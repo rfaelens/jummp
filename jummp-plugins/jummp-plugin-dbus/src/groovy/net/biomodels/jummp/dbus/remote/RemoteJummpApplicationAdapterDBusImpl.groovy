@@ -27,7 +27,7 @@ class RemoteJummpApplicationAdapterDBusImpl implements RemoteJummpApplicationAda
     }
 
     @Profiled(tag="RemoteJummpApplicationAdapterDBusImpl.authenticate")
-    Authentication authenticate(Authentication authentication) throws AuthenticationException, JummpException {
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException, JummpException {
         return applicationDBusAdapter.authenticate((String)authentication.principal, (String)authentication.credentials)
     }
 }
