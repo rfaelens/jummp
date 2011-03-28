@@ -57,20 +57,12 @@ class RemoteUserAdapterDBusImpl implements RemoteUserAdapter, InitializingBean {
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.getUser")
     User getUser(String username) throws UserNotFoundException {
-        try {
-            return userDBusAdapter.getUserByName(authenticationToken(), username).toUser()
-        } catch (UserManagementDBusException e) {
-            throw new UserNotFoundException(username)
-        }
+        return userDBusAdapter.getUserByName(authenticationToken(), username).toUser()
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.getUser")
     User getUser(Long id) throws UserNotFoundException {
-        try {
-            return userDBusAdapter.getUserById(authenticationToken(), id).toUser()
-        } catch (UserManagementDBusException e) {
-            throw new UserNotFoundException(id)
-        }
+        return userDBusAdapter.getUserById(authenticationToken(), id).toUser()
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.getAllUsers")
@@ -85,38 +77,22 @@ class RemoteUserAdapterDBusImpl implements RemoteUserAdapter, InitializingBean {
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.enableUser")
     Boolean enableUser(Long userId, Boolean enable) throws UserNotFoundException {
-        try {
-            return userDBusAdapter.enableUser(authenticationToken(), userId, enable)
-        } catch (UserManagementDBusException e) {
-            throw new UserNotFoundException(userId)
-        }
+        return userDBusAdapter.enableUser(authenticationToken(), userId, enable)
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.lockAccount")
     Boolean lockAccount(Long userId, Boolean lock) throws UserNotFoundException {
-        try {
-            return userDBusAdapter.lockAccount(authenticationToken(), userId, lock)
-        } catch (UserManagementDBusException e) {
-            throw new UserNotFoundException(userId)
-        }
+        return userDBusAdapter.lockAccount(authenticationToken(), userId, lock)
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.expireAccount")
     Boolean expireAccount(Long userId, Boolean expire) throws UserNotFoundException {
-        try {
-            return userDBusAdapter.expireAccount(authenticationToken(), userId, expire)
-        } catch (UserManagementDBusException e) {
-            throw new UserNotFoundException(userId)
-        }
+        return userDBusAdapter.expireAccount(authenticationToken(), userId, expire)
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.expirePassword")
     Boolean expirePassword(Long userId, Boolean expire) throws UserNotFoundException {
-        try {
-            return userDBusAdapter.expirePassword(authenticationToken(), userId, expire)
-        } catch (UserManagementDBusException e) {
-            throw new UserNotFoundException(userId)
-        }
+        return userDBusAdapter.expirePassword(authenticationToken(), userId, expire)
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.register")
@@ -145,11 +121,7 @@ class RemoteUserAdapterDBusImpl implements RemoteUserAdapter, InitializingBean {
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.requestPassword")
     void requestPassword(String username) throws UserNotFoundException {
-        try {
-            userDBusAdapter.requestPassword(username)
-        } catch (UserManagementDBusException e) {
-            throw new UserNotFoundException(username)
-        }
+        userDBusAdapter.requestPassword(username)
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.resetPassword")

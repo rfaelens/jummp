@@ -9,6 +9,7 @@ import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException;
 import net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException;
 import net.biomodels.jummp.dbus.authentication.BadCredentialsDBusException;
 import net.biomodels.jummp.dbus.user.UserManagementDBusException;
+import net.biomodels.jummp.dbus.user.UserNotFoundDBusException;
 import net.biomodels.jummp.plugins.security.User;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -89,7 +90,11 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (UserNotFoundException e) {
-            throw new UserManagementDBusException(e.getMessage());
+            if (e.getUserName() != null) {
+                throw new UserNotFoundDBusException(e.getUserName());
+            } else {
+                throw new UserNotFoundDBusException(e.getId().toString());
+            }
         } finally {
             restoreAuthentication();
         }
@@ -102,7 +107,11 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (UserNotFoundException e) {
-            throw new UserManagementDBusException(e.getMessage());
+            if (e.getUserName() != null) {
+                throw new UserNotFoundDBusException(e.getUserName());
+            } else {
+                throw new UserNotFoundDBusException(e.getId().toString());
+            }
         } finally {
             restoreAuthentication();
         }
@@ -115,7 +124,11 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (UserNotFoundException e) {
-            throw new UserManagementDBusException(e.getMessage());
+            if (e.getUserName() != null) {
+                throw new UserNotFoundDBusException(e.getUserName());
+            } else {
+                throw new UserNotFoundDBusException(e.getId().toString());
+            }
         } finally {
             restoreAuthentication();
         }
@@ -128,7 +141,11 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (UserNotFoundException e) {
-            throw new UserManagementDBusException(e.getMessage());
+            if (e.getUserName() != null) {
+                throw new UserNotFoundDBusException(e.getUserName());
+            } else {
+                throw new UserNotFoundDBusException(e.getId().toString());
+            }
         } finally {
             restoreAuthentication();
         }
@@ -182,7 +199,11 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (UserNotFoundException e) {
-            throw new UserManagementDBusException(e.getMessage());
+            if (e.getUserName() != null) {
+                throw new UserNotFoundDBusException(e.getUserName());
+            } else {
+                throw new UserNotFoundDBusException(e.getId().toString());
+            }
         } finally {
             restoreAuthentication();
         }
@@ -196,7 +217,11 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (UserNotFoundException e) {
-            throw new UserManagementDBusException(e.getMessage());
+            if (e.getUserName() != null) {
+                throw new UserNotFoundDBusException(e.getUserName());
+            } else {
+                throw new UserNotFoundDBusException(e.getId().toString());
+            }
         } finally {
             restoreAuthentication();
         }
@@ -211,7 +236,11 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (UserNotFoundException e) {
-            throw new UserManagementDBusException(e.getMessage());
+            if (e.getUserName() != null) {
+                throw new UserNotFoundDBusException(e.getUserName());
+            } else {
+                throw new UserNotFoundDBusException(e.getId().toString());
+            }
         } finally {
             restoreAuthentication();
         }
