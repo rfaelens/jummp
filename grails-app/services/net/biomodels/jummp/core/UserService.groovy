@@ -404,4 +404,15 @@ class UserService implements IUserService {
         }
         UserRole.remove(user, role, true)
     }
+
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="userService.removeRoleFromUser")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    Role getRoleByAuthority(String authority) throws RoleNotFoundException {
+        Role role = Role.findByAuthority(authority)
+        if (!role) {
+            throw new RoleNotFoundException(authority)
+        }
+        return role
+    }
 }

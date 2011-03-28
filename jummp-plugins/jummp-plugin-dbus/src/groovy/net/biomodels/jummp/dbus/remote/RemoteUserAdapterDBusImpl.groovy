@@ -18,6 +18,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import net.biomodels.jummp.dbus.DBusRole
 
 /**
  * @short DBus Implementation of the RemoteUserAdapter.
@@ -126,24 +127,32 @@ class RemoteUserAdapterDBusImpl implements RemoteUserAdapter, InitializingBean {
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.getAllRoles")
     List<Role> getAllRoles() {
-        // TODO: implement me
-        return []
+        List<String> roles = userDBusAdapter.getAllRoles(authenticationToken())
+        List<Role> returnVal = []
+        roles.each {
+            returnVal << userDBusAdapter.getRoleByAuthority(authenticationToken(), it).toRole()
+        }
+        return returnVal
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.getRolesForUser")
     List<Role> getRolesForUser(Long id) {
-        // TODO: implement me
-        return []
+        List<String> roles = userDBusAdapter.getRolesForUser(authenticationToken(), id)
+        List<Role> returnVal = []
+        roles.each {
+            returnVal << userDBusAdapter.getRoleByAuthority(authenticationToken(), it).toRole()
+        }
+        return returnVal
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.addRoleToUser")
     void addRoleToUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException {
-        // TODO: implement me
+        userDBusAdapter.addRoleToUser(authenticationToken(), userId, roleId)
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.removeRoleFromUser")
     void removeRoleFromUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException {
-        // TODO: implement me
+        userDBusAdapter.removeRoleFromUser(authenticationToken(), userId, roleId)
     }
 
     private String authenticationToken() {

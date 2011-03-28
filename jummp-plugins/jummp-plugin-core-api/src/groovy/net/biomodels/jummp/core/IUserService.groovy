@@ -8,6 +8,7 @@ import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.authentication.BadCredentialsException
+import javax.management.relation.Role
 
 /**
  * @short Interface describing the UserService.
@@ -201,4 +202,10 @@ public interface IUserService {
      * @throws RoleNotFoundException In case there is no role with @p roleId
      */
     void removeRoleFromUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException
+    /**
+     * Retrieves the Role identified by the @p authority.
+     * @param authority The authority specifying the Role
+     * @throws RoleNotFoundException If there is no such Role
+     */
+    net.biomodels.jummp.plugins.security.Role getRoleByAuthority(String authority) throws RoleNotFoundException
 }

@@ -1,16 +1,15 @@
 package net.biomodels.jummp.dbus;
 
 import net.biomodels.jummp.core.IUserService;
-import net.biomodels.jummp.core.user.RegistrationException;
-import net.biomodels.jummp.core.user.UserInvalidException;
-import net.biomodels.jummp.core.user.UserManagementException;
-import net.biomodels.jummp.core.user.UserNotFoundException;
+import net.biomodels.jummp.core.user.*;
 import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException;
 import net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException;
 import net.biomodels.jummp.dbus.authentication.BadCredentialsDBusException;
+import net.biomodels.jummp.dbus.user.RoleNotFoundDBusException;
 import net.biomodels.jummp.dbus.user.UserInvalidDBusException;
 import net.biomodels.jummp.dbus.user.UserManagementDBusException;
 import net.biomodels.jummp.dbus.user.UserNotFoundDBusException;
+import net.biomodels.jummp.plugins.security.Role;
 import net.biomodels.jummp.plugins.security.User;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -248,10 +247,88 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         return user;
     }
 
+    public List<String> getAllRoles(String authenticationHash) throws AuthenticationHashNotFoundDBusException {
+        List<String> returnRoles = new ArrayList<String>();
+        try {
+            setAuthentication(authenticationHash);
+            List<Role> roles = userService.getAllRoles();
+            for (Role role : roles) {
+                returnRoles.add(role.getAuthority());
+            }
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
+        } finally {
+            restoreAuthentication();
+        }
+        return returnRoles;
+    }
+
+    public List<String> getRolesForUser(String authenticationHash, Long userId) throws AuthenticationHashNotFoundDBusException {
+        List<String> returnRoles = new ArrayList<String>();
+        try {
+            setAuthentication(authenticationHash);
+            List<Role> roles = userService.getRolesForUser(userId);
+            for (Role role : roles) {
+                returnRoles.add(role.getAuthority());
+            }
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
+        } finally {
+            restoreAuthentication();
+        }
+        return returnRoles;
+    }
+
+    public void addRoleToUser(String authenticationHash, Long userId, Long roleId) throws AuthenticationHashNotFoundDBusException, UserNotFoundDBusException, RoleNotFoundDBusException {
+        try {
+            setAuthentication(authenticationHash);
+            userService.addRoleToUser(userId, roleId);
+        } catch (RoleNotFoundException e) {
+            throw new RoleNotFoundDBusException(e.getMessage());
+        } catch (UserNotFoundException e) {
+            if (e.getUserName() != null) {
+                throw new UserNotFoundDBusException(e.getUserName());
+            } else {
+                throw new UserNotFoundDBusException(e.getId().toString());
+            }
+        } finally {
+            restoreAuthentication();
+        }
+    }
+
+    public void removeRoleFromUser(String authenticationHash, Long userId, Long roleId) throws AuthenticationHashNotFoundDBusException, UserNotFoundDBusException, RoleNotFoundDBusException {
+        try {
+            setAuthentication(authenticationHash);
+            userService.removeRoleFromUser(userId, roleId);
+        } catch (RoleNotFoundException e) {
+            throw new RoleNotFoundDBusException(e.getMessage());
+        } catch (UserNotFoundException e) {
+            if (e.getUserName() != null) {
+                throw new UserNotFoundDBusException(e.getUserName());
+            } else {
+                throw new UserNotFoundDBusException(e.getId().toString());
+            }
+        } finally {
+            restoreAuthentication();
+        }
+    }
+
     public boolean isRemote() {
         return false;
     }
 
+    public DBusRole getRoleByAuthority(String authenticationHash, String authority) throws AuthenticationHashNotFoundDBusException, RoleNotFoundDBusException {
+        try {
+            setAuthentication(authenticationHash);
+            return DBusRole.fromRole(userService.getRoleByAuthority(authority));
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
+        } catch (RoleNotFoundException e) {
+            throw new RoleNotFoundDBusException(e.getMessage());
+        } finally {
+            restoreAuthentication();
+        }
+    }
     /**
      * Setter for Dependency Injection of UserService.
      * @param userService

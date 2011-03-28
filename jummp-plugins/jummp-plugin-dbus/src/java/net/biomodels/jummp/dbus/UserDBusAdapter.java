@@ -1,7 +1,9 @@
 package net.biomodels.jummp.dbus;
 
 import net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException;
+import net.biomodels.jummp.dbus.user.RoleNotFoundDBusException;
 import net.biomodels.jummp.dbus.user.UserManagementDBusException;
+import net.biomodels.jummp.dbus.user.UserNotFoundDBusException;
 import org.freedesktop.dbus.DBusInterface;
 import org.freedesktop.dbus.DBusInterfaceName;
 
@@ -66,4 +68,9 @@ public interface UserDBusAdapter extends DBusInterface {
      * @throws UserManagementDBusException If user not found
      */
     public DBusUser getUserByName(String authenticationHash, String username) throws AuthenticationHashNotFoundDBusException, UserManagementDBusException;
+    public List<String> getAllRoles(String authenticationHash) throws AuthenticationHashNotFoundDBusException;
+    public List<String> getRolesForUser(String authenticationHash, Long userId) throws AuthenticationHashNotFoundDBusException;
+    public DBusRole getRoleByAuthority(String authenticationHash, String authority) throws AuthenticationHashNotFoundDBusException, RoleNotFoundDBusException;
+    public void addRoleToUser(String authenticationHash, Long userId, Long roleId) throws AuthenticationHashNotFoundDBusException, UserNotFoundDBusException, RoleNotFoundDBusException;
+    public void removeRoleFromUser(String authenticationHash, Long userId, Long roleId) throws AuthenticationHashNotFoundDBusException, UserNotFoundDBusException, RoleNotFoundDBusException;
 }
