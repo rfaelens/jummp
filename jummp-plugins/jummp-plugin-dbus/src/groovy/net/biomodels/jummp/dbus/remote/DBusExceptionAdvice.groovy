@@ -8,6 +8,8 @@ import org.springframework.security.authentication.DisabledException
 import org.springframework.security.authentication.LockedException
 import net.biomodels.jummp.core.JummpException
 import org.freedesktop.dbus.exceptions.DBusExecutionException
+import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
+import org.springframework.security.access.AccessDeniedException
 
 /**
  * @short Advice to map DBusExecutionException to appropriate type.
@@ -28,6 +30,10 @@ class DBusExceptionAdvice implements ThrowsAdvice {
             throw new DisabledException(e.message)
         case "net.biomodels.jummp.dbus.authentication.LockedDBusException":
             throw new LockedException(e.message)
+        case "net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException":
+            throw new AuthenticationHashNotFoundException(e.message)
+        case "net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException":
+            throw new AccessDeniedException(e.message)
         default:
             throw new JummpException(e.message, e)
         }
