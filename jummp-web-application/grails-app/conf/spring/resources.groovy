@@ -7,8 +7,8 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
 beans = {
     xmlns aop: "http://www.springframework.org/schema/aop"
     def grailsApplication = ApplicationHolder.application
-    // TODO: move the JummpApplicationJmsRemoteAdapter to the JMS part
-    jummpApplicationJmsRemoteAdapter(net.biomodels.jummp.plugins.jms.JummpApplicationJmsRemoteAdapter) {
+    // TODO: move the RemoteJummpApplicationAdapterJmsImpl to the JMS part
+    jummpApplicationJmsRemoteAdapter(net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl) {
         jmsSynchronousService = ref("jmsSynchronousService")
     }
     if (grailsApplication.config.net.biomodels.jummp.webapp.remote == "dbus") {
@@ -31,7 +31,7 @@ beans = {
         remoteAuthenticationProvider(net.biomodels.jummp.webapp.RemoteAuthenticationProvider) {
             remoteJummpApplicationAdapter = jummpApplicationJmsRemoteAdapter
         }
-        userJmsRemoteAdapter(net.biomodels.jummp.plugins.jms.UserJmsRemoteAdapter) {
+        userJmsRemoteAdapter(net.biomodels.jummp.jms.remote.RemoteUserAdapterJmsImpl) {
             jmsSynchronousService = ref("jmsSynchronousService")
         }
         remoteUserService(net.biomodels.jummp.webapp.remote.RemoteUserService) {

@@ -1,4 +1,4 @@
-package net.biomodels.jummp.plugins.jms
+package net.biomodels.jummp.jms.remote
 
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder

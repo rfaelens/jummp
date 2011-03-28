@@ -1,4 +1,4 @@
-package net.biomodels.jummp.plugins.jms
+package net.biomodels.jummp.jms.remote
 
 import net.biomodels.jummp.core.JummpException
 import org.perf4j.aop.Profiled
@@ -20,7 +20,7 @@ import net.biomodels.jummp.remote.RemoteJummpApplicationAdapter
  * as retrieving the configuration or authenticating a user.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class JummpApplicationJmsRemoteAdapter extends AbstractJmsRemoteAdapter implements RemoteJummpApplicationAdapter {
+class RemoteJummpApplicationAdapterJmsImpl extends AbstractJmsRemoteAdapter implements RemoteJummpApplicationAdapter {
 
     private static final String ADAPTER_SERVICE_NAME = "jmsAdapter"
 
@@ -33,7 +33,7 @@ class JummpApplicationJmsRemoteAdapter extends AbstractJmsRemoteAdapter implemen
      * @param appToken The unique application token
      * @return The core's configuration
      */
-    @Profiled(tag="JummpApplicationJmsRemoteAdapter.getJummpConfig")
+    @Profiled(tag="RemoteJummpApplicationAdapterJmsImpl.getJummpConfig")
     ConfigObject getJummpConfig(String appToken) {
         return (ConfigObject)jmsSynchronousService.send([app: "jummp", service: "jmsAdapter", method: "getJummpConfig"], appToken, [service: "jmsAdapter", method: "getJummpConfig.response"])
     }
@@ -45,7 +45,7 @@ class JummpApplicationJmsRemoteAdapter extends AbstractJmsRemoteAdapter implemen
      * @throws AuthenticationException If the Authentication is not valid
      * @throws JummpException If an error occurred
      */
-    @Profiled(tag="JummpApplicationJmsRemoteAdapter.authenticate")
+    @Profiled(tag="RemoteJummpApplicationAdapterJmsImpl.authenticate")
     Authentication authenticate(Authentication authentication) throws AuthenticationException, JummpException {
         def retVal = send("authenticate", authentication, false)
         validateReturnValue(retVal, Authentication)
