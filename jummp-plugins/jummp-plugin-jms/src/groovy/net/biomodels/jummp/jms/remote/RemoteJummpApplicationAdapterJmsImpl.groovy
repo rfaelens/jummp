@@ -22,7 +22,7 @@ import net.biomodels.jummp.remote.RemoteJummpApplicationAdapter
  */
 class RemoteJummpApplicationAdapterJmsImpl extends AbstractJmsRemoteAdapter implements RemoteJummpApplicationAdapter {
 
-    private static final String ADAPTER_SERVICE_NAME = "jmsAdapter"
+    private static final String ADAPTER_SERVICE_NAME = "applicationJmsAdapter"
 
     protected String getAdapterServiceName() {
         return ADAPTER_SERVICE_NAME
@@ -35,7 +35,7 @@ class RemoteJummpApplicationAdapterJmsImpl extends AbstractJmsRemoteAdapter impl
      */
     @Profiled(tag="RemoteJummpApplicationAdapterJmsImpl.getJummpConfig")
     ConfigObject getJummpConfig(String appToken) {
-        return (ConfigObject)jmsSynchronousService.send([app: "jummp", service: "jmsAdapter", method: "getJummpConfig"], appToken, [service: "jmsAdapter", method: "getJummpConfig.response"])
+        return (ConfigObject)jmsSynchronousService.send([app: "jummp", service: "applicationJmsAdapter", method: "getJummpConfig"], appToken, [service: "applicationJmsAdapter", method: "getJummpConfig.response"])
     }
 
     /**

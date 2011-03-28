@@ -1,4 +1,4 @@
-package net.biomodels.jummp.core
+package net.biomodels.jummp.jms
 
 import grails.plugin.jms.Queue
 import net.biomodels.jummp.plugins.security.User
@@ -31,7 +31,7 @@ import net.biomodels.jummp.jms.AbstractJmsAdapter
  * In case a method is invoked with the wrong number of arguments an IllegalArgumentException is returned.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class JmsAdapterService extends AbstractJmsAdapter {
+class ApplicationJmsAdapterService extends AbstractJmsAdapter {
 
     @SuppressWarnings("GrailsStatelessService")
     static exposes = ['jms']
@@ -50,7 +50,7 @@ class JmsAdapterService extends AbstractJmsAdapter {
      * @return ConfigObject for jummp config
      * @todo Implement appToken verification
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="jmsAdapterService.getJummpConfig")
     def getJummpConfig(String appToken) {
         return ConfigurationHolder.config.jummp
@@ -61,7 +61,7 @@ class JmsAdapterService extends AbstractJmsAdapter {
      * @param message The Authentication, mostly a UsernamePasswordAuthenticationToken
      * @return A fully propagated Authentication or an AuthenticationException or an IllegalArgumentException if @p message is not an Authentication
      */
-    @Queue
+    @grails.plugin.jms.Queue
     @Profiled(tag="jmsAdapterService.authenticate")
     def authenticate(def message) {
         if (message instanceof Authentication) {
@@ -77,13 +77,13 @@ class JmsAdapterService extends AbstractJmsAdapter {
                 // The authentication is propagated with an GrailsUser as principal
                 // Unfortunately the GrailsUser class is not serializable.
                 // Because of that a new Authentication is created using an own implementation of a serializable GrailsUser
-                return new UsernamePasswordAuthenticationToken(SerializableGrailsUser.fromGrailsUser((GrailsUser)auth.principal),
+                return new UsernamePasswordAuthenticationToken(SerializableGrailsUser.fromGrailsUser((org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser)auth.principal),
                         auth.getCredentials(), auth.getAuthorities())
             } catch (AuthenticationException e) {
                 // extraInformation is also a GrailsUser, so if it is set we need to create a new AuthenticationException
                 // with a SerializableGrailsUser instead of the GrailsUser as extraInformation
                 if (e.extraInformation) {
-                    AuthenticationException exception = e.class.newInstance(e.message, SerializableGrailsUser.fromGrailsUser((GrailsUser)e.extraInformation))
+                    AuthenticationException exception = e.class.newInstance(e.message, SerializableGrailsUser.fromGrailsUser((org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser)e.extraInformation))
                     exception.setAuthentication(e.authentication)
                     return exception
                 } else {

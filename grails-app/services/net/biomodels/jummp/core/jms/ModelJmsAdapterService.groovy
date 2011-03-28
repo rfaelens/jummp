@@ -1,7 +1,6 @@
 package net.biomodels.jummp.core.jms
 
 import grails.plugin.jms.Queue
-import net.biomodels.jummp.core.JmsAdapterService
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
@@ -17,16 +16,17 @@ import org.apache.commons.io.FileUtils
 import org.perf4j.aop.Profiled
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.Authentication
+import net.biomodels.jummp.jms.AbstractJmsAdapter
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
  *
  * For more documentation about the idea of exporting a service to JMS please refer to
- * @link JmsAdapterService.
+ * @link ApplicationJmsAdapterService.
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class ModelJmsAdapterService extends JmsAdapterService {
+class ModelJmsAdapterService extends AbstractJmsAdapter {
 
     @SuppressWarnings("GrailsStatelessService")
     static exposes = ['jms']
