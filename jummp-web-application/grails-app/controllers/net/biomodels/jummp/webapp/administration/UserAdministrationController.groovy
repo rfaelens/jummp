@@ -70,7 +70,7 @@ class UserAdministrationController {
         try {
             def data = [success: remoteUserService.enableUser(params.id as Long, Boolean.parseBoolean(params.value))]
             render data as JSON
-        } catch (IllegalArgumentException e) {
+        } catch (UserNotFoundException e) {
             def data = [error: true, message: e.message]
             render data as JSON
         }
@@ -83,7 +83,7 @@ class UserAdministrationController {
         try {
             def data = [success: remoteUserService.lockAccount(params.id as Long, Boolean.parseBoolean(params.value))]
             render data as JSON
-        } catch (IllegalArgumentException e) {
+        } catch (UserNotFoundException e) {
             def data = [error: true, message: e.message]
             render data as JSON
         }
@@ -96,7 +96,7 @@ class UserAdministrationController {
         try {
             def data = [success: remoteUserService.expireAccount(params.id as Long, Boolean.parseBoolean(params.value))]
             render data as JSON
-        } catch (IllegalArgumentException e) {
+        } catch (UserNotFoundException e) {
             def data = [error: true, message: e.message]
             render data as JSON
         }
@@ -109,7 +109,7 @@ class UserAdministrationController {
         try {
             def data = [success: remoteUserService.expirePassword(params.id as Long, Boolean.parseBoolean(params.value))]
             render data as JSON
-        } catch (IllegalArgumentException e) {
+        } catch (UserNotFoundException e) {
             def data = [error: true, message: e.message]
             render data as JSON
         }
