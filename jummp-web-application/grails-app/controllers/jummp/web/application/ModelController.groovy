@@ -15,15 +15,15 @@ import net.biomodels.jummp.core.model.AuthorTransportCommand
 /**
  * @short Controller providing basic access to Models.
  *
- * This controller communicates with the modelAdapterService to retrieve Models and
+ * This controller communicates with the remoteModelService to retrieve Models and
  * Model information from the core application.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class ModelController {
     /**
-     * Dependency injection of modelAdapterService
+     * Dependency injection of remoteModelService
      */
-    def modelAdapterService
+    def remoteModelService
     /**
      * Dependency injection of springSecurityService
      */
@@ -45,8 +45,8 @@ class ModelController {
             return
         }
         ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
-        RevisionTransportCommand rev = modelAdapterService.getLatestRevision(model)
-        [revision: rev, addRevision: modelAdapterService.canAddRevision(model)]
+        RevisionTransportCommand rev = remoteModelService.getLatestRevision(model)
+        [revision: rev, addRevision: remoteModelService.canAddRevision(model)]
     }
 
     def summary = {
@@ -55,7 +55,7 @@ class ModelController {
             return
         }
         ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
-        RevisionTransportCommand rev = modelAdapterService.getLatestRevision(model)
+        RevisionTransportCommand rev = remoteModelService.getLatestRevision(model)
         [publication: rev.model.publication, revision: rev]
     }
 
@@ -76,7 +76,7 @@ class ModelController {
      */
     def publication = {
         ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
-        PublicationTransportCommand publication = modelAdapterService.getPublication(model)
+        PublicationTransportCommand publication = remoteModelService.getPublication(model)
         render(template: "/templates/publication", model: [publication: publication])
     }
 
@@ -98,7 +98,7 @@ class ModelController {
         dataToRender.sEcho = params.sEcho
         dataToRender.aaData = []
 
-        dataToRender.iTotalRecords = modelAdapterService.getModelCount()
+        dataToRender.iTotalRecords = remoteModelService.getModelCount()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
         ModelListSorting sort
@@ -120,7 +120,7 @@ class ModelController {
             sort = ModelListSorting.ID
             break
         }
-        List models = modelAdapterService.getAllModels(start, length, params.sSortDir_0 == "asc", sort)
+        List models = remoteModelService.getAllModels(start, length, params.sSortDir_0 == "asc", sort)
         models.each { model ->
             Map publication = [:]
             if (model.publication) {
@@ -184,7 +184,7 @@ class ModelController {
                         }
                     }
                 }
-                ModelTransportCommand model = modelAdapterService.uploadModel(cmd.model.bytes, uploadModel)
+                ModelTransportCommand model = remoteModelService.uploadModel(cmd.model.bytes, uploadModel)
                 render "<textarea>" + ([success: true, model: model] as JSON) + "</textarea>"
             } catch (ModelException e) {
                 Map errors = [error: true]
@@ -219,7 +219,7 @@ class ModelController {
         } else {
             try {
                 ModelTransportCommand model = new ModelTransportCommand(id: cmd.modelId)
-                RevisionTransportCommand revision = modelAdapterService.addRevision(model, cmd.model.bytes, new ModelFormatTransportCommand(identifier: "SBML"), cmd.comment)
+                RevisionTransportCommand revision = remoteModelService.addRevision(model, cmd.model.bytes, new ModelFormatTransportCommand(identifier: "SBML"), cmd.comment)
                 render "<textarea>" + ([success: true, revision: revision] as JSON) + "</textarea>"
             } catch (ModelException e) {
                 Map errors = [error: true]
@@ -233,7 +233,7 @@ class ModelController {
      * File download of the model file for a model by id
      */
     def download = {
-        byte[] bytes = modelAdapterService.retrieveModelFile(new ModelTransportCommand(id: params.id as int))
+        byte[] bytes = remoteModelService.retrieveModelFile(new ModelTransportCommand(id: params.id as int))
         response.setContentType("application/xml")
         // TODO: set a proper name for the model
         response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")
@@ -243,7 +243,7 @@ class ModelController {
      * File download of the model file for a model by id
      */
     def downloadModelRevision = {
-        byte[] bytes = modelAdapterService.retrieveModelFile(new RevisionTransportCommand(id: params.id as int))
+        byte[] bytes = remoteModelService.retrieveModelFile(new RevisionTransportCommand(id: params.id as int))
         response.setContentType("application/xml")
         // TODO: set a proper name for the model
         response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")

@@ -11,6 +11,12 @@ beans = {
     jummpApplicationJmsRemoteAdapter(net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl) {
         jmsSynchronousService = ref("jmsSynchronousService")
     }
+    jmsModelAdapter(net.biomodels.jummp.jms.remote.RemoteModelAdapterJmsImpl) {
+        jmsSynchronousService = ref("jmsSynchronousService")
+    }
+    remoteModelService(net.biomodels.jummp.webapp.remote.RemoteModelService) {
+        remoteModelAdapter = jmsModelAdapter
+    }
     if (grailsApplication.config.net.biomodels.jummp.webapp.remote == "dbus") {
         println("Using DBus")
         remoteJummpApplicationAdapterDBusImpl(net.biomodels.jummp.dbus.remote.RemoteJummpApplicationAdapterDBusImpl)

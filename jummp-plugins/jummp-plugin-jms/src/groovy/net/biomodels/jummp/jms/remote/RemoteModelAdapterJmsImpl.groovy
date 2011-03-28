@@ -1,4 +1,4 @@
-package net.biomodels.jummp.plugins.jms
+package net.biomodels.jummp.jms.remote
 
 import org.perf4j.aop.Profiled
 import net.biomodels.jummp.core.ModelException
@@ -21,7 +21,7 @@ import net.biomodels.jummp.remote.RemoteModelAdapter
  * it uses JMS internally is completely transparent to the users of this service.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class ModelAdapterService extends AbstractJmsRemoteAdapter implements RemoteModelAdapter {
+class RemoteModelAdapterJmsImpl extends AbstractJmsRemoteAdapter implements RemoteModelAdapter {
 
     static transactional = false
     private static final String ADAPTER_SERVICE_NAME = "modelJmsAdapter"
@@ -30,96 +30,96 @@ class ModelAdapterService extends AbstractJmsRemoteAdapter implements RemoteMode
         return ADAPTER_SERVICE_NAME
     }
 
-    @Profiled(tag="modelAdapterService.getAllModels")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getAllModels")
     public List<ModelTransportCommand> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sort) {
         def retVal = send("getAllModels", [offset, count, sortOrder, sort])
         validateReturnValue(retVal, List)
         return (List)retVal
     }
 
-    @Profiled(tag="modelAdapterService.getAllModels")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getAllModels")
     public List<ModelTransportCommand> getAllModels(int offset, int count, boolean sortOrder) {
         def retVal = send("getAllModels", [offset, count, sortOrder])
         validateReturnValue(retVal, List)
         return (List)retVal
     }
 
-    @Profiled(tag="modelAdapterService.getAllModels")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getAllModels")
     public List<ModelTransportCommand> getAllModels(int offset, int count, ModelListSorting sort) {
         def retVal = send("getAllModels", [offset, count, sort])
         validateReturnValue(retVal, List)
         return (List)retVal
     }
 
-    @Profiled(tag="modelAdapterService.getAllModels")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getAllModels")
     public List<ModelTransportCommand> getAllModels(int offset, int count) {
         def retVal = send("getAllModels", [offset, count])
         validateReturnValue(retVal, List)
         return (List)retVal
     }
 
-    @Profiled(tag="modelAdapterService.getAllModels")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getAllModels")
     public List<ModelTransportCommand> getAllModels(ModelListSorting sort) {
         def retVal = send("getAllModels", [sort])
         validateReturnValue(retVal, List)
         return (List)retVal
     }
 
-    @Profiled(tag="modelAdapterService.getAllModels")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getAllModels")
     public List<ModelTransportCommand> getAllModels() {
         return getAllModels(ModelListSorting.ID)
     }
 
-    @Profiled(tag="modelAdapterService.getModelCount")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getModelCount")
     public Integer getModelCount() {
         def retVal = send("getModelCount")
         validateReturnValue(retVal, Integer)
         return (Integer)retVal
     }
 
-    @Profiled(tag="modelAdapterService.getLatestRevision")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getLatestRevision")
     public RevisionTransportCommand getLatestRevision(ModelTransportCommand model) {
         def retVal = send("getLatestRevision", model)
         validateReturnValue(retVal, RevisionTransportCommand)
         return (RevisionTransportCommand)retVal
     }
 
-    @Profiled(tag="modelAdapterService.getAllRevisions")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getAllRevisions")
     public List<RevisionTransportCommand> getAllRevisions(ModelTransportCommand model) {
         def retVal = send("getAllRevisions", model)
         validateReturnValue(retVal, List)
         return (List<RevisionTransportCommand>)retVal
     }
 
-    @Profiled(tag="modelAdapterService.getPublication")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getPublication")
     public PublicationTransportCommand getPublication(final ModelTransportCommand model) {
         def retVal = send("getPublication", model)
         validateReturnValue(retVal, PublicationTransportCommand)
         return (PublicationTransportCommand)retVal
     }
 
-    @Profiled(tag="modelAdapterService.uploadModel")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.uploadModel")
     public ModelTransportCommand uploadModel(byte[] bytes, ModelTransportCommand meta) throws ModelException {
         def retVal = send("uploadModel", [bytes, meta])
         validateReturnValue(retVal, ModelTransportCommand)
         return (ModelTransportCommand)retVal
     }
 
-    @Profiled(tag="modelAdapterService.addRevision")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.addRevision")
     public RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException {
         def retVal = send("addRevision", [model, bytes, format, comment])
         validateReturnValue(retVal, RevisionTransportCommand)
         return (RevisionTransportCommand)retVal
     }
 
-    @Profiled(tag="modelAdapterService.canAddRevision")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.canAddRevision")
     public Boolean canAddRevision(final ModelTransportCommand model) {
         def retVal = send("canAddRevision", model)
         validateReturnValue(retVal, Boolean)
         return (Boolean)retVal
     }
 
-    @Profiled(tag="modelAdapterService.retrieveModelFile")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.retrieveModelFile")
     public byte[] retrieveModelFile(RevisionTransportCommand revision) {
         // TODO: verify closely because of byte[]
         def retVal = send("retrieveModelFile", revision)
@@ -127,7 +127,7 @@ class ModelAdapterService extends AbstractJmsRemoteAdapter implements RemoteMode
         return (byte[])retVal
     }
 
-    @Profiled(tag="modelAdapterService.retrieveModelFile")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.retrieveModelFile")
     public byte[] retrieveModelFile(ModelTransportCommand model) {
         // TODO: verify closely because of byte[]
         def retVal = send("retrieveModelFile", model)
@@ -136,14 +136,14 @@ class ModelAdapterService extends AbstractJmsRemoteAdapter implements RemoteMode
     }
 
     // TODO: how to handle grant/revoke rights from the webapplication? Which users to show?
-    @Profiled(tag="modelAdapterService.deleteModel")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.deleteModel")
     public Boolean deleteModel(ModelTransportCommand model) {
         def retVal = send("deleteModel", model)
         validateReturnValue(retVal, Boolean)
         return (Boolean)retVal
     }
 
-    @Profiled(tag="modelAdapterService.restoreModel")
+    @Profiled(tag="RemoteModelAdapterJmsImpl.restoreModel")
     public Boolean restoreModel(ModelTransportCommand model) {
         def retVal = send("restoreModel", model)
         validateReturnValue(retVal, Boolean)
