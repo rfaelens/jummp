@@ -8,7 +8,6 @@ import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.dbus.DBusAuthentication
 import net.biomodels.jummp.dbus.DBusUser
 import net.biomodels.jummp.dbus.UserDBusAdapter
-import net.biomodels.jummp.dbus.user.UserManagementDBusException
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.remote.RemoteUserAdapter
@@ -43,11 +42,7 @@ class RemoteUserAdapterDBusImpl implements RemoteUserAdapter, InitializingBean {
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.editUser")
     void editUser(User user) throws UserInvalidException {
-        try {
-            userDBusAdapter.editUser(authenticationToken(), DBusUser.fromUser(user))
-        } catch (UserManagementDBusException e) {
-            throw new UserInvalidException(user.username)
-        }
+        userDBusAdapter.editUser(authenticationToken(), DBusUser.fromUser(user))
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.getCurrentUser")

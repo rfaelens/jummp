@@ -11,6 +11,7 @@ import org.freedesktop.dbus.exceptions.DBusExecutionException
 import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.user.UserNotFoundException
+import net.biomodels.jummp.core.user.UserInvalidException
 
 /**
  * @short Advice to map DBusExecutionException to appropriate type.
@@ -42,6 +43,8 @@ class DBusExceptionAdvice implements ThrowsAdvice {
             } catch (NumberFormatException nfe) {
                 throw new UserNotFoundException(e.message)
             }
+        case "net.biomodels.jummp.dbus.user.UserInvalidDBusException":
+            throw new UserInvalidException(e.message)
         default:
             throw new JummpException(e.message, e)
         }

@@ -8,6 +8,7 @@ import net.biomodels.jummp.core.user.UserNotFoundException;
 import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException;
 import net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException;
 import net.biomodels.jummp.dbus.authentication.BadCredentialsDBusException;
+import net.biomodels.jummp.dbus.user.UserInvalidDBusException;
 import net.biomodels.jummp.dbus.user.UserManagementDBusException;
 import net.biomodels.jummp.dbus.user.UserNotFoundDBusException;
 import net.biomodels.jummp.plugins.security.User;
@@ -51,7 +52,7 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (UserInvalidException e) {
-            throw new UserManagementDBusException(e.getMessage());
+            throw new UserInvalidDBusException(e.getUserName());
         } finally {
             restoreAuthentication();
         }
@@ -158,7 +159,7 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (UserInvalidException e) {
-            throw new UserManagementDBusException(e.getMessage());
+            throw new UserInvalidDBusException(e.getUserName());
         } catch (RegistrationException e) {
             throw new UserManagementDBusException(e.getMessage());
         } finally {
