@@ -18,6 +18,7 @@ try {
 } catch (Exception e) {
     jummpProperties.setProperty("jummp.security.ldap.enabled", "false")
     jummpProperties.setProperty("jummp.security.registration.email.send", "false")
+    jummpProperties.setProperty("jummp.export.dbus", "false")
 }
 def jummpConfig = new ConfigSlurper().parse(jummpProperties)
 List pluginsToExclude = []
@@ -229,6 +230,12 @@ if (!(jummpConfig.jummp.security.ui.changePassword instanceof ConfigObject)) {
 if (jummp.security.ldap.enabled) {
     // as long as our LDAP implementation does not support changing passwords we need to disable
     jummp.security.ui.changePassword = false
+}
+
+if (!(jummpConfig.jummp.export.dbus instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.export.dbus)) {
+    jummp.export.dbus = true
+} else {
+    jummp.export.dbus = false
 }
 
 // In case of LDAP there is no need to allow users to register with a password as we cannot (yet) add anything to the LDAP
