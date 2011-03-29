@@ -3,12 +3,9 @@ package net.biomodels.jummp.dbus
 import org.freedesktop.dbus.DBusInterface
 import org.freedesktop.dbus.exceptions.DBusException
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.security.authentication.AnonymousAuthenticationToken
-import org.springframework.security.core.authority.GrantedAuthorityImpl
-import org.springframework.security.core.context.SecurityContextHolder
-import net.biomodels.jummp.core.IAuthenticationHashService
 import net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException
 import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
+import net.biomodels.jummp.remote.AbstractCoreAdapter
 
 /**
  * @short Abstract Base class for all DBusAdapter Implementations.
@@ -19,11 +16,7 @@ import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-public abstract class AbstractDBusAdapter implements InitializingBean {
-    /**
-     * Dependency injection of AuthenticationHashService
-     */
-    protected IAuthenticationHashService authenticationHashService
+public abstract class AbstractDBusAdapter extends AbstractCoreAdapter implements InitializingBean {
     /**
      * Dependency injection of DBusManager
      */
@@ -32,42 +25,17 @@ public abstract class AbstractDBusAdapter implements InitializingBean {
      * The name of the object exported to DBus - needs to be set in the bean configuration
      */
     protected String objectName
-    private static final ANONYMOUS_AUTH = new AnonymousAuthenticationToken("key", "anonymousUser", [new GrantedAuthorityImpl("ROLE_ANONYMOUS")])
 
     /**
      * Helper function to set the Authentication in the current thread
      * @param authentication
      */
     protected void setAuthentication(String authenticationHash) throws AuthenticationHashNotFoundDBusException {
-        SecurityContextHolder.clearContext()
         try {
-            SecurityContextHolder.context.setAuthentication(authenticationHashService.retrieveAuthentication(authenticationHash))
+            super.setAuthentication(authenticationHash)
         } catch (AuthenticationHashNotFoundException e) {
             throw new AuthenticationHashNotFoundDBusException(e.getMessage())
         }
-    }
-
-    /**
-     * Helper function to set an anonymous Authentication in the current thread
-     */
-    protected void setAnonymousAuthentication() {
-        SecurityContextHolder.clearContext()
-        SecurityContextHolder.context.setAuthentication(ANONYMOUS_AUTH)
-    }
-
-    /**
-     * Helper function to remove the Authentication from current thread.
-     */
-    protected void restoreAuthentication() {
-        SecurityContextHolder.clearContext()
-    }
-
-    /**
-     * Setter for Dependency Injection of AuthenticationHashService.
-     * @param authenticationHashService
-     */
-    public void setAuthenticationHashService(IAuthenticationHashService authenticationHashService) {
-        this.authenticationHashService = authenticationHashService
     }
 
     /**
