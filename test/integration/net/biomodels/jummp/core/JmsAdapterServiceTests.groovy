@@ -21,7 +21,7 @@ import org.springframework.security.core.authority.GrantedAuthorityImpl
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
-import net.biomodels.jummp.jms.ApplicationJmsAdapterService
+import net.biomodels.jummp.jms.ApplicationJmsAdapter
 
 class JmsAdapterServiceTests extends JummpIntegrationTestCase {
     def aclUtilService
@@ -31,7 +31,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         super.setUp()
         createUserAndRoles()
         mockLogging(ModelService)
-        mockLogging(ApplicationJmsAdapterService)
+        mockLogging(ApplicationJmsAdapter)
     }
 
     protected void tearDown() {

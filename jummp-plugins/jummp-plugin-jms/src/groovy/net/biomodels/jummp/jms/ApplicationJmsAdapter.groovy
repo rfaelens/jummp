@@ -33,7 +33,7 @@ import net.biomodels.jummp.core.user.JummpAuthenticationImpl
  * In case a method is invoked with the wrong number of arguments an IllegalArgumentException is returned.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class ApplicationJmsAdapterService extends AbstractJmsAdapter {
+class ApplicationJmsAdapter extends AbstractJmsAdapter {
 
     @SuppressWarnings("GrailsStatelessService")
     static exposes = ['jms']
