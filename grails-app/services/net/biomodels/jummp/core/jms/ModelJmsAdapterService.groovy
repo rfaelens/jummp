@@ -7,16 +7,13 @@ import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.model.ModelFormat
-import net.biomodels.jummp.model.Publication
-import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.io.FileUtils
 import org.perf4j.aop.Profiled
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.Authentication
 import net.biomodels.jummp.jms.AbstractJmsAdapter
+import net.biomodels.jummp.core.IModelService
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -36,7 +33,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     /**
      * Dependency injection of ModelService
      */
-    def modelService
+    IModelService modelService
 
     /**
      * Wrapper for ModelService.getAllModels
@@ -55,8 +52,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("Invalid arguments passed to method. Allowed is Authentication or Authentication, Integer, Integer or Authentication, Integer, Integer, Boolean")
         }
         List arguments = (List)message
-        List<Model> modelList = []
-        List<ModelTransportCommand> returnList = []
+        List<ModelTransportCommand> modelList = []
         // set authentication
         try {
             setAuthentication((Authentication)arguments[0])
@@ -87,10 +83,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         } finally {
             restoreAuthentication()
         }
-        modelList.each {
-            returnList << it.toCommandObject()
-        }
-        return returnList
+        return modelList
     }
 
     /**
@@ -125,10 +118,10 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         if (!verifyMessage(message, [Authentication, ModelTransportCommand])) {
             return new IllegalArgumentException("Authentication and Model as arguments expected")
         }
-        Revision revision = null
+        RevisionTransportCommand revision = null
         try {
             setAuthentication((Authentication)message[0])
-            revision = modelService.getLatestRevision(Model.get(message[1].id))
+            revision = modelService.getLatestRevision(message[1])
         } finally {
             restoreAuthentication()
         }
@@ -136,7 +129,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         if (revision == null) {
             return new AccessDeniedException("No access to any revision of Model ${message[1].id}")
         } else {
-            return revision.toCommandObject()
+            return revision
         }
     }
 
@@ -151,18 +144,14 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         if (!verifyMessage(message, [Authentication, ModelTransportCommand])) {
             return new IllegalArgumentException("Authentication and Model as arguments expected")
         }
-        List<Revision> result = []
+        List<RevisionTransportCommand> result = []
         try {
             setAuthentication((Authentication)message[0])
-            result = modelService.getAllRevisions(Model.get(message[1].id))
+            result = modelService.getAllRevisions(message[1])
         } finally {
             restoreAuthentication()
         }
-        List<RevisionTransportCommand> revisions = []
-        result.each {
-            revisions << it.toCommandObject()
-        }
-        return revisions
+        return result
     }
 
     /**
@@ -179,18 +168,16 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((Authentication)message[0])
-            Publication publication = modelService.getPublication(Model.get(message[1].id))
-            if (publication) {
-                result = publication.toCommandObject()
-            } else {
-                result = new PublicationTransportCommand()
-            }
+            result = modelService.getPublication(message[1])
         } catch (AccessDeniedException e) {
             result = e
         } catch (IllegalArgumentException e) {
             result = e
         } finally {
             restoreAuthentication()
+        }
+        if (!result) {
+            result = new PublicationTransportCommand()
         }
         return result
     }
@@ -213,7 +200,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
             setAuthentication((Authentication)message[0])
             File file = File.createTempFile("jummpJms", null)
             file.append(message[1])
-            result = modelService.uploadModel(file, (ModelTransportCommand)message[2]).toCommandObject()
+            result = modelService.uploadModel(file, (ModelTransportCommand)message[2])
             FileUtils.deleteQuietly(file)
         } catch (AccessDeniedException e) {
             result = e
@@ -243,7 +230,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
             setAuthentication((Authentication)message[0])
             File file = File.createTempFile("jummpJms", null)
             file.append(message[2])
-            result = modelService.addRevision(Model.get((message[1]).id), file, ModelFormat.findByIdentifier(((ModelFormatTransportCommand)message[3]).identifier), (String)message[4]).toCommandObject()
+            result = modelService.addRevision(message[1], file, message[3], (String)message[4])
             FileUtils.deleteQuietly(file)
         } catch (AccessDeniedException e) {
             result = e
@@ -271,7 +258,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((Authentication)message[0])
-            result = modelService.canAddRevision(Model.get((message[1]).id))
+            result = modelService.canAddRevision(message[1])
         } finally {
             restoreAuthentication()
         }
@@ -295,9 +282,9 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         try {
             setAuthentication((Authentication)message[0])
             if (message[1] instanceof RevisionTransportCommand) {
-                result = modelService.retrieveModelFile(Revision.get(message[1].id))
+                result = modelService.retrieveModelFile(message[1].id)
             } else {
-                result = modelService.retrieveModelFile(Model.get(message[1].id))
+                result = modelService.retrieveModelFile(message[1].id)
             }
         } catch (AccessDeniedException e) {
             result = e
@@ -324,7 +311,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((Authentication)message[0])
-            modelService.grantReadAccess(Model.get(message[1].id), User.get(message[2].id))
+            modelService.grantReadAccess(message[1], message[2])
             result = true
         } catch (AccessDeniedException e) {
             result = e
@@ -349,7 +336,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((Authentication)message[0])
-            modelService.grantWriteAccess(Model.get(message[1].id), message[2])
+            modelService.grantWriteAccess(message[1], message[2])
             result = true
         } catch (AccessDeniedException e) {
             result = e
@@ -374,7 +361,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((Authentication)message[0])
-            result = modelService.revokeReadAccess(Model.get(message[1].id), message[2])
+            result = modelService.revokeReadAccess(message[1], message[2])
         } catch (AccessDeniedException e) {
             result = e
         } finally {
@@ -398,7 +385,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((Authentication)message[0])
-            result = modelService.revokeWriteAccess(Model.get(message[1].id), message[2])
+            result = modelService.revokeWriteAccess(message[1], message[2])
         } catch (AccessDeniedException e) {
             result = e
         } finally {
@@ -422,7 +409,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((Authentication)message[0])
-            result = modelService.deleteModel(Model.get(message[1].id))
+            result = modelService.deleteModel(message[1])
         } catch (AccessDeniedException e) {
             result = e
         } finally {
@@ -446,7 +433,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((Authentication)message[0])
-            result = modelService.restoreModel(Model.get(message[1].id))
+            result = modelService.restoreModel(message[1])
         } catch (AccessDeniedException e) {
             result = e
         } finally {
