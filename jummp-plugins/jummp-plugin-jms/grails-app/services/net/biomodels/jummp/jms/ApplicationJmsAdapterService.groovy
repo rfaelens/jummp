@@ -13,6 +13,7 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import net.biomodels.jummp.jms.AbstractJmsAdapter
 import net.biomodels.jummp.core.IAuthenticationHashService
+import net.biomodels.jummp.core.user.JummpAuthenticationImpl
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -75,15 +76,9 @@ class ApplicationJmsAdapterService extends AbstractJmsAdapter {
                     if (!User.findByUsername(auth.principal.getUsername())) {
                         throw new BadCredentialsException("User does not have an account in the database")
                     }
-                    String hash = authenticationHashService.hashAuthentication(auth);
-                    return auth
                 }
-                String hash = authenticationHashService.hashAuthentication(auth);
-                // The authentication is propagated with an GrailsUser as principal
-                // Unfortunately the GrailsUser class is not serializable.
-                // Because of that a new Authentication is created using an own implementation of a serializable GrailsUser
-                return new UsernamePasswordAuthenticationToken(SerializableGrailsUser.fromGrailsUser((org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser)auth.principal),
-                        auth.getCredentials(), auth.getAuthorities())
+                String hash = authenticationHashService.hashAuthentication(auth)
+                return JummpAuthenticationImpl.fromAuthentication(auth, hash)
             } catch (AuthenticationException e) {
                 // extraInformation is also a GrailsUser, so if it is set we need to create a new AuthenticationException
                 // with a SerializableGrailsUser instead of the GrailsUser as extraInformation

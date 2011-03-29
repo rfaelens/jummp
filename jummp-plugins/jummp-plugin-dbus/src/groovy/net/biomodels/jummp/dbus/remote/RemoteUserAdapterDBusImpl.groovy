@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserCodeExpiredException
+import net.biomodels.jummp.core.user.JummpAuthentication
 
 /**
  * @short DBus Implementation of the RemoteUserAdapter.
@@ -160,8 +161,8 @@ class RemoteUserAdapterDBusImpl implements RemoteUserAdapter, InitializingBean {
         Authentication auth = SecurityContextHolder.context.authentication
         if (auth instanceof AnonymousAuthenticationToken) {
             return "anonymous"
-        } else if (auth instanceof DBusAuthentication) {
-            return ((DBusAuthentication)auth).getHash()
+        } else if (auth instanceof JummpAuthentication) {
+            return ((JummpAuthentication)auth).getAuthenticationHash()
         } else {
             return ""
         }

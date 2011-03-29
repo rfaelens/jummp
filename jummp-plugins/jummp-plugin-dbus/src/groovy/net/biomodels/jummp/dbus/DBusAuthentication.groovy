@@ -4,6 +4,7 @@ import org.freedesktop.dbus.DBusSerializable
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.GrantedAuthorityImpl
+import net.biomodels.jummp.core.user.JummpAuthentication
 
 /**
  * @short DBus Wrapper for an Authentication.
@@ -19,7 +20,7 @@ import org.springframework.security.core.authority.GrantedAuthorityImpl
  * 
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class DBusAuthentication implements DBusSerializable, Authentication {
+class DBusAuthentication implements DBusSerializable, JummpAuthentication {
     private static final long serialVersionUID = 1L
     String username
     String hash
@@ -79,6 +80,10 @@ class DBusAuthentication implements DBusSerializable, Authentication {
         this.username = username
         this.hash = hash
         this.roles = roles
+    }
+
+    public String getAuthenticationHash() {
+        return this.hash
     }
 
     public static DBusAuthentication fromAuthentication(Authentication auth) {
