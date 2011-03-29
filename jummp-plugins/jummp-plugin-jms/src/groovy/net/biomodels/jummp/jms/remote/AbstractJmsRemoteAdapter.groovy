@@ -3,6 +3,7 @@ package net.biomodels.jummp.jms.remote
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import net.biomodels.jummp.core.JummpException
+import org.apache.log4j.Logger
 
 /**
  * @short Base class for services delegating to the core through synchronous JMS.
@@ -27,6 +28,7 @@ import net.biomodels.jummp.core.JummpException
  */
 abstract class AbstractJmsRemoteAdapter {
     def jmsSynchronousService
+    Logger log = Logger.getLogger(AbstractJmsRemoteAdapter) 
 
     /**
      * Validates the @p retVal. In case of a @c null value an JummpException is thrown, in case the
