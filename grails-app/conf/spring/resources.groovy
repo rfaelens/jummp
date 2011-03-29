@@ -26,7 +26,7 @@ beans = {
         userService = ref("userService")
     }
 
-    modelJmsAdapterService(net.biomodels.jummp.core.jms.ModelJmsAdapterService) {
+    modelJmsAdapterService(net.biomodels.jummp.jms.ModelJmsAdapterService) {
         modelService = ref("modelDelegateService")
     }
 

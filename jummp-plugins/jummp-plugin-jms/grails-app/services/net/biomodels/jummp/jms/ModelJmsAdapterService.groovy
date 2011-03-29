@@ -1,4 +1,4 @@
-package net.biomodels.jummp.core.jms
+package net.biomodels.jummp.jms
 
 import grails.plugin.jms.Queue
 import net.biomodels.jummp.core.ModelException
