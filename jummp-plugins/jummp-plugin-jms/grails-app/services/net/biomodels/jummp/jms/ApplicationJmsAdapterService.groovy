@@ -12,6 +12,7 @@ import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
 import org.springframework.security.authentication.BadCredentialsException
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import net.biomodels.jummp.jms.AbstractJmsAdapter
+import net.biomodels.jummp.core.IAuthenticationHashService
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -44,6 +45,8 @@ class ApplicationJmsAdapterService extends AbstractJmsAdapter {
     @SuppressWarnings("GrailsStatelessService")
     def authenticationManager
 
+    private IAuthenticationHashService authenticationHashService
+
     /**
      * Retrieves the externalized Jummp configuration.
      * @param appToken A unique token to verify that the remote application is allowed to retrieve the configuration.
@@ -72,8 +75,10 @@ class ApplicationJmsAdapterService extends AbstractJmsAdapter {
                     if (!User.findByUsername(auth.principal.getUsername())) {
                         throw new BadCredentialsException("User does not have an account in the database")
                     }
+                    String hash = authenticationHashService.hashAuthentication(auth);
                     return auth
                 }
+                String hash = authenticationHashService.hashAuthentication(auth);
                 // The authentication is propagated with an GrailsUser as principal
                 // Unfortunately the GrailsUser class is not serializable.
                 // Because of that a new Authentication is created using an own implementation of a serializable GrailsUser
@@ -92,5 +97,13 @@ class ApplicationJmsAdapterService extends AbstractJmsAdapter {
             }
         }
         return new IllegalArgumentException("Did not receive an authentication")
+    }
+
+    /**
+     * Setter for Dependency Injection of AuthenticationHashService.
+     * @param authenticationHashService
+     */
+    public void setAuthenticationHashService(IAuthenticationHashService authenticationHashService) {
+        this.authenticationHashService = authenticationHashService
     }
 }

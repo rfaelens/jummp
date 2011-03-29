@@ -30,6 +30,11 @@ beans = {
         modelService = ref("modelDelegateService")
     }
 
+    applicationJmsAdapterService(net.biomodels.jummp.jms.ApplicationJmsAdapterService) {
+        authenticationHashService = ref("authenticationHashService")
+        authenticationManager = ref("authenticationManager")
+    }
+
     // for DBus
     if (grailsApplication.config.jummp.export.dbus == true) {
         dbusManager(net.biomodels.jummp.dbus.DBusManagerImpl)
