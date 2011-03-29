@@ -1,8 +1,7 @@
 package net.biomodels.jummp.jms.remote
 
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
 import net.biomodels.jummp.core.JummpException
+import net.biomodels.jummp.remote.AbstractRemoteAdapter
 import org.apache.log4j.Logger
 
 /**
@@ -26,7 +25,7 @@ import org.apache.log4j.Logger
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-abstract class AbstractJmsRemoteAdapter {
+abstract class AbstractJmsRemoteAdapter extends AbstractRemoteAdapter {
     def jmsSynchronousService
     Logger log = Logger.getLogger(AbstractJmsRemoteAdapter) 
 
@@ -79,14 +78,13 @@ abstract class AbstractJmsRemoteAdapter {
      */
     protected def send(String method, def message, boolean authenticated) {
         if (authenticated && message) {
-            Authentication auth = SecurityContextHolder.context.authentication
             if (message instanceof List) {
-                ((List)message).add(0, auth)
+                ((List)message).add(0, authenticationToken())
             } else {
-                message = [auth, message]
+                message = [authenticationToken(), message]
             }
         } else if (authenticated && !message) {
-            message = SecurityContextHolder.context.authentication
+            message = authenticationToken()
         }
         return jmsSynchronousService.send([app: "jummp", service: getAdapterServiceName(), method: method],message, [service: getAdapterServiceName(), method: "${method}.response"])
     }

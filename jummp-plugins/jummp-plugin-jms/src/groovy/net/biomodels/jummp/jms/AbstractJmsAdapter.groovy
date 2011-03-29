@@ -2,6 +2,10 @@ package net.biomodels.jummp.jms
 
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.Authentication
+import net.biomodels.jummp.core.IAuthenticationHashService
+import org.springframework.security.authentication.AnonymousAuthenticationToken
+import org.springframework.security.core.authority.GrantedAuthorityImpl
+import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 
 /**
  * @short Abstract base class for all Jms Adapter.
@@ -11,6 +15,10 @@ import org.springframework.security.core.Authentication
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 abstract class AbstractJmsAdapter {
+    /**
+     * Dependency injection of AuthenticationHashService
+     */
+    protected IAuthenticationHashService authenticationHashService
     /**
      * Helper function to verify that @p message has correct structure.
      * @param message The message to verify
@@ -37,9 +45,9 @@ abstract class AbstractJmsAdapter {
      * Helper function to set the Authentication in the current thread
      * @param authentication
      */
-    protected void setAuthentication(Authentication authentication) {
+    protected void setAuthentication(String authenticationHash) throws AuthenticationHashNotFoundException {
         SecurityContextHolder.clearContext()
-        SecurityContextHolder.context.setAuthentication(authentication)
+        SecurityContextHolder.context.setAuthentication(authenticationHashService.retrieveAuthentication(authenticationHash))
     }
 
     /**
@@ -47,5 +55,13 @@ abstract class AbstractJmsAdapter {
      */
     protected void restoreAuthentication() {
         SecurityContextHolder.clearContext()
+    }
+
+    /**
+     * Setter for Dependency Injection of AuthenticationHashService.
+     * @param authenticationHashService
+     */
+    public void setAuthenticationHashService(IAuthenticationHashService authenticationHashService) {
+        this.authenticationHashService = authenticationHashService
     }
 }

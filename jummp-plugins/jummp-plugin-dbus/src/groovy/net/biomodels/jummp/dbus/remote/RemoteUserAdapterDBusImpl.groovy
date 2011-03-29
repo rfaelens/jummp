@@ -5,7 +5,6 @@ import net.biomodels.jummp.core.user.RoleNotFoundException
 import net.biomodels.jummp.core.user.UserInvalidException
 import net.biomodels.jummp.core.user.UserManagementException
 import net.biomodels.jummp.core.user.UserNotFoundException
-import net.biomodels.jummp.dbus.DBusAuthentication
 import net.biomodels.jummp.dbus.DBusUser
 import net.biomodels.jummp.dbus.UserDBusAdapter
 import net.biomodels.jummp.plugins.security.Role
@@ -14,13 +13,10 @@ import net.biomodels.jummp.remote.RemoteUserAdapter
 import org.freedesktop.dbus.DBusConnection
 import org.perf4j.aop.Profiled
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
 import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserCodeExpiredException
-import net.biomodels.jummp.core.user.JummpAuthentication
+import net.biomodels.jummp.remote.AbstractRemoteAdapter
 
 /**
  * @short DBus Implementation of the RemoteUserAdapter.
@@ -29,7 +25,7 @@ import net.biomodels.jummp.core.user.JummpAuthentication
  * translates the thrown DBus exceptions to the appropriate Application level exceptions.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class RemoteUserAdapterDBusImpl implements RemoteUserAdapter, InitializingBean {
+class RemoteUserAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteUserAdapter, InitializingBean {
     private DBusConnection connection
     private UserDBusAdapter userDBusAdapter
 
@@ -155,16 +151,5 @@ class RemoteUserAdapterDBusImpl implements RemoteUserAdapter, InitializingBean {
     @Profiled(tag="RemoteUserAdapterDBusImpl.removeRoleFromUser")
     void removeRoleFromUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException {
         userDBusAdapter.removeRoleFromUser(authenticationToken(), userId, roleId)
-    }
-
-    private String authenticationToken() {
-        Authentication auth = SecurityContextHolder.context.authentication
-        if (auth instanceof AnonymousAuthenticationToken) {
-            return "anonymous"
-        } else if (auth instanceof JummpAuthentication) {
-            return ((JummpAuthentication)auth).getAuthenticationHash()
-        } else {
-            return ""
-        }
     }
 }

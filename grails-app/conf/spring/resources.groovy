@@ -24,10 +24,12 @@ beans = {
 
     userJmsAdapterService(net.biomodels.jummp.jms.UserJmsAdapterService) {
         userService = ref("userService")
+        authenticationHashService = ref("authenticationHashService")
     }
 
     modelJmsAdapterService(net.biomodels.jummp.jms.ModelJmsAdapterService) {
         modelService = ref("modelDelegateService")
+        authenticationHashService = ref("authenticationHashService")
     }
 
     applicationJmsAdapterService(net.biomodels.jummp.jms.ApplicationJmsAdapterService) {
