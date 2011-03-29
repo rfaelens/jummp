@@ -282,9 +282,9 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         try {
             setAuthentication((Authentication)message[0])
             if (message[1] instanceof RevisionTransportCommand) {
-                result = modelService.retrieveModelFile(message[1].id)
+                result = modelService.retrieveModelFile((RevisionTransportCommand)message[1])
             } else {
-                result = modelService.retrieveModelFile(message[1].id)
+                result = modelService.retrieveModelFile((ModelTransportCommand)message[1])
             }
         } catch (AccessDeniedException e) {
             result = e
