@@ -6,6 +6,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.plugins.security.User
 
 /**
  * @short Service Interface for accessing the Model Service from a Remote Adapter.
@@ -155,7 +156,7 @@ public interface IModelService {
     * @param collaborator The user who should receive read access
     * @todo Might be better in a CollaborationService?
     **/
-    public void grantReadAccess(ModelTransportCommand model, net.biomodels.jummp.plugins.security.User collaborator)
+    public void grantReadAccess(ModelTransportCommand model, User collaborator)
     /**
     * Grants write access for @p model to @p collaborator.
     *
@@ -167,7 +168,7 @@ public interface IModelService {
     * @param collaborator The user who should receive write access
     * @todo Might be better in a CollaborationService?
     **/
-    public void grantWriteAccess(ModelTransportCommand model, net.biomodels.jummp.plugins.security.User collaborator)
+    public void grantWriteAccess(ModelTransportCommand model, User collaborator)
     /**
     * Revokes read access for @p model from @p collaborator.
     *
@@ -182,7 +183,7 @@ public interface IModelService {
     * @return @c true if the right has been revoked, @c false otherwise
     * @todo Might be better in a CollaborationService?
     **/
-    public boolean revokeReadAccess(ModelTransportCommand model, net.biomodels.jummp.plugins.security.User collaborator)
+    public boolean revokeReadAccess(ModelTransportCommand model, User collaborator)
     /**
     * Revokes write access for @p model from @p collaborator.
     *
@@ -194,7 +195,7 @@ public interface IModelService {
     * @return @c true if the right has been revoked, @c false otherwise
     * @todo Might be better in a CollaborationService?
     **/
-    public boolean revokeWriteAccess(ModelTransportCommand model, net.biomodels.jummp.plugins.security.User collaborator)
+    public boolean revokeWriteAccess(ModelTransportCommand model, User collaborator)
     /**
     * Transfers the ownership of the @p model to @p collaborator.
     *
@@ -212,7 +213,7 @@ public interface IModelService {
     * @param collaborator The User who becomes the new owner
     * @todo Might be better in a CollaborationService?
     **/
-    public void transferOwnerShip(ModelTransportCommand model, net.biomodels.jummp.plugins.security.User collaborator)
+    public void transferOwnerShip(ModelTransportCommand model, User collaborator)
     /**
     * Deletes the @p model including all Revisions.
     *

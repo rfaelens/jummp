@@ -1,8 +1,10 @@
 package net.biomodels.jummp.core.user
 
+import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
+import net.biomodels.jummp.plugins.security.SerializableGrailsUser
 
 /**
  * @short Concrete Implementation of the JummpAuthentication.
@@ -48,11 +50,11 @@ final class JummpAuthenticationImpl extends AbstractAuthenticationToken implemen
         auth.setAuthenticated(authentication.isAuthenticated())
         auth.setDetails(authentication.getDetails())
         auth.principal = authentication.getPrincipal()
-        if (auth.principal instanceof org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser) {
+        if (auth.principal instanceof GrailsUser) {
             // The authentication is propagated with an GrailsUser as principal
             // Unfortunately the GrailsUser class is not serializable.
             // Because of that we transform to a serializable GrailsUser
-            auth.principal = net.biomodels.jummp.plugins.security.SerializableGrailsUser.fromGrailsUser((org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser)auth.principal)
+            auth.principal = SerializableGrailsUser.fromGrailsUser((GrailsUser)auth.principal)
         }
         auth.authenticationHash = authenticationHash
         return auth
