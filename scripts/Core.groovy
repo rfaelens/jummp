@@ -25,6 +25,7 @@ target(main: "Runs a core application with a few models") {
     createUsers()
     setupVcs()
     models()
+    startJms()
     // and execute
     watchContext()
 }
