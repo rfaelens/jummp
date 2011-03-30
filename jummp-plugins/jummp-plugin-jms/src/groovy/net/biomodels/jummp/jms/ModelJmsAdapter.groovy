@@ -7,6 +7,7 @@ import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.io.FileUtils
 import org.perf4j.aop.Profiled
@@ -50,7 +51,7 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
             return new IllegalArgumentException("Invalid arguments passed to method. Allowed is AuthenticationHash or AuthenticationHash, Integer, Integer or AuthenticationHash, Integer, Integer, Boolean")
         }
         List arguments = (List)message
-        List<ModelTransportCommand> modelList = []
+        def modelList = []
         // set authentication
         try {
             setAuthentication((String)arguments[0])
@@ -78,6 +79,8 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
                 // nothing
                 break
             }
+        } catch (AuthenticationHashNotFoundException e) {
+            modelList = e
         } finally {
             restoreAuthentication()
         }
@@ -95,10 +98,12 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
         if (!(message instanceof String)) {
             return new IllegalArgumentException("AuthenticationHash as argument expected")
         }
-        Integer result = 0
+        def result = 0
         try {
             setAuthentication((String)message)
             result = modelService.getModelCount()
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
@@ -116,10 +121,14 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
         if (!verifyMessage(message, [String, ModelTransportCommand])) {
             return new IllegalArgumentException("AuthenticationHash and Model as arguments expected")
         }
-        RevisionTransportCommand revision = null
+        def revision = null
         try {
             setAuthentication((String)message[0])
             revision = modelService.getLatestRevision(message[1])
+        } catch (AuthenticationHashNotFoundException e) {
+            revision = e
+        } catch (AccessDeniedException e) {
+            revision = e
         } finally {
             restoreAuthentication()
         }
@@ -142,10 +151,12 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
         if (!verifyMessage(message, [String, ModelTransportCommand])) {
             return new IllegalArgumentException("AuthenticationHash and Model as arguments expected")
         }
-        List<RevisionTransportCommand> result = []
+        def result = []
         try {
             setAuthentication((String)message[0])
             result = modelService.getAllRevisions(message[1])
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
@@ -167,6 +178,8 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
         try {
             setAuthentication((String)message[0])
             result = modelService.getPublication(message[1])
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } catch (AccessDeniedException e) {
             result = e
         } catch (IllegalArgumentException e) {
@@ -200,9 +213,13 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
             file.append(message[1])
             result = modelService.uploadModel(file, (ModelTransportCommand)message[2])
             FileUtils.deleteQuietly(file)
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } catch (AccessDeniedException e) {
             result = e
         } catch (ModelException e) {
+            result = e
+        } catch (Exception e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -230,6 +247,8 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
             file.append(message[2])
             result = modelService.addRevision(message[1], file, message[3], (String)message[4])
             FileUtils.deleteQuietly(file)
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } catch (AccessDeniedException e) {
             result = e
         } catch (ModelException e) {
@@ -257,6 +276,8 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
         try {
             setAuthentication((String)message[0])
             result = modelService.canAddRevision(message[1])
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
@@ -284,6 +305,8 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
             } else {
                 result = modelService.retrieveModelFile((ModelTransportCommand)message[1])
             }
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } catch (AccessDeniedException e) {
             result = e
         } catch (ModelException e) {
@@ -311,6 +334,8 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
             setAuthentication((String)message[0])
             modelService.grantReadAccess(message[1], message[2])
             result = true
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } catch (AccessDeniedException e) {
             result = e
         } finally {
@@ -336,6 +361,8 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
             setAuthentication((String)message[0])
             modelService.grantWriteAccess(message[1], message[2])
             result = true
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } catch (AccessDeniedException e) {
             result = e
         } finally {
@@ -360,6 +387,8 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
         try {
             setAuthentication((String)message[0])
             result = modelService.revokeReadAccess(message[1], message[2])
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } catch (AccessDeniedException e) {
             result = e
         } finally {
@@ -384,6 +413,8 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
         try {
             setAuthentication((String)message[0])
             result = modelService.revokeWriteAccess(message[1], message[2])
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } catch (AccessDeniedException e) {
             result = e
         } finally {
@@ -408,6 +439,8 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
         try {
             setAuthentication((String)message[0])
             result = modelService.deleteModel(message[1])
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } catch (AccessDeniedException e) {
             result = e
         } finally {
@@ -432,6 +465,8 @@ class ModelJmsAdapter extends AbstractJmsAdapter {
         try {
             setAuthentication((String)message[0])
             result = modelService.restoreModel(message[1])
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } catch (AccessDeniedException e) {
             result = e
         } finally {

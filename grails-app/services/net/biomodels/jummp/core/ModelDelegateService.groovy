@@ -1,5 +1,6 @@
 package net.biomodels.jummp.core
 
+import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -78,7 +79,12 @@ class ModelDelegateService implements IModelService {
     }
 
     RevisionTransportCommand getLatestRevision(ModelTransportCommand model) {
-        return modelService.getLatestRevision(Model.get(model.id)).toCommandObject()
+        Revision rev = modelService.getLatestRevision(Model.get(model.id))
+        if (rev) {
+            return rev.toCommandObject()
+        } else {
+            throw new AccessDeniedException("No access to any revision of Model ${model.id}")
+        }
     }
 
     List<RevisionTransportCommand> getAllRevisions(ModelTransportCommand model) {
@@ -93,11 +99,11 @@ class ModelDelegateService implements IModelService {
         return modelService.getPublication(Model.get(model.id)).toCommandObject()
     }
 
-    ModelTransportCommand uploadModel(File modelFile, ModelTransportCommand meta) {
+    ModelTransportCommand uploadModel(File modelFile, ModelTransportCommand meta) throws ModelException {
         return modelService.uploadModel(modelFile, meta).toCommandObject()
     }
 
-    RevisionTransportCommand addRevision(ModelTransportCommand model, File file, ModelFormatTransportCommand format, String comment) {
+    RevisionTransportCommand addRevision(ModelTransportCommand model, File file, ModelFormatTransportCommand format, String comment) throws ModelException {
         return modelService.addRevision(Model.get(model.id), file, ModelFormat.findByIdentifier(format.identifier), comment).toCommandObject()
     }
 
@@ -105,7 +111,7 @@ class ModelDelegateService implements IModelService {
         return modelService.canAddRevision(Model.get(model.id))
     }
 
-    byte[] retrieveModelFile(RevisionTransportCommand revision) {
+    byte[] retrieveModelFile(RevisionTransportCommand revision) throws ModelException {
         return modelService.retrieveModelFile(Revision.get(revision.id))
     }
 
