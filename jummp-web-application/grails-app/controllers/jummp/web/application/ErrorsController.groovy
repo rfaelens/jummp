@@ -1,14 +1,11 @@
 package jummp.web.application
 
-import grails.converters.JSON
-
 class ErrorsController {
     def springSecurityService
 
     def error403 = {
         if (springSecurityService.isAjax(request)) {
-            def data = [error: 403, authenticated: springSecurityService.isLoggedIn()]
-            render data as JSON
+            render springSecurityService.isLoggedIn().toString()
             return
         } else {
             [authenticated: springSecurityService.isLoggedIn()]
@@ -17,8 +14,7 @@ class ErrorsController {
 
     def error404 = {
         if (springSecurityService.isAjax(request)) {
-            def data = [error: 404, resource: request.forwardURI]
-            render data as JSON
+            render request.forwardURI
             return
         } else {
             [resource: request.forwardURI]
@@ -38,8 +34,7 @@ class ErrorsController {
         }
         digest = digest.encodeAsMD5()
         if (springSecurityService.isAjax(request)) {
-            def data = [error: 500, code: digest]
-            render data as JSON
+            render digest
             return
         } else {
             [code: digest]

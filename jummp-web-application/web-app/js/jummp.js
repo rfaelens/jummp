@@ -34,22 +34,16 @@ function loadView(url, loadCallback, callbackData) {
         success: function(data) {
             $("#body").unblock();
             clearErrorMessages();
-            var json = null;
-            try {
-                json = $.parseJSON(data);
-            } catch (e) {
-                // ignore - this is expected for the case that HTML is retrieved
-            }
-            if (handleError(json)) {
-                // TODO: with jquery 1.5 should be handled by status code function
-                return;
-            }
             $("#body").html(data);
             loadCallback(data, callbackData);
         },
         error: function(jqXHR) {
             $("#body").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
+        },
+        statusCode: {
+            403: handler403,
+            404: handler404,
+            500: handler500
         }
     });
 }
@@ -70,16 +64,16 @@ function submitForm(form, url, callback) {
         cache: 'false',
         success: function (data) {
             form.unblock();
-            if (handleError(data)) {
-                // TODO: with jquery 1.5 should be handled by status code function
-                return;
-            }
             clearErrorMessages();
             callback(data);
         },
         error: function(jqXHR) {
             form.unblock();
-            handleError($.parseJSON(jqXHR.responseText));
+        },
+        statusCode: {
+            403: handler403,
+            404: handler404,
+            500: handler500
         }
     });
 }
@@ -105,10 +99,6 @@ function submitFormWithFile(form, url, callback) {
         cache: 'false',
         success: function(data) {
             form.unblock();
-            if (handleError(data)) {
-                // TODO: with jquery 1.5 should be handled by status code function
-                return;
-            }
             clearErrorMessages();
             callback(data);
         },
@@ -128,6 +118,40 @@ function submitFormWithFile(form, url, callback) {
             handleError({error: statusCode, code: errorCode, authenticated: authenticated});
         }
     });
+}
+
+/**
+ * Callback for a 403 response.
+ * Shows the error message and expects as responseText either @c true for authenticated users or @c false otherwise.
+ * @param jqXHR The jqXHR object passed by ajax function.
+ */
+function handler403(jqXHR) {
+    clearErrorMessages();
+    showErrorMessage(i18n.error.denied);
+    if (jqXHR.responseText == "false") {
+        switchUserInformation(false);
+        showLoginDialog();
+    }
+}
+
+/**
+ * Callback for a 404 response.
+ * Expects as responseText the resource which could not be found.
+ * @param jqXHR The jqXHR object passed by ajax function.
+ */
+function handler404(jqXHR) {
+    clearErrorMessages();
+    showErrorMessage(i18n.error.notFound.replace(/_CODE_/, jqXHR.responseText));
+}
+
+/**
+ * Callback for a 500 response.
+ * Expects as responseText the error code on the server.
+ * @param jqXHR The jqXHR object passed by ajax function.
+ */
+function handler500(jqXHR) {
+    clearErrorMessages();
+    showErrorMessage(i18n.error.unexpected.replace(/_CODE_/, jqXHR.responseText));
 }
 
 /**
@@ -180,8 +204,10 @@ function authAjax() {
                 $("#ajaxLoginStatus").show();
             }
         },
-        error: function(jqXHR) {
-            handleError($.parseJSON(jqXHR.responseText));
+        statusCode: {
+            403: handler403,
+            404: handler404,
+            500: handler500
         }
     });
 }
@@ -260,7 +286,11 @@ function changeUser(userId, field, target) {
         },
         error: function(jqXHR) {
             $("#userTable").unblock();
-            handleError($.parseJSON(jqXHR.responseText));
+        },
+        statusCode: {
+            403: handler403,
+            404: handler404,
+            500: handler500
         }
     });
 }
@@ -473,22 +503,13 @@ function reloadMenu() {
         type: 'GET',
         cache: 'false',
         success: function(data) {
-            clearErrorMessages();
-            var json = null;
-            try {
-                json = $.parseJSON(data);
-            } catch (e) {
-                // ignore - this is expected for the case that HTML is retrieved
-            }
-            if (handleError(json)) {
-                // TODO: with jquery 1.5 should be handled by status code function
-                return;
-            }
             $("#menu").html($("ul.jd_menu", $(data)));
             $("#menu ul.jd_menu").jdMenu();
         },
-        error: function(jqXHR) {
-            handleError($.parseJSON(jqXHR.responseText));
+        statusCode: {
+            403: handler403,
+            404: handler404,
+            500: handler500
         }
     });
 }

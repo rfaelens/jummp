@@ -59,8 +59,7 @@ class LoginController {
 
     def authAjax = {
         response.setStatus HttpServletResponse.SC_FORBIDDEN
-        def data = [error: 403, authenticated: springSecurityService.isLoggedIn()]
-        render data as JSON
+        render springSecurityService.isLoggedIn().toString()
     }
 
     /**
@@ -130,6 +129,7 @@ class LoginController {
      * The Ajax denied redirect url.
      */
     def ajaxDenied = {
-        render([error: 403] as JSON)
+        response.setStatus HttpServletResponse.SC_FORBIDDEN
+        render(springSecurityService.isLoggedIn().toString())
     }
 }
