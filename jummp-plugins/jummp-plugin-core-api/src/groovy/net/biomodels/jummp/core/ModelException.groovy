@@ -17,7 +17,7 @@ class ModelException extends JummpException implements Serializable {
     private ModelTransportCommand model
 
     public ModelException(ModelTransportCommand model) {
-        this(model, "Failed to manipulate Model ${model?.id}")
+        this(model, "Failed to manipulate Model ${model?.id}".toString())
     }
 
     public ModelException(ModelTransportCommand model, String message) {
@@ -26,7 +26,7 @@ class ModelException extends JummpException implements Serializable {
     }
 
     public ModelException(ModelTransportCommand model, Throwable cause) {
-        this(model, "Failed to manipulate Model ${model?.id}", cause)
+        this(model, "Failed to manipulate Model ${model?.id}".toString(), cause)
     }
 
     public ModelException(ModelTransportCommand model, String message, Throwable cause) {
