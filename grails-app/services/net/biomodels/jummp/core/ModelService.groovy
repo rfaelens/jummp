@@ -216,6 +216,25 @@ class ModelService {
     }
 
     /**
+     * Returns the Model identified by @p id.
+     * @param id The id of the model.
+     * @return The Model
+     */
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getModel")
+    public Model getModel(long id) {
+        Model model = Model.get(id)
+        if (model) {
+            if (!getLatestRevision(model)) {
+                throw new AccessDeniedException("No access to Model with Id ${id}")
+            }
+        } else {
+            throw new AccessDeniedException("No access to Model with Id ${id}")
+        }
+        return model
+    }
+
+    /**
     * Queries the @p model for the latest available revision the user has read access to.
     * @param model The Model for which the latest revision should be retrieved.
     * @return Latest Revision the current user has read access to. If there is no such revision null is returned

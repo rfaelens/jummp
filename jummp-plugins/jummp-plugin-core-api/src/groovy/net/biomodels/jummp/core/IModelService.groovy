@@ -76,6 +76,12 @@ public interface IModelService {
     **/
     public Integer getModelCount()
     /**
+     * Returns the Model identified by @p id
+     * @param id The Model to be returned
+     * @return The Model if available
+     */
+    public ModelTransportCommand getModel(long id)
+    /**
     * Queries the @p model for the latest available revision the user has read access to.
     * @param model The Model for which the latest revision should be retrieved.
     * @return Latest Revision the current user has read access to. If there is no such revision null is returned

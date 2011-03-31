@@ -78,6 +78,10 @@ class ModelDelegateService implements IModelService {
         return modelService.getModelCount()
     }
 
+    ModelTransportCommand getModel(long id) {
+        return modelService.getModel(id).toCommandObject()
+    }
+
     RevisionTransportCommand getLatestRevision(ModelTransportCommand model) {
         Revision rev = modelService.getLatestRevision(Model.get(model.id))
         if (rev) {
