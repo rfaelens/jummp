@@ -56,7 +56,7 @@ class ModelController {
         }
         ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
         RevisionTransportCommand rev = remoteModelService.getLatestRevision(model)
-        [publication: rev.model.publication, revision: rev]
+        [publication: remoteModelService.getPublication(model), revision: rev]
     }
 
     /**
