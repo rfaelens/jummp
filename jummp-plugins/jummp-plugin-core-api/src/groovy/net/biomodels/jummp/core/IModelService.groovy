@@ -96,6 +96,13 @@ public interface IModelService {
     **/
     public List<RevisionTransportCommand> getAllRevisions(ModelTransportCommand model)
     /**
+     * Retrieves the Revision for the Model identified by @p modelId and @p revisionNumber
+     * @param modelId The Id of the model
+     * @param revisionNumber The revision in context of the Model
+     * @return The Revision or @c null if there is no such Revision
+     */
+    public RevisionTransportCommand getRevision(long modelId, int revisionNumber)
+    /**
      * Returns the reference publication of this @p model.
      * @param model The Model for which the reference publication should be returned.
      * @return The reference publication

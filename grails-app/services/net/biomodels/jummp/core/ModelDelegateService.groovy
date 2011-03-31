@@ -99,6 +99,10 @@ class ModelDelegateService implements IModelService {
         return revisions
     }
 
+    RevisionTransportCommand getRevision(long modelId, int revisionNumber) {
+        return modelService.getRevision(Model.get(modelId), revisionNumber).toCommandObject()
+    }
+
     PublicationTransportCommand getPublication(ModelTransportCommand model) {
         return modelService.getPublication(Model.get(model.id)).toCommandObject()
     }

@@ -23,6 +23,7 @@ import net.biomodels.jummp.core.events.ModelCreatedEvent
 import net.biomodels.jummp.core.events.RevisionCreatedEvent
 import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.model.Publication
+import org.springframework.security.access.prepost.PostAuthorize
 
 /**
  * @short Service class for managing Models
@@ -281,6 +282,21 @@ class ModelService {
             return []
         }
         return model.revisions.toList().sort {it.revisionNumber}
+    }
+
+    /**
+     * Queries the @p model for the revision with @p revisionNumber.
+     * If there is no such revision @c null will be returned. The
+     * returned object is filtered against the ACL.
+     * @param model The Model to which the revision belongs
+     * @param revisionNumber The revision number in context of the Model
+     * @return The revision or @c null if there is no such revision
+     */
+    @PostAuthorize("hasPermission(returnObject, read) or hasRole('ROLE_ADMIN')")
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getRevision")
+    public Revision getRevision(Model model, int revisionNumber) {
+        return Revision.findByRevisionNumberAndModel(revisionNumber, model)
     }
 
     /**
