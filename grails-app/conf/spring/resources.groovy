@@ -21,6 +21,10 @@ beans = {
             brokerURL = 'tcp://localhost:61616'
         }
     }
+    // for JMS
+    modelJmsAdapterService(net.biomodels.jummp.jms.ModelJmsAdapterService) {
+        modelService = ref("modelDelegateService")
+    }
 
     // for DBus
     if (grailsApplication.config.jummp.export.dbus == true) {
