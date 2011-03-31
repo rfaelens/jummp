@@ -41,6 +41,12 @@ beans = {
             authenticationHashService = ref("authenticationHashService")
             objectName = "/Application"
         }
+        modelDBusAdapter(net.biomodels.jummp.dbus.ModelDBusAdapterImpl) {
+            dbusManager = dbusManager
+            modelService = ref("modelDelegateService")
+            authenticationHashService = ref("authenticationHashService")
+            objectName = "/Model"
+        }
     }
 
     if (Environment.getCurrent() == Environment.DEVELOPMENT) {

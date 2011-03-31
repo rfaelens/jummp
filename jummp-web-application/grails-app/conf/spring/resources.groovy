@@ -11,12 +11,6 @@ beans = {
     jummpApplicationJmsRemoteAdapter(net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl) {
         jmsSynchronousService = ref("jmsSynchronousService")
     }
-    jmsModelAdapter(net.biomodels.jummp.jms.remote.RemoteModelAdapterJmsImpl) {
-        jmsSynchronousService = ref("jmsSynchronousService")
-    }
-    remoteModelService(net.biomodels.jummp.webapp.remote.RemoteModelService) {
-        remoteModelAdapter = jmsModelAdapter
-    }
     if (grailsApplication.config.net.biomodels.jummp.webapp.remote == "dbus") {
         println("Using DBus")
         remoteJummpApplicationAdapterDBusImpl(net.biomodels.jummp.dbus.remote.RemoteJummpApplicationAdapterDBusImpl)
@@ -26,6 +20,10 @@ beans = {
         remoteUserAdapterDBusImpl(net.biomodels.jummp.dbus.remote.RemoteUserAdapterDBusImpl)
         remoteUserService(net.biomodels.jummp.webapp.remote.RemoteUserService) {
             remoteUserAdapter = remoteUserAdapterDBusImpl
+        }
+        remoteModelAdapterDBusImpl(net.biomodels.jummp.dbus.remote.RemoteModelAdapterDBusImpl)
+        remoteModelService(net.biomodels.jummp.webapp.remote.RemoteModelService) {
+            remoteModelAdapter = remoteModelAdapterDBusImpl
         }
         aop.config {
             pointcut(id: "dbusExceptionPointcut", expression: "execution(public * net.biomodels.jummp.dbus.remote.*.*(..))")
@@ -42,6 +40,12 @@ beans = {
         }
         remoteUserService(net.biomodels.jummp.webapp.remote.RemoteUserService) {
             remoteUserAdapter = userJmsRemoteAdapter
+        }
+        jmsModelAdapter(net.biomodels.jummp.jms.remote.RemoteModelAdapterJmsImpl) {
+            jmsSynchronousService = ref("jmsSynchronousService")
+        }
+        remoteModelService(net.biomodels.jummp.webapp.remote.RemoteModelService) {
+            remoteModelAdapter = jmsModelAdapter
         }
     }
 
