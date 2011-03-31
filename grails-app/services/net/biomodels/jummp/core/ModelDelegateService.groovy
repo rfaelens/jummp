@@ -104,7 +104,7 @@ class ModelDelegateService implements IModelService {
     }
 
     PublicationTransportCommand getPublication(ModelTransportCommand model) {
-        return modelService.getPublication(Model.get(model.id)).toCommandObject()
+        return modelService.getPublication(Model.get(model.id))?.toCommandObject()
     }
 
     ModelTransportCommand uploadModel(File modelFile, ModelTransportCommand meta) throws ModelException {
