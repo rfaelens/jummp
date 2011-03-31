@@ -12,16 +12,16 @@ import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.authentication.AnonymousAuthenticationToken
+
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
+
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.authority.GrantedAuthorityImpl
+
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
-import net.biomodels.jummp.jms.ApplicationJmsAdapter
+import net.biomodels.jummp.jms.ApplicationJmsAdapterService
 import net.biomodels.jummp.core.user.JummpAuthentication
 import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 
@@ -33,7 +33,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         super.setUp()
         createUserAndRoles()
         mockLogging(ModelService)
-        mockLogging(ApplicationJmsAdapter)
+        mockLogging(ApplicationJmsAdapterService)
     }
 
     protected void tearDown() {

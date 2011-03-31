@@ -22,7 +22,7 @@ import net.biomodels.jummp.core.IModelService
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class ModelJmsAdapter extends AbstractJmsAdapter {
+class ModelJmsAdapterService extends AbstractJmsAdapter {
 
     @SuppressWarnings("GrailsStatelessService")
     static exposes = ['jms']

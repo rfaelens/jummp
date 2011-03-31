@@ -28,7 +28,6 @@ target(main: "Bootstraps a test server with some test users") {
         new SessionHolder(SessionFactoryUtils.getSession(appCtx.sessionFactory, true)))
     createUsers()
     setupVcs()
-    startJms()
     // and execute
     watchContext()
 }
@@ -98,31 +97,6 @@ target(setupVcs: "Creates a VCS repository") {
     config.jummp.vcs.exchangeDirectory="target/vcs/exchange"
     config.jummp.vcs.pluginServiceName="gitService"
     appCtx.getBean("vcsService").init()
-}
-
-target(startJms: "Starts the JMS listeners") {
-    def serviceInspectorClass = grailsApp.classLoader.loadClass("grails.plugin.jms.listener.ServiceInspector")
-    def listenerConfigFactoryClass = grailsApp.classLoader.loadClass("grails.plugin.jms.listener.ListenerConfigFactory")
-    def modelJmsAdapterClass = grailsApp.classLoader.loadClass("net.biomodels.jummp.jms.ModelJmsAdapter")
-    def userJmsAdapterClass = grailsApp.classLoader.loadClass("net.biomodels.jummp.jms.UserJmsAdapter")
-    def applicationJmsAdapterClass = grailsApp.classLoader.loadClass("net.biomodels.jummp.jms.ApplicationJmsAdapter")
-    def si = serviceInspectorClass.newInstance()
-    def listenerConfigFactory = listenerConfigFactoryClass.newInstance()
-    def listenerConfigs = si.getListenerConfigs(modelJmsAdapterClass, listenerConfigFactory, grailsApp)
-    listenerConfigs.each {
-        it.serviceBeanName = "modelJmsAdapterService"
-        appCtx.getBean(it.listenerContainerBeanName).start()
-    }
-    listenerConfigs = si.getListenerConfigs(userJmsAdapterClass, listenerConfigFactory, grailsApp)
-    listenerConfigs.each {
-        it.serviceBeanName = "userJmsAdapterService"
-        appCtx.getBean(it.listenerContainerBeanName).start()
-    }
-    listenerConfigs = si.getListenerConfigs(applicationJmsAdapterClass, listenerConfigFactory, grailsApp)
-    listenerConfigs.each {
-        it.serviceBeanName = "applicationJmsAdapterService"
-        appCtx.getBean(it.listenerContainerBeanName).start()
-    }
 }
 
 setDefaultTarget(main)
