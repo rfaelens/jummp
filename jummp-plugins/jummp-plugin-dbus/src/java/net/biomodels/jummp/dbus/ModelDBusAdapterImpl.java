@@ -5,9 +5,11 @@ import net.biomodels.jummp.core.model.ModelListSorting;
 import net.biomodels.jummp.core.model.ModelTransportCommand;
 import net.biomodels.jummp.core.model.PublicationTransportCommand;
 import net.biomodels.jummp.core.model.RevisionTransportCommand;
+import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException;
 import net.biomodels.jummp.dbus.model.DBusModel;
 import net.biomodels.jummp.dbus.model.DBusPublication;
 import net.biomodels.jummp.dbus.model.DBusRevision;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,6 +125,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         try {
             setAuthentication(authenticationHash);
             return DBusModel.fromModelTransportCommand(modelService.getModel(id));
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -134,6 +138,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             ModelTransportCommand model = new ModelTransportCommand();
             model.setId(id);
             return DBusRevision.fromRevisionTransportCommand(modelService.getLatestRevision(model));
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -159,6 +165,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         try {
             setAuthentication(authenticationHash);
             return DBusRevision.fromRevisionTransportCommand(modelService.getRevision(modelId, revisionNumber));
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -174,6 +182,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
                 publication = new PublicationTransportCommand();
             }
             return DBusPublication.fromPublicationTransportCommand(publication);
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -182,6 +192,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     /*public DBusModel uploadModel(String authenticationHash, String fileName, DBusModel meta) {
         try {
             setAuthentication(authenticationHash);
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -191,6 +203,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public DBusRevision addRevision(String authenticationHash, DBusModel model, String fileName, String format, String comment) {
         try {
             setAuthentication(authenticationHash);
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -212,6 +226,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         try {
             setAuthentication(authenticationHash);
             // TODO: change ModelService to return File handle instead of byte array
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -223,6 +239,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             setAuthentication(authenticationHash);
             // TODO: change ModelService to return File handle instead of byte array
             //return modelService.retrieveModelFile()
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -235,6 +253,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             ModelTransportCommand model = new ModelTransportCommand();
             model.setId(id);
             modelService.grantWriteAccess(model, user.toUser());
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -246,6 +266,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             ModelTransportCommand model = new ModelTransportCommand();
             model.setId(id);
             modelService.grantWriteAccess(model, user.toUser());
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -257,6 +279,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             ModelTransportCommand model = new ModelTransportCommand();
             model.setId(id);
             modelService.revokeReadAccess(model, user.toUser());
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -268,6 +292,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             ModelTransportCommand model = new ModelTransportCommand();
             model.setId(id);
             modelService.revokeWriteAccess(model, user.toUser());
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -279,6 +305,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             ModelTransportCommand model = new ModelTransportCommand();
             model.setId(id);
             modelService.transferOwnerShip(model, collaborator.toUser());
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -301,6 +329,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             ModelTransportCommand model = new ModelTransportCommand();
             model.setId(id);
             return modelService.restoreModel(model);
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
