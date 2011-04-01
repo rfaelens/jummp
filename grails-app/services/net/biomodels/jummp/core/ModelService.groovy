@@ -709,6 +709,9 @@ class ModelService {
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.restoreModel")
     public boolean restoreModel(Model model) {
+        if (!model) {
+            throw new IllegalArgumentException("Model may not be null")
+        }
         // TODO: the code does not check whether the model exists
         if (model.state == ModelState.DELETED) {
             model.state = ModelState.UNPUBLISHED

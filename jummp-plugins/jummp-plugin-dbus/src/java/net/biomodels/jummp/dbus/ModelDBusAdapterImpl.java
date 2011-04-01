@@ -347,6 +347,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         try {
             setAuthentication(authenticationHash);
             return modelService.deleteModel(id);
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -358,6 +360,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             return modelService.restoreModel(id);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
+        }  catch (IllegalArgumentException e) {
+            throw new IllegalArgumentDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }

@@ -469,6 +469,8 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
             result = e
         } catch (AccessDeniedException e) {
             result = e
+        } catch (IllegalArgumentException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
