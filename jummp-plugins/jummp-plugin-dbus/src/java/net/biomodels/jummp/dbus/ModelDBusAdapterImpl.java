@@ -212,6 +212,11 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         }
     }
 
+    public DBusModel uploadModelWithPublication(String authenticationHash, String fileName, DBusModel meta, DBusPublication publication) {
+        meta.setPublication(publication);
+        return uploadModel(authenticationHash, fileName, meta);
+    }
+
     /*public DBusRevision addRevision(String authenticationHash, DBusModel model, String fileName, String format, String comment) {
         try {
             setAuthentication(authenticationHash);

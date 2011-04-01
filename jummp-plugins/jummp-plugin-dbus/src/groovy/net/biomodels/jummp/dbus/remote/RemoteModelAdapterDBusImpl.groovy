@@ -13,6 +13,7 @@ import org.perf4j.aop.Profiled
 import org.springframework.beans.factory.InitializingBean
 import org.apache.commons.io.FileUtils
 import net.biomodels.jummp.dbus.model.DBusModel
+import net.biomodels.jummp.dbus.model.DBusPublication
 
 /**
  * @short DBus Implementation of RemoteModelAdapter.
@@ -89,7 +90,11 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
         file.withWriter {
             it.write(new String(bytes))
         }
-        return modelDBusAdapter.uploadModel(authenticationToken(), file.getAbsolutePath(), DBusModel.fromModelTransportCommand(meta))
+        if (meta.publication) {
+            return modelDBusAdapter.uploadModelWithPublication(authenticationToken(), file.getAbsolutePath(), DBusModel.fromModelTransportCommand(meta), DBusPublication.fromPublicationTransportCommand(meta.publication))
+        } else {
+            return modelDBusAdapter.uploadModel(authenticationToken(), file.getAbsolutePath(), DBusModel.fromModelTransportCommand(meta))
+        }
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.addRevision")
