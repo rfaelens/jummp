@@ -24,6 +24,7 @@ beans = {
     // for JMS
     modelJmsAdapterService(net.biomodels.jummp.jms.ModelJmsAdapterService) {
         modelService = ref("modelDelegateService")
+        authenticationHashService = ref("authenticationHashService")
     }
 
     // for DBus
