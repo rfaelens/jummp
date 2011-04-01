@@ -11,6 +11,9 @@ import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.user.JummpAuthentication
+import net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl
+import net.biomodels.jummp.jms.remote.RemoteModelAdapterJmsImpl
 
 /**
  * @short Test suite for the CoreAdapterService.
@@ -31,7 +34,8 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class CoreAdapterServiceTests extends GrailsUnitTestCase {
-    def coreAdapterService
+    def jummpApplicationJmsRemoteAdapter
+    def remoteModelService
     protected void setUp() {
         super.setUp()
     }
@@ -43,22 +47,23 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
     void testAuthenticate() {
         // test an invalid authentication
         shouldFail(AuthenticationException) {
-            coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "wrong"))
+            jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("testuser", "wrong"))
         }
         shouldFail(AuthenticationException) {
-            coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("nosuchuser", "wrong"))
+            jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("nosuchuser", "wrong"))
         }
-        Authentication result = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        Authentication result = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         assertNotNull(result)
+        assertTrue(result instanceof JummpAuthentication)
         assertTrue(result.isAuthenticated())
     }
 
     void testGetAllModels() {
         // we do not have any models in the database yet
         // first authenticate
-        Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        Authentication auth = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
-        List result = coreAdapterService.getAllModels()
+        List result = remoteModelService.getAllModels()
         assertTrue(result.isEmpty())
         // upload one model
         ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetAllModels", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
@@ -83,27 +88,27 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
     </listOfReactions>
   </model>
 </sbml>'''
-        ModelTransportCommand model = coreAdapterService.uploadModel(modelSource.bytes, meta)
+        ModelTransportCommand model = remoteModelService.uploadModel(modelSource.bytes, meta)
         // now we should have a model
-        result = coreAdapterService.getAllModels()
+        result = remoteModelService.getAllModels()
         assertFalse(result.isEmpty())
         assertEquals(1, result.size())
         assertEquals(model.id, result[0].id)
         // different user should not see it
-        Authentication auth2 = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        Authentication auth2 = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
         SecurityContextHolder.context.authentication = auth2
-        assertTrue(coreAdapterService.getAllModels().isEmpty())
+        assertTrue(remoteModelService.getAllModels().isEmpty())
         // for cleaning up: delete
         SecurityContextHolder.context.authentication = auth
-        assertTrue(coreAdapterService.deleteModel(model))
+        assertTrue(remoteModelService.deleteModel(model.id))
     }
 
     void testModelCount() {
         // we do not have any models in the database yet
         // first authenticate
-        Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        Authentication auth = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
-        Integer result = coreAdapterService.getModelCount()
+        Integer result = remoteModelService.getModelCount()
         assertEquals(0, result)
         // upload one model
         ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetModelCount", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
@@ -128,22 +133,22 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
     </listOfReactions>
   </model>
 </sbml>'''
-        ModelTransportCommand model = coreAdapterService.uploadModel(modelSource.bytes, meta)
+        ModelTransportCommand model = remoteModelService.uploadModel(modelSource.bytes, meta)
         // now we should have a model
-        result = coreAdapterService.getModelCount()
-        assertEquals(1, coreAdapterService.getModelCount())
+        result = remoteModelService.getModelCount()
+        assertEquals(1, remoteModelService.getModelCount())
         // different user should not see it
-        Authentication auth2 = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        Authentication auth2 = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
         SecurityContextHolder.context.authentication = auth2
-        assertEquals(0, coreAdapterService.getModelCount())
+        assertEquals(0, remoteModelService.getModelCount())
         // for cleaning up: delete
         SecurityContextHolder.context.authentication = auth
-        assertTrue(coreAdapterService.deleteModel(model))
+        assertTrue(remoteModelService.deleteModel(model.id))
     }
 
     void testGetLatestRevision() {
         // first authenticate
-        Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        Authentication auth = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
         // upload one model
         ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetLatestRevision", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
@@ -168,24 +173,24 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
     </listOfReactions>
   </model>
 </sbml>'''
-        ModelTransportCommand model = coreAdapterService.uploadModel(modelSource.bytes, meta)
-        RevisionTransportCommand revision = coreAdapterService.getLatestRevision(model)
+        ModelTransportCommand model = remoteModelService.uploadModel(modelSource.bytes, meta)
+        RevisionTransportCommand revision = remoteModelService.getLatestRevision(model.id)
         assertNotNull(revision)
         assertEquals(model.id, revision.model.id)
         // different user should not see it
-        Authentication auth2 = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        Authentication auth2 = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
         SecurityContextHolder.context.authentication = auth2
         shouldFail(AccessDeniedException) {
-            coreAdapterService.getLatestRevision(model)
+            remoteModelService.getLatestRevision(model.id)
         }
         // for cleaning up: delete
         SecurityContextHolder.context.authentication = auth
-        assertTrue(coreAdapterService.deleteModel(model))
+        assertTrue(remoteModelService.deleteModel(model.id))
     }
 
     void testGetAllRevisions() {
         // first authenticate
-        Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        Authentication auth = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
         // upload one model
         ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetAllRevisions", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
@@ -210,25 +215,25 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
     </listOfReactions>
   </model>
 </sbml>'''
-        ModelTransportCommand model = coreAdapterService.uploadModel(modelSource.bytes, meta)
-        List<RevisionTransportCommand> revisions = coreAdapterService.getAllRevisions(model)
+        ModelTransportCommand model = remoteModelService.uploadModel(modelSource.bytes, meta)
+        List<RevisionTransportCommand> revisions = remoteModelService.getAllRevisions(model.id)
         assertFalse(revisions.isEmpty())
         assertEquals(1, revisions.size)
         assertEquals(model.id, revisions.first().model.id)
         // different user should not see it
-        Authentication auth2 = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        Authentication auth2 = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
         SecurityContextHolder.context.authentication = auth2
-        assertTrue(coreAdapterService.getAllRevisions(model).isEmpty())
+        assertTrue(remoteModelService.getAllRevisions(model.id).isEmpty())
         // for cleaning up: delete
         SecurityContextHolder.context.authentication = auth
-        assertTrue(coreAdapterService.deleteModel(model))
+        assertTrue(remoteModelService.deleteModel(model.id))
     }
 
     void testUploadModel() {
         // we know that uploading works, due to the method being used in the other tests
         // so we just need to test for the model exception being thrown
         // first authenticate
-        Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        Authentication auth = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
         ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestGetAllRevisions", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"), comment: "test")
         String modelSource = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -253,13 +258,13 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
   </model>
 </sbml>'''
         shouldFail(ModelException) {
-            coreAdapterService.uploadModel(modelSource.bytes, meta)
+            remoteModelService.uploadModel(modelSource.bytes, meta)
         }
     }
 
     void testAddRevision() {
         // first authenticate
-        Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        Authentication auth = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
         // upload one model
         ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestAddRevision", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
@@ -284,9 +289,9 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
     </listOfReactions>
   </model>
 </sbml>'''
-        ModelTransportCommand model = coreAdapterService.uploadModel(modelSource.bytes, meta)
+        ModelTransportCommand model = remoteModelService.uploadModel(modelSource.bytes, meta)
         // user should have one revision
-        assertEquals(1, coreAdapterService.getAllRevisions(model).size())
+        assertEquals(1, remoteModelService.getAllRevisions(model.id).size())
         // adding one revision
         modelSource = '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
@@ -309,30 +314,30 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
     </listOfReactions>
   </model>
 </sbml>'''
-        RevisionTransportCommand revision = coreAdapterService.addRevision(model, modelSource.bytes, new ModelFormatTransportCommand(identifier: "SBML"), "Add Revision")
+        RevisionTransportCommand revision = remoteModelService.addRevision(model.id, modelSource.bytes, new ModelFormatTransportCommand(identifier: "SBML"), "Add Revision")
         assertNotNull(revision)
         assertEquals(model.id, revision.model.id)
-        assertEquals(2, coreAdapterService.getAllRevisions(model).size())
-        assertEquals(revision.id, coreAdapterService.getLatestRevision(model).id)
+        assertEquals(2, remoteModelService.getAllRevisions(model.id).size())
+        assertEquals(revision.id, remoteModelService.getLatestRevision(model.id).id)
         // create a model exception
         shouldFail(ModelException) {
-            coreAdapterService.addRevision(model, modelSource.bytes, new ModelFormatTransportCommand(identifier: "UNKNOWN"), "Add Revision")
+            remoteModelService.addRevision(model.id, modelSource.bytes, new ModelFormatTransportCommand(identifier: "UNKNOWN"), "Add Revision")
         }
         // different user should not see it
-        Authentication auth2 = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        Authentication auth2 = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
         SecurityContextHolder.context.authentication = auth2
-        assertTrue(coreAdapterService.getAllRevisions(model).isEmpty())
+        assertTrue(remoteModelService.getAllRevisions(model.id).isEmpty())
         shouldFail(AccessDeniedException) {
-            coreAdapterService.addRevision(model, "Test".bytes, new ModelFormatTransportCommand(identifier: "UNKNOWN"), "Test")
+            remoteModelService.addRevision(model.id, "Test".bytes, new ModelFormatTransportCommand(identifier: "UNKNOWN"), "Test")
         }
         // for cleaning up: delete
         SecurityContextHolder.context.authentication = auth
-        assertTrue(coreAdapterService.deleteModel(model))
+        assertTrue(remoteModelService.deleteModel(model.id))
     }
 
     void testRetrieveModelFile() {
         // first authenticate
-        Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        Authentication auth = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
         // upload one model
         ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestRetrieveModelFile", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
@@ -357,25 +362,25 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
     </listOfReactions>
   </model>
 </sbml>'''
-        ModelTransportCommand model = coreAdapterService.uploadModel(modelSource.bytes, meta)
-        RevisionTransportCommand revision = coreAdapterService.getLatestRevision(model)
-        byte[] modelData = coreAdapterService.retrieveModelFile(revision)
+        ModelTransportCommand model = remoteModelService.uploadModel(modelSource.bytes, meta)
+        RevisionTransportCommand revision = remoteModelService.getLatestRevision(model.id)
+        byte[] modelData = remoteModelService.retrieveModelFile(revision)
         assertEquals(modelSource, new String(modelData))
-        Authentication auth2 = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        Authentication auth2 = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
         SecurityContextHolder.context.authentication = auth2
         shouldFail(AccessDeniedException) {
-            coreAdapterService.retrieveModelFile(revision)
+            remoteModelService.retrieveModelFile(revision)
         }
         // for cleaning up: delete
         SecurityContextHolder.context.authentication = auth
-        assertTrue(coreAdapterService.deleteModel(model))
+        assertTrue(remoteModelService.deleteModel(model.id))
     }
 
     void testDeleteModel() {
         // delete is called from each and every method, so we know it works
         // we just need to try different cases
         // first authenticate
-        Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        Authentication auth = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
         // upload one model
         ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestDeleteModel", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
@@ -400,27 +405,27 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
     </listOfReactions>
   </model>
 </sbml>'''
-        ModelTransportCommand model = coreAdapterService.uploadModel(modelSource.bytes, meta)
+        ModelTransportCommand model = remoteModelService.uploadModel(modelSource.bytes, meta)
         // different user should not be allowed to delete the model
-        Authentication auth2 = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        Authentication auth2 = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("user", "verysecret"))
         SecurityContextHolder.context.authentication = auth2
         shouldFail(AccessDeniedException) {
-            coreAdapterService.deleteModel(model)
+            remoteModelService.deleteModel(model.id)
         }
         // user himself should be able to delete
         SecurityContextHolder.context.authentication = auth
-        assertTrue(coreAdapterService.deleteModel(model))
+        assertTrue(remoteModelService.deleteModel(model.id))
         // deleting again should not work
-        assertFalse(coreAdapterService.deleteModel(model))
+        assertFalse(remoteModelService.deleteModel(model.id))
         // deleting a non-existant model should not work
         shouldFail(AccessDeniedException) {
-            coreAdapterService.deleteModel(new ModelTransportCommand(id: 0))
+            remoteModelService.deleteModel(0)
         }
     }
 
     void testRestoreModel() {
         // first authenticate
-        Authentication auth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
+        Authentication auth = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("testuser", "secret"))
         SecurityContextHolder.context.authentication = auth
         // upload one model
         ModelTransportCommand meta = new ModelTransportCommand(name: "coreTestRestoreModel", format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test")
@@ -445,26 +450,26 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
     </listOfReactions>
   </model>
 </sbml>'''
-        ModelTransportCommand model = coreAdapterService.uploadModel(modelSource.bytes, meta)
+        ModelTransportCommand model = remoteModelService.uploadModel(modelSource.bytes, meta)
         // delete the model
-        assertTrue(coreAdapterService.deleteModel(model))
+        assertTrue(remoteModelService.deleteModel(model.id))
         // restore not allowed to user
         shouldFail(AccessDeniedException) {
-            coreAdapterService.restoreModel(model)
+            remoteModelService.restoreModel(model.id)
         }
         // admin user is allowed
-        Authentication adminAuth = coreAdapterService.authenticate(new UsernamePasswordAuthenticationToken("admin", "1234"))
+        Authentication adminAuth = jummpApplicationJmsRemoteAdapter.authenticate(new UsernamePasswordAuthenticationToken("admin", "1234"))
         SecurityContextHolder.context.authentication = adminAuth
-        assertTrue(coreAdapterService.restoreModel(model))
+        assertTrue(remoteModelService.restoreModel(model.id))
         // restoring again should not be possible
-        assertFalse(coreAdapterService.restoreModel(model))
-        shouldFail(JummpException) {
+        assertFalse(remoteModelService.restoreModel(model.id))
+        shouldFail(IllegalArgumentException) {
             // model does not exist - it should fail
-            coreAdapterService.restoreModel(new ModelTransportCommand(id: 0))
+            remoteModelService.restoreModel(0)
         }
     }
 
-    void testValidateReturnValue() {
+    /*void testValidateReturnValue() {
         shouldFail(JummpException) {
             coreAdapterService.validateReturnValue(null, String.class)
         }
@@ -478,5 +483,5 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
         coreAdapterService.validateReturnValue("test", String.class)
         coreAdapterService.validateReturnValue(1, Integer.class)
         coreAdapterService.validateReturnValue(true, Boolean.class)
-    }
+    }*/
 }
