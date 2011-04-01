@@ -23,12 +23,12 @@ class DBusModel extends ModelTransportCommand implements DBusSerializable {
         retVals[0] = this.id ? this.id : 0
         retVals[1] = this.name ? this.name : ""
         retVals[2] = this.state ? this.state.toString() : ""
-        retVals[3] = this.format ? this.format.name : ""
+        retVals[3] = this.format ? this.format.identifier : ""
         retVals[4] = this.comment ? this.comment : ""
         retVals[5] = this.lastModifiedDate ? this.lastModifiedDate.getTime() : 0
         retVals[6] = this.submitter ? this.submitter : ""
         retVals[7] = this.submissionDate ? this.submissionDate.getTime() : 0
-        retVals[8] = this.creators.toArray()
+        retVals[8] = this.creators ? this.creators.toArray() : [''].toArray()
         return retVals
     }
 
@@ -38,7 +38,7 @@ class DBusModel extends ModelTransportCommand implements DBusSerializable {
         //this.state =
         this.comment = comment
         if (format != "") {
-            this.format = new ModelFormatTransportCommand(name: format)
+            this.format = new ModelFormatTransportCommand(identifier: format)
         }
         if (comment != "") {
             this.comment = comment

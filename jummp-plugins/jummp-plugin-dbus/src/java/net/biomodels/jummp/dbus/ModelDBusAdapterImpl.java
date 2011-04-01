@@ -10,6 +10,7 @@ import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException;
 import net.biomodels.jummp.dbus.model.DBusModel;
 import net.biomodels.jummp.dbus.model.DBusPublication;
 import net.biomodels.jummp.dbus.model.DBusRevision;
+import org.apache.commons.io.FileUtils;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -194,18 +195,24 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         }
     }
 
-    /*public DBusModel uploadModel(String authenticationHash, String fileName, DBusModel meta) {
+    public DBusModel uploadModel(String authenticationHash, String fileName, DBusModel meta) {
         try {
             setAuthentication(authenticationHash);
+            File file = new File(fileName);
+            DBusModel model = DBusModel.fromModelTransportCommand(modelService.uploadModel(file, meta));
+            FileUtils.deleteQuietly(file);
+            return model;
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
+        } catch (ModelException e) {
+            // TODO: throw correct exception
+            throw new DBusExecutionException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public DBusRevision addRevision(String authenticationHash, DBusModel model, String fileName, String format, String comment) {
+    /*public DBusRevision addRevision(String authenticationHash, DBusModel model, String fileName, String format, String comment) {
         try {
             setAuthentication(authenticationHash);
         } catch (AccessDeniedException e) {
