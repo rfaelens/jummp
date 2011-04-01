@@ -51,6 +51,8 @@ class DBusExceptionAdvice implements ThrowsAdvice {
             throw new UserCodeInvalidException("", null, e.message)
         case "net.biomodels.jummp.dbus.user.UserCodeExpiredDBusException":
             throw new UserCodeExpiredException(e.message, null)
+        case "net.biomodels.jummp.dbus.IllegalArgumentDBusException":
+            throw new IllegalArgumentException(e.message)
         default:
             throw new JummpException(e.message, e)
         }

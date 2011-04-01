@@ -9,6 +9,7 @@ import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException;
 import net.biomodels.jummp.dbus.model.DBusModel;
 import net.biomodels.jummp.dbus.model.DBusPublication;
 import net.biomodels.jummp.dbus.model.DBusRevision;
+import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.util.ArrayList;
@@ -184,6 +185,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             return DBusPublication.fromPublicationTransportCommand(publication);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }

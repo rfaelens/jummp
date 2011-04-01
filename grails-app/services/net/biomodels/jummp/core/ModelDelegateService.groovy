@@ -103,7 +103,7 @@ class ModelDelegateService implements IModelService {
         return modelService.getRevision(Model.get(modelId), revisionNumber).toCommandObject()
     }
 
-    PublicationTransportCommand getPublication(ModelTransportCommand model) {
+    PublicationTransportCommand getPublication(ModelTransportCommand model) throws AccessDeniedException, IllegalArgumentException {
         return modelService.getPublication(Model.get(model.id))?.toCommandObject()
     }
 
