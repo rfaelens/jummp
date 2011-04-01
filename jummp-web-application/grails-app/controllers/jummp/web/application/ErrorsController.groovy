@@ -1,9 +1,12 @@
 package jummp.web.application
 
+import javax.servlet.http.HttpServletResponse
+
 class ErrorsController {
     def springSecurityService
 
     def error403 = {
+        response.setStatus HttpServletResponse.SC_FORBIDDEN
         if (springSecurityService.isAjax(request)) {
             render springSecurityService.isLoggedIn().toString()
             return
