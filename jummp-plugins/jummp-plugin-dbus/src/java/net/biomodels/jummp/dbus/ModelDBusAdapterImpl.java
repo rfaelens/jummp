@@ -137,9 +137,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public DBusRevision getLatestRevision(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
-            ModelTransportCommand model = new ModelTransportCommand();
-            model.setId(id);
-            return DBusRevision.fromRevisionTransportCommand(modelService.getLatestRevision(model));
+            return DBusRevision.fromRevisionTransportCommand(modelService.getLatestRevision(id));
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } finally {
@@ -150,10 +148,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public List<String> getAllRevisions(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
-            ModelTransportCommand model = new ModelTransportCommand();
-            model.setId(id);
             List<String> revisionNumbers = new ArrayList<String>();
-            List<RevisionTransportCommand> revisions = modelService.getAllRevisions(model);
+            List<RevisionTransportCommand> revisions = modelService.getAllRevisions(id);
             for (RevisionTransportCommand revision : revisions) {
                 revisionNumbers.add(revision.getRevisionNumber().toString());
             }
@@ -177,9 +173,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public DBusPublication getPublication(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
-            ModelTransportCommand model = new ModelTransportCommand();
-            model.setId(id);
-            PublicationTransportCommand publication = modelService.getPublication(model);
+            PublicationTransportCommand publication = modelService.getPublication(id);
             if (publication == null) {
                 publication = new PublicationTransportCommand();
             }
@@ -217,12 +211,10 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public DBusRevision addRevision(String authenticationHash, long modelId, String fileName, String format, String comment) {
         try {
             setAuthentication(authenticationHash);
-            ModelTransportCommand model = new ModelTransportCommand();
-            model.setId(modelId);
             File file = new File(fileName);
             ModelFormatTransportCommand modelFormat = new ModelFormatTransportCommand();
             modelFormat.setIdentifier(format);
-            DBusRevision revision = DBusRevision.fromRevisionTransportCommand(modelService.addRevision(model, file, modelFormat, comment));
+            DBusRevision revision = DBusRevision.fromRevisionTransportCommand(modelService.addRevision(modelId, file, modelFormat, comment));
             FileUtils.deleteQuietly(file);
             return revision;
         } catch (AccessDeniedException e) {
@@ -237,9 +229,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public boolean canAddRevision(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
-            ModelTransportCommand model = new ModelTransportCommand();
-            model.setId(id);
-            return modelService.canAddRevision(model);
+            return modelService.canAddRevision(id);
         } finally {
             restoreAuthentication();
         }
@@ -276,9 +266,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public String retrieveModelFileByModel(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
-            ModelTransportCommand model = new ModelTransportCommand();
-            model.setId(id);
-            byte[] bytes = modelService.retrieveModelFile(model);
+            byte[] bytes = modelService.retrieveModelFile(id);
             File file = File.createTempFile("jummp", "model");
             FileOutputStream out = new FileOutputStream(file);
             try {
@@ -303,9 +291,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public void grantReadAccess(String authenticationHash, long id, DBusUser user) {
         try {
             setAuthentication(authenticationHash);
-            ModelTransportCommand model = new ModelTransportCommand();
-            model.setId(id);
-            modelService.grantWriteAccess(model, user.toUser());
+            modelService.grantWriteAccess(id, user.toUser());
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } finally {
@@ -316,9 +302,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public void grantWriteAccess(String authenticationHash, long id, DBusUser user) {
         try {
             setAuthentication(authenticationHash);
-            ModelTransportCommand model = new ModelTransportCommand();
-            model.setId(id);
-            modelService.grantWriteAccess(model, user.toUser());
+            modelService.grantWriteAccess(id, user.toUser());
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } finally {
@@ -329,9 +313,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public void revokeReadAccess(String authenticationHash, long id, DBusUser user) {
         try {
             setAuthentication(authenticationHash);
-            ModelTransportCommand model = new ModelTransportCommand();
-            model.setId(id);
-            modelService.revokeReadAccess(model, user.toUser());
+            modelService.revokeReadAccess(id, user.toUser());
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } finally {
@@ -342,9 +324,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public void revokeWriteAccess(String authenticationHash, long id, DBusUser user) {
         try {
             setAuthentication(authenticationHash);
-            ModelTransportCommand model = new ModelTransportCommand();
-            model.setId(id);
-            modelService.revokeWriteAccess(model, user.toUser());
+            modelService.revokeWriteAccess(id, user.toUser());
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } finally {
@@ -355,9 +335,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public void transferOwnerShip(String authenticationHash, long id, DBusUser collaborator) {
         try {
             setAuthentication(authenticationHash);
-            ModelTransportCommand model = new ModelTransportCommand();
-            model.setId(id);
-            modelService.transferOwnerShip(model, collaborator.toUser());
+            modelService.transferOwnerShip(id, collaborator.toUser());
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } finally {
@@ -368,9 +346,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public boolean deleteModel(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
-            ModelTransportCommand model = new ModelTransportCommand();
-            model.setId(id);
-            return modelService.deleteModel(model);
+            return modelService.deleteModel(id);
         } finally {
             restoreAuthentication();
         }
@@ -379,9 +355,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public boolean restoreModel(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
-            ModelTransportCommand model = new ModelTransportCommand();
-            model.setId(id);
-            return modelService.restoreModel(model);
+            return modelService.restoreModel(id);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } finally {

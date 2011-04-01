@@ -124,7 +124,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def revision = null
         try {
             setAuthentication((String)message[0])
-            revision = modelService.getLatestRevision(message[1])
+            revision = modelService.getLatestRevision(message[1].id)
         } catch (AuthenticationHashNotFoundException e) {
             revision = e
         } catch (AccessDeniedException e) {
@@ -154,7 +154,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result = []
         try {
             setAuthentication((String)message[0])
-            result = modelService.getAllRevisions(message[1])
+            result = modelService.getAllRevisions(message[1].id)
         } catch (AuthenticationHashNotFoundException e) {
             result = e
         } finally {
@@ -177,7 +177,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((String)message[0])
-            result = modelService.getPublication(message[1])
+            result = modelService.getPublication(message[1].id)
         } catch (AuthenticationHashNotFoundException e) {
             result = e
         } catch (AccessDeniedException e) {
@@ -245,7 +245,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
             setAuthentication((String)message[0])
             File file = File.createTempFile("jummpJms", null)
             file.append(message[2])
-            result = modelService.addRevision(message[1], file, message[3], (String)message[4])
+            result = modelService.addRevision(message[1].id, file, message[3], (String)message[4])
             FileUtils.deleteQuietly(file)
         } catch (AuthenticationHashNotFoundException e) {
             result = e
@@ -275,7 +275,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((String)message[0])
-            result = modelService.canAddRevision(message[1])
+            result = modelService.canAddRevision(message[1].id)
         } catch (AuthenticationHashNotFoundException e) {
             result = e
         } finally {
@@ -303,7 +303,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
             if (message[1] instanceof RevisionTransportCommand) {
                 result = modelService.retrieveModelFile((RevisionTransportCommand)message[1])
             } else {
-                result = modelService.retrieveModelFile((ModelTransportCommand)message[1])
+                result = modelService.retrieveModelFile(((ModelTransportCommand)message[1]).id)
             }
         } catch (AuthenticationHashNotFoundException e) {
             result = e
@@ -332,7 +332,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((String)message[0])
-            modelService.grantReadAccess(message[1], message[2])
+            modelService.grantReadAccess(message[1].id, message[2])
             result = true
         } catch (AuthenticationHashNotFoundException e) {
             result = e
@@ -359,7 +359,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((String)message[0])
-            modelService.grantWriteAccess(message[1], message[2])
+            modelService.grantWriteAccess(message[1].id, message[2])
             result = true
         } catch (AuthenticationHashNotFoundException e) {
             result = e
@@ -386,7 +386,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((String)message[0])
-            result = modelService.revokeReadAccess(message[1], message[2])
+            result = modelService.revokeReadAccess(message[1].id, message[2])
         } catch (AuthenticationHashNotFoundException e) {
             result = e
         } catch (AccessDeniedException e) {
@@ -412,7 +412,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((String)message[0])
-            result = modelService.revokeWriteAccess(message[1], message[2])
+            result = modelService.revokeWriteAccess(message[1].id, message[2])
         } catch (AuthenticationHashNotFoundException e) {
             result = e
         } catch (AccessDeniedException e) {
@@ -438,7 +438,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((String)message[0])
-            result = modelService.deleteModel(message[1])
+            result = modelService.deleteModel(message[1].id)
         } catch (AuthenticationHashNotFoundException e) {
             result = e
         } catch (AccessDeniedException e) {
@@ -464,7 +464,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         def result
         try {
             setAuthentication((String)message[0])
-            result = modelService.restoreModel(message[1])
+            result = modelService.restoreModel(message[1].id)
         } catch (AuthenticationHashNotFoundException e) {
             result = e
         } catch (AccessDeniedException e) {

@@ -78,22 +78,22 @@ class ModelDelegateService implements IModelService {
         return modelService.getModelCount()
     }
 
-    ModelTransportCommand getModel(long id) {
-        return modelService.getModel(id).toCommandObject()
+    ModelTransportCommand getModel(long modelId) {
+        return modelService.getModel(modelId).toCommandObject()
     }
 
-    RevisionTransportCommand getLatestRevision(ModelTransportCommand model) {
-        Revision rev = modelService.getLatestRevision(Model.get(model.id))
+    RevisionTransportCommand getLatestRevision(long modelId) {
+        Revision rev = modelService.getLatestRevision(Model.get(modelId))
         if (rev) {
             return rev.toCommandObject()
         } else {
-            throw new AccessDeniedException("No access to any revision of Model ${model.id}")
+            throw new AccessDeniedException("No access to any revision of Model ${modelId}")
         }
     }
 
-    List<RevisionTransportCommand> getAllRevisions(ModelTransportCommand model) {
+    List<RevisionTransportCommand> getAllRevisions(long modelId) {
         List<RevisionTransportCommand> revisions = []
-        modelService.getAllRevisions(Model.get(model.id)).each {
+        modelService.getAllRevisions(Model.get(modelId)).each {
             revisions << it.toCommandObject()
         }
         return revisions
@@ -103,55 +103,55 @@ class ModelDelegateService implements IModelService {
         return modelService.getRevision(Model.get(modelId), revisionNumber).toCommandObject()
     }
 
-    PublicationTransportCommand getPublication(ModelTransportCommand model) throws AccessDeniedException, IllegalArgumentException {
-        return modelService.getPublication(Model.get(model.id))?.toCommandObject()
+    PublicationTransportCommand getPublication(long modelId) throws AccessDeniedException, IllegalArgumentException {
+        return modelService.getPublication(Model.get(modelId))?.toCommandObject()
     }
 
     ModelTransportCommand uploadModel(File modelFile, ModelTransportCommand meta) throws ModelException {
         return modelService.uploadModel(modelFile, meta).toCommandObject()
     }
 
-    RevisionTransportCommand addRevision(ModelTransportCommand model, File file, ModelFormatTransportCommand format, String comment) throws ModelException {
-        return modelService.addRevision(Model.get(model.id), file, ModelFormat.findByIdentifier(format.identifier), comment).toCommandObject()
+    RevisionTransportCommand addRevision(long modelId, File file, ModelFormatTransportCommand format, String comment) throws ModelException {
+        return modelService.addRevision(Model.get(modelId), file, ModelFormat.findByIdentifier(format.identifier), comment).toCommandObject()
     }
 
-    Boolean canAddRevision(ModelTransportCommand model) {
-        return modelService.canAddRevision(Model.get(model.id))
+    Boolean canAddRevision(long modelId) {
+        return modelService.canAddRevision(Model.get(modelId))
     }
 
     byte[] retrieveModelFile(RevisionTransportCommand revision) throws ModelException {
         return modelService.retrieveModelFile(Revision.get(revision.id))
     }
 
-    byte[] retrieveModelFile(ModelTransportCommand model) {
-        return modelService.retrieveModelFile(Model.get(model.id))
+    byte[] retrieveModelFile(long modelId) {
+        return modelService.retrieveModelFile(Model.get(modelId))
     }
 
-    void grantReadAccess(ModelTransportCommand model, User collaborator) {
-        modelService.grantReadAccess(Model.get(model.id), User.get(collaborator.id))
+    void grantReadAccess(long modelId, User collaborator) {
+        modelService.grantReadAccess(Model.get(modelId), User.get(collaborator.id))
     }
 
-    void grantWriteAccess(ModelTransportCommand model, User collaborator) {
-        modelService.grantWriteAccess(Model.get(model.id), User.get(collaborator.id))
+    void grantWriteAccess(long modelId, User collaborator) {
+        modelService.grantWriteAccess(Model.get(modelId), User.get(collaborator.id))
     }
 
-    boolean revokeReadAccess(ModelTransportCommand model, User collaborator) {
-        return modelService.revokeReadAccess(Model.get(model.id), User.get(collaborator.id))
+    boolean revokeReadAccess(long modelId, User collaborator) {
+        return modelService.revokeReadAccess(Model.get(modelId), User.get(collaborator.id))
     }
 
-    boolean revokeWriteAccess(ModelTransportCommand model, User collaborator) {
-        return modelService.revokeWriteAccess(Model.get(model.id), User.get(collaborator.id))
+    boolean revokeWriteAccess(long modelId, User collaborator) {
+        return modelService.revokeWriteAccess(Model.get(modelId), User.get(collaborator.id))
     }
 
-    void transferOwnerShip(ModelTransportCommand model, User collaborator) {
-        modelService.transferOwnerShip(Model.get(model.id), User.get(collaborator.id))
+    void transferOwnerShip(long modelId, User collaborator) {
+        modelService.transferOwnerShip(Model.get(modelId), User.get(collaborator.id))
     }
 
-    boolean deleteModel(ModelTransportCommand model) {
-        return modelService.deleteModel(Model.get(model.id))
+    boolean deleteModel(long modelId) {
+        return modelService.deleteModel(Model.get(modelId))
     }
 
-    boolean restoreModel(ModelTransportCommand model) {
-        return modelService.restoreModel(Model.get(model.id))
+    boolean restoreModel(long modelId) {
+        return modelService.restoreModel(Model.get(modelId))
     }
 }

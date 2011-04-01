@@ -76,25 +76,25 @@ public interface IModelService {
     **/
     public Integer getModelCount()
     /**
-     * Returns the Model identified by @p id
-     * @param id The Model to be returned
+     * Returns the Model identified by @p modelId
+     * @param modelId The Model to be returned
      * @return The Model if available
      */
-    public ModelTransportCommand getModel(long id)
+    public ModelTransportCommand getModel(long modelId)
     /**
-    * Queries the @p model for the latest available revision the user has read access to.
-    * @param model The Model for which the latest revision should be retrieved.
+    * Queries the model for the latest available revision the user has read access to.
+    * @param modelId The id of the Model for which the latest revision should be retrieved.
     * @return Latest Revision the current user has read access to. If there is no such revision null is returned
     **/
-    public RevisionTransportCommand getLatestRevision(ModelTransportCommand model)
+    public RevisionTransportCommand getLatestRevision(long modelId)
     /**
-    * Queries the @p model for all revisions the user has read access to.
+    * Queries the model for all revisions the user has read access to.
     * The returned list is ordered by revision number of the model.
-    * @param model The Model for which all revisions should be retrieved
+    * @param modelId The id of the Model for which all revisions should be retrieved
     * @return List of Revisions ordered by revision numbers of underlying VCS. If the user has no access to any revision an empty list is returned
     * @todo: add paginated version with offset and count. Problem: filter
     **/
-    public List<RevisionTransportCommand> getAllRevisions(ModelTransportCommand model)
+    public List<RevisionTransportCommand> getAllRevisions(long modelId)
     /**
      * Retrieves the Revision for the Model identified by @p modelId and @p revisionNumber
      * @param modelId The Id of the model
@@ -103,13 +103,13 @@ public interface IModelService {
      */
     public RevisionTransportCommand getRevision(long modelId, int revisionNumber)
     /**
-     * Returns the reference publication of this @p model.
-     * @param model The Model for which the reference publication should be returned.
+     * Returns the reference publication of this model.
+     * @param modelId The if of the Model for which the reference publication should be returned.
      * @return The reference publication
      * @throws IllegalArgumentException if @p model is null
      * @throws AccessDeniedException if the current user is not allowed to access at least one Model Revision
      */
-    public PublicationTransportCommand getPublication(final ModelTransportCommand model) throws AccessDeniedException, IllegalArgumentException
+    public PublicationTransportCommand getPublication(final long modelId) throws AccessDeniedException, IllegalArgumentException
     /**
     * Creates a new Model and stores it in the VCS.
     *
@@ -126,22 +126,22 @@ public interface IModelService {
     /**
     * Adds a new Revision to the model.
     *
-    * The provided @p file will be stored in the VCS as an update to an existing file of the same @p model.
+    * The provided @p file will be stored in the VCS as an update to an existing file of the same model.
     * A new Revision will be created and appended to the list of Revisions of the @p model.
-    * @param model The Model the revision should be added
+    * @param modelId The id of the Model the revision should be added
     * @param file The model file to be stored in the VCS as a new revision
     * @param format The format of the model file
     * @param comment The commit message for the new revision
     * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
     * @throws ModelException If either @p model, @p file or @p comment are null or if the file does not exists or is a directory
     **/
-    public RevisionTransportCommand addRevision(ModelTransportCommand model, final File file, final ModelFormatTransportCommand format, final String comment) throws ModelException
+    public RevisionTransportCommand addRevision(long modelId, final File file, final ModelFormatTransportCommand format, final String comment) throws ModelException
     /**
      * Returns whether the current user has the right to add a revision to the model.
-     * @param model The model to check
+     * @param modelId The id of the model to check
      * @return @c true if the user has write permission on the revision or is an admin user, @c false otherwise.
      */
-    public Boolean canAddRevision(final ModelTransportCommand model)
+    public Boolean canAddRevision(final long modelId)
     /**
      * Retrieves the model file for the @p revision.
      * @param revision The Model Revision for which the file should be retrieved.
@@ -150,67 +150,67 @@ public interface IModelService {
      */
     byte[] retrieveModelFile(final RevisionTransportCommand revision) throws ModelException
     /**
-     * Retrieves the model file for the latest revision of the @p model
-     * @param model The Model for which the file should be retrieved
+     * Retrieves the model file for the latest revision of the model.
+     * @param modelId The id of the Model for which the file should be retrieved
      * @return Byte Array of the content of the Model file.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    byte[] retrieveModelFile(final ModelTransportCommand model) throws ModelException
+    byte[] retrieveModelFile(final long modelId) throws ModelException
 
     /**
-    * Grants read access for @p model to @p collaborator.
+    * Grants read access for model to @p collaborator.
     *
-    * The @p collaborator receives the right to read all future revisions of the @p model
+    * The @p collaborator receives the right to read all future revisions of the model
     * as well as read access to all revisions the current user has read access to.
-    * The current user can only grant read access in case he has read access on the @p model
+    * The current user can only grant read access in case he has read access on the model
     * himself and the right to grant read access.
     *
-    * @param model The Model for which read access should be granted
+    * @param modelId The id of the Model for which read access should be granted
     * @param collaborator The user who should receive read access
     * @todo Might be better in a CollaborationService?
     **/
-    public void grantReadAccess(ModelTransportCommand model, User collaborator)
+    public void grantReadAccess(long modelId, User collaborator)
     /**
-    * Grants write access for @p model to @p collaborator.
+    * Grants write access for model to @p collaborator.
     *
-    * The @p collaborator receives the right to add new revisions to the @p model.
-    * The current user can only grant write access in case he has write access on the @p model
+    * The @p collaborator receives the right to add new revisions to the model.
+    * The current user can only grant write access in case he has write access on the model
     * himself and the right to grant write access.
     *
-    * @param model The Model for which write access should be granted
+    * @param modelId The id of the Model for which write access should be granted
     * @param collaborator The user who should receive write access
     * @todo Might be better in a CollaborationService?
     **/
-    public void grantWriteAccess(ModelTransportCommand model, User collaborator)
+    public void grantWriteAccess(long modelId, User collaborator)
     /**
-    * Revokes read access for @p model from @p collaborator.
+    * Revokes read access for model from @p collaborator.
     *
-    * The @p collaborator gets the right to read future revisions to the @p model revoked.
+    * The @p collaborator gets the right to read future revisions to the model revoked.
     * Read access to existing revisions is not revoked.
     * Write access to the model (that is uploading new revisions) is also revoked.
     * The current user can only revoke the right if he has the right to read future revisions
     * himself and has the right to grant/revoke read rights on the model. The right is not revoked
     * if the user is an administrator of the model.
-    * @param model The Model for which read access should be revoked
+    * @param modelId The id of the Model for which read access should be revoked
     * @param collaborator The User whose read access should be revoked
     * @return @c true if the right has been revoked, @c false otherwise
     * @todo Might be better in a CollaborationService?
     **/
-    public boolean revokeReadAccess(ModelTransportCommand model, User collaborator)
+    public boolean revokeReadAccess(long modelId, User collaborator)
     /**
-    * Revokes write access for @p model from @p collaborator.
+    * Revokes write access for model from @p collaborator.
     *
-    * The @p collaborator gets the right to add revisions to the @p model revoked.
+    * The @p collaborator gets the right to add revisions to the model revoked.
     * The current user can only revoke the right if he has the right to add revisions
     * himself and has the right to grant/revoke write rights on the model
-    * @param model The Model for which write access should be revoked
+    * @param modelId The id of the Model for which write access should be revoked
     * @param collaborator The User whose write access should be revoked
     * @return @c true if the right has been revoked, @c false otherwise
     * @todo Might be better in a CollaborationService?
     **/
-    public boolean revokeWriteAccess(ModelTransportCommand model, User collaborator)
+    public boolean revokeWriteAccess(long modelId, User collaborator)
     /**
-    * Transfers the ownership of the @p model to @p collaborator.
+    * Transfers the ownership of the model to @p collaborator.
     *
     * The ownership can only be transferred from a user having the right to grant
     * read/write access and the @p model is not yet under curation or published.
@@ -218,36 +218,36 @@ public interface IModelService {
     *
     * All Model specific rights are revoked from the owner and granted to the @p collaborator.
     * This includes:
-    * @li Write access to the @p model
+    * @li Write access to the model
     * @li Read access to future revisions of the @p model
     * @li Start of curation
     * @li Grant/Revoke read/write access to the @p model
-    * @param model The Model for which the ownership should be transferred.
+    * @param model The id of the Model for which the ownership should be transferred.
     * @param collaborator The User who becomes the new owner
     * @todo Might be better in a CollaborationService?
     **/
-    public void transferOwnerShip(ModelTransportCommand model, User collaborator)
+    public void transferOwnerShip(long modelId, User collaborator)
     /**
-    * Deletes the @p model including all Revisions.
+    * Deletes the model including all Revisions.
     *
-    * Flags the @p model and all its revisions as deleted. A deletion from VCS is for
+    * Flags the model and all its revisions as deleted. A deletion from VCS is for
     * technical reasons not possible and because of that a deletion of the Model object
     * is not possible.
     *
-    * Deletion of @p model is only possible if the model is neither under curation nor published.
-    * @param model The Model to be deleted
+    * Deletion of model is only possible if the model is neither under curation nor published.
+    * @param modelId The id of the Model to be deleted
     * @return @c true in case the Model has been deleted, @c false otherwise.
     * @see restoreModel
     **/
-    public boolean deleteModel(ModelTransportCommand model)
+    public boolean deleteModel(long modelId)
     /**
-    * Restores the deleted @p model.
+    * Restores the deleted model.
     *
     * Removes the deleted flag from the model and all its Revisions.
-    * @param model The deleted Model to restore
+    * @param modelId The id of the deleted Model to restore
     * @return @c true, whether the state was restored, @c false otherwise.
     * @see deleteModel
     * @todo might belong in an administration service?
     **/
-    public boolean restoreModel(ModelTransportCommand model)
+    public boolean restoreModel(long modelId)
 }
