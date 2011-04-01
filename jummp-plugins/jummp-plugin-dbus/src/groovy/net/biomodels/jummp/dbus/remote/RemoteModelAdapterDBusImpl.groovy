@@ -99,7 +99,11 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.addRevision")
     RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        File file = File.createTempFile("jummp", "model")
+        file.withWriter {
+            it.write(new String(bytes))
+        }
+        return modelDBusAdapter.addRevision(authenticationToken(), model.id, file.getAbsolutePath(), format.identifier, comment)
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.canAddRevision")

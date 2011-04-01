@@ -2,10 +2,7 @@ package net.biomodels.jummp.dbus;
 
 import net.biomodels.jummp.core.IModelService;
 import net.biomodels.jummp.core.ModelException;
-import net.biomodels.jummp.core.model.ModelListSorting;
-import net.biomodels.jummp.core.model.ModelTransportCommand;
-import net.biomodels.jummp.core.model.PublicationTransportCommand;
-import net.biomodels.jummp.core.model.RevisionTransportCommand;
+import net.biomodels.jummp.core.model.*;
 import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException;
 import net.biomodels.jummp.dbus.model.DBusModel;
 import net.biomodels.jummp.dbus.model.DBusPublication;
@@ -217,16 +214,26 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         return uploadModel(authenticationHash, fileName, meta);
     }
 
-    /*public DBusRevision addRevision(String authenticationHash, DBusModel model, String fileName, String format, String comment) {
+    public DBusRevision addRevision(String authenticationHash, long modelId, String fileName, String format, String comment) {
         try {
             setAuthentication(authenticationHash);
+            ModelTransportCommand model = new ModelTransportCommand();
+            model.setId(modelId);
+            File file = new File(fileName);
+            ModelFormatTransportCommand modelFormat = new ModelFormatTransportCommand();
+            modelFormat.setIdentifier(format);
+            DBusRevision revision = DBusRevision.fromRevisionTransportCommand(modelService.addRevision(model, file, modelFormat, comment));
+            FileUtils.deleteQuietly(file);
+            return revision;
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
+        } catch (ModelException e) {
+            // TODO: throw correct exception
+            throw new DBusExecutionException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }*/
+    }
 
     public boolean canAddRevision(String authenticationHash, long id) {
         try {
