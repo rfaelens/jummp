@@ -285,7 +285,7 @@ environments {
         jummp.security.registration.email.send = false
         jummp.security.resetPassword.email.send = false
         // disable dbus
-        jummp.export.dbus = false
+        //jummp.export.dbus = false
     }
 }
 
