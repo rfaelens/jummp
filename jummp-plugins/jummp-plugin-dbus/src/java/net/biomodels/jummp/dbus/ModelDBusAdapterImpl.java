@@ -1,6 +1,7 @@
 package net.biomodels.jummp.dbus;
 
 import net.biomodels.jummp.core.IModelService;
+import net.biomodels.jummp.core.ModelException;
 import net.biomodels.jummp.core.model.ModelListSorting;
 import net.biomodels.jummp.core.model.ModelTransportCommand;
 import net.biomodels.jummp.core.model.PublicationTransportCommand;
@@ -12,6 +13,7 @@ import net.biomodels.jummp.dbus.model.DBusRevision;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.springframework.security.access.AccessDeniedException;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -225,30 +227,66 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         }
     }
 
-    /*public String retrieveModelFileByRevision(String authenticationHash, DBusRevision revision) {
+    public String retrieveModelFileByRevision(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
+            RevisionTransportCommand revision = new RevisionTransportCommand();
+            revision.setId(id);
+            byte[] bytes = modelService.retrieveModelFile(revision);
+            File file = File.createTempFile("jummp", "model");
+            FileOutputStream out = new FileOutputStream(file);
+            try {
+                out.write(bytes);
+            } catch (IOException e) {
+                // TODO: throw correct exception
+                throw new DBusExecutionException(e.getMessage());
+            } finally {
+                out.close();
+            }
+            return file.getAbsolutePath();
             // TODO: change ModelService to return File handle instead of byte array
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
+        } catch (ModelException e) {
+            // TODO: throw correct exception
+            throw new DBusExecutionException(e.getMessage());
+        }catch (IOException e) {
+            // TODO: throw correct exception
+            throw new DBusExecutionException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public String retrieveModelFileByModel(String authenticationHash, DBusModel model) {
+    public String retrieveModelFileByModel(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
-            // TODO: change ModelService to return File handle instead of byte array
-            //return modelService.retrieveModelFile()
+            ModelTransportCommand model = new ModelTransportCommand();
+            model.setId(id);
+            byte[] bytes = modelService.retrieveModelFile(model);
+            File file = File.createTempFile("jummp", "model");
+            FileOutputStream out = new FileOutputStream(file);
+            try {
+                out.write(bytes);
+            } catch (IOException e) {
+                // TODO: throw correct exception
+                throw new DBusExecutionException(e.getMessage());
+            } finally {
+                out.close();
+            }
+            return file.getAbsolutePath();
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
+        } catch (ModelException e) {
+            // TODO: throw correct exception
+            throw new DBusExecutionException(e.getMessage());
+        } catch (IOException e) {
+            // TODO: throw correct exception
+            throw new DBusExecutionException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }*/
+    }
 
     public void grantReadAccess(String authenticationHash, long id, DBusUser user) {
         try {

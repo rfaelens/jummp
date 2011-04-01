@@ -44,8 +44,8 @@ public interface ModelDBusAdapter extends DBusInterface {
     /*public DBusModel uploadModel(String authenticationHash, String fileName, DBusModel meta);
     public DBusRevision addRevision(String authenticationHash, DBusModel model, String fileName, String format, String comment);*/
     public boolean canAddRevision(String authenticationHash, long id);
-    /*public String retrieveModelFileByRevision(String authenticationHash, DBusRevision revision);
-    public String retrieveModelFileByModel(String authenticationHash, DBusModel model);*/
+    public String retrieveModelFileByRevision(String authenticationHash, long id);
+    public String retrieveModelFileByModel(String authenticationHash, long id);
     public void grantReadAccess(String authenticationHash, long id, DBusUser user);
     public void grantWriteAccess(String authenticationHash, long id, DBusUser user);
     public void revokeReadAccess(String authenticationHash, long id, DBusUser user);

@@ -11,6 +11,7 @@ import net.biomodels.jummp.remote.RemoteModelAdapter
 import org.freedesktop.dbus.DBusConnection
 import org.perf4j.aop.Profiled
 import org.springframework.beans.factory.InitializingBean
+import org.apache.commons.io.FileUtils
 
 /**
  * @short DBus Implementation of RemoteModelAdapter.
@@ -98,12 +99,18 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFile")
     byte[] retrieveModelFile(RevisionTransportCommand revision) {
-        return new byte[0];  //To change body of implemented methods use File | Settings | File Templates.
+        File file = new File(modelDBusAdapter.retrieveModelFileByRevision(authenticationToken(), revision.id))
+        byte[] bytes = file.readBytes()
+        FileUtils.deleteQuietly(file)
+        return bytes
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFile")
     byte[] retrieveModelFile(ModelTransportCommand model) {
-        return new byte[0];  //To change body of implemented methods use File | Settings | File Templates.
+        File file = new File(modelDBusAdapter.retrieveModelFileByModel(authenticationToken(), model.id))
+        byte[] bytes = file.readBytes()
+        FileUtils.deleteQuietly(file)
+        return bytes
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.deleteModel")
