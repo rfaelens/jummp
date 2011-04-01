@@ -7,6 +7,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import org.perf4j.aop.Profiled
+import net.biomodels.jummp.core.ModelException
 
 class RemoteModelService implements RemoteModelAdapter {
 
@@ -64,12 +65,12 @@ class RemoteModelService implements RemoteModelAdapter {
     }
 
     @Profiled(tag="RemoteModelService.uploadModel")
-    def ModelTransportCommand uploadModel(byte[] bytes, ModelTransportCommand meta) {
+    def ModelTransportCommand uploadModel(byte[] bytes, ModelTransportCommand meta) throws ModelException {
         return remoteModelAdapter.uploadModel(bytes, meta)
     }
 
     @Profiled(tag="RemoteModelService.addRevision")
-    def RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) {
+    def RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException {
         return remoteModelAdapter.addRevision(model, bytes, format, comment)
     }
 
@@ -79,12 +80,12 @@ class RemoteModelService implements RemoteModelAdapter {
     }
 
     @Profiled(tag="RemoteModelService.retrieveModelFile")
-    def byte[] retrieveModelFile(RevisionTransportCommand revision) {
+    def byte[] retrieveModelFile(RevisionTransportCommand revision) throws ModelException {
         return remoteModelAdapter.retrieveModelFile(revision)
     }
 
     @Profiled(tag="RemoteModelService.retrieveModelFile")
-    def byte[] retrieveModelFile(ModelTransportCommand model) {
+    def byte[] retrieveModelFile(ModelTransportCommand model) throws ModelException {
         return remoteModelAdapter.retrieveModelFile(model)
     }
 

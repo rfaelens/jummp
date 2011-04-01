@@ -7,6 +7,7 @@ import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException;
 import net.biomodels.jummp.dbus.model.DBusModel;
 import net.biomodels.jummp.dbus.model.DBusPublication;
 import net.biomodels.jummp.dbus.model.DBusRevision;
+import net.biomodels.jummp.dbus.model.ModelDBusException;
 import org.apache.commons.io.FileUtils;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.springframework.security.access.AccessDeniedException;
@@ -202,8 +203,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (ModelException e) {
-            // TODO: throw correct exception
-            throw new DBusExecutionException(e.getMessage());
+            throw new ModelDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -228,8 +228,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (ModelException e) {
-            // TODO: throw correct exception
-            throw new DBusExecutionException(e.getMessage());
+            throw new ModelDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -257,8 +256,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             try {
                 out.write(bytes);
             } catch (IOException e) {
-                // TODO: throw correct exception
-                throw new DBusExecutionException(e.getMessage());
+                throw new ModelDBusException(e.getMessage());
             } finally {
                 out.close();
             }
@@ -267,11 +265,9 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (ModelException e) {
-            // TODO: throw correct exception
-            throw new DBusExecutionException(e.getMessage());
+            throw new ModelDBusException(e.getMessage());
         }catch (IOException e) {
-            // TODO: throw correct exception
-            throw new DBusExecutionException(e.getMessage());
+            throw new ModelDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
@@ -288,8 +284,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             try {
                 out.write(bytes);
             } catch (IOException e) {
-                // TODO: throw correct exception
-                throw new DBusExecutionException(e.getMessage());
+                throw new ModelDBusException(e.getMessage());
             } finally {
                 out.close();
             }
@@ -297,11 +292,9 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (ModelException e) {
-            // TODO: throw correct exception
-            throw new DBusExecutionException(e.getMessage());
+            throw new ModelDBusException(e.getMessage());
         } catch (IOException e) {
-            // TODO: throw correct exception
-            throw new DBusExecutionException(e.getMessage());
+            throw new ModelDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }

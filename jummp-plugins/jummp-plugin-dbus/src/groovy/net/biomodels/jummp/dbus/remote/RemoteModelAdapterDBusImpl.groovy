@@ -14,6 +14,7 @@ import org.springframework.beans.factory.InitializingBean
 import org.apache.commons.io.FileUtils
 import net.biomodels.jummp.dbus.model.DBusModel
 import net.biomodels.jummp.dbus.model.DBusPublication
+import net.biomodels.jummp.core.ModelException
 
 /**
  * @short DBus Implementation of RemoteModelAdapter.
@@ -85,7 +86,7 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.uploadModel")
-    ModelTransportCommand uploadModel(byte[] bytes, ModelTransportCommand meta) {
+    ModelTransportCommand uploadModel(byte[] bytes, ModelTransportCommand meta) throws ModelException {
         File file = File.createTempFile("jummp", "model")
         file.withWriter {
             it.write(new String(bytes))
@@ -98,7 +99,7 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.addRevision")
-    RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) {
+    RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException {
         File file = File.createTempFile("jummp", "model")
         file.withWriter {
             it.write(new String(bytes))
@@ -112,7 +113,7 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFile")
-    byte[] retrieveModelFile(RevisionTransportCommand revision) {
+    byte[] retrieveModelFile(RevisionTransportCommand revision) throws ModelException {
         File file = new File(modelDBusAdapter.retrieveModelFileByRevision(authenticationToken(), revision.id))
         byte[] bytes = file.readBytes()
         FileUtils.deleteQuietly(file)
@@ -120,7 +121,7 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFile")
-    byte[] retrieveModelFile(ModelTransportCommand model) {
+    byte[] retrieveModelFile(ModelTransportCommand model) throws ModelException {
         File file = new File(modelDBusAdapter.retrieveModelFileByModel(authenticationToken(), model.id))
         byte[] bytes = file.readBytes()
         FileUtils.deleteQuietly(file)

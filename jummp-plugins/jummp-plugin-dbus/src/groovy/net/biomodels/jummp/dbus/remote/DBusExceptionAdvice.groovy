@@ -14,6 +14,8 @@ import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.core.user.UserInvalidException
 import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserCodeExpiredException
+import net.biomodels.jummp.core.ModelException
+import net.biomodels.jummp.core.model.ModelTransportCommand
 
 /**
  * @short Advice to map DBusExecutionException to appropriate type.
@@ -53,6 +55,8 @@ class DBusExceptionAdvice implements ThrowsAdvice {
             throw new UserCodeExpiredException(e.message, null)
         case "net.biomodels.jummp.dbus.IllegalArgumentDBusException":
             throw new IllegalArgumentException(e.message)
+        case "net.biomodels.jummp.dbus.model.ModelDBusException":
+            throw new ModelException(new ModelTransportCommand(), e.getMessage())
         default:
             throw new JummpException(e.message, e)
         }
