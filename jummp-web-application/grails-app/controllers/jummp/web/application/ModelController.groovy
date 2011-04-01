@@ -44,9 +44,8 @@ class ModelController {
             render(template: "/templates/page", model: [link: g.createLink(action: "show", id: params.id), callback: "loadModelTabCallback"])
             return
         }
-        ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
-        RevisionTransportCommand rev = remoteModelService.getLatestRevision(model)
-        [revision: rev, addRevision: remoteModelService.canAddRevision(model)]
+        RevisionTransportCommand rev = remoteModelService.getLatestRevision(params.id as Long)
+        [revision: rev, addRevision: remoteModelService.canAddRevision(params.id as Long)]
     }
 
     def summary = {
@@ -54,9 +53,8 @@ class ModelController {
             render(template: "/templates/page", model: [link: g.createLink(action: "show", id: params.id), callback: "loadModelTabCallback"])
             return
         }
-        ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
-        RevisionTransportCommand rev = remoteModelService.getLatestRevision(model)
-        [publication: remoteModelService.getPublication(model), revision: rev]
+        RevisionTransportCommand rev = remoteModelService.getLatestRevision(params.id as Long)
+        [publication: remoteModelService.getPublication(params.id as Long), revision: rev]
     }
 
     /**
@@ -75,8 +73,7 @@ class ModelController {
      * Renders html snippet with Publication information for the current Model identified by the id.
      */
     def publication = {
-        ModelTransportCommand model = new ModelTransportCommand(id: params.id as Long)
-        PublicationTransportCommand publication = remoteModelService.getPublication(model)
+        PublicationTransportCommand publication = remoteModelService.getPublication(params.id as Long)
         render(template: "/templates/publication", model: [publication: publication])
     }
 
@@ -218,8 +215,7 @@ class ModelController {
             render "<textarea>" + (errors as JSON) + "</textarea>"
         } else {
             try {
-                ModelTransportCommand model = new ModelTransportCommand(id: cmd.modelId)
-                RevisionTransportCommand revision = remoteModelService.addRevision(model, cmd.model.bytes, new ModelFormatTransportCommand(identifier: "SBML"), cmd.comment)
+                RevisionTransportCommand revision = remoteModelService.addRevision(params.modelId as Long, cmd.model.bytes, new ModelFormatTransportCommand(identifier: "SBML"), cmd.comment)
                 render "<textarea>" + ([success: true, revision: revision] as JSON) + "</textarea>"
             } catch (ModelException e) {
                 Map errors = [error: true]
@@ -233,7 +229,7 @@ class ModelController {
      * File download of the model file for a model by id
      */
     def download = {
-        byte[] bytes = remoteModelService.retrieveModelFile(new ModelTransportCommand(id: params.id as int))
+        byte[] bytes = remoteModelService.retrieveModelFile(params.id as Long)
         response.setContentType("application/xml")
         // TODO: set a proper name for the model
         response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")

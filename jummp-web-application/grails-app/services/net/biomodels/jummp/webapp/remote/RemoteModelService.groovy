@@ -50,18 +50,18 @@ class RemoteModelService implements RemoteModelAdapter {
     }
 
     @Profiled(tag="RemoteModelService.getLatestRevision")
-    def RevisionTransportCommand getLatestRevision(ModelTransportCommand model) {
-        return remoteModelAdapter.getLatestRevision(model)
+    def RevisionTransportCommand getLatestRevision(long modelId) {
+        return remoteModelAdapter.getLatestRevision(modelId)
     }
 
     @Profiled(tag="RemoteModelService.getAllRevisions")
-    def List<RevisionTransportCommand> getAllRevisions(ModelTransportCommand model) {
-        return remoteModelAdapter.getAllRevisions(model)
+    def List<RevisionTransportCommand> getAllRevisions(long modelId) {
+        return remoteModelAdapter.getAllRevisions(modelId)
     }
 
     @Profiled(tag="RemoteModelService.getPublication")
-    def PublicationTransportCommand getPublication(ModelTransportCommand model) {
-        return remoteModelAdapter.getPublication(model)
+    def PublicationTransportCommand getPublication(long modelId) {
+        return remoteModelAdapter.getPublication(modelId)
     }
 
     @Profiled(tag="RemoteModelService.uploadModel")
@@ -70,13 +70,13 @@ class RemoteModelService implements RemoteModelAdapter {
     }
 
     @Profiled(tag="RemoteModelService.addRevision")
-    def RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException {
-        return remoteModelAdapter.addRevision(model, bytes, format, comment)
+    def RevisionTransportCommand addRevision(long modelId, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException {
+        return remoteModelAdapter.addRevision(modelId, bytes, format, comment)
     }
 
     @Profiled(tag="RemoteModelService.canAddRevision")
-    def Boolean canAddRevision(ModelTransportCommand model) {
-        return remoteModelAdapter.canAddRevision(model)
+    def Boolean canAddRevision(long modelId) {
+        return remoteModelAdapter.canAddRevision(modelId)
     }
 
     @Profiled(tag="RemoteModelService.retrieveModelFile")
@@ -85,17 +85,17 @@ class RemoteModelService implements RemoteModelAdapter {
     }
 
     @Profiled(tag="RemoteModelService.retrieveModelFile")
-    def byte[] retrieveModelFile(ModelTransportCommand model) throws ModelException {
-        return remoteModelAdapter.retrieveModelFile(model)
+    def byte[] retrieveModelFile(long modelId) throws ModelException {
+        return remoteModelAdapter.retrieveModelFile(modelId)
     }
 
     @Profiled(tag="RemoteModelService.deleteModel")
-    def Boolean deleteModel(ModelTransportCommand model) {
-        return remoteModelAdapter.deleteModel(model)
+    def Boolean deleteModel(long modelId) {
+        return remoteModelAdapter.deleteModel(modelId)
     }
 
     @Profiled(tag="RemoteModelService.restoreModel")
-    def Boolean restoreModel(ModelTransportCommand model) {
-        return remoteModelAdapter.restoreModel(model)
+    def Boolean restoreModel(long modelId) {
+        return remoteModelAdapter.restoreModel(modelId)
     }
 }

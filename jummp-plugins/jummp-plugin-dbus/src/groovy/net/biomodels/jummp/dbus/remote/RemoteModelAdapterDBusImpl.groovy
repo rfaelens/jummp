@@ -65,24 +65,24 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.getLatestRevision")
-    RevisionTransportCommand getLatestRevision(ModelTransportCommand model) {
-        RevisionTransportCommand revision = modelDBusAdapter.getLatestRevision(authenticationToken(), model.id)
-        revision.model = modelDBusAdapter.getModel(authenticationToken(), model.id)
+    RevisionTransportCommand getLatestRevision(long modelId) {
+        RevisionTransportCommand revision = modelDBusAdapter.getLatestRevision(authenticationToken(), modelId)
+        revision.model = modelDBusAdapter.getModel(authenticationToken(), modelId)
         return revision
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.getAllRevisions")
-    List<RevisionTransportCommand> getAllRevisions(ModelTransportCommand model) {
+    List<RevisionTransportCommand> getAllRevisions(long modelId) {
         List<RevisionTransportCommand> revisions = []
-        modelDBusAdapter.getAllRevisions(authenticationToken(), model.id).each {
-            revisions << modelDBusAdapter.getRevision(authenticationToken(), model.id, it as int)
+        modelDBusAdapter.getAllRevisions(authenticationToken(), modelId).each {
+            revisions << modelDBusAdapter.getRevision(authenticationToken(), modelId, it as int)
         }
         return revisions
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.getPublication")
-    PublicationTransportCommand getPublication(ModelTransportCommand model) {
-        return modelDBusAdapter.getPublication(authenticationToken(), model.id)
+    PublicationTransportCommand getPublication(long modelId) {
+        return modelDBusAdapter.getPublication(authenticationToken(), modelId)
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.uploadModel")
@@ -99,17 +99,17 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.addRevision")
-    RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException {
+    RevisionTransportCommand addRevision(long modelId, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException {
         File file = File.createTempFile("jummp", "model")
         file.withWriter {
             it.write(new String(bytes))
         }
-        return modelDBusAdapter.addRevision(authenticationToken(), model.id, file.getAbsolutePath(), format.identifier, comment)
+        return modelDBusAdapter.addRevision(authenticationToken(), modelId, file.getAbsolutePath(), format.identifier, comment)
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.canAddRevision")
-    Boolean canAddRevision(ModelTransportCommand model) {
-        return modelDBusAdapter.canAddRevision(authenticationToken(), model.id)
+    Boolean canAddRevision(long modelId) {
+        return modelDBusAdapter.canAddRevision(authenticationToken(), modelId)
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFile")
@@ -121,21 +121,21 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFile")
-    byte[] retrieveModelFile(ModelTransportCommand model) throws ModelException {
-        File file = new File(modelDBusAdapter.retrieveModelFileByModel(authenticationToken(), model.id))
+    byte[] retrieveModelFile(long modelId) throws ModelException {
+        File file = new File(modelDBusAdapter.retrieveModelFileByModel(authenticationToken(), modelId))
         byte[] bytes = file.readBytes()
         FileUtils.deleteQuietly(file)
         return bytes
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.deleteModel")
-    Boolean deleteModel(ModelTransportCommand model) {
-        return modelDBusAdapter.deleteModel(authenticationToken(), model.id)
+    Boolean deleteModel(long modelId) {
+        return modelDBusAdapter.deleteModel(authenticationToken(), modelId)
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.restoreModel")
-    Boolean restoreModel(ModelTransportCommand model) {
-        return modelDBusAdapter.restoreModel(authenticationToken(), model.id)
+    Boolean restoreModel(long modelId) {
+        return modelDBusAdapter.restoreModel(authenticationToken(), modelId)
     }
 
     private List<ModelTransportCommand> retrieveModels(List<String> ids) {

@@ -78,22 +78,22 @@ class RemoteModelAdapterJmsImpl extends AbstractJmsRemoteAdapter implements Remo
     }
 
     @Profiled(tag="RemoteModelAdapterJmsImpl.getLatestRevision")
-    public RevisionTransportCommand getLatestRevision(ModelTransportCommand model) {
-        def retVal = send("getLatestRevision", model)
+    public RevisionTransportCommand getLatestRevision(long modelId) {
+        def retVal = send("getLatestRevision", new ModelTransportCommand(id: modelId))
         validateReturnValue(retVal, RevisionTransportCommand)
         return (RevisionTransportCommand)retVal
     }
 
     @Profiled(tag="RemoteModelAdapterJmsImpl.getAllRevisions")
-    public List<RevisionTransportCommand> getAllRevisions(ModelTransportCommand model) {
-        def retVal = send("getAllRevisions", model)
+    public List<RevisionTransportCommand> getAllRevisions(long modelId) {
+        def retVal = send("getAllRevisions", new ModelTransportCommand(id: modelId))
         validateReturnValue(retVal, List)
         return (List<RevisionTransportCommand>)retVal
     }
 
     @Profiled(tag="RemoteModelAdapterJmsImpl.getPublication")
-    public PublicationTransportCommand getPublication(final ModelTransportCommand model) {
-        def retVal = send("getPublication", model)
+    public PublicationTransportCommand getPublication(final long modelId) {
+        def retVal = send("getPublication", new ModelTransportCommand(id: modelId))
         validateReturnValue(retVal, PublicationTransportCommand)
         return (PublicationTransportCommand)retVal
     }
@@ -106,15 +106,15 @@ class RemoteModelAdapterJmsImpl extends AbstractJmsRemoteAdapter implements Remo
     }
 
     @Profiled(tag="RemoteModelAdapterJmsImpl.addRevision")
-    public RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException {
-        def retVal = send("addRevision", [model, bytes, format, comment])
+    public RevisionTransportCommand addRevision(long modelId, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException {
+        def retVal = send("addRevision", [new ModelTransportCommand(id: modelId), bytes, format, comment])
         validateReturnValue(retVal, RevisionTransportCommand)
         return (RevisionTransportCommand)retVal
     }
 
     @Profiled(tag="RemoteModelAdapterJmsImpl.canAddRevision")
-    public Boolean canAddRevision(final ModelTransportCommand model) {
-        def retVal = send("canAddRevision", model)
+    public Boolean canAddRevision(final long modelId) {
+        def retVal = send("canAddRevision", new ModelTransportCommand(id: modelId))
         validateReturnValue(retVal, Boolean)
         return (Boolean)retVal
     }
@@ -128,24 +128,24 @@ class RemoteModelAdapterJmsImpl extends AbstractJmsRemoteAdapter implements Remo
     }
 
     @Profiled(tag="RemoteModelAdapterJmsImpl.retrieveModelFile")
-    public byte[] retrieveModelFile(ModelTransportCommand model) {
+    public byte[] retrieveModelFile(long modelId) {
         // TODO: verify closely because of byte[]
-        def retVal = send("retrieveModelFile", model)
+        def retVal = send("retrieveModelFile", new ModelTransportCommand(id: modelId))
         validateReturnValue(retVal, byte[].class)
         return (byte[])retVal
     }
 
     // TODO: how to handle grant/revoke rights from the webapplication? Which users to show?
     @Profiled(tag="RemoteModelAdapterJmsImpl.deleteModel")
-    public Boolean deleteModel(ModelTransportCommand model) {
-        def retVal = send("deleteModel", model)
+    public Boolean deleteModel(long modelId) {
+        def retVal = send("deleteModel", new ModelTransportCommand(id: modelId))
         validateReturnValue(retVal, Boolean)
         return (Boolean)retVal
     }
 
     @Profiled(tag="RemoteModelAdapterJmsImpl.restoreModel")
-    public Boolean restoreModel(ModelTransportCommand model) {
-        def retVal = send("restoreModel", model)
+    public Boolean restoreModel(long modelId) {
+        def retVal = send("restoreModel", new ModelTransportCommand(id: modelId))
         validateReturnValue(retVal, Boolean)
         return (Boolean)retVal
     }

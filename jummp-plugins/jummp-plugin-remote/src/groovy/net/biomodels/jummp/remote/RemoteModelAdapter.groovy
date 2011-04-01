@@ -72,24 +72,24 @@ public interface RemoteModelAdapter {
     **/
     public Integer getModelCount()
     /**
-    * Queries the @p model for the latest available revision the user has read access to.
-    * @param model The Model for which the latest revision should be retrieved.
+    * Queries the model for the latest available revision the user has read access to.
+    * @param modelId The Model for which the latest revision should be retrieved.
     * @return Latest Revision the current user has read access to.
     **/
-    public RevisionTransportCommand getLatestRevision(ModelTransportCommand model)
+    public RevisionTransportCommand getLatestRevision(long modelId)
     /**
-    * Queries the @p model for all revisions the user has read access to.
+    * Queries the model for all revisions the user has read access to.
     * The returned list is ordered by revision number of the model.
-    * @param model The Model for which all revisions should be retrieved
+    * @param modelId The id of the Model for which all revisions should be retrieved
     * @return List of Revisions ordered by revision numbers of underlying VCS. If the user has no access to any revision an empty list is returned
     **/
-    public List<RevisionTransportCommand> getAllRevisions(ModelTransportCommand model)
+    public List<RevisionTransportCommand> getAllRevisions(long modelId)
     /**
-     * Returns the reference publication of this @p model.
-     * @param model The Model for which the reference publication should be returned.
+     * Returns the reference publication of this model.
+     * @param modelId The id of the Model for which the reference publication should be returned.
      * @return The reference publication
      */
-    public PublicationTransportCommand getPublication(final ModelTransportCommand model)
+    public PublicationTransportCommand getPublication(final long modelId)
     /**
     * Creates a new Model and stores it in the VCS.
     *
@@ -107,19 +107,19 @@ public interface RemoteModelAdapter {
     *
     * The provided @p file will be stored in the VCS as an update to an existing file of the same @p model.
     * A new Revision will be created and appended to the list of Revisions of the @p model.
-    * @param model The Model the revision should be added
+    * @param modelId The id of the Model the revision should be added
     * @param file The model file to be stored in the VCS as a new revision
     * @param format The format of the model file
     * @param comment The commit message for the new revision
     * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
     **/
-    public RevisionTransportCommand addRevision(ModelTransportCommand model, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException
+    public RevisionTransportCommand addRevision(long modelId, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException
     /**
      * Returns whether the current user has the right to add a revision to the model.
-     * @param model The model to check
+     * @param modelId The id of the model to check
      * @return @c true if the user has write permission on the revision or is an admin user, @c false otherwise.
      */
-    public Boolean canAddRevision(final ModelTransportCommand model)
+    public Boolean canAddRevision(final long modelId)
     /**
      * Retrieves the model file for the @p revision.
      * @param revision The Model Revision for which the file should be retrieved.
@@ -128,32 +128,32 @@ public interface RemoteModelAdapter {
      */
     public byte[] retrieveModelFile(RevisionTransportCommand revision)
     /**
-     * Retrieves the model file for the latest revision of the @p model
-     * @param model The Model for which the file should be retrieved
+     * Retrieves the model file for the latest revision of the model.
+     * @param modelId The Model for which the file should be retrieved
      * @return Byte Array of the content of the Model file.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    public byte[] retrieveModelFile(ModelTransportCommand model)
+    public byte[] retrieveModelFile(long modelId)
     /**
-    * Deletes the @p model including all Revisions.
+    * Deletes the model including all Revisions.
     *
-    * Flags the @p model and all its revisions as deleted. A deletion from VCS is for
+    * Flags the model and all its revisions as deleted. A deletion from VCS is for
     * technical reasons not possible and because of that a deletion of the Model object
     * is not possible.
     *
-    * Deletion of @p model is only possible if the model is neither under curation nor published.
-    * @param model The Model to be deleted
+    * Deletion of model is only possible if the model is neither under curation nor published.
+    * @param modelId The id of the Model to be deleted
     * @return @c true in case the Model has been deleted, @c false otherwise.
     * @see restoreModel
     **/
-    public Boolean deleteModel(ModelTransportCommand model)
+    public Boolean deleteModel(long modelId)
     /**
-    * Restores the deleted @p model.
+    * Restores the deleted model.
     *
     * Removes the deleted flag from the model and all its Revisions.
-    * @param model The deleted Model to restore
+    * @param modelId The id of the deleted Model to restore
     * @return @c true, whether the state was restored, @c false otherwise.
     * @see deleteModel
     **/
-    public Boolean restoreModel(ModelTransportCommand model)
+    public Boolean restoreModel(long modelId)
 }
