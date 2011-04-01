@@ -10,7 +10,8 @@ import org.springframework.security.core.AuthenticationException
  * 
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-public class AuthenticationHashNotFoundException extends AuthenticationException {
+public class AuthenticationHashNotFoundException extends AuthenticationException implements Serializable {
+    private static final long serialVersionUID = 1L
     public AuthenticationHashNotFoundException(String message) {
         super(message)
     }
