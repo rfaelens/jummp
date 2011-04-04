@@ -7,16 +7,9 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
 beans = {
     xmlns aop: "http://www.springframework.org/schema/aop"
     def grailsApplication = ApplicationHolder.application
-    // TODO: move the RemoteJummpApplicationAdapterJmsImpl to the JMS part
-    jummpApplicationJmsRemoteAdapter(net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl) {
-        jmsSynchronousService = ref("jmsSynchronousService")
-    }
     if (grailsApplication.config.net.biomodels.jummp.webapp.remote == "dbus") {
         println("Using DBus")
-        remoteJummpApplicationAdapterDBusImpl(net.biomodels.jummp.dbus.remote.RemoteJummpApplicationAdapterDBusImpl)
-        remoteAuthenticationProvider(net.biomodels.jummp.webapp.RemoteAuthenticationProvider) {
-            remoteJummpApplicationAdapter = remoteJummpApplicationAdapterDBusImpl
-        }
+        remoteJummpApplicationAdapter(net.biomodels.jummp.dbus.remote.RemoteJummpApplicationAdapterDBusImpl)
         remoteUserAdapterDBusImpl(net.biomodels.jummp.dbus.remote.RemoteUserAdapterDBusImpl)
         remoteUserService(net.biomodels.jummp.webapp.remote.RemoteUserService) {
             remoteUserAdapter = remoteUserAdapterDBusImpl
@@ -32,8 +25,8 @@ beans = {
         dbusExceptionAdvice(net.biomodels.jummp.dbus.remote.DBusExceptionAdvice)
     } else {
         println("Using JMS")
-        remoteAuthenticationProvider(net.biomodels.jummp.webapp.RemoteAuthenticationProvider) {
-            remoteJummpApplicationAdapter = jummpApplicationJmsRemoteAdapter
+        remoteJummpApplicationAdapter(net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl) {
+            jmsSynchronousService = ref("jmsSynchronousService")
         }
         userJmsRemoteAdapter(net.biomodels.jummp.jms.remote.RemoteUserAdapterJmsImpl) {
             jmsSynchronousService = ref("jmsSynchronousService")
@@ -47,14 +40,16 @@ beans = {
         remoteModelService(net.biomodels.jummp.webapp.remote.RemoteModelService) {
             remoteModelAdapter = jmsModelAdapter
         }
-    }
-
-    // TODO: move inot the JMS section
-    jmsConnectionFactory(SingleConnectionFactory) {
-        targetConnectionFactory = { ActiveMQConnectionFactory cf ->
-            brokerURL = 'tcp://localhost:61616'
+        jmsConnectionFactory(SingleConnectionFactory) {
+            targetConnectionFactory = { ActiveMQConnectionFactory cf ->
+                brokerURL = 'tcp://localhost:61616'
+            }
         }
     }
+    remoteAuthenticationProvider(net.biomodels.jummp.webapp.RemoteAuthenticationProvider) {
+        remoteJummpApplicationAdapter = ref("remoteJummpApplicationAdapter")
+    }
+
     if (Environment.getCurrent() == Environment.DEVELOPMENT) {
         timingAspect(org.perf4j.log4j.aop.TimingAspect)
     }

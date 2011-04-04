@@ -24,4 +24,10 @@ public interface RemoteJummpApplicationAdapter {
      * @throws JummpException If an error occurred
      */
     Authentication authenticate(Authentication authentication) throws AuthenticationException, JummpException
+    /**
+     * Retrieves the externalized configuration of the core application.
+     * @param appToken The unique application token
+     * @return The core's configuration
+     */
+    ConfigObject getJummpConfig(String appToken)
 }

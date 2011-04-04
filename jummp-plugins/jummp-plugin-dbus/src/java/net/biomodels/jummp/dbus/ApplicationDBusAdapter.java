@@ -4,6 +4,8 @@ import net.biomodels.jummp.dbus.authentication.AuthenticationDBusException;
 import org.freedesktop.dbus.DBusInterface;
 import org.freedesktop.dbus.DBusInterfaceName;
 
+import java.util.Map;
+
 /**
  * @short DBus Interface for Application instance methods.
  *
@@ -22,4 +24,9 @@ public interface ApplicationDBusAdapter extends DBusInterface {
      * @throws AuthenticationDBusException Wrapper for AuthenticationException following the same contract.
      */
     public DBusAuthentication authenticate(String userName, String password) throws AuthenticationDBusException;
+    /**
+     * Retrieves the jummp configuration of the core application.
+     * @return The core's configuration as a flattened map structure.
+     */
+    public Map<String, String> getJummpConfig();
 }

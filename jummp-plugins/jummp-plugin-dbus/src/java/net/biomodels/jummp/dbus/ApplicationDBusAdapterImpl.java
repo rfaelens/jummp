@@ -1,9 +1,13 @@
 package net.biomodels.jummp.dbus;
 
+import groovy.util.ConfigObject;
 import net.biomodels.jummp.dbus.authentication.*;
+import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+
+import java.util.Map;
 
 /**
  * @short Concrete implementation of ApplicationDBusAdapter.
@@ -44,6 +48,10 @@ public class ApplicationDBusAdapterImpl extends AbstractDBusAdapter implements A
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    public Map<String, String> getJummpConfig() {
+        return (Map<String, String>)((ConfigObject)ConfigurationHolder.getConfig().get("jummp")).flatten();
     }
 
     public boolean isRemote() {

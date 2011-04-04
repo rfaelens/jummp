@@ -30,4 +30,26 @@ class RemoteJummpApplicationAdapterDBusImpl implements RemoteJummpApplicationAda
     public Authentication authenticate(Authentication authentication) throws AuthenticationException, JummpException {
         return applicationDBusAdapter.authenticate((String)authentication.principal, (String)authentication.credentials)
     }
+
+    @Profiled(tag="RemoteJummpApplicationAdapterDBusImpl.getJummpConfig")
+    public ConfigObject getJummpConfig(String appToken) {
+        Map<String, String> flatten = applicationDBusAdapter.getJummpConfig()
+        ConfigObject config = new ConfigObject()
+        flatten.each { key, value ->
+            List<String> parts = key.tokenize('.')
+            def configObject = config
+            parts.eachWithIndex { it, i ->
+                if (i == parts.size() - 1) {
+                    if (value == "true" || value == "false") {
+                        configObject."${it}" = Boolean.parseBoolean(value)
+                    } else {
+                        configObject."${it}" = value
+                    }
+                } else {
+                    configObject = configObject.getProperty(it)
+                }
+            }
+        }
+        return config
+    }
 }
