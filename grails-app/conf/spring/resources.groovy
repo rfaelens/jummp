@@ -1,5 +1,3 @@
-import org.apache.activemq.ActiveMQConnectionFactory
-import org.springframework.jms.connection.SingleConnectionFactory
 import grails.util.Environment
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 
@@ -16,11 +14,6 @@ beans = {
     }
     postLogging(net.biomodels.jummp.core.events.PostLoggingAdvice)
 
-    jmsConnectionFactory(SingleConnectionFactory) {
-        targetConnectionFactory = { ActiveMQConnectionFactory cf ->
-            brokerURL = 'tcp://localhost:61616'
-        }
-    }
     // for JMS
     modelJmsAdapterService(net.biomodels.jummp.jms.ModelJmsAdapterService) {
         modelService = ref("modelDelegateService")

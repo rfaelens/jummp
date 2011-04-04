@@ -1,5 +1,3 @@
-import org.apache.activemq.ActiveMQConnectionFactory
-import org.springframework.jms.connection.SingleConnectionFactory
 import grails.util.Environment
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 
@@ -40,12 +38,8 @@ beans = {
         remoteModelService(net.biomodels.jummp.webapp.remote.RemoteModelService) {
             remoteModelAdapter = jmsModelAdapter
         }
-        jmsConnectionFactory(SingleConnectionFactory) {
-            targetConnectionFactory = { ActiveMQConnectionFactory cf ->
-                brokerURL = 'tcp://localhost:61616'
-            }
-        }
     }
+
     remoteAuthenticationProvider(net.biomodels.jummp.webapp.RemoteAuthenticationProvider) {
         remoteJummpApplicationAdapter = ref("remoteJummpApplicationAdapter")
     }

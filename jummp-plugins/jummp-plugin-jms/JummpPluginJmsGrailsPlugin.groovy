@@ -1,3 +1,6 @@
+import org.apache.activemq.ActiveMQConnectionFactory
+import org.springframework.jms.connection.SingleConnectionFactory
+
 class JummpPluginJmsGrailsPlugin {
     // the plugin version
     def version = "0.1"
@@ -27,6 +30,11 @@ Brief description of the plugin.
 
     def doWithSpring = {
         // TODO Implement runtime spring config (optional)
+        jmsConnectionFactory(SingleConnectionFactory) {
+            targetConnectionFactory = { ActiveMQConnectionFactory cf ->
+                brokerURL = 'tcp://localhost:61616'
+            }
+        }
     }
 
     def doWithDynamicMethods = { ctx ->
