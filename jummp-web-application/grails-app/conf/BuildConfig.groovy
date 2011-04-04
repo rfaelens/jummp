@@ -29,8 +29,24 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.13'
     }
 }
-grails.plugin.location.'jummp-plugin-dbus' = "../jummp-plugins/jummp-plugin-dbus"
-grails.plugin.location.'jummp-plugin-jms' = "../jummp-plugins/jummp-plugin-jms"
+Properties jummpProperties = new Properties()
+try {
+    jummpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"))
+} catch (Exception e) {
+    // ignore
+}
+boolean includeDBus = false
+boolean includeJms = true
+if (jummpProperties.containsKey("jummp.remote") && jummpProperties.getProperty("jummp.remote") == "dbus") {
+    includeDBus = true
+    includeJms = false
+}
+if (includeDBus) {
+    grails.plugin.location.'jummp-plugin-dbus' = "../jummp-plugins/jummp-plugin-dbus"
+}
+if (includeJms) {
+    grails.plugin.location.'jummp-plugin-jms' = "../jummp-plugins/jummp-plugin-jms"
+}
 grails.plugin.location.'jummp-plugin-remote' = "../jummp-plugins/jummp-plugin-remote"
 grails.plugin.location.'jummp-plugin-security' = "../jummp-plugins/jummp-plugin-security"
 grails.plugin.location.'jummp-plugin-core-api' = "../jummp-plugins/jummp-plugin-core-api"

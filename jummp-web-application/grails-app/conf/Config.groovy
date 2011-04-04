@@ -144,6 +144,9 @@ if (jummpProperties.containsKey("jummp.theme")) {
 
 if (jummpProperties.containsKey("jummp.remote")) {
     net.biomodels.jummp.webapp.remote = jummpProperties.getProperty("jummp.remote")
+    if (jummpProperties.getProperty("jummp.remote") != "jms") {
+        jms.disabled = true
+    }
 } else {
     net.biomodels.jummp.webapp.remote = "jms"
 }
