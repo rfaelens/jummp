@@ -419,7 +419,8 @@ class CoreAdapterServiceTests extends GrailsUnitTestCase {
         assertFalse(remoteModelService.deleteModel(model.id))
         // deleting a non-existant model should not work
         shouldFail(AccessDeniedException) {
-            remoteModelService.deleteModel(0)
+            // passing 0 through JMS seems not to work
+            remoteModelService.deleteModel(10000000l)
         }
     }
 

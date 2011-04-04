@@ -118,13 +118,13 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Queue
     @Profiled(tag="ModelJmsAdapter.getLatestRevision")
     def getLatestRevision(def message) {
-        if (!verifyMessage(message, [String, ModelTransportCommand])) {
-            return new IllegalArgumentException("AuthenticationHash and Model as arguments expected")
+        if (!verifyMessage(message, [String, Long])) {
+            return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
         }
         def revision = null
         try {
             setAuthentication((String)message[0])
-            revision = modelService.getLatestRevision(message[1].id)
+            revision = modelService.getLatestRevision(message[1])
         } catch (AuthenticationHashNotFoundException e) {
             revision = e
         } catch (AccessDeniedException e) {
@@ -148,13 +148,13 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Queue
     @Profiled(tag="ModelJmsAdapter.getAllRevisions")
     def getAllRevisions(def message) {
-        if (!verifyMessage(message, [String, ModelTransportCommand])) {
-            return new IllegalArgumentException("AuthenticationHash and Model as arguments expected")
+        if (!verifyMessage(message, [String, Long])) {
+            return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
         }
         def result = []
         try {
             setAuthentication((String)message[0])
-            result = modelService.getAllRevisions(message[1].id)
+            result = modelService.getAllRevisions(message[1])
         } catch (AuthenticationHashNotFoundException e) {
             result = e
         } finally {
@@ -171,13 +171,13 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Queue
     @Profiled(tag="ModelJmsAdapter.getPublication")
     def getPublication(def message) {
-        if (!verifyMessage(message, [String, ModelTransportCommand])) {
-            return new IllegalArgumentException("AuthenticationHash and Model as arguments expected")
+        if (!verifyMessage(message, [String, Long])) {
+            return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
         }
         def result
         try {
             setAuthentication((String)message[0])
-            result = modelService.getPublication(message[1].id)
+            result = modelService.getPublication(message[1])
         } catch (AuthenticationHashNotFoundException e) {
             result = e
         } catch (AccessDeniedException e) {
@@ -236,8 +236,8 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Queue
     @Profiled(tag="ModelJmsAdapter.addRevision")
     def addRevision(def message) {
-        if (!verifyMessage(message, [String, ModelTransportCommand, byte[], ModelFormatTransportCommand, String])) {
-            return new IllegalArgumentException("AuthenticationHash, Model, Byte Array, ModelFormatTransportCommand and String as arguments expected")
+        if (!verifyMessage(message, [String, Long, byte[], ModelFormatTransportCommand, String])) {
+            return new IllegalArgumentException("AuthenticationHash, Long, Byte Array, ModelFormatTransportCommand and String as arguments expected")
         }
         def result
 
@@ -245,7 +245,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
             setAuthentication((String)message[0])
             File file = File.createTempFile("jummpJms", null)
             file.append(message[2])
-            result = modelService.addRevision(message[1].id, file, message[3], (String)message[4])
+            result = modelService.addRevision(message[1], file, message[3], (String)message[4])
             FileUtils.deleteQuietly(file)
         } catch (AuthenticationHashNotFoundException e) {
             result = e
@@ -268,14 +268,14 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Queue
     @Profiled(tag="ModelJmsAdapter.canAddRevision")
     def canAddRevision(def message) {
-        if (!verifyMessage(message, [String, ModelTransportCommand])) {
-            return new IllegalArgumentException("AuthenticationHash and Model as arguments expected")
+        if (!verifyMessage(message, [String, Long])) {
+            return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
         }
 
         def result
         try {
             setAuthentication((String)message[0])
-            result = modelService.canAddRevision(message[1].id)
+            result = modelService.canAddRevision(message[1])
         } catch (AuthenticationHashNotFoundException e) {
             result = e
         } finally {
@@ -293,7 +293,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Profiled(tag="ModelJmsAdapter.retrieveModelFile")
     def retrieveModelFile(def message) {
         if (!verifyMessage(message, [String, RevisionTransportCommand]) &&
-            !verifyMessage(message, [String, ModelTransportCommand])) {
+            !verifyMessage(message, [String, Long])) {
             return new IllegalArgumentException("AuthenticationHash and Revision or Model as arguments expected")
         }
 
@@ -303,7 +303,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
             if (message[1] instanceof RevisionTransportCommand) {
                 result = modelService.retrieveModelFile((RevisionTransportCommand)message[1])
             } else {
-                result = modelService.retrieveModelFile(((ModelTransportCommand)message[1]).id)
+                result = modelService.retrieveModelFile(message[1])
             }
         } catch (AuthenticationHashNotFoundException e) {
             result = e
@@ -431,14 +431,14 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Queue
     @Profiled(tag="ModelJmsAdapter.deleteModel")
     def deleteModel(def message) {
-        if (!verifyMessage(message, [String, ModelTransportCommand])) {
-            return new IllegalArgumentException("AuthenticationHash and Model as arguments expected")
+        if (!verifyMessage(message, [String, Long])) {
+            return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
         }
 
         def result
         try {
             setAuthentication((String)message[0])
-            result = modelService.deleteModel(message[1].id)
+            result = modelService.deleteModel(message[1])
         } catch (AuthenticationHashNotFoundException e) {
             result = e
         } catch (AccessDeniedException e) {
@@ -457,14 +457,14 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Queue
     @Profiled(tag="ModelJmsAdapter.restoreModel")
     def restoreModel(def message) {
-        if (!verifyMessage(message, [String, ModelTransportCommand])) {
-            return new IllegalArgumentException("AuthenticationHash and Model as arguments expected")
+        if (!verifyMessage(message, [String, Long])) {
+            return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
         }
 
         def result
         try {
             setAuthentication((String)message[0])
-            result = modelService.restoreModel(message[1].id)
+            result = modelService.restoreModel(message[1])
         } catch (AuthenticationHashNotFoundException e) {
             result = e
         } catch (AccessDeniedException e) {
