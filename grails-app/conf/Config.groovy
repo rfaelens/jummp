@@ -233,9 +233,9 @@ if (jummp.security.ldap.enabled) {
 }
 
 if (!(jummpConfig.jummp.export.dbus instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.export.dbus)) {
-    jummp.export.dbus = true
+    jummp.plugin.dbus.export = true
 } else {
-    jummp.export.dbus = false
+    jummp.plugin.dbus.export = false
 }
 
 // In case of LDAP there is no need to allow users to register with a password as we cannot (yet) add anything to the LDAP
@@ -285,7 +285,7 @@ environments {
         jummp.security.registration.email.send = false
         jummp.security.resetPassword.email.send = false
         // disable dbus
-        jummp.export.dbus = false
+        jummp.plugin.dbus.export = false
     }
 }
 

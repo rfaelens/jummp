@@ -1,3 +1,8 @@
+import net.biomodels.jummp.dbus.DBusManagerImpl
+import net.biomodels.jummp.dbus.UserDBusAdapterImpl
+import net.biomodels.jummp.dbus.ApplicationDBusAdapterImpl
+import net.biomodels.jummp.dbus.ModelDBusAdapterImpl
+
 class JummpPluginDbusGrailsPlugin {
     // the plugin version
     def version = "0.1"
@@ -26,7 +31,27 @@ Brief description of the plugin.
     }
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
+        if (!(application.config.jummp.plugin.dbus.export instanceof ConfigObject) && application.config.jummp.plugin.dbus.export) {
+            dbusManager(DBusManagerImpl)
+            userDBusAdapter(UserDBusAdapterImpl) {
+                userService = ref("userService")
+                dbusManager = dbusManager
+                authenticationHashService = ref("authenticationHashService")
+                objectName = "/User"
+            }
+            applicationDBusAdapter(ApplicationDBusAdapterImpl) {
+                dbusManager = dbusManager
+                authenticationManager = ref("authenticationManager")
+                authenticationHashService = ref("authenticationHashService")
+                objectName = "/Application"
+            }
+            modelDBusAdapter(ModelDBusAdapterImpl) {
+                dbusManager = dbusManager
+                modelService = ref("modelDelegateService")
+                authenticationHashService = ref("authenticationHashService")
+                objectName = "/Model"
+            }
+        }
     }
 
     def doWithDynamicMethods = { ctx ->

@@ -20,29 +20,6 @@ beans = {
         authenticationHashService = ref("authenticationHashService")
     }
 
-    // for DBus
-    if (grailsApplication.config.jummp.export.dbus == true) {
-        dbusManager(net.biomodels.jummp.dbus.DBusManagerImpl)
-        userDBusAdapter(net.biomodels.jummp.dbus.UserDBusAdapterImpl) {
-            userService = ref("userService")
-            dbusManager = dbusManager
-            authenticationHashService = ref("authenticationHashService")
-            objectName = "/User"
-        }
-        applicationDBusAdapter(net.biomodels.jummp.dbus.ApplicationDBusAdapterImpl) {
-            dbusManager = dbusManager
-            authenticationManager = ref("authenticationManager")
-            authenticationHashService = ref("authenticationHashService")
-            objectName = "/Application"
-        }
-        modelDBusAdapter(net.biomodels.jummp.dbus.ModelDBusAdapterImpl) {
-            dbusManager = dbusManager
-            modelService = ref("modelDelegateService")
-            authenticationHashService = ref("authenticationHashService")
-            objectName = "/Model"
-        }
-    }
-
     if (Environment.getCurrent() == Environment.DEVELOPMENT) {
         timingAspect(org.perf4j.log4j.aop.TimingAspect)
     }
