@@ -29,24 +29,15 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.13'
     }
 }
-Properties jummpProperties = new Properties()
-try {
-    jummpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"))
-} catch (Exception e) {
-    // ignore
+// depending on whether a war is generated or test-app is executed the path to the dependency plugin differs
+File directory = new File(".")
+String path = directory.getCanonicalPath()
+if (path.tokenize(File.separatorChar).last() == "jummp") {
+    path = "../../jummp-plugins"
+} else {
+    // are in plugin directory
+    path = ".."
 }
-boolean includeDBus = false
-boolean includeJms = true
-if (jummpProperties.containsKey("jummp.remote") && jummpProperties.getProperty("jummp.remote") == "dbus") {
-    includeDBus = true
-    includeJms = false
-}
-if (includeDBus) {
-    grails.plugin.location.'jummp-plugin-dbus' = "../jummp-plugins/jummp-plugin-dbus"
-}
-if (includeJms) {
-    grails.plugin.location.'jummp-plugin-jms-remote' = "../jummp-plugins/jummp-plugin-jms-remote"
-}
-grails.plugin.location.'jummp-plugin-remote' = "../jummp-plugins/jummp-plugin-remote"
-grails.plugin.location.'jummp-plugin-security' = "../jummp-plugins/jummp-plugin-security"
-grails.plugin.location.'jummp-plugin-core-api' = "../jummp-plugins/jummp-plugin-core-api"
+grails.plugin.location.'jummp-plugin-remote' = path + File.separator + "jummp-plugin-remote"
+grails.plugin.location.'jummp-plugin-core-api' = path + File.separator + "jummp-plugin-core-api"
+grails.plugin.location.'jummp-plugin-security' = path + File.separator + "jummp-plugin-security"

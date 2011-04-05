@@ -1,11 +1,14 @@
 import org.apache.activemq.ActiveMQConnectionFactory
 import org.springframework.jms.connection.SingleConnectionFactory
+import net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl
+import net.biomodels.jummp.jms.remote.RemoteUserAdapterJmsImpl
+import net.biomodels.jummp.jms.remote.RemoteModelAdapterJmsImpl
 
-class JummpPluginJmsGrailsPlugin {
+class JummpPluginJmsRemoteGrailsPlugin {
     // the plugin version
     def version = "0.1"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.3.6 > *"
+    def grailsVersion = "1.3.7 > *"
     // the other plugins this plugin depends on
     def dependsOn = [:]
     // resources that are excluded from plugin packaging
@@ -22,17 +25,27 @@ Brief description of the plugin.
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/jummp-plugin-jms"
+    def documentation = "http://grails.org/plugin/jummp-plugin-jms-remote"
 
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional), this event occurs before 
     }
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
         jmsConnectionFactory(SingleConnectionFactory) {
             targetConnectionFactory = { ActiveMQConnectionFactory cf ->
                 brokerURL = 'tcp://localhost:61616'
+            }
+        }
+        if (!(application.config.jummp.plugin.jms.remote instanceof ConfigObject) && application.config.jummp.plugin.jms.remote) {
+            remoteJummpApplicationAdapter(RemoteJummpApplicationAdapterJmsImpl) {
+                jmsSynchronousService = ref("jmsSynchronousService")
+            }
+            userJmsRemoteAdapter(RemoteUserAdapterJmsImpl) {
+                jmsSynchronousService = ref("jmsSynchronousService")
+            }
+            jmsModelAdapter(RemoteModelAdapterJmsImpl) {
+                jmsSynchronousService = ref("jmsSynchronousService")
             }
         }
     }
