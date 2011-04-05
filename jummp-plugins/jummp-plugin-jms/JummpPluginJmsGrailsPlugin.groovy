@@ -1,5 +1,8 @@
 import org.apache.activemq.ActiveMQConnectionFactory
 import org.springframework.jms.connection.SingleConnectionFactory
+import net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl
+import net.biomodels.jummp.jms.remote.RemoteUserAdapterJmsImpl
+import net.biomodels.jummp.jms.remote.RemoteModelAdapterJmsImpl
 
 class JummpPluginJmsGrailsPlugin {
     // the plugin version
@@ -33,6 +36,17 @@ Brief description of the plugin.
         jmsConnectionFactory(SingleConnectionFactory) {
             targetConnectionFactory = { ActiveMQConnectionFactory cf ->
                 brokerURL = 'tcp://localhost:61616'
+            }
+        }
+        if (!(application.config.jummp.plugin.jms.remote instanceof ConfigObject) && application.config.jummp.plugin.jms.remote) {
+            remoteJummpApplicationAdapter(RemoteJummpApplicationAdapterJmsImpl) {
+                jmsSynchronousService = ref("jmsSynchronousService")
+            }
+            userJmsRemoteAdapter(RemoteUserAdapterJmsImpl) {
+                jmsSynchronousService = ref("jmsSynchronousService")
+            }
+            jmsModelAdapter(RemoteModelAdapterJmsImpl) {
+                jmsSynchronousService = ref("jmsSynchronousService")
             }
         }
     }

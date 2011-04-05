@@ -15,20 +15,11 @@ beans = {
         }
     } else {
         println("Using JMS")
-        remoteJummpApplicationAdapter(net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl) {
-            jmsSynchronousService = ref("jmsSynchronousService")
-        }
-        userJmsRemoteAdapter(net.biomodels.jummp.jms.remote.RemoteUserAdapterJmsImpl) {
-            jmsSynchronousService = ref("jmsSynchronousService")
-        }
         remoteUserService(net.biomodels.jummp.webapp.remote.RemoteUserService) {
-            remoteUserAdapter = userJmsRemoteAdapter
-        }
-        jmsModelAdapter(net.biomodels.jummp.jms.remote.RemoteModelAdapterJmsImpl) {
-            jmsSynchronousService = ref("jmsSynchronousService")
+            remoteUserAdapter = ref("userJmsRemoteAdapter")
         }
         remoteModelService(net.biomodels.jummp.webapp.remote.RemoteModelService) {
-            remoteModelAdapter = jmsModelAdapter
+            remoteModelAdapter = ref("jmsModelAdapter")
         }
     }
 
