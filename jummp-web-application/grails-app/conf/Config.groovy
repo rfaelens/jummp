@@ -142,10 +142,12 @@ if (jummpProperties.containsKey("jummp.theme")) {
     net.biomodels.jummp.webapp.theme = "smoothness"
 }
 
+jummp.plugin.dbus.remote = false
 if (jummpProperties.containsKey("jummp.remote")) {
     net.biomodels.jummp.webapp.remote = jummpProperties.getProperty("jummp.remote")
     if (jummpProperties.getProperty("jummp.remote") != "jms") {
         jms.disabled = true
+        jummp.plugin.dbus.remote = true
     }
 } else {
     net.biomodels.jummp.webapp.remote = "jms"

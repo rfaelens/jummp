@@ -7,20 +7,12 @@ beans = {
     def grailsApplication = ApplicationHolder.application
     if (grailsApplication.config.net.biomodels.jummp.webapp.remote == "dbus") {
         println("Using DBus")
-        remoteJummpApplicationAdapter(net.biomodels.jummp.dbus.remote.RemoteJummpApplicationAdapterDBusImpl)
-        remoteUserAdapterDBusImpl(net.biomodels.jummp.dbus.remote.RemoteUserAdapterDBusImpl)
         remoteUserService(net.biomodels.jummp.webapp.remote.RemoteUserService) {
-            remoteUserAdapter = remoteUserAdapterDBusImpl
+            remoteUserAdapter = ref("remoteUserAdapterDBusImpl")
         }
-        remoteModelAdapterDBusImpl(net.biomodels.jummp.dbus.remote.RemoteModelAdapterDBusImpl)
         remoteModelService(net.biomodels.jummp.webapp.remote.RemoteModelService) {
-            remoteModelAdapter = remoteModelAdapterDBusImpl
+            remoteModelAdapter = ref("remoteModelAdapterDBusImpl")
         }
-        aop.config {
-            pointcut(id: "dbusExceptionPointcut", expression: "execution(public * net.biomodels.jummp.dbus.remote.*.*(..))")
-            advisor('pointcut-ref': "dbusExceptionPointcut", 'advice-ref': "dbusExceptionAdvice")
-        }
-        dbusExceptionAdvice(net.biomodels.jummp.dbus.remote.DBusExceptionAdvice)
     } else {
         println("Using JMS")
         remoteJummpApplicationAdapter(net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl) {

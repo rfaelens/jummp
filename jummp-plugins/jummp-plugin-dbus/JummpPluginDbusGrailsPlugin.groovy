@@ -2,6 +2,10 @@ import net.biomodels.jummp.dbus.DBusManagerImpl
 import net.biomodels.jummp.dbus.UserDBusAdapterImpl
 import net.biomodels.jummp.dbus.ApplicationDBusAdapterImpl
 import net.biomodels.jummp.dbus.ModelDBusAdapterImpl
+import net.biomodels.jummp.dbus.remote.RemoteJummpApplicationAdapterDBusImpl
+import net.biomodels.jummp.dbus.remote.RemoteUserAdapterDBusImpl
+import net.biomodels.jummp.dbus.remote.RemoteModelAdapterDBusImpl
+import net.biomodels.jummp.dbus.remote.DBusExceptionAdvice
 
 class JummpPluginDbusGrailsPlugin {
     // the plugin version
@@ -51,6 +55,17 @@ Brief description of the plugin.
                 authenticationHashService = ref("authenticationHashService")
                 objectName = "/Model"
             }
+        }
+        if (!(application.config.jummp.plugin.dbus.remote instanceof ConfigObject) && application.config.jummp.plugin.dbus.remote) {
+            remoteJummpApplicationAdapter(RemoteJummpApplicationAdapterDBusImpl)
+            remoteUserAdapterDBusImpl(RemoteUserAdapterDBusImpl)
+            remoteModelAdapterDBusImpl(RemoteModelAdapterDBusImpl)
+            xmlns aop: "http://www.springframework.org/schema/aop"
+            aop.config {
+                pointcut(id: "dbusExceptionPointcut", expression: "execution(public * net.biomodels.jummp.dbus.remote.*.*(..))")
+                advisor('pointcut-ref': "dbusExceptionPointcut", 'advice-ref': "dbusExceptionAdvice")
+            }
+            dbusExceptionAdvice(DBusExceptionAdvice)
         }
     }
 
