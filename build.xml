@@ -93,7 +93,6 @@
                 <exclude name="jummp-plugins/**/grails-app/views/error.gsp"/>
                 <exclude name="jummp-plugins/**/grails-app/views/layouts/"/>
                 <exclude name="jummp-plugins/**/web-app/"/>
-                <exclude name="jummp-web-application/"/>
                 <exclude name="**/*.iml"/>
                 <exclude name="**/cobertura.ser"/>
                 <exclude name="**/*.orig"/>
@@ -188,12 +187,16 @@
         <grails command="clean" cwd="${builddir}"/>
         <grails command="war" cwd="${builddir}"/>
     </target>
+    <target name="build-webapplication-war" depends="remove-grails-plugins">
+        <grails command="clean" cwd="${builddir}/jummp-web-application"/>
+        <grails command="war" cwd="${builddir}/jummp-web-application"/>
+    </target>
 
 <!-- Build war with all plugins -->
-    <target name="war" depends="build-war">
+    <target name="war" depends="build-war,build-webapplication-war">
     </target>
 
 <!-- Build war with asking for plugins to include     -->
-    <target name="interactive-war" depends="ask-for-plugins, build-war">
+    <target name="interactive-war" depends="ask-for-plugins, build-war,build-webapplication-war">
     </target>
 </project>
