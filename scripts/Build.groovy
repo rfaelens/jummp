@@ -15,6 +15,10 @@ target(deleteJummpPlugins: "Deletes Jummp Plugins depending on user selection!")
     }
     if (!properties.containsKey("jms") || !Boolean.parseBoolean(properties.getProperty("jms"))) {
         ant.delete(dir: "${builddir}/jummp-plugins/jummp-plugin-jms")
+        // remove the jms plugin from main application
+        ant.propertyfile(file: "${builddir}/application.properties") {
+            ant.entry(key: "plugins.jms", operation: "del")
+        }
     }
     if (!properties.containsKey("dbus") || !Boolean.parseBoolean(properties.getProperty("dbus"))) {
         ant.delete(dir: "${builddir}/jummp-plugins/jummp-plugin-dbus")
