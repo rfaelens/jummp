@@ -35,16 +35,10 @@ try {
 } catch (Exception e) {
     // ignore
 }
-boolean includeDBus = false
-boolean includeJms = true
-if (jummpProperties.containsKey("jummp.remote") && jummpProperties.getProperty("jummp.remote") == "dbus") {
-    includeDBus = true
-    includeJms = false
-}
-if (includeDBus) {
+if (new File("../jummp-plugins/jummp-plugin-dbus").exists()) {
     grails.plugin.location.'jummp-plugin-dbus' = "../jummp-plugins/jummp-plugin-dbus"
 }
-if (includeJms) {
+if (new File("../jummp-plugins/jummp-plugin-jms-remote").exists()) {
     grails.plugin.location.'jummp-plugin-jms-remote' = "../jummp-plugins/jummp-plugin-jms-remote"
 }
 grails.plugin.location.'jummp-plugin-remote' = "../jummp-plugins/jummp-plugin-remote"
