@@ -185,11 +185,11 @@
 <!-- Performs the actual building of war file using grails war. Cleans before building -->
     <target name="build-war" depends="remove-grails-plugins">
         <grails command="clean" cwd="${builddir}"/>
-        <grails command="war" cwd="${builddir}"/>
+        <grails command="war ${builddir}/target/jummp.war" cwd="${builddir}"/>
     </target>
     <target name="build-webapplication-war" depends="remove-grails-plugins">
         <grails command="clean" cwd="${builddir}/jummp-web-application"/>
-        <grails command="war" cwd="${builddir}/jummp-web-application"/>
+        <grails command="war ${builddir}/target/jummp-web-application.war" cwd="${builddir}/jummp-web-application"/>
     </target>
 
 <!-- Build war with all plugins -->
