@@ -108,8 +108,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         Git git = new Git(repository)
         git.init().setDirectory(gitDirectory).call()
         assertFalse(vcsService.isValid())
-        appCtx.getBean("gitManagerFactory").getInstance()
-        vcsService.init()
+        vcsService.vcsManager = appCtx.getBean("gitManagerFactory").getInstance()
         assertTrue(vcsService.isValid())
     }
 
@@ -122,8 +121,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         ''')
         SVNRepositoryFactory.createLocalRepository(new File("target/vcs/repository"), true, false)
         assertFalse(vcsService.isValid())
-        appCtx.getBean("svnManagerFactory").getInstance()
-        vcsService.init()
+        vcsService.vcsManager = appCtx.getBean("svnManagerFactory").getInstance()
         assertTrue(vcsService.isValid())
     }
 

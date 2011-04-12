@@ -30,7 +30,7 @@ Brief description of the plugin.
     def doWithSpring = {
         svnManagerFactory(SvnManagerFactory)
         if (!(application.config.jummp.plugins.subversion.enabled instanceof ConfigObject) && application.config.jummp.plugins.subversion.enabled) {
-            svnManager(svnManagerFactory: "getInstance")
+            vcsManager(svnManagerFactory: "getInstance")
         }
     }
 

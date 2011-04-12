@@ -30,7 +30,7 @@ Brief description of the plugin.
     def doWithSpring = {
         gitManagerFactory(GitManagerFactory)
         if (!(application.config.jummp.plugins.git.enabled instanceof ConfigObject) && application.config.jummp.plugins.git.enabled) {
-            gitManager(gitManagerFactory: "getInstance")
+            vcsManager(gitManagerFactory: "getInstance")
         }
     }
 
