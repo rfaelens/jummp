@@ -1,7 +1,6 @@
 package net.biomodels.jummp.core
 
 import org.springframework.security.access.prepost.PreAuthorize
-import net.biomodels.jummp.core.vcs.Vcs
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsManager
 import net.biomodels.jummp.model.Model
@@ -15,7 +14,6 @@ import net.biomodels.jummp.model.Revision
  * made part of the external API.
  * @internal
  * @see VcsManager
- * @see Vcs
  * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class VcsService {
