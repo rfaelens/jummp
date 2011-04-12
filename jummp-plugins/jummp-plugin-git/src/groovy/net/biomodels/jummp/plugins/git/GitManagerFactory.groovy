@@ -5,6 +5,14 @@ import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 
+/**
+ * @short Factory Class for GitManager.
+ *
+ * The factory takes care of creating the GitManager and all the required directories based on
+ * the current configuration. If the configuration does not satisfy the factory's need it will
+ * throw a VcsException.
+ * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ */
 class GitManagerFactory {
     static transactional = true
     @SuppressWarnings('GrailsStatelessService')

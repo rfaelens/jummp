@@ -6,6 +6,14 @@ import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 import org.apache.commons.io.FileUtils
 
+/**
+ * @short Factory Class for SvnManager.
+ *
+ * The factory takes care of creating the SvnManager and all the required directories based on
+ * the current configuration. If the configuration does not satisfy the factory's need it will
+ * throw a VcsException.
+ * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ */
 class SvnManagerFactory {
     static transactional = true
     @SuppressWarnings('GrailsStatelessService')
