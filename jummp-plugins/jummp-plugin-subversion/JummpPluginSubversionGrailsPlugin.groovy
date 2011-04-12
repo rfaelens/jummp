@@ -1,5 +1,4 @@
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import org.codehaus.groovy.grails.exceptions.GrailsRuntimeException
+import net.biomodels.jummp.plugins.subversion.SvnManagerFactory
 
 class JummpPluginSubversionGrailsPlugin {
     // the plugin version
@@ -29,7 +28,10 @@ Brief description of the plugin.
     }
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
+        svnManagerFactory(SvnManagerFactory)
+        if (!(application.config.jummp.plugins.subversion.enabled instanceof ConfigObject) && application.config.jummp.plugins.subversion.enabled) {
+            svnManager(svnManagerFactory: "getInstance")
+        }
     }
 
     def doWithDynamicMethods = { ctx ->

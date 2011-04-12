@@ -2,27 +2,33 @@ package net.biomodels.jummp.plugins.subversion
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.springframework.beans.factory.InitializingBean
 import net.biomodels.jummp.core.vcs.Vcs
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 import net.biomodels.jummp.core.vcs.VcsManager
 import org.apache.commons.io.FileUtils
 
-class SvnService implements InitializingBean, Vcs {
+class SvnManagerFactory implements Vcs {
     static transactional = true
     @SuppressWarnings('GrailsStatelessService')
     SvnManager svn
 
-    void afterPropertiesSet() {
-        ConfigObject config = ConfigurationHolder.config
-        if (!config.jummp.plugins.subversion.enabled) {
-            log.debug("Subversion service not enabled")
-            return
+    VcsManager vcsManager() throws VcsNotInitedException {
+        if (svn) {
+            return svn
+        } else {
+            throw new VcsNotInitedException()
         }
+    }
+
+    SvnManager getInstance() throws Exception {
+        if (svn) {
+            return svn
+        }
+        ConfigObject config = ConfigurationHolder.config
         if (!config.jummp.plugins.subversion.localRepository) {
             log.debug("No checkout repository set - Subversion service not enabled")
-            return
+            throw new VcsNotInitedException()
         }
         File localRepository = new File(config.jummp.plugins.subversion.localRepository)
         File workingDirectory
@@ -50,15 +56,9 @@ class SvnService implements InitializingBean, Vcs {
             svn = null
             log.error(e.getMessage())
             e.printStackTrace()
-        }
-    }
-
-    VcsManager vcsManager() throws VcsNotInitedException {
-        if (svn) {
-            return svn
-        } else {
             throw new VcsNotInitedException()
         }
+        return svn
     }
 
     boolean isValid() {

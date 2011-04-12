@@ -1,7 +1,7 @@
 package net.biomodels.jummp.core
 
 import net.biomodels.jummp.plugins.git.GitManagerFactory
-import net.biomodels.jummp.plugins.subversion.SvnService
+import net.biomodels.jummp.plugins.subversion.SvnManagerFactory
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
@@ -44,7 +44,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         createUserAndRoles()
         mockLogging(VcsService, true)
         mockLogging(GitManagerFactory, true)
-        mockLogging(SvnService, true)
+        mockLogging(SvnManagerFactory, true)
     }
 
     protected void tearDown() {
@@ -116,13 +116,13 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
     void testSvn() {
         // verifies that the service is valid, if svn backend is configured correctly
         mockConfig('''
-            jummp.vcs.pluginServiceName="svnService"
+            jummp.vcs.pluginServiceName="svnManagerFactory"
             jummp.plugins.subversion.enabled=true
             jummp.plugins.subversion.localRepository="target/vcs/repository"
         ''')
         SVNRepositoryFactory.createLocalRepository(new File("target/vcs/repository"), true, false)
         assertFalse(vcsService.isValid())
-        appCtx.getBean("svnService").afterPropertiesSet()
+        appCtx.getBean("svnManagerFactory").getInstance()
         vcsService.init()
         assertTrue(vcsService.isValid())
     }
