@@ -15,7 +15,6 @@ import net.biomodels.jummp.core.vcs.VcsNotInitedException
  */
 class GitManagerFactory {
     static transactional = true
-    @SuppressWarnings('GrailsStatelessService')
     GitManager git
 
     GitManager getInstance() throws Exception {

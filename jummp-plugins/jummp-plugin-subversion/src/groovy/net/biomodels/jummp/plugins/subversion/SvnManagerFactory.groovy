@@ -16,7 +16,6 @@ import org.apache.commons.io.FileUtils
  */
 class SvnManagerFactory {
     static transactional = true
-    @SuppressWarnings('GrailsStatelessService')
     SvnManager svn
 
     SvnManager getInstance() throws Exception {
