@@ -96,7 +96,7 @@ target(setupVcs: "Creates a VCS repository") {
     config.jummp.vcs.workingDirectory="target/vcs/git"
     config.jummp.vcs.exchangeDirectory="target/vcs/exchange"
     config.jummp.vcs.pluginServiceName="gitService"
-    appCtx.getBean("vcsService").init()
+    appCtx.getBean("vcsService").vcsManager = appCtx.getBean("gitService").getInstance()
 }
 
 setDefaultTarget(main)

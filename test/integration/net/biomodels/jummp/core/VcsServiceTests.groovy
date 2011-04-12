@@ -1,7 +1,6 @@
 package net.biomodels.jummp.core
 
-import grails.test.*
-import net.biomodels.jummp.plugins.git.GitService
+import net.biomodels.jummp.plugins.git.GitManagerFactory
 import net.biomodels.jummp.plugins.subversion.SvnService
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
@@ -44,7 +43,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         super.setUp()
         createUserAndRoles()
         mockLogging(VcsService, true)
-        mockLogging(GitService, true)
+        mockLogging(GitManagerFactory, true)
         mockLogging(SvnService, true)
     }
 
@@ -55,7 +54,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         FileUtils.deleteDirectory(new File("target/vcs/repository"))
         FileUtils.deleteDirectory(new File("target/vcs/exchange"))
         vcsService.vcsManager = null
-        appCtx.getBean("gitService").git = null
+        appCtx.getBean("gitManagerFactory").git = null
     }
 
     void testNotConfigured() {
@@ -96,7 +95,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
     void testGit() {
         // verifies that the service is valid, if git backend is configured correctly
         mockConfig('''
-            jummp.vcs.pluginServiceName="gitService"
+            jummp.vcs.pluginServiceName="gitManagerFactory"
             jummp.plugins.git.enabled=true
             jummp.vcs.workingDirectory="target/vcs/git"
         ''')
@@ -109,7 +108,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         Git git = new Git(repository)
         git.init().setDirectory(gitDirectory).call()
         assertFalse(vcsService.isValid())
-        appCtx.getBean("gitService").afterPropertiesSet()
+        appCtx.getBean("gitManagerFactory").getInstance()
         vcsService.init()
         assertTrue(vcsService.isValid())
     }
@@ -166,13 +165,13 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         .build()
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
-        GitService gitService = new GitService()
+        GitManagerFactory gitService = new GitManagerFactory()
         mockConfig('''
             jummp.plugins.git.enabled=true
             jummp.vcs.workingDirectory="target/vcs/git"
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
-        gitService.afterPropertiesSet()
+        gitService.getInstance()
         assertTrue(gitService.isValid())
         vcsService.vcsManager = gitService.vcsManager()
         assertTrue(vcsService.isValid())
@@ -240,13 +239,13 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         .build()
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
-        GitService gitService = new GitService()
+        GitManagerFactory gitService = new GitManagerFactory()
         mockConfig('''
             jummp.plugins.git.enabled=true
             jummp.vcs.workingDirectory="target/vcs/git"
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
-        gitService.afterPropertiesSet()
+        gitService.getInstance()
         assertTrue(gitService.isValid())
         vcsService.vcsManager = gitService.vcsManager()
         assertTrue(vcsService.isValid())
@@ -379,13 +378,13 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         .build()
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
-        GitService gitService = new GitService()
+        GitManagerFactory gitService = new GitManagerFactory()
         mockConfig('''
             jummp.plugins.git.enabled=true
             jummp.vcs.workingDirectory="target/vcs/git"
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
-        gitService.afterPropertiesSet()
+        gitService.getInstance()
         assertTrue(gitService.isValid())
         vcsService.vcsManager = gitService.vcsManager()
         assertTrue(vcsService.isValid())

@@ -4,7 +4,7 @@ import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.model.Revision
-import net.biomodels.jummp.plugins.git.GitService
+import net.biomodels.jummp.plugins.git.GitManagerFactory
 import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
@@ -685,15 +685,14 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         .build()
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
-        GitService gitService = new GitService()
+        GitManagerFactory gitService = new GitManagerFactory()
         mockConfig('''
             jummp.plugins.git.enabled=true
             jummp.vcs.workingDirectory="target/vcs/git"
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
-        gitService.afterPropertiesSet()
+        modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(gitService.isValid())
-        modelService.vcsService.vcsManager = gitService.vcsManager()
         assertTrue(modelService.vcsService.isValid())
     }
 }

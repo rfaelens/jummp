@@ -11,7 +11,7 @@ Brief description of the plugin.
     <resource>DataSource</resource>
     <resource>JummpPluginConfig</resource>
     <resource>UrlMappings</resource>
-    <resource>net.biomodels.jummp.plugins.git.GitService</resource>
+    <resource>net.biomodels.jummp.plugins.git.GitManagerFactory</resource>
   </resources>
   <dependencies />
   <behavior />

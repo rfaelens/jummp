@@ -10,7 +10,7 @@ import org.eclipse.jgit.lib.Repository
 import org.apache.commons.io.FileUtils
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.access.AccessDeniedException
-import net.biomodels.jummp.plugins.git.GitService
+import net.biomodels.jummp.plugins.git.GitManagerFactory
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.lib.ObjectId
@@ -543,15 +543,14 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         .build()
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
-        GitService gitService = new GitService()
+        GitManagerFactory gitService = new GitManagerFactory()
         mockConfig('''
             jummp.plugins.git.enabled=true
             jummp.vcs.workingDirectory="target/vcs/git"
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
-        gitService.afterPropertiesSet()
+        modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(gitService.isValid())
-        modelService.vcsService.vcsManager = gitService.vcsManager()
         assertTrue(modelService.vcsService.isValid())
         // import a file to the git repository, to make future updates possible
         gitService.vcsManager().importFile(importFile, "test.xml")
@@ -781,13 +780,13 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         .build()
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
-        GitService gitService = new GitService()
+        GitManagerFactory gitService = new GitManagerFactory()
         mockConfig('''
             jummp.plugins.git.enabled=true
             jummp.vcs.workingDirectory="target/vcs/git"
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
-        gitService.afterPropertiesSet()
+        modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(gitService.isValid())
         modelService.vcsService.vcsManager = gitService.vcsManager()
         assertTrue(modelService.vcsService.isValid())
@@ -877,13 +876,13 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         .build()
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
-        GitService gitService = new GitService()
+        GitManagerFactory gitService = new GitManagerFactory()
         mockConfig('''
             jummp.plugins.git.enabled=true
             jummp.vcs.workingDirectory="target/vcs/git"
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
-        gitService.afterPropertiesSet()
+        modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(gitService.isValid())
         modelService.vcsService.vcsManager = gitService.vcsManager()
         assertTrue(modelService.vcsService.isValid())
