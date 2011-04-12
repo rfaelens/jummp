@@ -30,9 +30,8 @@ class GitServiceTests extends GrailsUnitTestCase {
         shouldFail(VcsNotInitedException) {
             git.getInstance()
         }
-        assertFalse(git.isValid())
         shouldFail(VcsNotInitedException) {
-            git.vcsManager()
+            git.getInstance()
         }
         // verifies that GitManagerFactory does not get enabled if disabled in config
         mockConfig("jummp.plugins.git.enabled=false")
@@ -40,9 +39,8 @@ class GitServiceTests extends GrailsUnitTestCase {
         shouldFail(VcsNotInitedException) {
             git.getInstance()
         }
-        assertFalse(git.isValid())
         shouldFail(VcsNotInitedException) {
-            git.vcsManager()
+            git.getInstance()
         }
     }
 
@@ -55,9 +53,8 @@ class GitServiceTests extends GrailsUnitTestCase {
         shouldFail(VcsNotInitedException) {
             git.getInstance()
         }
-        assertFalse(git.isValid())
         shouldFail(VcsNotInitedException) {
-            git.vcsManager()
+            git.getInstance()
         }
         // verifies that GitManagerFactory creates exchangeDirectory if passed in and does not get enabled
         // if workingDirectory is not a git directory
@@ -79,9 +76,8 @@ class GitServiceTests extends GrailsUnitTestCase {
         assertTrue(exchangeDirectory.exists())
         assertTrue(exchangeDirectory.isDirectory())
         assertLength(0, exchangeDirectory.list())
-        assertFalse(git.isValid())
         shouldFail(VcsNotInitedException) {
-            git.vcsManager()
+            git.getInstance()
         }
         // verifies that GitManagerFactory creates exchangeDirectory in resources if exchange directory is not set
         // git directory is not valid, so GitManagerFactory won't be enabled
@@ -104,11 +100,7 @@ class GitServiceTests extends GrailsUnitTestCase {
         }
         assertTrue(resourceDirectory.exists())
         assertTrue(resourceDirectory.isDirectory())
-        assertFalse(git.isValid())
         contextControl.verify()
-        shouldFail(VcsNotInitedException) {
-            git.vcsManager()
-        }
     }
 
     void testCreateManager() {
@@ -140,8 +132,7 @@ class GitServiceTests extends GrailsUnitTestCase {
         assertTrue(resourceDirectory.exists())
         assertTrue(resourceDirectory.isDirectory())
         contextControl.verify()
-        VcsManager manager = service.vcsManager()
-        assertTrue(service.isValid())
+        VcsManager manager = service.getInstance()
         assertNotNull(manager)
         assertTrue(manager instanceof GitManager)
 
@@ -157,8 +148,7 @@ class GitServiceTests extends GrailsUnitTestCase {
         service.getInstance()
         assertTrue(exchangeDirectory.exists())
         assertTrue(exchangeDirectory.isDirectory())
-        manager = service.vcsManager()
-        assertTrue(service.isValid())
+        manager = service.getInstance()
         assertNotNull(manager)
         assertTrue(manager instanceof GitManager)
     }

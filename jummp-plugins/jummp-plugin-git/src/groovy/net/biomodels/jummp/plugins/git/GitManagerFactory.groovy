@@ -1,24 +1,14 @@
 package net.biomodels.jummp.plugins.git
 
-import net.biomodels.jummp.core.vcs.Vcs
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import net.biomodels.jummp.core.vcs.VcsException
-import net.biomodels.jummp.core.vcs.VcsManager
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 
-class GitManagerFactory implements Vcs {
+class GitManagerFactory {
     static transactional = true
     @SuppressWarnings('GrailsStatelessService')
     GitManager git
-
-    VcsManager vcsManager() throws VcsNotInitedException {
-        if (git) {
-            return git
-        } else {
-            throw new VcsNotInitedException()
-        }
-    }
 
     GitManager getInstance() throws Exception {
         if (git) {
@@ -51,9 +41,5 @@ class GitManagerFactory implements Vcs {
             throw new VcsNotInitedException()
         }
         return git
-    }
-
-    boolean isValid() {
-        return (git != null)
     }
 }

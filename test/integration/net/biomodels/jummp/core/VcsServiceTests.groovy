@@ -57,41 +57,6 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         appCtx.getBean("gitManagerFactory").git = null
     }
 
-    void testNotConfigured() {
-        // verifies that the service is not valid, if plugin not specified
-        mockConfig("")
-        VcsService service = new VcsService()
-        assertFalse(service.isValid())
-        service.init()
-        assertFalse(service.isValid())
-        // verifies that the service is not valid, when config option is empty
-        mockConfig('''jummp.vcs.pluginServiceName=""''')
-        service = new VcsService()
-        assertFalse(service.isValid())
-        service.init()
-        assertFalse(service.isValid())
-        // verifies that the service is not valid, if not existing plugin is specified
-        mockConfig('''jummp.vcs.pluginServiceName="novcs"''')
-        service = new VcsService()
-        assertFalse(service.isValid())
-        service.init()
-        assertFalse(service.isValid())
-    }
-
-    void testNoBackend(){
-        // verifies that the service is not valid, if the backends are not configured correctly
-        mockConfig('''jummp.vcs.pluginServiceName="svnService"''')
-        VcsService service = new VcsService()
-        assertFalse(service.isValid())
-        service.init()
-        assertFalse(service.isValid())
-        mockConfig('''jummp.vcs.pluginServiceName="gitService"''')
-        service = new VcsService()
-        assertFalse(service.isValid())
-        service.init()
-        assertFalse(service.isValid())
-    }
-
     void testGit() {
         // verifies that the service is valid, if git backend is configured correctly
         mockConfig('''
@@ -169,9 +134,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
             jummp.vcs.workingDirectory="target/vcs/git"
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
-        gitService.getInstance()
-        assertTrue(gitService.isValid())
-        vcsService.vcsManager = gitService.vcsManager()
+        vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
         // now as user we should be able to import
         authenticateAsTestUser()
@@ -243,9 +206,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
             jummp.vcs.workingDirectory="target/vcs/git"
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
-        gitService.getInstance()
-        assertTrue(gitService.isValid())
-        vcsService.vcsManager = gitService.vcsManager()
+        vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
 
         // file is not yet imported, so uploading should fail with a VcsException
@@ -253,7 +214,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
             vcsService.updateFile(model, importFile, null)
         }
         // import a file to the git repository, to make future updates possible
-        gitService.vcsManager().importFile(importFile, "test.xml")
+        gitService.getInstance().importFile(importFile, "test.xml")
         // now we should be able to update the file
         File updateFile = new File("target/vcs/exchange/update.xml")
         updateFile.append("Test\n")
@@ -382,9 +343,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
             jummp.vcs.workingDirectory="target/vcs/git"
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
-        gitService.getInstance()
-        assertTrue(gitService.isValid())
-        vcsService.vcsManager = gitService.vcsManager()
+        vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
         // git is valid, but file does not yet exist
         shouldFail(VcsException) {

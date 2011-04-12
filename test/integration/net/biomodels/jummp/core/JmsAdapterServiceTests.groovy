@@ -692,7 +692,6 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
         modelService.vcsService.vcsManager = gitService.getInstance()
-        assertTrue(gitService.isValid())
         assertTrue(modelService.vcsService.isValid())
     }
 }

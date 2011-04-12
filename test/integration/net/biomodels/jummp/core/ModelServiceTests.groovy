@@ -550,10 +550,9 @@ class ModelServiceTests extends JummpIntegrationTestCase {
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
         modelService.vcsService.vcsManager = gitService.getInstance()
-        assertTrue(gitService.isValid())
         assertTrue(modelService.vcsService.isValid())
         // import a file to the git repository, to make future updates possible
-        gitService.vcsManager().importFile(importFile, "test.xml")
+        gitService.getInstance().importFile(importFile, "test.xml")
         // test the real update
         File updateFile = new File("target/vcs/exchange/update.xml")
         updateFile.append("Test\n")
@@ -787,8 +786,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
         modelService.vcsService.vcsManager = gitService.getInstance()
-        assertTrue(gitService.isValid())
-        modelService.vcsService.vcsManager = gitService.vcsManager()
+        modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
         // import should work now
         Model model = modelService.uploadModel(importFile, meta)
@@ -883,8 +881,6 @@ class ModelServiceTests extends JummpIntegrationTestCase {
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
             ''')
         modelService.vcsService.vcsManager = gitService.getInstance()
-        assertTrue(gitService.isValid())
-        modelService.vcsService.vcsManager = gitService.vcsManager()
         assertTrue(modelService.vcsService.isValid())
         // import a file
         authenticateAsTestUser()
