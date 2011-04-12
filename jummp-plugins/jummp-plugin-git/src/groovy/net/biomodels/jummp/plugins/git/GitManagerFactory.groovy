@@ -4,6 +4,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
+import org.apache.log4j.Logger
 
 /**
  * @short Factory Class for GitManager.
@@ -16,6 +17,7 @@ import net.biomodels.jummp.core.vcs.VcsNotInitedException
 class GitManagerFactory {
     static transactional = true
     GitManager git
+    Logger log = Logger.getLogger(GitManagerFactory)
 
     GitManager getInstance() throws Exception {
         if (git) {

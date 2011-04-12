@@ -5,6 +5,7 @@ import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 import org.apache.commons.io.FileUtils
+import org.apache.log4j.Logger
 
 /**
  * @short Factory Class for SvnManager.
@@ -17,6 +18,7 @@ import org.apache.commons.io.FileUtils
 class SvnManagerFactory {
     static transactional = true
     SvnManager svn
+    Logger log = Logger.getLogger(SvnManagerFactory)
 
     SvnManager getInstance() throws Exception {
         if (svn) {
