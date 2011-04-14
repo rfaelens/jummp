@@ -154,3 +154,5 @@ if (jummpProperties.containsKey("jummp.remote")) {
 } else {
     net.biomodels.jummp.webapp.remote = "jms"
 }
+// fails the ant build script
+grails.enable.native2ascii=false

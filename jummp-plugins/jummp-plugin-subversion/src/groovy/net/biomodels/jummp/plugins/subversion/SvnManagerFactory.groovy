@@ -2,27 +2,31 @@ package net.biomodels.jummp.plugins.subversion
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.springframework.beans.factory.InitializingBean
-import net.biomodels.jummp.core.vcs.Vcs
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
-import net.biomodels.jummp.core.vcs.VcsManager
 import org.apache.commons.io.FileUtils
 
-class SvnService implements InitializingBean, Vcs {
+/**
+ * @short Factory Class for SvnManager.
+ *
+ * The factory takes care of creating the SvnManager and all the required directories based on
+ * the current configuration. If the configuration does not satisfy the factory's need it will
+ * throw a VcsException.
+ * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ */
+class SvnManagerFactory {
     static transactional = true
     @SuppressWarnings('GrailsStatelessService')
     SvnManager svn
 
-    void afterPropertiesSet() {
-        ConfigObject config = ConfigurationHolder.config
-        if (!config.jummp.plugins.subversion.enabled) {
-            log.debug("Subversion service not enabled")
-            return
+    SvnManager getInstance() throws Exception {
+        if (svn) {
+            return svn
         }
+        ConfigObject config = ConfigurationHolder.config
         if (!config.jummp.plugins.subversion.localRepository) {
             log.debug("No checkout repository set - Subversion service not enabled")
-            return
+            throw new VcsNotInitedException()
         }
         File localRepository = new File(config.jummp.plugins.subversion.localRepository)
         File workingDirectory
@@ -50,18 +54,8 @@ class SvnService implements InitializingBean, Vcs {
             svn = null
             log.error(e.getMessage())
             e.printStackTrace()
-        }
-    }
-
-    VcsManager vcsManager() throws VcsNotInitedException {
-        if (svn) {
-            return svn
-        } else {
             throw new VcsNotInitedException()
         }
-    }
-
-    boolean isValid() {
-        return (svn != null)
+        return svn
     }
 }

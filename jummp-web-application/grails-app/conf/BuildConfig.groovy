@@ -35,18 +35,19 @@ try {
 } catch (Exception e) {
     // ignore
 }
-boolean includeDBus = false
-boolean includeJms = true
-if (jummpProperties.containsKey("jummp.remote") && jummpProperties.getProperty("jummp.remote") == "dbus") {
-    includeDBus = true
-    includeJms = false
-}
-if (includeDBus) {
+if (new File("../jummp-plugins/jummp-plugin-dbus").exists()) {
     grails.plugin.location.'jummp-plugin-dbus' = "../jummp-plugins/jummp-plugin-dbus"
 }
-if (includeJms) {
+if (new File("../jummp-plugins/jummp-plugin-jms-remote").exists()) {
     grails.plugin.location.'jummp-plugin-jms-remote' = "../jummp-plugins/jummp-plugin-jms-remote"
 }
 grails.plugin.location.'jummp-plugin-remote' = "../jummp-plugins/jummp-plugin-remote"
 grails.plugin.location.'jummp-plugin-security' = "../jummp-plugins/jummp-plugin-security"
 grails.plugin.location.'jummp-plugin-core-api' = "../jummp-plugins/jummp-plugin-core-api"
+
+// Remove libraries not needed in productive mode
+grails.war.resources = { stagingDir ->
+  delete(file:"${stagingDir}/WEB-INF/lib/hsqldb-1.8.0.10.jar")
+  // need to remove unix socket JNI library as incompatible with placing inside web-app
+  delete(file:"${stagingDir}/WEB-INF/lib/unix-0.5.jar")
+}

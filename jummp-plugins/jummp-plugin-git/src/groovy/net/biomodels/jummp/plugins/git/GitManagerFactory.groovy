@@ -1,30 +1,34 @@
 package net.biomodels.jummp.plugins.git
 
-import net.biomodels.jummp.core.vcs.Vcs
-import org.springframework.beans.factory.InitializingBean
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import net.biomodels.jummp.core.vcs.VcsException
-import net.biomodels.jummp.core.vcs.VcsManager
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 
-class GitService implements InitializingBean, Vcs {
+/**
+ * @short Factory Class for GitManager.
+ *
+ * The factory takes care of creating the GitManager and all the required directories based on
+ * the current configuration. If the configuration does not satisfy the factory's need it will
+ * throw a VcsException.
+ * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ */
+class GitManagerFactory {
     static transactional = true
     @SuppressWarnings('GrailsStatelessService')
     GitManager git
 
-    void afterPropertiesSet() {
-        ConfigObject config = ConfigurationHolder.config
-        if (!config.jummp.plugins.git.enabled) {
-            log.debug("Git service not enabled")
-            return
+    GitManager getInstance() throws Exception {
+        if (git) {
+            return git
         }
+        ConfigObject config = ConfigurationHolder.config
         File workingDirectory
         if (config.jummp.vcs.workingDirectory) {
             workingDirectory = new File(config.jummp.vcs.workingDirectory)
         } else {
             log.error("No working directory set, cannot enable git")
-            return
+            throw new VcsNotInitedException()
         }
         File exchangeDirectory
         if (config.jummp.vcs.exchangeDirectory) {
@@ -42,18 +46,8 @@ class GitService implements InitializingBean, Vcs {
             git = null
             log.error(e.getMessage())
             e.printStackTrace()
-        }
-    }
-
-    VcsManager vcsManager() throws VcsNotInitedException {
-        if (git) {
-            return git
-        } else {
             throw new VcsNotInitedException()
         }
-    }
-
-    boolean isValid() {
-        return (git != null)
+        return git
     }
 }

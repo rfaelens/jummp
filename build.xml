@@ -5,7 +5,7 @@
     <taskdef name="gant" classname="org.codehaus.gant.ant.Gant">
         <classpath>
             <pathelement location="${env.GRAILS_HOME}/lib/gant_groovy1.7-1.9.2.jar"/>
-            <pathelement location="${env.GRAILS_HOME}/lib/groovy-all-1.7.5.jar"/>
+            <pathelement location="${env.GRAILS_HOME}/lib/groovy-all-1.7.8.jar"/>
         </classpath>
     </taskdef>
 
@@ -93,7 +93,6 @@
                 <exclude name="jummp-plugins/**/grails-app/views/error.gsp"/>
                 <exclude name="jummp-plugins/**/grails-app/views/layouts/"/>
                 <exclude name="jummp-plugins/**/web-app/"/>
-                <exclude name="jummp-web-application/"/>
                 <exclude name="**/*.iml"/>
                 <exclude name="**/cobertura.ser"/>
                 <exclude name="**/*.orig"/>
@@ -145,6 +144,7 @@
         <input message="Include Plugin Configuration, required to configure the core application?" validargs="y,n" addproperty="plugin.configuration" defaultvalue="y"/>
         <input message="Include Plugin SBML, required to handle SBML files?" validargs="y,n" addproperty="plugin.sbml" defaultvalue="y"/>
         <input message="Include Plugin JMS, required to communicate with a Web Application through JMS?" validargs="y,n" addproperty="plugin.jms" defaultvalue="y"/>
+        <input message="Include Plugin D-Dbus, required to export the Application Interface to D-Bus?" validargs="y,n" addproperty="plugin.dbus" defaultvalue="y"/>
         <condition property="plugin.persist.svn">
             <equals arg1="${plugin.svn}" arg2="y"/>
         </condition>
@@ -160,17 +160,22 @@
         <condition property="plugin.persist.jms">
             <equals arg1="${plugin.jms}" arg2="y"/>
         </condition>
+        <condition property="plugin.persist.dbus">
+            <equals arg1="${plugin.dbus}" arg2="y"/>
+        </condition>
         <property name="plugin.persist.svn" value="false"/>
         <property name="plugin.persist.git" value="false"/>
         <property name="plugin.persist.configuration" value="false"/>
         <property name="plugin.persist.sbml" value="false"/>
         <property name="plugin.persist.jms" value="false"/>
+        <property name="plugin.persist.dbus" value="false"/>
         <propertyfile file="${builddir}/jummpPlugins.properties">
             <entry key="subversion" value="${plugin.persist.svn}"/>
             <entry key="git" value="${plugin.persist.git}"/>
             <entry key="configuration" value="${plugin.persist.configuration}"/>
             <entry key="sbml" value="${plugin.persist.sbml}"/>
             <entry key="jms" value="${plugin.persist.jms}"/>
+            <entry key="dbus" value="${plugin.persist.dbus}"/>
         </propertyfile>
         <gant file="${builddir}/scripts/Build.groovy" target="deleteJummpPlugins">
             <definition name="builddir" value="${builddir}"/>
@@ -180,14 +185,18 @@
 <!-- Performs the actual building of war file using grails war. Cleans before building -->
     <target name="build-war" depends="remove-grails-plugins">
         <grails command="clean" cwd="${builddir}"/>
-        <grails command="war" cwd="${builddir}"/>
+        <grails command="war ${builddir}/target/jummp.war" cwd="${builddir}"/>
+    </target>
+    <target name="build-webapplication-war" depends="remove-grails-plugins">
+        <grails command="clean" cwd="${builddir}/jummp-web-application"/>
+        <grails command="war ${builddir}/target/jummp-web-application.war" cwd="${builddir}/jummp-web-application"/>
     </target>
 
 <!-- Build war with all plugins -->
-    <target name="war" depends="build-war">
+    <target name="war" depends="build-war,build-webapplication-war">
     </target>
 
 <!-- Build war with asking for plugins to include     -->
-    <target name="interactive-war" depends="ask-for-plugins, build-war">
+    <target name="interactive-war" depends="ask-for-plugins, build-war,build-webapplication-war">
     </target>
 </project>

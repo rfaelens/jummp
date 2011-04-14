@@ -1,3 +1,5 @@
+import net.biomodels.jummp.plugins.git.GitManagerFactory
+
 class JummpPluginGitGrailsPlugin {
     // the plugin version
     def version = "0.1"
@@ -26,7 +28,10 @@ Brief description of the plugin.
     }
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
+        gitManagerFactory(GitManagerFactory)
+        if (!(application.config.jummp.plugins.git.enabled instanceof ConfigObject) && application.config.jummp.plugins.git.enabled) {
+            vcsManager(gitManagerFactory: "getInstance")
+        }
     }
 
     def doWithDynamicMethods = { ctx ->

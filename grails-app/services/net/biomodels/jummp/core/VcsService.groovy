@@ -1,9 +1,5 @@
 package net.biomodels.jummp.core
 
-import org.codehaus.groovy.grails.commons.ApplicationHolder
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import org.springframework.beans.factory.NoSuchBeanDefinitionException
-import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
 import net.biomodels.jummp.core.vcs.Vcs
 import net.biomodels.jummp.core.vcs.VcsException
@@ -25,34 +21,9 @@ import net.biomodels.jummp.model.Revision
 class VcsService {
     static transactional = true
     @SuppressWarnings('GrailsStatelessService')
-    private VcsManager vcsManager = null
+    VcsManager vcsManager
     @SuppressWarnings('GrailsStatelessService')
     def grailsApplication
-
-    void init() {
-        // config option is a map in case it is not defined and a String if it is defined
-        // because of that we need to use a def and do an instance of test
-        def pluginServiceName = ConfigurationHolder.config.jummp.vcs.pluginServiceName
-        if (pluginServiceName instanceof String && !pluginServiceName.isEmpty()) {
-            try {
-                ApplicationContext ctx = (ApplicationContext)ApplicationHolder.getApplication().getMainContext()
-                if (ctx == null) {
-                    return
-                }
-                Vcs vcs = (Vcs)ctx.getBean(pluginServiceName)
-                if (vcs.isValid()) {
-                    vcsManager = vcs.vcsManager()
-                } else {
-                    log.error("Vcs service ${pluginServiceName} is not valid, disabling VcsService")
-                }
-            } catch(NoSuchBeanDefinitionException e) {
-                log.error(e.getMessage())
-                e.printStackTrace()
-            }
-        } else {
-            log.error("No vcs plugin service specified")
-        }
-    }
 
     /**
      * Checks whether the Version Control System is configured properly

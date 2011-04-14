@@ -41,9 +41,12 @@ if (new File("jummp-plugins/jummp-plugin-configuration").exists()) {
 if (new File("jummp-plugins/jummp-plugin-sbml").exists()) {
     grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
 }
-grails.plugin.location.'jummp-plugin-dbus' = "jummp-plugins/jummp-plugin-dbus"
+grails.plugin.location.'jummp-plugin-remote' = "jummp-plugins/jummp-plugin-remote"
 grails.plugin.location.'jummp-plugin-core-api' = "jummp-plugins/jummp-plugin-core-api"
 grails.plugin.location.'jummp-plugin-security' = "jummp-plugins/jummp-plugin-security"
+if (new File("jummp-plugins/jummp-plugin-dbus").exists()) {
+    grails.plugin.location.'jummp-plugin-dbus' = "jummp-plugins/jummp-plugin-dbus"
+}
 if (new File("jummp-plugins/jummp-plugin-jms").exists()) {
     grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
 }
@@ -52,4 +55,6 @@ grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plug
 // Remove libraries not needed in productive mode
 grails.war.resources = { stagingDir ->
   delete(file:"${stagingDir}/WEB-INF/lib/hsqldb-1.8.0.10.jar")
+  // need to remove unix socket JNI library as incompatible with placing inside web-app
+  delete(file:"${stagingDir}/WEB-INF/lib/unix-0.5.jar")
 }

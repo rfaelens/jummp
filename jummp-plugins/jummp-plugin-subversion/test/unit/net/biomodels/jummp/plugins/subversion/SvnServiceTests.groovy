@@ -11,7 +11,7 @@ import net.biomodels.jummp.core.vcs.VcsManager
 class SvnServiceTests extends GrailsUnitTestCase {
     protected void setUp() {
         super.setUp()
-        mockLogging(SvnService)
+        mockLogging(SvnManagerFactory)
     }
 
     protected void tearDown() {
@@ -23,29 +23,32 @@ class SvnServiceTests extends GrailsUnitTestCase {
     }
 
     void testDisabled() {
-        // verifies that SvnService does not get enabled if there is no config
+        // verifies that SvnManagerFactory does not get enabled if there is no config
         mockConfig("")
-        SvnService svn = new SvnService()
-        svn.afterPropertiesSet()
-        assertFalse(svn.isValid())
+        SvnManagerFactory svn = new SvnManagerFactory()
         shouldFail(VcsNotInitedException) {
-            svn.vcsManager()
+            svn.getInstance()
         }
-        // verifies that SvnService does not get enabled if disabled in config
+        shouldFail(VcsNotInitedException) {
+            svn.getInstance()
+        }
+        // verifies that SvnManagerFactory does not get enabled if disabled in config
         mockConfig("jummp.plugins.subversion.enabled=false")
-        svn = new SvnService()
-        svn.afterPropertiesSet()
-        assertFalse(svn.isValid())
+        svn = new SvnManagerFactory()
         shouldFail(VcsNotInitedException) {
-            svn.vcsManager()
+            svn.getInstance()
         }
-        // verifies that SvnService does not get enabled if localRepository is not set
-        mockConfig('''jummp.plugins.subversion.enabled=true''')
-        svn = new SvnService()
-        svn.afterPropertiesSet()
-        assertFalse(svn.isValid())
         shouldFail(VcsNotInitedException) {
-            svn.vcsManager()
+            svn.getInstance()
+        }
+        // verifies that SvnManagerFactory does not get enabled if localRepository is not set
+        mockConfig('''jummp.plugins.subversion.enabled=true''')
+        svn = new SvnManagerFactory()
+        shouldFail(VcsNotInitedException) {
+            svn.getInstance()
+        }
+        shouldFail(VcsNotInitedException) {
+            svn.getInstance()
         }
     }
 
@@ -55,7 +58,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
             jummp.plugins.subversion.enabled=true
             jummp.plugins.subversion.localRepository="target/vcs/repository"
         ''')
-        // will be used for two calls to setup SvnService - therefore 4 mock calls expected
+        // will be used for two calls to setup SvnManagerFactory - therefore 4 mock calls expected
         def contextControl = mockFor(ServletContext)
         contextControl.demand.getRealPath(4..4) {path ->
             return "target/vcs" + path
@@ -65,26 +68,22 @@ class SvnServiceTests extends GrailsUnitTestCase {
         File workingDirectory = new File("target/vcs/resource/workingDir")
         assertFalse(exchangeDirectory.exists())
         assertFalse(workingDirectory.exists())
-        SvnService svn = new SvnService()
-        svn.afterPropertiesSet()
+        SvnManagerFactory svn = new SvnManagerFactory()
+        shouldFail(VcsNotInitedException) {
+            svn.getInstance()
+        }
         assertTrue(exchangeDirectory.exists())
         assertTrue(exchangeDirectory.isDirectory())
         assertTrue(workingDirectory.exists())
         assertTrue(workingDirectory.isDirectory())
-        assertFalse(svn.isValid())
-        shouldFail(VcsNotInitedException) {
-            svn.vcsManager()
-        }
         // verify that the working directory gets cleaned
         FileUtils.touch(new File("target/vcs/resource/workingDir/test"))
         assertLength(1, workingDirectory.list())
-        svn = new SvnService()
-        svn.afterPropertiesSet()
-        assertLength(0, workingDirectory.list())
-        assertFalse(svn.isValid())
+        svn = new SvnManagerFactory()
         shouldFail(VcsNotInitedException) {
-            svn.vcsManager()
+            svn.getInstance()
         }
+        assertLength(0, workingDirectory.list())
         contextControl.verify()
     }
 
@@ -107,28 +106,24 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertFalse(resourceExchangeDirectory.exists())
         assertFalse(workingDirectory.exists())
         assertFalse(resourceWorkingDirectory.exists())
-        SvnService svn = new SvnService()
-        svn.afterPropertiesSet()
+        SvnManagerFactory svn = new SvnManagerFactory()
+        shouldFail(VcsNotInitedException) {
+            svn.getInstance()
+        }
         assertTrue(resourceExchangeDirectory.exists())
         assertTrue(resourceExchangeDirectory.isDirectory())
         assertTrue(workingDirectory.exists())
         assertTrue(workingDirectory.isDirectory())
         assertFalse(resourceWorkingDirectory.exists())
-        assertFalse(svn.isValid())
-        shouldFail(VcsNotInitedException) {
-            svn.vcsManager()
-        }
         // test that working directory gets cleaned
         FileUtils.touch(new File("target/vcs/svn/test"))
         assertLength(1, workingDirectory.list())
-        svn = new SvnService()
-        svn.afterPropertiesSet()
+        svn = new SvnManagerFactory()
+        shouldFail(VcsNotInitedException) {
+            svn.getInstance()
+        }
         assertLength(0, workingDirectory.list())
         assertFalse(resourceWorkingDirectory.exists())
-        assertFalse(svn.isValid())
-        shouldFail(VcsNotInitedException) {
-            svn.vcsManager()
-        }
         // verify other way around: working directory in resource, exchange not in resource
         mockConfig('''
             jummp.plugins.subversion.enabled=true
@@ -139,26 +134,22 @@ class SvnServiceTests extends GrailsUnitTestCase {
         FileUtils.deleteDirectory(resourceExchangeDirectory)
         assertFalse(exchangeDirectory.exists())
         assertFalse(resourceWorkingDirectory.exists())
-        svn = new SvnService()
-        svn.afterPropertiesSet()
+        svn = new SvnManagerFactory()
+        shouldFail(VcsNotInitedException) {
+            svn.getInstance()
+        }
         assertTrue(exchangeDirectory.exists())
         assertTrue(exchangeDirectory.isDirectory())
         assertTrue(resourceWorkingDirectory.exists())
         assertTrue(resourceWorkingDirectory.isDirectory())
-        assertFalse(svn.isValid())
-        shouldFail(VcsNotInitedException) {
-            svn.vcsManager()
-        }
         // test that working directory gets cleaned
         FileUtils.touch(new File("target/vcs/resource/workingDir/test"))
         assertLength(1, resourceWorkingDirectory.list())
-        svn = new SvnService()
-        svn.afterPropertiesSet()
-        assertLength(0, resourceWorkingDirectory.list())
-        assertFalse(svn.isValid())
+        svn = new SvnManagerFactory()
         shouldFail(VcsNotInitedException) {
-            svn.vcsManager()
+            svn.getInstance()
         }
+        assertLength(0, resourceWorkingDirectory.list())
         contextControl.verify()
         // verify that exchange and working directory get created, if passed in
         mockConfig('''
@@ -175,25 +166,27 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertFalse(resourceExchangeDirectory.exists())
         assertFalse(exchangeDirectory.exists())
         assertFalse(workingDirectory.exists())
-        svn = new SvnService()
-        svn.afterPropertiesSet()
+        svn = new SvnManagerFactory()
+        shouldFail(VcsNotInitedException) {
+            svn.getInstance()
+        }
         assertFalse(resourceWorkingDirectory.exists())
         assertFalse(resourceExchangeDirectory.exists())
         assertTrue(exchangeDirectory.exists())
         assertTrue(workingDirectory.exists())
-        assertFalse(svn.isValid())
         shouldFail(VcsNotInitedException) {
-            svn.vcsManager()
+            svn.getInstance()
         }
         // test that working directory gets cleaned
         FileUtils.touch(new File("target/vcs/svn/test"))
         assertLength(1, workingDirectory.list())
-        svn = new SvnService()
-        svn.afterPropertiesSet()
-        assertLength(0, workingDirectory.list())
-        assertFalse(svn.isValid())
+        svn = new SvnManagerFactory()
         shouldFail(VcsNotInitedException) {
-            svn.vcsManager()
+            svn.getInstance()
+        }
+        assertLength(0, workingDirectory.list())
+        shouldFail(VcsNotInitedException) {
+            svn.getInstance()
         }
     }
 
@@ -212,11 +205,9 @@ class SvnServiceTests extends GrailsUnitTestCase {
         ''')
         File resourceWorkingDirectory = new File("target/vcs/resource/workingDir")
         assertFalse(resourceWorkingDirectory.exists())
-        SvnService svn = new SvnService()
-        svn.afterPropertiesSet()
-        VcsManager manager = svn.vcsManager()
+        SvnManagerFactory svn = new SvnManagerFactory()
+        VcsManager manager = svn.getInstance()
         assertNotNull(manager)
-        assertTrue(svn.isValid())
         assertTrue(manager instanceof SvnManager)
         assertTrue(resourceWorkingDirectory.exists())
         assertLength(1, resourceWorkingDirectory.list())
@@ -230,11 +221,10 @@ class SvnServiceTests extends GrailsUnitTestCase {
         ''')
         File workingDirectory = new File("target/vcs/svn")
         assertFalse(workingDirectory.exists())
-        svn = new SvnService()
-        svn.afterPropertiesSet()
-        manager = svn.vcsManager()
+        svn = new SvnManagerFactory()
+        svn.getInstance()
+        manager = svn.getInstance()
         assertNotNull(manager)
-        assertTrue(svn.isValid())
         assertTrue(manager instanceof SvnManager)
         assertTrue(workingDirectory.exists())
         assertLength(1, workingDirectory.list())
