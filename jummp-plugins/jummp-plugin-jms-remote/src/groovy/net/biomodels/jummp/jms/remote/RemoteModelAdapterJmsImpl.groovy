@@ -7,7 +7,6 @@ import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.jms.remote.AbstractJmsRemoteAdapter
 import net.biomodels.jummp.remote.RemoteModelAdapter
 
 /**

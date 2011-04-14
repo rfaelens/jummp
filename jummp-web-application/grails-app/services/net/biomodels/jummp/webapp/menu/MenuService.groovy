@@ -26,6 +26,7 @@ class MenuService {
      * As key a hash code of the user's roles is used. So two users with the same set of roles
      * evaluate to the same key and receive the same menu.
      */
+    @SuppressWarnings('GrailsStatelessService')
     private Map<Integer, List<MenuItem>> menus = [:]
 
     /**

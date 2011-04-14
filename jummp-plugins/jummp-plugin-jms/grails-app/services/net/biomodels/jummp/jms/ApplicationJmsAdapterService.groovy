@@ -11,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
 import org.springframework.security.authentication.BadCredentialsException
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import net.biomodels.jummp.jms.AbstractJmsAdapter
 import net.biomodels.jummp.core.IAuthenticationHashService
 import net.biomodels.jummp.core.user.JummpAuthenticationImpl
 

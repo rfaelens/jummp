@@ -39,6 +39,7 @@ class AuthenticationHashService implements IAuthenticationHashService {
     /**
      * Map of the Authentications and their Ids.
      */
+    @SuppressWarnings('GrailsStatelessService')
     private Map<String, AuthenticationHashEntry> authentications = [:]
 
     String hashAuthentication(Authentication auth) {

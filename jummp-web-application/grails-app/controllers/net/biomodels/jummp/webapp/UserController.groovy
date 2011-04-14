@@ -5,9 +5,7 @@ import grails.plugins.springsecurity.Secured
 import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.authentication.BadCredentialsException
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import net.biomodels.jummp.core.JummpException
 import net.biomodels.jummp.core.user.UserNotFoundException
-import net.biomodels.jummp.core.user.UserManagementException
 import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserCodeExpiredException
 
