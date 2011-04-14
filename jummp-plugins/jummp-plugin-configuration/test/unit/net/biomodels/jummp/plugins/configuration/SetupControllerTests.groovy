@@ -62,6 +62,42 @@ class SetupControllerTests extends ControllerUnitTestCase {
         assertTrue(cmd.validate())
     }
 
+    void testRemoteCommand() {
+        mockForConstraintsTests(RemoteCommand)
+        // null should fail
+        RemoteCommand cmd = new RemoteCommand()
+        assertFalse(cmd.validate())
+        assertEquals("validator", cmd.errors["jummpExportDbus"])
+        assertEquals("validator", cmd.errors["jummpExportJms"])
+        // test for blanks
+        cmd = new RemoteCommand()
+        cmd.jummpRemote=""
+        assertFalse(cmd.validate())
+        assertEquals("blank", cmd.errors["jummpRemote"])
+        // jummpRemote has value in list
+        cmd = new RemoteCommand()
+        cmd.jummpRemote="smj"
+        assertFalse(cmd.validate())
+        assertEquals("inList", cmd.errors["jummpRemote"])
+        cmd = new RemoteCommand()
+        cmd.jummpRemote="subD"
+        assertFalse(cmd.validate())
+        assertEquals("inList", cmd.errors["jummpRemote"])
+        cmd = new RemoteCommand()
+        cmd.jummpRemote="jms"
+        assertFalse(cmd.validate())
+        assertNull(cmd.errors["jummpRemote"])
+        cmd = new RemoteCommand()
+        cmd.jummpRemote="Dbus"
+        assertFalse(cmd.validate())
+        // and one test that should work
+        cmd = new RemoteCommand()
+        cmd.jummpRemote="jms"
+        cmd.jummpExportDbus=false
+        cmd.jummpExportJms=true
+        assertTrue(cmd.validate())
+    }
+
     void testLdapCommand() {
         mockForConstraintsTests(LdapCommand)
         // null should fail
