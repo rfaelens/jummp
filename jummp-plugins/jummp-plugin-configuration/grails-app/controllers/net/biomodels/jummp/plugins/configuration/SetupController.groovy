@@ -111,8 +111,35 @@ class SetupController {
                 } else {
                     return success()
                 }
-            }.to("server")
+            }.to("remoteExport")
             on("back").to("userRegistration")
+        }
+
+        remoteExport {
+            on("next") { RemoteCommand cmd ->
+                flow.remote = cmd
+                if (flow.remote.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("validateRemote")
+            on("back").to("changePassword")
+        }
+
+        remoteRemote {
+            on("next") { RemoteCommand cmd ->
+                cmd.jummpExportDbus = flow.remote.jummpExportDbus
+                cmd.jummpExportJms = flow.remote.jummpExportJms
+                flow.remote = cmd
+                flow.remote.validate()
+                if (flow.remote.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("server")
+            on("back").to("remoteExport")
         }
 
         server {
@@ -121,11 +148,11 @@ class SetupController {
                 if (flow.server.hasErrors()) {
                     return error()
                 } else {
-                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword)
+                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote)
                     return success()
                 }
             }.to("finish")
-            on("back").to("changePassword")
+            on("back").to("remoteExport")
         }
 
         validateAuthenticationBackend {
@@ -143,6 +170,19 @@ class SetupController {
             on("database").to("vcs")
             on("ldap").to("ldap")
             on("error").to("authenticationBackend")
+        }
+
+        validateRemote {
+            action {
+                if (flow.remote.jummpExportDbus && flow.remote.jummpExportJms) {
+                    remote()
+                } else {
+                    flow.remote.jummpRemote = flow.remote.jummpExportDbus ? "dbus" : "jms"
+                    server()
+                }
+            }
+            on("server").to("server")
+            on("remote").to("remoteRemote")
         }
 
         validateVcs {

@@ -81,6 +81,31 @@ class ConfigurationControllerTests extends ControllerUnitTestCase {
 
     }
 
+    void testSaveRemote() {
+        mockForConstraintsTests(RemoteCommand)
+        // test for incorrect command
+        RemoteCommand cmd = new RemoteCommand()
+        cmd.validate()
+        this.controller.saveRemote(cmd)
+        assertEquals("configuration", this.controller.renderArgs["view"])
+        assertEquals("saveRemote", this.controller.renderArgs["model"].action)
+        assertEquals("Remote", this.controller.renderArgs["model"].template)
+        assertEquals(cmd, this.controller.renderArgs["model"].remote)
+        // test for correct command
+        cmd = new RemoteCommand()
+        cmd.jummpRemote="jms"
+        cmd.jummpExportDbus=false
+        cmd.jummpExportJms=true
+        cmd.validate()
+        this.controller.saveRemote(cmd)
+        assertEquals("saved", this.controller.renderArgs["view"])
+        assertEquals("Remote", this.controller.renderArgs["model"].module)
+        RemoteCommand saved = this.controller.configurationService.loadRemoteConfiguration()
+        assertEquals("jms", saved.jummpRemote)
+        assertFalse(saved.jummpExportDbus)
+        assertTrue(saved.jummpExportJms)
+    }
+
     void testSaveServer() {
         mockForConstraintsTests(ServerCommand)
         // test for incorrect command

@@ -115,6 +115,26 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         setupController.params.body = ""
         setupController.params.senderAddress = ""
         signalEvent("next")
+        assertCurrentStateEquals("remoteExport")
+         // incorrect values should fail
+        setupController.params.jummpExportDbus = false
+        setupController.params.jummpExportJms = false
+        signalEvent("next")
+        assertCurrentStateEquals("remoteExport")
+        assertTrue(getFlowScope().remote.hasErrors())
+        // correct values should transit to remote Remote state
+        setupController.params.jummpExportDbus = true
+        setupController.params.jummpExportJms = true
+        signalEvent("next")
+        assertCurrentStateEquals("remoteRemote")
+        // incorrect value should fail
+        setupController.params.jummpRemote = "smj"
+        signalEvent("next")
+        assertCurrentStateEquals("remoteRemote")
+        assertTrue(getFlowScope().remote.hasErrors())
+        // correct values should transit to end state
+        setupController.params.jummpRemote = "jms"
+        signalEvent("next")
         assertCurrentStateEquals("server")
         // incorrect value should fail
         setupController.params.url = "test"
@@ -122,7 +142,7 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         assertCurrentStateEquals("server")
         assertTrue(getFlowScope().server.hasErrors())
         assertFlowExecutionActive()
-        // correct value should end the flow
+        // correct value should transit to remoteExport state
         setupController.params.url = "http://127.0.0.1:8080/jummp/"
         signalEvent("next")
         assertFlowExecutionEnded()
@@ -183,6 +203,9 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         // tests that all non-branching states work correctly
         setCurrentState("server")
         assertCurrentStateEquals("server")
+        // go back to remoteExport
+        signalEvent("back")
+        assertCurrentStateEquals("remoteExport")
         // go back to changePassword
         signalEvent("back")
         assertCurrentStateEquals("changePassword")

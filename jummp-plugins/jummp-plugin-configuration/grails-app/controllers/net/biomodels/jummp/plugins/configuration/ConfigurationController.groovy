@@ -25,6 +25,20 @@ class ConfigurationController {
         }
     }
 
+
+    def remote = {
+        render(view: 'configuration', model: [remote: configurationService.loadRemoteConfiguration(), title: "Remote", action: "saveRemote", template: 'remote'])
+    }
+
+    def saveRemote = { RemoteCommand remote  ->
+        if (remote.hasErrors()) {
+            render(view: 'configuration', model: [remote: remote, title: "Invoker Service", action: "saveRemote", template: 'Remote'])
+        } else {
+            configurationService.saveRemoteConfiguration(remote)
+            render(view: "saved", model: [module: "Remote"])
+        }
+    }
+
     def ldap = {
         render(view: 'configuration', model: [ldap: configurationService.loadLdapConfiguration(), title: "LDAP", action: "saveLdap", template: 'ldap'])
     }

@@ -43,11 +43,13 @@ class ConfigurationService implements InitializingBean {
      * @param server The Server configuration
      * @param userRegistration the user registration configuration
      * @param changePassword the change/reset password configuration
+     * @param remote The Remote configuration
      */
     public void storeConfiguration(MysqlCommand mysql, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun,
-                                   ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword) {
+                                   ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword, RemoteCommand remote) {
         Properties properties = new Properties()
         updateMysqlConfiguration(properties, mysql)
+        updateRemoteConfiguration(properties, remote)
         updateLdapConfiguration(properties, ldap)
         updateVcsConfiguration(properties, vcs)
         updateSvnConfiguration(properties, svn)
@@ -76,6 +78,19 @@ class ConfigurationService implements InitializingBean {
         mysql.username = properties.getProperty("jummp.database.username")
         mysql.password = properties.getProperty("jummp.database.password")
         return mysql
+    }
+
+    /**
+     * Loads the current Remote Configuration.
+     * @return A command object encapsulating the current Remote Configuration
+     */
+    public RemoteCommand loadRemoteConfiguration() {
+        Properties properties = loadProperties()
+        RemoteCommand remote = new RemoteCommand()
+        remote.jummpRemote = properties.getProperty("jummp.remote")
+        remote.jummpExportDbus = Boolean.parseBoolean(properties.getProperty("jummp.export.dbus"))
+        remote.jummpExportJms = Boolean.parseBoolean(properties.getProperty("jummp.export.jms"))
+        return remote
     }
 
     /**
@@ -180,6 +195,19 @@ class ConfigurationService implements InitializingBean {
     }
 
     /**
+     * Updates the Remote configuration stored in the properties file.
+     * Other settings are not changed!
+     * It is important to remember that the settings will only be activated after
+     * a restart of the application!
+     * @param remote The new Remote configuration
+     */
+    public void saveRemoteConfiguration(RemoteCommand remote) {
+        Properties properties = loadProperties()
+        updateRemoteConfiguration(properties, remote)
+        saveProperties(properties)
+    }
+
+    /**
      * Updates the LDAP configuration stored in the properties file.
      * Other settings are not changed!
      * It is important to remember that the settings will only be activated after
@@ -271,6 +299,20 @@ class ConfigurationService implements InitializingBean {
         properties.setProperty("jummp.database.database", mysql.database)
         properties.setProperty("jummp.database.username", mysql.username)
         properties.setProperty("jummp.database.password", mysql.password)
+    }
+
+    /**
+     * Updates the @p properties with the settings from @p remote.
+     * @param properties The existing properties
+     * @param remote The new remote settings
+     */
+    private void updateRemoteConfiguration(Properties properties, RemoteCommand remote) {
+        if (!remote.validate()) {
+            return
+        }
+        properties.setProperty("jummp.remote",   remote.jummpRemote)
+        properties.setProperty("jummp.export.dbus",     remote.jummpExportDbus.toString())
+        properties.setProperty("jummp.export.jms", remote.jummpExportJms.toString())
     }
 
     /**
