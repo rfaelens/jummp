@@ -2,3 +2,20 @@
 syntax: glob
 
 *~
+*.orig
+*.iml
+target/*
+build/*
+.*
+stacktrace.log
+jummp-plugins/jummp-plugin-git/out/*
+out/*
+log/*
+jummp-web-application/log/*
+activemq-data/*
+CodeNarcReport.html
+cobertura.ser
+*/cobertura.ser
+jummp-plugins/*/web-app
+jummp-plugins/*/grails-app/i18n
+jummp-plugins/*/plugin.xml
