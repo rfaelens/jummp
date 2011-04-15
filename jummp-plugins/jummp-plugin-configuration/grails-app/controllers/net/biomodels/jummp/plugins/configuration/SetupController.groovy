@@ -254,6 +254,9 @@ class SetupController {
                     person.password = springSecurityService.encodePassword(params.passwd)
                 }
                 person.enabled = true
+                person.accountExpired=false
+                person.accountLocked=false
+                person.passwordExpired=false
                 if (person.validate()) {
                     if (create(person)) {
                         props.setProperty("jummp.firstRun", "false")
