@@ -40,3 +40,4 @@ if (path.tokenize(File.separatorChar).last() == "jummp") {
     path = ".."
 }
 grails.plugin.location.'jummp-plugin-security' = path + File.separator + "jummp-plugin-security"
+grails.plugin.location.'jummp-plugin-core-api' = path + File.separator + "jummp-plugin-core-api"

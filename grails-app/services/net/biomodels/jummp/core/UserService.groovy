@@ -19,6 +19,7 @@ import net.biomodels.jummp.core.user.UserCodeExpiredException
 import net.biomodels.jummp.core.user.RegistrationException
 import net.biomodels.jummp.core.user.UserManagementException
 import net.biomodels.jummp.core.user.RoleNotFoundException
+import org.springframework.transaction.TransactionStatus
 
 /**
  * @short Service for User administration.
@@ -414,5 +415,69 @@ class UserService implements IUserService {
             throw new RoleNotFoundException(authority)
         }
         return role
+    }
+
+    boolean createAdmin(UserCommand user) {
+        User person = new User()
+        person.properties = user
+        boolean userCreated = false
+        File file = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
+        Properties props = new Properties()
+        props.load(new FileInputStream(file))
+
+        if (Boolean.parseBoolean(props.getProperty("jummp.security.ldap.enabled"))) {
+            // no password for ldap
+            person.password = "*"
+        } else {
+            person.password = springSecurityService.encodePassword(user.password)
+        }
+        person.enabled = true
+        person.accountExpired = false
+        person.accountLocked = false
+        person.passwordExpired = false
+        if (person.validate()) {
+            if (create(person)) {
+                props.setProperty("jummp.firstRun", "false")
+                FileOutputStream out = new FileOutputStream(file)
+                props.store(out, "Jummp Configuration")
+                userCreated = true
+            } else {
+                log.error("The initial user could not be created in the database. Is the database configured properly?")
+                userCreated = false
+            }
+        } else {
+            userCreated = false
+        }
+        return userCreated
+    }
+
+    boolean create(User person) {
+        boolean ok = true
+        User.withTransaction { TransactionStatus status ->
+
+            if (!person.save()) {
+                ok = false
+                status.setRollbackOnly()
+            }
+            if (!createRoles(person)) {
+                ok = false
+                status.setRollbackOnly()
+            }
+        }
+        return ok
+    }
+
+    boolean createRoles(User user) {
+        Role adminRole = new Role(authority: "ROLE_ADMIN")
+        if (!adminRole.save(flush: true)) {
+            return false
+        }
+        UserRole.create(user, adminRole, true)
+        Role userRole = new Role(authority: "ROLE_USER")
+        if (!userRole.save(flush: true)) {
+            return false
+        }
+        UserRole.create(user, userRole, true)
+        return true
     }
 }

@@ -22,31 +22,31 @@
             <tr class="prop">
                 <td class="name"><label for="senderAddress">Sender Address:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'senderAddress', 'errors')}">
-                    <input type="text" name="senderAddress" id="senderAddress" value="${userRegistration?.senderAddress}"/>
+                    <input type="text" name="senderAddress" id="senderAddress" value="${userRegistration?.senderAddress ?: 'user@example.org' }"/>
                 </td>
             </tr>
             <tr class="prop">
                 <td class="name"><label for="adminAddress">Admin Address:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'adminAddress', 'errors')}">
-                    <input type="text" name="adminAddress" id="adminAddress" value="${userRegistration?.adminAddress}"/>
+                    <input type="text" name="adminAddress" id="adminAddress" value="${userRegistration?.adminAddress ?: 'admin@example.org'}"/>
                 </td>
             </tr>
             <tr class="prop">
                 <td class="name"><label for="subject">Subject:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'subject', 'errors')}">
-                    <input type="text" name="subject" id="subject" value="${userRegistration?.subject}"/>
+                    <input type="text" name="subject" id="subject" value="${userRegistration?.subject ?: 'Example Subject: New User'}"/>
                 </td>
             </tr>
             <tr class="prop">
                 <td class="name"><label for="body">Body:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'body', 'errors')}">
-                    <textarea id="body" rows="20" cols="100" name="body">${userRegistration?.body}</textarea>
+                    <textarea id="body" rows="20" cols="100" name="body">${userRegistration?.body ?: 'Example Text: New User'}</textarea>
                 </td>
             </tr>
             <tr class="prop">
                 <td class="name"><label for="url">URL for Account Verification:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'url', 'errors')}">
-                    <input type="text" name="url" id="url" value="${userRegistration?.url}"/><span>register/validate/{{CODE}}</span>
+                    <input type="text" name="url" id="url" value="${userRegistration?.url ?: 'http://example.org:8080/jummp-web-application/'}"/><span>register/validate/{{CODE}}</span>
                 </td>
             </tr>
             <tr class="prop">
@@ -55,19 +55,19 @@
             <tr class="prop">
                 <td class="name"><label for="activationSubject">Subject for Activation:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'activationSubject', 'errors')}">
-                    <input type="text" name="activationSubject" id="activationSubject" value="${userRegistration?.activationSubject}"/>
+                    <input type="text" name="activationSubject" id="activationSubject" value="${userRegistration?.activationSubject ?: 'New User, activate your account.'}"/>
                 </td>
             </tr>
             <tr class="prop">
                 <td class="name"><label for="activationBody">Body for Account Verification:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'activationBody', 'errors')}">
-                    <textarea id="activationBody" rows="20" cols="100" name="activationBody">${userRegistration?.activationBody}</textarea>
+                    <textarea id="activationBody" rows="20" cols="100" name="activationBody">${userRegistration?.activationBody ?: 'Please activate your account.'}</textarea>
                 </td>
             </tr>
             <tr class="prop">
                 <td class="name"><label for="activationUrl">URL for Account Activation:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'activationUrl', 'errors')}">
-                    <input type="text" name="activationUrl" id="activationUrl" value="${userRegistration?.activationUrl}"/><span>register/confirmRegistration/{{CODE}}</span>
+                    <input type="text" name="activationUrl" id="activationUrl" value="${userRegistration?.activationUrl ?: 'http://example.org:8080/jummp-web-application/'}"/><span>register/confirmRegistration/{{CODE}}</span>
                 </td>
             </tr>
         </tbody>

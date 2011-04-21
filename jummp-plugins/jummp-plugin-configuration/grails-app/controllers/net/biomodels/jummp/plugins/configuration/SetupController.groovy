@@ -1,9 +1,6 @@
 package net.biomodels.jummp.plugins.configuration
 
-import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.plugins.security.Role
-import net.biomodels.jummp.plugins.security.UserRole
-import org.springframework.transaction.TransactionStatus
+import net.biomodels.jummp.core.UserCommand
 
 /**
  * @short Controller to bootstrap the configuration of an application instance.
@@ -23,6 +20,7 @@ import org.springframework.transaction.TransactionStatus
 class SetupController {
     def configurationService
     def springSecurityService
+    def userService
 
     def index = {
         redirect(action: "setup")
@@ -234,39 +232,21 @@ class SetupController {
     }
 
     def firstRunFlow = {
-        start {
-            on("next").to("validateAdmin")
+            start {
+                on("next") { UserCommand cmd ->
+                flow.user = cmd
+                if (flow.user.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("validateAdmin")
         }
 
         validateAdmin {
             action {
-                User person = new User()
-                person.properties = params
-
-                File file = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
-                Properties props = new Properties()
-                props.load(new FileInputStream(file))
-
-                if (Boolean.parseBoolean(props.getProperty("jummp.security.ldap.enabled"))) {
-                    // no password for ldap
-                    person.password = "*"
-                } else {
-                    person.password = springSecurityService.encodePassword(params.passwd)
-                }
-                person.enabled = true
-                person.accountExpired=false
-                person.accountLocked=false
-                person.passwordExpired=false
-                if (person.validate()) {
-                    if (create(person)) {
-                        props.setProperty("jummp.firstRun", "false")
-                        FileOutputStream out = new FileOutputStream(file)
-                        props.store(out, "Jummp Configuration")
+                if (userService.createAdmin(flow.user)) {
                         next()
-                    } else {
-                        log.error("The initial user could not be created in the database. Is the database configured properly?")
-                        error()
-                    }
                 } else {
                     error()
                 }
@@ -277,35 +257,5 @@ class SetupController {
 
         finish {
         }
-    }
-
-    private boolean create(User person) {
-        boolean ok = true
-        User.withTransaction { TransactionStatus status ->
-
-            if (!person.save()) {
-                ok = false
-                status.setRollbackOnly()
-            }
-            if (!createRoles(person)) {
-                ok = false
-                status.setRollbackOnly()
-            }
-        }
-        return ok
-    }
-
-    private boolean createRoles(User user) {
-        Role adminRole = new Role(authority: "ROLE_ADMIN")
-        if (!adminRole.save(flush: true)) {
-            return false
-        }
-        UserRole.create(user, adminRole, true)
-        Role userRole = new Role(authority: "ROLE_USER")
-        if (!userRole.save(flush: true)) {
-            return false
-        }
-        UserRole.create(user, userRole, true)
-        return true
     }
 }
