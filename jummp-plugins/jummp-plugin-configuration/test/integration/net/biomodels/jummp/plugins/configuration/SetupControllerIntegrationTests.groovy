@@ -213,16 +213,16 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         signalEvent("next")
         assertCurrentStateEquals("remoteExport")
         // the correct values should transit to remoteRemote state
-        setupController.params.jummpExportDbus = false
+        setupController.params.jummpExportDbus = true
         setupController.params.jummpExportJms = true
         signalEvent("next")
         assertCurrentStateEquals("remoteRemote")
         // wrong value should not transit
-        setupController.params.remote = "smj"
+        setupController.params.jummpRemote = "smj"
         signalEvent("next")
         assertCurrentStateEquals("remoteRemote")
         // this value should transit
-        setupController.params.remote = "jms"
+        setupController.params.jummpRemote = "jms"
         signalEvent("next")
         assertCurrentStateEquals("server")
     }
@@ -326,9 +326,13 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         setupController.params.ldapSearchSubtree = "true"
         signalEvent("next")
         assertCurrentStateEquals("vcs")
-        File directory = new File("target/vcs/workingDirectory")
-        directory.mkdirs()
+        setupController.params.vcs = "git"
+        File workingDirectory = new File("target/vcs/workingDirectory")
+        workingDirectory.mkdirs()
         setupController.params.workingDirectory = "target/vcs/workingDirectory"
+        File exchangeDirectory = new File("target/vcs/exchangeDirectory")
+        exchangeDirectory.mkdirs()
+        setupController.params.exchangeDirectory = "target/vcs/exchangeDirectory"
         signalEvent("next")
         assertCurrentStateEquals("git")
         signalEvent("next")
@@ -374,17 +378,21 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         // going back should end in firstRun
         signalEvent("back")
         assertCurrentStateEquals("firstRun")
-        // going back should end in decideBackFromFirstRun
+        // going back should end in git
         signalEvent("back")
-        assertCurrentStateEquals("decideBackFromFirstRun")
-        // going on should end in git
         assertCurrentStateEquals("git")
-        signalEvent("back")
         // going back should end in vcs
+        signalEvent("back")
         assertCurrentStateEquals("vcs")
-        // now going back should end again in authenticationBackend
+        // going back should end in ldap
+        signalEvent("back")
+        assertCurrentStateEquals("ldap")
+        // now going back should end in authenticationBackend
         signalEvent("back")
         assertCurrentStateEquals("authenticationBackend")
+        // going back should end in start
+        signalEvent("back")
+        assertCurrentStateEquals("start")
     }
 
     void testFirstRunGoBack() {
