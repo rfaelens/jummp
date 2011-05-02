@@ -29,16 +29,21 @@ class SbmlService implements FileFormatService {
             log.error("SBMLDocuement is not valid for file ${model.name}")
             return false
         }
-        boolean valid = true
-        // search for an error - judging the JSMBL source code this might not yet be implemented
-        for (SBMLError error in doc.getListOfErrors()) {
-            if (error.isFatal() || error.isInternal() || error.isSystem() || error.isXML()) {
-                log.debug(error.getMessage())
-                valid = false
-                break
+        // TODO: WARNING: checkConsistency uses an online validator. This might render timeouts during model upload
+        if (doc.checkConsistency() > 0) {
+            boolean valid = true
+            // search for an error
+            for (SBMLError error in doc.getListOfErrors().validationErrors) {
+                if (error.isFatal() || error.isInternal() || error.isSystem() || error.isXML() || error.isError()) {
+                    log.debug(error.getMessage())
+                    valid = false
+                    break
+                }
             }
+            return valid
+        } else {
+            return true
         }
-        return valid
     }
 
     public String extractName(final File model) {
