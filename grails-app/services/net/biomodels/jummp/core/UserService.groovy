@@ -421,11 +421,7 @@ class UserService implements IUserService {
         User person = new User()
         person.properties = user
         boolean userCreated = false
-        File file = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
-        Properties props = new Properties()
-        props.load(new FileInputStream(file))
-
-        if (Boolean.parseBoolean(props.getProperty("jummp.security.ldap.enabled"))) {
+        if (ConfigurationHolder.config.jummp.security.ldap.enabled) {
             // no password for ldap
             person.password = "*"
         } else {
@@ -436,10 +432,7 @@ class UserService implements IUserService {
         person.accountLocked = false
         person.passwordExpired = false
         if (person.validate()) {
-            if (create(person)) {
-                props.setProperty("jummp.firstRun", "false")
-                FileOutputStream out = new FileOutputStream(file)
-                props.store(out, "Jummp Configuration")
+            if (persistAdminWithRoles(person)) {
                 userCreated = true
             } else {
                 log.error("The initial user could not be created in the database. Is the database configured properly?")
@@ -451,15 +444,14 @@ class UserService implements IUserService {
         return userCreated
     }
 
-    boolean create(User person) {
+    boolean persistAdminWithRoles(User person) {
         boolean ok = true
         User.withTransaction { TransactionStatus status ->
-
             if (!person.save()) {
                 ok = false
                 status.setRollbackOnly()
             }
-            if (!createRoles(person)) {
+            if (!createRolesForAdmin(person)) {
                 ok = false
                 status.setRollbackOnly()
             }
@@ -467,17 +459,17 @@ class UserService implements IUserService {
         return ok
     }
 
-    boolean createRoles(User user) {
+    boolean createRolesForAdmin(User user) {
         Role adminRole = new Role(authority: "ROLE_ADMIN")
         if (!adminRole.save(flush: true)) {
             return false
         }
-        UserRole.create(user, adminRole, true)
+        addRoleToUser(user.id, adminRole.id)
         Role userRole = new Role(authority: "ROLE_USER")
         if (!userRole.save(flush: true)) {
             return false
         }
-        UserRole.create(user, userRole, true)
+        addRoleToUser(user.id, userRole.id)
         return true
     }
 }

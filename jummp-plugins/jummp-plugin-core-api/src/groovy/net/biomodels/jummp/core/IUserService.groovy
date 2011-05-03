@@ -215,7 +215,7 @@ public interface IUserService {
  * Instantiates a new user object for the initial user (admin).
  * The values are handed over by the setup controller in form of strings.
  * Some values are hard coded, these are always the same.
- * Triggers the create() method.
+ * Triggers the persistAdminWithRoles() method.
  * @param username The name of the user submitted
  * @param passwd The password of the new user
  * @param userRealName The real name
@@ -225,15 +225,16 @@ public interface IUserService {
     boolean createAdmin(UserCommand user)
 /**
  * Persists the newly instantiated admin user.
- * Triggers the createRoles() method.
+ * Triggers the createRolesForAdmin() method.
  * @param person The instantiated user
  * @return boolean True if user could be persisted, false otherwise
  */
-    boolean create(User person)
+    boolean persistAdminWithRoles(User person)
 /**
- * Assigns the roles to the new user.
+ * Creates the roles to the new user and triggers the addRoleToUser() method twice
+ * which.adds a role to a given user.
  * @param user The created and persisted user
  * @return boolean Indicating whether assigning could be applied
  */
-    boolean createRoles(User user)
+    boolean createRolesForAdmin(User user)
 }

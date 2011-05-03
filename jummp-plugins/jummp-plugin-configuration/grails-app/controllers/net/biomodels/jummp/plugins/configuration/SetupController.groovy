@@ -246,7 +246,13 @@ class SetupController {
         validateAdmin {
             action {
                 if (userService.createAdmin(flow.user)) {
-                        next()
+                    Properties props = new Properties()
+                    File file = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
+                    props.load(new FileInputStream(file))
+                    props.setProperty("jummp.firstRun", "false")
+                    FileOutputStream out = new FileOutputStream(file)
+                    props.store(out, "Jummp Configuration")
+                    next()
                 } else {
                     error()
                 }
