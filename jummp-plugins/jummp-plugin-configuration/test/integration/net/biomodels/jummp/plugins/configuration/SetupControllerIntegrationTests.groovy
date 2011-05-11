@@ -9,6 +9,9 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
     def getFlow() {
         return setupController.setupFlow
     }
+
+    def getFirstRunFlow() {
+    }
     
     protected void setUp() {
         super.setUp()
@@ -199,6 +202,31 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         assertCurrentStateEquals("git")
     }
 
+    void testRemoteTransitions() {
+        setCurrentState("remoteExport")
+        assertCurrentStateEquals("remoteExport")
+        // no remoteExport info should stay in current state
+        signalEvent("next")
+        assertCurrentStateEquals("remoteExport")
+        setupController.params.jummpExportDbus = false
+        setupController.params.jummpExportJms = false
+        signalEvent("next")
+        assertCurrentStateEquals("remoteExport")
+        // the correct values should transit to remoteRemote state
+        setupController.params.jummpExportDbus = true
+        setupController.params.jummpExportJms = true
+        signalEvent("next")
+        assertCurrentStateEquals("remoteRemote")
+        // wrong value should not transit
+        setupController.params.jummpRemote = "smj"
+        signalEvent("next")
+        assertCurrentStateEquals("remoteRemote")
+        // this value should transit
+        setupController.params.jummpRemote = "jms"
+        signalEvent("next")
+        assertCurrentStateEquals("server")
+    }
+
     void testSimpleBackTransitions() {
         // tests that all non-branching states work correctly
         setCurrentState("server")
@@ -273,6 +301,98 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         // now going back should end again in authenticationBackend
         signalEvent("back")
         assertCurrentStateEquals("authenticationBackend")
+    }
+
+    void testRemoteGoBack() {
+        // tests that we end up in the correct state when going back from remote
+        // first navigate to remote
+        setCurrentState("authenticationBackend")
+        assertCurrentStateEquals("authenticationBackend")
+        setupController.params.authenticationBackend = "database"
+        signalEvent("next")
+        assertCurrentStateEquals("vcs")
+        // going back should be in authenticationBackend
+        signalEvent("back")
+        assertCurrentStateEquals("authenticationBackend")
+        // try going over ldap
+        setupController.params.authenticationBackend = "ldap"
+        signalEvent("next")
+        assertCurrentStateEquals("ldap")
+        setupController.params.ldapServer = "server"
+        setupController.params.ldapManagerDn = "manager"
+        setupController.params.ldapManagerPassword = "password"
+        setupController.params.ldapSearchBase = "search"
+        setupController.params.ldapSearchFilter = "filter"
+        setupController.params.ldapSearchSubtree = "true"
+        signalEvent("next")
+        assertCurrentStateEquals("vcs")
+        setupController.params.vcs = "git"
+        File workingDirectory = new File("target/vcs/workingDirectory")
+        workingDirectory.mkdirs()
+        setupController.params.workingDirectory = "target/vcs/workingDirectory"
+        File exchangeDirectory = new File("target/vcs/exchangeDirectory")
+        exchangeDirectory.mkdirs()
+        setupController.params.exchangeDirectory = "target/vcs/exchangeDirectory"
+        signalEvent("next")
+        assertCurrentStateEquals("git")
+        signalEvent("next")
+        assertCurrentStateEquals("firstRun")
+        signalEvent("next")
+        setupController.params.firstRun = "true"
+        signalEvent("next")
+        assertCurrentStateEquals("userRegistration")
+        setupController.params.registration = "false"
+        setupController.params.sendEmail = "false"
+        setupController.params.subject = ""
+        setupController.params.url = ""
+        setupController.params.body = ""
+        setupController.params.senderAddress = ""
+        setupController.params.adminAddress = ""
+        setupController.params.activationBody = ""
+        setupController.params.activationSubject = ""
+        setupController.params.activationUrl = ""
+        signalEvent("next")
+        assertCurrentStateEquals("changePassword")
+        setupController.params.changePassword = "false"
+        setupController.params.resetPassword = "false"
+        setupController.params.subject = ""
+        setupController.params.url = ""
+        setupController.params.body = ""
+        setupController.params.senderAddress = ""
+        signalEvent("next")
+        assertCurrentStateEquals("remoteExport")
+        setupController.params.jummpExportDbus = true
+        setupController.params.jummpExportJms = true
+        signalEvent("next")
+        assertCurrentStateEquals("remoteRemote")
+        setupController.params.jummpRemote = "jms"
+        // going back should end in remoteExport
+        signalEvent("back")
+        assertCurrentStateEquals("remoteExport")
+        // going back should end in changePassword
+        signalEvent("back")
+        assertCurrentStateEquals("changePassword")
+        // going back should end in userRegistration
+        signalEvent("back")
+        assertCurrentStateEquals("userRegistration")
+        // going back should end in firstRun
+        signalEvent("back")
+        assertCurrentStateEquals("firstRun")
+        // going back should end in git
+        signalEvent("back")
+        assertCurrentStateEquals("git")
+        // going back should end in vcs
+        signalEvent("back")
+        assertCurrentStateEquals("vcs")
+        // going back should end in ldap
+        signalEvent("back")
+        assertCurrentStateEquals("ldap")
+        // now going back should end in authenticationBackend
+        signalEvent("back")
+        assertCurrentStateEquals("authenticationBackend")
+        // going back should end in start
+        signalEvent("back")
+        assertCurrentStateEquals("start")
     }
 
     void testFirstRunGoBack() {

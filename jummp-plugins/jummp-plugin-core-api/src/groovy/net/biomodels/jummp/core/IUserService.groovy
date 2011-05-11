@@ -211,4 +211,30 @@ public interface IUserService {
      * @throws RoleNotFoundException If there is no such Role
      */
     Role getRoleByAuthority(String authority) throws RoleNotFoundException
+/**
+ * Instantiates a new user object for the initial user (admin).
+ * The values are handed over by the setup controller in form of strings.
+ * Some values are hard coded, these are always the same.
+ * Triggers the persistAdminWithRoles() method.
+ * @param username The name of the user submitted
+ * @param passwd The password of the new user
+ * @param userRealName The real name
+ * @param email The e-mail address handed over
+ * @return boolean Indicating whether everything worked well
+ */
+    boolean createAdmin(UserCommand user)
+/**
+ * Persists the newly instantiated admin user.
+ * Triggers the createRolesForAdmin() method.
+ * @param person The instantiated user
+ * @return boolean True if user could be persisted, false otherwise
+ */
+    boolean persistAdminWithRoles(User person)
+/**
+ * Creates the roles to the new user and triggers the addRoleToUser() method twice
+ * which.adds a role to a given user.
+ * @param user The created and persisted user
+ * @return boolean Indicating whether assigning could be applied
+ */
+    boolean createRolesForAdmin(User user)
 }
