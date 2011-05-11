@@ -100,6 +100,61 @@ class SbmlServiceTests extends JummpIntegrationTestCase {
         assertEquals("_688624", sbmlService.getMetaId(rev2))
     }
 
+    void testModelNotes() {
+        authenticateAsTestUser()
+        File modelFile = File.createTempFile("jummp", null)
+        modelFile.append('''<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
+  <model>
+    <listOfCompartments>
+      <compartment name="x"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <specie name="y" compartment="x" initialAmount="1"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction name="r">
+        <listOfReactants>
+          <specieReference specie="y"/>
+        </listOfReactants>
+        <listOfProducts>
+          <specieReference specie="y"/>
+        </listOfProducts>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>''')
+        Model model = modelService.uploadModel(modelFile, new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
+        RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
+        assertNull(sbmlService.getNotes(rev))
+
+        File modelWithNotes =  File.createTempFile("jummp", null)
+        modelWithNotes.append('''<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
+  <model>
+    <notes><body xmlns="http://www.w3.org/1999/xhtml"><p>Test</p></body></notes>
+    <listOfCompartments>
+      <compartment name="x"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <specie name="y" compartment="x" initialAmount="1"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction name="r">
+        <listOfReactants>
+          <specieReference specie="y"/>
+        </listOfReactants>
+        <listOfProducts>
+          <specieReference specie="y"/>
+        </listOfProducts>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>''')
+        RevisionTransportCommand rev2 = modelService.addRevision(model, modelWithNotes, ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
+        assertEquals('''<notes>\n  <body xmlns="http://www.w3.org/1999/xhtml"><p>Test</p></body>\n</notes>''', sbmlService.getNotes(rev2))
+    }
+
     private void setupVcs() {
         // setup VCS
         File clone = new File("target/sbml/git")

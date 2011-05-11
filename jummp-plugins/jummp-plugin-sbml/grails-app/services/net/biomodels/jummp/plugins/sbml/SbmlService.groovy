@@ -88,6 +88,17 @@ class SbmlService implements FileFormatService {
     }
 
     /**
+     * Retrieves the notes element as an xml String on model level.
+     * It cannot be used to retrieve notes on another level. If there
+     * are no notes an empty string is returned.
+     * @param revision
+     * @return The notes of the model.
+     */
+    public String getNotes(RevisionTransportCommand revision) {
+         return getFromCache(revision).model.notesString
+    }
+
+    /**
      * Returns the SBMLDocument for the @p revision from the cache.
      * If the cache does not contain the SBMLDocument, the model file is
      * retrieved, parsed and inserted into the Cache.
