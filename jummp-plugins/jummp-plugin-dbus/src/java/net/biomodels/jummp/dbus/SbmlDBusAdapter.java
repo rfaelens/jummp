@@ -1,0 +1,28 @@
+package net.biomodels.jummp.dbus;
+
+import org.freedesktop.dbus.DBusInterface;
+import org.freedesktop.dbus.DBusInterfaceName;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @short DBus interface to SBML.
+ */
+@DBusInterfaceName("net.biomodels.jummp.sbml")
+public interface SbmlDBusAdapter  extends DBusInterface {
+
+    public long getVersion(String authenticationHash, long modelId, int revisionNumber);
+    public long getLevel(String authenticationHash, long modelId, int revisionNumber);
+    public String getModelNotes(String authenticationHash, long modelId, int revisionNumber);
+    public String getModelMetaId(String authenticationHash, long modelId, int revisionNumber);
+
+    /**
+     *
+     * @param authenticationHash
+     * @param modelId
+     * @param revisionNumber
+     * @return JSON String of the annotation on Model level
+     */
+    public String getModelAnnotations(String authenticationHash, long modelId, int revisionNumber);
+}

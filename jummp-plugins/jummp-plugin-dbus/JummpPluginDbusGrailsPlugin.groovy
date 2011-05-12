@@ -6,6 +6,7 @@ import net.biomodels.jummp.dbus.remote.RemoteJummpApplicationAdapterDBusImpl
 import net.biomodels.jummp.dbus.remote.RemoteUserAdapterDBusImpl
 import net.biomodels.jummp.dbus.remote.RemoteModelAdapterDBusImpl
 import net.biomodels.jummp.dbus.remote.DBusExceptionAdvice
+import net.biomodels.jummp.dbus.SbmlDBusAdapterImpl
 
 class JummpPluginDbusGrailsPlugin {
     // the plugin version
@@ -54,6 +55,13 @@ Brief description of the plugin.
                 modelService = ref("modelDelegateService")
                 authenticationHashService = ref("authenticationHashService")
                 objectName = "/Model"
+            }
+            sbmlDBusAdapter(SbmlDBusAdapterImpl) {
+                dbusManager = dbusManager
+                authenticationHashService = ref("authenticationHashService")
+                modelService = ref("modelDelegateService")
+                sbmlService = ref("sbmlService")
+                objectName = "/SBML"
             }
         }
         if (!(application.config.jummp.plugin.dbus.remote instanceof ConfigObject) && application.config.jummp.plugin.dbus.remote) {

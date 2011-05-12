@@ -6,12 +6,14 @@ import org.sbml.jsbml.SBMLDocument
 import org.sbml.jsbml.SBMLError
 import org.sbml.jsbml.SBMLReader
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import org.sbml.jsbml.Model
+import net.biomodels.jummp.core.ISbmlService
 
 /**
  * Service class for handling Model files in the SBML format.
  * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class SbmlService implements FileFormatService {
+class SbmlService implements FileFormatService, ISbmlService {
 
     static transactional = true
 
@@ -59,43 +61,34 @@ class SbmlService implements FileFormatService {
         return ""
     }
 
-    /**
-     * Retrieves the metaId on the Model level. Does not retrieve the metaId of child elements
-     * of model such as compartment.
-     * @param revision
-     * @return MetaId on Model level
-     */
     public String getMetaId(RevisionTransportCommand revision) {
         return getFromCache(revision).model.metaId
     }
 
-    /**
-     *
-     * @param revision
-     * @return Version of the SBML file
-     */
     public long getVersion(RevisionTransportCommand revision) {
         return getFromCache(revision).version
     }
 
-    /**
-     *
-     * @param revision
-     * @return Level of the SBML file
-     */
     public long getLevel(RevisionTransportCommand revision) {
         return getFromCache(revision).level
     }
 
-    /**
-     * Retrieves the notes element as an xml String on model level.
-     * It cannot be used to retrieve notes on another level. If there
-     * are no notes an empty string is returned.
-     * @param revision
-     * @return The notes of the model.
-     */
     public String getNotes(RevisionTransportCommand revision) {
          return getFromCache(revision).model.notesString
+    }
+
+    public List<Map> getAnnotations(RevisionTransportCommand revision) {
+        Model model = getFromCache(revision).model
+        List<Map> list = []
+        model.annotation.listOfCVTerms.each { cvTerm ->
+            list << [
+                    qualifier: cvTerm.biologicalQualifier ? cvTerm.biologicalQualifierType.toString() : (cvTerm.modelQualifier ? cvTerm.modelQualifierType.toString() : ""),
+                    biologicalQualifier: cvTerm.biologicalQualifier,
+                    modelQualifier: cvTerm.modelQualifier,
+                    resources: cvTerm.resources
+            ]
+        }
+        return list
     }
 
     /**
