@@ -7,6 +7,7 @@ import net.biomodels.jummp.dbus.remote.RemoteUserAdapterDBusImpl
 import net.biomodels.jummp.dbus.remote.RemoteModelAdapterDBusImpl
 import net.biomodels.jummp.dbus.remote.DBusExceptionAdvice
 import net.biomodels.jummp.dbus.SbmlDBusAdapterImpl
+import net.biomodels.jummp.dbus.remote.RemoteSbmlAdapterDBusImpl
 
 class JummpPluginDbusGrailsPlugin {
     // the plugin version
@@ -68,6 +69,7 @@ Brief description of the plugin.
             remoteJummpApplicationAdapter(RemoteJummpApplicationAdapterDBusImpl)
             remoteUserAdapterDBusImpl(RemoteUserAdapterDBusImpl)
             remoteModelAdapterDBusImpl(RemoteModelAdapterDBusImpl)
+            remoteSbmlAdapterDBusImpl(RemoteSbmlAdapterDBusImpl)
             xmlns aop: "http://www.springframework.org/schema/aop"
             aop.config {
                 pointcut(id: "dbusExceptionPointcut", expression: "execution(public * net.biomodels.jummp.dbus.remote.*.*(..))")
