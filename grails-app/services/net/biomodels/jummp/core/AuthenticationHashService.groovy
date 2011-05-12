@@ -4,6 +4,7 @@ import org.springframework.security.core.Authentication
 import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.core.authority.GrantedAuthorityImpl
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
  * @short Service implementing the IAuthenticationHashService
@@ -59,6 +60,20 @@ class AuthenticationHashService implements IAuthenticationHashService {
             return entry.authentication
         } else {
             throw new AuthenticationHashNotFoundException("No Authentication for Hash " + hash)
+        }
+    }
+
+    /**
+     * Removes outdated authentications from the map holding all active authentications.
+     */
+    void checkAuthenticationExpired() {
+        long time = Long.parseLong(ConfigurationHolder.config.jummp.authenticationHash.maxInactiveTime)
+        long maxInactiveTime = new Date().getTime() - time
+        authentications.each { user, hash ->
+            long timeStamp = hash.timeStamp.getTime()
+            if (timeStamp < maxInactiveTime) {
+                authentications.remove(user)
+            }
         }
     }
 }

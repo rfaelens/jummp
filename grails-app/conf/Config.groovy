@@ -250,6 +250,24 @@ if (!(jummpConfig.jummp.security.anonymousRegistration instanceof ConfigObject))
     jummp.security.anonymousRegistration = true
 }
 
+// For the job, removing authentication hashes that are unused for a configurable time
+// Used by AuthenticationHashService
+if (!(jummpConfig.jummp.authenticationHash.startRemoveOffset instanceof ConfigObject)) {
+    jummp.authenticationHash.startRemoveOffset = jummpConfig.jummp.authenticationHash.startRemoveOffset
+} else {
+    jummp.authenticationHash.startRemoveOffset = 5*60*1000
+}
+if (!(jummpConfig.jummp.authenticationHash.removeInterval instanceof ConfigObject)) {
+    jummp.authenticationHash.removeInterval = jummpConfig.jummp.authenticationHash.removeInterval
+} else {
+    jummp.authenticationHash.removeInterval = 30*60*1000
+}
+if (!(jummpConfig.jummp.authenticationHash.maxInactiveTime instanceof ConfigObject)) {
+    jummp.authenticationHash.maxInactiveTime = jummpConfig.jummp.authenticationHash.maxInactiveTime
+} else {
+    jummp.authenticationHash.maxInactiveTime = 30*60*1000
+}
+
 // get all Plugin Configurations
 // the list of available plugins is read from the BuildConfig's plugin location
 // for each plugin it is assumed that it has a JummpPluginConfig class in the package
