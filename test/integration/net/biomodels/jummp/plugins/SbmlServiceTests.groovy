@@ -38,29 +38,7 @@ class SbmlServiceTests extends JummpIntegrationTestCase {
 
     void testLevelAndVersion() {
         authenticateAsTestUser()
-        File modelFile = File.createTempFile("jummp", null)
-        modelFile.append('''<?xml version="1.0" encoding="UTF-8"?>
-<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
-  <model>
-    <listOfCompartments>
-      <compartment name="x"/>
-    </listOfCompartments>
-    <listOfSpecies>
-      <specie name="y" compartment="x" initialAmount="1"/>
-    </listOfSpecies>
-    <listOfReactions>
-      <reaction name="r">
-        <listOfReactants>
-          <specieReference specie="y"/>
-        </listOfReactants>
-        <listOfProducts>
-          <specieReference specie="y"/>
-        </listOfProducts>
-      </reaction>
-    </listOfReactions>
-  </model>
-</sbml>''')
-        Model model = modelService.uploadModel(modelFile, new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
+        Model model = modelService.uploadModel(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
         assertEquals(1, sbmlService.getLevel(rev))
         assertEquals(1, sbmlService.getVersion(rev))
@@ -71,29 +49,7 @@ class SbmlServiceTests extends JummpIntegrationTestCase {
 
     void testModelMetaId() {
         authenticateAsTestUser()
-        File modelFile = File.createTempFile("jummp", null)
-        modelFile.append('''<?xml version="1.0" encoding="UTF-8"?>
-<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
-  <model>
-    <listOfCompartments>
-      <compartment name="x"/>
-    </listOfCompartments>
-    <listOfSpecies>
-      <specie name="y" compartment="x" initialAmount="1"/>
-    </listOfSpecies>
-    <listOfReactions>
-      <reaction name="r">
-        <listOfReactants>
-          <specieReference specie="y"/>
-        </listOfReactants>
-        <listOfProducts>
-          <specieReference specie="y"/>
-        </listOfProducts>
-      </reaction>
-    </listOfReactions>
-  </model>
-</sbml>''')
-        Model model = modelService.uploadModel(modelFile, new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
+        Model model = modelService.uploadModel(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
         assertEquals("", sbmlService.getMetaId(rev))
         RevisionTransportCommand rev2 = modelService.addRevision(model, new File("test/files/BIOMD0000000272.xml"), ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
@@ -102,29 +58,7 @@ class SbmlServiceTests extends JummpIntegrationTestCase {
 
     void testModelNotes() {
         authenticateAsTestUser()
-        File modelFile = File.createTempFile("jummp", null)
-        modelFile.append('''<?xml version="1.0" encoding="UTF-8"?>
-<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
-  <model>
-    <listOfCompartments>
-      <compartment name="x"/>
-    </listOfCompartments>
-    <listOfSpecies>
-      <specie name="y" compartment="x" initialAmount="1"/>
-    </listOfSpecies>
-    <listOfReactions>
-      <reaction name="r">
-        <listOfReactants>
-          <specieReference specie="y"/>
-        </listOfReactants>
-        <listOfProducts>
-          <specieReference specie="y"/>
-        </listOfProducts>
-      </reaction>
-    </listOfReactions>
-  </model>
-</sbml>''')
-        Model model = modelService.uploadModel(modelFile, new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
+        Model model = modelService.uploadModel(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
         assertNull(sbmlService.getNotes(rev))
 
@@ -173,5 +107,31 @@ class SbmlServiceTests extends JummpIntegrationTestCase {
             jummp.vcs.exchangeDirectory="target/sbml/exchange"
             ''')
         modelService.vcsService.vcsManager = gitService.getInstance()
+    }
+
+    private File smallModel() {
+        File modelFile = File.createTempFile("jummp", null)
+        modelFile.append('''<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
+  <model>
+    <listOfCompartments>
+      <compartment name="x"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <specie name="y" compartment="x" initialAmount="1"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction name="r">
+        <listOfReactants>
+          <specieReference specie="y"/>
+        </listOfReactants>
+        <listOfProducts>
+          <specieReference specie="y"/>
+        </listOfProducts>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>''')
+        return modelFile
     }
 }
