@@ -50,7 +50,7 @@ class DBusRevision extends RevisionTransportCommand implements DBusSerializable 
      */
     public static DBusRevision fromRevisionTransportCommand(RevisionTransportCommand rev) {
         return new DBusRevision(id: rev.id,
-                revisionNumber: rev.id,
+                revisionNumber: rev.revisionNumber,
                 owner: rev.owner,
                 minorRevision: rev.minorRevision,
                 comment: rev.comment,
