@@ -74,7 +74,13 @@ class SbmlService implements FileFormatService, ISbmlService {
     }
 
     public String getNotes(RevisionTransportCommand revision) {
-         return getFromCache(revision).model.notesString
+        // JSBML may return null - see https://sourceforge.net/tracker/?func=detail&aid=3300490&group_id=279608&atid=1186776
+        String notesString = getFromCache(revision).model.notesString
+        if (!notesString) {
+            return ""
+        } else {
+            return notesString
+        }
     }
 
     public List<Map> getAnnotations(RevisionTransportCommand revision) {
