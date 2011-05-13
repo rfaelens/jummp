@@ -2,7 +2,6 @@ package net.biomodels.jummp.webapplication
 
 import net.biomodels.jummp.webapp.menu.MenuItem
 import net.biomodels.jummp.webapp.miriam.MiriamDatatype
-import org.codehaus.groovy.grails.plugins.codecs.URLCodec
 
 /**
  * Small TagLib to render custom tags.
@@ -193,10 +192,7 @@ class JummpTagLib {
         MiriamDatatype miriam = miriamService.resolveDatatype(urn)
         out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).location}\">${miriam.name}</a>"
         out << "&nbsp;"
-        // TODO: BioModels DB is able to render a name for the identifier by directly connecting to the database
-        // we cannot do that right now. Maybe for the EBI it would be possible to use a plugin for such resources
-        // for other instances the usage of a web service might work, but would slow down everything
-        out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).action.replace('$id', identifier)}\">${URLCodec.decode(identifier)}</a>"
+        out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).action.replace('$id', identifier)}\">${miriamService.resolveName(miriam, identifier)}</a>"
     }
 
     /**
