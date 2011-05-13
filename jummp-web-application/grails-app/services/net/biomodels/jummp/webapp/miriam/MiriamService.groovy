@@ -1,6 +1,7 @@
 package net.biomodels.jummp.webapp.miriam
 
 import org.codehaus.groovy.grails.plugins.codecs.URLCodec
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
  * Service for handling MIRIAM resources.
@@ -41,6 +42,13 @@ class MiriamService {
      * @return The preferred Resource for the given datatype
      */
     public MiriamResource preferredResource(MiriamDatatype datatype) {
+        if (ConfigurationHolder.config.jummp.webapp.miriam.prefered.containsKey(datatype.identifier)) {
+            // try to find the resource
+            MiriamResource resource = (MiriamResource)datatype.resources.find{ it.identifier == ConfigurationHolder.config.jummp.webapp.miriam.prefered[datatype.identifier] }
+            if (resource) {
+                return resource
+            }
+        }
         return (MiriamResource)(datatype.resources.findAll { !it.obsolete }.sort { it.id }?.first())
     }
 
