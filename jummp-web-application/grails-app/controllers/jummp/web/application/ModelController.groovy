@@ -101,7 +101,8 @@ class ModelController {
             }
             notes = html
         }
-        [publication: remoteModelService.getPublication(params.id as Long), revision: rev, notes: notes]
+        // TODO: find a better solution to include SBML information. The web application should not be SBML specific
+        [publication: remoteModelService.getPublication(params.id as Long), revision: rev, notes: notes, annotations: remoteSbmlService.getAnnotations(params.id as Long, rev.revisionNumber)]
     }
 
     /**

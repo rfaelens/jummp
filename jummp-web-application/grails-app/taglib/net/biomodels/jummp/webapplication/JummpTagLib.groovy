@@ -1,6 +1,8 @@
 package net.biomodels.jummp.webapplication
 
 import net.biomodels.jummp.webapp.menu.MenuItem
+import net.biomodels.jummp.webapp.miriam.MiriamDatatype
+import org.codehaus.groovy.grails.plugins.codecs.URLCodec
 
 /**
  * Small TagLib to render custom tags.
@@ -12,6 +14,10 @@ class JummpTagLib {
      * Dependency Injection of Menu Service
      */
     def menuService
+    /**
+     * Dependency Injection for Miriam Service
+     */
+    def miriamService
 
     /**
      * Renders a compact title of a publication.
@@ -113,6 +119,141 @@ class JummpTagLib {
 
         if (renderDiv) {
             out << "</div>"
+        }
+    }
+
+    /**
+     * Renders a list of Annotations. An annotation is a map consisting of following key/value pairs:
+     * @li biologicalQualifier
+     * @li modelQualifier
+     * @li qualifier
+     * @li resources
+     * A description of the keys can be found in ISbmlService.getAnnotations().
+     * @attr annotations List of Annotation maps (required)
+     * @attr biological Boolean attribute whether to include annotations with biological qualifier (optional, default @c true)
+     * @attr model Boolean attribute whether to include annotations with model qualifier (optional, decault @c true)
+     * @todo move into an SBML taglib
+     */
+    def annotations = { attrs ->
+        boolean biologicalAnnotations = true
+        boolean modelAnnotations = true
+        if (attrs.containsKey("biological")) {
+            biologicalAnnotations = Boolean.parseBoolean(attrs.biological)
+        }
+        if (attrs.containsKey("model")) {
+            modelAnnotations = Boolean.parseBoolean(attrs.model)
+        }
+        out << "<ul>"
+        attrs.annotations.each { annotation ->
+            if (annotation.qualifier == "BQB_UNKNOWN" || annotation.qualifier == "BQM_UNKNOWN") {
+                return
+            }
+            if (annotation.biologicalQualifier && !biologicalAnnotations) {
+                return
+            }
+            if (annotation.modelQualifier && !modelAnnotations) {
+                return
+            }
+            out << "<li>"
+            out << renderAnnotation(annotation)
+            out << "</li>"
+        }
+        out << "</ul>"
+    }
+
+    /**
+     * Renders one Annotations Map.
+     * @see annotations
+     * @todo move into an SBML taglib
+     */
+    def renderAnnotation = { annotation ->
+        renderQualifer(annotation.qualifier)
+        if (annotation.resources.size() == 1) {
+            out << "&nbsp;"
+            renderURN(annotation.resources[0])
+        } else {
+            out << "<ul>"
+            annotation.resources.each {
+                out << "<li>"
+                renderURN(it)
+                out << "</li>"
+            }
+            out << "</ul>"
+        }
+    }
+
+    /**
+     * Renders a single MIRIAM URN from an annotation resource.
+     * @todo move into an SBML taglib
+     */
+    def renderURN = { resource ->
+        int colonIndex = resource.lastIndexOf(':')
+        String urn = resource.substring(0, colonIndex)
+        String identifier = resource.substring(colonIndex + 1)
+        MiriamDatatype miriam = miriamService.resolveDatatype(urn)
+        out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).location}\">${miriam.name}</a>"
+        out << "&nbsp;"
+        // TODO: BioModels DB is able to render a name for the identifier by directly connecting to the database
+        // we cannot do that right now. Maybe for the EBI it would be possible to use a plugin for such resources
+        // for other instances the usage of a web service might work, but would slow down everything
+        out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).action.replace('$id', identifier)}\">${URLCodec.decode(identifier)}</a>"
+    }
+
+    /**
+     * Renders a Biomodels.net annotation qualifier.
+     * The qualifier has to be one of org.sbml.jsbml.CVTerm.Qualifier
+     * @todo move into an SBML taglib
+     */
+    def renderQualifer = { qualifier ->
+        switch (qualifier) {
+        case "BQB_ENCODES":
+            out << g.message(code: "sbml.qualifier.bqb.encodes")
+            break
+        case "BQB_HAS_PART":
+            out << g.message(code: "sbml.qualifier.bqb.hasPart")
+            break
+        case "BQB_HAS_PROPERTY":
+            out << g.message(code: "sbml.qualifier.bqb.hasProperty")
+            break
+        case "BQB_HAS_VERSION":
+            out << g.message(code: "sbml.qualifier.bqb.hasVersion")
+            break
+        case "BQB_IS":
+            out << g.message(code: "sbml.qualifier.bqb.is")
+            break
+        case "BQB_IS_DESCRIBED_BY":
+            out << g.message(code: "sbml.qualifier.bqb.isDescribedBy")
+            break
+        case "BQB_IS_ENCODED_BY":
+            out << g.message(code: "sbml.qualifier.bqb.isEncodedBy")
+            break
+        case "BQB_IS_HOMOLOG_TO":
+            out << g.message(code: "sbml.qualifier.bqb.isHomologTo")
+            break
+        case "BQB_IS_PART_OF":
+            out << g.message(code: "sbml.qualifier.bqb.isPartOf")
+            break
+        case "BQB_IS_PROPERTY_OF":
+            out << g.message(code: "sbml.qualifier.bqb.isPropertyOf")
+            break
+        case "BQB_IS_VERSION_OF":
+            out << g.message(code: "sbml.qualifier.bqb.isVersionOf")
+            break
+        case "BQB_OCCURS_IN":
+            out << g.message(code: "sbml.qualifier.bqb.occursIn")
+            break
+        case "BQM_IS":
+            out << g.message(code: "sbml.qualifier.bqm.is")
+            break
+        case "BQM_IS_DERIVED_FROM":
+            out << g.message(code: "sbml.qualifier.bqm.isDerivedFrom")
+            break
+        case "BQM_IS_DESCRIBED_BY":
+            out << g.message(code: "sbml.qualifier.bqm.isDescribedBy")
+            break
+        default:
+            out << ""
+            break
         }
     }
 }
