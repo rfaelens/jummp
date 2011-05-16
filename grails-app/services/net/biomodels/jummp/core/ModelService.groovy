@@ -356,7 +356,7 @@ class ModelService {
                 uploadDate: new Date(),
                 format: ModelFormat.findByIdentifier(meta.format.identifier))
         // vcs identifier is upload date + name - this should by all means be unique
-        model.vcsIdentifier = revision.uploadDate.format("yyyy-MM-dd'T'HH:mm:ss:SSS") + "_" + model.name
+        model.vcsIdentifier = revision.uploadDate.format("yyyy-MM-dd'T'HH-mm-ss-SSS") + "_" + model.name
         try {
             revision.vcsId = vcsService.importFile(model, modelFile)
         } catch (VcsException e) {
