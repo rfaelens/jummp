@@ -8,6 +8,8 @@ import org.sbml.jsbml.SBMLReader
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import org.sbml.jsbml.Model
 import net.biomodels.jummp.core.ISbmlService
+import org.sbml.jsbml.ListOf
+import org.sbml.jsbml.Parameter
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -92,6 +94,24 @@ class SbmlService implements FileFormatService, ISbmlService {
                     biologicalQualifier: cvTerm.biologicalQualifier,
                     modelQualifier: cvTerm.modelQualifier,
                     resources: cvTerm.resources
+            ]
+        }
+        return list
+    }
+
+    public List<Map> getParameters(RevisionTransportCommand revision) {
+        Model model = getFromCache(revision).model
+        ListOf<Parameter> parameters = model.getListOfParameters()
+        List<Map> list = []
+        parameters.each { parameter ->
+            list << [
+                    id: parameter.id,
+                    name: parameter.name,
+                    metaId: parameter.metaId,
+                    constant: parameter.constant,
+                    value: parameter.isSetValue() ? parameter.value : null,
+                    sboTerm: parameter.getSBOTerm() != -1 ? parameter.getSBOTerm() : null,
+                    unit: parameter.units
             ]
         }
         return list

@@ -25,4 +25,5 @@ public interface SbmlDBusAdapter  extends DBusInterface {
      * @return JSON String of the annotation on Model level
      */
     public String getModelAnnotations(String authenticationHash, long modelId, int revisionNumber);
+    public String getParameters(String authenticationHash, long modelId, int revisionNumber);
 }

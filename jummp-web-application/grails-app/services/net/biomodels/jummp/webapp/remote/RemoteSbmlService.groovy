@@ -26,4 +26,8 @@ class RemoteSbmlService implements RemoteSbmlAdapter {
     def List<Map> getAnnotations(long modelId, int revisionNumber) {
         return remoteSbmlAdapter.getAnnotations(modelId, revisionNumber)
     }
+
+    List<Map> getParameters(long modelId, int revisionNumber) {
+        return remoteSbmlAdapter.getParameters(modelId, revisionNumber)
+    }
 }

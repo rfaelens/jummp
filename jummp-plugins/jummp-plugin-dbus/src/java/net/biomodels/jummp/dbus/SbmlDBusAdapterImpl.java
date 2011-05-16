@@ -69,6 +69,16 @@ public class SbmlDBusAdapterImpl extends AbstractDBusAdapter implements SbmlDBus
         }
     }
 
+    public String getParameters(String authenticationHash, long modelId, int revisionNumber) {
+        try {
+            setAuthentication(authenticationHash);
+            JSON json = new JSON(sbmlService.getParameters(modelService.getRevision(modelId, revisionNumber)));
+            return json.toString();
+        } finally {
+            restoreAuthentication();
+        }
+    }
+
     public boolean isRemote() {
         return false;
     }

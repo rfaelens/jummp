@@ -53,4 +53,19 @@ interface ISbmlService {
      * @return List of all MIRIAM annotations of the model element
      */
     public List<Map> getAnnotations(RevisionTransportCommand revision)
+
+    /**
+     * Retrieves the global parameters of the SBML Model.
+     * The returned list contains one map for each parameter with the following keys/values:
+     * @li id: the id element
+     * @li metaId: The metaId element
+     * @li name: The name element
+     * @li constants: @c true if parameter is a constant, @c false otherwise
+     * @li value: The value element if set, otherwise @c null
+     * @li sboTerm: The numerical sbo term if set, otherwise @c null
+     * @li unit: The unit element
+     * @param revision
+     * @return List of all parameters in the Model
+     */
+    public List<Map> getParameters(RevisionTransportCommand revision)
 }
