@@ -10,7 +10,6 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
  * @short Service implementing the IAuthenticationHashService
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
- * @todo Thread to remove Hash Entries
  */
 class AuthenticationHashService implements IAuthenticationHashService {
     /**

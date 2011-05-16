@@ -253,12 +253,12 @@ if (!(jummpConfig.jummp.security.anonymousRegistration instanceof ConfigObject))
 // For the job, removing authentication hashes that are unused for a configurable time
 // Used by AuthenticationHashService
 if (!(jummpConfig.jummp.authenticationHash.startRemoveOffset instanceof ConfigObject)) {
-    jummp.authenticationHash.startRemoveOffset = jummpConfig.jummp.authenticationHash.startRemoveOffset
+    jummp.authenticationHash.startRemoveOffset = Long.parseLong(jummpConfig.jummp.authenticationHash.startRemoveOffset)
 } else {
     jummp.authenticationHash.startRemoveOffset = 5*60*1000
 }
 if (!(jummpConfig.jummp.authenticationHash.removeInterval instanceof ConfigObject)) {
-    jummp.authenticationHash.removeInterval = jummpConfig.jummp.authenticationHash.removeInterval
+    jummp.authenticationHash.removeInterval = Long.parseLong(jummpConfig.jummp.authenticationHash.removeInterval)
 } else {
     jummp.authenticationHash.removeInterval = 30*60*1000
 }
