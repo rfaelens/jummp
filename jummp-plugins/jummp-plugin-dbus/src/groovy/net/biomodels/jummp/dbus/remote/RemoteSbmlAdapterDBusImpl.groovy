@@ -6,6 +6,7 @@ import org.freedesktop.dbus.DBusConnection
 import net.biomodels.jummp.dbus.SbmlDBusAdapter
 import org.springframework.beans.factory.InitializingBean
 import grails.converters.JSON
+import org.codehaus.groovy.grails.web.json.JSONObject
 
 /**
  * Created by IntelliJ IDEA.
@@ -57,7 +58,15 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
         def parsedJSON = JSON.parse(json)
         List<Map> returnList = []
         parsedJSON.each {
-            returnList << it
+            Map entry = [:]
+            it.keySet().each { key ->
+                def value = it.get(key)
+                if (value == JSONObject.NULL) {
+                    value = null
+                }
+                entry.put(key, value)
+            }
+            returnList << entry
         }
         return returnList
     }
