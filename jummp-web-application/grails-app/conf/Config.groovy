@@ -154,5 +154,41 @@ if (jummpProperties.containsKey("jummp.remote")) {
 } else {
     net.biomodels.jummp.webapp.remote = "jms"
 }
+
+// TODO: externalize the prefered MIRIAM resources
+// format: key == datatype, value == resource
+jummp.webapp.miriam.prefered = [
+        "MIR:00000007": "MIR:00100006",
+        "MIR:00000111": "MIR:00100144",
+        "MIR:00000002": "MIR:00100009",
+        "MIR:00000021": "MIR:00100030",
+        "MIR:00000019": "MIR:00100010",
+        "MIR:00000003": "MIR:00100011",
+        "MIR:00000069": "MIR:00100099",
+        "MIR:00000004": "MIR:00100001",
+        "MIR:00000067": "MIR:00100097",
+        "MIR:00000022": "MIR:00100012",
+        "MIR:00000009": "MIR:00100016",
+        "MIR:00000010": "MIR:00100017",
+        "MIR:00000011": "MIR:00100018",
+        "MIR:00000043": "MIR:00100071",
+        "MIR:00000013": "MIR:00100021",
+        "MIR:00000116": "MIR:00100149",
+        "MIR:00000012": "MIR:00100020",
+        "MIR:00000014": "MIR:00100022",
+        "MIR:00000016": "MIR:00100024",
+        "MIR:00000060": "MIR:00100088",
+        "MIR:00000017": "MIR:00100025",
+        "MIR:00000056": "MIR:00100084",
+        "MIR:00000034": "MIR:00100059",
+        "MIR:00000015": "MIR:00100032",
+        "MIR:00000018": "MIR:00100026",
+        "MIR:00000086": "MIR:00100117",
+        "MIR:00000038": "MIR:00100063",
+        "MIR:00000006": "MIR:00100019",
+        "MIR:00000005": "MIR:00100004",
+        "MIR:00000112": "MIR:00100145"
+]
+
 // fails the ant build script
 grails.enable.native2ascii=false

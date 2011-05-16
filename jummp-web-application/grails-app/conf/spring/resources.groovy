@@ -13,6 +13,9 @@ beans = {
         remoteModelService(net.biomodels.jummp.webapp.remote.RemoteModelService) {
             remoteModelAdapter = ref("remoteModelAdapterDBusImpl")
         }
+        remoteSbmlService(net.biomodels.jummp.webapp.remote.RemoteSbmlService) {
+            remoteSbmlAdapter = ref("remoteSbmlAdapterDBusImpl")
+        }
     } else {
         println("Using JMS")
         remoteUserService(net.biomodels.jummp.webapp.remote.RemoteUserService) {
