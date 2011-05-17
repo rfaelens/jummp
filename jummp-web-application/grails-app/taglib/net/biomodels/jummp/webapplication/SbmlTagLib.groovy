@@ -5,7 +5,7 @@ class SbmlTagLib {
 
     /**
      * Renders an SBML notes string.
-     * @attribute notes The notes string
+     * @attr notes REQUIRED The notes string
      */
     def notes = { attrs ->
         if (!attrs.notes || attrs.notes == "") {
@@ -56,8 +56,8 @@ class SbmlTagLib {
 
     /**
      * Renders a list of SBML parameters - either global or reaction parameters.
-     * @attribute parameters List of Parameters
-     * @attribute The Title for the parameters
+     * @attr parameters List of Parameters
+     * @attr title REQUIRED The Title for the parameters
      */
     def renderParameters = { attrs ->
         out << renderParameterTitle(title: attrs.title, size: attrs.parameters.size())
@@ -68,7 +68,7 @@ class SbmlTagLib {
 
     /**
      * Renders the HTML code for one SBML parameter
-     * @attribute parameter The Map describing one parameter
+     * @attr parameter REQUIRED The Map describing one parameter
      */
     def renderParameter = { attrs ->
         // TODO: don't hardcode html
@@ -95,8 +95,8 @@ class SbmlTagLib {
 
     /**
      * Renders the title row of one SBML parameter section.
-     * @attribute title The title for the following parameter section
-     * @attribute size The number of parameters in the following section
+     * @attr title REQUIRED The title for the following parameter section
+     * @attr size REQUIRED The number of parameters in the following section
      */
     def renderParameterTitle = { attrs ->
         // TODO: don't hardcode html
