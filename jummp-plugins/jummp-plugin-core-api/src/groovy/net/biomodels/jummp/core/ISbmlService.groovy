@@ -68,4 +68,14 @@ interface ISbmlService {
      * @return List of all parameters in the Model
      */
     public List<Map> getParameters(RevisionTransportCommand revision)
+    /**
+     * Retrieves the parameter with given @p id from the SBML Model.
+     * The returned Map contains all the elements as explained in @link getParameters
+     * with additionally the annotation and notes added to the map. The annotation
+     * element follows the description of @link getAnnotations.
+     * @param revision
+     * @param id The unique id in the SBML Model.
+     * @return Map of all parameter data
+     */
+    public Map getParameter(RevisionTransportCommand revision, String id)
 }

@@ -30,4 +30,8 @@ class RemoteSbmlService implements RemoteSbmlAdapter {
     List<Map> getParameters(long modelId, int revisionNumber) {
         return remoteSbmlAdapter.getParameters(modelId, revisionNumber)
     }
+
+    Map getParameter(long modelId, int revisionNumber, String id) {
+        return remoteSbmlAdapter.getParameter(modelId, revisionNumber, id)
+    }
 }

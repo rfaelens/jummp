@@ -26,4 +26,5 @@ public interface SbmlDBusAdapter  extends DBusInterface {
      */
     public String getModelAnnotations(String authenticationHash, long modelId, int revisionNumber);
     public String getParameters(String authenticationHash, long modelId, int revisionNumber);
+    public String getParameter(String authenticationHash, long modelId, int revisionNumber, String id);
 }
