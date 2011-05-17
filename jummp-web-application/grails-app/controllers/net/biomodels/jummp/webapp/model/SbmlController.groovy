@@ -15,7 +15,8 @@ class SbmlController {
             render(template: "/templates/page", model: [link: g.createLink(action: "parameter", id: params.id)+ "?revision=${params.revision}", callback: "loadModelTabCallback"])
             return
         }
-        [parameters: remoteSbmlService.getParameters(params.id as long, params.revision as int)]
+        [parameters: remoteSbmlService.getParameters(params.id as long, params.revision as int),
+        reactionParameters: remoteSbmlService.getLocalParameters(params.id as long, params.revision as int)]
     }
 
     def parameterMeta = {
