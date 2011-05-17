@@ -44,6 +44,13 @@ class SbmlTagLib {
         rootNode.body.childNodes().each { child ->
             html += closure(child, closure)
         }
+        // not all notes are wrapped in a body
+        rootNode.childNodes().each { child ->
+            // body already handled above
+            if (child.name.toLowerCase() != "body") {
+                html += closure(child, closure)
+            }
+        }
         out << html
     }
 }
