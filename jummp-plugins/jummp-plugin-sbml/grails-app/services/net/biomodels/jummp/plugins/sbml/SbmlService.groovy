@@ -171,5 +171,4 @@ class SbmlService implements FileFormatService, ISbmlService {
         }
         return list
     }
-
 }

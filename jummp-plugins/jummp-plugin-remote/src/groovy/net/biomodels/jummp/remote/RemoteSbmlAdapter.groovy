@@ -90,5 +90,4 @@ public interface RemoteSbmlAdapter {
      * @return List of all reactions with their parameters
      */
     public List<Map> getLocalParameters(long modelId, int revisionNumber)
-
 }
