@@ -11,6 +11,7 @@ import net.biomodels.jummp.core.ISbmlService
 import org.sbml.jsbml.ListOf
 import org.sbml.jsbml.Parameter
 import org.sbml.jsbml.Annotation
+import org.sbml.jsbml.QuantityWithUnit
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -113,6 +114,20 @@ class SbmlService implements FileFormatService, ISbmlService {
         return map
     }
 
+    public List<Map> getLocalParameters(RevisionTransportCommand revision) {
+        Model model = getFromCache(revision).model
+        List<Map> reactions = []
+        model.listOfReactions.each { reaction ->
+            List<Map> localParameters = []
+            reaction.kineticLaw.getListOfLocalParameters().each { parameter ->
+                Map map = parameterToMap(parameter)
+                localParameters << map
+            }
+            reactions << [id: reaction.id, name: reaction.name, parameters: localParameters]
+        }
+        return reactions
+    }
+
     /**
      * Returns the SBMLDocument for the @p revision from the cache.
      * If the cache does not contain the SBMLDocument, the model file is
@@ -132,12 +147,12 @@ class SbmlService implements FileFormatService, ISbmlService {
         return document
     }
 
-    private Map parameterToMap(Parameter parameter) {
+    private Map parameterToMap(QuantityWithUnit parameter) {
         return [
                 id: parameter.id,
                 name: parameter.name,
                 metaId: parameter.metaId,
-                constant: parameter.constant,
+                constant: (parameter instanceof Parameter) ? parameter.constant : true,
                 value: parameter.isSetValue() ? parameter.value : null,
                 sboTerm: parameter.getSBOTerm() != -1 ? parameter.getSBOTerm() : null,
                 unit: parameter.units
