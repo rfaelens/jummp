@@ -71,26 +71,10 @@ class SbmlTagLib {
      * @attr parameter REQUIRED The Map describing one parameter
      */
     def renderParameter = { attrs ->
-        // TODO: don't hardcode html
         Map param = attrs.parameter
         String name = param.name ? param.name : param.id
         String metaLink = g.createLink(controller: 'sbml', action: 'parameterMeta', params: [id: params.id, parameterId: param.id, revision: params.revision])
-        out << "<tr rel=\"${metaLink}\" title=\"${name}\">"
-        out << "<th class=\"parameterTitle\">${name}</th>"
-        out << "<td class=\"parameterValue\">"
-        out << "<p>"
-        if (param.value) {
-            out << "Value: ${param.value}"
-        }
-        if (param.unit) {
-            out << "<span class=\"parameterUnit\">(Units: ${param.unit})</span>"
-        }
-        out << "</p>"
-        if (param.constant) {
-            out << "<p class=\"parameterConstant\">Constant</p>"
-        }
-        out << "</td>"
-        out << "</tr>"
+        out << render(template: "/templates/sbml/parameter", model: [title: name, metaLink: metaLink, value: param.value, unit: param.unit, constant: param.constant])
     }
 
     /**
@@ -99,11 +83,6 @@ class SbmlTagLib {
      * @attr size REQUIRED The number of parameters in the following section
      */
     def renderParameterTitle = { attrs ->
-        // TODO: don't hardcode html
-        out << "<tr>"
-        out << "<th colspan=\"2\">"
-        out << attrs.title + "&nbsp;(" + attrs.size + ")"
-        out << "</th>"
-        out << "</tr>"
+        out << render(template: "/templates/sbml/parameterTitle", model: [title: attrs.title, size: attrs.size])
     }
 }
