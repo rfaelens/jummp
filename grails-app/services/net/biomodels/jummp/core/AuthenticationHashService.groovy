@@ -75,4 +75,8 @@ class AuthenticationHashService implements IAuthenticationHashService {
             }
         }
     }
+
+    boolean isAuthenticated(String hash) {
+        return authentications.containsKey(hash)
+    }
 }

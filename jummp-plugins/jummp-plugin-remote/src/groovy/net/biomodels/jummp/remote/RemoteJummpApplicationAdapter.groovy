@@ -30,4 +30,11 @@ public interface RemoteJummpApplicationAdapter {
      * @return The core's configuration
      */
     ConfigObject getJummpConfig(String appToken)
+    /**
+     * Retrieves a boolean from the core, indicating whether a user's
+     * authentication hash is still valid or already removed.
+     * @param authentication The authentication of a user
+     * @return true if authentication is valid, false otherwise
+     */
+    boolean isAuthenticated(Authentication authentication)
 }

@@ -5,6 +5,7 @@ import org.perf4j.aop.Profiled
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import net.biomodels.jummp.remote.RemoteJummpApplicationAdapter
+import net.biomodels.jummp.core.user.JummpAuthentication
 
 /**
  * @short Service delegating to Application specific methods of the core via synchronous JMS
@@ -52,4 +53,10 @@ class RemoteJummpApplicationAdapterJmsImpl extends AbstractJmsRemoteAdapter impl
         return (Authentication)retVal
     }
 
+    @Profiled(tag="RemoteJummpApplicationAdapterJmsImpl.isAuthenticated")
+    boolean isAuthenticated(Authentication authentication) {
+        def retVal = send("isAuthenticated", ((JummpAuthentication)authentication).getAuthenticationHash())
+        validateReturnValue(retVal, Boolean)
+        return (Boolean)retVal
+    }
 }

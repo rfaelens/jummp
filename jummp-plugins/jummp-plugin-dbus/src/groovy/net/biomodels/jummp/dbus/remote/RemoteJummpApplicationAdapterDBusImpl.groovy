@@ -8,6 +8,7 @@ import org.freedesktop.dbus.DBusConnection
 import net.biomodels.jummp.dbus.ApplicationDBusAdapter
 import org.springframework.beans.factory.InitializingBean
 import org.perf4j.aop.Profiled
+import net.biomodels.jummp.core.user.JummpAuthentication
 
 /**
  * @short DBus Remote Adapter to JummpApplication.
@@ -51,5 +52,10 @@ class RemoteJummpApplicationAdapterDBusImpl implements RemoteJummpApplicationAda
             }
         }
         return config
+    }
+
+    @Profiled(tag="RemoteJummpApplicationAdapterDBusImpl.isAuthenticated")
+    boolean isAuthenticated(Authentication authentication) {
+        return applicationDBusAdapter.isAuthenticated(((JummpAuthentication)authentication).getAuthenticationHash())
     }
 }

@@ -94,6 +94,17 @@ class ApplicationJmsAdapterService extends AbstractJmsAdapter {
     }
 
     /**
+     * Retrieves a boolean from the core, indicating if a user's authentication still is valid.
+     * @param message The authentication hash of the actual user
+     * @return True if user is valid, false otherwise
+     */
+    @grails.plugin.jms.Queue
+    @Profiled(tag="jmsAdapterService.isUserAuthenticated")
+    def isUserAuthenticated(def message) {
+        return authenticationHashService.isAuthenticated(message)
+    }
+
+    /**
      * Setter for Dependency Injection of AuthenticationHashService.
      * @param authenticationHashService
      */
