@@ -11,8 +11,6 @@ import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.AuthorTransportCommand
-import groovy.xml.StreamingMarkupBuilder
-import groovy.xml.MarkupBuilder
 
 /**
  * @short Controller providing basic access to Models.
