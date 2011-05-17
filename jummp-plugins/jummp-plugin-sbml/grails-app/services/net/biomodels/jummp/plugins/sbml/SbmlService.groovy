@@ -104,7 +104,10 @@ class SbmlService implements FileFormatService, ISbmlService {
 
     public Map getParameter(RevisionTransportCommand revision, String id) {
         Model model = getFromCache(revision).model
-        Parameter param = model.getParameter(id)
+        QuantityWithUnit param = model.getParameter(id)
+        if (!param) {
+            param = (QuantityWithUnit)model.findLocalParameters(id).find { it.id == id }
+        }
         if (!param) {
             return [:]
         }
