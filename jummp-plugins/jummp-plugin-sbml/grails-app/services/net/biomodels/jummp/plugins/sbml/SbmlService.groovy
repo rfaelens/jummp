@@ -119,7 +119,7 @@ class SbmlService implements FileFormatService, ISbmlService {
         List<Map> reactions = []
         model.listOfReactions.each { reaction ->
             List<Map> localParameters = []
-            reaction.kineticLaw.getListOfLocalParameters().each { parameter ->
+            reaction.kineticLaw?.getListOfLocalParameters()?.each { parameter ->
                 Map map = parameterToMap(parameter)
                 localParameters << map
             }
