@@ -102,7 +102,7 @@ function loadModelTabCallback(data, tabIndex) {
     $("#navigationButtons a:eq(1)").click(function() {
         loadView(createLink('model', 'upload'), loadUploadModelCallback);
     });
-    $("#modelTabs").tabs({disabled: [1, 2, 3, 4, 5],
+    $("#modelTabs").tabs({disabled: [1, 2, 3, 5],
         ajaxOptions: {
             error: function(jqXHR) {
                 $("#body").unblock();
@@ -113,6 +113,10 @@ function loadModelTabCallback(data, tabIndex) {
         load: function(event, ui) {
             // ui has index
             switch ($(ui.tab).attr("id")) {
+            case "modelTabs-parameter":
+                // add tooltips to the rows
+                $("#model-parameters tbody tr").cluetip({clickThrough: false, sticky: true, mouseOutClose: true});
+                break;
             case "modelTabs-addRevision":
                 // add revision tab
                 $("#revision-upload-form div.ui-dialog-buttonpane input").button();
