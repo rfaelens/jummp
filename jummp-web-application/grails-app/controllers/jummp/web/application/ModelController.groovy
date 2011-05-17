@@ -61,48 +61,8 @@ class ModelController {
         }
         RevisionTransportCommand rev = remoteModelService.getLatestRevision(params.id as Long)
 
-        String notes = remoteSbmlService.getNotes(params.id as Long, rev.revisionNumber)
-        if (notes == "") {
-            notes = null
-        } else {
-            // the notesString returned by the core is wrapped in a <notes><body></body></notes>
-            // we parse the String and build a new XML String from the GPath representation
-            // at the same time we also drop the dangerous script tag
-            // for reconstructing the HTML we use a closure
-            // TODO: this might be useful in a taglib
-            def rootNode = new XmlSlurper(false, false).parseText(notes)
-            String html = ""
-            def closure = { element, closure ->
-                if (!(element instanceof groovy.util.slurpersupport.Node)) {
-                    return element
-                }
-                String text = ""
-                if (element.name.toLowerCase() == "script") {
-                    return ""
-                }
-                text += "<${element.name}"
-                element.attributes.each { name, value ->
-                    // TODO: the attributes may contain JavaScript, this should be stripped
-                    text += " ${name}=\"${value}\""
-                }
-                if (element.children.isEmpty()) {
-                    text += "/>"
-                    return text
-                }
-                text += ">"
-                element.children.each {
-                    text += closure(it, closure)
-                }
-                text += "</${element.name}>"
-                return text
-            }
-            rootNode.body.childNodes().each { child ->
-                html += closure(child, closure)
-            }
-            notes = html
-        }
         // TODO: find a better solution to include SBML information. The web application should not be SBML specific
-        [publication: remoteModelService.getPublication(params.id as Long), revision: rev, notes: notes, annotations: remoteSbmlService.getAnnotations(params.id as Long, rev.revisionNumber)]
+        [publication: remoteModelService.getPublication(params.id as Long), revision: rev, notes: remoteSbmlService.getNotes(params.id as Long, rev.revisionNumber), annotations: remoteSbmlService.getAnnotations(params.id as Long, rev.revisionNumber)]
     }
 
     /**
