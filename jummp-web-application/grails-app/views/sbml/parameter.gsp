@@ -2,7 +2,9 @@
     <table>
     <sbml:renderParameters title="${g.message(code: 'sbml.parameters.globalParameters')}" parameters="${parameters}"/>
 <g:each var="reaction" in="${reactionParameters}">
-    <sbml:renderParameters title="${reaction.name}" parameters="${reaction.parameters}"/>
+    <g:if test="${!reaction.parameters.isEmpty()}">
+        <sbml:renderParameters title="${reaction.name}" parameters="${reaction.parameters}"/>
+    </g:if>
 </g:each>
     </table>
 </div>
