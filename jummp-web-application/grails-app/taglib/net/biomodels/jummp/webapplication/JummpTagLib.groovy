@@ -185,7 +185,13 @@ class JummpTagLib {
      * Renders a single MIRIAM URN from an annotation resource.
      * @todo move into an SBML taglib
      */
-    def renderURN = { resource ->
+    def renderURN = { attrs ->
+        String resource
+        if (attrs instanceof String) {
+            resource = attrs
+        } else {
+            resource = attrs.resource
+        }
         int colonIndex = resource.lastIndexOf(':')
         String urn = resource.substring(0, colonIndex)
         String identifier = resource.substring(colonIndex + 1)
