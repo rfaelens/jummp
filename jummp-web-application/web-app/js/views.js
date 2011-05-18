@@ -102,7 +102,7 @@ function loadModelTabCallback(data, tabIndex) {
     $("#navigationButtons a:eq(1)").click(function() {
         loadView(createLink('model', 'upload'), loadUploadModelCallback);
     });
-    $("#modelTabs").tabs({disabled: [1, 2, 3, 5],
+    $("#modelTabs").tabs({disabled: [1, 3, 5],
         ajaxOptions: {
             error: function(jqXHR) {
                 $("#body").unblock();

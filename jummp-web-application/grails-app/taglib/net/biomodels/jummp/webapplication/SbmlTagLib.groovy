@@ -85,4 +85,25 @@ class SbmlTagLib {
     def renderParameterTitle = { attrs ->
         out << render(template: "/templates/sbml/parameterTitle", model: [title: attrs.title, size: attrs.size])
     }
+
+    /**
+     * Renders a list of SBML reactions.
+     * @attr reactions REQUIRED List of Reactions
+     */
+    def renderReactions = { attrs ->
+        out << renderParameterTitle(title: g.message(code: "sbml.reactions.title"), size: attrs.reactions.size())
+        attrs.reactions.each {
+            out << renderReaction(reaction: it)
+        }
+    }
+
+    /**
+     * Renders one reaction.
+     * @attr reaction REQUIRED Map describing the Reaction
+     */
+    def renderReaction = { attrs ->
+        Map reaction = attrs.reaction
+        String name = reaction.name ? reaction.name : reaction.id
+        out << render(template: "/templates/sbml/reaction", model: [title: name, reversible: reaction.reversible, products: reaction.products, modifiers: reaction.modifiers, reactants: reaction.reactants])
+    }
 }
