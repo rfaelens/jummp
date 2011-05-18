@@ -90,4 +90,27 @@ public interface RemoteSbmlAdapter {
      * @return List of all reactions with their parameters
      */
     public List<Map> getLocalParameters(long modelId, int revisionNumber)
+    /**
+     * Retrieves all reactions in the SBML Model.
+     * The returned list contains one map for each reaction with the following keys/values:
+     * @li id: the id element
+     * @li metaId: The metaId element
+     * @li name: The name element
+     * @li reversible: boolean indicating whether the reaction is reversible
+     * @li sboTerm: The sboTerm if set, @c null otherwise
+     * @li reactants: list of all Reactants with a Map for each Reactant, description see below
+     * @li products: list of all Products with a Map for each Product, description see below
+     * @li modifiers: list of all Modifiers with a Map for each Modifier, description see below
+     *
+     * The three contained lists reactants, products and modifiers represent a list of species each.
+     * Each of the lists can be empty or contain one to many maps with the following keys/values:
+     * @li species: the id of the referenced species
+     * @li speciesName: The name of the referenced species
+     * @li constant: boolean indicating whether the species has a constant value (only for products and reactants)
+     * @li stoichiometry: The shoichiometry value (only for products and reactants
+     * @param modelId
+     * @param revisionNumber
+     * @return List of all reactions
+     */
+    public List<Map> getReactions(long modelId, int revisionNumber)
 }

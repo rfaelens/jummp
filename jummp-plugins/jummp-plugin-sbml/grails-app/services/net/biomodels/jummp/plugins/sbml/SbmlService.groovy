@@ -12,6 +12,8 @@ import org.sbml.jsbml.ListOf
 import org.sbml.jsbml.Parameter
 import org.sbml.jsbml.Annotation
 import org.sbml.jsbml.QuantityWithUnit
+import org.sbml.jsbml.SpeciesReference
+import org.sbml.jsbml.SimpleSpeciesReference
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -131,6 +133,24 @@ class SbmlService implements FileFormatService, ISbmlService {
         return reactions
     }
 
+    public List<Map> getReactions(RevisionTransportCommand revision) {
+        Model model = getFromCache(revision).model
+        List<Map> reactions = []
+        model.listOfReactions.each { reaction ->
+            reactions << [
+                    id: reaction.id,
+                    metaId: reaction.metaId,
+                    name: reaction.name,
+                    reversible: reaction.reversible,
+                    sboTerm: reaction.getSBOTerm() != -1 ? reaction.getSBOTerm() : null,
+                    reactants: convertSpeciesReferences(reaction.listOfReactants),
+                    products: convertSpeciesReferences(reaction.listOfProducts),
+                    modifiers: convertSpeciesReferences(reaction.listOfModifiers)
+            ]
+        }
+        return reactions
+    }
+
     /**
      * Returns the SBMLDocument for the @p revision from the cache.
      * If the cache does not contain the SBMLDocument, the model file is
@@ -173,5 +193,26 @@ class SbmlService implements FileFormatService, ISbmlService {
             ]
         }
         return list
+    }
+
+    private List<Map> convertSpeciesReferences(List<SimpleSpeciesReference> list) {
+        List<Map> species = []
+        list.each {
+            if (it instanceof SpeciesReference) {
+                species << speciesReferenceToMap(it)
+            } else {
+                species << [species: it.species, speciesName: it.model.getSpecies(it.species).name]
+            }
+        }
+        return species
+    }
+
+    private Map speciesReferenceToMap(SpeciesReference reference) {
+        return [
+                species: reference.species,
+                speciesName: reference.model.getSpecies(reference.species).name,
+                constant: reference.constant,
+                stoichiometry: reference.stoichiometry
+        ]
     }
 }

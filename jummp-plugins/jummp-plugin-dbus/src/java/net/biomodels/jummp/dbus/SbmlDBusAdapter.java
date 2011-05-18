@@ -28,4 +28,5 @@ public interface SbmlDBusAdapter  extends DBusInterface {
     public String getParameters(String authenticationHash, long modelId, int revisionNumber);
     public String getParameter(String authenticationHash, long modelId, int revisionNumber, String id);
     public String getLocalParameters(String authenticationHash, long modelId, int revisionNumber);
+    public String getReactions(String authenticationHash, long modelId, int revisionNumber);
 }

@@ -71,6 +71,10 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
         return mapFromJSON(sbmlDBusAdapter.getLocalParameters(authenticationToken(), modelId, revisionNumber))
     }
 
+    public List<Map> getReactions(long modelId, int revisionNumber) {
+        return mapFromJSON(sbmlDBusAdapter.getReactions(authenticationToken(), modelId, revisionNumber))
+    }
+
     private List<Map> mapFromJSON(String json) {
         def parsedJSON = JSON.parse(json)
         List<Map> returnList = []
