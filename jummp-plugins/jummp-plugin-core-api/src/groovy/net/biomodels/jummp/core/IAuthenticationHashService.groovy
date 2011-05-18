@@ -34,4 +34,14 @@ public interface IAuthenticationHashService {
      * @throws AuthenticationHashNotFoundException Thrown if the internal Authentication hash does not contain @p hash.
      */
     Authentication retrieveAuthentication(String hash) throws AuthenticationHashNotFoundException
+    /**
+     * Removes outdated authentications from the map holding all active authentications.
+     */
+    void checkAuthenticationExpired()
+    /**
+     * Checks, if an authentication exists or if it has been removed by checkAuthenticationExpired().
+     * @param hash The hash of the authentication to be checked
+     * @return True if authentication exists, false otherwise
+     */
+    boolean isAuthenticated(String hash)
 }

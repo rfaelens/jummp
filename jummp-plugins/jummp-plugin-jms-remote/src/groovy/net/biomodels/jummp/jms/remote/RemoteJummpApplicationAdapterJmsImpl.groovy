@@ -5,6 +5,7 @@ import org.perf4j.aop.Profiled
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import net.biomodels.jummp.remote.RemoteJummpApplicationAdapter
+import net.biomodels.jummp.core.user.JummpAuthentication
 
 /**
  * @short Service delegating to Application specific methods of the core via synchronous JMS
@@ -28,23 +29,11 @@ class RemoteJummpApplicationAdapterJmsImpl extends AbstractJmsRemoteAdapter impl
         return ADAPTER_SERVICE_NAME
     }
 
-    /**
-     * Retrieves the externalized configuration of the core application.
-     * @param appToken The unique application token
-     * @return The core's configuration
-     */
     @Profiled(tag="RemoteJummpApplicationAdapterJmsImpl.getJummpConfig")
     ConfigObject getJummpConfig(String appToken) {
         return (ConfigObject)jmsSynchronousService.send([app: "jummp", service: "applicationJmsAdapter", method: "getJummpConfig"], appToken, [service: "applicationJmsAdapter", method: "getJummpConfig.response"])
     }
 
-    /**
-     * Tries to authenticate the given @p Authentication in the core.
-     * @param authentication The Authentication to test. In most cases a UsernamePasswordAuthenticationToken
-     * @return An authenticated user
-     * @throws AuthenticationException If the Authentication is not valid
-     * @throws JummpException If an error occurred
-     */
     @Profiled(tag="RemoteJummpApplicationAdapterJmsImpl.authenticate")
     Authentication authenticate(Authentication authentication) throws AuthenticationException, JummpException {
         def retVal = send("authenticate", authentication, false)
@@ -52,4 +41,10 @@ class RemoteJummpApplicationAdapterJmsImpl extends AbstractJmsRemoteAdapter impl
         return (Authentication)retVal
     }
 
+    @Profiled(tag="RemoteJummpApplicationAdapterJmsImpl.isAuthenticated")
+    boolean isAuthenticated(Authentication authentication) {
+        def retVal = send("isAuthenticated", ((JummpAuthentication)authentication).getAuthenticationHash())
+        validateReturnValue(retVal, Boolean)
+        return (Boolean)retVal
+    }
 }

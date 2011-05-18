@@ -33,4 +33,8 @@ beans = {
     if (Environment.getCurrent() == Environment.DEVELOPMENT) {
         timingAspect(org.perf4j.log4j.aop.TimingAspect)
     }
+
+    authenticationCheckFilter(net.biomodels.jummp.webapp.CheckAuthenticationFilter) {
+        remoteJummpApplicationAdapter = ref("remoteJummpApplicationAdapter")
+    }
 }

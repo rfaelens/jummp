@@ -79,6 +79,9 @@ target(models: "Creates some models to be used in the application") {
     modelService.grantReadAccess(model, userClass.findByUsername("user"))
     ConfigurationHolder.config.jummp.security.registration.email.send = true
     ConfigurationHolder.config.jummp.security.resetPassword.email.send = true
+    ConfigurationHolder.config.quartz.autoStartup = true
+    def quartzScheduler = appCtx.getBean("quartzScheduler")
+    quartzScheduler.start()
 }
 
 setDefaultTarget(main)

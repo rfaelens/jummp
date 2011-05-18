@@ -11,6 +11,7 @@ import net.biomodels.jummp.core.user.UserInvalidException
 import net.biomodels.jummp.core.user.UserManagementException
 import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.core.IUserService
+import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 
 /**
  * @short Wrapper class around the UserService exposed to JMS.
@@ -51,6 +52,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             result = true
         } catch (BadCredentialsException e) {
             result = e
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
@@ -78,6 +81,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             result = e
         } catch (UserInvalidException e) {
             result = e
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
@@ -101,6 +106,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             setAuthentication((String)message)
             result = userService.getCurrentUser()
         } catch (AccessDeniedException e) {
+            result = e
+        } catch (AuthenticationHashNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -131,6 +138,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             result = e
         } catch (UserNotFoundException e) {
             result = e
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
@@ -154,6 +163,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             setAuthentication((String)message[0])
             result = userService.getAllUsers((Integer)message[1], (Integer)message[2])
         } catch (AccessDeniedException e) {
+            result = e
+        } catch (AuthenticationHashNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -181,6 +192,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             result = e
         } catch (UserNotFoundException e) {
             result = e
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
@@ -206,6 +219,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
         } catch (AccessDeniedException e) {
             result = e
         } catch (UserNotFoundException e) {
+            result = e
+        } catch (AuthenticationHashNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -233,6 +248,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             result = e
         } catch (UserNotFoundException e) {
             result = e
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
@@ -258,6 +275,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
         } catch (AccessDeniedException e) {
             result = e
         } catch (UserNotFoundException e) {
+            result = e
+        } catch (AuthenticationHashNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -287,6 +306,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             result = e
         } catch (UserInvalidException e) {
             result = e
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
@@ -313,6 +334,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
         } catch (AccessDeniedException e) {
             result = e
         } catch (UserManagementException e) {
+            result = e
+        } catch (AuthenticationHashNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -346,6 +369,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             result = e
         } catch (UserManagementException e) {
             result = e
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
@@ -372,6 +397,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
         } catch (AccessDeniedException e) {
             result = e
         } catch (UserNotFoundException e) {
+            result = e
+        } catch (AuthenticationHashNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -400,6 +427,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             result = e
         } catch (UserManagementException e) {
             result = e
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
@@ -424,6 +453,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             result = userService.getAllRoles()
         } catch (AccessDeniedException e) {
             result = e
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
@@ -447,6 +478,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             setAuthentication((String)message[0])
             result = userService.getRolesForUser((Long)message[1])
         } catch (AccessDeniedException e) {
+            result = e
+        } catch (AuthenticationHashNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
@@ -477,6 +510,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             result = e
         } catch (RoleNotFoundException e) {
             result = e
+        } catch (AuthenticationHashNotFoundException e) {
+            result = e
         } finally {
             restoreAuthentication()
         }
@@ -505,6 +540,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
         } catch (UserNotFoundException e) {
             result = e
         } catch (RoleNotFoundException e) {
+            result = e
+        } catch (AuthenticationHashNotFoundException e) {
             result = e
         } finally {
             restoreAuthentication()
