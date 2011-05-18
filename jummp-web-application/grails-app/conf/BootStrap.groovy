@@ -1,4 +1,6 @@
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.codehaus.groovy.grails.plugins.springsecurity.SecurityFilterPosition
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 
 class BootStrap {
     /**
@@ -14,6 +16,7 @@ class BootStrap {
         // TODO: proper app token
         ConfigurationHolder.config.jummpCore = remoteJummpApplicationAdapter.getJummpConfig("web application")
         miriamService.init()
+        SpringSecurityUtils.clientRegisterFilter('authenticationCheckFilter', SecurityFilterPosition.SECURITY_CONTEXT_FILTER.order + 10)
     }
     def destroy = {
     }
