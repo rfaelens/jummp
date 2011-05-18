@@ -142,7 +142,7 @@ class JummpTagLib {
         if (attrs.containsKey("model")) {
             modelAnnotations = Boolean.parseBoolean(attrs.model)
         }
-        out << "<ul>"
+        List<String> renderedAnnotations = []
         attrs.annotations.each { annotation ->
             if (annotation.qualifier == "BQB_UNKNOWN" || annotation.qualifier == "BQM_UNKNOWN") {
                 return
@@ -153,11 +153,17 @@ class JummpTagLib {
             if (annotation.modelQualifier && !modelAnnotations) {
                 return
             }
-            out << "<li>"
-            out << renderAnnotation(annotation)
-            out << "</li>"
+            renderedAnnotations << renderAnnotation(annotation)
         }
-        out << "</ul>"
+        if (renderedAnnotations.size() == 1) {
+            out << renderedAnnotations.first()
+        } else {
+            out << "<ul>"
+            renderedAnnotations.each {
+                out << "<li>${it}</li>"
+            }
+            out << "</ul>"
+        }
     }
 
     /**
