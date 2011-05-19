@@ -107,4 +107,36 @@ class SbmlTagLib {
         String name = reaction.name ? reaction.name : reaction.id
         out << render(template: "/templates/sbml/reaction", model: [title: name, metaLink: metaLink, reversible: reaction.reversible, products: reaction.products, modifiers: reaction.modifiers, reactants: reaction.reactants])
     }
+
+    /**
+     * Renders a list of SBML events.
+     * @attr events REQUIRED List of Events
+     */
+    def renderEvents = { attrs ->
+        out << renderParameterTitle(title: "Events", size: attrs.events.size())
+        attrs.events.each {
+            out << renderEvent(event: it)
+        }
+    }
+
+    /**
+     * Renders one event.
+     * @attr event REQUIRED Map describing the Event
+     */
+    def renderEvent = { attrs ->
+        Map event = attrs.event
+        String metaLink = g.createLink(controller: 'sbml', action: 'eventMeta', params: [id: params.id, eventId: event.id, revision: params.revision])
+        String name = (event.name && event.name != "") ? event.name : event.id
+        out << render(template: "/templates/sbml/event", model: [title: name, metaLink: metaLink, assignments: event.assignments])
+    }
+
+    /**
+     * Renders one event assignment.
+     * @attr assignment REQUIRED Map describing the Event Assignment.
+     */
+    def renderEventAssignment = { attrs ->
+        Map assignment = attrs.assignment
+        String name = (assignment.variableName && assignment.variableName != "") ? assignment.variableName : assignment.variableId
+        out << render(template: "/templates/sbml/eventAssignment", model: [variable: name, math: assignment.math, type: assignment.variableType])
+    }
 }
