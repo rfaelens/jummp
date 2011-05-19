@@ -139,4 +139,18 @@ class SbmlTagLib {
         String name = (assignment.variableName && assignment.variableName != "") ? assignment.variableName : assignment.variableId
         out << render(template: "/templates/sbml/eventAssignment", model: [variable: name, math: assignment.math, type: assignment.variableType])
     }
+
+    /**
+     * Renders a table row with the given notes.
+     * The primary use for this tag is inside of the tooltips for various SBML elements.
+     * The tag expects an attribute notes which is the notes xhtml markup as a string to be rendered.
+     * In case the string is empty the table row is not rendered.
+     * @attr notes REQUIRED The notes string
+     */
+    def notesTableRow = { attrs ->
+        if (!attrs.notes || attrs.notes == "") {
+            return
+        }
+        out << render(template: "/templates/sbml/notesTableRow", model: [notes: attrs.notes])
+    }
 }

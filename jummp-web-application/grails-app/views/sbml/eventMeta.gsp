@@ -13,10 +13,5 @@
     </g:if>
     <jummp:sboTableRow sbo="${event.sboTerm}"/>
     <jummp:annotationsTableRow annotations="${event.annotation}"/>
-    <g:if test="${event.notes}">
-    <tr>
-        <td>Notes:</td>
-        <td><sbml:notes notes="${event.notes}"/></td>
-    </tr>
-    </g:if>
+    <sbml:notesTableRow notes="${event.notes}"/>
 </table>
