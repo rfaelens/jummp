@@ -63,7 +63,7 @@ class AuthenticationHashService implements IAuthenticationHashService {
     }
 
     void checkAuthenticationExpired() {
-        long time = Long.parseLong(ConfigurationHolder.config.jummp.authenticationHash.maxInactiveTime)
+        long time = Long.valueOf(ConfigurationHolder.config.jummp.authenticationHash.maxInactiveTime)
         long maxInactiveTime = new Date().getTime() - time
         authentications.each { user, hash ->
             long timeStamp = hash.timeStamp.getTime()
