@@ -10,7 +10,7 @@
         <li><a href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Overview</a></li>
         <li><a href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Math</a></li>
         <li><a href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Physical Entities</a></li>
-        <li><a href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Parameters</a></li>
+        <li><a id="modelTabs-parameter" href="${g.createLink(controller: 'sbml', action: 'parameter', id: params.id)}?revision=${revision.revisionNumber}">Parameters</a></li>
         <li><a href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Curation</a></li>
         <g:if test="${addRevision}">
             <li><a id="modelTabs-addRevision" href="${g.createLink(controller: 'model', action: 'newRevision', id: params.id)}"><g:message code="model.revision.upload.goto"/></a></li>

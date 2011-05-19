@@ -10,6 +10,8 @@ import org.sbml.jsbml.Model
 import net.biomodels.jummp.core.ISbmlService
 import org.sbml.jsbml.ListOf
 import org.sbml.jsbml.Parameter
+import org.sbml.jsbml.Annotation
+import org.sbml.jsbml.QuantityWithUnit
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -87,16 +89,7 @@ class SbmlService implements FileFormatService, ISbmlService {
 
     public List<Map> getAnnotations(RevisionTransportCommand revision) {
         Model model = getFromCache(revision).model
-        List<Map> list = []
-        model.annotation.listOfCVTerms.each { cvTerm ->
-            list << [
-                    qualifier: cvTerm.biologicalQualifier ? cvTerm.biologicalQualifierType.toString() : (cvTerm.modelQualifier ? cvTerm.modelQualifierType.toString() : ""),
-                    biologicalQualifier: cvTerm.biologicalQualifier,
-                    modelQualifier: cvTerm.modelQualifier,
-                    resources: cvTerm.resources
-            ]
-        }
-        return list
+        return convertCVTerms(model.annotation)
     }
 
     public List<Map> getParameters(RevisionTransportCommand revision) {
@@ -104,17 +97,38 @@ class SbmlService implements FileFormatService, ISbmlService {
         ListOf<Parameter> parameters = model.getListOfParameters()
         List<Map> list = []
         parameters.each { parameter ->
-            list << [
-                    id: parameter.id,
-                    name: parameter.name,
-                    metaId: parameter.metaId,
-                    constant: parameter.constant,
-                    value: parameter.isSetValue() ? parameter.value : null,
-                    sboTerm: parameter.getSBOTerm() != -1 ? parameter.getSBOTerm() : null,
-                    unit: parameter.units
-            ]
+            list << parameterToMap(parameter)
         }
         return list
+    }
+
+    public Map getParameter(RevisionTransportCommand revision, String id) {
+        Model model = getFromCache(revision).model
+        QuantityWithUnit param = model.getParameter(id)
+        if (!param) {
+            param = (QuantityWithUnit)model.findLocalParameters(id).find { it.id == id }
+        }
+        if (!param) {
+            return [:]
+        }
+        Map map = parameterToMap(param)
+        map.put("notes", param.getNotesString())
+        map.put("annotation", convertCVTerms(param.annotation))
+        return map
+    }
+
+    public List<Map> getLocalParameters(RevisionTransportCommand revision) {
+        Model model = getFromCache(revision).model
+        List<Map> reactions = []
+        model.listOfReactions.each { reaction ->
+            List<Map> localParameters = []
+            reaction.kineticLaw?.getListOfLocalParameters()?.each { parameter ->
+                Map map = parameterToMap(parameter)
+                localParameters << map
+            }
+            reactions << [id: reaction.id, name: reaction.name, parameters: localParameters]
+        }
+        return reactions
     }
 
     /**
@@ -134,5 +148,30 @@ class SbmlService implements FileFormatService, ISbmlService {
         document = (new SBMLReader()).readSBMLFromStream(new ByteArrayInputStream(bytes))
         cache.put(revision, document)
         return document
+    }
+
+    private Map parameterToMap(QuantityWithUnit parameter) {
+        return [
+                id: parameter.id,
+                name: parameter.name,
+                metaId: parameter.metaId,
+                constant: (parameter instanceof Parameter) ? parameter.constant : true,
+                value: parameter.isSetValue() ? parameter.value : null,
+                sboTerm: parameter.getSBOTerm() != -1 ? parameter.getSBOTerm() : null,
+                unit: parameter.units
+        ]
+    }
+
+    private List<Map> convertCVTerms(Annotation annotation) {
+        List<Map> list = []
+        annotation.listOfCVTerms.each { cvTerm ->
+            list << [
+                    qualifier: cvTerm.biologicalQualifier ? cvTerm.biologicalQualifierType.toString() : (cvTerm.modelQualifier ? cvTerm.modelQualifierType.toString() : ""),
+                    biologicalQualifier: cvTerm.biologicalQualifier,
+                    modelQualifier: cvTerm.modelQualifier,
+                    resources: cvTerm.resources
+            ]
+        }
+        return list
     }
 }

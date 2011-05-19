@@ -22,7 +22,7 @@ class JummpTagLib {
      * Renders a compact title of a publication.
      * Format: Journal Year Month; Volume (Issue) Pages
      * All fields are optional.
-     * @param publication The PublicationTransportCommand
+     * @attr publication REQUIRED The PublicationTransportCommand
      */
     def compactPublicationTitle = { attrs ->
         def publication = attrs.publication
@@ -64,7 +64,7 @@ class JummpTagLib {
      * it is doubtable that this is any advantage in this app. Nevertheless also the correct href are set
      * additionally to the onclick events. All onclick events have a "return false" added to prevent the
      * loading of the actual href.
-     * @attr menu The menu to render (optional)
+     * @attr menu REQUIRED The menu to render (optional)
      */
     def menu = { attrs ->
         List<MenuItem> m = []
@@ -185,7 +185,13 @@ class JummpTagLib {
      * Renders a single MIRIAM URN from an annotation resource.
      * @todo move into an SBML taglib
      */
-    def renderURN = { resource ->
+    def renderURN = { attrs ->
+        String resource
+        if (attrs instanceof String) {
+            resource = attrs
+        } else {
+            resource = attrs.resource
+        }
         int colonIndex = resource.lastIndexOf(':')
         String urn = resource.substring(0, colonIndex)
         String identifier = resource.substring(colonIndex + 1)

@@ -2,6 +2,8 @@ grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
+// Relative path to JUMMP core application - this can be adjusted by users if they don't use the reference filesystem layout
+grails.project.jummp.dir = "../"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -35,15 +37,15 @@ try {
 } catch (Exception e) {
     // ignore
 }
-if (new File("../jummp-plugins/jummp-plugin-dbus").exists()) {
-    grails.plugin.location.'jummp-plugin-dbus' = "../jummp-plugins/jummp-plugin-dbus"
+if (new File("${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-dbus").exists()) {
+    grails.plugin.location.'jummp-plugin-dbus' = "${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-dbus"
 }
-if (new File("../jummp-plugins/jummp-plugin-jms-remote").exists()) {
-    grails.plugin.location.'jummp-plugin-jms-remote' = "../jummp-plugins/jummp-plugin-jms-remote"
+if (new File("${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-jms-remote").exists()) {
+    grails.plugin.location.'jummp-plugin-jms-remote' = "${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-jms-remote"
 }
-grails.plugin.location.'jummp-plugin-remote' = "../jummp-plugins/jummp-plugin-remote"
-grails.plugin.location.'jummp-plugin-security' = "../jummp-plugins/jummp-plugin-security"
-grails.plugin.location.'jummp-plugin-core-api' = "../jummp-plugins/jummp-plugin-core-api"
+grails.plugin.location.'jummp-plugin-remote' = "${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-remote"
+grails.plugin.location.'jummp-plugin-security' = "${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-security"
+grails.plugin.location.'jummp-plugin-core-api' = "${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-core-api"
 
 // Remove libraries not needed in productive mode
 grails.war.resources = { stagingDir ->

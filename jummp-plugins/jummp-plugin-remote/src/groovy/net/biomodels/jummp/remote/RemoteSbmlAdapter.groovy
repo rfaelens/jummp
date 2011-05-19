@@ -67,5 +67,27 @@ public interface RemoteSbmlAdapter {
      * @return List of all parameters in the Model
      */
     public List<Map> getParameters(long modelId, int revisionNumber)
-
+    /**
+     * Retrieves the parameter with given @p id from the SBML Model.
+     * The returned Map contains all the elements as explained in @link getParameters
+     * with additionally the annotation and notes added to the map. The annotation
+     * element follows the description of @link getAnnotations.
+     * @param modelId
+     * @param revisionNumber
+     * @param id The unique id in the SBML Model.
+     * @return Map of all parameter data
+     */
+    public Map getParameter(long modelId, int revisionNumber, String id)
+    /**
+     * Retrieves all parameters local to the reactions in the SBML Model.
+     * The parameters are sorted to the reactions. The returned list is actually a list
+     * of minimum information about the reaction plus the parameters:
+     * @li id: The id of the reaction
+     * @li name: The name of the reaction
+     * @li parameters: List of parameters as in @link getParameters with the following addition:
+     * constant is always true and an additional map to identify the reaction is added.
+     * @param revision
+     * @return List of all reactions with their parameters
+     */
+    public List<Map> getLocalParameters(long modelId, int revisionNumber)
 }
