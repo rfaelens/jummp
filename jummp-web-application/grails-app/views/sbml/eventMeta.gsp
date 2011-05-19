@@ -1,16 +1,6 @@
 <table>
-    <g:if test="${event.trigger}">
-        <tr>
-            <td>Trigger:</td>
-            <td><jummp:contentMathML mathML="${event.trigger}"/></td>
-        </tr>
-    </g:if>
-    <g:if test="${event.delay}">
-        <tr>
-            <td>Delay:</td>
-            <td><jummp:contentMathML mathML="${event.delay}"/></td>
-        </tr>
-    </g:if>
+    <jummp:contentMathMLTableRow mathML="${event.trigger}" title="${g.message(code: 'sbml.event.trigger.title')}"/>
+    <jummp:contentMathMLTableRow mathML="${event.delay}" title="${g.message(code: 'sbml.event.delay.title')}"/>
     <jummp:sboTableRow sbo="${event.sboTerm}"/>
     <jummp:annotationsTableRow annotations="${event.annotation}"/>
     <sbml:notesTableRow notes="${event.notes}"/>

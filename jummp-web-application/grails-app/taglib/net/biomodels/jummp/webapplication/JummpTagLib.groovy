@@ -315,4 +315,25 @@ class JummpTagLib {
         }
         out << render(template: "/templates/annotationsTableRow", model: [annotations: attrs.annotations])
     }
+
+    /**
+     * Renders a table row with the given content MathML string.
+     * The primary use for this tag is inside of the tooltips for various SBML elements.
+     * The tag expects an attribute mathML which contains the content MathML string to be rendered.
+     * Additionally an optional title attribute can be specified, which is used instead of a generic
+     * title.
+     * In case the mathML attribute is empty the row is not rendered.
+     * @attr mathML REQUIRED The content MathML string
+     * @attr title The optional title, if not present or empty a generic title is used
+     */
+    def contentMathMLTableRow = { attrs->
+        if (!attrs.mathML || attrs.mathML == "") {
+            return
+        }
+        String title = attrs.title
+        if (!title || title == "") {
+            title = g.message(code: "math.tableRow.title")
+        }
+        out << render(template: "/templates/contentMathMLTableRow", model: [mathML: attrs.mathML, title: title])
+    }
 }
