@@ -125,4 +125,34 @@ public interface RemoteSbmlAdapter {
      * @return Map describing the reaction
      */
     public Map getReaction(long modelId, int revisionNumber, String id)
+    /**
+     * Retrieves all events in the SBML Model.
+     * The returned list contains one map for each event with the following keys/values:
+     * @li id: The id element
+     * @li metaId: The metaId element
+     * @li name: The name element
+     * @li assignments: List of all Assignments for this Event. It contains a map for each Assignment
+     * with the following key/value pairs:
+     * @li metaId: The metaId element associated with the event assignment
+     * @li math: The Content MathML of the assignment as a String
+     * @li variableId: The Id of the referenced variable
+     * @li variableName: The resolved name of the referenced variable
+     * @li variableType: The element name of the referenced variable
+     * @param modelId
+     * @param revisionNumber
+     * @return List of all events
+     */
+    public List<Map> getEvents(long modelId, int revisionNumber)
+    /**
+     * Retrieves the Event with the given @p id from the SBML Model.
+     * The returned map contains all the elements as explained in @link getEvents
+     * with additionally the annotation, notes, sboTerm, trigger and delay. The
+     * annotation element follows the description of @link getAnnotations. Trigger
+     * and delay contain both either a Content MathML String or an empty String.
+     * @param modelId
+     * @param revisionNumber
+     * @param id The Id of the Event
+     * @return Map describing the event
+     */
+    public Map getEvent(long modelId, int revisionNumber, String id)
 }

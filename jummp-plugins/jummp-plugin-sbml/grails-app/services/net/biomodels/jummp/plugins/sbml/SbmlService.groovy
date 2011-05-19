@@ -15,6 +15,9 @@ import org.sbml.jsbml.QuantityWithUnit
 import org.sbml.jsbml.SpeciesReference
 import org.sbml.jsbml.SimpleSpeciesReference
 import org.sbml.jsbml.Reaction
+import org.sbml.jsbml.Event
+import org.sbml.jsbml.EventAssignment
+import org.sbml.jsbml.Symbol
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -156,6 +159,27 @@ class SbmlService implements FileFormatService, ISbmlService {
         return reactionMap
     }
 
+    public List<Map> getEvents(RevisionTransportCommand revision) {
+        Model model = getFromCache(revision).model
+        List<Map> events = []
+        model.listOfEvents.each { event ->
+            events << eventToMap(event)
+        }
+        return events
+    }
+
+    public Map getEvent(RevisionTransportCommand revision, String id) {
+        Model model = getFromCache(revision).model
+        Event event = model.getEvent(id)
+        Map eventMap = eventToMap(event)
+        eventMap.put("annotation", convertCVTerms(event.annotation))
+        eventMap.put("notes", event.notesString)
+        eventMap.put("sboTerm", event.getSBOTerm())
+        eventMap.put("trigger", event.trigger ? event.trigger.mathMLString : "")
+        eventMap.put("delay", event.delay ? event.delay.mathMLString : "")
+        return eventMap
+    }
+
     /**
      * Returns the SBMLDocument for the @p revision from the cache.
      * If the cache does not contain the SBMLDocument, the model file is
@@ -232,5 +256,29 @@ class SbmlService implements FileFormatService, ISbmlService {
                 products: convertSpeciesReferences(reaction.listOfProducts),
                 modifiers: convertSpeciesReferences(reaction.listOfModifiers)
         ]
+    }
+
+    private Map eventToMap(Event event) {
+        return [
+                id: event.id,
+                metaId: event.metaId,
+                name: event.name,
+                assignments: eventAssignmentsToList(event.listOfEventAssignments)
+        ]
+    }
+
+    private List<Map> eventAssignmentsToList(List<EventAssignment> assignments) {
+        List<Map> eventAssignments = []
+        assignments.each { assignment ->
+            Symbol symbol = assignment.model.findSymbol(assignment.variable)
+            eventAssignments << [
+                    meataId: assignment.metaId,
+                    math: assignment.mathMLString,
+                    variableId: assignment.variable,
+                    variableName: symbol ? symbol.name : "",
+                    variableType: symbol ? symbol.elementName : ""
+            ]
+        }
+        return eventAssignments
     }
 }
