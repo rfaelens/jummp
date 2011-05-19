@@ -301,4 +301,18 @@ class JummpTagLib {
         }
         out << render(template: "/templates/sboTableRow", model: [urn: "urn:miriam:obo.sbo:SBO%3A" + sbo])
     }
+
+    /**
+     * Renders a table row with the given annotations.
+     * The primary use for this tag is inside of the tooltips for various SBML elements.
+     * The tag expects an attribute annotations which is a list of the annotations to be rendered.
+     * In case the list is empty the table row is not rendered.
+     * @attr annotations REQUIRED The list of annotations
+     */
+    def annotationsTableRow = { attrs ->
+        if (!attrs.annotations) {
+            return;
+        }
+        out << render(template: "/templates/annotationsTableRow", model: [annotations: attrs.annotations])
+    }
 }

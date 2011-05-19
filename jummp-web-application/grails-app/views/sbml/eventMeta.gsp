@@ -12,12 +12,7 @@
         </tr>
     </g:if>
     <jummp:sboTableRow sbo="${event.sboTerm}"/>
-    <g:if test="${event.annotation}">
-    <tr>
-        <td>Annotations:</td>
-        <td><jummp:annotations annotations="${event.annotation}" model="false"/></td>
-    </tr>
-    </g:if>
+    <jummp:annotationsTableRow annotations="${event.annotation}"/>
     <g:if test="${event.notes}">
     <tr>
         <td>Notes:</td>
