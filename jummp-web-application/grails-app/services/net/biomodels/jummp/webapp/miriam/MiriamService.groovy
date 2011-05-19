@@ -65,31 +65,36 @@ class MiriamService {
      * @return Either the resolved name, or HTML cleaned id.
      */
     public String resolveName(MiriamDatatype miriam, String id) {
-        switch (miriam.identifier) {
-        // UniProt
-        case "MIR:00000005":
-            MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100134"}
-            if (resource) {
-                return resolveUniProt(resource, id)
+        try {
+            switch (miriam.identifier) {
+            // UniProt
+            case "MIR:00000005":
+                MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100134"}
+                if (resource) {
+                    return resolveUniProt(resource, id)
+                }
+                break
+            // Taxonomy
+            case "MIR:00000006":
+                MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100019"}
+                if (resource) {
+                    return resolveTaxonomy(resource, id)
+                }
+                break
+            // Gene Ontology
+            case "MIR:00000022":
+                MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100012"}
+                if (resource) {
+                    return resolveGeneOntology(resource, id)
+                }
+                break
+            default:
+                // nothing
+                break
             }
-            break
-        // Taxonomy
-        case "MIR:00000006":
-            MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100019"}
-            if (resource) {
-                return resolveTaxonomy(resource, id)
-            }
-            break
-        // Gene Ontology
-        case "MIR:00000022":
-            MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100012"}
-            if (resource) {
-                return resolveGeneOntology(resource, id)
-            }
-            break
-        default:
-            // nothing
-            break
+        } catch (IOException e) {
+            // an IOException if thrown if the service we use to resolve the name is currently down
+            log.debug(e.getMessage())
         }
         // fallback: to just cleaning for HTML
         return URLCodec.decode(id)
