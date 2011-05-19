@@ -2,6 +2,11 @@ package net.biomodels.jummp.webapplication
 
 import net.biomodels.jummp.webapp.menu.MenuItem
 import net.biomodels.jummp.webapp.miriam.MiriamDatatype
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.stream.StreamSource
+import javax.xml.transform.stream.StreamResult
+import org.codehaus.groovy.grails.web.context.ServletContextHolder
+import javax.xml.transform.Transformer
 
 /**
  * Small TagLib to render custom tags.
@@ -17,6 +22,8 @@ class JummpTagLib {
      * Dependency Injection for Miriam Service
      */
     def miriamService
+
+    Transformer transformer = null
 
     /**
      * Renders a compact title of a publication.
@@ -142,7 +149,7 @@ class JummpTagLib {
         if (attrs.containsKey("model")) {
             modelAnnotations = Boolean.parseBoolean(attrs.model)
         }
-        out << "<ul>"
+        List<String> renderedAnnotations = []
         attrs.annotations.each { annotation ->
             if (annotation.qualifier == "BQB_UNKNOWN" || annotation.qualifier == "BQM_UNKNOWN") {
                 return
@@ -153,11 +160,17 @@ class JummpTagLib {
             if (annotation.modelQualifier && !modelAnnotations) {
                 return
             }
-            out << "<li>"
-            out << renderAnnotation(annotation)
-            out << "</li>"
+            renderedAnnotations << renderAnnotation(annotation)
         }
-        out << "</ul>"
+        if (renderedAnnotations.size() == 1) {
+            out << renderedAnnotations.first()
+        } else {
+            out << "<ul>"
+            renderedAnnotations.each {
+                out << "<li>${it}</li>"
+            }
+            out << "</ul>"
+        }
     }
 
     /**
@@ -257,5 +270,70 @@ class JummpTagLib {
             out << ""
             break
         }
+    }
+
+    def contentMathML = { attrs ->
+        if (!transformer) {
+            def factory = TransformerFactory.newInstance()
+            transformer = factory.newTransformer(new StreamSource(new File(ServletContextHolder.servletContext.getRealPath("/xsl/mathmlc2p.xsl"))))
+        }
+        transformer.transform(new StreamSource(new StringReader(attrs.mathML)), new StreamResult(out))
+    }
+
+    /**
+     * Renders a table row with the resolved SBO term.
+     * The primary use for this tag is inside of the tooltips for various SBML elements
+     * The tag expects an attribute sbo containing the integer value of the sbo term.
+     * In case the tag is not set or an empty string the table row is not rendered.
+     * @attr sbo REQUIRED the numerical SBO term without the urn header
+     */
+    def sboTableRow = { attrs ->
+        if (!attrs.sbo || attrs.sbo == "") {
+            return
+        }
+        String sbo = attrs.sbo
+        if (sbo.size() > 7) {
+            log.debug("${sbo} is not a valid SBO Term")
+            return
+        }
+        while (sbo.size() < 7) {
+            sbo = "0" + sbo
+        }
+        out << render(template: "/templates/sboTableRow", model: [urn: "urn:miriam:obo.sbo:SBO%3A" + sbo])
+    }
+
+    /**
+     * Renders a table row with the given annotations.
+     * The primary use for this tag is inside of the tooltips for various SBML elements.
+     * The tag expects an attribute annotations which is a list of the annotations to be rendered.
+     * In case the list is empty the table row is not rendered.
+     * @attr annotations REQUIRED The list of annotations
+     */
+    def annotationsTableRow = { attrs ->
+        if (!attrs.annotations) {
+            return;
+        }
+        out << render(template: "/templates/annotationsTableRow", model: [annotations: attrs.annotations])
+    }
+
+    /**
+     * Renders a table row with the given content MathML string.
+     * The primary use for this tag is inside of the tooltips for various SBML elements.
+     * The tag expects an attribute mathML which contains the content MathML string to be rendered.
+     * Additionally an optional title attribute can be specified, which is used instead of a generic
+     * title.
+     * In case the mathML attribute is empty the row is not rendered.
+     * @attr mathML REQUIRED The content MathML string
+     * @attr title The optional title, if not present or empty a generic title is used
+     */
+    def contentMathMLTableRow = { attrs->
+        if (!attrs.mathML || attrs.mathML == "") {
+            return
+        }
+        String title = attrs.title
+        if (!title || title == "") {
+            title = g.message(code: "math.tableRow.title")
+        }
+        out << render(template: "/templates/contentMathMLTableRow", model: [mathML: attrs.mathML, title: title])
     }
 }

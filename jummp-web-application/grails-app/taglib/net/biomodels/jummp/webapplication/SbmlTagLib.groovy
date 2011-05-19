@@ -85,4 +85,72 @@ class SbmlTagLib {
     def renderParameterTitle = { attrs ->
         out << render(template: "/templates/sbml/parameterTitle", model: [title: attrs.title, size: attrs.size])
     }
+
+    /**
+     * Renders a list of SBML reactions.
+     * @attr reactions REQUIRED List of Reactions
+     */
+    def renderReactions = { attrs ->
+        out << renderParameterTitle(title: g.message(code: "sbml.reactions.title"), size: attrs.reactions.size())
+        attrs.reactions.each {
+            out << renderReaction(reaction: it)
+        }
+    }
+
+    /**
+     * Renders one reaction.
+     * @attr reaction REQUIRED Map describing the Reaction
+     */
+    def renderReaction = { attrs ->
+        Map reaction = attrs.reaction
+        String metaLink = g.createLink(controller: 'sbml', action: 'reactionMeta', params: [id: params.id, reactionId: reaction.id, revision: params.revision])
+        String name = reaction.name ? reaction.name : reaction.id
+        out << render(template: "/templates/sbml/reaction", model: [title: name, metaLink: metaLink, reversible: reaction.reversible, products: reaction.products, modifiers: reaction.modifiers, reactants: reaction.reactants])
+    }
+
+    /**
+     * Renders a list of SBML events.
+     * @attr events REQUIRED List of Events
+     */
+    def renderEvents = { attrs ->
+        out << renderParameterTitle(title: "Events", size: attrs.events.size())
+        attrs.events.each {
+            out << renderEvent(event: it)
+        }
+    }
+
+    /**
+     * Renders one event.
+     * @attr event REQUIRED Map describing the Event
+     */
+    def renderEvent = { attrs ->
+        Map event = attrs.event
+        String metaLink = g.createLink(controller: 'sbml', action: 'eventMeta', params: [id: params.id, eventId: event.id, revision: params.revision])
+        String name = (event.name && event.name != "") ? event.name : event.id
+        out << render(template: "/templates/sbml/event", model: [title: name, metaLink: metaLink, assignments: event.assignments])
+    }
+
+    /**
+     * Renders one event assignment.
+     * @attr assignment REQUIRED Map describing the Event Assignment.
+     */
+    def renderEventAssignment = { attrs ->
+        Map assignment = attrs.assignment
+        String name = (assignment.variableName && assignment.variableName != "") ? assignment.variableName : assignment.variableId
+        out << render(template: "/templates/sbml/eventAssignment", model: [variable: name, math: assignment.math, type: assignment.variableType])
+    }
+
+    /**
+     * Renders a table row with the given notes.
+     * The primary use for this tag is inside of the tooltips for various SBML elements.
+     * The tag expects an attribute notes which is the notes xhtml markup as a string to be rendered.
+     * In case the string is empty the table row is not rendered.
+     * @attr notes REQUIRED The notes string
+     */
+    def notesTableRow = { attrs ->
+        if (!attrs.notes || attrs.notes == "") {
+            return
+        }
+        out << render(template: "/templates/sbml/notesTableRow", model: [notes: attrs.notes])
+    }
 }

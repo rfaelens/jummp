@@ -22,4 +22,19 @@ class SbmlController {
     def parameterMeta = {
         [parameter: remoteSbmlService.getParameter(params.id as long, params.revision as int, params.parameterId)]
     }
+
+    def math = {
+        [
+                reactions: remoteSbmlService.getReactions(params.id as long, params.revision as int),
+                events: remoteSbmlService.getEvents(params.id as long, params.revision as int)
+        ]
+    }
+
+    def reactionMeta = {
+        [reaction: remoteSbmlService.getReaction(params.id as long, params.revision as int, params.reactionId)]
+    }
+
+    def eventMeta = {
+        [event: remoteSbmlService.getEvent(params.id as long, params.revision as int, params.eventId)]
+    }
 }

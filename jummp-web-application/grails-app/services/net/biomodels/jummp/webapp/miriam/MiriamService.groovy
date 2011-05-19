@@ -19,6 +19,10 @@ class MiriamService {
      * Hash of already resolved gene ontologies. Key is the identifier, value the resolved name
      */
     private Map<String, String> geneOntologies = [:]
+    /**
+     * Hash of already resolved UniProt. Key is identifier, value the resolved name
+     */
+    private Map<String, String> uniProts = [:]
 
     /**
      * Helper method to be called from Bootstrap
@@ -61,24 +65,36 @@ class MiriamService {
      * @return Either the resolved name, or HTML cleaned id.
      */
     public String resolveName(MiriamDatatype miriam, String id) {
-        switch (miriam.identifier) {
-        // Taxonomy
-        case "MIR:00000006":
-            MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100019"}
-            if (resource) {
-                return resolveTaxonomy(resource, id)
+        try {
+            switch (miriam.identifier) {
+            // UniProt
+            case "MIR:00000005":
+                MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100134"}
+                if (resource) {
+                    return resolveUniProt(resource, id)
+                }
+                break
+            // Taxonomy
+            case "MIR:00000006":
+                MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100019"}
+                if (resource) {
+                    return resolveTaxonomy(resource, id)
+                }
+                break
+            // Gene Ontology
+            case "MIR:00000022":
+                MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100012"}
+                if (resource) {
+                    return resolveGeneOntology(resource, id)
+                }
+                break
+            default:
+                // nothing
+                break
             }
-            break
-        // Gene Ontology
-        case "MIR:00000022":
-            MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100012"}
-            if (resource) {
-                return resolveGeneOntology(resource, id)
-            }
-            break
-        default:
-            // nothing
-            break
+        } catch (IOException e) {
+            // an IOException if thrown if the service we use to resolve the name is currently down
+            log.debug(e.getMessage())
         }
         // fallback: to just cleaning for HTML
         return URLCodec.decode(id)
@@ -162,5 +178,28 @@ class MiriamService {
             return text
         }
 
+    }
+
+    /**
+     * Resolves the name of the given protein by downloading the xml description from UniProt.
+     * If the name could be resolved it is added to a hash for further fast lookup
+     *
+     * @param resource The MIRIAM resource to use for downloading the xml description
+     * @param id The UniProt id
+     * @return The resolved protein name, or the passed in id
+     */
+    private String resolveUniProt(MiriamResource resource, String id) {
+        if (uniProts.containsKey(id)) {
+            return uniProts[id]
+        }
+        String xml = new URL("${resource.action.replace('$id', id)}.xml").getText()
+        def rootNode = new XmlSlurper().parseText(xml)
+        String text = rootNode.entry.name.text()
+        if (text == "") {
+            return URLCodec.decode(id)
+        } else {
+            uniProts.put(id, text)
+            return text
+        }
     }
 }

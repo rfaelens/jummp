@@ -90,4 +90,66 @@ interface ISbmlService {
      * @return List of all reactions with their parameters
      */
     public List<Map> getLocalParameters(RevisionTransportCommand revision)
+    /**
+     * Retrieves all reactions in the SBML Model.
+     * The returned list contains one map for each reaction with the following keys/values:
+     * @li id: the id element
+     * @li metaId: The metaId element
+     * @li name: The name element
+     * @li reversible: boolean indicating whether the reaction is reversible
+     * @li sboTerm: The sboTerm if set, @c null otherwise
+     * @li reactants: list of all Reactants with a Map for each Reactant, description see below
+     * @li products: list of all Products with a Map for each Product, description see below
+     * @li modifiers: list of all Modifiers with a Map for each Modifier, description see below
+     *
+     * The three contained lists reactants, products and modifiers represent a list of species each.
+     * Each of the lists can be empty or contain one to many maps with the following keys/values:
+     * @li species: the id of the referenced species
+     * @li speciesName: The name of the referenced species
+     * @li constant: boolean indicating whether the species has a constant value (only for products and reactants)
+     * @li stoichiometry: The shoichiometry value (only for products and reactants
+     * @param revision
+     * @return  List of all reactions
+     */
+    public List<Map> getReactions(RevisionTransportCommand revision)
+    /**
+     * Retrieves the Reaction with the given @p id from the SBML Model.
+     * The returned Map contains all the elements as explained in @link getReactions
+     * with additionally the annotation, notes and math added to the map. The annotation
+     * element follows teh description of @link getAnnotations. The math value is the
+     * contained MathML of the kinetic law as a String or an empty string in case there
+     * is no kinetic law
+     * @param revision
+     * @param id The id of the Reaction
+     * @return Map describing the reaction
+     */
+    public Map getReaction(RevisionTransportCommand revision, String id)
+    /**
+     * Retrieves all events in the SBML Model.
+     * The returned list contains one map for each event with the following keys/values:
+     * @li id: The id element
+     * @li metaId: The metaId element
+     * @li name: The name element
+     * @li assignments: List of all Assignments for this Event. It contains a map for each Assignment
+     * with the following key/value pairs:
+     * @li metaId: The metaId element associated with the event assignment
+     * @li math: The Content MathML of the assignment as a String
+     * @li variableId: The Id of the referenced variable
+     * @li variableName: The resolved name of the referenced variable
+     * @li variableType: The element name of the referenced variable
+     * @param revision
+     * @return List of all events
+     */
+    public List<Map> getEvents(RevisionTransportCommand revision)
+    /**
+     * Retrieves the Event with the given @p id from the SBML Model.
+     * The returned map contains all the elements as explained in @link getEvents
+     * with additionally the annotation, notes, sboTerm, trigger and delay. The
+     * annotation element follows the description of @link getAnnotations. Trigger
+     * and delay contain both either a Content MathML String or an empty String.
+     * @param revision
+     * @param id The Id of the Event
+     * @return Map describing the event
+     */
+    public Map getEvent(RevisionTransportCommand revision, String id)
 }

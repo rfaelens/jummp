@@ -38,4 +38,20 @@ class RemoteSbmlService implements RemoteSbmlAdapter {
     List<Map> getLocalParameters(long modelId, int revisionNumber) {
         return remoteSbmlAdapter.getLocalParameters(modelId, revisionNumber)
     }
+
+    public List<Map> getReactions(long modelId, int revisionNumber) {
+        return remoteSbmlAdapter.getReactions(modelId, revisionNumber)
+    }
+
+    public Map getReaction(long modelId, int revisionNumber, String id) {
+        return remoteSbmlAdapter.getReaction(modelId, revisionNumber, id)
+    }
+
+    public List<Map> getEvents(long modelId, int revisionNumber) {
+        return remoteSbmlAdapter.getEvents(modelId, revisionNumber)
+    }
+
+    public Map getEvent(long modelId, int revisionNumber, String id) {
+        return remoteSbmlAdapter.getEvent(modelId, revisionNumber, id)
+    }
 }
