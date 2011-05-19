@@ -279,4 +279,26 @@ class JummpTagLib {
         }
         transformer.transform(new StreamSource(new StringReader(attrs.mathML)), new StreamResult(out))
     }
+
+    /**
+     * Renders a table row with the resolved SBO term.
+     * The primary use for this tag is inside of the tooltips for various SBML elements
+     * The tag expects an attribute sbo containing the integer value of the sbo term.
+     * In case the tag is not set or an empty string the table row is not rendered.
+     * @attr sbo REQUIRED the numerical SBO term without the urn header
+     */
+    def sboTableRow = { attrs ->
+        if (!attrs.sbo || attrs.sbo == "") {
+            return
+        }
+        String sbo = attrs.sbo
+        if (sbo.size() > 7) {
+            log.debug("${sbo} is not a valid SBO Term")
+            return
+        }
+        while (sbo.size() < 7) {
+            sbo = "0" + sbo
+        }
+        out << render(template: "/templates/sboTableRow", model: [urn: "urn:miriam:obo.sbo:SBO%3A" + sbo])
+    }
 }
