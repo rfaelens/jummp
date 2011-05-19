@@ -14,6 +14,7 @@ import org.sbml.jsbml.Annotation
 import org.sbml.jsbml.QuantityWithUnit
 import org.sbml.jsbml.SpeciesReference
 import org.sbml.jsbml.SimpleSpeciesReference
+import org.sbml.jsbml.Reaction
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -137,18 +138,22 @@ class SbmlService implements FileFormatService, ISbmlService {
         Model model = getFromCache(revision).model
         List<Map> reactions = []
         model.listOfReactions.each { reaction ->
-            reactions << [
-                    id: reaction.id,
-                    metaId: reaction.metaId,
-                    name: reaction.name,
-                    reversible: reaction.reversible,
-                    sboTerm: reaction.getSBOTerm() != -1 ? reaction.getSBOTerm() : null,
-                    reactants: convertSpeciesReferences(reaction.listOfReactants),
-                    products: convertSpeciesReferences(reaction.listOfProducts),
-                    modifiers: convertSpeciesReferences(reaction.listOfModifiers)
-            ]
+            reactions << reactionToMap(reaction)
         }
         return reactions
+    }
+
+    public Map getReaction(RevisionTransportCommand revision, String id) {
+        Model model = getFromCache(revision).model
+        Reaction reaction = model.getReaction(id)
+        if (!reaction) {
+            return [:]
+        }
+        Map reactionMap = reactionToMap(reaction)
+        reactionMap.put("annotation", convertCVTerms(reaction.annotation))
+        reactionMap.put("math", reaction.kineticLaw ? reaction.kineticLaw.mathMLString : "")
+        reactionMap.put("notes", reaction.notesString)
+        return reactionMap
     }
 
     /**
@@ -213,6 +218,19 @@ class SbmlService implements FileFormatService, ISbmlService {
                 speciesName: reference.model.getSpecies(reference.species).name,
                 constant: reference.constant,
                 stoichiometry: reference.stoichiometry
+        ]
+    }
+
+    private Map reactionToMap(Reaction reaction) {
+        return [
+                id: reaction.id,
+                metaId: reaction.metaId,
+                name: reaction.name,
+                reversible: reaction.reversible,
+                sboTerm: reaction.getSBOTerm() != -1 ? reaction.getSBOTerm() : null,
+                reactants: convertSpeciesReferences(reaction.listOfReactants),
+                products: convertSpeciesReferences(reaction.listOfProducts),
+                modifiers: convertSpeciesReferences(reaction.listOfModifiers)
         ]
     }
 }

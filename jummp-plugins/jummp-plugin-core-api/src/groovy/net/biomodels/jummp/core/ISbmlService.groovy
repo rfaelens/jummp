@@ -112,4 +112,16 @@ interface ISbmlService {
      * @return  List of all reactions
      */
     public List<Map> getReactions(RevisionTransportCommand revision)
+    /**
+     * Retrieves the Reaction with the given @p id from the SBML Model.
+     * The returned Map contains all the elements as explained in @link getReactions
+     * with additionally the annotation, notes and math added to the map. The annotation
+     * element follows teh description of @link getAnnotations. The math value is the
+     * contained MathML of the kinetic law as a String or an empty string in case there
+     * is no kinetic law
+     * @param revision
+     * @param id The id of the Reaction
+     * @return Map describing the reaction
+     */
+    public Map getReaction(RevisionTransportCommand revision, String id)
 }

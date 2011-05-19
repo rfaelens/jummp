@@ -42,4 +42,8 @@ class RemoteSbmlService implements RemoteSbmlAdapter {
     public List<Map> getReactions(long modelId, int revisionNumber) {
         return remoteSbmlAdapter.getReactions(modelId, revisionNumber)
     }
+
+    public Map getReaction(long modelId, int revisionNumber, String id) {
+        return remoteSbmlAdapter.getReaction(modelId, revisionNumber, id)
+    }
 }
