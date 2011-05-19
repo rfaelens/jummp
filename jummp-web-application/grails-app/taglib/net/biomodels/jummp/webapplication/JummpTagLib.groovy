@@ -2,6 +2,11 @@ package net.biomodels.jummp.webapplication
 
 import net.biomodels.jummp.webapp.menu.MenuItem
 import net.biomodels.jummp.webapp.miriam.MiriamDatatype
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.stream.StreamSource
+import javax.xml.transform.stream.StreamResult
+import org.codehaus.groovy.grails.web.context.ServletContextHolder
+import javax.xml.transform.Transformer
 
 /**
  * Small TagLib to render custom tags.
@@ -17,6 +22,8 @@ class JummpTagLib {
      * Dependency Injection for Miriam Service
      */
     def miriamService
+
+    Transformer transformer = null
 
     /**
      * Renders a compact title of a publication.
@@ -263,5 +270,13 @@ class JummpTagLib {
             out << ""
             break
         }
+    }
+
+    def contentMathML = { attrs ->
+        if (!transformer) {
+            def factory = TransformerFactory.newInstance()
+            transformer = factory.newTransformer(new StreamSource(new File(ServletContextHolder.servletContext.getRealPath("/xsl/mathmlc2p.xsl"))))
+        }
+        transformer.transform(new StreamSource(new StringReader(attrs.mathML)), new StreamResult(out))
     }
 }
