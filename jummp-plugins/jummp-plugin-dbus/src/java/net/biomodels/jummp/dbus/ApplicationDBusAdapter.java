@@ -3,7 +3,6 @@ package net.biomodels.jummp.dbus;
 import net.biomodels.jummp.dbus.authentication.AuthenticationDBusException;
 import org.freedesktop.dbus.DBusInterface;
 import org.freedesktop.dbus.DBusInterfaceName;
-
 import java.util.Map;
 
 /**
@@ -29,4 +28,11 @@ public interface ApplicationDBusAdapter extends DBusInterface {
      * @return The core's configuration as a flattened map structure.
      */
     public Map<String, String> getJummpConfig();
+    /**
+     * Retrieves a boolean from the core, indicating whether a user's
+     * authentication hash is still valid or already removed.
+     * @param hash The authentication hash of a user
+     * @return true if authentication is valid, false otherwise
+     */
+    public boolean isAuthenticated(String hash);
 }

@@ -54,6 +54,10 @@ public class ApplicationDBusAdapterImpl extends AbstractDBusAdapter implements A
         return (Map<String, String>)((ConfigObject)ConfigurationHolder.getConfig().get("jummp")).flatten();
     }
 
+    public boolean isAuthenticated(String hash) {
+        return authenticationHashService.isAuthenticated(hash);
+    }
+
     public boolean isRemote() {
         return false;
     }
