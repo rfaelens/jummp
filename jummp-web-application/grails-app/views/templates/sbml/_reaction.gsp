@@ -1,4 +1,4 @@
-<tr title="${title}">
+<tr rel="${metaLink}" title="${title}">
     <th class="reactionTitle">${title}</th>
     <td class="reactionValue">
         <span class="reactionReactants">

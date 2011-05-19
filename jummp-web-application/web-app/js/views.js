@@ -113,6 +113,10 @@ function loadModelTabCallback(data, tabIndex) {
         load: function(event, ui) {
             // ui has index
             switch ($(ui.tab).attr("id")) {
+            case "modelTabs-math":
+                // add tooltips to the rows
+                $("#model-math tbody tr").cluetip({clickThrough: false, sticky: true, mouseOutClose: true});
+                break;
             case "modelTabs-parameter":
                 // add tooltips to the rows
                 $("#model-parameters tbody tr").cluetip({clickThrough: false, sticky: true, mouseOutClose: true});

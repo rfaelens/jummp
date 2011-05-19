@@ -103,7 +103,8 @@ class SbmlTagLib {
      */
     def renderReaction = { attrs ->
         Map reaction = attrs.reaction
+        String metaLink = g.createLink(controller: 'sbml', action: 'reactionMeta', params: [id: params.id, reactionId: reaction.id, revision: params.revision])
         String name = reaction.name ? reaction.name : reaction.id
-        out << render(template: "/templates/sbml/reaction", model: [title: name, reversible: reaction.reversible, products: reaction.products, modifiers: reaction.modifiers, reactants: reaction.reactants])
+        out << render(template: "/templates/sbml/reaction", model: [title: name, metaLink: metaLink, reversible: reaction.reversible, products: reaction.products, modifiers: reaction.modifiers, reactants: reaction.reactants])
     }
 }

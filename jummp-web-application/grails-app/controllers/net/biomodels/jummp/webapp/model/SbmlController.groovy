@@ -26,4 +26,8 @@ class SbmlController {
     def math = {
         [reactions: remoteSbmlService.getReactions(params.id as long, params.revision as int)]
     }
+
+    def reactionMeta = {
+        [reaction: remoteSbmlService.getReaction(params.id as long, params.revision as int, params.reactionId)]
+    }
 }
