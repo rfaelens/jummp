@@ -7,7 +7,7 @@ class JummpPluginConfig {
             println("using subversion as vcs backend")
             jummp.vcs.pluginServiceName = "svnManagerFactory"
             jummp.plugins.subversion.enabled = true
-            jummp.plugins.subversion.localRepository = jummpConfig.plugins.subversion.localRepository
+            jummp.plugins.subversion.localRepository = jummpConfig.jummp.plugins.subversion.localRepository
         }
     }
 }
