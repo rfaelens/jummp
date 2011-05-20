@@ -15,159 +15,71 @@ import java.util.Map;
  */
 public class SbmlDBusAdapterImpl extends AbstractDBusAdapter implements SbmlDBusAdapter {
     /**
-     * Dependency Injection for ModelService
+     * Dependency Injection of SbmlDBusAdapterHelper
      */
-    private IModelService modelService;
-    /**
-     * Dependency Injection of SbmlService
-     */
-    private ISbmlService sbmlService;
+    private SbmlDBusAdapterHelper helper;
 
     public long getVersion(String authenticationHash, long modelId, int revisionNumber) {
-        try {
-            setAuthentication(authenticationHash);
-            return sbmlService.getVersion(modelService.getRevision(modelId, revisionNumber));
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsLong("Version", authenticationHash, modelId, revisionNumber);
     }
 
     public long getLevel(String authenticationHash, long modelId, int revisionNumber) {
-        try {
-            setAuthentication(authenticationHash);
-            return sbmlService.getLevel(modelService.getRevision(modelId, revisionNumber));
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsLong("Level", authenticationHash, modelId, revisionNumber);
     }
 
     public String getModelNotes(String authenticationHash, long modelId, int revisionNumber) {
-        try {
-            setAuthentication(authenticationHash);
-            return sbmlService.getNotes(modelService.getRevision(modelId, revisionNumber));
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsString("Notes", authenticationHash, modelId, revisionNumber);
     }
 
     public String getModelMetaId(String authenticationHash, long modelId, int revisionNumber) {
-        try {
-            setAuthentication(authenticationHash);
-            return sbmlService.getMetaId(modelService.getRevision(modelId, revisionNumber));
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsString("MetaId", authenticationHash, modelId, revisionNumber);
     }
 
     public String getModelAnnotations(String authenticationHash, long modelId, int revisionNumber) {
-        try {
-            setAuthentication(authenticationHash);
-            JSON json = new JSON(sbmlService.getAnnotations(modelService.getRevision(modelId, revisionNumber)));
-            return json.toString();
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsJSON("Annotations", authenticationHash, modelId, revisionNumber);
     }
 
     public String getParameters(String authenticationHash, long modelId, int revisionNumber) {
-        try {
-            setAuthentication(authenticationHash);
-            JSON json = new JSON(sbmlService.getParameters(modelService.getRevision(modelId, revisionNumber)));
-            return json.toString();
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsJSON("Parameters", authenticationHash, modelId, revisionNumber);
     }
 
     public String getParameter(String authenticationHash, long modelId, int revisionNumber, String id) {
-        try {
-            setAuthentication(authenticationHash);
-            JSON json = new JSON(sbmlService.getParameter(modelService.getRevision(modelId, revisionNumber), id));
-            return json.toString();
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsJSON("Parameter", authenticationHash, modelId, revisionNumber, id);
     }
 
     public String getLocalParameters(String authenticationHash, long modelId, int revisionNumber) {
-        try {
-            setAuthentication(authenticationHash);
-            JSON json = new JSON(sbmlService.getLocalParameters(modelService.getRevision(modelId, revisionNumber)));
-            return json.toString();
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsJSON("LocalParameters", authenticationHash, modelId, revisionNumber);
     }
 
     public String getReactions(String authenticationHash, long modelId, int revisionNumber) {
-        try {
-            setAuthentication(authenticationHash);
-            JSON json = new JSON(sbmlService.getReactions(modelService.getRevision(modelId, revisionNumber)));
-            return json.toString();
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsJSON("Reactions", authenticationHash, modelId, revisionNumber);
     }
 
     public String getReaction(String authenticationHash, long modelId, int revisionNumber, String id) {
-        try {
-            setAuthentication(authenticationHash);
-            JSON json = new JSON(sbmlService.getReaction(modelService.getRevision(modelId, revisionNumber), id));
-            return json.toString();
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsJSON("Reaction", authenticationHash, modelId, revisionNumber, id);
     }
 
     public String getEvents(String authenticationHash, long modelId, int revisionNumber) {
-        try {
-            setAuthentication(authenticationHash);
-            JSON json = new JSON(sbmlService.getEvents(modelService.getRevision(modelId, revisionNumber)));
-            return json.toString();
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsJSON("Events", authenticationHash, modelId, revisionNumber);
     }
 
     public String getEvent(String authenticationHash, long modelId, int revisionNumber, String id) {
-        try {
-            setAuthentication(authenticationHash);
-            JSON json = new JSON(sbmlService.getEvent(modelService.getRevision(modelId, revisionNumber), id));
-            return json.toString();
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsJSON("Event", authenticationHash, modelId, revisionNumber, id);
     }
 
     public String getRules(String authenticationHash, long modelId, int revisionNumber) {
-        try {
-            setAuthentication(authenticationHash);
-            JSON json = new JSON(sbmlService.getRules(modelService.getRevision(modelId, revisionNumber)));
-            return json.toString();
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsJSON("Rules", authenticationHash, modelId, revisionNumber);
     }
 
     public String getRule(String authenticationHash, long modelId, int revisionNumber, String variable) {
-        try {
-            setAuthentication(authenticationHash);
-            JSON json = new JSON(sbmlService.getRule(modelService.getRevision(modelId, revisionNumber), variable));
-            return json.toString();
-        } finally {
-            restoreAuthentication();
-        }
+        return helper.getAsJSON("Rule", authenticationHash, modelId, revisionNumber, variable);
     }
 
     public boolean isRemote() {
         return false;
     }
 
-    public void setModelService(IModelService modelService) {
-        this.modelService = modelService;
-    }
-
-    public void setSbmlService(ISbmlService sbmlService) {
-        this.sbmlService = sbmlService;
+    public void setHelper(SbmlDBusAdapterHelper helper) {
+        this.helper = helper;
     }
 }
