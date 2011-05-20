@@ -54,4 +54,12 @@ class RemoteSbmlService implements RemoteSbmlAdapter {
     public Map getEvent(long modelId, int revisionNumber, String id) {
         return remoteSbmlAdapter.getEvent(modelId, revisionNumber, id)
     }
+
+    public List<Map> getRules(long modelId, int revisionNumber) {
+        return remoteSbmlAdapter.getRules(modelId, revisionNumber)
+    }
+
+    public Map getRule(long modelId, int revisionNumber, String variable) {
+        return remoteSbmlAdapter.getRule(modelId, revisionNumber, variable)
+    }
 }

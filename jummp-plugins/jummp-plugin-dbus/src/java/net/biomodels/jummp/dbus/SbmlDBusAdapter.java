@@ -32,4 +32,6 @@ public interface SbmlDBusAdapter  extends DBusInterface {
     public String getReaction(String authenticationHash, long modelId, int revisionNumber, String id);
     public String getEvents(String authenticationHash, long modelId, int revisionNumber);
     public String getEvent(String authenticationHash, long modelId, int revisionNumber, String id);
+    public String getRules(String authenticationHash, long modelId, int revisionNumber);
+    public String getRule(String authenticationHash, long modelId, int revisionNumber, String variable);
 }

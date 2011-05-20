@@ -18,6 +18,12 @@ import org.sbml.jsbml.Reaction
 import org.sbml.jsbml.Event
 import org.sbml.jsbml.EventAssignment
 import org.sbml.jsbml.Symbol
+import org.sbml.jsbml.Rule
+import org.sbml.jsbml.RateRule
+import org.sbml.jsbml.AlgebraicRule
+import org.sbml.jsbml.AssignmentRule
+import org.sbml.jsbml.ExplicitRule
+import org.sbml.jsbml.Variable
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -180,6 +186,27 @@ class SbmlService implements FileFormatService, ISbmlService {
         return eventMap
     }
 
+    public List<Map> getRules(RevisionTransportCommand revision) {
+        Model model = getFromCache(revision).model
+        List<Map> rules = []
+        model.listOfRules.each { rule ->
+            rules << ruleToMap(rule)
+        }
+        return rules
+    }
+
+    public Map getRule(RevisionTransportCommand revision, String variable) {
+        Model model = getFromCache(revision).model
+        ExplicitRule rule = model.getRule(variable)
+        if (!rule) {
+            return [:]
+        }
+        Map ruleMap = ruleToMap(rule)
+        ruleMap.put("annotation", convertCVTerms(rule.annotation))
+        ruleMap.put("notes", rule.notesString)
+        return ruleMap
+    }
+
     /**
      * Returns the SBMLDocument for the @p revision from the cache.
      * If the cache does not contain the SBMLDocument, the model file is
@@ -280,5 +307,29 @@ class SbmlService implements FileFormatService, ISbmlService {
             ]
         }
         return eventAssignments
+    }
+
+    private Map ruleToMap(Rule rule) {
+        String type = null
+        Variable symbol = null
+        if (rule instanceof RateRule) {
+            type = "rate"
+            symbol = rule.model.findSymbol(rule.variable)
+        } else if (rule instanceof AssignmentRule) {
+            type = "assignment"
+            symbol = rule.model.findSymbol(rule.variable)
+        } else if (rule instanceof AlgebraicRule) {
+            type = "algebraic"
+            symbol = rule.derivedVariable
+        }
+
+        return [
+                metaId: rule.metaId,
+                math: rule.getMathMLString(),
+                variableId : symbol ? symbol.id : null,
+                variableName: symbol ? symbol.name : null,
+                variableType: symbol ? symbol.elementName : null,
+                type: type
+        ]
     }
 }

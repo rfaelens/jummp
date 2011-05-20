@@ -104,6 +104,22 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
         }
         return event
     }
+    public List<Map> getRules(long modelId, int revisionNumber) {
+        return mapFromJSON(sbmlDBusAdapter.getRules(authenticationToken(), modelId, revisionNumber))
+    }
+
+    public Map getRule(long modelId, int revisionNumber, String variable) {
+        def parsedJSON = JSON.parse(sbmlDBusAdapter.getRule(authenticationToken(), modelId, revisionNumber, variable))
+        Map rule = [:]
+        parsedJSON.keySet().each { key ->
+            def value = parsedJSON.get(key)
+            if (value == JSONObject.NULL) {
+                value = null
+            }
+            rule.put(key, value)
+        }
+        return rule
+    }
 
     private List<Map> mapFromJSON(String json) {
         def parsedJSON = JSON.parse(json)

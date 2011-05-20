@@ -155,4 +155,29 @@ public interface RemoteSbmlAdapter {
      * @return Map describing the event
      */
     public Map getEvent(long modelId, int revisionNumber, String id)
+    /**
+     * Retrieves all rules in the SBML Model.
+     * The returned list contains one map for each rule with the following keys/values:
+     * @li metaId: The metaId element
+     * @li math: The Content MathML of this rule
+     * @li type: Either rate, assignment or algebraic. Describes the type of the rule.
+     * @li variableId: Id element of referenced variable if present, otherwise @c null
+     * @li variableId: Name element of referenced variable if present, otherwise @c null
+     * @li variableType: Element name of referenced variable if present, otherwise @c null
+     * @param modelId
+     * @param revisionNumber
+     * @return List of all rules
+     */
+    public List<Map> getRules(long modelId, int revisionNumber)
+    /**
+     * Retrieves the Rule for the given referenced @p variable in the SBML Model.
+     * The returned map contains all the elements as explained in @link getRules with
+     * additionally the annotation and notes string. The annotation element follows
+     * the description of @link getAnnotations.
+     * @param modelId
+     * @param revisionNumber
+     * @param variable The id of the referenced Variable
+     * @return Map describing the Rule
+     */
+    public Map getRule(long modelId, int revisionNumber, String variable)
 }
