@@ -24,6 +24,7 @@ import org.sbml.jsbml.AlgebraicRule
 import org.sbml.jsbml.AssignmentRule
 import org.sbml.jsbml.ExplicitRule
 import org.sbml.jsbml.Variable
+import org.perf4j.aop.Profiled
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -41,6 +42,7 @@ class SbmlService implements FileFormatService, ISbmlService {
     // TODO: move initialization into afterPropertiesSet and make it configuration dependent
     SbmlCache<RevisionTransportCommand, SBMLDocument> cache = new SbmlCache(100)
 
+    @Profiled(tag="SbmlService.validate")
     public boolean validate(final File model) {
         // TODO: we should insert the parsed model into the cache
         SBMLDocument doc
@@ -73,22 +75,27 @@ class SbmlService implements FileFormatService, ISbmlService {
         }
     }
 
+    @Profiled(tag="SbmlService.extractName")
     public String extractName(final File model) {
         return ""
     }
 
+    @Profiled(tag="SbmlService.getMetaId")
     public String getMetaId(RevisionTransportCommand revision) {
         return getFromCache(revision).model.metaId
     }
 
+    @Profiled(tag="SbmlService.getVersion")
     public long getVersion(RevisionTransportCommand revision) {
         return getFromCache(revision).version
     }
 
+    @Profiled(tag="SbmlService.getLevel")
     public long getLevel(RevisionTransportCommand revision) {
         return getFromCache(revision).level
     }
 
+    @Profiled(tag="SbmlService.getNotes")
     public String getNotes(RevisionTransportCommand revision) {
         // JSBML may return null - see https://sourceforge.net/tracker/?func=detail&aid=3300490&group_id=279608&atid=1186776
         String notesString = getFromCache(revision).model.notesString
@@ -99,11 +106,13 @@ class SbmlService implements FileFormatService, ISbmlService {
         }
     }
 
+    @Profiled(tag="SbmlService.getAnnotations")
     public List<Map> getAnnotations(RevisionTransportCommand revision) {
         Model model = getFromCache(revision).model
         return convertCVTerms(model.annotation)
     }
 
+    @Profiled(tag="SbmlService.getParameters")
     public List<Map> getParameters(RevisionTransportCommand revision) {
         Model model = getFromCache(revision).model
         ListOf<Parameter> parameters = model.getListOfParameters()
@@ -114,6 +123,7 @@ class SbmlService implements FileFormatService, ISbmlService {
         return list
     }
 
+    @Profiled(tag="SbmlService.getParameter")
     public Map getParameter(RevisionTransportCommand revision, String id) {
         Model model = getFromCache(revision).model
         QuantityWithUnit param = model.getParameter(id)
@@ -129,6 +139,7 @@ class SbmlService implements FileFormatService, ISbmlService {
         return map
     }
 
+    @Profiled(tag="SbmlService.getLocalParameters")
     public List<Map> getLocalParameters(RevisionTransportCommand revision) {
         Model model = getFromCache(revision).model
         List<Map> reactions = []
@@ -143,6 +154,7 @@ class SbmlService implements FileFormatService, ISbmlService {
         return reactions
     }
 
+    @Profiled(tag="SbmlService.getReactions")
     public List<Map> getReactions(RevisionTransportCommand revision) {
         Model model = getFromCache(revision).model
         List<Map> reactions = []
@@ -152,6 +164,7 @@ class SbmlService implements FileFormatService, ISbmlService {
         return reactions
     }
 
+    @Profiled(tag="SbmlService.getReaction")
     public Map getReaction(RevisionTransportCommand revision, String id) {
         Model model = getFromCache(revision).model
         Reaction reaction = model.getReaction(id)
@@ -165,6 +178,7 @@ class SbmlService implements FileFormatService, ISbmlService {
         return reactionMap
     }
 
+    @Profiled(tag="SbmlService.getEvents")
     public List<Map> getEvents(RevisionTransportCommand revision) {
         Model model = getFromCache(revision).model
         List<Map> events = []
@@ -174,6 +188,7 @@ class SbmlService implements FileFormatService, ISbmlService {
         return events
     }
 
+    @Profiled(tag="SbmlService.getEvent")
     public Map getEvent(RevisionTransportCommand revision, String id) {
         Model model = getFromCache(revision).model
         Event event = model.getEvent(id)
@@ -186,6 +201,7 @@ class SbmlService implements FileFormatService, ISbmlService {
         return eventMap
     }
 
+    @Profiled(tag="SbmlService.getRules")
     public List<Map> getRules(RevisionTransportCommand revision) {
         Model model = getFromCache(revision).model
         List<Map> rules = []
@@ -195,6 +211,7 @@ class SbmlService implements FileFormatService, ISbmlService {
         return rules
     }
 
+    @Profiled(tag="SbmlService.getRule")
     public Map getRule(RevisionTransportCommand revision, String variable) {
         Model model = getFromCache(revision).model
         ExplicitRule rule = model.getRule(variable)

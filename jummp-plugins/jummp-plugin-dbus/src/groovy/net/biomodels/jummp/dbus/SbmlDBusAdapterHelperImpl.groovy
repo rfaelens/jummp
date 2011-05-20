@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 import net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException
+import org.perf4j.aop.Profiled
 
 /**
  * @short Helper class for the SbmlDBusAdapter.
@@ -45,18 +46,22 @@ class SbmlDBusAdapterHelperImpl implements SbmlDBusAdapterHelper {
         }
     }
 
+    @Profiled(tag='SbmlDBusAdapterHelper.get{$0}')
     public String getAsJSON(String name, String authenticationHash, long modelId, int revisionNumber) {
         return perform(name, authenticationHash, modelId, revisionNumber, null) as JSON
     }
 
+    @Profiled(tag='SbmlDBusAdapterHelper.get{$0}')
     public String getAsJSON(String name, String authenticationHash, long modelId, int revisionNumber, String id) {
         return perform(name, authenticationHash, modelId, revisionNumber, id) as JSON
     }
 
+    @Profiled(tag='SbmlDBusAdapterHelper.get{$0}')
     public String getAsString(String name, String authenticationHash, long modelId, int revisionNumber) {
         return perform(name, authenticationHash, modelId, revisionNumber, null)
     }
 
+    @Profiled(tag='SbmlDBusAdapterHelper.get{$0}')
     public long getAsLong(String name, String authenticationHash, long modelId, int revisionNumber) {
         return perform(name, authenticationHash, modelId, revisionNumber, null)
     }
