@@ -1,14 +1,5 @@
 package net.biomodels.jummp.dbus;
 
-import grails.converters.JSON;
-import net.biomodels.jummp.core.IModelService;
-import net.biomodels.jummp.core.ISbmlService;
-import net.biomodels.jummp.core.model.RevisionTransportCommand;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 /**
  * @short Concrete Implementation of SbmlDBusAdapter.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
