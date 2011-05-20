@@ -1,5 +1,7 @@
 package net.biomodels.jummp.webapplication
 
+import groovy.xml.StreamingMarkupBuilder
+
 class SbmlTagLib {
     static namespace = "sbml"
 
@@ -209,6 +211,23 @@ class SbmlTagLib {
             variableName = attrs.rule.variableId
         }
         out << render(template: "/templates/sbml/assignmentRuleRow", model: [variable: variableName, math: attrs.rule.math])
+    }
+
+    /**
+     * Modifies the assignment MathML to contain the equals variable.
+     * Expects a jummp:contentMathML as body.
+     * @attr variable REQUIRED The name of the variable
+     */
+    def assignmentRuleMath = { attrs, body ->
+        String math = body()
+        def root = new XmlSlurper(true, false).parseText(math)
+        root.mrow.appendNode {
+            mo("=")
+            mi(attrs.variable)
+        }
+        def outputBuilder = new StreamingMarkupBuilder()
+        String result = outputBuilder.bind{ mkp.yield root }
+        out << result
     }
 
     /**
