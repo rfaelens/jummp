@@ -240,4 +240,20 @@ class SbmlTagLib {
         }
         out << render(template: "/templates/sbml/algebraicRuleRow", model: [math: attrs.rule.math])
     }
+
+    /**
+     * Modifies the algebraic MathML to contain the equals 0.
+     * Expects a jummp:contentMathML as body.
+     */
+    def algebraicRuleMath = { attrs, body ->
+        String math = body()
+        def root = new XmlSlurper(true, false).parseText(math)
+        root.mrow.appendNode {
+            mo("=")
+            mn(0)
+        }
+        def outputBuilder = new StreamingMarkupBuilder()
+        String result = outputBuilder.bind{ mkp.yield root }
+        out << result
+    }
 }
