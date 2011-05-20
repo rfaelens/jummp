@@ -153,4 +153,72 @@ class SbmlTagLib {
         }
         out << render(template: "/templates/sbml/notesTableRow", model: [notes: attrs.notes])
     }
+
+    /**
+     * Renders list of SBML Rules.
+     * @attr rules REQUIRED The list of rules
+     */
+    def renderRules = { attrs ->
+        if (!attrs.rules) {
+            return
+        }
+        out << renderParameterTitle(title: g.message(code: "sbml.rules.title"), size: attrs.rules.size())
+        attrs.rules.each { rule ->
+            switch (rule.type) {
+            case "rate":
+                out << renderRateRule(rule: rule)
+                break
+            case "assignment":
+                out << renderAssignmentRule(rule: rule)
+                break
+            case "algebraic":
+                out << renderAlgebraicRule(rule: rule)
+                break
+            default:
+                // no real rule - nothing to render
+                break
+            }
+        }
+    }
+
+    /**
+     * Renders one SBML Rate Rule.
+     * @attr rule REQUIRED Map describing the Rate Rule
+     */
+    def renderRateRule = { attrs ->
+        if (!attrs.rule) {
+            return
+        }
+        String variableName = attrs.rule.variableName
+        if (!variableName || variableName == "") {
+            variableName = attrs.rule.variableId
+        }
+        out << render(template: "/templates/sbml/rateRuleRow", model: [variable: variableName, math: attrs.rule.math])
+    }
+
+    /**
+     * Renders one SBML Assignment Rule.
+     * @attr rule REQUIRED Map describing the Assignment Rule
+     */
+    def renderAssignmentRule = { attrs ->
+        if (!attrs.rule) {
+            return
+        }
+        String variableName = attrs.rule.variableName
+        if (!variableName || variableName == "") {
+            variableName = attrs.rule.variableId
+        }
+        out << render(template: "/templates/sbml/assignmentRuleRow", model: [variable: variableName, math: attrs.rule.math])
+    }
+
+    /**
+     * Renders one SBML Algebraic Rule.
+     * @attr rule REQUIRED Map describing the Algebraic Rule
+     */
+    def renderAlgebraicRule = { attrs ->
+        if (!attrs.rule) {
+            return
+        }
+        out << render(template: "/templates/sbml/algebraicRuleRow", model: [math: attrs.rule.math])
+    }
 }
