@@ -199,6 +199,36 @@ class SbmlTagLib {
     }
 
     /**
+     * Modifies the assignment MathML to contain the "= d(variable)/dt".
+     * Expects a jummp:contentMathML as body.
+     * @attr variable REQUIRED The name of the variable
+     */
+    def rateRuleMath = { attrs, body ->
+        String math = body()
+        def root = new XmlSlurper(true, false).parseText(math)
+        root.mrow.appendNode {
+            mo("=")
+            mfrac {
+                mrow {
+                    mi("d")
+                    mfenced(open: "(", close: ")") {
+                        mi(attrs.variable)
+                    }
+                }
+                mrow {
+                    mi("d")
+                    mkp.yieldUnescaped("<mo>&it;</mo>")
+                    mi("t")
+                }
+            }
+        }
+        def outputBuilder = new StreamingMarkupBuilder()
+        //String result = outputBuilder.bind{ mkp.yield root }
+        String result = outputBuilder.bindNode(root)
+        out << result
+    }
+
+    /**
      * Renders one SBML Assignment Rule.
      * @attr rule REQUIRED Map describing the Assignment Rule
      */
