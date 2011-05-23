@@ -25,6 +25,7 @@ import org.sbml.jsbml.AssignmentRule
 import org.sbml.jsbml.ExplicitRule
 import org.sbml.jsbml.Variable
 import org.perf4j.aop.Profiled
+import org.sbml.jsbml.FunctionDefinition
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -224,6 +225,28 @@ class SbmlService implements FileFormatService, ISbmlService {
         return ruleMap
     }
 
+    public List<Map> getFunctionDefinitions(RevisionTransportCommand revision) {
+        Model model = getFromCache(revision).model
+        List<Map> functions = []
+        model.listOfFunctionDefinitions.each { function ->
+            functions << functionDefinitionToMap(function)
+        }
+        return functions
+    }
+
+    public Map getFunctionDefinition(RevisionTransportCommand revision, String id) {
+        Model model = getFromCache(revision).model
+        FunctionDefinition function = model.getFunctionDefinition(id)
+        if (!function) {
+            return [:]
+        }
+        Map functionMap = functionDefinitionToMap(function)
+        functionMap.put("annotation", convertCVTerms(function.annotation))
+        functionMap.put("notes", function.notesString)
+        functionMap.put("sboTerm", function.getSBOTerm())
+        return functionMap
+    }
+
     /**
      * Returns the SBMLDocument for the @p revision from the cache.
      * If the cache does not contain the SBMLDocument, the model file is
@@ -347,6 +370,15 @@ class SbmlService implements FileFormatService, ISbmlService {
                 variableName: symbol ? symbol.name : null,
                 variableType: symbol ? symbol.elementName : null,
                 type: type
+        ]
+    }
+
+    private Map functionDefinitionToMap(FunctionDefinition function) {
+        return [
+                id: function.id,
+                name: function.name,
+                metaId: function.metaId,
+                math: function.mathMLString
         ]
     }
 }

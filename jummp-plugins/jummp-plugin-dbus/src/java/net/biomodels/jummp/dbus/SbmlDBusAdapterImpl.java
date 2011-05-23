@@ -66,6 +66,14 @@ public class SbmlDBusAdapterImpl extends AbstractDBusAdapter implements SbmlDBus
         return helper.getAsJSON("Rule", authenticationHash, modelId, revisionNumber, variable);
     }
 
+    public String getFunctionDefinitions(String authenticationHash, long modelId, int revisionNumber) {
+        return helper.getAsJSON("FunctionDefinitions", authenticationHash, modelId, revisionNumber);
+    }
+
+    public String getFunctionDefinition(String authenticationHash, long modelId, int revisionNumber, String id) {
+        return helper.getAsJSON("FunctionDefinition", authenticationHash, modelId, revisionNumber, id);
+    }
+
     public boolean isRemote() {
         return false;
     }

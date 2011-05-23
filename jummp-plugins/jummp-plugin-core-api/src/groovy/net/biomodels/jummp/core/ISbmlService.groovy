@@ -175,4 +175,25 @@ interface ISbmlService {
      * @return Map describing the Rule
      */
     public Map getRule(RevisionTransportCommand revision, String variable)
+    /**
+     * Retrieves all function definitions in the SBML Model.
+     * The returned list contains one map for each function definition with the following keys/values:
+     * @li id The id element
+     * @li name The name element
+     * @li metaId The metaId element
+     * @li math The content MathML String
+     * @param revision
+     * @return List of all Function Definitions
+     */
+    public List<Map> getFunctionDefinitions(RevisionTransportCommand revision)
+    /**
+     * Retrieves the Function Definition with the given @p id in the SBML Model.
+     * The returned map contains all the elements as explained in @link getFunctionDefinitions with
+     * additionally the annotation, notes and sboTerm. The annotation element follows the description
+     * of @link getAnnotations.
+     * @param revision
+     * @param id
+     * @return Map describing the Function Definition
+     */
+    public Map getFunctionDefinition(RevisionTransportCommand revision, String id)
 }

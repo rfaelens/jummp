@@ -77,4 +77,14 @@ class RemoteSbmlService implements RemoteSbmlAdapter {
     public Map getRule(long modelId, int revisionNumber, String variable) {
         return remoteSbmlAdapter.getRule(modelId, revisionNumber, variable)
     }
+
+    @Profiled(tag="RemoteSbmlService.getFunctionDefinitions")
+    public List<Map> getFunctionDefinitions(long modelId, int revisionNumber) {
+        return remoteSbmlAdapter.getFunctionDefinitions(modelId, revisionNumber)
+    }
+
+    @Profiled(tag="RemoteSbmlService.getFunctionDefinition")
+    public Map getFunctionDefinition(long modelId, int revisionNumber, String id) {
+        return remoteSbmlAdapter.getFunctionDefinition(modelId, revisionNumber, id)
+    }
 }
