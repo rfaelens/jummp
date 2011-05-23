@@ -27,6 +27,7 @@ class SbmlController {
         [
                 reactions: remoteSbmlService.getReactions(params.id as long, params.revision as int),
                 rules: remoteSbmlService.getRules(params.id as long, params.revision as int),
+                functions: remoteSbmlService.getFunctionDefinitions(params.id as long, params.revision as int),
                 events: remoteSbmlService.getEvents(params.id as long, params.revision as int)
         ]
     }
@@ -37,5 +38,9 @@ class SbmlController {
 
     def eventMeta = {
         [event: remoteSbmlService.getEvent(params.id as long, params.revision as int, params.eventId)]
+    }
+
+    def functionDefinitionMeta = {
+        [function: remoteSbmlService.getFunctionDefinition(params.id as long, params.revision as int, params.functionDefinitionId)]
     }
 }

@@ -286,4 +286,29 @@ class SbmlTagLib {
         String result = outputBuilder.bind{ mkp.yield root }
         out << result
     }
+
+    /**
+     * Renders a list of Function Definitions.
+     * @attr functions REQUIRED The list of function definitions
+     */
+    def renderFunctionDefinitions = { attrs ->
+        if (!attrs.functions) {
+            return
+        }
+        out << renderParameterTitle(title: g.message(code: "sbml.functionDefinitions.title"), size: attrs.functions.size())
+        attrs.functions.each {
+            out << renderFunctionDefinition(function: it)
+        }
+    }
+
+    /**
+     * Renders one Function Definition.
+     * @attr function REQUIRED Map describing the Function Definition
+     */
+    def renderFunctionDefinition = { attrs ->
+        Map function = attrs.function
+        String metaLink = g.createLink(controller: 'sbml', action: 'functionDefinitionMeta', params: [id: params.id, functionDefinitionId: function.id, revision: params.revision])
+        String name = (function.name && function.name != "") ? function.name : function.id
+        out << render(template: "/templates/sbml/functionDefinition", model: [title: name, metaLink: metaLink, math: function.math])
+    }
 }

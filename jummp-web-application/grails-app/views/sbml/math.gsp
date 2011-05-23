@@ -5,5 +5,6 @@
         <g:if test="${!events.isEmpty()}">
             <sbml:renderEvents events="${events}"/>
         </g:if>
+        <sbml:renderFunctionDefinitions functions="${functions}"/>
     </table>
 </div>
