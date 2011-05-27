@@ -18,15 +18,15 @@ public class SbmlDBusAdapterImpl extends AbstractDBusAdapter implements SbmlDBus
         return helper.getAsLong("Level", authenticationHash, modelId, revisionNumber);
     }
 
-    public String getModelNotes(String authenticationHash, long modelId, int revisionNumber) {
+    public String getNotes(String authenticationHash, long modelId, int revisionNumber) {
         return helper.getAsString("Notes", authenticationHash, modelId, revisionNumber);
     }
 
-    public String getModelMetaId(String authenticationHash, long modelId, int revisionNumber) {
+    public String getMetaId(String authenticationHash, long modelId, int revisionNumber) {
         return helper.getAsString("MetaId", authenticationHash, modelId, revisionNumber);
     }
 
-    public String getModelAnnotations(String authenticationHash, long modelId, int revisionNumber) {
+    public String getAnnotations(String authenticationHash, long modelId, int revisionNumber) {
         return helper.getAsJSON("Annotations", authenticationHash, modelId, revisionNumber);
     }
 

@@ -22,16 +22,4 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
         connection =  DBusConnection.getConnection(DBusConnection.SESSION)
         sbmlDBusAdapter = (SbmlDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/SBML", SbmlDBusAdapter.class)
     }
-
-    String getMetaId(long modelId, int revisionNumber) {
-        return sbmlDBusAdapter.getModelMetaId(authenticationToken(), modelId, revisionNumber)
-    }
-
-    String getNotes(long modelId, int revisionNumber) {
-        return sbmlDBusAdapter.getModelNotes(authenticationToken(), modelId, revisionNumber)
-    }
-
-    List<Map> getAnnotations(long modelId, int revisionNumber) {
-        return listOfMapFromJSON(sbmlDBusAdapter.getModelAnnotations(authenticationToken(), modelId, revisionNumber))
-    }
 }

@@ -14,8 +14,8 @@ public interface SbmlDBusAdapter  extends DBusInterface {
 
     public long getVersion(String authenticationHash, long modelId, int revisionNumber);
     public long getLevel(String authenticationHash, long modelId, int revisionNumber);
-    public String getModelNotes(String authenticationHash, long modelId, int revisionNumber);
-    public String getModelMetaId(String authenticationHash, long modelId, int revisionNumber);
+    public String getNotes(String authenticationHash, long modelId, int revisionNumber);
+    public String getMetaId(String authenticationHash, long modelId, int revisionNumber);
 
     /**
      *
@@ -24,7 +24,7 @@ public interface SbmlDBusAdapter  extends DBusInterface {
      * @param revisionNumber
      * @return JSON String of the annotation on Model level
      */
-    public String getModelAnnotations(String authenticationHash, long modelId, int revisionNumber);
+    public String getAnnotations(String authenticationHash, long modelId, int revisionNumber);
     public String getParameters(String authenticationHash, long modelId, int revisionNumber);
     public String getParameter(String authenticationHash, long modelId, int revisionNumber, String id);
     public String getLocalParameters(String authenticationHash, long modelId, int revisionNumber);
