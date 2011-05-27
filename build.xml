@@ -9,6 +9,28 @@
         </classpath>
     </taskdef>
 
+    <!--Task Definition to invoke Groovy compile-->
+    <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
+        <classpath>
+            <pathelement location="${env.GRAILS_HOME}/lib/gant_groovy1.7-1.9.2.jar"/>
+            <pathelement location="${env.GRAILS_HOME}/lib/groovy-all-1.7.8.jar"/>
+        </classpath>
+    </taskdef>
+
+    <!--Compiles the AST Transformation code-->
+    <target name="ast-compile">
+        <echo message="Compiling ast transformations"/>
+        <mkdir dir="${basedir}/ast-build"/>
+        <groovyc srcdir="${basedir}/jummp-plugins/jummp-plugin-ast/src/groovy/" destdir="${basedir}/ast-build"/>
+    </target>
+
+    <!--Generates a jar from the compiled AST Transformation and places it into the core's and web application's lib folder-->
+    <target name="ast-jar" depends="ast-compile">
+        <jar destfile="${basedir}/lib/jummp-ast.jar" basedir="${basedir}/ast-build"/>
+        <copy file="${basedir}/lib/jummp-ast.jar" tofile="${basedir}/jummp-web-application/lib/jummp-ast.jar"/>
+        <delete dir="${basedir}/ast-build"/>
+    </target>
+
 <!-- Target to execute the testing of one plugin. Used by antcall from test-plugins -->
     <target name="test-plugin">
         <echo message="Running tests for Plugin ${plugin}"/>

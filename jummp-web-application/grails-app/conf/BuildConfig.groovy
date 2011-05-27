@@ -37,7 +37,6 @@ try {
 } catch (Exception e) {
     // ignore
 }
-grails.plugin.location.'jummp-plugin-ast' = "${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-ast"
 if (new File("${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-dbus").exists()) {
     grails.plugin.location.'jummp-plugin-dbus' = "${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-dbus"
 }
