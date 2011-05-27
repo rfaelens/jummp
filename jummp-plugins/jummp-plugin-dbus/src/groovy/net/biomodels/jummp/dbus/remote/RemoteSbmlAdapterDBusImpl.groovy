@@ -41,17 +41,11 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
     }
 
     List<Map> getAnnotations(long modelId, int revisionNumber) {
-        String json = sbmlDBusAdapter.getModelAnnotations(authenticationToken(), modelId, revisionNumber)
-        def parsedJSON = JSON.parse(json)
-        List<Map> returnList = []
-        parsedJSON.each {
-            returnList << it
-        }
-        return returnList
+        return listOfMapFromJSON(sbmlDBusAdapter.getModelAnnotations(authenticationToken(), modelId, revisionNumber))
     }
 
     List<Map> getParameters(long modelId, int revisionNumber) {
-        return mapFromJSON(sbmlDBusAdapter.getParameters(authenticationToken(), modelId, revisionNumber))
+        return listOfMapFromJSON(sbmlDBusAdapter.getParameters(authenticationToken(), modelId, revisionNumber))
     }
 
     Map getParameter(long modelId, int revisionNumber, String id) {
@@ -68,11 +62,11 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
     }
 
     List<Map> getLocalParameters(long modelId, int revisionNumber) {
-        return mapFromJSON(sbmlDBusAdapter.getLocalParameters(authenticationToken(), modelId, revisionNumber))
+        return listOfMapFromJSON(sbmlDBusAdapter.getLocalParameters(authenticationToken(), modelId, revisionNumber))
     }
 
     public List<Map> getReactions(long modelId, int revisionNumber) {
-        return mapFromJSON(sbmlDBusAdapter.getReactions(authenticationToken(), modelId, revisionNumber))
+        return listOfMapFromJSON(sbmlDBusAdapter.getReactions(authenticationToken(), modelId, revisionNumber))
     }
 
     public Map getReaction(long modelId, int revisionNumber, String id) {
@@ -89,7 +83,7 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
     }
 
     public List<Map> getEvents(long modelId, int revisionNumber) {
-        return mapFromJSON(sbmlDBusAdapter.getEvents(authenticationToken(), modelId, revisionNumber))
+        return listOfMapFromJSON(sbmlDBusAdapter.getEvents(authenticationToken(), modelId, revisionNumber))
     }
 
     public Map getEvent(long modelId, int revisionNumber, String id) {
@@ -105,7 +99,7 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
         return event
     }
     public List<Map> getRules(long modelId, int revisionNumber) {
-        return mapFromJSON(sbmlDBusAdapter.getRules(authenticationToken(), modelId, revisionNumber))
+        return listOfMapFromJSON(sbmlDBusAdapter.getRules(authenticationToken(), modelId, revisionNumber))
     }
 
     public Map getRule(long modelId, int revisionNumber, String variable) {
@@ -122,7 +116,7 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
     }
 
     public List<Map> getFunctionDefinitions(long modelId, int revisionNumber) {
-        return mapFromJSON(sbmlDBusAdapter.getFunctionDefinitions(authenticationToken(), modelId, revisionNumber))
+        return listOfMapFromJSON(sbmlDBusAdapter.getFunctionDefinitions(authenticationToken(), modelId, revisionNumber))
     }
 
     public Map getFunctionDefinition(long modelId, int revisionNumber, String id) {
@@ -138,7 +132,7 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
         return function
     }
 
-    private List<Map> mapFromJSON(String json) {
+    private List<Map> listOfMapFromJSON(String json) {
         def parsedJSON = JSON.parse(json)
         List<Map> returnList = []
         parsedJSON.each {
