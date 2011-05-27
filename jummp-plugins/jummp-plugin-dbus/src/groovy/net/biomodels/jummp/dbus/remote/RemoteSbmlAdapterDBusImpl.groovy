@@ -49,16 +49,7 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
     }
 
     Map getParameter(long modelId, int revisionNumber, String id) {
-        def parsedJSON = JSON.parse(sbmlDBusAdapter.getParameter(authenticationToken(), modelId, revisionNumber, id))
-        Map entry = [:]
-        parsedJSON.keySet().each { key ->
-            def value = parsedJSON.get(key)
-            if (value == JSONObject.NULL) {
-                value = null
-            }
-            entry.put(key, value)
-        }
-        return entry
+        return mapFromJSON(sbmlDBusAdapter.getParameter(authenticationToken(), modelId, revisionNumber, id))
     }
 
     List<Map> getLocalParameters(long modelId, int revisionNumber) {
@@ -70,16 +61,7 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
     }
 
     public Map getReaction(long modelId, int revisionNumber, String id) {
-        def parsedJSON = JSON.parse(sbmlDBusAdapter.getReaction(authenticationToken(), modelId, revisionNumber, id))
-        Map reaction = [:]
-        parsedJSON.keySet().each { key ->
-            def value = parsedJSON.get(key)
-            if (value == JSONObject.NULL) {
-                value = null
-            }
-            reaction.put(key, value)
-        }
-        return reaction
+        return mapFromJSON(sbmlDBusAdapter.getReaction(authenticationToken(), modelId, revisionNumber, id))
     }
 
     public List<Map> getEvents(long modelId, int revisionNumber) {
@@ -87,32 +69,14 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
     }
 
     public Map getEvent(long modelId, int revisionNumber, String id) {
-        def parsedJSON = JSON.parse(sbmlDBusAdapter.getEvent(authenticationToken(), modelId, revisionNumber, id))
-        Map event = [:]
-        parsedJSON.keySet().each { key ->
-            def value = parsedJSON.get(key)
-            if (value == JSONObject.NULL) {
-                value = null
-            }
-            event.put(key, value)
-        }
-        return event
+       return mapFromJSON(sbmlDBusAdapter.getEvent(authenticationToken(), modelId, revisionNumber, id))
     }
     public List<Map> getRules(long modelId, int revisionNumber) {
         return listOfMapFromJSON(sbmlDBusAdapter.getRules(authenticationToken(), modelId, revisionNumber))
     }
 
     public Map getRule(long modelId, int revisionNumber, String variable) {
-        def parsedJSON = JSON.parse(sbmlDBusAdapter.getRule(authenticationToken(), modelId, revisionNumber, variable))
-        Map rule = [:]
-        parsedJSON.keySet().each { key ->
-            def value = parsedJSON.get(key)
-            if (value == JSONObject.NULL) {
-                value = null
-            }
-            rule.put(key, value)
-        }
-        return rule
+        return mapFromJSON(sbmlDBusAdapter.getRule(authenticationToken(), modelId, revisionNumber, variable))
     }
 
     public List<Map> getFunctionDefinitions(long modelId, int revisionNumber) {
@@ -120,16 +84,7 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
     }
 
     public Map getFunctionDefinition(long modelId, int revisionNumber, String id) {
-        def parsedJSON = JSON.parse(sbmlDBusAdapter.getFunctionDefinition(authenticationToken(), modelId, revisionNumber, id))
-        Map function = [:]
-        parsedJSON.keySet().each { key ->
-            def value = parsedJSON.get(key)
-            if (value == JSONObject.NULL) {
-                value = null
-            }
-            function.put(key, value)
-        }
-        return function
+        return mapFromJSON(sbmlDBusAdapter.getFunctionDefinition(authenticationToken(), modelId, revisionNumber, id))
     }
 
     private List<Map> listOfMapFromJSON(String json) {
@@ -147,5 +102,18 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteS
             returnList << entry
         }
         return returnList
+    }
+
+    private Map mapFromJSON(String json) {
+        def parsedJSON = JSON.parse(json)
+        Map returnMap = [:]
+        parsedJSON.keySet().each { key ->
+            def value = parsedJSON.get(key)
+            if (value == JSONObject.NULL) {
+                value = null
+            }
+            returnMap.put(key, value)
+        }
+        return returnMap
     }
 }
