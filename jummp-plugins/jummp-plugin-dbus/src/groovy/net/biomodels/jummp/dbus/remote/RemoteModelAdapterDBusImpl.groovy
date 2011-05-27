@@ -15,11 +15,13 @@ import org.apache.commons.io.FileUtils
 import net.biomodels.jummp.dbus.model.DBusModel
 import net.biomodels.jummp.dbus.model.DBusPublication
 import net.biomodels.jummp.core.ModelException
+import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
 
 /**
  * @short DBus Implementation of RemoteModelAdapter.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
+@RemoteDBusAdapter(interfaceName="RemoteModelAdapter",dbusAdapterName="modelDBusAdapter")
 class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteModelAdapter, InitializingBean {
     private DBusConnection connection
     private ModelDBusAdapter modelDBusAdapter
@@ -59,11 +61,6 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
         return retrieveModels(modelDBusAdapter.getAllModels(authenticationToken()))
     }
 
-    @Profiled(tag="RemoteModelAdapterDBusImpl.getModelCount")
-    Integer getModelCount() {
-        return modelDBusAdapter.getModelCount(authenticationToken())
-    }
-
     @Profiled(tag="RemoteModelAdapterDBusImpl.getLatestRevision")
     RevisionTransportCommand getLatestRevision(long modelId) {
         RevisionTransportCommand revision = modelDBusAdapter.getLatestRevision(authenticationToken(), modelId)
@@ -78,11 +75,6 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
             revisions << modelDBusAdapter.getRevision(authenticationToken(), modelId, it as int)
         }
         return revisions
-    }
-
-    @Profiled(tag="RemoteModelAdapterDBusImpl.getPublication")
-    PublicationTransportCommand getPublication(long modelId) {
-        return modelDBusAdapter.getPublication(authenticationToken(), modelId)
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.uploadModel")
@@ -107,11 +99,6 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
         return modelDBusAdapter.addRevision(authenticationToken(), modelId, file.getAbsolutePath(), format.identifier, comment)
     }
 
-    @Profiled(tag="RemoteModelAdapterDBusImpl.canAddRevision")
-    Boolean canAddRevision(long modelId) {
-        return modelDBusAdapter.canAddRevision(authenticationToken(), modelId)
-    }
-
     @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFile")
     byte[] retrieveModelFile(RevisionTransportCommand revision) throws ModelException {
         File file = new File(modelDBusAdapter.retrieveModelFileByRevision(authenticationToken(), revision.id))
@@ -126,16 +113,6 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteAdapter implements Remote
         byte[] bytes = file.readBytes()
         FileUtils.deleteQuietly(file)
         return bytes
-    }
-
-    @Profiled(tag="RemoteModelAdapterDBusImpl.deleteModel")
-    Boolean deleteModel(long modelId) {
-        return modelDBusAdapter.deleteModel(authenticationToken(), modelId)
-    }
-
-    @Profiled(tag="RemoteModelAdapterDBusImpl.restoreModel")
-    Boolean restoreModel(long modelId) {
-        return modelDBusAdapter.restoreModel(authenticationToken(), modelId)
     }
 
     private List<ModelTransportCommand> retrieveModels(List<String> ids) {
