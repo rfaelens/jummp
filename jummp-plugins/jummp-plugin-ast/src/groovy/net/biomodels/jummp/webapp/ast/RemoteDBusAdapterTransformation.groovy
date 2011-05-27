@@ -161,7 +161,7 @@ class RemoteDBusAdapterTransformation implements ASTTransformation {
                 // we assume that the delegated method returns JSON and we need to convert it to a Map, we generate:
                 // mapFromJSON(delegatedMethodCall())
                 statement = new ReturnStatement(new MethodCallExpression(new VariableExpression("this"), "mapFromJSON", delegatedMethodCall))
-            } else if (it.returnType.typeClass == Void.TYPE) {
+            } else if (it.returnType.name == Void.TYPE.toString()) {
                 // if the method returns void, we may not create a return statement
                 statement = new ExpressionStatement(delegatedMethodCall)
             } else {
