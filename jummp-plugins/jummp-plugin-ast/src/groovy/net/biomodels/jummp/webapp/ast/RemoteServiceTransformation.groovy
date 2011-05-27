@@ -82,7 +82,7 @@ class RemoteServiceTransformation implements ASTTransformation {
             )
             // add Profiled annotation to method. Annotation has a "tag" with String value: className.methodName
             // looks like: @Profiled(tag="${classNode.getNameWithoutPackage()}.${it.name}")
-            AnnotationNode profiled = new AnnotationNode(new ClassNode(org.perf4j.aop.Profiled.class))
+            AnnotationNode profiled = new AnnotationNode(new ClassNode(this.getClass().classLoader.loadClass("org.perf4j.aop.Profiled")))
             profiled.addMember("tag", new ConstantExpression(classNode.getNameWithoutPackage() + "." + it.name))
             method.addAnnotation(profiled)
             // and finally add the method to our class
