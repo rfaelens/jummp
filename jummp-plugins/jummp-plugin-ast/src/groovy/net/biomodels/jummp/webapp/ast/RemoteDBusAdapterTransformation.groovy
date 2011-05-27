@@ -164,7 +164,34 @@ class RemoteDBusAdapterTransformation implements ASTTransformation {
             } else if (it.returnType.name == Void.TYPE.toString()) {
                 // if the method returns void, we may not create a return statement
                 statement = new ExpressionStatement(delegatedMethodCall)
-            } else {
+            } else if (it.returnType.name == "java.util.List") {
+                if (it.returnType.isUsingGenerics()) {
+                    switch (it.returnType.genericsTypes[0].type.name) {
+                    case "net.biomodels.jummp.plugins.security.Role":
+                        // generates the code to retrieve all roles
+                        // return retrieveAllElements(${serviceName}, "getRoleByAuthority", "Role", delegateMethodCall())
+                        ArgumentListExpression retrieveArguments = new ArgumentListExpression()
+                        retrieveArguments.addExpression(new VariableExpression(serviceName))
+                        retrieveArguments.addExpression(new ConstantExpression("getRoleByAuthority"))
+                        retrieveArguments.addExpression(new ConstantExpression("Role"))
+                        retrieveArguments.addExpression(delegatedMethodCall)
+                        statement = new ReturnStatement(new MethodCallExpression(new VariableExpression("this"), "retrieveAllElements", retrieveArguments))
+                        break
+                    case "net.biomodels.jummp.plugins.security.User":
+                        // generates the code to retrieve all users
+                        // return retrieveAllElements(${serviceName}, "getUserById", "User", delegateMethodCall(), Long.class)
+                        ArgumentListExpression retrieveArguments = new ArgumentListExpression()
+                        retrieveArguments.addExpression(new VariableExpression(serviceName))
+                        retrieveArguments.addExpression(new ConstantExpression("getUserById"))
+                        retrieveArguments.addExpression(new ConstantExpression("User"))
+                        retrieveArguments.addExpression(delegatedMethodCall)
+                        retrieveArguments.addExpression(new ClassExpression(new ClassNode(Long.class)))
+                        statement = new ReturnStatement(new MethodCallExpression(new VariableExpression("this"), "retrieveAllElements", retrieveArguments))
+                        break
+                    }
+                }
+            }
+            if (!statement) {
                 // if it returns a value we just return the result of the delegated method
                 statement = new ReturnStatement(delegatedMethodCall)
             }

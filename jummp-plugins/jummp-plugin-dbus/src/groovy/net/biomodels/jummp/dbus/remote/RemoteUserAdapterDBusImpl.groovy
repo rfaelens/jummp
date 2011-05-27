@@ -39,11 +39,6 @@ class RemoteUserAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteU
         return userDBusAdapter.getUserById(authenticationToken(), id).toUser()
     }
 
-    @Profiled(tag="RemoteUserAdapterDBusImpl.getAllUsers")
-    List<User> getAllUsers(Integer offset, Integer count) {
-        return retrieveAllElements(userDBusAdapter, "getUserById", "User", userDBusAdapter.getAllUsers(authenticationToken(), offset, count), Long.class)
-    }
-
     @Profiled(tag="RemoteUserAdapterDBusImpl.validateAdminRegistration")
     void validateAdminRegistration(String username, String code) throws UserManagementException {
         userDBusAdapter.validateAdminRegistration(username, code, "")
@@ -54,15 +49,5 @@ class RemoteUserAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteU
     void validateAdminRegistration(String username, String code, String password) throws UserManagementException {
         userDBusAdapter.validateAdminRegistration(username, code, password)
         // TODO: catch all possible exceptions
-    }
-
-    @Profiled(tag="RemoteUserAdapterDBusImpl.getAllRoles")
-    List<Role> getAllRoles() {
-        return retrieveAllElements(userDBusAdapter, "getRoleByAuthority", "Role", userDBusAdapter.getAllRoles(authenticationToken()))
-    }
-
-    @Profiled(tag="RemoteUserAdapterDBusImpl.getRolesForUser")
-    List<Role> getRolesForUser(Long id) {
-        return retrieveAllElements(userDBusAdapter, "getRoleByAuthority", "Role", userDBusAdapter.getRolesForUser(authenticationToken(), id))
     }
 }
