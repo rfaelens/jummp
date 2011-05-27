@@ -49,12 +49,6 @@ class RemoteUserAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteU
         return users
     }
 
-    @Profiled(tag="RemoteUserAdapterDBusImpl.validateRegistration")
-    void validateRegistration(String username, String code) throws UserManagementException {
-        userDBusAdapter.validateRegistration(username, code)
-        // TODO: catch all possible exceptions
-    }
-
     @Profiled(tag="RemoteUserAdapterDBusImpl.validateAdminRegistration")
     void validateAdminRegistration(String username, String code) throws UserManagementException {
         userDBusAdapter.validateAdminRegistration(username, code, "")
