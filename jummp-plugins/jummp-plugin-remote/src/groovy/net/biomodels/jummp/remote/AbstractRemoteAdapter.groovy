@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.codehaus.groovy.grails.web.json.JSONObject
 import grails.converters.JSON
+import grails.util.GrailsNameUtils
 
 /**
  * @short Base class for all Remote Adapters.
@@ -72,5 +73,42 @@ abstract class AbstractRemoteAdapter {
             returnMap.put(key, value)
         }
         return returnMap
+    }
+
+    /**
+     * Helper method for retrieving all elements of a List, if only ids are returned.
+     * The method uses dynamic groovy features to retrieve the data.
+     * @param adapter The core's adapter to invoke
+     * @param methodName The name of the method to retrieve the single elements
+     * @param returnType The name of the class to return, if the returned element is not of that type a "to${Name}" is invoked
+     * @param identifiers The List of identifiers for the data to retrieve
+     * @param convert An optional class to convert the id element to before retrieving the data, may be @c null
+     * @return List of elements in returnType
+     */
+    protected List retrieveAllElements(def adapter, String methodName, String returnType, List identifiers, Class convert) {
+        List returnValues = []
+        identifiers.each { id ->
+            if (convert) {
+                id = id."to${GrailsNameUtils.getShortName(convert)}"()
+            }
+            def element = adapter."${methodName}"(authenticationToken(), id)
+            if (GrailsNameUtils.getShortName(element.class) != returnType) {
+                element = element."to${returnType}"()
+            }
+            returnValues << element
+        }
+        return returnValues
+    }
+
+    /**
+     * Overloaded method for convenience.
+     * @param adapter
+     * @param methodName
+     * @param returnType
+     * @param identifiers
+     * @return
+     */
+    protected List retrieveAllElements(def adapter, String methodName, String returnType, List identifiers) {
+        return retrieveAllElements(adapter, methodName, returnType, identifiers, null)
     }
 }
