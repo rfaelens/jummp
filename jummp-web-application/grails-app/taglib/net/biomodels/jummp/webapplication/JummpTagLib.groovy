@@ -201,10 +201,12 @@ class JummpTagLib {
      */
     def renderURN = { attrs ->
         String resource
+        String resolvedName = null
         if (attrs instanceof String) {
             resource = attrs
         } else {
             resource = attrs.resource
+            resolvedName = attrs.resolvedName
         }
         int colonIndex = resource.lastIndexOf(':')
         String urn = resource.substring(0, colonIndex)
@@ -212,7 +214,10 @@ class JummpTagLib {
         MiriamDatatype miriam = miriamService.resolveDatatype(urn)
         out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).location}\">${miriam.name}</a>"
         out << "&nbsp;"
-        out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).action.replace('$id', identifier)}\">${miriamService.resolveName(miriam, identifier)}</a>"
+        if (!resolvedName) {
+            resolvedName = miriamService.resolveName(miriam, identifier)
+        }
+        out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).action.replace('$id', identifier)}\">${resolvedName}</a>"
     }
 
     /**
@@ -287,12 +292,17 @@ class JummpTagLib {
      * The tag expects an attribute sbo containing the integer value of the sbo term.
      * In case the tag is not set or an empty string the table row is not rendered.
      * @attr sbo REQUIRED the numerical SBO term without the urn header
+     * @attr name Optional resolved name of the SBO term
      */
     def sboTableRow = { attrs ->
         if (!attrs.sbo || attrs.sbo == "") {
             return
         }
-        out << render(template: "/templates/sboTableRow", model: [urn: "urn:miriam:obo.sbo:" + URLCodec.encode(attrs.sbo)])
+        String name = attrs.name
+        if (name == "") {
+            name = null
+        }
+        out << render(template: "/templates/sboTableRow", model: [urn: "urn:miriam:obo.sbo:" + URLCodec.encode(attrs.sbo), name: name])
     }
 
     /**
