@@ -7,6 +7,7 @@ import javax.xml.transform.stream.StreamSource
 import javax.xml.transform.stream.StreamResult
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import javax.xml.transform.Transformer
+import org.codehaus.groovy.grails.plugins.codecs.URLCodec
 
 /**
  * Small TagLib to render custom tags.
@@ -291,15 +292,7 @@ class JummpTagLib {
         if (!attrs.sbo || attrs.sbo == "") {
             return
         }
-        String sbo = attrs.sbo
-        if (sbo.size() > 7) {
-            log.debug("${sbo} is not a valid SBO Term")
-            return
-        }
-        while (sbo.size() < 7) {
-            sbo = "0" + sbo
-        }
-        out << render(template: "/templates/sboTableRow", model: [urn: "urn:miriam:obo.sbo:SBO%3A" + sbo])
+        out << render(template: "/templates/sboTableRow", model: [urn: "urn:miriam:obo.sbo:" + URLCodec.encode(attrs.sbo)])
     }
 
     /**

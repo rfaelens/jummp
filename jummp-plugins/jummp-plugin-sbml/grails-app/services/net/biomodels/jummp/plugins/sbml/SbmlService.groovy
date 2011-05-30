@@ -26,6 +26,7 @@ import org.sbml.jsbml.ExplicitRule
 import org.sbml.jsbml.Variable
 import org.perf4j.aop.Profiled
 import org.sbml.jsbml.FunctionDefinition
+import org.sbml.jsbml.SBO
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -196,7 +197,8 @@ class SbmlService implements FileFormatService, ISbmlService {
         Map eventMap = eventToMap(event)
         eventMap.put("annotation", convertCVTerms(event.annotation))
         eventMap.put("notes", event.notesString)
-        eventMap.put("sboTerm", event.getSBOTerm())
+        eventMap.put("sboTerm", event.getSBOTermID())
+        eventMap.put("sboName", SBO.getTerm(event.getSBOTerm()).name)
         eventMap.put("trigger", event.trigger ? event.trigger.mathMLString : "")
         eventMap.put("delay", event.delay ? event.delay.mathMLString : "")
         return eventMap
@@ -243,7 +245,8 @@ class SbmlService implements FileFormatService, ISbmlService {
         Map functionMap = functionDefinitionToMap(function)
         functionMap.put("annotation", convertCVTerms(function.annotation))
         functionMap.put("notes", function.notesString)
-        functionMap.put("sboTerm", function.getSBOTerm())
+        functionMap.put("sboTerm", function.getSBOTermID())
+        functionMap.put("sboName", SBO.getTerm(function.getSBOTerm()).name)
         return functionMap
     }
 
@@ -273,7 +276,8 @@ class SbmlService implements FileFormatService, ISbmlService {
                 metaId: parameter.metaId,
                 constant: (parameter instanceof Parameter) ? parameter.constant : true,
                 value: parameter.isSetValue() ? parameter.value : null,
-                sboTerm: parameter.getSBOTerm() != -1 ? parameter.getSBOTerm() : null,
+                sboTerm: parameter.getSBOTermID(),
+                sboName: SBO.getTerm(parameter.getSBOTerm()).name,
                 unit: parameter.units
         ]
     }
@@ -318,7 +322,8 @@ class SbmlService implements FileFormatService, ISbmlService {
                 metaId: reaction.metaId,
                 name: reaction.name,
                 reversible: reaction.reversible,
-                sboTerm: reaction.getSBOTerm() != -1 ? reaction.getSBOTerm() : null,
+                sboTerm: reaction.getSBOTermID(),
+                sboName: SBO.getTerm(reaction.getSBOTerm()).name,
                 reactants: convertSpeciesReferences(reaction.listOfReactants),
                 products: convertSpeciesReferences(reaction.listOfProducts),
                 modifiers: convertSpeciesReferences(reaction.listOfModifiers)
