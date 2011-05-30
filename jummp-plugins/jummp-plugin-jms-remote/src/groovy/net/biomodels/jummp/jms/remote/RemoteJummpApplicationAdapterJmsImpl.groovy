@@ -43,8 +43,6 @@ class RemoteJummpApplicationAdapterJmsImpl extends AbstractJmsRemoteAdapter impl
 
     @Profiled(tag="RemoteJummpApplicationAdapterJmsImpl.isAuthenticated")
     boolean isAuthenticated(Authentication authentication) {
-        def retVal = send("isAuthenticated", ((JummpAuthentication)authentication).getAuthenticationHash())
-        validateReturnValue(retVal, Boolean)
-        return (Boolean)retVal
+        return (Boolean)jmsSynchronousService.send([app: "jummp", service: "applicationJmsAdapter", method: "isAuthenticated"], ((JummpAuthentication)authentication).getAuthenticationHash(), [service: "applicationJmsAdapter", method: "isAuthenticated.response"])
     }
 }

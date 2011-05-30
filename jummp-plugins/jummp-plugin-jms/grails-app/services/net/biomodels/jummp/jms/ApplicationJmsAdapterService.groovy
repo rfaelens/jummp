@@ -99,8 +99,8 @@ class ApplicationJmsAdapterService extends AbstractJmsAdapter {
      * @return True if user is valid, false otherwise
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="jmsAdapterService.isUserAuthenticated")
-    def isUserAuthenticated(def message) {
+    @Profiled(tag="jmsAdapterService.isAuthenticated")
+    def isAuthenticated(def message) {
         return authenticationHashService.isAuthenticated(message)
     }
 
