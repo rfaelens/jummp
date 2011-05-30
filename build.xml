@@ -43,7 +43,7 @@
     </target>
 
 <!-- Runs test-app in all plugins (except JMS) -->
-    <target name="test-plugins">
+    <target name="test-plugins" depends="ast-jar">
         <antcall target="test-plugin">
             <param name="plugin" value="configuration"/>
         </antcall>
@@ -66,7 +66,7 @@
     </target>
 
 <!-- Runs test-app in the core application -->
-    <target name="test-core">
+    <target name="test-core" depends="ast-jar">
         <grails command="test-app" args="-xml ${coverage}" cwd="${basedir}"/>
     </target>
 
@@ -100,7 +100,7 @@
     </target>
 
     <!-- Copies the sources to a build directory excluding not needed files and directories -->
-    <target name="copy">
+    <target name="copy" depends="ast-jar">
         <property name="builddir" value="${basedir}/build"/>
         <delete dir="${builddir}"/>
         <mkdir dir="${builddir}"/>
@@ -205,11 +205,11 @@
     </target>
 
 <!-- Performs the actual building of war file using grails war. Cleans before building -->
-    <target name="build-war" depends="remove-grails-plugins">
+    <target name="build-war" depends="remove-grails-plugins,ast-jar">
         <grails command="clean" cwd="${builddir}"/>
         <grails command="war ${builddir}/target/jummp.war" cwd="${builddir}"/>
     </target>
-    <target name="build-webapplication-war" depends="remove-grails-plugins">
+    <target name="build-webapplication-war" depends="remove-grails-plugins,ast-jar">
         <grails command="clean" cwd="${builddir}/jummp-web-application"/>
         <grails command="war ${builddir}/target/jummp-web-application.war" cwd="${builddir}/jummp-web-application"/>
     </target>
