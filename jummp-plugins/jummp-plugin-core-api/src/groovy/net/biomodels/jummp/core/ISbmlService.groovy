@@ -1,7 +1,6 @@
 package net.biomodels.jummp.core
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import org.sbml.jsbml.Compartment
 
 /**
  * @short Interface describing the service to access an SBML Model.
