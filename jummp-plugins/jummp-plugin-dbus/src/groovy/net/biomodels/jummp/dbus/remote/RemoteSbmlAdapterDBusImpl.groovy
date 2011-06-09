@@ -14,7 +14,7 @@ import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
  * by the RemoteDBusAdapterTransformation AST Transformation.
  */
 @RemoteDBusAdapter(interfaceName="RemoteSbmlAdapter",dbusAdapterName="sbmlDBusAdapter")
-class RemoteSbmlAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteSbmlAdapter, InitializingBean {
+class RemoteSbmlAdapterDBusImpl extends AbstractRemoteDBusAdapter implements RemoteSbmlAdapter, InitializingBean {
     private DBusConnection connection
     private SbmlDBusAdapter sbmlDBusAdapter
 

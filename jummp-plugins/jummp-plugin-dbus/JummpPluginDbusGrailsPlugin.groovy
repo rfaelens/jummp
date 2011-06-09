@@ -75,12 +75,6 @@ Brief description of the plugin.
             remoteUserAdapterDBusImpl(RemoteUserAdapterDBusImpl)
             remoteModelAdapterDBusImpl(RemoteModelAdapterDBusImpl)
             remoteSbmlAdapterDBusImpl(RemoteSbmlAdapterDBusImpl)
-            xmlns aop: "http://www.springframework.org/schema/aop"
-            aop.config {
-                pointcut(id: "dbusExceptionPointcut", expression: "execution(public * net.biomodels.jummp.dbus.remote.*.*(..))")
-                advisor('pointcut-ref': "dbusExceptionPointcut", 'advice-ref': "dbusExceptionAdvice")
-            }
-            dbusExceptionAdvice(DBusExceptionAdvice)
         }
     }
 

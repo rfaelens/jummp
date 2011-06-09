@@ -1,6 +1,6 @@
 package net.biomodels.jummp.dbus.remote
 
-import org.springframework.aop.ThrowsAdvice
+import net.biomodels.jummp.remote.AbstractRemoteAdapter
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.AccountExpiredException
 import org.springframework.security.authentication.CredentialsExpiredException
@@ -18,47 +18,52 @@ import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelTransportCommand
 
 /**
- * @short Advice to map DBusExecutionException to appropriate type.
+ * @short Abstract base class for all RemoteDBusAdapters.
  *
- * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Martin Gräßlin <m.graeslin@dkfz.de>
  */
-class DBusExceptionAdvice implements ThrowsAdvice {
+class AbstractRemoteDBusAdapter extends AbstractRemoteAdapter {
 
-    void afterThrowing(DBusExecutionException e) throws Throwable {
+    /**
+     * Maps a DBusExecutionException to a "normal" exception.
+     * @param e The DBusExecutionException
+     * @return The mapped exception or a JummpException if we don't have a special type
+     */
+    protected Exception mapException(DBusExecutionException e) {
         switch (e.type) {
         case "net.biomodels.jummp.dbus.authentication.BadCredentialsDBusException":
-            throw new BadCredentialsException(e.message)
+            return new BadCredentialsException(e.message)
         case "net.biomodels.jummp.dbus.authentication.AccountExpiredDBusException":
-            throw new AccountExpiredException(e.message)
+            return new AccountExpiredException(e.message)
         case "net.biomodels.jummp.dbus.authentication.CredentialsExpiredDBusException":
-            throw new CredentialsExpiredException(e.message)
+            return new CredentialsExpiredException(e.message)
         case "net.biomodels.jummp.dbus.authentication.DisabledDBusException":
-            throw new DisabledException(e.message)
+            return new DisabledException(e.message)
         case "net.biomodels.jummp.dbus.authentication.LockedDBusException":
-            throw new LockedException(e.message)
+            return new LockedException(e.message)
         case "net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException":
-            throw new AuthenticationHashNotFoundException(e.message)
+            return new AuthenticationHashNotFoundException(e.message)
         case "net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException":
-            throw new AccessDeniedException(e.message)
+            return new AccessDeniedException(e.message)
         case "net.biomodels.jummp.dbus.user.UserNotFoundDBusException":
             try {
                 Long id = Long.parseLong(e.message)
-                throw new UserNotFoundException(id)
+                return new UserNotFoundException(id)
             } catch (NumberFormatException nfe) {
-                throw new UserNotFoundException(e.message)
+                return new UserNotFoundException(e.message)
             }
         case "net.biomodels.jummp.dbus.user.UserInvalidDBusException":
-            throw new UserInvalidException(e.message)
+            return new UserInvalidException(e.message)
         case "net.biomodels.jummp.dbus.user.UserCodeInvalidDBusException":
-            throw new UserCodeInvalidException("", null, e.message)
+            return new UserCodeInvalidException("", null, e.message)
         case "net.biomodels.jummp.dbus.user.UserCodeExpiredDBusException":
-            throw new UserCodeExpiredException(e.message, null)
+            return new UserCodeExpiredException(e.message, null)
         case "net.biomodels.jummp.dbus.IllegalArgumentDBusException":
-            throw new IllegalArgumentException(e.message)
+            return new IllegalArgumentException(e.message)
         case "net.biomodels.jummp.dbus.model.ModelDBusException":
-            throw new ModelException(new ModelTransportCommand(), e.getMessage())
+            return new ModelException(new ModelTransportCommand(), e.getMessage())
         default:
-            throw new JummpException(e.message, e)
+            return new JummpException(e.message, e)
         }
     }
 }
