@@ -43,4 +43,16 @@ class SbmlController {
     def functionDefinitionMeta = {
         [function: remoteSbmlService.getFunctionDefinition(params.id as long, params.revision as int, params.functionDefinitionId)]
     }
+
+    def entity = {
+        [compartments: remoteSbmlService.getCompartments(params.id as long, params.revision as int)]
+    }
+
+    def compartmentMeta = {
+        [compartment: remoteSbmlService.getCompartment(params.id as long, params.revision as int, params.compartmentId)]
+    }
+
+    def speciesMeta = {
+        [species: remoteSbmlService.getSpecies(params.id as long, params.revision as int, params.speciesId)]
+    }
 }

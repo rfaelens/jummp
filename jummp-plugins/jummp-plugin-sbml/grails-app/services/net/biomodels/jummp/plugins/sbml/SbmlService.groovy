@@ -27,6 +27,8 @@ import org.sbml.jsbml.Variable
 import org.perf4j.aop.Profiled
 import org.sbml.jsbml.FunctionDefinition
 import org.sbml.jsbml.SBO
+import org.sbml.jsbml.Compartment
+import org.sbml.jsbml.Species
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -250,6 +252,64 @@ class SbmlService implements FileFormatService, ISbmlService {
         return functionMap
     }
 
+    @Profiled(tag="SbmlService.getCompartments")
+    public List<Map> getCompartments(RevisionTransportCommand revision) {
+        Model model = getFromCache(revision).model
+        List<Map> compartments = []
+        model.listOfCompartments.each { compartment ->
+             compartments << compartmentToMap(compartment)
+        }
+        return compartments
+    }
+
+    @Profiled(tag="SbmlService.getCompartment")
+    public Map getCompartment(RevisionTransportCommand revision, String id) {
+        Model model = getFromCache(revision).model
+        Compartment compartment = model.getCompartment(id)
+        if(!compartment) {
+            return [:]
+        }
+        Map compartmentMap = compartmentToMap(compartment)
+        compartmentMap.put("annotation", convertCVTerms(compartment.annotation))
+        compartmentMap.put("notes", compartment.notesString)
+        return compartmentMap
+    }
+
+    @Profiled(tag="SbmlService.getAllSpecies")
+    public List<Map> getAllSpecies(RevisionTransportCommand revision) {
+        Model model = getFromCache(revision).model
+        List<Map> allSpecies = []
+        model.listOfSpecies.each { species ->
+            allSpecies << speciesToMap(species)
+        }
+        return allSpecies
+    }
+
+    @Profiled(tag="SbmlService.getAllCompartmentSpecies")
+    private List<Map> getAllCompartmentSpecies(Compartment compartment) {
+        Model model = compartment.model
+        List<Map> allSpecies = []
+        model.listOfSpecies.each { species ->
+            if (species.compartmentInstance == compartment) {
+                allSpecies << speciesToMap(species)
+            }
+        }
+        return allSpecies
+    }
+
+     @Profiled(tag="SbmlService.getSpecies")
+     public Map getSpecies(RevisionTransportCommand revision, String id) {
+         Model model =getFromCache(revision).model
+         Species species = model.getSpecies(id)
+         if(!species) {
+             return [:]
+         }
+         Map speciesMap = speciesToMap(species)
+         speciesMap.put("annotation", convertCVTerms(species.annotation))
+         speciesMap.put("notes", species.notesString)
+         return speciesMap
+     }
+
     /**
      * Returns the SBMLDocument for the @p revision from the cache.
      * If the cache does not contain the SBMLDocument, the model file is
@@ -384,6 +444,46 @@ class SbmlService implements FileFormatService, ISbmlService {
                 name: function.name,
                 metaId: function.metaId,
                 math: function.mathMLString
+        ]
+    }
+
+    private Map compartmentToMap(Compartment compartment) {
+        return [
+                metaId: compartment.metaId,
+                id: compartment.id,
+                name: compartment.name,
+                size: compartment.size,
+                spatialDimensions: compartment.spatialDimensions,
+                units: compartment.units,
+                sboTerm: compartment.getSBOTermID(),
+                sboName: SBO.getTerm(compartment.getSBOTerm()).name,
+                allSpecies: getAllCompartmentSpecies(compartment)
+        ]
+    }
+
+    private Map speciesToMap(Species species) {
+        def initialAmount
+        def initialConcentration
+        if (species.isSetInitialAmount())
+        {
+            initialAmount = species.initialAmount
+        } else {
+            initialAmount = null
+        }
+        if (species.isSetInitialConcentration())
+        {
+            initialConcentration = species.initialConcentration
+        } else {
+            initialConcentration = null
+        }
+        return [
+                metaid: species.metaId,
+                id: species.id,
+                initialAmount: initialAmount,
+                initialConcentration: initialConcentration,
+                substanceUnits: species.substanceUnits,
+                sboTerm: species.getSBOTermID(),
+                sboName: SBO.getTerm(species.getSBOTerm()).name,
         ]
     }
 }

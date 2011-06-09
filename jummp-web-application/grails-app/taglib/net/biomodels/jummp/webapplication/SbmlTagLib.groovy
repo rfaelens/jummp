@@ -157,6 +157,48 @@ class SbmlTagLib {
     }
 
     /**
+     * Renders a table row with the given initial amount.
+     * The primary use for this tag is inside of the tooltips for various SBML elements.
+     * The tag expects an attribute notes which is the notes xhtml markup as a string to be rendered.
+     * In case the string is empty the table row is not rendered.
+     * @attr notes REQUIRED The initialAmount string
+     */
+    def initialAmountTableRow = { attrs ->
+        if (attrs.initialAmount == null) {
+            return
+        }
+        out << render(template: "/templates/sbml/initialAmountTableRow", model: [initialAmount: attrs.initialAmount])
+    }
+
+    /**
+     * Renders a table row with the given initial concentration.
+     * The primary use for this tag is inside of the tooltips for various SBML elements.
+     * The tag expects an attribute notes which is the notes xhtml markup as a string to be rendered.
+     * In case the string is empty the table row is not rendered.
+     * @attr notes REQUIRED The initialConcentration string
+     */
+    def initialConcentrationTableRow = { attrs ->
+        if (attrs.initialConcentration == null) {
+            return
+        }
+        out << render(template: "/templates/sbml/initialConcentrationTableRow", model: [initialConcentration: attrs.initialConcentration])
+    }
+
+    /**
+     * Renders a table row with the given substance units.
+     * The primary use for this tag is inside of the tooltips for various SBML elements.
+     * The tag expects an attribute notes which is the notes xhtml markup as a string to be rendered.
+     * In case the string is empty the table row is not rendered.
+     * @attr notes REQUIRED The substanceUnits string
+     */
+    def substanceUnitsTableRow = { attrs ->
+        if (!attrs.substanceUnits || attrs.substanceUnits == "") {
+            return
+        }
+        out << render(template: "/templates/sbml/substanceUnitsTableRow", model: [substanceUnits: attrs.substanceUnits])
+    }
+
+    /**
      * Renders list of SBML Rules.
      * @attr rules REQUIRED The list of rules
      */
@@ -310,5 +352,40 @@ class SbmlTagLib {
         String metaLink = g.createLink(controller: 'sbml', action: 'functionDefinitionMeta', params: [id: params.id, functionDefinitionId: function.id, revision: params.revision])
         String name = (function.name && function.name != "") ? function.name : function.id
         out << render(template: "/templates/sbml/functionDefinition", model: [title: name, metaLink: metaLink, math: function.math])
+    }
+
+    /**
+     * Renders a list of SBML compartments.
+     * @attr compartments REQUIRED List of Compartments
+     */
+    def renderCompartments = { attrs ->
+        if(!attrs.compartments) {
+            return
+        }
+        out << renderParameterTitle(title: g.message(code: "sbml.compartments.title"), size: attrs.compartments.size())
+        attrs.compartments.each {
+            out << renderCompartment(compartment: it)
+        }
+    }
+
+    /**
+     * Renders one compartment.
+     * @attr compartment REQUIRED Map describing the Compartment
+     */
+    def renderCompartment = { attrs ->
+        Map compartment = attrs.compartment
+        String metaLink = g.createLink(controller: 'sbml', action: 'compartmentMeta', params: [id: params.id, compartmentId: compartment.id, revision: params.revision])
+        String name = compartment.name ? compartment.name : compartment.id
+        out << render(template: "/templates/sbml/compartment", model:[title: name, metaLink: metaLink, size: compartment.size, spatialDimensions: compartment.spatialDimensions?compartment.spatialDimensions:3, units: compartment.units, notes: compartment.notes, allSpecies: compartment.allSpecies])
+    }
+
+    /**
+     * Renders one Species
+     * @attr assignment REQUIRED Map describing the Species
+     */
+    def renderSpecies = { attrs ->
+        Map species = attrs.species
+        String metaLink = g.createLink(controller: 'sbml', action: 'speciesMeta', params: [id: params.id, speciesId: species.id, revision: params.revision])
+        out << render(template: "/templates/sbml/species", model: [title: species.id, initialAmount: species.initialAmount, initialConcentration: species.initialConcentration, substanceUnits: species.substanceUnits, metaLink: metaLink])
     }
 }

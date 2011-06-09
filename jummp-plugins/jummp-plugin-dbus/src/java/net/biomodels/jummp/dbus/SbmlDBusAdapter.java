@@ -36,4 +36,8 @@ public interface SbmlDBusAdapter  extends DBusInterface {
     public String getRule(String authenticationHash, long modelId, int revisionNumber, String variable);
     public String getFunctionDefinitions(String authenticationHash, long modelId, int revisionNumber);
     public String getFunctionDefinition(String authenticationHash, long modelId, int revisionNumber, String id);
+    public String getCompartments(String authenticationHash, long modelId, int revisionNumber);
+    public String getCompartment(String authenticationHash, long modelId, int revisionNumber, String id);
+    public String getAllSpecies(String authenticationHash, long modelId, int revisionNumber);
+    public String getSpecies(String authenticationHash, long modelId, int revisionNumber, String id);
 }

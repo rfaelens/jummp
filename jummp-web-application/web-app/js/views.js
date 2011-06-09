@@ -102,7 +102,7 @@ function loadModelTabCallback(data, tabIndex) {
     $("#navigationButtons a:eq(1)").click(function() {
         loadView(createLink('model', 'upload'), loadUploadModelCallback);
     });
-    $("#modelTabs").tabs({disabled: [1, 3, 5],
+    $("#modelTabs").tabs({disabled: [1, 5],
         ajaxOptions: {
             error: function(jqXHR) {
                 $("#body").unblock();
@@ -120,6 +120,10 @@ function loadModelTabCallback(data, tabIndex) {
             case "modelTabs-parameter":
                 // add tooltips to the rows
                 $("#model-parameters tbody tr").cluetip({clickThrough: false, sticky: true, mouseOutClose: true});
+                break;
+            case "modelTabs-entity":
+                // add tooltips to the rows
+                $("#model-entity tbody tr").cluetip({clickThrough: false, sticky: true, mouseOutClose: true});
                 break;
             case "modelTabs-addRevision":
                 // add revision tab

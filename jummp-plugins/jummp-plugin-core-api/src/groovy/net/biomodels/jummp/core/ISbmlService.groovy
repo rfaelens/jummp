@@ -1,6 +1,7 @@
 package net.biomodels.jummp.core
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import org.sbml.jsbml.Compartment
 
 /**
  * @short Interface describing the service to access an SBML Model.
@@ -196,4 +197,56 @@ interface ISbmlService {
      * @return Map describing the Function Definition
      */
     public Map getFunctionDefinition(RevisionTransportCommand revision, String id)
+    /**
+     * Retrieves all compartments in the SBML Model.
+     * The returned list contains one map for each compartment with the following keys/values:
+     * spatialDimensions: compartment.spatialDimensions
+     * @li metaId: The meta id element
+     * @li id: The id element
+     * @li name: The name element
+     * @li size: The size of the object
+     * @li spatialDimensions: The spatial dimensions element
+     * @li units: The unit element
+     * @li notes:  The notes element
+     * @li sboTerm: The numerical sbo term if set, otherwise @c null
+     * @li sboName: The sbo name
+     * @li allSpecies: The needed attributes of all related species
+     * @param revision
+     * @return List of all Compartments
+     */
+    public List<Map> getCompartments(RevisionTransportCommand revision)
+    /**
+     * Retrieves the Compartment with the given @p id in the SBML Model.
+     * The returned map contains all the elements as explained in @link getCompartments with
+     * additionally the annotation and notes. The annotation element follows the description
+     * of @link getAnnotations.
+     * @param revision
+     * @param id
+     * @return Map describing the Compartment
+     */
+    public Map getCompartment(RevisionTransportCommand revision, String id)
+    /**
+     * Retrieves all species in the SBML Model.
+     * The returned list contains one map for each compartment with the following keys/values:
+     * metaid: species.metaId
+     * @li metaId: The metaId element
+     * @li id: The id element
+     * @li initialAmount: The initial amount element
+     * @li initialConcentration: The initial concentration element
+     * @li substanceUnits: The substance units  element
+     * @param modelId
+     * @param revisionNumber
+     * @return List of all species
+     */
+    public List<Map> getAllSpecies(RevisionTransportCommand revision)
+    /**
+     * Retrieves the Species for the given referenced @p variable in the SBML Model.
+     * The returned map contains all the elements as explained in @link getAllSpecies with
+     * additionally the annotation and notes string. The annotation element follows
+     * the description of @link getAnnotations.
+     * @param revision
+     * @param id
+     * @return Map describing the Species
+     */
+     public Map getSpecies(RevisionTransportCommand revision, String id)
 }

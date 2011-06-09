@@ -203,4 +203,58 @@ public interface RemoteSbmlAdapter {
      * @return Map describing the Function Definition
      */
     public Map getFunctionDefinition(long modelId, int revisionNumber, String id)
+    /**
+     * Retrieves all compartments in the SBML Model.
+     * The returned list contains one map for each compartment with the following keys/values:
+     * spatialDimensions: compartment.spatialDimensions
+     * @li metaId: The metaId
+     * @li id: The id
+     * @li name: The compartment
+     * @li size: The size
+     * @li spatialDimensions: The spatial dimensions
+     * @li units: The units
+     * @li sboTerm: The sboTerm if set, @c null otherwise
+     * @li sboName: The sbo name
+     * @li allSpecies: The needed attributes of all related species
+     * @param modelId
+     * @param revisionNumber
+     * @return List of all compartments
+     */
+    public List<Map> getCompartments(long modelId, int revisionNumber)
+    /**
+     * Retrieves the Compartment for the given referenced @p variable in the SBML Model.
+     * The returned map contains all the elements as explained in @link getCompartments with
+     * additionally the annotation and notes string. The annotation element follows
+     * the description of @link getAnnotations.
+     * @param modelId
+     * @param revisionNumber
+     * @param variable The id of the referenced Variable
+     * @return Map describing the Compartment
+     */
+    public Map getCompartment(long modelId, int revisionNumber, String id)
+    /**
+     * Retrieves all species in the SBML Model.
+     * The returned list contains one map for each compartment with the following keys/values:
+     * metaid: species.metaId
+     * @li metaId: The metaId
+     * @li id: The id
+     * @li initialAmount: The initial amount
+     * @li initialConcentration: The initial concentration
+     * @li substanceUnits: The substance units' id
+     * @param modelId
+     * @param revisionNumber
+     * @return List of all species
+     */
+    public List<Map> getAllSpecies(long modelId, int revisionNumber)
+    /**
+     * Retrieves the Species for the given referenced @p variable in the SBML Model.
+     * The returned map contains all the elements as explained in @link getAllSpecies with
+     * additionally the annotation and notes string. The annotation element follows
+     * the description of @link getAnnotations.
+     * @param modelId
+     * @param revisionNumber
+     * @param variable The id of the referenced Variable
+     * @return Map describing the Species
+     */
+     public Map getSpecies(long modelId, int revisionNumber, String id)
 }
