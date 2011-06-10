@@ -60,7 +60,7 @@ class SbmlServiceTests extends JummpIntegrationTestCase {
         authenticateAsTestUser()
         Model model = modelService.uploadModel(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
-        assertNull(sbmlService.getNotes(rev))
+        assertEquals("", sbmlService.getNotes(rev))
 
         File modelWithNotes =  File.createTempFile("jummp", null)
         modelWithNotes.append('''<?xml version="1.0" encoding="UTF-8"?>
