@@ -24,6 +24,9 @@ beans = {
         remoteModelService(net.biomodels.jummp.webapp.remote.RemoteModelService) {
             remoteModelAdapter = ref("jmsModelAdapter")
         }
+        remoteSbmlService(net.biomodels.jummp.webapp.remote.RemoteSbmlService) {
+            remoteSbmlAdapter = ref("sbmlJmsRemoteAdapter")
+        }
     }
 
     remoteAuthenticationProvider(net.biomodels.jummp.webapp.RemoteAuthenticationProvider) {

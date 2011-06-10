@@ -3,6 +3,7 @@ import org.springframework.jms.connection.SingleConnectionFactory
 import net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteUserAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteModelAdapterJmsImpl
+import net.biomodels.jummp.jms.remote.RemoteSbmlAdapterJmsImpl
 
 class JummpPluginJmsRemoteGrailsPlugin {
     // the plugin version
@@ -45,6 +46,9 @@ Brief description of the plugin.
                 jmsSynchronousService = ref("jmsSynchronousService")
             }
             jmsModelAdapter(RemoteModelAdapterJmsImpl) {
+                jmsSynchronousService = ref("jmsSynchronousService")
+            }
+            sbmlJmsRemoteAdapter(RemoteSbmlAdapterJmsImpl) {
                 jmsSynchronousService = ref("jmsSynchronousService")
             }
         }
