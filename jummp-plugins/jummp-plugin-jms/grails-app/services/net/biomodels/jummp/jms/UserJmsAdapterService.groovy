@@ -2,16 +2,9 @@ package net.biomodels.jummp.jms
 
 import grails.plugin.jms.Queue
 import net.biomodels.jummp.plugins.security.User
-import org.perf4j.aop.Profiled
-import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.authentication.BadCredentialsException
-import net.biomodels.jummp.core.user.RegistrationException
-import net.biomodels.jummp.core.user.RoleNotFoundException
-import net.biomodels.jummp.core.user.UserInvalidException
-import net.biomodels.jummp.core.user.UserManagementException
-import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.core.IUserService
-import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
+import net.biomodels.jummp.webapp.ast.JmsAdapter
+import net.biomodels.jummp.webapp.ast.JmsQueueMethod
 
 /**
  * @short Wrapper class around the UserService exposed to JMS.
@@ -21,6 +14,7 @@ import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
  * 
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
+@JmsAdapter
 class UserJmsAdapterService extends AbstractJmsAdapter {
 
     @SuppressWarnings("GrailsStatelessService")
@@ -39,25 +33,10 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return @c true if password changed, InvalidArgumentException of BadCredentialsException if old password is incorrect
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.changePassword")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[String, String])
     def changePassword(def message) {
-        if (!verifyMessage(message, [String, String, String])) {
-            return new IllegalArgumentException("AuthenticationHash, String and String as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.changePassword(message[1], message[2])
-            result = true
-        } catch (BadCredentialsException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        userService.changePassword(message[1], message[2])
+        return true
     }
 
     /**
@@ -66,27 +45,10 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return @c true if user was changed, IllegalArgumentException or AccessDeniedException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.editUser")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[User])
     def editUser(def message) {
-        if (!verifyMessage(message, [String, User])) {
-            return new IllegalArgumentException("AuthenticationHash and User as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.editUser((User)message[1])
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserInvalidException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        userService.editUser((User)message[1])
+        return true
     }
 
     /**
@@ -95,24 +57,13 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return The User, IllegalArgumentException or AccessDeniedException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.getCurrentUser")
     def getCurrentUser(def message) {
         if (!(message instanceof String)) {
             return new IllegalArgumentException("AuthenticationHash as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message)
-            result = userService.getCurrentUser()
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message)
+        return userService.getCurrentUser()
     }
 
     /**
@@ -121,29 +72,16 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return The User, IllegalArgumentException or AccessDeniedException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.getUser")
     def getUser(def message) {
         if (!verifyMessage(message, [String, String]) && !verifyMessage(message, [String, Long])) {
             return new IllegalArgumentException("AuthenticationHash and String or Long as arguments expected")
         }
-        def result
-        try {
-            setAuthentication((String)message[0])
-            if (message[1] instanceof Long) {
-                result = userService.getUser((Long)message[1])
-            } else {
-                result = userService.getUser((String)message[1])
-            }
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
+        setAuthentication((String)message[0])
+        if (message[1] instanceof Long) {
+            return userService.getUser((Long)message[1])
+        } else {
+            return userService.getUser((String)message[1])
         }
-        return result
     }
 
     /**
@@ -152,24 +90,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return List of Users, IllegalArgumentException of AccessDeniedException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.getAllUser")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[Integer, Integer])
     def getAllUsers(def message) {
-        if (!verifyMessage(message, [String, Integer, Integer])) {
-            return new IllegalArgumentException("AuthenticationHash, Integer and Integer as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.getAllUsers((Integer)message[1], (Integer)message[2])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        return userService.getAllUsers((Integer)message[1], (Integer)message[2])
     }
 
     /**
@@ -178,26 +101,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return Boolean, AccessDeniedException or IllegalArgumentException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.enableUser")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Boolean])
     def enableUser(def message) {
-        if (!verifyMessage(message, [String, Long, Boolean])) {
-            return new IllegalArgumentException("AuthenticationHash, Long and Boolean as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.enableUser((Long)message[1], (Boolean)message[2])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        return userService.enableUser((Long)message[1], (Boolean)message[2])
     }
 
     /**
@@ -206,26 +112,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return Boolean, AccessDeniedException or IllegalArgumentException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.lockAccount")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Boolean])
     def lockAccount(def message) {
-        if (!verifyMessage(message, [String, Long, Boolean])) {
-            return new IllegalArgumentException("AuthenticationHash, Long and Boolean as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.lockAccount((Long)message[1], (Boolean)message[2])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        return userService.lockAccount((Long)message[1], (Boolean)message[2])
     }
 
     /**
@@ -234,26 +123,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return Boolean, AccessDeniedException or IllegalArgumentException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.expireAccount")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Boolean])
     def expireAccount(def message) {
-        if (!verifyMessage(message, [String, Long, Boolean])) {
-            return new IllegalArgumentException("AuthenticationHash, Long and Boolean as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.expireAccount((Long)message[1], (Boolean)message[2])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        return userService.expireAccount((Long)message[1], (Boolean)message[2])
     }
 
     /**
@@ -262,26 +134,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return Boolean, AccessDeniedException or IllegalArgumentException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.expirePassword")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Boolean])
     def expirePassword(def message) {
-        if (!verifyMessage(message, [String, Long, Boolean])) {
-            return new IllegalArgumentException("AuthenticationHash, Long and Boolean as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.expirePassword((Long)message[1], (Boolean)message[2])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        return userService.expirePassword((Long)message[1], (Boolean)message[2])
     }
 
     /**
@@ -290,28 +145,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return Boolean, AccessDeniedException, JummpException or IllegalArgumentException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.register")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[User])
     def register(def message) {
-        if (!verifyMessage(message, [String, User])) {
-            return new IllegalArgumentException("AuthenticationHash and User as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.register((User)message[1])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (RegistrationException e) {
-            result = e
-        } catch (UserInvalidException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        return userService.register((User)message[1])
     }
 
     /**
@@ -320,27 +156,10 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return Boolean, AccessDeniedException, JummpException or IllegalArgumentException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.validateRegistration")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[String, String])
     def validateRegistration(def message) {
-        if (!verifyMessage(message, [String, String, String])) {
-            return new IllegalArgumentException("AuthenticationHash, String and String as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.validateRegistration((String)message[1], (String)message[2])
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserManagementException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        userService.validateRegistration((String)message[1], (String)message[2])
+        return true
     }
 
     /**
@@ -349,32 +168,19 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return Boolean, AccessDeniedException, UserManagementException or IllegalArgumentException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.validateAdminRegistration")
     def validateAdminRegistration(def message) {
         if (!verifyMessage(message, [String, String, String]) &&
                 !verifyMessage(message, [String, String, String, String])) {
             return new IllegalArgumentException("AuthenticationHash, String and String or AuthenticationHash, String, String and String as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            if (message.size() == 3) {
-                userService.validateAdminRegistration((String)message[1], (String)message[2])
-            } else {
-                userService.validateAdminRegistration((String)message[1], (String)message[2], (String)message[3])
-            }
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserManagementException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
+        setAuthentication((String)message[0])
+        if (message.size() == 3) {
+            userService.validateAdminRegistration((String)message[1], (String)message[2])
+        } else {
+            userService.validateAdminRegistration((String)message[1], (String)message[2], (String)message[3])
         }
-        return result
+        return true
     }
 
     /**
@@ -383,27 +189,10 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return Boolean, AccessDeniedException, JummpException of IllegalArgumentException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.requestPassword")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[String])
     def requestPassword(def message) {
-        if (!verifyMessage(message, [String, String])) {
-            return new IllegalArgumentException("AuthenticationHash and String as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.requestPassword((String)message[1])
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        userService.requestPassword((String)message[1])
+        return true
     }
 
     /**
@@ -412,27 +201,10 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return Boolean, AccessDeniedException, JummpException of IllegalArgumentException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.resetPassword")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[String, String, String])
     def resetPassword(def message) {
-        if (!verifyMessage(message, [String, String, String, String])) {
-            return new IllegalArgumentException("AuthenticationHash, String, String and String as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.resetPassword((String)message[1], (String)message[2], (String)message[3])
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserManagementException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        userService.resetPassword((String)message[1], (String)message[2], (String)message[3])
+        return true
     }
 
     /**
@@ -441,24 +213,13 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return List<Role>, AccessDeniedException or IllegalArgumentException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.getAllRoles")
     def getAllRoles(def message) {
         if (!(message instanceof String)) {
             return new IllegalArgumentException("AuthenticationHash as argument expected")
         }
 
-        def result
-        try {
-            setAuthentication(message)
-            result = userService.getAllRoles()
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication(message)
+        return userService.getAllRoles()
     }
 
     /**
@@ -467,24 +228,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return List<Role>, AccessDeniedException or IllegalArgumentException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.getRolesForUser")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[Long])
     def getRolesForUser(def message) {
-        if (!verifyMessage(message, [String, Long])) {
-            return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.getRolesForUser((Long)message[1])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        return userService.getRolesForUser((Long)message[1])
     }
 
     /**
@@ -493,29 +239,10 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return Boolean, AccessDeniedException, UserNotFoundException, RoleNotFoundException or IllegalArgumentException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.addRoleToUser")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Long])
     def addRoleToUser(def message) {
-        if (!verifyMessage(message, [String, Long, Long])) {
-            return new IllegalArgumentException("AuthenticationHash, Long and Long as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.addRoleToUser((Long)message[1], (Long)message[2])
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (RoleNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        userService.addRoleToUser((Long)message[1], (Long)message[2])
+        return true
     }
 
     /**
@@ -524,28 +251,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
      * @return Boolean, AccessDeniedException, UserNotFoundException, RoleNotFoundException or IllegalArgumentException
      */
     @grails.plugin.jms.Queue
-    @Profiled(tag="UserJmsAdapter.removeRoleFromUser")
+    @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Long])
     def removeRoleFromUser(def message) {
-        if (!verifyMessage(message, [String, Long, Long])) {
-            return new IllegalArgumentException("AuthenticationHash, Long and Long as arguments expected")
-        }
-
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.removeRoleFromUser((Long)message[1], (Long)message[2])
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (RoleNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        userService.removeRoleFromUser((Long)message[1], (Long)message[2])
+        return true
     }
 }

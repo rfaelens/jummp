@@ -5,7 +5,6 @@ import net.biomodels.jummp.dbus.ModelDBusAdapterImpl
 import net.biomodels.jummp.dbus.remote.RemoteJummpApplicationAdapterDBusImpl
 import net.biomodels.jummp.dbus.remote.RemoteUserAdapterDBusImpl
 import net.biomodels.jummp.dbus.remote.RemoteModelAdapterDBusImpl
-import net.biomodels.jummp.dbus.remote.DBusExceptionAdvice
 import net.biomodels.jummp.dbus.SbmlDBusAdapterImpl
 import net.biomodels.jummp.dbus.remote.RemoteSbmlAdapterDBusImpl
 import net.biomodels.jummp.dbus.SbmlDBusAdapterHelperImpl
@@ -75,12 +74,6 @@ Brief description of the plugin.
             remoteUserAdapterDBusImpl(RemoteUserAdapterDBusImpl)
             remoteModelAdapterDBusImpl(RemoteModelAdapterDBusImpl)
             remoteSbmlAdapterDBusImpl(RemoteSbmlAdapterDBusImpl)
-            xmlns aop: "http://www.springframework.org/schema/aop"
-            aop.config {
-                pointcut(id: "dbusExceptionPointcut", expression: "execution(public * net.biomodels.jummp.dbus.remote.*.*(..))")
-                advisor('pointcut-ref': "dbusExceptionPointcut", 'advice-ref': "dbusExceptionAdvice")
-            }
-            dbusExceptionAdvice(DBusExceptionAdvice)
         }
     }
 

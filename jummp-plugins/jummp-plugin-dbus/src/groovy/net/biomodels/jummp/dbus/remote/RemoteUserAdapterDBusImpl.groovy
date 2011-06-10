@@ -20,7 +20,7 @@ import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 @RemoteDBusAdapter(interfaceName="RemoteUserAdapter",dbusAdapterName="userDBusAdapter")
-class RemoteUserAdapterDBusImpl extends AbstractRemoteAdapter implements RemoteUserAdapter, InitializingBean {
+class RemoteUserAdapterDBusImpl extends AbstractRemoteDBusAdapter implements RemoteUserAdapter, InitializingBean {
     private DBusConnection connection
     private UserDBusAdapter userDBusAdapter
 

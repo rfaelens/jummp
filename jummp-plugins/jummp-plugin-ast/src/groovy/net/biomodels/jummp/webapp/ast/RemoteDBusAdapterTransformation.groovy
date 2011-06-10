@@ -23,6 +23,11 @@ import org.codehaus.groovy.syntax.Token
 import org.codehaus.groovy.syntax.Types
 import org.codehaus.groovy.transform.GroovyASTTransformation
 import org.codehaus.groovy.transform.ASTTransformation
+import org.codehaus.groovy.ast.stmt.TryCatchStatement
+import org.codehaus.groovy.ast.Parameter
+import org.codehaus.groovy.ast.stmt.ThrowStatement
+import org.codehaus.groovy.ast.stmt.CatchStatement
+import org.codehaus.groovy.ast.stmt.EmptyStatement
 
 /**
  * @short AST Transformation to generate code for remote DBus Adapters.
@@ -32,12 +37,15 @@ import org.codehaus.groovy.transform.ASTTransformation
  * Remote*Adapter interface and delegates the calls to the core with most often the same name. In such a case this
  * transformation can be used to auto-generate the code. The transformation skips methods which are already implemented
  * in the DBus Adapter. It cannot be used to generate code for overloaded methods as DBus doesn't support them and
- * by that the name differs and at least one method has to be implemented.
+ * by that the name differs and at least one method has to be implemented. Nevertheless the code of such implemented
+ * methods are wrapped in a try/catch block (see below).
  *
  * The generated code handles the cases that an Authentication Token has to be passed as first argument to the core
  * and the case where it is not needed. It handles the case that a User object is passed in as an argument and needs
  * to be converted to a DBusUser and vice versa. If the core returns a String and the interface requires to return
  * a List or a Map, the core's return value is expected to be JSON and parsed to the required type.
+ *
+ * Possible thrown DBusExecutionExceptions are caught and mapped to a "normal" Exception.
  *
  * Example code that can be generated:
  *
@@ -46,27 +54,51 @@ import org.codehaus.groovy.transform.ASTTransformation
  *     FooDBusAdapter fooDBusAdapter
  *
  *     Bar getFooBar(Foo parameter1, Baz parameter2) {
- *         return fooDBusAdapter.getFooBar(parameter1, parameter2)
+ *         try {
+ *             return fooDBusAdapter.getFooBar(parameter1, parameter2)
+ *         } catch (DBusExecutionException e) {
+ *             throw mapException(e)
+ *         }
  *     }
  *
  *     Bar getFooBarBaz(Foo parameter1, Baz parameter2) {
- *         return fooDBusAdapter.getFooBarBaz(authenticationToken(), parameter1, parameter2)
+ *         try {
+ *             return fooDBusAdapter.getFooBarBaz(authenticationToken(), parameter1, parameter2)
+ *         } catch (DBusExecutionException e) {
+ *             throw mapException(e)
+ *         }
  *     }
  *
  *     void operateOnUser(User user) {
- *         fooDBusAdapter.operateOnUser(authenticationToken(), DBusUser.fromUser(user))
+ *         try {
+ *             fooDBusAdapter.operateOnUser(authenticationToken(), DBusUser.fromUser(user))
+ *         } catch (DBusExecutionException e) {
+ *             throw mapException(e)
+ *         }
  *     }
  *
  *     User getSomeUser() {
- *         return fooDBusAdapter.getSomeUser(authenticationToken()).toUser()
+ *         try {
+ *             return fooDBusAdapter.getSomeUser(authenticationToken()).toUser()
+ *         } catch (DBusExecutionException e) {
+ *             throw mapException(e)
+ *         }
  *     }
  *
  *     List<Map> getSomeJSON() {
- *         return listOfMapFromJSON(fooDBusAdapter.getSomeJSON(authenticationToken()))
+ *         try {
+ *             return listOfMapFromJSON(fooDBusAdapter.getSomeJSON(authenticationToken()))
+ *         } catch (DBusExecutionException e) {
+ *             throw mapException(e)
+ *         }
  *     }
  *
  *     Map getSomeOtherJSON() {
- *         return mapFromJSON(fooDBusAdapter.getSomeOtherJSON(authenticationToken()))
+ *         try {
+ *             return mapFromJSON(fooDBusAdapter.getSomeOtherJSON(authenticationToken()))
+ *         } catch (DBusExecutionException e) {
+ *             throw mapException(e)
+ *         }
  *     }
  * }
  * @endcode
@@ -122,6 +154,11 @@ class RemoteDBusAdapterTransformation implements ASTTransformation {
             List<MethodNode> methodsSameName = classNode.getMethods(it.name)
             if (!methodsSameName.isEmpty()) {
                 // TODO: properly find same methods, this just excludes all methods with the name which are implemented
+                // wrap code in try/catch block
+                methodsSameName.each {
+                    // TODO: this is actually not correct as we might match too many methods, so we put the try/catch into a try/catch and so on
+                    it.setCode(tryCatchStatment(it.getCode()))
+                }
                 return
             }
             List arguments = []
@@ -196,7 +233,7 @@ class RemoteDBusAdapterTransformation implements ASTTransformation {
                 statement = new ReturnStatement(delegatedMethodCall)
             }
             // the complete method: same name, same return type, same parameters, same exceptions and either just a method call (return type void) or a return statement
-            MethodNode method = new MethodNode(it.name, Opcodes.ACC_PUBLIC, it.returnType, it.parameters, it.exceptions, statement)
+            MethodNode method = new MethodNode(it.name, Opcodes.ACC_PUBLIC, it.returnType, it.parameters, it.exceptions, tryCatchStatment(statement))
             // add Profiled annotation to method. Annotation has a "tag" with String value: className.methodName
             // looks like: @Profiled(tag="${classNode.getNameWithoutPackage()}.${it.name}")
             AnnotationNode profiled = new AnnotationNode(new ClassNode(this.getClass().classLoader.loadClass("org.perf4j.aop.Profiled")))
@@ -226,5 +263,29 @@ class RemoteDBusAdapterTransformation implements ASTTransformation {
         statements << new ExpressionStatement(declaration)
         statements << new ReturnStatement(toUserCall)
         return new BlockStatement(statements, new VariableScope())
+    }
+
+    /**
+     * Wraps the @p statement in a try-catch block to translate the DBusExecutionException.
+     * Generates the following code:
+     * @code
+     * try {
+     *     statement
+     * } catch (DBusExceutionException e) {
+     *     throw mapException(e)
+     * }
+     * @endcode
+     * @param statement
+     * @return A Statement containing the try-catch block around the passed in Statment
+     */
+    private Statement tryCatchStatment(Statement statement) {
+        if (!statement) {
+            return statement
+        }
+        TryCatchStatement tc = new TryCatchStatement(statement, new EmptyStatement())
+        CatchStatement catchStatement = new CatchStatement(new Parameter(new ClassNode(this.getClass().classLoader.loadClass("org.freedesktop.dbus.exceptions.DBusExecutionException")), "e"), new Statement())
+        catchStatement.setCode(new ThrowStatement(new MethodCallExpression(new VariableExpression("this"), "mapException", new ArgumentListExpression(new VariableExpression("e")))))
+        tc.addCatch(catchStatement)
+        return tc
     }
 }
