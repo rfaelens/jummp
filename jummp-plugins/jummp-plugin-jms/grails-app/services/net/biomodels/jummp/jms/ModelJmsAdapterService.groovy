@@ -8,7 +8,6 @@ import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.io.FileUtils
-import org.perf4j.aop.Profiled
 import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.IModelService
 import net.biomodels.jummp.webapp.ast.JmsAdapter
@@ -40,7 +39,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return List of ModelTransportCommands or IllegalArgumentException for incorrect arguments
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.getAllModels")
     def getAllModels(def message) {
         if (!verifyMessage(message, [String.class]) &&
                 !verifyMessage(message, [String.class, ModelListSorting.class]) &&
@@ -87,7 +85,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return Number of Models or IllegalArgumentException for missing AuthenticationHash
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.getModelCount")
     def getModelCount(def message) {
         if (!(message instanceof String)) {
             return new IllegalArgumentException("AuthenticationHash as argument expected")
@@ -104,7 +101,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return A RevisionTransportCommand or IllegalArgumentException or AccessDeniedException if user does not have access to any Revision.
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.getLatestRevision")
     def getLatestRevision(def message) {
         if (!verifyMessage(message, [String, Long])) {
             return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
@@ -126,7 +122,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return List of Revisions wrapped in RevisionTransportCommand or IllegalArgumentException
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.getAllRevisions")
     def getAllRevisions(def message) {
         if (!verifyMessage(message, [String, Long])) {
             return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
@@ -143,7 +138,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return PublicationTransportCommand or IllegalArgumentException or AccessDeniedException
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.getPublication")
     def getPublication(def message) {
         if (!verifyMessage(message, [String, Long])) {
             return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
@@ -163,7 +157,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return New created Model as ModelTransportCommand, InvalidArgumentException, AccessDeniedException or ModelException
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.uploadModel")
     def uploadModel(def message) {
         // TODO: replace Map by the proper type
         if (!verifyMessage(message, [String, byte[], ModelTransportCommand])) {
@@ -186,7 +179,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return New created Revision as RevisionTransportCommand, InvalidArgumentException, AccessDeniedException or ModelException
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.addRevision")
     def addRevision(def message) {
         if (!verifyMessage(message, [String, Long, byte[], ModelFormatTransportCommand, String])) {
             return new IllegalArgumentException("AuthenticationHash, Long, Byte Array, ModelFormatTransportCommand and String as arguments expected")
@@ -208,7 +200,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return Boolean or IllegalArgumentException
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.canAddRevision")
     def canAddRevision(def message) {
         if (!verifyMessage(message, [String, Long])) {
             return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
@@ -226,7 +217,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return Byte Array, InvalidArgumentException, AccessDeniedException or ModelException
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.retrieveModelFile")
     def retrieveModelFile(def message) {
         if (!verifyMessage(message, [String, RevisionTransportCommand]) &&
             !verifyMessage(message, [String, Long])) {
@@ -247,7 +237,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return @c true if successfully updated, InvalidArgumentException or AccessDeniedException
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.grantReadAccess")
     def grantReadAccess(def message) {
         if (!verifyMessage(message, [String, ModelTransportCommand, User])) {
             return new IllegalArgumentException("AuthenticationHash, Model and User as arguments expected")
@@ -264,7 +253,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return @c true if successfully updated, InvalidArgumentException or AccessDeniedException
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.grantWriteAccess")
     def grantWriteAccess(def message) {
         if (!verifyMessage(message, [String, ModelTransportCommand, User])) {
             return new IllegalArgumentException("AuthenticationHash, Model and User as arguments expected")
@@ -281,7 +269,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return @c true if successfully updated, @c false otherwise, InvalidArgumentException or AccessDeniedException
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.revokeReadAccess")
     def revokeReadAccess(def message) {
         if (!verifyMessage(message, [String, ModelTransportCommand, User])) {
             return new IllegalArgumentException("AuthenticationHash, Model and User as arguments expected")
@@ -297,7 +284,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return @c true if successfully updated, @c false otherwise, InvalidArgumentException or AccessDeniedException
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.revokeWriteAccess")
     def revokeWriteAccess(def message) {
         if (!verifyMessage(message, [String, ModelTransportCommand, User])) {
             return new IllegalArgumentException("AuthenticationHash, Model and User as arguments expected")
@@ -313,7 +299,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return @c true if successfully deleted, @c false otherwise, InvalidArgumentException or AccessDeniedException
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.deleteModel")
     def deleteModel(def message) {
         if (!verifyMessage(message, [String, Long])) {
             return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
@@ -329,7 +314,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      * @return @c true if successfully deleted, @c false otherwise, InvalidArgumentException or AccessDeniedException
      */
     @Queue
-    @Profiled(tag="ModelJmsAdapter.restoreModel")
     def restoreModel(def message) {
         if (!verifyMessage(message, [String, Long])) {
             return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")

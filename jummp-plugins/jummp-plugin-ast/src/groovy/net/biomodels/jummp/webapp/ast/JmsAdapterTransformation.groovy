@@ -15,6 +15,8 @@ import org.codehaus.groovy.transform.ASTTransformation
 import org.codehaus.groovy.ast.stmt.TryCatchStatement
 import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.stmt.CatchStatement
+import org.codehaus.groovy.ast.expr.ConstantExpression
+import org.codehaus.groovy.ast.AnnotationNode
 
 /**
  * @short AST Transformation for core JMS Adapters.
@@ -40,6 +42,11 @@ class JmsAdapterTransformation implements ASTTransformation {
             if (it.getAnnotations().find { it.classNode.name == "grails.plugin.jms.Queue"}) {
                 // yes, so let's wrap the code in a try-catch-finally block
                 it.setCode(tryCatchFinallyStatement(it.getCode()))
+                // add Profiled annotation to method. Annotation has a "tag" with String value: className.methodName
+                // looks like: @Profiled(tag="${classNode.getNameWithoutPackage()}.${it.name}")
+                AnnotationNode profiled = new AnnotationNode(new ClassNode(this.getClass().classLoader.loadClass("org.perf4j.aop.Profiled")))
+                profiled.addMember("tag", new ConstantExpression(classNode.getNameWithoutPackage() + "." + it.name))
+                it.addAnnotation(profiled)
             }
         }
     }
