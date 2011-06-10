@@ -319,6 +319,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
         }
 
+        setAuthentication((String)message[0])
         return modelDelegateService.restoreModel(message[1])
     }
 
