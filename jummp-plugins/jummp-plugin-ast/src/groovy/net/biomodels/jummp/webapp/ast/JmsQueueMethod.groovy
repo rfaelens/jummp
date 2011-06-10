@@ -14,7 +14,8 @@ import java.lang.annotation.Target
  * matches the types specified by this annotation.
  *
  * The annotation takes two parameters:
- * @li isAuthenticate to indicate whether the generated code has to check for the AuthenticationHash
+ * @li isAuthenticate to indicate whether the generated code has to check for the AuthenticationHash, if @c true
+ * the code will also contain a method call to set the Authentication from the message
  * @li arguments Array of Classes of parameters <b>without</b> the AuthenticationHash 
  *
  * @see JmsAdapter

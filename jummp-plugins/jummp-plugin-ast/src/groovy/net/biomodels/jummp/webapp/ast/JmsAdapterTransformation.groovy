@@ -25,6 +25,7 @@ import org.codehaus.groovy.ast.stmt.IfStatement
 import org.codehaus.groovy.ast.stmt.EmptyStatement
 import org.codehaus.groovy.ast.expr.ClassExpression
 import org.codehaus.groovy.ast.expr.ListExpression
+import org.codehaus.groovy.ast.expr.CastExpression
 
 /**
  * @short AST Transformation for core JMS Adapters.
@@ -37,7 +38,8 @@ import org.codehaus.groovy.ast.expr.ListExpression
  * bound to the current thread.
  *
  * By using the @link JmsQueueMethod annotation on a method the Transformation can
- * generate the verifyMessage block.
+ * generate the verifyMessage block. If the annotation has the isAuthenticate argument
+ * on @c true the transformation will also generate code to set the Authentication
  *
  * @see JmsAdapter
  * @see JmsQueueMethod
@@ -65,6 +67,9 @@ class JmsAdapterTransformation implements ASTTransformation {
                     // We need to prepend the code with a if statement
                     BlockStatement block = new BlockStatement()
                     block.addStatement(verifyMessage(verify))
+                    if (verify.getMember("isAuthenticate").getValue()) {
+                        block.addStatement(setAuthentication())
+                    }
                     block.addStatement(it.getCode())
                     it.setCode(block)
                 }
@@ -129,5 +134,18 @@ class JmsAdapterTransformation implements ASTTransformation {
         ifBlock.addStatement(new ReturnStatement(new ConstructorCallExpression(new ClassNode(IllegalArgumentException.class), new ArgumentListExpression(new ConstantExpression("Argument mismatch")))))
         BooleanExpression condition = new BooleanExpression(new NotExpression(new MethodCallExpression(new VariableExpression("this"), "verifyMessage", new ArgumentListExpression(new VariableExpression("message"), new ListExpression(classes)))))
         return new IfStatement(condition, ifBlock, new EmptyStatement())
+    }
+
+    /**
+     * Generates the code to set the Authentication from the message.
+     * @code
+     * setAuthentication((String)message.first())
+     * @endcode
+     * @return The generated code
+     */
+    private Statement setAuthentication() {
+        MethodCallExpression first = new MethodCallExpression(new VariableExpression("message"), "first", ArgumentListExpression.EMPTY_ARGUMENTS)
+        CastExpression cast = new CastExpression(new ClassNode(String), first)
+        return new ExpressionStatement(new MethodCallExpression(new VariableExpression("this"), "setAuthentication", new ArgumentListExpression(cast)))
     }
 }

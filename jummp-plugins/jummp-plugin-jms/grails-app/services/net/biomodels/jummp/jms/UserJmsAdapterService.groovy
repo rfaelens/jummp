@@ -35,7 +35,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[String, String])
     def changePassword(def message) {
-        setAuthentication((String)message[0])
         userService.changePassword(message[1], message[2])
         return true
     }
@@ -48,7 +47,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[User])
     def editUser(def message) {
-        setAuthentication((String)message[0])
         userService.editUser((User)message[1])
         return true
     }
@@ -94,7 +92,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Integer, Integer])
     def getAllUsers(def message) {
-        setAuthentication((String)message[0])
         return userService.getAllUsers((Integer)message[1], (Integer)message[2])
     }
 
@@ -106,7 +103,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Boolean])
     def enableUser(def message) {
-        setAuthentication((String)message[0])
         return userService.enableUser((Long)message[1], (Boolean)message[2])
     }
 
@@ -118,7 +114,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Boolean])
     def lockAccount(def message) {
-        setAuthentication((String)message[0])
         return userService.lockAccount((Long)message[1], (Boolean)message[2])
     }
 
@@ -130,7 +125,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Boolean])
     def expireAccount(def message) {
-        setAuthentication((String)message[0])
         return userService.expireAccount((Long)message[1], (Boolean)message[2])
     }
 
@@ -142,7 +136,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Boolean])
     def expirePassword(def message) {
-        setAuthentication((String)message[0])
         return userService.expirePassword((Long)message[1], (Boolean)message[2])
     }
 
@@ -154,7 +147,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[User])
     def register(def message) {
-        setAuthentication((String)message[0])
         return userService.register((User)message[1])
     }
 
@@ -166,7 +158,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[String, String])
     def validateRegistration(def message) {
-        setAuthentication((String)message[0])
         userService.validateRegistration((String)message[1], (String)message[2])
         return true
     }
@@ -200,7 +191,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[String])
     def requestPassword(def message) {
-        setAuthentication((String)message[0])
         userService.requestPassword((String)message[1])
         return true
     }
@@ -213,7 +203,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[String, String, String])
     def resetPassword(def message) {
-        setAuthentication((String)message[0])
         userService.resetPassword((String)message[1], (String)message[2], (String)message[3])
         return true
     }
@@ -241,7 +230,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long])
     def getRolesForUser(def message) {
-        setAuthentication((String)message[0])
         return userService.getRolesForUser((Long)message[1])
     }
 
@@ -253,7 +241,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Long])
     def addRoleToUser(def message) {
-        setAuthentication((String)message[0])
         userService.addRoleToUser((Long)message[1], (Long)message[2])
         return true
     }
@@ -266,7 +253,6 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Long])
     def removeRoleFromUser(def message) {
-        setAuthentication((String)message[0])
         userService.removeRoleFromUser((Long)message[1], (Long)message[2])
         return true
     }

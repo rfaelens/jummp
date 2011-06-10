@@ -105,7 +105,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long])
     def getLatestRevision(def message) {
         def revision = null
-        setAuthentication((String)message[0])
         revision = modelDelegateService.getLatestRevision(message[1])
 
         if (revision == null) {
@@ -124,7 +123,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long])
     def getAllRevisions(def message) {
         def result = []
-        setAuthentication((String)message[0])
         result = modelDelegateService.getAllRevisions(message[1])
         return result
     }
@@ -138,7 +136,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long])
     def getPublication(def message) {
         def result
-        setAuthentication((String)message[0])
         result = modelDelegateService.getPublication(message[1])
         if (!result) {
             result = new PublicationTransportCommand()
@@ -156,7 +153,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     def uploadModel(def message) {
         def result
 
-        setAuthentication((String)message[0])
         File file = File.createTempFile("jummpJms", null)
         file.append(message[1])
         result = modelDelegateService.uploadModel(file, (ModelTransportCommand)message[2])
@@ -175,7 +171,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     def addRevision(def message) {
         def result
 
-        setAuthentication((String)message[0])
         File file = File.createTempFile("jummpJms", null)
         file.append(message[2])
         result = modelDelegateService.addRevision(message[1], file, message[3], (String)message[4])
@@ -193,7 +188,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long])
     def canAddRevision(def message) {
         def result
-        setAuthentication((String)message[0])
         result = modelDelegateService.canAddRevision(message[1])
         return result
     }
@@ -226,7 +220,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[ModelTransportCommand, User])
     def grantReadAccess(def message) {
-        setAuthentication((String)message[0])
         modelDelegateService.grantReadAccess(message[1].id, message[2])
         return true
     }
@@ -239,7 +232,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[ModelTransportCommand, User])
     def grantWriteAccess(def message) {
-        setAuthentication((String)message[0])
         modelDelegateService.grantWriteAccess(message[1].id, message[2])
         return true
     }
@@ -252,7 +244,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[ModelTransportCommand, User])
     def revokeReadAccess(def message) {
-        setAuthentication((String)message[0])
         return modelDelegateService.revokeReadAccess(message[1].id, message[2])
     }
 
@@ -264,7 +255,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[ModelTransportCommand, User])
     def revokeWriteAccess(def message) {
-        setAuthentication((String)message[0])
         return modelDelegateService.revokeWriteAccess(message[1].id, message[2])
     }
 
@@ -276,7 +266,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long])
     def deleteModel(def message) {
-        setAuthentication((String)message[0])
         return modelDelegateService.deleteModel(message[1])
     }
 
@@ -288,7 +277,6 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long])
     def restoreModel(def message) {
-        setAuthentication((String)message[0])
         return modelDelegateService.restoreModel(message[1])
     }
 
