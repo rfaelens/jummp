@@ -3,15 +3,8 @@ package net.biomodels.jummp.jms
 import grails.plugin.jms.Queue
 import net.biomodels.jummp.plugins.security.User
 import org.perf4j.aop.Profiled
-import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.authentication.BadCredentialsException
-import net.biomodels.jummp.core.user.RegistrationException
-import net.biomodels.jummp.core.user.RoleNotFoundException
-import net.biomodels.jummp.core.user.UserInvalidException
-import net.biomodels.jummp.core.user.UserManagementException
-import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.core.IUserService
-import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
+import net.biomodels.jummp.webapp.ast.JmsAdapter
 
 /**
  * @short Wrapper class around the UserService exposed to JMS.
@@ -21,6 +14,7 @@ import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
  * 
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
+@JmsAdapter
 class UserJmsAdapterService extends AbstractJmsAdapter {
 
     @SuppressWarnings("GrailsStatelessService")
@@ -45,19 +39,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash, String and String as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.changePassword(message[1], message[2])
-            result = true
-        } catch (BadCredentialsException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        userService.changePassword(message[1], message[2])
+        return true
     }
 
     /**
@@ -72,21 +56,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash and User as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.editUser((User)message[1])
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserInvalidException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        userService.editUser((User)message[1])
+        return true
     }
 
     /**
@@ -101,18 +73,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message)
-            result = userService.getCurrentUser()
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message)
+        return userService.getCurrentUser()
     }
 
     /**
@@ -126,24 +88,12 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
         if (!verifyMessage(message, [String, String]) && !verifyMessage(message, [String, Long])) {
             return new IllegalArgumentException("AuthenticationHash and String or Long as arguments expected")
         }
-        def result
-        try {
-            setAuthentication((String)message[0])
-            if (message[1] instanceof Long) {
-                result = userService.getUser((Long)message[1])
-            } else {
-                result = userService.getUser((String)message[1])
-            }
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
+        setAuthentication((String)message[0])
+        if (message[1] instanceof Long) {
+            return userService.getUser((Long)message[1])
+        } else {
+            return userService.getUser((String)message[1])
         }
-        return result
     }
 
     /**
@@ -158,18 +108,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash, Integer and Integer as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.getAllUsers((Integer)message[1], (Integer)message[2])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        return userService.getAllUsers((Integer)message[1], (Integer)message[2])
     }
 
     /**
@@ -184,20 +124,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash, Long and Boolean as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.enableUser((Long)message[1], (Boolean)message[2])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        return userService.enableUser((Long)message[1], (Boolean)message[2])
     }
 
     /**
@@ -212,20 +140,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash, Long and Boolean as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.lockAccount((Long)message[1], (Boolean)message[2])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        return userService.lockAccount((Long)message[1], (Boolean)message[2])
     }
 
     /**
@@ -240,20 +156,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash, Long and Boolean as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.expireAccount((Long)message[1], (Boolean)message[2])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        return userService.expireAccount((Long)message[1], (Boolean)message[2])
     }
 
     /**
@@ -268,20 +172,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash, Long and Boolean as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.expirePassword((Long)message[1], (Boolean)message[2])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        return userService.expirePassword((Long)message[1], (Boolean)message[2])
     }
 
     /**
@@ -296,22 +188,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash and User as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.register((User)message[1])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (RegistrationException e) {
-            result = e
-        } catch (UserInvalidException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        return userService.register((User)message[1])
     }
 
     /**
@@ -326,21 +204,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash, String and String as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.validateRegistration((String)message[1], (String)message[2])
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserManagementException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        userService.validateRegistration((String)message[1], (String)message[2])
+        return true
     }
 
     /**
@@ -356,25 +222,13 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash, String and String or AuthenticationHash, String, String and String as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            if (message.size() == 3) {
-                userService.validateAdminRegistration((String)message[1], (String)message[2])
-            } else {
-                userService.validateAdminRegistration((String)message[1], (String)message[2], (String)message[3])
-            }
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserManagementException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
+        setAuthentication((String)message[0])
+        if (message.size() == 3) {
+            userService.validateAdminRegistration((String)message[1], (String)message[2])
+        } else {
+            userService.validateAdminRegistration((String)message[1], (String)message[2], (String)message[3])
         }
-        return result
+        return true
     }
 
     /**
@@ -389,21 +243,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash and String as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.requestPassword((String)message[1])
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        userService.requestPassword((String)message[1])
+        return true
     }
 
     /**
@@ -418,21 +260,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash, String, String and String as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.resetPassword((String)message[1], (String)message[2], (String)message[3])
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserManagementException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        userService.resetPassword((String)message[1], (String)message[2], (String)message[3])
+        return true
     }
 
     /**
@@ -447,18 +277,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash as argument expected")
         }
 
-        def result
-        try {
-            setAuthentication(message)
-            result = userService.getAllRoles()
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication(message)
+        return userService.getAllRoles()
     }
 
     /**
@@ -473,18 +293,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash and Long as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            result = userService.getRolesForUser((Long)message[1])
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        return userService.getRolesForUser((Long)message[1])
     }
 
     /**
@@ -499,23 +309,9 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash, Long and Long as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.addRoleToUser((Long)message[1], (Long)message[2])
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (RoleNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        userService.addRoleToUser((Long)message[1], (Long)message[2])
+        return true
     }
 
     /**
@@ -530,22 +326,8 @@ class UserJmsAdapterService extends AbstractJmsAdapter {
             return new IllegalArgumentException("AuthenticationHash, Long and Long as arguments expected")
         }
 
-        def result
-        try {
-            setAuthentication((String)message[0])
-            userService.removeRoleFromUser((Long)message[1], (Long)message[2])
-            result = true
-        } catch (AccessDeniedException e) {
-            result = e
-        } catch (UserNotFoundException e) {
-            result = e
-        } catch (RoleNotFoundException e) {
-            result = e
-        } catch (AuthenticationHashNotFoundException e) {
-            result = e
-        } finally {
-            restoreAuthentication()
-        }
-        return result
+        setAuthentication((String)message[0])
+        userService.removeRoleFromUser((Long)message[1], (Long)message[2])
+        return true
     }
 }
