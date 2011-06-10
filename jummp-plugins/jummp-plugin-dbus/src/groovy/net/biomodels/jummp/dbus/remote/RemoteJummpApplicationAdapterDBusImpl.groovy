@@ -9,6 +9,7 @@ import net.biomodels.jummp.dbus.ApplicationDBusAdapter
 import org.springframework.beans.factory.InitializingBean
 import org.perf4j.aop.Profiled
 import net.biomodels.jummp.core.user.JummpAuthentication
+import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
 
 /**
  * @short DBus Remote Adapter to JummpApplication.
@@ -18,7 +19,8 @@ import net.biomodels.jummp.core.user.JummpAuthentication
  * 
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class RemoteJummpApplicationAdapterDBusImpl implements RemoteJummpApplicationAdapter, InitializingBean {
+@RemoteDBusAdapter(interfaceName="RemoteJummpApplicationAdapter",dbusAdapterName="applicationDBusAdapter")
+class RemoteJummpApplicationAdapterDBusImpl extends AbstractRemoteDBusAdapter implements RemoteJummpApplicationAdapter, InitializingBean {
     private DBusConnection connection
     private ApplicationDBusAdapter applicationDBusAdapter
 
