@@ -5,7 +5,6 @@ import net.biomodels.jummp.dbus.ModelDBusAdapterImpl
 import net.biomodels.jummp.dbus.remote.RemoteJummpApplicationAdapterDBusImpl
 import net.biomodels.jummp.dbus.remote.RemoteUserAdapterDBusImpl
 import net.biomodels.jummp.dbus.remote.RemoteModelAdapterDBusImpl
-import net.biomodels.jummp.dbus.remote.DBusExceptionAdvice
 import net.biomodels.jummp.dbus.SbmlDBusAdapterImpl
 import net.biomodels.jummp.dbus.remote.RemoteSbmlAdapterDBusImpl
 import net.biomodels.jummp.dbus.SbmlDBusAdapterHelperImpl
