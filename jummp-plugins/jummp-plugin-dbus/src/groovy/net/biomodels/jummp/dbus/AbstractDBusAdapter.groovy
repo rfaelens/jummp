@@ -6,6 +6,8 @@ import org.springframework.beans.factory.InitializingBean
 import net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException
 import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 import net.biomodels.jummp.remote.AbstractCoreAdapter
+import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException
+import org.springframework.security.access.AccessDeniedException
 
 /**
  * @short Abstract Base class for all DBusAdapter Implementations.
@@ -44,6 +46,21 @@ public abstract class AbstractDBusAdapter extends AbstractCoreAdapter implements
      */
     public void setDbusManager(DBusManager dbusManager) {
         this.dbusManager = dbusManager
+    }
+
+    /**
+     * Maps an Exception to a DBus Exception
+     * @param e The normal Exception
+     * @return The DBus Exception
+     */
+    protected Exception exceptionMapping(Exception e) {
+        if (e instanceof AccessDeniedException) {
+            return new AccessDeniedDBusException(e.getMessage())
+        }
+        if (e instanceof IllegalArgumentException) {
+            return new IllegalArgumentDBusException(e.getMessage())
+        }
+        return e
     }
 
     /**
