@@ -66,62 +66,20 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
     public boolean expirePassword(String authenticationHash, Long userId, boolean expire) throws AuthenticationHashNotFoundDBusException {
     }
 
+    @DBusMethod(isAnonymous = true)
     public Long register(DBusUser user) {
-        try {
-            setAnonymousAuthentication();
-            return userService.register(user.toUser());
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } catch (UserInvalidException e) {
-            throw new UserInvalidDBusException(e.getUserName());
-        } catch (RegistrationException e) {
-            throw new UserManagementDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAnonymous = true)
     public void validateRegistration(String username, String code) {
-        try {
-            setAnonymousAuthentication();
-            userService.validateRegistration(username, code);
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } catch (UserManagementException e) {
-            throw new UserManagementDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAnonymous = true)
     public void validateAdminRegistration(String username, String code, String password) {
-        try {
-            setAnonymousAuthentication();
-            userService.validateAdminRegistration(username, code, password);
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } catch (UserManagementException e) {
-            throw new UserManagementDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAnonymous = true)
     public void requestPassword(String username) {
-        try {
-            setAnonymousAuthentication();
-            userService.requestPassword(username);
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } catch (UserNotFoundException e) {
-            if (e.getUserName() != null) {
-                throw new UserNotFoundDBusException(e.getUserName());
-            } else {
-                throw new UserNotFoundDBusException(e.getId().toString());
-            }
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     public DBusUser getUserById(String authenticationHash, Long id) throws AuthenticationHashNotFoundDBusException, UserManagementDBusException {
@@ -200,23 +158,8 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
     public DBusRole getRoleByAuthority(String authenticationHash, String authority) throws AuthenticationHashNotFoundDBusException, RoleNotFoundDBusException {
     }
 
+    @DBusMethod(isAnonymous = true)
     public void resetPassword(String code, String username, String password) throws UserNotFoundDBusException, UserCodeInvalidDBusException, UserCodeExpiredDBusException {
-        try {
-            setAnonymousAuthentication();
-            userService.resetPassword(code, username, password);
-        } catch (UserCodeInvalidException e) {
-            throw new UserCodeInvalidDBusException(e.getCode());
-        } catch (UserCodeExpiredException e) {
-            throw new UserCodeExpiredDBusException(e.getUserName());
-        } catch (UserNotFoundException e) {
-            if (e.getUserName() != null) {
-                throw new UserNotFoundDBusException(e.getUserName());
-            } else {
-                throw new UserNotFoundDBusException(e.getId().toString());
-            }
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     /**

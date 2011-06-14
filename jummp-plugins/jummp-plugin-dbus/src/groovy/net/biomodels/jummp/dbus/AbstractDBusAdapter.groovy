@@ -16,6 +16,13 @@ import net.biomodels.jummp.core.user.UserInvalidException
 import net.biomodels.jummp.dbus.user.UserInvalidDBusException
 import org.springframework.security.authentication.BadCredentialsException
 import net.biomodels.jummp.dbus.authentication.BadCredentialsDBusException
+import net.biomodels.jummp.core.user.RegistrationException
+import net.biomodels.jummp.dbus.user.UserManagementDBusException
+import net.biomodels.jummp.core.user.UserManagementException
+import net.biomodels.jummp.core.user.UserCodeInvalidException
+import net.biomodels.jummp.dbus.user.UserCodeInvalidDBusException
+import net.biomodels.jummp.core.user.UserCodeExpiredException
+import net.biomodels.jummp.dbus.user.UserCodeExpiredDBusException
 
 /**
  * @short Abstract Base class for all DBusAdapter Implementations.
@@ -71,8 +78,17 @@ public abstract class AbstractDBusAdapter extends AbstractCoreAdapter implements
         if (e instanceof IllegalArgumentException) {
             return new IllegalArgumentDBusException(e.getMessage())
         }
+        if (e instanceof RegistrationException) {
+            return new UserManagementDBusException(e.getMessage())
+        }
         if (e instanceof RoleNotFoundException) {
             return new RoleNotFoundDBusException(e.getMessage())
+        }
+        if (e instanceof UserCodeExpiredException) {
+            return new UserCodeExpiredDBusException(e.getUserName())
+        }
+        if (e instanceof UserCodeInvalidException) {
+            return new UserCodeInvalidDBusException(e.getCode())
         }
         if (e instanceof UserInvalidException) {
             return new UserInvalidDBusException(e.getUserName())
@@ -83,6 +99,9 @@ public abstract class AbstractDBusAdapter extends AbstractCoreAdapter implements
             } else {
                 return new UserNotFoundDBusException(e.getId().toString());
             }
+        }
+        if (e instanceof UserManagementException) {
+            return new UserManagementDBusException(e.getMessage())
         }
         return e
     }

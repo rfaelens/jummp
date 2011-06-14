@@ -16,5 +16,6 @@ import java.lang.annotation.ElementType
 @Retention(RetentionPolicy.SOURCE)
 @Target([ElementType.METHOD])
 public @interface DBusMethod {
-    boolean isAuthenticate()
+    boolean isAuthenticate() default false
+    boolean isAnonymous() default false
 }

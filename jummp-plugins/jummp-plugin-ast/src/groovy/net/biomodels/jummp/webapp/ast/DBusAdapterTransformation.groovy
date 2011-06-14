@@ -75,9 +75,15 @@ class DBusAdapterTransformation implements ASTTransformation {
             }
             BlockStatement code = new BlockStatement()
             // do we need to add an setAuthentication statement?
-            boolean authenticate = dbusMethodAnnotations.first().getMember("isAuthenticate").getValue()
+            boolean authenticate = false
+            if (dbusMethodAnnotations.first().getMember("isAuthenticate")) {
+                authenticate = dbusMethodAnnotations.first().getMember("isAuthenticate")?.getValue()
+            }
             if (authenticate) {
                 code.addStatement(setAuthentication(it.parameters[0].name))
+            }
+            if (dbusMethodAnnotations.first().getMember("isAnonymous")?.getValue()) {
+                code.addStatement(new ExpressionStatement(new MethodCallExpression(new VariableExpression("this"), "setAnonymousAuthentication", ArgumentListExpression.EMPTY_ARGUMENTS)))
             }
             // generate the list of arguments for the delegated method call
             List arguments = []
