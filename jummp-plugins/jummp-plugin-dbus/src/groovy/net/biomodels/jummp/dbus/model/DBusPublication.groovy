@@ -94,6 +94,9 @@ class DBusPublication extends PublicationTransportCommand implements DBusSeriali
      * @return New instance based on passed in publication.
      */
     static public DBusPublication fromPublicationTransportCommand(PublicationTransportCommand publication) {
+        if (!publication) {
+            publication = new PublicationTransportCommand()
+        }
         return new DBusPublication(journal: publication.journal,
                 title: publication.title,
                 affiliation: publication.affiliation,
