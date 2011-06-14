@@ -82,42 +82,12 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
     public void requestPassword(String username) {
     }
 
+    @DBusMethod(isAuthenticate = true, delegate = "getUser")
     public DBusUser getUserById(String authenticationHash, Long id) throws AuthenticationHashNotFoundDBusException, UserManagementDBusException {
-        DBusUser user = null;
-        try {
-            setAuthentication(authenticationHash);
-            user = DBusUser.fromUser(userService.getUser(id));
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } catch (UserNotFoundException e) {
-            if (e.getUserName() != null) {
-                throw new UserNotFoundDBusException(e.getUserName());
-            } else {
-                throw new UserNotFoundDBusException(e.getId().toString());
-            }
-        } finally {
-            restoreAuthentication();
-        }
-        return user;
     }
 
+    @DBusMethod(isAuthenticate = true, delegate = "getUser")
     public DBusUser getUserByName(String authenticationHash, String username) throws AuthenticationHashNotFoundDBusException, UserManagementDBusException {
-        DBusUser user = null;
-        try {
-            setAuthentication(authenticationHash);
-            user = DBusUser.fromUser(userService.getUser(username));
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } catch (UserNotFoundException e) {
-            if (e.getUserName() != null) {
-                throw new UserNotFoundDBusException(e.getUserName());
-            } else {
-                throw new UserNotFoundDBusException(e.getId().toString());
-            }
-        } finally {
-            restoreAuthentication();
-        }
-        return user;
     }
 
     public List<String> getAllRoles(String authenticationHash) throws AuthenticationHashNotFoundDBusException {

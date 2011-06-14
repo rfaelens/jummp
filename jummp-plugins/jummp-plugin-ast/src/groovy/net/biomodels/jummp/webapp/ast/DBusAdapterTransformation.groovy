@@ -101,7 +101,7 @@ class DBusAdapterTransformation implements ASTTransformation {
                 }
             }
             // add the delegated method call
-            code.addStatement delegatedMethodCall(serviceName, it, arguments)
+            code.addStatement delegatedMethodCall(serviceName, it, arguments, dbusMethodAnnotations.first().getMember("delegate")?.getValue())
             // wrap everything in the tryCatchFinally Statement and replace the code of the method
             it.setCode tryCatchFinallyStatement(code)
         }
@@ -129,10 +129,16 @@ class DBusAdapterTransformation implements ASTTransformation {
      * @param serviceName The name of the service variable
      * @param method The method for which the code is generated
      * @param arguments The list of arguments
+     * @param delegate Optional name of the method to delegate to
      * @return The code for the delegated method call
      */
-    private Statement delegatedMethodCall(String serviceName, MethodNode method, List arguments) {
-        MethodCallExpression methodCall = new MethodCallExpression(new VariableExpression(serviceName), method.name, arguments.isEmpty() ? ArgumentListExpression.EMPTY_ARGUMENTS : new ArgumentListExpression(arguments))
+    private Statement delegatedMethodCall(String serviceName, MethodNode method, List arguments, String delegate) {
+        String methodName = method.name
+        if (delegate) {
+            methodName = delegate
+        }
+        // if our DBusMethod Annotation has the field delegate use this as method name
+        MethodCallExpression methodCall = new MethodCallExpression(new VariableExpression(serviceName), methodName, arguments.isEmpty() ? ArgumentListExpression.EMPTY_ARGUMENTS : new ArgumentListExpression(arguments))
         if (method.returnType.nameWithoutPackage == "DBusModel") {
             methodCall = new MethodCallExpression(new ClassExpression(method.returnType), "fromModelTransportCommand", new ArgumentListExpression(methodCall))
         }

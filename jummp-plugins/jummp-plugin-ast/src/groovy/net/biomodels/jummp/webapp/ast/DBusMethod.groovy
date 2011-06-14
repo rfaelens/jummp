@@ -18,4 +18,5 @@ import java.lang.annotation.ElementType
 public @interface DBusMethod {
     boolean isAuthenticate() default false
     boolean isAnonymous() default false
+    String delegate() default ""
 }
