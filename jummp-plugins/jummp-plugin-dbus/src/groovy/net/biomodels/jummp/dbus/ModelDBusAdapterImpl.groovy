@@ -9,17 +9,16 @@ import net.biomodels.jummp.dbus.model.DBusPublication;
 import net.biomodels.jummp.dbus.model.DBusRevision;
 import net.biomodels.jummp.dbus.model.ModelDBusException;
 import org.apache.commons.io.FileUtils;
-import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.springframework.security.access.AccessDeniedException;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import net.biomodels.jummp.webapp.ast.DBusAdapter
+import net.biomodels.jummp.webapp.ast.DBusMethod;
 
 /**
  * @short Concrete Implementation of ModelDBusAdapter.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
+@DBusAdapter(interfaceName="ModelDBusAdapter", serviceName="modelService")
 public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDBusAdapter {
     /**
      * Dependency Injection of ModelService
@@ -114,35 +113,17 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public int getModelCount(String authenticationHash) {
-        try {
-            setAuthentication(authenticationHash);
-            return modelService.getModelCount();
-        } finally {
-            restoreAuthentication();
-        }
+
     }
 
+    @DBusMethod(isAuthenticate = true)
     public DBusModel getModel(String authenticationHash, long id) {
-        try {
-            setAuthentication(authenticationHash);
-            return DBusModel.fromModelTransportCommand(modelService.getModel(id));
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public DBusRevision getLatestRevision(String authenticationHash, long id) {
-        try {
-            setAuthentication(authenticationHash);
-            return DBusRevision.fromRevisionTransportCommand(modelService.getLatestRevision(id));
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     public List<String> getAllRevisions(String authenticationHash, long id) {
@@ -159,32 +140,12 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public DBusRevision getRevision(String authenticationHash, long modelId, int revisionNumber) {
-        try {
-            setAuthentication(authenticationHash);
-            return DBusRevision.fromRevisionTransportCommand(modelService.getRevision(modelId, revisionNumber));
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public DBusPublication getPublication(String authenticationHash, long id) {
-        try {
-            setAuthentication(authenticationHash);
-            PublicationTransportCommand publication = modelService.getPublication(id);
-            if (publication == null) {
-                publication = new PublicationTransportCommand();
-            }
-            return DBusPublication.fromPublicationTransportCommand(publication);
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     public DBusModel uploadModel(String authenticationHash, String fileName, DBusModel meta) {
@@ -226,13 +187,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public boolean canAddRevision(String authenticationHash, long id) {
-        try {
-            setAuthentication(authenticationHash);
-            return modelService.canAddRevision(id);
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     public String retrieveModelFileByRevision(String authenticationHash, long id) {
@@ -288,83 +244,32 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public void grantReadAccess(String authenticationHash, long id, DBusUser user) {
-        try {
-            setAuthentication(authenticationHash);
-            modelService.grantWriteAccess(id, user.toUser());
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public void grantWriteAccess(String authenticationHash, long id, DBusUser user) {
-        try {
-            setAuthentication(authenticationHash);
-            modelService.grantWriteAccess(id, user.toUser());
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public void revokeReadAccess(String authenticationHash, long id, DBusUser user) {
-        try {
-            setAuthentication(authenticationHash);
-            modelService.revokeReadAccess(id, user.toUser());
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public void revokeWriteAccess(String authenticationHash, long id, DBusUser user) {
-        try {
-            setAuthentication(authenticationHash);
-            modelService.revokeWriteAccess(id, user.toUser());
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public void transferOwnerShip(String authenticationHash, long id, DBusUser collaborator) {
-        try {
-            setAuthentication(authenticationHash);
-            modelService.transferOwnerShip(id, collaborator.toUser());
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public boolean deleteModel(String authenticationHash, long id) {
-        try {
-            setAuthentication(authenticationHash);
-            return modelService.deleteModel(id);
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public boolean restoreModel(String authenticationHash, long id) {
-        try {
-            setAuthentication(authenticationHash);
-            return modelService.restoreModel(id);
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        }  catch (IllegalArgumentException e) {
-            throw new IllegalArgumentDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     public boolean isRemote() {
