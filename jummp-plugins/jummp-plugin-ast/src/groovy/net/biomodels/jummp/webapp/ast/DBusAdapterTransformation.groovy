@@ -136,6 +136,12 @@ class DBusAdapterTransformation implements ASTTransformation {
         if (method.returnType.nameWithoutPackage == "DBusPublication") {
             methodCall = new MethodCallExpression(new ClassExpression(method.returnType), "fromPublicationTransportCommand", new ArgumentListExpression(methodCall))
         }
+        if (method.returnType.nameWithoutPackage == "DBusRole") {
+            methodCall = new MethodCallExpression(new ClassExpression(method.returnType), "fromRole", new ArgumentListExpression(methodCall))
+        }
+        if (method.returnType.nameWithoutPackage == "DBusUser") {
+            methodCall = new MethodCallExpression(new ClassExpression(method.returnType), "fromUser", new ArgumentListExpression(methodCall))
+        }
         if (method.returnType.name == Void.TYPE.toString()) {
             return new ExpressionStatement(methodCall)
         } else {

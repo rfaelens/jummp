@@ -8,6 +8,14 @@ import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 import net.biomodels.jummp.remote.AbstractCoreAdapter
 import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException
 import org.springframework.security.access.AccessDeniedException
+import net.biomodels.jummp.core.user.RoleNotFoundException
+import net.biomodels.jummp.dbus.user.RoleNotFoundDBusException
+import net.biomodels.jummp.core.user.UserNotFoundException
+import net.biomodels.jummp.dbus.user.UserNotFoundDBusException
+import net.biomodels.jummp.core.user.UserInvalidException
+import net.biomodels.jummp.dbus.user.UserInvalidDBusException
+import org.springframework.security.authentication.BadCredentialsException
+import net.biomodels.jummp.dbus.authentication.BadCredentialsDBusException
 
 /**
  * @short Abstract Base class for all DBusAdapter Implementations.
@@ -57,8 +65,24 @@ public abstract class AbstractDBusAdapter extends AbstractCoreAdapter implements
         if (e instanceof AccessDeniedException) {
             return new AccessDeniedDBusException(e.getMessage())
         }
+        if (e instanceof BadCredentialsException) {
+            return new BadCredentialsDBusException(e.getMessage())
+        }
         if (e instanceof IllegalArgumentException) {
             return new IllegalArgumentDBusException(e.getMessage())
+        }
+        if (e instanceof RoleNotFoundException) {
+            return new RoleNotFoundDBusException(e.getMessage())
+        }
+        if (e instanceof UserInvalidException) {
+            return new UserInvalidDBusException(e.getUserName())
+        }
+        if (e instanceof UserNotFoundException) {
+            if (e.getUserName() != null) {
+                return new UserNotFoundDBusException(e.getUserName());
+            } else {
+                return new UserNotFoundDBusException(e.getId().toString());
+            }
         }
         return e
     }

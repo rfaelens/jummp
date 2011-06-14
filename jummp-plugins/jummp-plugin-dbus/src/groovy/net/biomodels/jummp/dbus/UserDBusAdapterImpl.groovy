@@ -13,12 +13,15 @@ import org.springframework.security.authentication.BadCredentialsException;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.biomodels.jummp.webapp.ast.DBusAdapter
+import net.biomodels.jummp.webapp.ast.DBusMethod
 
 /**
  * @short Concrete implementation of interface UserDBusAdapter.
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
+@DBusAdapter(interfaceName="UserDBusAdapter", serviceName="userService")
 public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBusAdapter {
     /**
      * Dependency Injection of UserService
@@ -30,39 +33,16 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
      */
     public UserDBusAdapterImpl() {}
 
+    @DBusMethod(isAuthenticate = true)
     public void changePassword(String authenticationHash, String oldPassword, String newPassword) throws AuthenticationHashNotFoundDBusException {
-        try {
-            setAuthentication(authenticationHash);
-            userService.changePassword(oldPassword, newPassword);
-        } catch (BadCredentialsException e) {
-            throw new BadCredentialsDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public void editUser(String authenticationHash, DBusUser user) throws AuthenticationHashNotFoundDBusException {
-        try {
-            setAuthentication(authenticationHash);
-            userService.editUser(user.toUser());
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } catch (UserInvalidException e) {
-            throw new UserInvalidDBusException(e.getUserName());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public DBusUser getCurrentUser(String authenticationHash) throws AuthenticationHashNotFoundDBusException {
-        try {
-            setAuthentication(authenticationHash);
-            return DBusUser.fromUser(userService.getCurrentUser());
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     public List<String> getAllUsers(String authenticationHash, int offset, int count) throws AuthenticationHashNotFoundDBusException {
@@ -80,72 +60,20 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public boolean enableUser(String authenticationHash, Long userId, boolean enable) throws AuthenticationHashNotFoundDBusException {
-        try {
-            setAuthentication(authenticationHash);
-            return userService.enableUser(userId, enable);
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } catch (UserNotFoundException e) {
-            if (e.getUserName() != null) {
-                throw new UserNotFoundDBusException(e.getUserName());
-            } else {
-                throw new UserNotFoundDBusException(e.getId().toString());
-            }
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public boolean lockAccount(String authenticationHash, Long userId, boolean lock) throws AuthenticationHashNotFoundDBusException {
-        try {
-            setAuthentication(authenticationHash);
-            return userService.lockAccount(userId, lock);
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } catch (UserNotFoundException e) {
-            if (e.getUserName() != null) {
-                throw new UserNotFoundDBusException(e.getUserName());
-            } else {
-                throw new UserNotFoundDBusException(e.getId().toString());
-            }
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public boolean expireAccount(String authenticationHash, Long userId, boolean expire) throws AuthenticationHashNotFoundDBusException {
-        try {
-            setAuthentication(authenticationHash);
-            return userService.expireAccount(userId, expire);
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } catch (UserNotFoundException e) {
-            if (e.getUserName() != null) {
-                throw new UserNotFoundDBusException(e.getUserName());
-            } else {
-                throw new UserNotFoundDBusException(e.getId().toString());
-            }
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public boolean expirePassword(String authenticationHash, Long userId, boolean expire) throws AuthenticationHashNotFoundDBusException {
-        try {
-            setAuthentication(authenticationHash);
-            return userService.expirePassword(userId, expire);
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } catch (UserNotFoundException e) {
-            if (e.getUserName() != null) {
-                throw new UserNotFoundDBusException(e.getUserName());
-            } else {
-                throw new UserNotFoundDBusException(e.getId().toString());
-            }
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     public Long register(DBusUser user) {
@@ -276,55 +204,20 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
         return returnRoles;
     }
 
+    @DBusMethod(isAuthenticate = true)
     public void addRoleToUser(String authenticationHash, Long userId, Long roleId) throws AuthenticationHashNotFoundDBusException, UserNotFoundDBusException, RoleNotFoundDBusException {
-        try {
-            setAuthentication(authenticationHash);
-            userService.addRoleToUser(userId, roleId);
-        } catch (RoleNotFoundException e) {
-            throw new RoleNotFoundDBusException(e.getMessage());
-        } catch (UserNotFoundException e) {
-            if (e.getUserName() != null) {
-                throw new UserNotFoundDBusException(e.getUserName());
-            } else {
-                throw new UserNotFoundDBusException(e.getId().toString());
-            }
-        } finally {
-            restoreAuthentication();
-        }
     }
 
+    @DBusMethod(isAuthenticate = true)
     public void removeRoleFromUser(String authenticationHash, Long userId, Long roleId) throws AuthenticationHashNotFoundDBusException, UserNotFoundDBusException, RoleNotFoundDBusException {
-        try {
-            setAuthentication(authenticationHash);
-            userService.removeRoleFromUser(userId, roleId);
-        } catch (RoleNotFoundException e) {
-            throw new RoleNotFoundDBusException(e.getMessage());
-        } catch (UserNotFoundException e) {
-            if (e.getUserName() != null) {
-                throw new UserNotFoundDBusException(e.getUserName());
-            } else {
-                throw new UserNotFoundDBusException(e.getId().toString());
-            }
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     public boolean isRemote() {
         return false;
     }
 
+    @DBusMethod(isAuthenticate = true)
     public DBusRole getRoleByAuthority(String authenticationHash, String authority) throws AuthenticationHashNotFoundDBusException, RoleNotFoundDBusException {
-        try {
-            setAuthentication(authenticationHash);
-            return DBusRole.fromRole(userService.getRoleByAuthority(authority));
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedDBusException(e.getMessage());
-        } catch (RoleNotFoundException e) {
-            throw new RoleNotFoundDBusException(e.getMessage());
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     public void resetPassword(String code, String username, String password) throws UserNotFoundDBusException, UserCodeInvalidDBusException, UserCodeExpiredDBusException {
