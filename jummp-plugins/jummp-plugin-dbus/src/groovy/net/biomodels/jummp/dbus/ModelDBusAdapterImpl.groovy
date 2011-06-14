@@ -32,12 +32,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public List<String> getAllModelsByOffsetCountSortOrderAndSortColumn(String authenticationHash, int offset, int count, boolean sortOrder, String sortColumn) {
         try {
             setAuthentication(authenticationHash);
-            List<ModelTransportCommand> models = modelService.getAllModels(offset, count, sortOrder, ModelListSorting.valueOf(ModelListSorting.class, sortColumn));
-            List<String> returnList = new ArrayList<String>();
-            for (ModelTransportCommand model : models) {
-                returnList.add(model.getId().toString());
-            }
-            return returnList;
+            return modelService.getAllModels(offset, count, sortOrder, ModelListSorting.valueOf(ModelListSorting.class, sortColumn)).collect { it.id.toString() }
         } finally {
             restoreAuthentication();
         }
@@ -46,12 +41,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public List<String> getAllModelsByOffsetCountAndSortOrder(String authenticationHash, int offset, int count, boolean sortOrder) {
         try {
             setAuthentication(authenticationHash);
-            List<ModelTransportCommand> models = modelService.getAllModels(offset, count, sortOrder);
-            List<String> returnList = new ArrayList<String>();
-            for (ModelTransportCommand model : models) {
-                returnList.add(model.getId().toString());
-            }
-            return returnList;
+            return modelService.getAllModels(offset, count, sortOrder).collect { it.id.toString() }
         } finally {
             restoreAuthentication();
         }
@@ -60,12 +50,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public List<String> getAllModelsByOffsetCountAndSortColumn(String authenticationHash, int offset, int count, String sortColumn) {
         try {
             setAuthentication(authenticationHash);
-            List<ModelTransportCommand> models = modelService.getAllModels(offset, count, ModelListSorting.valueOf(ModelListSorting.class, sortColumn));
-            List<String> returnList = new ArrayList<String>();
-            for (ModelTransportCommand model : models) {
-                returnList.add(model.getId().toString());
-            }
-            return returnList;
+            return modelService.getAllModels(offset, count, ModelListSorting.valueOf(ModelListSorting.class, sortColumn)).collect { it.id.toString() }
         } finally {
             restoreAuthentication();
         }
@@ -74,12 +59,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public List<String> getAllModelsByOffsetAndCount(String authenticationHash, int offset, int count) {
         try {
             setAuthentication(authenticationHash);
-            List<ModelTransportCommand> models = modelService.getAllModels(offset, count);
-            List<String> returnList = new ArrayList<String>();
-            for (ModelTransportCommand model : models) {
-                returnList.add(model.getId().toString());
-            }
-            return returnList;
+            return modelService.getAllModels(offset, count).collect { it.id.toString() }
         } finally {
             restoreAuthentication();
         }
@@ -88,12 +68,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public List<String> getAllModelsBySortColumn(String authenticationHash, String sortColumn) {
         try {
             setAuthentication(authenticationHash);
-            List<ModelTransportCommand> models = modelService.getAllModels(ModelListSorting.valueOf(ModelListSorting.class, sortColumn));
-            List<String> returnList = new ArrayList<String>();
-            for (ModelTransportCommand model : models) {
-                returnList.add(model.getId().toString());
-            }
-            return returnList;
+            return modelService.getAllModels(ModelListSorting.valueOf(ModelListSorting.class, sortColumn)).collect { it.id.toString() }
         } finally {
             restoreAuthentication();
         }
@@ -102,12 +77,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public List<String> getAllModels(String authenticationHash) {
         try {
             setAuthentication(authenticationHash);
-            List<ModelTransportCommand> models = modelService.getAllModels();
-            List<String> returnList = new ArrayList<String>();
-            for (ModelTransportCommand model : models) {
-                returnList.add(model.getId().toString());
-            }
-            return returnList;
+            return modelService.getAllModels().collect { it.id.toString() }
         } finally {
             restoreAuthentication();
         }
@@ -129,12 +99,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public List<String> getAllRevisions(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
-            List<String> revisionNumbers = new ArrayList<String>();
-            List<RevisionTransportCommand> revisions = modelService.getAllRevisions(id);
-            for (RevisionTransportCommand revision : revisions) {
-                revisionNumbers.add(revision.getRevisionNumber().toString());
-            }
-            return revisionNumbers;
+            return modelService.getAllRevisions(id).collect { it.revisionNumber.toString() }
         } finally {
             restoreAuthentication();
         }
