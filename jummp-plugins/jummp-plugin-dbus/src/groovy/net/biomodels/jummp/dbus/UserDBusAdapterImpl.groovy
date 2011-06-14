@@ -4,15 +4,9 @@ import net.biomodels.jummp.core.IUserService;
 import net.biomodels.jummp.core.user.*;
 import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException;
 import net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException;
-import net.biomodels.jummp.dbus.authentication.BadCredentialsDBusException;
 import net.biomodels.jummp.dbus.user.*;
-import net.biomodels.jummp.plugins.security.Role;
-import net.biomodels.jummp.plugins.security.User;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
 
-import java.util.ArrayList;
-import java.util.List;
 import net.biomodels.jummp.webapp.ast.DBusAdapter
 import net.biomodels.jummp.webapp.ast.DBusMethod
 
@@ -48,11 +42,7 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
     public List<String> getAllUsers(String authenticationHash, int offset, int count) throws AuthenticationHashNotFoundDBusException {
         try {
             setAuthentication(authenticationHash);
-            List<String> userNames = new ArrayList<String>();
-            for (User u : userService.getAllUsers(offset, count)) {
-                userNames.add(u.domainId().toString());
-            }
-            return userNames;
+            return userService.getAllUsers(offset, count).collect { it.domainId().toString() }
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } finally {
@@ -173,35 +163,25 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
     }
 
     public List<String> getAllRoles(String authenticationHash) throws AuthenticationHashNotFoundDBusException {
-        List<String> returnRoles = new ArrayList<String>();
         try {
             setAuthentication(authenticationHash);
-            List<Role> roles = userService.getAllRoles();
-            for (Role role : roles) {
-                returnRoles.add(role.getAuthority());
-            }
+            return userService.getAllRoles().collect { it.authority }
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
-        return returnRoles;
     }
 
     public List<String> getRolesForUser(String authenticationHash, Long userId) throws AuthenticationHashNotFoundDBusException {
-        List<String> returnRoles = new ArrayList<String>();
         try {
             setAuthentication(authenticationHash);
-            List<Role> roles = userService.getRolesForUser(userId);
-            for (Role role : roles) {
-                returnRoles.add(role.getAuthority());
-            }
+            return userService.getRolesForUser(userId).collect { it.authority }
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } finally {
             restoreAuthentication();
         }
-        return returnRoles;
     }
 
     @DBusMethod(isAuthenticate = true)
