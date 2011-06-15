@@ -58,10 +58,6 @@ public class ApplicationDBusAdapterImpl extends AbstractDBusAdapter implements A
         return authenticationHashService.isAuthenticated(hash);
     }
 
-    public boolean isRemote() {
-        return false;
-    }
-
     /**
      * Setter for Dependency Injection of AuthenticationManager
      * @param authenticationManager The AuthenticationManager

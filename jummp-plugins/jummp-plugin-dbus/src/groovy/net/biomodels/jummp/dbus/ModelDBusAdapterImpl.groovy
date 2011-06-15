@@ -217,10 +217,6 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public boolean restoreModel(String authenticationHash, long id) {
     }
 
-    public boolean isRemote() {
-        return false;
-    }
-
     public void setModelService(IModelService modelService) {
         this.modelService = modelService;
     }

@@ -121,4 +121,12 @@ public abstract class AbstractDBusAdapter extends AbstractCoreAdapter implements
             e.printStackTrace()
         }
     }
+
+    /**
+     * Providing a method of DBusInterface.
+     * @return @c false
+     */
+    public boolean isRemote() {
+        return false
+    }
 }

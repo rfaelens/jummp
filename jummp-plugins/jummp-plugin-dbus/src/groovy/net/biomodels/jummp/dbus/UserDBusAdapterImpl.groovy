@@ -96,10 +96,6 @@ public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBus
     public void removeRoleFromUser(String authenticationHash, Long userId, Long roleId) throws AuthenticationHashNotFoundDBusException, UserNotFoundDBusException, RoleNotFoundDBusException {
     }
 
-    public boolean isRemote() {
-        return false;
-    }
-
     @DBusMethod(isAuthenticate = true)
     public DBusRole getRoleByAuthority(String authenticationHash, String authority) throws AuthenticationHashNotFoundDBusException, RoleNotFoundDBusException {
     }
