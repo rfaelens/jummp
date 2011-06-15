@@ -22,6 +22,9 @@ import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.stmt.BlockStatement
 import org.codehaus.groovy.ast.expr.ClassExpression
 import org.codehaus.groovy.ast.stmt.ThrowStatement
+import org.codehaus.groovy.ast.expr.ClosureExpression
+import org.codehaus.groovy.ast.expr.PropertyExpression
+import org.codehaus.groovy.ast.VariableScope
 
 /**
  * @short AST Transformation for Core DBus Adapter.
@@ -101,7 +104,7 @@ class DBusAdapterTransformation implements ASTTransformation {
                 }
             }
             // add the delegated method call
-            code.addStatement delegatedMethodCall(serviceName, it, arguments, dbusMethodAnnotations.first().getMember("delegate")?.getValue())
+            code.addStatement delegatedMethodCall(serviceName, it, arguments, dbusMethodAnnotations.first().getMember("delegate")?.getValue(), dbusMethodAnnotations.first().getMember("collect")?.getValue())
             // wrap everything in the tryCatchFinally Statement and replace the code of the method
             it.setCode tryCatchFinallyStatement(code)
         }
@@ -125,14 +128,16 @@ class DBusAdapterTransformation implements ASTTransformation {
      * @li DBusPublication
      *
      * Additionally it also takes care of not returning anything if the method's return type is void.
+     * If the return type is a list, the method can generate to collect on one of the return values.
      *
      * @param serviceName The name of the service variable
      * @param method The method for which the code is generated
      * @param arguments The list of arguments
      * @param delegate Optional name of the method to delegate to
+     * @param collect Optional name of the field to collect list values on
      * @return The code for the delegated method call
      */
-    private Statement delegatedMethodCall(String serviceName, MethodNode method, List arguments, String delegate) {
+    private Statement delegatedMethodCall(String serviceName, MethodNode method, List arguments, String delegate, String collect) {
         String methodName = method.name
         if (delegate) {
             methodName = delegate
@@ -153,6 +158,9 @@ class DBusAdapterTransformation implements ASTTransformation {
         }
         if (method.returnType.nameWithoutPackage == "DBusUser") {
             methodCall = new MethodCallExpression(new ClassExpression(method.returnType), "fromUser", new ArgumentListExpression(methodCall))
+        }
+        if (collect) {
+            methodCall = generateCollectList(methodCall, collect)
         }
         if (method.returnType.name == Void.TYPE.toString()) {
             return new ExpressionStatement(methodCall)
@@ -184,5 +192,25 @@ class DBusAdapterTransformation implements ASTTransformation {
         catchStatement.setCode(new ThrowStatement(new MethodCallExpression(new VariableExpression("this"), "exceptionMapping", new ArgumentListExpression(new VariableExpression("e")))))
         tc.addCatch(catchStatement)
         return tc
+    }
+
+    /**
+     * Generates the following code:
+     * @code
+     * original.collect { it.${field} }
+     * @endcode
+     *
+     * The generated code is without dynamic field resolving.
+     *
+     * @param original The original method call to take as the base for the collect.
+     * @param field The name of the field to collect
+     * @return The generated MethodCallExpression
+     */
+    private MethodCallExpression generateCollectList(MethodCallExpression original, String field) {
+        BlockStatement code = new BlockStatement()
+        code.addStatement(new ExpressionStatement(new MethodCallExpression(new PropertyExpression(new VariableExpression("it"), field), "toString", ArgumentListExpression.EMPTY_ARGUMENTS)))
+        ClosureExpression closure = new ClosureExpression(Parameter.EMPTY_ARRAY, code)
+        closure.setVariableScope(new VariableScope())
+        return new MethodCallExpression(original, "collect", new ArgumentListExpression(closure))
     }
 }

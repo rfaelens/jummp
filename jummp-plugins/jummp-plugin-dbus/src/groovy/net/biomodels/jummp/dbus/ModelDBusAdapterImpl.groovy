@@ -38,13 +38,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         }
     }
 
+    @DBusMethod(isAuthenticate = true, collect = "id", delegate = "getAllModels")
     public List<String> getAllModelsByOffsetCountAndSortOrder(String authenticationHash, int offset, int count, boolean sortOrder) {
-        try {
-            setAuthentication(authenticationHash);
-            return modelService.getAllModels(offset, count, sortOrder).collect { it.id.toString() }
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     public List<String> getAllModelsByOffsetCountAndSortColumn(String authenticationHash, int offset, int count, String sortColumn) {
@@ -56,13 +51,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         }
     }
 
+    @DBusMethod(isAuthenticate = true, collect = "id", delegate = "getAllModels")
     public List<String> getAllModelsByOffsetAndCount(String authenticationHash, int offset, int count) {
-        try {
-            setAuthentication(authenticationHash);
-            return modelService.getAllModels(offset, count).collect { it.id.toString() }
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     public List<String> getAllModelsBySortColumn(String authenticationHash, String sortColumn) {
@@ -74,13 +64,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         }
     }
 
+    @DBusMethod(isAuthenticate = true, collect = "id")
     public List<String> getAllModels(String authenticationHash) {
-        try {
-            setAuthentication(authenticationHash);
-            return modelService.getAllModels().collect { it.id.toString() }
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     @DBusMethod(isAuthenticate = true)
@@ -96,13 +81,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public DBusRevision getLatestRevision(String authenticationHash, long id) {
     }
 
+    @DBusMethod(isAuthenticate = true, collect = "revisionNumber")
     public List<String> getAllRevisions(String authenticationHash, long id) {
-        try {
-            setAuthentication(authenticationHash);
-            return modelService.getAllRevisions(id).collect { it.revisionNumber.toString() }
-        } finally {
-            restoreAuthentication();
-        }
     }
 
     @DBusMethod(isAuthenticate = true)

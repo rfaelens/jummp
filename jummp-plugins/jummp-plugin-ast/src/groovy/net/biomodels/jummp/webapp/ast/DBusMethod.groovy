@@ -19,4 +19,5 @@ public @interface DBusMethod {
     boolean isAuthenticate() default false
     boolean isAnonymous() default false
     String delegate() default ""
+    String collect() default ""
 }
