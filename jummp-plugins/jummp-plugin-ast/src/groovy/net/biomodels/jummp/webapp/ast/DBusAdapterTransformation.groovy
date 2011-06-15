@@ -25,6 +25,8 @@ import org.codehaus.groovy.ast.stmt.ThrowStatement
 import org.codehaus.groovy.ast.expr.ClosureExpression
 import org.codehaus.groovy.ast.expr.PropertyExpression
 import org.codehaus.groovy.ast.VariableScope
+import org.codehaus.groovy.ast.expr.CastExpression
+import grails.converters.JSON
 
 /**
  * @short AST Transformation for Core DBus Adapter.
@@ -119,7 +121,7 @@ class DBusAdapterTransformation implements ASTTransformation {
                 }
             }
             // add the delegated method call
-            code.addStatement delegatedMethodCall(serviceName, it, arguments, dbusMethodAnnotations.first().getMember("delegate")?.getValue(), dbusMethodAnnotations.first().getMember("collect")?.getValue())
+            code.addStatement delegatedMethodCall(serviceName, it, arguments, dbusMethodAnnotations.first().getMember("delegate")?.getValue(), dbusMethodAnnotations.first().getMember("collect")?.getValue(), dbusMethodAnnotations.first().getMember("json")?.getValue())
             // wrap everything in the tryCatchFinally Statement and replace the code of the method
             it.setCode tryCatchFinallyStatement(code)
         }
@@ -150,9 +152,10 @@ class DBusAdapterTransformation implements ASTTransformation {
      * @param arguments The list of arguments
      * @param delegate Optional name of the method to delegate to
      * @param collect Optional name of the field to collect list values on
+     * @param json Whether to generate an "as JSON"
      * @return The code for the delegated method call
      */
-    private Statement delegatedMethodCall(String serviceName, MethodNode method, List arguments, String delegate, String collect) {
+    private Statement delegatedMethodCall(String serviceName, MethodNode method, List arguments, String delegate, String collect, Boolean json) {
         String methodName = method.name
         if (delegate) {
             methodName = delegate
@@ -180,7 +183,11 @@ class DBusAdapterTransformation implements ASTTransformation {
         if (method.returnType.name == Void.TYPE.toString()) {
             return new ExpressionStatement(methodCall)
         } else {
-            return new ReturnStatement(methodCall)
+            if (json) {
+                return new ReturnStatement(CastExpression.asExpression(new ClassNode(JSON), methodCall))
+            } else {
+                return new ReturnStatement(methodCall)
+            }
         }
     }
 

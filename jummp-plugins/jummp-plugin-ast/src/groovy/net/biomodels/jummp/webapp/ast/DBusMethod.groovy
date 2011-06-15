@@ -21,4 +21,5 @@ public @interface DBusMethod {
     String delegate() default ""
     String collect() default ""
     int[] getRevision()
+    boolean json() default false
 }
