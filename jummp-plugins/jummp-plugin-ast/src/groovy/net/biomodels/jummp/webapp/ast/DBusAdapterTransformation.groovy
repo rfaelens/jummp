@@ -90,9 +90,24 @@ class DBusAdapterTransformation implements ASTTransformation {
             }
             // generate the list of arguments for the delegated method call
             List arguments = []
+            // if there is a getRevision member in the annotation we use it to generate a getRevision call to modelDelegateService
+            // the list contains the indices to the parameters which go into the getRevision call
+            List revisionParameters = dbusMethodAnnotations.first().getMember("getRevision")?.getExpressions()
+            if (revisionParameters) {
+                List revisionArguments = []
+                revisionParameters.each { id ->
+                    revisionArguments << new VariableExpression(it.parameters[id.getValue()].name)
+                }
+                arguments << new MethodCallExpression(new VariableExpression("modelDelegateService"), "getRevision", new ArgumentListExpression(revisionArguments))
+            }
+            // normal parameter wrapping
             it.parameters.eachWithIndex { parameter, i ->
                 // skip the first argument, if it is the authentication hash
                 if (authenticate && i == 0) {
+                    return
+                }
+                if (revisionParameters && revisionParameters.find { it.getValue() == i }) {
+                    // skip parameters which are already used to get the revision
                     return
                 }
                 if (parameter.type.nameWithoutPackage == "DBusUser") {

@@ -1,29 +1,41 @@
 package net.biomodels.jummp.dbus;
 
+import net.biomodels.jummp.webapp.ast.DBusAdapter
+import net.biomodels.jummp.webapp.ast.DBusMethod
+
 /**
  * @short Concrete Implementation of SbmlDBusAdapter.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
+@DBusAdapter(interfaceName="SbmlDBusAdapter", serviceName="sbmlService")
 public class SbmlDBusAdapterImpl extends AbstractDBusAdapter implements SbmlDBusAdapter {
     /**
      * Dependency Injection of SbmlDBusAdapterHelper
      */
     private SbmlDBusAdapterHelper helper;
+    /**
+     * Dependency Injection of sbmlService
+     */
+    def sbmlService
+    /**
+     * Dependency Injection of modelDelegateService
+     */
+    def modelDelegateService
 
+    @DBusMethod(isAuthenticate = true, getRevision = [1, 2])
     public long getVersion(String authenticationHash, long modelId, int revisionNumber) {
-        return helper.getAsLong("Version", authenticationHash, modelId, revisionNumber);
     }
 
+    @DBusMethod(isAuthenticate = true, getRevision = [1, 2])
     public long getLevel(String authenticationHash, long modelId, int revisionNumber) {
-        return helper.getAsLong("Level", authenticationHash, modelId, revisionNumber);
     }
 
+    @DBusMethod(isAuthenticate = true, getRevision = [1, 2])
     public String getNotes(String authenticationHash, long modelId, int revisionNumber) {
-        return helper.getAsString("Notes", authenticationHash, modelId, revisionNumber);
     }
 
+    @DBusMethod(isAuthenticate = true, getRevision = [1, 2])
     public String getMetaId(String authenticationHash, long modelId, int revisionNumber) {
-        return helper.getAsString("MetaId", authenticationHash, modelId, revisionNumber);
     }
 
     public String getAnnotations(String authenticationHash, long modelId, int revisionNumber) {

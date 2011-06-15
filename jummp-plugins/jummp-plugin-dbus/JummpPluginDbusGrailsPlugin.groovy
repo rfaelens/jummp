@@ -66,6 +66,8 @@ Brief description of the plugin.
                 dbusManager = dbusManager
                 authenticationHashService = ref("authenticationHashService")
                 helper = sbmlDBusAdapterHelper
+                sbmlService = ref("sbmlService")
+                modelDelegateService = ref("modelDelegateService")
                 objectName = "/SBML"
             }
         }
