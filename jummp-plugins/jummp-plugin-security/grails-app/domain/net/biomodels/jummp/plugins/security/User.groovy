@@ -60,17 +60,4 @@ class User implements Serializable {
     User sanitizedUser() {
         return new User(id: this.id, username: this.username, userRealName: this.userRealName, email: this.email)
     }
-
-    /**
-     * Java and Grails compatible getter for the Id property.
-     *
-     * Java compilation fails when trying to access the getId() method.
-     * All Grails methods fail when implementing the getId() method ourselves. If we give this method
-     * the proper naming with getDomainId() Grails thinks there is a property "domainId" and fails again.
-     * Because of that a non-standard getter.
-     * @return The id property
-     */
-    public Long domainId() {
-        return this.getId()
-    }
 }
