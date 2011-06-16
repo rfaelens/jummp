@@ -29,6 +29,7 @@ import org.sbml.jsbml.FunctionDefinition
 import org.sbml.jsbml.SBO
 import org.sbml.jsbml.Compartment
 import org.sbml.jsbml.Species
+import org.sbml.jsbml.SBase
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -200,7 +201,7 @@ class SbmlService implements FileFormatService, ISbmlService {
         eventMap.put("annotation", convertCVTerms(event.annotation))
         eventMap.put("notes", event.notesString)
         eventMap.put("sboTerm", event.getSBOTermID())
-        eventMap.put("sboName", SBO.getTerm(event.getSBOTerm()).name)
+        eventMap.put("sboName", sboName(event))
         eventMap.put("trigger", event.trigger ? event.trigger.mathMLString : "")
         eventMap.put("delay", event.delay ? event.delay.mathMLString : "")
         return eventMap
@@ -248,7 +249,7 @@ class SbmlService implements FileFormatService, ISbmlService {
         functionMap.put("annotation", convertCVTerms(function.annotation))
         functionMap.put("notes", function.notesString)
         functionMap.put("sboTerm", function.getSBOTermID())
-        functionMap.put("sboName", SBO.getTerm(function.getSBOTerm()).name)
+        functionMap.put("sboName", sboName(function))
         return functionMap
     }
 
@@ -337,7 +338,7 @@ class SbmlService implements FileFormatService, ISbmlService {
                 constant: (parameter instanceof Parameter) ? parameter.constant : true,
                 value: parameter.isSetValue() ? parameter.value : null,
                 sboTerm: parameter.getSBOTermID(),
-                sboName: SBO.getTerm(parameter.getSBOTerm()).name,
+                sboName: sboName(parameter),
                 unit: parameter.units
         ]
     }
@@ -377,13 +378,14 @@ class SbmlService implements FileFormatService, ISbmlService {
     }
 
     private Map reactionToMap(Reaction reaction) {
+
         return [
                 id: reaction.id,
                 metaId: reaction.metaId,
                 name: reaction.name,
                 reversible: reaction.reversible,
                 sboTerm: reaction.getSBOTermID(),
-                sboName: SBO.getTerm(reaction.getSBOTerm()).name,
+                sboName: sboName(reaction),
                 reactants: convertSpeciesReferences(reaction.listOfReactants),
                 products: convertSpeciesReferences(reaction.listOfProducts),
                 modifiers: convertSpeciesReferences(reaction.listOfModifiers)
@@ -456,7 +458,7 @@ class SbmlService implements FileFormatService, ISbmlService {
                 spatialDimensions: compartment.spatialDimensions,
                 units: compartment.units,
                 sboTerm: compartment.getSBOTermID(),
-                sboName: SBO.getTerm(compartment.getSBOTerm()).name,
+                sboName: sboName(compartment),
                 allSpecies: getAllCompartmentSpecies(compartment)
         ]
     }
@@ -483,7 +485,20 @@ class SbmlService implements FileFormatService, ISbmlService {
                 initialConcentration: initialConcentration,
                 substanceUnits: species.substanceUnits,
                 sboTerm: species.getSBOTermID(),
-                sboName: SBO.getTerm(species.getSBOTerm()).name,
+                sboName: sboName(species),
         ]
+    }
+
+    /**
+     * Retrieves the name of the SBOTerm in the given @p sbase.
+     * @param sbase The sbase from which to extract the SBO Term name.
+     * @return The name or an empty String if there is no name
+     */
+    private String sboName(SBase sbase) {
+        try {
+            return SBO.getTerm(sbase.getSBOTerm()).name
+        } catch (NoSuchElementException e) {
+            return ""
+        }
     }
 }
