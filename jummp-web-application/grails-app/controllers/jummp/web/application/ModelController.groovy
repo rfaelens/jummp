@@ -64,7 +64,7 @@ class ModelController {
     }
 
     def revisions = {
-        [revisions: remoteModelService.getAllRevisions(params.id as Long)]
+        [revisions: remoteModelService.getAllRevisions(params.id as Long).reverse()]
     }
 
     /**
