@@ -125,6 +125,19 @@ function loadModelTabCallback(data, tabIndex) {
                 // add tooltips to the rows
                 $("#model-entity tbody tr").cluetip({clickThrough: false, sticky: true, mouseOutClose: true});
                 break;
+            case "modelTabs-revisions":
+                $("#model-revisions table tr td.revisionNumber a").click(function() {
+                    var revisionNumber = $(this).text();
+                    $("#modelTabs ul.ui-tabs-nav li a").each(function(index) {
+                        var url = $(this).data('load.tabs');
+                        if (url.search(/\?revision=\d+/) != -1) {
+                            url = url.replace(/\?revision=\d+/, "?revision=" + revisionNumber);
+                            $("#modelTabs").tabs("url", index, url);
+                        }
+                    });
+                    $("#modelTabs").tabs("select", $("#modelTabs-model").attr("href"));
+                });
+                break;
             case "modelTabs-addRevision":
                 // add revision tab
                 $("#revision-upload-form div.ui-dialog-buttonpane input").button();

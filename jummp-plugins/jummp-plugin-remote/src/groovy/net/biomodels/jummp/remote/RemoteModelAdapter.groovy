@@ -78,6 +78,13 @@ public interface RemoteModelAdapter {
     **/
     public RevisionTransportCommand getLatestRevision(long modelId)
     /**
+     * Queries the model for the revision identified with the specified revisionNumber.
+     * @param modelId The Model fro which the revision should be retrieved.
+     * @param revisionNumber The revision number in context to the model
+     * @return The Revision
+     */
+    public RevisionTransportCommand getRevision(long modelId, int revisionNumber)
+    /**
     * Queries the model for all revisions the user has read access to.
     * The returned list is ordered by revision number of the model.
     * @param modelId The id of the Model for which all revisions should be retrieved

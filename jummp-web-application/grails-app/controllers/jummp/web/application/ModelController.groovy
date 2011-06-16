@@ -57,10 +57,14 @@ class ModelController {
             render(template: "/templates/page", model: [link: g.createLink(action: "show", id: params.id), callback: "loadModelTabCallback"])
             return
         }
-        RevisionTransportCommand rev = remoteModelService.getLatestRevision(params.id as Long)
+        RevisionTransportCommand rev = remoteModelService.getRevision(params.id as Long, params.revision as Integer)
 
         // TODO: find a better solution to include SBML information. The web application should not be SBML specific
         [publication: remoteModelService.getPublication(params.id as Long), revision: rev, notes: remoteSbmlService.getNotes(params.id as Long, rev.revisionNumber), annotations: remoteSbmlService.getAnnotations(params.id as Long, rev.revisionNumber)]
+    }
+
+    def revisions = {
+        [revisions: remoteModelService.getAllRevisions(params.id as Long)]
     }
 
     /**

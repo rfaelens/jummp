@@ -68,6 +68,13 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteDBusAdapter implements Re
         return revision
     }
 
+    @Profiled(tag="RemoteModelAdapterDBusImpl.getRevision")
+    RevisionTransportCommand getRevision(long modelId, int revisionNumber) {
+        RevisionTransportCommand revision = modelDBusAdapter.getRevision(authenticationToken(), modelId, revisionNumber)
+        revision.model = modelDBusAdapter.getModel(authenticationToken(), modelId)
+        return revision
+    }
+
     @Profiled(tag="RemoteModelAdapterDBusImpl.getAllRevisions")
     List<RevisionTransportCommand> getAllRevisions(long modelId) {
         List<RevisionTransportCommand> revisions = []
