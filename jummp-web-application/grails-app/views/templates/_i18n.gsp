@@ -39,6 +39,9 @@ var i18n = {
             upload: {
                 success: "${g.message(code: 'model.revision.upload.success', args: ['_NAME_'])}"
             }
+        },
+        view: {
+            header: "${g.message(code: 'model.view.header', args: ['_ID_', '_NAME_', '_REVISION_'])}"
         }
     },
     publication: {

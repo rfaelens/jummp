@@ -91,6 +91,8 @@ function loadModelListCallback() {
  * @param tabIndex Optional selector for tab index to switch to after the tab view has been loaded
  */
 function loadModelTabCallback(data, tabIndex) {
+    // set the header
+    updateModelHeader($("#model-header span:eq(0)").text(), $("#model-header span:eq(1)").text(), $("#model-header span:eq(2)").text());
     $("#modelTabs").tabs({disabled: [1, 5],
         ajaxOptions: {
             error: function(jqXHR) {
@@ -117,6 +119,7 @@ function loadModelTabCallback(data, tabIndex) {
             case "modelTabs-revisions":
                 $("#model-revisions table tr td.revisionNumber a").click(function() {
                     changeModelTabRevision($(this).text());
+                    updateModelHeader(null, null, $(this).text());
                     $("#modelTabs").tabs("select", $("#modelTabs-model").attr("href"));
                 });
                 break;
@@ -151,6 +154,32 @@ function changeModelTabRevision(revisionNumber) {
 }
 
 /**
+ * Updates the Model header with new modelId, modelName and revisionNumber.
+ * In case one of the parameters is @c null a cached information is used
+ * @param modelId The model Id
+ * @param modelName The name of the model
+ * @param revisionNumber The revision number
+ */
+function updateModelHeader(modelId, modelName, revisionNumber) {
+    if (!modelId) {
+        modelId = $("#model-header").data("id");
+    }
+    if (!modelName) {
+        modelName = $("#model-header").data("name");
+    }
+    if (!revisionNumber) {
+        revisionNumber = $("#model-header").data("revision");
+    }
+    var text = i18n.model.view.header.replace(/_ID_/, modelId);
+    text = text.replace(/_NAME_/, modelName);
+    text = text.replace(/_REVISION_/, revisionNumber);
+    $("#model-header").html(text);
+    $("#model-header").data("id", modelId);
+    $("#model-header").data("name", modelName);
+    $("#model-header").data("revision", revisionNumber);
+}
+
+/**
  * Callback for successful form submission to /model/saveNewRevision/
  * @param data JSON object returned by server
  */
@@ -162,6 +191,7 @@ function uploadRevisionCallback(data) {
     } else if (data.success) {
         showInfoMessage(i18n.model.revision.upload.success.replace(/_NAME_/, data.revision.model.name), 20000);
         changeModelTabRevision(data.revision.revisionNumber);
+        updateModelHeader(data.revision.model.id, data.revision.model.name, data.revision.revisionNumber);
         $("#modelTabs").tabs("select", $("#modelTabs-model").attr("href"));
     }
 }
