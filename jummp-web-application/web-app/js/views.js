@@ -162,7 +162,7 @@ function uploadRevisionCallback(data) {
     } else if (data.success) {
         showInfoMessage(i18n.model.revision.upload.success.replace(/_NAME_/, data.revision.model.name), 20000);
         changeModelTabRevision(data.revision.revisionNumber);
-        $("#modelTabs").tabs("select", 0);
+        $("#modelTabs").tabs("select", $("#modelTabs-model").attr("href"));
     }
 }
 
