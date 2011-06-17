@@ -52,7 +52,7 @@ Brief description of the plugin.
             }
             modelDBusAdapter(ModelDBusAdapterImpl) {
                 dbusManager = dbusManager
-                modelService = ref("modelDelegateService")
+                modelDelegateService = ref("modelDelegateService")
                 authenticationHashService = ref("authenticationHashService")
                 objectName = "/Model"
             }

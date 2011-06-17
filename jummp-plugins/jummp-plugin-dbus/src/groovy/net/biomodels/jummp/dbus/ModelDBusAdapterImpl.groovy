@@ -18,12 +18,12 @@ import net.biomodels.jummp.webapp.ast.DBusMethod;
  * @short Concrete Implementation of ModelDBusAdapter.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-@DBusAdapter(interfaceName="ModelDBusAdapter", serviceName="modelService")
+@DBusAdapter(interfaceName="ModelDBusAdapter", serviceName="modelDelegateService")
 public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDBusAdapter {
     /**
      * Dependency Injection of ModelService
      */
-    private IModelService modelService;
+    private IModelService modelDelegateService;
 
     /**
      * Empty default constructor.
@@ -32,7 +32,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public List<String> getAllModelsByOffsetCountSortOrderAndSortColumn(String authenticationHash, int offset, int count, boolean sortOrder, String sortColumn) {
         try {
             setAuthentication(authenticationHash);
-            return modelService.getAllModels(offset, count, sortOrder, ModelListSorting.valueOf(ModelListSorting.class, sortColumn)).collect { it.id.toString() }
+            return modelDelegateService.getAllModels(offset, count, sortOrder, ModelListSorting.valueOf(ModelListSorting.class, sortColumn)).collect { it.id.toString() }
         } finally {
             restoreAuthentication();
         }
@@ -45,7 +45,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public List<String> getAllModelsByOffsetCountAndSortColumn(String authenticationHash, int offset, int count, String sortColumn) {
         try {
             setAuthentication(authenticationHash);
-            return modelService.getAllModels(offset, count, ModelListSorting.valueOf(ModelListSorting.class, sortColumn)).collect { it.id.toString() }
+            return modelDelegateService.getAllModels(offset, count, ModelListSorting.valueOf(ModelListSorting.class, sortColumn)).collect { it.id.toString() }
         } finally {
             restoreAuthentication();
         }
@@ -58,7 +58,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public List<String> getAllModelsBySortColumn(String authenticationHash, String sortColumn) {
         try {
             setAuthentication(authenticationHash);
-            return modelService.getAllModels(ModelListSorting.valueOf(ModelListSorting.class, sortColumn)).collect { it.id.toString() }
+            return modelDelegateService.getAllModels(ModelListSorting.valueOf(ModelListSorting.class, sortColumn)).collect { it.id.toString() }
         } finally {
             restoreAuthentication();
         }
@@ -97,7 +97,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         try {
             setAuthentication(authenticationHash);
             File file = new File(fileName);
-            DBusModel model = DBusModel.fromModelTransportCommand(modelService.uploadModel(file, meta));
+            DBusModel model = DBusModel.fromModelTransportCommand(modelDelegateService.uploadModel(file, meta));
             FileUtils.deleteQuietly(file);
             return model;
         } catch (AccessDeniedException e) {
@@ -120,7 +120,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             File file = new File(fileName);
             ModelFormatTransportCommand modelFormat = new ModelFormatTransportCommand();
             modelFormat.setIdentifier(format);
-            DBusRevision revision = DBusRevision.fromRevisionTransportCommand(modelService.addRevision(modelId, file, modelFormat, comment));
+            DBusRevision revision = DBusRevision.fromRevisionTransportCommand(modelDelegateService.addRevision(modelId, file, modelFormat, comment));
             FileUtils.deleteQuietly(file);
             return revision;
         } catch (AccessDeniedException e) {
@@ -141,7 +141,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             setAuthentication(authenticationHash);
             RevisionTransportCommand revision = new RevisionTransportCommand();
             revision.setId(id);
-            byte[] bytes = modelService.retrieveModelFile(revision);
+            byte[] bytes = modelDelegateService.retrieveModelFile(revision);
             File file = File.createTempFile("jummp", "model");
             FileOutputStream out = new FileOutputStream(file);
             try {
@@ -167,7 +167,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public String retrieveModelFileByModel(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
-            byte[] bytes = modelService.retrieveModelFile(id);
+            byte[] bytes = modelDelegateService.retrieveModelFile(id);
             File file = File.createTempFile("jummp", "model");
             FileOutputStream out = new FileOutputStream(file);
             try {
@@ -217,7 +217,7 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public boolean restoreModel(String authenticationHash, long id) {
     }
 
-    public void setModelService(IModelService modelService) {
-        this.modelService = modelService;
+    public void setModelDelegateService(IModelService modelDelegateService) {
+        this.modelDelegateService = modelDelegateService;
     }
 }
