@@ -116,14 +116,7 @@ function loadModelTabCallback(data, tabIndex) {
                 break;
             case "modelTabs-revisions":
                 $("#model-revisions table tr td.revisionNumber a").click(function() {
-                    var revisionNumber = $(this).text();
-                    $("#modelTabs ul.ui-tabs-nav li a").each(function(index) {
-                        var url = $(this).data('load.tabs');
-                        if (url.search(/\?revision=\d+/) != -1) {
-                            url = url.replace(/\?revision=\d+/, "?revision=" + revisionNumber);
-                            $("#modelTabs").tabs("url", index, url);
-                        }
-                    });
+                    changeModelTabRevision($(this).text());
                     $("#modelTabs").tabs("select", $("#modelTabs-model").attr("href"));
                 });
                 break;
@@ -144,6 +137,20 @@ function loadModelTabCallback(data, tabIndex) {
 }
 
 /**
+ * Updates the Revision Number in all ModelTabs links
+ * @param revisionNumber The revision number to switch to
+ */
+function changeModelTabRevision(revisionNumber) {
+    $("#modelTabs ul.ui-tabs-nav li a").each(function(index) {
+        var url = $(this).data('load.tabs');
+        if (url.search(/\?revision=\d+/) != -1) {
+            url = url.replace(/\?revision=\d+/, "?revision=" + revisionNumber);
+            $("#modelTabs").tabs("url", index, url);
+        }
+    });
+}
+
+/**
  * Callback for successful form submission to /model/saveNewRevision/
  * @param data JSON object returned by server
  */
@@ -154,6 +161,7 @@ function uploadRevisionCallback(data) {
         setErrorState("#revision-upload-comment", data.comment);
     } else if (data.success) {
         showInfoMessage(i18n.model.revision.upload.success.replace(/_NAME_/, data.revision.model.name), 20000);
+        changeModelTabRevision(data.revision.revisionNumber);
         $("#modelTabs").tabs("select", 0);
     }
 }
