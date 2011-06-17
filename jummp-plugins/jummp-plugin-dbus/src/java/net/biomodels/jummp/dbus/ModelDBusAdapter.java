@@ -54,4 +54,5 @@ public interface ModelDBusAdapter extends DBusInterface {
     public void transferOwnerShip(String authenticationHash, long id, DBusUser collaborator);
     public boolean deleteModel(String authenticationHash, long id);
     public boolean restoreModel(String authenticationHash, long id);
+    public boolean deleteRevision(String authenticationHash, long modelId, int revisionNumber);
 }

@@ -154,4 +154,8 @@ class ModelDelegateService implements IModelService {
     boolean restoreModel(long modelId) {
         return modelService.restoreModel(Model.get(modelId))
     }
+
+    boolean deleteRevision(RevisionTransportCommand revision) {
+        return modelService.deleteRevision(Revision.get(revision.id))
+    }
 }

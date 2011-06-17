@@ -280,4 +280,10 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         return modelDelegateService.restoreModel(message[1])
     }
 
+    @Queue
+    @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Integer])
+    def deleteRevision(def message) {
+        return modelDelegateService.deleteRevision(modelDelegateService.getRevision(message[1], message[2]))
+    }
+
 }

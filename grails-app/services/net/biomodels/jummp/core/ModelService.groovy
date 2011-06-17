@@ -730,4 +730,35 @@ class ModelService {
             return false
         }
     }
+
+    /**
+     * Deletes the @p revision of the model if it is the latest Revision of the model.
+     *
+     * This is no real deletion, but only a flag which is set on the Revision. Due to
+     * technical constraints of the underlying version control system a real deletion
+     * is not possible.
+     * @param revision The Revision to delete
+     * @return @c true if revision was deleted, @c false otherwise
+     */
+    @PreAuthorize("hasPermission(#revision, delete) or hasRole('ROLE_ADMIN')")
+    @PostLogging(LoggingEventType.DELETION)
+    @Profiled(tag="modelService.deleteRevision")
+    public boolean deleteRevision(Revision revision) {
+        if (!revision) {
+            throw new IllegalArgumentException("Revision may not be null")
+        }
+        if (revision.deleted) {
+            // revision is already deleted
+            return false
+        }
+        // check if the revision is the latest non-deleted method
+        if (revision.id != revision.model.revisions.findAll { !it.deleted }.sort { it.revisionNumber }.last().id) {
+            // TODO: maybe better throw an exception
+            return false
+        }
+        // TODO: delete the model if the revision is the first revision of the model
+        revision.deleted = true
+        revision.save(flush: true)
+        return true
+    }
 }

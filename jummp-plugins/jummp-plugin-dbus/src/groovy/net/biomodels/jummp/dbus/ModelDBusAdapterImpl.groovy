@@ -217,6 +217,10 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public boolean restoreModel(String authenticationHash, long id) {
     }
 
+    @DBusMethod(isAuthenticate = true, getRevision = [1, 2])
+    public boolean deleteRevision(String authenticationHash, long modelId, int revisionNumber) {
+    }
+
     public void setModelDelegateService(IModelService modelDelegateService) {
         this.modelDelegateService = modelDelegateService;
     }

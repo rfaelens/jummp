@@ -250,4 +250,5 @@ public interface IModelService {
     * @todo might belong in an administration service?
     **/
     public boolean restoreModel(long modelId)
+    public boolean deleteRevision(RevisionTransportCommand revision)
 }
