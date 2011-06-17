@@ -23,6 +23,7 @@ import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.dbus.user.UserCodeInvalidDBusException
 import net.biomodels.jummp.core.user.UserCodeExpiredException
 import net.biomodels.jummp.dbus.user.UserCodeExpiredDBusException
+import org.apache.log4j.Logger
 
 /**
  * @short Abstract Base class for all DBusAdapter Implementations.
@@ -42,6 +43,8 @@ public abstract class AbstractDBusAdapter extends AbstractCoreAdapter implements
      * The name of the object exported to DBus - needs to be set in the bean configuration
      */
     protected String objectName
+
+    protected Logger log = Logger.getLogger(getClass())
 
     /**
      * Helper function to set the Authentication in the current thread
@@ -103,6 +106,7 @@ public abstract class AbstractDBusAdapter extends AbstractCoreAdapter implements
         if (e instanceof UserManagementException) {
             return new UserManagementDBusException(e.getMessage())
         }
+        log.debug(e.message, e)
         return e
     }
 
