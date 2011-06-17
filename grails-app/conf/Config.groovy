@@ -137,6 +137,8 @@ log4j = {
 
     // configure the performanceStatsAppender to log at INFO level
     info   performanceStatsAppender: 'org.perf4j.TimingLogger'
+    // uncomment the following line to have debug output in development mode
+//    debug console: 'net.biomodels.jummp'
 }
 
 // Added by the Spring Security Core plugin:
