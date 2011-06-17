@@ -122,6 +122,29 @@ function loadModelTabCallback(data, tabIndex) {
                     updateModelHeader(null, null, $(this).text());
                     $("#modelTabs").tabs("select", $("#modelTabs-model").attr("href"));
                 });
+                $("#model-revisions table tr td.revisionControl a").button();
+                $("#model-revisions table tr td.revisionControl a.delete").button("option", "icons", {primary:'ui-icon-trash'});
+                $("#model-revisions table tr td.revisionControl a.delete").click(function() {
+                    if (confirm(i18n.model.revision.deleteRevision.verify)) {
+                        submitForm($("#model-revisions table tr td.revisionControl form[name=delete]"), createLink("model", "deleteRevision"), function(data) {
+                            if (data.deleted) {
+                                showInfoMessage(i18n.model.revision.deleteRevision.success, 20000);
+                                if ($("#model-revisions table tr").size() == 1) {
+                                    // User has no longer access to the model, may be deleted
+                                    loadView(createLink('model', 'index'), loadModelListCallback);
+                                } else {
+                                    // there is at least one more revision
+                                    var newLatestRevision = $("#model-revisions table tr td.revisionNumber:eq(1) a").text();
+                                    changeModelTabRevision(newLatestRevision);
+                                    updateModelHeader(null, null, newLatestRevision);
+                                    $("#modelTabs").tabs("load", $("#modelTabs-revisions").attr("href"));
+                                }
+                            } else {
+                                showInfoMessage(i18n.model.revision.deleteRevision.error, 20000);
+                            }
+                        });
+                    }
+                });
                 break;
             case "modelTabs-addRevision":
                 // add revision tab

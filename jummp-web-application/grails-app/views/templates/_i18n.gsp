@@ -38,6 +38,11 @@ var i18n = {
         revision: {
             upload: {
                 success: "${g.message(code: 'model.revision.upload.success', args: ['_NAME_'])}"
+            },
+            deleteRevision: {
+                verify:  "${g.message(code: 'model.revision.delete.verify')}",
+                success: "${g.message(code: 'model.revision.delete.success')}",
+                error:   "${g.message(code: 'model.revision.delete.error')}"
             }
         },
         view: {

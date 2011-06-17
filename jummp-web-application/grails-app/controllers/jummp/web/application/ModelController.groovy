@@ -256,6 +256,11 @@ class ModelController {
         response.outputStream << new ByteArrayInputStream(bytes)
     }
 
+    def deleteRevision = {
+        Map data = [deleted: remoteModelService.deleteRevision(params.id as Long, params.revision as Integer)]
+        render data as JSON
+    }
+
     /**
      * Resolves the error message for a field error
      * @param cmd The UploadCommand for resolving the errors
