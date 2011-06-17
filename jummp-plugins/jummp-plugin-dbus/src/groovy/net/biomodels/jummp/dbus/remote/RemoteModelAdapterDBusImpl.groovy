@@ -103,7 +103,9 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteDBusAdapter implements Re
         file.withWriter {
             it.write(new String(bytes))
         }
-        return modelDBusAdapter.addRevision(authenticationToken(), modelId, file.getAbsolutePath(), format.identifier, comment)
+        RevisionTransportCommand revision = modelDBusAdapter.addRevision(authenticationToken(), modelId, file.getAbsolutePath(), format.identifier, comment)
+        revision.model = modelDBusAdapter.getModel(authenticationToken(), modelId)
+        return revision
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFile")
