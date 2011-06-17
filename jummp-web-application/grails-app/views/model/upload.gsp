@@ -1,7 +1,4 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<div id="navigationButtons">
-    <a href="#"><g:message code="model.list.goto"/></a>
-</div>
 <form action="save" method="post" id="model-upload-form" class="ui-widget-content" enctype="multipart/form-data">
     <table>
         <thead></thead>

@@ -30,10 +30,6 @@ function requestPasswordCallback(data) {
  * View logic for /model/
  */
 function loadModelListCallback() {
-    $("#navigationButtons a").button();
-    $("#navigationButtons a").click(function() {
-        loadView(createLink('model', 'upload'), loadUploadModelCallback);
-    });
     $('#modelTable').dataTable({
         // TODO: in future it might be interesting to allow filtering
         bFilter: false,
@@ -95,13 +91,6 @@ function loadModelListCallback() {
  * @param tabIndex Optional selector for tab index to switch to after the tab view has been loaded
  */
 function loadModelTabCallback(data, tabIndex) {
-    $("#navigationButtons a").button();
-    $("#navigationButtons a:eq(0)").click(function() {
-        loadView(createLink('model', 'index'), loadModelListCallback);
-    });
-    $("#navigationButtons a:eq(1)").click(function() {
-        loadView(createLink('model', 'upload'), loadUploadModelCallback);
-    });
     $("#modelTabs").tabs({disabled: [1, 5],
         ajaxOptions: {
             error: function(jqXHR) {
@@ -202,10 +191,6 @@ function loadUploadModelCallback() {
             break;
         }
     };
-    $("#navigationButtons a").button();
-    $("#navigationButtons a").click(function() {
-        loadView(createLink('model', 'index'), loadModelListCallback);
-    });
     $("input:radio[name=publicationType]")[0].checked = true;
     $("#model-upload-form div.ui-dialog-buttonpane input").button();
     $("#model-upload-form div.ui-dialog-buttonpane input:button").click(function() {

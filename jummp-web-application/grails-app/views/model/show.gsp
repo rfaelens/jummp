@@ -1,9 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <h1><g:message code="model.view.header" args="[revision.model.id, revision.model.name]"/></h1>
-<div id="navigationButtons">
-    <a href="#"><g:message code="model.list.goto"/></a>
-    <a href="#"><g:message code="model.upload.goto"/></a>
-</div>
 <div id="modelTabs" style="display: none">
     <ul>
         <li><a id="modelTabs-model" href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}?revision=${revision.revisionNumber}">Model</a></li>
