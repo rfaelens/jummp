@@ -256,7 +256,10 @@ class ModelService {
         boolean admin = SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")
         for (revision in model.revisions) {
             if (admin || aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)) {
-                revisions << revision
+                if (!revision.deleted) {
+                    // only include not deleted revisions
+                    revisions << revision
+                }
             }
         }
         if (revisions.isEmpty()) {
@@ -281,7 +284,8 @@ class ModelService {
         if (model.state == ModelState.DELETED) {
             return []
         }
-        return model.revisions.toList().sort {it.revisionNumber}
+        // exclude deleted revisions
+        return model.revisions.toList().findAll { !it.deleted }.sort {it.revisionNumber}
     }
 
     /**
@@ -296,7 +300,12 @@ class ModelService {
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getRevision")
     public Revision getRevision(Model model, int revisionNumber) {
-        return Revision.findByRevisionNumberAndModel(revisionNumber, model)
+        Revision revision = Revision.findByRevisionNumberAndModel(revisionNumber, model)
+        if (revision.deleted) {
+            return null
+        } else {
+            return revision
+        }
     }
 
     /**

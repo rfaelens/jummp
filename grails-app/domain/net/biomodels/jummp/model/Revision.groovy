@@ -55,6 +55,10 @@ class Revision implements Serializable {
      * Kept in the Revision and not in the Model to make it possible to upload a new Revision in a different format.
      */
     ModelFormat format
+    /**
+     * Indicates whether this Revision is marked as deleted.
+     */
+    Boolean deleted = false
     // TODO: UML diagram lists a "format" and a "state". Do these belong here? What is the type of them?
 
     static constraints = {
@@ -66,6 +70,7 @@ class Revision implements Serializable {
         uploadDate(nullable: false)
         comment(nullable: false, blank: true, maxSize: 1000)
         format(nullable: false)
+        deleted(nullable: false)
     }
 
     RevisionTransportCommand toCommandObject() {
