@@ -80,6 +80,29 @@ class SbmlTagLib {
     }
 
     /**
+     * Renders a list of SBML parameters - either global or reaction parameters - for the overview.
+     * @attr parameters List of Parameters
+     * @attr title REQUIRED The Title for the parameters
+     */
+    def renderParametersOverview = { attrs ->
+        out << renderParameterTitle(title: attrs.title, size: attrs.parameters.size())
+        attrs.parameters.each { param ->
+            out << renderParameterOverview(parameter: param)
+        }
+    }
+
+    /**
+     * Renders the HTML code for one SBML parameter for the overview
+     * @attr parameter REQUIRED The Map describing one parameter
+     */
+    def renderParameterOverview = { attrs ->
+        Map param = attrs.parameter
+        String name = param.name ? param.name : param.id
+        String metaLink = g.createLink(controller: 'sbml', action: 'parameterMetaOverview', params: [id: params.id, parameterId: param.id, revision: params.revision])
+        out << render(template: "/templates/sbml/parameter", model: [title: name, metaLink: metaLink])
+    }
+
+    /**
      * Renders the title row of one SBML parameter section.
      * @attr title REQUIRED The title for the following parameter section
      * @attr size REQUIRED The number of parameters in the following section
@@ -108,6 +131,28 @@ class SbmlTagLib {
         String metaLink = g.createLink(controller: 'sbml', action: 'reactionMeta', params: [id: params.id, reactionId: reaction.id, revision: params.revision])
         String name = reaction.name ? reaction.name : reaction.id
         out << render(template: "/templates/sbml/reaction", model: [title: name, metaLink: metaLink, reversible: reaction.reversible, products: reaction.products, modifiers: reaction.modifiers, reactants: reaction.reactants])
+    }
+
+    /**
+     * Renders a list of SBML reactions for the overview.
+     * @attr reactions REQUIRED List of Reactions
+     */
+    def renderReactionsOverview = { attrs ->
+        out << renderParameterTitle(title: g.message(code: "sbml.reactions.title"), size: attrs.reactions.size())
+        attrs.reactions.each {
+            out << renderReactionOverview(reaction: it)
+        }
+    }
+
+    /**
+     * Renders one reaction for the overview.
+     * @attr reaction REQUIRED Map describing the Reaction
+     */
+    def renderReactionOverview = { attrs ->
+        Map reaction = attrs.reaction
+        String metaLink = g.createLink(controller: 'sbml', action: 'reactionMetaOverview', params: [id: params.id, reactionId: reaction.id, revision: params.revision, reversible: reaction.reversible, products: reaction.products, modifiers: reaction.modifiers, reactants: reaction.reactants])
+        String name = reaction.name ? reaction.name : reaction.id
+        out << render(template: "/templates/sbml/reactionOverview", model: [title: name, metaLink: metaLink])
     }
 
     /**
@@ -199,6 +244,20 @@ class SbmlTagLib {
     }
 
     /**
+     * Renders a table row with the given substance units.
+     * The primary use for this tag is inside of the tooltips for various SBML elements.
+     * The tag expects an attribute notes which is the notes xhtml markup as a string to be rendered.
+     * In case the string is empty the table row is not rendered.
+     * @attr notes REQUIRED The substanceUnits string
+     */
+    def speciesTitleTableRow = { attrs ->
+        if (!attrs.title || attrs.title == "") {
+            return
+        }
+        out << render(template: "/templates/sbml/speciesTitleTableRow", model: [title: attrs.title])
+    }
+
+    /**
      * Renders list of SBML Rules.
      * @attr rules REQUIRED The list of rules
      */
@@ -217,6 +276,38 @@ class SbmlTagLib {
                 break
             case "algebraic":
                 out << renderAlgebraicRule(rule: rule)
+                break
+            default:
+                // no real rule - nothing to render
+                break
+            }
+        }
+    }
+
+    /**
+     * Renders list of SBML Rules.
+     * @attr rules REQUIRED The list of rules
+     */
+    def renderRulesOverview = { attrs ->
+        if (!attrs.rules) {
+            return
+        }
+        out << renderParameterTitle(title: g.message(code: "sbml.rules.title"), size: attrs.rules.size())
+        attrs.rules.each { rule ->
+            switch (rule.type) {
+            case "rate":
+                String variableName = rule.variableName
+                if (!variableName || variableName == "") {
+                    variableName = rule.variableId
+                }
+                out << render(template: "/templates/sbml/rateRuleRowOverview", model: [variable: variableName])
+                break
+            case "assignment":
+                String variableName = rule.variableName
+                if (!variableName || variableName == "") {
+                    variableName = rule.variableId
+                }
+                out << render(template: "/templates/sbml/assignmentRuleRowOverview", model: [variable: variableName])
                 break
             default:
                 // no real rule - nothing to render
@@ -265,7 +356,6 @@ class SbmlTagLib {
             }
         }
         def outputBuilder = new StreamingMarkupBuilder()
-        //String result = outputBuilder.bind{ mkp.yield root }
         String result = outputBuilder.bindNode(root)
         out << result
     }
@@ -387,5 +477,39 @@ class SbmlTagLib {
         Map species = attrs.species
         String metaLink = g.createLink(controller: 'sbml', action: 'speciesMeta', params: [id: params.id, speciesId: species.id, revision: params.revision])
         out << render(template: "/templates/sbml/species", model: [title: species.id, initialAmount: species.initialAmount, initialConcentration: species.initialConcentration, substanceUnits: species.substanceUnits, metaLink: metaLink])
+    }
+
+    /**
+     * Renders one Species for the overview.
+     * @attr assignment REQUIRED Map describing the Species
+     */
+    def renderSpeciesOverview = { attrs ->
+        Map species = attrs.species
+        out << render(template: "/templates/sbml/speciesOverview", model: [title: species.id, initialAmount: species.initialAmount, initialConcentration: species.initialConcentration, substanceUnits: species.substanceUnits, sboName: species.sboName, sboTerm: species.sboTerm, annotation: species.annotation])
+    }
+
+    /**
+     * Renders a list of SBML compartments for the overview.
+     * @attr compartments REQUIRED List of Compartments
+     */
+    def renderCompartmentsOverview = { attrs ->
+        if(!attrs.compartments) {
+            return
+        }
+        out << renderParameterTitle(title: g.message(code: "sbml.compartments.title"), size: attrs.compartments.size())
+        attrs.compartments.each {
+            out << renderCompartmentOverview(compartment: it)
+        }
+    }
+
+    /**
+     * Renders one compartment for the overview.
+     * @attr compartment REQUIRED Map describing the Compartment
+     */
+    def renderCompartmentOverview = { attrs ->
+        Map compartment = attrs.compartment
+        String metaLink = g.createLink(controller: 'sbml', action: 'compartmentMetaOverview', params: [id: params.id, compartmentId: compartment.id, revision: params.revision, size: compartment.size, spatialDimensions: compartment.spatialDimensions?compartment.spatialDimensions:3, units: compartment.units, notes: compartment.notes, allSpecies: compartment.allSpecies])
+        String name = compartment.name ? compartment.name : compartment.id
+        out << render(template: "/templates/sbml/compartmentOverview", model:[title: name, metaLink: metaLink, allSpecies: compartment.allSpecies])
     }
 }
