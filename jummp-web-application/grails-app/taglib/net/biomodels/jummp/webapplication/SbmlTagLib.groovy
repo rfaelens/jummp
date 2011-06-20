@@ -466,7 +466,7 @@ class SbmlTagLib {
         Map compartment = attrs.compartment
         String metaLink = g.createLink(controller: 'sbml', action: 'compartmentMeta', params: [id: params.id, compartmentId: compartment.id, revision: params.revision])
         String name = compartment.name ? compartment.name : compartment.id
-        out << render(template: "/templates/sbml/compartment", model:[title: name, metaLink: metaLink, size: compartment.size, spatialDimensions: compartment.spatialDimensions?compartment.spatialDimensions:3, units: compartment.units, notes: compartment.notes, allSpecies: compartment.allSpecies])
+        out << render(template: "/templates/sbml/compartment", model:[title: name, metaLink: metaLink, size: compartment.size, spatialDimensions: compartment.spatialDimension, units: compartment.units, notes: compartment.notes, allSpecies: compartment.allSpecies])
     }
 
     /**
@@ -508,7 +508,7 @@ class SbmlTagLib {
      */
     def renderCompartmentOverview = { attrs ->
         Map compartment = attrs.compartment
-        String metaLink = g.createLink(controller: 'sbml', action: 'compartmentMetaOverview', params: [id: params.id, compartmentId: compartment.id, revision: params.revision, size: compartment.size, spatialDimensions: compartment.spatialDimensions?compartment.spatialDimensions:3, units: compartment.units, notes: compartment.notes, allSpecies: compartment.allSpecies])
+        String metaLink = g.createLink(controller: 'sbml', action: 'compartmentMetaOverview', params: [id: params.id, compartmentId: compartment.id, revision: params.revision, size: compartment.size, spatialDimensions: compartment.spatialDimensions, units: compartment.units, notes: compartment.notes, allSpecies: compartment.allSpecies])
         String name = compartment.name ? compartment.name : compartment.id
         out << render(template: "/templates/sbml/compartmentOverview", model:[title: name, metaLink: metaLink, allSpecies: compartment.allSpecies])
     }
