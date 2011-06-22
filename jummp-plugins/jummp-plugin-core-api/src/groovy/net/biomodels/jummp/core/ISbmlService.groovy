@@ -248,4 +248,10 @@ interface ISbmlService {
      * @return Map describing the Species
      */
      public Map getSpecies(RevisionTransportCommand revision, String id)
+    /**
+     * Generates an SVG for the given SBML model.
+     * @param revision The Revision identifying an SBML model
+     * @return Content of generated SVG
+     */
+    public byte[] generateSvg(RevisionTransportCommand revision)
 }

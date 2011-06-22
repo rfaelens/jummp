@@ -311,6 +311,13 @@ class SbmlService implements FileFormatService, ISbmlService {
          return speciesMap
      }
 
+    @Profiled(tag="SbmlService.generateSvg")
+    public byte[] generateSvg(RevisionTransportCommand revision) {
+        Model model = getFromCache(revision).model
+        ReactionToDot converter = new ReactionToDot(model)
+        return converter.convertToSvg()
+    }
+
     /**
      * Returns the SBMLDocument for the @p revision from the cache.
      * If the cache does not contain the SBMLDocument, the model file is

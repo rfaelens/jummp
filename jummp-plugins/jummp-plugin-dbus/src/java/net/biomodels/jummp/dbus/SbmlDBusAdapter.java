@@ -40,4 +40,6 @@ public interface SbmlDBusAdapter  extends DBusInterface {
     public String getCompartment(String authenticationHash, long modelId, int revisionNumber, String id);
     public String getAllSpecies(String authenticationHash, long modelId, int revisionNumber);
     public String getSpecies(String authenticationHash, long modelId, int revisionNumber, String id);
+
+    public byte[] generateSvg(String authenticationHash, long modelId, int revisionNumber);
 }
