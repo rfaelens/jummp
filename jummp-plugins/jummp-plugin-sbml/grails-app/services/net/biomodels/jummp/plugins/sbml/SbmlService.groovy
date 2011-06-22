@@ -462,7 +462,7 @@ class SbmlService implements FileFormatService, ISbmlService {
                 id: compartment.id,
                 name: compartment.name,
                 size: compartment.size,
-                spatialDimensions: compartment.spatialDimensions,
+                spatialDimensions: compartment.getSpatialDimensions(),
                 units: compartment.units,
                 sboTerm: compartment.getSBOTermID(),
                 sboName: sboName(compartment),

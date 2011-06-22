@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.codehaus.groovy.grails.web.json.JSONObject
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
+import org.codehaus.groovy.grails.web.json.JSONArray
 
 /**
  * @short Base class for all Remote Adapters.
@@ -40,19 +41,7 @@ abstract class AbstractRemoteAdapter {
      */
     protected List<Map> listOfMapFromJSON(String json) {
         def parsedJSON = JSON.parse(json)
-        List<Map> returnList = []
-        parsedJSON.each {
-            Map entry = [:]
-            it.keySet().each { key ->
-                def value = it.get(key)
-                if (value == JSONObject.NULL) {
-                    value = null
-                }
-                entry.put(key, value)
-            }
-            returnList << entry
-        }
-        return returnList
+        return jsonToList((JSONArray) parsedJSON)
     }
 
     /**
@@ -70,9 +59,38 @@ abstract class AbstractRemoteAdapter {
             if (value == JSONObject.NULL) {
                 value = null
             }
+            if (value instanceof JSONArray) {
+                value = jsonToList(value)
+            }
             returnMap.put(key, value)
         }
         return returnMap
+    }
+
+    /**
+     * Converts a JSON array into a List with each entry being a Map.
+     * This method is needed, when a JSON string contains
+     * inner arrays.
+     * @param array The JSON array
+     * @return List of Map entries
+     */
+    private List<Map> jsonToList(JSONArray array) {
+        List<Map> returnList = []
+        array.each {
+            Map entry = [:]
+            if (it.isEmpty()) {
+                return
+            }
+            it.keySet().each { key ->
+                def value = it.get(key)
+                if (value == JSONObject.NULL) {
+                    value = null
+                }
+                entry.put(key, value)
+            }
+            returnList << entry
+        }
+        return returnList
     }
 
     /**
