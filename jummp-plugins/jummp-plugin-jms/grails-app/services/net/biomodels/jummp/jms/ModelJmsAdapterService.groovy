@@ -127,6 +127,12 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
         return result
     }
 
+    @Queue
+    @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Integer])
+    def getRevision(def message) {
+        return modelDelegateService.getRevision((Long)message[1], (Integer)message[2])
+    }
+
     /**
      * Wrapper around ModelService.getPublication
      * @param message List consisting of AuthenticationHash and Model
