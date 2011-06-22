@@ -257,4 +257,5 @@ public interface RemoteSbmlAdapter {
      * @return Map describing the Species
      */
      public Map getSpecies(long modelId, int revisionNumber, String id)
+    public byte[] generateSvg(long modelId, int revisionNumber)
 }

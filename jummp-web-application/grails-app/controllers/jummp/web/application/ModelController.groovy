@@ -262,6 +262,13 @@ class ModelController {
     }
 
     /**
+     * Renders the HTML including the reaction graph svg
+     */
+    def reactionGraph = {
+        [model: params.id, revision: params.revision]
+    }
+
+    /**
      * Resolves the error message for a field error
      * @param cmd The UploadCommand for resolving the errors
      * @param field The field to be tested

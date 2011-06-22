@@ -55,4 +55,13 @@ class SbmlController {
     def speciesMeta = {
         [species: remoteSbmlService.getSpecies(params.id as long, params.revision as int, params.speciesId)]
     }
+
+    /**
+     * Renders the reaction graph svg
+     */
+    def reactionGraphSvg = {
+        byte[] bytes = remoteSbmlService.generateSvg(params.id as long, params.revision as int)
+        response.setContentType("image/svg+xml")
+        response.outputStream << new ByteArrayInputStream(bytes)
+    }
 }
