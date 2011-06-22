@@ -10,8 +10,5 @@
         <li><a id="modelTabs-reactionGraph" href="${g.createLink(controller: 'model', action: 'reactionGraph', id: params.id)}?revision=${revision.revisionNumber}">Reaction Graph</a></li>
         <li><a href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}">Curation</a></li>
         <li><a id="modelTabs-revisions" href="${g.createLink(controller: 'model', action: 'revisions', id: params.id)}">Revisions</a></li>
-        <g:if test="${addRevision}">
-            <li><a id="modelTabs-addRevision" href="${g.createLink(controller: 'model', action: 'newRevision', id: params.id)}"><g:message code="model.revision.upload.goto"/></a></li>
-        </g:if>
     </ul>
 </div>

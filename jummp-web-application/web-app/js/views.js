@@ -145,13 +145,13 @@ function loadModelTabCallback(data, tabIndex) {
                         });
                     }
                 });
-                break;
-            case "modelTabs-addRevision":
-                // add revision tab
+                // add revision
                 $("#revision-upload-form div.ui-dialog-buttonpane input").button();
                 $("#revision-upload-form div.ui-dialog-buttonpane input:button").click(function() {
                     submitFormWithFile($("#revision-upload-form"), createLink("model", "saveNewRevision"), uploadRevisionCallback);
                 });
+                break;
+            case "modelTabs-addRevision":
                 break;
             }
         }
