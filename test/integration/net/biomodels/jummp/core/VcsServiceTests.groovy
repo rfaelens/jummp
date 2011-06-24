@@ -45,6 +45,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         mockLogging(VcsService, true)
         mockLogging(GitManagerFactory, true)
         mockLogging(SvnManagerFactory, true)
+        vcsService.vcsManager = null
     }
 
     protected void tearDown() {
