@@ -16,7 +16,8 @@ class MiriamService {
      * Helper method to be called from Bootstrap
      */
     public void init() {
-        parseResourceXML()
+        // TODO: URL should be read from configuration
+        parseResourceXML("http://www.ebi.ac.uk/miriam/main/export/xml/")
     }
 
     /**
@@ -100,30 +101,42 @@ class MiriamService {
 
     /**
      * Downloads the MIRIAM Resource description and parses it into MiriamDatatype domain objects.
+     * @param url The URL to the XML file describing the MIRIAM resources
      */
-    private void parseResourceXML() {
-        // TODO: URL should be read from configuration
+    private void parseResourceXML(String url) {
         // TODO: move parsing into a Thread
-        String xml = new URL("http://www.ebi.ac.uk/miriam/main/export/xml/").getText()
+        String xml = new URL(url).getText()
         def rootNode = new XmlSlurper().parseText(xml)
         rootNode.datatype.each { datatype ->
-            MiriamDatatype miriam = new MiriamDatatype()
+            MiriamDatatype miriam = MiriamDatatype.findByIdentifier(datatype.@id.text())
+            if (!miriam) {
+                miriam = new MiriamDatatype()
+            }
             miriam.identifier = datatype.@id.text()
             miriam.name = datatype.name.text()
             miriam.pattern = datatype.@pattern.text()
             miriam.urn = datatype.uris.uri.find { it.@type.text() == "URN" }.text()
             datatype.synonyms.synonym.each { synonym ->
-                miriam.synonyms << synonym.text()
+                if (!miriam.synonyms.contains(synonym.text())) {
+                    miriam.synonyms << synonym.text()
+                }
             }
             datatype.resources.resource.each { resource ->
-                MiriamResource res = new MiriamResource()
+                MiriamResource res = MiriamResource.findByIdentifier(resource.@id.text())
+                if (!res) {
+                    res = new MiriamResource()
+                }
                 res.identifier = resource.@id.text()
                 res.location = resource.dataResource.text()
                 res.action = resource.dataEntry.text()
                 if (resource.@obsolete?.text() == "true") {
                     res.obsolete = true
                 }
-                miriam.addToResources(res)
+                if (res.id == null || !miriam.resources.contains(res)) {
+                    miriam.addToResources(res)
+                } else {
+                    res.save()
+                }
             }
             miriam.save()
         }
