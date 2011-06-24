@@ -11,18 +11,6 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 class MiriamService {
 
     static transactional = true
-    /**
-     * Hash of already resolved taxonomies. Key is the identifier, value the resolved name
-     */
-    private Map<String, String> taxonomies = [:]
-    /**
-     * Hash of already resolved gene ontologies. Key is the identifier, value the resolved name
-     */
-    private Map<String, String> geneOntologies = [:]
-    /**
-     * Hash of already resolved UniProt. Key is identifier, value the resolved name
-     */
-    private Map<String, String> uniProts = [:]
 
     /**
      * Helper method to be called from Bootstrap
@@ -65,27 +53,32 @@ class MiriamService {
      * @return Either the resolved name, or HTML cleaned id.
      */
     public String resolveName(MiriamDatatype miriam, String id) {
+        MiriamIdentifier identifier = MiriamIdentifier.findByDatatypeAndIdentifier(miriam, id)
+        if (identifier) {
+            return identifier.name
+        }
+        String name = null
         try {
             switch (miriam.identifier) {
             // UniProt
             case "MIR:00000005":
                 MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100134"}
                 if (resource) {
-                    return resolveUniProt(resource, id)
+                    name = resolveUniProt(resource, id)
                 }
                 break
             // Taxonomy
             case "MIR:00000006":
                 MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100019"}
                 if (resource) {
-                    return resolveTaxonomy(resource, id)
+                    name = resolveTaxonomy(resource, id)
                 }
                 break
             // Gene Ontology
             case "MIR:00000022":
                 MiriamResource resource = (MiriamResource)miriam.resources.find { it.identifier == "MIR:00100012"}
                 if (resource) {
-                    return resolveGeneOntology(resource, id)
+                    name = resolveGeneOntology(resource, id)
                 }
                 break
             default:
@@ -95,6 +88,11 @@ class MiriamService {
         } catch (IOException e) {
             // an IOException if thrown if the service we use to resolve the name is currently down
             log.debug(e.getMessage())
+        }
+        if (name && name != id) {
+            identifier = new MiriamIdentifier(identifier: id, datatype: miriam, name: name)
+            identifier.save(flush: true)
+            return name
         }
         // fallback: to just cleaning for HTML
         return URLCodec.decode(id)
@@ -133,48 +131,38 @@ class MiriamService {
 
     /**
      * Resolves the name for the given taxonomy by downloading the RDF provided by the
-     * MIRIAM resource. If the name could be resolved it is added to a hash for further
-     * fast lookup.
+     * MIRIAM resource.
      *
      * @param resource The MIRIAM resource to use for downloading the RDF
      * @param id The id of the taxonomy
-     * @return The resolved taxonomy, or the passed in id.
+     * @return The resolved taxonomy if it could be resolved, if not @c null
      */
     private String resolveTaxonomy(MiriamResource resource, String id) {
-        if (taxonomies.containsKey(id)) {
-            return taxonomies[id]
-        }
         String xml = new URL("${resource.action.replace('$id', id)}.rdf").getText()
         def rootNode = new XmlSlurper().parseText(xml)
         String text = rootNode.Description.scientificName.text()
         if (text == "") {
-            return URLCodec.decode(id)
+            return null
         } else {
-            taxonomies.put(id, text)
             return text
         }
     }
 
     /**
      * Resolves the name for the given gene ontology by downloading the obo xml provided by the
-     * MIRIAM resource. If the name could be resolved it is added to a hash for further
-     * fast lookup.
+     * MIRIAM resource.
      *
      * @param resource The MIRIAM resource to use for downloading the obo xml
      * @param id The id of the taxonomy
-     * @return The resolved taxonomy, or the passed in id.
+     * @return The resolved gene ontology if it could be resolved, if not @c null
      */
     private String resolveGeneOntology(MiriamResource resource, String id) {
-        if (geneOntologies.containsKey(id)) {
-            return geneOntologies[id]
-        }
         String xml = new URL("${resource.action.replace('$id', id)}&format=oboxml").getText()
         def rootNode = new XmlSlurper().parseText(xml)
         String text = rootNode.term.name.text()
         if (text == "") {
-            return URLCodec.decode(id)
+            return null
         } else {
-            geneOntologies.put(id, text)
             return text
         }
 
@@ -182,23 +170,18 @@ class MiriamService {
 
     /**
      * Resolves the name of the given protein by downloading the xml description from UniProt.
-     * If the name could be resolved it is added to a hash for further fast lookup
      *
      * @param resource The MIRIAM resource to use for downloading the xml description
      * @param id The UniProt id
-     * @return The resolved protein name, or the passed in id
+     * @return The resolved protein name if it could be resolved, if not @c null
      */
     private String resolveUniProt(MiriamResource resource, String id) {
-        if (uniProts.containsKey(id)) {
-            return uniProts[id]
-        }
         String xml = new URL("${resource.action.replace('$id', id)}.xml").getText()
         def rootNode = new XmlSlurper().parseText(xml)
         String text = rootNode.entry.name.text()
         if (text == "") {
-            return URLCodec.decode(id)
+            return null
         } else {
-            uniProts.put(id, text)
             return text
         }
     }
