@@ -30,12 +30,16 @@ import org.sbml.jsbml.SBO
 import org.sbml.jsbml.Compartment
 import org.sbml.jsbml.Species
 import org.sbml.jsbml.SBase
+import org.sbfc.converter.sbml2dot.SBML2Dot
+import org.apache.commons.io.FileUtils
+import org.springframework.beans.factory.InitializingBean
+import grails.util.Environment
 
 /**
  * Service class for handling Model files in the SBML format.
  * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class SbmlService implements FileFormatService, ISbmlService {
+class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     static transactional = true
 
@@ -44,8 +48,21 @@ class SbmlService implements FileFormatService, ISbmlService {
      */
     def modelDelegateService
 
+    /**
+     * Keep one SBML2Dot converter around as it takes quite some time to load the converter.
+     * It's a def because we don't want to call the static initialization code immediately.
+     */
+    private def dotConverter = null
+
     // TODO: move initialization into afterPropertiesSet and make it configuration dependent
     SbmlCache<RevisionTransportCommand, SBMLDocument> cache = new SbmlCache(100)
+
+    public void afterPropertiesSet() {
+        if (Environment.current == Environment.PRODUCTION) {
+            // only initialize the SBML2Dot Converter during startup in production mode
+            sbml2dotConverter()
+        }
+    }
 
     @Profiled(tag="SbmlService.validate")
     public boolean validate(final File model) {
@@ -313,9 +330,20 @@ class SbmlService implements FileFormatService, ISbmlService {
 
     @Profiled(tag="SbmlService.generateSvg")
     public byte[] generateSvg(RevisionTransportCommand revision) {
-        Model model = getFromCache(revision).model
-        ReactionToDot converter = new ReactionToDot(model)
-        return converter.convertToSvg()
+        File dotFile = File.createTempFile("jummp", "dot")
+        PrintWriter writer = new PrintWriter(dotFile)
+        sbml2dotConverter().dotExport(getFromCache(revision), writer)
+        File svgFile = File.createTempFile("jummp", "svg")
+        def process = "dot -Tsvg -o ${svgFile.absolutePath} ${dotFile.absolutePath}".execute()
+        process.waitFor()
+        FileUtils.deleteQuietly(dotFile)
+        if (process.exitValue()) {
+            FileUtils.deleteQuietly(svgFile)
+            return new byte[0]
+        }
+        byte[] bytes = svgFile.readBytes()
+        FileUtils.deleteQuietly(svgFile)
+        return bytes
     }
 
     /**
@@ -507,5 +535,12 @@ class SbmlService implements FileFormatService, ISbmlService {
         } catch (NoSuchElementException e) {
             return ""
         }
+    }
+
+    private SBML2Dot sbml2dotConverter() {
+        if (!dotConverter) {
+            dotConverter = new SBML2Dot()
+        }
+        return dotConverter
     }
 }
