@@ -76,4 +76,8 @@ class SbmlController {
     def parameterMetaOverview = {
         [parameter: remoteSbmlService.getParameter(params.id as long, params.revision as int, params.parameterId)]
     }
+
+    def submodel = {
+        [submodel: remoteSbmlService. triggerSubmodelGeneration(params.id as long, params.revision as int, params.submodelId,  params.metaId, params.compartmentIds as List, params.speciesIds as List, params.reactionIds as List, params.ruleIds as List, params.eventIds as List)]
+    }
 }

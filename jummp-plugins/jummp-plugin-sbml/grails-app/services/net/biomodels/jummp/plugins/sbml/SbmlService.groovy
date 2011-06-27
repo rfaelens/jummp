@@ -501,4 +501,9 @@ class SbmlService implements FileFormatService, ISbmlService {
             return ""
         }
     }
+
+    public String triggerSubmodelGeneration(RevisionTransportCommand revision, String subModelId, String metaId, List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds) {
+        Model model = getFromCache(revision).model
+        return new SubmodelGenerator().generateSubModel(model, subModelId, metaId, compartmentIds, speciesIds, reactionIds, ruleIds, eventIds)
+    }
 }

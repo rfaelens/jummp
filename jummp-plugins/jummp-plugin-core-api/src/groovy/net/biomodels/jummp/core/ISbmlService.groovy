@@ -248,4 +248,18 @@ interface ISbmlService {
      * @return Map describing the Species
      */
      public Map getSpecies(RevisionTransportCommand revision, String id)
+    /**
+     * Triggers the generation of a sub model taking selected parts of an existing model.
+     * The returned String contains the generated SBML model.
+     * @param revision
+     * @param subModelId: The sub model id which can be given by a user
+     * @param metaId: The given meta id
+     * @param compartmentIds: The selected compartment ids
+     * @param speciesIds: The selected species ids
+     * @param reactionIds: The selected reaction ids
+     * @param ruleIds: The selected rule ids
+     * @param eventIds: The selected event ids
+     * @return String containing the generated SBML model
+     */
+    public String triggerSubmodelGeneration(RevisionTransportCommand revision, String subModelId, String metaId, List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds)
 }
