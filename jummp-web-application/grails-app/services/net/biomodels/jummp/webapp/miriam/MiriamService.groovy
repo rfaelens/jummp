@@ -48,6 +48,39 @@ class MiriamService {
     }
 
     /**
+     * Returns all relevant MIRIAM data in one map for the given @p resource, that is a complete URN
+     * consisting of the MIRIAM datatype plus the element identifier within the datatype
+     * The map consists of the following elements:
+     * @li <strong>dataTypeLocation:</strong> URL for the datatype
+     * @li <strong>dataTypeName:</strong> Human readable name of the datatype
+     * @li <strong>name:</strong> Human readable name of the identifier (if it could be resolved) or the identifier
+     * @li <strong>url:</strong> URL to the identifier
+     *
+     * If the datatype is unknown or no MIRIAM resource could be located for the datatype an empty map is returned.
+     * @param urn The URN consisting of both MIRIAM datatype and identifier
+     * @return Map as described above
+     */
+    public Map miriamData(String urn) {
+        int colonIndex = urn.lastIndexOf(':')
+        String datatypeUrn = urn.substring(0, colonIndex)
+        String identifier = urn.substring(colonIndex + 1)
+        MiriamDatatype datatype = resolveDatatype(datatypeUrn)
+        if (!datatype) {
+            return [:]
+        }
+        MiriamResource preferred = preferredResource(datatype)
+        if (!preferred) {
+            return [:]
+        }
+        return [
+                dataTypeLocation: preferred.location,
+                dataTypeName: datatype.name,
+                name: resolveName(datatype, identifier),
+                url: preferred.action.replace('$id', identifier)
+        ]
+    }
+
+    /**
      *
      * @param uri The MIRIAM uri
      * @return The MiriamDatatype for the given MIRIAM uri

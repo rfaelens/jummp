@@ -208,17 +208,14 @@ class JummpTagLib {
             resource = attrs.resource
             resolvedName = attrs.resolvedName
         }
-        int colonIndex = resource.lastIndexOf(':')
-        String urn = resource.substring(0, colonIndex)
-        String identifier = resource.substring(colonIndex + 1)
-        MiriamDatatype miriam = miriamService.resolveDatatype(urn)
-        if (miriam) {
-            out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).location}\">${miriam.name}</a>"
+        Map miriam = miriamService.miriamData(resource)
+        if (!miriam.isEmpty()) {
+            out << "<a target=\"_blank\" href=\"${miriam["dataTypeLocation"]}\">${miriam["dataTypeName"]}</a>"
             out << "&nbsp;"
             if (!resolvedName) {
-                resolvedName = miriamService.resolveName(miriam, identifier)
+                resolvedName = miriam["name"]
             }
-            out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).action.replace('$id', identifier)}\">${resolvedName}</a>"
+            out << "<a target=\"_blank\" href=\"${miriam["url"]}\">${resolvedName}</a>"
         } else {
             out << resource
         }
