@@ -2,6 +2,8 @@ package net.biomodels.jummp.webapp.miriam
 
 import org.codehaus.groovy.grails.plugins.codecs.URLCodec
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.transaction.TransactionStatus
 
 /**
  * Service for handling MIRIAM resources.
@@ -10,14 +12,39 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
  */
 class MiriamService {
 
-    static transactional = true
+    static transactional = false
 
     /**
-     * Helper method to be called from Bootstrap
+     * Updates the MIRIAM Resources in the database from the XML specified in @p url.
+     * @param url The URL to the MIRIAM Resource XML
+     * @param force If @c true previously fetched data will be discarded, if @c false only new entries are added
+     * @throws MiriamUpdateException In case an error occurs while downloading or parsing the XML
      */
-    public void init() {
-        // TODO: URL should be read from configuration
-        parseResourceXML("http://www.ebi.ac.uk/miriam/main/export/xml/")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void updateMiriamResources(String url, boolean force) throws MiriamUpdateException {
+        // TODO: move into thread
+        // we cannot throw the exception from inside the closure
+        // therefore we store it in the variable and throw it after the withTransaction closure
+        MiriamUpdateException exception = null
+        MiriamResource.withTransaction { TransactionStatus status ->
+            if (force) {
+                // delete all MIRIAM data
+                MiriamDatatype.list().each {
+                    it.delete()
+                }
+            }
+            try {
+                parseResourceXML(url)
+                status.flush()
+            } catch (Exception e) {
+                status.setRollbackOnly()
+                log.info(e.getMessage(), e)
+                exception = new MiriamUpdateException(e)
+            }
+        }
+        if (exception) {
+            throw exception
+        }
     }
 
     /**
