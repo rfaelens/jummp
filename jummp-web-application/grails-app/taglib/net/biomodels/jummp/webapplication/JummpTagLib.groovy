@@ -212,12 +212,16 @@ class JummpTagLib {
         String urn = resource.substring(0, colonIndex)
         String identifier = resource.substring(colonIndex + 1)
         MiriamDatatype miriam = miriamService.resolveDatatype(urn)
-        out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).location}\">${miriam.name}</a>"
-        out << "&nbsp;"
-        if (!resolvedName) {
-            resolvedName = miriamService.resolveName(miriam, identifier)
+        if (miriam) {
+            out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).location}\">${miriam.name}</a>"
+            out << "&nbsp;"
+            if (!resolvedName) {
+                resolvedName = miriamService.resolveName(miriam, identifier)
+            }
+            out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).action.replace('$id', identifier)}\">${resolvedName}</a>"
+        } else {
+            out << resource
         }
-        out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).action.replace('$id', identifier)}\">${resolvedName}</a>"
     }
 
     /**
