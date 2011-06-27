@@ -5,7 +5,7 @@ package net.biomodels.jummp.webapp.miriam
  * @author Martin Gräßlin <m.graesslin@dkfz.de>
  */
 class MiriamDatatype implements Serializable {
-    static hasMany = [resources: MiriamResource]
+    static hasMany = [resources: MiriamResource, identifiers: MiriamIdentifier]
     /**
      * The identifier of the MIRIAM datatype. E.g. "MIR:00000014"
      */

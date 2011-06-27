@@ -5,6 +5,7 @@ package net.biomodels.jummp.webapp.miriam
  * Linked to MiriamDatatype.
  */
 class MiriamResource {
+    static belongsTo = [datatype: MiriamDatatype]
     /**
      * The identifier of the resource. E.g. "MIR:00100022"
      */

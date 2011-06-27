@@ -5,14 +5,11 @@ package net.biomodels.jummp.webapp.miriam
  * @author Martin Gräßlin <m.graesslin@dkfz.de>
  */
 class MiriamIdentifier implements Serializable {
+    static belongsTo = [datatype: MiriamDatatype]
     /**
      * The Identifier of the MIRIAM URN (part after last colon.
      */
     String identifier
-    /**
-     * The MIRIAM Datatype
-     */
-    MiriamDatatype datatype
     /**
      * The resolved name for this identifier.
      */
