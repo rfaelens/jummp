@@ -85,7 +85,7 @@ class MiriamService {
      * @param uri The MIRIAM uri
      * @return The MiriamDatatype for the given MIRIAM uri
      */
-    public MiriamDatatype resolveDatatype(String urn) {
+    private MiriamDatatype resolveDatatype(String urn) {
         return MiriamDatatype.findByUrn(urn)
     }
 
@@ -94,7 +94,7 @@ class MiriamService {
      * @param datatype The MiriamDatatype to check
      * @return The preferred Resource for the given datatype
      */
-    public MiriamResource preferredResource(MiriamDatatype datatype) {
+    private MiriamResource preferredResource(MiriamDatatype datatype) {
         if (ConfigurationHolder.config.jummp.webapp.miriam.prefered.containsKey(datatype.identifier)) {
             // try to find the resource
             MiriamResource resource = (MiriamResource)datatype.resources.find{ it.identifier == ConfigurationHolder.config.jummp.webapp.miriam.prefered[datatype.identifier] }
@@ -113,7 +113,7 @@ class MiriamService {
      * @param id The identifier part of the URN.
      * @return Either the resolved name, or HTML cleaned id.
      */
-    public String resolveName(MiriamDatatype miriam, String id) {
+    private String resolveName(MiriamDatatype miriam, String id) {
         MiriamIdentifier identifier = MiriamIdentifier.findByDatatypeAndIdentifier(miriam, id)
         if (identifier) {
             return identifier.name
