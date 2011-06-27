@@ -1,4 +1,4 @@
-package net.biomodels.jummp.webapp.miriam
+package net.biomodels.jummp.core
 
 import org.codehaus.groovy.grails.plugins.codecs.URLCodec
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
@@ -6,6 +6,9 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.transaction.TransactionStatus
 import net.biomodels.jummp.core.miriam.IMiriamService
 import net.biomodels.jummp.core.miriam.MiriamUpdateException
+import net.biomodels.jummp.core.miriam.MiriamResource
+import net.biomodels.jummp.core.miriam.MiriamDatatype
+import net.biomodels.jummp.core.miriam.MiriamIdentifier
 
 /**
  * Service for handling MIRIAM resources.
@@ -14,7 +17,7 @@ import net.biomodels.jummp.core.miriam.MiriamUpdateException
  */
 class MiriamService implements IMiriamService {
 
-    static transactional = false
+    static transactional = true
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateMiriamResources(String url, boolean force) throws MiriamUpdateException {

@@ -6,7 +6,7 @@ import net.biomodels.jummp.core.miriam.MiriamUpdateException
 
 @Secured('ROLE_ADMIN')
 class MiriamController {
-    def miriamService
+    def remoteMiriamService
 
     def index = { }
 
@@ -25,7 +25,7 @@ class MiriamController {
             render data as JSON
         } else {
             try {
-                miriamService.updateMiriamResources(cmd.miriamUrl, cmd.force)
+                remoteMiriamService.updateMiriamResources(cmd.miriamUrl, cmd.force)
                 data.put("success", true)
             } catch (MiriamUpdateException e) {
                 data.put("error", g.message(code: "miriam.update.error"))

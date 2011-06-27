@@ -1,7 +1,6 @@
 package net.biomodels.jummp.webapplication
 
 import net.biomodels.jummp.webapp.menu.MenuItem
-import net.biomodels.jummp.webapp.miriam.MiriamDatatype
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamSource
 import javax.xml.transform.stream.StreamResult
@@ -22,7 +21,7 @@ class JummpTagLib {
     /**
      * Dependency Injection for Miriam Service
      */
-    def miriamService
+    def remoteMiriamService
 
     Transformer transformer = null
 
@@ -208,7 +207,7 @@ class JummpTagLib {
             resource = attrs.resource
             resolvedName = attrs.resolvedName
         }
-        Map miriam = miriamService.miriamData(resource)
+        Map miriam = remoteMiriamService.miriamData(resource)
         if (!miriam.isEmpty()) {
             out << "<a target=\"_blank\" href=\"${miriam["dataTypeLocation"]}\">${miriam["dataTypeName"]}</a>"
             out << "&nbsp;"

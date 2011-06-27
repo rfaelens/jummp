@@ -1,4 +1,4 @@
-package net.biomodels.jummp.webapp.miriam
+package net.biomodels.jummp.core.miriam
 
 /**
  * Domain object to describe a MIRIAM resource provider.
