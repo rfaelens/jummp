@@ -731,3 +731,24 @@ function registrationCallback(data) {
         setErrorState("#register-form-name", data.userRealName);
     }
 }
+
+/**
+ * View logic for /miriam/index
+ */
+function loadMiriamCallback() {
+    $("#miriam div.ui-dialog-buttonpane input").button();
+    $("#miriam div.ui-dialog-buttonpane input:button").click(function() {
+        submitForm($("#miriam form"), createLink("miriam", "updateResources"), function(data) {
+            if (data.success) {
+                showInfoMessage(i18n.miriam.update.success, 20000);
+                setErrorState("#miriam-update-miriam-url", false);
+            } else if (data.error) {
+                if (data.error != true) {
+                    showErrorMessage(data.error);
+                }
+                showErrorMessage(data.miriamUrl);
+                setErrorState("#miriam-update-miriam-url", data.miriamUrl);
+            }
+        });
+    });
+}
