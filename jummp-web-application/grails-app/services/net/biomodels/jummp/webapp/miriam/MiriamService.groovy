@@ -4,22 +4,18 @@ import org.codehaus.groovy.grails.plugins.codecs.URLCodec
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.transaction.TransactionStatus
+import net.biomodels.jummp.core.miriam.IMiriamService
+import net.biomodels.jummp.core.miriam.MiriamUpdateException
 
 /**
  * Service for handling MIRIAM resources.
  *
  * @author Martin Gräßlin <m.graesslin@dkfz.de>
  */
-class MiriamService {
+class MiriamService implements IMiriamService {
 
     static transactional = false
 
-    /**
-     * Updates the MIRIAM Resources in the database from the XML specified in @p url.
-     * @param url The URL to the MIRIAM Resource XML
-     * @param force If @c true previously fetched data will be discarded, if @c false only new entries are added
-     * @throws MiriamUpdateException In case an error occurs while downloading or parsing the XML
-     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateMiriamResources(String url, boolean force) throws MiriamUpdateException {
         // TODO: move into thread
@@ -47,19 +43,6 @@ class MiriamService {
         }
     }
 
-    /**
-     * Returns all relevant MIRIAM data in one map for the given @p resource, that is a complete URN
-     * consisting of the MIRIAM datatype plus the element identifier within the datatype
-     * The map consists of the following elements:
-     * @li <strong>dataTypeLocation:</strong> URL for the datatype
-     * @li <strong>dataTypeName:</strong> Human readable name of the datatype
-     * @li <strong>name:</strong> Human readable name of the identifier (if it could be resolved) or the identifier
-     * @li <strong>url:</strong> URL to the identifier
-     *
-     * If the datatype is unknown or no MIRIAM resource could be located for the datatype an empty map is returned.
-     * @param urn The URN consisting of both MIRIAM datatype and identifier
-     * @return Map as described above
-     */
     public Map miriamData(String urn) {
         int colonIndex = urn.lastIndexOf(':')
         String datatypeUrn = urn.substring(0, colonIndex)

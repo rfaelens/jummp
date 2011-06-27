@@ -2,7 +2,7 @@ package net.biomodels.jummp.webapp.administration
 
 import grails.plugins.springsecurity.Secured
 import grails.converters.JSON
-import net.biomodels.jummp.webapp.miriam.MiriamUpdateException
+import net.biomodels.jummp.core.miriam.MiriamUpdateException
 
 @Secured('ROLE_ADMIN')
 class MiriamController {
