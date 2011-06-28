@@ -182,12 +182,12 @@ class JummpTagLib {
         renderQualifer(annotation.qualifier)
         if (annotation.resources.size() == 1) {
             out << "&nbsp;"
-            renderURN(annotation.resources[0])
+            out << renderURN(annotation.resources[0])
         } else {
             out << "<ul>"
             annotation.resources.each {
                 out << "<li>"
-                renderURN(it)
+                out << renderURN(it)
                 out << "</li>"
             }
             out << "</ul>"
@@ -199,24 +199,18 @@ class JummpTagLib {
      * @todo move into an SBML taglib
      */
     def renderURN = { attrs ->
-        String resource
-        String resolvedName = null
-        if (attrs instanceof String) {
-            resource = attrs
-        } else {
-            resource = attrs.resource
-            resolvedName = attrs.resolvedName
+        Map miriam = attrs
+        if (attrs.resource) {
+            miriam = attrs.resource
         }
-        Map miriam = remoteMiriamService.miriamData(resource)
-        if (!miriam.isEmpty()) {
+        if (miriam.containsKey("dataTypeLocation") && miriam.containsKey("dataTypeName") && miriam.containsKey("name") && miriam.containsKey("url")) {
             out << "<a target=\"_blank\" href=\"${miriam["dataTypeLocation"]}\">${miriam["dataTypeName"]}</a>"
             out << "&nbsp;"
-            if (!resolvedName) {
-                resolvedName = miriam["name"]
-            }
-            out << "<a target=\"_blank\" href=\"${miriam["url"]}\">${resolvedName}</a>"
+            out << "<a target=\"_blank\" href=\"${miriam["url"]}\">${miriam.name}</a>"
+        } else if (miriam.containsKey("urn")) {
+            out << miriam["urn"]
         } else {
-            out << resource
+            out << miriam
         }
     }
 
@@ -292,17 +286,16 @@ class JummpTagLib {
      * The tag expects an attribute sbo containing the integer value of the sbo term.
      * In case the tag is not set or an empty string the table row is not rendered.
      * @attr sbo REQUIRED the numerical SBO term without the urn header
-     * @attr name Optional resolved name of the SBO term
      */
     def sboTableRow = { attrs ->
-        if (!attrs.sbo || attrs.sbo == "") {
+        Map sbo = attrs
+        if (attrs.sbo) {
+            sbo = attrs.sbo
+        }
+        if (!sbo) {
             return
         }
-        String name = attrs.name
-        if (name == "") {
-            name = null
-        }
-        out << render(template: "/templates/sboTableRow", model: [urn: "urn:miriam:obo.sbo:" + URLCodec.encode(attrs.sbo), name: name])
+        out << render(template: "/templates/sboTableRow", model: [urn: sbo])
     }
 
     /**

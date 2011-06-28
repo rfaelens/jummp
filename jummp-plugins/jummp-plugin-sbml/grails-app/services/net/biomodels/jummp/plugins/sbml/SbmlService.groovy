@@ -34,6 +34,7 @@ import org.sbfc.converter.sbml2dot.SBML2Dot
 import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.InitializingBean
 import grails.util.Environment
+import org.codehaus.groovy.grails.plugins.codecs.URLCodec
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -47,6 +48,10 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
      * Dependency Injection for ModelDelegateService allowing to access models
      */
     def modelDelegateService
+    /**
+     * Dependency Injection of MiriamService
+     */
+    def miriamService
 
     /**
      * Keep one SBML2Dot converter around as it takes quite some time to load the converter.
@@ -217,8 +222,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         Map eventMap = eventToMap(event)
         eventMap.put("annotation", convertCVTerms(event.annotation))
         eventMap.put("notes", event.notesString)
-        eventMap.put("sboTerm", event.getSBOTermID())
-        eventMap.put("sboName", sboName(event))
+        eventMap.put("sbo", sboName(event))
         eventMap.put("trigger", event.trigger ? event.trigger.mathMLString : "")
         eventMap.put("delay", event.delay ? event.delay.mathMLString : "")
         return eventMap
@@ -265,8 +269,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         Map functionMap = functionDefinitionToMap(function)
         functionMap.put("annotation", convertCVTerms(function.annotation))
         functionMap.put("notes", function.notesString)
-        functionMap.put("sboTerm", function.getSBOTermID())
-        functionMap.put("sboName", sboName(function))
+        functionMap.put("sbo", sboName(function))
         return functionMap
     }
 
@@ -372,8 +375,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 metaId: parameter.metaId,
                 constant: (parameter instanceof Parameter) ? parameter.constant : true,
                 value: parameter.isSetValue() ? parameter.value : null,
-                sboTerm: parameter.getSBOTermID(),
-                sboName: sboName(parameter),
+                sbo: sboName(parameter),
                 unit: parameter.units
         ]
     }
@@ -385,7 +387,11 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                     qualifier: cvTerm.biologicalQualifier ? cvTerm.biologicalQualifierType.toString() : (cvTerm.modelQualifier ? cvTerm.modelQualifierType.toString() : ""),
                     biologicalQualifier: cvTerm.biologicalQualifier,
                     modelQualifier: cvTerm.modelQualifier,
-                    resources: cvTerm.resources
+                    resources: cvTerm.resources.collect {
+                        Map data = miriamService.miriamData(it)
+                        data.put("urn", it)
+                        data
+                    }
             ]
         }
         return list
@@ -419,8 +425,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 metaId: reaction.metaId,
                 name: reaction.name,
                 reversible: reaction.reversible,
-                sboTerm: reaction.getSBOTermID(),
-                sboName: sboName(reaction),
+                sbo: sboName(reaction),
                 reactants: convertSpeciesReferences(reaction.listOfReactants),
                 products: convertSpeciesReferences(reaction.listOfProducts),
                 modifiers: convertSpeciesReferences(reaction.listOfModifiers)
@@ -492,8 +497,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 size: compartment.size,
                 spatialDimensions: compartment.getSpatialDimensions(),
                 units: compartment.units,
-                sboTerm: compartment.getSBOTermID(),
-                sboName: sboName(compartment),
+                sbo: sboName(compartment),
                 allSpecies: getAllCompartmentSpecies(compartment)
         ]
     }
@@ -519,8 +523,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 initialAmount: initialAmount,
                 initialConcentration: initialConcentration,
                 substanceUnits: species.substanceUnits,
-                sboTerm: species.getSBOTermID(),
-                sboName: sboName(species),
+                sbo: sboName(species)
         ]
     }
 
@@ -529,11 +532,14 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
      * @param sbase The sbase from which to extract the SBO Term name.
      * @return The name or an empty String if there is no name
      */
-    private String sboName(SBase sbase) {
+    private Map sboName(SBase sbase) {
         try {
-            return SBO.getTerm(sbase.getSBOTerm()).name
+            String name = SBO.getTerm(sbase.getSBOTerm()).name
+            Map map = miriamService.miriamData("urn:miriam:obo.sbo:${URLCodec.encode(sbase.getSBOTermID())}")
+            map.put("name", name)
+            return map
         } catch (NoSuchElementException e) {
-            return ""
+            return [:]
         }
     }
 
