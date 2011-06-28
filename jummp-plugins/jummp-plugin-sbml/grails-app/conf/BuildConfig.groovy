@@ -17,16 +17,25 @@ grails.project.dependency.resolution = {
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
         //mavenLocal()
-        //mavenCentral()
+        mavenCentral()
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
+        // repository for miriam lib
+        mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
+        // miriam lib required by sbml converters
+        runtime 'uk.ac.ebi.miriam:miriam-lib:1.1.2'
+        // dependencies of jsbml
+        runtime 'org.codehaus.woodstox:woodstox-core-lgpl:4.0.9'
+        runtime 'org.codehaus.staxmate:staxmate:2.0.0'
+        runtime 'org.w3c.jigsaw:jigsaw:2.2.6'
+        runtime 'com.thoughtworks.xstream:xstream:1.3.1'
     }
 }
 

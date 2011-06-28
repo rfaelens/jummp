@@ -155,4 +155,10 @@ class SbmlJmsAdapterService extends AbstractJmsAdapter {
     def triggerSubmodelGeneration(def message) {
         return sbmlService.triggerSubmodelGeneration(modelDelegateService.getRevision((Long)message[1], (Integer)message[2]), (String)message[3], (String)message[4], (List) message[5], (List)message[6], (List)message[7], (List)message[8], (List)message[9])
     }
+
+    @Queue
+    @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Integer])
+    def generateSvg(def message) {
+        return sbmlService.generateSvg(modelDelegateService.getRevision((Long)message[1], (Integer)message[2]))
+    }
 }

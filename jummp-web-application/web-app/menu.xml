@@ -59,6 +59,12 @@
                 <action>themes</action>
                 <viewCallback>loadThemeSelectionCallback</viewCallback>
             </menuItem>
+            <menuItem>
+                <name>MIRIAM</name>
+                <controller>miriam</controller>
+                <action>index</action>
+                <viewCallback>loadMiriamCallback</viewCallback>
+            </menuItem>
         </subMenu>
         <visibleTo>
             <role>ROLE_ADMIN</role>

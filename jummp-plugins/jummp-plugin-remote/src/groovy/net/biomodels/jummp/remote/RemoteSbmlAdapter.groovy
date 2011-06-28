@@ -273,4 +273,5 @@ public interface RemoteSbmlAdapter {
      * @return String containing the generated SBML model
      */
     public String triggerSubmodelGeneration(long modelId, int revisionNumber, String subModelId, String metaId, List compartmentIds, List speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds)
+    public byte[] generateSvg(long modelId, int revisionNumber)
 }

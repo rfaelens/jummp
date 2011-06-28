@@ -1,10 +1,11 @@
-package net.biomodels.jummp.webapp.miriam
+package net.biomodels.jummp.core.miriam
 
 /**
  * Domain object to describe a MIRIAM resource provider.
  * Linked to MiriamDatatype.
  */
 class MiriamResource {
+    static belongsTo = [datatype: MiriamDatatype]
     /**
      * The identifier of the resource. E.g. "MIR:00100022"
      */

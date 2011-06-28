@@ -756,6 +756,15 @@ class ModelService {
             // TODO: maybe better throw an exception
             return false
         }
+        if (revision.model.revisions.findAll { !it.deleted }.size() == 1) {
+            // only one revision, delete the Model
+            // first check the ACL, has to be manual as Spring would not intercept the direct method call
+            if (aclUtilService.hasPermission(springSecurityService.authentication, revision.model, BasePermission.DELETE) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+                deleteModel(revision.model)
+            } else {
+                throw new AccessDeniedException("No permission to delete Model ${revision.model.id}")
+            }
+        }
         // TODO: delete the model if the revision is the first revision of the model
         revision.deleted = true
         revision.save(flush: true)

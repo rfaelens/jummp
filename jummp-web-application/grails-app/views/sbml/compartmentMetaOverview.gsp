@@ -11,7 +11,7 @@
             <td><g:message code="sbml.compartments.size" args="${[compartment.size]}"/></td>
         </tr>
     </g:if>
-    <jummp:sboTableRow sbo="${compartment.sboTerm}" name="${compartment.sboName}"/>
+    <jummp:sboTableRow sbo="${compartment.sbo}"/>
     <jummp:annotationsTableRow annotations="${compartment.annotation}"/>
     <sbml:notesTableRow notes="${compartment.notes}"/>
     <g:if test="${compartment.allSpecies.size() == 1}">

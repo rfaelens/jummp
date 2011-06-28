@@ -133,7 +133,7 @@ class SbmlTagLib {
         out << render(template: "/templates/sbml/reaction", model: [title: name, metaLink: metaLink, reversible: reaction.reversible, products: reaction.products, modifiers: reaction.modifiers, reactants: reaction.reactants])
     }
 
-        /**
+    /**
      * Renders a list of SBML reactions for the overview.
      * @attr reactions REQUIRED List of Reactions
      */
@@ -485,7 +485,7 @@ class SbmlTagLib {
      */
     def renderSpeciesOverview = { attrs ->
         Map species = attrs.species
-        out << render(template: "/templates/sbml/speciesOverview", model: [title: species.id, initialAmount: species.initialAmount, initialConcentration: species.initialConcentration, substanceUnits: species.substanceUnits, sboName: species.sboName, sboTerm: species.sboTerm, annotation: species.annotation])
+        out << render(template: "/templates/sbml/speciesOverview", model: [title: species.id, initialAmount: species.initialAmount, initialConcentration: species.initialConcentration, substanceUnits: species.substanceUnits, sbo: species.sbo, annotation: species.annotation])
     }
 
     /**
