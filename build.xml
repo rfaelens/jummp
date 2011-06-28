@@ -35,7 +35,7 @@
 <!-- Target to execute the testing of one plugin. Used by antcall from test-plugins -->
     <target name="test-plugin">
         <echo message="Running tests for Plugin ${plugin}"/>
-        <grails command="test-app" args="-xml ${coverage}" cwd="${basedir}/jummp-plugins/jummp-plugin-${plugin}"/>
+        <grails command="${env.GRAILS_OPTS} test-app" args="-xml ${coverage}" cwd="${basedir}/jummp-plugins/jummp-plugin-${plugin}"/>
         <copy todir="${basedir}/target/test-reports">
             <fileset dir="${basedir}/jummp-plugins/jummp-plugin-${plugin}/target/test-reports">
                 <include name="TEST-*.xml"/>
@@ -68,7 +68,7 @@
 
 <!-- Runs test-app in the core application -->
     <target name="test-core" depends="ast-jar">
-        <grails command="test-app" args="-xml ${coverage}" cwd="${basedir}"/>
+        <grails command="${env.GRAILS_OPTS} test-app" args="-xml ${coverage}" cwd="${basedir}"/>
     </target>
 
 <!-- Generates the test reports for all tests -->
