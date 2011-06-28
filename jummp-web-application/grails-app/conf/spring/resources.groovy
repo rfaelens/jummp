@@ -30,6 +30,9 @@ beans = {
         remoteSbmlService(net.biomodels.jummp.webapp.remote.RemoteSbmlService) {
             remoteSbmlAdapter = ref("sbmlJmsRemoteAdapter")
         }
+        remoteMiriamService(net.biomodels.jummp.webapp.remote.RemoteMiriamService) {
+            iMiriamService = ref("miriamJmsRemoteAdapter")
+        }
     }
 
     remoteAuthenticationProvider(net.biomodels.jummp.webapp.RemoteAuthenticationProvider) {
