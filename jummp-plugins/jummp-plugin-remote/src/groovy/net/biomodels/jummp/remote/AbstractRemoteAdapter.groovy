@@ -86,6 +86,9 @@ abstract class AbstractRemoteAdapter {
                 if (value == JSONObject.NULL) {
                     value = null
                 }
+                if (value instanceof JSONArray) {
+                    value = jsonToList(value)
+                }
                 entry.put(key, value)
             }
             returnList << entry
