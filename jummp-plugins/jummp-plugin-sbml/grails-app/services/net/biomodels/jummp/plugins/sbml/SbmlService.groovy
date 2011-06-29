@@ -349,6 +349,32 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         return bytes
     }
 
+    @Profiled(tag="SbmlService.getAllAnnotationURNs")
+    public List<String> getAllAnnotationURNs(RevisionTransportCommand revision) {
+        SBMLDocument document = getFromCache(revision)
+        List<String> urns = []
+        List<SBase> sbases = []
+        sbases << document.model.listOfCompartments
+        sbases << document.model.listOfConstraints
+        sbases << document.model.listOfEvents
+        sbases << document.model.listOfFunctionDefinitions
+        sbases << document.model.listOfInitialAssignments
+        sbases << document.model.listOfParameters
+        sbases << document.model.listOfReactions
+        sbases << document.model.listOfRules
+        sbases << document.model.listOfSpecies
+        sbases << document.model.listOfUnitDefinitions
+        sbases << document.model
+        sbases.each { sbase ->
+            sbase.annotation.listOfCVTerms.each { cvTerm ->
+                cvTerm.resources.each {
+                    urns << it
+                }
+            }
+        }
+        return urns
+    }
+
     /**
      * Returns the SBMLDocument for the @p revision from the cache.
      * If the cache does not contain the SBMLDocument, the model file is

@@ -58,12 +58,30 @@ class MiriamService implements IMiriamService {
         if (!preferred) {
             return [:]
         }
+        MiriamIdentifier resolvedName = MiriamIdentifier.findByDatatypeAndIdentifier(datatype, identifier)
         return [
                 dataTypeLocation: preferred.location,
                 dataTypeName: datatype.name,
-                name: resolveName(datatype, identifier),
+                name: resolvedName ? resolvedName.name : URLCodec.decode(identifier),
                 url: preferred.action.replace('$id', identifier)
         ]
+    }
+
+    public void fetchMiriamData(List<String> urns) {
+        urns.each { urn ->
+            int colonIndex = urn.lastIndexOf(':')
+            String datatypeUrn = urn.substring(0, colonIndex)
+            String identifier = urn.substring(colonIndex + 1)
+            MiriamDatatype datatype = resolveDatatype(datatypeUrn)
+            if (!datatype) {
+                return
+            }
+            MiriamResource preferred = preferredResource(datatype)
+            if (!preferred) {
+                return
+            }
+            resolveName(datatype, identifier)
+        }
     }
 
     /**
@@ -92,17 +110,14 @@ class MiriamService implements IMiriamService {
     }
 
     /**
-     * Tries to resolve a name for the given MIRIAM datatype.
+     * Tries to resolve a name for the given MIRIAM datatype and stores in the database.
      * Uses some well known web services to connect to.
-     * If there is no well known web service the passed in id is cleaned for HTML output and returned.
      * @param miriam The datatype
      * @param id The identifier part of the URN.
-     * @return Either the resolved name, or HTML cleaned id.
      */
-    private String resolveName(MiriamDatatype miriam, String id) {
-        MiriamIdentifier identifier = MiriamIdentifier.findByDatatypeAndIdentifier(miriam, id)
-        if (identifier) {
-            return identifier.name
+    private void resolveName(MiriamDatatype miriam, String id) {
+        if (MiriamIdentifier.findByDatatypeAndIdentifier(miriam, id)) {
+            return
         }
         String name = null
         try {
@@ -137,12 +152,9 @@ class MiriamService implements IMiriamService {
             log.debug(e.getMessage())
         }
         if (name && name != id) {
-            identifier = new MiriamIdentifier(identifier: id, datatype: miriam, name: name)
+            MiriamIdentifier identifier = new MiriamIdentifier(identifier: id, datatype: miriam, name: name)
             identifier.save(flush: true)
-            return name
         }
-        // fallback: to just cleaning for HTML
-        return URLCodec.decode(id)
     }
 
     /**
