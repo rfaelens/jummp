@@ -4,6 +4,7 @@ import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import org.codehaus.groovy.grails.commons.ApplicationHolder
+import net.biomodels.jummp.model.Revision
 
 /**
  * @short Service to handle Model files.
@@ -88,6 +89,21 @@ class ModelFileFormatService {
             return service.validate(model)
         } else {
             return ""
+        }
+    }
+
+    /**
+     * Retrieves all annotation URNs through the service responsible for the format used
+     * by the @p revision.
+     * @param rev The Revision for which all URNs should be retrieved
+     * @return List of all URNs used in the Revision
+     */
+    List<String> getAllAnnotationURNs(Revision rev) {
+        FileFormatService service = serviceForFormat(rev.format)
+        if (service) {
+            return service.getAllAnnotationURNs(rev.toCommandObject())
+        } else {
+            return []
         }
     }
 

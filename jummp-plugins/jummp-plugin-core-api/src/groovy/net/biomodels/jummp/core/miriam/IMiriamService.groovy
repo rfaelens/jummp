@@ -28,4 +28,11 @@ public interface IMiriamService {
      * @return Map as described above
      */
     public Map miriamData(String urn)
+
+    /**
+     * Tries to fetch all the MIRIAM data for each of the given @p urns and stores them in the database, if not
+     * already present in the database
+     * @param urns List of URNs to be resolved
+     */
+    public void fetchMiriamData(List<String> urns)
 }

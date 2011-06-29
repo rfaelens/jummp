@@ -32,4 +32,11 @@ class MiriamJmsAdapterService extends AbstractJmsAdapter {
     def miriamData(def message) {
         miriamService.miriamData((String)message[1])
     }
+
+    @Queue
+    @JmsQueueMethod(isAuthenticate=true, arguments=[List])
+    def fetchMiriamData(def message) {
+        miriamService.fetchMiriamData((List)message[1])
+        return true
+    }
 }
