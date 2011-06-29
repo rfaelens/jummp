@@ -24,6 +24,7 @@ import net.biomodels.jummp.core.events.RevisionCreatedEvent
 import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.model.Publication
 import org.springframework.security.access.prepost.PostAuthorize
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 /**
  * @short Service class for managing Models
@@ -63,9 +64,9 @@ class ModelService {
      */
     def pubMedService
     /**
-     * Dependency injection for MiriamService
+     * Dependency injection for ExecutorService to run threads
      */
-    def miriamService
+    def executorService
 
     static transactional = true
 
@@ -411,7 +412,7 @@ class ModelService {
             aclUtilService.addPermission(revision, username, BasePermission.DELETE)
             aclUtilService.addPermission(revision, username, BasePermission.READ)
 
-            miriamService.fetchMiriamData(modelFileFormatService.getAllAnnotationURNs(revision))
+            executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", revision))
             // broadcast event
             grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFile))
         } else {
@@ -486,7 +487,7 @@ class ModelService {
                     aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.READ)
                 }
             }
-            miriamService.fetchMiriamData(modelFileFormatService.getAllAnnotationURNs(revision))
+            executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", revision))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), file))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad

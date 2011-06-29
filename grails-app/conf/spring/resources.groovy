@@ -12,6 +12,12 @@ beans = {
     }
     postLogging(net.biomodels.jummp.core.events.PostLoggingAdvice)
 
+    fetchAnnotations(net.biomodels.jummp.core.miriam.FetchAnnotationsThread) { bean ->
+        bean.autowire = "byName"
+        bean.factoryMethod = "getInstance"
+        bean.scope = "prototype"
+    }
+
     if (Environment.getCurrent() == Environment.DEVELOPMENT) {
         timingAspect(org.perf4j.log4j.aop.TimingAspect)
     }
