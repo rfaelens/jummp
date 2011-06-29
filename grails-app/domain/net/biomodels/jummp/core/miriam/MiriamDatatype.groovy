@@ -26,8 +26,13 @@ class MiriamDatatype implements Serializable {
      * The URN namespace of the MIRIAM datatype. E.g. urn:miriam:kegg.reaction
      */
     String urn
+    /**
+     * The preferred resource
+     */
+    MiriamResource preferred
 
     static constraints = {
+        preferred nullable: true
     }
 
     static mapping = {

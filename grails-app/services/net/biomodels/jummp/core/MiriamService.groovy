@@ -94,12 +94,8 @@ class MiriamService implements IMiriamService {
      * @return The preferred Resource for the given datatype
      */
     private MiriamResource preferredResource(MiriamDatatype datatype) {
-        if (ConfigurationHolder.config.jummp.webapp.miriam.prefered.containsKey(datatype.identifier)) {
-            // try to find the resource
-            MiriamResource resource = (MiriamResource)datatype.resources.find{ it.identifier == ConfigurationHolder.config.jummp.webapp.miriam.prefered[datatype.identifier] }
-            if (resource) {
-                return resource
-            }
+        if (datatype.preferred) {
+            return datatype.preferred
         }
         return (MiriamResource)(datatype.resources.findAll { !it.obsolete }.sort { it.id }?.first())
     }
@@ -184,10 +180,18 @@ class MiriamService implements IMiriamService {
                 if (resource.@obsolete?.text() == "true") {
                     res.obsolete = true
                 }
+                boolean hasPreferred = false
+                if (resource.@preferred?.text() == "true") {
+                    hasPreferred = true
+                }
                 if (res.id == null || !miriam.resources.contains(res)) {
                     miriam.addToResources(res)
                 } else {
                     res.save()
+                }
+                if (hasPreferred && miriam.preferred != res) {
+                    miriam.preferred == res
+                    miriam.save()
                 }
             }
             miriam.save()
