@@ -113,7 +113,6 @@ class ModelFileFormatService {
      * @return The service which handles the format.
      */
     private FileFormatService serviceForFormat(final ModelFormat format) {
-        println services
         if (format && services.containsKey(format.identifier)) {
             return ApplicationHolder.application.mainContext.getBean((String)services.getAt(format.identifier))
         } else {
