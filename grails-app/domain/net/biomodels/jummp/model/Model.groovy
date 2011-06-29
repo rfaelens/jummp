@@ -40,6 +40,10 @@ class Model implements Serializable {
     Publication publication
     // TODO: unique Identifier for the model? UML diagram lists an "accessionNumber"?
 
+    static mapping = {
+        publication lazy: false
+    }
+
     static constraints = {
         vcsIdentifier(nullable: false, blank: false, unique: true)
         name(nullable: false, unique: true, blank: false)
