@@ -62,6 +62,7 @@ target(models: "Creates some models to be used in the application") {
     def publicationLinkProviderClass = grailsApp.classLoader.loadClass("net.biomodels.jummp.core.model.PublicationLinkProvider")
     def publication = publicationTransportCommandClass.newInstance(link: "20488988", linkProvider: publicationLinkProviderClass.PUBMED)
     def doiPublication = publicationTransportCommandClass.newInstance(link: "10.1016/S0006-3495(61)86902-6", linkProvider: publicationLinkProviderClass.DOI, journal: "Journal", title: "Title", affiliation: "Affiliation", synopsis: "")
+    println("Importing Test Models...")
     modelService.uploadModel(modelFile, modelTransportCommandClass.newInstance(format: modelFormatClass.newInstance(identifier: "SBML"), comment: "Test", name: "1st model", publication: publication))
     modelService.uploadModel(modelFile, modelTransportCommandClass.newInstance(format: modelFormatClass.newInstance(identifier: "SBML"), comment: "Test", name: "2nd model", publication: doiPublication))
     modelService.uploadModel(modelFile, modelTransportCommandClass.newInstance(format: modelFormatClass.newInstance(identifier: "SBML"), comment: "Test", name: "3rd model"))
@@ -82,6 +83,7 @@ target(models: "Creates some models to be used in the application") {
     ConfigurationHolder.config.quartz.autoStartup = true
     def quartzScheduler = appCtx.getBean("quartzScheduler")
     quartzScheduler.start()
+    println("Core completely started")
 }
 
 setDefaultTarget(main)
