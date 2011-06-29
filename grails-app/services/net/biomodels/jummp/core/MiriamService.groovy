@@ -20,29 +20,24 @@ class MiriamService implements IMiriamService {
     static transactional = true
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void updateMiriamResources(String url, boolean force) throws MiriamUpdateException {
-        // TODO: move into thread
-        // we cannot throw the exception from inside the closure
-        // therefore we store it in the variable and throw it after the withTransaction closure
-        MiriamUpdateException exception = null
-        MiriamResource.withTransaction { TransactionStatus status ->
-            if (force) {
-                // delete all MIRIAM data
-                MiriamDatatype.list().each {
-                    it.delete()
+    public void updateMiriamResources(String url, boolean force) {
+        runAsync {
+            MiriamResource.withTransaction { TransactionStatus status ->
+                if (force) {
+                    // delete all MIRIAM data
+                    MiriamDatatype.list().each {
+                        it.delete()
+                    }
+                }
+                try {
+                    parseResourceXML(url)
+                    status.flush()
+                    log.info("MIRIAM resources updated successfully from ${url}")
+                } catch (Exception e) {
+                    status.setRollbackOnly()
+                    log.info(e.getMessage(), e)
                 }
             }
-            try {
-                parseResourceXML(url)
-                status.flush()
-            } catch (Exception e) {
-                status.setRollbackOnly()
-                log.info(e.getMessage(), e)
-                exception = new MiriamUpdateException(e)
-            }
-        }
-        if (exception) {
-            throw exception
         }
     }
 
@@ -162,7 +157,6 @@ class MiriamService implements IMiriamService {
      * @param url The URL to the XML file describing the MIRIAM resources
      */
     private void parseResourceXML(String url) {
-        // TODO: move parsing into a Thread
         String xml = new URL(url).getText()
         def rootNode = new XmlSlurper().parseText(xml)
         rootNode.datatype.each { datatype ->
