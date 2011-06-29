@@ -207,6 +207,8 @@ class JummpTagLib {
             out << "<a target=\"_blank\" href=\"${miriam["dataTypeLocation"]}\">${miriam["dataTypeName"]}</a>"
             out << "&nbsp;"
             out << "<a target=\"_blank\" href=\"${miriam["url"]}\">${miriam.name}</a>"
+        } else if (miriam.containsKey("name")) {
+            out << miriam["name"]
         } else if (miriam.containsKey("urn")) {
             out << miriam["urn"]
         } else {
