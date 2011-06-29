@@ -354,16 +354,16 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         SBMLDocument document = getFromCache(revision)
         List<String> urns = []
         List<SBase> sbases = []
-        sbases << document.model.listOfCompartments
-        sbases << document.model.listOfConstraints
-        sbases << document.model.listOfEvents
-        sbases << document.model.listOfFunctionDefinitions
-        sbases << document.model.listOfInitialAssignments
-        sbases << document.model.listOfParameters
-        sbases << document.model.listOfReactions
-        sbases << document.model.listOfRules
-        sbases << document.model.listOfSpecies
-        sbases << document.model.listOfUnitDefinitions
+        sbases.addAll(document.model.listOfCompartments)
+        sbases.addAll(document.model.listOfConstraints)
+        sbases.addAll(document.model.listOfEvents)
+        sbases.addAll(document.model.listOfFunctionDefinitions)
+        sbases.addAll(document.model.listOfInitialAssignments)
+        sbases.addAll(document.model.listOfParameters)
+        sbases.addAll(document.model.listOfReactions)
+        sbases.addAll(document.model.listOfRules)
+        sbases.addAll(document.model.listOfSpecies)
+        sbases.addAll(document.model.listOfUnitDefinitions)
         sbases << document.model
         sbases.each { sbase ->
             sbase.annotation.listOfCVTerms.each { cvTerm ->
