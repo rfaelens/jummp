@@ -1,11 +1,11 @@
-package net.biomodels.jummp.webapp.miriam
+package net.biomodels.jummp.core.miriam
 
 /**
  * Domain object to describe a MIRIAM datatype.
  * @author Martin Gräßlin <m.graesslin@dkfz.de>
  */
-class MiriamDatatype {
-    static hasMany = [resources: MiriamResource]
+class MiriamDatatype implements Serializable {
+    static hasMany = [resources: MiriamResource, identifiers: MiriamIdentifier]
     /**
      * The identifier of the MIRIAM datatype. E.g. "MIR:00000014"
      */

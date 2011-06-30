@@ -7,15 +7,10 @@ class BootStrap {
      * Dependency injection of remoteJummpApplicationAdapter
      */
     def remoteJummpApplicationAdapter
-    /**
-     * Dependency Injection of miriamService in order to parse during bootstrap
-     */
-    def miriamService
 
     def init = { servletContext ->
         // TODO: proper app token
         ConfigurationHolder.config.jummpCore = remoteJummpApplicationAdapter.getJummpConfig("web application")
-        miriamService.init()
         SpringSecurityUtils.clientRegisterFilter('authenticationCheckFilter', SecurityFilterPosition.SECURITY_CONTEXT_FILTER.order + 10)
     }
     def destroy = {

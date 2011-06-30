@@ -1,6 +1,7 @@
 package net.biomodels.jummp.core.model;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Service interface for handling a specific ModelFormat.
@@ -24,4 +25,10 @@ public interface FileFormatService {
      * @return The name of the Model, if possible, an empty String if not possible
      */
     public String extractName(final File model);
+    /**
+     * Retrieves all annotation URNs in the model file referenced by @p revision.
+     * @param revision The Revision identifying a model file
+     * @return List of all URNs in the model file.
+     */
+    public List<String> getAllAnnotationURNs(RevisionTransportCommand revision);
 }

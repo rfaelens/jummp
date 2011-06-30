@@ -93,7 +93,7 @@ function loadModelListCallback() {
 function loadModelTabCallback(data, tabIndex) {
     // set the header
     updateModelHeader($("#model-header span:eq(0)").text(), $("#model-header span:eq(1)").text(), $("#model-header span:eq(2)").text());
-    $("#modelTabs").tabs({disabled: [1, 5],
+    $("#modelTabs").tabs({disabled: [6],
         ajaxOptions: {
             error: function(jqXHR) {
                 $("#body").unblock();
@@ -104,6 +104,12 @@ function loadModelTabCallback(data, tabIndex) {
         load: function(event, ui) {
             // ui has index
             switch ($(ui.tab).attr("id")) {
+            case "modelTabs-overview":
+                // add tooltips to the rows
+                $("#model-math tbody tr").cluetip({clickThrough: false, sticky: true, mouseOutClose: true});
+                $("#model-parameters tbody tr").cluetip({clickThrough: false, sticky: true, mouseOutClose: true});
+                $("#model-entity tbody tr").cluetip({clickThrough: false, sticky: true, mouseOutClose: true});
+                break;
             case "modelTabs-math":
                 // add tooltips to the rows
                 $("#model-math tbody tr").cluetip({clickThrough: false, sticky: true, mouseOutClose: true});
@@ -145,13 +151,13 @@ function loadModelTabCallback(data, tabIndex) {
                         });
                     }
                 });
-                break;
-            case "modelTabs-addRevision":
-                // add revision tab
+                // add revision
                 $("#revision-upload-form div.ui-dialog-buttonpane input").button();
                 $("#revision-upload-form div.ui-dialog-buttonpane input:button").click(function() {
                     submitFormWithFile($("#revision-upload-form"), createLink("model", "saveNewRevision"), uploadRevisionCallback);
                 });
+                break;
+            case "modelTabs-addRevision":
                 break;
             }
         }
@@ -724,4 +730,25 @@ function registrationCallback(data) {
         setErrorState("#register-form-email", data.email);
         setErrorState("#register-form-name", data.userRealName);
     }
+}
+
+/**
+ * View logic for /miriam/index
+ */
+function loadMiriamCallback() {
+    $("#miriam div.ui-dialog-buttonpane input").button();
+    $("#miriam div.ui-dialog-buttonpane input:button").click(function() {
+        submitForm($("#miriam form"), createLink("miriam", "updateResources"), function(data) {
+            if (data.success) {
+                showInfoMessage(i18n.miriam.update.success, 20000);
+                setErrorState("#miriam-update-miriam-url", false);
+            } else if (data.error) {
+                if (data.error != true) {
+                    showErrorMessage(data.error);
+                }
+                showErrorMessage(data.miriamUrl);
+                setErrorState("#miriam-update-miriam-url", data.miriamUrl);
+            }
+        });
+    });
 }

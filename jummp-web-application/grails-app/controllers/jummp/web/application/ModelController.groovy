@@ -64,19 +64,7 @@ class ModelController {
     }
 
     def revisions = {
-        [revisions: remoteModelService.getAllRevisions(params.id as Long).reverse()]
-    }
-
-    /**
-     * View for uploading a new Model Revision.
-     */
-    def newRevision = {
-        if (!springSecurityService.isAjax(request)) {
-            render(template: "/templates/page", model: [link: g.createLink(action: "show", id: params.id), callback: "loadModelTabCallback", data: "#modelTabs-addRevision"])
-            return
-        }
-        // TODO: verify that user has write access to the Model
-        [params: params]
+        [revisions: remoteModelService.getAllRevisions(params.id as Long).reverse(), addRevision: remoteModelService.canAddRevision(params.id as Long)]
     }
 
     /**
@@ -259,6 +247,13 @@ class ModelController {
     def deleteRevision = {
         Map data = [deleted: remoteModelService.deleteRevision(params.id as Long, params.revision as Integer)]
         render data as JSON
+    }
+
+    /**
+     * Renders the HTML including the reaction graph svg
+     */
+    def reactionGraph = {
+        [model: params.id, revision: params.revision]
     }
 
     /**

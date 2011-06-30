@@ -95,6 +95,11 @@ var i18n = {
             removeRole: "${g.message(code: 'user.administration.userRole.ui.removeRole')}"
         }
     },
+    miriam: {
+        update: {
+            success: "${g.message(code: 'miriam.update.success')}"
+        }
+    },
     ui: {
         button: {
             cancel: "${g.message(code: 'ui.button.cancel')}",

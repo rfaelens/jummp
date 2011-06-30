@@ -257,4 +257,21 @@ public interface RemoteSbmlAdapter {
      * @return Map describing the Species
      */
      public Map getSpecies(long modelId, int revisionNumber, String id)
+    /**
+     * Retrieves the generated sub model.
+     * The model is generated with components from an existing model which are
+     * handed over.
+     * @param modelId: The existing model's id
+     * @param revisionNumber: The revision number of the chosen revision
+     * @param subModelId: The sub model id which can be given by a user
+     * @param metaId: The given meta id
+     * @param compartmentIds: The selected compartment ids
+     * @param speciesIds: The selected species ids
+     * @param reactionIds: The selected reaction ids
+     * @param ruleIds: The selected rule ids
+     * @param eventIds: The selected event ids
+     * @return String containing the generated SBML model
+     */
+    public String triggerSubmodelGeneration(long modelId, int revisionNumber, String subModelId, String metaId, List compartmentIds, List speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds)
+    public byte[] generateSvg(long modelId, int revisionNumber)
 }

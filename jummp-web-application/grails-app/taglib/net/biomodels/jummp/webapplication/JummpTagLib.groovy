@@ -1,7 +1,6 @@
 package net.biomodels.jummp.webapplication
 
 import net.biomodels.jummp.webapp.menu.MenuItem
-import net.biomodels.jummp.webapp.miriam.MiriamDatatype
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamSource
 import javax.xml.transform.stream.StreamResult
@@ -22,7 +21,7 @@ class JummpTagLib {
     /**
      * Dependency Injection for Miriam Service
      */
-    def miriamService
+    def remoteMiriamService
 
     Transformer transformer = null
 
@@ -183,12 +182,12 @@ class JummpTagLib {
         renderQualifer(annotation.qualifier)
         if (annotation.resources.size() == 1) {
             out << "&nbsp;"
-            renderURN(annotation.resources[0])
+            out << renderURN(annotation.resources[0])
         } else {
             out << "<ul>"
             annotation.resources.each {
                 out << "<li>"
-                renderURN(it)
+                out << renderURN(it)
                 out << "</li>"
             }
             out << "</ul>"
@@ -200,24 +199,19 @@ class JummpTagLib {
      * @todo move into an SBML taglib
      */
     def renderURN = { attrs ->
-        String resource
-        String resolvedName = null
-        if (attrs instanceof String) {
-            resource = attrs
+        Map miriam = attrs
+        if (attrs.resource) {
+            miriam = attrs.resource
+        }
+        if (miriam.containsKey("dataTypeLocation") && miriam.containsKey("dataTypeName") && miriam.containsKey("name") && miriam.containsKey("url")) {
+            out << "<a target=\"_blank\" href=\"${miriam["dataTypeLocation"]}\">${miriam["dataTypeName"]}</a>"
+            out << "&nbsp;"
+            out << "<a target=\"_blank\" href=\"${miriam["url"]}\">${miriam.name}</a>"
+        } else if (miriam.containsKey("urn")) {
+            out << miriam["urn"]
         } else {
-            resource = attrs.resource
-            resolvedName = attrs.resolvedName
+            out << miriam
         }
-        int colonIndex = resource.lastIndexOf(':')
-        String urn = resource.substring(0, colonIndex)
-        String identifier = resource.substring(colonIndex + 1)
-        MiriamDatatype miriam = miriamService.resolveDatatype(urn)
-        out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).location}\">${miriam.name}</a>"
-        out << "&nbsp;"
-        if (!resolvedName) {
-            resolvedName = miriamService.resolveName(miriam, identifier)
-        }
-        out << "<a target=\"_blank\" href=\"${miriamService.preferredResource(miriam).action.replace('$id', identifier)}\">${resolvedName}</a>"
     }
 
     /**
@@ -292,17 +286,16 @@ class JummpTagLib {
      * The tag expects an attribute sbo containing the integer value of the sbo term.
      * In case the tag is not set or an empty string the table row is not rendered.
      * @attr sbo REQUIRED the numerical SBO term without the urn header
-     * @attr name Optional resolved name of the SBO term
      */
     def sboTableRow = { attrs ->
-        if (!attrs.sbo || attrs.sbo == "") {
+        Map sbo = attrs
+        if (attrs.sbo) {
+            sbo = attrs.sbo
+        }
+        if (!sbo) {
             return
         }
-        String name = attrs.name
-        if (name == "") {
-            name = null
-        }
-        out << render(template: "/templates/sboTableRow", model: [urn: "urn:miriam:obo.sbo:" + URLCodec.encode(attrs.sbo), name: name])
+        out << render(template: "/templates/sboTableRow", model: [urn: sbo])
     }
 
     /**

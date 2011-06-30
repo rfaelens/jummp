@@ -4,7 +4,6 @@ import org.freedesktop.dbus.DBusInterface;
 import org.freedesktop.dbus.DBusInterfaceName;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @short DBus interface to SBML.
@@ -40,4 +39,6 @@ public interface SbmlDBusAdapter  extends DBusInterface {
     public String getCompartment(String authenticationHash, long modelId, int revisionNumber, String id);
     public String getAllSpecies(String authenticationHash, long modelId, int revisionNumber);
     public String getSpecies(String authenticationHash, long modelId, int revisionNumber, String id);
+    public String triggerSubmodelGeneration(String authenticationHash, long modelId, int revisionNumber, String subModelId, String metaId, List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds);
+    public byte[] generateSvg(String authenticationHash, long modelId, int revisionNumber);
 }

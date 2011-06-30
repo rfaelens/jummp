@@ -48,7 +48,12 @@ interface ISbmlService {
      * @li qualifier: name for the MIRIAM qualifier as listed in http://sbml.org/Special/Software/JSBML/build/apidocs/org/sbml/jsbml/CVTerm.Qualifier.html
      * @li biologicalQualifier: @c true if the qualifier is a biological qualifier, @c false otherwise
      * @li modelQualifier: @c true if the qualifier is a model qualifier, @c false otherwise
-     * @li resources: list of all uris for this annotation
+     * @li resources: list of all uris for this annotation fully resolved as a Map each with the following items:
+     * @li urn: The unique MIRIAM urn
+     * @li dataTypeLocation: URL to the Website of this data type (optional)
+     * @li dataTypeName: Human readable name for the data type (optional)
+     * @li url: direct URL to the website describing the resource (optional)
+     * @li name: Human readable name of the resource (optional)
      * @param revision
      * @return List of all MIRIAM annotations of the model element
      */
@@ -62,7 +67,7 @@ interface ISbmlService {
      * @li name: The name element
      * @li constants: @c true if parameter is a constant, @c false otherwise
      * @li value: The value element if set, otherwise @c null
-     * @li sboTerm: The numerical sbo term if set, otherwise @c null
+     * @li sbo: Map describing the SBO term, like resources in @link getAnnotations
      * @li unit: The unit element
      * @param revision
      * @return List of all parameters in the Model
@@ -97,7 +102,7 @@ interface ISbmlService {
      * @li metaId: The metaId element
      * @li name: The name element
      * @li reversible: boolean indicating whether the reaction is reversible
-     * @li sboTerm: The sboTerm if set, @c null otherwise
+     * @li sbo: Map describing the SBO term, like resources in @link getAnnotations
      * @li reactants: list of all Reactants with a Map for each Reactant, description see below
      * @li products: list of all Products with a Map for each Product, description see below
      * @li modifiers: list of all Modifiers with a Map for each Modifier, description see below
@@ -144,7 +149,7 @@ interface ISbmlService {
     /**
      * Retrieves the Event with the given @p id from the SBML Model.
      * The returned map contains all the elements as explained in @link getEvents
-     * with additionally the annotation, notes, sboTerm, trigger and delay. The
+     * with additionally the annotation, notes, sbo, trigger and delay. The
      * annotation element follows the description of @link getAnnotations. Trigger
      * and delay contain both either a Content MathML String or an empty String.
      * @param revision
@@ -189,7 +194,7 @@ interface ISbmlService {
     /**
      * Retrieves the Function Definition with the given @p id in the SBML Model.
      * The returned map contains all the elements as explained in @link getFunctionDefinitions with
-     * additionally the annotation, notes and sboTerm. The annotation element follows the description
+     * additionally the annotation, notes and sbo. The annotation element follows the description
      * of @link getAnnotations.
      * @param revision
      * @param id
@@ -207,8 +212,7 @@ interface ISbmlService {
      * @li spatialDimensions: The spatial dimensions element
      * @li units: The unit element
      * @li notes:  The notes element
-     * @li sboTerm: The numerical sbo term if set, otherwise @c null
-     * @li sboName: The sbo name
+     * @li sbo: Map describing the SBO term, like resources in @link getAnnotations
      * @li allSpecies: The needed attributes of all related species
      * @param revision
      * @return List of all Compartments
@@ -248,4 +252,24 @@ interface ISbmlService {
      * @return Map describing the Species
      */
      public Map getSpecies(RevisionTransportCommand revision, String id)
+    /**
+     * Triggers the generation of a sub model taking selected parts of an existing model.
+     * The returned String contains the generated SBML model.
+     * @param revision
+     * @param subModelId: The sub model id which can be given by a user
+     * @param metaId: The given meta id
+     * @param compartmentIds: The selected compartment ids
+     * @param speciesIds: The selected species ids
+     * @param reactionIds: The selected reaction ids
+     * @param ruleIds: The selected rule ids
+     * @param eventIds: The selected event ids
+     * @return String containing the generated SBML model
+     */
+    public String triggerSubmodelGeneration(RevisionTransportCommand revision, String subModelId, String metaId, List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds)
+    /**
+     * Generates an SVG for the given SBML model.
+     * @param revision The Revision identifying an SBML model
+     * @return Content of generated SVG
+     */
+    public byte[] generateSvg(RevisionTransportCommand revision)
 }

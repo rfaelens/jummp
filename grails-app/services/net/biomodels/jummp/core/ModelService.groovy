@@ -62,6 +62,10 @@ class ModelService {
      * Dependency Injection for PubMedService
      */
     def pubMedService
+    /**
+     * Dependency injection for MiriamService
+     */
+    def miriamService
 
     static transactional = true
 
@@ -406,6 +410,8 @@ class ModelService {
             aclUtilService.addPermission(revision, username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, username, BasePermission.DELETE)
             aclUtilService.addPermission(revision, username, BasePermission.READ)
+
+            miriamService.fetchMiriamData(modelFileFormatService.getAllAnnotationURNs(revision))
             // broadcast event
             grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFile))
         } else {
@@ -480,6 +486,7 @@ class ModelService {
                     aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.READ)
                 }
             }
+            miriamService.fetchMiriamData(modelFileFormatService.getAllAnnotationURNs(revision))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), file))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
@@ -755,6 +762,15 @@ class ModelService {
         if (revision.id != revision.model.revisions.findAll { !it.deleted }.sort { it.revisionNumber }.last().id) {
             // TODO: maybe better throw an exception
             return false
+        }
+        if (revision.model.revisions.findAll { !it.deleted }.size() == 1) {
+            // only one revision, delete the Model
+            // first check the ACL, has to be manual as Spring would not intercept the direct method call
+            if (aclUtilService.hasPermission(springSecurityService.authentication, revision.model, BasePermission.DELETE) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+                deleteModel(revision.model)
+            } else {
+                throw new AccessDeniedException("No permission to delete Model ${revision.model.id}")
+            }
         }
         // TODO: delete the model if the revision is the first revision of the model
         revision.deleted = true

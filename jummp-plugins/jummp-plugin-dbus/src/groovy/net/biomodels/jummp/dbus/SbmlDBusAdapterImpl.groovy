@@ -97,4 +97,12 @@ public class SbmlDBusAdapterImpl extends AbstractDBusAdapter implements SbmlDBus
     @DBusMethod(isAuthenticate = true, getRevision = [1, 2], json = true)
     public String getSpecies(String authenticationHash, long modelId, int revisionNumber, String id) {
     }
+
+    @DBusMethod(isAuthenticate = true, getRevision = [1, 2])
+    public String triggerSubmodelGeneration(String authenticationHash, long modelId, int revisionNumber, String subModelId, String metaId, List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds) {
+    }
+
+    @DBusMethod(isAuthenticate = true, getRevision = [1, 2])
+    public byte[] generateSvg(String authenticationHash, long modelId, int revisionNumber) {
+    }
 }
