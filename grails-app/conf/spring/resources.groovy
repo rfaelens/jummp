@@ -12,7 +12,7 @@ beans = {
     }
     postLogging(net.biomodels.jummp.core.events.PostLoggingAdvice)
 
-    if (Environment.getCurrent() == Environment.DEVELOPMENT) {
+//    if (Environment.getCurrent() == Environment.DEVELOPMENT) {
         timingAspect(org.perf4j.log4j.aop.TimingAspect)
-    }
+//    }
 }
