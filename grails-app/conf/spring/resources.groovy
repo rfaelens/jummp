@@ -33,6 +33,17 @@ beans = {
         resourceIdentifier = "MIR:00100012"
     }
 
+    ontologyLookupServiceResolver(net.biomodels.jummp.core.miriam.OntologyLookupResolver) {
+        supportedIdentifiers = [
+                "MIR:00000056": "MIR:00100084",
+                "MIR:00000067": "MIR:00100097",
+                "MIR:00100097": "MIR:00100143",
+                "MIR:00000111": "MIR:00100144",
+                "MIR:00000112": "MIR:00100145",
+                "MIR:00000002": "MIR:00100158"
+        ]
+    }
+
     if (Environment.getCurrent() == Environment.DEVELOPMENT) {
         timingAspect(org.perf4j.log4j.aop.TimingAspect)
     }
