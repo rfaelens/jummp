@@ -772,4 +772,25 @@ function loadMiriamCallback() {
             }
         });
     });
+    $("#miriam-model-update div.ui-dialog-buttonpane input").button();
+    $("#miriam-model-update div.ui-dialog-buttonpane input:button").click(function() {
+        $.ajax({
+            url: createLink("miriam", "updateModels"),
+            dataType: 'json',
+            success: function(data) {
+                if (data.success) {
+                    showInfoMessage(i18n.miriam.model.update.success, 20000);
+                } else if (data.error) {
+                    if (data.error != true) {
+                        showErrorMessage(data.error);
+                    }
+                }
+            },
+            statusCode: {
+                403: handler403,
+                404: handler404,
+                500: handler500
+            }
+        });
+    });
 }

@@ -46,4 +46,11 @@ class MiriamJmsAdapterService extends AbstractJmsAdapter {
         miriamService.updateAllMiriamData()
         return true
     }
+
+    @Queue
+    @JmsQueueMethod(isAuthenticate=true, arguments=[])
+    def updateModels(String authenticationHash) {
+        miriamService.updateModels()
+        return true
+    }
 }

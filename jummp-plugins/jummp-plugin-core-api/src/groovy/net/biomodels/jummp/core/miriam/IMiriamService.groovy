@@ -41,4 +41,8 @@ public interface IMiriamService {
      * if it changed.
      */
     public updateAllMiriamIdentifiers()
+    /**
+     * Fetches the MIRIAM annotations in each of the models.
+     */
+    public void updateModels()
 }

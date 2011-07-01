@@ -22,3 +22,9 @@
         <input type="button" value="${g.message(code: 'ui.button.schedule')}"/>
     </div>
 </div>
+<div id="miriam-model-update">
+    <g:message code="miriam.model.update"/>
+    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+        <input type="button" value="${g.message(code: 'ui.button.schedule')}"/>
+    </div>
+</div>

@@ -10,6 +10,8 @@ import net.biomodels.jummp.core.miriam.MiriamDatatype
 import net.biomodels.jummp.core.miriam.MiriamIdentifier
 import net.biomodels.jummp.core.miriam.NameResolver
 import org.codehaus.groovy.grails.commons.ApplicationHolder
+import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.Revision
 
 /**
  * Service for handling MIRIAM resources.
@@ -17,6 +19,14 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
  * @author Martin Gräßlin <m.graesslin@dkfz.de>
  */
 class MiriamService implements IMiriamService {
+    /**
+     * Dependency Injection of Model Service
+     */
+    def modelService
+    /**
+     * Dependency injection for ExecutorService to run threads
+     */
+    def executorService
 
     static transactional = true
 
@@ -98,6 +108,17 @@ class MiriamService implements IMiriamService {
                     }
                 }
             }
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public void updateModels() {
+        Model.list().each {
+            Revision revision = modelService.getLatestRevision(it)
+            if (!revision) {
+                return
+            }
+            executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", revision))
         }
     }
 
