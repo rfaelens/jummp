@@ -3,7 +3,7 @@
         <table>
             <tr>
                 <th><label for="miriam-update-miriam-url"><g:message code="miriam.update.ui.url"/></label></th>
-                <td><span><input type="text" id="miriam-update-miriam-url" name="miriamUrl"/><jummp:errorField/></span></td>
+                <td><span><input type="text" id="miriam-update-miriam-url" name="miriamUrl" value="http://www.ebi.ac.uk/miriam/main/export/xml/"/><jummp:errorField/></span></td>
             </tr>
             <tr>
                 <th><label for="miriam-update-force"><g:message code="miriam.update.ui.force"/></label></th>
