@@ -291,10 +291,10 @@ class JummpTagLib {
      */
     def sboTableRow = { attrs ->
         Map sbo = attrs
-        if (attrs.sbo) {
+        if (attrs.sbo instanceof Map) {
             sbo = attrs.sbo
         }
-        if (!sbo) {
+        if (!sbo || sbo.isEmpty()) {
             return
         }
         out << render(template: "/templates/sboTableRow", model: [urn: sbo])
