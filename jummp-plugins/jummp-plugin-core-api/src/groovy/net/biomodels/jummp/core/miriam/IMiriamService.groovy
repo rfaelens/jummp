@@ -35,4 +35,10 @@ public interface IMiriamService {
      * @param urns List of URNs to be resolved
      */
     public void fetchMiriamData(List<String> urns)
+
+    /**
+     * Updates all Miriam Identifiers stored in the database by trying to resolve the name again and update
+     * if it changed.
+     */
+    public updateAllMiriamIdentifiers()
 }

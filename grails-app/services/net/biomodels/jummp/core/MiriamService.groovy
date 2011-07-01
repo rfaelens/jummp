@@ -80,6 +80,27 @@ class MiriamService implements IMiriamService {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public updateAllMiriamIdentifiers() {
+        runAsync {
+            MiriamIdentifier.list().each { identifier ->
+                Map<String, NameResolver> nameResolvers = ApplicationHolder.application.mainContext.getBeansOfType(NameResolver)
+                for (NameResolver nameResolver in nameResolvers.values()) {
+                    if (nameResolver.supports(identifier.datatype)) {
+                        String resolvedName = nameResolver.resolve(identifier.datatype, identifier.identifier)
+                        if (resolvedName && identifier.name != resolvedName) {
+                            String oldName = identifier.name
+                            identifier.name = resolvedName
+                            identifier.save(flush: true)
+                            log.info("Miriam Identifier with id '${identifier.identifier}' for datatype '${identifier.datatype.identifier}' updated from '${oldName}' to '${resolvedName}'")
+                            break
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /**
      *
      * @param uri The MIRIAM uri

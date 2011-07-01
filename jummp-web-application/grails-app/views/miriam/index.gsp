@@ -16,3 +16,9 @@
         </div>
     </form>
 </div>
+<div id="miriam-update">
+    <g:message code="miriam.data.update"/>
+    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+        <input type="button" value="${g.message(code: 'ui.button.schedule')}"/>
+    </div>
+</div>

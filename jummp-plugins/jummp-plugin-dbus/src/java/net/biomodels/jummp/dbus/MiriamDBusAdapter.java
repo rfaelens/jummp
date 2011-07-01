@@ -14,4 +14,5 @@ public interface MiriamDBusAdapter extends DBusInterface {
     public void updateMiriamResources(String authenticationHash, String url, boolean force);
     public String miriamData(String authenticationHash, String urn);
     public void fetchMiriamData(String authenticationHash, List<String> urns);
+    public void updateAllMiriamIdentifiers(String authenticationHash);
 }
