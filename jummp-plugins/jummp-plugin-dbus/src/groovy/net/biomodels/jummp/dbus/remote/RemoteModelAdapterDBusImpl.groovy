@@ -90,11 +90,14 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteDBusAdapter implements Re
         file.withWriter {
             it.write(new String(bytes))
         }
+        ModelTransportCommand model = null
         if (meta.publication) {
-            return modelDBusAdapter.uploadModelWithPublication(authenticationToken(), file.getAbsolutePath(), DBusModel.fromModelTransportCommand(meta), DBusPublication.fromPublicationTransportCommand(meta.publication))
+            model = modelDBusAdapter.uploadModelWithPublication(authenticationToken(), file.getAbsolutePath(), DBusModel.fromModelTransportCommand(meta), DBusPublication.fromPublicationTransportCommand(meta.publication))
         } else {
-            return modelDBusAdapter.uploadModel(authenticationToken(), file.getAbsolutePath(), DBusModel.fromModelTransportCommand(meta))
+            model = modelDBusAdapter.uploadModel(authenticationToken(), file.getAbsolutePath(), DBusModel.fromModelTransportCommand(meta))
         }
+        FileUtils.deleteQuietly(file)
+        return model
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.addRevision")
@@ -105,6 +108,7 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteDBusAdapter implements Re
         }
         RevisionTransportCommand revision = modelDBusAdapter.addRevision(authenticationToken(), modelId, file.getAbsolutePath(), format.identifier, comment)
         revision.model = modelDBusAdapter.getModel(authenticationToken(), modelId)
+        FileUtils.deleteQuietly(file)
         return revision
     }
 
