@@ -1,8 +1,11 @@
 import grails.util.Environment
+import java.util.concurrent.Executors
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 // Place your Spring DSL code here
 beans = {
     xmlns aop: "http://www.springframework.org/schema/aop"
+    def grailsApplication = ApplicationHolder.application
 
     aop.config {
         // intercept all methods annotated with PostLogging annotation
@@ -46,5 +49,11 @@ beans = {
 
     if (Environment.getCurrent() == Environment.DEVELOPMENT) {
         timingAspect(org.perf4j.log4j.aop.TimingAspect)
+    }
+
+    executorService(  grails.plugin.executor.PersistenceContextExecutorWrapper ) { bean->
+        bean.destroyMethod = 'destroy' //keep this destroy method so it can try and clean up nicely
+        persistenceInterceptor = ref("persistenceInterceptor")
+        executor = Executors.newFixedThreadPool(grailsApplication.config.jummp.threadPool.size)
     }
 }
