@@ -30,13 +30,6 @@ public interface IMiriamService {
     public Map miriamData(String urn)
 
     /**
-     * Tries to fetch all the MIRIAM data for each of the given @p urns and stores them in the database, if not
-     * already present in the database
-     * @param urns List of URNs to be resolved
-     */
-    public void fetchMiriamData(List<String> urns)
-
-    /**
      * Updates all Miriam Identifiers stored in the database by trying to resolve the name again and update
      * if it changed.
      */

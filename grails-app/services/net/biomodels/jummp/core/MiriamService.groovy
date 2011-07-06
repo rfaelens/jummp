@@ -4,14 +4,13 @@ import org.codehaus.groovy.grails.plugins.codecs.URLCodec
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.transaction.TransactionStatus
 import net.biomodels.jummp.core.miriam.IMiriamService
-import net.biomodels.jummp.core.miriam.MiriamUpdateException
 import net.biomodels.jummp.core.miriam.MiriamResource
 import net.biomodels.jummp.core.miriam.MiriamDatatype
 import net.biomodels.jummp.core.miriam.MiriamIdentifier
 import net.biomodels.jummp.core.miriam.NameResolver
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.model.Revision
+import org.perf4j.aop.Profiled
 
 /**
  * Service for handling MIRIAM resources.
@@ -52,6 +51,7 @@ class MiriamService implements IMiriamService {
         }
     }
 
+    @Profiled(tag="MiriamService.miriamData")
     public Map miriamData(String urn) {
         int colonIndex = urn.lastIndexOf(':')
         String datatypeUrn = urn.substring(0, colonIndex)
@@ -71,23 +71,6 @@ class MiriamService implements IMiriamService {
                 name: resolvedName ? resolvedName.name : URLCodec.decode(identifier),
                 url: preferred.action.replace('$id', identifier)
         ]
-    }
-
-    public void fetchMiriamData(List<String> urns) {
-        urns.each { urn ->
-            int colonIndex = urn.lastIndexOf(':')
-            String datatypeUrn = urn.substring(0, colonIndex)
-            String identifier = urn.substring(colonIndex + 1)
-            MiriamDatatype datatype = resolveDatatype(datatypeUrn)
-            if (!datatype) {
-                return
-            }
-            MiriamResource preferred = preferredResource(datatype)
-            if (!preferred) {
-                return
-            }
-            resolveName(datatype, identifier)
-        }
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -112,13 +95,10 @@ class MiriamService implements IMiriamService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Profiled(tag="MiriamService.updateModels")
     public void updateModels() {
         Model.list().each {
-            Revision revision = modelService.getLatestRevision(it)
-            if (!revision) {
-                return
-            }
-            executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", revision))
+            executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", it.id))
         }
     }
 
@@ -127,7 +107,7 @@ class MiriamService implements IMiriamService {
      * @param uri The MIRIAM uri
      * @return The MiriamDatatype for the given MIRIAM uri
      */
-    private MiriamDatatype resolveDatatype(String urn) {
+    MiriamDatatype resolveDatatype(String urn) {
         return MiriamDatatype.findByUrn(urn)
     }
 
@@ -136,34 +116,11 @@ class MiriamService implements IMiriamService {
      * @param datatype The MiriamDatatype to check
      * @return The preferred Resource for the given datatype
      */
-    private MiriamResource preferredResource(MiriamDatatype datatype) {
+    MiriamResource preferredResource(MiriamDatatype datatype) {
         if (datatype.preferred) {
             return datatype.preferred
         }
         return (MiriamResource)(datatype.resources.findAll { !it.obsolete }.sort { it.id }?.first())
-    }
-
-    /**
-     * Tries to resolve a name for the given MIRIAM datatype and stores in the database.
-     * Uses some well known web services to connect to.
-     * @param miriam The datatype
-     * @param id The identifier part of the URN.
-     */
-    private void resolveName(MiriamDatatype miriam, String id) {
-        if (MiriamIdentifier.findByDatatypeAndIdentifier(miriam, id)) {
-            return
-        }
-        Map<String, NameResolver> nameResolvers = ApplicationHolder.application.mainContext.getBeansOfType(NameResolver)
-        for (NameResolver nameResolver in nameResolvers.values()) {
-            if (nameResolver.supports(miriam)) {
-                String resolvedName = nameResolver.resolve(miriam, id)
-                if (resolvedName) {
-                    MiriamIdentifier identifier = new MiriamIdentifier(identifier: id, datatype: miriam, name: resolvedName)
-                    identifier.save(flush: true)
-                    return
-                }
-            }
-        }
     }
 
     /**
