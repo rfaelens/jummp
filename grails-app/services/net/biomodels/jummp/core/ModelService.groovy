@@ -67,6 +67,10 @@ class ModelService {
      * Dependency injection for ExecutorService to run threads
      */
     def executorService
+    /**
+     * Dependency injection of SessionFactory
+     */
+    def sessionFactory
 
     static transactional = true
 
@@ -412,7 +416,11 @@ class ModelService {
             aclUtilService.addPermission(revision, username, BasePermission.DELETE)
             aclUtilService.addPermission(revision, username, BasePermission.READ)
 
+            // manually commit the transaction in oder to be able to access the Model in other threads
+            sessionFactory.currentSession.flush()
+            sessionFactory.currentSession.transaction.commit()
             executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", model.id))
+
             // broadcast event
             grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFile))
         } else {
@@ -487,6 +495,9 @@ class ModelService {
                     aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.READ)
                 }
             }
+            // manually commit the transaction in oder to be able to access the Model in other threads
+            sessionFactory.currentSession.flush()
+            sessionFactory.currentSession.transaction.commit()
             executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", model.id))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), file))
         } else {
