@@ -416,9 +416,6 @@ class ModelService {
             aclUtilService.addPermission(revision, username, BasePermission.DELETE)
             aclUtilService.addPermission(revision, username, BasePermission.READ)
 
-            // manually commit the transaction in oder to be able to access the Model in other threads
-            sessionFactory.currentSession.flush()
-            sessionFactory.currentSession.transaction.commit()
             executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", model.id))
 
             // broadcast event
@@ -495,9 +492,6 @@ class ModelService {
                     aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.READ)
                 }
             }
-            // manually commit the transaction in oder to be able to access the Model in other threads
-            sessionFactory.currentSession.flush()
-            sessionFactory.currentSession.transaction.commit()
             executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", model.id))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), file))
         } else {

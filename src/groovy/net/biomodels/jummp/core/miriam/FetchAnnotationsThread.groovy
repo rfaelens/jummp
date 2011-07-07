@@ -55,6 +55,18 @@ class FetchAnnotationsThread implements Runnable {
         SecurityContextHolder.context.setAuthentication(authentication)
         // perform the operation
         Model threadModel = Model.get(model)
+        if (!threadModel) {
+            // when started from a different Hibernate session it is possible that
+            // the transaction is not yet written to the database and the session
+            // bound to this Thread cannot yet access the Model. By waiting a small
+            // amount of time it becomes likely that we can access the Model in this thread.
+            try {
+                Thread.sleep(10000)
+            } catch (InterruptedException e) {
+                // ignore
+            }
+            threadModel = Model.get(model)
+        }
         Revision revision = modelService.getLatestRevision(threadModel)
         if (revision) {
             fetchMiriamData(modelFileFormatService.getAllAnnotationURNs(revision))
