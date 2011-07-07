@@ -411,6 +411,16 @@ class ModelService {
             aclUtilService.addPermission(revision, username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, username, BasePermission.DELETE)
             aclUtilService.addPermission(revision, username, BasePermission.READ)
+            if (!meta.publication) {
+                String annotation = getPubMedAnnotation(model)
+                String pubMed
+                if (annotation) {
+                    if (annotation.contains(":")) {
+                        pubMed = annotation.substring(annotation.lastIndexOf(":")+1, annotation.indexOf("]")).trim()
+                        model.publication = pubMedService.getPublication(pubMed)
+                    }
+                }
+            }
 
             executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", revision))
             // broadcast event
@@ -777,5 +787,22 @@ class ModelService {
         revision.deleted = true
         revision.save(flush: true)
         return true
+    }
+
+    /**
+     * Retrieves the pub med annotations of the @p model.
+     * @param model The model of which the pub med annotation are to be retrieved
+     * @return The retrieved pub med annotations or @c null
+     * @throws JummpException
+     */
+    protected List<String> getPubMedAnnotation(Model model) throws JummpException {
+        if (!model) {
+            return null
+        }
+        Revision revision = getLatestRevision(model)
+        if (!revision) {
+            return null
+        }
+        return modelFileFormatService.getPubMedAnnotation(revision)
     }
 }

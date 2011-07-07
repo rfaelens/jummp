@@ -108,6 +108,21 @@ class ModelFileFormatService {
     }
 
     /**
+     * Retrieves all pubmed annotations through the service responsible for the format used
+     * by the @p revision.
+     * @param rev The Revision for which all pubmed annotations should be retrieved
+     * @return List of all pubmeds used in the Revision
+     */
+    List<String> getPubMedAnnotation(Revision rev) {
+        FileFormatService service = serviceForFormat(rev.format)
+        if (service) {
+            return service.getPubMedAnnotation(rev.toCommandObject())
+        } else {
+            return []
+        }
+    }
+
+    /**
      * Helper function to get the proper service for @p format.
      * @param format The ModelFormat for which the service should be returned.
      * @return The service which handles the format.

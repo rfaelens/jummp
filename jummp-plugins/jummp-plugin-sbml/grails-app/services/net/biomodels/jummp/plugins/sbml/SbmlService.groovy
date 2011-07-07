@@ -35,6 +35,7 @@ import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.InitializingBean
 import grails.util.Environment
 import org.codehaus.groovy.grails.plugins.codecs.URLCodec
+import org.sbml.jsbml.CVTerm
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -373,6 +374,22 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             }
         }
         return urns
+    }
+
+    @Profiled(tag="SbmlService.getPubMedAnnotation")
+    public List<List<String>> getPubMedAnnotation(RevisionTransportCommand revision) {
+        Model model = getFromCache(revision).model
+        Annotation annotation = model.annotation
+        if(!annotation) {
+            return null
+        }
+        List<CVTerm> filters = annotation.filterCVTerms(CVTerm.Qualifier.BQM_IS_DESCRIBED_BY)
+        List<List<String>> pubMedAnnotation = []
+        filters.each { filter ->
+            CVTerm cvTerm = new CVTerm(filter)
+            pubMedAnnotation.add(cvTerm.filterResources("pubmed"))
+        }
+        return pubMedAnnotation
     }
 
     /**
