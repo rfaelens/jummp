@@ -67,7 +67,7 @@ function loadModelListCallback() {
                             rowData[2] = html;
                         }
                         // id column
-                        rowData[0] = '<a href="#" onclick="showModel(\'' + id + '\');">' + id + '</a>';
+                        rowData[0] = '<a href="#" onclick="loadView(\'' + createLink("model", "show", id) + "?offset=" + (json.offset + i) + '&count=' + json.iTotalRecords + '&sort=' + json.iSortCol_0 + '&dir=' + json.sSortDir_0 + '\', loadModelTabCallback)">' + id + '</a>';
                         // the format/download column
                         rowData[4] = rowData[4] + '&nbsp;<a href="' + createLink('model', 'download', id) + '">' + i18n.model.list.download + '</a>';
                     }
@@ -166,6 +166,21 @@ function loadModelTabCallback(data, tabIndex) {
     if (tabIndex) {
         $("#modelTabs").tabs("select", $(tabIndex).attr("href"));
     }
+    // next/previous buttons
+    $("#modelNavigation a").button();
+    var offset = parseInt($("#modelNavigationOffset").text());
+    if ($("#modelNavigationOffset").text() == "" || offset == 0) {
+        $("#modelNavigation a.previous").button("disable");
+    }
+    if ($("#modelNavigationOffset").text() == "" || offset == parseInt($("#modelNavigationCount").text()) - 1) {
+        $("#modelNavigation a.next").button("disable");
+    }
+    $("#modelNavigation a.previous").click(function() {
+        loadView(createLink("model", "nextPreviousModel") + "?offset=" + (offset - 1) + '&count=' + $("#modelNavigationCount").text() + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelTabCallback);
+    });
+    $("#modelNavigation a.next").click(function() {
+        loadView(createLink("model", "nextPreviousModel") + "?offset=" + (offset + 1) + '&count=' + $("#modelNavigationCount").text() + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelTabCallback);
+    });
 }
 
 /**
