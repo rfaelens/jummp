@@ -177,6 +177,9 @@ function loadModelTabCallback(data, tabIndex) {
     if ($("#modelNavigationOffset").text() == "" || offset == parseInt($("#modelNavigationCount").text()) - 1) {
         $("#modelNavigation a.next").button("disable");
     }
+    if ($("#modelNavigationOffset").text() == "") {
+        $("#modelNavigation a.overview").button("disable");
+    }
     $("#modelNavigation a.previous").click(function() {
         loadView(createLink("model", "nextPreviousModel") + "?offset=" + (offset - 1) + '&count=' + $("#modelNavigationCount").text() + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelTabCallback);
     });
