@@ -41,6 +41,7 @@ class ModelController {
             render(template: "/templates/page", model: [link: g.createLink(action: "index"), callback: "loadModelListCallback"])
             return
         }
+        [offset: params.offset, sort: params.sort, dir: params.dir]
     }
 
     def show = {

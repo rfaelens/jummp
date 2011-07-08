@@ -38,6 +38,8 @@ function loadModelListCallback() {
         bJQueryUI: true,
         sPaginationType: "full_numbers",
         sAjaxSource: createLink('model', 'dataTableSource'),
+        iDisplayStart: parseInt($("#modelNavigationOffset").text()),
+        aaSorting: [[parseInt($("#modelNavigationSorting").text()), $("#modelNavigationDirection").text()]],
         // TODO: move function into an own method,
         "fnServerData": function(sSource, aoData, fnCallback) {
             $.ajax({
@@ -180,6 +182,9 @@ function loadModelTabCallback(data, tabIndex) {
     });
     $("#modelNavigation a.next").click(function() {
         loadView(createLink("model", "nextPreviousModel") + "?offset=" + (offset + 1) + '&count=' + $("#modelNavigationCount").text() + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelTabCallback);
+    });
+    $("#modelNavigation a.overview").click(function() {
+        loadView(createLink("model", "index") + "?offset=" + offset + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelListCallback);
     });
 }
 

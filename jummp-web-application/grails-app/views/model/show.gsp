@@ -7,6 +7,7 @@
     <span id="modelNavigationDirection" style="display: none">${dir}</span>
     <a href="#" class="previous">Previous Model</a>
     <a href="#" class="next">Next Model</a>
+    <a href="#" class="overview">Back to Overview</a>
 </div>
 <div id="modelTabs" style="display: none">
     <ul>
