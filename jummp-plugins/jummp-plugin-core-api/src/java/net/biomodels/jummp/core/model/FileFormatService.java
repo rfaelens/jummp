@@ -31,4 +31,10 @@ public interface FileFormatService {
      * @return List of all URNs in the model file.
      */
     public List<String> getAllAnnotationURNs(RevisionTransportCommand revision);
+    /**
+     * Retrieves all pubmed annotations in the model file referenced by @p revision.
+     * @param revision  The Revision identifying a model file
+     * @return List of all pubmeds used in the Revision
+     */
+    public List<String> getPubMedAnnotation(RevisionTransportCommand revision);
 }
