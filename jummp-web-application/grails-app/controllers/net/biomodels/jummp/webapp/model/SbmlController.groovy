@@ -65,6 +65,13 @@ class SbmlController {
         response.outputStream << new ByteArrayInputStream(bytes)
     }
 
+    /**
+     * Outputs the Octave file
+     */
+    def reactionOctave = {
+        [octave: remoteSbmlService.generateOctave(params.id as long, params.revision as int)]
+    }
+
     def overview = {
         [
                 reactions: remoteSbmlService.getReactions(params.id as long, params.revision as int),

@@ -272,4 +272,10 @@ interface ISbmlService {
      * @return Content of generated SVG
      */
     public byte[] generateSvg(RevisionTransportCommand revision)
+    /**
+     * Generates Octave output for the given SBML model.
+     * @param revision The Revision identifying an SBML model
+     * @return Content of generated Octave file
+     */
+    public String generateOctave(RevisionTransportCommand revision)
 }
