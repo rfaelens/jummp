@@ -17,11 +17,11 @@ class GeneOntologyResolver implements NameResolver {
      */
     String resourceIdentifier
 
-    def boolean supports(MiriamDatatype datatype) {
+    boolean supports(MiriamDatatype datatype) {
         return datatype.identifier == dataTypeIdentifier && MiriamResource.findByIdentifier(resourceIdentifier)
     }
 
-    def String resolve(MiriamDatatype datatype, String id) {
+    String resolve(MiriamDatatype datatype, String id) {
         if (datatype.identifier != dataTypeIdentifier) {
             return null
         }
