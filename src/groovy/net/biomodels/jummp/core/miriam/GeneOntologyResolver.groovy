@@ -55,7 +55,7 @@ class GeneOntologyResolver implements NameResolver {
         parsedXML.term.is_a.each {
             addRelationship(ontology, GeneOntologyRelationshipType.IsA, URLEncoder.encode(it.text().trim()))
         }
-        parsedXML.term.relationship.each { relationship ->
+        parsedXML.term?.relationship?.each { relationship ->
             String id = URLEncoder.encode(relationship.to.text().trim())
             switch (relationship.type.text().trim()) {
             case "part_of":
@@ -88,12 +88,15 @@ class GeneOntologyResolver implements NameResolver {
             miriamIdentifier = new MiriamIdentifier(identifier: id, datatype: datatype, name: resolvedName)
             miriamIdentifier = miriamIdentifier.save(flush: true)
             GeneOntology geneOntology = new GeneOntology(description: miriamIdentifier)
-            geneOntology.save(flush: true)
+            geneOntology = geneOntology.save(flush: true)
             resolver.resolveRelationship(geneOntology)
         }
         GeneOntology toOntology = GeneOntology.findByDescription(miriamIdentifier, [lock:true])
         if (!toOntology) {
-            return
+            toOntology = new GeneOntology(description: miriamIdentifier)
+            toOntology = toOntology.save(flush: true)
+            GeneOntologyResolver resolver = ApplicationHolder.application.mainContext.getBean("geneOntologyResolver") as GeneOntologyResolver
+            resolver.resolveRelationship(toOntology)
         }
         GeneOntologyRelationship relationship = new GeneOntologyRelationship(from: ontology, to: toOntology, type: type)
         ontology.addToRelationships(relationship)
