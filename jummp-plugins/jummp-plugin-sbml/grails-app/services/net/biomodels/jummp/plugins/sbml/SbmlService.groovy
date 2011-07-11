@@ -40,6 +40,8 @@ import org.sbml.jsbml.CVTerm
 import org.sbfc.converter.models.SBMLModel
 import org.sbfc.converter.models.OctaveModel
 import org.sbml.jsbml.SBMLWriter
+import org.sbfc.converter.sbml2biopax.SBML2BioPAX_l3
+import org.sbfc.converter.models.BioPaxModel
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -364,6 +366,13 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         return octaveModel.modelToString()
     }
 
+    @Profiled(tag="SbmlService.generateBioPax")
+    public String generateBioPax(RevisionTransportCommand revision) {
+        SBMLModel sbmlModel = resolveSbmlModel(revision)
+        BioPaxModel bioPaxModel = sbml2BioPaxConverter().biopaxexport(sbmlModel)
+        return bioPaxModel.modelToString()
+    }
+
     @Profiled(tag="SbmlService.getAllAnnotationURNs")
     public List<String> getAllAnnotationURNs(RevisionTransportCommand revision) {
         SBMLDocument document = getFromCache(revision)
@@ -612,6 +621,13 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             octaveConverter = new SBML2Octave()
         }
         return octaveConverter
+    }
+
+    private SBML2BioPAX_l3 sbml2BioPaxConverter() {
+        if (!biopaxConverter) {
+            biopaxConverter = new SBML2BioPAX_l3()
+        }
+        return biopaxConverter
     }
 
     /**

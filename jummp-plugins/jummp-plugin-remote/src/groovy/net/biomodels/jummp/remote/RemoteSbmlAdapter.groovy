@@ -275,4 +275,5 @@ public interface RemoteSbmlAdapter {
     public String triggerSubmodelGeneration(long modelId, int revisionNumber, String subModelId, String metaId, List compartmentIds, List speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds)
     public byte[] generateSvg(long modelId, int revisionNumber)
     public String generateOctave(long modelId, int revisionNumber)
+    public String generateBioPax(long modelId, int revisionNumber)
 }

@@ -42,4 +42,5 @@ public interface SbmlDBusAdapter  extends DBusInterface {
     public String triggerSubmodelGeneration(String authenticationHash, long modelId, int revisionNumber, String subModelId, String metaId, List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds);
     public byte[] generateSvg(String authenticationHash, long modelId, int revisionNumber);
     public String generateOctave(String authenticationHash, long modelId, int revisionNumber);
+    public String generateBioPax(String authenticationHash, long modelId, int revisionNumber);
 }

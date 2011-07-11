@@ -72,6 +72,13 @@ class SbmlController {
         [octave: remoteSbmlService.generateOctave(params.id as long, params.revision as int)]
     }
 
+    /**
+     * Outputs the BioPax file
+     */
+    def reactionBioPax = {
+        [biopax: remoteSbmlService.generateOctave(params.id as long, params.revision as int)]
+    }
+
     def overview = {
         [
                 reactions: remoteSbmlService.getReactions(params.id as long, params.revision as int),

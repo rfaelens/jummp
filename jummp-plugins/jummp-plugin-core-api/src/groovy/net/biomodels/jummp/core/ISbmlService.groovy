@@ -278,4 +278,10 @@ interface ISbmlService {
      * @return Content of generated Octave file
      */
     public String generateOctave(RevisionTransportCommand revision)
+    /**
+     * Generates BioPAX output for the given SBML model.
+     * @param revision The Revision identifying an SBML model
+     * @return Content of generated BioPAX file
+     */
+    public String generateBioPax(RevisionTransportCommand revision)
 }
