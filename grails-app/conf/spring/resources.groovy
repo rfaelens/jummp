@@ -31,7 +31,8 @@ beans = {
         resourceIdentifier = "MIR:00100019"
     }
 
-    geneOntologyResolver(net.biomodels.jummp.core.miriam.GeneOntologyResolver) {
+    geneOntologyResolver(net.biomodels.jummp.core.miriam.GeneOntologyResolver) { bean ->
+        bean.scope = "prototype"
         dataTypeIdentifier = "MIR:00000022"
         resourceIdentifier = "MIR:00100012"
     }

@@ -49,6 +49,10 @@ class FetchAnnotationsThread implements Runnable {
      * The Authentication of the user who uploaded the Revision
      */
     private Authentication authentication
+    /**
+     * The revision on which we operate
+     */
+    private Revision revision
 
     void run() {
         // set the Authentication in the Thread's SecurityContext
@@ -67,7 +71,7 @@ class FetchAnnotationsThread implements Runnable {
             }
             threadModel = Model.get(model)
         }
-        Revision revision = modelService.getLatestRevision(threadModel)
+        revision = modelService.getLatestRevision(threadModel)
         if (revision) {
             fetchMiriamData(modelFileFormatService.getAllAnnotationURNs(revision))
         }
@@ -100,6 +104,19 @@ class FetchAnnotationsThread implements Runnable {
      */
     private void resolveName(MiriamDatatype miriam, String id) {
         if (MiriamIdentifier.findByDatatypeAndIdentifier(miriam, id)) {
+            if (miriam.identifier == "MIR:00000022") {
+                GeneOntology ontology = GeneOntology.findByDescription(MiriamIdentifier.findByDatatypeAndIdentifier(miriam, id), [lock:true])
+                if (!ontology) {
+                    GeneOntology geneOntology = new GeneOntology(description: MiriamIdentifier.findByDatatypeAndIdentifier(miriam, id))
+                    geneOntology.addToRevisions(revision)
+                    geneOntology = geneOntology.save(flush: true)
+                    resolveGeneOntologyRelationships(geneOntology, null)
+                    return
+                }
+                ontology.addToRevisions(revision)
+                ontology.refresh()
+                ontology.save(flush: true)
+            }
             return
         }
         Map<String, NameResolver> nameResolvers = ApplicationHolder.application.mainContext.getBeansOfType(NameResolver)
@@ -114,6 +131,14 @@ class FetchAnnotationsThread implements Runnable {
                     try {
                         MiriamIdentifier identifier = new MiriamIdentifier(identifier: id, datatype: miriam, name: resolvedName)
                         identifier.save(flush: true)
+
+                        // is this a GeneOntology?
+                        if (miriam.identifier == "MIR:00000022") {
+                            GeneOntology geneOntology = new GeneOntology(description: identifier)
+                            geneOntology.addToRevisions(revision)
+                            geneOntology.save(flush: true)
+                            resolveGeneOntologyRelationships(geneOntology, nameResolver as GeneOntologyResolver)
+                        }
                     } catch (DataIntegrityViolationException e) {
                         // such an exception can be thrown in a highly concurrent situation when another running thread
                         // just resolved the name. We can savely ignore the exception
@@ -122,6 +147,22 @@ class FetchAnnotationsThread implements Runnable {
                 }
             }
         }
+    }
+
+    private void resolveGeneOntologyRelationships(GeneOntology geneOntology, GeneOntologyResolver geneOntologyResolver) {
+        if (!geneOntologyResolver) {
+            Map<String, NameResolver> nameResolvers = ApplicationHolder.application.mainContext.getBeansOfType(NameResolver)
+            for (NameResolver nameResolver in nameResolvers.values()) {
+                if (nameResolver.supports(geneOntology.description.datatype)) {
+                    geneOntologyResolver = nameResolver as GeneOntologyResolver
+                    break
+                }
+            }
+            if (!geneOntologyResolver) {
+                return
+            }
+        }
+        geneOntologyResolver.resolveRelationship(geneOntology)
     }
 
     static public FetchAnnotationsThread getInstance(Long model) {
