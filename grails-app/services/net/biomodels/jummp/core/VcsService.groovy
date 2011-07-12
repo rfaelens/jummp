@@ -84,6 +84,15 @@ class VcsService {
         if (!isValid()) {
             throw new VcsException("Version Control System is not valid")
         }
+        def latestRevId = Revision.createCriteria().get {
+            eq("model.id", revision.model.id)
+            projections {
+                max("revisionNumber")
+            }
+        }
+        if (revision.revisionNumber == latestRevId) {
+            return vcsManager.retrieveFile(revision.model.vcsIdentifier)
+        }
 
         return vcsManager.retrieveFile(revision.model.vcsIdentifier, revision.vcsId)
     }
