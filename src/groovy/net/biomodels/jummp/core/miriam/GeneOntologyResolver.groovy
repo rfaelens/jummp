@@ -53,10 +53,10 @@ class GeneOntologyResolver implements NameResolver {
             parsedXML = new XmlSlurper().parseText(getOboXML(resource.action, ontology.description.identifier))
         }
         parsedXML.term.is_a.each {
-            addRelationship(ontology, GeneOntologyRelationshipType.IsA, URLEncoder.encode(it.text().trim()))
+            addRelationship(ontology, GeneOntologyRelationshipType.IsA, it.text().trim())
         }
         parsedXML.term?.relationship?.each { relationship ->
-            String id = URLEncoder.encode(relationship.to.text().trim())
+            String id = relationship.to.text().trim()
             switch (relationship.type.text().trim()) {
             case "part_of":
                 addRelationship(ontology, GeneOntologyRelationshipType.PartOf, id)

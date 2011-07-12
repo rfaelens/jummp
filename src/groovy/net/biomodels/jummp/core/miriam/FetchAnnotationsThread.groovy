@@ -84,6 +84,7 @@ class FetchAnnotationsThread implements Runnable {
             int colonIndex = urn.lastIndexOf(':')
             String datatypeUrn = urn.substring(0, colonIndex)
             String identifier = urn.substring(colonIndex + 1)
+            identifier = URLDecoder.decode(identifier)
             MiriamDatatype datatype = miriamService.resolveDatatype(datatypeUrn)
             if (!datatype) {
                 continue

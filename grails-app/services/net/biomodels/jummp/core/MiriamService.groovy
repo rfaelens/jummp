@@ -56,6 +56,7 @@ class MiriamService implements IMiriamService {
         int colonIndex = urn.lastIndexOf(':')
         String datatypeUrn = urn.substring(0, colonIndex)
         String identifier = urn.substring(colonIndex + 1)
+        identifier = URLDecoder.decode(identifier)
         MiriamDatatype datatype = resolveDatatype(datatypeUrn)
         if (!datatype) {
             return [:]
