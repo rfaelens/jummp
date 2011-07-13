@@ -75,12 +75,15 @@ class DiffDataProvider implements InitializingBean {
 			// get models
 			currRev = modelDelegateService.getRevision(modelId, recentRevision)
 			prevRev = modelDelegateService.getRevision(modelId, predecessorRevision)
-
-			// TODO get model files for both revisions and store them
+			// for filtering duplicate moves
+			String currentPath = "";
 			// moves
 			for(ElementType element : diff.getMoves().getElement()) {
-				moves << [current: getPathObject(element.getPath(), currRev),
-						previous: getPathObject(element.getOldPath(), prevRev)]
+				if(currentPath.equals(element.getOldPath())) {
+					moves << [current: getPathObject(element.getPath(), currRev),
+							previous: getPathObject(element.getOldPath(), prevRev)]
+				}
+				currentPath = element.getPath();
 			}
 			//inserts
 			for(ElementType element : diff.getInserts().getElement()) {
