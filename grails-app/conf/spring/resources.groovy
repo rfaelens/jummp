@@ -21,12 +21,20 @@ beans = {
         bean.scope = "prototype"
     }
 
-    uniProtResolver(net.biomodels.jummp.core.miriam.UniProtResolver) {
+    resolveMiriamIdentifier(net.biomodels.jummp.core.miriam.ResolveMiriamIdentifierThread) { bean ->
+        bean.autowire = "byName"
+        bean.factoryMethod = "getInstance"
+        bean.scope = "prototype"
+    }
+
+    uniProtResolver(net.biomodels.jummp.core.miriam.UniProtResolver) { bean ->
+        bean.scope = "prototype"
         dataTypeIdentifier = "MIR:00000005"
         resourceIdentifier = "MIR:00100134"
     }
 
-    taxonomyResolver(net.biomodels.jummp.core.miriam.TaxonomyResolver) {
+    taxonomyResolver(net.biomodels.jummp.core.miriam.TaxonomyResolver) { bean ->
+        bean.scope = "prototype"
         dataTypeIdentifier = "MIR:00000006"
         resourceIdentifier = "MIR:00100019"
     }
@@ -37,7 +45,8 @@ beans = {
         resourceIdentifier = "MIR:00100012"
     }
 
-    ontologyLookupServiceResolver(net.biomodels.jummp.core.miriam.OntologyLookupResolver) {
+    ontologyLookupServiceResolver(net.biomodels.jummp.core.miriam.OntologyLookupResolver) { bean ->
+        bean.scope = "prototype"
         supportedIdentifiers = [
                 "MIR:00000056": "MIR:00100084",
                 "MIR:00000067": "MIR:00100097",

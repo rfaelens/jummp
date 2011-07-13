@@ -11,6 +11,9 @@ import net.biomodels.jummp.core.miriam.NameResolver
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import net.biomodels.jummp.model.Model
 import org.perf4j.aop.Profiled
+import net.biomodels.jummp.model.Revision
+import java.util.concurrent.locks.ReentrantLock
+import java.util.concurrent.locks.Lock
 
 /**
  * Service for handling MIRIAM resources.
@@ -27,7 +30,16 @@ class MiriamService implements IMiriamService {
      */
     def executorService
 
-    static transactional = true
+    static transactional = false
+
+    /**
+     * Map of the current to be resolved Miriam URNs
+     */
+    private final Map<String, List<Revision>> identifiersToBeResolved = [:]
+    /**
+     * Lock to protect the access to the identifiersToBeResolved
+     */
+    private final Lock lock = new ReentrantLock()
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateMiriamResources(String url, boolean force) {
@@ -100,6 +112,92 @@ class MiriamService implements IMiriamService {
     public void updateModels() {
         Model.list().each {
             executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", it.id))
+        }
+    }
+
+    /**
+     * Queues a Miriam URN for name resolving.
+     *
+     * Each URN which is currently being resolved is stored in a Map. Access to the Map
+     * is protected by a lock. If the URN is currently being resolved or if it is already
+     * in the database, nothing is done. In case of currently being resolved, the referenced
+     * @p revision is added to the list of Revisions for this URN.
+     *
+     * The actual resolving is performed by starting off a new thread. This thread will call
+     * @link dequeueUrnForIdentifierResolving when the name has been resolved or failed to be resolved.
+     * @param urn The Miriam URN for which the name should be resolved
+     * @param rev The revision where the URN was used
+     * @see dequeueUrnForIdentifierResolving
+     */
+    @Profiled(tag="MiriamService.queueUrnForIdentifierResolving")
+    void queueUrnForIdentifierResolving(String urn, Revision rev) {
+        int colonIndex = urn.lastIndexOf(':')
+        String datatypeUrn = urn.substring(0, colonIndex)
+        String identifier = urn.substring(colonIndex + 1)
+        identifier = URLDecoder.decode(identifier)
+        MiriamDatatype datatype = resolveDatatype(datatypeUrn)
+        if (!datatype) {
+            return
+        }
+
+        Runnable runnable = null
+        lock.lock()
+        try {
+            if (identifiersToBeResolved.containsKey(urn)) {
+                identifiersToBeResolved[urn] << rev
+                return
+            }
+            boolean found = false
+            MiriamIdentifier.withNewSession {
+                if (MiriamIdentifier.findByDatatypeAndIdentifier(datatype, identifier)) {
+                    found = true
+                }
+            }
+            if (found) {
+                return
+            }
+            // create Thread
+            runnable = ApplicationHolder.application.mainContext.getBean("resolveMiriamIdentifier", urn, identifier, datatype) as Runnable
+            if (runnable) {
+                identifiersToBeResolved[urn] = [rev]
+            }
+        } catch (Exception e) {
+            log.debug(e.message, e)
+        } finally {
+            lock.unlock()
+        }
+        // schedule thread
+        if (runnable) {
+            executorService.submit(runnable)
+        }
+    }
+
+    /**
+     * Dequeues a resolved Miriam URN.
+     *
+     * This method will only be called by the thread started off by @link queueUrnForIdentifierResolving.
+     * The method persists the resolved MiriamIdentifier and locks the complete operations with the lock
+     * used to protect the Map of URNs to be resolved. This way it is ensured that two threads will never
+     * save the same MiriamIdentifier in a concurrent situation. Also the lock ensures that a second thread
+     * will not be started to resolve the identifier while the identifier is persisted in the database.
+     * @param urn The URN for which the Identifier was resolved
+     * @param miriam The resolved and not yet persisted miriam identifier.
+     * @see queueUrnForIdentifierResolving
+     */
+    @Profiled(tag="MiriamService.dequeueUrnForIdentifierResolving")
+    void dequeueUrnForIdentifierResolving(String urn, MiriamIdentifier miriam) {
+        lock.lock()
+        try {
+            identifiersToBeResolved.remove(urn)
+            if (miriam) {
+                MiriamIdentifier.withNewSession {
+                    miriam.save(flush: true)
+                }
+            }
+        } catch (Exception e) {
+            log.debug(e.message, e)
+        } finally {
+            lock.unlock()
         }
     }
 

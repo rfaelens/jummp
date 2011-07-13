@@ -73,7 +73,9 @@ class FetchAnnotationsThread implements Runnable {
         }
         revision = modelService.getLatestRevision(threadModel)
         if (revision) {
-            fetchMiriamData(modelFileFormatService.getAllAnnotationURNs(revision))
+            modelFileFormatService.getAllAnnotationURNs(revision).each {
+                miriamService.queueUrnForIdentifierResolving(it, revision)
+            }
         }
         // clear the Authentication from the Thread's SecurityContext
         SecurityContextHolder.clearContext()
