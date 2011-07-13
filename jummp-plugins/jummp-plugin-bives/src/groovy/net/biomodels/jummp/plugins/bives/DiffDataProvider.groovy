@@ -6,15 +6,15 @@
 package net.biomodels.jummp.plugins.bives
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.plugins.sbml.SbmlService
 
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.beans.factory.InitializingBean
 
-import de.unirostock.bives.diff.model.AttributeType
+import net.biomodels.jummp.plugins.bives.JummpRepositoryManager
 import de.unirostock.bives.diff.model.Diff
 import de.unirostock.bives.diff.model.ElementType
+import de.unirostock.bives.diff.model.AttributeType
 import de.unirostock.bives.diff.model.ValueType
 
 /**
@@ -26,13 +26,13 @@ import de.unirostock.bives.diff.model.ValueType
 class DiffDataProvider implements InitializingBean {
 
 	// key: element from current revision, value: element from previous revision
-	Map moves = [:]
+	List moves = []
 	// key: element from current revision, value: element from previous revision
-	Map inserts = [:]
+	List inserts = []
 	// key: element from previous revision, value: element from current revision
-	Map deletes = [:]
+	List deletes = []
 	// key: element from current revision, value: element from previous revision
-	Map updates = [:]
+	List updates = []
 	// models
 	private RevisionTransportCommand currRev
 	private RevisionTransportCommand prevRev
@@ -67,69 +67,73 @@ class DiffDataProvider implements InitializingBean {
 	 * @param originId
 	 * @param predecessorId
 	 */
-	public void getDiffInformation(long modelId, int predecessorRevision,  int originRevision) {
-		File diffFile = repoMan.getDiffFile(modelId, predecessorRevision, originRevision)
+	public boolean getDiffInformation(long modelId, int predecessorRevision,  int recentRevision) {
+		File diffFile = repoMan.getDiffFile(modelId, predecessorRevision, recentRevision)
 		Diff diff = null;
 		if(diffFile.exists()) {
-			diff = repoMan.getDiff(repoMan.getDiffFile(modelId, predecessorRevision, originRevision))
-		}
-		if(diff == null) {
-			println("<<< diff is null, can not return diff information >>>")
-		} else {
+			diff = repoMan.getDiff(repoMan.getDiffFile(modelId, predecessorRevision, recentRevision))
 			// get models
-			currRev = modelDelegateService.getRevision(modelId, originRevision)
+			currRev = modelDelegateService.getRevision(modelId, recentRevision)
 			prevRev = modelDelegateService.getRevision(modelId, predecessorRevision)
 
 			// TODO get model files for both revisions and store them
 			// moves
 			for(ElementType element : diff.getMoves().getElement()) {
-				moves.put(getPathObject(element.getOldpath(), currRev),
-						getPathObject(element.getPath(), prevRev))
+				moves << [current: getPathObject(element.getPath(), currRev),
+						previous: getPathObject(element.getOldPath(), prevRev)]
 			}
 			//inserts
 			for(ElementType element : diff.getInserts().getElement()) {
-				inserts.put(getPathObject(element.getPath(), currRev), null)
+				inserts << [current: getPathObject(element.getPath(), currRev),
+						previous: getPathObject(element.getPath(), prevRev)]
 			}
 			for(AttributeType attribute : diff.getInserts().getAttribute()) {
-				inserts.put(getPathObject(attribute.getPath(), currRev),
-						getPathObject(attribute.getPath(), prevRev))
+				inserts << [current: getPathObject(attribute.getPath(), currRev),
+						previous: getPathObject(attribute.getPath(), prevRev)]
 			}
 			for(ValueType value : diff.getInserts().getValue()) {
-				inserts.put(getPathObject(value.getPath(), currRev),
-						getPathObject(value.getPath(), prevRev))
+				inserts << [current: getPathObject(value.getPath(), currRev),
+						previous: getPathObject(value.getPath(), prevRev)]
 			}
 			// deletes
-			for(ElementType element : diff.getInserts().getElement()) {
-				deletes.put(getPathObject(element.getPath(), prevRev), null)
+			for(ElementType element : diff.getDeletes().getElement()) {
+				deletes << [current: getPathObject(element.getPath(), currRev),
+						previous: getPathObject(element.getPath(), prevRev)]
 			}
-			for(AttributeType attribute : diff.getInserts().getAttribute()) {
-				deletes.put(getPathObject(attribute.getPath(), prevRev),
-						getPathObject(attribute.getPath(), currRev))
+			for(AttributeType attribute : diff.getDeletes().getAttribute()) {
+				deletes << [current: getPathObject(attribute.getPath(), currRev),
+						previous: getPathObject(attribute.getPath(), prevRev)]
 			}
-			for(ValueType value : diff.getInserts().getValue()) {
-				deletes.put(getPathObject(value.getPath(), prevRev),
-						getPathObject(value.getPath(), currRev))
+			for(ValueType value : diff.getDeletes().getValue()) {
+				deletes << [current: getPathObject(value.getPath(), currRev),
+						previous: getPathObject(value.getPath(), prevRev)]
 			}
 			// updates
 			for(AttributeType attribute : diff.getUpdates().getAttribute()) {
-				updates.put(getPathObject(attribute.getPath(), currRev),
-						getPathObject(attribute.getPath(), prevRev))
+				updates << [current: getPathObject(attribute.getPath(), currRev),
+						previous: getPathObject(attribute.getPath(), prevRev)]
 			}
 			for(ValueType value : diff.getUpdates().getValue()) {
-				updates.put(getPathObject(attribute.getPath(), currRev),
-						getPathObject(attribute.getPath(), prevRev))
+				updates << [current: getPathObject(value.getPth(), currRev),
+						previous: getPathObject(value.getPath(), prevRev)]
 			}
+			return true;
+		} else {
+			return false;
 		}
 	}
 
 	/**
 	 * 
+	 * @param xpath
+	 * @param revision
+	 * @return
 	 */
-	private Object getPathObject(String xpath, RevisionTransportCommand revision) {
+	private Map<Map, String> getPathObject(String xpath, RevisionTransportCommand revision) {
 		try {
 			String[] nodes = xpath.split("/")
 			boolean resolved = false
-			Object sbmlNode = null
+			Map sbmlNode = [:]
 			// if the xpath has more than 1 id in it
 			if(xpath.count(ID) > 1) {
 				for(int i = nodes.size() - 1; i >= 0; i--) {
@@ -137,21 +141,20 @@ class DiffDataProvider implements InitializingBean {
 					if(nodes[i].contains(ID)) {
 						String elementName = nodes[i].subSequence(nodes[i].indexOf(":") + 1, nodes[i].indexOf("[")).capitalize()
 						String id = nodes[i].subSequence(nodes[i].indexOf("'") + 1, nodes[i].lastIndexOf("'"))
-						println("Element name: " + elementName)
-						println("Element id: " + id)
 						sbmlNode = sbmlService."get${elementName}"(revision, id)
+						sbmlNode.type = elementName
 						break
 					}
 				}
 			// we are looking at an element without an id, so we have to improvise ;)
 			} else {
-				
+				// TODO
 			}
 			return sbmlNode
 		} catch (Exception e) {
 			log.fatal(e.getMessage())
 		}
-		return null
+		return [:]
 	}
 
 }

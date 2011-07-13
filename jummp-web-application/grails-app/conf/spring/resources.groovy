@@ -19,6 +19,9 @@ beans = {
         remoteMiriamService(net.biomodels.jummp.webapp.remote.RemoteMiriamService) {
             iMiriamService = ref("remoteMiriamAdapterDBusImpl")
         }
+        remoteDiffDataService(net.biomodels.jummp.webapp.remote.RemoteDiffDataService) {
+            remoteDiffDataAdapter = ref("remoteDiffDataAdapterDBusImpl")
+        }
     } else {
         println("Using JMS")
         remoteUserService(net.biomodels.jummp.webapp.remote.RemoteUserService) {
@@ -32,6 +35,9 @@ beans = {
         }
         remoteMiriamService(net.biomodels.jummp.webapp.remote.RemoteMiriamService) {
             iMiriamService = ref("miriamJmsRemoteAdapter")
+        }
+        remoteDiffDataService(net.biomodels.jummp.webapp.remote.RemoteDiffDataService) {
+            remoteDiffDataAdapter = ref("diffDataJmsRemoteAdapter")
         }
     }
 

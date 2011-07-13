@@ -123,6 +123,7 @@ function loadModelTabCallback(data, tabIndex) {
                 $("#model-entity tbody tr").cluetip({clickThrough: false, sticky: true, mouseOutClose: true});
                 break;
             case "modelTabs-revisions":
+                $("#model-revisions table tr td.revisionNumber a").button();
                 $("#model-revisions table tr td.revisionNumber a").click(function() {
                     changeModelTabRevision($(this).text());
                     updateModelHeader(null, null, $(this).text());
@@ -150,6 +151,22 @@ function loadModelTabCallback(data, tabIndex) {
                             }
                         });
                     }
+                });
+                // show diff
+                $("#model-revisions table tr td a.diff").button();
+                $("#model-revisions table tr td a.diff").click(function() {
+                    var recentRevision = $("#model-revisions table tr td input:radio[name='recentRevision']:checked").val();
+                    var previousRevision = $("#model-revisions table tr td input:radio[name='previousRevision']:checked").val();
+                    if (recentRevision == previousRevision) {
+                        // TODO remove string
+                        showInfoMessage("Unable to show diff between the revision and itself. Please choose two different revisions.", 20000);
+                        return false;
+                    }
+//                    console.log($(this).attr("href"));
+//                    console.log($(this).attr("href") + "?prevRev=" + previousRevision + "&currRev=" + recentRevision);
+//                    $.get($(this).attr("href") + "/?prevRev=" + previousRevision + "&currRev=" + recentRevision);
+                    loadView($(this).attr("href") + "/?prevRev=" + previousRevision + "&currRev=" + recentRevision, showDiffDataCallback);
+                    return false;
                 });
                 // add revision
                 $("#revision-upload-form div.ui-dialog-buttonpane input").button();
@@ -180,6 +197,62 @@ function changeModelTabRevision(revisionNumber) {
             $("#modelTabs").tabs("url", index, url);
         }
     });
+}
+
+/**
+ * 
+ */
+function showDiffDataCallback() {
+	// TODO some formatting here before...
+	$("div.diffData").each(function(index, value) {
+	    var id = "#" + $(value).attr("id");
+	    var treeId = "#tree_" + $(value).attr("id");
+	    $(treeId).dynatree({
+	        expand: true
+	    });
+	    var parsed = $.parseJSON($(value).text());
+	    var rootNode = $(treeId).dynatree("getRoot");
+	    rootNode.title = parsed.type;
+	    var mainNode = rootNode.addChild({
+	        title: parsed.type
+	    });
+	    for(var key in parsed) {
+	    	addNodeToTree(mainNode, key, parsed[key]);
+	    }
+	    $(treeId).dynatree("getRoot").visit(function(node){
+	        node.expand(true);
+	    });
+	    $(id).text("");
+	});
+}
+
+function addNodeToTree(node, key, value) {
+	if(value != null) {
+		if(!(value instanceof Object)) {
+		    if(key != "type" && value.toString().length > 0) {
+	            node.addChild({
+	            	title: key + " = " + value
+	            });
+	            return;
+	        }
+		} else {
+	        if(value instanceof Array && value.length > 0) {
+	            var child = node.addChild({
+	                title: key
+	            });
+	            for(var i = 0; i < value.length; i++) {
+	            	addNodeToTree(child, i + 1, value[i]);
+	            }
+	        } else {
+	            var child = node.addChild({
+	                title: key
+	            });
+	            for(var key2 in value) {
+	            	addNodeToTree(child, key2, value[key2]);
+	            }
+	        }
+	    }
+	}
 }
 
 /**

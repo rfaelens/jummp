@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="${resource(dir:'css', file:'jquery.cluetip.css')}" type="text/css" />
         <link rel="stylesheet" href="${resource(dir:'css', file:'jquery.jdMenu.css')}" type="text/css" />
         <link rel="stylesheet" href="${resource(dir:'css', file:'jummp.css')}" type="text/css"/>
+        <link rel="stylesheet" href="${resource(dir:'css', file:'ui.dynatree.css')}" type="text/css"/>
         <g:render template="/templates/i18n"/>
         <g:javascript library="jquery" plugin="jquery"/>
         <jqDT:resources jqueryUi="true"/>
@@ -18,6 +19,13 @@
         <g:javascript src="jquery/jquery.positionBy.js"/>
         <g:javascript src="jquery/jquery.bgiframe.js"/>
         <g:javascript src="jquery/jquery.jdMenu.js"/>
+        %{--Required for dynatree--}%
+        <g:javascript src="jquery/jquery.cookie.js"/>
+        <g:javascript src="jquery/jquery-ui.custom.js"/>
+        <g:javascript src="jquery/jquery-ui.custom.min.js"/>
+		<g:javascript src="jquery/jquery.preload-min.js"/>
+        <g:javascript src="jquery/jquery.dynatree.js"/>
+        
 <%
 String themeName = null
 if (params.theme) {

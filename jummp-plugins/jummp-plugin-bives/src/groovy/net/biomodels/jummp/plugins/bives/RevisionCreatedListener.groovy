@@ -42,30 +42,21 @@ class RevisionCreatedListener implements ApplicationListener {
 				File refFile = File.createTempFile("referenceFile", ".xml")
 				refFile.write(new String(modelDelegateService.retrieveModelFile(modelDelegateService.getRevision(command.model.id, command.revisionNumber - 1))))
 				// create diff, initialize required variables
-				println("<<< starting diff generation >>>")
 				Diff diff = diffMan.generateDiff(refFile, testFile, true)
-				if(diff != null) {
-					// debug
-					println("<<< diff not null, storing file >>>")
-					int prevRev = command.revisionNumber - 1
-					int currRev = command.revisionNumber
-					diff.setOriginId(prevRev)
-					diff.setSuccessorId(currRev)
-					long modelId = command.model.id
-					String diffDir = ConfigurationHolder.config.jummp.plugins.bives.diffdir as String
-					JummpRepositoryManager repoMan = new JummpRepositoryManager()
-					repoMan.createNewRepository(diffDir)
-					repoMan.uploadDiff(diff, modelId, prevRev, currRev)
-					
-					// debugging of DiffDataProvider
-					DiffDataProvider ddp = ApplicationHolder.application.mainContext.getBean("diffDataProvider") as DiffDataProvider
-					ddp.getDiffInformation(command.model.id, command.revisionNumber - 1, command.revisionNumber)
-					// TODO database entries -> later
-				
-					// TODO optional: Component extension for diffs
-				} else {
-					println("<<< diff is null, not doing anything >>>")
-				}
+				// debug
+				int prevRev = command.revisionNumber - 1
+				int currRev = command.revisionNumber
+				diff.setModelId(command.model.id as String)
+				diff.setOriginId(prevRev)
+				diff.setSuccessorId(currRev)
+				long modelId = command.model.id
+				String diffDir = ConfigurationHolder.config.jummp.plugins.bives.diffdir as String
+				JummpRepositoryManager repoMan = new JummpRepositoryManager()
+				repoMan.createNewRepository(diffDir)
+				repoMan.uploadDiff(diff, modelId, prevRev, currRev)
+				// TODO database entries -> later
+
+				// TODO optional: Component extension for diffs
 				refFile.delete();
 			} catch (Exception e) {
 				e.printStackTrace()
