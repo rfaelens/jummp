@@ -14,6 +14,7 @@ import org.perf4j.aop.Profiled
 import net.biomodels.jummp.model.Revision
 import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.locks.Lock
+import net.biomodels.jummp.core.miriam.GeneOntology
 
 /**
  * Service for handling MIRIAM resources.
@@ -149,8 +150,15 @@ class MiriamService implements IMiriamService {
             }
             boolean found = false
             MiriamIdentifier.withNewSession {
-                if (MiriamIdentifier.findByDatatypeAndIdentifier(datatype, identifier)) {
+                MiriamIdentifier existingMiriamIdentifier = MiriamIdentifier.findByDatatypeAndIdentifier(datatype, identifier)
+                if (existingMiriamIdentifier) {
                     found = true
+                    GeneOntology geneOntology = GeneOntology.findByDescription(existingMiriamIdentifier)
+                    if (geneOntology) {
+                        rev.refresh()
+                        geneOntology.addToRevisions(rev)
+                        geneOntology.save(flush: true)
+                    }
                 }
             }
             if (found) {
@@ -188,10 +196,19 @@ class MiriamService implements IMiriamService {
     void dequeueUrnForIdentifierResolving(String urn, MiriamIdentifier miriam) {
         lock.lock()
         try {
+            List<Revision> revisions = identifiersToBeResolved[urn]
             identifiersToBeResolved.remove(urn)
             if (miriam) {
                 MiriamIdentifier.withNewSession {
                     miriam.save(flush: true)
+                    if (miriam.datatype.identifier == "MIR:00000022") {
+                        GeneOntology geneOntology = new GeneOntology(description: miriam)
+                        revisions.each {
+                            it.refresh()
+                            geneOntology.addToRevisions(it)
+                        }
+                        geneOntology.save(flush: true)
+                    }
                 }
             }
         } catch (Exception e) {
