@@ -145,7 +145,9 @@ class MiriamService implements IMiriamService {
         lock.lock()
         try {
             if (identifiersToBeResolved.containsKey(urn)) {
-                identifiersToBeResolved[urn] << rev
+                if (rev) {
+                    identifiersToBeResolved[urn] << rev
+                }
                 return
             }
             boolean found = false
@@ -155,8 +157,10 @@ class MiriamService implements IMiriamService {
                     found = true
                     GeneOntology geneOntology = GeneOntology.findByDescription(existingMiriamIdentifier)
                     if (geneOntology) {
-                        rev.refresh()
-                        geneOntology.addToRevisions(rev)
+                        if (rev) {
+                            rev.refresh()
+                            geneOntology.addToRevisions(rev)
+                        }
                         geneOntology.save(flush: true)
                     }
                 }
@@ -167,7 +171,11 @@ class MiriamService implements IMiriamService {
             // create Thread
             runnable = ApplicationHolder.application.mainContext.getBean("resolveMiriamIdentifier", urn, identifier, datatype) as Runnable
             if (runnable) {
-                identifiersToBeResolved[urn] = [rev]
+                if (rev) {
+                    identifiersToBeResolved[urn] = [rev]
+                } else {
+                    identifiersToBeResolved[urn] = []
+                }
             }
         } catch (Exception e) {
             log.debug(e.message, e)
@@ -204,8 +212,10 @@ class MiriamService implements IMiriamService {
                     if (miriam.datatype.identifier == "MIR:00000022") {
                         GeneOntology geneOntology = new GeneOntology(description: miriam)
                         revisions.each {
-                            it.refresh()
-                            geneOntology.addToRevisions(it)
+                            if (it) {
+                                it.refresh()
+                                geneOntology.addToRevisions(it)
+                            }
                         }
                         geneOntology.save(flush: true)
                     }

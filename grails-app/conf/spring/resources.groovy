@@ -40,6 +40,7 @@ beans = {
     }
 
     geneOntologyResolver(net.biomodels.jummp.core.miriam.GeneOntologyResolver) { bean ->
+        bean.autowire = "byName"
         bean.scope = "prototype"
         dataTypeIdentifier = "MIR:00000022"
         resourceIdentifier = "MIR:00100012"

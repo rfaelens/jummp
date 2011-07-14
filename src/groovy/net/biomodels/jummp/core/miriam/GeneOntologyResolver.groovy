@@ -11,6 +11,10 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
  */
 class GeneOntologyResolver implements NameResolver {
     /**
+     * Dependency injection
+     */
+    def miriamService
+    /**
      * Dependency Injection of the Miriam Datatype identifier this resolver can handle
      */
     String dataTypeIdentifier
@@ -18,10 +22,6 @@ class GeneOntologyResolver implements NameResolver {
      * Dependency Injection of the Miriam Resource identifier this resolver uses to resolve a name
      */
     String resourceIdentifier
-    /**
-     * The parsed xml file downloaded during resolving.
-     */
-    private def parsedXML = null
 
     boolean supports(MiriamDatatype datatype) {
         return datatype.identifier == dataTypeIdentifier && MiriamResource.findByIdentifier(resourceIdentifier)
@@ -35,8 +35,15 @@ class GeneOntologyResolver implements NameResolver {
         if (!resource) {
             return null
         }
-        parsedXML = new XmlSlurper().parseText(getOboXML(resource.action, id))
+        def parsedXML = new XmlSlurper().parseText(getOboXML(resource.action, id))
         String text = parsedXML.term.name.text()
+
+        parsedXML.term.is_a.each {
+            miriamService.queueUrnForIdentifierResolving(datatype.urn + ":" + URLEncoder.encode(it.text().trim()), null)
+        }
+        parsedXML.term?.relationship?.each { relationship ->
+            miriamService.queueUrnForIdentifierResolving(datatype.urn + ":" + URLEncoder.encode(relationship.to.text().trim()), null)
+        }
         if (text == "") {
             return null
         } else {
