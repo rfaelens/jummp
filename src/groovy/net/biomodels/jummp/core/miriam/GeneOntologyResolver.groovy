@@ -39,10 +39,21 @@ class GeneOntologyResolver implements NameResolver {
         String text = parsedXML.term.name.text()
 
         parsedXML.term.is_a.each {
-            miriamService.queueUrnForIdentifierResolving(datatype.urn + ":" + URLEncoder.encode(it.text().trim()), null)
+            String toId = it.text().trim()
+            miriamService.queueGeneOntologyRelationship(id, toId, GeneOntologyRelationshipType.IsA, datatype.urn + ":" + URLEncoder.encode(toId))
         }
         parsedXML.term?.relationship?.each { relationship ->
-            miriamService.queueUrnForIdentifierResolving(datatype.urn + ":" + URLEncoder.encode(relationship.to.text().trim()), null)
+            String toId = relationship.to.text().trim()
+            GeneOntologyRelationshipType type
+            switch (relationship.type.text().trim()) {
+            case "part_of":
+                type = GeneOntologyRelationshipType.PartOf
+                break
+            default:
+                type = GeneOntologyRelationshipType.Other
+                break
+            }
+            miriamService.queueGeneOntologyRelationship(id, toId, type, datatype.urn + ":" + URLEncoder.encode(toId))
         }
         if (text == "") {
             return null
@@ -51,62 +62,7 @@ class GeneOntologyResolver implements NameResolver {
         }
     }
 
-    void resolveRelationship(GeneOntology ontology) {
-        if (!parsedXML) {
-            MiriamResource resource = MiriamResource.findByIdentifierAndDatatype(resourceIdentifier, ontology.description.datatype)
-            if (!resource) {
-                return
-            }
-            parsedXML = new XmlSlurper().parseText(getOboXML(resource.action, ontology.description.identifier))
-        }
-        parsedXML.term.is_a.each {
-            addRelationship(ontology, GeneOntologyRelationshipType.IsA, it.text().trim())
-        }
-        parsedXML.term?.relationship?.each { relationship ->
-            String id = relationship.to.text().trim()
-            switch (relationship.type.text().trim()) {
-            case "part_of":
-                addRelationship(ontology, GeneOntologyRelationshipType.PartOf, id)
-                break
-            default:
-                addRelationship(ontology, GeneOntologyRelationshipType.Other, id)
-                break
-            }
-        }
-    }
-
     private String getOboXML(String url, String id) {
         return new URL("${url.replace('$id', id)}&format=oboxml").getText()
-    }
-
-    private void addRelationship(GeneOntology ontology, GeneOntologyRelationshipType type, String id) {
-        MiriamIdentifier miriamIdentifier = MiriamIdentifier.findByIdentifier(id)
-        if (!miriamIdentifier) {
-            GeneOntologyResolver resolver = ApplicationHolder.application.mainContext.getBean("geneOntologyResolver") as GeneOntologyResolver
-            MiriamDatatype datatype = MiriamDatatype.findByIdentifier(dataTypeIdentifier)
-            if (!datatype) {
-                return
-            }
-            String resolvedName = resolve(datatype, id)
-            if (!resolvedName) {
-                return
-            }
-
-            miriamIdentifier = new MiriamIdentifier(identifier: id, datatype: datatype, name: resolvedName)
-            miriamIdentifier = miriamIdentifier.save(flush: true)
-            GeneOntology geneOntology = new GeneOntology(description: miriamIdentifier)
-            geneOntology = geneOntology.save(flush: true)
-            resolver.resolveRelationship(geneOntology)
-        }
-        GeneOntology toOntology = GeneOntology.findByDescription(miriamIdentifier, [lock:true])
-        if (!toOntology) {
-            toOntology = new GeneOntology(description: miriamIdentifier)
-            toOntology = toOntology.save(flush: true)
-            GeneOntologyResolver resolver = ApplicationHolder.application.mainContext.getBean("geneOntologyResolver") as GeneOntologyResolver
-            resolver.resolveRelationship(toOntology)
-        }
-        GeneOntologyRelationship relationship = new GeneOntologyRelationship(from: ontology, to: toOntology, type: type)
-        ontology.addToRelationships(relationship)
-        relationship.save(flush: true)
     }
 }

@@ -15,6 +15,8 @@ import net.biomodels.jummp.model.Revision
 import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.locks.Lock
 import net.biomodels.jummp.core.miriam.GeneOntology
+import net.biomodels.jummp.core.miriam.GeneOntologyRelationshipType
+import net.biomodels.jummp.core.miriam.GeneOntologyRelationship
 
 /**
  * Service for handling MIRIAM resources.
@@ -22,6 +24,30 @@ import net.biomodels.jummp.core.miriam.GeneOntology
  * @author Martin Gräßlin <m.graesslin@dkfz.de>
  */
 class MiriamService implements IMiriamService {
+    /**
+     * Helper class for the relation between two GeneOntologies.
+     * Only used during import of Miriam data.
+     */
+    private class GeneOntologyRelationshipInformation {
+        /**
+         * The Gene Ontology identifier (GO:#####) the relation points from
+         */
+        String from
+        /**
+         * The Gene Ontology identifier (GO:#####) the relation points to.
+         */
+        String to
+        /**
+         * The relationship type between the from and to Gene Ontologies
+         */
+        GeneOntologyRelationshipType type
+
+        GeneOntologyRelationshipInformation(String from, String to, GeneOntologyRelationshipType type) {
+            this.from = from
+            this.to = to
+            this.type = type
+        }
+    }
     /**
      * Dependency Injection of Model Service
      */
@@ -37,6 +63,10 @@ class MiriamService implements IMiriamService {
      * Map of the current to be resolved Miriam URNs
      */
     private final Map<String, List<Revision>> identifiersToBeResolved = [:]
+    /**
+     * List of Gene Ontology Relationships to be resolved
+     */
+    private final List<GeneOntologyRelationshipInformation> geneOntologyRelationships = []
     /**
      * Lock to protect the access to the identifiersToBeResolved
      */
@@ -162,6 +192,7 @@ class MiriamService implements IMiriamService {
                             geneOntology.addToRevisions(rev)
                         }
                         geneOntology.save(flush: true)
+                        createGeneOntologyRelationships(geneOntology, existingMiriamIdentifier.identifier)
                     }
                 }
             }
@@ -217,7 +248,82 @@ class MiriamService implements IMiriamService {
                                 geneOntology.addToRevisions(it)
                             }
                         }
-                        geneOntology.save(flush: true)
+                        geneOntology = geneOntology.save(flush: true)
+                        createGeneOntologyRelationships(geneOntology, miriam.identifier)
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.debug(e.message, e)
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    /**
+     * Queues the generation of a Gene Ontology relationship.
+     * This method should be used when a Gene Ontology relationship is discovered during the creation of
+     * a Miriam Identifier. It is assumed that the @p from gene ontology is already discovered and the @p to
+     * gene ontology might be a new discovery.
+     *
+     * The maybe new gene ontology @p to is scheduled for Miriam name resolving. The actual relationship will be
+     * created and persisted in the database as soon as both Gene Ontologies are resolved.
+     * @param from The gene ontology identifier the relationship points from
+     * @param to The gene ontology identifier the relationship points to
+     * @param type The type of relationship between the two gene ontologies
+     * @param toUrn The complete Miriam URN of the to gene ontology.
+     */
+    @Profiled(tag="MiriamService.queueGeneOntologyRelationship")
+    void queueGeneOntologyRelationship(String from, String to, GeneOntologyRelationshipType type, String toUrn) {
+        lock.lock()
+        try {
+            geneOntologyRelationships << new GeneOntologyRelationshipInformation(from, to, type)
+            queueUrnForIdentifierResolving(toUrn, null)
+        } catch (Exception e) {
+            log.debug(e.message, e)
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    /**
+     * Creates all possible gene ontology relationships between @p ontology and other already found ontologies.
+     *
+     * The method loops through the list of scheduled gene ontology relationships and creates a relationship if both
+     * gene ontologies are already present in the database.
+     * @param ontology The newly created GeneOntology
+     * @param id The identifier of the GeneOntology, for convenience
+     */
+    private void createGeneOntologyRelationships(GeneOntology ontology, String id) {
+        lock.lock()
+        try {
+            ontology.refresh()
+            MiriamDatatype datatype = MiriamDatatype.findByIdentifier("MIR:00000022")
+            ListIterator<GeneOntologyRelationshipInformation> it = geneOntologyRelationships.listIterator()
+            while (it.hasNext()) {
+                GeneOntologyRelationshipInformation gor = it.next()
+                if (gor.from == id || gor.to == id) {
+                    GeneOntology from = null
+                    GeneOntology to = null
+                    if (gor.from == id) {
+                        from = ontology
+                        MiriamIdentifier miriam = MiriamIdentifier.findByIdentifierAndDatatype(gor.to, datatype)
+                        if (miriam) {
+                            to = GeneOntology.findByDescription(miriam)
+                        }
+                    } else {
+                        to = ontology
+                        MiriamIdentifier miriam = MiriamIdentifier.findByIdentifierAndDatatype(gor.from, datatype)
+                        if (miriam) {
+                            from = GeneOntology.findByDescription(miriam)
+                        }
+                    }
+                    if (to && from) {
+                        GeneOntologyRelationship relationship = new GeneOntologyRelationship(from: from, to: to, type: gor.type)
+                        if (relationship.validate()) {
+                            relationship.save()
+                        }
+                        it.remove()
                     }
                 }
             }
