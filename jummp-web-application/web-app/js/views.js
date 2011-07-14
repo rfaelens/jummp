@@ -162,9 +162,6 @@ function loadModelTabCallback(data, tabIndex) {
                         showInfoMessage("Unable to show diff between the revision and itself. Please choose two different revisions.", 20000);
                         return false;
                     }
-//                    console.log($(this).attr("href"));
-//                    console.log($(this).attr("href") + "?prevRev=" + previousRevision + "&currRev=" + recentRevision);
-//                    $.get($(this).attr("href") + "/?prevRev=" + previousRevision + "&currRev=" + recentRevision);
                     loadView($(this).attr("href") + "/?prevRev=" + previousRevision + "&currRev=" + recentRevision, showDiffDataCallback);
                     return false;
                 });
