@@ -842,6 +842,11 @@ function loadGOTreeCallback() {
                     }
                 }
             });
+        },
+        onDblClick: function(node) {
+            if (!node.data.isFolder) {
+                loadView(createLink('model', 'show', node.data.modelId) + "?revision=" + node.data.revisionNumber, loadModelTabCallback);
+            }
         }
     });
 }
