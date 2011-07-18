@@ -3,6 +3,7 @@ package net.biomodels.jummp.core
 import net.biomodels.jummp.core.miriam.GeneOntology
 import net.biomodels.jummp.core.miriam.GeneOntologyRelationship
 import net.biomodels.jummp.core.miriam.GeneOntologyTreeLevel
+import net.biomodels.jummp.core.miriam.GeneOntologyRelationshipType
 
 /**
  * @short Service to retrieve Gene Ontology Tree information.
@@ -26,15 +27,23 @@ class GeneOntologyTreeService {
      */
     GeneOntologyTreeLevel treeLevel(Long goId) {
         GeneOntology geneOntology = GeneOntology.get(goId)
-        List<GeneOntology> geneOntologies
+        List geneOntologies
         if (geneOntology) {
             geneOntologies = nextLevel(geneOntology)
         } else {
             geneOntologies = rootLevel()
         }
         GeneOntologyTreeLevel level = new GeneOntologyTreeLevel()
-        geneOntologies.each { go ->
-            level.addOntology(go.id, go.description.identifier, go.description.name)
+        geneOntologies.each {
+            GeneOntology go
+            GeneOntologyRelationshipType type = null
+            if (geneOntology) {
+                go = it[0] as GeneOntology
+                type = it[1] as GeneOntologyRelationshipType
+            } else {
+                go = it as GeneOntology
+            }
+            level.addOntology(go.id, go.description.identifier, go.description.name, type)
         }
         if (geneOntology) {
             geneOntology.revisions.each {
@@ -64,10 +73,10 @@ class GeneOntologyTreeService {
      * @param go The parent GeneOntology
      * @return List of child GeneOntology
      */
-    private List<GeneOntology> nextLevel(GeneOntology go) {
+    private List nextLevel(GeneOntology go) {
         if (!go) {
             return []
         }
-        return GeneOntology.executeQuery("SELECT DISTINCT rel.from FROM GeneOntologyRelationship rel WHERE rel.to=:go", [go: go])
+        return GeneOntology.executeQuery("SELECT DISTINCT rel.from, rel.type FROM GeneOntologyRelationship rel WHERE rel.to=:go", [go: go])
     }
 }

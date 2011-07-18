@@ -32,11 +32,16 @@ class GeneOntologyTreeLevel implements Serializable {
          * The human readable name of the Gene Ontology.
          */
         String name
+        /**
+         * The relationship to the parent element
+         */
+        GeneOntologyRelationshipType type
 
-        GeneOntologyInformation(Long id, String identifier, String name) {
+        GeneOntologyInformation(Long id, String identifier, String name, GeneOntologyRelationshipType type) {
             this.id = id
             this.identifier = identifier
             this.name = name
+            this.type = type
         }
     }
 
@@ -54,9 +59,10 @@ class GeneOntologyTreeLevel implements Serializable {
      * @param id The internal id
      * @param identifier The Gene Ontolog identifier
      * @param name The human readable name
+     * @param type The relationship type to the parent gene ontology, maybe @c null for toplevel ontologies
      * @throws IllegalArgumentException thrown in case any of the arguments are not valid
      */
-    public void addOntology(Long id, String identifier, String name) throws IllegalArgumentException {
+    public void addOntology(Long id, String identifier, String name, GeneOntologyRelationshipType type) throws IllegalArgumentException {
         if (!id || !identifier || !name) {
             throw new IllegalArgumentException("Id, identifier and Name have to be set")
         }
@@ -65,7 +71,7 @@ class GeneOntologyTreeLevel implements Serializable {
                 return
             }
         }
-        ontologies << new GeneOntologyInformation(id, identifier, name)
+        ontologies << new GeneOntologyInformation(id, identifier, name, type)
     }
 
     /**
