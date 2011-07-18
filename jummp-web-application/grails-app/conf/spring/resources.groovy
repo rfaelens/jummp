@@ -19,6 +19,9 @@ beans = {
         remoteMiriamService(net.biomodels.jummp.webapp.remote.RemoteMiriamService) {
             iMiriamService = ref("remoteMiriamAdapterDBusImpl")
         }
+        remoteGeneOntologyTreeService(net.biomodels.jummp.webapp.remote.RemoteGeneOntologyTreeService) {
+            remoteGeneOntologyTreeAdapter = ref("remoteGeneOntologyTreeDBusAdapterImpl")
+        }
     } else {
         println("Using JMS")
         remoteUserService(net.biomodels.jummp.webapp.remote.RemoteUserService) {

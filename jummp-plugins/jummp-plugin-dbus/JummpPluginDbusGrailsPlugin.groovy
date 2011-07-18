@@ -9,6 +9,8 @@ import net.biomodels.jummp.dbus.SbmlDBusAdapterImpl
 import net.biomodels.jummp.dbus.remote.RemoteSbmlAdapterDBusImpl
 import net.biomodels.jummp.dbus.MiriamDBusAdapterImpl
 import net.biomodels.jummp.dbus.remote.RemoteMiriamAdapterDBusImpl
+import net.biomodels.jummp.dbus.GeneOntologyTreeDBusAdapterImpl
+import net.biomodels.jummp.dbus.remote.RemoteGeneOntologyTreeDBusAdapterImpl
 
 class JummpPluginDbusGrailsPlugin {
     // the plugin version
@@ -71,6 +73,12 @@ Brief description of the plugin.
                 miriamService = ref("miriamService")
                 objectName = "/Miriam"
             }
+            geneOntologyTreeDBusAdapter(GeneOntologyTreeDBusAdapterImpl) {
+                dbusManager = dbusManager
+                authenticationHashService = ref("authenticationHashService")
+                geneOntologyTreeService = ref("geneOntologyTreeService")
+                objectName = "/GOTree"
+            }
         }
         if (!(application.config.jummp.plugin.dbus.remote instanceof ConfigObject) && application.config.jummp.plugin.dbus.remote) {
             remoteJummpApplicationAdapter(RemoteJummpApplicationAdapterDBusImpl)
@@ -78,6 +86,7 @@ Brief description of the plugin.
             remoteModelAdapterDBusImpl(RemoteModelAdapterDBusImpl)
             remoteSbmlAdapterDBusImpl(RemoteSbmlAdapterDBusImpl)
             remoteMiriamAdapterDBusImpl(RemoteMiriamAdapterDBusImpl)
+            remoteGeneOntologyTreeDBusAdapterImpl(RemoteGeneOntologyTreeDBusAdapterImpl)
         }
     }
 
