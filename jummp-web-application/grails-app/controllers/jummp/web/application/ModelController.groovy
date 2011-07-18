@@ -68,6 +68,11 @@ class ModelController {
         [revisions: remoteModelService.getAllRevisions(params.id as Long).reverse(), addRevision: remoteModelService.canAddRevision(params.id as Long)]
     }
 
+    def info = {
+        RevisionTransportCommand rev = remoteModelService.getRevision(params.id as Long, params.revision as Integer)
+        [revision: rev, publication: remoteModelService.getPublication(params.id as Long)]
+    }
+
     /**
      * Renders html snippet with Publication information for the current Model identified by the id.
      */

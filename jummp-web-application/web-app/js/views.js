@@ -829,7 +829,18 @@ function loadGOTreeCallback() {
         },
         onLazyRead: function(node) {
             node.appendAjax({
-                url: createLink("gotree", "level", node.data.goid)
+                url: createLink("gotree", "level", node.data.goid),
+                success: function(node) {
+                    for (var i=0; i < node.childList.length; i++) {
+                        var child = node.childList[i];
+                        if (!child.data.isFolder) {
+                            var element = $("a", $(child.li));
+                            element.attr("rel", createLink("model", "info", child.data.modelId) + "?revision=" + child.data.revisionNumber);
+                            element.attr("title", child.data.title);
+                            element.cluetip({width: 550, clickThrough: false, sticky: true, mouseOutClose: true});
+                        }
+                    }
+                }
             });
         }
     });

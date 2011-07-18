@@ -56,7 +56,7 @@ class GotreeController {
             jsonNodes << [isLazy: true, title: "${it.identifier} - ${it.name}", goid: it.id, isFolder: true, icon: icon]
         }
         nodes.revisions.each {
-            jsonNodes << [isLazy: false, title: it.model.name, revid: it.id, isFolder: false]
+            jsonNodes << [isLazy: false, title: it.model.name, modelId: it.model.id, revisionNumber: it.revisionNumber, isFolder: false]
         }
         render jsonNodes as JSON
     }
