@@ -823,6 +823,7 @@ function loadMiriamCallback() {
  */
 function loadGOTreeCallback() {
     $("#gotree").dynatree({
+        imagePath: createURI("/css/dynatree/"),
         initAjax: {
             url: createLink("gotree", "level", 0)
         },

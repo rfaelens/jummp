@@ -35,7 +35,25 @@ class GotreeController {
         }
         List jsonNodes = []
         nodes.ontologies.each {
-            jsonNodes << [isLazy: true, title: "${it.identifier} - ${it.name}", goid: it.id, isFolder: true]
+            String icon = null
+            if (it.type) {
+                switch (it.type.name) {
+                case "IsA":
+                    icon = "go_isa.gif"
+                    break
+                case "PartOf":
+                    icon = "go_partof.gif"
+                    break
+                case "DevelopFrom":
+                    icon = "go_devfrom.gif"
+                    break
+                case "Other":
+                default:
+                    icon = "go_other.gif"
+                    break
+                }
+            }
+            jsonNodes << [isLazy: true, title: "${it.identifier} - ${it.name}", goid: it.id, isFolder: true, icon: icon]
         }
         nodes.revisions.each {
             jsonNodes << [isLazy: false, title: it.model.name, revid: it.id, isFolder: false]
