@@ -817,3 +817,19 @@ function loadMiriamCallback() {
         });
     });
 }
+
+/**
+ * View logic for /gotree/index. Handles the GO Tree
+ */
+function loadGOTreeCallback() {
+    $("#gotree").dynatree({
+        initAjax: {
+            url: createLink("gotree", "level", 0)
+        },
+        onLazyRead: function(node) {
+            node.appendAjax({
+                url: createLink("gotree", "level", node.data.goid)
+            });
+        }
+    });
+}

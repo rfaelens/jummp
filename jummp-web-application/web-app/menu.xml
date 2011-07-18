@@ -10,6 +10,12 @@
                 <viewCallback>loadModelListCallback</viewCallback>
             </menuItem>
             <menuItem>
+                <name>Browse By Gene Ontology</name>
+                <controller>gotree</controller>
+                <action>index</action>
+                <viewCallback>loadGOTreeCallback</viewCallback>
+            </menuItem>
+            <menuItem>
                 <name>Upload Model</name>
                 <controller>model</controller>
                 <action>upload</action>
