@@ -833,7 +833,7 @@ function loadGOTreeCallback() {
                 success: function(node) {
                     for (var i=0; i < node.childList.length; i++) {
                         var child = node.childList[i];
-                        if (!child.data.isFolder) {
+                        if (!child.data.isFolder && child.data.modelId) {
                             var element = $("a", $(child.li));
                             element.attr("rel", createLink("model", "info", child.data.modelId) + "?revision=" + child.data.revisionNumber);
                             element.attr("title", child.data.title);

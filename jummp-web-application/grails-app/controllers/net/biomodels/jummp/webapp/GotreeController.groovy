@@ -58,6 +58,9 @@ class GotreeController {
         nodes.revisions.each {
             jsonNodes << [isLazy: false, title: it.model.name, modelId: it.model.id, revisionNumber: it.revisionNumber, isFolder: false]
         }
+        if (jsonNodes.isEmpty()) {
+            jsonNodes << [isLazy: false, title: "No Model found", isFolder: false]
+        }
         render jsonNodes as JSON
     }
 }
