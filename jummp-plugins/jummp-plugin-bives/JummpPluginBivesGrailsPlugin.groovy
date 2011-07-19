@@ -33,6 +33,11 @@ Brief description of the plugin.
 			bean.autowire = "byName"
 			bean.scope = "prototype"
 		}
+		createDiff(net.biomodels.jummp.plugins.bives.CreateDiffThread) { bean ->
+			bean.autowire = "byName"
+			bean.factoryMethod = "getInstance"
+			bean.scope = "prototype"
+		}
     }
 
     def doWithDynamicMethods = { ctx ->

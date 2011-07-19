@@ -16,7 +16,7 @@ class MiriamIdentifier implements Serializable {
     String name
 
     static mapping = {
-        id composite: ['identifier', 'datatype']
+        identifier(unique: 'datatype')
     }
 
     static constraints = {

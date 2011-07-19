@@ -1,5 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <h1 id="model-header"><span>${revision.model.id}</span><span>${revision.model.name}</span><span>${revision.revisionNumber}</span></h1>
+<div id="modelNavigation">
+    <span id="modelNavigationCount" style="display: none">${count}</span>
+    <span id="modelNavigationOffset" style="display: none">${offset}</span>
+    <span id="modelNavigationSorting" style="display: none">${sort}</span>
+    <span id="modelNavigationDirection" style="display: none">${dir}</span>
+    <a href="#" class="previous">Previous Model</a>
+    <a href="#" class="next">Next Model</a>
+    <a href="#" class="overview">Back to Overview</a>
+</div>
 <div id="modelTabs" style="display: none">
     <ul>
         <li><a id="modelTabs-model" href="${g.createLink(controller: 'model', action: 'summary', id: params.id)}?revision=${revision.revisionNumber}">Model</a></li>

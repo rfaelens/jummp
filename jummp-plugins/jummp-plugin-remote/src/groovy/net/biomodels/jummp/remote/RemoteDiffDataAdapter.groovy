@@ -1,7 +1,9 @@
 package net.biomodels.jummp.remote
 
+import net.biomodels.jummp.plugins.bives.DiffDataService;
+
 /**
- * 
+ * @short Interface describing how to access the {@link DiffDataService}
  * @author Robert Haelke, robert.haelke@googlemail.com
  * @date 04.07.2011
  * @year 2011
@@ -9,11 +11,12 @@ package net.biomodels.jummp.remote
 public interface RemoteDiffDataAdapter {
 
 	/**
-	 * 
-	 * @param modelId
-	 * @param previousRevision
-	 * @param recentRevision
-	 * @return
+	 * Provides the data from a generated diff for the view if present or starts a thread
+	 * for the creation of a non-existing diff
+	 * @param modelId the id of the model
+	 * @param previousRevision the number of a previous model revision
+	 * @param recentRevision a successor revision (in relation to the previous revision)
+	 * @return a Map containing the different types of changes extracted from the diff
 	 */
 	public Map generateDiffData(long modelId, int previousRevision, int recentRevision)
 

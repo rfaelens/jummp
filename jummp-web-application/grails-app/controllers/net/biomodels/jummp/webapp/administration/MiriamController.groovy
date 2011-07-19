@@ -33,6 +33,18 @@ class MiriamController {
             render data as JSON
         }
     }
+
+    def updateMiriamData = {
+        remoteMiriamService.updateAllMiriamIdentifiers()
+        Map data = [success: true]
+        render data as JSON
+    }
+
+    def updateModels = {
+        remoteMiriamService.updateModels()
+        Map data = [success: true]
+        render data as JSON
+    }
 }
 
 class UpdateResourcesCommand implements Serializable {

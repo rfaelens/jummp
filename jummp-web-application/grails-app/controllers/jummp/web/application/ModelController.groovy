@@ -41,6 +41,7 @@ class ModelController {
             render(template: "/templates/page", model: [link: g.createLink(action: "index"), callback: "loadModelListCallback"])
             return
         }
+        [offset: params.offset, sort: params.sort, dir: params.dir]
     }
 
     def show = {
@@ -49,7 +50,7 @@ class ModelController {
             return
         }
         RevisionTransportCommand rev = remoteModelService.getLatestRevision(params.id as Long)
-        [revision: rev, addRevision: remoteModelService.canAddRevision(params.id as Long)]
+        [revision: rev, addRevision: remoteModelService.canAddRevision(params.id as Long), offset: params.offset as Integer, count: params.count as Integer, sort: params.sort, dir: params.dir]
     }
 
     def summary = {
@@ -75,6 +76,33 @@ class ModelController {
         render(template: "/templates/publication", model: [publication: publication])
     }
 
+    def nextPreviousModel = {
+        Integer offset = params.offset as Integer
+        ModelListSorting sort
+        switch (params.sort as int) {
+        case 1:
+            sort = ModelListSorting.NAME
+            break
+        case 2:
+            sort = ModelListSorting.PUBLICATION
+            break
+        case 3:
+            sort = ModelListSorting.LAST_MODIFIED
+            break
+        case 4:
+            sort = ModelListSorting.FORMAT
+            break
+        case 0: // id column is the default
+        default:
+            sort = ModelListSorting.ID
+            break
+        }
+        List models = remoteModelService.getAllModels(offset, 1, params.dir == "asc", sort)
+        RevisionTransportCommand rev = remoteModelService.getLatestRevision(models.first().id)
+        params.id = models.first().id
+        render(view: "show", model: [revision: rev, offset: offset, count: params.count, sort: params.sort, dir: params.dir])
+    }
+
     /**
      * AJAX action to get all Models from the core the current user has access to.
      * Returns a JSON data structure for consumption by a jQuery DataTables. 
@@ -95,6 +123,9 @@ class ModelController {
 
         dataToRender.iTotalRecords = remoteModelService.getModelCount()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.offset = start
+        dataToRender.iSortCol_0 = params.iSortCol_0
+        dataToRender.sSortDir_0 = params.sSortDir_0
 
         ModelListSorting sort
         switch (params.iSortCol_0 as int) {

@@ -8,11 +8,11 @@ package net.biomodels.jummp.core.miriam
 public interface IMiriamService {
     /**
      * Updates the MIRIAM Resources in the database from the XML specified in @p url.
+     * This is executed in a threaded way
      * @param url The URL to the MIRIAM Resource XML
      * @param force If @c true previously fetched data will be discarded, if @c false only new entries are added
-     * @throws MiriamUpdateException In case an error occurs while downloading or parsing the XML
      */
-    public void updateMiriamResources(String url, boolean force) throws MiriamUpdateException
+    public void updateMiriamResources(String url, boolean force)
 
     /**
      * Returns all relevant MIRIAM data in one map for the given @p resource, that is a complete URN
@@ -30,9 +30,12 @@ public interface IMiriamService {
     public Map miriamData(String urn)
 
     /**
-     * Tries to fetch all the MIRIAM data for each of the given @p urns and stores them in the database, if not
-     * already present in the database
-     * @param urns List of URNs to be resolved
+     * Updates all Miriam Identifiers stored in the database by trying to resolve the name again and update
+     * if it changed.
      */
-    public void fetchMiriamData(List<String> urns)
+    public updateAllMiriamIdentifiers()
+    /**
+     * Fetches the MIRIAM annotations in each of the models.
+     */
+    public void updateModels()
 }

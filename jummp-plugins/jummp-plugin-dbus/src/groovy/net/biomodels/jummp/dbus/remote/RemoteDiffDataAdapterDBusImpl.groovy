@@ -15,7 +15,7 @@ import org.freedesktop.dbus.DBusConnection
 import org.springframework.beans.factory.InitializingBean
 
 /**
- * //TODO add description for class RemoteDiffDataAdapterDBusImpl.groovy
+ * @short DBus implementation for the {@link RemoteDiffDataAdapter}
  * @author Robert Haelke, robert.haelke@googlemail.com
  * @date 05.07.2011
  * @year 2011

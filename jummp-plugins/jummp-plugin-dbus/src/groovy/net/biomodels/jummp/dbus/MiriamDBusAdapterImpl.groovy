@@ -28,7 +28,10 @@ public class MiriamDBusAdapterImpl extends AbstractDBusAdapter implements Miriam
     public String miriamData(String authenticationHash, String urn) {
     }
     @DBusMethod(isAuthenticate = true)
-    public void fetchMiriamData(String authenticationHash, List<String> urns) {
+    public void updateAllMiriamIdentifiers(String authenticationHash) {
+    }
+    @DBusMethod(isAuthenticate = true)
+    public void updateModels(String authenticationHash) {
     }
 
     public void setMiriamService(IMiriamService miriamService) {

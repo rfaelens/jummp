@@ -270,6 +270,12 @@ if (!(jummpConfig.jummp.authenticationHash.maxInactiveTime instanceof ConfigObje
     jummp.authenticationHash.maxInactiveTime = 30*60*1000
 }
 
+if (!(jummpConfig.jummp.threadPool.size instanceof ConfigObject)) {
+    jummp.threadPool.size = jummpConfig.jummp.threadPool.size as Integer
+} else {
+    jummp.threadPool.size = 10
+}
+
 // get all Plugin Configurations
 // the list of available plugins is read from the BuildConfig's plugin location
 // for each plugin it is assumed that it has a JummpPluginConfig class in the package

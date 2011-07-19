@@ -25,10 +25,6 @@ class RevisionCreatedListener implements ApplicationListener {
 	 * Dependency Injection of ModelDelegateService
 	 */
 	def modelDelegateService
-	/**
-	 * The logger for this class
-	 */
-	Logger log = Logger.getLogger(getClass())
 
 	public void onApplicationEvent(ApplicationEvent event) {
 		if (event instanceof RevisionCreatedEvent) {

@@ -8,7 +8,6 @@ import net.biomodels.jummp.dbus.model.DBusModel;
 import net.biomodels.jummp.dbus.model.DBusPublication;
 import net.biomodels.jummp.dbus.model.DBusRevision;
 import net.biomodels.jummp.dbus.model.ModelDBusException;
-import org.apache.commons.io.FileUtils;
 import org.springframework.security.access.AccessDeniedException;
 
 import net.biomodels.jummp.webapp.ast.DBusAdapter
@@ -98,7 +97,6 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             setAuthentication(authenticationHash);
             File file = new File(fileName);
             DBusModel model = DBusModel.fromModelTransportCommand(modelDelegateService.uploadModel(file, meta));
-            FileUtils.deleteQuietly(file);
             return model;
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
@@ -121,7 +119,6 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
             ModelFormatTransportCommand modelFormat = new ModelFormatTransportCommand();
             modelFormat.setIdentifier(format);
             DBusRevision revision = DBusRevision.fromRevisionTransportCommand(modelDelegateService.addRevision(modelId, file, modelFormat, comment));
-            FileUtils.deleteQuietly(file);
             return revision;
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());

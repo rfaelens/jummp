@@ -28,7 +28,7 @@ class JummpRepositoryManager extends AbstractRepositoryManager {
 	
 	/**
 	 * Constructor
-	 * @param repository
+	 * @param repository the path of the diff repository
 	 */
 	public JummpRepositoryManager(String repository) {
 		super(repository);
@@ -55,16 +55,15 @@ class JummpRepositoryManager extends AbstractRepositoryManager {
 		if(new File(name).exists()) {
 			return new File(name);
 		} else {
-			System.out.println("<<< the file " + name + " does not exist >>>");
 			return null;
 		}
 	}
 
 	/**
-	 * 
-	 * @param modelId
-	 * @param predecessorRevision
-	 * @param successorRevision
+	 * Retrieves a diff file from the configured directory
+	 * @param modelId the id of the corresponding model
+	 * @param previousRevision the number of a previous model revision
+	 * @param recentRevision a successor revision (in relation to the previous revision)
 	 * @return
 	 */
 	public File getDiffFile(long modelId, int predecessorRevision, int successorRevision) {
@@ -84,12 +83,12 @@ class JummpRepositoryManager extends AbstractRepositoryManager {
 	}
 
 	/**
-	 * 
-	 * @param diff
-	 * @param modelId
-	 * @param predecessorRevision
-	 * @param successorRevision
-	 * @return
+	 * Stores a {@link Diff} in the configured directory
+	 * @param diff the {@link Diff} between both revisions
+	 * @param modelId the id of the corresponding model
+	 * @param previousRevision the number of a previous model revision
+	 * @param recentRevision a successor revision (in relation to the previous revision)
+	 * @return the {@link Diff} {@link File} which has been stored
 	 */
 	public File uploadDiff(Diff diff, long modelId, int predecessorRevision, int successorRevision) {
 		File file = new File(getRepositoryPath() + SLASH + getDiffName(modelId, predecessorRevision, successorRevision));
@@ -109,11 +108,11 @@ class JummpRepositoryManager extends AbstractRepositoryManager {
 	}
 	
 	/**
-	 * 
-	 * @param modelId
-	 * @param predecessorRevision
-	 * @param successorRevision
-	 * @return
+	 * Generates the name for a diff file to be stored or retrieved.
+	 * @param modelId the id of the corresponding model
+	 * @param previousRevision the number of a previous model revision
+	 * @param recentRevision a successor revision (in relation to the previous revision)
+	 * @return a {@link String}
 	 */
 	protected String getDiffName(long modelId, int predecessorRevision, int successorRevision) {
 		return new String(PREFIX + modelId + "_diff_" + predecessorRevision + "_" + successorRevision + XML);

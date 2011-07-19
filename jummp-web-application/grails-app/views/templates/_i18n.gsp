@@ -98,6 +98,16 @@ var i18n = {
     miriam: {
         update: {
             success: "${g.message(code: 'miriam.update.success')}"
+        },
+        data: {
+            update: {
+                success: "${g.message(code: 'miriam.data.update.success')}"
+            }
+        },
+        model: {
+            update: {
+                success: "${g.message(code: 'miriam.model.update.success')}"
+            }
         }
     },
     ui: {

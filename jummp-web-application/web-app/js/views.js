@@ -38,6 +38,8 @@ function loadModelListCallback() {
         bJQueryUI: true,
         sPaginationType: "full_numbers",
         sAjaxSource: createLink('model', 'dataTableSource'),
+        iDisplayStart: parseInt($("#modelNavigationOffset").text()),
+        aaSorting: [[parseInt($("#modelNavigationSorting").text()), $("#modelNavigationDirection").text()]],
         // TODO: move function into an own method,
         "fnServerData": function(sSource, aoData, fnCallback) {
             $.ajax({
@@ -67,7 +69,7 @@ function loadModelListCallback() {
                             rowData[2] = html;
                         }
                         // id column
-                        rowData[0] = '<a href="#" onclick="showModel(\'' + id + '\');">' + id + '</a>';
+                        rowData[0] = '<a href="#" onclick="loadView(\'' + createLink("model", "show", id) + "?offset=" + (json.offset + i) + '&count=' + json.iTotalRecords + '&sort=' + json.iSortCol_0 + '&dir=' + json.sSortDir_0 + '\', loadModelTabCallback)">' + id + '</a>';
                         // the format/download column
                         rowData[4] = rowData[4] + '&nbsp;<a href="' + createLink('model', 'download', id) + '">' + i18n.model.list.download + '</a>';
                     }
@@ -180,6 +182,27 @@ function loadModelTabCallback(data, tabIndex) {
     if (tabIndex) {
         $("#modelTabs").tabs("select", $(tabIndex).attr("href"));
     }
+    // next/previous buttons
+    $("#modelNavigation a").button();
+    var offset = parseInt($("#modelNavigationOffset").text());
+    if ($("#modelNavigationOffset").text() == "" || offset == 0) {
+        $("#modelNavigation a.previous").button("disable");
+    }
+    if ($("#modelNavigationOffset").text() == "" || offset == parseInt($("#modelNavigationCount").text()) - 1) {
+        $("#modelNavigation a.next").button("disable");
+    }
+    if ($("#modelNavigationOffset").text() == "") {
+        $("#modelNavigation a.overview").button("disable");
+    }
+    $("#modelNavigation a.previous").click(function() {
+        loadView(createLink("model", "nextPreviousModel") + "?offset=" + (offset - 1) + '&count=' + $("#modelNavigationCount").text() + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelTabCallback);
+    });
+    $("#modelNavigation a.next").click(function() {
+        loadView(createLink("model", "nextPreviousModel") + "?offset=" + (offset + 1) + '&count=' + $("#modelNavigationCount").text() + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelTabCallback);
+    });
+    $("#modelNavigation a.overview").click(function() {
+        loadView(createLink("model", "index") + "?offset=" + offset + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelListCallback);
+    });
 }
 
 /**
@@ -197,7 +220,7 @@ function changeModelTabRevision(revisionNumber) {
 }
 
 /**
- * 
+ * Provides a tree for each element for the diff view
  */
 function showDiffDataCallback() {
 	// TODO some formatting here before...
@@ -223,6 +246,12 @@ function showDiffDataCallback() {
 	});
 }
 
+/**
+ * Recursive method that adds a subnode to the provided tree node of a dynatree
+ * @param node the tree node to which a subnode is added
+ * @param key the key of the provided data
+ * @param value the value of the provided data
+ */
 function addNodeToTree(node, key, value) {
 	if(value != null) {
 		if(!(value instanceof Object)) {
@@ -818,6 +847,48 @@ function loadMiriamCallback() {
                 }
                 showErrorMessage(data.miriamUrl);
                 setErrorState("#miriam-update-miriam-url", data.miriamUrl);
+            }
+        });
+    });
+    $("#miriam-update div.ui-dialog-buttonpane input").button();
+    $("#miriam-update div.ui-dialog-buttonpane input:button").click(function() {
+        $.ajax({
+            url: createLink("miriam", "updateMiriamData"),
+            dataType: 'json',
+            success: function(data) {
+                if (data.success) {
+                    showInfoMessage(i18n.miriam.data.update.success, 20000);
+                } else if (data.error) {
+                    if (data.error != true) {
+                        showErrorMessage(data.error);
+                    }
+                }
+            },
+            statusCode: {
+                403: handler403,
+                404: handler404,
+                500: handler500
+            }
+        });
+    });
+    $("#miriam-model-update div.ui-dialog-buttonpane input").button();
+    $("#miriam-model-update div.ui-dialog-buttonpane input:button").click(function() {
+        $.ajax({
+            url: createLink("miriam", "updateModels"),
+            dataType: 'json',
+            success: function(data) {
+                if (data.success) {
+                    showInfoMessage(i18n.miriam.model.update.success, 20000);
+                } else if (data.error) {
+                    if (data.error != true) {
+                        showErrorMessage(data.error);
+                    }
+                }
+            },
+            statusCode: {
+                403: handler403,
+                404: handler404,
+                500: handler500
             }
         });
     });

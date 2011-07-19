@@ -5,6 +5,8 @@
  */
 package net.biomodels.jummp.plugins.bives
 
+import java.util.Map;
+
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 import org.apache.log4j.Logger
@@ -17,6 +19,7 @@ import de.unirostock.bives.diff.model.ElementType
 import de.unirostock.bives.diff.model.AttributeType
 import de.unirostock.bives.diff.model.ValueType
 
+
 /**
  * 
  * @author Robert Haelke, robert.haelke@googlemail.com
@@ -25,13 +28,23 @@ import de.unirostock.bives.diff.model.ValueType
  */
 class DiffDataProvider implements InitializingBean {
 
-	// key: element from current revision, value: element from previous revision
+	/**
+	 * List containing moves; key: current (higher) revision, value: previous (lower) revision
+	 */
 	List moves = []
-	// key: element from current revision, value: element from previous revision
+	/**
+	 * List containing inserts; key: current (higher) revision, value: previous (lower) revision
+	 * value may contain nothing more than the type of the element
+	 */
 	List inserts = []
-	// key: element from previous revision, value: element from current revision
+	/**
+	 * List containing deletes; key: current (higher) revision, value: previous (lower) revision
+	 * key may contain nothing more than the type of the element
+	 */
 	List deletes = []
-	// key: element from current revision, value: element from previous revision
+	/**
+	 * List containing updates; key: current (higher) revision, value: previous (lower) revision
+	 */
 	List updates = []
 	// models
 	private RevisionTransportCommand currRev
@@ -53,9 +66,6 @@ class DiffDataProvider implements InitializingBean {
 	 */
 	Logger log = Logger.getLogger(getClass())
 
-	/* (non-Javadoc)
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 */
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		String diffDir = ConfigurationHolder.config.jummp.plugins.bives.diffdir as String
@@ -63,18 +73,22 @@ class DiffDataProvider implements InitializingBean {
 	}
 
 	/**
-	 * 
-	 * @param originId
-	 * @param predecessorId
+	 * Retrieves all the change types stored in the {@link Diff} file, storing them
+	 * in the the maps <code>moves</code>, <code>inserts</code>, <code>deletes</code>,
+	 * and <code>updates</code>.
+	 * @param modelId the id of the corresponding model
+	 * @param previousRevision the number of a previous model revision
+	 * @param recentRevision a successor revision (in relation to the previous revision)
+	 * @return <code>true</code> if the {@link Diff} information was successfully retrieved, <code>false</code> otherwise
 	 */
-	public boolean getDiffInformation(long modelId, int predecessorRevision,  int recentRevision) {
-		File diffFile = repoMan.getDiffFile(modelId, predecessorRevision, recentRevision)
+	public boolean getDiffInformation(long modelId, int previousRevision,  int recentRevision) {
+		File diffFile = repoMan.getDiffFile(modelId, previousRevision, recentRevision)
 		Diff diff = null;
-		if(diffFile.exists()) {
-			diff = repoMan.getDiff(repoMan.getDiffFile(modelId, predecessorRevision, recentRevision))
+		if(diffFile != null && diffFile.exists()) {
+			diff = repoMan.getDiff(repoMan.getDiffFile(modelId, previousRevision, recentRevision))
 			// get models
 			currRev = modelDelegateService.getRevision(modelId, recentRevision)
-			prevRev = modelDelegateService.getRevision(modelId, predecessorRevision)
+			prevRev = modelDelegateService.getRevision(modelId, previousRevision)
 			// for filtering duplicate moves
 			String currentPath = "";
 			// moves
@@ -127,10 +141,10 @@ class DiffDataProvider implements InitializingBean {
 	}
 
 	/**
-	 * 
-	 * @param xpath
-	 * @param revision
-	 * @return
+	 * Returns the JSBML object for the provided xpath of an element
+	 * @param xpath the XPath of the XML element
+	 * @param revision the {@link RevisionTransportCommand} resp. the Model
+	 * @return a {@link Map} containing the type of the element and its JSBML representation
 	 */
 	private Map<Map, String> getPathObject(String xpath, RevisionTransportCommand revision) {
 		try {
@@ -151,7 +165,7 @@ class DiffDataProvider implements InitializingBean {
 				}
 			// we are looking at an element without an id, so we have to improvise ;)
 			} else {
-				// TODO
+				// TODO this part may have to be implemented
 			}
 			return sbmlNode
 		} catch (Exception e) {
@@ -159,5 +173,4 @@ class DiffDataProvider implements InitializingBean {
 		}
 		return [:]
 	}
-
 }
