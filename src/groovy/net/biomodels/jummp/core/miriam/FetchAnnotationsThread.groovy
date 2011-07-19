@@ -53,6 +53,10 @@ class FetchAnnotationsThread implements Runnable {
      * The revision on which we operate
      */
     private Revision revision
+    /**
+     * Optional Id of the revision to fetch
+     */
+    private Long revisionId
 
     void run() {
         // set the Authentication in the Thread's SecurityContext
@@ -71,7 +75,19 @@ class FetchAnnotationsThread implements Runnable {
             }
             threadModel = Model.get(model)
         }
-        revision = modelService.getLatestRevision(threadModel)
+        if (!revisionId) {
+            revision = modelService.getLatestRevision(threadModel)
+        } else {
+            revision = Revision.get(revisionId)
+            if (!revision) {
+                try {
+                    Thread.sleep(10000)
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+                revision = Revision.get(revisionId)
+            }
+        }
         if (revision) {
             modelFileFormatService.getAllAnnotationURNs(revision).each {
                 miriamService.queueUrnForIdentifierResolving(it, revision)
@@ -81,10 +97,11 @@ class FetchAnnotationsThread implements Runnable {
         SecurityContextHolder.clearContext()
     }
 
-    static public FetchAnnotationsThread getInstance(Long model) {
+    static public FetchAnnotationsThread getInstance(Long model, Long revision = null) {
         FetchAnnotationsThread thread = new FetchAnnotationsThread()
         thread.authentication = SecurityContextHolder.context.authentication
         thread.model = model
+        thread.revisionId = revision
         return thread
     }
 }
