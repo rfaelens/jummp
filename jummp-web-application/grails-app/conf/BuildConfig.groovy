@@ -49,7 +49,6 @@ grails.plugin.location.'jummp-plugin-core-api' = "${grails.project.jummp.dir}/ju
 
 // Remove libraries not needed in productive mode
 grails.war.resources = { stagingDir ->
-  delete(file:"${stagingDir}/WEB-INF/lib/hsqldb-1.8.0.10.jar")
   // need to remove unix socket JNI library as incompatible with placing inside web-app
   delete(file:"${stagingDir}/WEB-INF/lib/unix-0.5.jar")
 }
