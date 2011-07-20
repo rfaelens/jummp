@@ -251,4 +251,5 @@ public interface IModelService {
     **/
     public boolean restoreModel(long modelId)
     public boolean deleteRevision(RevisionTransportCommand revision)
+    public void publishModelRevision(RevisionTransportCommand revision)
 }

@@ -784,4 +784,27 @@ class ModelService {
         revision.save(flush: true)
         return true
     }
+
+    /**
+     * Makes a Model Revision publicly available.
+     * This means that ROLE_USER and ROLE_ANONYMOUS gain read access to the Revision and by that also to
+     * the Model.
+     *
+     * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
+     * method.
+     * @param revision The Revision to be published
+     */
+    @PreAuthorize("(hasRole('ROLE_CURATOR') and hasPermission(#revision, write)) or hasRole('ROLE_ADMIN')")
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.publishModelRevision")
+    public void publishModelRevision(Revision revision) {
+        if (!revision) {
+            throw new IllegalArgumentException("Revision may not be null")
+        }
+        if (revision.deleted) {
+            throw new IllegalArgumentException("Revision may not be deleted")
+        }
+        aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
+        aclUtilService.addPermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
+    }
 }

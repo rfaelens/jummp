@@ -55,4 +55,5 @@ public interface ModelDBusAdapter extends DBusInterface {
     public boolean deleteModel(String authenticationHash, long id);
     public boolean restoreModel(String authenticationHash, long id);
     public boolean deleteRevision(String authenticationHash, long modelId, int revisionNumber);
+    public void publishModelRevision(String authenticationHash, long modelId, int revisionNumber);
 }

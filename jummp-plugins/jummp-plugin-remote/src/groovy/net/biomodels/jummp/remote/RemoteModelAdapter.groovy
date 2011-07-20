@@ -164,4 +164,5 @@ public interface RemoteModelAdapter {
     **/
     public Boolean restoreModel(long modelId)
     public Boolean deleteRevision(long modelId, int revisionNumber)
+    public void publishModelRevision(long modelId, int revisionNumber)
 }
