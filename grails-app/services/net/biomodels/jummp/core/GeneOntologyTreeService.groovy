@@ -143,7 +143,7 @@ class GeneOntologyTreeService {
                 rev.id IN (:ids)
                 GROUP BY rev.model, rev.id
                 HAVING rev.revisionNumber = max(revisions.revisionNumber)
-                ORDER BY rev.model''', [ids: ids])
+                ORDER BY rev.model.name''', [ids: ids])
         }
     }
 }
