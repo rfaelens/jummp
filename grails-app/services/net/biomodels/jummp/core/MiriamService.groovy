@@ -73,6 +73,7 @@ class MiriamService implements IMiriamService {
     private final Lock lock = new ReentrantLock()
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Profiled(tag="MiriamService.updateMiriamResources")
     public void updateMiriamResources(String url, boolean force) {
         runAsync {
             MiriamResource.withTransaction { TransactionStatus status ->
@@ -118,6 +119,7 @@ class MiriamService implements IMiriamService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Profiled(tag="MiriamService.updateAllMiriamIdentifiers")
     public updateAllMiriamIdentifiers() {
         runAsync {
             MiriamIdentifier.list().each { identifier ->

@@ -9,6 +9,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import net.biomodels.jummp.model.Revision
 import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclObjectIdentity
 import org.springframework.security.core.userdetails.UserDetails
+import org.perf4j.aop.Profiled
 
 /**
  * @short Service to retrieve Gene Ontology Tree information.
@@ -38,6 +39,7 @@ class GeneOntologyTreeService {
      * @param goId The internal id, may be @c null or @c 0 to retrieve the Root level
      * @return Information about the next tree level.
      */
+    @Profiled(tag="GeneOntologyTreeService.treeLevel")
     GeneOntologyTreeLevel treeLevel(Long goId) {
         GeneOntology geneOntology = GeneOntology.get(goId)
         List geneOntologies
