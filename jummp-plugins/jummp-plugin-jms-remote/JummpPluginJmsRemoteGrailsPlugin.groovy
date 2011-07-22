@@ -1,10 +1,11 @@
 import org.apache.activemq.ActiveMQConnectionFactory
 import org.springframework.jms.connection.SingleConnectionFactory
+import net.biomodels.jummp.jms.remote.RemoteDiffDataAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl
-import net.biomodels.jummp.jms.remote.RemoteUserAdapterJmsImpl
+import net.biomodels.jummp.jms.remote.RemoteMiriamAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteModelAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteSbmlAdapterJmsImpl
-import net.biomodels.jummp.jms.remote.RemoteMiriamAdapterJmsImpl
+import net.biomodels.jummp.jms.remote.RemoteUserAdapterJmsImpl
 
 class JummpPluginJmsRemoteGrailsPlugin {
     // the plugin version
@@ -55,6 +56,9 @@ Brief description of the plugin.
             miriamJmsRemoteAdapter(RemoteMiriamAdapterJmsImpl) {
                 jmsSynchronousService = ref("jmsSynchronousService")
             }
+			diffJmsRemoteAdapter(RemoteDiffDataAdapterJmsImpl) {
+				jmsSynchronousService = ref("jmsSynchronousService")
+			}
         }
     }
 
