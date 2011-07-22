@@ -1,29 +1,33 @@
 package net.biomodels.jummp.dbus
 
+import net.biomodels.jummp.core.bives.DiffNotExistingException
+import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
+import net.biomodels.jummp.core.user.RegistrationException
+import net.biomodels.jummp.core.user.RoleNotFoundException
+import net.biomodels.jummp.core.user.UserCodeExpiredException
+import net.biomodels.jummp.core.user.UserCodeInvalidException
+import net.biomodels.jummp.core.user.UserInvalidException
+import net.biomodels.jummp.core.user.UserManagementException
+import net.biomodels.jummp.core.user.UserNotFoundException
+import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException
+import net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException
+import net.biomodels.jummp.dbus.authentication.BadCredentialsDBusException
+import net.biomodels.jummp.dbus.user.RoleNotFoundDBusException
+import net.biomodels.jummp.dbus.user.UserCodeExpiredDBusException
+import net.biomodels.jummp.dbus.user.UserCodeInvalidDBusException
+import net.biomodels.jummp.dbus.user.UserInvalidDBusException
+import net.biomodels.jummp.dbus.user.UserManagementDBusException
+import net.biomodels.jummp.dbus.user.UserNotFoundDBusException
+import net.biomodels.jummp.remote.AbstractCoreAdapter
+
+import org.apache.log4j.Logger
 import org.freedesktop.dbus.DBusInterface
 import org.freedesktop.dbus.exceptions.DBusException
 import org.springframework.beans.factory.InitializingBean
-import net.biomodels.jummp.dbus.authentication.AuthenticationHashNotFoundDBusException
-import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
-import net.biomodels.jummp.remote.AbstractCoreAdapter
-import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException
 import org.springframework.security.access.AccessDeniedException
-import net.biomodels.jummp.core.user.RoleNotFoundException
-import net.biomodels.jummp.dbus.user.RoleNotFoundDBusException
-import net.biomodels.jummp.core.user.UserNotFoundException
-import net.biomodels.jummp.dbus.user.UserNotFoundDBusException
-import net.biomodels.jummp.core.user.UserInvalidException
-import net.biomodels.jummp.dbus.user.UserInvalidDBusException
 import org.springframework.security.authentication.BadCredentialsException
-import net.biomodels.jummp.dbus.authentication.BadCredentialsDBusException
-import net.biomodels.jummp.core.user.RegistrationException
-import net.biomodels.jummp.dbus.user.UserManagementDBusException
-import net.biomodels.jummp.core.user.UserManagementException
-import net.biomodels.jummp.core.user.UserCodeInvalidException
-import net.biomodels.jummp.dbus.user.UserCodeInvalidDBusException
-import net.biomodels.jummp.core.user.UserCodeExpiredException
-import net.biomodels.jummp.dbus.user.UserCodeExpiredDBusException
-import org.apache.log4j.Logger
+
+import net.biomodels.jummp.dbus.bives.DiffNotExistingDBusException
 
 /**
  * @short Abstract Base class for all DBusAdapter Implementations.
@@ -106,6 +110,9 @@ public abstract class AbstractDBusAdapter extends AbstractCoreAdapter implements
         if (e instanceof UserManagementException) {
             return new UserManagementDBusException(e.getMessage())
         }
+		if (e instanceof DiffNotExistingException) {
+			return new DiffNotExistingDBusException(e.getMessage())
+		}
         log.debug(e.message, e)
         return e
     }

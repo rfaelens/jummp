@@ -1,9 +1,9 @@
 package net.biomodels.jummp.remote
 
-import net.biomodels.jummp.plugins.bives.DiffDataService;
+import net.biomodels.jummp.core.bives.DiffNotExistingException
 
 /**
- * @short Interface describing how to access the {@link DiffDataService}
+ * @short Interface describing how to access the DiffDataService
  * @author Robert Haelke, robert.haelke@googlemail.com
  * @date 04.07.2011
  * @year 2011
@@ -18,6 +18,6 @@ public interface RemoteDiffDataAdapter {
 	 * @param recentRevision a successor revision (in relation to the previous revision)
 	 * @return a Map containing the different types of changes extracted from the diff
 	 */
-	public Map generateDiffData(long modelId, int previousRevision, int recentRevision)
+	public Map generateDiffData(long modelId, int previousRevision, int recentRevision) throws DiffNotExistingException
 
 }

@@ -3,12 +3,12 @@ package net.biomodels.jummp.plugins.bives
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
-import net.biomodels.jummp.plugins.bives.DiffDataProvider
+import net.biomodels.jummp.core.bives.DiffNotExistingException;
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 /**
- * Provides the data from the {@link DiffDataProvider} for the view and creates a new thread
+ * Provides the data from the DiffDataProvider for the view and creates a new thread
  * for the generation of a diff, in case it's not been created yet.
  * @author Robert Haelke, robert.haelke@googlemail.com
  * @date 05.07.2011
@@ -42,32 +42,31 @@ public class DiffDataService {
 	 * @param recentRevision a successor revision (in relation to the previous revision)
 	 * @return a Map containing the different types of changes extracted from the diff
 	 */
-	Map generateDiffData(long modelId, int previousRevision, int recentRevision) {
-		try {
-			DiffDataProvider diffData = ApplicationHolder.application.mainContext.getBean("diffDataProvider") as DiffDataProvider
-			if(!diffData.getDiffInformation(modelId, previousRevision, recentRevision)) {
-				Runnable runnable = null
-				String diff = modelId + ";" + previousRevision + ";" + recentRevision
-				// prevents the multiple generation of the same diff by locking this process and
-				// storing the information about the currently generated diff
-				lock.lock();
+	Map generateDiffData(long modelId, int previousRevision, int recentRevision) throws DiffNotExistingException {
+		DiffDataProvider diffData = ApplicationHolder.application.mainContext.getBean("diffDataProvider") as DiffDataProvider
+		if(!diffData.getDiffInformation(modelId, previousRevision, recentRevision)) {
+			Runnable runnable = null
+			String diff = modelId + ";" + previousRevision + ";" + recentRevision
+			// prevents the multiple generation of the same diff by locking this process and
+			// storing the information about the currently generated diff
+			lock.lock();
+			try {
 				if(lockedDiffs.contains(diff)) {
-					return [moves:[:], updates:[:], inserts:[:], deletes:[:]]
+					throw new DiffNotExistingException()
 				}
 				runnable = ApplicationHolder.application.mainContext.getBean("createDiff", modelId, previousRevision, recentRevision) as Runnable
 				if(runnable) {
-					println("setting lock: " + diff)
 					lockedDiffs << diff
 				}
 				executorService.submit(runnable)
-				return [moves:[:], updates:[:], inserts:[:], deletes:[:]]
+				throw new DiffNotExistingException()
+//			} catch (Exception e) {
+			} 
+				finally {
+				lock.unlock();
 			}
-			return [moves: diffData.moves, updates: diffData.updates, inserts: diffData.inserts, deletes: diffData.deletes]
-		} catch (Exception e) {
-
-		} finally {
-			lock.unlock();
 		}
+		return [moves: diffData.moves, updates: diffData.updates, inserts: diffData.inserts, deletes: diffData.deletes]
 	}
 
 	/**
@@ -81,7 +80,6 @@ public class DiffDataService {
 			String diff = modelId + ";" + previousRevision + ";" + recentRevision
 			lock.lock();
 			if(lockedDiffs.contains(diff)) {
-				println("unlocking: " + diff)
 				lockedDiffs.remove(diff)
 			}
 		} catch (Exception e) {

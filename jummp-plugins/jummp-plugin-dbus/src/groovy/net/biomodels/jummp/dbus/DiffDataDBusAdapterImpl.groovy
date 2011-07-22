@@ -7,6 +7,7 @@ package net.biomodels.jummp.dbus
 
 import net.biomodels.jummp.webapp.ast.DBusAdapter
 import net.biomodels.jummp.webapp.ast.DBusMethod
+import net.biomodels.jummp.core.bives.DiffNotExistingException
 
 /**
  * //TODO add description for class DiffDataDBusAdapterImpl.groovy
@@ -20,7 +21,7 @@ public class DiffDataDBusAdapterImpl extends AbstractDBusAdapter implements Diff
 	def diffDataService
 	
 	@DBusMethod(isAuthenticate = true, json=true)
-	public String generateDiffData(String authenticationHash, long modelId, int predecessorRevision,  int recentRevision) {
+	public String generateDiffData(String authenticationHash, long modelId, int predecessorRevision,  int recentRevision) throws DiffNotExistingException {
 	}
 	
 }

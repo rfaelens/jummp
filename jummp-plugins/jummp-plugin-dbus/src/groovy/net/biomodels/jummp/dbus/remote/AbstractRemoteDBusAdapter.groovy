@@ -16,6 +16,7 @@ import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserCodeExpiredException
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.bives.DiffNotExistingException
 
 /**
  * @short Abstract base class for all RemoteDBusAdapters.
@@ -62,6 +63,8 @@ class AbstractRemoteDBusAdapter extends AbstractRemoteAdapter {
             return new IllegalArgumentException(e.message)
         case "net.biomodels.jummp.dbus.model.ModelDBusException":
             return new ModelException(new ModelTransportCommand(), e.getMessage())
+		case "net.biomodels.jummp.dbus.bives.DiffNotExistingDBusException":
+			return new DiffNotExistingException(e.message)
         default:
             return new JummpException(e.message, e)
         }

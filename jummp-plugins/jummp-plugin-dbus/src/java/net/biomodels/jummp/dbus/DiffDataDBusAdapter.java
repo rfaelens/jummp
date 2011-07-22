@@ -5,15 +5,13 @@
  */
 package net.biomodels.jummp.dbus;
 
-import net.biomodels.jummp.plugins.bives.DiffDataService;
-
 import org.freedesktop.dbus.DBusInterface;
 import org.freedesktop.dbus.DBusInterfaceName;
 
-import de.unirostock.bives.diff.model.Diff;
+import net.biomodels.jummp.core.bives.DiffNotExistingException;
 
 /**
- * @short DBus adapter for the {@link DiffDataService}
+ * @short DBus adapter for the DiffDataService
  * @author Robert Haelke, robert.haelke@googlemail.com
  * @date 05.07.2011
  * @year 2011
@@ -27,8 +25,8 @@ public interface DiffDataDBusAdapter extends DBusInterface {
 	 * @param modelId the id of the model
 	 * @param previousRevision the number of a previous model revision
 	 * @param recentRevision a successor revision (in relation to the previous revision)
-	 * @return a JSON {@link String} containing the {@link Diff} information
+	 * @return a JSON {@link String} containing the Diff information
 	 */
-	public String generateDiffData(String authenticationHash, long modelId, int predecessorRevision,  int recentRevision);
+	public String generateDiffData(String authenticationHash, long modelId, int predecessorRevision,  int recentRevision) throws DiffNotExistingException;
 	
 }
