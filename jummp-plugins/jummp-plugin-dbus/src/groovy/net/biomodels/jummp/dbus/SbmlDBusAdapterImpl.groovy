@@ -105,4 +105,12 @@ public class SbmlDBusAdapterImpl extends AbstractDBusAdapter implements SbmlDBus
     @DBusMethod(isAuthenticate = true, getRevision = [1, 2])
     public byte[] generateSvg(String authenticationHash, long modelId, int revisionNumber) {
     }
+
+    @DBusMethod(isAuthenticate = true, getRevision = [1, 2])
+    public String generateOctave(String authenticationHash, long modelId, int revisionNumber) {
+    }
+
+    @DBusMethod(isAuthenticate = true, getRevision = [1, 2])
+    public String generateBioPax(String authenticationHash, long modelId, int revisionNumber) {
+    }
 }

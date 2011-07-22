@@ -31,11 +31,17 @@ import org.sbml.jsbml.Compartment
 import org.sbml.jsbml.Species
 import org.sbml.jsbml.SBase
 import org.sbfc.converter.sbml2dot.SBML2Dot
+import org.sbfc.converter.sbml2octave.SBML2Octave
 import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.InitializingBean
 import grails.util.Environment
 import org.codehaus.groovy.grails.plugins.codecs.URLCodec
 import org.sbml.jsbml.CVTerm
+import org.sbfc.converter.models.SBMLModel
+import org.sbfc.converter.models.OctaveModel
+import org.sbml.jsbml.SBMLWriter
+import org.sbfc.converter.sbml2biopax.SBML2BioPAX_l3
+import org.sbfc.converter.models.BioPaxModel
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -55,18 +61,22 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     def miriamService
 
     /**
-     * Keep one SBML2Dot converter around as it takes quite some time to load the converter.
-     * It's a def because we don't want to call the static initialization code immediately.
+     * Keep one of each SBML2* converters around as it takes quite some time to load the converters.
+     * These are defs because we don't want to call the static initialization code immediately.
      */
     private def dotConverter = null
+    private def octaveConverter = null
+    private def biopaxConverter = null
 
     // TODO: move initialization into afterPropertiesSet and make it configuration dependent
     SbmlCache<RevisionTransportCommand, SBMLDocument> cache = new SbmlCache(100)
 
     public void afterPropertiesSet() {
         if (Environment.current == Environment.PRODUCTION) {
-            // only initialize the SBML2Dot Converter during startup in production mode
+            // only initialize the SBML2* Converters during startup in production mode
             sbml2dotConverter()
+            sbml2OctaveConverter()
+            sbml2BioPaxConverter()
         }
     }
 
@@ -350,6 +360,20 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         return bytes
     }
 
+    @Profiled(tag="SbmlService.generateOctave")
+    public String generateOctave(RevisionTransportCommand revision) {
+        SBMLModel sbmlModel = resolveSbmlModel(revision)
+        OctaveModel octaveModel = sbml2OctaveConverter().octaveExport(sbmlModel)
+        return octaveModel.modelToString()
+    }
+
+    @Profiled(tag="SbmlService.generateBioPax")
+    public String generateBioPax(RevisionTransportCommand revision) {
+        SBMLModel sbmlModel = resolveSbmlModel(revision)
+        BioPaxModel bioPaxModel = sbml2BioPaxConverter().biopaxexport(sbmlModel)
+        return bioPaxModel.modelToString()
+    }
+
     @Profiled(tag="SbmlService.getAllAnnotationURNs")
     public List<String> getAllAnnotationURNs(RevisionTransportCommand revision) {
         SBMLDocument document = getFromCache(revision)
@@ -591,6 +615,38 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             dotConverter = new SBML2Dot()
         }
         return dotConverter
+    }
+
+    private SBML2Octave sbml2OctaveConverter() {
+        if (!octaveConverter) {
+            octaveConverter = new SBML2Octave()
+        }
+        return octaveConverter
+    }
+
+    private SBML2BioPAX_l3 sbml2BioPaxConverter() {
+        if (!biopaxConverter) {
+            biopaxConverter = new SBML2BioPAX_l3()
+        }
+        return biopaxConverter
+    }
+
+    /**
+     * Resolves the SBMLModel from the given @p revision.
+     * @param revision The RevisionTransportCommand from which to extract the SBMLModel.
+     * @return The SBMLModel to be found or an empty array if the model could not be found.
+     */
+    private SBMLModel resolveSbmlModel(RevisionTransportCommand revision) {
+        try {
+        Model model = getFromCache(revision).model
+        SBMLWriter sbmlWriter = new SBMLWriter()
+        String sbmlString = sbmlWriter.writeSBMLToString(model.getSBMLDocument())
+        SBMLModel sbmlModel = new SBMLModel()
+        sbmlModel.setModelFromString(sbmlString)
+        return sbmlModel
+        } catch (NoSuchElementException e) {
+            return [:]
+        }
     }
 
     public String triggerSubmodelGeneration(RevisionTransportCommand revision, String subModelId, String metaId, List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds) {

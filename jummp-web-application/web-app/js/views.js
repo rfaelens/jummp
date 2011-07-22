@@ -95,7 +95,7 @@ function loadModelListCallback() {
 function loadModelTabCallback(data, tabIndex) {
     // set the header
     updateModelHeader($("#model-header span:eq(0)").text(), $("#model-header span:eq(1)").text(), $("#model-header span:eq(2)").text());
-    $("#modelTabs").tabs({disabled: [6],
+    $("#modelTabs").tabs({disabled: [8],
         ajaxOptions: {
             error: function(jqXHR) {
                 $("#body").unblock();

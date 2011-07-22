@@ -161,4 +161,16 @@ class SbmlJmsAdapterService extends AbstractJmsAdapter {
     def generateSvg(def message) {
         return sbmlService.generateSvg(modelDelegateService.getRevision((Long)message[1], (Integer)message[2]))
     }
+
+    @Queue
+    @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Integer])
+    def generateOctave(def message) {
+        return sbmlService.generateOctave(modelDelegateService.getRevision((Long)message[1], (Integer)message[2]))
+    }
+
+    @Queue
+    @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Integer])
+    def generateBioPax(def message) {
+        return sbmlService.generateOctave(modelDelegateService.getRevision((Long)message[1], (Integer)message[2]))
+    }
 }
