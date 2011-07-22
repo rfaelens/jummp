@@ -12,7 +12,7 @@ class RemoteGeneOntologyTreeDBusAdapterImpl extends AbstractRemoteDBusAdapter im
     private GeneOntologyTreeDBusAdapter geneOntologyTreeDBusAdapter
 
     public void afterPropertiesSet() throws Exception {
-        connection =  DBusConnection.getConnection(DBusConnection.SESSION)
+        connection =  DBusConnection.getConnection(DBusConnection.SYSTEM)
         geneOntologyTreeDBusAdapter = (GeneOntologyTreeDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/GOTree", GeneOntologyTreeDBusAdapter.class)
     }
 }

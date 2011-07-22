@@ -19,7 +19,7 @@ class RemoteMiriamAdapterDBusImpl extends AbstractRemoteDBusAdapter implements I
     private MiriamDBusAdapter miriamDBusAdapter
 
     public void afterPropertiesSet() throws Exception {
-        connection = DBusConnection.getConnection(DBusConnection.SESSION)
+        connection = DBusConnection.getConnection(DBusConnection.SYSTEM)
         miriamDBusAdapter = (MiriamDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/Miriam", MiriamDBusAdapter.class)
     }
 }
