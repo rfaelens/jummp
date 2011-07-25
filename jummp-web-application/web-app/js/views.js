@@ -226,11 +226,22 @@ function showDiffDataCallback() {
 	// TODO some formatting here before...
 	$("div.diffData").each(function(index, value) {
 	    var id = "#" + $(value).attr("id");
+	    var parsed = $.parseJSON($(value).text());
+        var hasChildren = false;
+        for (var k in parsed) {
+            if (k != "type") {
+                hasChildren = true;
+                break;
+            }
+        }
+        if (!hasChildren) {
+            $(id).text("");
+            return;
+        }
 	    var treeId = "#tree_" + $(value).attr("id");
 	    $(treeId).dynatree({
 	        expand: true
 	    });
-	    var parsed = $.parseJSON($(value).text());
 	    var rootNode = $(treeId).dynatree("getRoot");
 	    rootNode.title = parsed.type;
 	    var mainNode = rootNode.addChild({
