@@ -223,10 +223,6 @@ function changeModelTabRevision(revisionNumber) {
  * Provides a tree for each element for the diff view
  */
 function showDiffDataCallback() {
-	if ($("#diffError").size() == 1) {
-		showInfoMessage("Model Diff in creation. Please try again later");
-		return;
-	}
 	// TODO some formatting here before...
 	$("div.diffData").each(function(index, value) {
 	    var id = "#" + $(value).attr("id");

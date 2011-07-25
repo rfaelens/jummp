@@ -41,6 +41,7 @@ function loadView(url, loadCallback, callbackData) {
             $("#body").unblock();
         },
         statusCode: {
+            400: handler400,
             403: handler403,
             404: handler404,
             500: handler500
@@ -118,6 +119,11 @@ function submitFormWithFile(form, url, callback) {
             handleError({error: statusCode, code: errorCode, authenticated: authenticated});
         }
     });
+}
+
+function handler400(jqXHR) {
+    clearErrorMessages();
+    showErrorMessage(jqXHR.responseText);
 }
 
 /**
