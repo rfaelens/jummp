@@ -561,6 +561,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         return [
                 metaid: species.metaId,
                 id: species.id,
+                compartment: species.compartment,
                 initialAmount: initialAmount,
                 initialConcentration: initialConcentration,
                 substanceUnits: species.substanceUnits,
