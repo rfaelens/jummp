@@ -269,7 +269,17 @@ function addNodeToTree(node, key, value) {
 	            for(var i = 0; i < value.length; i++) {
 	            	addNodeToTree(child, i + 1, value[i]);
 	            }
-	        } else {
+	        } else if (!(value instanceof Array)) {
+                // HACK: need to loop over the object to find out if it is empty
+                // if it is empty we don't want to add an element to the tree
+                var hasChild = false;
+                for (var k in value) {
+                    hasChild = true;
+                    break;
+                }
+                if (!hasChild) {
+                    return;
+                }
 	            var child = node.addChild({
 	                title: key
 	            });
