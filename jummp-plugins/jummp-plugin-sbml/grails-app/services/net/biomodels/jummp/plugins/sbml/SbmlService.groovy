@@ -548,14 +548,12 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     private Map speciesToMap(Species species) {
         def initialAmount
         def initialConcentration
-        if (species.isSetInitialAmount())
-        {
+        if (species.isSetInitialAmount()) {
             initialAmount = species.initialAmount
         } else {
             initialAmount = null
         }
-        if (species.isSetInitialConcentration())
-        {
+        if (species.isSetInitialConcentration()) {
             initialConcentration = species.initialConcentration
         } else {
             initialConcentration = null
