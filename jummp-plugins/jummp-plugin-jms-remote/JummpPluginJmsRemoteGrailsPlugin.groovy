@@ -5,6 +5,7 @@ import net.biomodels.jummp.jms.remote.RemoteUserAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteModelAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteSbmlAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteMiriamAdapterJmsImpl
+import net.biomodels.jummp.jms.remote.RemoteGeneOntologyTreeAdapterJmsImpl
 
 class JummpPluginJmsRemoteGrailsPlugin {
     // the plugin version
@@ -53,6 +54,9 @@ Brief description of the plugin.
                 jmsSynchronousService = ref("jmsSynchronousService")
             }
             miriamJmsRemoteAdapter(RemoteMiriamAdapterJmsImpl) {
+                jmsSynchronousService = ref("jmsSynchronousService")
+            }
+            geneOntologyTreeJmsRemoteAdapter(RemoteGeneOntologyTreeAdapterJmsImpl) {
                 jmsSynchronousService = ref("jmsSynchronousService")
             }
         }
