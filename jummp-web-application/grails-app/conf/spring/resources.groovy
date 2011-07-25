@@ -19,6 +19,9 @@ beans = {
         remoteMiriamService(net.biomodels.jummp.webapp.remote.RemoteMiriamService) {
             iMiriamService = ref("remoteMiriamAdapterDBusImpl")
         }
+        remoteDiffDataService(net.biomodels.jummp.webapp.remote.RemoteDiffDataService) {
+            remoteDiffDataAdapter = ref("remoteDiffDataAdapterDBusImpl")
+        }
         remoteGeneOntologyTreeService(net.biomodels.jummp.webapp.remote.RemoteGeneOntologyTreeService) {
             remoteGeneOntologyTreeAdapter = ref("remoteGeneOntologyTreeDBusAdapterImpl")
         }
@@ -38,6 +41,9 @@ beans = {
         }
         remoteGeneOntologyTreeService(net.biomodels.jummp.webapp.remote.RemoteGeneOntologyTreeService) {
             remoteGeneOntologyTreeAdapter = ref("geneOntologyTreeJmsRemoteAdapter")
+        }
+        remoteDiffDataService(net.biomodels.jummp.webapp.remote.RemoteDiffDataService) {
+            remoteDiffDataAdapter = ref("diffDataJmsRemoteAdapter")
         }
     }
 

@@ -1,11 +1,16 @@
 import org.apache.activemq.ActiveMQConnectionFactory
 import org.springframework.jms.connection.SingleConnectionFactory
+import net.biomodels.jummp.jms.remote.RemoteDiffDataAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl
-import net.biomodels.jummp.jms.remote.RemoteUserAdapterJmsImpl
+import net.biomodels.jummp.jms.remote.RemoteMiriamAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteModelAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteSbmlAdapterJmsImpl
+<<<<<<< /data/martin/java/jummp/jummp/jummp-plugins/jummp-plugin-jms-remote/JummpPluginJmsRemoteGrailsPlugin.groovy
 import net.biomodels.jummp.jms.remote.RemoteMiriamAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteGeneOntologyTreeAdapterJmsImpl
+=======
+import net.biomodels.jummp.jms.remote.RemoteUserAdapterJmsImpl
+>>>>>>> /tmp/JummpPluginJmsRemoteGrailsPlugin.groovy~other.lTbXnp
 
 class JummpPluginJmsRemoteGrailsPlugin {
     // the plugin version
@@ -57,6 +62,9 @@ Brief description of the plugin.
                 jmsSynchronousService = ref("jmsSynchronousService")
             }
             geneOntologyTreeJmsRemoteAdapter(RemoteGeneOntologyTreeAdapterJmsImpl) {
+                jmsSynchronousService = ref("jmsSynchronousService")
+            }
+            diffJmsRemoteAdapter(RemoteDiffDataAdapterJmsImpl) {
                 jmsSynchronousService = ref("jmsSynchronousService")
             }
         }
