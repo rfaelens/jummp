@@ -60,7 +60,7 @@ Brief description of the plugin.
             geneOntologyTreeJmsRemoteAdapter(RemoteGeneOntologyTreeAdapterJmsImpl) {
                 jmsSynchronousService = ref("jmsSynchronousService")
             }
-            diffJmsRemoteAdapter(RemoteDiffDataAdapterJmsImpl) {
+            diffDataJmsRemoteAdapter(RemoteDiffDataAdapterJmsImpl) {
                 jmsSynchronousService = ref("jmsSynchronousService")
             }
         }
