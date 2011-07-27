@@ -248,6 +248,14 @@ function showDiffDataCallback() {
 	    });
 	    $(id).text("");
 	});
+	// add link to revisions
+	$("li.diffRevisionNumber a").each(function(index, value) {
+		$(value).click(function() {
+	    	var modelId = $("#diff-summary ul li.modelId a").text();
+	    	var revisionId = $(value).text();
+	        loadView(createLink("model", "show", modelId) + "?revision=" + revisionId, loadModelTabCallback);
+	    });
+	});
 }
 
 /**

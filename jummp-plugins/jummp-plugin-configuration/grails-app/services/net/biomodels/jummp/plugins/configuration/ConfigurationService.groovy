@@ -44,9 +44,10 @@ class ConfigurationService implements InitializingBean {
      * @param userRegistration the user registration configuration
      * @param changePassword the change/reset password configuration
      * @param remote The Remote configuration
+     * @param bives the BiVeS configuration
      */
     public void storeConfiguration(MysqlCommand mysql, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun,
-                                   ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword, RemoteCommand remote) {
+                                   ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword, RemoteCommand remote, BivesCommand bives) {
         Properties properties = new Properties()
         updateMysqlConfiguration(properties, mysql)
         updateRemoteConfiguration(properties, remote)
@@ -57,6 +58,7 @@ class ConfigurationService implements InitializingBean {
         updateServerConfiguration(properties, server)
         updateUserRegistrationConfiguration(properties, userRegistration)
         updateChangePasswordConfiguration(properties, changePassword)
+        updateBivesConfiguration(properties, bives)
         if (ldap) {
             properties.setProperty("jummp.security.authenticationBackend", "ldap")
         } else {
@@ -64,6 +66,17 @@ class ConfigurationService implements InitializingBean {
         }
         saveProperties(properties)
     }
+
+    /**
+     * Loads the current BiVeS Configuration.
+     * @return A command object encapsulating the current BiVeS configuration
+     */
+    public BivesCommand loadBivesConfiguration() {
+        Properties properties = loadProperties()
+        BivesCommand bives = new BivesCommand()
+        bives.diffDir   = properties.getProperty("jummp.plugins.bives.diffdir")
+        return bives
+    } 
 
     /**
      * Loads the current MySql Configuration.
@@ -182,6 +195,19 @@ class ConfigurationService implements InitializingBean {
     }
 
     /**
+     * Updates the BiVeS configuration stored in the properties file.
+     * Other settings are not changed!
+     * It is important to remember that the settings will only be activated after
+     * a restart of the application!
+     * @param bives The new BiVeS configuration
+     */
+    public void saveBivesConfiguration(BivesCommand bives) {
+        Properties properties = loadProperties()
+        updateBivesConfiguration(properties, bives)
+        saveProperties(properties)
+    }
+    
+    /**
      * Updates the MySQL configuration stored in the properties file.
      * Other settings are not changed!
      * It is important to remember that the settings will only be activated after
@@ -285,6 +311,18 @@ class ConfigurationService implements InitializingBean {
         saveProperties(properties)
     }
 
+    /**
+     * Updates the @p properties with the settings from @p bives.
+     * @param properties The existing properties
+     * @param bives the BiVeS settings
+     */
+    private void updateBivesConfiguration(Properties properties, BivesCommand bives) {
+        if(!bives.validate()) {
+            return
+        }
+        properties.setProperty("jummp.plugins.bives.diffdir", bives.diffDir)
+    }
+    
     /**
      * Updates the @p properties with the settings from @p mysql.
      * @param properties The existing properties
