@@ -3,6 +3,7 @@ package net.biomodels.jummp.plugins.bives
 import java.lang.reflect.UndeclaredThrowableException;
 
 import net.biomodels.jummp.core.bives.DiffNotExistingException;
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 
 /**
@@ -12,12 +13,16 @@ import net.biomodels.jummp.core.bives.DiffNotExistingException;
  * @year 2011
  */
 class ModelDiffController {
+    /**
+     * Dependency injection of remoteModelService
+     */
+    def remoteModelService
 
 	def remoteDiffDataService
 	
     def index = {
 		try {
-			[modelId:params.id, previousRevision:params.prevRev, currentRevision:params.currRev,
+			[revision: remoteModelService.getRevision(params.id as Long, params.currRev as Integer), modelId:params.id, previousRevision:params.prevRev, currentRevision:params.currRev,
 				modifications:remoteDiffDataService.generateDiffData(params.id as Long,
 					params.prevRev as Integer, params.currRev as Integer)]
 		} catch (DiffNotExistingException e) {

@@ -69,7 +69,7 @@ class ModelController {
     }
 
     def info = {
-        RevisionTransportCommand rev = remoteModelService.getRevision(params.id as Long, params.revision as Integer)
+        RevisionTransportCommand rev = params.revision ? remoteModelService.getRevision(params.id as Long, params.revision as Integer) : remoteModelService.getLatestRevision(params.id as Long)
         [revision: rev, publication: remoteModelService.getPublication(params.id as Long)]
     }
 

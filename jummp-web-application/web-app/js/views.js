@@ -263,6 +263,9 @@ function showDiffDataCallback() {
 	        loadView(createLink("model", "show", modelId) + "?revision=" + revisionId, loadModelTabCallback);
 	    });
 	});
+    var element = $("#diff-summary ul li.modelId a");
+    element.attr("rel", createLink("model", "info", element.text()));
+    element.cluetip({width: 550, clickThrough: false, sticky: true, mouseOutClose: true});
 }
 
 /**

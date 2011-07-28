@@ -2,7 +2,7 @@
     <div id="diff-summary">
         <p><b><g:message code="bives.overview.headline"></g:message></b></p>
         <ul>
-        	<li class="modelId"><g:message code="model.list.modelId"></g:message>:&nbsp;<a href="#">${modelId}</a></li>
+        	<li class="modelId"><g:message code="model.list.modelId"></g:message>:&nbsp;<a href="#" title="${revision.model.name}">${modelId}</a></li>
         	<li class="diffRevisionNumber"><g:message code="bives.revision.recent"></g:message>&nbsp;<a href="#">${currentRevision}</a></li>
         	<li class="diffRevisionNumber"><g:message code="bives.revision.previous"></g:message>&nbsp;<a href="#">${previousRevision}</a></li>
         	<li><g:message code="bives.modifications"></g:message></li>
