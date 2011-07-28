@@ -12,12 +12,12 @@ import net.biomodels.jummp.webapp.ast.JmsQueueMethod
  * @year 2011
  */
 @JmsAdapter
-class DiffJmsAdapterService extends AbstractJmsAdapter {
+class DiffDataJmsAdapterService extends AbstractJmsAdapter {
 
 	@SuppressWarnings("GrailsStatelessService")
 	static exposes = ['jms']
 	@SuppressWarnings("GrailsStatelessService")
-	static destination = "jummpDiffJms"
+	static destination = "jummpDiffDataJms"
 	static transactional = false
 	
 	/**
@@ -33,7 +33,6 @@ class DiffJmsAdapterService extends AbstractJmsAdapter {
 	@Queue
 	@JmsQueueMethod(isAuthenticate=true, arguments=[Long, Integer, Integer])
 	def generateDiffData(def message) {
-		println(diffDataService.generateDiffData(message[1] as Long, message[2] as Integer, message[3] as Integer))
 		return diffDataService.generateDiffData(message[1] as Long, message[2] as Integer, message[3] as Integer)
 	}
 }

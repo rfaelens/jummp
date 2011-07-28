@@ -27,7 +27,7 @@ class RemoteDiffDataAdapterDBusImpl extends AbstractRemoteDBusAdapter implements
 	private DiffDataDBusAdapter diffDataDBusAdapter
 
 	public void afterPropertiesSet() throws Exception {
-		connection =  DBusConnection.getConnection(DBusConnection.SESSION)
+		connection =  DBusConnection.getConnection(DBusConnection.SYSTEM)
 		diffDataDBusAdapter = (DiffDataDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/DiffData", DiffDataDBusAdapter.class)
 	}
 }

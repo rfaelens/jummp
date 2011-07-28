@@ -227,6 +227,8 @@ class RemoteDBusAdapterTransformation implements ASTTransformation {
                         break
                     }
                 }
+            } else if (it.returnType.name == "net.biomodels.jummp.core.miriam.GeneOntologyTreeLevel") {
+                statement = new ReturnStatement(new MethodCallExpression(new ClassExpression(it.returnType), "fromJSON", delegatedMethodCall))
             }
             if (!statement) {
                 // if it returns a value we just return the result of the delegated method

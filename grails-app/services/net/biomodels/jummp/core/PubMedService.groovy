@@ -62,10 +62,18 @@ class PubMedService {
             }
         }
         if (slurper.Article.Journal.JournalIssue.Volume.size() == 1) {
-            publication.volume = slurper.Article.Journal.JournalIssue.Volume[0].text() as Integer
+            try {
+                publication.volume = slurper.Article.Journal.JournalIssue.Volume[0].text() as Integer
+            } catch (NumberFormatException e) {
+                // ignore
+            }
         }
         if (slurper.Article.Journal.JournalIssue.Issue.size() == 1) {
-            publication.issue = slurper.Article.Journal.JournalIssue.Issue[0].text() as Integer
+            try {
+                publication.issue = slurper.Article.Journal.JournalIssue.Issue[0].text() as Integer
+            } catch (NumberFormatException e) {
+                // ignore
+            }
         }
         if (slurper.Article.Pagination.MedlinePgn.size() == 1) {
             publication.pages = slurper.Article.Pagination.MedlinePgn[0].text()

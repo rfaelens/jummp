@@ -19,7 +19,7 @@ class DBusManagerImpl implements DBusManager, InitializingBean, DisposableBean {
     private DBusConnection connection
 
     public void afterPropertiesSet() throws Exception {
-        connection = DBusConnection.getConnection(DBusConnection.SESSION)
+        connection = DBusConnection.getConnection(DBusConnection.SYSTEM)
         connection.requestBusName("net.biomodels.jummp")
     }
 

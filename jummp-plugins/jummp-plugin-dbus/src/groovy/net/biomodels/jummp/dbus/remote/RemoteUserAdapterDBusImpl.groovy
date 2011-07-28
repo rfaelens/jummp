@@ -25,7 +25,7 @@ class RemoteUserAdapterDBusImpl extends AbstractRemoteDBusAdapter implements Rem
     private UserDBusAdapter userDBusAdapter
 
     public void afterPropertiesSet() throws Exception {
-        connection =  DBusConnection.getConnection(DBusConnection.SESSION)
+        connection =  DBusConnection.getConnection(DBusConnection.SYSTEM)
         userDBusAdapter = (UserDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/User", UserDBusAdapter.class)
     }
 

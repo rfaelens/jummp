@@ -21,14 +21,8 @@ class ModelDiffController {
 				modifications:remoteDiffDataService.generateDiffData(params.id as Long,
 					params.prevRev as Integer, params.currRev as Integer)]
 		} catch (DiffNotExistingException e) {
-			render {
-				div(id: "diffError", style: "display: none")
-			}
-		} catch (Exception e) {
-			e.printStackTrace()
-			render {
-				div(id: "diffError", style: "display: none")
-			}
+			response.status = 400
+			render "Model Diff in creation. Please try again later"
 		}
     }
 }
