@@ -15,6 +15,7 @@
                     <li><a href="${createLink(action: 'vcs')}">Version Control System</a></li>
                     <li><a href="${createLink(action: 'remote')}">Remote</a></li>
                     <li><a href="${createLink(action: 'server')}">Server</a></li>
+                    <li><a href="${createLink(action: 'bives')}">Model Versioning System - BiVeS</a></li>
                     <li><a href="${createLink(action: 'userRegistration')}">User Registration</a></li>
                     <li><a href="${createLink(action: 'changePassword')}">Change/Reset Password</a></li>
                 </ul>

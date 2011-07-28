@@ -11,7 +11,7 @@
                 <g:render template="/templates/configuration/bives"/>
                 <div class="buttons">
                     <g:submitButton name="back" value="Back"/>
-                    <g:submitButton name="next" value="Next"/>
+                    <g:submitButton name="next" value="Finish"/>
                 </div>
             </g:form>
         </div>
