@@ -56,14 +56,28 @@ class JummpIntegrationTestCase  extends GrailsUnitTestCase {
                 passwordExpired: false)
         assertNotNull(admin.save())
         assertNotNull(new AclSid(sid: admin.username, principal: true).save(flush: true))
+        User curator = new User(username: "curator",
+                password: springSecurityService.encodePassword("extremelysecret"),
+                userRealName: "Curator",
+                email: "curator@test.com",
+                enabled: true,
+                accountExpired: false,
+                accountLocked: false,
+                passwordExpired: false)
+        assertNotNull(curator.save())
+        assertNotNull(new AclSid(sid: curator.username, principal: true).save(flush: true))
         Role userRole = new Role(authority: "ROLE_USER")
         assertNotNull(userRole.save())
         UserRole.create(user, userRole, false)
         UserRole.create(user2, userRole, false)
         UserRole.create(admin, userRole, false)
+        UserRole.create(curator, userRole, false)
         Role adminRole = new Role(authority: "ROLE_ADMIN")
         assertNotNull(adminRole.save())
         UserRole.create(admin, adminRole, false)
+        Role curatorRole = new Role(authority: "ROLE_CURATOR")
+        assertNotNull(curatorRole.save())
+        UserRole.create(curator, curatorRole, false)
     }
 
     /**
@@ -125,5 +139,14 @@ class JummpIntegrationTestCase  extends GrailsUnitTestCase {
         def auth = new AnonymousAuthenticationToken("test", "Anonymous", [ new GrantedAuthorityImpl("ROLE_ANONYMOUS")])
         SecurityContextHolder.getContext().setAuthentication(auth)
         return auth
+    }
+
+    /**
+     * Sets the current authentication to curator and does not models as admin user.
+     * @return The curator authentication
+     */
+    protected def authenticateAsCurator() {
+        modelAdminUser(false)
+        return authenticate("curator", "extremelysecret")
     }
 }

@@ -1126,4 +1126,52 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertFalse(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.READ))
     }
+
+    void testPublishModelRevision() {
+        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("curator"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
+        assertTrue(revision.validate())
+        model.addToRevisions(revision)
+        assertTrue(model.validate())
+        model.save()
+        // testUser should not get access to the method
+        authenticateAsTestUser()
+        shouldFail(AccessDeniedException) {
+            modelService.publishModelRevision(revision)
+        }
+        // user should not get access to the method
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            modelService.publishModelRevision(revision)
+        }
+        // user should not see the revision
+        authenticateAsUser()
+        Revision latest = modelService.getLatestRevision(model)
+        assertNull(latest)
+        // curator should get access to the method
+        authenticateAsCurator()
+        aclUtilService.addPermission(Revision.class, revision.id, "ROLE_CURATOR", BasePermission.WRITE)
+        modelService.publishModelRevision(revision)
+        assertNotNull(modelService.getLatestRevision(model))
+        // user should now see the revision
+        authenticateAsUser()
+        assertNotNull(modelService.getLatestRevision(model))
+        // Anonymous should now see the revision
+        authenticateAnonymous()
+        assertNotNull(modelService.getLatestRevision(model))
+        // admin should get access to the method
+        authenticateAsAdmin()
+        modelService.publishModelRevision(revision)
+        // null set revision should lead to exception
+        revision = null
+        shouldFail(IllegalArgumentException) {
+            modelService.publishModelRevision(revision)
+        }
+        revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("curator"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
+        // deleted revision should lead to exception
+        revision.deleted
+        shouldFail(IllegalArgumentException) {
+            modelService.publishModelRevision(revision)
+        }
+    }
 }
