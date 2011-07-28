@@ -1,6 +1,9 @@
 package net.biomodels.jummp.core.miriam
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import grails.converters.JSON
+import org.codehaus.groovy.grails.web.json.JSONObject
+import net.biomodels.jummp.core.model.ModelTransportCommand
 
 /**
  * @short Class representing one level of the Gene Ontology tree.
@@ -89,5 +92,22 @@ class GeneOntologyTreeLevel implements Serializable {
             }
         }
         revisions << revision
+    }
+
+    public static GeneOntologyTreeLevel fromJSON(String json) {
+        def parsedJSON = JSON.parse(json)
+        GeneOntologyTreeLevel level = new GeneOntologyTreeLevel()
+        parsedJSON.ontologies.each { ontology ->
+            GeneOntologyRelationshipType type = null
+            if (ontology.type != JSONObject.NULL) {
+                type = GeneOntologyRelationshipType.valueOf(GeneOntologyRelationshipType.class, ontology.type.name)
+            }
+            level.addOntology(ontology.id, ontology.identifier, ontology.name, type)
+        }
+        parsedJSON.revisions.each { revision ->
+            level.addRevision(new RevisionTransportCommand(id: revision.id, revisionNumber: revision.revisionNumber,
+                    model: new ModelTransportCommand(id: revision.model.id, name: revision.model.name)))
+        }
+        return level
     }
 }

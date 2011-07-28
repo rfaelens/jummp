@@ -25,7 +25,7 @@ class RemoteJummpApplicationAdapterDBusImpl extends AbstractRemoteDBusAdapter im
     private ApplicationDBusAdapter applicationDBusAdapter
 
     public void afterPropertiesSet() throws Exception {
-        connection =  DBusConnection.getConnection(DBusConnection.SESSION)
+        connection =  DBusConnection.getConnection(DBusConnection.SYSTEM)
         applicationDBusAdapter = (ApplicationDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/Application", ApplicationDBusAdapter.class)
     }
 

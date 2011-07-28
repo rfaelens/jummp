@@ -1,4 +1,4 @@
-<g:if test="${modelId} && ${previousRevision} && ${currentRevision}">
+<%@ page import="grails.converters.JSON" %><g:if test="${modelId} && ${previousRevision} && ${currentRevision}">
     <div id="diff-summary">
         <p><b><g:message code="bives.overview.headline"></g:message></b></p>
         <ul>
@@ -50,8 +50,8 @@
                             <td><div class="tree" id="tree_diffInsert${2*i+1}"></div></td>
                         <tr />
                         <tr>
-                            <td><div class="diffData" id="diffInsert${2*i}">${insert.previous}</div></td>
-                            <td><div class="diffData" id="diffInsert${2*i+1}">${insert.current}</div></td>
+                            <td><div class="diffData" id="diffInsert${2*i}">${insert.previous as JSON}</div></td>
+                            <td><div class="diffData" id="diffInsert${2*i+1}">${insert.current as JSON}</div></td>
                         </tr>
                     </g:each>
 	            </g:if>
@@ -73,8 +73,8 @@
                             <td><div class="tree" id="tree_diffDelete${2*i+1}"></div></td>
                         </tr>
                         <tr>
-                            <td><div class="diffData" id="diffDelete${2*i}">${delete.previous}</div></td>
-                            <td><div class="diffData" id="diffDelete${2*i+1}">${delete.current}</div></td>
+                            <td><div class="diffData" id="diffDelete${2*i}">${delete.previous as JSON}</div></td>
+                            <td><div class="diffData" id="diffDelete${2*i+1}">${delete.current as JSON}</div></td>
                         </tr>
                         <tr />
                     </g:each>
@@ -97,8 +97,8 @@
                             <td><div class="tree" id="tree_diffUpdate${2*i+1}"></div></td>
                         </tr>
                         <tr>
-                            <td><div class="diffData" id="diffUpdate${2*i}">${update.previous}</div></td>
-                            <td><div class="diffData" id="diffUpdate${2*i+1}">${update.current}</div></td>
+                            <td><div class="diffData" id="diffUpdate${2*i}">${update.previous as JSON}</div></td>
+                            <td><div class="diffData" id="diffUpdate${2*i+1}">${update.current as JSON}</div></td>
                         </tr>
                         <tr />
                     </g:each>
@@ -121,8 +121,8 @@
                             <td><div class="tree" id="tree_diffMove${2*i+1}"></div></td>
                         </tr>
                         <tr>
-                            <td><div class="diffData" id="diffMove${2*i}">${move.previous}</div></td>
-                            <td><div class="diffData" id="diffMove${2*i+1}">${move.current}</div></td>
+                            <td><div class="diffData" id="diffMove${2*i}">${move.previous as JSON}</div></td>
+                            <td><div class="diffData" id="diffMove${2*i+1}">${move.current as JSON}</div></td>
                         </tr>
                         <tr />
                     </g:each>

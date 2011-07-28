@@ -28,8 +28,8 @@ class GotreeController {
      */
     def level = {
         def nodes
-        if (!params.id) {
-            nodes = remoteGeneOntologyTreeService.treeLevel(0L)
+        if (!params.id || params.id == "0") {
+            nodes = remoteGeneOntologyTreeService.treeLevel(-1L)
         } else {
             nodes = remoteGeneOntologyTreeService.treeLevel(params.id as Long)
         }
@@ -37,7 +37,7 @@ class GotreeController {
         nodes.ontologies.each {
             String icon = null
             if (it.type) {
-                switch (it.type.name) {
+                switch (it.type) {
                 case "IsA":
                     icon = "go_isa.gif"
                     break

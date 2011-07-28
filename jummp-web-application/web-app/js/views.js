@@ -223,18 +223,25 @@ function changeModelTabRevision(revisionNumber) {
  * Provides a tree for each element for the diff view
  */
 function showDiffDataCallback() {
-	if ($("#diffError").size() == 1) {
-		showInfoMessage("Model Diff in creation. Please try again later");
-		return;
-	}
 	// TODO some formatting here before...
 	$("div.diffData").each(function(index, value) {
 	    var id = "#" + $(value).attr("id");
+	    var parsed = $.parseJSON($(value).text());
+        var hasChildren = false;
+        for (var k in parsed) {
+            if (k != "type") {
+                hasChildren = true;
+                break;
+            }
+        }
+        if (!hasChildren) {
+            $(id).text("");
+            return;
+        }
 	    var treeId = "#tree_" + $(value).attr("id");
 	    $(treeId).dynatree({
 	        expand: true
 	    });
-	    var parsed = $.parseJSON($(value).text());
 	    var rootNode = $(treeId).dynatree("getRoot");
 	    rootNode.title = parsed.type;
 	    var mainNode = rootNode.addChild({
@@ -281,7 +288,17 @@ function addNodeToTree(node, key, value) {
 	            for(var i = 0; i < value.length; i++) {
 	            	addNodeToTree(child, i + 1, value[i]);
 	            }
-	        } else {
+	        } else if (!(value instanceof Array)) {
+                // HACK: need to loop over the object to find out if it is empty
+                // if it is empty we don't want to add an element to the tree
+                var hasChild = false;
+                for (var k in value) {
+                    hasChild = true;
+                    break;
+                }
+                if (!hasChild) {
+                    return;
+                }
 	            var child = node.addChild({
 	                title: key
 	            });

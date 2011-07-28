@@ -19,7 +19,7 @@ class RemoteSbmlAdapterDBusImpl extends AbstractRemoteDBusAdapter implements Rem
     private SbmlDBusAdapter sbmlDBusAdapter
 
     public void afterPropertiesSet() throws Exception {
-        connection =  DBusConnection.getConnection(DBusConnection.SESSION)
+        connection =  DBusConnection.getConnection(DBusConnection.SYSTEM)
         sbmlDBusAdapter = (SbmlDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/SBML", SbmlDBusAdapter.class)
     }
 }
