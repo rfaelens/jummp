@@ -16,6 +16,7 @@ lib/jummp-ast.jar
 jummp-web-application/log/*
 jummp-web-application/logs/*
 jummp-web-application/lib/jummp-ast.jar
+jummp-web-application/grails-app/views/templates/_version.gsp
 activemq-data/*
 CodeNarcReport.html
 cobertura.ser
