@@ -23,11 +23,9 @@ import org.springframework.beans.factory.InitializingBean
 @RemoteDBusAdapter(interfaceName="RemoteDiffDataAdapter",dbusAdapterName="diffDataDBusAdapter")
 class RemoteDiffDataAdapterDBusImpl extends AbstractRemoteDBusAdapter implements RemoteDiffDataAdapter, InitializingBean {
 
-	private DBusConnection connection
 	private DiffDataDBusAdapter diffDataDBusAdapter
 
 	public void afterPropertiesSet() throws Exception {
-		connection =  DBusConnection.getConnection(DBusConnection.SYSTEM)
-		diffDataDBusAdapter = (DiffDataDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/DiffData", DiffDataDBusAdapter.class)
+		diffDataDBusAdapter = getRemoteObject("/DiffData", DiffDataDBusAdapter.class)
 	}
 }

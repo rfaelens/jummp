@@ -10,6 +10,7 @@ import org.springframework.beans.factory.InitializingBean
 import org.perf4j.aop.Profiled
 import net.biomodels.jummp.core.user.JummpAuthentication
 import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
+import org.freedesktop.dbus.exceptions.DBusExecutionException
 
 /**
  * @short DBus Remote Adapter to JummpApplication.
@@ -21,12 +22,10 @@ import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
  */
 @RemoteDBusAdapter(interfaceName="RemoteJummpApplicationAdapter",dbusAdapterName="applicationDBusAdapter")
 class RemoteJummpApplicationAdapterDBusImpl extends AbstractRemoteDBusAdapter implements RemoteJummpApplicationAdapter, InitializingBean {
-    private DBusConnection connection
     private ApplicationDBusAdapter applicationDBusAdapter
 
     public void afterPropertiesSet() throws Exception {
-        connection =  DBusConnection.getConnection(DBusConnection.SYSTEM)
-        applicationDBusAdapter = (ApplicationDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/Application", ApplicationDBusAdapter.class)
+        applicationDBusAdapter = getRemoteObject("/Application", ApplicationDBusAdapter.class)
     }
 
     @Profiled(tag="RemoteJummpApplicationAdapterDBusImpl.authenticate")
