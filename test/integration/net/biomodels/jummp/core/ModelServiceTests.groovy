@@ -1127,6 +1127,120 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.READ))
     }
 
+    void testDeleteModel() {
+        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("user"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
+        assertTrue(revision.validate())
+        model.addToRevisions(revision)
+        assertTrue(model.validate())
+        model.save()
+        // testUser should not get access to the method
+        authenticateAsTestUser()
+        shouldFail(AccessDeniedException) {
+            modelService.deleteModel(model)
+        }
+        // user should not get access to the method
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            modelService.deleteModel(model)
+        }
+        // now user should get access to the method
+        final String username = revision.owner.username
+        aclUtilService.addPermission(model, username, BasePermission.DELETE)
+        assertTrue(modelService.deleteModel(model))
+        // set model state back to initial tate
+        model.state = ModelState.UNPUBLISHED
+        // admin should get access to the method
+        authenticateAsAdmin()
+        assertTrue(modelService.deleteModel(model))
+        model.state = ModelState.PUBLISHED
+        assertFalse(modelService.deleteModel(model))
+        model = null
+        shouldFail(IllegalArgumentException) {
+            modelService.deleteModel(model)
+        }
+    }
+
+    void testRestoreModel() {
+        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("user"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
+        assertTrue(revision.validate())
+        model.addToRevisions(revision)
+        assertTrue(model.validate())
+        model.save()
+        // testUser should not get access to the method
+        authenticateAsTestUser()
+        shouldFail(AccessDeniedException) {
+            modelService.restoreModel(model)
+        }
+        // user should not get access to the method
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+            modelService.restoreModel(model)
+        }
+        // admin should get access to the method
+        authenticateAsAdmin()
+        assertFalse(modelService.restoreModel(model))
+        model.state = ModelState.DELETED
+        assertTrue(modelService.restoreModel(model))
+        model.state = ModelState.PUBLISHED
+        assertFalse(modelService.deleteModel(model))
+        model = null
+        shouldFail(IllegalArgumentException) {
+            modelService.deleteModel(model)
+        }
+    }
+
+    void testDeleteRevision() {
+        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("user"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
+        assertTrue(revision.validate())
+        model.addToRevisions(revision)
+        assertTrue(model.validate())
+        model.save()
+        // testUser should not get access to the method
+        authenticateAsTestUser()
+        shouldFail(AccessDeniedException) {
+            modelService.deleteRevision(revision)
+        }
+        // Revision should not be set to deleted
+        assertFalse(revision.deleted)
+        // user should get access to the method
+        authenticateAsUser()
+        final String username = revision.owner.username
+        // let's add the required rights
+        aclUtilService.addPermission(model, username, BasePermission.DELETE)
+        aclUtilService.addPermission(revision, username, BasePermission.DELETE)
+        modelService.deleteRevision(revision)
+        assertTrue(revision.deleted)
+        // a second time the revision cannot be set to null
+        assertFalse(modelService.deleteRevision(revision))
+        // Set flag back to not deleted
+        revision.deleted = false
+        assertFalse(revision.deleted)
+        // admin should get access to the method
+        authenticateAsAdmin()
+        modelService.deleteRevision(revision)
+        assertTrue(revision.deleted)
+        // add another revision to test if only current revision is set to deleted
+        Revision revision2 = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: User.findByUsername("user"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
+        assertTrue(revision2.validate())
+        model.addToRevisions(revision2)
+        assertTrue(model.validate())
+        model.save()
+        // Set flag of first revision back to not deleted
+        revision.deleted = false
+        authenticateAsAdmin()
+        modelService.deleteRevision(revision2)
+        assertTrue(revision2.deleted)
+        assertFalse(revision.deleted)
+        revision2.deleted = false
+        // test is it's this time enough to give user the right to delete only the revision
+        authenticateAsUser()
+        aclUtilService.addPermission(revision2, username, BasePermission.DELETE)
+        modelService.deleteRevision(revision2)
+    }
+
     void testPublishModelRevision() {
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("curator"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
