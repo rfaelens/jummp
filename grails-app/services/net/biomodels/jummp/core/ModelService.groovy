@@ -720,6 +720,9 @@ class ModelService {
     @PostLogging(LoggingEventType.DELETION)
     @Profiled(tag="modelService.deleteModel")
     public boolean deleteModel(Model model) {
+        if (!model) {
+            throw new IllegalArgumentException("Model may not be null")
+        }
         // TODO: the code does not check whether the model exists
         if (model.state != ModelState.UNPUBLISHED) {
             return false
