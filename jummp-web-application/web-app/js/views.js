@@ -95,7 +95,7 @@ function loadModelListCallback() {
 function loadModelTabCallback(data, tabIndex) {
     // set the header
     updateModelHeader($("#model-header span:eq(0)").text(), $("#model-header span:eq(1)").text(), $("#model-header span:eq(2)").text());
-    $("#modelTabs").tabs({disabled: [8],
+    $("#modelTabs").tabs({disabled: [6],
         ajaxOptions: {
             error: function(jqXHR) {
                 $("#body").unblock();
@@ -849,4 +849,13 @@ function loadGOTreeCallback() {
             }
         }
     });
+}
+
+function loadOctaveCallback() {
+    var modelId = $("#modelId").text();
+    var revisionNumber = $("#revisionNumber").text();
+        $.get(loadView(createLink('sbml', 'reactionOctave', modelId) + "?revision=" + revisionNumber),
+                function(data) {
+                    $("#model-reaction-octave").html(data);
+                });
 }
