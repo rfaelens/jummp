@@ -37,6 +37,7 @@ import org.springframework.beans.factory.InitializingBean
 import grails.util.Environment
 import org.codehaus.groovy.grails.plugins.codecs.URLCodec
 import org.sbml.jsbml.CVTerm
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.sbfc.converter.models.SBMLModel
 import org.sbfc.converter.models.OctaveModel
 import org.sbml.jsbml.SBMLWriter
@@ -95,6 +96,11 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             // although the API documentation states that an Exception is thrown for incorrect files, it seems that null is returned
             log.error("SBMLDocuement is not valid for file ${model.name}")
             return false
+        }
+        if (!ConfigurationHolder.config.jummp.plugins.sbml.validate) {
+            log.info("Validation for ${model.name} skipped due to configuration option")
+            println("Validation for ${model.name} skipped due to configuration option")
+            return true
         }
         // TODO: WARNING: checkConsistency uses an online validator. This might render timeouts during model upload
         if (doc.checkConsistency() > 0) {
@@ -572,14 +578,12 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     private Map speciesToMap(Species species) {
         def initialAmount
         def initialConcentration
-        if (species.isSetInitialAmount())
-        {
+        if (species.isSetInitialAmount()) {
             initialAmount = species.initialAmount
         } else {
             initialAmount = null
         }
-        if (species.isSetInitialConcentration())
-        {
+        if (species.isSetInitialConcentration()) {
             initialConcentration = species.initialConcentration
         } else {
             initialConcentration = null
@@ -587,6 +591,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         return [
                 metaid: species.metaId,
                 id: species.id,
+                compartment: species.compartment,
                 initialAmount: initialAmount,
                 initialConcentration: initialConcentration,
                 substanceUnits: species.substanceUnits,

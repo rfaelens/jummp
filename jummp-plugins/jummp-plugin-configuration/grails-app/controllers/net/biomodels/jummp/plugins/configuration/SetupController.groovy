@@ -146,13 +146,26 @@ class SetupController {
                 if (flow.server.hasErrors()) {
                     return error()
                 } else {
-                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote)
                     return success()
                 }
-            }.to("finish")
+            }.to("bives")
             on("back").to("remoteExport")
         }
 
+        bives {
+            on("next") { BivesCommand cmd ->
+                flow.bives = cmd
+                if (flow.bives.hasErrors()) {
+                    return error()
+                } else {
+                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote, flow.bives)
+                    return success()
+                }
+            }.to("finish")
+            on("back").to("server")
+            
+        }
+        
         validateAuthenticationBackend {
             action {
                 if (params.authenticationBackend == "database") {

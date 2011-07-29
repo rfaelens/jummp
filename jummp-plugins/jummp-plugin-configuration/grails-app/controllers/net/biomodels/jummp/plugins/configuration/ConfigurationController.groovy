@@ -123,4 +123,18 @@ class ConfigurationController {
             render(view: "saved", model: [module: "Change/Reset Password"])
         }
     }
+    
+    def bives = {
+        BivesCommand cmd = configurationService.loadBivesConfiguration()
+        render(view: 'configuration', model: [bives: cmd, title: "Model Versioning System - BiVeS", action: "saveBives", template: "bives"])
+    }
+    
+    def saveBives = { BivesCommand cmd ->
+        if (cmd.hasErrors()) {
+            render(view: 'configuration', model: [bives: cmd, title: "Model Versioning System - BiVeS", action: "saveBives", template: "bives"])
+        } else {
+            configurationService.saveBivesConfiguration(cmd)
+            render(view: "saved", model: [module: "Model Versioning System - BiVeS"])
+        }
+    }
 }

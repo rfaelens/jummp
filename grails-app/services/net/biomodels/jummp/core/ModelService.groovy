@@ -415,15 +415,19 @@ class ModelService {
             aclUtilService.addPermission(revision, username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, username, BasePermission.DELETE)
             aclUtilService.addPermission(revision, username, BasePermission.READ)
-            if (!meta.publication) {
-                String annotation = getPubMedAnnotation(model)
-                String pubMed
-                if (annotation) {
-                    if (annotation.contains(":")) {
-                        pubMed = annotation.substring(annotation.lastIndexOf(":")+1, annotation.indexOf("]")).trim()
-                        model.publication = pubMedService.getPublication(pubMed)
+            try {
+                if (!meta.publication) {
+                    String annotation = getPubMedAnnotation(model)
+                    String pubMed
+                    if (annotation) {
+                        if (annotation.contains(":")) {
+                            pubMed = annotation.substring(annotation.lastIndexOf(":")+1, annotation.indexOf("]")).trim()
+                            model.publication = pubMedService.getPublication(pubMed)
+                        }
                     }
                 }
+            } catch (JummpException e) {
+                log.debug(e.message, e)
             }
 
             executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", model.id))

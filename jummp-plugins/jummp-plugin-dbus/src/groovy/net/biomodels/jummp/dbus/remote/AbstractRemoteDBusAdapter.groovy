@@ -16,6 +16,8 @@ import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserCodeExpiredException
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.bives.DiffNotExistingException
+import org.freedesktop.dbus.DBusConnection
 
 /**
  * @short Abstract base class for all RemoteDBusAdapters.
@@ -23,6 +25,26 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
  * @author Martin Gräßlin <m.graeslin@dkfz.de>
  */
 class AbstractRemoteDBusAdapter extends AbstractRemoteAdapter {
+    protected DBusConnection connection
+
+    /**
+     * Retrieves a reference to the remote Object at the bus with name "net.biomodels.jummp" and with @p objectPath.
+     * The method first tries to use the System bus. If the object cannot be resolved
+     * on the System bus, the Session bus is tried.
+     * @param objectPath The path on which the
+     * @param clazz The interface
+     * @return A reference to the remote object
+     * @throws DBusExecutionException
+     */
+    protected <T> T getRemoteObject(String objectPath, Class<T> clazz) throws DBusExecutionException {
+        try {
+            connection = DBusConnection.getConnection(DBusConnection.SYSTEM)
+            return (T)connection.getPeerRemoteObject("net.biomodels.jummp", objectPath, T)
+        } catch (DBusExecutionException e) {
+            connection = DBusConnection.getConnection(DBusConnection.SESSION)
+            return (T)connection.getPeerRemoteObject("net.biomodels.jummp", objectPath, clazz)
+        }
+    }
 
     /**
      * Maps a DBusExecutionException to a "normal" exception.
@@ -62,6 +84,8 @@ class AbstractRemoteDBusAdapter extends AbstractRemoteAdapter {
             return new IllegalArgumentException(e.message)
         case "net.biomodels.jummp.dbus.model.ModelDBusException":
             return new ModelException(new ModelTransportCommand(), e.getMessage())
+		case "net.biomodels.jummp.dbus.bives.DiffNotExistingDBusException":
+			return new DiffNotExistingException(e.message)
         default:
             return new JummpException(e.message, e)
         }

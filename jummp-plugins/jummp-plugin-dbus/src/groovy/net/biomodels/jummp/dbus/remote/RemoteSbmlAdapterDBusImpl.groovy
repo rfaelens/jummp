@@ -15,11 +15,9 @@ import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
  */
 @RemoteDBusAdapter(interfaceName="RemoteSbmlAdapter",dbusAdapterName="sbmlDBusAdapter")
 class RemoteSbmlAdapterDBusImpl extends AbstractRemoteDBusAdapter implements RemoteSbmlAdapter, InitializingBean {
-    private DBusConnection connection
     private SbmlDBusAdapter sbmlDBusAdapter
 
     public void afterPropertiesSet() throws Exception {
-        connection =  DBusConnection.getConnection(DBusConnection.SESSION)
-        sbmlDBusAdapter = (SbmlDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/SBML", SbmlDBusAdapter.class)
+        sbmlDBusAdapter = getRemoteObject("/SBML", SbmlDBusAdapter.class)
     }
 }

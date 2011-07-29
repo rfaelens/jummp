@@ -125,6 +125,7 @@ function loadModelTabCallback(data, tabIndex) {
                 $("#model-entity tbody tr").cluetip({clickThrough: false, sticky: true, mouseOutClose: true});
                 break;
             case "modelTabs-revisions":
+                $("#model-revisions table tr td.revisionNumber a").button();
                 $("#model-revisions table tr td.revisionNumber a").click(function() {
                     changeModelTabRevision($(this).text());
                     updateModelHeader(null, null, $(this).text());
@@ -152,6 +153,19 @@ function loadModelTabCallback(data, tabIndex) {
                             }
                         });
                     }
+                });
+                // show diff
+                $("#model-revisions table tr td a.diff").button();
+                $("#model-revisions table tr td a.diff").click(function() {
+                    var recentRevision = $("#model-revisions table tr td input:radio[name='recentRevision']:checked").val();
+                    var previousRevision = $("#model-revisions table tr td input:radio[name='previousRevision']:checked").val();
+                    if (recentRevision == previousRevision) {
+                        // TODO remove string
+                        showInfoMessage("Unable to show diff between the revision and itself. Please choose two different revisions.", 20000);
+                        return false;
+                    }
+                    loadView($(this).attr("href") + "/?prevRev=" + previousRevision + "&currRev=" + recentRevision, showDiffDataCallback);
+                    return false;
                 });
                 // add revision
                 $("#revision-upload-form div.ui-dialog-buttonpane input").button();
@@ -203,6 +217,100 @@ function changeModelTabRevision(revisionNumber) {
             $("#modelTabs").tabs("url", index, url);
         }
     });
+}
+
+/**
+ * Provides a tree for each element for the diff view
+ */
+function showDiffDataCallback() {
+	// TODO some formatting here before...
+	$("div.diffData").each(function(index, value) {
+	    var id = "#" + $(value).attr("id");
+	    var parsed = $.parseJSON($(value).text());
+        var hasChildren = false;
+        for (var k in parsed) {
+            if (k != "type") {
+                hasChildren = true;
+                break;
+            }
+        }
+        if (!hasChildren) {
+            $(id).text("");
+            return;
+        }
+	    var treeId = "#tree_" + $(value).attr("id");
+	    $(treeId).dynatree({
+	        expand: true
+	    });
+	    var rootNode = $(treeId).dynatree("getRoot");
+	    rootNode.title = parsed.type;
+	    var mainNode = rootNode.addChild({
+	        title: parsed.type
+	    });
+	    for(var key in parsed) {
+	    	addNodeToTree(mainNode, key, parsed[key]);
+	    }
+	    $(treeId).dynatree("getRoot").visit(function(node){
+	        node.expand(true);
+	    });
+	    $(id).text("");
+	});
+	// add link to revisions
+	$("li.diffRevisionNumber a").each(function(index, value) {
+		$(value).click(function() {
+	    	var modelId = $("#diff-summary ul li.modelId a").text();
+	    	var revisionId = $(value).text();
+	        loadView(createLink("model", "show", modelId) + "?revision=" + revisionId, loadModelTabCallback);
+	    });
+	});
+    var element = $("#diff-summary ul li.modelId a");
+    element.attr("rel", createLink("model", "info", element.text()));
+    element.cluetip({width: 550, clickThrough: false, sticky: true, mouseOutClose: true});
+}
+
+/**
+ * Recursive method that adds a subnode to the provided tree node of a dynatree
+ * @param node the tree node to which a subnode is added
+ * @param key the key of the provided data
+ * @param value the value of the provided data
+ */
+function addNodeToTree(node, key, value) {
+	if(value != null) {
+		if(!(value instanceof Object)) {
+		    if(key != "type" && value.toString().length > 0) {
+	            node.addChild({
+	            	title: key + " = " + value
+	            });
+	            return;
+	        }
+		} else {
+	        if(value instanceof Array && value.length > 0) {
+	            var child = node.addChild({
+	                title: key
+	            });
+	            for(var i = 0; i < value.length; i++) {
+	            	addNodeToTree(child, i + 1, value[i]);
+	            }
+	        } else if (!(value instanceof Array)) {
+                // HACK: need to loop over the object to find out if it is empty
+                // if it is empty we don't want to add an element to the tree
+                var hasChild = false;
+                for (var k in value) {
+                    hasChild = true;
+                    break;
+                }
+                if (!hasChild) {
+                    return;
+                }
+	            var child = node.addChild({
+	                title: key
+	            });
+	            for(var key2 in value) {
+	            	addNodeToTree(child, key2, value[key2]);
+	            }
+	        }
+	    }
+	}
 }
 
 /**

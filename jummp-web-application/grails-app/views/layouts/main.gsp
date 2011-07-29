@@ -57,5 +57,8 @@ if (!themeName || !(new File(ServletContextHolder.servletContext.getRealPath("jq
         </div>
         <jummp:menu/>
         <g:layoutBody />
+        <div id="footer">
+            Build: <g:render template="/templates/version"/>
+        </div>
     </body>
 </html>

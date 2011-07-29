@@ -8,11 +8,9 @@ import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
 
 @RemoteDBusAdapter(interfaceName="RemoteGeneOntologyTreeAdapter", dbusAdapterName="geneOntologyTreeDBusAdapter")
 class RemoteGeneOntologyTreeDBusAdapterImpl extends AbstractRemoteDBusAdapter implements RemoteGeneOntologyTreeAdapter, InitializingBean {
-    private DBusConnection connection
     private GeneOntologyTreeDBusAdapter geneOntologyTreeDBusAdapter
 
     public void afterPropertiesSet() throws Exception {
-        connection =  DBusConnection.getConnection(DBusConnection.SESSION)
-        geneOntologyTreeDBusAdapter = (GeneOntologyTreeDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/GOTree", GeneOntologyTreeDBusAdapter.class)
+        geneOntologyTreeDBusAdapter = getRemoteObject("/GOTree", GeneOntologyTreeDBusAdapter.class)
     }
 }

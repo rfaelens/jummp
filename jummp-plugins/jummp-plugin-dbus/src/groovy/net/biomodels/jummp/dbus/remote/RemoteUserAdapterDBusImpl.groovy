@@ -21,12 +21,10 @@ import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
  */
 @RemoteDBusAdapter(interfaceName="RemoteUserAdapter",dbusAdapterName="userDBusAdapter")
 class RemoteUserAdapterDBusImpl extends AbstractRemoteDBusAdapter implements RemoteUserAdapter, InitializingBean {
-    private DBusConnection connection
     private UserDBusAdapter userDBusAdapter
 
     public void afterPropertiesSet() throws Exception {
-        connection =  DBusConnection.getConnection(DBusConnection.SESSION)
-        userDBusAdapter = (UserDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/User", UserDBusAdapter.class)
+        userDBusAdapter = getRemoteObject("/User", UserDBusAdapter.class)
     }
 
     @Profiled(tag="RemoteUserAdapterDBusImpl.getUser")

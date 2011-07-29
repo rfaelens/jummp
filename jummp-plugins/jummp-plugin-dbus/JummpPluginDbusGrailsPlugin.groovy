@@ -1,7 +1,9 @@
 import net.biomodels.jummp.dbus.DBusManagerImpl
+import net.biomodels.jummp.dbus.DiffDataDBusAdapterImpl;
 import net.biomodels.jummp.dbus.UserDBusAdapterImpl
 import net.biomodels.jummp.dbus.ApplicationDBusAdapterImpl
 import net.biomodels.jummp.dbus.ModelDBusAdapterImpl
+import net.biomodels.jummp.dbus.remote.RemoteDiffDataAdapterDBusImpl;
 import net.biomodels.jummp.dbus.remote.RemoteJummpApplicationAdapterDBusImpl
 import net.biomodels.jummp.dbus.remote.RemoteUserAdapterDBusImpl
 import net.biomodels.jummp.dbus.remote.RemoteModelAdapterDBusImpl
@@ -79,6 +81,12 @@ Brief description of the plugin.
                 geneOntologyTreeService = ref("geneOntologyTreeService")
                 objectName = "/GOTree"
             }
+			diffDataDBusAdapter(DiffDataDBusAdapterImpl) {
+                dbusManager = dbusManager
+                authenticationHashService = ref("authenticationHashService")
+                diffDataService = ref("diffDataService")
+                objectName = "/DiffData"
+            }
         }
         if (!(application.config.jummp.plugin.dbus.remote instanceof ConfigObject) && application.config.jummp.plugin.dbus.remote) {
             remoteJummpApplicationAdapter(RemoteJummpApplicationAdapterDBusImpl)
@@ -86,6 +94,7 @@ Brief description of the plugin.
             remoteModelAdapterDBusImpl(RemoteModelAdapterDBusImpl)
             remoteSbmlAdapterDBusImpl(RemoteSbmlAdapterDBusImpl)
             remoteMiriamAdapterDBusImpl(RemoteMiriamAdapterDBusImpl)
+			remoteDiffDataAdapterDBusImpl(RemoteDiffDataAdapterDBusImpl)
             remoteGeneOntologyTreeDBusAdapterImpl(RemoteGeneOntologyTreeDBusAdapterImpl)
         }
     }

@@ -49,7 +49,7 @@ class ModelController {
             render(template: "/templates/page", model: [link: g.createLink(action: "show", id: params.id), callback: "loadModelTabCallback"])
             return
         }
-        RevisionTransportCommand rev = remoteModelService.getLatestRevision(params.id as Long)
+        RevisionTransportCommand rev = params.revision ? remoteModelService.getRevision(params.id as Long, params.revision as Integer) : remoteModelService.getLatestRevision(params.id as Long)
         [revision: rev, addRevision: remoteModelService.canAddRevision(params.id as Long), offset: params.offset as Integer, count: params.count as Integer, sort: params.sort, dir: params.dir]
     }
 
@@ -69,7 +69,7 @@ class ModelController {
     }
 
     def info = {
-        RevisionTransportCommand rev = remoteModelService.getRevision(params.id as Long, params.revision as Integer)
+        RevisionTransportCommand rev = params.revision ? remoteModelService.getRevision(params.id as Long, params.revision as Integer) : remoteModelService.getLatestRevision(params.id as Long)
         [revision: rev, publication: remoteModelService.getPublication(params.id as Long)]
     }
 

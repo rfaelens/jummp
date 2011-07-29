@@ -15,11 +15,9 @@ import org.springframework.beans.factory.InitializingBean
  */
 @RemoteDBusAdapter(interfaceName="IMiriamService", dbusAdapterName="miriamDBusAdapter")
 class RemoteMiriamAdapterDBusImpl extends AbstractRemoteDBusAdapter implements IMiriamService, InitializingBean {
-    private DBusConnection connection
     private MiriamDBusAdapter miriamDBusAdapter
 
     public void afterPropertiesSet() throws Exception {
-        connection = DBusConnection.getConnection(DBusConnection.SESSION)
-        miriamDBusAdapter = (MiriamDBusAdapter)connection.getRemoteObject("net.biomodels.jummp", "/Miriam", MiriamDBusAdapter.class)
+        miriamDBusAdapter = getRemoteObject("/Miriam", MiriamDBusAdapter.class)
     }
 }
