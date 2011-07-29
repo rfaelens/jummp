@@ -16,7 +16,7 @@
                 <g:render template="/templates/configuration/server"/>
                 <div class="buttons">
                     <g:submitButton name="back" value="Back"/>
-                    <g:submitButton name="next" value="Finish"/>
+                    <g:submitButton name="next" value="Next"/>
                 </div>
             </g:form>
         </div>
