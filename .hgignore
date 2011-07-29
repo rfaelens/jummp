@@ -11,7 +11,11 @@ stacktrace.log
 jummp-plugins/jummp-plugin-git/out/*
 out/*
 log/*
+logs/*
+lib/jummp-ast.jar
 jummp-web-application/log/*
+jummp-web-application/logs/*
+jummp-web-application/lib/jummp-ast.jar
 activemq-data/*
 CodeNarcReport.html
 cobertura.ser
