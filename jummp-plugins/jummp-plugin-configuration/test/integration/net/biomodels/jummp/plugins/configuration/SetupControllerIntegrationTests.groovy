@@ -148,6 +148,18 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         // correct value should transit to remoteExport state
         setupController.params.url = "http://127.0.0.1:8080/jummp/"
         signalEvent("next")
+        assertCurrentStateEquals("bives")
+        // incorrect value should fail
+        setupController.params.diffDir = null
+        signalEvent("next")
+        assertCurrentStateEquals("bives")
+        // incorrect value should fail
+        setupController.params.diffDir = ""
+        signalEvent("next")
+        assertCurrentStateEquals("bives")
+        // correct value should transit to finish
+        setupController.params.diffDir = "/tmp/jummp/bives/diffDir"
+        signalEvent("next")
         assertFlowExecutionEnded()
         assertFlowExecutionOutcomeEquals("finish")
     }
@@ -229,6 +241,9 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
 
     void testSimpleBackTransitions() {
         // tests that all non-branching states work correctly
+        setCurrentState("bives")
+        assertCurrentStateEquals("bives")
+        // go back to server
         setCurrentState("server")
         assertCurrentStateEquals("server")
         // go back to remoteExport
@@ -366,6 +381,15 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         signalEvent("next")
         assertCurrentStateEquals("remoteRemote")
         setupController.params.jummpRemote = "jms"
+        signalEvent("next")
+        assertCurrentStateEquals("server")
+        setupController.params.url = "http://127.0.0.1:8080/jummp/"
+        signalEvent("next")
+        assertCurrentStateEquals("bives")
+        setupController.params.diffDir = "/tmp/jummp/bives/diffDir"
+        // going back should end in server
+        signalEvent("back")
+        assertCurrentStateEquals("server")
         // going back should end in remoteExport
         signalEvent("back")
         assertCurrentStateEquals("remoteExport")
