@@ -148,8 +148,20 @@ class SetupController {
                 } else {
                     return success()
                 }
-            }.to("bives")
+            }.to("trigger")
             on("back").to("remoteExport")
+        }
+
+        trigger {
+            on("next") { TriggerCommand cmd ->
+                flow.trigger = cmd
+                if (flow.trigger.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("bives")
+            on("back").to("server")
         }
 
         bives {
@@ -158,14 +170,13 @@ class SetupController {
                 if (flow.bives.hasErrors()) {
                     return error()
                 } else {
-                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote, flow.bives)
+                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote, flow.trigger, flow.bives)
                     return success()
                 }
             }.to("finish")
             on("back").to("server")
-            
         }
-        
+
         validateAuthenticationBackend {
             action {
                 if (params.authenticationBackend == "database") {

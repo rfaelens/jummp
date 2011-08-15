@@ -44,10 +44,11 @@ class ConfigurationService implements InitializingBean {
      * @param userRegistration the user registration configuration
      * @param changePassword the change/reset password configuration
      * @param remote The Remote configuration
+     * @param trigger The Trigger configuration
      * @param bives the BiVeS configuration
      */
     public void storeConfiguration(MysqlCommand mysql, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun,
-                                   ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword, RemoteCommand remote, BivesCommand bives) {
+                                   ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword, RemoteCommand remote, TriggerCommand trigger, BivesCommand bives) {
         Properties properties = new Properties()
         updateMysqlConfiguration(properties, mysql)
         updateRemoteConfiguration(properties, remote)
@@ -58,6 +59,7 @@ class ConfigurationService implements InitializingBean {
         updateServerConfiguration(properties, server)
         updateUserRegistrationConfiguration(properties, userRegistration)
         updateChangePasswordConfiguration(properties, changePassword)
+        updateTriggerConfiguration(properties, trigger)
         updateBivesConfiguration(properties, bives)
         if (ldap) {
             properties.setProperty("jummp.security.authenticationBackend", "ldap")
@@ -195,6 +197,19 @@ class ConfigurationService implements InitializingBean {
     }
 
     /**
+     * Loads the current triggerConfiguration.
+     * @return A command object encapsulating the current BiVeS configuration
+     */
+    public TriggerCommand loadTriggerConfiguration() {
+        Properties properties = loadProperties()
+        TriggerCommand trigger = new TriggerCommand()
+        trigger.startRemoveOffset = properties.getProperty("jummp.authenticationHash.startRemoveOffset")
+        trigger.removeInterval = properties.getProperty("jummp.authenticationHash.removeInterval")
+        trigger.maxInactiveTime = properties.getProperty("jummp.authenticationHash.maxInactiveTime")
+        return bives
+    }
+
+    /**
      * Updates the BiVeS configuration stored in the properties file.
      * Other settings are not changed!
      * It is important to remember that the settings will only be activated after
@@ -308,6 +323,19 @@ class ConfigurationService implements InitializingBean {
     public void saveChangePasswordConfiguration(ChangePasswordCommand cmd) {
         Properties properties = loadProperties()
         updateChangePasswordConfiguration(properties, cmd)
+        saveProperties(properties)
+    }
+
+    /**
+     * Updates the trigger configuration stored in the properties file.
+     * Other settings are not changed!
+     * It is important to remember that the settings will only be activated after
+     * a restart of the application!
+     * @param trigger The new trigger configuration
+     */
+    public void saveTriggerConfiguration(TriggerCommand trigger) {
+        Properties properties = loadProperties()
+        updateTriggerConfiguration(properties, trigger)
         saveProperties(properties)
     }
 
@@ -485,6 +513,20 @@ class ConfigurationService implements InitializingBean {
         properties.setProperty("jummp.security.resetPassword.email.subject", cmd.subject)
         properties.setProperty("jummp.security.resetPassword.email.body",    cmd.body)
         properties.setProperty("jummp.security.resetPassword.url",           cmd.url)
+    }
+
+    /**
+     * Updates the @p properties with the settings from @p trigger.
+     * @param properties The existing properties
+     * @param trigger The trigger settings
+     */
+    private void updateTriggerConfiguration(Properties properties, TriggerCommand trigger) {
+        if(!trigger.validate()) {
+            return
+        }
+        properties.setProperty("jummp.authenticationHash.startRemoveOffset", trigger.startRemoveOffset)
+        properties.setProperty("jummp.authenticationHash.removeInterval", trigger.removeInterval)
+        properties.setProperty("jummp.authenticationHash.maxInactiveTime", trigger.maxInactiveTime)
     }
 
     /**
