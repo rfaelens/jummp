@@ -95,7 +95,7 @@ class JummpTagLib {
             String link = null
             String onClick = null
             if (menuItem.controller && menuItem.action) {
-                link = g.createLink(controller: menuItem.controller, action: menuItem.action)
+                link = g.createLink(controller: menuItem.controller, action: menuItem.action).toString()
                 if (menuItem.parameters) {
                     link += "?"
                     menuItem.parameters.eachWithIndex { parameter, i ->
