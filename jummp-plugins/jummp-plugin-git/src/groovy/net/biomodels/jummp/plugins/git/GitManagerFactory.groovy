@@ -1,7 +1,6 @@
 package net.biomodels.jummp.plugins.git
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 import org.apache.log4j.Logger
@@ -18,6 +17,10 @@ class GitManagerFactory {
     static transactional = true
     GitManager git
     Logger log = Logger.getLogger(GitManagerFactory)
+    /**
+     * Dependency Injection of Servlet Context
+     */
+    def servletContext
 
     GitManager getInstance() throws Exception {
         if (git) {
@@ -35,7 +38,7 @@ class GitManagerFactory {
         if (config.jummp.vcs.exchangeDirectory) {
             exchangeDirectory = new File(config.jummp.vcs.exchangeDirectory)
         } else {
-            exchangeDirectory = new File(ServletContextHolder.servletContext.getRealPath("/resource/exchangeDir"))
+            exchangeDirectory = new File(servletContext.getRealPath("/resource/exchangeDir"))
         }
         try {
             if (!exchangeDirectory.exists()) {
