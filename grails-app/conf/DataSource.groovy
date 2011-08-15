@@ -16,10 +16,10 @@ try {
     }
 } catch (Exception e) {
     // no database configured yet, use hsqldb
-    databaseProperties.setProperty("jummp.database.driver", "org.hsqldb.jdbcDriver")
+    databaseProperties.setProperty("jummp.database.driver", "org.h2.Driver")
     databaseProperties.setProperty("jummp.database.username", "sa")
     databaseProperties.setProperty("jummp.database.password", "")
-    databaseProperties.setProperty("jummp.database.url", "jdbc:hsqldb:mem:devDB")
+    databaseProperties.setProperty("jummp.database.url", "jdbc:h2:mem:devDB")
     databaseProperties.setProperty("jummp.database.pooled", "false")
     databaseProperties.setProperty("jummp.database.dbCreate", "create")
     databaseProperties.setProperty("jummp.database.dialect", "")
@@ -53,7 +53,7 @@ environments {
         }
         dataSource {
             dbCreate = "update"
-            url = "jdbc:hsqldb:mem:testDb"
+            url = "jdbc:h2:mem:testDb"
         }
     }
     production {
