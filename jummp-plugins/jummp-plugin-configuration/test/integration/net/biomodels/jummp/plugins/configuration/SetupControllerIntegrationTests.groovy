@@ -145,8 +145,24 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         assertCurrentStateEquals("server")
         assertTrue(getFlowScope().server.hasErrors())
         assertFlowExecutionActive()
-        // correct value should transit to remoteExport state
+        // correct value should transit to trigger state
         setupController.params.url = "http://127.0.0.1:8080/jummp/"
+        signalEvent("next")
+        assertCurrentStateEquals("trigger")
+        // incorrect value should fail
+        setupController.params.maxInactiveTime = "anyString"
+        setupController.params.removeInterval = "anyString"
+        setupController.params.startRemoveOffset = "anyString"
+        signalEvent("next")
+        assertCurrentStateEquals("trigger")
+        // incorrect value should fail
+        setupController.params.maxInactiveTime = 123
+        setupController.params.removeInterval = 456
+        setupController.params.startRemoveOffset = 789
+        // correct value should transit to bives state
+        setupController.params.maxInactiveTime = 1230
+        setupController.params.removeInterval = 4560
+        setupController.params.startRemoveOffset = 7890
         signalEvent("next")
         assertCurrentStateEquals("bives")
         // incorrect value should fail
@@ -243,6 +259,9 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         // tests that all non-branching states work correctly
         setCurrentState("bives")
         assertCurrentStateEquals("bives")
+        // go back to trigger
+        signalEvent("back")
+        assertCurrentStateEquals("trigger")
         // go back to server
         setCurrentState("server")
         assertCurrentStateEquals("server")
@@ -385,8 +404,13 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         assertCurrentStateEquals("server")
         setupController.params.url = "http://127.0.0.1:8080/jummp/"
         signalEvent("next")
+        assertCurrentStateEquals("trigger")
+        signalEvent("next")
         assertCurrentStateEquals("bives")
         setupController.params.diffDir = "/tmp/jummp/bives/diffDir"
+        // going back should end in trigger
+        signalEvent("back")
+        assertCurrentStateEquals("trigger")
         // going back should end in server
         signalEvent("back")
         assertCurrentStateEquals("server")

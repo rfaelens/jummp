@@ -454,4 +454,32 @@ class SetupControllerTests extends ControllerUnitTestCase {
         cmd.body = "Body Test"
         assertTrue(cmd.validate())
     }
+
+    void testTriggerCommand() {
+        mockForConstraintsTests(TriggerCommand)
+        // test for null
+        TriggerCommand cmd = new TriggerCommand()
+        cmd.maxInactiveTime = null
+        cmd.removeInterval = null
+        cmd.startRemoveOffset = null
+        assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["maxInactiveTime"])
+        assertEquals("nullable", cmd.errors["removeInterval"])
+        assertEquals("nullable", cmd.errors["startRemoveOffset"])
+        // strings should not pass
+        cmd.maxInactiveTime = "test"
+        cmd.removeInterval = "test"
+        cmd.startRemoveOffset = "test"
+        assertFalse(cmd.validate)
+        // too short values should not validate
+        cmd.maxInactiveTime = 100
+        cmd.removeInterval = 100
+        cmd.startRemoveOffset = 100
+        assertFalse(cmd.validate)
+        // correct values should pass
+        cmd.maxInactiveTime = 10000
+        cmd.removeInterval = 10000
+        cmd.startRemoveOffset = 10000
+        assertTrue(cmd.validate())
+    }
 }
