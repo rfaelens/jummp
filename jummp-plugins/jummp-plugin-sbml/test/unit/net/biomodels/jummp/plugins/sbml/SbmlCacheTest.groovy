@@ -116,9 +116,9 @@ class SbmlCacheTest extends GrailsUnitTestCase {
         cache.put(new RevisionTransportCommand(id: 5), doc4)
         cache.put(new RevisionTransportCommand(id: 6), doc5)
         assertArrayEquals([doc1, doc2, doc3, doc4, doc5].toArray(), cache.values().toArray())
-        assertArrayEquals([2, 3, 4, 5, 6].toArray(), cache.keySet().toList().sort { it.id }.collect { it.id }.toArray())
+        assertArrayEquals([2L, 3L, 4L, 5L, 6L].toArray(), cache.keySet().toList().sort { it.id }.collect { it.id }.toArray())
         List<Entry<RevisionTransportCommand, SBMLDocument>> entries = cache.entrySet().toList().sort { it.key.id }
-        assertArrayEquals([2, 3, 4, 5, 6].toArray(), entries.collect { it.key.id }.toArray())
+        assertArrayEquals([2L, 3L, 4L, 5L, 6L].toArray(), entries.collect { it.key.id }.toArray())
         assertArrayEquals([doc1, doc2, doc3, doc4, doc5].toArray(), entries.collect { it.value }.toArray())
         assertSame(doc1, cache.get(new RevisionTransportCommand(id: 2)))
         assertSame(doc2, cache.get(new RevisionTransportCommand(id: 3)))
