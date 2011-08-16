@@ -91,10 +91,10 @@ class GitServiceTests extends GrailsUnitTestCase {
         contextControl.demand.getRealPath(1..1) {path ->
             return "target/vcs" + path
         }
-        ServletContextHolder.servletContext = (ServletContext)contextControl.createMock()
         File resourceDirectory = new File("target/vcs/resource/exchangeDir")
         assertFalse(resourceDirectory.exists())
         git = new GitManagerFactory()
+        git.servletContext = (ServletContext)contextControl.createMock()
         shouldFail(VcsNotInitedException) {
             git.getInstance()
         }
@@ -124,10 +124,10 @@ class GitServiceTests extends GrailsUnitTestCase {
         contextControl.demand.getRealPath(1..1) {path ->
             return "target/vcs" + path
         }
-        ServletContextHolder.servletContext = (ServletContext)contextControl.createMock()
         File resourceDirectory = new File("target/vcs/resource/exchangeDir")
         assertFalse(resourceDirectory.exists())
         GitManagerFactory service = new GitManagerFactory()
+        service.servletContext = (ServletContext)contextControl.createMock()
         service.getInstance()
         assertTrue(resourceDirectory.exists())
         assertTrue(resourceDirectory.isDirectory())
