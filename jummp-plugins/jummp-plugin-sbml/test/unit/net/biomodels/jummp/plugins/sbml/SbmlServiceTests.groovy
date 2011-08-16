@@ -15,6 +15,9 @@ class SbmlServiceTests extends GrailsUnitTestCase {
     }
 
     void testValidate() {
+        mockConfig('''
+            jummp.plugins.sbml.validate=true
+            ''')
         // we do not want to test whether the library works correctly
         // we only need to check that an invalid file is marked as invalid and a valid file is marked as valid.
         // test empty file
