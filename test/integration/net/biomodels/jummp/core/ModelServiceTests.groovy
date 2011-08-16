@@ -22,22 +22,12 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 class ModelServiceTests extends JummpIntegrationTestCase {
     def aclUtilService
     def modelService
-    def origMethod
+    def modelFileFormatService
 
     protected void setUp() {
         super.setUp()
         mockLogging(VcsService, true)
         createUserAndRoles()
-        origMethod = modelService.modelFileFormatService.metaClass.methods.findAll { it.name == "validate" }.first()
-        println origMethod
-        modelService.modelFileFormatService.metaClass.validate = { File file, ModelFormat format ->
-            if (format.identifier == "UNKNOWN") {
-                // for unknown format we model true to make all tests pass
-                return true
-            } else {
-                return modelService.modelFileFormatService.serviceForFormat(format).validate(file)
-            }
-        }
     }
 
     protected void tearDown() {
@@ -45,7 +35,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         FileUtils.deleteDirectory(new File("target/vcs/git"))
         FileUtils.deleteDirectory(new File("target/vcs/exchange"))
         modelService.vcsService.vcsManager = null
-        modelService.modelFileFormatService.metaClass.validate = origMethod
+        modelService.modelFileFormatService = modelFileFormatService
     }
 
     void testGetAllModelsSecurity() {
@@ -484,6 +474,16 @@ class ModelServiceTests extends JummpIntegrationTestCase {
     }
 
     void testAddRevision() {
+        def formatControl = mockFor(ModelFileFormatService)
+        formatControl.demand.validate(6..6) { model, format ->
+            if (format.identifier == "UNKNOWN") {
+                // for unknown format we model true to make all tests pass
+                return true
+            } else {
+                return modelFileFormatService.validate(model, format)
+            }
+        }
+        modelService.modelFileFormatService = (ModelFileFormatService)formatControl.createMock()
         // create one model with one revision and no acl
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -743,6 +743,19 @@ class ModelServiceTests extends JummpIntegrationTestCase {
     }
 
     void testUploadModel() {
+        def formatControl = mockFor(ModelFileFormatService, true)
+        formatControl.demand.validate(4..4) { model, format ->
+            if (format.identifier == "UNKNOWN") {
+                // for unknown format we model true to make all tests pass
+                return true
+            } else {
+                return modelFileFormatService.validate(model, format)
+            }
+        }
+        formatControl.demand.getPubMedAnnotation(2..2) { argument ->
+            modelFileFormatService.getPubMedAnnotation(argument)
+        }
+        modelService.modelFileFormatService = (ModelFileFormatService)formatControl.createMock()
         // anonymous user is not allowed to invoke method
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -805,8 +818,8 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertEquals(commit.getName(), model.revisions.toList().first().vcsId)
         assertEquals(1, model.revisions.size())
         // we did not specify a commit message, so default should be used
-        assertEquals("Import of ${model.vcsIdentifier}", revCommit.getShortMessage())
-        assertEquals("Import of ${model.vcsIdentifier}", revCommit.getFullMessage())
+        assertEquals("Import of ${model.vcsIdentifier}".toString(), revCommit.getShortMessage())
+        assertEquals("Import of ${model.vcsIdentifier}".toString(), revCommit.getFullMessage())
         // verify set permissions
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.READ))
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.ADMINISTRATION))
@@ -864,6 +877,19 @@ class ModelServiceTests extends JummpIntegrationTestCase {
     }
 
     void testRetrieveModelFile() {
+        def formatControl = mockFor(ModelFileFormatService)
+        formatControl.demand.validate(1..1) { model, format ->
+            if (format.identifier == "UNKNOWN") {
+                // for unknown format we model true to make all tests pass
+                return true
+            } else {
+                return modelFileFormatService.validate(model, format)
+            }
+        }
+        formatControl.demand.getPubMedAnnotation(1..1) { rev ->
+            return modelFileFormatService.getPubMedAnnotation(rev)
+        }
+        modelService.modelFileFormatService = (ModelFileFormatService)formatControl.createMock()
         // first create the VCS
         File clone = new File("target/vcs/git")
         clone.mkdirs()
