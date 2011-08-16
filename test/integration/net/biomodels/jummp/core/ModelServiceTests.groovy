@@ -548,6 +548,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
             jummp.plugins.git.enabled=true
             jummp.vcs.workingDirectory="target/vcs/git"
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
+            jummp.plugins.sbml.validate=true
             ''')
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
@@ -797,6 +798,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
             jummp.plugins.git.enabled=true
             jummp.vcs.workingDirectory="target/vcs/git"
             jummp.vcs.exchangeDirectory="target/vcs/exchange"
+            jummp.plugins.sbml.validate=true
             ''')
         modelService.vcsService.vcsManager = gitService.getInstance()
         modelService.vcsService.vcsManager = gitService.getInstance()
