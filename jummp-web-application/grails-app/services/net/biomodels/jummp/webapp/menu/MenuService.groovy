@@ -1,7 +1,6 @@
 package net.biomodels.jummp.webapp.menu
 
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
 
 /**
  * @short Service managing menus.
@@ -21,6 +20,7 @@ class MenuService {
      * Dependency injection of Spring Security Service
      */
     def springSecurityService
+    def servletContext
     /**
      * Cache for the parsed menus.
      * As key a hash code of the user's roles is used. So two users with the same set of roles
@@ -47,7 +47,7 @@ class MenuService {
      * @return New menu for the user
      */
     private List<MenuItem> createMenu() {
-        return parse(new XmlSlurper().parse(new File(ServletContextHolder?.servletContext?.getRealPath("menu.xml"))))
+        return parse(new XmlSlurper().parse(new File(servletContext.getRealPath("menu.xml"))))
     }
 
     /**

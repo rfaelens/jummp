@@ -1,7 +1,5 @@
 package net.biomodels.jummp.core.miriam
 
-import org.codehaus.groovy.grails.commons.ApplicationHolder
-
 /**
  * @short Thread to resolve the name of one Miriam Identifier.
  *
@@ -23,6 +21,10 @@ class ResolveMiriamIdentifierThread implements Runnable {
      * Dependency Injection of Miriam Service
      */
     def miriamService
+    /**
+     * Dependency Injection of Grails Application
+     */
+    def grailsApplication
 
     /**
      * The Miriam Datatype this URN is for
@@ -40,7 +42,7 @@ class ResolveMiriamIdentifierThread implements Runnable {
     void run() {
         MiriamIdentifier miriamIdentifier = null
         try {
-            Map<String, NameResolver> nameResolvers = ApplicationHolder.application.mainContext.getBeansOfType(NameResolver)
+            Map<String, NameResolver> nameResolvers = grailsApplication.mainContext.getBeansOfType(NameResolver)
             for (NameResolver nameResolver in nameResolvers.values()) {
                 if (nameResolver.supports(datatype)) {
                     String resolvedName = nameResolver.resolve(datatype, identifier)

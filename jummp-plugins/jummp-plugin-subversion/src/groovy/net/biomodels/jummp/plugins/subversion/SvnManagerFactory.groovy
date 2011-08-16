@@ -1,7 +1,6 @@
 package net.biomodels.jummp.plugins.subversion
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 import org.apache.commons.io.FileUtils
@@ -19,6 +18,10 @@ class SvnManagerFactory {
     static transactional = true
     SvnManager svn
     Logger log = Logger.getLogger(SvnManagerFactory)
+    /**
+     * Dependency injection of servlet context
+     */
+    def servletContext
 
     SvnManager getInstance() throws Exception {
         if (svn) {
@@ -35,13 +38,13 @@ class SvnManagerFactory {
             workingDirectory = new File(config.jummp.vcs.workingDirectory)
         } else {
             // config option not set - use resource/workingDirectory
-            workingDirectory = new File(ServletContextHolder.servletContext.getRealPath("/resource/workingDir"))
+            workingDirectory = new File(servletContext.getRealPath("/resource/workingDir"))
         }
         File exchangeDirectory
         if (config.jummp.vcs.exchangeDirectory) {
             exchangeDirectory = new File(config.jummp.vcs.exchangeDirectory)
         } else {
-            exchangeDirectory = new File(ServletContextHolder.servletContext.getRealPath("/resource/exchangeDir"))
+            exchangeDirectory = new File(servletContext.getRealPath("/resource/exchangeDir"))
         }
         try {
             FileUtils.deleteDirectory(workingDirectory)

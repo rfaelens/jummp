@@ -2,7 +2,6 @@ package net.biomodels.jummp.plugins.bives
 
 import net.biomodels.jummp.plugins.bives.DiffDataProvider
 
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -23,6 +22,10 @@ class CreateDiffThread implements Runnable {
 	 * Dependency Injection of ModelDelegateService
 	 */
 	def modelDelegateService
+    /**
+     * Dependency Injection of Grails Application
+     */
+    def grailsApplication
 
 	/**
 	 * Dependency Injection of DiffDataService
@@ -42,7 +45,7 @@ class CreateDiffThread implements Runnable {
 		try {
 			// set the Authentication in the Thread's SecurityContext
 			SecurityContextHolder.context.setAuthentication(authentication)
-			DiffDataProvider diffData = ApplicationHolder.application.mainContext.getBean("diffDataProvider") as DiffDataProvider
+			DiffDataProvider diffData = grailsApplication.mainContext.getBean("diffDataProvider") as DiffDataProvider
 			if(!diffData.getDiffInformation(modelId, previousRevision, recentRevision)) {
 				DiffGeneratorManager diffMan = new DiffGeneratorManager()
 				String previous = new String (modelDelegateService.retrieveModelFile(modelDelegateService.getRevision(modelId,

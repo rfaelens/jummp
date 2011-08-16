@@ -1,7 +1,6 @@
 package net.biomodels.jummp.webapp.administration
 
 import grails.plugins.springsecurity.Secured
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import grails.converters.JSON
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
@@ -21,6 +20,7 @@ class ThemeingController {
      * Dependency injection of springSecurityService
      */
     def springSecurityService
+    def servletContext
 
     /**
      * Action to list all available themes.
@@ -31,7 +31,7 @@ class ThemeingController {
             return
         }
         List<String> themeNames = []
-        File themeDir = new File(ServletContextHolder.servletContext.getRealPath("jquery-ui"))
+        File themeDir = new File(servletContext.getRealPath("jquery-ui"))
         themeDir.listFiles().each { file ->
             if (file.isDirectory()) {
                 themeNames << file.name
@@ -84,9 +84,6 @@ class ThemeSaveCommand implements Serializable {
     String theme
 
     static constraints = {
-        theme(nullable: false, blank: false, validator: { name ->
-            File cssFile = new File(ServletContextHolder.servletContext.getRealPath("jquery-ui/${name}/${name}.css"))
-            return (cssFile.exists() && cssFile.isFile())
-        })
+        theme(nullable: false, blank: false)
     }
 }

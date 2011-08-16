@@ -4,17 +4,18 @@
     <!-- Sets the gant environment -->
     <taskdef name="gant" classname="org.codehaus.gant.ant.Gant">
         <classpath>
-            <pathelement location="${env.GRAILS_HOME}/lib/gant_groovy1.7-1.9.2.jar"/>
-            <pathelement location="${env.GRAILS_HOME}/lib/groovy-all-1.7.8.jar"/>
+            <pathelement location="${env.GRAILS_HOME}/lib/org.codehaus.gant/gant_groovy1.8/jars/gant_groovy1.8-1.9.5.jar"/>
+            <pathelement location="${env.GRAILS_HOME}/lib/org.codehaus.groovy/groovy-all/jars/groovy-all-1.8.0.jar"/>
         </classpath>
     </taskdef>
 
     <!--Task Definition to invoke Groovy compile-->
     <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
         <classpath>
-            <pathelement location="${env.GRAILS_HOME}/lib/gant_groovy1.7-1.9.2.jar"/>
-            <pathelement location="${env.GRAILS_HOME}/lib/groovy-all-1.7.8.jar"/>
-            <pathelement location="${env.GRAILS_HOME}/dist/grails-web-1.3.7.jar"/>
+            <pathelement location="${env.GRAILS_HOME}/lib/org.codehaus.gant/gant_groovy1.8/jars/gant_groovy1.8-1.9.5.jar"/>
+            <pathelement location="${env.GRAILS_HOME}/lib/org.codehaus.groovy/groovy-all/jars/groovy-all-1.8.0.jar"/>
+            <pathelement location="${env.GRAILS_HOME}/dist/grails-web-2.0.0.M1.jar"/>
+            <pathelement location="${env.GRAILS_HOME}/dist/grails-plugin-converters-2.0.0.M1.jar"/>
         </classpath>
     </taskdef>
 

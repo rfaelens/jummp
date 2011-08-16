@@ -5,8 +5,6 @@ import java.util.concurrent.locks.ReentrantLock
 
 import net.biomodels.jummp.core.bives.DiffNotExistingException;
 
-import org.codehaus.groovy.grails.commons.ApplicationHolder
-
 /**
  * Provides the data from the DiffDataProvider for the view and creates a new thread
  * for the generation of a diff, in case it's not been created yet.
@@ -24,6 +22,10 @@ public class DiffDataService {
 	 * DependencyInjection of ExecutorService
 	 */
 	def executorService
+    /**
+     * Dependency Injection of Grails Application
+     */
+    def grailsApplication
 
 	static transactional = true
 
@@ -43,7 +45,7 @@ public class DiffDataService {
 	 * @return a Map containing the different types of changes extracted from the diff
 	 */
 	Map generateDiffData(long modelId, int previousRevision, int recentRevision) throws DiffNotExistingException {
-		DiffDataProvider diffData = ApplicationHolder.application.mainContext.getBean("diffDataProvider") as DiffDataProvider
+		DiffDataProvider diffData = grailsApplication.mainContext.getBean("diffDataProvider") as DiffDataProvider
 		if(!diffData.getDiffInformation(modelId, previousRevision, recentRevision)) {
 			Runnable runnable = null
 			String diff = modelId + ";" + previousRevision + ";" + recentRevision
@@ -54,7 +56,7 @@ public class DiffDataService {
 				if(lockedDiffs.contains(diff)) {
 					throw new DiffNotExistingException()
 				}
-				runnable = ApplicationHolder.application.mainContext.getBean("createDiff", modelId, previousRevision, recentRevision) as Runnable
+				runnable = grailsApplication.mainContext.getBean("createDiff", modelId, previousRevision, recentRevision) as Runnable
 				if(runnable) {
 					lockedDiffs << diff
 				}

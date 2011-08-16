@@ -1,7 +1,5 @@
 package net.biomodels.jummp.core.miriam
 
-import org.codehaus.groovy.grails.commons.ApplicationHolder
-
 /**
  * @short NameResolver able to resolve GeneOntology.
  *

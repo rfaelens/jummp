@@ -4,7 +4,6 @@ import net.biomodels.jummp.model.Revision
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import net.biomodels.jummp.model.Model
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.springframework.dao.DataIntegrityViolationException
 
 /**
@@ -17,7 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException
  * As Spring is used to configure the dependencies it is not allowed to construct
  * an instance directly. To retrieve an instance of this class use:
  * @code
- * ApplicationHolder.application.mainContext.getBean("fetchAnnotations", revision)
+ * grailsApplication.mainContext.getBean("fetchAnnotations", revision)
  * @endcode
  *
  * The Thread operates on one Revision and takes care of setting the Authentication in

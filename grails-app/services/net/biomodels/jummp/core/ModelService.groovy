@@ -24,7 +24,6 @@ import net.biomodels.jummp.core.events.RevisionCreatedEvent
 import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.model.Publication
 import org.springframework.security.access.prepost.PostAuthorize
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 /**
  * @short Service class for managing Models
@@ -430,7 +429,7 @@ class ModelService {
                 log.debug(e.message, e)
             }
 
-            executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", model.id))
+            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
 
             // broadcast event
             grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFile))
@@ -507,7 +506,7 @@ class ModelService {
                 }
             }
             revision.refresh()
-            executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", model.id, revision.id))
+            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), file))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad

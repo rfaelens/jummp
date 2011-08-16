@@ -4,7 +4,6 @@ import net.biomodels.jummp.webapp.menu.MenuItem
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamSource
 import javax.xml.transform.stream.StreamResult
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import javax.xml.transform.Transformer
 import org.codehaus.groovy.grails.plugins.codecs.URLCodec
 
@@ -22,6 +21,10 @@ class JummpTagLib {
      * Dependency Injection for Miriam Service
      */
     def remoteMiriamService
+    /**
+     * Dependency Injection of Servlet Context
+     */
+    def servletContext
 
     Transformer transformer = null
 
@@ -92,7 +95,7 @@ class JummpTagLib {
             String link = null
             String onClick = null
             if (menuItem.controller && menuItem.action) {
-                link = g.createLink(controller: menuItem.controller, action: menuItem.action)
+                link = g.createLink(controller: menuItem.controller, action: menuItem.action).toString()
                 if (menuItem.parameters) {
                     link += "?"
                     menuItem.parameters.eachWithIndex { parameter, i ->
@@ -277,7 +280,7 @@ class JummpTagLib {
     def contentMathML = { attrs ->
         if (!transformer) {
             def factory = TransformerFactory.newInstance()
-            transformer = factory.newTransformer(new StreamSource(new File(ServletContextHolder.servletContext.getRealPath("/xsl/mathmlc2p.xsl"))))
+            transformer = factory.newTransformer(new StreamSource(new File(servletContext.getRealPath("/xsl/mathmlc2p.xsl"))))
         }
         transformer.transform(new StreamSource(new StringReader(attrs.mathML)), new StreamResult(out))
     }
