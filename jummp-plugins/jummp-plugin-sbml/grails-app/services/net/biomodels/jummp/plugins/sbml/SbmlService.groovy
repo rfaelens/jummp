@@ -43,6 +43,7 @@ import org.sbfc.converter.models.OctaveModel
 import org.sbml.jsbml.SBMLWriter
 import org.sbfc.converter.sbml2biopax.SBML2BioPAX_l3
 import org.sbfc.converter.models.BioPaxModel
+import com.thoughtworks.xstream.converters.ConversionException
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -103,19 +104,24 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             return true
         }
         // TODO: WARNING: checkConsistency uses an online validator. This might render timeouts during model upload
-        if (doc.checkConsistency() > 0) {
-            boolean valid = true
-            // search for an error
-            for (SBMLError error in doc.getListOfErrors().validationErrors) {
-                if (error.isFatal() || error.isInternal() || error.isSystem() || error.isXML() || error.isError()) {
-                    log.debug(error.getMessage())
-                    valid = false
-                    break
+        try {
+            if (doc.checkConsistency() > 0) {
+                boolean valid = true
+                // search for an error
+                for (SBMLError error in doc.getListOfErrors().validationErrors) {
+                    if (error.isFatal() || error.isInternal() || error.isSystem() || error.isXML() || error.isError()) {
+                        log.debug(error.getMessage())
+                        valid = false
+                        break
+                    }
                 }
+                return valid
+            } else {
+                return true
             }
-            return valid
-        } else {
-            return true
+        } catch (ConversionException e) {
+            log.error(e.getMessage(), e)
+            return false
         }
     }
 
