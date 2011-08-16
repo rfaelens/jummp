@@ -31,6 +31,9 @@ class ModelFileFormatServiceTests extends JummpIntegrationTestCase {
     }
 
     void testValidate() {
+        mockConfig('''
+            jummp.plugins.sbml.validate=true
+        ''')
         // for unknown file type this should evaluate to false
         assertFalse(modelFileFormatService.validate(null, ModelFormat.findByIdentifier("UNKNOWN")))
         // for an invalid sbml file it should also evaluate to false
