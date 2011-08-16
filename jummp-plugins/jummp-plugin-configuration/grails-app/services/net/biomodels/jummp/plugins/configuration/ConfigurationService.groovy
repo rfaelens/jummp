@@ -203,9 +203,9 @@ class ConfigurationService implements InitializingBean {
     public TriggerCommand loadTriggerConfiguration() {
         Properties properties = loadProperties()
         TriggerCommand trigger = new TriggerCommand()
-        trigger.startRemoveOffset = properties.getProperty("jummp.authenticationHash.startRemoveOffset")
-        trigger.removeInterval = properties.getProperty("jummp.authenticationHash.removeInterval")
-        trigger.maxInactiveTime = properties.getProperty("jummp.authenticationHash.maxInactiveTime")
+        trigger.startRemoveOffset = Long.parseLong(properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
+        trigger.removeInterval = Long.parseLong(properties.getProperty("jummp.authenticationHash.removeInterval"))
+        trigger.maxInactiveTime = Long.parseLong(properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         return bives
     }
 
@@ -524,9 +524,9 @@ class ConfigurationService implements InitializingBean {
         if(!trigger.validate()) {
             return
         }
-        properties.setProperty("jummp.authenticationHash.startRemoveOffset", trigger.startRemoveOffset)
-        properties.setProperty("jummp.authenticationHash.removeInterval", trigger.removeInterval)
-        properties.setProperty("jummp.authenticationHash.maxInactiveTime", trigger.maxInactiveTime)
+        properties.setProperty("jummp.authenticationHash.startRemoveOffset", trigger.startRemoveOffset.toString())
+        properties.setProperty("jummp.authenticationHash.removeInterval", trigger.removeInterval.toString())
+        properties.setProperty("jummp.authenticationHash.maxInactiveTime", trigger.maxInactiveTime.toString())
     }
 
     /**
