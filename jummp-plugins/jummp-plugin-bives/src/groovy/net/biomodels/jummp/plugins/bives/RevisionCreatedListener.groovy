@@ -4,7 +4,6 @@ import net.biomodels.jummp.core.events.RevisionCreatedEvent
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationListener

@@ -3,7 +3,6 @@ package net.biomodels.jummp.core
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import net.biomodels.jummp.model.Revision
 
 /**
@@ -20,6 +19,10 @@ import net.biomodels.jummp.model.Revision
 class ModelFileFormatService {
 
     static transactional = true
+    /**
+     * Dependency Injection of grails application
+     */
+    def grailsApplication
 
     /**
      * The registered services to handle ModelFormats
@@ -129,7 +132,7 @@ class ModelFileFormatService {
      */
     private FileFormatService serviceForFormat(final ModelFormat format) {
         if (format && services.containsKey(format.identifier)) {
-            return ApplicationHolder.application.mainContext.getBean((String)services.getAt(format.identifier))
+            return grailsApplication.mainContext.getBean((String)services.getAt(format.identifier))
         } else {
             return null
         }

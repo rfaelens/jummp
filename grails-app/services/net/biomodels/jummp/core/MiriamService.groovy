@@ -8,7 +8,6 @@ import net.biomodels.jummp.core.miriam.MiriamResource
 import net.biomodels.jummp.core.miriam.MiriamDatatype
 import net.biomodels.jummp.core.miriam.MiriamIdentifier
 import net.biomodels.jummp.core.miriam.NameResolver
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import net.biomodels.jummp.model.Model
 import org.perf4j.aop.Profiled
 import net.biomodels.jummp.model.Revision
@@ -56,6 +55,10 @@ class MiriamService implements IMiriamService {
      * Dependency injection for ExecutorService to run threads
      */
     def executorService
+    /**
+     * Dependency injection of Grails Application
+     */
+    def grailsApplication
 
     static transactional = false
 
@@ -123,7 +126,7 @@ class MiriamService implements IMiriamService {
     public updateAllMiriamIdentifiers() {
         runAsync {
             MiriamIdentifier.list().each { identifier ->
-                Map<String, NameResolver> nameResolvers = ApplicationHolder.application.mainContext.getBeansOfType(NameResolver)
+                Map<String, NameResolver> nameResolvers = grailsApplication.mainContext.getBeansOfType(NameResolver)
                 for (NameResolver nameResolver in nameResolvers.values()) {
                     if (nameResolver.supports(identifier.datatype)) {
                         String resolvedName = nameResolver.resolve(identifier.datatype, identifier.identifier)
@@ -144,7 +147,7 @@ class MiriamService implements IMiriamService {
     @Profiled(tag="MiriamService.updateModels")
     public void updateModels() {
         Model.list().each {
-            executorService.submit(ApplicationHolder.application.mainContext.getBean("fetchAnnotations", it.id))
+            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", it.id))
         }
     }
 
@@ -202,7 +205,7 @@ class MiriamService implements IMiriamService {
                 return
             }
             // create Thread
-            runnable = ApplicationHolder.application.mainContext.getBean("resolveMiriamIdentifier", urn, identifier, datatype) as Runnable
+            runnable = grailsApplication.mainContext.getBean("resolveMiriamIdentifier", urn, identifier, datatype) as Runnable
             if (runnable) {
                 if (rev) {
                     identifiersToBeResolved[urn] = [rev]
