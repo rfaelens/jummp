@@ -20,6 +20,8 @@ import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.lib.Constants
 import net.biomodels.jummp.model.ModelFormat
+import org.springframework.mock.web.MockServletContext
+import org.springframework.core.io.FileSystemResourceLoader
 
 class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationContextAware {
     /**
@@ -46,6 +48,8 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         mockLogging(GitManagerFactory, true)
         mockLogging(SvnManagerFactory, true)
         vcsService.vcsManager = null
+        appCtx.getBean("gitManagerFactory").servletContext = new MockServletContext("./target", new FileSystemResourceLoader())
+        appCtx.getBean("svnManagerFactory").servletContext = new MockServletContext("./target", new FileSystemResourceLoader())
     }
 
     protected void tearDown() {
