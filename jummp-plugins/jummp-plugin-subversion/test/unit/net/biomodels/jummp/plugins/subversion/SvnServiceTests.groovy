@@ -63,12 +63,13 @@ class SvnServiceTests extends GrailsUnitTestCase {
         contextControl.demand.getRealPath(4..4) {path ->
             return "target/vcs" + path
         }
-        ServletContextHolder.servletContext = (ServletContext)contextControl.createMock()
         File exchangeDirectory = new File("target/vcs/resource/exchangeDir")
         File workingDirectory = new File("target/vcs/resource/workingDir")
         assertFalse(exchangeDirectory.exists())
         assertFalse(workingDirectory.exists())
         SvnManagerFactory svn = new SvnManagerFactory()
+        def servletContext = (ServletContext)contextControl.createMock()
+        svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
         }
@@ -80,6 +81,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         FileUtils.touch(new File("target/vcs/resource/workingDir/test"))
         assertLength(1, workingDirectory.list())
         svn = new SvnManagerFactory()
+        svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
         }
@@ -93,7 +95,6 @@ class SvnServiceTests extends GrailsUnitTestCase {
         contextControl.demand.getRealPath(4..4) {path ->
             return "target/vcs" + path
         }
-        ServletContextHolder.servletContext = (ServletContext)contextControl.createMock()
         // exchange directory in resources, working directory external
         mockConfig('''
             jummp.plugins.subversion.enabled=true
@@ -107,6 +108,8 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertFalse(workingDirectory.exists())
         assertFalse(resourceWorkingDirectory.exists())
         SvnManagerFactory svn = new SvnManagerFactory()
+        def servletContext = (ServletContext)contextControl.createMock()
+        svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
         }
@@ -119,6 +122,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         FileUtils.touch(new File("target/vcs/svn/test"))
         assertLength(1, workingDirectory.list())
         svn = new SvnManagerFactory()
+        svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
         }
@@ -135,6 +139,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertFalse(exchangeDirectory.exists())
         assertFalse(resourceWorkingDirectory.exists())
         svn = new SvnManagerFactory()
+        svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
         }
@@ -146,6 +151,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         FileUtils.touch(new File("target/vcs/resource/workingDir/test"))
         assertLength(1, resourceWorkingDirectory.list())
         svn = new SvnManagerFactory()
+        svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
         }
@@ -167,6 +173,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertFalse(exchangeDirectory.exists())
         assertFalse(workingDirectory.exists())
         svn = new SvnManagerFactory()
+        svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
         }
@@ -181,6 +188,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         FileUtils.touch(new File("target/vcs/svn/test"))
         assertLength(1, workingDirectory.list())
         svn = new SvnManagerFactory()
+        svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
         }
@@ -196,7 +204,6 @@ class SvnServiceTests extends GrailsUnitTestCase {
         contextControl.demand.getRealPath(2..2) {path ->
             return "target/vcs" + path
         }
-        ServletContextHolder.servletContext = (ServletContext)contextControl.createMock()
         SVNRepositoryFactory.createLocalRepository(new File("target/vcs/repository"), true, false)
         // first test with resource directories
         mockConfig('''
@@ -206,6 +213,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         File resourceWorkingDirectory = new File("target/vcs/resource/workingDir")
         assertFalse(resourceWorkingDirectory.exists())
         SvnManagerFactory svn = new SvnManagerFactory()
+        svn.servletContext = (ServletContext)contextControl.createMock()
         VcsManager manager = svn.getInstance()
         assertNotNull(manager)
         assertTrue(manager instanceof SvnManager)
