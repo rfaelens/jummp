@@ -24,12 +24,17 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.jms.ApplicationJmsAdapterService
 import net.biomodels.jummp.core.user.JummpAuthentication
 import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
+import java.util.concurrent.Callable
 
 class JmsAdapterServiceTests extends JummpIntegrationTestCase {
     def aclUtilService
     def modelService
     def applicationJmsAdapterService
     def modelJmsAdapterService
+    /**
+     * Dependency injection for ExecutorService to run threads
+     */
+    def executorService
     protected void setUp() {
         super.setUp()
         createUserAndRoles()
@@ -658,21 +663,19 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
     }
 
     private def send2(String method, def message) {
-        def result = null
-        def thread = Thread.start {
-            result = applicationJmsAdapterService."${method}"(message)
-        }
-        thread.join()
-        return result
+        def future =  executorService.submit(new Callable() {
+            def call() {
+            return applicationJmsAdapterService."${method}"(message)
+        }})
+        return future.get()
     }
 
     private def send(String method, def message) {
-        def result = null
-        def thread = Thread.start {
-            result = modelJmsAdapterService."${method}"(message)
-        }
-        thread.join()
-        return result
+        def future = executorService.submit(new Callable() {
+            def call() {
+            return modelJmsAdapterService."${method}"(message)
+        }})
+        return future.get()
     }
 
     private void setupVcs() {
