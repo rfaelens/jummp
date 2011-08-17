@@ -466,16 +466,11 @@ class SetupControllerTests extends ControllerUnitTestCase {
         assertEquals("nullable", cmd.errors["maxInactiveTime"])
         assertEquals("nullable", cmd.errors["removeInterval"])
         assertEquals("nullable", cmd.errors["startRemoveOffset"])
-        // strings should not pass
-        cmd.maxInactiveTime = "test"
-        cmd.removeInterval = "test"
-        cmd.startRemoveOffset = "test"
-        assertFalse(cmd.validate)
         // too short values should not validate
         cmd.maxInactiveTime = 100
         cmd.removeInterval = 100
         cmd.startRemoveOffset = 100
-        assertFalse(cmd.validate)
+        assertFalse(cmd.validate())
         // correct values should pass
         cmd.maxInactiveTime = 10000
         cmd.removeInterval = 10000

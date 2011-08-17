@@ -11,8 +11,8 @@ class TriggerCommand implements Serializable {
     Long maxInactiveTime
 
     static constraints = {
-        startRemoveOffset(nullable: false, blank: false, minSize: 4)
-        removeInterval(nullable: false, blank: false, minSize: 4)
-        maxInactiveTime(nullable: false, blank: false, minSize: 4)
+        startRemoveOffset(nullable: false, blank: false, min: 1000L)
+        removeInterval(nullable: false, blank: false, min: 1000L)
+        maxInactiveTime(nullable: false, blank: false, min: 1000L)
     }
 }
