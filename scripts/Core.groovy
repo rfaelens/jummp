@@ -18,7 +18,7 @@ includeTargets << grailsScript("_GrailsRun")
 includeTargets << grailsScript("TestCore")
 
 target(main: "Runs a core application with a few models") {
-    depends(checkVersion, configureProxy, packageApp, parseArguments, bootstrap)
+    depends(checkVersion, configureProxy, packageApp, parseArguments, bootstrapOnce)
     // bind a Hibernate Session to avoid lazy initialization exceptions
     TransactionSynchronizationManager.bindResource(appCtx.sessionFactory,
         new SessionHolder(SessionFactoryUtils.getSession(appCtx.sessionFactory, true)))
