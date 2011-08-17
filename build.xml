@@ -1,5 +1,6 @@
 <project name="jummp" default="test-app">
     <property environment="env"/>
+    <property name="grailsWorkdir" value="${basedir}/grailswork"/>
     <import file="${env.GRAILS_HOME}/src/grails/grails-macros.xml" />
     <!-- Sets the gant environment -->
     <taskdef name="gant" classname="org.codehaus.gant.ant.Gant">
@@ -36,7 +37,11 @@
 <!-- Target to execute the testing of one plugin. Used by antcall from test-plugins -->
     <target name="test-plugin">
         <echo message="Running tests for Plugin ${plugin}"/>
-        <grails command="${env.GRAILS_OPTS} test-app" args="-xml ${coverage}" cwd="${basedir}/jummp-plugins/jummp-plugin-${plugin}"/>
+        <grails command="test-app" args="-xml ${coverage}" cwd="${basedir}/jummp-plugins/jummp-plugin-${plugin}">
+            <sysprops>
+                <sysproperty key="grails.work.dir" value="${grailsWorkdir}"/>
+            </sysprops>
+        </grails>
         <copy todir="${basedir}/target/test-reports">
             <fileset dir="${basedir}/jummp-plugins/jummp-plugin-${plugin}/target/test-reports">
                 <include name="TEST-*.xml"/>
@@ -69,7 +74,11 @@
 
 <!-- Runs test-app in the core application -->
     <target name="test-core" depends="ast-jar">
-        <grails command="${env.GRAILS_OPTS} test-app" args="-xml ${coverage}" cwd="${basedir}"/>
+        <grails command="test-app" args="-xml ${coverage}" cwd="${basedir}">
+            <sysprops>
+                <sysproperty key="grails.work.dir" value="${grailsWorkdir}"/>
+            </sysprops>
+        </grails>
     </target>
 
 <!-- Generates the test reports for all tests -->
@@ -208,12 +217,28 @@
 
 <!-- Performs the actual building of war file using grails war. Cleans before building -->
     <target name="build-war" depends="remove-grails-plugins,ast-jar">
-        <grails command="clean" cwd="${builddir}"/>
-        <grails command="war ${builddir}/target/jummp.war" cwd="${builddir}"/>
+        <grails command="clean" cwd="${builddir}">
+            <sysprops>
+                <sysproperty key="grails.work.dir" value="${grailsWorkdir}"/>
+            </sysprops>
+        </grails>
+        <grails command="war ${builddir}/target/jummp.war" cwd="${builddir}">
+            <sysprops>
+                <sysproperty key="grails.work.dir" value="${grailsWorkdir}"/>
+            </sysprops>
+        </grails>
     </target>
     <target name="build-webapplication-war" depends="remove-grails-plugins,ast-jar">
-        <grails command="clean" cwd="${builddir}/jummp-web-application"/>
-        <grails command="war ${builddir}/target/jummp-web-application.war" cwd="${builddir}/jummp-web-application"/>
+        <grails command="clean" cwd="${builddir}/jummp-web-application">
+            <sysprops>
+                <sysproperty key="grails.work.dir" value="${grailsWorkdir}"/>
+            </sysprops>
+        </grails>
+        <grails command="war ${builddir}/target/jummp-web-application.war" cwd="${builddir}/jummp-web-application">
+            <sysprops>
+                <sysproperty key="grails.work.dir" value="${grailsWorkdir}"/>
+            </sysprops>
+        </grails>
     </target>
 
 <!-- Build war with all plugins -->
