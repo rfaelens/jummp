@@ -12,6 +12,8 @@ jummp-plugins/jummp-plugin-git/out/*
 out/*
 log/*
 logs/*
+grailswork/*
+\[:\]/*
 lib/jummp-ast.jar
 jummp-web-application/log/*
 jummp-web-application/logs/*
