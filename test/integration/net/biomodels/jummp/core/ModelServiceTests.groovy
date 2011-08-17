@@ -879,8 +879,8 @@ class ModelServiceTests extends JummpIntegrationTestCase {
     }
 
     void testRetrieveModelFile() {
-        def formatControl = mockFor(ModelFileFormatService)
-        formatControl.demand.validate(1..1) { model, format ->
+        def formatControl = mockFor(ModelFileFormatService, true)
+        formatControl.demand.validate(2..2) { model, format ->
             if (format.identifier == "UNKNOWN") {
                 // for unknown format we model true to make all tests pass
                 return true
@@ -941,9 +941,16 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         model.addToRevisions(rev)
         model.save(flush: true)
         aclUtilService.addPermission(rev, "testuser", BasePermission.READ)
+        // now add another "real" revision
+        importFile.append("Test\n")
+        Revision rev4 = modelService.addRevision(model, importFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
+        // retrieving the random revision should fail
         shouldFail(ModelException) {
             modelService.retrieveModelFile(rev)
         }
+        // retrieving the proper uploaded revision should work
+        bytes = modelService.retrieveModelFile(rev4)
+        assertEquals("Test\nTest\n", new String(bytes))
     }
 
     void testGrantReadAccess() {
