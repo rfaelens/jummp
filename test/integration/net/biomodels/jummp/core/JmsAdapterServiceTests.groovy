@@ -411,18 +411,12 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         // get the file
         def result = send("retrieveModelFile", [auth.getAuthenticationHash(), revision])
         assertTrue(result instanceof byte[])
-        assertEquals(modelSource.bytes, result)
+        assertEquals(modelSource.bytes.toString(), result.toString())
         // other user should get an AccessDeniedException
         def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
         assertNotNull(auth2)
         assertTrue(auth2 instanceof JummpAuthentication)
         assertTrue(send("retrieveModelFile", [auth2.getAuthenticationHash(), revision]) instanceof AccessDeniedException)
-        // create a random revision
-        Revision rev = new Revision(model: Model.get(model.id), vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
-        Model.get(model.id).refresh().addToRevisions(rev)
-        Model.get(model.id).save(flush: true)
-        aclUtilService.addPermission(rev, "testuser", BasePermission.READ)
-        assertTrue(send("retrieveModelFile", [auth.getAuthenticationHash(), rev.toCommandObject()]) instanceof ModelException)
 
         // test illegal argument exceptions
         assertTrue(send("retrieveModelFile", [auth.getAuthenticationHash()]) instanceof IllegalArgumentException)
