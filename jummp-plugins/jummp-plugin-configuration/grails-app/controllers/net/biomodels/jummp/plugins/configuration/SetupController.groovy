@@ -174,7 +174,7 @@ class SetupController {
                     return success()
                 }
             }.to("finish")
-            on("back").to("server")
+            on("back").to("trigger")
         }
 
         validateAuthenticationBackend {

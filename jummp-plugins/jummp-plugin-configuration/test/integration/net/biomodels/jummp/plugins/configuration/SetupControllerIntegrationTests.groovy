@@ -405,6 +405,9 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         setupController.params.url = "http://127.0.0.1:8080/jummp/"
         signalEvent("next")
         assertCurrentStateEquals("trigger")
+        setupController.params.startRemoveOffset = 1000
+        setupController.params.removeInterval = 1000
+        setupController.params.maxInactiveTime = 1000
         signalEvent("next")
         assertCurrentStateEquals("bives")
         setupController.params.diffDir = "/tmp/jummp/bives/diffDir"
