@@ -53,7 +53,9 @@ environments {
         }
         dataSource {
             dbCreate = "update"
-            url = "jdbc:h2:mem:testDb"
+            url = "jdbc:hsqldb:mem:testDb"
+            dialect = ""
+            driverClassName = "org.hsqldb.jdbcDriver"
         }
     }
     production {
