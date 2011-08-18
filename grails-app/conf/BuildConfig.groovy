@@ -42,7 +42,6 @@ grails.project.dependency.resolution = {
         compile ":grails-plugin-jummp-plugin-bives:0.1"
         compile ":grails-plugin-jummp-plugin-remote:0.1"
         runtime ":grails-plugin-jummp-plugin-dbus:0.1"
-        compile ":grails-plugin-jummp-plugin-jms:0.1"
         compile ":grails-plugin-jummp-plugin-simple-logging:0.1"
         // dependencies of plugins
         // sbml
@@ -66,6 +65,7 @@ grails.project.dependency.resolution = {
 
         // jms
         runtime "org.apache.activemq:activemq-all:5.5.0"
+        runtime "commons-jexl:commons-jexl:1.1"
 
         // dbus
         runtime ":dbus:2.7"
@@ -79,8 +79,12 @@ grails.project.dependency.resolution = {
 
     plugins {
         compile ":perf4j:0.1.1"
+        compile ":jms:1.1"
+        runtime ":spring-security-core:1.2"
     }
 }
+
+grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
 
 // Remove libraries not needed in productive mode
 grails.war.resources = { stagingDir ->
