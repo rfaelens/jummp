@@ -72,6 +72,9 @@ grails.project.dependency.resolution = {
         runtime ":debug-disable:1.1"
         runtime ":hexdump:0.2"
         runtime ":unix:0.5"
+
+        //git
+        runtime 'org.eclipse.jgit:org.eclipse.jgit:1.0.0.201106090707-r'
     }
 
     plugins {
