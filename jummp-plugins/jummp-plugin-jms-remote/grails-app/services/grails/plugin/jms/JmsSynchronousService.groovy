@@ -17,7 +17,7 @@ import org.springframework.jms.core.JmsTemplate
 class JmsSynchronousService {
 
     static transactional = false
-    static final LOG = LogFactory.getLog(JmsService)
+    static final LOG = LogFactory.getLog(JmsSynchronousService)
     static final DEFAULT_JMS_TEMPLATE_BEAN_NAME = "standard"
 
     def jmsService
