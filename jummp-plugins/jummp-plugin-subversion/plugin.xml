@@ -7,9 +7,7 @@ Brief description of the plugin.
   <documentation>http://grails.org/plugin/jummp-plugin-subversion</documentation>
   <type>JummpPluginSubversionGrailsPlugin</type>
   <packaging>binary</packaging>
-  <resources>
-    <resource>JummpPluginConfig</resource>
-  </resources>
+  <resources />
   <dependencies>
     <plugin name='jummp-plugin-core-api' version='0.1' />
   </dependencies>
