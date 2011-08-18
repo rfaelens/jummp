@@ -297,22 +297,69 @@ if (!(jummpConfig.jummp.threadPool.size instanceof ConfigObject)) {
 // to provide a closure configure with takes two ConfigObjects as arguments. The first
 // is the ConfigObject which is just constructed, that is "jummp", the second is the
 // ConfigObject containing the externalized configuration.
+
+// Resolving the Plugins is non-trivial:
+// * We get a GrailsClassLoader and use it to parse the BuildConfig file
+// * The BuildConfig contains a closure "resolution" which contains at least one closure "dependencies"
+// * the dependencies closure calls methods "compile", "runtime" etc.
+// * We are interested in the methods of the dependencies closure
+// * for that we need to execute the resolution closure and afterwards the dependencies closure
+// * PROBLEM: we cannot execute the closure as the methods used in the closure are not known here
+// * To circumvent this problem a class "BuildConfigParser" is implemented (see below) which implements methodMissing
+// * An instance of the BuildConfigParser class is used as the delegate for the resolution closure and the closure is
+//   changed to resolve methods first through the delegate
+// * The methodMissing method looks at the method name which has been invoked and does the same game again for the
+//   dependency closure
+// * For all methods called "compile" or "runtime" the first argument is inspected, split at ":" and looked whether it
+//   refers to a JUMMP Plugin
+// * If it is a JUMMP Plugin, the name is extracted, it is tried to load a JummpPluginConfig class and it's closure is executed
+//
+// With other words: MAGIC HAPPENS HERE
 GrailsClassLoader classLoader = new GrailsClassLoader()
 ConfigSlurper slurper = new ConfigSlurper()
 ConfigObject buildConfig = slurper.parse(classLoader.loadClass("BuildConfig"))
-buildConfig.grails.plugin.location.each { key, value ->
-    String pluginName = key.minus("jummp-plugin-")
-    try {
-        def pluginConfigClass = classLoader.loadClass("net.biomodels.jummp.plugins.${pluginName}.JummpPluginConfig")
-        try {
-            pluginConfigClass.configure(jummp, jummpConfig)
-        } catch (MissingMethodException e) {
-            println "Plugin ${pluginName} does not provide the configure closure"
+resolutionClosure = buildConfig.grails.project.dependency.resolution
+
+class BuildConfigParser {
+    private ClassLoader classLoader
+    private def jummp
+    private def jummpConfig
+
+    BuildConfigParser(ClassLoader cl, def jummp, def jummpConfig) {
+        this.classLoader = cl
+        this.jummp = jummp
+        this.jummpConfig = jummpConfig
+    }
+
+    def methodMissing(String name, args) {
+        if (name == "dependencies") {
+            def dependenciesClosure = args[0]
+            dependenciesClosure.resolveStrategy = Closure.DELEGATE_FIRST
+            dependenciesClosure.delegate = this
+            dependenciesClosure.call()
         }
-    } catch (ClassNotFoundException e) {
-        println "Plugin ${pluginName} does not provide a configuration"
+        if (name == "compile" || name == "runtime") {
+            // this is a jar
+            String jarName = (args[0] as String).split(":")[1]
+            if (jarName.startsWith("grails-plugin-jummp-plugin-")) {
+                String pluginName = jarName.minus("grails-plugin-jummp-plugin-")
+                try {
+                    def pluginConfigClass = classLoader.loadClass("net.biomodels.jummp.plugins.${pluginName}.JummpPluginConfig")
+                    try {
+                        pluginConfigClass.configure(jummp, jummpConfig)
+                    } catch (MissingMethodException e) {
+                        println "Plugin ${pluginName} does not provide the configure closure"
+                    }
+                } catch (ClassNotFoundException e) {
+                    println "Plugin ${pluginName} does not provide a configuration"
+                }
+            }
+        }
     }
 }
+resolutionClosure.resolveStrategy = Closure.DELEGATE_FIRST
+resolutionClosure.delegate = new BuildConfigParser(classLoader, jummp, jummpConfig)
+resolutionClosure.call()
 
 environments {
     test {
