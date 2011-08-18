@@ -22,6 +22,8 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
+        flatDir name: 'jummpPlugins', dirs: "./pluginlibs"
+        mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -30,33 +32,52 @@ grails.project.dependency.resolution = {
         // required by OntologyLookupResolver
         compile "org.ccil.cowan.tagsoup:tagsoup:1.2"
         test 'hsqldb:hsqldb:1.8.0.10'
+        // plugin dependencies
+        compile ":grails-plugin-jummp-plugin-security:0.1"
+        compile ":grails-plugin-jummp-plugin-core-api:0.1"
+        compile ":grails-plugin-jummp-plugin-git:0.1"
+        compile ":grails-plugin-jummp-plugin-subversion:0.1"
+        compile ":grails-plugin-jummp-plugin-configuration:0.1"
+        compile ":grails-plugin-jummp-plugin-sbml:0.1"
+        compile ":grails-plugin-jummp-plugin-bives:0.1"
+        compile ":grails-plugin-jummp-plugin-remote:0.1"
+        runtime ":grails-plugin-jummp-plugin-dbus:0.1"
+        compile ":grails-plugin-jummp-plugin-jms:0.1"
+        compile ":grails-plugin-jummp-plugin-simple-logging:0.1"
+        // dependencies of plugins
+        // sbml
+        runtime ":jsbml:0.8-b2"
+        runtime ":sbfc:1.1-20110624-109"
+        runtime ":biojava-ontology:1.7"
+        // miriam lib required by sbml converters
+        runtime 'uk.ac.ebi.miriam:miriam-lib:1.1.2'
+        // dependencies of jsbml
+        runtime 'org.codehaus.woodstox:woodstox-core-lgpl:4.0.9'
+        runtime 'org.codehaus.staxmate:staxmate:2.0.0'
+        runtime 'org.w3c.jigsaw:jigsaw:2.2.6'
+        runtime 'com.thoughtworks.xstream:xstream:1.3.1'
+
+        // bives
+        runtime ":jaxen:1.1.1"
+        runtime ":jdom:1.1.1"
+        runtime ":bives-fwk:0.9.0"
+        runtime ":bives.diff:0.1.0"
+        runtime 'org.apache.commons:commons-compress:1.1'
+
+        // jms
+        runtime "org.apache.activemq:activemq-all:5.5.0"
+
+        // dbus
+        runtime ":dbus:2.7"
+        runtime ":debug-disable:1.1"
+        runtime ":hexdump:0.2"
+        runtime ":unix:0.5"
+    }
+
+    plugins {
+        compile ":perf4j:0.1.1"
     }
 }
-if (new File("jummp-plugins/jummp-plugin-subversion").exists()) {
-    grails.plugin.location.'jummp-plugin-subversion' = "jummp-plugins/jummp-plugin-subversion"
-}
-if (new File("jummp-plugins/jummp-plugin-git").exists()) {
-    grails.plugin.location.'jummp-plugin-git' = "jummp-plugins/jummp-plugin-git"
-}
-if (new File("jummp-plugins/jummp-plugin-configuration").exists()) {
-    grails.plugin.location.'jummp-plugin-configuration' = "jummp-plugins/jummp-plugin-configuration"
-}
-if (new File("jummp-plugins/jummp-plugin-sbml").exists()) {
-    grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
-}
-
-grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
-
-grails.plugin.location.'jummp-plugin-remote' = "jummp-plugins/jummp-plugin-remote"
-grails.plugin.location.'jummp-plugin-core-api' = "jummp-plugins/jummp-plugin-core-api"
-grails.plugin.location.'jummp-plugin-security' = "jummp-plugins/jummp-plugin-security"
-if (new File("jummp-plugins/jummp-plugin-dbus").exists()) {
-    grails.plugin.location.'jummp-plugin-dbus' = "jummp-plugins/jummp-plugin-dbus"
-}
-if (new File("jummp-plugins/jummp-plugin-jms").exists()) {
-    grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
-}
-grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plugin-simple-logging"
 
 // Remove libraries not needed in productive mode
 grails.war.resources = { stagingDir ->

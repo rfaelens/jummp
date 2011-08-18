@@ -19,33 +19,41 @@ grails.project.dependency.resolution = {
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
         //mavenLocal()
-        //mavenCentral()
+        mavenCentral()
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
+        flatDir name: 'jummpPlugins', dirs: "${grails.project.jummp.dir}/pluginlibs"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
+        // plugin dependencies
+        compile ":grails-plugin-jummp-plugin-security:0.1"
+        compile ":grails-plugin-jummp-plugin-core-api:0.1"
+        runtime ":grails-plugin-jummp-plugin-jms-remote:0.1"
+        compile ":grails-plugin-jummp-plugin-remote:0.1"
+        runtime ":grails-plugin-jummp-plugin-dbus:0.1"
+        compile ":jummp-ast:0.1"
+
+        // jms
+        runtime "org.apache.activemq:activemq-all:5.5.0"
+        runtime "commons-jexl:commons-jexl:1.1"
+        // dbus
+        runtime ":dbus:2.7"
+        runtime ":debug-disable:1.1"
+        runtime ":hexdump:0.2"
+        runtime ":unix:0.5"
+    }
+
+    plugins {
+        compile ":spring-security-core:1.2"
+        compile ":perf4j:0.1.1"
+        compile ":jms:1.2"
     }
 }
-Properties jummpProperties = new Properties()
-try {
-    jummpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"))
-} catch (Exception e) {
-    // ignore
-}
-if (new File("${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-dbus").exists()) {
-    grails.plugin.location.'jummp-plugin-dbus' = "${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-dbus"
-}
-if (new File("${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-jms-remote").exists()) {
-    grails.plugin.location.'jummp-plugin-jms-remote' = "${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-jms-remote"
-}
-grails.plugin.location.'jummp-plugin-remote' = "${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-remote"
-grails.plugin.location.'jummp-plugin-security' = "${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-security"
-grails.plugin.location.'jummp-plugin-core-api' = "${grails.project.jummp.dir}/jummp-plugins/jummp-plugin-core-api"
 
 // Remove libraries not needed in productive mode
 grails.war.resources = { stagingDir ->

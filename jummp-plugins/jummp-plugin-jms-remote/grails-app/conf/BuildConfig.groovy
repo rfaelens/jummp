@@ -22,23 +22,22 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
+        flatDir name: 'jummpPlugins', dirs: "../../pluginlibs"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
         compile "org.apache.activemq:activemq-all:5.5.0"
+        // plugin dependencies
+        compile ":grails-plugin-jummp-plugin-security:0.1"
+        compile ":grails-plugin-jummp-plugin-core-api:0.1"
+        compile ":grails-plugin-jummp-plugin-remote:0.1"
+        compile ":jummp-ast:0.1"
+    }
+    plugins {
+        compile ":spring-security-core:1.2"
+        compile ":perf4j:0.1.1"
+        compile ":jms:1.2"
     }
 }
-// depending on whether a war is generated or test-app is executed the path to the dependency plugin differs
-File directory = new File(".")
-String path = directory.getCanonicalPath()
-if (path.tokenize(File.separatorChar).last() == "jummp") {
-    path = "../../jummp-plugins"
-} else {
-    // are in plugin directory
-    path = ".."
-}
-grails.plugin.location.'jummp-plugin-remote' = path + File.separator + "jummp-plugin-remote"
-grails.plugin.location.'jummp-plugin-core-api' = path + File.separator + "jummp-plugin-core-api"
-grails.plugin.location.'jummp-plugin-security' = path + File.separator + "jummp-plugin-security"

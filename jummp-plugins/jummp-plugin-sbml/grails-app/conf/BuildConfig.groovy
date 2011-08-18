@@ -24,6 +24,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
         // repository for miriam lib
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
+        flatDir name: 'jummpPlugins', dirs: "../../pluginlibs"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -36,16 +37,15 @@ grails.project.dependency.resolution = {
         runtime 'org.codehaus.staxmate:staxmate:2.0.0'
         runtime 'org.w3c.jigsaw:jigsaw:2.2.6'
         runtime 'com.thoughtworks.xstream:xstream:1.3.1'
+        compile ":jsbml:0.8-b2"
+        compile ":sbfc:1.1-20110624-109"
+        compile ":biojava-ontology:1.7"
+
+        // plugin dependencies
+        compile ":grails-plugin-jummp-plugin-core-api:0.1"
+    }
+
+    plugins {
+        compile ":perf4j:0.1.1"
     }
 }
-
-// depending on whether a war is generated or test-app is executed the path to the dependency plugin differs
-File directory = new File(".")
-String path = directory.getCanonicalPath()
-if (path.tokenize(File.separatorChar).last() == "jummp") {
-    path = "../../jummp-plugins"
-} else {
-    // are in plugin directory
-    path = ".."
-}
-grails.plugin.location.'jummp-plugin-core-api' = path + File.separator + "jummp-plugin-core-api"

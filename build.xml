@@ -29,8 +29,7 @@
 
     <!--Generates a jar from the compiled AST Transformation and places it into the core's and web application's lib folder-->
     <target name="ast-jar" depends="ast-compile">
-        <jar destfile="${basedir}/lib/jummp-ast.jar" basedir="${basedir}/ast-build"/>
-        <copy file="${basedir}/lib/jummp-ast.jar" tofile="${basedir}/jummp-web-application/lib/jummp-ast.jar"/>
+        <jar destfile="${basedir}/pluginlibs/jummp-ast-0.1.jar" basedir="${basedir}/ast-build"/>
         <delete dir="${basedir}/ast-build"/>
     </target>
 
@@ -108,6 +107,62 @@
 <!-- Runs all tests with code coverage -->
     <target name="coverage" depends="prepare-coverage, test-core, test-plugins, generate-report">
         <grails command="coverage-report" cwd="${basedir}"/>
+    </target>
+
+    <target name="packagePlugin">
+        <grails command="package-plugin" cwd="${pluginBaseDir}/jummp-plugins/jummp-plugin-${plugin}"/>
+        <move file="${pluginBaseDir}/jummp-plugins/jummp-plugin-${plugin}/target/grails-plugin-jummp-plugin-${plugin}-0.1.jar" todir="${pluginBaseDir}/pluginlibs"/>
+    </target>
+
+    <target name="packagePlugins" depends="ast-jar">
+        <antcall target="packagePlugin">
+            <param name="pluginBaseDir" value="${basedir}"/>
+            <param name="plugin" value="security"/>
+        </antcall>
+        <antcall target="packagePlugin">
+            <param name="pluginBaseDir" value="${basedir}"/>
+            <param name="plugin" value="core-api"/>
+        </antcall>
+        <antcall target="packagePlugin">
+            <param name="pluginBaseDir" value="${basedir}"/>
+            <param name="plugin" value="sbml"/>
+        </antcall>
+        <antcall target="packagePlugin">
+            <param name="pluginBaseDir" value="${basedir}"/>
+            <param name="plugin" value="simple-logging"/>
+        </antcall>
+        <antcall target="packagePlugin">
+            <param name="pluginBaseDir" value="${basedir}"/>
+            <param name="plugin" value="configuration"/>
+        </antcall>
+        <antcall target="packagePlugin">
+            <param name="pluginBaseDir" value="${basedir}"/>
+            <param name="plugin" value="git"/>
+        </antcall>
+        <antcall target="packagePlugin">
+            <param name="pluginBaseDir" value="${basedir}"/>
+            <param name="plugin" value="subversion"/>
+        </antcall>
+        <antcall target="packagePlugin">
+            <param name="pluginBaseDir" value="${basedir}"/>
+            <param name="plugin" value="remote"/>
+        </antcall>
+        <antcall target="packagePlugin">
+            <param name="pluginBaseDir" value="${basedir}"/>
+            <param name="plugin" value="dbus"/>
+        </antcall>
+        <antcall target="packagePlugin">
+            <param name="pluginBaseDir" value="${basedir}"/>
+            <param name="plugin" value="jms-remote"/>
+        </antcall>
+        <antcall target="packagePlugin">
+            <param name="pluginBaseDir" value="${basedir}"/>
+            <param name="plugin" value="bives"/>
+        </antcall>
+        <antcall target="packagePlugin">
+            <param name="pluginBaseDir" value="${basedir}"/>
+            <param name="plugin" value="jms"/>
+        </antcall>
     </target>
 
     <!-- Copies the sources to a build directory excluding not needed files and directories -->

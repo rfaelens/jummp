@@ -22,6 +22,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
+        flatDir name: 'jummpPlugins', dirs: "../../pluginlibs"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -30,16 +31,8 @@ grails.project.dependency.resolution = {
         // perf4j dependency
         compile "org.perf4j:perf4j:0.9.13"
         runtime "commons-jexl:commons-jexl:1.1"
+
+        // plugin dependencies
+        compile ":grails-plugin-jummp-plugin-security:0.1"
     }
 }
-
-// depending on whether a war is generated or test-app is executed the path to the dependency plugin differs
-File directory = new File(".")
-String path = directory.getCanonicalPath()
-if (path.tokenize(File.separatorChar).last() == "jummp") {
-    path = "../../jummp-plugins"
-} else {
-    // are in plugin directory
-    path = ".."
-}
-grails.plugin.location.'jummp-plugin-security' = path + File.separator + "jummp-plugin-security"
