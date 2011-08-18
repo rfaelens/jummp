@@ -6,7 +6,6 @@ rankdir=BT;
 
     // without dependencies
     "security" [label=security];
-    "bives" [label=bives];
 
     // plugins depending security
     "coreApi"[label="core-api"];
@@ -23,6 +22,7 @@ rankdir=BT;
     "remote" [label="Remote"];
     "git" [label="git"];
     "svn" [label="subversion"];
+    "bives" [label=bives];
     "conf" -> "coreApi";
     "conf" -> "security";
     "remote" -> "coreApi";
@@ -31,19 +31,25 @@ rankdir=BT;
     "git" -> "security";
     "svn" -> "coreApi";
     "svn" -> "security";
+    "bives" -> "coreApi";
+    "bives" -> "security";
 
     // plugins depending core-api, security and remote
     "dbus" [label=dBus];
-    "jms" [label=JMS];
     "jmsRemote" [label="JMS-Remote"];
 
     "dbus" -> "coreApi";
     "dbus" -> "security";
     "dbus" -> "remote";
-    "jms" -> "coreApi";
-    "jms" -> "security";
-    "jms" -> "remote";
     "jmsRemote" -> "coreApi";
     "jmsRemote" -> "security";
     "jmsRemote" -> "remote";
+
+    // plugins depending core-api, security, remote and bives
+    "jms" [label=JMS];
+    "jms" -> "coreApi";
+    "jms" -> "security";
+    "jms" -> "remote";
+    "jms" -> "bives";
+    
 }
