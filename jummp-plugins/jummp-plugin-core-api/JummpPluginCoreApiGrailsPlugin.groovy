@@ -20,6 +20,7 @@ All other plugins providing core functionality depend on this plugin and the cor
 
     // URL to the plugin's documentation
     def documentation = "https://bitbucket.org/jummp/jummp/wiki"
+    def packaging = "binary"
 
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional), this event occurs before 
