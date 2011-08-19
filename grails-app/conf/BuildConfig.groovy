@@ -80,7 +80,25 @@ grails.project.dependency.resolution = {
     plugins {
         compile ":perf4j:0.1.1"
         compile ":jms:1.2"
+        compile ":executor:0.3"
+        compile ":mail:1.0-SNAPSHOT"
+        compile ":quartz:0.4.2"
+        compile ":spring-security-acl:1.1"
+        compile ":svn:1.0.0.M1"
         runtime ":spring-security-core:1.2.1"
+        runtime ":spring-security-ldap:1.0.5"
+        runtime ":mysql-connectorj:5.1.12"
+        test ":code-coverage:1.2.4"
+        test ":codenarc:0.11"
+        test ":gmetrics:0.3.1"
+
+        // default grails plugins
+        compile ":hibernate:$grailsVersion"
+        compile ":jquery:1.6.1.1"
+        //compile ":resources:1.0.2"
+
+        build ":tomcat:$grailsVersion"
+
     }
 }
 
