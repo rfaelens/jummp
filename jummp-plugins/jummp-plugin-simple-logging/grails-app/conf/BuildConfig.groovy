@@ -32,4 +32,12 @@ grails.project.dependency.resolution = {
         // plugin dependencies
         compile ":grails-plugin-jummp-plugin-core-api:0.1"
     }
+    plugins {
+        // default grails plugins
+        compile ":hibernate:$grailsVersion"
+        compile ":jquery:1.6.1.1"
+        //compile ":resources:1.0.2"
+
+        build ":tomcat:$grailsVersion"
+    }
 }
