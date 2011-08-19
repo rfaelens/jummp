@@ -35,4 +35,7 @@ grails.project.dependency.resolution = {
         // plugin dependencies
         compile ":grails-plugin-jummp-plugin-security:0.1"
     }
+    plugins {
+        compile ":spring-security-core:1.2.1"
+    }
 }

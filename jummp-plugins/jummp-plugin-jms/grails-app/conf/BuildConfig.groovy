@@ -38,6 +38,7 @@ grails.project.dependency.resolution = {
     }
     plugins {
         compile ":perf4j:0.1.1"
+        compile ":spring-security-core:1.2.1"
         compile ":spring-security-ldap:1.0.5"
     }
 }
