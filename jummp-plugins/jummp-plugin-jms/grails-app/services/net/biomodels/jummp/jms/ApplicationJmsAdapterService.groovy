@@ -4,8 +4,6 @@ import grails.plugin.jms.Queue
 import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
-import net.biomodels.jummp.plugins.security.SerializableGrailsUser
-import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
 import org.perf4j.aop.Profiled
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
@@ -79,15 +77,7 @@ class ApplicationJmsAdapterService extends AbstractJmsAdapter {
                 String hash = authenticationHashService.hashAuthentication(auth)
                 return JummpAuthenticationImpl.fromAuthentication(auth, hash)
             } catch (AuthenticationException e) {
-                // extraInformation is also a GrailsUser, so if it is set we need to create a new AuthenticationException
-                // with a SerializableGrailsUser instead of the GrailsUser as extraInformation
-                if (e.extraInformation) {
-                    AuthenticationException exception = e.class.newInstance(e.message, SerializableGrailsUser.fromGrailsUser((org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser)e.extraInformation))
-                    exception.setAuthentication(e.authentication)
-                    return exception
-                } else {
-                    return e
-                }
+                return e
             }
         }
         return new IllegalArgumentException("Did not receive an authentication")
