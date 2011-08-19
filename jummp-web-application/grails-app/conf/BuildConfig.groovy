@@ -49,8 +49,18 @@ grails.project.dependency.resolution = {
 
     plugins {
         compile ":spring-security-core:1.2.1"
+        runtime ":spring-security-ldap:1.0.5"
+        compile ":jquery-ui:1.8.11"
+        compile ":jquery-datatables:1.7.5"
         compile ":perf4j:0.1.1"
         compile ":jms:1.2"
+
+        // default grails plugins
+        compile ":hibernate:$grailsVersion"
+        compile ":jquery:1.6.1.1"
+        //compile ":resources:1.0.2"
+
+        build ":tomcat:$grailsVersion"
     }
 }
 
