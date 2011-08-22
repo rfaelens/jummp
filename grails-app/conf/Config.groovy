@@ -159,7 +159,7 @@ grails.plugins.springsecurity.userLookup.userDomainClassName = 'net.biomodels.ju
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'net.biomodels.jummp.plugins.security.UserRole'
 grails.plugins.springsecurity.authority.className = 'net.biomodels.jummp.plugins.security.Role'
 
-grails.plugins.springsecurity.controllerAnnotations.staticRules = [
+jummp.controllerAnnotations = [
         // protect the springsecurity ui plugin controllers
         '/aclclass/**':          ['ROLE_ADMIN'],
         '/aclentry/**':          ['ROLE_ADMIN'],
@@ -360,6 +360,8 @@ class BuildConfigParser {
 resolutionClosure.resolveStrategy = Closure.DELEGATE_FIRST
 resolutionClosure.delegate = new BuildConfigParser(classLoader, jummp, jummpConfig)
 resolutionClosure.call()
+
+grails.plugins.springsecurity.controllerAnnotations.staticRules = jummp.controllerAnnotations
 
 environments {
     test {
