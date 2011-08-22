@@ -4,6 +4,7 @@ syntax: glob
 *~
 *.orig
 *.iml
+*.log
 target/*
 build/*
 .*
@@ -26,3 +27,6 @@ cobertura.ser
 jummp-plugins/*/web-app
 jummp-plugins/*/grails-app/i18n
 jummp-plugins/*/plugin.xml
+pluginlibs/jummp-ast-0.1.jar
+pluginlibs/grails-plugin-jummp-plugin-*.jar
+jummp-plugins/*/target/*
