@@ -33,9 +33,9 @@ grails.project.dependency.resolution = {
         compile ":hexdump:0.2"
         compile ":unix:0.5"
         // plugin dependencies
-        compile ":grails-plugin-jummp-plugin-security:0.1"
-        compile ":grails-plugin-jummp-plugin-core-api:0.1"
-        compile ":grails-plugin-jummp-plugin-remote:0.1"
+        compile ":grails-plugin-jummp-plugin-security:latest.integration"
+        compile ":grails-plugin-jummp-plugin-core-api:latest.integration"
+        compile ":grails-plugin-jummp-plugin-remote:latest.integration"
         compile ":jummp-ast:0.1"
     }
     plugins {

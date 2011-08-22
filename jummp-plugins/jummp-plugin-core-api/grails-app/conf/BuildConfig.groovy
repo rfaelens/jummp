@@ -33,7 +33,7 @@ grails.project.dependency.resolution = {
         runtime "commons-jexl:commons-jexl:1.1"
 
         // plugin dependencies
-        compile ":grails-plugin-jummp-plugin-security:0.1"
+        compile ":grails-plugin-jummp-plugin-security:latest.integration"
     }
     plugins {
         compile ":spring-security-core:1.2.1"

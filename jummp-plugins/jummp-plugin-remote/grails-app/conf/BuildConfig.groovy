@@ -29,8 +29,8 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
         // plugin dependencies
-        compile ":grails-plugin-jummp-plugin-security:0.1"
-        compile ":grails-plugin-jummp-plugin-core-api:0.1"
+        compile ":grails-plugin-jummp-plugin-security:latest.integration"
+        compile ":grails-plugin-jummp-plugin-core-api:latest.integration"
     }
     plugins {
         compile ":spring-security-core:1.2.1"

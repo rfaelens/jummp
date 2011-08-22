@@ -33,16 +33,16 @@ grails.project.dependency.resolution = {
         compile "org.ccil.cowan.tagsoup:tagsoup:1.2"
         test 'hsqldb:hsqldb:1.8.0.10'
         // plugin dependencies
-        compile ":grails-plugin-jummp-plugin-security:0.1"
-        compile ":grails-plugin-jummp-plugin-core-api:0.1"
-        compile ":grails-plugin-jummp-plugin-git:0.1"
-        compile ":grails-plugin-jummp-plugin-subversion:0.1"
-        compile ":grails-plugin-jummp-plugin-configuration:0.1"
-        compile ":grails-plugin-jummp-plugin-sbml:0.1"
-        compile ":grails-plugin-jummp-plugin-bives:0.1"
-        compile ":grails-plugin-jummp-plugin-remote:0.1"
-        runtime ":grails-plugin-jummp-plugin-dbus:0.1"
-        compile ":grails-plugin-jummp-plugin-simple-logging:0.1"
+        compile ":grails-plugin-jummp-plugin-security:latest.integration"
+        compile ":grails-plugin-jummp-plugin-core-api:latest.integration"
+        compile ":grails-plugin-jummp-plugin-git:latest.integration"
+        compile ":grails-plugin-jummp-plugin-subversion:latest.integration"
+        compile ":grails-plugin-jummp-plugin-configuration:latest.integration"
+        compile ":grails-plugin-jummp-plugin-sbml:latest.integration"
+        compile ":grails-plugin-jummp-plugin-bives:latest.integration"
+        compile ":grails-plugin-jummp-plugin-remote:latest.integration"
+        runtime ":grails-plugin-jummp-plugin-dbus:latest.integration"
+        compile ":grails-plugin-jummp-plugin-simple-logging:latest.integration"
         // dependencies of plugins
         // sbml
         runtime ":jsbml:0.8-b2"
