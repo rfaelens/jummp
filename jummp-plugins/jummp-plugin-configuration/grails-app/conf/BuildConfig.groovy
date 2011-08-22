@@ -34,7 +34,7 @@ grails.project.dependency.resolution = {
     }
     plugins {
         compile ":spring-security-core:1.2.1"
-        compile ":webflow:1.3.6"
+        compile ":webflow:$grailsVersion"
         test ":code-coverage:1.2.4"
 
         // default grails plugins
