@@ -32,7 +32,7 @@ class ConfigurationController {
 
     def saveRemote = { RemoteCommand remote  ->
         if (remote.hasErrors()) {
-            render(view: 'configuration', model: [remote: remote, title: "Invoker Service", action: "saveRemote", template: 'Remote'])
+            render(view: 'configuration', model: [remote: remote, title: "Invoker Service", action: "saveRemote", template: 'remote'])
         } else {
             configurationService.saveRemoteConfiguration(remote)
             render(view: "saved", model: [module: "Remote"])
