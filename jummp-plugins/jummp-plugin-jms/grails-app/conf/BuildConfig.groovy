@@ -30,11 +30,21 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.13'
         compile "org.apache.activemq:activemq-all:5.5.0"
         // plugin dependencies
-        compile ":grails-plugin-jummp-plugin-security:latest.integration"
-        compile ":grails-plugin-jummp-plugin-core-api:latest.integration"
-        compile ":grails-plugin-jummp-plugin-remote:latest.integration"
-        compile ":grails-plugin-jummp-plugin-bives:latest.integration"
-        compile ":jummp-ast:0.1"
+        compile(":grails-plugin-jummp-plugin-security:latest.integration") {
+            changing = true
+        }
+        compile(":grails-plugin-jummp-plugin-core-api:latest.integration") {
+            changing = true
+        }
+        compile(":grails-plugin-jummp-plugin-remote:latest.integration") {
+            changing = true
+        }
+        compile(":grails-plugin-jummp-plugin-bives:latest.integration") {
+            changing = true
+        }
+        compile(":jummp-ast:latest.integration") {
+            changing = true
+        }
     }
     plugins {
         compile ":perf4j:0.1.1"

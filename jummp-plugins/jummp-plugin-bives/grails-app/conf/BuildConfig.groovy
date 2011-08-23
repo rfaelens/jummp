@@ -34,8 +34,12 @@ grails.project.dependency.resolution = {
         compile ":bives-fwk:0.9.0"
         compile ":bives.diff:0.1.0"
         // plugin dependencies
-        compile ":grails-plugin-jummp-plugin-security:latest.integration"
-        compile ":grails-plugin-jummp-plugin-core-api:latest.integration"
+        compile(":grails-plugin-jummp-plugin-security:latest.integration") {
+            changing = true
+        }
+        compile(":grails-plugin-jummp-plugin-core-api:latest.integration") {
+            changing = true
+        }
     }
     plugins {
         compile ":perf4j:0.1.1"

@@ -42,7 +42,9 @@ grails.project.dependency.resolution = {
         compile ":biojava-ontology:1.7"
 
         // plugin dependencies
-        compile ":grails-plugin-jummp-plugin-core-api:latest.integration"
+        compile(":grails-plugin-jummp-plugin-core-api:latest.integration") {
+            changing = true
+        }
     }
 
     plugins {

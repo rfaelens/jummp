@@ -30,7 +30,9 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.13'
 
         // plugin dependencies
-        compile ":grails-plugin-jummp-plugin-core-api:latest.integration"
+        compile(":grails-plugin-jummp-plugin-core-api:latest.integration") {
+            changing = true
+        }
     }
     plugins {
         // default grails plugins
