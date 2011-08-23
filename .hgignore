@@ -24,6 +24,7 @@ activemq-data/*
 CodeNarcReport.html
 cobertura.ser
 */cobertura.ser
+*/build.number
 jummp-plugins/*/web-app
 jummp-plugins/*/grails-app/i18n
 jummp-plugins/*/plugin.xml
