@@ -111,8 +111,7 @@
 
     <target name="packagePlugin">
         <grails command="clean" cwd="${pluginBaseDir}/jummp-plugins/jummp-plugin-${plugin}"/>
-        <grails command="package-plugin" cwd="${pluginBaseDir}/jummp-plugins/jummp-plugin-${plugin}"/>
-        <move file="${pluginBaseDir}/jummp-plugins/jummp-plugin-${plugin}/target/grails-plugin-jummp-plugin-${plugin}-0.1.jar" todir="${pluginBaseDir}/pluginlibs"/>
+        <grails command="jummp-plugin" cwd="${pluginBaseDir}/jummp-plugins/jummp-plugin-${plugin}"/>
     </target>
 
     <target name="packagePlugins" depends="ast-jar">
