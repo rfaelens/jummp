@@ -24,6 +24,7 @@ import net.biomodels.jummp.core.events.RevisionCreatedEvent
 import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.model.Publication
 import org.springframework.security.access.prepost.PostAuthorize
+import org.springframework.security.core.userdetails.UserDetails
 
 /**
  * @short Service class for managing Models
@@ -220,18 +221,32 @@ class ModelService {
                 }
             } as Integer
         }
-        // TODO: implement better by going down to database
-        List<Model> models = Model.list()
-        int count = 0
-        for (model in models) {
-            if (model.state == ModelState.DELETED) {
-                continue
-            }
-            if (getLatestRevision(model)) {
-                count++
-            }
+
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
         }
-        return count
+
+        return Model.executeQuery('''
+SELECT COUNT(DISTINCT m.id) FROM Revision AS r, AclEntry AS ace
+JOIN r.model AS m
+JOIN ace.aclObjectIdentity AS aoi
+JOIN aoi.aclClass AS ac
+JOIN ace.sid AS sid
+WHERE
+aoi.objectId = r.id
+AND ac.className = :className
+AND sid.sid IN (:roles)
+AND ace.mask IN (:permissions)
+AND ace.granting = true
+AND m.state != :deleted
+AND r.deleted = false
+''', [
+        className: Revision.class.getName(),
+        permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+        deleted: ModelState.DELETED,
+        roles: roles])[0] as Integer
     }
 
     /**
