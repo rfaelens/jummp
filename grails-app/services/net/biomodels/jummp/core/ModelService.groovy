@@ -210,6 +210,16 @@ class ModelService {
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getModelCount")
     public Integer getModelCount() {
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            // special handling for Admin - is allowed to see all (not deleted) Models
+            def criteria = Model.createCriteria()
+            return criteria.get {
+                ne("state", ModelState.DELETED)
+                projections {
+                    count("id")
+                }
+            } as Integer
+        }
         // TODO: implement better by going down to database
         List<Model> models = Model.list()
         int count = 0
@@ -217,7 +227,7 @@ class ModelService {
             if (model.state == ModelState.DELETED) {
                 continue
             }
-            if (getLatestRevision(model) || SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            if (getLatestRevision(model)) {
                 count++
             }
         }
