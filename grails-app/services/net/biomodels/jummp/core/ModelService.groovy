@@ -89,8 +89,38 @@ class ModelService {
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllModels")
     public List<Model> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn) {
-        // TODO: implement better by going down to database
         String sorting = sortOrder ? 'asc' : 'desc'
+        // for Admin - sees all (not deleted) models
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            def criteria = Model.createCriteria()
+            return criteria.list {
+                ne("state", ModelState.DELETED)
+                maxResults(count)
+                firstResult(offset)
+                switch (sortColumn) {
+                case ModelListSorting.NAME:
+                    order("name", sorting)
+                    break
+                case ModelListSorting.LAST_MODIFIED:
+                    revisions {
+                        order("uploadDate", sorting)
+                    }
+                    break
+                case ModelListSorting.FORMAT:
+                    revisions {
+                        order("format", sorting)
+                    }
+                    break
+                case ModelListSorting.PUBLICATION:
+                    // TODO: implement, fall through to default
+                case ModelListSorting.ID: // Id is the default
+                default:
+                    order("id", sorting)
+                    break
+                }
+            }
+        }
+        // TODO: implement better by going down to database
         def criteria = Model.createCriteria()
         def allModels = criteria.list {
             switch (sortColumn) {
@@ -124,7 +154,7 @@ class ModelService {
                 continue
             }
             // admin has access to all models
-            if (getLatestRevision(model) || SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            if (getLatestRevision(model)) {
                 skipCounter++
             }
         }
@@ -135,7 +165,7 @@ class ModelService {
             if (model.state == ModelState.DELETED) {
                 continue
             }
-            if (getLatestRevision(model) || SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            if (getLatestRevision(model)) {
                 returnList << model
             }
         }
