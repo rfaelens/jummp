@@ -306,7 +306,6 @@ AND r.deleted = false
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getLatestRevision")
     public Revision getLatestRevision(Model model) {
-        // TODO: maybe querying the database directly is more efficient?
         if (!model) {
             return null
         }
@@ -322,7 +321,7 @@ AND r.deleted = false
                 JOIN rev.model.revisions AS revisions
                 WHERE
                 rev.model = :model
-                AND rev.deleted = false
+                AND revisions.deleted = false
                 GROUP BY rev.model, rev.id, rev.revisionNumber
                 HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [model: model]) as List
             if (!result) {
@@ -330,22 +329,37 @@ AND r.deleted = false
             }
             return Revision.get(result[0])
         }
-        // we cannot call getAllRevisions as filtering does not work when calling methods directly
-        List<Revision> revisions = []
-        for (revision in model.revisions) {
-            if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)) {
-                if (!revision.deleted) {
-                    // only include not deleted revisions
-                    revisions << revision
-                }
+
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+        }
+        List<Long> result = Revision.executeQuery('''
+SELECT rev.id
+FROM Revision AS rev, AclEntry AS ace
+JOIN rev.model.revisions AS revisions
+JOIN ace.aclObjectIdentity AS aoi
+JOIN aoi.aclClass AS ac
+JOIN ace.sid AS sid
+WHERE
+rev.model = :model
+AND revisions.deleted = false
+AND aoi.objectId = revisions.id
+AND ac.className = :className
+AND sid.sid IN (:roles)
+AND ace.mask IN (:permissions)
+AND ace.granting = true
+GROUP BY rev.model, rev.id, rev.revisionNumber
+HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
+                model: model,
+                className: Revision.class.getName(),
+                roles: roles,
+                permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()] ]) as List
+            if (!result) {
+                return null
             }
-        }
-        if (revisions.isEmpty()) {
-            return null
-        } else {
-            revisions = revisions.sort{it.revisionNumber}
-            return revisions.last()
-        }
+            return Revision.get(result[0])
     }
 
     /**
