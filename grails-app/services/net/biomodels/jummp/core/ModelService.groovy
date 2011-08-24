@@ -89,6 +89,10 @@ class ModelService {
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllModels")
     public List<Model> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn) {
+        if (offset < 0 || count <= 0) {
+            // safety check
+            return []
+        }
         String sorting = sortOrder ? 'asc' : 'desc'
         // for Admin - sees all (not deleted) models
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
@@ -120,56 +124,52 @@ class ModelService {
                 }
             }
         }
-        // TODO: implement better by going down to database
-        def criteria = Model.createCriteria()
-        def allModels = criteria.list {
-            switch (sortColumn) {
-            case ModelListSorting.NAME:
-                order("name", sorting)
-                break
-            case ModelListSorting.LAST_MODIFIED:
-                revisions {
-                    order("uploadDate", sorting)
-                }
-                break
-            case ModelListSorting.FORMAT:
-                revisions {
-                    order("format", sorting)
-                }
-                break
-            case ModelListSorting.PUBLICATION:
-                // TODO: implement, fall through to default
-            case ModelListSorting.ID: // Id is the default
-            default:
-                order("id", sorting)
-                break
-            }
+
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
         }
-        // first skip all models till offset
-        int skipCounter = 0
-        int index = 0
-        while (skipCounter < offset && index < allModels.size()) {
-            Model model = allModels[index++]
-            if (model.state == ModelState.DELETED) {
-                continue
-            }
-            // admin has access to all models
-            if (getLatestRevision(model)) {
-                skipCounter++
-            }
+        String query = '''
+SELECT DISTINCT m FROM Revision AS r, AclEntry AS ace
+JOIN r.model AS m
+JOIN ace.aclObjectIdentity AS aoi
+JOIN aoi.aclClass AS ac
+JOIN ace.sid AS sid
+WHERE
+aoi.objectId = r.id
+AND ac.className = :className
+AND sid.sid IN (:roles)
+AND ace.mask IN (:permissions)
+AND ace.granting = true
+AND m.state != :deleted
+AND r.deleted = false
+ORDER BY
+'''
+        switch (sortColumn) {
+        case ModelListSorting.NAME:
+            query += "m.name"
+            break
+        case ModelListSorting.LAST_MODIFIED:
+            query += "r.uploadDate"
+            break
+        case ModelListSorting.FORMAT:
+            query += "r.format"
+            break
+        case ModelListSorting.PUBLICATION:
+            // TODO: implement, fall through to default
+        case ModelListSorting.ID: // Id is the default
+        default:
+            query += "m.id"
+            break
         }
-        // now add each model the user has access to revisions to the return list
-        List<Model> returnList = []
-        while (returnList.size() < count && index < allModels.size()) {
-            Model model = allModels[index++]
-            if (model.state == ModelState.DELETED) {
-                continue
-            }
-            if (getLatestRevision(model)) {
-                returnList << model
-            }
-        }
-        return returnList
+        query += " " + sorting
+
+        return Model.executeQuery(query, [
+            className: Revision.class.getName(),
+            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+            deleted: ModelState.DELETED,
+            roles: roles, max: count, offset: offset])
     }
 
     /**
