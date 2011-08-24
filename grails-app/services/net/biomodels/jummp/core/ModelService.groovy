@@ -314,11 +314,26 @@ AND r.deleted = false
             // exclude deleted models
             return null
         }
+        // admin gets max (non deleted) revision
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            List<Long> result = Revision.executeQuery('''
+                SELECT rev.id
+                FROM Revision AS rev
+                JOIN rev.model.revisions AS revisions
+                WHERE
+                rev.model = :model
+                AND rev.deleted = false
+                GROUP BY rev.model, rev.id, rev.revisionNumber
+                HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [model: model]) as List
+            if (!result) {
+                return null
+            }
+            return Revision.get(result[0])
+        }
         // we cannot call getAllRevisions as filtering does not work when calling methods directly
         List<Revision> revisions = []
-        boolean admin = SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")
         for (revision in model.revisions) {
-            if (admin || aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)) {
+            if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)) {
                 if (!revision.deleted) {
                     // only include not deleted revisions
                     revisions << revision
