@@ -40,6 +40,8 @@ grails.project.dependency.resolution = {
         compile(":grails-plugin-jummp-plugin-core-api:latest.integration") {
             changing = true
         }
+
+        test 'hsqldb:hsqldb:1.8.0.10'
     }
     plugins {
         compile ":perf4j:0.1.1"

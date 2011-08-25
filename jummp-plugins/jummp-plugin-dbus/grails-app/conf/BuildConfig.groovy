@@ -45,6 +45,8 @@ grails.project.dependency.resolution = {
         compile(":jummp-ast:latest.integration") {
             changing = true
         }
+
+        test 'hsqldb:hsqldb:1.8.0.10'
     }
     plugins {
         compile ":spring-security-core:1.2.1"
