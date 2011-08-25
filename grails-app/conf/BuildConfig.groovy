@@ -32,6 +32,7 @@ grails.project.dependency.resolution = {
         // required by OntologyLookupResolver
         compile "org.ccil.cowan.tagsoup:tagsoup:1.2"
         test 'hsqldb:hsqldb:1.8.0.10'
+        runtime 'mysql:mysql-connector-java:5.1.17'
         // plugin dependencies
         compile(":grails-plugin-jummp-plugin-security:latest.integration") {
             changing = true
@@ -107,7 +108,6 @@ grails.project.dependency.resolution = {
         compile ":svn:1.0.0.M1"
         runtime ":spring-security-core:1.2.1"
         runtime ":spring-security-ldap:1.0.5"
-        runtime ":mysql-connectorj:5.1.12"
         test ":code-coverage:1.2.4"
         test ":codenarc:0.11"
         test ":gmetrics:0.3.1"
