@@ -89,7 +89,7 @@ class ConfigurationControllerTests extends ControllerUnitTestCase {
         this.controller.saveRemote(cmd)
         assertEquals("configuration", this.controller.renderArgs["view"])
         assertEquals("saveRemote", this.controller.renderArgs["model"].action)
-        assertEquals("Remote", this.controller.renderArgs["model"].template)
+        assertEquals("remote", this.controller.renderArgs["model"].template)
         assertEquals(cmd, this.controller.renderArgs["model"].remote)
         // test for correct command
         cmd = new RemoteCommand()
