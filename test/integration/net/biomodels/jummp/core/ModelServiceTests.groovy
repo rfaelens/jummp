@@ -388,7 +388,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         List<Revision> testResults = modelService.getAllRevisions(model)
         assertEquals(6, testResults.size())
         for (int i=0; i<6; i++) {
-            assertSame(Revision.findByRevisionNumber(i+1), testResults[i])
+            assertSame(Revision.findByRevisionNumberAndModel(i+1, model), testResults[i])
         }
         // add some permissions to the revisions
         aclUtilService.addPermission(rev1, "testuser", BasePermission.READ)
@@ -418,7 +418,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         testResults = modelService.getAllRevisions(model)
         assertEquals(6, testResults.size())
         for (int i=0; i<6; i++) {
-            assertSame(Revision.findByRevisionNumber(i+1), testResults[i])
+            assertSame(Revision.findByRevisionNumberAndModel(i+1, model), testResults[i])
         }
         // add another model
         Model model2 = new Model(name: "test12", vcsIdentifier: "test12.xml")
@@ -449,7 +449,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         testResults = modelService.getAllRevisions(model)
         assertEquals(6, testResults.size())
         for (int i=0; i<6; i++) {
-            assertSame(Revision.findByRevisionNumber(i+1), testResults[i])
+            assertSame(Revision.findByRevisionNumberAndModel(i+1, model), testResults[i])
         }
         // lets' see if we all get the revision for model2
         authenticateAsTestUser()
