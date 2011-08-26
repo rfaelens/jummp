@@ -306,6 +306,8 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         aclUtilService.deletePermission(Revision, revision.id, "testuser", BasePermission.READ)
         authenticateAnonymous()
         modelAdminUser(false)
+        // cleanup
+        assertTrue(send("deleteModel", [auth.getAuthenticationHash(), result.id as Long]))
     }
 
     void testAddRevision() {
@@ -429,6 +431,9 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         aclUtilService.deletePermission(Revision, revision.id, "testuser", BasePermission.READ)
         authenticateAnonymous()
         modelAdminUser(false)
+
+        // cleanup
+        assertTrue(send("deleteModel", [auth.getAuthenticationHash(), model.id as Long]))
     }
 
     void testGrantReadAccess() {
