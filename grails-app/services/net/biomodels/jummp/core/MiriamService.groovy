@@ -117,7 +117,7 @@ class MiriamService implements IMiriamService {
                 dataTypeLocation: preferred.location,
                 dataTypeName: datatype.name,
                 name: resolvedName ? resolvedName.name : URLCodec.decode(identifier),
-                url: preferred.action.replace('$id', identifier)
+                url: "http://identifiers.org/${datatype.urn.substring(datatype.urn.lastIndexOf(':') + 1)}/${identifier}"
         ]
     }
 
