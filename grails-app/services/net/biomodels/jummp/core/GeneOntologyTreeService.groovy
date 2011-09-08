@@ -49,20 +49,16 @@ class GeneOntologyTreeService {
             geneOntologies = rootLevel()
         }
         GeneOntologyTreeLevel level = new GeneOntologyTreeLevel()
-        geneOntologies.each {
-            GeneOntology go
-            GeneOntologyRelationshipType type = null
-            if (geneOntology) {
-                go = it[0] as GeneOntology
-                type = it[1] as GeneOntologyRelationshipType
-            } else {
-                go = it as GeneOntology
-            }
-            level.addOntology(go.id, go.description.identifier, go.description.name, type)
-        }
         if (geneOntology) {
+            geneOntologies.each { go, type ->
+                level.addOntology(go.id, go.description.identifier, go.description.name, type)
+            }
             revisionsForGeneOntology(geneOntology).each {
                 level.addRevision(it.toCommandObject())
+            }
+        } else {
+            geneOntologies.each { go ->
+                level.addOntology(go.id, go.description.identifier, go.description.name, null)
             }
         }
         return level
