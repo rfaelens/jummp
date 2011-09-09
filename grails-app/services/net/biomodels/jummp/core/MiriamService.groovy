@@ -48,10 +48,6 @@ class MiriamService implements IMiriamService {
         }
     }
     /**
-     * Dependency Injection of Model Service
-     */
-    def modelService
-    /**
      * Dependency injection for ExecutorService to run threads
      */
     def executorService

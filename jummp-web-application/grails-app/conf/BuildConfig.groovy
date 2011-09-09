@@ -54,7 +54,7 @@ grails.project.dependency.resolution = {
         runtime ":dbus:2.7"
         runtime ":debug-disable:1.1"
         runtime ":hexdump:0.2"
-        runtime ":unix:0.5"
+        provided ":unix:0.5"
     }
 
     plugins {

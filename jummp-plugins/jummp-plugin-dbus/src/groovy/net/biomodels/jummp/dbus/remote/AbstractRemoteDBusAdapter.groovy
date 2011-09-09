@@ -39,7 +39,7 @@ class AbstractRemoteDBusAdapter extends AbstractRemoteAdapter {
     protected <T> T getRemoteObject(String objectPath, Class<T> clazz) throws DBusExecutionException {
         try {
             connection = DBusConnection.getConnection(DBusConnection.SYSTEM)
-            return (T)connection.getPeerRemoteObject("net.biomodels.jummp", objectPath, T)
+            return (T)connection.getPeerRemoteObject("net.biomodels.jummp", objectPath, clazz)
         } catch (DBusExecutionException e) {
             connection = DBusConnection.getConnection(DBusConnection.SESSION)
             return (T)connection.getPeerRemoteObject("net.biomodels.jummp", objectPath, clazz)
