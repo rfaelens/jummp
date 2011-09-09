@@ -37,7 +37,6 @@ import org.springframework.beans.factory.InitializingBean
 import grails.util.Environment
 import org.codehaus.groovy.grails.plugins.codecs.URLCodec
 import org.sbml.jsbml.CVTerm
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.sbfc.converter.models.SBMLModel
 import org.sbfc.converter.models.OctaveModel
 import org.sbml.jsbml.SBMLWriter
@@ -54,13 +53,11 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     static transactional = true
 
     /**
-     * Dependency Injection for ModelDelegateService allowing to access models
-     */
-    def modelDelegateService
-    /**
      * Dependency Injection of MiriamService
      */
     def miriamService
+    def grailsApplication
+    def config
 
     /**
      * Keep one of each SBML2* converters around as it takes quite some time to load the converters.
@@ -98,7 +95,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             log.error("SBMLDocuement is not valid for file ${model.name}")
             return false
         }
-        if (!ConfigurationHolder.config.jummp.plugins.sbml.validate) {
+        if (!config.jummp.plugins.sbml.validate) {
             log.info("Validation for ${model.name} skipped due to configuration option")
             println("Validation for ${model.name} skipped due to configuration option")
             return true
@@ -441,7 +438,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             return document
         }
         // we do not have a document, so retrieve first the file
-        byte[] bytes = modelDelegateService.retrieveModelFile(revision)
+        byte[] bytes = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFile(revision)
         document = (new SBMLReader()).readSBMLFromStream(new ByteArrayInputStream(bytes))
         cache.put(revision, document)
         return document
