@@ -41,6 +41,6 @@ class MiriamDatatype implements Serializable {
     }
 
     public String toString() {
-        return "Id: ${identifier}, Name: ${name}, Pattern: ${pattern}, URI: ${uri}, Synonyms: ${synonyms}, Resources: ${resources}"
+        return "Id: ${identifier}, Name: ${name}, Pattern: ${pattern}, URN: ${urn}, Synonyms: ${synonyms}, Resources: ${resources}"
     }
 }
