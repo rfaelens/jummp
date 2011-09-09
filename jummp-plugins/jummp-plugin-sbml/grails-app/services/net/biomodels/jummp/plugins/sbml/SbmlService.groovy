@@ -75,7 +75,8 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             // only initialize the SBML2* Converters during startup in production mode
             sbml2dotConverter()
             sbml2OctaveConverter()
-            sbml2BioPaxConverter()
+            // FIXME: fails the startup of Tomcat server
+            //sbml2BioPaxConverter()
         }
     }
 
