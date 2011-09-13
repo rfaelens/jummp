@@ -16,6 +16,7 @@ class AuthenticationOutdaterJob {
     def authenticationHashService
 
     static triggers = {
+        // TODO: find a solution for ConfigurationHolder as it is deprecated
         simple name: 'authenticationRemoveTrigger', startDelay: Long.valueOf(ConfigurationHolder.config.jummp.authenticationHash.startRemoveOffset), repeatInterval: Long.valueOf(ConfigurationHolder.config.jummp.authenticationHash.removeInterval)
     }
 
