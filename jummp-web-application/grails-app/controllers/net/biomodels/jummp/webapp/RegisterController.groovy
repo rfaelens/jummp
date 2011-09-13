@@ -4,7 +4,6 @@ import grails.plugins.springsecurity.Secured
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.core.JummpException
 import grails.converters.JSON
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.user.UserManagementException
 
@@ -24,6 +23,10 @@ class RegisterController {
      * Dependency injection of spring security service
      */
     def springSecurityService
+    /**
+     * Dependency injection of grailsApplication
+     */
+    def grailsApplication
 
     /**
      * Default action rendering the Registration Dialog markup
@@ -33,10 +36,10 @@ class RegisterController {
             render(template: "/templates/page", model: [link: g.createLink(action: "index"), callback: "loadRegistrationCallback"])
             return
         }
-        if (!ConfigurationHolder.config.jummpCore.security.anonymousRegistration) {
+        if (!grailsApplication.config.jummpCore.security.anonymousRegistration) {
             throw new AccessDeniedException(g.message(code: "user.register.disabled"))
         }
-        [password: ConfigurationHolder.config.jummpCore.security.registration.ui.userPassword]
+        [password: grailsApplication.config.jummpCore.security.registration.ui.userPassword]
     }
 
     /**
@@ -45,7 +48,7 @@ class RegisterController {
      */
     def register = { RegistrationCommand cmd ->
         def data = [:]
-        if (!ConfigurationHolder.config.jummpCore.security.anonymousRegistration) {
+        if (!grailsApplication.config.jummpCore.security.anonymousRegistration) {
             data.put("error", g.message(code: "user.register.disabled"))
             render data as JSON
             return
@@ -100,7 +103,7 @@ class RegisterController {
             render(template: "/templates/page", model: [link: g.createLink(action: "confirmRegistration", id: params.id), callback: "loadConfirmRegistrationCallback"])
             return
         }
-        [code: params.id, password: ConfigurationHolder.config.jummpCore.security.registration.ui.userPassword]
+        [code: params.id, password: grailsApplication.config.jummpCore.security.registration.ui.userPassword]
     }
 
     /**
@@ -182,7 +185,7 @@ class RegistrationCommand implements Serializable {
     static constraints = {
         username(nullable: false, blank: false)
         password(nullable: true, blank: false, validator: { password ->
-            if (ConfigurationHolder.config.jummpCore.security.registration.ui.userPassword) {
+            if (grailsApplication.config.jummpCore.security.registration.ui.userPassword) {
                 return password != null
             } else {
                 return password == null
@@ -218,7 +221,7 @@ class ConfirmRegistrationCommand implements Serializable {
         username(nullable: false, blank: false)
         code(nullable: false, blank: false)
         password(nullable: true, blank: false, validator: { password ->
-            if (ConfigurationHolder.config.jummpCore.security.registration.ui.userPassword) {
+            if (grailsApplication.config.jummpCore.security.registration.ui.userPassword) {
                 return password != null
             } else {
                 return password == null

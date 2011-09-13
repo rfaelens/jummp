@@ -2,7 +2,6 @@ package net.biomodels.jummp.webapp.administration
 
 import grails.plugins.springsecurity.Secured
 import grails.converters.JSON
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
  * @short Controller for changing themes.
@@ -16,6 +15,10 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
  */
 @Secured('ROLE_ADMIN')
 class ThemeingController {
+    /**
+     * Dependency injection of grails Application
+     */
+    def grailsApplication
     /**
      * Dependency injection of springSecurityService
      */
@@ -38,8 +41,8 @@ class ThemeingController {
             }
         }
         String selectedTheme = null
-        if (ConfigurationHolder.config.net.biomodels.jummp.webapp.theme) {
-            selectedTheme = ConfigurationHolder.config.net.biomodels.jummp.webapp.theme
+        if (grailsApplication.config.net.biomodels.jummp.webapp.theme) {
+            selectedTheme = grailsApplication.config.net.biomodels.jummp.webapp.theme
         }
         [themes: themeNames, selected: selectedTheme]
     }
@@ -62,7 +65,7 @@ class ThemeingController {
             }
             render data as JSON
         } else {
-            ConfigurationHolder.config.net.biomodels.jummp.webapp.theme = cmd.theme
+            grailsApplication.config.net.biomodels.jummp.webapp.theme = cmd.theme
             Properties properties = new Properties()
             File configurationFile = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
             if (configurationFile.exists()) {

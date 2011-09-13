@@ -4,7 +4,6 @@ import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
 import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.authentication.BadCredentialsException
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserCodeExpiredException
@@ -19,6 +18,7 @@ import net.biomodels.jummp.core.user.UserCodeExpiredException
  */
 @Secured('ROLE_USER')
 class UserController {
+    def grailsApplication
     def remoteUserService
     def springSecurityService
 
@@ -30,7 +30,7 @@ class UserController {
             render(template: "/templates/page", model: [link: g.createLink(action: "index"), callback: "loadShowUserInfoCallback"])
             return
         }
-        [user: remoteUserService.getCurrentUser(), changePassword: ConfigurationHolder.config.jummpCore.security.ui.changePassword]
+        [user: remoteUserService.getCurrentUser(), changePassword: grailsApplication.config.jummpCore.security.ui.changePassword]
     }
 
     /**
@@ -38,7 +38,7 @@ class UserController {
      */
     def changePassword = { ChangePasswordCommand cmd ->
         Map data = [:]
-        if (!ConfigurationHolder.config.jummpCore.security.ui.changePassword) {
+        if (!grailsApplication.config.jummpCore.security.ui.changePassword) {
             data.put("error", g.message(code: 'user.change.password.disabled'))
             render data as JSON
             return
