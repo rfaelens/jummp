@@ -268,9 +268,9 @@ class UserServiceTests extends JummpIntegrationTestCase {
         }
         authenticateAsAdmin()
         List<Role> roles = userService.getAllRoles()
-        println("roles.toArray(): ${roles.toArray()}")
-        println("roles: ${roles.toString()}")
-        assertArrayEquals([Role.findByAuthority("ROLE_USER"), Role.findByAuthority("ROLE_ADMIN"), Role.findByAuthority("ROLE_CURATOR")].toArray(), roles.toArray())
+        assertEquals(Role.findByAuthority("ROLE_USER").id, roles[0].id)
+        assertEquals(Role.findByAuthority("ROLE_ADMIN").id, roles[1].id)
+        assertEquals(Role.findByAuthority("ROLE_CURATOR").id, roles[2].id)
     }
 
     void testGetRolesForUser() {
