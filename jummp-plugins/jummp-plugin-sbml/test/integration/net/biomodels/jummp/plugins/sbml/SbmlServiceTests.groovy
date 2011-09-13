@@ -4,28 +4,27 @@ import grails.test.*
 import org.apache.commons.io.FileUtils
 
 class SbmlServiceTests extends GrailsUnitTestCase {
+    def sbmlService
+    def grailsApplication
     protected void setUp() {
         super.setUp()
-        mockLogging(SbmlService)
     }
 
     protected void tearDown() {
         super.tearDown()
         // trying to delete the directory causes a crash. Seems like jsbml does not close the files!
+        grailsApplication.config.jummp.plugins.sbml.validate = false
     }
 
     void testValidate() {
-        mockConfig('''
-            jummp.plugins.sbml.validate=true
-            ''')
+        grailsApplication.config.jummp.plugins.sbml.validate = true
         // we do not want to test whether the library works correctly
         // we only need to check that an invalid file is marked as invalid and a valid file is marked as valid.
         // test empty file
         File file = new File("target/sbml/test")
         FileUtils.deleteQuietly(file)
         FileUtils.touch(file)
-        SbmlService service = new SbmlService()
-        assertFalse(service.validate(file))
+        assertFalse(sbmlService.validate(file))
 
         // unknown sbml
         File unknownSbml = new File("target/sbml/unknown")
@@ -35,7 +34,7 @@ class SbmlServiceTests extends GrailsUnitTestCase {
 <sbml level="99" version="1">
   <model/>
 </sbml>''')
-        assertFalse(service.validate(unknownSbml))
+        assertFalse(sbmlService.validate(unknownSbml))
 
         // TODO: we need test files for errors reported by jsbml
 
@@ -64,6 +63,6 @@ class SbmlServiceTests extends GrailsUnitTestCase {
     </listOfReactions>
   </model>
 </sbml>''')
-        assertTrue(service.validate(validFile))
+        assertTrue(sbmlService.validate(validFile))
     }
 }
