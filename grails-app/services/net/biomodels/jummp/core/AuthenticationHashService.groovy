@@ -4,7 +4,6 @@ import org.springframework.security.core.Authentication
 import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.core.authority.GrantedAuthorityImpl
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
  * @short Service implementing the IAuthenticationHashService
@@ -12,6 +11,10 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class AuthenticationHashService implements IAuthenticationHashService {
+    /**
+     * Dependency Injection of grailsApplication
+     */
+    def grailsApplication
     /**
      * Private class describing a hash entry in the authentication Map.
      */
@@ -63,7 +66,7 @@ class AuthenticationHashService implements IAuthenticationHashService {
     }
 
     void checkAuthenticationExpired() {
-        long time = Long.valueOf(ConfigurationHolder.config.jummp.authenticationHash.maxInactiveTime)
+        long time = Long.valueOf(grailsApplication.config.jummp.authenticationHash.maxInactiveTime)
         long maxInactiveTime = new Date().getTime() - time
         List authenticationsTmp = []
         authentications.each { user, hash ->
