@@ -28,7 +28,23 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
-        compile "org.apache.activemq:activemq-all:5.5.0"
+        runtime('org.apache.activemq:activeio-core:3.1.2',
+                'org.apache.activemq:activemq-core:5.5.0',
+                'org.apache.activemq:activemq-spring:5.5.0',
+                'org.apache.xbean:xbean-spring:3.7') {
+            excludes 'commons-logging',
+                    'commons-pool',
+                    'groovy-all',
+                    'howl-logger',
+                    'log4j',
+                    'spring-beans',
+                    'spring-context',
+                    'spring-core',
+                    'spring-test',
+                    'slf4j-api',
+                    'xalan',
+                    'xml-apis'
+        }
         // plugin dependencies
         compile(":grails-plugin-jummp-plugin-security:latest.integration") {
             changing = true
