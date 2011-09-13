@@ -3,7 +3,6 @@ package net.biomodels.jummp.core
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.plugins.security.UserRole
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.springframework.security.access.prepost.PreAuthorize
@@ -40,6 +39,10 @@ class UserService implements IUserService {
      * Dependency injection of mail Service provided by the Mail plugin
      */
     def mailService
+    /**
+     * Dependency injection of grails Application
+     */
+    def grailsApplication
     /**
      * Random number generator for creating user validation ids.
      */
@@ -181,7 +184,7 @@ class UserService implements IUserService {
     @PreAuthorize("isAnonymous() or hasRole('ROLE_ADMIN')")
     Long register(User user) throws RegistrationException, UserInvalidException {
         if (springSecurityService.authentication instanceof AnonymousAuthenticationToken &&
-                !ConfigurationHolder.config.jummp.security.anonymousRegistration) {
+                !grailsApplication.config.jummp.security.anonymousRegistration) {
             throw new AccessDeniedException("Registration disabled for anonymous users")
         }
         if (User.findByUsername(user.username)) {
@@ -196,7 +199,7 @@ class UserService implements IUserService {
             newUser.passwordExpired = true
             adminRegistration = true
         } else {
-            if (ConfigurationHolder.config.jummp.security.ldap.enabled) {
+            if (grailsApplication.config.jummp.security.ldap.enabled) {
                 // disable password for ldap
                 newUser.password = "*"
             } else {
@@ -222,18 +225,18 @@ class UserService implements IUserService {
         newUser.save(flush: true)
         UserRole.create(newUser, Role.findByAuthority("ROLE_USER"), true)
         // send out notification mail
-        if (ConfigurationHolder.config.jummp.security.registration.email.send) {
+        if (grailsApplication.config.jummp.security.registration.email.send) {
             String recipient = newUser.email
-            if (ConfigurationHolder.config.jummp.security.registration.email.sendToAdmin) {
-                recipient = ConfigurationHolder.config.jummp.security.registration.email.adminAddress
+            if (grailsApplication.config.jummp.security.registration.email.sendToAdmin) {
+                recipient = grailsApplication.config.jummp.security.registration.email.adminAddress
             }
-            String url = ConfigurationHolder.config.jummp.security.registration.verificationURL
-            String emailBody = ConfigurationHolder.config.jummp.security.registration.email.body
-            String emailSubject = ConfigurationHolder.config.jummp.security.registration.email.subject
+            String url = grailsApplication.config.jummp.security.registration.verificationURL
+            String emailBody = grailsApplication.config.jummp.security.registration.email.body
+            String emailSubject = grailsApplication.config.jummp.security.registration.email.subject
             if (adminRegistration) {
-                url = ConfigurationHolder.config.jummp.security.activation.activationURL
-                emailSubject = ConfigurationHolder.config.jummp.security.activation.email.subject
-                emailBody = ConfigurationHolder.config.jummp.security.activation.email.body
+                url = grailsApplication.config.jummp.security.activation.activationURL
+                emailSubject = grailsApplication.config.jummp.security.activation.email.subject
+                emailBody = grailsApplication.config.jummp.security.activation.email.body
                 emailBody = emailBody.replace("{{USERNAME}}", newUser.username)
             }
             url = url.replace("{{CODE}}", newUser.registrationCode)
@@ -241,7 +244,7 @@ class UserService implements IUserService {
             emailBody = emailBody.replace("{{URL}}", url)
             mailService.sendMail {
                 to recipient
-                from ConfigurationHolder.config.jummp.security.registration.email.sender
+                from grailsApplication.config.jummp.security.registration.email.sender
                 subject emailSubject
                 body emailBody
             }
@@ -286,7 +289,7 @@ class UserService implements IUserService {
         if (!user.registrationInvalidation || user.registrationInvalidation.before(new Date())) {
             throw new UserCodeExpiredException(username, user.id)
         }
-        if (!ConfigurationHolder.config.jummp.security.ldap.enabled) {
+        if (!grailsApplication.config.jummp.security.ldap.enabled) {
             if (password) {
                 user.password = springSecurityService.encodePassword(password, null)
             } else {
@@ -321,17 +324,17 @@ class UserService implements IUserService {
         user.passwordForgottenInvalidation = codeInvalidation.getTime()
         user.save(flush: true)
         // send out notification mail
-        if (ConfigurationHolder.config.jummp.security.resetPassword.email.send) {
+        if (grailsApplication.config.jummp.security.resetPassword.email.send) {
             String recipient = user.email
-            String url = ConfigurationHolder.config.jummp.security.resetPassword.url
+            String url = grailsApplication.config.jummp.security.resetPassword.url
             url = url.replace("{{CODE}}", user.passwordForgottenCode)
-            String emailBody = ConfigurationHolder.config.jummp.security.resetPassword.email.body
+            String emailBody = grailsApplication.config.jummp.security.resetPassword.email.body
             emailBody = emailBody.replace("{{NAME}}", user.userRealName)
             emailBody = emailBody.replace("{{URL}}", url)
             mailService.sendMail {
                 to recipient
-                from ConfigurationHolder.config.jummp.security.resetPassword.email.sender
-                subject ConfigurationHolder.config.jummp.security.resetPassword.email.subject
+                from grailsApplication.config.jummp.security.resetPassword.email.sender
+                subject grailsApplication.config.jummp.security.resetPassword.email.subject
                 body emailBody
             }
         }
@@ -421,7 +424,7 @@ class UserService implements IUserService {
         User person = new User()
         person.properties = user
         boolean userCreated = false
-        if (ConfigurationHolder.config.jummp.security.ldap.enabled) {
+        if (grailsApplication.config.jummp.security.ldap.enabled) {
             // no password for ldap
             person.password = "*"
         } else {
