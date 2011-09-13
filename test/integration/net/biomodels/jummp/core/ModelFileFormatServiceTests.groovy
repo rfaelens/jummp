@@ -8,12 +8,14 @@ import org.apache.commons.io.FileUtils
 
 class ModelFileFormatServiceTests extends JummpIntegrationTestCase {
     def modelFileFormatService
+    def grailsApplication
     protected void setUp() {
         super.setUp()
     }
 
     protected void tearDown() {
         super.tearDown()
+        grailsApplication.config.jummp.plugins.sbml.validate = false
     }
 
     void testServiceForFormat() {
@@ -31,9 +33,7 @@ class ModelFileFormatServiceTests extends JummpIntegrationTestCase {
     }
 
     void testValidate() {
-        mockConfig('''
-            jummp.plugins.sbml.validate=true
-        ''')
+        grailsApplication.config.jummp.plugins.sbml.validate = true
         // for unknown file type this should evaluate to false
         assertFalse(modelFileFormatService.validate(null, ModelFormat.findByIdentifier("UNKNOWN")))
         // for an invalid sbml file it should also evaluate to false
