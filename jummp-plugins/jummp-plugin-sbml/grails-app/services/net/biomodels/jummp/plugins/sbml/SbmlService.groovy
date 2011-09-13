@@ -57,7 +57,6 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
      */
     def miriamService
     def grailsApplication
-    def config
 
     /**
      * Keep one of each SBML2* converters around as it takes quite some time to load the converters.
@@ -96,7 +95,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             log.error("SBMLDocuement is not valid for file ${model.name}")
             return false
         }
-        if (!config.jummp.plugins.sbml.validate) {
+        if (!grailsApplication.config.jummp.plugins.sbml.validate) {
             log.info("Validation for ${model.name} skipped due to configuration option")
             println("Validation for ${model.name} skipped due to configuration option")
             return true
