@@ -8,7 +8,6 @@ import org.perf4j.aop.Profiled
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
 import org.springframework.security.authentication.BadCredentialsException
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import net.biomodels.jummp.core.IAuthenticationHashService
 import net.biomodels.jummp.core.user.JummpAuthenticationImpl
 
@@ -42,6 +41,10 @@ class ApplicationJmsAdapterService extends AbstractJmsAdapter {
      */
     @SuppressWarnings("GrailsStatelessService")
     def authenticationManager
+    /**
+     * Dependency injection of grailsApplication
+     */
+    def grailsApplication
 
     private IAuthenticationHashService authenticationHashService
 
@@ -54,7 +57,7 @@ class ApplicationJmsAdapterService extends AbstractJmsAdapter {
     @grails.plugin.jms.Queue
     @Profiled(tag="jmsAdapterService.getJummpConfig")
     def getJummpConfig(String appToken) {
-        return ConfigurationHolder.config.jummp
+        return grailsApplication.config.jummp
     }
 
     /**
