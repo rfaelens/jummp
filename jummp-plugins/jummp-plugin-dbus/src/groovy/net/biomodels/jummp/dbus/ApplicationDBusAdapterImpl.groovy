@@ -2,7 +2,6 @@ package net.biomodels.jummp.dbus;
 
 import groovy.util.ConfigObject;
 import net.biomodels.jummp.dbus.authentication.*;
-import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -19,6 +18,10 @@ public class ApplicationDBusAdapterImpl extends AbstractDBusAdapter implements A
      * Dependency Injection of AuthenticationManager
      */
     private AuthenticationManager authenticationManager;
+    /**
+     * Dependency Injection of grailsApplication
+     */
+    def grailsApplication
 
     /**
      * Default empty constructor
@@ -51,7 +54,7 @@ public class ApplicationDBusAdapterImpl extends AbstractDBusAdapter implements A
     }
 
     public Map<String, String> getJummpConfig() {
-        return (Map<String, String>)((ConfigObject)ConfigurationHolder.getConfig().get("jummp")).flatten();
+        return (Map<String, String>)((ConfigObject)grailsApplication.config.get("jummp")).flatten();
     }
 
     public boolean isAuthenticated(String hash) {

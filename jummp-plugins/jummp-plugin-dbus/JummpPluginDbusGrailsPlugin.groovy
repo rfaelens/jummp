@@ -44,7 +44,9 @@ Brief description of the plugin.
 
     def doWithSpring = {
         if (!(application.config.jummp.plugin.dbus.export instanceof ConfigObject) && application.config.jummp.plugin.dbus.export) {
-            dbusManager(DBusManagerImpl)
+            dbusManager(DBusManagerImpl) {
+                grailsApplication = ref("grailsApplication")
+            }
             userDBusAdapter(UserDBusAdapterImpl) {
                 userService = ref("userService")
                 dbusManager = dbusManager
@@ -55,6 +57,7 @@ Brief description of the plugin.
                 dbusManager = dbusManager
                 authenticationManager = ref("authenticationManager")
                 authenticationHashService = ref("authenticationHashService")
+                grailsApplication = ref("grailsApplication")
                 objectName = "/Application"
             }
             modelDBusAdapter(ModelDBusAdapterImpl) {

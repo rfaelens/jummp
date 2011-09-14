@@ -2,7 +2,6 @@ package net.biomodels.jummp.dbus
 import org.freedesktop.dbus.DBusConnection
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.DisposableBean
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
  * @short Concrete implementation of the DBusManager interface.
@@ -17,10 +16,14 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class DBusManagerImpl implements DBusManager, InitializingBean, DisposableBean {
+    /**
+     * Dependency Injection of grailsApplication
+     */
+    def grailsApplication
     private DBusConnection connection
 
     public void afterPropertiesSet() throws Exception {
-        connection = DBusConnection.getConnection(ConfigurationHolder.config.jummp.plugins.dbus.systemBus ? DBusConnection.SYSTEM : DBusConnection.SESSION)
+        connection = DBusConnection.getConnection(grailsApplication.config.jummp.plugins.dbus.systemBus ? DBusConnection.SYSTEM : DBusConnection.SESSION)
         connection.requestBusName("net.biomodels.jummp")
     }
 
