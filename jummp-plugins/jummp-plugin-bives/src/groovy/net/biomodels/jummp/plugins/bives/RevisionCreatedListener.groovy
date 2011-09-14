@@ -4,7 +4,6 @@ import net.biomodels.jummp.core.events.RevisionCreatedEvent
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationListener
 
@@ -24,6 +23,10 @@ class RevisionCreatedListener implements ApplicationListener {
 	 * Dependency Injection of ModelDelegateService
 	 */
 	def modelDelegateService
+    /**
+     * Dependency Injection of grailsApplication
+     */
+    def grailsApplication
 
 	public void onApplicationEvent(ApplicationEvent event) {
 		if (event instanceof RevisionCreatedEvent) {
@@ -45,7 +48,7 @@ class RevisionCreatedListener implements ApplicationListener {
 				diff.setOriginId(prevRev)
 				diff.setSuccessorId(currRev)
 				long modelId = command.model.id
-				String diffDir = ConfigurationHolder.config.jummp.plugins.bives.diffdir as String
+				String diffDir = grailsApplication.config.jummp.plugins.bives.diffdir as String
 				JummpRepositoryManager repoMan = new JummpRepositoryManager()
 				repoMan.createNewRepository(diffDir)
 				repoMan.uploadDiff(diff, modelId, prevRev, currRev)

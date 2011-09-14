@@ -10,7 +10,6 @@ import java.util.Map;
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.beans.factory.InitializingBean
 
 import net.biomodels.jummp.plugins.bives.JummpRepositoryManager
@@ -61,6 +60,10 @@ class DiffDataProvider implements InitializingBean {
 	 * Dependency Injection of SbmlService
 	 */
 	def sbmlService
+    /**
+     * Dependency Injection of grailsApplication
+     */
+    def grailsApplication
 	/**
 	 * The logger for this class
 	 */
@@ -68,7 +71,7 @@ class DiffDataProvider implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		String diffDir = ConfigurationHolder.config.jummp.plugins.bives.diffdir as String
+		String diffDir = grailsApplication.config.jummp.plugins.bives.diffdir as String
 		repoMan = new JummpRepositoryManager(diffDir)
 	}
 

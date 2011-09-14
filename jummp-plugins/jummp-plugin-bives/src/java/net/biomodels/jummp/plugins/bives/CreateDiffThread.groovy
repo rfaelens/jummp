@@ -2,7 +2,6 @@ package net.biomodels.jummp.plugins.bives
 
 import net.biomodels.jummp.plugins.bives.DiffDataProvider
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 
@@ -56,7 +55,7 @@ class CreateDiffThread implements Runnable {
 				diff.setModelId(modelId as String)
 				diff.setOriginId(previousRevision)
 				diff.setSuccessorId(recentRevision)
-				String diffDir = ConfigurationHolder.config.jummp.plugins.bives.diffdir as String
+				String diffDir = grailsApplication.config.jummp.plugins.bives.diffdir as String
 				JummpRepositoryManager repoMan = new JummpRepositoryManager()
 				repoMan.createNewRepository(diffDir)
 				repoMan.uploadDiff(diff, modelId, previousRevision, recentRevision)
