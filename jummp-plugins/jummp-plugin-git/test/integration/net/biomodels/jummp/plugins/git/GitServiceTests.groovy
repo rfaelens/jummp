@@ -11,6 +11,7 @@ import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 
 class GitServiceTests extends GrailsUnitTestCase {
+    def grailsApplication
     protected void setUp() {
         super.setUp()
         mockLogging(GitManagerFactory)
@@ -25,8 +26,9 @@ class GitServiceTests extends GrailsUnitTestCase {
 
     void testDisabled() {
         // verifies that GitManagerFactory does not get enabled if there is no config
-        mockConfig("")
+        grailsApplication.config.jummp.plugins.git = [:]
         GitManagerFactory git = new GitManagerFactory()
+        git.grailsApplication = grailsApplication
         shouldFail(VcsNotInitedException) {
             git.getInstance()
         }
@@ -34,8 +36,9 @@ class GitServiceTests extends GrailsUnitTestCase {
             git.getInstance()
         }
         // verifies that GitManagerFactory does not get enabled if disabled in config
-        mockConfig("jummp.plugins.git.enabled=false")
+        grailsApplication.config.jummp.plugins.git.enabled=false
         git = new GitManagerFactory()
+        git.grailsApplication = grailsApplication
         shouldFail(VcsNotInitedException) {
             git.getInstance()
         }
@@ -46,10 +49,9 @@ class GitServiceTests extends GrailsUnitTestCase {
 
     void testDirectories() {
         // verifies that GitManagerFactory does not get enabled if no git directory is passed
-        mockConfig('''
-            jummp.plugins.git.enabled=true
-        ''')
+        grailsApplication.config.jummp.plugins.git.enabled = true
         GitManagerFactory git = new GitManagerFactory()
+        git.grailsApplication = grailsApplication
         shouldFail(VcsNotInitedException) {
             git.getInstance()
         }
@@ -58,11 +60,9 @@ class GitServiceTests extends GrailsUnitTestCase {
         }
         // verifies that GitManagerFactory creates exchangeDirectory if passed in and does not get enabled
         // if workingDirectory is not a git directory
-        mockConfig('''
-            jummp.plugins.git.enabled=true
-            jummp.vcs.workingDirectory="target/vcs/git"
-            jummp.vcs.exchangeDirectory="target/vcs/exchange"
-        ''')
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         File exchangeDirectory = new File("target/vcs/exchange")
         File gitDirectory = new File("target/vcs/git")
         gitDirectory.mkdirs()
@@ -70,6 +70,7 @@ class GitServiceTests extends GrailsUnitTestCase {
         assertLength(0, gitDirectory.list())
         assertFalse(exchangeDirectory.exists())
         git = new GitManagerFactory()
+        git.grailsApplication = grailsApplication
         shouldFail(VcsNotInitedException) {
             git.getInstance()
         }
@@ -81,10 +82,9 @@ class GitServiceTests extends GrailsUnitTestCase {
         }
         // verifies that GitManagerFactory creates exchangeDirectory in resources if exchange directory is not set
         // git directory is not valid, so GitManagerFactory won't be enabled
-        mockConfig('''
-            jummp.plugins.git.enabled=true
-            jummp.vcs.workingDirectory="target/vcs/git"
-        ''')
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = [:]
         assertTrue(gitDirectory.isDirectory())
         assertLength(0, gitDirectory.list())
         def contextControl = mockFor(ServletContext)
@@ -94,6 +94,7 @@ class GitServiceTests extends GrailsUnitTestCase {
         File resourceDirectory = new File("target/vcs/resource/exchangeDir")
         assertFalse(resourceDirectory.exists())
         git = new GitManagerFactory()
+        git.grailsApplication = grailsApplication
         git.servletContext = (ServletContext)contextControl.createMock()
         shouldFail(VcsNotInitedException) {
             git.getInstance()
@@ -105,10 +106,8 @@ class GitServiceTests extends GrailsUnitTestCase {
 
     void testCreateManager() {
         // verifies the setups which should return a working GitManager
-        mockConfig('''
-            jummp.plugins.git.enabled=true
-            jummp.vcs.workingDirectory="target/vcs/git"
-        ''')
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         File gitDirectory = new File("target/vcs/git")
         gitDirectory.mkdirs()
@@ -127,6 +126,7 @@ class GitServiceTests extends GrailsUnitTestCase {
         File resourceDirectory = new File("target/vcs/resource/exchangeDir")
         assertFalse(resourceDirectory.exists())
         GitManagerFactory service = new GitManagerFactory()
+        service.grailsApplication = grailsApplication
         service.servletContext = (ServletContext)contextControl.createMock()
         service.getInstance()
         assertTrue(resourceDirectory.exists())
@@ -137,14 +137,13 @@ class GitServiceTests extends GrailsUnitTestCase {
         assertTrue(manager instanceof GitManager)
 
         // verify with existing exchange directory
-        mockConfig('''
-            jummp.plugins.git.enabled=true
-            jummp.vcs.workingDirectory="target/vcs/git"
-            jummp.vcs.exchangeDirectory="target/vcs/exchange"
-        ''')
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         File exchangeDirectory = new File("target/vcs/exchange")
         assertFalse(exchangeDirectory.exists())
         service = new GitManagerFactory()
+        service.grailsApplication = grailsApplication
         service.getInstance()
         assertTrue(exchangeDirectory.exists())
         assertTrue(exchangeDirectory.isDirectory())

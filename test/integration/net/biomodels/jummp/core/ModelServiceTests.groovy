@@ -23,6 +23,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
     def aclUtilService
     def modelService
     def modelFileFormatService
+    def grailsApplication
 
     protected void setUp() {
         super.setUp()
@@ -544,12 +545,11 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
         GitManagerFactory gitService = new GitManagerFactory()
-        mockConfig('''
-            jummp.plugins.git.enabled=true
-            jummp.vcs.workingDirectory="target/vcs/git"
-            jummp.vcs.exchangeDirectory="target/vcs/exchange"
-            jummp.plugins.sbml.validate=true
-            ''')
+        gitService.grailsApplication = grailsApplication
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        grailsApplication.config.jummp.plugins.sbml.validate = true
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
         // import a file to the git repository, to make future updates possible
@@ -794,12 +794,11 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
         GitManagerFactory gitService = new GitManagerFactory()
-        mockConfig('''
-            jummp.plugins.git.enabled=true
-            jummp.vcs.workingDirectory="target/vcs/git"
-            jummp.vcs.exchangeDirectory="target/vcs/exchange"
-            jummp.plugins.sbml.validate=true
-            ''')
+        gitService.grailsApplication = grailsApplication
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        grailsApplication.config.jummp.plugins.sbml.validate = true
         modelService.vcsService.vcsManager = gitService.getInstance()
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
@@ -903,11 +902,10 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
         GitManagerFactory gitService = new GitManagerFactory()
-        mockConfig('''
-            jummp.plugins.git.enabled=true
-            jummp.vcs.workingDirectory="target/vcs/git"
-            jummp.vcs.exchangeDirectory="target/vcs/exchange"
-            ''')
+        gitService.grailsApplication = grailsApplication
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
         // import a file

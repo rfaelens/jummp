@@ -36,6 +36,10 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
      * Dependency infection of application context
      */
     def appCtx
+    /**
+     * Dependency injection of grails Application
+     */
+    def grailsApplication
 
     void setApplicationContext(ApplicationContext applicationContext) {
         appCtx = applicationContext
@@ -64,11 +68,9 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
 
     void testGit() {
         // verifies that the service is valid, if git backend is configured correctly
-        mockConfig('''
-            jummp.vcs.pluginServiceName="gitManagerFactory"
-            jummp.plugins.git.enabled=true
-            jummp.vcs.workingDirectory="target/vcs/git"
-        ''')
+        grailsApplication.config.jummp.vcs.pluginServiceName="gitManagerFactory"
+        grailsApplication.config.jummp.plugins.git.enabled=true
+        grailsApplication.config.jummp.vcs.workingDirectory="target/vcs/git"
         File gitDirectory = new File("target/vcs/git")
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(gitDirectory)
@@ -134,11 +136,10 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
         GitManagerFactory gitService = new GitManagerFactory()
-        mockConfig('''
-            jummp.plugins.git.enabled=true
-            jummp.vcs.workingDirectory="target/vcs/git"
-            jummp.vcs.exchangeDirectory="target/vcs/exchange"
-            ''')
+        gitService.grailsApplication = grailsApplication
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
         // now as user we should be able to import
@@ -206,11 +207,10 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
         GitManagerFactory gitService = new GitManagerFactory()
-        mockConfig('''
-            jummp.plugins.git.enabled=true
-            jummp.vcs.workingDirectory="target/vcs/git"
-            jummp.vcs.exchangeDirectory="target/vcs/exchange"
-            ''')
+        gitService.grailsApplication = grailsApplication
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
 
@@ -343,11 +343,10 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
         GitManagerFactory gitService = new GitManagerFactory()
-        mockConfig('''
-            jummp.plugins.git.enabled=true
-            jummp.vcs.workingDirectory="target/vcs/git"
-            jummp.vcs.exchangeDirectory="target/vcs/exchange"
-            ''')
+        gitService.grailsApplication = grailsApplication
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
         // git is valid, but file does not yet exist

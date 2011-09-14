@@ -31,6 +31,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
     def modelService
     def applicationJmsAdapterService
     def modelJmsAdapterService
+    def grailsApplication
     /**
      * Dependency injection for ExecutorService to run threads
      */
@@ -688,11 +689,10 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
         GitManagerFactory gitService = new GitManagerFactory()
-        mockConfig('''
-            jummp.plugins.git.enabled=true
-            jummp.vcs.workingDirectory="target/vcs/git"
-            jummp.vcs.exchangeDirectory="target/vcs/exchange"
-            ''')
+        gitService.grailsApplication = grailsApplication
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
     }

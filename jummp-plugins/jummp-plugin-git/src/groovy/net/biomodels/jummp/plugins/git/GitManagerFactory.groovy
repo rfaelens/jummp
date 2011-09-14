@@ -1,6 +1,5 @@
 package net.biomodels.jummp.plugins.git
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 import org.apache.log4j.Logger
@@ -21,12 +20,16 @@ class GitManagerFactory {
      * Dependency Injection of Servlet Context
      */
     def servletContext
+    /**
+     * Dependency Injection of grailsApplication
+     */
+    def grailsApplication
 
     GitManager getInstance() throws Exception {
         if (git) {
             return git
         }
-        ConfigObject config = ConfigurationHolder.config
+        ConfigObject config = grailsApplication.config
         File workingDirectory
         if (config.jummp.vcs.workingDirectory) {
             workingDirectory = new File(config.jummp.vcs.workingDirectory)

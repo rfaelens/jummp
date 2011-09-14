@@ -22,6 +22,7 @@ class SbmlServiceTests extends JummpIntegrationTestCase {
      */
     def sbmlService
     def modelService
+    def grailsApplication
 
     protected void setUp() {
         super.setUp()
@@ -101,11 +102,10 @@ class SbmlServiceTests extends JummpIntegrationTestCase {
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
         GitManagerFactory gitService = new GitManagerFactory()
-        mockConfig('''
-            jummp.plugins.git.enabled=true
-            jummp.vcs.workingDirectory="target/sbml/git"
-            jummp.vcs.exchangeDirectory="target/sbml/exchange"
-            ''')
+        gitService.grailsApplication = grailsApplication
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/sbml/git"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/sbml/exchange"
         modelService.vcsService.vcsManager = gitService.getInstance()
     }
 

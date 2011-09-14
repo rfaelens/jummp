@@ -29,7 +29,9 @@ Brief description of the plugin.
     }
 
     def doWithSpring = {
-        gitManagerFactory(GitManagerFactory)
+        gitManagerFactory(GitManagerFactory) {
+            grailsApplication = ref("grailsApplication")
+        }
         if (!(application.config.jummp.plugins.git.enabled instanceof ConfigObject) && application.config.jummp.plugins.git.enabled) {
             vcsManager(gitManagerFactory: "getInstance")
         }
