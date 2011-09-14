@@ -1,6 +1,5 @@
 package net.biomodels.jummp.plugins.subversion
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 import org.apache.commons.io.FileUtils
