@@ -29,7 +29,9 @@ Brief description of the plugin.
     }
 
     def doWithSpring = {
-        svnManagerFactory(SvnManagerFactory)
+        svnManagerFactory(SvnManagerFactory) {
+            grailsApplication = ref("grailsApplication")
+        }
         if (!(application.config.jummp.plugins.subversion.enabled instanceof ConfigObject) && application.config.jummp.plugins.subversion.enabled) {
             vcsManager(svnManagerFactory: "getInstance")
         }

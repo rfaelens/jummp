@@ -86,11 +86,9 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
 
     void testSvn() {
         // verifies that the service is valid, if svn backend is configured correctly
-        mockConfig('''
-            jummp.vcs.pluginServiceName="svnManagerFactory"
-            jummp.plugins.subversion.enabled=true
-            jummp.plugins.subversion.localRepository="target/vcs/repository"
-        ''')
+        grailsApplication.config.jummp.vcs.pluginServiceName = "svnManagerFactory"
+        grailsApplication.config.jummp.plugins.subversion.enabled = true
+        grailsApplication.config.jummp.plugins.subversion.localRepository = "target/vcs/repository"
         SVNRepositoryFactory.createLocalRepository(new File("target/vcs/repository"), true, false)
         assertFalse(vcsService.isValid())
         vcsService.vcsManager = appCtx.getBean("svnManagerFactory").getInstance()

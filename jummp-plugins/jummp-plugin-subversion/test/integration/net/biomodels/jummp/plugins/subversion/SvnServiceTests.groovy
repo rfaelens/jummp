@@ -9,6 +9,7 @@ import org.tmatesoft.svn.core.io.SVNRepositoryFactory
 import net.biomodels.jummp.core.vcs.VcsManager
 
 class SvnServiceTests extends GrailsUnitTestCase {
+    def grailsApplication
     protected void setUp() {
         super.setUp()
         mockLogging(SvnManagerFactory)
@@ -24,8 +25,9 @@ class SvnServiceTests extends GrailsUnitTestCase {
 
     void testDisabled() {
         // verifies that SvnManagerFactory does not get enabled if there is no config
-        mockConfig("")
+        grailsApplication.config.jummp.plugins.subversion = [:]
         SvnManagerFactory svn = new SvnManagerFactory()
+        svn.grailsApplication = grailsApplication
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
         }
@@ -33,8 +35,9 @@ class SvnServiceTests extends GrailsUnitTestCase {
             svn.getInstance()
         }
         // verifies that SvnManagerFactory does not get enabled if disabled in config
-        mockConfig("jummp.plugins.subversion.enabled=false")
+        grailsApplication.config.jummp.plugins.subversion.enabled = false
         svn = new SvnManagerFactory()
+        svn.grailsApplication = grailsApplication
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
         }
@@ -42,8 +45,9 @@ class SvnServiceTests extends GrailsUnitTestCase {
             svn.getInstance()
         }
         // verifies that SvnManagerFactory does not get enabled if localRepository is not set
-        mockConfig('''jummp.plugins.subversion.enabled=true''')
+        grailsApplication.config.jummp.plugins.subversion.enabled = true
         svn = new SvnManagerFactory()
+        svn.grailsApplication = grailsApplication
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
         }
@@ -54,10 +58,8 @@ class SvnServiceTests extends GrailsUnitTestCase {
 
     void testResourceDirectories() {
         // verifies that the exchange and working directories in resource are created
-        mockConfig('''
-            jummp.plugins.subversion.enabled=true
-            jummp.plugins.subversion.localRepository="target/vcs/repository"
-        ''')
+        grailsApplication.config.jummp.plugins.subversion.enabled = true
+        grailsApplication.config.jummp.plugins.subversion.localRepository = "target/vcs/repository"
         // will be used for two calls to setup SvnManagerFactory - therefore 4 mock calls expected
         def contextControl = mockFor(ServletContext)
         contextControl.demand.getRealPath(4..4) {path ->
@@ -68,6 +70,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertFalse(exchangeDirectory.exists())
         assertFalse(workingDirectory.exists())
         SvnManagerFactory svn = new SvnManagerFactory()
+        svn.grailsApplication = grailsApplication
         def servletContext = (ServletContext)contextControl.createMock()
         svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
@@ -81,6 +84,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         FileUtils.touch(new File("target/vcs/resource/workingDir/test"))
         assertLength(1, workingDirectory.list())
         svn = new SvnManagerFactory()
+        svn.grailsApplication = grailsApplication
         svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
@@ -96,11 +100,9 @@ class SvnServiceTests extends GrailsUnitTestCase {
             return "target/vcs" + path
         }
         // exchange directory in resources, working directory external
-        mockConfig('''
-            jummp.plugins.subversion.enabled=true
-            jummp.plugins.subversion.localRepository="target/vcs/repository"
-            jummp.vcs.workingDirectory="target/vcs/svn"
-        ''')
+        grailsApplication.config.jummp.plugins.subversion.enabled = true
+        grailsApplication.config.jummp.plugins.subversion.localRepository = "target/vcs/repository"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/svn"
         File resourceExchangeDirectory = new File("target/vcs/resource/exchangeDir")
         File workingDirectory = new File("target/vcs/svn")
         File resourceWorkingDirectory = new File("target/vcs/resource/workingDir")
@@ -108,6 +110,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertFalse(workingDirectory.exists())
         assertFalse(resourceWorkingDirectory.exists())
         SvnManagerFactory svn = new SvnManagerFactory()
+        svn.grailsApplication = grailsApplication
         def servletContext = (ServletContext)contextControl.createMock()
         svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
@@ -122,6 +125,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         FileUtils.touch(new File("target/vcs/svn/test"))
         assertLength(1, workingDirectory.list())
         svn = new SvnManagerFactory()
+        svn.grailsApplication = grailsApplication
         svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
@@ -129,16 +133,16 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertLength(0, workingDirectory.list())
         assertFalse(resourceWorkingDirectory.exists())
         // verify other way around: working directory in resource, exchange not in resource
-        mockConfig('''
-            jummp.plugins.subversion.enabled=true
-            jummp.plugins.subversion.localRepository="target/vcs/repository"
-            jummp.vcs.exchangeDirectory="target/vcs/exchange"
-        ''')
+        grailsApplication.config.jummp.plugins.subversion.enabled = true
+        grailsApplication.config.jummp.plugins.subversion.localRepository = "target/vcs/repository"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        grailsApplication.config.jummp.vcs.workingDirectory = [:]
         File exchangeDirectory = new File("target/vcs/exchange")
         FileUtils.deleteDirectory(resourceExchangeDirectory)
         assertFalse(exchangeDirectory.exists())
         assertFalse(resourceWorkingDirectory.exists())
         svn = new SvnManagerFactory()
+        svn.grailsApplication = grailsApplication
         svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
@@ -151,6 +155,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         FileUtils.touch(new File("target/vcs/resource/workingDir/test"))
         assertLength(1, resourceWorkingDirectory.list())
         svn = new SvnManagerFactory()
+        svn.grailsApplication = grailsApplication
         svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
@@ -158,12 +163,10 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertLength(0, resourceWorkingDirectory.list())
         contextControl.verify()
         // verify that exchange and working directory get created, if passed in
-        mockConfig('''
-            jummp.plugins.subversion.enabled=true
-            jummp.plugins.subversion.localRepository="target/vcs/repository"
-            jummp.vcs.exchangeDirectory="target/vcs/exchange"
-            jummp.vcs.workingDirectory="target/vcs/svn"
-        ''')
+        grailsApplication.config.jummp.plugins.subversion.enabled = true
+        grailsApplication.config.jummp.plugins.subversion.localRepository = "target/vcs/repository"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/svn"
         FileUtils.deleteDirectory(resourceWorkingDirectory)
         FileUtils.deleteDirectory(resourceExchangeDirectory)
         FileUtils.deleteDirectory(exchangeDirectory)
@@ -173,6 +176,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertFalse(exchangeDirectory.exists())
         assertFalse(workingDirectory.exists())
         svn = new SvnManagerFactory()
+        svn.grailsApplication = grailsApplication
         svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
@@ -188,6 +192,7 @@ class SvnServiceTests extends GrailsUnitTestCase {
         FileUtils.touch(new File("target/vcs/svn/test"))
         assertLength(1, workingDirectory.list())
         svn = new SvnManagerFactory()
+        svn.grailsApplication = grailsApplication
         svn.servletContext = servletContext
         shouldFail(VcsNotInitedException) {
             svn.getInstance()
@@ -206,13 +211,13 @@ class SvnServiceTests extends GrailsUnitTestCase {
         }
         SVNRepositoryFactory.createLocalRepository(new File("target/vcs/repository"), true, false)
         // first test with resource directories
-        mockConfig('''
-            jummp.plugins.subversion.enabled=true
-            jummp.plugins.subversion.localRepository="target/vcs/repository"
-        ''')
+        grailsApplication.config.jummp.plugins.subversion.enabled = true
+        grailsApplication.config.jummp.plugins.subversion.localRepository = "target/vcs/repository"
+        grailsApplication.config.jummp.vcs.workingDirectory = [:]
         File resourceWorkingDirectory = new File("target/vcs/resource/workingDir")
         assertFalse(resourceWorkingDirectory.exists())
         SvnManagerFactory svn = new SvnManagerFactory()
+        svn.grailsApplication = grailsApplication
         svn.servletContext = (ServletContext)contextControl.createMock()
         VcsManager manager = svn.getInstance()
         assertNotNull(manager)
@@ -221,15 +226,14 @@ class SvnServiceTests extends GrailsUnitTestCase {
         assertLength(1, resourceWorkingDirectory.list())
         assertEquals(".svn", resourceWorkingDirectory.list()[0])
         // test with configured directory
-        mockConfig('''
-            jummp.plugins.subversion.enabled=true
-            jummp.plugins.subversion.localRepository="target/vcs/repository"
-            jummp.vcs.workingDirectory="target/vcs/svn"
-            jummp.vcs.exchangeDirectory="target/vcs/exchange"
-        ''')
+        grailsApplication.config.jummp.plugins.subversion.enabled = true
+        grailsApplication.config.jummp.plugins.subversion.localRepository = "target/vcs/repository"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/svn"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         File workingDirectory = new File("target/vcs/svn")
         assertFalse(workingDirectory.exists())
         svn = new SvnManagerFactory()
+        svn.grailsApplication = grailsApplication
         svn.getInstance()
         manager = svn.getInstance()
         assertNotNull(manager)

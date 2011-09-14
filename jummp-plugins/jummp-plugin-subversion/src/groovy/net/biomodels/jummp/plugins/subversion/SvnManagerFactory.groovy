@@ -22,12 +22,16 @@ class SvnManagerFactory {
      * Dependency injection of servlet context
      */
     def servletContext
+    /**
+     * Dependency injection of grailsApplication
+     */
+    def grailsApplication
 
     SvnManager getInstance() throws Exception {
         if (svn) {
             return svn
         }
-        ConfigObject config = ConfigurationHolder.config
+        ConfigObject config = grailsApplication.config
         if (!config.jummp.plugins.subversion.localRepository) {
             log.debug("No checkout repository set - Subversion service not enabled")
             throw new VcsNotInitedException()
