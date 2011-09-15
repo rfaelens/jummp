@@ -24,6 +24,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
         flatDir name: 'jummpPlugins', dirs: "./pluginlibs"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
+        mavenRepo "http://download.eclipse.org/jgit/maven"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
