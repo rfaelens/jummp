@@ -24,6 +24,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
         flatDir name: 'jummpPlugins', dirs: "./pluginlibs"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
+        mavenRepo "http://download.eclipse.org/jgit/maven"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -31,7 +32,7 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.5'
         // required by OntologyLookupResolver
         compile "org.ccil.cowan.tagsoup:tagsoup:1.2"
-        test 'hsqldb:hsqldb:1.8.0.10'
+        runtime 'hsqldb:hsqldb:1.8.0.10'
         runtime 'mysql:mysql-connector-java:5.1.17'
         // plugin dependencies
         compile(":grails-plugin-jummp-plugin-security:latest.integration") {

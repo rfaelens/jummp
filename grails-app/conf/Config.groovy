@@ -19,6 +19,7 @@ try {
     jummpProperties.setProperty("jummp.security.ldap.enabled", "false")
     jummpProperties.setProperty("jummp.security.registration.email.send", "false")
     jummpProperties.setProperty("jummp.export.dbus", "false")
+    jummpProperties.setProperty("jummp.server.url", "http://localhost:8080/${appName}")
 }
 def jummpConfig = new ConfigSlurper().parse(jummpProperties)
 List pluginsToExclude = []

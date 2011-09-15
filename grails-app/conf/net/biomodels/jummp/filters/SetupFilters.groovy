@@ -1,5 +1,7 @@
 package net.biomodels.jummp.filters
 
+import org.springframework.beans.factory.InitializingBean
+
 /**
  * @short Filter to redirect to SetupController
  *
@@ -17,11 +19,11 @@ package net.biomodels.jummp.filters
  * @see net.biomodels.jummp.controllers.SetupController
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class SetupFilters {
-    private boolean configFileExists
-    private boolean firstRun
+class SetupFilters implements InitializingBean {
+    private boolean configFileExists = false
+    private boolean firstRun = false
 
-    public SetupFilters() {
+    public void afterPropertiesSet() throws Exception {
         File configurationProperties = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
         configFileExists = configurationProperties.exists()
         if (configFileExists) {
@@ -36,15 +38,16 @@ class SetupFilters {
     def filters = {
         if (configFileExists) {
             if (firstRun) {
-                setupFilter(controller: '*', action: '*') {
+                setupFilter(controllerExclude: 'setup') {
                     before = {
-                        if ((controllerName != 'setup' || (controllerName == "setup" && actionName != "firstRun"))
-                                && !request.getHeader("X-Requested-With") && request.getParameter('ajax') != "true") {
-                            redirect(controller: 'setup', action: "firstRun")
-                            return false
-                        } else {
-                            return true
-                        }
+                        redirect(controller: 'setup', action: "firstRun")
+                        return false
+                    }
+                }
+                flowFilter(controller: 'setup', action: 'setup') {
+                    before = {
+                        redirect(controller: 'setup', action: "firstRun")
+                        return false
                     }
                 }
 
@@ -57,14 +60,16 @@ class SetupFilters {
                 }
             }
         } else {
-            setupFilter(controller: '*', action: '*') {
+            setupFilter(controllerExclude: 'setup') {
                 before = {
-                    if (controllerName != 'setup' && !request.getHeader("X-Requested-With") && request.getParameter('ajax') != "true") {
-                        redirect(controller: 'setup')
-                        return false
-                    } else {
-                        return true
-                    }
+                    redirect(controller: 'setup')
+                    return false
+                }
+            }
+            firstRun(controller: 'setup', action: 'firstRun') {
+                before = {
+                    redirect(controller: 'setup', action: 'setup')
+                    return false
                 }
             }
         }
