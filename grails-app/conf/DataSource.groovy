@@ -22,7 +22,7 @@ try {
     databaseProperties.setProperty("jummp.database.url", "jdbc:hsqldb:mem:devDb")
     databaseProperties.setProperty("jummp.database.pooled", "false")
     databaseProperties.setProperty("jummp.database.dbCreate", "create")
-    databaseProperties.setProperty("jummp.database.dialect", "")
+    databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.HSQLDialect")
 }
 def databaseConfig = new ConfigSlurper().parse(databaseProperties)
 
