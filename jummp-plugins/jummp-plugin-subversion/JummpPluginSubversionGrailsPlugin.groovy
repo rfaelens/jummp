@@ -1,4 +1,5 @@
 import net.biomodels.jummp.plugins.subversion.SvnManagerFactory
+import grails.util.Environment
 
 class JummpPluginSubversionGrailsPlugin {
     // the plugin version
@@ -29,8 +30,12 @@ Brief description of the plugin.
     }
 
     def doWithSpring = {
+        if (Environment.getCurrent() == Environment.TEST) {
+            servletContext(org.springframework.mock.web.MockServletContext)
+        }
         svnManagerFactory(SvnManagerFactory) {
             grailsApplication = ref("grailsApplication")
+            servletContext = ref("servletContext")
         }
         if (!(application.config.jummp.plugins.subversion.enabled instanceof ConfigObject) && application.config.jummp.plugins.subversion.enabled) {
             vcsManager(svnManagerFactory: "getInstance")
