@@ -1,4 +1,5 @@
 import net.biomodels.jummp.plugins.git.GitManagerFactory
+import grails.util.Environment
 
 class JummpPluginGitGrailsPlugin {
     // the plugin version
@@ -29,6 +30,10 @@ Brief description of the plugin.
     }
 
     def doWithSpring = {
+
+        if (Environment.getCurrent() == Environment.TEST) {
+            servletContext(org.springframework.mock.web.MockServletContext)
+        }
         gitManagerFactory(GitManagerFactory) {
             grailsApplication = ref("grailsApplication")
             servletContext = ref("servletContext")
