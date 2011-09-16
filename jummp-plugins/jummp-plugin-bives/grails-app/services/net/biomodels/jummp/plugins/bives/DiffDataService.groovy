@@ -5,6 +5,8 @@ import java.util.concurrent.locks.ReentrantLock
 
 import net.biomodels.jummp.core.bives.DiffNotExistingException;
 
+import org.springframework.beans.factory.InitializingBean
+
 /**
  * Provides the data from the DiffDataProvider for the view and creates a new thread
  * for the generation of a diff, in case it's not been created yet.
@@ -12,7 +14,7 @@ import net.biomodels.jummp.core.bives.DiffNotExistingException;
  * @date 05.07.2011
  * @year 2011
  */
-public class DiffDataService {
+public class DiffDataService implements InitializingBean {
 
 	/**
 	 * Dependency Injection of ModelDelegateService
@@ -26,6 +28,10 @@ public class DiffDataService {
      * Dependency Injection of Grails Application
      */
     def grailsApplication
+    /**
+     * Dependency Injection of Servlet Context
+     */
+    def servletContext
 
 	static transactional = true
 
@@ -35,6 +41,19 @@ public class DiffDataService {
 	 * Lock to protect the access to the identifiersToBeResolved
 	 */
 	private final Lock lock = new ReentrantLock()
+
+    void afterPropertiesSet() throws Exception {
+        if (!(grailsApplication.config.jummp.plugins.bives.diffdir instanceof String) || grailsApplication.config.jummp.plugins.bives.diffdir.isEmpty()) {
+            grailsApplication.config.jummp.plugins.bives.diffdir = servletContext.getRealPath("/resource/diffDir")
+        }
+    }
+
+    /**
+     * @returns Path to the diff directory
+     */
+    public String diffDirectory() {
+        return grailsApplication.config.jummp.plugins.bives.diffdir
+    }
 
 	/**
 	 * Provides the data from a generated diff for the view if present or starts a thread

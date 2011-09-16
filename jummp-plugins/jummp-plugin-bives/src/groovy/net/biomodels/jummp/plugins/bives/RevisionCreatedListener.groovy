@@ -24,9 +24,9 @@ class RevisionCreatedListener implements ApplicationListener {
 	 */
 	def modelDelegateService
     /**
-     * Dependency Injection of grailsApplication
+     * Dependency Injection of DiffDataService
      */
-    def grailsApplication
+    def diffDataService
 
 	public void onApplicationEvent(ApplicationEvent event) {
 		if (event instanceof RevisionCreatedEvent) {
@@ -48,9 +48,8 @@ class RevisionCreatedListener implements ApplicationListener {
 				diff.setOriginId(prevRev)
 				diff.setSuccessorId(currRev)
 				long modelId = command.model.id
-				String diffDir = grailsApplication.config.jummp.plugins.bives.diffdir as String
 				JummpRepositoryManager repoMan = new JummpRepositoryManager()
-				repoMan.createNewRepository(diffDir)
+				repoMan.createNewRepository(diffDataService.diffDirectory())
 				repoMan.uploadDiff(diff, modelId, prevRev, currRev)
 				// TODO database entries -> later
 

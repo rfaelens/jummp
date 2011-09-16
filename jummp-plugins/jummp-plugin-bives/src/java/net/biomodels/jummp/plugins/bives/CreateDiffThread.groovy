@@ -55,9 +55,8 @@ class CreateDiffThread implements Runnable {
 				diff.setModelId(modelId as String)
 				diff.setOriginId(previousRevision)
 				diff.setSuccessorId(recentRevision)
-				String diffDir = grailsApplication.config.jummp.plugins.bives.diffdir as String
 				JummpRepositoryManager repoMan = new JummpRepositoryManager()
-				repoMan.createNewRepository(diffDir)
+				repoMan.createNewRepository(diffDataService.diffDirectory())
 				repoMan.uploadDiff(diff, modelId, previousRevision, recentRevision)
 				diffDataService.unqueueDiff(modelId, previousRevision, recentRevision)
 			}

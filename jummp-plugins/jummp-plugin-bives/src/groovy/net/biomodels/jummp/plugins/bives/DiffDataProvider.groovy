@@ -64,6 +64,7 @@ class DiffDataProvider implements InitializingBean {
      * Dependency Injection of grailsApplication
      */
     def grailsApplication
+    def diffDataService
 	/**
 	 * The logger for this class
 	 */
@@ -71,8 +72,7 @@ class DiffDataProvider implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		String diffDir = grailsApplication.config.jummp.plugins.bives.diffdir as String
-		repoMan = new JummpRepositoryManager(diffDir)
+		repoMan = new JummpRepositoryManager(diffDataService.diffDirectory())
 	}
 
 	/**
