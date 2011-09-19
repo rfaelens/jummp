@@ -458,6 +458,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 format: ModelFormat.findByIdentifier(meta.format.identifier))
         // vcs identifier is upload date + name - this should by all means be unique
         model.vcsIdentifier = revision.uploadDate.format("yyyy-MM-dd'T'HH-mm-ss-SSS") + "_" + model.name
+        model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
         try {
             revision.vcsId = vcsService.importFile(model, modelFile)
         } catch (VcsException e) {

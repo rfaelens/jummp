@@ -745,7 +745,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
 
     void testUploadModel() {
         def formatControl = mockFor(ModelFileFormatService, true)
-        formatControl.demand.validate(4..4) { model, format ->
+        formatControl.demand.validate(5..5) { model, format ->
             if (format.identifier == "UNKNOWN") {
                 // for unknown format we model true to make all tests pass
                 return true
@@ -753,7 +753,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
                 return modelFileFormatService.validate(model, format)
             }
         }
-        formatControl.demand.getPubMedAnnotation(2..2) { argument ->
+        formatControl.demand.getPubMedAnnotation(3..3) { argument ->
             modelFileFormatService.getPubMedAnnotation(argument)
         }
         modelService.modelFileFormatService = (ModelFileFormatService)formatControl.createMock()
@@ -873,6 +873,13 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(model.validate())
         assertEquals(ModelFormat.findByIdentifier("SBML"), model.revisions.toList().first().format)
         assertNotNull(model.revisions.toList().first().uploadDate)
+        // test strange characters in the name, which should not end in the file name
+        meta.name = "test/:/test"
+        model = modelService.uploadModel(sbmlFile, meta)
+        File gitDirectory = new File("target/vcs/git/")
+        gitFile = new File("target/vcs/git/${model.vcsIdentifier}")
+        assertTrue(model.validate())
+        assertEquals(gitDirectory.getPath(), gitFile.getParent())
         // TODO: somehow we need to test the failing cases, which is non-trivial
         // the only solution were to modify comment to make the revision non-validate, but in future it will be a command object which validates
     }
