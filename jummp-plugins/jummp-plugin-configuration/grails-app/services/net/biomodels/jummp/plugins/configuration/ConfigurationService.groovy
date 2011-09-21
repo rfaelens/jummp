@@ -1,3 +1,4 @@
+
 package net.biomodels.jummp.plugins.configuration
 
 import java.util.concurrent.locks.ReentrantLock
@@ -44,14 +45,18 @@ class ConfigurationService implements InitializingBean {
      * @param userRegistration the user registration configuration
      * @param changePassword the change/reset password configuration
      * @param remote The Remote configuration
+     * @param dbus The DBus configuration
      * @param trigger The Trigger configuration
      * @param bives the BiVeS configuration
      */
     public void storeConfiguration(MysqlCommand mysql, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun,
-                                   ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword, RemoteCommand remote, TriggerCommand trigger, BivesCommand bives) {
+                                   ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword, RemoteCommand remote, DBusCommand dbus, TriggerCommand trigger, BivesCommand bives) {
         Properties properties = new Properties()
         updateMysqlConfiguration(properties, mysql)
         updateRemoteConfiguration(properties, remote)
+        if(dbus) {
+             updateDBusConfiguration(properties, dbus)
+        }
         updateLdapConfiguration(properties, ldap)
         updateVcsConfiguration(properties, vcs)
         updateSvnConfiguration(properties, svn)
@@ -106,6 +111,17 @@ class ConfigurationService implements InitializingBean {
         remote.jummpExportDbus = Boolean.parseBoolean(properties.getProperty("jummp.export.dbus"))
         remote.jummpExportJms = Boolean.parseBoolean(properties.getProperty("jummp.export.jms"))
         return remote
+    }
+
+    /**
+     * Loads the current DBus Configuration.
+     * @return A command object encapsulating the current DBus Configuration
+     */
+    public DBusCommand loadDBusConfiguration() {
+        Properties properties = loadProperties()
+        DBusCommand dbus = new DBusCommand()
+        dbus.systemBus = Boolean.parseBoolean(properties.getProperty("jummp.plugins.dbus.systemBus"))
+        return dbus
     }
 
     /**
@@ -249,6 +265,19 @@ class ConfigurationService implements InitializingBean {
     }
 
     /**
+     * Updates the DBus configuration stored in the properties file.
+     * Other settings are not changed!
+     * It is important to remember that the settings will only be activated after
+     * a restart of the application!
+     * @param dbus The new DBus configuration
+     */
+    public void saveDBusConfiguration(DBusCommand dbus) {
+        Properties properties = loadProperties()
+        updateDBusConfiguration(properties, dbus)
+        saveProperties(properties)
+    }
+
+    /**
      * Updates the LDAP configuration stored in the properties file.
      * Other settings are not changed!
      * It is important to remember that the settings will only be activated after
@@ -379,6 +408,18 @@ class ConfigurationService implements InitializingBean {
         properties.setProperty("jummp.remote",   remote.jummpRemote)
         properties.setProperty("jummp.export.dbus",     remote.jummpExportDbus.toString())
         properties.setProperty("jummp.export.jms", remote.jummpExportJms.toString())
+    }
+
+    /**
+     * Updates the @p properties with the settings from @p remoteDBus.
+     * @param properties The existing properties
+     * @param remoteDBus.The new remoteDBus.settings
+     */
+    private void updateDBusConfiguration(Properties properties, DBusCommand dbus) {
+        if (!dbus.validate()) {
+            return
+        }
+        properties.setProperty("jummp.plugins.dbus.systemBus",   dbus.systemBus.toString())
     }
 
     /**

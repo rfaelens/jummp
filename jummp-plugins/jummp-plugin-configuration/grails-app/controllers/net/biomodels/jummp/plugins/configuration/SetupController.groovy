@@ -54,7 +54,6 @@ class SetupController {
             }.to("vcs")
             on("back").to("authenticationBackend")
         }
-
         vcs {
             on("next").to("validateVcs")
             on("back").to("decideBackFromVcs")
@@ -133,11 +132,23 @@ class SetupController {
                 flow.remote.validate()
                 if (flow.remote.hasErrors()) {
                     return error()
+                } else  {
+                    return success()
+                }
+            }.to("validateDBus")
+            on("back").to("remoteExport")
+        }
+
+        dbus {
+            on("next") { DBusCommand cmd ->
+                flow.dbus = cmd
+                if(flow.dbus.hasErrors()) {
+                    return error()
                 } else {
                     return success()
                 }
             }.to("server")
-            on("back").to("remoteExport")
+            on("back").to("remoteRemote")
         }
 
         server {
@@ -170,7 +181,7 @@ class SetupController {
                 if (flow.bives.hasErrors()) {
                     return error()
                 } else {
-                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote, flow.trigger, flow.bives)
+                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote, flow.dbus, flow.trigger, flow.bives)
                     return success()
                 }
             }.to("finish")
@@ -198,13 +209,30 @@ class SetupController {
             action {
                 if (flow.remote.jummpExportDbus && flow.remote.jummpExportJms) {
                     remote()
-                } else {
-                    flow.remote.jummpRemote = flow.remote.jummpExportDbus ? "dbus" : "jms"
+                } else if(!flow.remote.jummpExportJms) {
+                    flow.remote.jummpRemote = "dbus"
+                    dbus()
+                }
+                else {
+                    flow.remote.jummpRemote = "jms"
                     server()
                 }
             }
-            on("server").to("server")
             on("remote").to("remoteRemote")
+            on("dbus").to("dbus")
+            on("server").to("server")
+        }
+
+        validateDBus {
+            action {
+                if(params.jummpRemote == "dbus") {
+                    dbus()
+                } else {
+                    server()
+                }
+            }
+            on("dbus").to("dbus")
+            on("server").to("server")
         }
 
         validateVcs {
