@@ -71,6 +71,10 @@ class ModelService {
      * Dependency injection of SessionFactory
      */
     def sessionFactory
+    /**
+     * Dependency injection of ModelHistoryService
+     */
+    def modelHistoryService
 
     static transactional = true
 
@@ -396,6 +400,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (revision.deleted) {
             return null
         } else {
+            modelHistoryService.addModelToHistory(model)
+            revision.refresh()
             return revision
         }
     }

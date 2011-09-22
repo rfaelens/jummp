@@ -290,6 +290,12 @@ if (!(jummpConfig.jummp.threadPool.size instanceof ConfigObject)) {
     jummp.threadPool.size = 10
 }
 
+if (!(jummpConfig.model.history.maxElements instanceof ConfigObject)) {
+    jummp.model.history.maxElements = jummpConfig.model.history.maxElements as Integer
+} else {
+    jummp.model.history.maxElements = 10
+}
+
 // get all Plugin Configurations
 // the list of available plugins is read from the BuildConfig's plugin location
 // for each plugin it is assumed that it has a JummpPluginConfig class in the package
