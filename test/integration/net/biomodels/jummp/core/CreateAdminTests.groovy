@@ -1,19 +1,22 @@
 package net.biomodels.jummp.core
 
+import static org.junit.Assert.*
+import org.junit.*
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.plugins.security.UserRole
 import net.biomodels.jummp.plugins.security.Role
 
-class CreateAdminTests extends JummpIntegrationTestCase {
+class CreateAdminTests extends JummpIntegrationTest {
     def userService
-    protected void setUp() {
-        super.setUp()
+    @Before
+    void setUp() {
     }
 
-    protected void tearDown() {
-        super.tearDown()
+    @After
+    void tearDown() {
     }
 
+    @Test
     void testCreateAdmin() {
         User user = new User(username: "admin", password: "1234", userRealName: "Administrator", email: "admin@test.com")
         authenticateAnonymous()
@@ -32,6 +35,7 @@ class CreateAdminTests extends JummpIntegrationTestCase {
         assertFalse(userService.persistAdminWithRoles(user))
     }
 
+    @Test
     void testCreateRolesForAdmin() {
         User user = new User(username: "admin", password: "1234", userRealName: "Administrator", email: "admin@test.com")
         authenticateAnonymous()
