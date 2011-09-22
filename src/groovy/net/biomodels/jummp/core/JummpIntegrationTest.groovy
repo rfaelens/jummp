@@ -19,6 +19,17 @@ class JummpIntegrationTest {
     def authenticationManager
     def springSecurityService
 
+    def shouldFail = { exception, code ->
+        try {
+            code.call()
+            fail("Exception of type ${exception} was expected")
+        } catch (Exception e) {
+            if (e.class != exception) {
+                fail("Exception of type ${exception} expected but got ${e.class}")
+            }
+        }
+    }
+
     /**
      * Creates three users and their roles:
      * @li testuser with password secret and role ROLE_USER
