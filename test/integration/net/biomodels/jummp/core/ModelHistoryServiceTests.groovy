@@ -26,7 +26,7 @@ import org.springframework.security.core.authority.GrantedAuthorityImpl
 import org.springframework.security.core.context.SecurityContextHolder
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 
-class ModelHistoryServiceTests {
+class ModelHistoryServiceTests extends JummpIntegrationTest {
     /**
      * Dependency Injection of Grails Application
      */
@@ -39,14 +39,6 @@ class ModelHistoryServiceTests {
      * Dependency Injection of Model History Service
      */
     def modelHistoryService
-    /**
-     * Dependency Injection of Spring Security Service
-     */
-    def springSecurityService
-    /**
-     * Dependency Injection of Authentication Manager
-     */
-    def authenticationManager
     /**
      * Dependency Injection of ACL Util Service
      */
@@ -192,105 +184,6 @@ class ModelHistoryServiceTests {
         assertNotNull(modelService.getRevision(currentModel, 1))
         assertTrue(modelHistoryService.history().isEmpty())
         assertNull(modelHistoryService.lastAccessedModel().id)
-    }
-
-    // TOOD: remove this copy from JummpIntegrationTestCase
-    private void createUserAndRoles() {
-        User user = new User(username: "testuser",
-                password: springSecurityService.encodePassword("secret"),
-                userRealName: "Test",
-                email: "test@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(user.save())
-        assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
-        User user2 = new User(username: "user",
-                password: springSecurityService.encodePassword("verysecret"),
-                userRealName: "Test2",
-                email: "test2@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(user2.save())
-        assertNotNull(new AclSid(sid: user2.username, principal: true).save(flush: true))
-        User admin = new User(username: "admin",
-                password: springSecurityService.encodePassword("1234"),
-                userRealName: "Administrator",
-                email: "admin@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(admin.save())
-        assertNotNull(new AclSid(sid: admin.username, principal: true).save(flush: true))
-        User curator = new User(username: "curator",
-                password: springSecurityService.encodePassword("extremelysecret"),
-                userRealName: "Curator",
-                email: "curator@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(curator.save())
-        assertNotNull(new AclSid(sid: curator.username, principal: true).save(flush: true))
-        Role userRole = new Role(authority: "ROLE_USER")
-        assertNotNull(userRole.save())
-        UserRole.create(user, userRole, false)
-        UserRole.create(user2, userRole, false)
-        UserRole.create(admin, userRole, false)
-        UserRole.create(curator, userRole, false)
-        Role adminRole = new Role(authority: "ROLE_ADMIN")
-        assertNotNull(adminRole.save())
-        UserRole.create(admin, adminRole, false)
-        Role curatorRole = new Role(authority: "ROLE_CURATOR")
-        assertNotNull(curatorRole.save())
-        UserRole.create(curator, curatorRole, false)
-    }
-
-    /**
-     * Sets and authentication based on username and password.
-     * @param username The name of the user
-     * @param password The password of the user.
-     * @return The Authentication object
-     */
-    protected def authenticate(String username, String password) {
-        def authToken = new UsernamePasswordAuthenticationToken(username, password)
-        def auth = authenticationManager.authenticate(authToken)
-        SecurityContextHolder.getContext().setAuthentication(auth)
-        return auth
-    }
-
-    /**
-     * Modifies the ifAnyGranted method of SpringSecurityUtils to return @p admin value.
-     * @param admin if @c true, all access to ifAnyGranted returns @c true, @c false otherwise
-     */
-    protected void modelAdminUser(boolean admin) {
-        SpringSecurityUtils.metaClass.'static'.ifAnyGranted = { String parameter ->
-            return admin
-        }
-    }
-
-    /**
-     * Sets the current authentication to testuser and does not model as admin user.
-     * @return The testusers authentication
-     */
-    protected def authenticateAsTestUser() {
-        modelAdminUser(false)
-        return authenticate("testuser", "secret")
-    }
-
-     /**
-     * Sets an anonymous authentication and does not model as admin user.
-     * @return The anonymous authentication
-     */
-    protected def authenticateAnonymous() {
-        modelAdminUser(false)
-        def auth = new AnonymousAuthenticationToken("test", "Anonymous", [ new GrantedAuthorityImpl("ROLE_ANONYMOUS")])
-        SecurityContextHolder.getContext().setAuthentication(auth)
-        return auth
     }
 
     // TODO: remove this copy from JmsAdapterServiceTest
