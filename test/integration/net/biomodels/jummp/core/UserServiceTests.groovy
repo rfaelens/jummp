@@ -1,6 +1,7 @@
 package net.biomodels.jummp.core
 
-import grails.test.*
+import static org.junit.Assert.*
+import org.junit.*
 import org.springframework.security.authentication.BadCredentialsException
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
@@ -12,18 +13,20 @@ import net.biomodels.jummp.core.user.UserCodeExpiredException
 import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserNotFoundException
 
-class UserServiceTests extends JummpIntegrationTestCase {
+class UserServiceTests extends JummpIntegrationTest {
     def userService
     def grailsApplication
-    protected void setUp() {
-        super.setUp()
+
+    @Before
+    void setUp() {
         createUserAndRoles()
     }
 
-    protected void tearDown() {
-        super.tearDown()
+    @After
+    void tearDown() {
     }
 
+    @Test
     void testChangePassword() {
         authenticateAsTestUser()
         shouldFail(BadCredentialsException) {
@@ -36,6 +39,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         authenticate("testuser", "secure")
     }
 
+    @Test
     void testEditUser() {
         authenticateAsTestUser()
         User user = User.findByUsername("user")
@@ -50,6 +54,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         userService.editUser(user)
     }
 
+    @Test
     void testGetCurrentUser() {
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -60,6 +65,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertEquals("user", user.username)
     }
 
+    @Test
     void testGetUser() {
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -84,6 +90,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         }
     }
 
+    @Test
     void testGetAllUsers() {
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -99,6 +106,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         // TODO: add tests for the size - requires creation of more users
     }
 
+    @Test
     void testEnableUser() {
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -116,6 +124,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertTrue(userService.enableUser(User.findByUsername("testuser").id, false))
     }
 
+    @Test
     void testLockAccount() {
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -133,6 +142,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertTrue(userService.lockAccount(User.findByUsername("testuser").id, true))
     }
 
+    @Test
     void testExpireAccount() {
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -150,6 +160,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertTrue(userService.expireAccount(User.findByUsername("testuser").id, true))
     }
 
+    @Test
     void testExpirePassword() {
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -167,6 +178,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertTrue(userService.expirePassword(User.findByUsername("testuser").id, true))
     }
 
+    @Test
     void testRegister() {
         User user = new User(username: "register", password: "test", userRealName: "Test Name", email: "test@example.com")
         authenticateAsUser()
@@ -215,6 +227,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         grailsApplication.config.jummp.security.anonymousRegistration = anonymousRegistration
     }
 
+    @Test
     void testValidateRegistration() {
         authenticateAsUser()
         shouldFail(AccessDeniedException) {
@@ -257,6 +270,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         }
     }
 
+    @Test
     void testGetAllRoles() {
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -273,6 +287,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertEquals(Role.findByAuthority("ROLE_CURATOR").id, roles[2].id)
     }
 
+    @Test
     void testGetRolesForUser() {
         User user = User.findByUsername("testuser")
         authenticateAnonymous()
@@ -290,6 +305,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertArrayEquals([Role.findByAuthority("ROLE_USER"), Role.findByAuthority("ROLE_ADMIN")].toArray(), userService.getRolesForUser(admin.id).toArray())
     }
 
+    @Test
     void testAddRoleToUser() {
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -319,6 +335,7 @@ class UserServiceTests extends JummpIntegrationTestCase {
         assertNotNull(UserRole.get(user.id, adminRole.id))
     }
 
+    @Test
     void testRemoveRoleFromUser() {
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
