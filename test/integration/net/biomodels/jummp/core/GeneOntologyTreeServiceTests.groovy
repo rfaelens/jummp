@@ -2,6 +2,8 @@ package net.biomodels.jummp.core
 
 import org.springframework.security.access.AccessDeniedException
 
+import static org.junit.Assert.*
+import org.junit.*
 import net.biomodels.jummp.core.miriam.MiriamDatatype
 import net.biomodels.jummp.core.miriam.GeneOntologyTreeLevel
 import net.biomodels.jummp.core.miriam.GeneOntology
@@ -14,18 +16,19 @@ import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.core.miriam.MiriamResource
 
-class GeneOntologyTreeServiceTests extends JummpIntegrationTestCase {
+class GeneOntologyTreeServiceTests extends JummpIntegrationTest {
     def geneOntologyTreeService
 
-    protected void setUp() {
-        super.setUp()
+    @Before
+    void setUp() {
         createUserAndRoles()
     }
 
-    protected void tearDown() {
-        super.tearDown()
+    @After
+    void tearDown() {
     }
 
+    @Test
     void testTreeLevel() {
         authenticateAsAdmin()
         Model model1 = new Model(name: "test1", vcsIdentifier: "test1.xml")
