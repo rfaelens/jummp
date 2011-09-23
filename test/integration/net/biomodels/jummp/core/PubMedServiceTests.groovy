@@ -1,18 +1,20 @@
 package net.biomodels.jummp.core
 
-import grails.test.*
+import static org.junit.Assert.*
+import org.junit.*
 import net.biomodels.jummp.model.Publication
 
-class PubMedServiceTests extends GrailsUnitTestCase {
+class PubMedServiceTests extends JummpIntegrationTest {
     def pubMedService
-    protected void setUp() {
-        super.setUp()
+    @Before
+    void setUp() {
     }
 
-    protected void tearDown() {
-        super.tearDown()
+    @After
+    void tearDown() {
     }
 
+    @Test
     void testFetchPublicationData() {
         // publication: Science   (ISSN: 0036-8075)   (ESSN: 1095-9203)
         String id = "20488988"
