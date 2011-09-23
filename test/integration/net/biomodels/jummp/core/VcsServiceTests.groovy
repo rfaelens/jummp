@@ -1,5 +1,7 @@
 package net.biomodels.jummp.core
 
+import static org.junit.Assert.*
+import org.junit.*
 import net.biomodels.jummp.plugins.git.GitManagerFactory
 import net.biomodels.jummp.plugins.subversion.SvnManagerFactory
 import org.apache.commons.io.FileUtils
@@ -23,7 +25,7 @@ import net.biomodels.jummp.model.ModelFormat
 import org.springframework.mock.web.MockServletContext
 import org.springframework.core.io.FileSystemResourceLoader
 
-class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationContextAware {
+class VcsServiceTests extends JummpIntegrationTest implements ApplicationContextAware {
     /**
      * Dependency injection of the service we want to test
      */
@@ -45,19 +47,16 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         appCtx = applicationContext
     }
 
-    protected void setUp() {
-        super.setUp()
+    @Before
+    void setUp() {
         createUserAndRoles()
-        mockLogging(VcsService, true)
-        mockLogging(GitManagerFactory, true)
-        mockLogging(SvnManagerFactory, true)
         vcsService.vcsManager = null
         appCtx.getBean("gitManagerFactory").servletContext = new MockServletContext("./target", new FileSystemResourceLoader())
         appCtx.getBean("svnManagerFactory").servletContext = new MockServletContext("./target", new FileSystemResourceLoader())
     }
 
-    protected void tearDown() {
-        super.tearDown()
+    @After
+    void tearDown() {
         FileUtils.deleteDirectory(new File("target/vcs/git"))
         FileUtils.deleteDirectory(new File("target/vcs/resource"))
         FileUtils.deleteDirectory(new File("target/vcs/repository"))
@@ -66,6 +65,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         appCtx.getBean("gitManagerFactory").git = null
     }
 
+    @Test
     void testGit() {
         // verifies that the service is valid, if git backend is configured correctly
         grailsApplication.config.jummp.vcs.pluginServiceName="gitManagerFactory"
@@ -84,6 +84,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         assertTrue(vcsService.isValid())
     }
 
+    @Test
     void testSvn() {
         // verifies that the service is valid, if svn backend is configured correctly
         grailsApplication.config.jummp.vcs.pluginServiceName = "svnManagerFactory"
@@ -95,6 +96,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         assertTrue(vcsService.isValid())
     }
 
+    @Test
     void testImportFile() {
         assertFalse(vcsService.isValid())
         // first create a model
@@ -161,6 +163,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         }
     }
 
+    @Test
     void testUpdateFile() {
         assertFalse(vcsService.isValid())
         // first create a model
@@ -296,6 +299,7 @@ class VcsServiceTests extends JummpIntegrationTestCase implements ApplicationCon
         }
     }
 
+    @Test
     void testRetrieveFile() {
         assertFalse(vcsService.isValid())
         // first create a model
