@@ -8,6 +8,7 @@ import net.biomodels.jummp.dbus.remote.RemoteDiffDataAdapterDBusImpl;
 import net.biomodels.jummp.dbus.remote.RemoteJummpApplicationAdapterDBusImpl
 import net.biomodels.jummp.dbus.remote.RemoteUserAdapterDBusImpl
 import net.biomodels.jummp.dbus.remote.RemoteModelAdapterDBusImpl
+import net.biomodels.jummp.dbus.remote.RemoteModelHistoryDBusAdapterImpl
 import net.biomodels.jummp.dbus.SbmlDBusAdapterImpl
 import net.biomodels.jummp.dbus.remote.RemoteSbmlAdapterDBusImpl
 import net.biomodels.jummp.dbus.MiriamDBusAdapterImpl
@@ -107,6 +108,7 @@ Brief description of the plugin.
             remoteMiriamAdapterDBusImpl(RemoteMiriamAdapterDBusImpl)
 			remoteDiffDataAdapterDBusImpl(RemoteDiffDataAdapterDBusImpl)
             remoteGeneOntologyTreeDBusAdapterImpl(RemoteGeneOntologyTreeDBusAdapterImpl)
+            remoteModelHistoryDBusAdapterImpl(RemoteModelHistoryDBusAdapterImpl)
         }
     }
 

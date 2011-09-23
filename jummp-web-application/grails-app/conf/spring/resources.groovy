@@ -25,6 +25,9 @@ beans = {
         remoteGeneOntologyTreeService(net.biomodels.jummp.webapp.remote.RemoteGeneOntologyTreeService) {
             remoteGeneOntologyTreeAdapter = ref("remoteGeneOntologyTreeDBusAdapterImpl")
         }
+        remoteModelHistoryService(net.biomodels.jummp.webapp.remote.RemoteModelHistoryService) {
+            remoteModelHistoryAdapter = ref("remoteModelHistoryDBusAdapterImpl")
+        }
     } else {
         println("Using JMS")
         remoteUserService(net.biomodels.jummp.webapp.remote.RemoteUserService) {
@@ -44,6 +47,9 @@ beans = {
         }
         remoteDiffDataService(net.biomodels.jummp.webapp.remote.RemoteDiffDataService) {
             remoteDiffDataAdapter = ref("diffDataJmsRemoteAdapter")
+        }
+        remoteModelHistoryService(net.biomodels.jummp.webapp.remote.RemoteModelHistoryService) {
+            remoteModelHistoryAdapter = ref("modelHistoryJmsRemoteAdapter")
         }
     }
 
