@@ -1,6 +1,8 @@
 package net.biomodels.jummp.plugins
 
-import net.biomodels.jummp.core.JummpIntegrationTestCase
+import static org.junit.Assert.*
+import org.junit.*
+import net.biomodels.jummp.core.JummpIntegrationTest
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
@@ -16,7 +18,7 @@ import net.biomodels.jummp.model.ModelFormat
 /**
  * Test for SbmlService parts which require a running core to retrieve Models.
  */
-class SbmlServiceTests extends JummpIntegrationTestCase {
+class SbmlServiceTests extends JummpIntegrationTest {
     /**
      * Dependency injection of SbmlService
      */
@@ -24,19 +26,19 @@ class SbmlServiceTests extends JummpIntegrationTestCase {
     def modelService
     def grailsApplication
 
-    protected void setUp() {
-        super.setUp()
+    @Before
+    void setUp() {
         createUserAndRoles()
         setupVcs()
-        mockLogging(net.biomodels.jummp.plugins.sbml.SbmlService, true)
     }
 
-    protected void tearDown() {
-        super.tearDown()
+    @After
+    void tearDown() {
         FileUtils.deleteDirectory(new File("target/sbml/git"))
         FileUtils.deleteDirectory(new File("target/sbml/exchange"))
     }
 
+    @Test
     void testLevelAndVersion() {
         authenticateAsTestUser()
         Model model = modelService.uploadModel(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
@@ -48,6 +50,7 @@ class SbmlServiceTests extends JummpIntegrationTestCase {
         assertEquals(4, sbmlService.getVersion(rev2))
     }
 
+    @Test
     void testModelMetaId() {
         authenticateAsTestUser()
         Model model = modelService.uploadModel(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
@@ -57,6 +60,7 @@ class SbmlServiceTests extends JummpIntegrationTestCase {
         assertEquals("_688624", sbmlService.getMetaId(rev2))
     }
 
+    @Test
     void testModelNotes() {
         authenticateAsTestUser()
         Model model = modelService.uploadModel(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
