@@ -1,5 +1,7 @@
 package net.biomodels.jummp.core
 
+import static org.junit.Assert.*
+import org.junit.*
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.core.model.ModelState
@@ -26,7 +28,7 @@ import net.biomodels.jummp.core.user.JummpAuthentication
 import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 import java.util.concurrent.Callable
 
-class JmsAdapterServiceTests extends JummpIntegrationTestCase {
+class JmsAdapterServiceTests extends JummpIntegrationTest {
     def aclUtilService
     def modelService
     def applicationJmsAdapterService
@@ -36,15 +38,13 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
      * Dependency injection for ExecutorService to run threads
      */
     def executorService
-    protected void setUp() {
-        super.setUp()
+    @Before
+    void setUp() {
         createUserAndRoles()
-        mockLogging(ModelService)
-        mockLogging(ApplicationJmsAdapterService)
     }
 
-    protected void tearDown() {
-        super.tearDown()
+    @After
+    void tearDown() {
         FileUtils.deleteDirectory(new File("target/vcs/git"))
         FileUtils.deleteDirectory(new File("target/vcs/resource"))
         FileUtils.deleteDirectory(new File("target/vcs/repository"))
@@ -52,6 +52,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         modelService.vcsService.vcsManager = null
     }
 
+    @Test
     void testAuthenticate() {
         // test wrong parameter
         def illegalArgumentException = send2("authenticate", "test")
@@ -73,6 +74,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(auth instanceof JummpAuthentication)
     }
 
+    @Test
     void testGetAllModels() {
         // invalid parameter should end in IllegalArgumentException
         assertTrue(send("getAllModels", "test") instanceof IllegalArgumentException)
@@ -135,6 +137,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(send("getAllModels", [auth3.getAuthenticationHash(), 0, 0, true, "test"]) instanceof IllegalArgumentException)
     }
 
+    @Test
     void testModelCount() {
         // first test without authentication
         assertTrue(send("getModelCount", ["test"]) instanceof IllegalArgumentException)
@@ -174,6 +177,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertEquals(0, result)
     }
 
+    @Test
     void testGetLatestRevision() {
         // first test a completely invalid variant
         assertTrue(send("getLatestRevision", "test") instanceof IllegalArgumentException)
@@ -210,6 +214,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(send("getLatestRevision", [auth2.getAuthenticationHash(), model.id]) instanceof AccessDeniedException)
     }
 
+    @Test
     void testGetAllRevisions() {
         // first test a completely invalid variant
         assertTrue(send("getAllRevisions", "test") instanceof IllegalArgumentException)
@@ -251,6 +256,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(result.isEmpty())
     }
 
+    @Test
     void testUploadModel() {
         // first test a completely invalid variant
         assertTrue(send("uploadModel", "test") instanceof IllegalArgumentException)
@@ -311,6 +317,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(send("deleteModel", [auth.getAuthenticationHash(), result.id as Long]))
     }
 
+    @Test
     void testAddRevision() {
         // first test a completely invalid variant
         assertTrue(send("addRevision", "test") instanceof IllegalArgumentException)
@@ -372,6 +379,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         modelAdminUser(false)
     }
 
+    @Test
     void testRetrieveModelFile() {
         // first test a completely invalid variant
         assertTrue(send("retrieveModelFile", "test") instanceof IllegalArgumentException)
@@ -437,6 +445,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(send("deleteModel", [auth.getAuthenticationHash(), model.id as Long]))
     }
 
+    @Test
     void testGrantReadAccess() {
         // first test a completely invalid variant
         assertTrue(send("grantReadAccess", "test") instanceof IllegalArgumentException)
@@ -480,6 +489,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertEquals(0, send("getModelCount", auth2.getAuthenticationHash()))
     }
 
+    @Test
     void testGrantWriteAccess() {
         // first test a completely invalid variant
         assertTrue(send("grantWriteAccess", "test") instanceof IllegalArgumentException)
@@ -524,6 +534,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(result instanceof AccessDeniedException)
     }
 
+    @Test
     void testRevokeReadAccess() {
         // first test a completely invalid variant
         assertTrue(send("revokeReadAccess", "test") instanceof IllegalArgumentException)
@@ -566,6 +577,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(send("revokeReadAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("user")]) instanceof AccessDeniedException)
     }
 
+    @Test
     void testRevokeWriteAccess() {
         // first test a completely invalid variant
         assertTrue(send("revokeWriteAccess", "test") instanceof IllegalArgumentException)
@@ -609,6 +621,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTestCase {
         assertTrue(send("revokeWriteAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("user")]) instanceof AccessDeniedException)
     }
 
+    @Test
     void testDeleteRestoreModel() {
         // first test a completely invalid variant
         assertTrue(send("deleteModel", "test") instanceof IllegalArgumentException)
