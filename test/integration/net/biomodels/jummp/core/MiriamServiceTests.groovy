@@ -2,6 +2,8 @@ package net.biomodels.jummp.core
 
 import org.springframework.security.access.AccessDeniedException
 
+import static org.junit.Assert.*
+import org.junit.*
 import net.biomodels.jummp.core.miriam.MiriamDatatype
 import net.biomodels.jummp.core.miriam.MiriamIdentifier
 import net.biomodels.jummp.core.miriam.MiriamResource
@@ -12,18 +14,19 @@ import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.core.miriam.GeneOntology
 import net.biomodels.jummp.core.miriam.GeneOntologyRelationship
 
-class MiriamServiceTests extends JummpIntegrationTestCase {
+class MiriamServiceTests extends JummpIntegrationTest {
     def miriamService
 
-    protected void setUp() {
-        super.setUp()
+    @Before
+    void setUp() {
         createUserAndRoles()
     }
 
-    protected void tearDown() {
-        super.tearDown()
+    @After
+    void tearDown() {
     }
 
+    @Test
     void testUpdateMiriamResourcesSecurity() {
         String url = "http://www.ebi.ac.uk/miriam/main/export/xml/"
         authenticateAsTestUser()
@@ -32,6 +35,7 @@ class MiriamServiceTests extends JummpIntegrationTestCase {
         }
     }
 
+    @Test
     void testUpdateAllMiriamIdentifiersSecurity() {
         authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
@@ -47,6 +51,7 @@ class MiriamServiceTests extends JummpIntegrationTestCase {
         }
     }
 
+    @Test
     void testMiriamData() {
         authenticateAsAdmin()
         MiriamDatatype md1 = new MiriamDatatype(identifier: "00000001", name: "BIND", pattern: "^\\d+\$", urn: "urn:miriam:bind")
@@ -81,7 +86,7 @@ class MiriamServiceTests extends JummpIntegrationTestCase {
         assertEquals("co.mbine", data.dataTypeLocation)
         assertEquals("BIND", data.dataTypeName)
         assertEquals("00000001", data.name)
-        assertEquals("http://identifiers.org/bind/00000001", data.url)
+        assertEquals("http://identifiers.org/bind/00000001", data.url.toString())
     }
 
     void testQueueUrnForIdentifierResolving() {
