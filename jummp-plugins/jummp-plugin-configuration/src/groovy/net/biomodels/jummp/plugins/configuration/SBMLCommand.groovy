@@ -9,6 +9,6 @@ class SBMLCommand implements Serializable {
     Boolean validation
 
     static constraints = {
-        validation(blank: false)
+        validation(nullable: false)
     }
 }

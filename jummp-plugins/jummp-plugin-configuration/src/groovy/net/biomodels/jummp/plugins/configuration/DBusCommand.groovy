@@ -9,6 +9,6 @@ class DBusCommand implements Serializable {
     Boolean systemBus
 
     static constraints = {
-        systemBus(blank: false)
+        systemBus(blank: false, nullable: false)
         }
 }
