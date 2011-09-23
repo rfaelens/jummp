@@ -47,10 +47,11 @@ class ConfigurationService implements InitializingBean {
      * @param remote The Remote configuration
      * @param dbus The DBus configuration
      * @param trigger The Trigger configuration
+     * @param tsbml The SBML configuration
      * @param bives the BiVeS configuration
      */
     public void storeConfiguration(MysqlCommand mysql, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun,
-                                   ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword, RemoteCommand remote, DBusCommand dbus, TriggerCommand trigger, BivesCommand bives) {
+                                   ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword, RemoteCommand remote, DBusCommand dbus, TriggerCommand trigger, SBMLCommand sbml, BivesCommand bives) {
         Properties properties = new Properties()
         updateMysqlConfiguration(properties, mysql)
         updateRemoteConfiguration(properties, remote)
@@ -64,6 +65,7 @@ class ConfigurationService implements InitializingBean {
         updateServerConfiguration(properties, server)
         updateUserRegistrationConfiguration(properties, userRegistration)
         updateChangePasswordConfiguration(properties, changePassword)
+        updateSBMLConfiguration(properties, sbml)
         updateTriggerConfiguration(properties, trigger)
         updateBivesConfiguration(properties, bives)
         if (ldap) {
@@ -222,7 +224,18 @@ class ConfigurationService implements InitializingBean {
         trigger.startRemoveOffset = Long.parseLong(properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
         trigger.removeInterval = Long.parseLong(properties.getProperty("jummp.authenticationHash.removeInterval"))
         trigger.maxInactiveTime = Long.parseLong(properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
-        return bives
+        return trigger
+    }
+
+    /**
+     * Loads the current SBMLConfiguration.
+     * @return A command object encapsulating the current SBML configuration
+     */
+    public SBMLCommand loadSBMLConfiguration() {
+        Properties properties = loadProperties()
+        SBMLCommand sbml = new SBMLCommand()
+        sbml.validate = Boolean.parseBoolean(properties.getProperty("jummp.plugins.sbml.validation"))
+        return sbml
     }
 
     /**
@@ -365,6 +378,19 @@ class ConfigurationService implements InitializingBean {
     public void saveTriggerConfiguration(TriggerCommand trigger) {
         Properties properties = loadProperties()
         updateTriggerConfiguration(properties, trigger)
+        saveProperties(properties)
+    }
+
+    /**
+     * Updates the SBML configuration stored in the properties file.
+     * Other settings are not changed!
+     * It is important to remember that the settings will only be activated after
+     * a restart of the application!
+     * @param sbml The new SBML configuration
+     */
+    public void saveSBMLConfiguration(SBMLCommand sbml) {
+        Properties properties = loadProperties()
+        updateSBMLConfiguration(properties, sbml)
         saveProperties(properties)
     }
 
@@ -568,6 +594,18 @@ class ConfigurationService implements InitializingBean {
         properties.setProperty("jummp.authenticationHash.startRemoveOffset", trigger.startRemoveOffset.toString())
         properties.setProperty("jummp.authenticationHash.removeInterval", trigger.removeInterval.toString())
         properties.setProperty("jummp.authenticationHash.maxInactiveTime", trigger.maxInactiveTime.toString())
+    }
+
+    /**
+     * Updates the @p properties with the settings from @p sbml
+     * @param properties The existing properties
+     * @param sbml The SBML settings
+     */
+    private void updateSBMLConfiguration(Properties properties, SBMLCommand sbml) {
+        if(!sbml.validate()) {
+            return
+        }
+        properties.setProperty("jummp.plugins.sbml.validation", sbml.validation.toString())
     }
 
     /**
