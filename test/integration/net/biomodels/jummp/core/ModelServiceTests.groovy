@@ -1,5 +1,7 @@
 package net.biomodels.jummp.core
 
+import static org.junit.Assert.*
+import org.junit.*
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.core.model.ModelState
@@ -19,26 +21,26 @@ import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 
-class ModelServiceTests extends JummpIntegrationTestCase {
+class ModelServiceTests extends JummpIntegrationTest {
     def aclUtilService
     def modelService
     def modelFileFormatService
     def grailsApplication
 
-    protected void setUp() {
-        super.setUp()
-        mockLogging(VcsService, true)
+    @Before
+    void setUp() {
         createUserAndRoles()
     }
 
-    protected void tearDown() {
-        super.tearDown()
+    @After
+     void tearDown() {
         FileUtils.deleteDirectory(new File("target/vcs/git"))
         FileUtils.deleteDirectory(new File("target/vcs/exchange"))
         modelService.vcsService.vcsManager = null
         modelService.modelFileFormatService = modelFileFormatService
     }
 
+    @Test
     void testGetAllModelsSecurity() {
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -67,6 +69,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertEquals(1, modelService.getModelCount())
     }
 
+    @Test
     void testModelCount() {
         // no models, should return 0 for all users
         authenticateAsTestUser()
@@ -165,6 +168,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertEquals(6, modelService.getModelCount())
     }
 
+    @Test
     void testGetLatestRevision() {
         // create Model with one revision, without ACL
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
@@ -245,6 +249,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertNull(modelService.getLatestRevision(model))
     }
 
+    @Test
     @SuppressWarnings('UnusedVariable')
     void testGetAllModels() {
         for (int i=0; i<30; i++) {
@@ -332,6 +337,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertSame(Model.findByName("2"), testElements.first())
     }
 
+    @Test
     @SuppressWarnings('UnusedVariable')
     void testGetAllRevisions() {
         // create one model with one revision and no acl
@@ -474,17 +480,9 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(modelService.getAllRevisions(model2).isEmpty())
     }
 
+    @Test
     void testAddRevision() {
-        def formatControl = mockFor(ModelFileFormatService)
-        formatControl.demand.validate(6..6) { model, format ->
-            if (format.identifier == "UNKNOWN") {
-                // for unknown format we model true to make all tests pass
-                return true
-            } else {
-                return modelFileFormatService.validate(model, format)
-            }
-        }
-        modelService.modelFileFormatService = (ModelFileFormatService)formatControl.createMock()
+        modelService.modelFileFormatService = new UnknownModelFileFormatService(modelFileFormatService: modelFileFormatService)
         // create one model with one revision and no acl
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -645,6 +643,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         }
     }
 
+    @Test
     void testDeleteRestoreModel() {
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
         Revision rev1 = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -743,20 +742,9 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertEquals(ModelState.RELEASED, model.state)
     }
 
+    @Test
     void testUploadModel() {
-        def formatControl = mockFor(ModelFileFormatService, true)
-        formatControl.demand.validate(5..5) { model, format ->
-            if (format.identifier == "UNKNOWN") {
-                // for unknown format we model true to make all tests pass
-                return true
-            } else {
-                return modelFileFormatService.validate(model, format)
-            }
-        }
-        formatControl.demand.getPubMedAnnotation(3..3) { argument ->
-            modelFileFormatService.getPubMedAnnotation(argument)
-        }
-        modelService.modelFileFormatService = (ModelFileFormatService)formatControl.createMock()
+        modelService.modelFileFormatService = new UnknownModelFileFormatService(modelFileFormatService: modelFileFormatService)
         // anonymous user is not allowed to invoke method
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -884,20 +872,9 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         // the only solution were to modify comment to make the revision non-validate, but in future it will be a command object which validates
     }
 
+    @Test
     void testRetrieveModelFile() {
-        def formatControl = mockFor(ModelFileFormatService, true)
-        formatControl.demand.validate(2..2) { model, format ->
-            if (format.identifier == "UNKNOWN") {
-                // for unknown format we model true to make all tests pass
-                return true
-            } else {
-                return modelFileFormatService.validate(model, format)
-            }
-        }
-        formatControl.demand.getPubMedAnnotation(1..1) { rev ->
-            return modelFileFormatService.getPubMedAnnotation(rev)
-        }
-        modelService.modelFileFormatService = (ModelFileFormatService)formatControl.createMock()
+        modelService.modelFileFormatService = new UnknownModelFileFormatService(modelFileFormatService: modelFileFormatService)
         // first create the VCS
         File clone = new File("target/vcs/git")
         clone.mkdirs()
@@ -958,6 +935,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertEquals("Test\nTest\n", new String(bytes))
     }
 
+    @Test
     void testGrantReadAccess() {
         // create a model with some revisions
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
@@ -1043,6 +1021,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
 
     }
 
+    @Test
     void testGrantWriteAccess() {
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
         Revision rev1 = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -1075,6 +1054,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         // TODO: add checks to verify that uploading a new model revision is allowed
     }
 
+    @Test
     void testRevokeReadAccess() {
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
         Revision rev1 = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -1118,6 +1098,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertFalse(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
     }
 
+    @Test
     void testRevokeWriteAccess() {
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
         Revision rev1 = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -1167,6 +1148,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.READ))
     }
 
+    @Test
     void testDeleteModel() {
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("user"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -1201,6 +1183,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         }
     }
 
+    @Test
     void testRestoreModel() {
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("user"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -1231,6 +1214,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         }
     }
 
+    @Test
     void testDeleteRevision() {
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("user"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -1281,6 +1265,7 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         modelService.deleteRevision(revision2)
     }
 
+    @Test
     void testPublishModelRevision() {
         Model model = new Model(name: "test", vcsIdentifier: "test.xml")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("curator"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -1327,5 +1312,40 @@ class ModelServiceTests extends JummpIntegrationTestCase {
         shouldFail(IllegalArgumentException) {
             modelService.publishModelRevision(revision)
         }
+    }
+}
+
+/**
+ * Mock class for unknown Model File Formats.
+**/
+class UnknownModelFileFormatService {
+    def modelFileFormatService
+
+    ModelFormatTransportCommand registerModelFormat(String identifier, String name) {
+        return modelFileFormatService.registerModelFormat(identifier, name)
+    }
+
+    void handleModelFormat(ModelFormatTransportCommand format, String service) {
+        modelFileFormatService.handleModelFormat(format, service)
+    }
+
+    boolean validate(final File model, final ModelFormat format) {
+        if (format.identifier == "UNKNOWN") {
+            return true
+        } else {
+            return modelFileFormatService.validate(model, format)
+        }
+    }
+
+    String extractName(final File model, final ModelFormat format) {
+        return modelFileFormatService.extractName(model, format)
+    }
+
+    List<String> getAllAnnotationURNs(Revision rev) {
+        return modelFileFormatService.getAllAnnotationURNs(rev)
+    }
+
+    List<String> getPubMedAnnotation(Revision rev) {
+        return modelFileFormatService.getPubMedAnnotation(rev)
     }
 }
