@@ -24,7 +24,7 @@ class JummpIntegrationTest {
             code.call()
             fail("Exception of type ${exception} was expected")
         } catch (Exception e) {
-            if (e.class != exception) {
+            if (!exception.isAssignableFrom(e.class)) {
                 fail("Exception of type ${exception} expected but got ${e.class}")
             }
         }
