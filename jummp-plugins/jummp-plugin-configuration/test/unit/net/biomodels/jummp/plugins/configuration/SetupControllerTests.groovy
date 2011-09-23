@@ -98,6 +98,29 @@ class SetupControllerTests extends ControllerUnitTestCase {
         assertTrue(cmd.validate())
     }
 
+    void testDBusCommand() {
+        mockForConstraintsTests(DBusCommand)
+        // null should fail
+        DBusCommand cmd = new DBusCommand()
+        cmd.systemBus = null
+        assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["systemBus"])
+        // test for blanks
+        cmd = new DBusCommand()
+        cmd.systemBus
+        assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["systemBus"])
+        // test for null
+        cmd = new DBusCommand()
+        cmd.systemBus = null
+        assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["systemBus"])
+        // this test should work
+        cmd = new DBusCommand()
+        cmd.systemBus = false
+        assertTrue(cmd.validate())
+    }
+
     void testLdapCommand() {
         mockForConstraintsTests(LdapCommand)
         // null should fail
@@ -475,6 +498,21 @@ class SetupControllerTests extends ControllerUnitTestCase {
         cmd.maxInactiveTime = 10000
         cmd.removeInterval = 10000
         cmd.startRemoveOffset = 10000
+        assertTrue(cmd.validate())
+    }
+
+    void testSBMLCommand() {
+        mockForConstraintsTests(SBMLCommand)
+        // test for null
+        SBMLCommand cmd = new SBMLCommand()
+        cmd.validation = null
+        assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["validation"])
+        // blank should not validate
+        cmd.validation
+        assertEquals("nullable", cmd.errors["validation"])
+        // correct value should pass
+        cmd.validation = false
         assertTrue(cmd.validate())
     }
 }
