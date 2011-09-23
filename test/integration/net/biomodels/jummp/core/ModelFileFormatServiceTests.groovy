@@ -1,23 +1,25 @@
 package net.biomodels.jummp.core
 
-import grails.test.*
+import static org.junit.Assert.*
+import org.junit.*
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.plugins.sbml.SbmlService
 import net.biomodels.jummp.core.model.FileFormatService
 import org.apache.commons.io.FileUtils
 
-class ModelFileFormatServiceTests extends JummpIntegrationTestCase {
+class ModelFileFormatServiceTests {
     def modelFileFormatService
     def grailsApplication
-    protected void setUp() {
-        super.setUp()
+    @Before
+    void setUp() {
     }
 
-    protected void tearDown() {
-        super.tearDown()
+    @After
+    void tearDown() {
         grailsApplication.config.jummp.plugins.sbml.validate = false
     }
 
+    @Test
     void testServiceForFormat() {
         // unknown format should return null
         ModelFormat format = ModelFormat.findByIdentifier("SBML")
@@ -32,6 +34,7 @@ class ModelFileFormatServiceTests extends JummpIntegrationTestCase {
         assertTrue(formatService instanceof SbmlService)
     }
 
+    @Test
     void testValidate() {
         grailsApplication.config.jummp.plugins.sbml.validate = true
         // for unknown file type this should evaluate to false
@@ -73,6 +76,7 @@ class ModelFileFormatServiceTests extends JummpIntegrationTestCase {
         assertTrue(modelFileFormatService.validate(validSbml, ModelFormat.findByIdentifier("SBML")))
     }
 
+    @Test
     void testExtractName() {
         // for unknown format it's empty
         assertEquals("", modelFileFormatService.extractName(null, ModelFormat.findByIdentifier("UNKNOWN")))
