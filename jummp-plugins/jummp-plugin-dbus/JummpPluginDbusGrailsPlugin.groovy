@@ -1,5 +1,6 @@
 import net.biomodels.jummp.dbus.DBusManagerImpl
 import net.biomodels.jummp.dbus.DiffDataDBusAdapterImpl;
+import net.biomodels.jummp.dbus.ModelHistoryDBusAdapterImpl;
 import net.biomodels.jummp.dbus.UserDBusAdapterImpl
 import net.biomodels.jummp.dbus.ApplicationDBusAdapterImpl
 import net.biomodels.jummp.dbus.ModelDBusAdapterImpl
@@ -90,6 +91,12 @@ Brief description of the plugin.
                 authenticationHashService = ref("authenticationHashService")
                 diffDataService = ref("diffDataService")
                 objectName = "/DiffData"
+            }
+            modelHistoryDBusAdapter(ModelHistoryDBusAdapterImpl) {
+                dbusManager = dbusManager
+                authenticationHashService = ref("authenticationHashService")
+                modelHistoryService = ref("modelHistoryService")
+                objectName = "/ModelHistory"
             }
         }
         if (!(application.config.jummp.plugin.dbus.remote instanceof ConfigObject) && application.config.jummp.plugin.dbus.remote) {
