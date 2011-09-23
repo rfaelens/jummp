@@ -39,6 +39,19 @@ class ConfigurationController {
         }
     }
 
+    def dbus = {
+        render(view: 'configuration', model: [dbus: configurationService.loadDBusConfiguration(), title: "DBus", action: "saveDBus", template: 'dbus'])
+    }
+
+    def saveDBus = { DBusCommand dbus  ->
+        if (remote.hasErrors()) {
+            render(view: 'configuration', model: [dbus: remote, title: "DBus", action: "saveDBus", template: 'dbus'])
+        } else {
+            configurationService.saveDBusConfiguration(dbus)
+            render(view: "saved", model: [module: "DBus"])
+        }
+    }
+
     def ldap = {
         render(view: 'configuration', model: [ldap: configurationService.loadLdapConfiguration(), title: "LDAP", action: "saveLdap", template: 'ldap'])
     }
@@ -123,7 +136,35 @@ class ConfigurationController {
             render(view: "saved", model: [module: "Change/Reset Password"])
         }
     }
-    
+
+    def trigger = {
+        TriggerCommand cmd = configurationService.loadTriggerConfiguration()
+        render(view: 'configuration', model: [trigger: cmd, title: "Change Session Remove Intervals", action: "save", template: "trigger"])
+    }
+
+    def saveTrigger = { TriggerCommand cmd ->
+        if (cmd.hasErrors()) {
+            render(view: 'configuration', model: [trigger: cmd, title: "Change Session Remove Intervals", action: "saveTrigger", template: "trigger"])
+        } else {
+            configurationService.saveTriggerConfiguration(cmd)
+            render(view: "saved", model: [module: "Change Session Remove Intervals"])
+        }
+    }
+
+    def sbml = {
+        SBMLCommand cmd = configurationService.loadSBMLConfiguration()
+        render(view: 'configuration', model: [sbml: cmd, title: "Enable/Disable SBML Validation", action: "save", template: "sbml"])
+    }
+
+    def saveSBML = { SBMLCommand cmd ->
+        if (cmd.hasErrors()) {
+            render(view: 'configuration', model: [sbml: cmd, title: "Enable/Disable SBML Validation", action: "saveSBML", template: "sbml"])
+        } else {
+            configurationService.saveSBMLConfiguration(cmd)
+            render(view: "saved", model: [module: "Enable/Disable SBML Validation"])
+        }
+    }
+
     def bives = {
         BivesCommand cmd = configurationService.loadBivesConfiguration()
         render(view: 'configuration', model: [bives: cmd, title: "Model Versioning System - BiVeS", action: "saveBives", template: "bives"])
