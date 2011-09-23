@@ -135,8 +135,16 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         signalEvent("next")
         assertCurrentStateEquals("remoteRemote")
         assertTrue(getFlowScope().remote.hasErrors())
-        // correct values should transit to end state
-        setupController.params.jummpRemote = "jms"
+        // correct values should transit to dbus state
+        setupController.params.jummpRemote = "dbus"
+        signalEvent("next")
+        assertCurrentStateEquals("dbus")
+        // incorrect value should fail
+        setupController.params.systemBus = null
+        signalEvent("next")
+        assertCurrentStateEquals("dbus")
+        // correct value should transit to server state
+        setupController.params.systemBus = false
         signalEvent("next")
         assertCurrentStateEquals("server")
         // incorrect value should fail
@@ -159,10 +167,18 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         setupController.params.maxInactiveTime = 123
         setupController.params.removeInterval = 456
         setupController.params.startRemoveOffset = 789
-        // correct value should transit to bives state
+        // correct values should transit to dbus state
         setupController.params.maxInactiveTime = 1230
         setupController.params.removeInterval = 4560
         setupController.params.startRemoveOffset = 7890
+        signalEvent("next")
+        assertCurrentStateEquals("sbml")
+        // incorrect value should fail
+        setupController.params.validation
+        signalEvent("next")
+        assertCurrentStateEquals("sbml")
+        // correct value should transit to bives state
+        setupController.params.validation = false
         signalEvent("next")
         assertCurrentStateEquals("bives")
         // incorrect value should fail
@@ -250,7 +266,15 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         signalEvent("next")
         assertCurrentStateEquals("remoteRemote")
         // this value should transit
-        setupController.params.jummpRemote = "jms"
+        setupController.params.jummpRemote = "dbus"
+        signalEvent("next")
+        assertCurrentStateEquals("dbus")
+        // wrong value should not transit
+        setupController.params.systemBus =
+        signalEvent("next")
+        assertCurrentStateEquals("dbus")
+        // this value should transit
+        setupController.params.systemBus = false
         signalEvent("next")
         assertCurrentStateEquals("server")
     }
@@ -259,6 +283,9 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         // tests that all non-branching states work correctly
         setCurrentState("bives")
         assertCurrentStateEquals("bives")
+        // go back to sbml
+        signalEvent("back")
+        assertCurrentStateEquals("sbml")
         // go back to trigger
         signalEvent("back")
         assertCurrentStateEquals("trigger")
@@ -399,7 +426,10 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         setupController.params.jummpExportJms = true
         signalEvent("next")
         assertCurrentStateEquals("remoteRemote")
-        setupController.params.jummpRemote = "jms"
+        setupController.params.jummpRemote = "dbus"
+        signalEvent("next")
+        assertCurrentStateEquals("dbus")
+        setupController.params.systemBus = false
         signalEvent("next")
         assertCurrentStateEquals("server")
         setupController.params.url = "http://127.0.0.1:8080/jummp/"
@@ -409,8 +439,14 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         setupController.params.removeInterval = 1000
         setupController.params.maxInactiveTime = 1000
         signalEvent("next")
+        assertCurrentStateEquals("sbml")
+        setupController.params.validation = false
+        signalEvent("next")
         assertCurrentStateEquals("bives")
         setupController.params.diffDir = "/tmp/jummp/bives/diffDir"
+        // going back should end in sbml
+        signalEvent("back")
+        assertCurrentStateEquals("sbml")
         // going back should end in trigger
         signalEvent("back")
         assertCurrentStateEquals("trigger")

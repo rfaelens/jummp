@@ -1,14 +1,14 @@
 package net.biomodels.jummp.plugins.configuration
 
 /**
- * Command Object for validating DBus settings (system or session).
+ * Command Object for validating the SBML settings.
  * @author Jochen Schramm <j.schramm@dkfz-heidelberg.de>
  */
-class DBusCommand implements Serializable {
+class SBMLCommand implements Serializable {
     private static final long serialVersionUID = 1L
-    Boolean systemBus
+    Boolean validation
 
     static constraints = {
-        systemBus(blank: false, nullable: false)
-        }
+        validation(nullable: false)
+    }
 }

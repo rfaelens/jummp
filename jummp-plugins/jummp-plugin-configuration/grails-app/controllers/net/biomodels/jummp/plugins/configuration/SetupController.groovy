@@ -171,8 +171,20 @@ class SetupController {
                 } else {
                     return success()
                 }
-            }.to("bives")
+            }.to("sbml")
             on("back").to("server")
+        }
+
+        sbml {
+            on("next") { SBMLCommand cmd ->
+                flow.sbml = cmd
+                if (flow.sbml.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("bives")
+            on("back").to("trigger")
         }
 
         bives {
@@ -181,11 +193,11 @@ class SetupController {
                 if (flow.bives.hasErrors()) {
                     return error()
                 } else {
-                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote, flow.dbus, flow.trigger, flow.bives)
+                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote, flow.dbus, flow.trigger, flow.sbml, flow.bives)
                     return success()
                 }
             }.to("finish")
-            on("back").to("trigger")
+            on("back").to("sbml")
         }
 
         validateAuthenticationBackend {
