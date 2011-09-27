@@ -254,14 +254,6 @@ if (!(jummpConfig.jummp.export.dbus instanceof ConfigObject) && Boolean.parseBoo
     jummp.plugin.dbus.export = false
 }
 
-// When DBus is used this variable indicates whether the system or the session DBus is used
-// by JUMMP for the communication between core and web application.
-if (!(jummpConfig.jummp.plugins.dbus.systemBus instanceof ConfigObject)) {
-    jummp.plugins.dbus.systemBus = Boolean.parseBoolean(jummpConfig.jummp.plugins.dbus.systemBus)
-} else {
-    jummp.plugins.dbus.systemBus = false
-}
-
 // In case of LDAP there is no need to allow users to register with a password as we cannot (yet) add anything to the LDAP
 jummp.security.registration.ui.userPassword = !jummp.security.ldap.enabled
 
@@ -290,13 +282,6 @@ if (!(jummpConfig.jummp.authenticationHash.maxInactiveTime instanceof ConfigObje
     jummp.authenticationHash.maxInactiveTime = jummpConfig.jummp.authenticationHash.maxInactiveTime
 } else {
     jummp.authenticationHash.maxInactiveTime = 30*60*1000
-}
-
-// Enables or disables the validation of SBML files.
-if (!(jummpConfig.jummp.plugins.sbml.validation instanceof ConfigObject)) {
-    jummp.plugins.sbml.validation = Boolean.parseBoolean(jummpConfig.jummp.plugins.sbml.validation)
-} else {
-    jummp.plugins.sbml.validation = false
 }
 
 if (!(jummpConfig.jummp.threadPool.size instanceof ConfigObject)) {
