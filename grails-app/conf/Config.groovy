@@ -294,7 +294,7 @@ if (!(jummpConfig.jummp.authenticationHash.maxInactiveTime instanceof ConfigObje
 
 // Enables or disables the validation of SBML files.
 if (!(jummpConfig.jummp.plugins.sbml.validation instanceof ConfigObject)) {
-    jummp.plugins.sbml.validation = Boolean.parseBoolean(jummp.plugins.sbml.validation)
+    jummp.plugins.sbml.validation = Boolean.parseBoolean(jummpConfig.jummp.plugins.sbml.validation)
 } else {
     jummp.plugins.sbml.validation = false
 }
