@@ -347,10 +347,32 @@ class SetupControllerTests extends ControllerUnitTestCase {
         cmd.url = "test"
         assertFalse(cmd.validate())
         assertEquals("url", cmd.errors["url"])
+
+        // tests for weburl
+        // test for null
+        cmd = new ServerCommand()
+        cmd.url = "http://127.0.0.1:8080/jummp/"
+        cmd.weburl = null
+        assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["weburl"])
+        // test for blank
+        cmd = new ServerCommand()
+        cmd.url = "http://127.0.0.1:8080/jummp/"
+        cmd.weburl = ""
+        assertFalse(cmd.validate())
+        assertEquals("blank", cmd.errors["weburl"])
+        // test for not a url
+        cmd = new ServerCommand()
+        cmd.url = "http://127.0.0.1:8080/jummp/"
+        cmd.weburl = "test"
+        assertFalse(cmd.validate())
+        assertEquals("url", cmd.errors["weburl"])
+
         // test with proper settings
         // url fails for localhost, that's why 127.0.0.1 is used
         cmd = new ServerCommand()
         cmd.url = "http://127.0.0.1:8080/jummp/"
+        cmd.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         assertTrue(cmd.validate())
 
     }

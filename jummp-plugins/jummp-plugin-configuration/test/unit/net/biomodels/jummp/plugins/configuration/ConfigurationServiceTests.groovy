@@ -327,22 +327,27 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // passing in a correct command should update
         server = new ServerCommand()
         server.url = "http://127.0.0.1:8080/jummp/"
+        server.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         service.updateServerConfiguration(properties, server)
         assertFalse(properties.isEmpty())
-        assertEquals(1, properties.size())
+        assertEquals(2, properties.size())
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
+        assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
         // passing in different options should update
         server = new ServerCommand()
         server.url = "http://www.example.com/"
+        server.weburl = "http://www.example.org/"
         service.updateServerConfiguration(properties, server)
         assertFalse(properties.isEmpty())
-        assertEquals(1, properties.size())
+        assertEquals(2, properties.size())
         assertEquals("http://www.example.com/", properties.getProperty("jummp.server.url"))
+        assertEquals("http://www.example.org/", properties.getProperty("jummp.server.web.url"))
         // passing in incalid vommand should not update
         service.updateServerConfiguration(properties, new ServerCommand())
         assertFalse(properties.isEmpty())
-        assertEquals(1, properties.size())
+        assertEquals(2, properties.size())
         assertEquals("http://www.example.com/", properties.getProperty("jummp.server.url"))
+        assertEquals("http://www.example.org/", properties.getProperty("jummp.server.web.url"))
     }
 
     void testStoreConfiguration() {
@@ -402,6 +407,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertTrue(vcs.validate())
         ServerCommand server = new ServerCommand()
         server.url = "http://127.0.0.1:8080/jummp/"
+        server.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         assertTrue(server.validate())
         UserRegistrationCommand userRegistration = new UserRegistrationCommand()
         userRegistration.registration = true
@@ -440,7 +446,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         service.storeConfiguration(mysql, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives)
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(45, properties.size())
+        assertEquals(46, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -464,6 +470,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("true",      properties.getProperty("jummp.export.jms"))
         assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
+        assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
         assertEquals("1002",    properties.getProperty("jummp.authenticationHash.removeInterval"))
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
@@ -483,7 +490,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         service.storeConfiguration(mysql, null, vcs, null, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives)
         properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(21, properties.size())
+        assertEquals(22, properties.size())
         assertEquals("true",      properties.getProperty("jummp.firstRun"))
         assertEquals("target",    properties.getProperty("jummp.vcs.workingDirectory"))
         assertEquals("",          properties.getProperty("jummp.vcs.exchangeDirectory"))
@@ -496,6 +503,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("database",  properties.getProperty("jummp.security.authenticationBackend"))
         assertEquals("false",     properties.getProperty("jummp.security.ldap.enabled"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
+        assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
     }
 
     void testLoadStoreMysqlConfiguration() {
@@ -541,7 +549,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(45, properties.size())
+        assertEquals(46, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -560,6 +568,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("true",   properties.getProperty("jummp.export.jms"))
         assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
+        assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
         assertEquals("1002",    properties.getProperty("jummp.authenticationHash.removeInterval"))
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
@@ -604,7 +613,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(45, properties.size())
+        assertEquals(46, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -619,6 +628,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("manager",  properties.getProperty("jummp.security.ldap.managerDn"))
         assertEquals("server",   properties.getProperty("jummp.security.ldap.server"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
+        assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
         assertEquals("1002",    properties.getProperty("jummp.authenticationHash.removeInterval"))
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
@@ -670,7 +680,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(45, properties.size())
+        assertEquals(46, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -692,6 +702,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("true",   properties.getProperty("jummp.export.jms"))
         assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
+        assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
         assertEquals("1002",    properties.getProperty("jummp.authenticationHash.removeInterval"))
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
@@ -728,7 +739,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(45, properties.size())
+        assertEquals(46, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
         assertEquals("",           properties.getProperty("jummp.vcs.exchangeDirectory"))
@@ -751,6 +762,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("true",   properties.getProperty("jummp.export.jms"))
         assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
+        assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
         assertEquals("1002",    properties.getProperty("jummp.authenticationHash.removeInterval"))
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
@@ -793,7 +805,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(45, properties.size())
+        assertEquals(46, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("ldap",     properties.getProperty("jummp.security.authenticationBackend"))
@@ -814,6 +826,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("true",   properties.getProperty("jummp.export.jms"))
         assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
+        assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
         assertEquals("1002",    properties.getProperty("jummp.authenticationHash.removeInterval"))
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
@@ -840,9 +853,11 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // verify the configuration
         ServerCommand server = service.loadServerConfiguration()
         assertEquals("http://127.0.0.1:8080/jummp/", server.url)
+        assertEquals("http://127.0.0.1:8080/jummp-web-application/", server.weburl)
         // set new configuration
         server = new ServerCommand()
         server.url = "https://www.example.com/"
+        server.weburl = "https://www.example.org/"
         service.saveServerConfiguration(server)
         // verify new configuration
         ServerCommand server2 = service.loadServerConfiguration()
@@ -850,7 +865,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         // verify that other configuration options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(45, properties.size())
+        assertEquals(46, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -874,6 +889,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("true",   properties.getProperty("jummp.export.jms"))
         assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("https://www.example.com/", properties.getProperty("jummp.server.url"))
+        assertEquals("https://www.example.org/", properties.getProperty("jummp.server.web.url"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
         assertEquals("1002",    properties.getProperty("jummp.authenticationHash.removeInterval"))
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
@@ -922,6 +938,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertTrue(vcs.validate())
         ServerCommand server = new ServerCommand()
         server.url = "http://127.0.0.1:8080/jummp/"
+        server.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         assertTrue(server.validate())
         UserRegistrationCommand userRegistration = new UserRegistrationCommand()
         userRegistration.registration = true
@@ -960,7 +977,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         service.storeConfiguration(mysql, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives)
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(45, properties.size())
+        assertEquals(46, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -984,6 +1001,7 @@ class ConfigurationServiceTests extends GrailsUnitTestCase {
         assertEquals("true",   properties.getProperty("jummp.export.jms"))
         assertEquals("false",   properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
+        assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
         assertEquals("true",                  properties.getProperty("jummp.security.anonymousRegistration"))
         assertEquals("true",                  properties.getProperty("jummp.security.registration.email.send"))
         assertEquals("true",                  properties.getProperty("jummp.security.registration.email.sendToAdmin"))

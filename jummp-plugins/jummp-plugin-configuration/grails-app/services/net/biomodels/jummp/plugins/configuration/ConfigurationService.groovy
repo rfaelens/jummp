@@ -174,6 +174,7 @@ class ConfigurationService implements InitializingBean {
         Properties properties = loadProperties()
         ServerCommand server = new ServerCommand()
         server.url = properties.getProperty("jummp.server.url")
+        server.weburl = properties.getProperty("jummp.server.web.url")
         return server
     }
 
@@ -529,6 +530,7 @@ class ConfigurationService implements InitializingBean {
             return
         }
         properties.setProperty("jummp.server.url", server.url)
+        properties.setProperty("jummp.server.web.url", server.weburl)
     }
 
     /**

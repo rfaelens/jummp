@@ -119,12 +119,14 @@ class ConfigurationControllerTests extends ControllerUnitTestCase {
         // test for correct command
         cmd = new ServerCommand()
         cmd.url = "http://127.0.0.1:8080/jummp/"
+        cmd.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         cmd.validate()
         this.controller.saveServer(cmd)
         assertEquals("saved", this.controller.renderArgs["view"])
         assertEquals("Server", this.controller.renderArgs["model"].module)
         ServerCommand saved = this.controller.configurationService.loadServerConfiguration()
         assertEquals("http://127.0.0.1:8080/jummp/", saved.url)
+        assertEquals("http://127.0.0.1:8080/jummp-web-application/", saved.weburl)
     }
 
     void testSaveSvn() {

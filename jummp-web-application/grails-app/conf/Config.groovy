@@ -49,10 +49,18 @@ grails.logging.jul.usebridge = true
 // packages to include in Spring bean scanning
 grails.spring.bean.packages = []
 
+// theme name loaded from external configuration file
+Properties jummpProperties = new Properties()
+try {
+    jummpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"))
+} catch (Exception e) {
+    // ignore
+}
+
 // set per-environment serverURL stem for creating absolute links
 environments {
     production {
-        grails.serverURL = "http://www.changeme.com"
+        grails.serverURL = jummpProperties.getProperty("jummp.server.web.url", "http://localhost:8080/${appName}")
     }
     development {
         grails.serverURL = "http://localhost:8080/${appName}"
@@ -139,13 +147,6 @@ log4j = {
 grails.plugins.springsecurity.providerNames = ['remoteAuthenticationProvider', 'anonymousAuthenticationProvider', 'rememberMeAuthenticationProvider']
 grails.plugins.springsecurity.successHandler.alwaysUseDefault = true
 
-// theme name loaded from external configuration file
-Properties jummpProperties = new Properties()
-try {
-    jummpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"))
-} catch (Exception e) {
-    // ignore
-}
 if (jummpProperties.containsKey("jummp.theme")) {
     net.biomodels.jummp.webapp.theme = jummpProperties.getProperty("jummp.theme")
     // TODO: verify if it exists
