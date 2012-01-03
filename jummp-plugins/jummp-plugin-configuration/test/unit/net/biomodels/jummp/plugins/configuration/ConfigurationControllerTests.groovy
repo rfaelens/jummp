@@ -2,36 +2,36 @@ package net.biomodels.jummp.plugins.configuration
 
 import grails.test.*
 import org.apache.commons.io.FileUtils
+import org.junit.After
+import org.junit.Before
 
-class ConfigurationControllerTests extends ControllerUnitTestCase {
-    protected void setUp() {
-        super.setUp()
+@TestFor(ConfigurationController)
+class ConfigurationControllerTests {
+    @Before
+    void setUp() {
         // inject a ConfigurationService into the controller
         ConfigurationService service = new ConfigurationService()
         File configurationFile = new File("target/jummp.properties")
         FileUtils.touch(configurationFile)
         service.configurationFile = configurationFile
         service.afterPropertiesSet()
-        this.controller.configurationService = service
+        controller.configurationService = service
     }
-
-    protected void tearDown() {
-        super.tearDown()
+    @After
+    void tearDown() {
         FileUtils.deleteQuietly(new File("target/jummp.properties"))
     }
 
     void testSaveLdap() {
-        mockForConstraintsTests(LdapCommand)
         // test for incorrect command
-        LdapCommand cmd = new LdapCommand()
+        LdapCommand cmd = mockCommandObject(LdapCommand)
         cmd.validate()
-        this.controller.saveLdap(cmd)
-        assertEquals("configuration", this.controller.renderArgs["view"])
-        assertEquals("saveLdap", this.controller.renderArgs["model"].action)
-        assertEquals("ldap", this.controller.renderArgs["model"].template)
-        assertEquals(cmd, this.controller.renderArgs["model"].ldap)
+        controller.saveLdap(cmd)
+        assertEquals("/configuration/configuration", view)
+        assertEquals("ldap", model.template)
+        assertEquals(cmd, model.ldap)
         // test for correct command
-        cmd = new LdapCommand()
+        cmd = mockCommandObject(LdapCommand)
         cmd.ldapManagerDn = "user"
         cmd.ldapManagerPassword = "secure"
         cmd.ldapSearchBase = "search"
@@ -39,9 +39,9 @@ class ConfigurationControllerTests extends ControllerUnitTestCase {
         cmd.ldapSearchSubtree = true
         cmd.ldapServer = "localhost"
         cmd.validate()
-        this.controller.saveLdap(cmd)
-        assertEquals("saved", this.controller.renderArgs["view"])
-        assertEquals("LDAP", this.controller.renderArgs["model"].module)
+        controller.saveLdap(cmd)
+        assertEquals("/configuration/saved", view)
+        assertEquals("LDAP", model.module)
         LdapCommand saved = this.controller.configurationService.loadLdapConfiguration()
         assertTrue(saved.ldapSearchSubtree)
         assertEquals("filter", saved.ldapSearchFilter)
@@ -52,26 +52,24 @@ class ConfigurationControllerTests extends ControllerUnitTestCase {
     }
 
     void testSaveMysql() {
-        mockForConstraintsTests(MysqlCommand)
         // test for incorrect command
-        MysqlCommand cmd = new MysqlCommand()
+        MysqlCommand cmd = mockCommandObject(MysqlCommand)
         cmd.validate()
-        this.controller.saveMysql(cmd)
-        assertEquals("configuration", this.controller.renderArgs["view"])
-        assertEquals("saveMysql", this.controller.renderArgs["model"].action)
-        assertEquals("mysql", this.controller.renderArgs["model"].template)
-        assertEquals(cmd, this.controller.renderArgs["model"].mysql)
+        controller.saveMysql(cmd)
+        assertEquals("/configuration/configuration", view)
+        assertEquals("mysql", model.template)
+        assertEquals(cmd, model.mysql)
         // test for correct command
-        cmd = new MysqlCommand()
+        cmd = mockCommandObject(MysqlCommand)
         cmd.database = "jummp"
         cmd.password = "secure"
         cmd.port = 3306
         cmd.server = "localhost"
         cmd.username = "user"
         cmd.validate()
-        this.controller.saveMysql(cmd)
-        assertEquals("saved", this.controller.renderArgs["view"])
-        assertEquals("MySQL", this.controller.renderArgs["model"].module)
+        controller.saveMysql(cmd)
+        assertEquals("/configuration/saved", view)
+        assertEquals("MySQL", model.module)
         MysqlCommand saved = this.controller.configurationService.loadMysqlConfiguration()
         assertEquals(3306, saved.port)
         assertEquals("jummp", saved.database)
@@ -82,24 +80,22 @@ class ConfigurationControllerTests extends ControllerUnitTestCase {
     }
 
     void testSaveRemote() {
-        mockForConstraintsTests(RemoteCommand)
         // test for incorrect command
-        RemoteCommand cmd = new RemoteCommand()
+        RemoteCommand cmd = mockCommandObject(RemoteCommand)
         cmd.validate()
-        this.controller.saveRemote(cmd)
-        assertEquals("configuration", this.controller.renderArgs["view"])
-        assertEquals("saveRemote", this.controller.renderArgs["model"].action)
-        assertEquals("remote", this.controller.renderArgs["model"].template)
-        assertEquals(cmd, this.controller.renderArgs["model"].remote)
+        controller.saveRemote(cmd)
+        assertEquals("/configuration/configuration", view)
+        assertEquals("remote", model.template)
+        assertEquals(cmd, model.remote)
         // test for correct command
-        cmd = new RemoteCommand()
+        cmd = mockCommandObject(RemoteCommand)
         cmd.jummpRemote="jms"
         cmd.jummpExportDbus=false
         cmd.jummpExportJms=true
         cmd.validate()
-        this.controller.saveRemote(cmd)
-        assertEquals("saved", this.controller.renderArgs["view"])
-        assertEquals("Remote", this.controller.renderArgs["model"].module)
+        controller.saveRemote(cmd)
+        assertEquals("/configuration/saved", view)
+        assertEquals("Remote", model.module)
         RemoteCommand saved = this.controller.configurationService.loadRemoteConfiguration()
         assertEquals("jms", saved.jummpRemote)
         assertFalse(saved.jummpExportDbus)
@@ -107,67 +103,61 @@ class ConfigurationControllerTests extends ControllerUnitTestCase {
     }
 
     void testSaveServer() {
-        mockForConstraintsTests(ServerCommand)
         // test for incorrect command
-        ServerCommand cmd = new ServerCommand()
+        ServerCommand cmd = mockCommandObject(ServerCommand)
         cmd.validate()
-        this.controller.saveServer(cmd)
-        assertEquals("configuration", this.controller.renderArgs["view"])
-        assertEquals("saveServer", this.controller.renderArgs["model"].action)
-        assertEquals("server", this.controller.renderArgs["model"].template)
-        assertEquals(cmd, this.controller.renderArgs["model"].server)
+        controller.saveServer(cmd)
+        assertEquals("/configuration/configuration", view)
+        assertEquals("server", model.template)
+        assertEquals(cmd, model.server)
         // test for correct command
-        cmd = new ServerCommand()
+        cmd = mockCommandObject(ServerCommand)
         cmd.url = "http://127.0.0.1:8080/jummp/"
         cmd.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         cmd.validate()
-        this.controller.saveServer(cmd)
-        assertEquals("saved", this.controller.renderArgs["view"])
-        assertEquals("Server", this.controller.renderArgs["model"].module)
+        controller.saveServer(cmd)
+        assertEquals("/configuration/saved", view)
+        assertEquals("Server", model.module)
         ServerCommand saved = this.controller.configurationService.loadServerConfiguration()
         assertEquals("http://127.0.0.1:8080/jummp/", saved.url)
         assertEquals("http://127.0.0.1:8080/jummp-web-application/", saved.weburl)
     }
 
     void testSaveSvn() {
-        mockForConstraintsTests(SvnCommand)
-        SvnCommand cmd = new SvnCommand()
+        SvnCommand cmd = mockCommandObject(SvnCommand)
         cmd.validate()
-        this.controller.saveSvn(cmd)
-        assertEquals("configuration", this.controller.renderArgs["view"])
-        assertEquals("saveSvn", this.controller.renderArgs["model"].action)
-        assertEquals("svn", this.controller.renderArgs["model"].template)
-        assertEquals(cmd, this.controller.renderArgs["model"].svn)
+        controller.saveSvn(cmd)
+        assertEquals("/configuration/configuration", view)
+        assertEquals("svn", model.template)
+        assertEquals(cmd, model.svn)
         // test for correct command
-        cmd = new SvnCommand()
+        cmd = mockCommandObject(SvnCommand)
         cmd.localRepository = "target"
         cmd.validate()
-        this.controller.saveSvn(cmd)
-        assertEquals("saved", this.controller.renderArgs["view"])
-        assertEquals("Subversion", this.controller.renderArgs["model"].module)
+        controller.saveSvn(cmd)
+        assertEquals("/configuration/saved", view)
+        assertEquals("Subversion", model.module)
         SvnCommand saved = this.controller.configurationService.loadSvnConfiguration()
         assertEquals("target", saved.localRepository)
     }
 
     void testSaveVcs() {
-        mockForConstraintsTests(VcsCommand)
         // test for incorrect command
-        VcsCommand cmd = new VcsCommand()
+        VcsCommand cmd = mockCommandObject(VcsCommand)
         cmd.validate()
-        this.controller.saveVcs(cmd)
-        assertEquals("configuration", this.controller.renderArgs["view"])
-        assertEquals("saveVcs", this.controller.renderArgs["model"].action)
-        assertEquals("vcs", this.controller.renderArgs["model"].template)
-        assertEquals(cmd, this.controller.renderArgs["model"].vcs)
+        controller.saveVcs(cmd)
+        assertEquals("/configuration/configuration", view)
+        assertEquals("vcs", model.template)
+        assertEquals(cmd, model.vcs)
         // test for correct command
-        cmd = new VcsCommand()
+        cmd = mockCommandObject(VcsCommand)
         cmd.vcs = "svn"
         cmd.exchangeDirectory = ""
         cmd.workingDirectory = ""
         cmd.validate()
-        this.controller.saveVcs(cmd)
-        assertEquals("saved", this.controller.renderArgs["view"])
-        assertEquals("Version Control System", this.controller.renderArgs["model"].module)
+        controller.saveVcs(cmd)
+        assertEquals("/configuration/saved", view)
+        assertEquals("Version Control System", model.module)
         VcsCommand saved = this.controller.configurationService.loadVcsConfiguration()
         assertEquals("svn", saved.vcs)
     }
