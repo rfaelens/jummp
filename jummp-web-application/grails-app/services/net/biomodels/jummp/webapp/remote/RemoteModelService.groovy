@@ -1,7 +1,6 @@
 package net.biomodels.jummp.webapp.remote
 
 import net.biomodels.jummp.remote.RemoteModelAdapter
-import net.biomodels.jummp.webapp.ast.RemoteService
 
 /**
  * @short Delegating Service to RemoteModelAdapter.
