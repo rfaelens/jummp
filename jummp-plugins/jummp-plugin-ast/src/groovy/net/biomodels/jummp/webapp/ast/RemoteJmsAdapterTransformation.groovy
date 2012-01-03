@@ -6,6 +6,7 @@ import org.codehaus.groovy.ast.ASTNode
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.FieldNode
 import org.codehaus.groovy.ast.MethodNode
+import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.VariableScope
 import org.codehaus.groovy.ast.expr.ArgumentListExpression
 import org.codehaus.groovy.ast.expr.ClassExpression
@@ -62,6 +63,10 @@ class RemoteJmsAdapterTransformation implements ASTTransformation {
 
         // generate all the methods of the interface
         serviceInterface.getMethods().each {
+            if (classNode.getMethod(it.name, it.parameters)) {
+                // method already in class
+                return
+            }
             List arguments = []
             // the methods arguments become parameters
             arguments << new ConstantExpression(it.name)
@@ -74,6 +79,14 @@ class RemoteJmsAdapterTransformation implements ASTTransformation {
                 }
                 arguments << list
             }
+            def params = new Parameter[it.parameters.length]
+            it.parameters.eachWithIndex { Parameter param, int i ->
+                ClassNode paramClass = new ClassNode(param.type.name, param.type.modifiers, param.type.superClass)
+                if (param.type.name == "long" || param.type.name == "int" || param.type.name == "boolean") {
+                    paramClass = param.type
+                }
+                params[i] = new Parameter(paramClass, param.name)
+            }
             Statement statement = null
             if (it.returnType.name == Void.TYPE.toString()) {
                 statement = voidMethod(new ArgumentListExpression(arguments))
@@ -81,7 +94,11 @@ class RemoteJmsAdapterTransformation implements ASTTransformation {
                 statement = returningMethod(new ArgumentListExpression(arguments), it.returnType)
             }
             // the complete method: same name, same return type, same parameters, same exceptions and either just a method call (return type void) or a return statement
-            MethodNode method = new MethodNode(it.name, Opcodes.ACC_PUBLIC, it.returnType, it.parameters, it.exceptions, statement)
+            ClassNode returnType = new ClassNode(it.returnType.name, it.returnType.modifiers, it.returnType.superClass)
+            if (it.returnType.name == "long" || it.returnType.name == "int" || it.returnType.name == "boolean" || it.returnType.name == "void" || it.returnType.name == "[B") {
+                returnType = it.returnType
+            }
+            MethodNode method = new MethodNode(it.name, Opcodes.ACC_PUBLIC, returnType, params, it.exceptions, statement)
             // add Profiled annotation to method. Annotation has a "tag" with String value: className.methodName
             // looks like: @Profiled(tag="${classNode.getNameWithoutPackage()}.${it.name}")
             AnnotationNode profiled = new AnnotationNode(new ClassNode(this.getClass().classLoader.loadClass("org.perf4j.aop.Profiled")))

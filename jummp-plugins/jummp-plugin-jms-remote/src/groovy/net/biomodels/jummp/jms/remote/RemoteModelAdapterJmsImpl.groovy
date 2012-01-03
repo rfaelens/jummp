@@ -32,4 +32,22 @@ class RemoteModelAdapterJmsImpl extends AbstractJmsRemoteAdapter implements Remo
     protected String getAdapterServiceName() {
         return ADAPTER_SERVICE_NAME
     }
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getAllModels")
+    public List<ModelTransportCommand> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sort) {
+        def retVal = send("getAllModels", [offset, count, sortOrder, sort])
+        validateReturnValue(retVal, List)
+        return (List)retVal
+    }
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getAllModels")
+    public List<ModelTransportCommand> getAllModels(int offset, int count, ModelListSorting sort) {
+        def retVal = send("getAllModels", [offset, count, sort])
+        validateReturnValue(retVal, List)
+        return (List)retVal
+    }
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getAllModels")
+    public List<ModelTransportCommand> getAllModels(ModelListSorting sort) {
+        def retVal = send("getAllModels", [sort])
+        validateReturnValue(retVal, List)
+        return (List)retVal
+    }
 }
