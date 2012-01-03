@@ -10,9 +10,8 @@ import net.biomodels.jummp.webapp.ast.RemoteService
  * @date 04.07.2011
  * @year 2011
  */
-@RemoteService("RemoteDiffDataAdapter")
 class RemoteDiffDataService implements RemoteDiffDataAdapter {
 
     static transactional = true
-	RemoteDiffDataAdapter remoteDiffDataAdapter
+    @Delegate RemoteDiffDataAdapter remoteDiffDataAdapter
 }

@@ -11,9 +11,8 @@ import net.biomodels.jummp.webapp.ast.RemoteService
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-@RemoteService("RemoteUserAdapter")
 class RemoteUserService implements RemoteUserAdapter {
 
     static transactional = true
-    RemoteUserAdapter remoteUserAdapter
+    @Delegate RemoteUserAdapter remoteUserAdapter
 }
