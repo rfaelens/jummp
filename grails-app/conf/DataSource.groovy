@@ -8,7 +8,7 @@ try {
     databaseProperties.setProperty("jummp.database.url", "jdbc:mysql://${server}:${port}/${database}")
     databaseProperties.setProperty("jummp.database.pooled", "true")
     databaseProperties.setProperty("jummp.database.dbCreate", "update")
-    databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.MySQLInnoDBDialect")
+    databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.MySQL5InnoDBDialect")
     environments {
         test {
             throw new Exception("Test system")
