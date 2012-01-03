@@ -43,9 +43,6 @@ grails.project.dependency.resolution = {
         runtime(":grails-plugin-jummp-plugin-dbus:latest.integration") {
             changing = true
         }
-        compile(":jummp-ast:latest.integration") {
-            changing = true
-        }
 
         // jms
         runtime('org.apache.activemq:activeio-core:3.1.2',

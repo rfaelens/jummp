@@ -42,9 +42,6 @@ grails.project.dependency.resolution = {
         compile(":grails-plugin-jummp-plugin-remote:latest.integration") {
             changing = true
         }
-        compile(":jummp-ast:latest.integration") {
-            changing = true
-        }
 
         test 'hsqldb:hsqldb:1.8.0.10'
     }

@@ -20,19 +20,6 @@
         </classpath>
     </taskdef>
 
-    <!--Compiles the AST Transformation code-->
-    <target name="ast-compile">
-        <echo message="Compiling ast transformations"/>
-        <mkdir dir="${basedir}/ast-build"/>
-        <groovyc srcdir="${basedir}/jummp-plugins/jummp-plugin-ast/src/groovy/" destdir="${basedir}/ast-build"/>
-    </target>
-
-    <!--Generates a jar from the compiled AST Transformation and places it into the core's and web application's lib folder-->
-    <target name="ast-jar" depends="ast-compile">
-        <jar destfile="${basedir}/pluginlibs/jummp-ast-0.1.jar" basedir="${basedir}/ast-build"/>
-        <delete dir="${basedir}/ast-build"/>
-    </target>
-
 <!-- Target to execute the testing of one plugin. Used by antcall from test-plugins -->
     <target name="test-plugin">
         <echo message="Running tests for Plugin ${plugin}"/>
@@ -49,7 +36,7 @@
     </target>
 
 <!-- Runs test-app in all plugins (except JMS) -->
-    <target name="test-plugins" depends="ast-jar">
+    <target name="test-plugins">
         <antcall target="test-plugin">
             <param name="plugin" value="configuration"/>
         </antcall>
@@ -72,7 +59,7 @@
     </target>
 
 <!-- Runs test-app in the core application -->
-    <target name="test-core" depends="ast-jar">
+    <target name="test-core">
         <grails command="test-app" args="-xml ${coverage}" cwd="${basedir}">
             <sysprops>
                 <sysproperty key="grails.work.dir" value="${grailsWorkdir}"/>
@@ -114,7 +101,7 @@
         <grails command="jummp-plugin" cwd="${pluginBaseDir}/jummp-plugins/jummp-plugin-${plugin}"/>
     </target>
 
-    <target name="packagePlugins" depends="ast-jar">
+    <target name="packagePlugins">
         <antcall target="packagePlugin">
             <param name="pluginBaseDir" value="${basedir}"/>
             <param name="plugin" value="security"/>
@@ -166,7 +153,7 @@
     </target>
 
     <!-- Copies the sources to a build directory excluding not needed files and directories -->
-    <target name="copy" depends="ast-jar">
+    <target name="copy">
         <property name="builddir" value="${basedir}/build"/>
         <delete dir="${builddir}"/>
         <mkdir dir="${builddir}"/>
@@ -271,7 +258,7 @@
     </target>
 
 <!-- Performs the actual building of war file using grails war. Cleans before building -->
-    <target name="build-war" depends="remove-grails-plugins,ast-jar">
+    <target name="build-war" depends="remove-grails-plugins">
         <grails command="clean" cwd="${builddir}">
             <sysprops>
                 <sysproperty key="grails.work.dir" value="${grailsWorkdir}"/>
@@ -283,7 +270,7 @@
             </sysprops>
         </grails>
     </target>
-    <target name="build-webapplication-war" depends="remove-grails-plugins,ast-jar">
+    <target name="build-webapplication-war" depends="remove-grails-plugins">
         <grails command="clean" cwd="${builddir}/jummp-web-application">
             <sysprops>
                 <sysproperty key="grails.work.dir" value="${grailsWorkdir}"/>
