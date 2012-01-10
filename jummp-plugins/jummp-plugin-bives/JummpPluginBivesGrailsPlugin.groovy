@@ -29,6 +29,7 @@ Brief description of the plugin.
     def doWithSpring = {
 		bivesEventListener(net.biomodels.jummp.plugins.bives.RevisionCreatedListener) {
 			modelDelegateService = ref("modelDelegateService")
+            diffDataService = ref("diffDataService")
 		}
 		diffDataProvider(net.biomodels.jummp.plugins.bives.DiffDataProvider) { bean ->
 			bean.autowire = "byName"
