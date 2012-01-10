@@ -2,14 +2,8 @@ package net.biomodels.jummp.model
 
 import grails.test.*
 
-class ModelTests extends GrailsUnitTestCase {
-    protected void setUp() {
-        super.setUp()
-    }
-
-    protected void tearDown() {
-        super.tearDown()
-    }
+@TestFor(Model)
+class ModelTests {
 
     void testConstraints() {
         mockForConstraintsTests(Model, [new Model(name: "test", vcsIdentifier: "vcs")])
