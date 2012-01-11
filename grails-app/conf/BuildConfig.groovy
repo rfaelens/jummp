@@ -147,3 +147,30 @@ grails.war.resources = { stagingDir ->
   // need to remove unix socket JNI library as incompatible with placing inside web-app
   delete(file:"${stagingDir}/WEB-INF/lib/unix-0.5.jar")
 }
+
+codenarc.reports = {
+    CodeNarcXmlReport('xml') {
+        outputFile = 'target/CodeNarc-Report.xml'
+        title = "JUMMP CodeNarc Report"
+    }
+    CodeNarcHtmlReport('html') {
+        outputFile = 'target/CodeNarc-Report.html'
+        title = "JUMMP CodeNarc Report"
+    }
+}
+codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
+                             'jummp-plugins/*/grails-app/controllers',
+                             'jummp-plugins/*/grails-app/domain',
+                             'jummp-plugins/*/grails-app/services',
+                             'jummp-plugins/*/grails-app/taglib',
+                             'jummp-plugins/*/grails-app/utils',
+                             'jummp-plugins/*/test/unit',
+                             'jummp-plugins/*/test/integration',
+                             'jummp-web-application/src/groovy',
+                             'jummp-web-application/grails-app/controllers',
+                             'jummp-web-application/grails-app/domain',
+                             'jummp-web-application/grails-app/services',
+                             'jummp-web-application/grails-app/taglib',
+                             'jummp-web-application/grails-app/utils',
+                             'jummp-web-application/test/unit',
+                             'jummp-web-application/test/integration']

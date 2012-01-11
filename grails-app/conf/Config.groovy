@@ -387,24 +387,5 @@ environments {
 if (pluginsToExclude) {
     grails.plugin.exclude = pluginsToExclude
 }
-
-// Codenarc settings
-codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
-                             'jummp-plugins/*/grails-app/controllers',
-                             'jummp-plugins/*/grails-app/domain',
-                             'jummp-plugins/*/grails-app/services',
-                             'jummp-plugins/*/grails-app/taglib',
-                             'jummp-plugins/*/grails-app/utils',
-                             'jummp-plugins/*/test/unit',
-                             'jummp-plugins/*/test/integration',
-                             'jummp-web-application/src/groovy',
-                             'jummp-web-application/grails-app/controllers',
-                             'jummp-web-application/grails-app/domain',
-                             'jummp-web-application/grails-app/services',
-                             'jummp-web-application/grails-app/taglib',
-                             'jummp-web-application/grails-app/utils',
-                             'jummp-web-application/test/unit',
-                             'jummp-web-application/test/integration']
-gmetrics.extraIncludeDirs = codenarc.extraIncludeDirs
 // fails the ant test script
 grails.enable.native2ascii=false
