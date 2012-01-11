@@ -1,7 +1,6 @@
 package net.biomodels.jummp.jms.remote
 
 import org.perf4j.aop.Profiled
-import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.remote.RemoteModelAdapter

@@ -2,14 +2,11 @@ package net.biomodels.jummp.core
 
 import static org.junit.Assert.*
 import org.junit.*
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
 import net.biomodels.jummp.plugins.git.GitManagerFactory
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.plugins.security.UserRole
 
 import net.biomodels.jummp.core.model.ModelTransportCommand
-import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
@@ -20,11 +17,6 @@ import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 
 import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.authentication.AnonymousAuthenticationToken
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.authority.GrantedAuthorityImpl
-import org.springframework.security.core.context.SecurityContextHolder
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 
 class ModelHistoryServiceTests extends JummpIntegrationTest {
     /**

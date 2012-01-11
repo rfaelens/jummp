@@ -1,7 +1,5 @@
 package net.biomodels.jummp.dbus
 
-import java.util.List
-
 import net.biomodels.jummp.dbus.model.DBusModel
 import net.biomodels.jummp.webapp.ast.DBusAdapter
 import net.biomodels.jummp.webapp.ast.DBusMethod

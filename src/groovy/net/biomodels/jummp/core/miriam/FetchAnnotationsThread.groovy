@@ -4,7 +4,6 @@ import net.biomodels.jummp.model.Revision
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import net.biomodels.jummp.model.Model
-import org.springframework.dao.DataIntegrityViolationException
 
 /**
  * @short Thread to resolve all MIRIAM annotations used in a Revision.

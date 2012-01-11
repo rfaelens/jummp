@@ -1,7 +1,5 @@
 package net.biomodels.jummp.core
 
-import org.springframework.security.access.AccessDeniedException
-
 import static org.junit.Assert.*
 import org.junit.*
 import net.biomodels.jummp.core.miriam.MiriamDatatype

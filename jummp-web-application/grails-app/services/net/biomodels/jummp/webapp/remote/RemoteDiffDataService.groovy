@@ -1,7 +1,6 @@
 package net.biomodels.jummp.webapp.remote
 
 import net.biomodels.jummp.remote.RemoteDiffDataAdapter
-import net.biomodels.jummp.remote.RemoteSbmlAdapter
 /**
  * 
  * //TODO add description for class RemoteDiffService.groovy

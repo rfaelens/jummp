@@ -1,10 +1,6 @@
 package net.biomodels.jummp.plugins.bives
 
-import java.lang.reflect.UndeclaredThrowableException;
-
-import net.biomodels.jummp.core.bives.DiffNotExistingException;
-import net.biomodels.jummp.core.model.RevisionTransportCommand
-
+import net.biomodels.jummp.core.bives.DiffNotExistingException
 
 /**
  * 

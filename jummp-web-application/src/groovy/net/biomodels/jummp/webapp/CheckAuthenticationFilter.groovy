@@ -11,8 +11,6 @@ import javax.servlet.ServletResponse
 import org.springframework.web.filter.GenericFilterBean
 import net.biomodels.jummp.core.user.JummpAuthentication
 import org.springframework.security.core.Authentication
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository
-import org.springframework.security.web.context.SecurityContextRepository
 
 /**
  * @short Custom filter clearing context, if a user's authentication is removed.

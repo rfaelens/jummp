@@ -12,8 +12,6 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.user.JummpAuthentication
-import net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl
-import net.biomodels.jummp.jms.remote.RemoteModelAdapterJmsImpl
 
 /**
  * @short Test suite for the CoreAdapterService.

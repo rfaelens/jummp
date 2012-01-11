@@ -3,12 +3,10 @@ package net.biomodels.jummp.dbus.remote
 import net.biomodels.jummp.core.user.UserManagementException
 import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.dbus.UserDBusAdapter
-import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.remote.RemoteUserAdapter
 import org.perf4j.aop.Profiled
 import org.springframework.beans.factory.InitializingBean
-import net.biomodels.jummp.remote.AbstractRemoteAdapter
 import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
 
 /**

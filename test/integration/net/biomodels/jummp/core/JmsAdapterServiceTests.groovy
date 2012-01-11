@@ -23,7 +23,6 @@ import org.springframework.security.core.AuthenticationException
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
-import net.biomodels.jummp.jms.ApplicationJmsAdapterService
 import net.biomodels.jummp.core.user.JummpAuthentication
 import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 import java.util.concurrent.Callable

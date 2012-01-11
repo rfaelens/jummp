@@ -1,6 +1,5 @@
 package net.biomodels.jummp.dbus.remote
 
-import net.biomodels.jummp.remote.AbstractRemoteAdapter
 import net.biomodels.jummp.remote.RemoteSbmlAdapter
 import net.biomodels.jummp.dbus.SbmlDBusAdapter
 import org.springframework.beans.factory.InitializingBean
