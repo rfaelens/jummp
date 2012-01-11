@@ -37,7 +37,7 @@ grails.project.dependency.resolution = {
         runtime 'org.codehaus.staxmate:staxmate:2.0.0'
         runtime 'org.w3c.jigsaw:jigsaw:2.2.6'
         runtime 'com.thoughtworks.xstream:xstream:1.3.1'
-        compile ":jsbml:0.8-b2"
+        compile ":jsbml:0.8-rc1"
         compile ":sbfc:1.1-20110624-109"
         compile ":biojava-ontology:1.7"
 

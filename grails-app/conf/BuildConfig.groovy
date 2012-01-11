@@ -67,7 +67,7 @@ grails.project.dependency.resolution = {
         }
         // dependencies of plugins
         // sbml
-        runtime ":jsbml:0.8-b2"
+        runtime ":jsbml:0.8-rc1"
         runtime ":sbfc:1.1-20110624-109"
         runtime ":biojava-ontology:1.7"
         // miriam lib required by sbml converters
