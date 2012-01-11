@@ -7,6 +7,7 @@ import net.biomodels.jummp.webapp.ast.DBusMethod
  * @short Concrete Implementation of SbmlDBusAdapter.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
+@SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter']
 @DBusAdapter(interfaceName="SbmlDBusAdapter", serviceName="sbmlService")
 public class SbmlDBusAdapterImpl extends AbstractDBusAdapter implements SbmlDBusAdapter {
     /**

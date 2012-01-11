@@ -17,6 +17,7 @@ import net.biomodels.jummp.webapp.ast.DBusMethod;
  * @short Concrete Implementation of ModelDBusAdapter.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
+@SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter']
 @DBusAdapter(interfaceName="ModelDBusAdapter", serviceName="modelDelegateService")
 public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDBusAdapter {
     /**

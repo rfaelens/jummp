@@ -15,6 +15,7 @@ import net.biomodels.jummp.core.bives.DiffNotExistingException
  * @date 05.07.2011
  * @year 2011
  */
+@SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter']
 @DBusAdapter(interfaceName="DiffDataDBusAdapter", serviceName="diffDataService")
 public class DiffDataDBusAdapterImpl extends AbstractDBusAdapter implements DiffDataDBusAdapter {
 	

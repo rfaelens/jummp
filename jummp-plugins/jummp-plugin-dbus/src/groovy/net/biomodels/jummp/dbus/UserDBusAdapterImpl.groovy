@@ -12,6 +12,7 @@ import net.biomodels.jummp.webapp.ast.DBusMethod
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
+@SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter']
 @DBusAdapter(interfaceName="UserDBusAdapter", serviceName="userService")
 public class UserDBusAdapterImpl extends AbstractDBusAdapter implements UserDBusAdapter {
     /**
