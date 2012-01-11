@@ -112,7 +112,7 @@ grails.project.dependency.resolution = {
         provided ":unix:0.5"
 
         //git
-        runtime 'org.eclipse.jgit:org.eclipse.jgit:1.0.0.201106090707-r'
+        runtime 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
     }
 
     plugins {
