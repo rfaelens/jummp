@@ -2,7 +2,6 @@ package net.biomodels.jummp.plugins.sbml
 
 import grails.test.GrailsUnitTestCase
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import org.apache.commons.io.IOUtils
 import org.sbml.jsbml.*
 
 class SubmodelGeneratorTests extends GrailsUnitTestCase {

@@ -4,13 +4,11 @@ import net.biomodels.jummp.remote.RemoteJummpApplicationAdapter
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.Authentication
 import net.biomodels.jummp.core.JummpException
-import org.freedesktop.dbus.DBusConnection
 import net.biomodels.jummp.dbus.ApplicationDBusAdapter
 import org.springframework.beans.factory.InitializingBean
 import org.perf4j.aop.Profiled
 import net.biomodels.jummp.core.user.JummpAuthentication
 import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
-import org.freedesktop.dbus.exceptions.DBusExecutionException
 
 /**
  * @short DBus Remote Adapter to JummpApplication.

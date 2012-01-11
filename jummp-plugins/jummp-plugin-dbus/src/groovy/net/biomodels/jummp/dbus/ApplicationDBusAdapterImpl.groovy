@@ -1,12 +1,9 @@
 package net.biomodels.jummp.dbus;
 
-import groovy.util.ConfigObject;
 import net.biomodels.jummp.dbus.authentication.*;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-
-import java.util.Map;
 
 /**
  * @short Concrete implementation of ApplicationDBusAdapter.

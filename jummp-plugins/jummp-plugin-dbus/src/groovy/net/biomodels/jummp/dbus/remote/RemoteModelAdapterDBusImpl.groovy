@@ -8,7 +8,6 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.dbus.ModelDBusAdapter
 import net.biomodels.jummp.remote.AbstractRemoteAdapter
 import net.biomodels.jummp.remote.RemoteModelAdapter
-import org.freedesktop.dbus.DBusConnection
 import org.perf4j.aop.Profiled
 import org.springframework.beans.factory.InitializingBean
 import org.apache.commons.io.FileUtils

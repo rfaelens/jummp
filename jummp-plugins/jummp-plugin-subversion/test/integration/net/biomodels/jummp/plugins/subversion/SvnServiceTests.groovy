@@ -4,7 +4,6 @@ import grails.test.*
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 import org.apache.commons.io.FileUtils
 import javax.servlet.ServletContext
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory
 import net.biomodels.jummp.core.vcs.VcsManager
 

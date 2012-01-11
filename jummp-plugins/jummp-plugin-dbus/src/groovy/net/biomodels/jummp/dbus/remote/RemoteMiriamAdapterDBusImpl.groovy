@@ -2,7 +2,6 @@ package net.biomodels.jummp.dbus.remote
 
 import net.biomodels.jummp.core.miriam.IMiriamService
 import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
-import org.freedesktop.dbus.DBusConnection
 import net.biomodels.jummp.dbus.MiriamDBusAdapter
 import org.springframework.beans.factory.InitializingBean
 

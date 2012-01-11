@@ -6,7 +6,6 @@ import net.biomodels.jummp.dbus.UserDBusAdapter
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.remote.RemoteUserAdapter
-import org.freedesktop.dbus.DBusConnection
 import org.perf4j.aop.Profiled
 import org.springframework.beans.factory.InitializingBean
 import net.biomodels.jummp.remote.AbstractRemoteAdapter

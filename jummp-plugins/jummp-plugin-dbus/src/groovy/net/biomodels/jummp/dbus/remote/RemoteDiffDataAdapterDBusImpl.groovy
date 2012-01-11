@@ -5,13 +5,10 @@
  */
 package net.biomodels.jummp.dbus.remote
 
-import java.util.Map
-
 import net.biomodels.jummp.dbus.DiffDataDBusAdapter
 import net.biomodels.jummp.remote.RemoteDiffDataAdapter
 import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
 
-import org.freedesktop.dbus.DBusConnection
 import org.springframework.beans.factory.InitializingBean
 
 /**
