@@ -71,7 +71,7 @@ grails.project.dependency.resolution = {
         runtime ":sbfc:1.1-20110624-109"
         runtime ":biojava-ontology:1.7"
         // miriam lib required by sbml converters
-        runtime 'uk.ac.ebi.miriam:miriam-lib:1.1.2'
+        runtime 'uk.ac.ebi.miriam:miriam-lib:1.1.3'
         // dependencies of jsbml
         runtime 'org.codehaus.woodstox:woodstox-core-lgpl:4.0.9'
         runtime 'org.codehaus.staxmate:staxmate:2.0.0'
