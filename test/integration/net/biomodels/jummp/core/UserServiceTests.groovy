@@ -20,6 +20,7 @@ class UserServiceTests extends JummpIntegrationTest {
     @Before
     void setUp() {
         createUserAndRoles()
+        grailsApplication.config.jummp.security.anonymousRegistration = true
     }
 
     @After
