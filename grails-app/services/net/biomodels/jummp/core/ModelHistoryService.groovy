@@ -29,6 +29,7 @@ class ModelHistoryService {
     /**
      * Dependency Injection of Grails Application
      */
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
     /**

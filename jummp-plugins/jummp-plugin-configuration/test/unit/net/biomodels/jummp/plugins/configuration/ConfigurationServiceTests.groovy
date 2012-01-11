@@ -4,6 +4,7 @@ import grails.test.*
 
 @TestFor(ConfigurationController)
 class ConfigurationServiceTests {
+    @SuppressWarnings("CatchException")
     def shouldFail = { exception, code ->
         try {
             code.call()

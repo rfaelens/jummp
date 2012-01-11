@@ -4,6 +4,7 @@ import grails.plugin.jms.Queue
 import net.biomodels.jummp.webapp.ast.JmsAdapter
 import net.biomodels.jummp.webapp.ast.JmsQueueMethod
 
+@SuppressWarnings("UnusedMethodParameter")
 @JmsAdapter
 class ModelHistoryJmsAdapterService  extends AbstractJmsAdapter {
     @SuppressWarnings("GrailsStatelessService")
