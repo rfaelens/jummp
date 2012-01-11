@@ -6,7 +6,9 @@ import net.biomodels.jummp.webapp.ast.JmsQueueMethod
 
 @JmsAdapter
 class ModelHistoryJmsAdapterService  extends AbstractJmsAdapter {
+    @SuppressWarnings("GrailsStatelessService")
     static exposes = ['jms']
+    @SuppressWarnings("GrailsStatelessService")
     static destination = "jummpModelHistoryJms"
     static transactional = false
     /**

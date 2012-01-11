@@ -11,5 +11,6 @@ import net.biomodels.jummp.remote.RemoteDiffDataAdapter
 class RemoteDiffDataService implements RemoteDiffDataAdapter {
 
     static transactional = true
+    @SuppressWarnings("GrailsStatelessService")
     @Delegate RemoteDiffDataAdapter remoteDiffDataAdapter
 }

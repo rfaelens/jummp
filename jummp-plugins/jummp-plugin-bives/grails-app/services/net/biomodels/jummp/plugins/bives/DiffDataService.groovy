@@ -27,10 +27,12 @@ public class DiffDataService implements InitializingBean {
     /**
      * Dependency Injection of Grails Application
      */
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
     /**
      * Dependency Injection of Servlet Context
      */
+    @SuppressWarnings("GrailsStatelessService")
     def servletContext
 
 	static transactional = true

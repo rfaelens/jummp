@@ -54,6 +54,7 @@ class MiriamService implements IMiriamService {
     /**
      * Dependency injection of Grails Application
      */
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
     static transactional = false

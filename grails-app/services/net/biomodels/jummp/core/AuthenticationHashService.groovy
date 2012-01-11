@@ -14,6 +14,7 @@ class AuthenticationHashService implements IAuthenticationHashService {
     /**
      * Dependency Injection of grailsApplication
      */
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
     /**
      * Private class describing a hash entry in the authentication Map.

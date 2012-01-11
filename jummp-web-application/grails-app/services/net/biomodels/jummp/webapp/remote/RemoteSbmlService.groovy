@@ -11,5 +11,6 @@ import net.biomodels.jummp.remote.RemoteSbmlAdapter
 class RemoteSbmlService implements RemoteSbmlAdapter {
 
     static transactional = true
+    @SuppressWarnings("GrailsStatelessService")
     @Delegate RemoteSbmlAdapter remoteSbmlAdapter
 }

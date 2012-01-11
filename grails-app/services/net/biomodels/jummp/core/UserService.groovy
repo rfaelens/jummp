@@ -42,6 +42,7 @@ class UserService implements IUserService {
     /**
      * Dependency injection of grails Application
      */
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
     /**
      * Random number generator for creating user validation ids.

@@ -56,17 +56,22 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
      * Dependency Injection of MiriamService
      */
     def miriamService
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
     /**
      * Keep one of each SBML2* converters around as it takes quite some time to load the converters.
      * These are defs because we don't want to call the static initialization code immediately.
      */
+    @SuppressWarnings("GrailsStatelessService")
     private def dotConverter = null
+    @SuppressWarnings("GrailsStatelessService")
     private def octaveConverter = null
+    @SuppressWarnings("GrailsStatelessService")
     private def biopaxConverter = null
 
     // TODO: move initialization into afterPropertiesSet and make it configuration dependent
+    @SuppressWarnings("GrailsStatelessService")
     SbmlCache<RevisionTransportCommand, SBMLDocument> cache = new SbmlCache(100)
 
     public void afterPropertiesSet() {

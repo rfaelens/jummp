@@ -5,5 +5,6 @@ import net.biomodels.jummp.remote.RemoteGeneOntologyTreeAdapter
 class RemoteGeneOntologyTreeService implements RemoteGeneOntologyTreeAdapter {
 
     static transactional = true
+    @SuppressWarnings("GrailsStatelessService")
     @Delegate RemoteGeneOntologyTreeAdapter remoteGeneOntologyTreeAdapter
 }

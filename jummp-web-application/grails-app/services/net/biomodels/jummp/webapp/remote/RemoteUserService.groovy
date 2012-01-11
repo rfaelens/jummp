@@ -13,5 +13,6 @@ import net.biomodels.jummp.remote.RemoteUserAdapter
 class RemoteUserService implements RemoteUserAdapter {
 
     static transactional = true
+    @SuppressWarnings("GrailsStatelessService")
     @Delegate RemoteUserAdapter remoteUserAdapter
 }

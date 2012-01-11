@@ -22,6 +22,7 @@ class ModelFileFormatService {
     /**
      * Dependency Injection of grails application
      */
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
     /**

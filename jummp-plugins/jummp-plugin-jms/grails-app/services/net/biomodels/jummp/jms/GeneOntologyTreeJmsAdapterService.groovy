@@ -7,7 +7,9 @@ import net.biomodels.jummp.webapp.ast.JmsQueueMethod
 @JmsAdapter
 class GeneOntologyTreeJmsAdapterService  extends AbstractJmsAdapter {
 
+    @SuppressWarnings("GrailsStatelessService")
     static exposes = ['jms']
+    @SuppressWarnings("GrailsStatelessService")
     static destination = "jummpGeneOntologyTreeJms"
     static transactional = true
 

@@ -43,6 +43,7 @@ class ApplicationJmsAdapterService extends AbstractJmsAdapter {
     /**
      * Dependency injection of grailsApplication
      */
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
     private IAuthenticationHashService authenticationHashService
