@@ -122,7 +122,7 @@ grails.project.dependency.resolution = {
         compile ":mail:1.0"
         compile ":quartz:0.4.2"
         compile ":spring-security-acl:1.1"
-        compile ":svn:1.0.0.M1"
+        compile ":svn:1.0.2"
         runtime ":spring-security-core:1.2.1"
         runtime ":spring-security-ldap:1.0.5"
         test ":code-coverage:1.2.4"
