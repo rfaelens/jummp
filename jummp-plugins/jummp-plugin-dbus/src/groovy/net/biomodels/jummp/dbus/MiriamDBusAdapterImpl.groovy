@@ -11,7 +11,7 @@ import net.biomodels.jummp.webapp.ast.DBusMethod
  * Time: 1:18:35 PM
  * To change this template use File | Settings | File Templates.
  */
-@SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter']
+@SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter'])
 @DBusAdapter(interfaceName="MiriamDBusAdapter", serviceName="miriamService")
 public class MiriamDBusAdapterImpl extends AbstractDBusAdapter implements MiriamDBusAdapter {
 
