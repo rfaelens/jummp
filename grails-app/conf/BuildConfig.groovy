@@ -34,6 +34,7 @@ grails.project.dependency.resolution = {
         compile "org.ccil.cowan.tagsoup:tagsoup:1.2"
         runtime 'hsqldb:hsqldb:1.8.0.10'
         runtime 'mysql:mysql-connector-java:5.1.17'
+        runtime "postgresql:postgresql:9.1-901.jdbc4"
         // plugin dependencies
         compile(":grails-plugin-jummp-plugin-security:latest.integration") {
             changing = true
