@@ -121,7 +121,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(returnList[0] instanceof ModelTransportCommand)
         assertEquals(model.id, returnList[0].id)
         // switch to user
-        def auth3 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth3 = send2("authenticate", new UsernamePasswordAuthenticationToken("username", "verysecret"))
         assertNotNull(auth3)
         assertTrue(auth3 instanceof JummpAuthentication)
         // should not see the model
@@ -169,7 +169,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         result = send("getModelCount", auth.getAuthenticationHash())
         assertTrue(result instanceof Integer)
         assertEquals(1, result)
-        auth = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        auth = send2("authenticate", new UsernamePasswordAuthenticationToken("username", "verysecret"))
         assertNotNull(auth)
         assertTrue(auth instanceof JummpAuthentication)
         result = send("getModelCount", auth.getAuthenticationHash())
@@ -208,7 +208,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(send("getLatestRevision", [auth.getAuthenticationHash(), "test"]) instanceof IllegalArgumentException)
         assertTrue(send("getLatestRevision", [auth.getAuthenticationHash(), model.id, "test"]) instanceof IllegalArgumentException)
         // user should get an AccessDeniedException
-        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("username", "verysecret"))
         assertNotNull(auth2)
         assertTrue(auth2 instanceof JummpAuthentication)
         assertTrue(send("getLatestRevision", [auth2.getAuthenticationHash(), model.id]) instanceof AccessDeniedException)
@@ -248,7 +248,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(send("getAllRevisions", [auth.getAuthenticationHash(), "test"]) instanceof IllegalArgumentException)
         assertTrue(send("getAllRevisions", [auth.getAuthenticationHash(), model.id, "test"]) instanceof IllegalArgumentException)
         // user should get an empty List
-        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("username", "verysecret"))
         assertNotNull(auth2)
         assertTrue(auth2 instanceof JummpAuthentication)
         result = send("getAllRevisions", [auth2.getAuthenticationHash(), model.id])
@@ -357,7 +357,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         def result = send("addRevision", [auth.getAuthenticationHash(), model.id, modelSource.bytes, new ModelFormatTransportCommand(identifier: "SBML"), "Comment"])
         assertTrue(result instanceof RevisionTransportCommand)
         // other user should get an AccessDeniedException
-        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("username", "verysecret"))
         assertNotNull(auth2)
         assertTrue(auth2 instanceof JummpAuthentication)
         assertTrue(send("addRevision", [auth2.getAuthenticationHash(), model.id, modelSource.bytes, new ModelFormatTransportCommand(identifier: "SBML"), "Comment"]) instanceof AccessDeniedException)
@@ -424,7 +424,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(result instanceof byte[])
         assertEquals(modelSource.bytes.toString(), result.toString())
         // other user should get an AccessDeniedException
-        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("username", "verysecret"))
         assertNotNull(auth2)
         assertTrue(auth2 instanceof JummpAuthentication)
         assertTrue(send("retrieveModelFile", [auth2.getAuthenticationHash(), revision]) instanceof AccessDeniedException)
@@ -481,9 +481,9 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(send("grantReadAccess", [auth.getAuthenticationHash(), model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
         assertTrue(send("grantReadAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
         // test access denied exception
-        assertTrue(send("grantReadAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("user")]) instanceof AccessDeniedException)
+        assertTrue(send("grantReadAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("username")]) instanceof AccessDeniedException)
         // user should not have access to it
-        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("username", "verysecret"))
         assertNotNull(auth2)
         assertTrue(auth2 instanceof JummpAuthentication)
         assertEquals(0, send("getModelCount", auth2.getAuthenticationHash()))
@@ -520,14 +520,14 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         // TODO: do an actual test by trying to upload
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.WRITE))
         // user should not be allowed to grant right
-        assertTrue(send("grantWriteAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("user")]) instanceof AccessDeniedException)
+        assertTrue(send("grantWriteAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("username")]) instanceof AccessDeniedException)
         // test some illegal argument  exceptions
         assertTrue(send("grantWriteAccess", [auth.getAuthenticationHash()]) instanceof IllegalArgumentException)
         assertTrue(send("grantWriteAccess", [auth.getAuthenticationHash(), model.toCommandObject()]) instanceof IllegalArgumentException)
         assertTrue(send("grantWriteAccess", [auth.getAuthenticationHash(), model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
         assertTrue(send("grantWriteAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
         // user should not have access to it
-        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("user", "verysecret"))
+        def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("username", "verysecret"))
         assertNotNull(auth2)
         assertTrue(auth2 instanceof JummpAuthentication)
         result = send("addRevision", [auth2.getAuthenticationHash(), model.id, new byte[0], new ModelFormatTransportCommand(identifier: "UNKNOWN"), "no test"])
@@ -574,7 +574,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(send("revokeReadAccess", [auth.getAuthenticationHash(), model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
         assertTrue(send("revokeReadAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
         // revoking read access is not allowed for testuser
-        assertTrue(send("revokeReadAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("user")]) instanceof AccessDeniedException)
+        assertTrue(send("revokeReadAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("username")]) instanceof AccessDeniedException)
     }
 
     @Test
@@ -618,7 +618,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(send("revokeWriteAccess", [auth.getAuthenticationHash(), model.toCommandObject(), "test"]) instanceof IllegalArgumentException)
         assertTrue(send("revokeWriteAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("testuser"), "test"]) instanceof IllegalArgumentException)
         // revoking write access is not allowed for testuser
-        assertTrue(send("revokeWriteAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("user")]) instanceof AccessDeniedException)
+        assertTrue(send("revokeWriteAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("username")]) instanceof AccessDeniedException)
     }
 
     @Test
