@@ -16,7 +16,7 @@ class ModelFileFormatServiceTests {
 
     @After
     void tearDown() {
-        grailsApplication.config.jummp.plugins.sbml.validate = false
+        grailsApplication.config.jummp.plugins.sbml.validation = false
     }
 
     @Test
@@ -36,7 +36,7 @@ class ModelFileFormatServiceTests {
 
     @Test
     void testValidate() {
-        grailsApplication.config.jummp.plugins.sbml.validate = true
+        grailsApplication.config.jummp.plugins.sbml.validation = true
         // for unknown file type this should evaluate to false
         assertFalse(modelFileFormatService.validate(null, ModelFormat.findByIdentifier("UNKNOWN")))
         // for an invalid sbml file it should also evaluate to false

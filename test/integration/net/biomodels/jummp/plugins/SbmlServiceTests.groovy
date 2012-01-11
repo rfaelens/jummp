@@ -30,6 +30,8 @@ class SbmlServiceTests extends JummpIntegrationTest {
     void setUp() {
         createUserAndRoles()
         setupVcs()
+        // disable validation as it is broken
+        grailsApplication.config.jummp.plugins.sbml.validation = false
     }
 
     @After

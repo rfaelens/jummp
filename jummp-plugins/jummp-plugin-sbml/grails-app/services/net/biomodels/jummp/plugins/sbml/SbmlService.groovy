@@ -95,7 +95,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             log.error("SBMLDocuement is not valid for file ${model.name}")
             return false
         }
-        if (!grailsApplication.config.jummp.plugins.sbml.validate) {
+        if (!grailsApplication.config.jummp.plugins.sbml.validation) {
             log.info("Validation for ${model.name} skipped due to configuration option")
             println("Validation for ${model.name} skipped due to configuration option")
             return true
