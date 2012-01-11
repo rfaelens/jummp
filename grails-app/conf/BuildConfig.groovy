@@ -126,7 +126,7 @@ grails.project.dependency.resolution = {
         runtime ":spring-security-core:1.2.1"
         runtime ":spring-security-ldap:1.0.5"
         test ":code-coverage:1.2.4"
-        test ":codenarc:0.11"
+        test ":codenarc:0.16.1"
         test ":gmetrics:0.3.1"
 
         // default grails plugins
