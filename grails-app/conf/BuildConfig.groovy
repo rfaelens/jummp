@@ -119,7 +119,7 @@ grails.project.dependency.resolution = {
         compile ":perf4j:0.1.1"
         compile ":jms:1.2"
         compile ":executor:0.3"
-        compile ":mail:1.0-SNAPSHOT"
+        compile ":mail:1.0"
         compile ":quartz:0.4.2"
         compile ":spring-security-acl:1.1"
         compile ":svn:1.0.0.M1"
