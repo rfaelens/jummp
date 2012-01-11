@@ -23,6 +23,7 @@ class UserServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.security.anonymousRegistration = true
     }
 
+    @Override
     @After
     void tearDown() {
     }

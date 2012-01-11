@@ -16,11 +16,13 @@ import net.biomodels.jummp.core.miriam.GeneOntologyRelationship
 class MiriamServiceTests extends JummpIntegrationTest {
     def miriamService
 
+    @Override
     @Before
     void setUp() {
         createUserAndRoles()
     }
 
+    @Override
     @After
     void tearDown() {
     }

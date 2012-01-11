@@ -6,11 +6,6 @@ import grails.test.mixin.TestFor
 
 @TestFor(SetupController)
 class SetupControllerTests  {
-    void setUp() {
-    }
-
-    void tearDown() {
-    }
 
     void testMysqlCommand() {
         // null should fail

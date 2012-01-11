@@ -10,10 +10,12 @@ import org.apache.commons.io.FileUtils
 class ModelFileFormatServiceTests {
     def modelFileFormatService
     def grailsApplication
+    @Override
     @Before
     void setUp() {
     }
 
+    @Override
     @After
     void tearDown() {
         grailsApplication.config.jummp.plugins.sbml.validation = false

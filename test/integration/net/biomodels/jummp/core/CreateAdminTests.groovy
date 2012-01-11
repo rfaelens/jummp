@@ -8,10 +8,12 @@ import net.biomodels.jummp.plugins.security.Role
 
 class CreateAdminTests extends JummpIntegrationTest {
     def userService
+    @Override
     @Before
     void setUp() {
     }
 
+    @Override
     @After
     void tearDown() {
     }

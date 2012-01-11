@@ -17,11 +17,13 @@ import net.biomodels.jummp.core.miriam.MiriamResource
 class GeneOntologyTreeServiceTests extends JummpIntegrationTest {
     def geneOntologyTreeService
 
+    @Override
     @Before
     void setUp() {
         createUserAndRoles()
     }
 
+    @Override
     @After
     void tearDown() {
     }
