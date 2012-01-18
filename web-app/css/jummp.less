@@ -1,0 +1,337 @@
+.all {
+    display: block;
+}
+
+.standardMargins {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.container {
+    .all;
+    .standardMargins;
+    width: 1024px;
+}
+
+.containerOverall {
+    .container;
+    left: 0px;
+    right: 0px;
+    position: absolute;
+    z-index: 2;
+}
+
+.backgrounds {
+  width: 100%;
+  z-index: 1;
+  position: absolute;
+}
+
+.standardText {
+  margin: 0px;
+  font-size: 12pt;
+}
+
+@topBackgroundColor: #000000;
+@middleBackgroundBorderTop: 1px solid #FFFFFF;
+
+@highlightColor: #0060AE;
+@h2Overline: 1px solid #009EE1;
+@contentOverline: 1px solid #BAB5A6;
+@LinkAreaBorderTop: 1px solid #e0dee7;
+
+@sideBarColorExternal: #EF8C0B;
+@sideBarColor: #0060AD;
+
+@standardIndentation: 18px;
+@topBackgroundHeight: 251px;
+@highMargin: 30px;
+
+@modeSwitchStandardExtend: 42px;
+
+p {
+    .standardText;
+}
+body {
+    background-color: #BBB5A7;
+    margin: 0px;
+}
+a {
+    color: @highlightColor;
+    text-decoration: none;
+}
+a:active, a:hover {
+    text-decoration: underline;
+}
+ul {
+    list-style-type: none;
+}
+li::before {
+    color: @highlightColor;
+    content: "\2022";
+    padding-right: 6px;
+    font-weight: bold;
+}
+
+* {
+ font-family: sans-serif;
+}
+
+#topBackground {
+    background-color: @topBackgroundColor;
+    background-image: url(images/background_top.png);
+    background-repeat: no-repeat;
+    background-position: top center;
+    height: @topBackgroundHeight;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    .backgrounds;
+}
+
+#middleBackground {
+    border-top: @middleBackgroundBorderTop;
+    background-image: url(images/background_diagonal.png);
+    background-repeat: repeat;
+    height: 300px;
+    top: @topBackgroundHeight;
+    .backgrounds;
+}
+
+#logo {
+    background-image: url(images/jummp_logo.png);
+    background-repeat: no-repeat;
+    height: 100px;
+    .containerOverall;
+}
+
+#modeSwitch {
+    height: 47px;
+    top: 45px;
+    left: 0px;
+    right: 0px;
+    text-align: right;
+    .containerOverall;
+}
+
+#modeSwitch button {
+    height: @modeSwitchStandardExtend;
+    border: none;
+    background-color: rgba(0, 0, 0, 0);
+    color: white;
+    text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
+    font-weight: bold;
+    margin: 0px;
+    padding: 0px;
+}
+
+#modeSwitch button div {
+    position: relative;
+}
+
+#modeSwitch p {
+    background-image: url(images/button.png);
+    background-repeat: no-repeat;
+    height: @modeSwitchStandardExtend;
+}
+
+#modeSwitch button.left p {
+    background-position: right;
+    padding-right: @modeSwitchStandardExtend;
+}
+
+#modeSwitch button.right p {
+    background-position: left;
+    padding-left: @modeSwitchStandardExtend;
+}
+
+#modeSwitch button div.overlay {
+    background-image: url(images/button_active_overlay.png);
+    background-repeat: no-repeat;
+    display: none;
+    width: @modeSwitchStandardExtend;
+    height: @modeSwitchStandardExtend;
+    position: absolute;
+    top: 0px;
+}
+
+#modeSwitch button.left div.overlay {
+    right: 0px;
+}
+
+#modeSwitch button.right div.overlay {
+    left: 0px;
+}
+
+#modeSwitch button.active div.overlay {
+    display: block;
+}
+
+#container {
+    background-color: #FFFFFF;
+    top: 99px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
+    .containerOverall;
+    position: relative;
+}
+
+#nav {
+    .all;
+    height: 30px;
+    float: left;
+    margin-top: 70px;
+    margin-left: 0px;
+    margin-right: 0px;
+    position: relative;
+    box-shadow: 0px -2px 4px #000000;
+}
+
+#nav div {
+    height: 30px;
+    width: 200px;
+    position: relative;
+    .all;
+    float: left;
+    text-align: center;
+}
+
+#nav div a {
+    color: white;
+    text-decoration: none;
+    line-height: 30px;
+    font-weight: bold;
+    text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
+}
+
+#nav div.left {
+    background-repeat: repeat-x;
+    background-image: url(images/background_tab_selected.png);
+}
+
+#nav div.right {
+    background-repeat: repeat-x;
+    background-image: url(images/background_tab.png);
+}
+
+#branding {
+    .all;
+    height: 70px;
+    float: right;
+    padding: 15px;
+}
+
+#contentContainer {
+    clear: both;
+    .all;
+    padding-right: @standardIndentation;
+    padding-left: @standardIndentation;
+    border-top: 1px solid #0061B2;
+    box-shadow: 0px -2px 8px #000000;
+}
+
+#socialMedia {
+    .all;
+    text-align: right;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#main {
+    .all;
+    width: 602px;
+    float: left;
+    border-top: @contentOverline;
+    padding-right: @standardIndentation;
+}
+#main h1 {
+    color: @highlightColor;
+    margin-top: @highMargin;
+    margin-bottom: 0px;
+    padding-bottom: 15px;
+    border-bottom: @h2Overline;
+    font-size: 32pt;
+    font-weight: bold;
+}
+
+#main h2 {
+    margin-top: 0px;
+    padding-top: 12px;
+    font-size: 14pt;
+    font-weight: bold;
+}
+
+#sideBar {
+    .all;
+    width: 368px;
+    float: right;
+    border-top: @contentOverline;
+}
+#sideBar div.element {
+    background-color: #F2F1EE;
+    padding-bottom: @standardIndentation;
+    padding-left: @standardIndentation;
+    padding-right: @standardIndentation;
+}
+#sideBar div.element a {
+    color: @sideBarColor;
+    font-variant: small-caps;
+}
+#sideBar div.element p img {
+    float: right;
+}
+#sideBar div.element div.rss {
+    float: right;
+    margin-top: @highMargin;
+}
+#sideBar div.element h1 {
+    float: left;
+    margin: @highMargin @standardIndentation 15px 0px;
+    color: @highlightColor;
+    font-size: 18pt;
+    font-weight: bold;
+}
+#sideBar div.element h2 {
+    clear: both;
+    border-top: @h2Overline;
+    .standardText;
+    padding-top: 12px;
+    font-weight: bold;
+}
+#sideBar div.element p {
+    clear: both;
+}
+#sideBar div.followup {
+    margin-top: @standardIndentation;
+}
+
+#sideBar div.element.external a {
+    color: @sideBarColorExternal;
+}
+#sideBar div.element.external h1 {
+    color: @sideBarColorExternal;
+}
+#sideBar div.element.external h2 {
+    border-color: @sideBarColorExternal;
+}
+
+#linkArea {
+    clear: both;
+    .all;
+    color: @sideBarColor;
+    border-top: @LinkAreaBorderTop;
+    padding-bottom: @standardIndentation;
+}
+
+#footer {
+    .all;
+    background-color: #FFFFFF;
+    position: relative;
+    width: 988px;
+    .standardMargins;
+    z-index: 1000;
+    padding-left: @standardIndentation;
+    padding-right: @standardIndentation;
+    top: 99px;
+    box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.3);
+    font-size: 10pt;
+}

@@ -126,6 +126,7 @@ grails.project.dependency.resolution = {
         compile ":svn:1.0.2"
         runtime ":spring-security-core:1.2.7"
         runtime ":spring-security-ldap:1.0.5"
+        compile ":lesscss:1.0.0"
         test ":code-coverage:1.2.5"
         test ":codenarc:0.16.1"
         test ":gmetrics:0.3.1"
@@ -134,7 +135,7 @@ grails.project.dependency.resolution = {
         compile ":hibernate:$grailsVersion"
         compile ":webflow:$grailsVersion"
         compile ":jquery:1.6.1.1"
-        //compile ":resources:1.0.2"
+        compile ":resources:1.1.6"
 
         build ":tomcat:$grailsVersion"
 
