@@ -77,6 +77,21 @@ li::before {
  font-family: sans-serif;
 }
 
+input[type="reset"], input[type="submit"] {
+    background-color: transparent;
+    background-image: url(images/button.png);
+    background-repeat: no-repeat;
+    height: @modeSwitchStandardExtend;
+    padding-right: @modeSwitchStandardExtend + 4;
+    background-position: right;
+    border-style: none;
+}
+
+input[type="reset"]:hover, input[type="submit"]:hover {
+    background-image: url(images/button_active_overlay.png), url(images/button.png);
+    background-position: right, right;
+}
+
 #topBackground {
     background-color: @topBackgroundColor;
     background-image: url(images/background_top.png);
