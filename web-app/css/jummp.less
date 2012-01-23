@@ -366,59 +366,55 @@ input.right, button.right {
     width: @sideBarWidth;
     float: right;
     border-top: @contentOverline;
-}
-#sideBar div.element {
-    background-color: #F2F1EE;
-    padding-bottom: @standardIndentation;
-    padding-left: @standardIndentation;
-    padding-right: @standardIndentation;
-}
-#sideBar div.element a {
-    color: @sideBarColor;
-    font-variant: small-caps;
-}
-#sideBar div.element p img {
-    float: right;
-}
-#sideBar div.element div.rss {
-    float: right;
-    margin-top: @highMargin;
-}
-#sideBar div.element h1 {
-    float: left;
-    margin: @highMargin @standardIndentation 15px 0px;
-    color: @highlightColor;
-    font-size: 18pt;
-    font-weight: bold;
-}
-#sideBar div.element h2 {
-    clear: both;
-    border-top: @h2Overline;
-    .standardText;
-    padding-top: 12px;
-    font-weight: bold;
-}
-#sideBar div.element p {
-    clear: both;
-}
-#sideBar div.followup {
-    margin-top: @standardIndentation;
-}
-
-#sideBar div.element.external a {
-    color: @sideBarColorExternal;
-}
-#sideBar div.element.external h1 {
-    color: @sideBarColorExternal;
-}
-#sideBar div.element.external h2 {
-    border-color: @sideBarColorExternal;
-}
-/**
- * No indentation for list elements in side bar boxes.
- **/
-#sideBar ul {
-    padding-left: 0px;
+    div.element {
+        background-color: #F2F1EE;
+        padding-bottom: @standardIndentation;
+        padding-left: @standardIndentation;
+        padding-right: @standardIndentation;
+        a {
+            color: @sideBarColor;
+            font-variant: small-caps;
+        }
+        p {
+            clear: both;
+            img {
+                float: right;
+            }
+        }
+        div.rss {
+            float: right;
+            margin-top: @highMargin;
+        }
+        h1 {
+            float: left;
+            margin: @highMargin @standardIndentation 15px 0px;
+            color: @highlightColor;
+            font-size: 18pt;
+            font-weight: bold;
+        }
+        h2 {
+            clear: both;
+            border-top: @h2Overline;
+            .standardText;
+            padding-top: 12px;
+            font-weight: bold;
+        }
+    }
+    div.followup {
+        margin-top: @standardIndentation;
+    }
+    div.element.external {
+        a, h1, h2 {
+            color: @sideBarColorExternal;
+            border-color: @sideBarColorExternal;
+        }
+    }
+    /**
+    * No indentation for list elements in side bar boxes.
+    **/
+    ul {
+        padding-left: 0px;
+    }
 }
 
 #linkArea {
