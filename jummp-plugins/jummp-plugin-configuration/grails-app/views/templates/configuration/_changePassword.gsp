@@ -28,7 +28,7 @@
             <tr class="prop">
                 <td class="name"><label for="body">Body:</label></td>
                 <td class="value ${hasErrors(bean: changePassword, field: 'body', 'errors')}">
-                    <textarea id="body" rows="20" cols="100" name="body">${changePassword?.body ?: 'Example Text: Get a new password.'}</textarea>
+                    <textarea id="body" rows="20" cols="40" name="body">${changePassword?.body ?: 'Example Text: Get a new password.'}</textarea>
                 </td>
             </tr>
             <tr class="prop">
