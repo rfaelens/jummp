@@ -22,4 +22,5 @@
             </p>
         </div>
     </body>
+    <g:render template="/templates/configuration/configurationSidebar"/>
 </html>
