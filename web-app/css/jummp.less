@@ -293,33 +293,26 @@ input.right, button.right {
     margin-right: 0px;
     position: relative;
     box-shadow: 0px -2px 4px #000000;
-}
-
-#nav div {
-    height: 30px;
-    width: 200px;
-    position: relative;
-    .all;
-    float: left;
-    text-align: center;
-}
-
-#nav div a {
-    color: white;
-    text-decoration: none;
-    line-height: 30px;
-    font-weight: bold;
-    text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
-}
-
-#nav div.left {
-    background-repeat: repeat-x;
-    background-image: url(images/background_tab_selected.png);
-}
-
-#nav div.right {
-    background-repeat: repeat-x;
-    background-image: url(images/background_tab.png);
+    div {
+        width: 200px;
+        position: relative;
+        float: left;
+        text-align: center;
+        background-repeat: repeat-x;
+        a {
+            color: white;
+            text-decoration: none;
+            line-height: 30px;
+            font-weight: bold;
+            text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
+        }
+    }
+    div.left {
+        background-image: url(images/background_tab_selected.png);
+    }
+    div.right {
+        background-image: url(images/background_tab.png);
+    }
 }
 
 #branding {
