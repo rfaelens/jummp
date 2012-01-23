@@ -102,6 +102,13 @@ input[type="reset"]:hover, input[type="submit"]:hover, button.active, button:hov
     background-position: right, right;
 }
 
+/**
+ * Removes dotted outline of clicked (active) buttons in Firefox
+ **/
+button::-moz-focus-inner, input::-moz-focus-inner {
+    border: 0;
+}
+
 input.right, button.right {
     background-position: left;
     padding-left: @modeSwitchStandardExtend;
