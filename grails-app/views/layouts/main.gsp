@@ -14,8 +14,8 @@
     <div id="logo"></div>
     <div id="modeSwitch">
         <!-- TODO: active class has to be set on really selected mode -->
-        <button type="button" class="left active"><div><p><g:message code="jummp.main.search"/></p><div class="overlay"></div></div></button>
-        <button type="button" class="right"><div><p><g:message code="jummp.main.submit"/></p><div class="overlay"></div></div></button>
+        <button type="button" class="left active"><g:message code="jummp.main.search"/></button>
+        <button type="button" class="right"><g:message code="jummp.main.submit"/></button>
     </div>
     <div id="container">
         <div id="nav">
