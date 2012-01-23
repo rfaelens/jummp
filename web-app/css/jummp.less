@@ -33,6 +33,7 @@
 }
 
 @topBackgroundColor: #000000;
+@topBackgroundHighlightColor: white;
 @middleBackgroundBorderTop: 1px solid #FFFFFF;
 
 @highlightColor: #0060AE;
@@ -46,8 +47,17 @@
 @standardIndentation: 18px;
 @topBackgroundHeight: 251px;
 @highMargin: 30px;
+@textShadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
 
 @modeSwitchStandardExtend: 42px;
+
+.backgroundImage {
+    background-color: @topBackgroundColor;
+    background-image:  url(images/background_top.png);
+    background-repeat: no-repeat;
+    background-position: top center;
+    color: @topBackgroundHighlightColor;
+}
 
 p {
     .standardText;
@@ -93,15 +103,12 @@ input[type="reset"]:hover, input[type="submit"]:hover {
 }
 
 #topBackground {
-    background-color: @topBackgroundColor;
-    background-image: url(images/background_top.png);
-    background-repeat: no-repeat;
-    background-position: top center;
     height: @topBackgroundHeight;
     top: 0px;
     left: 0px;
     right: 0px;
     .backgrounds;
+    .backgroundImage;
 }
 
 #middleBackground {
@@ -133,8 +140,8 @@ input[type="reset"]:hover, input[type="submit"]:hover {
     height: @modeSwitchStandardExtend;
     border: none;
     background-color: rgba(0, 0, 0, 0);
-    color: white;
-    text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
+    color: @topBackgroundHighlightColor;
+    text-shadow: @textShadow;
     font-weight: bold;
     margin: 0px;
     padding: 0px;
@@ -261,7 +268,6 @@ input[type="reset"]:hover, input[type="submit"]:hover {
 #main h1 {
     color: @highlightColor;
     margin-top: @highMargin;
-    margin-bottom: 0px;
     padding-bottom: 15px;
     border-bottom: @h2Overline;
     font-size: 32pt;
@@ -349,4 +355,27 @@ input[type="reset"]:hover, input[type="submit"]:hover {
     top: 99px;
     box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.3);
     font-size: 10pt;
+}
+
+form {
+    padding: @standardIndentation;
+    box-shadow: 0px 0px 18px rgba(0, 0, 0, 0.75);
+    background-size: 110% 100%;
+    float: left;
+    .backgroundImage;
+}
+
+td.name {
+    text-align: right;
+}
+
+div.buttons {
+    float: right;
+}
+
+div.buttons input {
+    color: @topBackgroundHighlightColor;
+    text-shadow: @textShadow;
+    font-variant: small-caps;
+    font-weight: bold;
 }
