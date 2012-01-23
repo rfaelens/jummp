@@ -94,6 +94,12 @@
  **/
 @modeSwitchStandardExtend: 42px;
 
+@mainAreaWidth: 602px;
+/**
+ * Width of the Sidebar.
+ **/
+@sideBarWidth: 368px;
+
 /**
  * Class for using the top background image as a background.
  **/
@@ -194,6 +200,7 @@ form {
     box-shadow: 0px 0px 18px rgba(0, 0, 0, 0.75);
     background-size: 110% 100%;
     float: left;
+    width: @mainAreaWidth - 2 * @standardIndentation;
     .backgroundImage;
 }
 
@@ -337,7 +344,7 @@ input.right, button.right {
 
 #main {
     .all;
-    width: 602px;
+    width: @mainAreaWidth;
     float: left;
     border-top: @contentOverline;
     padding-right: @standardIndentation;
@@ -361,7 +368,7 @@ input.right, button.right {
 
 #sideBar {
     .all;
-    width: 368px;
+    width: @sideBarWidth;
     float: right;
     border-top: @contentOverline;
 }
@@ -445,12 +452,24 @@ input.right, button.right {
  * Class based styling
  ***********************************************/
 
-/**
- * Name elements in tabular layouts are right aligned.
- * (following the common pattern of form layouts).
- **/
-td.name {
-    text-align: right;
+div.dialog {
+    width: 100%;
+    table {
+        width: 100%;
+        /**
+        * Name elements in tabular layouts are right aligned.
+        * (following the common pattern of form layouts).
+        **/
+        td.name {
+            text-align: right;
+        }
+        /**
+        * Give maximum available width to input elements in our forms.
+        **/
+        td.value input[type="text"], td.value input[type="password"], td.value textarea {
+            width: 100%;
+        }
+    }
 }
 
 /**
