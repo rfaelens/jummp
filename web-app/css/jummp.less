@@ -320,6 +320,18 @@ input.right, button.right {
             }
         }
     }
+    div.glow {
+        .container;
+        display: none;
+        @glowSize: 495px;
+        top: -143px;
+        width: @glowSize;
+        height: @glowSize;
+        pointer-events:none;
+        background-image: url(images/button_glow.png);
+        background-position: center;
+        background-size: 100%;
+    }
     form {
         .container;
         background-image: none;

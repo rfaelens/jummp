@@ -24,6 +24,7 @@
         </form>
         <div class="loginButton">
             <button>LOGIN</button>
+            <div class="glow"></div>
         </div>
     </div>
 <script type='text/javascript'>
@@ -36,6 +37,11 @@ $("#loginForm input").focus(function() {
 });
 $("#login div.loginButton button").click(function() {
     $("#loginForm").submit();
+});
+$("#login div.loginButton button").hover(function() {
+    $("#login div.glow").show();
+}, function() {
+    $("#login div.glow").hide();
 });
 </script>
     <r:layoutResources/>
