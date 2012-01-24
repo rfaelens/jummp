@@ -376,9 +376,29 @@ input.right, button.right {
     text-align: right;
     .container;
     button {
+        @glowSize: 100px;
         color: @topBackgroundHighlightColor;
         text-shadow: @textShadow;
         font-weight: bold;
+        div.glow {
+            .container;
+            top: -1*(@glowSize/2)-@modeSwitchStandardExtend/2 + 1;
+            position: relative;
+            width: @glowSize;
+            height: @glowSize;
+            pointer-events:none;
+            background-position: center;
+            background-size: 100%;
+        }
+        &.left div {
+            left: @glowSize - @modeSwitchStandardExtend/2 - 2;
+        }
+        &.right div {
+            left: -1*@glowSize + @modeSwitchStandardExtend/2 + 8;
+        }
+        &.active div {
+            background-image: url(images/button_glow.png);
+        }
     }
 }
 
