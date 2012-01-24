@@ -51,17 +51,6 @@
   font-size: 12pt;
 }
 
-/**
-* Active state overlay for the standard buttons. Triggered either by pseudo-class "hover"
-* or class "active" on any input or button element.
-* The overlay is achived by using two background images put on top of each other. This might not
-* be supported by legacy browsers.
-**/
-.activeButtonBackground {
-    background-image: url(images/button_active_overlay.png), url(images/button.png);
-    background-position: right, right;
-}
-
 /***********************************************
  * Common less variables.
  ***********************************************/
@@ -188,13 +177,16 @@ input[type="reset"], input[type="submit"], button {
     padding-right: @modeSwitchStandardExtend + 4;
     background-position: right;
     border-style: none;
-
-    &:hover {
-        .activeButtonBackground;
+    /**
+    * Active state overlay for the standard buttons. Triggered either by pseudo-class "hover"
+    * or class "active" on any input or button element.
+    * The overlay is achived by using two background images put on top of each other. This might not
+    * be supported by legacy browsers.
+    **/
+    &:hover, &.active {
+        background-image: url(images/button_active_overlay.png), url(images/button.png);
+        background-position: right, right;
     }
-}
-button.active, input.active {
-    .activeButtonBackground;
 }
 
 /**
