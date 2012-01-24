@@ -23,10 +23,11 @@
  * @li standardMargins
  * @li width of 1024px
  **/
+@standardWidth: 1024px;
 .container {
     .all;
     .standardMargins;
-    width: 1024px;
+    width: @standardWidth;
     left: 0px;
     right: 0px;
     position: absolute;
@@ -135,6 +136,12 @@ p {
 body {
     background-color: #BBB5A7;
     margin: 0px;
+    /**
+    * Background of login page is top background color.
+    **/
+    &.login {
+        background-color: @topBackgroundColor;
+    }
 }
 /**
  * All links have the highlight color and are not underlined.
@@ -256,6 +263,101 @@ input.right, button.right {
     background-repeat: no-repeat;
     height: 100px;
     .container;
+}
+
+/**
+ * The background of the login page is a variant of the middle background.
+ * It uses the repeating stripe image as well as the top background behind.
+ **/
+#loginBackground {
+    background-color: @topBackgroundColor;
+    background-image: url(images/background_diagonal.png), url(images/background_top.png);
+    background-repeat: repeat, no-repeat;
+    background-size: auto, 1624px 100%;
+    border-top: @middleBackgroundBorderTop;
+    top: @topBackgroundHeight;
+    left: 0px;
+    right: 0px;
+    height: 599px;
+    background-position: top center;
+    .backgrounds;
+}
+
+#login {
+    top: @topBackgroundHeight;
+    .container;
+    height: 600px;
+    width: 100%;
+    @firstStop: 1599px;
+    @secondStop: 1600px;
+    @gradientOffset: -1200px;
+    background-image: radial-gradient(50% @gradientOffset, circle farthest-side, rgba(0,0,0,0), rgba(0,0,0,0) @firstStop,#000000 @secondStop);
+    background-image: -moz-radial-gradient(50% @gradientOffset, circle farthest-corner, rgba(0,0,0,0), rgba(0,0,0,0) @firstStop,#000000 @secondStop);
+    background-image: -webkit-radial-gradient(50% @gradientOffset, circle farthest-side, rgba(0,0,0,0), rgba(0,0,0,0) @firstStop,#000000 @secondStop);
+    background-image: -o-radial-gradient(50% @gradientOffset, circle farthest-side, rgba(0,0,0,0), rgba(0,0,0,0) @firstStop,#000000 @secondStop);
+    background-image: -ms-radial-gradient(50% @gradientOffset, circle farthest-side, rgba(0,0,0,0), rgba(0,0,0,0) @firstStop,#000000 @secondStop);
+
+    div.loginButton {
+        .container;
+        @buttonSize: 208px;
+        top: 400px - @buttonSize/2;
+        button {
+            width: @buttonSize;
+            height: @buttonSize;
+            position: relative;
+            left: @standardWidth/2 - @buttonSize/2;
+            background-image: url(images/button_large.png);
+            background-position: center;
+            color: @topBackgroundHighlightColor;
+            font-weight: bold;
+            text-align: center;
+            padding: 0px;
+            font-size: 24px;
+            text-shadow: @textShadow;
+            &:hover, &:active {
+                background-image: url(images/button_active_overlay.png), url(images/button_large.png);
+                background-size: 100%, auto;
+            }
+        }
+    }
+    form {
+        .container;
+        background-image: none;
+        background-color: transparent;
+        box-shadow: none;
+        table {
+            width: 100%;
+            td {
+                padding: 15px;
+            }
+        }
+        .formElement {
+            position: relative;
+            left: @standardWidth/3;
+            right: @standardWidth/3;
+            width: @standardWidth/3;
+            font-weight: bold;
+        }
+        p {
+            .formElement;
+            text-shadow: 0px 0px 10px rgba(1, 1, 1, 0.75);
+            text-align: center;
+        }
+        input {
+            .formElement;
+            margin: 0px;
+            padding: 0px;
+            padding-left: 12px;
+            background-color: #004b93;
+            color: @topBackgroundHighlightColor;
+            box-shadow: 0px 0px 21px 5px rgba(0, 152, 217, 0.75), inset 5px 5px 5px 0px rgba(0, 0, 0, 0.75);
+            border-style: none;
+            height: 30px;
+            border: none;
+            outline-style: none;
+            text-shadow: @textShadow;
+        }
+    }
 }
 
 /**
