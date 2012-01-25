@@ -177,6 +177,11 @@ input[type="reset"], input[type="submit"], button {
     padding-right: @modeSwitchStandardExtend + 4;
     background-position: right;
     border-style: none;
+    color: white;
+    font-weight: bold;
+    text-shadow: @textShadow;
+    @glowSize: 100px;
+    margin-top: @glowSize/2 - @modeSwitchStandardExtend;
     /**
     * Active state overlay for the standard buttons. Triggered either by pseudo-class "hover"
     * or class "active" on any input or button element.
@@ -186,6 +191,20 @@ input[type="reset"], input[type="submit"], button {
     &:hover, &.active {
         background-image: url(images/button_active_overlay.png), url(images/button.png);
         background-position: right, right;
+    }
+    div.glow {
+        .container;
+        top: -1*(@glowSize/2);
+        left: @glowSize - @modeSwitchStandardExtend/2 - 2;
+        position: relative;
+        width: @glowSize;
+        height: @glowSize;
+        pointer-events:none;
+        background-position: center;
+        background-size: 100%;
+    }
+    &:hover div.glow {
+        background-image: url(images/button_glow.png);
     }
 }
 
