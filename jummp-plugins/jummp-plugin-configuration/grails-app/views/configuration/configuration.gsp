@@ -15,11 +15,19 @@
             <g:form action="${action}">
                 <g:render template="/templates/configuration/${template}"/>
                 <div class="buttons">
-                    <input type="reset" value="Cancel"/>
-                    <g:submitButton name="save" value="Save"/>
+                    <jummp:button id="cancelButton">Cancel</jummp:button>
+                    <jummp:button id="submitButton">Save</jummp:button>
                 </div>
             </g:form>
         </div>
+        <g:javascript>
+$("#cancelButton").click(function() {
+    $("form")[0].reset();
+});
+$("#submitButton").click(function() {
+    $("form")[0].submit();
+});
+        </g:javascript>
     </body>
     <g:render template="/templates/configuration/configurationSidebar"/>
 </html>
