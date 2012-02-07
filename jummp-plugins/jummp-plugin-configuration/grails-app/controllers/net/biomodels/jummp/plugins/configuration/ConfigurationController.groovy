@@ -12,19 +12,18 @@ class ConfigurationController {
 
     def index = { }
 
-    def mysql = {
-        render(view: 'configuration', model: [mysql: configurationService.loadMysqlConfiguration(), title: "MySQL", action: "saveMysql", template: 'mysql'])
-    }
-    
-    def saveMysql = { MysqlCommand mysql ->
-        if (mysql.hasErrors()) {
-            render(view: 'configuration', model: [mysql: mysql, title: "MySQL", action: "saveMysql", template: 'mysql'])
-        } else {
-            configurationService.saveMysqlConfiguration(mysql)
-            render(view: "saved", model: [module: "MySQL"])
-        }
+    def database = {
+        render(view: 'configuration', model: [database: configurationService.loadDatabaseConfiguration(), title: "Database", action: "saveDatabase", template: 'database'])
     }
 
+    def saveDatabase = { DatabaseCommand database ->
+        if (database.hasErrors()) {
+            render(view: 'configuration', model: [database: database, title: "Database", action: "saveDatabase", template: 'database'])
+        } else {
+            configurationService.saveDatabaseConfiguration(database)
+            render(view: "saved", model: [module: "Database"])
+        }
+    }
 
     def remote = {
         render(view: 'configuration', model: [remote: configurationService.loadRemoteConfiguration(), title: "Remote", action: "saveRemote", template: 'remote'])
@@ -176,6 +175,20 @@ class ConfigurationController {
         } else {
             configurationService.saveBivesConfiguration(cmd)
             render(view: "saved", model: [module: "Model Versioning System - BiVeS"])
+        }
+    }
+
+    def branding = {
+        BrandingCommand cmd = configurationService.loadBrandingConfiguration()
+        render(view: 'configuration', model: [branding: cmd, title: "Select Branding", action: "saveBranding", template: "branding"])
+    }
+
+    def saveBranding = { BrandingCommand cmd ->
+        if (cmd.hasErrors()) {
+            render(view: 'configuration', model: [branding: cmd, title: "Select Branding", action: "saveBranding", template: "branding"])
+        } else {
+            configurationService.saveBrandingConfiguration(cmd)
+            render(view: "saved", model: [module: "Select Branding"])
         }
     }
 }
