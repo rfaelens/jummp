@@ -24,7 +24,7 @@
             <div class="right"><a href="#"><g:message code="jummp.main.tabs.search"/></a></div>
         </div>
         <div id="branding">
-        <!-- TODO: integrate branding button -->
+            <wcm:render path="jummp/branding"/>
         </div>
         <div id="contentContainer">
             <div id="socialMedia">
@@ -39,14 +39,12 @@
                 </div>
             </div>
             <div id="linkArea">
-            <!--  TODO: customizable Link area -->
-            Some site specific links
+                <wcm:render path="jummp/links"/>
             </div>
         </div>
     </div>
     <div id="footer">
-    <!-- TODO: customizable Imprint -->
-    Imprint
+        <wcm:render path="jummp/imprint"/>
     </div>
     <r:layoutResources/>
 </body>
