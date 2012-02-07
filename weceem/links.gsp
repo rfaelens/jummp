@@ -1,0 +1,1 @@
+<wcm:widget path="widgets/links"/>
