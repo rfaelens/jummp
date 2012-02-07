@@ -235,7 +235,19 @@ class RemoteDBusAdapterTransformation implements ASTTransformation {
                 statement = new ReturnStatement(delegatedMethodCall)
             }
             // the complete method: same name, same return type, same parameters, same exceptions and either just a method call (return type void) or a return statement
-            MethodNode method = new MethodNode(it.name, Opcodes.ACC_PUBLIC, it.returnType, it.parameters, it.exceptions, tryCatchStatment(statement))
+            ClassNode returnType = new ClassNode(it.returnType.name, it.returnType.modifiers, it.returnType.superClass)
+            if (it.returnType.name == "long" || it.returnType.name == "int" || it.returnType.name == "boolean" || it.returnType.name == "void" || it.returnType.name == "[B") {
+                returnType = it.returnType
+            }
+            def params = new Parameter[it.parameters.length]
+            it.parameters.eachWithIndex { Parameter param, int i ->
+                ClassNode paramClass = new ClassNode(param.type.name, param.type.modifiers, param.type.superClass)
+                if (param.type.name == "long" || param.type.name == "int" || param.type.name == "boolean") {
+                    paramClass = param.type
+                }
+                params[i] = new Parameter(paramClass, param.name)
+            }
+            MethodNode method = new MethodNode(it.name, Opcodes.ACC_PUBLIC, returnType, params, it.exceptions, tryCatchStatment(statement))
             // add Profiled annotation to method. Annotation has a "tag" with String value: className.methodName
             // looks like: @Profiled(tag="${classNode.getNameWithoutPackage()}.${it.name}")
             AnnotationNode profiled = new AnnotationNode(new ClassNode(this.getClass().classLoader.loadClass("org.perf4j.aop.Profiled")))

@@ -1,6 +1,5 @@
 package net.biomodels.jummp.webapp.ast
 
-import groovyjarjarasm.asm.Opcodes
 import org.codehaus.groovy.transform.GroovyASTTransformation
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.transform.ASTTransformation

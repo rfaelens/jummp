@@ -20,6 +20,7 @@ class MenuService {
      * Dependency injection of Spring Security Service
      */
     def springSecurityService
+    @SuppressWarnings("GrailsStatelessService")
     def servletContext
     /**
      * Cache for the parsed menus.

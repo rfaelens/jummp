@@ -3,7 +3,6 @@ package net.biomodels.jummp.plugins.bives
 import net.biomodels.jummp.core.events.RevisionCreatedEvent
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
-import org.apache.log4j.Logger
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationListener
 

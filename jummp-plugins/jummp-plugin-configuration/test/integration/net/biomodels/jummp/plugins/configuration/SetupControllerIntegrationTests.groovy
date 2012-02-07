@@ -38,6 +38,7 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
     void testBasicOrdering() {
         startFlow()
         assertCurrentStateEquals("start")
+        setupController.params.type = 'MYSQL'
         setupController.params.server = 'localhost'
         setupController.params.port = '3306'
         setupController.params.username = 'jummp'
@@ -155,6 +156,7 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         assertFlowExecutionActive()
         // correct value should transit to trigger state
         setupController.params.url = "http://127.0.0.1:8080/jummp/"
+        setupController.params.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         signalEvent("next")
         assertCurrentStateEquals("trigger")
         // incorrect value should fail
@@ -189,8 +191,16 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         setupController.params.diffDir = ""
         signalEvent("next")
         assertCurrentStateEquals("bives")
-        // correct value should transit to finish
+        // correct value should transit to branding
         setupController.params.diffDir = "/tmp/jummp/bives/diffDir"
+        signalEvent("next")
+        assertCurrentStateEquals("branding")
+        // null should fail for this value
+        setupController.params.internalColor = null
+        signalEvent("next")
+        assertCurrentStateEquals("branding")
+        // correct value should transit to finish
+        setupController.params.internalColor = "#FFFFFF"
         signalEvent("next")
         assertFlowExecutionEnded()
         assertFlowExecutionOutcomeEquals("finish")
@@ -281,6 +291,8 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
 
     void testSimpleBackTransitions() {
         // tests that all non-branching states work correctly
+        setCurrentState("branding")
+        signalEvent("back")
         setCurrentState("bives")
         assertCurrentStateEquals("bives")
         // go back to sbml
@@ -433,6 +445,7 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         signalEvent("next")
         assertCurrentStateEquals("server")
         setupController.params.url = "http://127.0.0.1:8080/jummp/"
+        setupController.params.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         signalEvent("next")
         assertCurrentStateEquals("trigger")
         setupController.params.startRemoveOffset = 1000
@@ -444,6 +457,12 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         signalEvent("next")
         assertCurrentStateEquals("bives")
         setupController.params.diffDir = "/tmp/jummp/bives/diffDir"
+        signalEvent("next")
+        assertCurrentStateEquals("branding")
+        setupController.params.internalColor = "#FFFFFF"
+        // going back should end in bives
+        signalEvent("back")
+        assertCurrentStateEquals("bives")
         // going back should end in sbml
         signalEvent("back")
         assertCurrentStateEquals("sbml")

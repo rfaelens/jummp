@@ -32,6 +32,7 @@ class PubMedService {
      * @param id The PubMed Identifier
      * @return A fully populated Publication
      */
+    @SuppressWarnings("EmptyCatchBlock")
     @Transactional
     private Publication fetchPublicationData(String id) throws JummpException {
         URL url

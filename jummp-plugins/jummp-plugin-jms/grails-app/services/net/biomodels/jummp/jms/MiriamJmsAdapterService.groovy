@@ -5,6 +5,7 @@ import net.biomodels.jummp.core.miriam.IMiriamService
 import net.biomodels.jummp.webapp.ast.JmsAdapter
 import net.biomodels.jummp.webapp.ast.JmsQueueMethod
 
+    @SuppressWarnings("UnusedMethodParameter")
 /**
  * @short Wrapper class around MiriamService exposed to JMS.
  *

@@ -5,7 +5,6 @@ import javax.servlet.ServletContext
 import net.biomodels.jummp.core.vcs.VcsManager
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 import org.apache.commons.io.FileUtils
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder

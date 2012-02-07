@@ -31,13 +31,13 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
         // miriam lib required by sbml converters
-        runtime 'uk.ac.ebi.miriam:miriam-lib:1.1.2'
+        runtime 'uk.ac.ebi.miriam:miriam-lib:1.1.3'
         // dependencies of jsbml
         runtime 'org.codehaus.woodstox:woodstox-core-lgpl:4.0.9'
         runtime 'org.codehaus.staxmate:staxmate:2.0.0'
         runtime 'org.w3c.jigsaw:jigsaw:2.2.6'
         runtime 'com.thoughtworks.xstream:xstream:1.3.1'
-        compile ":jsbml:0.8-b2"
+        compile ":jsbml:0.8-rc1"
         compile ":sbfc:1.1-20110624-109"
         compile ":biojava-ontology:1.7"
 
@@ -49,8 +49,8 @@ grails.project.dependency.resolution = {
 
     plugins {
         compile ":perf4j:0.1.1"
-        compile ":spring-security-core:1.2.1"
-        test ":code-coverage:1.2.4"
+        compile ":spring-security-core:1.2.7"
+        test ":code-coverage:1.2.5"
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"

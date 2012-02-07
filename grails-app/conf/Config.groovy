@@ -296,6 +296,51 @@ if (!(jummpConfig.model.history.maxElements instanceof ConfigObject)) {
     jummp.model.history.maxElements = 10
 }
 
+// For the appearance of the web front-end defines the color for internal usage
+if (!(jummpConfig.jummp.branding.internalColor instanceof ConfigObject)) {
+    jummp.branding.internalColor = jummpConfig.jummp.branding.internalColor
+}
+// For the appearance of the web front-end defines the color for external usage
+if (!(jummpConfig.jummp.branding.externalColor instanceof ConfigObject)) {
+    jummp.branding.externalColor = jummpConfig.jummp.branding.externalColor
+}
+// The type of the database server
+if (!(jummpConfig.jummp.database.type instanceof ConfigObject)) {
+    jummp.database.type = jummpConfig.jummp.database.type
+} else {
+    jummp.database.type = "MYSQL"
+}
+// The location of the database server
+if (!(jummpConfig.jummp.database.server instanceof ConfigObject)) {
+    jummp.database.server = jummpConfig.jummp.database.server
+} else {
+    jummp.database.server = "localhost"
+}
+// The port of the database server
+if (!(jummpConfig.jummp.database.port instanceof ConfigObject)) {
+    jummp.database.port = jummpConfig.jummp.database.port as Integer
+} else {
+    jummp.database.port = 3306
+}
+// The name of the database
+if (!(jummpConfig.jummp.database.database instanceof ConfigObject)) {
+    jummp.database.database = jummpConfig.jummp.database.database
+} else {
+    jummp.database.database = "jummp"
+}
+// The user of the database server
+if (!(jummpConfig.jummp.database.username instanceof ConfigObject)) {
+    jummp.database.username = jummpConfig.jummp.database.username
+} else {
+    jummp.database.username = "jummp"
+}
+// The user's password of the database server
+if (!(jummpConfig.jummp.database.password instanceof ConfigObject)) {
+    jummp.database.password = jummpConfig.jummp.database.password
+} else {
+    jummp.database.password = "jummp"
+}
+
 // get all Plugin Configurations
 // the list of available plugins is read from the BuildConfig's plugin location
 // for each plugin it is assumed that it has a JummpPluginConfig class in the package
@@ -387,24 +432,5 @@ environments {
 if (pluginsToExclude) {
     grails.plugin.exclude = pluginsToExclude
 }
-
-// Codenarc settings
-codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
-                             'jummp-plugins/*/grails-app/controllers',
-                             'jummp-plugins/*/grails-app/domain',
-                             'jummp-plugins/*/grails-app/services',
-                             'jummp-plugins/*/grails-app/taglib',
-                             'jummp-plugins/*/grails-app/utils',
-                             'jummp-plugins/*/test/unit',
-                             'jummp-plugins/*/test/integration',
-                             'jummp-web-application/src/groovy',
-                             'jummp-web-application/grails-app/controllers',
-                             'jummp-web-application/grails-app/domain',
-                             'jummp-web-application/grails-app/services',
-                             'jummp-web-application/grails-app/taglib',
-                             'jummp-web-application/grails-app/utils',
-                             'jummp-web-application/test/unit',
-                             'jummp-web-application/test/integration']
-gmetrics.extraIncludeDirs = codenarc.extraIncludeDirs
 // fails the ant test script
 grails.enable.native2ascii=false

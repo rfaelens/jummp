@@ -5,14 +5,10 @@
  */
 package net.biomodels.jummp.plugins.bives
 
-import java.util.Map;
-
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.InitializingBean
-
-import net.biomodels.jummp.plugins.bives.JummpRepositoryManager
 import de.unirostock.bives.diff.model.Diff
 import de.unirostock.bives.diff.model.ElementType
 import de.unirostock.bives.diff.model.AttributeType

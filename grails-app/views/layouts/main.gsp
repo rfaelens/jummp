@@ -1,17 +1,53 @@
+<!doctype html>
 <html>
-    <head>
-        <title><g:layoutTitle default="Grails" /></title>
-        <link rel="stylesheet" href="${resource(dir:'css',file:'main.css')}" />
-        <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
-        <g:layoutHead />
-        <g:javascript library="application" />
-        <g:javascript library="jquery" plugin="jquery"/>
-    </head>
-    <body>
-        <div id="spinner" class="spinner" style="display:none;">
-            <img src="${resource(dir:'images',file:'spinner.gif')}" alt="${message(code:'spinner.alt',default:'Loading...')}" />
+<head>
+    <title><g:layoutTitle default="${g.message(code: 'jummp.main.title') }"/></title>
+    <link rel="shortcut icon" href="${g.createLink(uri: '/images/favicon.ico')}"/>
+    <less:stylesheet name="jummp"/>
+    <less:scripts />
+    <r:require module="jquery"/>
+    <r:layoutResources/>
+    <g:layoutHead/>
+</head>
+<body>
+    <div id="topBackground"></div>
+    <div id="middleBackground"></div>
+    <div id="logo"></div>
+    <div id="modeSwitch">
+        <!-- TODO: active class has to be set on really selected mode -->
+        <jummp:button class="left active"><g:message code="jummp.main.search"/></jummp:button>
+        <jummp:button class="right"><g:message code="jummp.main.submit"/></jummp:button>
+    </div>
+    <div id="container">
+        <div id="nav">
+            <div class="left"><a href="${g.createLink(uri: '/')}"><g:message code="jummp.main.tabs.about"/></a></div>
+            <div class="right"><a href="#"><g:message code="jummp.main.tabs.search"/></a></div>
         </div>
-        <div id="grailsLogo"><a href="http://grails.org"><img src="${resource(dir:'images',file:'grails_logo.png')}" alt="Grails" border="0" /></a></div>
-        <g:layoutBody />
-    </body>
+        <div id="branding">
+        <!-- TODO: integrate branding button -->
+        </div>
+        <div id="contentContainer">
+            <div id="socialMedia">
+            <!-- TODO: integrate social media button or use area for other part -->
+            </div>
+            <div id="content">
+                <div id="main">
+                    <g:layoutBody/>
+                </div>
+                <div id="sideBar">
+                    <g:pageProperty name="page.sidebar"/>
+                </div>
+            </div>
+            <div id="linkArea">
+            <!--  TODO: customizable Link area -->
+            Some site specific links
+            </div>
+        </div>
+    </div>
+    <div id="footer">
+    <!-- TODO: customizable Imprint -->
+    Imprint
+    </div>
+    <r:layoutResources/>
+</body>
 </html>

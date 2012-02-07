@@ -3,7 +3,6 @@ package net.biomodels.jummp.core
 import static org.junit.Assert.*
 import org.junit.*
 import net.biomodels.jummp.plugins.git.GitManagerFactory
-import net.biomodels.jummp.plugins.subversion.SvnManagerFactory
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository

@@ -40,7 +40,7 @@
             <tr class="prop">
                 <td class="name"><label for="body">Body:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'body', 'errors')}">
-                    <textarea id="body" rows="20" cols="100" name="body">${userRegistration?.body ?: 'Example Text: New User'}</textarea>
+                    <textarea id="body" rows="20" cols="40" name="body">${userRegistration?.body ?: 'Example Text: New User'}</textarea>
                 </td>
             </tr>
             <tr class="prop">
@@ -61,7 +61,7 @@
             <tr class="prop">
                 <td class="name"><label for="activationBody">Body for Account Verification:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'activationBody', 'errors')}">
-                    <textarea id="activationBody" rows="20" cols="100" name="activationBody">${userRegistration?.activationBody ?: 'Please activate your account.'}</textarea>
+                    <textarea id="activationBody" rows="20" cols="40" name="activationBody">${userRegistration?.activationBody ?: 'Please activate your account.'}</textarea>
                 </td>
             </tr>
             <tr class="prop">

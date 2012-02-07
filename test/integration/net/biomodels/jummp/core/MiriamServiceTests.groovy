@@ -1,9 +1,8 @@
 package net.biomodels.jummp.core
 
-import org.springframework.security.access.AccessDeniedException
-
 import static org.junit.Assert.*
 import org.junit.*
+import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.miriam.MiriamDatatype
 import net.biomodels.jummp.core.miriam.MiriamIdentifier
 import net.biomodels.jummp.core.miriam.MiriamResource
@@ -17,11 +16,13 @@ import net.biomodels.jummp.core.miriam.GeneOntologyRelationship
 class MiriamServiceTests extends JummpIntegrationTest {
     def miriamService
 
+    @Override
     @Before
     void setUp() {
         createUserAndRoles()
     }
 
+    @Override
     @After
     void tearDown() {
     }

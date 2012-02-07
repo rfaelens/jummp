@@ -1,7 +1,6 @@
 package net.biomodels.jummp.webapp.remote
 
 import net.biomodels.jummp.remote.RemoteUserAdapter
-import net.biomodels.jummp.webapp.ast.RemoteService
 
 /**
  * @short Service delegating to RemoteUserAdapter.
@@ -11,9 +10,9 @@ import net.biomodels.jummp.webapp.ast.RemoteService
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-@RemoteService("RemoteUserAdapter")
 class RemoteUserService implements RemoteUserAdapter {
 
     static transactional = true
-    RemoteUserAdapter remoteUserAdapter
+    @SuppressWarnings("GrailsStatelessService")
+    @Delegate RemoteUserAdapter remoteUserAdapter
 }

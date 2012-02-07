@@ -3,7 +3,6 @@ package net.biomodels.jummp.core
 import net.biomodels.jummp.core.miriam.GeneOntology
 import net.biomodels.jummp.core.miriam.GeneOntologyRelationship
 import net.biomodels.jummp.core.miriam.GeneOntologyTreeLevel
-import net.biomodels.jummp.core.miriam.GeneOntologyRelationshipType
 import org.springframework.security.acls.domain.BasePermission
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import net.biomodels.jummp.model.Revision

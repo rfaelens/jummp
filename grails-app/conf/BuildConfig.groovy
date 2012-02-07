@@ -34,6 +34,7 @@ grails.project.dependency.resolution = {
         compile "org.ccil.cowan.tagsoup:tagsoup:1.2"
         runtime 'hsqldb:hsqldb:1.8.0.10'
         runtime 'mysql:mysql-connector-java:5.1.17'
+        runtime "postgresql:postgresql:9.1-901.jdbc4"
         // plugin dependencies
         compile(":grails-plugin-jummp-plugin-security:latest.integration") {
             changing = true
@@ -67,11 +68,11 @@ grails.project.dependency.resolution = {
         }
         // dependencies of plugins
         // sbml
-        runtime ":jsbml:0.8-b2"
+        runtime ":jsbml:0.8-rc1"
         runtime ":sbfc:1.1-20110624-109"
         runtime ":biojava-ontology:1.7"
         // miriam lib required by sbml converters
-        runtime 'uk.ac.ebi.miriam:miriam-lib:1.1.2'
+        runtime 'uk.ac.ebi.miriam:miriam-lib:1.1.3'
         // dependencies of jsbml
         runtime 'org.codehaus.woodstox:woodstox-core-lgpl:4.0.9'
         runtime 'org.codehaus.staxmate:staxmate:2.0.0'
@@ -112,28 +113,29 @@ grails.project.dependency.resolution = {
         provided ":unix:0.5"
 
         //git
-        runtime 'org.eclipse.jgit:org.eclipse.jgit:1.0.0.201106090707-r'
+        runtime 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
     }
 
     plugins {
         compile ":perf4j:0.1.1"
         compile ":jms:1.2"
         compile ":executor:0.3"
-        compile ":mail:1.0-SNAPSHOT"
+        compile ":mail:1.0"
         compile ":quartz:0.4.2"
         compile ":spring-security-acl:1.1"
-        compile ":svn:1.0.0.M1"
-        runtime ":spring-security-core:1.2.1"
+        compile ":svn:1.0.2"
+        runtime ":spring-security-core:1.2.7"
         runtime ":spring-security-ldap:1.0.5"
-        test ":code-coverage:1.2.4"
-        test ":codenarc:0.11"
+        compile ":lesscss:1.0.0"
+        test ":code-coverage:1.2.5"
+        test ":codenarc:0.16.1"
         test ":gmetrics:0.3.1"
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"
         compile ":webflow:$grailsVersion"
         compile ":jquery:1.6.1.1"
-        //compile ":resources:1.0.2"
+        compile ":resources:1.1.6"
 
         build ":tomcat:$grailsVersion"
 
@@ -147,3 +149,30 @@ grails.war.resources = { stagingDir ->
   // need to remove unix socket JNI library as incompatible with placing inside web-app
   delete(file:"${stagingDir}/WEB-INF/lib/unix-0.5.jar")
 }
+
+codenarc.reports = {
+    CodeNarcXmlReport('xml') {
+        outputFile = 'target/CodeNarc-Report.xml'
+        title = "JUMMP CodeNarc Report"
+    }
+    CodeNarcHtmlReport('html') {
+        outputFile = 'target/CodeNarc-Report.html'
+        title = "JUMMP CodeNarc Report"
+    }
+}
+codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
+                             'jummp-plugins/*/grails-app/controllers',
+                             'jummp-plugins/*/grails-app/domain',
+                             'jummp-plugins/*/grails-app/services',
+                             'jummp-plugins/*/grails-app/taglib',
+                             'jummp-plugins/*/grails-app/utils',
+                             'jummp-plugins/*/test/unit',
+                             'jummp-plugins/*/test/integration',
+                             'jummp-web-application/src/groovy',
+                             'jummp-web-application/grails-app/controllers',
+                             'jummp-web-application/grails-app/domain',
+                             'jummp-web-application/grails-app/services',
+                             'jummp-web-application/grails-app/taglib',
+                             'jummp-web-application/grails-app/utils',
+                             'jummp-web-application/test/unit',
+                             'jummp-web-application/test/integration']

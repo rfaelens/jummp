@@ -4,11 +4,22 @@ try {
     String server = databaseProperties.getProperty("jummp.database.server")
     String port = databaseProperties.getProperty("jummp.database.port")
     String database = databaseProperties.getProperty("jummp.database.database")
-    databaseProperties.setProperty("jummp.database.driver", "com.mysql.jdbc.Driver")
-    databaseProperties.setProperty("jummp.database.url", "jdbc:mysql://${server}:${port}/${database}")
+    String protocol = "mysql"
+    switch (databaseProperties.getProperty("jummp.database.type")) {
+    case "Postgres":
+        protocol = "postgresql"
+        databaseProperties.setProperty("jummp.database.driver", "org.postgresql.Driver")
+        databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.PostgreSQLDialect")
+        break
+    case "MySQL": // mysql is our default
+    default:
+        databaseProperties.setProperty("jummp.database.driver", "com.mysql.jdbc.Driver")
+        databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.MySQL5InnoDBDialect")
+        break
+    }
+    databaseProperties.setProperty("jummp.database.url", "jdbc:${protocol}://${server}:${port}/${database}")
     databaseProperties.setProperty("jummp.database.pooled", "true")
     databaseProperties.setProperty("jummp.database.dbCreate", "update")
-    databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.MySQLInnoDBDialect")
     environments {
         test {
             throw new Exception("Test system")

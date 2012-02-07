@@ -1,6 +1,5 @@
 package net.biomodels.jummp.jms
 
-import grails.plugin.jms.Queue
 import net.biomodels.jummp.plugins.security.User
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
@@ -44,6 +43,7 @@ class ApplicationJmsAdapterService extends AbstractJmsAdapter {
     /**
      * Dependency injection of grailsApplication
      */
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
     private IAuthenticationHashService authenticationHashService

@@ -56,17 +56,22 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
      * Dependency Injection of MiriamService
      */
     def miriamService
+    @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
     /**
      * Keep one of each SBML2* converters around as it takes quite some time to load the converters.
      * These are defs because we don't want to call the static initialization code immediately.
      */
+    @SuppressWarnings("GrailsStatelessService")
     private def dotConverter = null
+    @SuppressWarnings("GrailsStatelessService")
     private def octaveConverter = null
+    @SuppressWarnings("GrailsStatelessService")
     private def biopaxConverter = null
 
     // TODO: move initialization into afterPropertiesSet and make it configuration dependent
+    @SuppressWarnings("GrailsStatelessService")
     SbmlCache<RevisionTransportCommand, SBMLDocument> cache = new SbmlCache(100)
 
     public void afterPropertiesSet() {
@@ -95,7 +100,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             log.error("SBMLDocuement is not valid for file ${model.name}")
             return false
         }
-        if (!grailsApplication.config.jummp.plugins.sbml.validate) {
+        if (!grailsApplication.config.jummp.plugins.sbml.validation) {
             log.info("Validation for ${model.name} skipped due to configuration option")
             println("Validation for ${model.name} skipped due to configuration option")
             return true

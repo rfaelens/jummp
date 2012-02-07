@@ -20,8 +20,10 @@ class UserServiceTests extends JummpIntegrationTest {
     @Before
     void setUp() {
         createUserAndRoles()
+        grailsApplication.config.jummp.security.anonymousRegistration = true
     }
 
+    @Override
     @After
     void tearDown() {
     }
@@ -42,7 +44,7 @@ class UserServiceTests extends JummpIntegrationTest {
     @Test
     void testEditUser() {
         authenticateAsTestUser()
-        User user = User.findByUsername("user")
+        User user = User.findByUsername("username")
         user.userRealName = "Changed Name"
         shouldFail(AccessDeniedException) {
             userService.editUser(user)
@@ -62,29 +64,29 @@ class UserServiceTests extends JummpIntegrationTest {
         }
         authenticateAsUser()
         User user = userService.getCurrentUser()
-        assertEquals("user", user.username)
+        assertEquals("username", user.username)
     }
 
     @Test
     void testGetUser() {
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
-            userService.getUser("user")
+            userService.getUser("username")
         }
         authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
-            userService.getUser("user")
+            userService.getUser("username")
         }
         authenticateAsUser()
-        User user = userService.getUser("user")
-        assertEquals("user", user.username)
+        User user = userService.getUser("username")
+        assertEquals("username", user.username)
         assertNull(user.password)
         assertNull(user.enabled)
         assertNull(user.accountExpired)
         assertNull(user.accountLocked)
         assertNull(user.passwordExpired)
         authenticateAsAdmin()
-        userService.getUser("user")
+        userService.getUser("username")
         shouldFail(UserNotFoundException) {
             userService.getUser("noSuchUser")
         }
@@ -231,7 +233,7 @@ class UserServiceTests extends JummpIntegrationTest {
     void testValidateRegistration() {
         authenticateAsUser()
         shouldFail(AccessDeniedException) {
-            userService.validateRegistration("user", "1234")
+            userService.validateRegistration("username", "1234")
         }
         authenticateAnonymous()
         shouldFail(UserNotFoundException) {

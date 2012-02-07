@@ -29,7 +29,7 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.5'
-        compile 'org.eclipse.jgit:org.eclipse.jgit:1.0.0.201106090707-r'
+        compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
         // plugin dependencies
         compile(":grails-plugin-jummp-plugin-security:latest.integration") {
             changing = true
@@ -39,8 +39,8 @@ grails.project.dependency.resolution = {
         }
     }
     plugins {
-        compile ":spring-security-core:1.2.1"
-        test ":code-coverage:1.2.4"
+        compile ":spring-security-core:1.2.7"
+        test ":code-coverage:1.2.5"
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"

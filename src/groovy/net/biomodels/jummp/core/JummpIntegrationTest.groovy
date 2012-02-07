@@ -47,7 +47,7 @@ class JummpIntegrationTest {
                 passwordExpired: false)
         assertNotNull(user.save())
         assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
-        User user2 = new User(username: "user",
+        User user2 = new User(username: "username",
                 password: springSecurityService.encodePassword("verysecret"),
                 userRealName: "Test2",
                 email: "test2@test.com",
@@ -129,7 +129,7 @@ class JummpIntegrationTest {
      */
     protected def authenticateAsUser() {
         modelAdminUser(false)
-        return authenticate("user", "verysecret")
+        return authenticate("username", "verysecret")
     }
 
     /**

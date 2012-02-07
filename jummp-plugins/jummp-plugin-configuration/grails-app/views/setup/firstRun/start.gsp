@@ -24,12 +24,12 @@
                         %{--TODO hide in LDAP setup--}%
                             <tr class='prop'>
                                 <td  class='name'><label>Password:</label></td>
-                                <td  class='value'><input type="password" name='passwd'/></td>
+                                <td  class='value'><input type="password" name='password'/></td>
                             </tr>
 
                             <tr class='prop'>
                                 <td  class='name'><label>Confirm Password:</label></td>
-                                <td  class='value'><input type="password" name='repasswd'/></td>
+                                <td  class='value'><input type="password" name='rePassword'/></td>
                             </tr>
 
                             <tr class='prop'>

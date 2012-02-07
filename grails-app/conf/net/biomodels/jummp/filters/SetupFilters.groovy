@@ -41,13 +41,13 @@ class SetupFilters implements InitializingBean {
                 setupFilter(controllerExclude: 'setup') {
                     before = {
                         redirect(controller: 'setup', action: "firstRun")
-                        return false
+                        return true
                     }
                 }
                 flowFilter(controller: 'setup', action: 'setup') {
                     before = {
                         redirect(controller: 'setup', action: "firstRun")
-                        return false
+                        return true
                     }
                 }
 
@@ -63,13 +63,13 @@ class SetupFilters implements InitializingBean {
             setupFilter(controllerExclude: 'setup') {
                 before = {
                     redirect(controller: 'setup')
-                    return false
+                    return true
                 }
             }
             firstRun(controller: 'setup', action: 'firstRun') {
                 before = {
                     redirect(controller: 'setup', action: 'setup')
-                    return false
+                    return true
                 }
             }
         }

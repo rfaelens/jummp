@@ -6,10 +6,12 @@ import net.biomodels.jummp.model.Publication
 
 class PubMedServiceTests extends JummpIntegrationTest {
     def pubMedService
+    @Override
     @Before
     void setUp() {
     }
 
+    @Override
     @After
     void tearDown() {
     }

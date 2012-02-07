@@ -1,12 +1,8 @@
 package net.biomodels.jummp.jms.remote
 
 import org.perf4j.aop.Profiled
-import net.biomodels.jummp.core.ModelException
-import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand
-import net.biomodels.jummp.core.model.PublicationTransportCommand
-import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.remote.RemoteModelAdapter
 import net.biomodels.jummp.webapp.ast.RemoteJmsAdapter
 
@@ -31,5 +27,23 @@ class RemoteModelAdapterJmsImpl extends AbstractJmsRemoteAdapter implements Remo
 
     protected String getAdapterServiceName() {
         return ADAPTER_SERVICE_NAME
+    }
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getAllModels")
+    public List<ModelTransportCommand> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sort) {
+        def retVal = send("getAllModels", [offset, count, sortOrder, sort])
+        validateReturnValue(retVal, List)
+        return (List)retVal
+    }
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getAllModels")
+    public List<ModelTransportCommand> getAllModels(int offset, int count, ModelListSorting sort) {
+        def retVal = send("getAllModels", [offset, count, sort])
+        validateReturnValue(retVal, List)
+        return (List)retVal
+    }
+    @Profiled(tag="RemoteModelAdapterJmsImpl.getAllModels")
+    public List<ModelTransportCommand> getAllModels(ModelListSorting sort) {
+        def retVal = send("getAllModels", [sort])
+        validateReturnValue(retVal, List)
+        return (List)retVal
     }
 }

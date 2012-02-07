@@ -58,18 +58,15 @@ grails.project.dependency.resolution = {
         compile(":grails-plugin-jummp-plugin-bives:latest.integration") {
             changing = true
         }
-        compile(":jummp-ast:latest.integration") {
-            changing = true
-        }
 
         test 'hsqldb:hsqldb:1.8.0.10'
     }
     plugins {
         compile ":perf4j:0.1.1"
-        compile ":spring-security-core:1.2.1"
+        compile ":spring-security-core:1.2.7"
         compile ":spring-security-ldap:1.0.5"
         compile ":jms:1.2"
-        test ":code-coverage:1.2.4"
+        test ":code-coverage:1.2.5"
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"
