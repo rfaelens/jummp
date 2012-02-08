@@ -7,13 +7,10 @@
             <img src="${resource(dir: 'images', file: 'feed.png')}"/>
         </a>
     </div>
-    <h2>${it.title.encodeAsHTML()}</h2>
+    <h2><a href="${wcm.createLink(path: it)}">${it.title.encodeAsHTML()}</a></h2>
 ${it.summary}
-    <p>
-      <a href="${wcm.createLink(path: it)}">more</a>
-    </p>
   </wcm:eachChild>
   <p>
-    <a href="${wcm.createLink(path: 'news')}">all news</a>
+    <a href="${wcm.createLink(path: 'news')}">more</a>
   </p>
 </div>

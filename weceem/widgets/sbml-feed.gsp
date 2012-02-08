@@ -6,7 +6,7 @@
     </a>
   </div>
   <wcm:dataFeed type="atom" url="http://sbml.org/index.php?title=News&action=feed" max="1" custom="true">
-    <h2>${item.title.encodeAsHTML()}</h2>
+    <h2><a href="${item.link.@href}" target="_blank">${item.title.encodeAsHTML()}</a></h2>
 <%
 def regex = /<\/?(.|\n)*?>/
 %>
