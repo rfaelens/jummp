@@ -1,11 +1,13 @@
 package net.biomodels.jummp.plugins.configuration
 
 /**
- * Command Object for validating MySQL settings.
+ * Command Object for validating database settings.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class MysqlCommand implements Serializable {
+class DatabaseCommand implements Serializable {
     private static final long serialVersionUID = 1L
+
+    DatabaseType type
     String username
     String password
     String server
@@ -13,6 +15,7 @@ class MysqlCommand implements Serializable {
     String database
 
     static constraints = {
+        type(nullable: false, blank: false)
         username(nullable: false, blank: false)
         password(nullable: false, blank: true)
         // TODO: add constraints for a fqdn or IP address

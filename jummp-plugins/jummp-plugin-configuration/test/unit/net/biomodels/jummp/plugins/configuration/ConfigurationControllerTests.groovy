@@ -4,9 +4,10 @@ import grails.test.*
 import org.apache.commons.io.FileUtils
 import org.junit.After
 import org.junit.Before
+import grails.test.mixin.support.GrailsUnitTestMixin
 
 @TestFor(ConfigurationController)
-class ConfigurationControllerTests {
+class ConfigurationControllerTests extends GrailsUnitTestMixin {
     @Before
     void setUp() {
         // inject a ConfigurationService into the controller
@@ -16,6 +17,7 @@ class ConfigurationControllerTests {
         service.configurationFile = configurationFile
         service.afterPropertiesSet()
         controller.configurationService = service
+        service.grailsApplication = grailsApplication
     }
     @After
     void tearDown() {
@@ -42,6 +44,12 @@ class ConfigurationControllerTests {
         controller.saveLdap(cmd)
         assertEquals("/configuration/saved", view)
         assertEquals("LDAP", model.module)
+        grailsApplication.config.jummp.security.ldap.server = "localhost"
+        grailsApplication.config.jummp.security.ldap.managerDn = "user"
+        grailsApplication.config.jummp.security.ldap.managerPw = "secure"
+        grailsApplication.config.jummp.security.ldap.search.base = "search"
+        grailsApplication.config.jummp.security.ldap.search.filter = "filter"
+        grailsApplication.config.jummp.security.ldap.search.subTree = "true"
         LdapCommand saved = this.controller.configurationService.loadLdapConfiguration()
         assertTrue(saved.ldapSearchSubtree)
         assertEquals("filter", saved.ldapSearchFilter)
@@ -53,24 +61,31 @@ class ConfigurationControllerTests {
 
     void testSaveMysql() {
         // test for incorrect command
-        MysqlCommand cmd = mockCommandObject(MysqlCommand)
+        DatabaseCommand cmd = mockCommandObject(DatabaseCommand)
         cmd.validate()
-        controller.saveMysql(cmd)
+        controller.saveDatabase(cmd)
         assertEquals("/configuration/configuration", view)
-        assertEquals("mysql", model.template)
-        assertEquals(cmd, model.mysql)
+        assertEquals("database", model.template)
+        assertEquals(cmd, model.database)
         // test for correct command
-        cmd = mockCommandObject(MysqlCommand)
+        cmd = mockCommandObject(DatabaseCommand)
+        cmd.type = "MYSQL"
         cmd.database = "jummp"
         cmd.password = "secure"
         cmd.port = 3306
         cmd.server = "localhost"
         cmd.username = "user"
         cmd.validate()
-        controller.saveMysql(cmd)
+        controller.saveDatabase(cmd)
         assertEquals("/configuration/saved", view)
-        assertEquals("MySQL", model.module)
-        MysqlCommand saved = this.controller.configurationService.loadMysqlConfiguration()
+        assertEquals("Database", model.module)
+        grailsApplication.config.jummp.database.type = "MYSQL"
+        grailsApplication.config.jummp.database.server = "localhost"
+        grailsApplication.config.jummp.database.port = 3306
+        grailsApplication.config.jummp.database.database = "jummp"
+        grailsApplication.config.jummp.database.username = "user"
+        grailsApplication.config.jummp.database.password = "secure"
+        DatabaseCommand saved = this.controller.configurationService.loadDatabaseConfiguration()
         assertEquals(3306, saved.port)
         assertEquals("jummp", saved.database)
         assertEquals("secure", saved.password)
@@ -96,6 +111,9 @@ class ConfigurationControllerTests {
         controller.saveRemote(cmd)
         assertEquals("/configuration/saved", view)
         assertEquals("Remote", model.module)
+        grailsApplication.config.jummp.remote = "jms"
+        grailsApplication.config.jummp.export.dbus = "false"
+        grailsApplication.config.jummp.export.jms = "true"
         RemoteCommand saved = this.controller.configurationService.loadRemoteConfiguration()
         assertEquals("jms", saved.jummpRemote)
         assertFalse(saved.jummpExportDbus)
@@ -118,6 +136,8 @@ class ConfigurationControllerTests {
         controller.saveServer(cmd)
         assertEquals("/configuration/saved", view)
         assertEquals("Server", model.module)
+        grailsApplication.config.jummp.server.url = "http://127.0.0.1:8080/jummp/"
+        grailsApplication.config.jummp.server.web.url = "http://127.0.0.1:8080/jummp-web-application/"
         ServerCommand saved = this.controller.configurationService.loadServerConfiguration()
         assertEquals("http://127.0.0.1:8080/jummp/", saved.url)
         assertEquals("http://127.0.0.1:8080/jummp-web-application/", saved.weburl)
@@ -137,6 +157,7 @@ class ConfigurationControllerTests {
         controller.saveSvn(cmd)
         assertEquals("/configuration/saved", view)
         assertEquals("Subversion", model.module)
+        grailsApplication.config.jummp.plugins.subversion.localRepository = "target"
         SvnCommand saved = this.controller.configurationService.loadSvnConfiguration()
         assertEquals("target", saved.localRepository)
     }
@@ -158,6 +179,9 @@ class ConfigurationControllerTests {
         controller.saveVcs(cmd)
         assertEquals("/configuration/saved", view)
         assertEquals("Version Control System", model.module)
+        grailsApplication.config.jummp.vcs.plugin = "subversion"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = ""
+        grailsApplication.config.jummp.vcs.workingDirectory = ""
         VcsCommand saved = this.controller.configurationService.loadVcsConfiguration()
         assertEquals("svn", saved.vcs)
     }
