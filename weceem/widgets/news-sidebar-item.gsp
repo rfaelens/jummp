@@ -10,7 +10,7 @@
     <h2><a href="${wcm.createLink(path: it)}">${it.title.encodeAsHTML()}</a></h2>
 ${it.summary}
   </wcm:eachChild>
-  <g:if test="${wcm.countChildren() == '0'}">
+  <g:if test="${wcm.countChildren(node: newsBlog) == '0'}">
     <h2>No News published yet</h2>
   </g:if>
   <p>
