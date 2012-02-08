@@ -1,9 +1,21 @@
 package net.biomodels.jummp.plugins.configuration
 
 import grails.test.*
+import org.junit.Before
+import grails.test.mixin.support.GrailsUnitTestMixin
 
 @TestFor(ConfigurationController)
-class ConfigurationServiceTests {
+class ConfigurationServiceTests extends GrailsUnitTestMixin {
+
+    @Before
+    void setUp() {
+        // inject a ConfigurationService into the controller
+        ConfigurationService service = new ConfigurationService()
+        service.afterPropertiesSet()
+        controller.configurationService = service
+        service.grailsApplication = grailsApplication
+    }
+
     @SuppressWarnings("CatchException")
     def shouldFail = { exception, code ->
         try {
@@ -32,53 +44,58 @@ class ConfigurationServiceTests {
         assertEquals(new File("target/jummp.properties"), service.configurationFile)
     }
 
-    void testUpdateMysqlConfiguration() {
+    void testUpdateDatabaseConfiguration() {
         ConfigurationService service = new ConfigurationService()
         shouldFail(NullPointerException) {
-            service.updateMysqlConfiguration(null, null)
+            service.updateDatabaseConfiguration(null, null)
         }
         Properties properties = new Properties()
         shouldFail(NullPointerException) {
-            service.updateMysqlConfiguration(properties, null)
+            service.updateDatabaseConfiguration(properties, null)
         }
-        mockForConstraintsTests(MysqlCommand)
-        MysqlCommand mysql = mockCommandObject(MysqlCommand)
-        service.updateMysqlConfiguration(properties, mysql)
+        mockForConstraintsTests(DatabaseCommand)
+        DatabaseCommand database = mockCommandObject(DatabaseCommand)
+        service.updateDatabaseConfiguration(properties, database)
         assertTrue(properties.isEmpty())
         // set values
-        mysql = mockCommandObject(MysqlCommand)
-        mysql.database = "jummp"
-        mysql.server   = "localhost"
-        mysql.port     = 3306
-        mysql.username = "user"
-        mysql.password = "pass"
-        service.updateMysqlConfiguration(properties, mysql)
+        database = mockCommandObject(DatabaseCommand)
+        database.type = "MYSQL"
+        database.database = "jummp"
+        database.server   = "localhost"
+        database.port     = 3306
+        database.username = "user"
+        database.password = "pass"
+        service.updateDatabaseConfiguration(properties, database)
         assertFalse(properties.isEmpty())
-        assertEquals(5, properties.size())
+        assertEquals(6, properties.size())
+        assertEquals("MYSQL", properties.getProperty("jummp.database.type"))
         assertEquals("jummp", properties.getProperty("jummp.database.database"))
         assertEquals("localhost", properties.getProperty("jummp.database.server"))
         assertEquals("3306", properties.getProperty("jummp.database.port"))
         assertEquals("user", properties.getProperty("jummp.database.username"))
         assertEquals("pass", properties.getProperty("jummp.database.password"))
         // update values
-        mysql = mockCommandObject(MysqlCommand)
-        mysql.database = "database"
-        mysql.server   = "host"
-        mysql.port     = 1234
-        mysql.username = "name"
-        mysql.password = ""
-        service.updateMysqlConfiguration(properties, mysql)
+        database = mockCommandObject(DatabaseCommand)
+        database.type = "POSTRGESQL"
+        database.database = "database"
+        database.server   = "host"
+        database.port     = 1234
+        database.username = "name"
+        database.password = ""
+        service.updateDatabaseConfiguration(properties, database)
         assertFalse(properties.isEmpty())
-        assertEquals(5, properties.size())
+        assertEquals(6, properties.size())
+        assertEquals("POSTRGESQL", properties.getProperty("jummp.database.type"))
         assertEquals("database", properties.getProperty("jummp.database.database"))
         assertEquals("host", properties.getProperty("jummp.database.server"))
         assertEquals("1234", properties.getProperty("jummp.database.port"))
         assertEquals("name", properties.getProperty("jummp.database.username"))
         assertEquals("", properties.getProperty("jummp.database.password"))
         // invalid command should not change
-        service.updateMysqlConfiguration(properties, mockCommandObject(MysqlCommand))
+        service.updateDatabaseConfiguration(properties, mockCommandObject(DatabaseCommand))
         assertFalse(properties.isEmpty())
-        assertEquals(5, properties.size())
+        assertEquals(6, properties.size())
+        assertEquals("POSTRGESQL", properties.getProperty("jummp.database.type"))
         assertEquals("database", properties.getProperty("jummp.database.database"))
         assertEquals("host", properties.getProperty("jummp.database.server"))
         assertEquals("1234", properties.getProperty("jummp.database.port"))
@@ -362,13 +379,14 @@ class ConfigurationServiceTests {
         service.configurationFile.delete()
         service.afterPropertiesSet()
         assertEquals(new File("target/jummpProperties"), service.configurationFile)
-        MysqlCommand mysql = mockCommandObject(MysqlCommand)
-        mysql.database = "jummp"
-        mysql.server   = "localhost"
-        mysql.port     = 3306
-        mysql.username = "user"
-        mysql.password = "pass"
-        assertTrue(mysql.validate())
+        DatabaseCommand database = mockCommandObject(DatabaseCommand)
+        database.type = "MYSQL"
+        database.database = "jummp"
+        database.server   = "localhost"
+        database.port     = 3306
+        database.username = "user"
+        database.password = "pass"
+        assertTrue(database.validate())
         RemoteCommand remote = mockCommandObject(RemoteCommand)
         remote.jummpRemote="jms"
         remote.jummpExportDbus=false
@@ -432,12 +450,15 @@ class ConfigurationServiceTests {
         BivesCommand bives = mockCommandObject(BivesCommand)
         bives.diffDir = "/tmp/"
         assertTrue(bives.validate())
+        BrandingCommand branding = mockCommandObject(BrandingCommand)
+        branding.internalColor = "#FFFFFF"
+        assertTrue(branding.validate())
 
         // everything should be written to the properties file
-        service.storeConfiguration(mysql, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives)
+        service.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, branding)
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(46, properties.size())
+        assertEquals(50, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -451,6 +472,7 @@ class ConfigurationServiceTests {
         assertEquals("password", properties.getProperty("jummp.security.ldap.managerPw"))
         assertEquals("manager",  properties.getProperty("jummp.security.ldap.managerDn"))
         assertEquals("server",   properties.getProperty("jummp.security.ldap.server"))
+        assertEquals("MYSQL",     properties.getProperty("jummp.database.type"))
         assertEquals("jummp",     properties.getProperty("jummp.database.database"))
         assertEquals("localhost", properties.getProperty("jummp.database.server"))
         assertEquals("3306",      properties.getProperty("jummp.database.port"))
@@ -467,6 +489,7 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",     properties.getProperty("jummp.branding.internalColor"))
 
         // change configuration - no ldap, no svn
         firstRun = mockCommandObject(FirstRunCommand)
@@ -478,10 +501,10 @@ class ConfigurationServiceTests {
         vcs.vcs = "git"
         assertTrue(vcs.validate())
 
-        service.storeConfiguration(mysql, null, vcs, null, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives)
+        service.storeConfiguration(database, null, vcs, null, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, branding)
         properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(22, properties.size())
+        assertEquals(26, properties.size())
         assertEquals("true",      properties.getProperty("jummp.firstRun"))
         assertEquals("target",    properties.getProperty("jummp.vcs.workingDirectory"))
         assertEquals("",          properties.getProperty("jummp.vcs.exchangeDirectory"))
@@ -497,28 +520,36 @@ class ConfigurationServiceTests {
         assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
     }
 
-    void testLoadStoreMysqlConfiguration() {
+    void testLoadStoreDatabaseConfiguration() {
         ConfigurationService service = new ConfigurationService()
         populateProperties(service)
-
+        grailsApplication.config.jummp.database.type = "MYSQL"
+        grailsApplication.config.jummp.database.server = "localhost"
+        grailsApplication.config.jummp.database.port = 3306
+        grailsApplication.config.jummp.database.database = "jummp"
+        grailsApplication.config.jummp.database.username = "user"
+        grailsApplication.config.jummp.database.password = "secure"
         // now load the data from the service
-        MysqlCommand mysql = service.loadMysqlConfiguration()
-        assertEquals("jummp",     mysql.database)
-        assertEquals("localhost", mysql.server)
-        assertEquals(3306,        mysql.port)
-        assertEquals("user",      mysql.username)
-        assertEquals("pass",      mysql.password)
+        DatabaseCommand database = service.loadDatabaseConfiguration()
+        assertEquals("MYSQL",     database.type)
+        assertEquals("jummp",     database.database)
+        assertEquals("localhost", database.server)
+        assertEquals(3306,        database.port)
+        assertEquals("user",      database.username)
+        assertEquals("pass",      database.password)
 
         // store a new configuration
-        mysql = new MysqlCommand()
-        mysql.database = "database"
-        mysql.server   = "server"
-        mysql.port     = 1234
-        mysql.username = "name"
-        mysql.password = "secret"
-        service.saveMysqlConfiguration(mysql)
+        database = new DatabaseCommand()
+        database.type = "MYSQL"
+        database.database = "database"
+        database.server   = "server"
+        database.port     = 1234
+        database.username = "name"
+        database.password = "secret"
+        service.saveDatabaseConfiguration(database)
         // verify the configuration
-        MysqlCommand config = service.loadMysqlConfiguration()
+        DatabaseCommand config = service.loadDatabaseConfiguration()
+        assertEquals("MYSQL",    config.type)
         assertEquals("database", config.database)
         assertEquals("server",   config.server)
         assertEquals(1234,       config.port)
@@ -815,13 +846,14 @@ class ConfigurationServiceTests {
         service.configurationFile.delete()
         service.afterPropertiesSet()
         assertEquals(new File("target/jummpProperties"), service.configurationFile)
-        MysqlCommand mysql = mockCommandObject(MysqlCommand)
-        mysql.database = "jummp"
-        mysql.server   = "localhost"
-        mysql.port     = 3306
-        mysql.username = "user"
-        mysql.password = "pass"
-        assertTrue(mysql.validate())
+        DatabaseCommand database = mockCommandObject(DatabaseCommand)
+        database.type = "MYSQL"
+        database.database = "jummp"
+        database.server   = "localhost"
+        database.port     = 3306
+        database.username = "user"
+        database.password = "pass"
+        assertTrue(database.validate())
         RemoteCommand remote = mockCommandObject(RemoteCommand)
         remote.jummpRemote="jms"
         remote.jummpExportDbus=false
@@ -885,12 +917,15 @@ class ConfigurationServiceTests {
         BivesCommand bives = mockCommandObject(BivesCommand)
         bives.diffDir = "/tmp/"
         assertTrue(bives.validate())
+        BrandingCommand branding = mockCommandObject(BrandingCommand)
+        branding.internalColor = "#FFFFFF"
+        assertTrue(branding.validate())
 
         // everything should be written to the properties file
-        service.storeConfiguration(mysql, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives)
+        service.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, branding)
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(46, properties.size())
+        assertEquals(50, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -904,6 +939,7 @@ class ConfigurationServiceTests {
         assertEquals("password", properties.getProperty("jummp.security.ldap.managerPw"))
         assertEquals("manager",  properties.getProperty("jummp.security.ldap.managerDn"))
         assertEquals("server",   properties.getProperty("jummp.security.ldap.server"))
+        assertEquals("MYSQL",     properties.getProperty("jummp.database.type"))
         assertEquals("jummp",     properties.getProperty("jummp.database.database"))
         assertEquals("localhost", properties.getProperty("jummp.database.server"))
         assertEquals("3306",      properties.getProperty("jummp.database.port"))
@@ -937,5 +973,6 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
     }
 }
