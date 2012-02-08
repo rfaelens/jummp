@@ -39,3 +39,4 @@ jummp-plugins/*/target/*
 jummp-plugins/*/target-eclipse/*
 web-app/WEB-INF/classes/
 */web-app/WEB-INF/classes/
+src/groovy/weceem-jummp-default-space.zip
