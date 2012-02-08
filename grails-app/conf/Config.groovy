@@ -172,7 +172,26 @@ jummp.controllerAnnotations = [
         '/requestmap/**':        ['ROLE_ADMIN'],
         '/role/**':              ['ROLE_ADMIN'],
         '/securityinfo/**':      ['ROLE_ADMIN'],
-        '/user/**':              ['ROLE_ADMIN']
+        '/user/**':              ['ROLE_ADMIN'],
+        '/wcm-tools/**':         ['ROLE_ADMIN'],
+        '/searchable/**':        ['ROLE_ADMIN'],
+        '/ck/**':                ['ROLE_ADMIN'],
+        "/wcmEditor/**":         ["hasRole('ROLE_ADMIN')"],
+        "/wcmPortal/**":         ["hasRole('ROLE_ADMIN')"],
+        "/wcmRepository/**":     ["hasRole('ROLE_ADMIN')"],
+        "/wcmSpace/**":          ["hasRole('ROLE_ADMIN')"],
+        "/wcmSynchronization/**": ["hasRole('ROLE_ADMIN')"],
+        "/wcmVersion/**":        ["hasRole('ROLE_ADMIN')"],
+        "/wcm*/**":              ["permitAll"],
+        "/WeceemFiles/**":       ["permitAll"],
+        "/css/**":               ["permitAll"],
+        "/images/**":            ["permitAll"],
+        "/js/**":                ["permitAll"],
+        "/plugins/jquery*/**":   ["permitAll"],
+        "/plugins/navigation*/**": ["permitAll"],
+        "/plugins/blueprint*/**": ["permitAll"],
+        "/plugins/ckeditor*/**":  ["permitAll"],
+        "/plugins/weceem*/**":    ["permitAll"]
 ]
 
 // ldap
@@ -434,3 +453,11 @@ if (pluginsToExclude) {
 }
 // fails the ant test script
 grails.enable.native2ascii=false
+
+// weceem
+grails.mime.file.extensions = false
+weceem.content.prefix = 'content'
+weceem.tools.prefix = 'wcm-tools'
+weceem.admin.prefix = 'wcm-admin'
+weceem.create.default.space = false
+weceem.security.policy.path = "scripts/weceem-security.groovy"

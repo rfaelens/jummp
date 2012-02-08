@@ -23,9 +23,7 @@
             <div class="left"><a href="${g.createLink(uri: '/')}"><g:message code="jummp.main.tabs.about"/></a></div>
             <div class="right"><a href="#"><g:message code="jummp.main.tabs.search"/></a></div>
         </div>
-        <div id="branding">
-        <!-- TODO: integrate branding button -->
-        </div>
+        <wcm:render path="jummp/branding"/>
         <div id="contentContainer">
             <div id="socialMedia">
             <!-- TODO: integrate social media button or use area for other part -->
@@ -38,16 +36,10 @@
                     <g:pageProperty name="page.sidebar"/>
                 </div>
             </div>
-            <div id="linkArea">
-            <!--  TODO: customizable Link area -->
-            Some site specific links
-            </div>
+            <wcm:render path="jummp/links"/>
         </div>
     </div>
-    <div id="footer">
-    <!-- TODO: customizable Imprint -->
-    Imprint
-    </div>
+    <wcm:render path="jummp/footer"/>
     <r:layoutResources/>
 </body>
 </html>
