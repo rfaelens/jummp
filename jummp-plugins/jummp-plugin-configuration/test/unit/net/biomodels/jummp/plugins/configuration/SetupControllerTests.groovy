@@ -7,48 +7,51 @@ import grails.test.mixin.TestFor
 @TestFor(SetupController)
 class SetupControllerTests  {
 
-    void testMysqlCommand() {
+    void testDatabaseCommand() {
         // null should fail
-        MysqlCommand cmd = mockCommandObject(MysqlCommand)
-        //mockForConstraintsTests(MysqlCommand)
+        DatabaseCommand cmd = mockCommandObject(DatabaseCommand)
         cmd.server = null
         assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["type"].code)
         assertEquals("nullable", cmd.errors["server"].code)
         assertEquals("nullable", cmd.errors["port"].code)
         assertEquals("nullable", cmd.errors["database"].code)
         assertEquals("nullable", cmd.errors["username"].code)
         assertEquals("nullable", cmd.errors["password"].code)
         // test for blanks
-        cmd = mockCommandObject(MysqlCommand)
+        cmd = mockCommandObject(DatabaseCommand)
+        cmd.type = null
         cmd.server = ''
         cmd.database = ''
         cmd.username = ''
         cmd.password = ''
         assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["type"].code)
         assertEquals("nullable", cmd.errors["port"].code)
         assertEquals("blank", cmd.errors["server"].code)
         assertEquals("blank", cmd.errors["database"].code)
         assertEquals("blank", cmd.errors["username"].code)
         assertNull(cmd.errors["password"])
         // port in range 0 to 65535
-        cmd = mockCommandObject(MysqlCommand)
+        cmd = mockCommandObject(DatabaseCommand)
         cmd.port = -1
         assertFalse(cmd.validate())
         assertEquals("range.toosmall", cmd.errors["port"].code)
-        cmd = mockCommandObject(MysqlCommand)
+        cmd = mockCommandObject(DatabaseCommand)
         cmd.port = 65536
         assertFalse(cmd.validate())
         assertEquals("range.toobig", cmd.errors["port"].code)
-        cmd = mockCommandObject(MysqlCommand)
+        cmd = mockCommandObject(DatabaseCommand)
         cmd.port = 0
         assertFalse(cmd.validate())
         assertNull(cmd.errors["port"])
-        cmd = mockCommandObject(MysqlCommand)
+        cmd = mockCommandObject(DatabaseCommand)
         cmd.port = 65535
         assertFalse(cmd.validate())
         assertNull(cmd.errors["port"])
         // and one test that should work
-        cmd = mockCommandObject(MysqlCommand)
+        cmd = mockCommandObject(DatabaseCommand)
+        cmd.type = 'MYSQL'
         cmd.server = 'localhost'
         cmd.database = 'jummp'
         cmd.username = 'jummp'

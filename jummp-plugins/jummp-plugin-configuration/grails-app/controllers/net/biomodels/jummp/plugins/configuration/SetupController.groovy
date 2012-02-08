@@ -28,9 +28,9 @@ class SetupController {
 
     def setupFlow = {
         start {
-            on("next") { MysqlCommand cmd ->
-                flow.mysql = cmd
-                if (flow.mysql.hasErrors()) {
+            on("next") { DatabaseCommand cmd ->
+                flow.database = cmd
+                if (flow.database.hasErrors()) {
                     return error()
                 } else {
                     return success()
@@ -193,11 +193,23 @@ class SetupController {
                 if (flow.bives.hasErrors()) {
                     return error()
                 } else {
-                    configurationService.storeConfiguration(flow.mysql, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote, flow.dbus, flow.trigger, flow.sbml, flow.bives)
+                    return success()
+                }
+            }.to("branding")
+            on("back").to("sbml")
+        }
+
+        branding {
+            on("next") { BrandingCommand cmd ->
+                flow.branding = cmd
+                if (flow.branding.hasErrors()) {
+                    return error()
+                } else {
+                    configurationService.storeConfiguration(flow.database, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote, flow.dbus, flow.trigger, flow.sbml, flow.bives, flow.branding)
                     return success()
                 }
             }.to("finish")
-            on("back").to("sbml")
+            on("back").to("bives")
         }
 
         validateAuthenticationBackend {

@@ -1,4 +1,3 @@
-
 package net.biomodels.jummp.plugins.configuration
 
 import java.util.concurrent.locks.ReentrantLock
@@ -18,6 +17,7 @@ class ConfigurationService implements InitializingBean {
      * Methods accessing the configuration files, need to be thread save, therefore using a lock.
      */
     private final ReentrantLock lock = new ReentrantLock()
+    def grailsApplication
 
     static transactional = true
     /**
@@ -36,7 +36,7 @@ class ConfigurationService implements InitializingBean {
     /**
      * Rewrites the complete configuration.
      * Web application needs to be restarted after using this method.
-     * @param mysql The MySQL configuration
+     * @param database The database configuration
      * @param ldap The LDAP configuration, if @c null database backend is used
      * @param vcs The Version Control System configuration
      * @param svn The Subversion configuration, may be @c null
@@ -49,11 +49,14 @@ class ConfigurationService implements InitializingBean {
      * @param trigger The Trigger configuration
      * @param tsbml The SBML configuration
      * @param bives the BiVeS configuration
+     * @param branding the Branding configuration
      */
-    public void storeConfiguration(MysqlCommand mysql, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun,
-                                   ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword, RemoteCommand remote, DBusCommand dbus, TriggerCommand trigger, SBMLCommand sbml, BivesCommand bives) {
+    public void storeConfiguration(DatabaseCommand database, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun,
+                                   ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword,
+                                   RemoteCommand remote, DBusCommand dbus, TriggerCommand trigger, SBMLCommand sbml, BivesCommand bives,
+                                   BrandingCommand branding) {
         Properties properties = new Properties()
-        updateMysqlConfiguration(properties, mysql)
+        updateDatabaseConfiguration(properties, database)
         updateRemoteConfiguration(properties, remote)
         if(dbus) {
              updateDBusConfiguration(properties, dbus)
@@ -68,6 +71,7 @@ class ConfigurationService implements InitializingBean {
         updateSBMLConfiguration(properties, sbml)
         updateTriggerConfiguration(properties, trigger)
         updateBivesConfiguration(properties, bives)
+        updateBrandingConfiguration(properties, branding)
         if (ldap) {
             properties.setProperty("jummp.security.authenticationBackend", "ldap")
         } else {
@@ -81,25 +85,24 @@ class ConfigurationService implements InitializingBean {
      * @return A command object encapsulating the current BiVeS configuration
      */
     public BivesCommand loadBivesConfiguration() {
-        Properties properties = loadProperties()
         BivesCommand bives = new BivesCommand()
-        bives.diffDir   = properties.getProperty("jummp.plugins.bives.diffdir")
+        bives.diffDir   = grailsApplication.config.jummp.plugins.bives.diffdir
         return bives
     } 
 
     /**
-     * Loads the current MySql Configuration.
-     * @return A command object encapsulating the current MySql configuration
+     * Loads the current database Configuration.
+     * @return A command object encapsulating the current database configuration
      */
-    public MysqlCommand loadMysqlConfiguration() {
-        Properties properties = loadProperties()
-        MysqlCommand mysql = new MysqlCommand()
-        mysql.server   = properties.getProperty("jummp.database.server")
-        mysql.port     = Integer.parseInt(properties.getProperty("jummp.database.port"))
-        mysql.database = properties.getProperty("jummp.database.database")
-        mysql.username = properties.getProperty("jummp.database.username")
-        mysql.password = properties.getProperty("jummp.database.password")
-        return mysql
+    public DatabaseCommand loadDatabaseConfiguration() {
+        DatabaseCommand database = new DatabaseCommand()
+        database.type     = grailsApplication.config.jummp.database.type
+        database.server   = grailsApplication.config.jummp.database.server
+        database.port     = grailsApplication.config.jummp.database.port
+        database.database = grailsApplication.config.jummp.database.database
+        database.username = grailsApplication.config.jummp.database.username
+        database.password = grailsApplication.config.jummp.database.password
+        return database
     }
 
     /**
@@ -107,11 +110,10 @@ class ConfigurationService implements InitializingBean {
      * @return A command object encapsulating the current Remote Configuration
      */
     public RemoteCommand loadRemoteConfiguration() {
-        Properties properties = loadProperties()
         RemoteCommand remote = new RemoteCommand()
-        remote.jummpRemote = properties.getProperty("jummp.remote")
-        remote.jummpExportDbus = Boolean.parseBoolean(properties.getProperty("jummp.export.dbus"))
-        remote.jummpExportJms = Boolean.parseBoolean(properties.getProperty("jummp.export.jms"))
+        remote.jummpRemote = grailsApplication.config.jummp.remote
+        remote.jummpExportDbus = Boolean.parseBoolean(grailsApplication.config.jummp.export.dbus)
+        remote.jummpExportJms = Boolean.parseBoolean(grailsApplication.config.jummp.export.jms)
         return remote
     }
 
@@ -120,9 +122,8 @@ class ConfigurationService implements InitializingBean {
      * @return A command object encapsulating the current DBus Configuration
      */
     public DBusCommand loadDBusConfiguration() {
-        Properties properties = loadProperties()
         DBusCommand dbus = new DBusCommand()
-        dbus.systemBus = Boolean.parseBoolean(properties.getProperty("jummp.plugins.dbus.systemBus"))
+        dbus.systemBus = Boolean.parseBoolean(grailsApplication.config.jummp.plugins.dbus.systemBus)
         return dbus
     }
 
@@ -131,14 +132,13 @@ class ConfigurationService implements InitializingBean {
      * @return A command object encapsulating the current LDAP configuration
      */
     public LdapCommand loadLdapConfiguration() {
-        Properties properties = loadProperties()
         LdapCommand ldap = new LdapCommand()
-        ldap.ldapServer          = properties.getProperty("jummp.security.ldap.server")
-        ldap.ldapManagerDn       = properties.getProperty("jummp.security.ldap.managerDn")
-        ldap.ldapManagerPassword = properties.getProperty("jummp.security.ldap.managerPw")
-        ldap.ldapSearchBase      = properties.getProperty("jummp.security.ldap.search.base")
-        ldap.ldapSearchFilter    = properties.getProperty("jummp.security.ldap.search.filter")
-        ldap.ldapSearchSubtree   = Boolean.parseBoolean(properties.getProperty("jummp.security.ldap.search.subTree"))
+        ldap.ldapServer          = grailsApplication.config.jummp.security.ldap.server
+        ldap.ldapManagerDn       = grailsApplication.config.jummp.security.ldap.managerDn
+        ldap.ldapManagerPassword = grailsApplication.config.jummp.security.ldap.managerPw
+        ldap.ldapSearchBase      = grailsApplication.config.jummp.security.ldap.search.base
+        ldap.ldapSearchFilter    = grailsApplication.config.jummp.security.ldap.search.filter
+        ldap.ldapSearchSubtree   = Boolean.parseBoolean(grailsApplication.config.jummp.security.ldap.search.subTree)
         return ldap
     }
 
@@ -147,11 +147,10 @@ class ConfigurationService implements InitializingBean {
      * @return A command object encapsulating the current VCS configuration
      */
     public VcsCommand loadVcsConfiguration() {
-        Properties properties = loadProperties()
         VcsCommand vcs = new VcsCommand()
-        vcs.vcs = properties.getProperty("jummp.vcs.plugin") == "subversion" ? "svn" : "git"
-        vcs.exchangeDirectory = properties.getProperty("jummp.vcs.exchangeDirectory")
-        vcs.workingDirectory  = properties.getProperty("jummp.vcs.workingDirectory")
+        vcs.vcs = grailsApplication.config.jummp.vcs.plugin == "subversion" ? "svn" : "git"
+        vcs.exchangeDirectory = grailsApplication.config.jummp.vcs.exchangeDirectory
+        vcs.workingDirectory  = grailsApplication.config.jummp.vcs.workingDirectory
         return vcs
     }
 
@@ -160,9 +159,8 @@ class ConfigurationService implements InitializingBean {
      * @return A command object encapsulating the current SVN configuration
      */
     public SvnCommand loadSvnConfiguration() {
-        Properties properties = loadProperties()
         SvnCommand svn = new SvnCommand()
-        svn.localRepository = properties.getProperty("jummp.plugins.subversion.localRepository")
+        svn.localRepository = grailsApplication.config.jummp.plugins.subversion.localRepository
         return svn
     }
 
@@ -171,10 +169,9 @@ class ConfigurationService implements InitializingBean {
      * @return A command object encapsulating the current server configuration
      */
     public ServerCommand loadServerConfiguration() {
-        Properties properties = loadProperties()
         ServerCommand server = new ServerCommand()
-        server.url = properties.getProperty("jummp.server.url")
-        server.weburl = properties.getProperty("jummp.server.web.url")
+        server.url = grailsApplication.config.jummp.server.url
+        server.weburl = grailsApplication.config.jummp.server.web.url
         return server
     }
 
@@ -183,19 +180,18 @@ class ConfigurationService implements InitializingBean {
      * @return A command object encapsulating the current user registration configuration
      */
     public UserRegistrationCommand loadUserRegistrationConfiguration() {
-        Properties properties = loadProperties()
         UserRegistrationCommand cmd = new UserRegistrationCommand()
-        cmd.registration  = Boolean.parseBoolean(properties.getProperty("jummp.security.anonymousRegistration"))
-        cmd.sendEmail     = Boolean.parseBoolean(properties.getProperty("jummp.security.registration.email.send"))
-        cmd.sendToAdmin   = Boolean.parseBoolean(properties.getProperty("jummp.security.registration.email.sendToAdmin"))
-        cmd.subject       = properties.getProperty("jummp.security.registration.email.subject")
-        cmd.body          = properties.getProperty("jummp.security.registration.email.body")
-        cmd.url           = properties.getProperty("jummp.security.registration.verificationURL")
-        cmd.senderAddress = properties.getProperty("jummp.security.registration.email.sender")
-        cmd.adminAddress  = properties.getProperty("jummp.security.registration.email.adminAddress")
-        cmd.activationBody    = properties.getProperty("jummp.security.activation.email.body")
-        cmd.activationSubject = properties.getProperty("jummp.security.activation.email.subject")
-        cmd.activationUrl     = properties.getProperty("jummp.security.activation.activationURL")
+        cmd.registration  = Boolean.parseBoolean(grailsApplication.config.jummp.security.anonymousRegistration)
+        cmd.sendEmail     = Boolean.parseBoolean(grailsApplication.config.jummp.security.registration.email.send)
+        cmd.sendToAdmin   = Boolean.parseBoolean(grailsApplication.config.jummp.security.registration.email.sendToAdmin)
+        cmd.subject       = grailsApplication.config.jummp.security.registration.email.subject
+        cmd.body          = grailsApplication.config.jummp.security.registration.email.body
+        cmd.url           = grailsApplication.config.jummp.security.registration.verificationURL
+        cmd.senderAddress = grailsApplication.config.jummp.security.registration.email.sender
+        cmd.adminAddress  = grailsApplication.config.jummp.security.registration.email.adminAddress
+        cmd.activationBody    = grailsApplication.config.jummp.security.activation.email.body
+        cmd.activationSubject = grailsApplication.config.jummp.security.activation.email.subject
+        cmd.activationUrl     = grailsApplication.config.jummp.security.activation.activationURL
         return cmd
     }
 
@@ -204,14 +200,13 @@ class ConfigurationService implements InitializingBean {
      * @return A command object encapsulating the current change/reset password configuration
      */
     public ChangePasswordCommand loadChangePasswordConfiguration() {
-        Properties properties = loadProperties()
         ChangePasswordCommand cmd = new ChangePasswordCommand()
-        cmd.changePassword = Boolean.parseBoolean(properties.getProperty("jummp.security.ui.changePassword"))
-        cmd.resetPassword  = Boolean.parseBoolean(properties.getProperty("jummp.security.resetPassword.email.send"))
-        cmd.senderAddress  = properties.getProperty("jummp.security.resetPassword.email.sender")
-        cmd.subject        = properties.getProperty("jummp.security.resetPassword.email.subject")
-        cmd.body           = properties.getProperty("jummp.security.resetPassword.email.body")
-        cmd.url            = properties.getProperty("jummp.security.resetPassword.url")
+        cmd.changePassword = Boolean.parseBoolean(grailsApplication.config.jummp.security.ui.changePassword)
+        cmd.resetPassword  = Boolean.parseBoolean(grailsApplication.config.jummp.security.resetPassword.email.send)
+        cmd.senderAddress  = grailsApplication.config.jummp.security.resetPassword.email.sender
+        cmd.subject        = grailsApplication.config.jummp.security.resetPassword.email.subject
+        cmd.body           = grailsApplication.config.jummp.security.resetPassword.email.body
+        cmd.url            = grailsApplication.config.jummp.security.resetPassword.url
         return cmd
     }
 
@@ -220,11 +215,10 @@ class ConfigurationService implements InitializingBean {
      * @return A command object encapsulating the current BiVeS configuration
      */
     public TriggerCommand loadTriggerConfiguration() {
-        Properties properties = loadProperties()
         TriggerCommand trigger = new TriggerCommand()
-        trigger.startRemoveOffset = Long.parseLong(properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
-        trigger.removeInterval = Long.parseLong(properties.getProperty("jummp.authenticationHash.removeInterval"))
-        trigger.maxInactiveTime = Long.parseLong(properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
+        trigger.startRemoveOffset = Long.parseLong(grailsApplication.config.jummp.authenticationHash.startRemoveOffset)
+        trigger.removeInterval = Long.parseLong(grailsApplication.config.jummp.authenticationHash.removeInterval)
+        trigger.maxInactiveTime = Long.parseLong(grailsApplication.config.jummp.authenticationHash.maxInactiveTime)
         return trigger
     }
 
@@ -233,11 +227,21 @@ class ConfigurationService implements InitializingBean {
      * @return A command object encapsulating the current SBML configuration
      */
     public SBMLCommand loadSBMLConfiguration() {
-        Properties properties = loadProperties()
         SBMLCommand sbml = new SBMLCommand()
-        sbml.validate = Boolean.parseBoolean(properties.getProperty("jummp.plugins.sbml.validation"))
+        sbml.validation = Boolean.parseBoolean(grailsApplication.config.jummp.plugins.sbml.validation)
         return sbml
     }
+
+    /**
+    * Loads the current branding configuration.
+    * @return A command object encapsulating the current branding configuration
+    */
+   public BrandingCommand loadBrandingConfiguration() {
+       BrandingCommand branding = new BrandingCommand()
+       branding.internalColor = grailsApplication.config.jummp.branding.internalColor
+       branding.externalColor = grailsApplication.config.jummp.branding.externalColor
+       return branding
+   }
 
     /**
      * Updates the BiVeS configuration stored in the properties file.
@@ -253,15 +257,15 @@ class ConfigurationService implements InitializingBean {
     }
     
     /**
-     * Updates the MySQL configuration stored in the properties file.
+     * Updates the database configuration stored in the properties file.
      * Other settings are not changed!
      * It is important to remember that the settings will only be activated after
      * a restart of the application!
-     * @param mysql The new MySQL configuration
+     * @param mysql The new database configuration
      */
-    public void saveMysqlConfiguration(MysqlCommand mysql) {
+    public void saveDatabaseConfiguration(DatabaseCommand database) {
         Properties properties = loadProperties()
-        updateMysqlConfiguration(properties, mysql)
+        updateDatabaseConfiguration(properties, database)
         saveProperties(properties)
     }
 
@@ -396,6 +400,19 @@ class ConfigurationService implements InitializingBean {
     }
 
     /**
+    * Updates the branding configuration stored in the properties file.
+    * Other settings are not changed!
+    * It is important to remember that the settings will only be activated after
+    * a restart of the application!
+    * @param branding The new branding configuration
+    */
+   public void saveBrandingConfiguration(BrandingCommand branding) {
+       Properties properties = loadProperties()
+       updateBrandingConfiguration(properties, branding)
+       saveProperties(properties)
+   }
+
+    /**
      * Updates the @p properties with the settings from @p bives.
      * @param properties The existing properties
      * @param bives the BiVeS settings
@@ -408,19 +425,20 @@ class ConfigurationService implements InitializingBean {
     }
     
     /**
-     * Updates the @p properties with the settings from @p mysql.
+     * Updates the @p properties with the settings from @p database.
      * @param properties The existing properties
-     * @param mysql The new mysql settings
+     * @param database The new database settings
      */
-    private void updateMysqlConfiguration(Properties properties, MysqlCommand mysql) {
-        if (!mysql.validate()) {
+    private void updateDatabaseConfiguration(Properties properties, DatabaseCommand database) {
+        if (!database.validate()) {
             return
         }
-        properties.setProperty("jummp.database.server",   mysql.server)
-        properties.setProperty("jummp.database.port",     mysql.port.toString())
-        properties.setProperty("jummp.database.database", mysql.database)
-        properties.setProperty("jummp.database.username", mysql.username)
-        properties.setProperty("jummp.database.password", mysql.password)
+        properties.setProperty("jummp.database.type",   database.type.key)
+        properties.setProperty("jummp.database.server",   database.server)
+        properties.setProperty("jummp.database.port",     database.port.toString())
+        properties.setProperty("jummp.database.database", database.database)
+        properties.setProperty("jummp.database.username", database.username)
+        properties.setProperty("jummp.database.password", database.password)
     }
 
     /**
@@ -609,6 +627,19 @@ class ConfigurationService implements InitializingBean {
         }
         properties.setProperty("jummp.plugins.sbml.validation", sbml.validation.toString())
     }
+
+    /**
+    * Updates the @p properties with the settings from @p branding
+    * @param properties The existing properties
+    * @param branding The branding settings
+    */
+   private void updateBrandingConfiguration(Properties properties, BrandingCommand branding) {
+       if(!branding.validate()) {
+           return
+       }
+       properties.setProperty("jummp.branding.internalColor", branding.internalColor.toString())
+       properties.setProperty("jummp.branding.externalColor", branding.externalColor.toString())
+   }
 
     /**
      * Loads the properties from the configuration file
