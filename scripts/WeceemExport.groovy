@@ -53,13 +53,13 @@ target(weceem: "Create WeCeem Export File") {
             }
             int subDirOrder = 1
             subdir.eachFile { file ->
-                if (file.isDirectory()) {
+                if (file.isDirectory() || file.name.endsWith("~")) {
                     return // continue
                 }
                 String name = file.name.tokenize(".")[0]
                 if (subdir.name.toLowerCase() == "templates") {
-                    if (name.toLowerCase().equals("default-blot-template")) {
-                        defaultBlogTemplate = counter
+                    if (name.toLowerCase().equals("default-blog-template")) {
+                        defaultBlogTemplate = counter + 1
                     }
                     'org.weceem.content.WcmTemplate'() {
                         id(class: "java.lang.Long", counter++)
@@ -109,7 +109,7 @@ target(weceem: "Create WeCeem Export File") {
         }
         int subDirOrder = 1
         directory.eachFile { file ->
-            if (file.isDirectory()) {
+            if (file.isDirectory() || file.name.endsWith("~")) {
                 return // continue
             }
             String name = file.name.tokenize(".")[0]

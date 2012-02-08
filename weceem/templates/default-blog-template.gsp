@@ -1,6 +1,6 @@
 <html>
 <head>
-    <wcm:widget path="widgets/common-head"/>
+    <wcm:widget path="widgets/head"/>
     <wcm:ifContentIs type="org.weceem.blog.WcmBlog">  
         <wcm:feedLink type="rss" path="${node.absoluteURI}"/>  
         <wcm:feedLink type="atom" path="${node.absoluteURI}"/>  
