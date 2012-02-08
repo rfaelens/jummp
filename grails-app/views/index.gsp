@@ -4,9 +4,9 @@
         <meta name="layout" content="main"/>
     </head>
     <body>
-        <wcm:render path="jummp/index"/>
+        <wcm:render path="index"/>
     </body>
     <content tag="sidebar">
-        <wcm:render path="jummp/main-sidebar"/>
+        <wcm:render path="main-sidebar"/>
     </content>
 </html>
