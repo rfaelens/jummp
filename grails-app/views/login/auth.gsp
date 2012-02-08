@@ -36,6 +36,12 @@ $("#loginForm input").focus(function() {
         $(this).data("reset", true);
     }
 });
+$("#loginForm input").keyup(function(event) {
+    // magic value 13 is enter
+    if (event.which == 13) {
+        $("#loginForm").submit();
+    }
+});
 $("#login div.loginButton button").click(function() {
     $("#loginForm").submit();
 });
