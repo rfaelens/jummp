@@ -414,5 +414,6 @@ grails.mime.file.extensions = false
 weceem.content.prefix = 'content'
 weceem.tools.prefix = 'wcm-tools'
 weceem.admin.prefix = 'wcm-admin'
-weceem.create.default.space = false
+weceem.create.default.space = true
+weceem.default.space.template = "classpath:/weceem-jummp-default-space.zip"
 weceem.security.policy.path = "scripts/weceem-security.groovy"

@@ -153,7 +153,7 @@ target(weceem: "Create WeCeem Export File") {
             tags()
         }
     }
-    ant.zip(destfile: "target/weceem-export.zip", basedir: "build/weceem")
+    ant.zip(destfile: "src/groovy/weceem-jummp-default-space.zip", basedir: "build/weceem")
 }
 
 setDefaultTarget(weceem)
