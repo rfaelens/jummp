@@ -32,7 +32,7 @@ class BootStrap {
             },
             getUserPrincipal : { ->
                 def principal = springSecurityService.getPrincipal()
-                if (principal instanceof org.springframework.security.ldap.userdetails.LdapUserDetailsImpl) {
+                if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
                     return new org.springframework.security.core.userdetails.UserDetails() {
                         Collection<org.springframework.security.core.GrantedAuthority> getAuthorities() {
                             return principal.authorities
