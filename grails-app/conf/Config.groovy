@@ -462,3 +462,9 @@ weceem.admin.prefix = 'wcm-admin'
 weceem.create.default.space = true
 weceem.default.space.template = "classpath:/weceem-jummp-default-space.zip"
 weceem.security.policy.path = "scripts/weceem-security.groovy"
+
+environments {
+    test {
+        weceem.security.policy.path = null
+    }
+}
