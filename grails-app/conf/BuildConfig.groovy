@@ -10,6 +10,14 @@ grails.project.dependency.resolution = {
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {
+        if (System.getenv("JUMMP_ARTIFACTORY_URL")) {
+            println "Artifactory URL: " + System.getenv("JUMMP_ARTIFACTORY_URL")
+            mavenRepo "${System.getenv('JUMMP_ARTIFACTORY_URL')}"
+        }
+        if (System.getenv("JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL")) {
+            println "Grails Repo URL: " + System.getenv("JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL")
+            grailsRepo "${System.getenv('JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL')}"
+        }
         grailsPlugins()
         grailsHome()
         grailsCentral()
