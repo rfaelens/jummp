@@ -37,7 +37,7 @@ grails.project.dependency.resolution = {
         }
     }
     plugins {
-        compile ":spring-security-core:1.2.7"
+        compile ":spring-security-core:1.2.7.2"
         test ":code-coverage:1.2.5"
 
         // default grails plugins

@@ -45,7 +45,7 @@ grails.project.dependency.resolution = {
     }
     plugins {
         compile ":perf4j:0.1.1"
-        compile ":spring-security-core:1.2.7"
+        compile ":spring-security-core:1.2.7.2"
         // default grails plugins
         compile ":hibernate:$grailsVersion"
         compile ":jquery:1.6.1.1"
