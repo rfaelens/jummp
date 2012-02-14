@@ -177,3 +177,5 @@ codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
                              'jummp-web-application/grails-app/utils',
                              'jummp-web-application/test/unit',
                              'jummp-web-application/test/integration']
+
+grails.tomcat.jvmArgs = ["-Xmx1024m", "-XX:MaxPermSize=256m"]
