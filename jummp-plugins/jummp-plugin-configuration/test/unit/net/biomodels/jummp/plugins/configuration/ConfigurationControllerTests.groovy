@@ -17,7 +17,6 @@ class ConfigurationControllerTests extends GrailsUnitTestMixin {
         service.configurationFile = configurationFile
         service.afterPropertiesSet()
         controller.configurationService = service
-        service.grailsApplication = grailsApplication
     }
     @After
     void tearDown() {
