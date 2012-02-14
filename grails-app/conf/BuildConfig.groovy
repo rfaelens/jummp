@@ -124,7 +124,7 @@ grails.project.dependency.resolution = {
         compile ":quartz:0.4.2"
         compile ":spring-security-acl:1.1"
         compile ":svn:1.0.2"
-        runtime ":spring-security-core:1.2.7"
+        runtime ":spring-security-core:1.2.7.2"
         runtime ":spring-security-ldap:1.0.5"
         compile ":lesscss:1.0.0"
         test ":code-coverage:1.2.5"
@@ -177,3 +177,5 @@ codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
                              'jummp-web-application/grails-app/utils',
                              'jummp-web-application/test/unit',
                              'jummp-web-application/test/integration']
+
+grails.tomcat.jvmArgs = ["-Xmx1024m", "-XX:MaxPermSize=256m"]
