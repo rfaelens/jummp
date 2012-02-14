@@ -1,19 +1,19 @@
 package net.biomodels.jummp.plugins.configuration
 
 import grails.test.*
-import org.junit.Before
-import grails.test.mixin.support.GrailsUnitTestMixin
 
-@TestFor(ConfigurationController)
-class ConfigurationServiceTests extends GrailsUnitTestMixin {
+import org.junit.Before
+import grails.test.mixin.TestFor
+import static org.junit.Assert.*
+import org.junit.*
+
+class ConfigurationServiceTests {
+
+    def grailsApplication
+    def configurationService
 
     @Before
     void setUp() {
-        // inject a ConfigurationService into the controller
-        ConfigurationService service = new ConfigurationService()
-        service.afterPropertiesSet()
-        controller.configurationService = service
-        service.grailsApplication = grailsApplication
     }
 
     @SuppressWarnings("CatchException")
@@ -28,44 +28,42 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         }
     }
 
+    @Test
     void testConfigurationFile() {
         // default configuration file is in home directory
-        ConfigurationService service = new ConfigurationService()
-        assertNull(service.configurationFile)
-        service.afterPropertiesSet()
-        assertNotNull(service.configurationFile)
-        assertEquals(new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"), service.configurationFile)
+        assertNotNull(configurationService.configurationFile)
+        configurationService.afterPropertiesSet()
+        assertNotNull(configurationService.configurationFile)
+        assertEquals(new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"), configurationService.configurationFile)
         // test setting a file
-        service = new ConfigurationService()
-        assertNull(service.configurationFile)
-        service.configurationFile = new File("target/jummp.properties")
-        assertNotNull(service.configurationFile)
-        service.afterPropertiesSet()
-        assertEquals(new File("target/jummp.properties"), service.configurationFile)
+        configurationService.configurationFile = null
+        assertNull(configurationService.configurationFile)
+        configurationService.configurationFile = new File("target/jummp.properties")
+        assertNotNull(configurationService.configurationFile)
+        configurationService.afterPropertiesSet()
+        assertEquals(new File("target/jummp.properties"), configurationService.configurationFile)
     }
 
     void testUpdateDatabaseConfiguration() {
-        ConfigurationService service = new ConfigurationService()
         shouldFail(NullPointerException) {
-            service.updateDatabaseConfiguration(null, null)
+            configurationService.updateDatabaseConfiguration(null, null)
         }
         Properties properties = new Properties()
         shouldFail(NullPointerException) {
-            service.updateDatabaseConfiguration(properties, null)
+            configurationService.updateDatabaseConfiguration(properties, null)
         }
-        mockForConstraintsTests(DatabaseCommand)
-        DatabaseCommand database = mockCommandObject(DatabaseCommand)
-        service.updateDatabaseConfiguration(properties, database)
+        DatabaseCommand database = new DatabaseCommand()
+        configurationService.updateDatabaseConfiguration(properties, database)
         assertTrue(properties.isEmpty())
         // set values
-        database = mockCommandObject(DatabaseCommand)
+        database = new DatabaseCommand()
         database.type = "MYSQL"
         database.database = "jummp"
         database.server   = "localhost"
         database.port     = 3306
         database.username = "user"
         database.password = "pass"
-        service.updateDatabaseConfiguration(properties, database)
+        configurationService.updateDatabaseConfiguration(properties, database)
         assertFalse(properties.isEmpty())
         assertEquals(6, properties.size())
         assertEquals("MYSQL", properties.getProperty("jummp.database.type"))
@@ -75,14 +73,13 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         assertEquals("user", properties.getProperty("jummp.database.username"))
         assertEquals("pass", properties.getProperty("jummp.database.password"))
         // update values
-        database = mockCommandObject(DatabaseCommand)
         database.type = "POSTRGESQL"
         database.database = "database"
         database.server   = "host"
         database.port     = 1234
         database.username = "name"
         database.password = ""
-        service.updateDatabaseConfiguration(properties, database)
+        configurationService.updateDatabaseConfiguration(properties, database)
         assertFalse(properties.isEmpty())
         assertEquals(6, properties.size())
         assertEquals("POSTRGESQL", properties.getProperty("jummp.database.type"))
@@ -92,7 +89,7 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         assertEquals("name", properties.getProperty("jummp.database.username"))
         assertEquals("", properties.getProperty("jummp.database.password"))
         // invalid command should not change
-        service.updateDatabaseConfiguration(properties, mockCommandObject(DatabaseCommand))
+        configurationService.updateDatabaseConfiguration(properties, database)
         assertFalse(properties.isEmpty())
         assertEquals(6, properties.size())
         assertEquals("POSTRGESQL", properties.getProperty("jummp.database.type"))
@@ -104,42 +101,40 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
     }
 
     void testUpdateRemoteConfiguration() {
-        ConfigurationService service = new ConfigurationService()
         shouldFail(NullPointerException) {
-            service.updateRemoteConfiguration(null, null)
+            configurationService.updateRemoteConfiguration(null, null)
         }
         Properties properties = new Properties()
         shouldFail(NullPointerException) {
-            service.updateRemoteConfiguration(properties, null)
+            configurationService.updateRemoteConfiguration(properties, null)
         }
-        mockForConstraintsTests(RemoteCommand)
-        RemoteCommand remote = mockCommandObject(RemoteCommand)
-        service.updateRemoteConfiguration(properties, remote)
+        RemoteCommand remote = new RemoteCommand()
+        configurationService.updateRemoteConfiguration(properties, remote)
         assertTrue(properties.isEmpty())
         // set values
-        remote = mockCommandObject(RemoteCommand)
+        //remote = mockCommandObject(RemoteCommand)
         remote.jummpRemote = "jms"
         remote.jummpExportDbus=false
         remote.jummpExportJms=true
-        service.updateRemoteConfiguration(properties, remote)
+        configurationService.updateRemoteConfiguration(properties, remote)
         assertFalse(properties.isEmpty())
         assertEquals(3, properties.size())
         assertEquals("jms", properties.getProperty("jummp.remote"))
         assertEquals("false", properties.getProperty("jummp.export.dbus"))
         assertEquals("true", properties.getProperty("jummp.export.jms"))
         // update values
-        remote = mockCommandObject(RemoteCommand)
+        //remote = mockCommandObject(RemoteCommand)
         remote.jummpRemote = "dbus"
         remote.jummpExportDbus=true
         remote.jummpExportJms=false
-        service.updateRemoteConfiguration(properties, remote)
+        configurationService.updateRemoteConfiguration(properties, remote)
         assertFalse(properties.isEmpty())
         assertEquals(3, properties.size())
         assertEquals("dbus", properties.getProperty("jummp.remote"))
         assertEquals("true", properties.getProperty("jummp.export.dbus"))
         assertEquals("false", properties.getProperty("jummp.export.jms"))
         // invalid command should not change
-        service.updateRemoteConfiguration(properties, mockCommandObject(RemoteCommand))
+        configurationService.updateRemoteConfiguration(properties, remote)
         assertFalse(properties.isEmpty())
         assertEquals(3, properties.size())
         assertEquals("dbus", properties.getProperty("jummp.remote"))
@@ -148,33 +143,30 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
     }
 
     void testUpdateLdapConfiguration() {
-        ConfigurationService service = new ConfigurationService()
         shouldFail(NullPointerException) {
-            service.updateLdapConfiguration(null, null)
+            configurationService.updateLdapConfiguration(null, null)
         }
         Properties properties = new Properties()
         // null ldap should disable ldap usage
-        service.updateLdapConfiguration(properties, null)
+        configurationService.updateLdapConfiguration(properties, null)
         assertFalse(properties.isEmpty())
         assertEquals(1, properties.size())
         assertEquals("false", properties.getProperty("jummp.security.ldap.enabled"))
 
         // test with empty ldap command
         properties = new Properties()
-        mockForConstraintsTests(LdapCommand)
-        LdapCommand ldap = mockCommandObject(LdapCommand)
+        LdapCommand ldap = new LdapCommand()
         assertTrue(properties.isEmpty())
-        service.updateLdapConfiguration(properties, ldap)
+        configurationService.updateLdapConfiguration(properties, ldap)
         assertTrue(properties.isEmpty())
         // test with minimum values
-        ldap = mockCommandObject(LdapCommand)
         ldap.ldapManagerDn       = "manager"
         ldap.ldapManagerPassword = "password"
         ldap.ldapSearchBase      = "search"
         ldap.ldapSearchFilter    = "filter"
         ldap.ldapSearchSubtree   = true
         ldap.ldapServer          = "server"
-        service.updateLdapConfiguration(properties, ldap)
+        configurationService.updateLdapConfiguration(properties, ldap)
         assertFalse(properties.isEmpty())
         assertEquals(7, properties.size())
         assertEquals("true",     properties.getProperty("jummp.security.ldap.enabled"))
@@ -185,14 +177,13 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         assertEquals("filter",   properties.getProperty("jummp.security.ldap.search.filter"))
         assertEquals("true",     properties.getProperty("jummp.security.ldap.search.subTree"))
         // update values
-        ldap = mockCommandObject(LdapCommand)
         ldap.ldapManagerDn       = "ldap"
         ldap.ldapManagerPassword = "1234"
         ldap.ldapSearchBase      = "cn"
         ldap.ldapSearchFilter    = "ab"
         ldap.ldapSearchSubtree   = false
         ldap.ldapServer          = "localhost"
-        service.updateLdapConfiguration(properties, ldap)
+        configurationService.updateLdapConfiguration(properties, ldap)
         assertFalse(properties.isEmpty())
         assertEquals(7, properties.size())
         assertEquals("true",      properties.getProperty("jummp.security.ldap.enabled"))
@@ -203,7 +194,7 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         assertEquals("ab",        properties.getProperty("jummp.security.ldap.search.filter"))
         assertEquals("false",     properties.getProperty("jummp.security.ldap.search.subTree"))
         // invalid command should not change
-        service.updateLdapConfiguration(properties, mockCommandObject(LdapCommand))
+        configurationService.updateLdapConfiguration(properties, ldap)
         assertFalse(properties.isEmpty())
         assertEquals(7, properties.size())
         assertEquals("true",      properties.getProperty("jummp.security.ldap.enabled"))
@@ -214,49 +205,45 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         assertEquals("ab",        properties.getProperty("jummp.security.ldap.search.filter"))
         assertEquals("false",     properties.getProperty("jummp.security.ldap.search.subTree"))
         // passing in a null ldap should delete all properties
-        service.updateLdapConfiguration(properties, null)
+        configurationService.updateLdapConfiguration(properties, null)
         assertFalse(properties.isEmpty())
         assertEquals(1, properties.size())
         assertEquals("false", properties.getProperty("jummp.security.ldap.enabled"))
     }
 
     void testUpdateVcsConfiguration() {
-        ConfigurationService service = new ConfigurationService()
         shouldFail(NullPointerException) {
-            service.updateVcsConfiguration(null, null)
+            configurationService.updateVcsConfiguration(null, null)
         }
         Properties properties = new Properties()
         shouldFail(NullPointerException) {
-            service.updateVcsConfiguration(properties, null)
+            configurationService.updateVcsConfiguration(properties, null)
         }
-        mockForConstraintsTests(VcsCommand)
+        VcsCommand vcs = new VcsCommand()
         // should not update when command is not valid
-        VcsCommand vcs = mockCommandObject(VcsCommand)
-        service.updateVcsConfiguration(properties, vcs)
+        configurationService.updateVcsConfiguration(properties, vcs)
         assertTrue(properties.isEmpty())
-        vcs = mockCommandObject(VcsCommand)
         vcs.exchangeDirectory = ""
         vcs.workingDirectory = ""
         vcs.vcs = "svn"
-        service.updateVcsConfiguration(properties, vcs)
+        configurationService.updateVcsConfiguration(properties, vcs)
         assertFalse(properties.isEmpty())
         assertEquals(3, properties.size())
         assertEquals("subversion", properties.getProperty("jummp.vcs.plugin"))
         assertEquals("", properties.getProperty("jummp.vcs.exchangeDirectory"))
         assertEquals("", properties.getProperty("jummp.vcs.workingDirectory"))
         // invalid command should not change
-        service.updateVcsConfiguration(properties, mockCommandObject(VcsCommand))
+        configurationService.updateVcsConfiguration(properties, vcs)
         assertFalse(properties.isEmpty())
         assertEquals(3, properties.size())
         assertEquals("subversion", properties.getProperty("jummp.vcs.plugin"))
         assertEquals("", properties.getProperty("jummp.vcs.exchangeDirectory"))
         assertEquals("", properties.getProperty("jummp.vcs.workingDirectory"))
         // update to different settings
-        vcs = mockCommandObject(VcsCommand)
         vcs.exchangeDirectory = "target"
         vcs.workingDirectory = "."
         vcs.vcs = "git"
-        service.updateVcsConfiguration(properties, vcs)
+        configurationService.updateVcsConfiguration(properties, vcs)
         assertFalse(properties.isEmpty())
         assertEquals(3, properties.size())
         assertEquals("git", properties.getProperty("jummp.vcs.plugin"))
@@ -265,107 +252,95 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
     }
 
     void testUpdateSvnConfiguration() {
-        ConfigurationService service = new ConfigurationService()
         shouldFail(NullPointerException) {
-            service.updateSvnConfiguration(null, null)
+            configurationService.updateSvnConfiguration(null, null)
         }
         Properties properties = new Properties()
-        mockForConstraintsTests(SvnCommand)
-        SvnCommand svn = mockCommandObject(SvnCommand)
-        service.updateSvnConfiguration(properties, svn)
+        SvnCommand svn = new SvnCommand()
+        configurationService.updateSvnConfiguration(properties, svn)
         assertTrue(properties.isEmpty())
-        svn = mockCommandObject(SvnCommand)
         svn.localRepository = "target"
-        service.updateSvnConfiguration(properties, svn)
+        configurationService.updateSvnConfiguration(properties, svn)
         assertFalse(properties.isEmpty())
         assertEquals(1, properties.size())
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         // update configuration
-        svn = mockCommandObject(SvnCommand)
         svn.localRepository = "."
-        service.updateSvnConfiguration(properties, svn)
+        configurationService.updateSvnConfiguration(properties, svn)
         assertFalse(properties.isEmpty())
         assertEquals(1, properties.size())
         assertEquals(".", properties.getProperty("jummp.plugins.subversion.localRepository"))
         // invalid should not change
-        service.updateSvnConfiguration(properties, mockCommandObject(SvnCommand))
+        configurationService.updateSvnConfiguration(properties, svn)
         assertFalse(properties.isEmpty())
         assertEquals(1, properties.size())
         assertEquals(".", properties.getProperty("jummp.plugins.subversion.localRepository"))
         // passing in null should delete the property
-        service.updateSvnConfiguration(properties, null)
+        configurationService.updateSvnConfiguration(properties, null)
         assertTrue(properties.isEmpty())
     }
 
     void testUpdateFirstRunConfiguration() {
-        ConfigurationService service = new ConfigurationService()
         shouldFail(NullPointerException) {
-            service.updateFirstRunConfiguration(null, null)
+            configurationService.updateFirstRunConfiguration(null, null)
         }
         Properties properties = new Properties()
         shouldFail(NullPointerException) {
-            service.updateFirstRunConfiguration(properties, null)
+            configurationService.updateFirstRunConfiguration(properties, null)
         }
-        mockForConstraintsTests(FirstRunCommand)
         // invalid should not work
-        FirstRunCommand firstRun = mockCommandObject(FirstRunCommand)
-        service.updateFirstRunConfiguration(properties, firstRun)
+        FirstRunCommand firstRun = new FirstRunCommand()
+        configurationService.updateFirstRunConfiguration(properties, firstRun)
         assertTrue(properties.isEmpty())
         // passing in a correct command should update
-        firstRun = mockCommandObject(FirstRunCommand)
         firstRun.firstRun = "true"
-        service.updateFirstRunConfiguration(properties, firstRun)
+        configurationService.updateFirstRunConfiguration(properties, firstRun)
         assertFalse(properties.isEmpty())
         assertEquals(1, properties.size())
         assertEquals("true", properties.getProperty("jummp.firstRun"))
         // passing in different options should update
-        firstRun = mockCommandObject(FirstRunCommand)
         firstRun.firstRun = "false"
-        service.updateFirstRunConfiguration(properties, firstRun)
+        configurationService.updateFirstRunConfiguration(properties, firstRun)
         assertFalse(properties.isEmpty())
         assertEquals(1, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         // passing in invalid command should not update
-        service.updateFirstRunConfiguration(properties, mockCommandObject(FirstRunCommand))
+        configurationService.updateFirstRunConfiguration(properties, firstRun)
         assertFalse(properties.isEmpty())
         assertEquals(1, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
     }
 
     void testUpdateServerConfiguration() {
-        ConfigurationService service = new ConfigurationService()
         shouldFail(NullPointerException) {
-            service.updateServerConfiguration(null, null)
+            configurationService.updateServerConfiguration(null, null)
         }
         Properties properties = new Properties()
         shouldFail(NullPointerException) {
-            service.updateServerConfiguration(properties, null)
+            configurationService.updateServerConfiguration(properties, null)
         }
-        mockForConstraintsTests(ServerCommand)
         // invalid should not work
-        ServerCommand server = mockCommandObject(ServerCommand)
-        service.updateServerConfiguration(properties, server)
+        ServerCommand server = new ServerCommand()
+        configurationService.updateServerConfiguration(properties, server)
         assertTrue(properties.isEmpty())
         // passing in a correct command should update
-        server = mockCommandObject(ServerCommand)
         server.url = "http://127.0.0.1:8080/jummp/"
         server.weburl = "http://127.0.0.1:8080/jummp-web-application/"
-        service.updateServerConfiguration(properties, server)
+        configurationService.updateServerConfiguration(properties, server)
         assertFalse(properties.isEmpty())
         assertEquals(2, properties.size())
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
         assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
         // passing in different options should update
-        server = mockCommandObject(ServerCommand)
         server.url = "http://www.example.com/"
         server.weburl = "http://www.example.org/"
-        service.updateServerConfiguration(properties, server)
+        configurationService.updateServerConfiguration(properties, server)
         assertFalse(properties.isEmpty())
         assertEquals(2, properties.size())
         assertEquals("http://www.example.com/", properties.getProperty("jummp.server.url"))
         assertEquals("http://www.example.org/", properties.getProperty("jummp.server.web.url"))
-        // passing in incalid vommand should not update
-        service.updateServerConfiguration(properties, mockCommandObject(ServerCommand))
+        // passing in invalid command should not update
+        configurationService.updateServerConfiguration(properties, server)
         assertFalse(properties.isEmpty())
         assertEquals(2, properties.size())
         assertEquals("http://www.example.com/", properties.getProperty("jummp.server.url"))
@@ -373,13 +348,12 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
     }
 
     void testStoreConfiguration() {
-        ConfigurationService service = new ConfigurationService()
         // set a file to use
-        service.configurationFile = new File("target/jummpProperties")
-        service.configurationFile.delete()
-        service.afterPropertiesSet()
-        assertEquals(new File("target/jummpProperties"), service.configurationFile)
-        DatabaseCommand database = mockCommandObject(DatabaseCommand)
+        configurationService.configurationFile = new File("target/jummpProperties")
+        configurationService.configurationFile.delete()
+        configurationService.afterPropertiesSet()
+        assertEquals(new File("target/jummpProperties"), configurationService.configurationFile)
+        DatabaseCommand database = new DatabaseCommand()
         database.type = "MYSQL"
         database.database = "jummp"
         database.server   = "localhost"
@@ -387,15 +361,15 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         database.username = "user"
         database.password = "pass"
         assertTrue(database.validate())
-        RemoteCommand remote = mockCommandObject(RemoteCommand)
+        RemoteCommand remote = new RemoteCommand()
         remote.jummpRemote="jms"
         remote.jummpExportDbus=false
         remote.jummpExportJms=true
         assertTrue(remote.validate())
-        DBusCommand dbus = mockCommandObject(DBusCommand)
+        DBusCommand dbus = new DBusCommand()
         dbus.systemBus = false
         assertTrue(dbus.validate())
-        LdapCommand ldap = mockCommandObject(LdapCommand)
+        LdapCommand ldap = new LdapCommand()
         ldap.ldapManagerDn       = "manager"
         ldap.ldapManagerPassword = "password"
         ldap.ldapSearchBase      = "search"
@@ -403,22 +377,22 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         ldap.ldapSearchSubtree   = true
         ldap.ldapServer          = "server"
         assertTrue(ldap.validate())
-        FirstRunCommand firstRun = mockCommandObject(FirstRunCommand)
+        FirstRunCommand firstRun = new FirstRunCommand()
         firstRun.firstRun = "false"
         assertTrue(firstRun.validate())
-        SvnCommand svn = mockCommandObject(SvnCommand)
+        SvnCommand svn = new SvnCommand()
         svn.localRepository = "target"
         assertTrue(svn.validate())
-        VcsCommand vcs = mockCommandObject(VcsCommand)
+        VcsCommand vcs = new VcsCommand()
         vcs.exchangeDirectory = ""
         vcs.workingDirectory = ""
         vcs.vcs = "svn"
         assertTrue(vcs.validate())
-        ServerCommand server = mockCommandObject(ServerCommand)
+        ServerCommand server = new ServerCommand()
         server.url = "http://127.0.0.1:8080/jummp/"
         server.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         assertTrue(server.validate())
-        UserRegistrationCommand userRegistration = mockCommandObject(UserRegistrationCommand)
+        UserRegistrationCommand userRegistration = new UserRegistrationCommand()
         userRegistration.registration = true
         userRegistration.sendEmail = true
         userRegistration.sendToAdmin = true
@@ -431,7 +405,7 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         userRegistration.activationBody = "This is the activation body"
         userRegistration.activationUrl = "http://www.example.org"
         assertTrue(userRegistration.validate())
-        ChangePasswordCommand changePassword = mockCommandObject(ChangePasswordCommand)
+        ChangePasswordCommand changePassword = new ChangePasswordCommand()
         changePassword.changePassword = true
         changePassword.resetPassword  = true
         changePassword.senderAddress  = "test@example.com"
@@ -439,26 +413,26 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         changePassword.body           = "Body of the password forgotten mail"
         changePassword.url            = "http://www.example.com/"
         assertTrue(changePassword.validate())
-        TriggerCommand trigger = mockCommandObject(TriggerCommand)
+        TriggerCommand trigger = new TriggerCommand()
         trigger.maxInactiveTime = 1000
         trigger.startRemoveOffset = 1001
         trigger.removeInterval = 1002
         assertTrue(trigger.validate())
-        SBMLCommand sbml = mockCommandObject(SBMLCommand)
+        SBMLCommand sbml = new SBMLCommand()
         sbml.validation = false
         assertTrue(sbml.validate())
-        BivesCommand bives = mockCommandObject(BivesCommand)
+        BivesCommand bives = new BivesCommand()
         bives.diffDir = "/tmp/"
         assertTrue(bives.validate())
-        BrandingCommand branding = mockCommandObject(BrandingCommand)
+        BrandingCommand branding = new BrandingCommand()
         branding.internalColor = "#FFFFFF"
         assertTrue(branding.validate())
 
         // everything should be written to the properties file
-        service.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, branding)
+        configurationService.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, branding)
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(49, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -492,19 +466,17 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         assertEquals("#FFFFFF",     properties.getProperty("jummp.branding.internalColor"))
 
         // change configuration - no ldap, no svn
-        firstRun = mockCommandObject(FirstRunCommand)
         firstRun.firstRun = "true"
         assertTrue(firstRun.validate())
-        vcs = mockCommandObject(VcsCommand)
         vcs.exchangeDirectory = ""
         vcs.workingDirectory = "target"
         vcs.vcs = "git"
         assertTrue(vcs.validate())
 
-        service.storeConfiguration(database, null, vcs, null, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, branding)
+        configurationService.storeConfiguration(database, null, vcs, null, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, branding)
         properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(26, properties.size())
+        assertEquals(25, properties.size())
         assertEquals("true",      properties.getProperty("jummp.firstRun"))
         assertEquals("target",    properties.getProperty("jummp.vcs.workingDirectory"))
         assertEquals("",          properties.getProperty("jummp.vcs.exchangeDirectory"))
@@ -521,35 +493,39 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
     }
 
     void testLoadStoreDatabaseConfiguration() {
-        ConfigurationService service = new ConfigurationService()
-        populateProperties(service)
+        populateProperties()
         grailsApplication.config.jummp.database.type = "MYSQL"
         grailsApplication.config.jummp.database.server = "localhost"
         grailsApplication.config.jummp.database.port = 3306
         grailsApplication.config.jummp.database.database = "jummp"
         grailsApplication.config.jummp.database.username = "user"
-        grailsApplication.config.jummp.database.password = "secure"
+        grailsApplication.config.jummp.database.password = "pass"
         // now load the data from the service
-        DatabaseCommand database = service.loadDatabaseConfiguration()
-        assertEquals("MYSQL",     database.type)
+        DatabaseCommand database = configurationService.loadDatabaseConfiguration()
+        assertEquals("MYSQL",     database.type.key)
         assertEquals("jummp",     database.database)
         assertEquals("localhost", database.server)
         assertEquals(3306,        database.port)
         assertEquals("user",      database.username)
         assertEquals("pass",      database.password)
 
+        grailsApplication.config.jummp.database.server = "server"
+        grailsApplication.config.jummp.database.port = 1234
+        grailsApplication.config.jummp.database.database = "database"
+        grailsApplication.config.jummp.database.username = "name"
+        grailsApplication.config.jummp.database.password = "secret"
+
         // store a new configuration
-        database = new DatabaseCommand()
         database.type = "MYSQL"
         database.database = "database"
         database.server   = "server"
         database.port     = 1234
         database.username = "name"
         database.password = "secret"
-        service.saveDatabaseConfiguration(database)
+        configurationService.saveDatabaseConfiguration(database)
         // verify the configuration
-        DatabaseCommand config = service.loadDatabaseConfiguration()
-        assertEquals("MYSQL",    config.type)
+        DatabaseCommand config = configurationService.loadDatabaseConfiguration()
+        assertEquals("MYSQL",    config.type.key)
         assertEquals("database", config.database)
         assertEquals("server",   config.server)
         assertEquals(1234,       config.port)
@@ -558,7 +534,7 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(46, properties.size())
+        assertEquals(49, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -586,30 +562,35 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
     }
 
     void testLoadStoreRemoteConfiguration() {
-        ConfigurationService service = new ConfigurationService()
-        populateProperties(service)
+        populateProperties()
+        grailsApplication.config.jummp.remote = "jms"
+        grailsApplication.config.jummp.export.dbus = "false"
+        grailsApplication.config.jummp.export.jms = "true"
 
         // now load the data from the service
-        RemoteCommand remote = service.loadRemoteConfiguration()
+        RemoteCommand remote = configurationService.loadRemoteConfiguration()
         assertEquals("jms",  remote.jummpRemote)
         assertFalse(remote.jummpExportDbus)
         assertTrue( remote.jummpExportJms)
 
+        grailsApplication.config.jummp.remote = "dbus"
+        grailsApplication.config.jummp.export.dbus = "true"
+        grailsApplication.config.jummp.export.jms = "false"
+
         // store a new configuration
-        remote = mockCommandObject(RemoteCommand)
         remote.jummpRemote="dbus"
         remote.jummpExportDbus=true
         remote.jummpExportJms=false
-        service.saveRemoteConfiguration(remote)
+        configurationService.saveRemoteConfiguration(remote)
         // verify the configuration
-        RemoteCommand config = service.loadRemoteConfiguration()
+        RemoteCommand config = configurationService.loadRemoteConfiguration()
         assertEquals("dbus", config.jummpRemote)
         assertEquals(true,   config.jummpExportDbus)
         assertEquals(false,       config.jummpExportJms)
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(46, properties.size())
+        assertEquals(49, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -633,10 +614,15 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
     }
 
     void testLoadStoreLdapConfiguration() {
-        ConfigurationService service = new ConfigurationService()
-        populateProperties(service)
+        //populateProperties()
+        grailsApplication.config.jummp.security.ldap.server = "server"
+        grailsApplication.config.jummp.security.ldap.managerDn = "manager"
+        grailsApplication.config.jummp.security.ldap.search.base = "search"
+        grailsApplication.config.jummp.security.ldap.search.filter = "filter"
+        grailsApplication.config.jummp.security.ldap.search.subTree = "true"
+        grailsApplication.config.jummp.security.ldap.managerPw = "password"
         // Load the data from properties
-        LdapCommand ldap = service.loadLdapConfiguration()
+        LdapCommand ldap = configurationService.loadLdapConfiguration()
         assertTrue(ldap.ldapSearchSubtree)
         assertEquals("filter",   ldap.ldapSearchFilter)
         assertEquals("search",   ldap.ldapSearchBase)
@@ -644,16 +630,17 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         assertEquals("manager",  ldap.ldapManagerDn)
         assertEquals("server",   ldap.ldapServer)
         // store a new configuration
-        ldap = mockCommandObject(LdapCommand)
-        ldap.ldapSearchSubtree = false
-        ldap.ldapSearchFilter = "*"
-        ldap.ldapSearchBase = "base"
-        ldap.ldapManagerPassword = "secure"
-        ldap.ldapManagerDn = "cn"
-        ldap.ldapServer = "localhost"
-        service.saveLdapConfiguration(ldap)
+        LdapCommand ldap3 = new LdapCommand()
+        ldap3.ldapSearchSubtree = false
+        ldap3.ldapSearchFilter = "*"
+        ldap3.ldapSearchBase = "base"
+        ldap3.ldapManagerPassword = "secure"
+        ldap3.ldapManagerDn = "cn"
+        ldap3.ldapServer = "localhost"
+        configurationService.saveLdapConfiguration(ldap3)
         // verify new configuration
-        LdapCommand ldap2 = service.loadLdapConfiguration()
+        LdapCommand ldap2 = configurationService.loadLdapConfiguration()
+        //println(ldap2.)
         assertFalse(ldap2.ldapSearchSubtree)
         assertEquals("*",         ldap2.ldapSearchFilter)
         assertEquals("base",      ldap2.ldapSearchBase)
@@ -663,7 +650,7 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(46, properties.size())
+        assertEquals(49, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -680,9 +667,9 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         assertEquals("3306",      properties.getProperty("jummp.database.port"))
         assertEquals("user",      properties.getProperty("jummp.database.username"))
         assertEquals("pass",      properties.getProperty("jummp.database.password"))
-        assertEquals("jms",   properties.getProperty("jummp.remote"))
-        assertEquals("false",   properties.getProperty("jummp.export.dbus"))
-        assertEquals("true",   properties.getProperty("jummp.export.jms"))
+        assertEquals("dbus",   properties.getProperty("jummp.remote"))
+        assertEquals("true",   properties.getProperty("jummp.export.dbus"))
+        assertEquals("false",   properties.getProperty("jummp.export.jms"))
         assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
         assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
@@ -694,22 +681,22 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
     }
 
     void testLoadStoreSvnConfiguration() {
-        ConfigurationService service = new ConfigurationService()
-        populateProperties(service)
+        populateProperties()
+        grailsApplication.config.jummp.plugins.subversion.localRepository = "target"
         // verify svn configuration
-        SvnCommand svn = service.loadSvnConfiguration()
+        SvnCommand svn = configurationService.loadSvnConfiguration()
         assertEquals("target", svn.localRepository)
         // set new configuration
-        svn = mockCommandObject(SvnCommand)
+        grailsApplication.config.jummp.plugins.subversion.localRepository = "/tmp/"
         svn.localRepository = "/tmp/"
-        service.saveSvnConfiguration(svn)
+        configurationService.saveSvnConfiguration(svn)
         // verify new configuration
-        SvnCommand svn2 = service.loadSvnConfiguration()
+        SvnCommand svn2 = configurationService.loadSvnConfiguration()
         assertEquals("/tmp/", svn2.localRepository)
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(46, properties.size())
+        assertEquals(49, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
         assertEquals("",           properties.getProperty("jummp.vcs.exchangeDirectory"))
@@ -741,28 +728,26 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
     }
 
     void testLoadStoreVcsConfiguration() {
-        ConfigurationService service = new ConfigurationService()
-        populateProperties(service)
+        populateProperties()
         // verify the configuration
-        VcsCommand vcs = service.loadVcsConfiguration()
+        VcsCommand vcs = configurationService.loadVcsConfiguration()
         assertEquals("svn", vcs.vcs)
         assertEquals("", vcs.exchangeDirectory)
         assertEquals("", vcs.workingDirectory)
         // set new configuration
-        vcs = mockCommandObject(VcsCommand)
         vcs.vcs = "git"
         vcs.exchangeDirectory = "/tmp/"
         vcs.workingDirectory = "target"
-        service.saveVcsConfiguration(vcs)
+        configurationService.saveVcsConfiguration(vcs)
         // verify new configuration
-        VcsCommand vcs2 = service.loadVcsConfiguration()
+        VcsCommand vcs2 = configurationService.loadVcsConfiguration()
         assertEquals("git", vcs2.vcs)
         assertEquals("/tmp/", vcs2.exchangeDirectory)
         assertEquals("target", vcs2.workingDirectory)
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(46, properties.size())
+        assertEquals(49, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("ldap",     properties.getProperty("jummp.security.authenticationBackend"))
@@ -792,24 +777,25 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
     }
 
     void testLoadStoreServerConfiguration() {
-        ConfigurationService service = new ConfigurationService()
-        populateProperties(service)
+        populateProperties()
+        grailsApplication.config.jummp.server.url = "http://127.0.0.1:8080/jummp/"
+        grailsApplication.config.jummp.server.web.url = "http://127.0.0.1:8080/jummp-web-application/"
         // verify the configuration
-        ServerCommand server = service.loadServerConfiguration()
+        ServerCommand server = configurationService.loadServerConfiguration()
         assertEquals("http://127.0.0.1:8080/jummp/", server.url)
         assertEquals("http://127.0.0.1:8080/jummp-web-application/", server.weburl)
         // set new configuration
-        server = mockCommandObject(ServerCommand)
-        server.url = "https://www.example.com/"
-        server.weburl = "https://www.example.org/"
-        service.saveServerConfiguration(server)
+        ServerCommand server3 = new ServerCommand()
+        server3.url = "https://www.example.com/"
+        server3.weburl = "https://www.example.org/"
+        configurationService.saveServerConfiguration(server3)
         // verify new configuration
-        ServerCommand server2 = service.loadServerConfiguration()
+        ServerCommand server2 = configurationService.loadServerConfiguration()
         assertEquals("https://www.example.com/", server2.url)
         // verify that other configuration options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(46, properties.size())
+        assertEquals(49, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -841,12 +827,12 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
     }
 
-    private void populateProperties(ConfigurationService service) {
-        service.configurationFile = new File("target/jummpProperties")
-        service.configurationFile.delete()
-        service.afterPropertiesSet()
-        assertEquals(new File("target/jummpProperties"), service.configurationFile)
-        DatabaseCommand database = mockCommandObject(DatabaseCommand)
+    private void populateProperties() {
+        configurationService.configurationFile = new File("target/jummpProperties")
+        println configurationService.configurationFile
+        //configurationService.afterPropertiesSet()
+        assertEquals(new File("target/jummpProperties"), configurationService.configurationFile)
+        DatabaseCommand database = new DatabaseCommand()
         database.type = "MYSQL"
         database.database = "jummp"
         database.server   = "localhost"
@@ -854,15 +840,15 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         database.username = "user"
         database.password = "pass"
         assertTrue(database.validate())
-        RemoteCommand remote = mockCommandObject(RemoteCommand)
+        RemoteCommand remote = new RemoteCommand()
         remote.jummpRemote="jms"
         remote.jummpExportDbus=false
         remote.jummpExportJms=true
         assertTrue(remote.validate())
-        DBusCommand dbus = mockCommandObject(DBusCommand)
+        DBusCommand dbus = new DBusCommand()
         dbus.systemBus = false
         assertTrue(dbus.validate())
-        LdapCommand ldap = mockCommandObject(LdapCommand)
+        LdapCommand ldap = new LdapCommand()
         ldap.ldapManagerDn       = "manager"
         ldap.ldapManagerPassword = "password"
         ldap.ldapSearchBase      = "search"
@@ -870,22 +856,22 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         ldap.ldapSearchSubtree   = true
         ldap.ldapServer          = "server"
         assertTrue(ldap.validate())
-        FirstRunCommand firstRun = mockCommandObject(FirstRunCommand)
+        FirstRunCommand firstRun = new FirstRunCommand()
         firstRun.firstRun = "false"
         assertTrue(firstRun.validate())
-        SvnCommand svn = mockCommandObject(SvnCommand)
+        SvnCommand svn = new SvnCommand()
         svn.localRepository = "target"
         assertTrue(svn.validate())
-        VcsCommand vcs = mockCommandObject(VcsCommand)
+        VcsCommand vcs = new VcsCommand()
         vcs.exchangeDirectory = ""
         vcs.workingDirectory = ""
         vcs.vcs = "svn"
         assertTrue(vcs.validate())
-        ServerCommand server = mockCommandObject(ServerCommand)
+        ServerCommand server = new ServerCommand()
         server.url = "http://127.0.0.1:8080/jummp/"
         server.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         assertTrue(server.validate())
-        UserRegistrationCommand userRegistration = mockCommandObject(UserRegistrationCommand)
+        UserRegistrationCommand userRegistration = new UserRegistrationCommand()
         userRegistration.registration = true
         userRegistration.sendEmail = true
         userRegistration.sendToAdmin = true
@@ -898,7 +884,7 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         userRegistration.activationBody = "This is the activation body"
         userRegistration.activationUrl = "http://www.example.org"
         assertTrue(userRegistration.validate())
-        ChangePasswordCommand changePassword = mockCommandObject(ChangePasswordCommand)
+        ChangePasswordCommand changePassword = new ChangePasswordCommand()
         changePassword.changePassword = true
         changePassword.resetPassword  = true
         changePassword.senderAddress  = "test@example.com"
@@ -906,26 +892,26 @@ class ConfigurationServiceTests extends GrailsUnitTestMixin {
         changePassword.body           = "Body of the password forgotten mail"
         changePassword.url            = "http://www.example.com/"
         assertTrue(changePassword.validate())
-        TriggerCommand trigger = mockCommandObject(TriggerCommand)
+        TriggerCommand trigger = new TriggerCommand()
         trigger.maxInactiveTime = 1000
         trigger.startRemoveOffset = 1001
         trigger.removeInterval = 1002
         assertTrue(trigger.validate())
-        SBMLCommand sbml = mockCommandObject(SBMLCommand)
+        SBMLCommand sbml = new SBMLCommand()
         sbml.validation = false
         assertTrue(sbml.validate())
-        BivesCommand bives = mockCommandObject(BivesCommand)
+        BivesCommand bives = new BivesCommand()
         bives.diffDir = "/tmp/"
         assertTrue(bives.validate())
-        BrandingCommand branding = mockCommandObject(BrandingCommand)
+        BrandingCommand branding = new BrandingCommand()
         branding.internalColor = "#FFFFFF"
         assertTrue(branding.validate())
 
         // everything should be written to the properties file
-        service.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, branding)
+        configurationService.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, branding)
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(49, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
