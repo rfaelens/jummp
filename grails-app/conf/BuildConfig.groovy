@@ -139,6 +139,7 @@ grails.project.dependency.resolution = {
         test ":codenarc:0.16.1"
         test ":gmetrics:0.3.1"
         compile ":weceem:1.1.2"
+        compile ":jquery-datatables:1.7.5"
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"
