@@ -113,3 +113,28 @@ $.jummp.userAdministration.editUser = function() {
         });
     });
 };
+
+$.jummp.userAdministration.register = function() {
+    $("#registerForm").submit(function(event) {
+        event.preventDefault();
+        $.ajax({
+            type: 'GET',
+            url: "userAdministration/performRegistration",
+            dataType: 'json',
+            cache: 'false',
+            data: {
+                username: $("#register-form-username").val(),
+                userRealName: $("#register-form-name").val(),
+                email: $("#register-form-email").val()
+            },
+            success: function (data) {
+                // TODO: proper error and success notifications
+                if (data.error) {
+                    alert((data.username ? data.username : '') + (data.userRealName ? data.userRealName : '') + (data.email ? data.email : ''));
+                } else if (data.success) {
+                    alert("User successfully registered");
+                }
+            }
+        });
+    });
+};

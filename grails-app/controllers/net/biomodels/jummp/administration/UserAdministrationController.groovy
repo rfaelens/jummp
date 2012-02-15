@@ -166,11 +166,6 @@ class UserAdministrationController {
      * Action to render the view to register a new user as admin
      */
     def register = {
-        if (!springSecurityService.isAjax(request)) {
-            render(template: "/templates/page", model: [link: g.createLink(action: "register", id: params.id), callback: "loadAdminRegisterCallback"])
-            return
-        }
-        [password: false]
     }
 
     /**
