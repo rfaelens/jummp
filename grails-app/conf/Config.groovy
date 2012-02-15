@@ -478,6 +478,7 @@ grails.resources.modules = {
     core {
         dependsOn 'jquery'
 
+        resource url: '/js/jquery/jquery.i18n.properties-min-1.0.9.js'
         resource url: '/js/jummp.js'
         resource url: '/js/useradministration.js'
     }

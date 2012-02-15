@@ -1,3 +1,10 @@
+// TODO: create proper links
+$.i18n.properties({
+    name: 'messages',
+    path: '/jummp/js/i18n/',
+    mode: "map"
+});
+
 $.jummp = new Object();
 
 $.jummp.message = function(message, warning) {

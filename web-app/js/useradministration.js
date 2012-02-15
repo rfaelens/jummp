@@ -76,10 +76,10 @@ $.jummp.userAdministration.editUser = function() {
                     var linkText = "";
                     var divInsertId = "";
                     if (action == "addRole") {
-                        linkText = "Remove Role from User";
+                        linkText = $.i18n.prop("user.administration.userRole.ui.removeRole");
                         divInsertId = "#userRoles";
                     } else if (action == "removeRole") {
-                        linkText = "Add Role to User";
+                        linkText = $.i18n.prop("user.administration.userRole.ui.addRole");
                         divInsertId = "#availableRoles";
                     }
                     var tableRow = link.parents("tr");
@@ -108,7 +108,7 @@ $.jummp.userAdministration.editUser = function() {
                     $.jummp.warningMessage(data.userRealName);
                     $.jummp.warningMessage(data.email);
                 } else if (data.success) {
-                    $.jummp.infoMessage("User updated successfully");
+                    $.jummp.infoMessage($.i18n.prop("user.administration.edit.success"));
                 }
             }
         });
@@ -134,7 +134,7 @@ $.jummp.userAdministration.register = function() {
                     $.jummp.warningMessage(data.userRealName);
                     $.jummp.warningMessage(data.email);
                 } else if (data.success) {
-                    $.jummp.infoMessage("User successfully registered");
+                    $.jummp.infoMessage($.i18n.prop("user.administration.register.success", data.user));
                 }
             }
         });
