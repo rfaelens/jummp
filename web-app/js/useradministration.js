@@ -71,7 +71,7 @@ $.jummp.userAdministration.editUser = function() {
             cache: 'false',
             success: function (data) {
                 if (data.error) {
-                    alert(data.error);
+                    $.jummp.errorMessage(data.error);
                 } else if (data.success) {
                     var linkText = "";
                     var divInsertId = "";
@@ -103,11 +103,12 @@ $.jummp.userAdministration.editUser = function() {
                 email: $("#edit-user-email").val()
             },
             success: function (data) {
-                // TODO: proper error and success notifications
                 if (data.error) {
-                    alert((data.username ? data.username : '') + (data.userRealName ? data.userRealName : '') + (data.email ? data.email : ''));
+                    $.jummp.warningMessage(data.username);
+                    $.jummp.warningMessage(data.userRealName);
+                    $.jummp.warningMessage(data.email);
                 } else if (data.success) {
-                    alert("User updated successfully");
+                    $.jummp.infoMessage("User updated successfully");
                 }
             }
         });
@@ -119,7 +120,7 @@ $.jummp.userAdministration.register = function() {
         event.preventDefault();
         $.ajax({
             type: 'GET',
-            url: "userAdministration/performRegistration",
+            url: "performRegistration",
             dataType: 'json',
             cache: 'false',
             data: {
@@ -128,11 +129,12 @@ $.jummp.userAdministration.register = function() {
                 email: $("#register-form-email").val()
             },
             success: function (data) {
-                // TODO: proper error and success notifications
                 if (data.error) {
-                    alert((data.username ? data.username : '') + (data.userRealName ? data.userRealName : '') + (data.email ? data.email : ''));
+                    $.jummp.warningMessage(data.username);
+                    $.jummp.warningMessage(data.userRealName);
+                    $.jummp.warningMessage(data.email);
                 } else if (data.success) {
-                    alert("User successfully registered");
+                    $.jummp.infoMessage("User successfully registered");
                 }
             }
         });
