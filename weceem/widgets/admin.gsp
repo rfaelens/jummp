@@ -4,5 +4,6 @@
   <ul>
     <li><g:link controller="wcm-admin">Content Management System</g:link></li>
     <li><g:link controller="configuration">System Configuration</g:link></li>
+    <li><g:link controller="userAdministration">User Administration</g:link></li>
   </ul>
 </div>

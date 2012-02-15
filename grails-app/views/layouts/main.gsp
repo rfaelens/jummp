@@ -6,6 +6,7 @@
     <less:stylesheet name="jummp"/>
     <less:scripts />
     <r:require module="jquery"/>
+    <r:require module="core"/>
     <r:layoutResources/>
     <g:layoutHead/>
 </head>

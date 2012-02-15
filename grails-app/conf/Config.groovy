@@ -473,3 +473,12 @@ environments {
         weceem.security.policy.path = null
     }
 }
+
+grails.resources.modules = {
+    core {
+        dependsOn 'jquery'
+
+        resource url: '/js/jummp.js'
+        resource url: '/js/useradministration.js'
+    }
+}
