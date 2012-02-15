@@ -1,6 +1,9 @@
 $.jummp = new Object();
 
 $.jummp.message = function(message, warning) {
+    if (!message) {
+        return;
+    }
     var classes = "message";
     if (warning) {
         classes += " warning";
