@@ -31,6 +31,7 @@
             </div>
             <div id="content">
                 <div id="main">
+                    <div id="infoBox"></div>
                     <g:layoutBody/>
                 </div>
                 <div id="sideBar">

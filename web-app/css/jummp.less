@@ -101,6 +101,8 @@
  **/
 @sideBarWidth: 368px;
 
+@widgetBackgroundColor: #F2F1EE;
+
 /**
  * Class for using the top background image as a background.
  **/
@@ -518,7 +520,7 @@ input.right, button.right {
     float: right;
     border-top: @contentOverline;
     div.element {
-        background-color: #F2F1EE;
+        background-color: @widgetBackgroundColor;
         padding-bottom: @standardIndentation;
         padding-left: @standardIndentation;
         padding-right: @standardIndentation;
@@ -572,6 +574,36 @@ input.right, button.right {
     **/
     ul {
         padding-left: 0px;
+    }
+}
+
+#infoBox {
+    div.message {
+        background-color: @widgetBackgroundColor;
+        color: @sideBarColor;
+        overflow: auto;
+        padding: @standardIndentation;
+        position: relative;
+        div {
+            height: 30px;
+            float: right;
+            button {
+                background-image: url(images/quitButton.png);
+                width: 29px;
+                height: 30px;
+                margin: 0px;
+                padding: 0px;
+            }
+        }
+        p {
+            float: left;
+        }
+    }
+    div.message:nth-child(n+2) {
+        margin-top: @standardIndentation;
+    }
+    div.warning {
+        color: @sideBarColorExternal;
     }
 }
 
