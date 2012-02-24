@@ -22,7 +22,7 @@
     <div id="container">
         <div id="nav">
             <div class="left"><a href="${g.createLink(uri: '/')}"><g:message code="jummp.main.tabs.about"/></a></div>
-            <div class="right"><a href="#"><g:message code="jummp.main.tabs.search"/></a></div>
+            <div class="right"><a href="${g.createLink(controller: 'search', action: 'overlay')}"><g:message code="jummp.main.tabs.search"/></a></div>
         </div>
         <wcm:render path="branding"/>
         <div id="contentContainer">
@@ -31,6 +31,7 @@
             </div>
             <div id="content">
                 <div id="main">
+                    <g:pageProperty name="page.main-content" />
                     <div id="infoBox"></div>
                     <g:layoutBody/>
                 </div>
@@ -42,6 +43,7 @@
         </div>
     </div>
     <wcm:render path="footer"/>
+
     <r:layoutResources/>
 </body>
 </html>
