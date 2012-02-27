@@ -20,6 +20,7 @@ Brief summary/description of the plugin.
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/jummp-plugin-web-application"
+    def packaging = "binary"
 
     // Extra (optional) plugin metadata
 
