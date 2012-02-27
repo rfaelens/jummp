@@ -74,6 +74,9 @@ grails.project.dependency.resolution = {
         compile(":grails-plugin-jummp-plugin-simple-logging:latest.integration") {
             changing = true
         }
+        compile(":grails-plugin-jummp-plugin-web-application:latest.integration") {
+            changing = true
+        }
         // dependencies of plugins
         // sbml
         runtime ":jsbml:0.8-rc1"
