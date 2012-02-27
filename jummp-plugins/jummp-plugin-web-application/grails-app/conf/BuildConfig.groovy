@@ -18,6 +18,8 @@ grails.project.dependency.resolution = {
         if (System.getenv("JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL")) {
             grailsRepo "${System.getenv('JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL')}"
         }
+        grailsPlugins()
+        grailsHome()
         grailsCentral()
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
@@ -27,6 +29,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
+        flatDir name: 'jummpPlugins', dirs: "../../pluginlibs"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
