@@ -13,6 +13,12 @@
                     <input type="text" name="weburl" id="weburl" value="${server ? server.weburl : 'http://127.0.0.1:8080/jummp-web-application/'}" title="The web servers production URL"/>
                 </td>
             </tr>
+            <tr class="prop">
+                <td class="name"><label for="protectEverything" title="Whether the complete application requires login">Protect all pages:</label></td>
+                <td class="value ${hasErrors(bean: server, field: 'protectEverything', 'errors')}">
+                    <g:checkBox name="protectEverything" id="protectEverything" value="${true}" checked="${server ? server.protectEverything : 'false'}" title="Whether the complete application requires login"/>
+                </td>
+            </tr>
         </tbody>
     </table>
 </div>

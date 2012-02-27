@@ -16,9 +16,14 @@ class ServerCommand implements Serializable {
      * the IP address 127.0.0.1 validates
      */
     String weburl
+    /**
+     * Whether all web pages are password protected.
+     **/
+    Boolean protectEverything
 
     static constraints = {
         url(blank: false, nullable: false, url: true)
         weburl(blank: false, nullable: false, url: true)
+        protectEverything(nullable: false)
     }
 }

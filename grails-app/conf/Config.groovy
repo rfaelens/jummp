@@ -360,6 +360,11 @@ if (!(jummpConfig.jummp.database.password instanceof ConfigObject)) {
     jummp.database.password = "jummp"
 }
 
+if (!(jummpConfig.jummp.server.protection instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.server.protection)) {
+    jummp.controllerAnnotations.put("/login/**", ['IS_AUTHENTICATED_ANONYMOUSLY'])
+    jummp.controllerAnnotations.put("/**", ['ROLE_USER'])
+}
+
 // get all Plugin Configurations
 // the list of available plugins is read from the BuildConfig's plugin location
 // for each plugin it is assumed that it has a JummpPluginConfig class in the package

@@ -178,6 +178,7 @@ class ConfigurationService implements InitializingBean {
         ServerCommand server = new ServerCommand()
         server.url = properties.getProperty("jummp.server.url")
         server.weburl = properties.getProperty("jummp.server.web.url")
+        server.protectEverything = Boolean.parseBoolean(properties.getProperty("jummp.server.protection"))
         return server
     }
 
@@ -546,6 +547,7 @@ class ConfigurationService implements InitializingBean {
         }
         properties.setProperty("jummp.server.url", server.url)
         properties.setProperty("jummp.server.web.url", server.weburl)
+        properties.setProperty("jummp.server.protection", server.protectEverything ? "true" : "false")
     }
 
     /**
