@@ -251,17 +251,17 @@ class ConfigurationService implements InitializingBean {
         return sbml
     }
 
-   /**
-    * Loads the current branding configuration.
-    * @return A command object encapsulating the current branding configuration
-    */
-   public BrandingCommand loadBrandingConfiguration() {
+    /**
+     * Loads the current branding configuration.
+     * @return A command object encapsulating the current branding configuration
+     */
+    public BrandingCommand loadBrandingConfiguration() {
         Properties properties = loadProperties()
-       BrandingCommand branding = new BrandingCommand()
-       branding.internalColor = properties.getProperty("jummp.branding.internalColor")
-       branding.externalColor = properties.getProperty("jummp.branding.externalColor")
-       return branding
-   }
+        BrandingCommand branding = new BrandingCommand()
+        branding.internalColor = properties.getProperty("jummp.branding.internalColor")
+        branding.externalColor = properties.getProperty("jummp.branding.externalColor")
+        return branding
+    }
 
     /**
      * Updates the BiVeS configuration stored in the properties file.
