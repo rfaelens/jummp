@@ -96,7 +96,15 @@ class ConfigurationService implements InitializingBean {
     public DatabaseCommand loadDatabaseConfiguration() {
         Properties properties = loadProperties()
         DatabaseCommand database = new DatabaseCommand()
-        database.type     = properties.getProperty("jummp.database.type")
+        switch (properties.getProperty("jummp.database.type")) {
+        case "POSTRGESQL":
+            database.type = DatabaseType.POSTRGESQL
+            break
+        case "MYSQL": // fall through
+        default:
+            database.type = DatabaseType.MYSQL
+            break
+        }
         database.server   = properties.getProperty("jummp.database.server")
         database.port     = Integer.parseInt(properties.getProperty("jummp.database.port"))
         database.database = properties.getProperty("jummp.database.database")

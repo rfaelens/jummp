@@ -6,12 +6,12 @@ try {
     String database = databaseProperties.getProperty("jummp.database.database")
     String protocol = "mysql"
     switch (databaseProperties.getProperty("jummp.database.type")) {
-    case "Postgres":
+    case "POSTRGESQL":
         protocol = "postgresql"
         databaseProperties.setProperty("jummp.database.driver", "org.postgresql.Driver")
         databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.PostgreSQLDialect")
         break
-    case "MySQL": // mysql is our default
+    case "MYSQL": // mysql is our default
     default:
         databaseProperties.setProperty("jummp.database.driver", "com.mysql.jdbc.Driver")
         databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.MySQL5InnoDBDialect")
