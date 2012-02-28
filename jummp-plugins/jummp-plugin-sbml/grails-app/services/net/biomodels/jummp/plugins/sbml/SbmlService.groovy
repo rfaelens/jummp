@@ -77,7 +77,8 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     public void afterPropertiesSet() {
         if (Environment.current == Environment.PRODUCTION) {
             // only initialize the SBML2* Converters during startup in production mode
-            sbml2dotConverter()
+            // FIXME: fails the startup of Tomcat server
+//             sbml2dotConverter()
             sbml2OctaveConverter()
             // FIXME: fails the startup of Tomcat server
             //sbml2BioPaxConverter()
