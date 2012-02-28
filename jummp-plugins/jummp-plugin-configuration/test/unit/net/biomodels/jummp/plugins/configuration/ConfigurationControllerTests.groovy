@@ -131,6 +131,7 @@ class ConfigurationControllerTests extends GrailsUnitTestMixin {
         cmd = mockCommandObject(ServerCommand)
         cmd.url = "http://127.0.0.1:8080/jummp/"
         cmd.weburl = "http://127.0.0.1:8080/jummp-web-application/"
+        cmd.protectEverything = false
         cmd.validate()
         controller.saveServer(cmd)
         assertEquals("/configuration/saved", view)
