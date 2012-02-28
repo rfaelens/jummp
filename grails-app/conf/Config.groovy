@@ -486,6 +486,5 @@ grails.resources.modules = {
         resource url: '/js/jquery/jquery.tools.min-1.2.6.js', disposition:'head'
         resource url: '/js/jummp.js', disposition:'head'
         resource url: '/js/useradministration.js', disposition:'head'
-        resource url: '/js/views.js', disposition: 'head'
     }
 }
