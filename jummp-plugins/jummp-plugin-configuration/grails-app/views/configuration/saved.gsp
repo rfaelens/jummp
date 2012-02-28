@@ -11,4 +11,5 @@
             <p>The new settings will be activated after a restart of the web application.</p>
         </div>
     </body>
+    <g:render template="/templates/configuration/configurationSidebar"/>
 </html>
