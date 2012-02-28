@@ -256,6 +256,7 @@ class ConfigurationService implements InitializingBean {
     * @return A command object encapsulating the current branding configuration
     */
    public BrandingCommand loadBrandingConfiguration() {
+        Properties properties = loadProperties()
        BrandingCommand branding = new BrandingCommand()
        branding.internalColor = properties.getProperty("jummp.branding.internalColor")
        branding.externalColor = properties.getProperty("jummp.branding.externalColor")
