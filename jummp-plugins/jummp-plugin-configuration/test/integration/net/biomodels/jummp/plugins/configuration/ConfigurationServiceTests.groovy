@@ -9,7 +9,6 @@ import org.junit.*
 
 class ConfigurationServiceTests {
 
-    def grailsApplication
     def configurationService
 
     @Before
@@ -502,12 +501,6 @@ class ConfigurationServiceTests {
 
     void testLoadStoreDatabaseConfiguration() {
         populateProperties()
-        grailsApplication.config.jummp.database.type = "MYSQL"
-        grailsApplication.config.jummp.database.server = "localhost"
-        grailsApplication.config.jummp.database.port = 3306
-        grailsApplication.config.jummp.database.database = "jummp"
-        grailsApplication.config.jummp.database.username = "user"
-        grailsApplication.config.jummp.database.password = "pass"
         // now load the data from the service
         DatabaseCommand database = configurationService.loadDatabaseConfiguration()
         assertEquals("MYSQL",     database.type.key)
@@ -516,12 +509,6 @@ class ConfigurationServiceTests {
         assertEquals(3306,        database.port)
         assertEquals("user",      database.username)
         assertEquals("pass",      database.password)
-
-        grailsApplication.config.jummp.database.server = "server"
-        grailsApplication.config.jummp.database.port = 1234
-        grailsApplication.config.jummp.database.database = "database"
-        grailsApplication.config.jummp.database.username = "name"
-        grailsApplication.config.jummp.database.password = "secret"
 
         // store a new configuration
         database.type = "MYSQL"
@@ -572,19 +559,11 @@ class ConfigurationServiceTests {
 
     void testLoadStoreRemoteConfiguration() {
         populateProperties()
-        grailsApplication.config.jummp.remote = "jms"
-        grailsApplication.config.jummp.export.dbus = "false"
-        grailsApplication.config.jummp.export.jms = "true"
-
         // now load the data from the service
         RemoteCommand remote = configurationService.loadRemoteConfiguration()
         assertEquals("jms",  remote.jummpRemote)
         assertFalse(remote.jummpExportDbus)
         assertTrue( remote.jummpExportJms)
-
-        grailsApplication.config.jummp.remote = "dbus"
-        grailsApplication.config.jummp.export.dbus = "true"
-        grailsApplication.config.jummp.export.jms = "false"
 
         // store a new configuration
         remote.jummpRemote="dbus"
@@ -625,12 +604,6 @@ class ConfigurationServiceTests {
 
     void testLoadStoreLdapConfiguration() {
         //populateProperties()
-        grailsApplication.config.jummp.security.ldap.server = "server"
-        grailsApplication.config.jummp.security.ldap.managerDn = "manager"
-        grailsApplication.config.jummp.security.ldap.search.base = "search"
-        grailsApplication.config.jummp.security.ldap.search.filter = "filter"
-        grailsApplication.config.jummp.security.ldap.search.subTree = "true"
-        grailsApplication.config.jummp.security.ldap.managerPw = "password"
         // Load the data from properties
         LdapCommand ldap = configurationService.loadLdapConfiguration()
         assertTrue(ldap.ldapSearchSubtree)
@@ -693,12 +666,10 @@ class ConfigurationServiceTests {
 
     void testLoadStoreSvnConfiguration() {
         populateProperties()
-        grailsApplication.config.jummp.plugins.subversion.localRepository = "target"
         // verify svn configuration
         SvnCommand svn = configurationService.loadSvnConfiguration()
         assertEquals("target", svn.localRepository)
         // set new configuration
-        grailsApplication.config.jummp.plugins.subversion.localRepository = "/tmp/"
         svn.localRepository = "/tmp/"
         configurationService.saveSvnConfiguration(svn)
         // verify new configuration
@@ -791,8 +762,6 @@ class ConfigurationServiceTests {
 
     void testLoadStoreServerConfiguration() {
         populateProperties()
-        grailsApplication.config.jummp.server.url = "http://127.0.0.1:8080/jummp/"
-        grailsApplication.config.jummp.server.web.url = "http://127.0.0.1:8080/jummp-web-application/"
         // verify the configuration
         ServerCommand server = configurationService.loadServerConfiguration()
         assertEquals("http://127.0.0.1:8080/jummp/", server.url)
