@@ -360,9 +360,12 @@ if (!(jummpConfig.jummp.database.password instanceof ConfigObject)) {
     jummp.database.password = "jummp"
 }
 
-if (!(jummpConfig.jummp.server.protection instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.server.protection)) {
-    jummp.controllerAnnotations.put("/login/**", ['IS_AUTHENTICATED_ANONYMOUSLY'])
-    jummp.controllerAnnotations.put("/**", ['ROLE_USER'])
+if (jummpConfig.jummp.firstRun instanceof ConfigObject || !Boolean.parseBoolean(jummpConfig.jummp.firstRun)) {
+    // only add side protection if not in first run mode
+    if (!(jummpConfig.jummp.server.protection instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.server.protection)) {
+        jummp.controllerAnnotations.put("/login/**", ['IS_AUTHENTICATED_ANONYMOUSLY'])
+        jummp.controllerAnnotations.put("/**", ['ROLE_USER'])
+    }
 }
 
 // get all Plugin Configurations
