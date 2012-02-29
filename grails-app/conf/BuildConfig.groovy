@@ -156,6 +156,7 @@ grails.project.dependency.resolution = {
 }
 
 grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
+grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"
 
 // Remove libraries not needed in productive mode
 grails.war.resources = { stagingDir ->
