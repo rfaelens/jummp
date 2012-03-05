@@ -140,15 +140,11 @@
         </antcall>
         <antcall target="packagePlugin">
             <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="jms-remote"/>
-        </antcall>
-        <antcall target="packagePlugin">
-            <param name="pluginBaseDir" value="${basedir}"/>
             <param name="plugin" value="bives"/>
         </antcall>
         <antcall target="packagePlugin">
             <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="jms"/>
+            <param name="plugin" value="web-application"/>
         </antcall>
     </target>
 
