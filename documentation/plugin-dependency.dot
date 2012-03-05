@@ -23,6 +23,7 @@ rankdir=BT;
     "git" [label="git"];
     "svn" [label="subversion"];
     "bives" [label=bives];
+    "webapp" [label="Web Application"];
     "conf" -> "coreApi";
     "conf" -> "security";
     "remote" -> "coreApi";
@@ -33,6 +34,8 @@ rankdir=BT;
     "svn" -> "security";
     "bives" -> "coreApi";
     "bives" -> "security";
+    "webapp" -> "coreApi";
+    "webapp" -> "security";
 
     // plugins depending core-api, security and remote
     "dbus" [label=dBus];
