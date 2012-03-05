@@ -6,7 +6,7 @@
     <taskdef name="gant" classname="org.codehaus.gant.ant.Gant">
         <classpath>
             <pathelement location="${env.GRAILS_HOME}/lib/org.codehaus.gant/gant_groovy1.8/jars/gant_groovy1.8-1.9.6.jar"/>
-            <pathelement location="${env.GRAILS_HOME}/lib/org.codehaus.groovy/groovy-all/jars/groovy-all-1.8.2.jar"/>
+            <pathelement location="${env.GRAILS_HOME}/lib/org.codehaus.groovy/groovy-all/jars/groovy-all-1.8.6.jar"/>
         </classpath>
     </taskdef>
 
@@ -14,9 +14,9 @@
     <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
         <classpath>
             <pathelement location="${env.GRAILS_HOME}/lib/org.codehaus.gant/gant_groovy1.8/jars/gant_groovy1.8-1.9.6.jar"/>
-            <pathelement location="${env.GRAILS_HOME}/lib/org.codehaus.groovy/groovy-all/jars/groovy-all-1.8.4.jar"/>
-            <pathelement location="${env.GRAILS_HOME}/dist/grails-web-2.0.0.jar"/>
-            <pathelement location="${env.GRAILS_HOME}/dist/grails-plugin-converters-2.0.0.jar"/>
+            <pathelement location="${env.GRAILS_HOME}/lib/org.codehaus.groovy/groovy-all/jars/groovy-all-1.8.6.jar"/>
+            <pathelement location="${env.GRAILS_HOME}/dist/grails-web-2.0.1.jar"/>
+            <pathelement location="${env.GRAILS_HOME}/dist/grails-plugin-converters-2.0.1.jar"/>
         </classpath>
     </taskdef>
 
@@ -140,15 +140,11 @@
         </antcall>
         <antcall target="packagePlugin">
             <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="jms-remote"/>
-        </antcall>
-        <antcall target="packagePlugin">
-            <param name="pluginBaseDir" value="${basedir}"/>
             <param name="plugin" value="bives"/>
         </antcall>
         <antcall target="packagePlugin">
             <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="jms"/>
+            <param name="plugin" value="web-application"/>
         </antcall>
     </target>
 
