@@ -7,6 +7,7 @@
     <less:scripts />
     <r:require module="jquery"/>
     <r:require module="core"/>
+    <r:require module="overlay"/>
     <r:layoutResources/>
     <g:layoutHead/>
 </head>
@@ -43,7 +44,6 @@
         </div>
     </div>
     <wcm:render path="footer"/>
-
     <r:layoutResources/>
 </body>
 </html>
