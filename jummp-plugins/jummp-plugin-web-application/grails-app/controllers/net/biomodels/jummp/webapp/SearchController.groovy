@@ -1,7 +1,7 @@
 package net.biomodels.jummp.webapp
 
-//import net.biomodels.jummp.core.model.ModelListSorting
-//import grails.converters.JSON
+import grails.converters.JSON
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 class SearchController {
     /**
@@ -13,27 +13,26 @@ class SearchController {
      */
     def modelService
 
-    def overlay = {
-        render(template: "/templates/overlay")
-    }
-
     /**
      * Default action showing a list view
      */
     def list = {
-        //if (!springSecurityService.isAjax(request)) {
-        render(template: "/templates/list")//, model: [link: g.createLink(action: "list"), callback: "loadModelListCallback"])
+        render(template: "/templates/list")
         return
-        //}
-        //[offset: params.offset, sort: params.sort, dir: params.dir]
+    }
+
+    def overlay = {
+        render(template: "/templates/list", model: [link: g.createLink(action: "overlay", id: params.id)])
+    }
+
+    def summary = {
+            render(template: "/templates/overlay", model: [link: g.createLink(action: "show", id: params.id), callback: "loadModelTabCallback"])
     }
 
     /**
-     * AJAX action to get all Models from the core the current user has access to.
-     * Returns a JSON data structure for consumption by a jQuery DataTables.
+     * Action returning the DataTable content as JSON
      */
-/*    def dataTableSource = {
-        // input validation
+    def dataTableSource = {
         int start = 0
         int length = 10
         if (params.iDisplayStart) {
@@ -46,47 +45,19 @@ class SearchController {
         dataToRender.sEcho = params.sEcho
         dataToRender.aaData = []
 
-        dataToRender.iTotalRecords = remoteModelService.getModelCount()
+        dataToRender.iTotalRecords = 10 // TODO: real value from core
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.offset = start
-        dataToRender.iSortCol_0 = params.iSortCol_0
-        dataToRender.sSortDir_0 = params.sSortDir_0
 
-        ModelListSorting sort
-        switch (params.iSortCol_0 as int) {
-            case 1:
-                sort = ModelListSorting.NAME
-                break
-            case 2:
-                sort = ModelListSorting.PUBLICATION
-                break
-            case 3:
-                sort = ModelListSorting.LAST_MODIFIED
-                break
-            case 4:
-                sort = ModelListSorting.FORMAT
-                break
-            case 0: // id column is the default
-            default:
-                sort = ModelListSorting.ID
-                break
-        }
-        List models = modelService.getAllModels(start, length, params.sSortDir_0 == "asc", sort)
+        List models = modelService.getAllModels(start, length)
         models.each { model ->
-            Map publication = [:]
-            if (model.publication) {
-                publication.put("link", model.publication.link)
-                publication.put("linkProvider", model.publication.linkProvider.toString())
-                publication.put("compactTitle", jummp.compactPublicationTitle(publication: model.publication))
-            }
             dataToRender.aaData << [
                 model.id,
                 model.name,
-                publication,
-                model.lastModifiedDate,
-                model.format.name
+                model.vcsIdentifier,
+                model.state,
+                model.publication
             ]
         }
         render dataToRender as JSON
-    }*/
+    }
 }
