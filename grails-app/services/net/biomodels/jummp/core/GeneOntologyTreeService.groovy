@@ -41,7 +41,7 @@ class GeneOntologyTreeService {
     @Profiled(tag="GeneOntologyTreeService.treeLevel")
     GeneOntologyTreeLevel treeLevel(Long goId) {
         GeneOntology geneOntology = GeneOntology.get(goId)
-        List geneOntologies
+        def geneOntologies
         if (geneOntology) {
             geneOntologies = nextLevel(geneOntology)
         } else {
@@ -49,8 +49,8 @@ class GeneOntologyTreeService {
         }
         GeneOntologyTreeLevel level = new GeneOntologyTreeLevel()
         if (geneOntology) {
-            geneOntologies.each { go, type ->
-                level.addOntology(go.id, go.description.identifier, go.description.name, type)
+            geneOntologies.each { it ->
+                level.addOntology(it[0].id, it[0].description.identifier, it[0].description.name, it[1])
             }
             revisionsForGeneOntology(geneOntology).each {
                 level.addRevision(it.toCommandObject())
