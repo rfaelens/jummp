@@ -25,8 +25,9 @@
     </div>
     <div id="container">
         <div id="nav">
-            <div class="left"><a href="${g.createLink(uri: '/')}"><g:message code="jummp.main.tabs.about"/></a></div>
-            <div class="right"><a href="${g.createLink(controller: 'search', action: 'list')}"><g:message code="jummp.main.tabs.search"/></a></div>
+            <!-- TODO: active class has to be set on really selected mode -->
+            <div class="left ${pageProperty(name: 'body.activetab') ? (pageProperty(name: 'body.activetab') == 'about' ? 'active' : '') : 'active'}"><a href="${g.createLink(uri: '/')}"><g:message code="jummp.main.tabs.about"/></a></div>
+            <div class="right ${pageProperty(name: 'body.activetab') ? (pageProperty(name: 'body.activetab') == 'search' ? 'active' : '') : ''}"><a href="${g.createLink(controller: 'search', action: 'list')}"><g:message code="jummp.main.tabs.search"/></a></div>
         </div>
         <wcm:render path="branding"/>
         <div id="contentContainer">
