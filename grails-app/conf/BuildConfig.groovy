@@ -143,6 +143,7 @@ grails.project.dependency.resolution = {
         test ":gmetrics:0.3.1"
         compile ":weceem:1.1.2"
         compile ":jquery-datatables:1.7.5"
+        compile ":jquery-ui:1.8.15"
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"
@@ -156,7 +157,6 @@ grails.project.dependency.resolution = {
 }
 
 grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
-grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"
 
 // Remove libraries not needed in productive mode
 grails.war.resources = { stagingDir ->
