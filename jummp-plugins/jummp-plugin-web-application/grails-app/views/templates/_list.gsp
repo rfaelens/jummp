@@ -1,7 +1,10 @@
 <g:applyLayout name="main">
 <content tag="main-content">
 
-<button onClick="load()">load models</button>
+<r:script>
+$.jummp.showModels.loadModelList();
+$.jummp.showModels.loadModelTabs();
+</r:script>
 
 <div id="modelNavigation">
     <span id="modelNavigationOffset" style="display: none">${offset ? offset : "0"}</span>
@@ -30,23 +33,6 @@
     </tfoot>
 </table>
 
-<div id="body" class="ui-widget"></div>
-
 </content>
-
-<g:javascript>
-
-function load() {
-console.log('here!');
-//loadModelListCallback();
-    <g:if test="${data}">
-        loadView("${link}", ${callback}, "${data}");
-    </g:if>
-    <g:else>
-        loadView("${link}", ${callback});
-    </g:else>
-};
-
-</g:javascript>
 
 </g:applyLayout>
