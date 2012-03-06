@@ -7,7 +7,6 @@
     <less:scripts />
     <r:require module="jquery"/>
     <r:require module="core"/>
-    <r:require module="overlay"/>
     <r:layoutResources/>
     <g:layoutHead/>
     <r:script>
