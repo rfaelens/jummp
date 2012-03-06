@@ -10,6 +10,9 @@
     <r:require module="overlay"/>
     <r:layoutResources/>
     <g:layoutHead/>
+    <r:script>
+        $.appName = "${grailsApplication.metadata["app.name"]}";
+    </r:script>
 </head>
 <body>
     <div id="topBackground"></div>
