@@ -54,6 +54,5 @@ function createLink(controller, action, id) {
  * @param path The path
  */
 function createURI(path) {
-   // console.log("$.appName: " + $.appName)
     return "/" + $.appName + "/" + path;
 }
