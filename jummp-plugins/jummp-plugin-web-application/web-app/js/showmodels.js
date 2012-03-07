@@ -71,8 +71,6 @@ $.jummp.showModels.loadModelList = function() {
  * @param tabIndex Optional selector for tab index to switch to after the tab view has been loaded
  */
 $.jummp.showModels.loadModelTabs = function (data, tabIndex) {
-    // set the header
-    updateModelHeader($("#model-header span:eq(0)").text(), $("#model-header span:eq(1)").text(), $("#model-header span:eq(2)").text());
     $("#modelTabs").tabs({disabled: [6],
         ajaxOptions: {
             error: function(jqXHR) {
@@ -106,7 +104,6 @@ $.jummp.showModels.loadModelTabs = function (data, tabIndex) {
                 $("#model-revisions table tr td.revisionNumber a").button();
                 $("#model-revisions table tr td.revisionNumber a").click(function() {
                     changeModelTabRevision($(this).text());
-                    updateModelHeader(null, null, $(this).text());
                     $("#modelTabs").tabs("select", $("#modelTabs-model").attr("href"));
                 });
                 $("#model-revisions table tr td.revisionControl a").button();
@@ -123,7 +120,6 @@ $.jummp.showModels.loadModelTabs = function (data, tabIndex) {
                                     // there is at least one more revision
                                     var newLatestRevision = $("#model-revisions table tr td.revisionNumber:eq(1) a").text();
                                     changeModelTabRevision(newLatestRevision);
-                                    updateModelHeader(null, null, newLatestRevision);
                                     $("#modelTabs").tabs("load", $("#modelTabs-revisions").attr("href"));
                                 }
                             } else {
@@ -181,30 +177,4 @@ $.jummp.showModels.loadModelTabs = function (data, tabIndex) {
     $("#modelNavigation a.overview").click(function() {
         loadView(createLink("model", "index") + "?offset=" + offset + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelListCallback);
     });
-}
-
-/**
- * Updates the Model header with new modelId, modelName and revisionNumber.
- * In case one of the parameters is @c null a cached information is used
- * @param modelId The model Id
- * @param modelName The name of the model
- * @param revisionNumber The revision number
- */
-function updateModelHeader(modelId, modelName, revisionNumber) {
-    if (!modelId) {
-        modelId = $("#model-header").data("id");
-    }
-    if (!modelName) {
-        modelName = $("#model-header").data("name");
-    }
-    if (!revisionNumber) {
-        revisionNumber = $("#model-header").data("revision");
-    }
-    var text = i18n.model.view.header.replace(/_ID_/, modelId);
-    text = text.replace(/_NAME_/, modelName);
-    text = text.replace(/_REVISION_/, revisionNumber);
-    $("#model-header").html(text);
-    $("#model-header").data("id", modelId);
-    $("#model-header").data("name", modelName);
-    $("#model-header").data("revision", revisionNumber);
-}
+};
