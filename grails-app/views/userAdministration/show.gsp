@@ -66,7 +66,9 @@
             </div>
         </div>
         <r:script>
-$.jummp.userAdministration.editUser();
+$(function() {
+    $.jummp.userAdministration.editUser();
+});
         </r:script>
     </body>
 </html>

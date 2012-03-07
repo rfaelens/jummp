@@ -31,7 +31,9 @@
             </form>
         </div>
         <r:script>
-$.jummp.userAdministration.register();
+$(function() {
+    $.jummp.userAdministration.register();
+});
         </r:script>
     </body>
 </html>

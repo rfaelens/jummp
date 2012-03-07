@@ -34,7 +34,9 @@
             </tfoot>
         </table>
         <r:script>
-$.jummp.userAdministration.loadUserList();
+$(function() {
+    $.jummp.userAdministration.loadUserList();
+});
         </r:script>
     </body>
 </html>
