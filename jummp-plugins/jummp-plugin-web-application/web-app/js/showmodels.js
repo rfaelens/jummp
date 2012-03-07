@@ -38,6 +38,7 @@ $.jummp.showModels.loadModelList = function() {
                         var id = rowData[0];
                         var link = createLink("search", "overlay");
                         rowData[0] = "<a id='animate' onClick='createLink(\"search\", \"overlay\");' href=\"#/" + id + "\">" + id + "</a>";
+                        rowData[1] = rowData[1] ? rowData[1].replace(/_/g, " ") : "-";
                         rowData[2] = rowData[2] ? rowData[2].title : "-";
                     }
                     fnCallback(json);

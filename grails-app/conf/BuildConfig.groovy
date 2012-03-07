@@ -74,9 +74,9 @@ grails.project.dependency.resolution = {
         compile(":grails-plugin-jummp-plugin-simple-logging:latest.integration") {
             changing = true
         }
-        compile(":grails-plugin-jummp-plugin-web-application:latest.integration") {
+        /*compile(":grails-plugin-jummp-plugin-web-application:latest.integration") {
             changing = true
-        }
+        }*/
         // dependencies of plugins
         // sbml
         runtime ":jsbml:0.8-rc1"
@@ -157,6 +157,7 @@ grails.project.dependency.resolution = {
 }
 
 grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
+grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"
 
 // Remove libraries not needed in productive mode
 grails.war.resources = { stagingDir ->
