@@ -37,8 +37,8 @@ $.jummp.showModels.loadModelList = function() {
                         var rowData = json.aaData[i];
                         var id = rowData[0];
                         var link = createLink("search", "overlay");
-                        //console.log(link);
-                        rowData[0] = "<a id='animate' onClick='createLink(\"search\", \"overlay\");' href=\"#/" + id + "\">" + id + "</a>"
+                        rowData[0] = "<a id='animate' onClick='createLink(\"search\", \"overlay\");' href=\"#/" + id + "\">" + id + "</a>";
+                        rowData[2] = rowData[2] ? rowData[2].title : "-";
                     }
                     fnCallback(json);
                     $(".modalInput").overlay({

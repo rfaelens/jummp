@@ -51,8 +51,6 @@ class SearchController {
             dataToRender.aaData << [
                 model.id,
                 model.name,
-                model.vcsIdentifier,
-                model.state,
                 model.publication
             ]
         }
