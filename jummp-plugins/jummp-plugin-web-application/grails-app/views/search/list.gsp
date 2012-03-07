@@ -41,5 +41,12 @@ $(function() {
 });
     </r:script>
     </body>
-
+    <content tag="sidebar">
+        <div class="element">
+            <h1>Gene Ontology Tree</h1>
+            <h2>Browse models using GO Tree</h2>
+            <p>This is a tree view of the models in this Database based on <a href="http://www.geneontology.org/">Gene Ontology</a>.</p>
+            <p><g:link controller="gotree">link</g:link></p>
+        </div>
+    </content>
 </html>
