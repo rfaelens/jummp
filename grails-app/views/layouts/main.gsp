@@ -10,7 +10,7 @@
     <r:layoutResources/>
     <g:layoutHead/>
     <r:script>
-        $.jummp.appName = "${grailsApplication.metadata["app.name"]}";
+        $.appName = "${grailsApplication.metadata["app.name"]}";
     </r:script>
 </head>
 <body>
