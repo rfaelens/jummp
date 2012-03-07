@@ -7,7 +7,7 @@
         <r:require module="jquery-ui"/>
         <r:require module="gotree"/>
     </head>
-    <body>
+    <body activetab="search">
         <div id="gotree"></div>
         <r:script>
 $(function() {

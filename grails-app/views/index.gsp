@@ -3,7 +3,7 @@
     <head>
         <meta name="layout" content="main"/>
     </head>
-    <body>
+    <body activetab="about">
         <wcm:render path="index"/>
     </body>
     <content tag="sidebar">
