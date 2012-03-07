@@ -43,7 +43,7 @@ class SearchController {
         dataToRender.sEcho = params.sEcho
         dataToRender.aaData = []
 
-        dataToRender.iTotalRecords = 10 // TODO: real value from core
+        dataToRender.iTotalRecords = modelService.getModelCount()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
         List models = modelService.getAllModels(start, length)
