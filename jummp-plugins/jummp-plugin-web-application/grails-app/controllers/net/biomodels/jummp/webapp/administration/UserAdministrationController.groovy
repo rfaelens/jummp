@@ -1,4 +1,4 @@
-package net.biomodels.jummp.administration
+package net.biomodels.jummp.webapp.administration
 
 import grails.plugins.springsecurity.Secured
 import grails.converters.JSON

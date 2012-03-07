@@ -14,4 +14,8 @@ modules = {
         resource url: '/css/dynatree/go_other.gif', disposition: 'inline'
         resource url: '/css/dynatree/go_partof.gif', disposition: 'inline'
     }
+    userAdministration {
+        dependsOn 'core'
+        resource url: '/js/useradministration.js'
+    }
 }

@@ -3,6 +3,7 @@
     <head>
         <title><g:message code="user.administration.ui.heading.register"/></title>
         <meta name="layout" content="main" />
+        <r:require module="userAdministration"/>
     </head>
     <body>
         <h1><g:message code="user.administration.ui.heading.register"/></h1>

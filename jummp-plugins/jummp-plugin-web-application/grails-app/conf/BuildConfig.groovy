@@ -37,6 +37,9 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.5'
         
         // plugin dependencies
+        compile(":grails-plugin-jummp-plugin-security:latest.integration") {
+            changing = true
+        }
         compile(":grails-plugin-jummp-plugin-core-api:latest.integration") {
             changing = true
         }
@@ -47,5 +50,8 @@ grails.project.dependency.resolution = {
               ":release:1.0.0") {
             export = false
         }
+        compile ":jquery:1.6.1.1"
+        compile ":jquery-datatables:1.7.5"
+        compile ":spring-security-core:1.2.7.2"
     }
 }
