@@ -490,6 +490,7 @@ grails.resources.modules = {
 
     }
     overlay {
-        resource url: '/js/jquery/jquery.tools.min-1.2.6.js'
+        dependsOn 'jquery'
+        resource url: '/js/jquery/jquery.tools.min-1.2.6.js', disposition: 'head'
     }
 }

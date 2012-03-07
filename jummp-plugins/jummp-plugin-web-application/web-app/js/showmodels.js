@@ -36,32 +36,42 @@ $.jummp.showModels.loadModelList = function() {
                     for (var i=0; i<json.aaData.length; i++) {
                         var rowData = json.aaData[i];
                         var id = rowData[0];
-                        var link = createLink("search", "overlay");
-                        rowData[0] = "<a id='animate' onClick='createLink(\"search\", \"overlay\");' href=\"#/" + id + "\">" + id + "</a>";
+                        rowData[0] = "<a class='animate' onclick=\"$.jummp.showModels.showOverlay('" + createLink("search", "model", id) + "');\" href=\"#\">" + id + "</a>";
                         rowData[1] = rowData[1] ? rowData[1].replace(/_/g, " ") : "-";
                         rowData[2] = rowData[2] ? rowData[2].title : "-";
                     }
                     fnCallback(json);
-                    $(".modalInput").overlay({
-                        // some mask tweaks suitable for modal dialogs
-                        mask: {
-                            color: 'black',
-                            loadSpeed: 200,
-                            opacity: 0.8
-                        },
-                        closeOnClick: false
-                    });
-                    $('#animate').click(function() {
-                        var $overlay = $('#overlayContainer');
-                        if($overlay.height > 0) {
-                            $overlay.animate({ height: 0 });
-                        } else {
-                            $overlay.animate({ height: '100%' });
-                        }
-                    });
                 }
             });
         }
+    });
+};
+
+$.jummp.showModels.showOverlay = function(overlayLink) {
+    $("#overlayContainer").data("linkTarget", overlayLink);
+    if ($("#overlayContainer").data("overlay")) {
+        $("#overlayContainer").data("overlay").load();
+        return;
+    }
+    $("#overlayContainer").overlay({
+        onBeforeLoad: function() {
+            // grab wrapper element inside content
+            var wrap = this.getOverlay().find(".contentWrap");
+            wrap.load($("#overlayContainer").data("linkTarget"));
+        },
+        onLoad: function() {
+            $("#overlayContainer button.close").click(function() {
+                $("#overlayContainer").data("overlay").close();
+            });
+        },
+        // some mask tweaks suitable for modal dialogs
+        mask: {
+            color: 'black',
+            loadSpeed: 200,
+            opacity: 0.8
+        },
+        closeOnClick: false,
+        load: true
     });
 };
 

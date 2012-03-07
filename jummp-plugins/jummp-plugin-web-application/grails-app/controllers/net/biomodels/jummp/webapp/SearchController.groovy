@@ -19,8 +19,7 @@ class SearchController {
     def list = {
     }
 
-    def overlay = {
-        render(template: "/templates/list", model: [link: g.createLink(action: "overlay", id: params.id)])
+    def model = {
     }
 
     def summary = {
