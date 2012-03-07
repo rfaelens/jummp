@@ -2,7 +2,7 @@ $.jummp.gotree = new Object();
 
 $.jummp.gotree.load = function() {
     $("#gotree").dynatree({
-        imagePath: "/jummp/static/css/dynatree/",
+        imagePath: createURI("static/css/dynatree/"),
         initAjax: {
             url: createLink("gotree", "level", 0)
         },
