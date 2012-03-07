@@ -4,11 +4,11 @@ $.jummp.gotree.load = function() {
     $("#gotree").dynatree({
         imagePath: "/jummp/static/css/dynatree/",
         initAjax: {
-            url: "level/0/"
+            url: createLink("gotree", "level", 0)
         },
         onLazyRead: function(node) {
             node.appendAjax({
-                url: "level/" + node.data.goid + "/"
+                url: createLink("gotree", "level", node.data.goid)
             });
         },
         onActivate: function(node) {
