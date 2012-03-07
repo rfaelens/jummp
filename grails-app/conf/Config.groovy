@@ -489,8 +489,4 @@ grails.resources.modules = {
         resource url: '/js/jummp.js'
 
     }
-    overlay {
-        dependsOn 'jquery'
-        resource url: '/js/jquery/jquery.tools.min-1.2.6.js', disposition: 'head'
-    }
 }

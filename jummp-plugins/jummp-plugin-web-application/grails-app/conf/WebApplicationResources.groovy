@@ -19,7 +19,8 @@ modules = {
         resource url: '/js/useradministration.js'
     }
     showModels {
-        dependsOn 'core,overlay'
+        dependsOn 'core'
+        resource url: '/js/jquery/jquery.tools.min-1.2.6.js', disposition: 'head'
         resource url: '/js/showmodels.js'
     }
 }

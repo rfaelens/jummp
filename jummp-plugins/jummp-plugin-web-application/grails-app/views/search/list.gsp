@@ -4,7 +4,6 @@
         <title>Model Listing</title>
         <meta name="layout" content="main" />
         <r:require module="showModels"/>
-        <r:require module="overlay"/>
         <jqDT:resources/>
     </head>
     <body activetab="search">
