@@ -11,9 +11,9 @@ $.jummp.gotree.load = function() {
                 url: "level/" + node.data.goid + "/"
             });
         },
-        onDblClick: function(node) {
+        onActivate: function(node) {
             if (!node.data.isFolder) {
-                // TODO: show overlay
+                $.jummp.showModels.showOverlay(createLink("search", "model", node.data.modelId));
             }
         }
     });

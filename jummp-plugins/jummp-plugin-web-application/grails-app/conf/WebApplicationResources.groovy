@@ -19,7 +19,7 @@ modules = {
         resource url: '/js/useradministration.js'
     }
     showModels {
-        dependsOn 'core'
+        dependsOn 'core,overlay'
         resource url: '/js/showmodels.js'
     }
 }

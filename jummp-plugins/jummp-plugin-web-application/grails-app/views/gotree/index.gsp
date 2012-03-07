@@ -5,6 +5,7 @@
         <meta name="layout" content="main" />
         <link rel="stylesheet" href="${resource(dir:'css/dynatree', file:'ui.dynatree.css')}" type="text/css"/>
         <r:require module="jquery-ui"/>
+        <r:require module="showModels"/>
         <r:require module="gotree"/>
     </head>
     <body activetab="search">
