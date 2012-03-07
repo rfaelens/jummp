@@ -57,11 +57,10 @@ $.jummp.showModels.showOverlay = function(overlayLink) {
         onBeforeLoad: function() {
             // grab wrapper element inside content
             var wrap = this.getOverlay().find(".contentWrap");
-            wrap.load($("#overlayContainer").data("linkTarget"));
-        },
-        onLoad: function() {
-            $("#overlayContainer button.close").click(function() {
-                $("#overlayContainer").data("overlay").close();
+            wrap.load($("#overlayContainer").data("linkTarget"), function() {
+                $("#overlayContainer button.close").click(function() {
+                    $("#overlayContainer").data("overlay").close();
+                });
             });
         },
         // some mask tweaks suitable for modal dialogs
