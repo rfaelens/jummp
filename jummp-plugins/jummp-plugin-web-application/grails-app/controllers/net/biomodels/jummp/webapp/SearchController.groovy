@@ -5,11 +5,18 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 class SearchController {
     /**
+     * Dependency injection of modelService.
+     **/
+    def modelService
+
+    def index = {
+        redirect action: 'list'
+    }
+
+    /**
      * Default action showing a list view
      */
     def list = {
-        render(template: "/templates/list")
-        return
     }
 
     def overlay = {

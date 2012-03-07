@@ -18,4 +18,8 @@ modules = {
         dependsOn 'core'
         resource url: '/js/useradministration.js'
     }
+    showModels {
+        dependsOn 'core'
+        resource url: '/js/showmodels.js'
+    }
 }
