@@ -36,7 +36,7 @@ $.jummp.showModels.loadModelList = function() {
                     for (var i=0; i<json.aaData.length; i++) {
                         var rowData = json.aaData[i];
                         var id = rowData[0];
-                        rowData[0] = "<a class='animate' onclick=\"$.jummp.showModels.showOverlay('" + createLink("search", "model", id) + "');\" href=\"#\">" + id + "</a>";
+                        rowData[0] = "<a class='animate' onclick=\"$.jummp.showModels.showOverlay('" + $.jummp.createLink("search", "model", id) + "');\" href=\"#\">" + id + "</a>";
                         rowData[1] = rowData[1] ? rowData[1].replace(/_/g, " ") : "-";
                         rowData[2] = rowData[2] ? rowData[2].title : "-";
                     }
@@ -120,12 +120,12 @@ $.jummp.showModels.loadModelTabs = function (data, tabIndex) {
                 $("#model-revisions table tr td.revisionControl a.delete").button("option", "icons", {primary:'ui-icon-trash'});
                 $("#model-revisions table tr td.revisionControl a.delete").click(function() {
                     if (confirm(i18n.model.revision.deleteRevision.verify)) {
-                        submitForm($("#model-revisions table tr td.revisionControl form[name=delete]"), createLink("model", "deleteRevision"), function(data) {
+                        submitForm($("#model-revisions table tr td.revisionControl form[name=delete]"), $.jummp.createLink("model", "deleteRevision"), function(data) {
                             if (data.deleted) {
                                 showInfoMessage(i18n.model.revision.deleteRevision.success, 20000);
                                 if ($("#model-revisions table tr").size() == 1) {
                                     // User has no longer access to the model, may be deleted
-                                    loadView(createLink('model', 'index'), loadModelListCallback);
+                                    loadView($.jummp.createLink('model', 'index'), loadModelListCallback);
                                 } else {
                                     // there is at least one more revision
                                     var newLatestRevision = $("#model-revisions table tr td.revisionNumber:eq(1) a").text();
@@ -154,7 +154,7 @@ $.jummp.showModels.loadModelTabs = function (data, tabIndex) {
                 // add revision
                 $("#revision-upload-form div.ui-dialog-buttonpane input").button();
                 $("#revision-upload-form div.ui-dialog-buttonpane input:button").click(function() {
-                    submitFormWithFile($("#revision-upload-form"), createLink("model", "saveNewRevision"), uploadRevisionCallback);
+                    submitFormWithFile($("#revision-upload-form"), $.jummp.createLink("model", "saveNewRevision"), uploadRevisionCallback);
                 });
                 break;
             case "modelTabs-addRevision":
@@ -179,12 +179,12 @@ $.jummp.showModels.loadModelTabs = function (data, tabIndex) {
         $("#modelNavigation a.overview").button("disable");
     }
     $("#modelNavigation a.previous").click(function() {
-        loadView(createLink("model", "nextPreviousModel") + "?offset=" + (offset - 1) + '&count=' + $("#modelNavigationCount").text() + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelTabCallback);
+        loadView($.jummp.createLink("model", "nextPreviousModel") + "?offset=" + (offset - 1) + '&count=' + $("#modelNavigationCount").text() + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelTabCallback);
     });
     $("#modelNavigation a.next").click(function() {
-        loadView(createLink("model", "nextPreviousModel") + "?offset=" + (offset + 1) + '&count=' + $("#modelNavigationCount").text() + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelTabCallback);
+        loadView($.jummp.createLink("model", "nextPreviousModel") + "?offset=" + (offset + 1) + '&count=' + $("#modelNavigationCount").text() + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelTabCallback);
     });
     $("#modelNavigation a.overview").click(function() {
-        loadView(createLink("model", "index") + "?offset=" + offset + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelListCallback);
+        loadView($.jummp.createLink("model", "index") + "?offset=" + offset + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelListCallback);
     });
 };

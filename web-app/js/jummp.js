@@ -38,7 +38,7 @@ $.jummp.warningMessage = function(message) {
  * @param action The optional action
  * @param id The optional id
  */
-function createLink(controller, action, id) {
+$.jummp.createLink = function(controller, action, id) {
     var path = controller;
     if (action != undefined) {
         path += "/" + action;
@@ -46,14 +46,14 @@ function createLink(controller, action, id) {
             path += "/" + id;
         }
     }
-    return createURI(path);
-}
+    return $.jummp.createURI(path);
+};
 
 /**
  * Creates a URI to be used in a href or src HTML attribute.
  * @param path The path
  */
-function createURI(path) {
+$.jummp.createURI = function(path) {
    // console.log("$.appName: " + $.appName)
     return "/" + $.appName + "/" + path;
 }
