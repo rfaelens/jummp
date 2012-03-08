@@ -75,15 +75,41 @@ $.jummp.showModels.showOverlay = function(overlayLink) {
 };
 
 /**
- * View logic for /model/show/id/
- * @param data The original data retrieved through AJAX
- * @param tabIndex Optional selector for tab index to switch to after the tab view has been loaded
+ * Loads a new view for the #overlayContentContainer element through AJAX.
+ * @param url The URL from where to load the view
+ * @param loadCallback A callback to execute after successfully updating the view.
+ * @param callbackData Additional data to be passed to the callback
  */
+$.jummp.showModels.loadView = function(url, loadCallback, callbackData) {
+    $("#overlayContentContainer").block();
+    $.ajax({
+        url: url,
+        dataType: 'HTML',
+        type: 'GET',
+        cache: 'false',
+        success: function(data) {
+            $("#body").unblock();
+            clearErrorMessages();
+            $("#overlayContentContainer").html(data);
+            loadCallback(data, callbackData);
+        },
+        error: function(jqXHR) {
+            $("#body").unblock();
+        },
+        statusCode: {
+            400: handler400,
+            403: handler403,
+            404: handler404,
+            500: handler500
+        }
+    });
+};
+
 $.jummp.showModels.loadModelTabs = function (data, tabIndex) {
     $("#modelTabs").tabs({disabled: [6],
         ajaxOptions: {
             error: function(jqXHR) {
-//                $("#body").unblock();
+                $("#overlayContentContainer").unblock();
                 handleError($.parseJSON(jqXHR.responseText));
             },
             cache: false
@@ -124,7 +150,7 @@ $.jummp.showModels.loadModelTabs = function (data, tabIndex) {
                                 showInfoMessage(i18n.model.revision.deleteRevision.success, 20000);
                                 if ($("#model-revisions table tr").size() == 1) {
                                     // User has no longer access to the model, may be deleted
-                                    loadView($.jummp.createLink('model', 'index'), loadModelListCallback);
+                                    $.jummp.showModels.loadView($.jummp.createLink('model', 'index'), loadModelListCallback);
                                 } else {
                                     // there is at least one more revision
                                     var newLatestRevision = $("#model-revisions table tr td.revisionNumber:eq(1) a").text();
@@ -147,7 +173,7 @@ $.jummp.showModels.loadModelTabs = function (data, tabIndex) {
                         showInfoMessage("Unable to show diff between the revision and itself. Please choose two different revisions.", 20000);
                         return false;
                     }
-                    loadView($(this).attr("href") + "/?prevRev=" + previousRevision + "&currRev=" + recentRevision, showDiffDataCallback);
+                    $.jummp.showModels.loadView($(this).attr("href") + "/?prevRev=" + previousRevision + "&currRev=" + recentRevision, showDiffDataCallback);
                     return false;
                 });
                 // add revision
@@ -165,25 +191,4 @@ $.jummp.showModels.loadModelTabs = function (data, tabIndex) {
     if (tabIndex) {
         $("#modelTabs").tabs("select", $(tabIndex).attr("href"));
     }
-    // next/previous buttons
-    $("#modelNavigation a").button();
-    var offset = parseInt($("#modelNavigationOffset").text());
-    if ($("#modelNavigationOffset").text() == "" || offset == 0) {
-        $("#modelNavigation a.previous").button("disable");
-    }
-    if ($("#modelNavigationOffset").text() == "" || offset == parseInt($("#modelNavigationCount").text()) - 1) {
-        $("#modelNavigation a.next").button("disable");
-    }
-    if ($("#modelNavigationOffset").text() == "") {
-        $("#modelNavigation a.overview").button("disable");
-    }
-    $("#modelNavigation a.previous").click(function() {
-        loadView($.jummp.createLink("model", "nextPreviousModel") + "?offset=" + (offset - 1) + '&count=' + $("#modelNavigationCount").text() + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelTabCallback);
-    });
-    $("#modelNavigation a.next").click(function() {
-        loadView($.jummp.createLink("model", "nextPreviousModel") + "?offset=" + (offset + 1) + '&count=' + $("#modelNavigationCount").text() + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelTabCallback);
-    });
-    $("#modelNavigation a.overview").click(function() {
-        loadView($.jummp.createLink("model", "index") + "?offset=" + offset + '&sort=' + $("#modelNavigationSorting").text() + "&dir=" + $("#modelNavigationDirection").text(), loadModelListCallback);
-    });
 };
