@@ -1,29 +1,29 @@
 <div id='overlayHeadline'>
-    <h1></h1>
+    <h1>${revision.model.name}</h1>
     <button type='button' class='close'><p>Quit</p></button>
 </div>
 <div id='overlayInfoStripe'>
     <table border='0'>
         <tr>
             <td class='key left'>ID:</td>
-            <td class='value'></td>
+            <td class='value'>${revision.id}</td>
             <td class='key'>Version:</td>
-            <td class='value'></td>
+            <td class='value'>${revision.revisionNumber}</td>
             <td class='key'>Format:</td>
-            <td class='value'></td>
+            <td class='value'>${revision.format.identifier}</td>
         </tr>
         <tr>
             <td class='key left'>Biomodels-ID:</td>
             <td class='value'></td>
             <td class='key'>Status:</td>
-            <td class='value'></td>
+            <td class='value'>${revision.model.state}</td>
             <td class='key'>Original Model:</td>
             <td class='value'></td>
         <tr>
             <td class='key left'>Name:</td>
-            <td class='value'></td>
+            <td class='value'>${revision.model.name}</td>
             <td class='key'>Creation Date:</td>
-            <td class='value'></td>
+            <td class='value'>${revision.model.submissionDate}</td>
             <td class='key'>Change Comment:</td>
             <td></td>
         </tr>
@@ -34,7 +34,7 @@
     <table border='0'>
         <tr>
             <td class='key left'>Authors:</td>
-            <td class='value'></td>
+            <td class='value'><g:each in="${revision.model.publication.authors}">${it.firstName} ${it.lastName}, </g:each></td>
         </tr>
     </table>
     <button type='button' class='download'><p>Download</p></button>
