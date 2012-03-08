@@ -8,6 +8,10 @@ class SearchController {
      * Dependency injection of modelService.
      **/
     def modelService
+    /**
+     * Dependency injection of modelDelegateService.
+     **/
+    def modelDelegateService
 
     def index = {
         redirect action: 'list'
@@ -20,10 +24,8 @@ class SearchController {
     }
 
     def model = {
-    }
-
-    def summary = {
-            render(template: "/templates/overlay", model: [link: g.createLink(action: "show", id: params.id), callback: "loadModelTabCallback"])
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        [revision: rev]
     }
 
     /**
