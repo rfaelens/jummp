@@ -5,26 +5,26 @@
 <div id='overlayInfoStripe'>
     <table border='0'>
         <tr>
-            <td class='key left'>ID:</td>
+            <td class='key left'><g:message code="model.model.id"/></td>
             <td class='value'>${revision.id}</td>
-            <td class='key'>Version:</td>
+            <td class='key'><g:message code="model.model.version"/></td>
             <td class='value'>${revision.revisionNumber}</td>
-            <td class='key'>Format:</td>
+            <td class='key'><g:message code="model.model.format"/></td>
             <td class='value'>${revision.format.identifier}</td>
         </tr>
         <tr>
-            <td class='key left'>Biomodels-ID:</td>
+            <td class='key left'><g:message code="model.model.biomodelsId"/></td>
             <td class='value'></td>
-            <td class='key'>Status:</td>
+            <td class='key'><g:message code="model.model.status"/></td>
             <td class='value'>${revision.model.state}</td>
-            <td class='key'>Original Model:</td>
+            <td class='key'><g:message code="model.model.originalModel"/></td>
             <td class='value'></td>
         <tr>
-            <td class='key left'>Name:</td>
+            <td class='key left'><g:message code="model.model.name"/></td>
             <td class='value'>${revision.model.name}</td>
-            <td class='key'>Creation Date:</td>
+            <td class='key'><g:message code="model.model.creationDate"/></td>
             <td class='value'>${revision.model.submissionDate}</td>
-            <td class='key'>Change Comment:</td>
+            <td class='key'><g:message code="model.model.changeComment"/></td>
             <td></td>
         </tr>
         </tr>
@@ -33,19 +33,19 @@
 <div id='overlayAuthorStripe'>
     <table border='0'>
         <tr>
-            <td class='key left'>Authors:</td>
+            <td class='key left'><g:message code="model.model.authors"/></td>
             <td class='value'><g:each in="${revision.model.publication.authors}">${it.firstName} ${it.lastName}, </g:each></td>
         </tr>
     </table>
     <button type='button' class='download'><p>Download</p></button>
 </div>
 <div id='overlayNav'>
-    <div class='unselected'><a href='#'>Publication</a></div>
-    <div class='unselected'><span><a href='#'>Annotations</a></span></div>
-    <div class='unselected'><span><a href='#'>Notes</a></span></div>
-    <div class='unselected'><span><a href='#'>Reaction-Graph</a></span></div>
-    <div class='unselected'><span><a href='#'>Curation Results</a></span></div>
-    <div class='selected'><span><a id='modelTabs-model' onClick='createLink("search", "summary", params.id)' href='#'>Model</a></span></div>
+    <div class='unselected'><a href='#'><g:message code="model.model.publication"/></a></div>
+    <div class='unselected'><span><a href='#'><g:message code="model.model.annotations"/></a></span></div>
+    <div class='unselected'><span><a href='#'><g:message code="model.model.notes"/></a></span></div>
+    <div class='unselected'><span><a href='#'><g:message code="model.model.reactionGraph"/></a></span></div>
+    <div class='unselected'><span><a href='#'><g:message code="model.model.curationResults"/></a></span></div>
+    <div class='selected'><span><a href='#'><g:message code="model.model.model"/></a></span></div>
 </div>
 <div id='overlayContentContainer'>
     <h2>This is the core model described in the article:</h2>
