@@ -105,3 +105,12 @@ $.jummp.handler500 = function(jqXHR) {
     clearErrorMessages();
     showErrorMessage(i18n.error.unexpected.replace(/_CODE_/, jqXHR.responseText));
 }
+
+$(function() {
+    $("#loginLogout button.logout").click(function() {
+        window.location.pathname = $.jummp.createURI("logout");
+    });
+    $("#loginLogout button.login").click(function() {
+        window.location.pathname = $.jummp.createLink("login", "auth");
+    });
+});
