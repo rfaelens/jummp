@@ -2,6 +2,7 @@ package net.biomodels.jummp.webapp
 
 import grails.converters.JSON
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.PublicationTransportCommand
 
 class SearchController {
     /**
@@ -12,6 +13,10 @@ class SearchController {
      * Dependency injection of modelDelegateService.
      **/
     def modelDelegateService
+    /**
+     * Dependency injection of sbmlService.
+     */
+    def sbmlService
 
     def index = {
         redirect action: 'list'
@@ -26,6 +31,14 @@ class SearchController {
     def model = {
         RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
         [revision: rev]
+    }
+
+    /**
+     * Display basic information about the model
+     */
+    def summary = {
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        [publication: modelDelegateService.getPublication(params.id as Long), revision: rev, notes: sbmlService.getNotes(rev), annotations: sbmlService.getAnnotations(rev)]
     }
 
     /**
