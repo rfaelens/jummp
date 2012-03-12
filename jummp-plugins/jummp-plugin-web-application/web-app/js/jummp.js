@@ -57,3 +57,12 @@ $.jummp.createURI = function(path) {
    // console.log("$.appName: " + $.appName)
     return "/" + $.appName + "/" + path;
 }
+
+$(function() {
+    $("#loginLogout button.logout").click(function() {
+        window.location.pathname = $.jummp.createURI("logout");
+    });
+    $("#loginLogout button.login").click(function() {
+        window.location.pathname = $.jummp.createLink("login", "auth");
+    });
+});

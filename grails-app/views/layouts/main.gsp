@@ -24,6 +24,14 @@
         <jummp:button class="right"><g:message code="jummp.main.submit"/></jummp:button>
     </div>
     <div id="container">
+        <div id="loginLogout">
+            <sec:ifLoggedIn>
+                <button class="logout"><g:message code="jummp.main.logout"/></button>
+            </sec:ifLoggedIn>
+            <sec:ifNotLoggedIn>
+                <jummp:button class="login"><g:message code="jummp.main.login"/></jummp:button>
+            </sec:ifNotLoggedIn>
+        </div>
         <div id="nav">
             <!-- TODO: active class has to be set on really selected mode -->
             <div class="left ${pageProperty(name: 'body.activetab') ? (pageProperty(name: 'body.activetab') == 'about' ? 'active' : '') : 'active'}"><a href="${g.createLink(uri: '/')}"><g:message code="jummp.main.tabs.about"/></a></div>

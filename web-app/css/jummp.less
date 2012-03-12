@@ -336,6 +336,23 @@ input.right, button.right {
     .backgrounds;
 }
 
+#loginLogout {
+    .container;
+    @glowSize: 100px;
+    button {
+        .overlayButtons;
+        background-position: left;
+        padding-left: @modeSwitchStandardExtend + 4;
+        padding-right: 10px;
+        div.glow {
+            left: -1 * (@glowSize - @modeSwitchStandardExtend/2 - 2);
+        }
+    }
+    button.logout {
+        background-image: url(images/quitButton.png);
+    }
+}
+
 #login {
     top: @topBackgroundHeight;
     .container;
