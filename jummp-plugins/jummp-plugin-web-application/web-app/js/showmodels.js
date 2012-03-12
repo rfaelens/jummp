@@ -76,11 +76,13 @@ $.jummp.showModels.showOverlay = function(overlayLink) {
 
 /**
  * Loads a new view for the #overlayContentContainer element through AJAX.
- * @param url The URL from where to load the view
+ * @param controller The controller to be called
+ * @param action The action to be executed within the controller
+ * @param id The ID of the model of which content is to be loaded
  * @param loadCallback A callback to execute after successfully updating the view.
- * @param callbackData Additional data to be passed to the callback
  */
-$.jummp.showModels.loadView = function(url, loadCallback, callbackData) {
+$.jummp.showModels.loadView = function(controller, method, id, loadCallback) {
+    var url = $.jummp.createLink(controller, method, id);
     $("#overlayContentContainer").block();
     $.ajax({
         url: url,
@@ -88,19 +90,20 @@ $.jummp.showModels.loadView = function(url, loadCallback, callbackData) {
         type: 'GET',
         cache: 'false',
         success: function(data) {
-            $("#body").unblock();
-            clearErrorMessages();
+            $("#overlayContentContainer").unblock();
+            $.jummp.clearErrorMessages();
             $("#overlayContentContainer").html(data);
+            console.log("loadCallback: " + loadCallback);
             loadCallback(data, callbackData);
         },
         error: function(jqXHR) {
-            $("#body").unblock();
+            $("#overlayContentContainer").unblock();
         },
         statusCode: {
-            400: handler400,
-            403: handler403,
-            404: handler404,
-            500: handler500
+            400: $.jummp.handler400,
+            403: $.jummp.handler403,
+            404: $.jummp.handler404,
+            500: $.jummp.handler500
         }
     });
 };
