@@ -26,6 +26,7 @@ modules = {
     showModels {
         dependsOn 'core'
         resource url: '/js/jquery/jquery.tools.min-1.2.6.js', disposition: 'head'
+        resource url: '/js/jquery/jquery.blockUI.js', disposition: 'head'
         resource url: '/js/showmodels.js'
     }
 }
