@@ -28,6 +28,8 @@
     <r:script>
 $(function() {
     $.jummp.showModels.loadModelList();
+    $.jummp.showModels.loadView();
+    $.jummp.showModels.loadModelTabs();
 });
     </r:script>
     </body>
