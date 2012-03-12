@@ -54,6 +54,5 @@ $.jummp.createLink = function(controller, action, id) {
  * @param path The path
  */
 $.jummp.createURI = function(path) {
-   // console.log("$.appName: " + $.appName)
     return "/" + $.appName + "/" + path;
 }
