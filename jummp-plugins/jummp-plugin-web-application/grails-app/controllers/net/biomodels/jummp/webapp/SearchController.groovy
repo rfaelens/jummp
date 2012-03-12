@@ -42,6 +42,14 @@ class SearchController {
     }
 
     /**
+     * Renders html snippet with Publication information for the current Model identified by the id.
+     */
+   def publication = {
+       PublicationTransportCommand publication = modelDelegateService.getPublication(params.id as Long)
+       [publication: publication]
+   }
+
+    /**
      * Action returning the DataTable content as JSON
      */
     def dataTableSource = {
