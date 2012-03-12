@@ -93,7 +93,6 @@ $.jummp.showModels.loadView = function(controller, method, id, loadCallback) {
             $("#overlayContentContainer").unblock();
             $.jummp.clearErrorMessages();
             $("#overlayContentContainer").html(data);
-            console.log("loadCallback: " + loadCallback);
             loadCallback(data, callbackData);
         },
         error: function(jqXHR) {
