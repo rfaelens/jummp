@@ -248,6 +248,29 @@ input[type="reset"], input[type="submit"], button {
     p {
         line-height: @modeSwitchStandardExtend;
     }
+    &.close {
+        @glowSize: 77px;
+        @offset: 30px;
+        height: @offset;
+        padding-right: @offset + 4;
+        margin-top: @glowSize/2 - @offset;
+        background-image: url(images/quitButton.png);
+        &:hover, &.active {
+            background-image: url(images/quitButton_active.png);
+        }
+        div.glow {
+            top: -1*(@glowSize/2) - @offset/2;
+            left: @glowSize - @offset/2 - 2;
+            width: @glowSize;
+            height: @glowSize;
+        }
+        &:hover div.glow {
+            background-image: url(images/button_glow_red.png);
+        }
+        p {
+            line-height: @offset;
+        }
+    }
 }
 
 /**
@@ -348,10 +371,13 @@ input.right, button.right {
             left: -1 * (@glowSize - @modeSwitchStandardExtend/2 - 2);
         }
     }
-    button.logout {
-        background-image: url(images/quitButton.png);
-        &:hover, &.active {
-            background-image: url(images/quitButton_active.png);
+    button.close {
+        @glowSize: 77px;
+        @offset: 30px;
+        padding-left: @offset + 4;
+        div.glow {
+            left: -1 * (@glowSize - @offset/2) + 4;
+            top: -1*(@glowSize/2) - @offset/2 + 4;
         }
     }
 }
@@ -780,13 +806,6 @@ input.right, button.right {
         background-size: 0px;
         width: 0px;
         float: right;
-    }
-    button {
-        background-image: url(images/quitButton.png);
-        .overlayButtons;
-        &:hover, &.active {
-            background-image: url(images/quitButton_active.png);
-        }
     }
     p {
         .overlayStripes;

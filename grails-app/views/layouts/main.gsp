@@ -26,7 +26,7 @@
     <div id="container">
         <div id="loginLogout">
             <sec:ifLoggedIn>
-                <button class="logout"><g:message code="jummp.main.logout"/></button>
+                <jummp:button class="close logout"><g:message code="jummp.main.logout"/></jummp:button>
             </sec:ifLoggedIn>
             <sec:ifNotLoggedIn>
                 <jummp:button class="login"><g:message code="jummp.main.login"/></jummp:button>

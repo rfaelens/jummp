@@ -1,6 +1,6 @@
 <div id='overlayHeadline'>
     <h1>${revision.model.name}</h1>
-    <button type='button' class='close'><p>Quit</p></button>
+    <jummp:button class="close">Quit</jummp:button>
 </div>
 <div id='overlayInfoStripe'>
     <table border='0'>
