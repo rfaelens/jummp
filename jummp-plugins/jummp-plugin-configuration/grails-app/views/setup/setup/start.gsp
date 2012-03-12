@@ -5,15 +5,15 @@
         <title>Setup</title>
     </head>
     <body>
-        <g:hasErrors bean="${mysql}">
+        <g:hasErrors bean="${database}">
             <div class="errors">
-                <g:renderErrors bean="${mysql}"/>
+                <g:renderErrors bean="${database}"/>
             </div>
         </g:hasErrors>
         <div id="remote" class="body">
-            <h1>Specify MySQL Information</h1>
+            <h1>Specify Database Information</h1>
             <g:form name="databaseForm" action="setup">
-                <g:render template="/templates/configuration/mysql"/>
+                <g:render template="/templates/configuration/database"/>
                 <div class="buttons">
                     <g:submitButton name="next" value="Next"/>
                 </div>
