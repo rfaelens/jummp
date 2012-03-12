@@ -1,4 +1,4 @@
-package net.biomodels.jummp.core
+package net.biomodels.jummp.webapp
 
 class JummpTagLib {
     static namespace = "jummp"
