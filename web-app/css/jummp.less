@@ -350,6 +350,9 @@ input.right, button.right {
     }
     button.logout {
         background-image: url(images/quitButton.png);
+        &:hover, &.active {
+            background-image: url(images/quitButton_active.png);
+        }
     }
 }
 
@@ -781,6 +784,9 @@ input.right, button.right {
     button {
         background-image: url(images/quitButton.png);
         .overlayButtons;
+        &:hover, &.active {
+            background-image: url(images/quitButton_active.png);
+        }
     }
     p {
         .overlayStripes;
