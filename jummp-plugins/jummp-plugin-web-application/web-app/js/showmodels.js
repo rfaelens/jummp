@@ -97,12 +97,6 @@ $.jummp.showModels.loadView = function(controller, method, id, loadCallback) {
         },
         error: function(jqXHR) {
             $("#overlayContentContainer").unblock();
-        },
-        statusCode: {
-            400: $.jummp.handler400,
-            403: $.jummp.handler403,
-            404: $.jummp.handler404,
-            500: $.jummp.handler500
         }
     });
 };
