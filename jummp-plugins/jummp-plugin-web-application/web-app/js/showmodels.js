@@ -202,6 +202,7 @@ $.jummp.showModels.lastAccessedModels = function(container) {
     $.ajax({
         url: $.jummp.createLink("search", "lastAccessedModels"),
         dataType: 'JSON',
+        cache: false, // makes IE happy
         success: function(data) {
             if (data.length == 0) {
                 $("h2", container).text($.i18n.prop("model.history.empty"));
