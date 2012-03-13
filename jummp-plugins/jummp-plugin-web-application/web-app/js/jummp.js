@@ -57,55 +57,6 @@ $.jummp.createURI = function(path) {
     return "/" + $.appName + "/" + path;
 }
 
-/**
- * Removes all shown error messages of the site error message div and hides it.
- * This method can be used to clear the current state before adding new error
- * messages with showErrorMessage().
- */
-$.jummp.clearErrorMessages = function() {
-    $("#site-error-messages ul li").remove();
-    $("#site-error-messages").hide();
-}
-
-$.jummp.handler400 = function(jqXHR) {
-    clearErrorMessages();
-    showErrorMessage(jqXHR.responseText);
-}
-
-/**
- * Callback for a 403 response.
- * Shows the error message and expects as responseText either @c true for authenticated users or @c false otherwise.
- * @param jqXHR The jqXHR object passed by ajax function.
- */
-$.jummp.handler403 = function(jqXHR) {
-    clearErrorMessages();
-    showErrorMessage(i18n.error.denied);
-    if (jqXHR.responseText == "false") {
-        switchUserInformation(false);
-        showLoginDialog();
-    }
-}
-
-/**
- * Callback for a 404 response.
- * Expects as responseText the resource which could not be found.
- * @param jqXHR The jqXHR object passed by ajax function.
- */
-$.jummp.handler404 = function(jqXHR) {
-    clearErrorMessages();
-    showErrorMessage(i18n.error.notFound.replace(/_CODE_/, jqXHR.responseText));
-}
-
-/**
- * Callback for a 500 response.
- * Expects as responseText the error code on the server.
- * @param jqXHR The jqXHR object passed by ajax function.
- */
-$.jummp.handler500 = function(jqXHR) {
-    clearErrorMessages();
-    showErrorMessage(i18n.error.unexpected.replace(/_CODE_/, jqXHR.responseText));
-}
-
 $(function() {
     $("#loginLogout button.logout").click(function() {
         window.location.pathname = $.jummp.createURI("logout");
