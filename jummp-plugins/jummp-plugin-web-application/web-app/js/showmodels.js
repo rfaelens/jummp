@@ -213,7 +213,7 @@ $.jummp.showModels.lastAccessedModels = function(container) {
             $("p", container).text("");
             var ul = $("<ul/>");
             for (var i=0; i<data.length; i++) {
-                ul.append("<li>" + data[i].name + "<br/>"
+                ul.append("<li>" + data[i].name.replace(/_/g, " ") + "<br/>"
                 + $.i18n.prop("model.history.submitter") + " " + data[i].submitter +
                 "<br/><a href=\"#\" rel=\"" + data[i].id + "\">" + $.i18n.prop("model.history.link") + "</a></li>");
             }
