@@ -83,6 +83,7 @@ $.jummp.showModels.showOverlay = function(overlayLink) {
  */
 $.jummp.showModels.loadView = function(controller, method, id, loadCallback) {
     var url = $.jummp.createLink(controller, method, id);
+    console.log("url: " + url);
     $("#overlayContentContainer").block();
     $.ajax({
         url: url,
@@ -91,7 +92,6 @@ $.jummp.showModels.loadView = function(controller, method, id, loadCallback) {
         cache: 'false',
         success: function(data) {
             $("#overlayContentContainer").unblock();
-            $.jummp.clearErrorMessages();
             $("#overlayContentContainer").html(data);
             loadCallback(data, callbackData);
         },
