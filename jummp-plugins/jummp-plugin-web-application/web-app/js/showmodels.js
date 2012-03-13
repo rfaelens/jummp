@@ -81,9 +81,8 @@ $.jummp.showModels.showOverlay = function(overlayLink) {
  * @param id The ID of the model of which content is to be loaded
  * @param loadCallback A callback to execute after successfully updating the view.
  */
-$.jummp.showModels.loadView = function(controller, method, id, loadCallback) {
+$.jummp.showModels.loadView = function(controller, method, id) {
     var url = $.jummp.createLink(controller, method, id);
-    console.log("url: " + url);
     $("#overlayContentContainer").block();
     $.ajax({
         url: url,
@@ -93,7 +92,7 @@ $.jummp.showModels.loadView = function(controller, method, id, loadCallback) {
         success: function(data) {
             $("#overlayContentContainer").unblock();
             $("#overlayContentContainer").html(data);
-            loadCallback(data, callbackData);
+            $.jummp.showModels.loadModelTabs();
         },
         error: function(jqXHR) {
             $("#overlayContentContainer").unblock();
