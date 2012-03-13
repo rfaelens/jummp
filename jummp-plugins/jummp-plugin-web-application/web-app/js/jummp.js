@@ -15,7 +15,7 @@ $.jummp.message = function(message, warning) {
     if (warning) {
         classes += " warning";
     }
-    var button = $("<div><button></button></div>");
+    var button = $("<div><button class=\"close\"></button></div>");
     $("button", button).click(function() {
         $(this).parent().parent().remove();
     });
