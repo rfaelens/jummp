@@ -113,6 +113,7 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
 
         // now the same with history enabled
         grailsApplication.config.jummp.model.history.maxElements = 10
+        assertTrue(modelHistoryService.history().isEmpty())
         // add a Model to the history by accessing its revision
         Model model = Model.findByName("model1")
         assertNotNull(modelService.getRevision(model, 1))
@@ -203,6 +204,7 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
      */
     private void createModels() {
         authenticateAsTestUser()
+        grailsApplication.config.jummp.model.history.maxElements = 0
         // try uploading a valid model
         String modelSource = '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
