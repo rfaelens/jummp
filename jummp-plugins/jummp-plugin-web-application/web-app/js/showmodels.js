@@ -63,6 +63,11 @@ $.jummp.showModels.showOverlay = function(overlayLink) {
                 });
             });
         },
+        onLoad: function() {
+            if ($("#sidebar-element-last-accessed-models").get(0)) {
+                $.jummp.showModels.lastAccessedModels($("#sidebar-element-last-accessed-models"));
+            }
+        },
         // some mask tweaks suitable for modal dialogs
         mask: {
             color: 'black',
@@ -191,4 +196,30 @@ $.jummp.showModels.loadModelTabs = function (data, tabIndex) {
     if (tabIndex) {
         $("#modelTabs").tabs("select", $(tabIndex).attr("href"));
     }
+};
+
+$.jummp.showModels.lastAccessedModels = function(container) {
+    $.ajax({
+        url: $.jummp.createLink("search", "lastAccessedModels"),
+        dataType: 'JSON',
+        success: function(data) {
+            if (data.length == 0) {
+                $("h2", container).text($.i18n.prop("model.history.empty"));
+                $("p", container).text("");
+                return;
+            }
+            $("h2", container).text($.i18n.prop("model.history.explanation"));
+            $("p", container).text("");
+            var ul = $("<ul/>");
+            for (var i=0; i<data.length; i++) {
+                ul.append("<li>" + data[i].name + "<br/>"
+                + $.i18n.prop("model.history.submitter") + " " + data[i].submitter +
+                "<br/><a href=\"#\" rel=\"" + data[i].id + "\">" + $.i18n.prop("model.history.link") + "</a></li>");
+            }
+            $("p", container).append(ul);
+            $("p ul li a", container).click(function() {
+                $.jummp.showModels.showOverlay($.jummp.createLink("search", "model", $(this).prop("rel")));
+            });
+        }
+    });
 };

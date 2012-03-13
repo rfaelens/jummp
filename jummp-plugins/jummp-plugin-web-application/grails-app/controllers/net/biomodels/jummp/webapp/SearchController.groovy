@@ -12,6 +12,10 @@ class SearchController {
      * Dependency injection of modelDelegateService.
      **/
     def modelDelegateService
+    /**
+     * Dependency injection of modelHistoryService.
+    **/
+    def modelHistoryService
 
     def index = {
         redirect action: 'list'
@@ -54,6 +58,15 @@ class SearchController {
                 model.name,
                 model.publication
             ]
+        }
+        render dataToRender as JSON
+    }
+
+    def lastAccessedModels = {
+        List data = modelHistoryService.history()
+        def dataToRender = []
+        data.each { model ->
+            dataToRender << [id: model.id, name: model.name, submitter: model.submitter]
         }
         render dataToRender as JSON
     }
