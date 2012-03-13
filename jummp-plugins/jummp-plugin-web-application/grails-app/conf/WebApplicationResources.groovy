@@ -29,4 +29,8 @@ modules = {
         resource url: '/js/jquery/jquery.blockUI.js', disposition: 'head'
         resource url: '/js/showmodels.js'
     }
+    miriamAdministration {
+        dependsOn 'core'
+        resource url: '/js/miriamadministration.js'
+    }
 }

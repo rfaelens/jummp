@@ -331,6 +331,7 @@ AND r.deleted = false
             if (!result) {
                 return null
             }
+            modelHistoryService.addModelToHistory(model)
             return Revision.get(result[0])
         }
 
@@ -363,6 +364,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             if (!result) {
                 return null
             }
+            modelHistoryService.addModelToHistory(model)
             return Revision.get(result[0])
     }
 

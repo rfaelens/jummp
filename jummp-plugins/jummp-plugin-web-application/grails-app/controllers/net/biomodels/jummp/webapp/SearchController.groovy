@@ -14,6 +14,10 @@ class SearchController {
      **/
     def modelDelegateService
     /**
+     * Dependency injection of modelHistoryService.
+    **/
+    def modelHistoryService
+    /**
      * Dependency injection of sbmlService.
      */
     def sbmlService
@@ -75,6 +79,15 @@ class SearchController {
                 model.name,
                 model.publication
             ]
+        }
+        render dataToRender as JSON
+    }
+
+    def lastAccessedModels = {
+        List data = modelHistoryService.history()
+        def dataToRender = []
+        data.each { model ->
+            dataToRender << [id: model.id, name: model.name, submitter: model.submitter]
         }
         render dataToRender as JSON
     }
