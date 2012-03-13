@@ -1,5 +1,8 @@
 package net.biomodels.jummp.webapp
 
+import java.util.List;
+import java.util.Map;
+
 import grails.converters.JSON
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
@@ -44,10 +47,23 @@ class SearchController {
     /**
      * Renders html snippet with Publication information for the current Model identified by the id.
      */
-   def publication = {
-       PublicationTransportCommand publication = modelDelegateService.getPublication(params.id as Long)
-       [publication: publication]
-   }
+    def publication = {
+        PublicationTransportCommand publication = modelDelegateService.getPublication(params.id as Long)
+        [publication: publication]
+    }
+
+    def notes = {
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        [notes: sbmlService.getNotes(rev)]
+    }
+
+    /**
+     * Retrieve annotations and hand them over to the view
+     */
+    def annotations = {
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        [annotations: sbmlService.getAnnotations(rev)]
+    }
 
     /**
      * Action returning the DataTable content as JSON
