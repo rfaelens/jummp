@@ -41,8 +41,8 @@
 </div>
 <div id='overlayNav'>
     <div class='unselected'><a href='#' onclick="$.jummp.showModels.loadView('search', 'publication', ${revision.id}, '$.jummp.showModels.loadModelTabs');"><g:message code="model.model.publication"/></a></div>
-    <div class='unselected'><span><a href='#'><g:message code="model.model.annotations"/></a></span></div>
-    <div class='unselected'><span><a href='#'><g:message code="model.model.notes"/></a></span></div>
+    <div class='unselected'><span><a href='#' onclick="$.jummp.showModels.loadView('search', 'annotations', ${revision.id}, '$.jummp.showModels.loadModelTabs');"><g:message code="model.model.annotations"/></a></span></div>
+    <div class='unselected'><span><a href='#' onclick="$.jummp.showModels.loadView('search', 'notes', ${revision.id}, '$.jummp.showModels.loadModelTabs');"><g:message code="model.model.notes"/></a></span></div>
     <div class='unselected'><span><a href='#'><g:message code="model.model.reactionGraph"/></a></span></div>
     <div class='unselected'><span><a href='#'><g:message code="model.model.curationResults"/></a></span></div>
     <div class='selected'><span><a href='#' onclick="$.jummp.showModels.loadView('search', 'summary', ${revision.id}, '$.jummp.showModels.loadModelTabs');"><g:message code="model.model.model"/></a></span></div>
