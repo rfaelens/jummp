@@ -28,12 +28,18 @@
     <r:script>
 $(function() {
     $.jummp.showModels.loadModelList();
+    $.jummp.showModels.lastAccessedModels($("#sidebar-element-last-accessed-models"));
     $.jummp.showModels.loadView();
     $.jummp.showModels.loadModelTabs();
 });
     </r:script>
     </body>
     <content tag="sidebar">
+        <div class="element" id="sidebar-element-last-accessed-models">
+            <h1><g:message code="model.history.title"/></h1>
+            <h2><g:message code="model.history.empty"/></h2>
+            <p></p>
+        </div>
         <div class="element">
             <h1>Gene Ontology Tree</h1>
             <h2>Browse models using GO Tree</h2>
