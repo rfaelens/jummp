@@ -5,30 +5,34 @@ $.i18n.properties({
     mode: "map"
 });
 
-$.jummp = new Object();
+$.jummp = {};
 
 $.jummp.message = function(message, warning) {
+    "use strict";
     if (!message) {
         return;
     }
-    var classes = "message";
+    var classes, button, divCode;
+    classes = "message";
     if (warning) {
         classes += " warning";
     }
-    var button = $("<div><button class=\"close\"></button></div>");
+    button = $("<div><button class=\"close\"></button></div>");
     $("button", button).click(function() {
         $(this).parent().parent().remove();
     });
-    var divCode = $("<div class=\"" + classes + "\"><p>" + message + "</p></div>");
+    divCode = $("<div class=\"" + classes + "\"><p>" + message + "</p></div>");
     button.appendTo(divCode);
     $("#infoBox").append(divCode);
 };
 
 $.jummp.infoMessage = function(message) {
+    "use strict";
     this.message(message, false);
 };
 
 $.jummp.warningMessage = function(message) {
+    "use strict";
     this.message(message, true);
 };
 
@@ -39,10 +43,11 @@ $.jummp.warningMessage = function(message) {
  * @param id The optional id
  */
 $.jummp.createLink = function(controller, action, id) {
+    "use strict";
     var path = controller;
-    if (action != undefined) {
+    if (action !== undefined) {
         path += "/" + action;
-        if (id != undefined) {
+        if (id !== undefined) {
             path += "/" + id;
         }
     }
@@ -54,10 +59,12 @@ $.jummp.createLink = function(controller, action, id) {
  * @param path The path
  */
 $.jummp.createURI = function(path) {
+    "use strict";
     return "/" + $.appName + "/" + path;
-}
+};
 
 $(function() {
+    "use strict";
     $("#loginLogout button.logout").click(function() {
         window.location.pathname = $.jummp.createURI("logout");
     });
