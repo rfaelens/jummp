@@ -49,7 +49,7 @@ $.jummp.showModels.loadModelList = function() {
     });
 };
 
-$.jummp.showModels.showOverlay = function(overlayLink) {
+$.jummp.showModels.showOverlay = function(overlayLink, closeCallback) {
     "use strict";
     $("#overlayContainer").data("linkTarget", overlayLink);
     if ($("#overlayContainer").data("overlay")) {
@@ -82,7 +82,8 @@ $.jummp.showModels.showOverlay = function(overlayLink) {
             opacity: 0.8
         },
         closeOnClick: false,
-        load: true
+        load: true,
+        onClose: closeCallback
     });
 };
 
