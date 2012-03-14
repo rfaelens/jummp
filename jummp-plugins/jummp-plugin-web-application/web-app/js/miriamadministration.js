@@ -1,12 +1,14 @@
-$.jummp.miriam = new Object();
+$.jummp.miriam = {};
 
 $.jummp.miriam.init = function() {
+    "use strict";
     $("#miriam form").submit($.jummp.miriam.updateResources);
     $("#miriam-update form").submit($.jummp.miriam.updateMiriamData);
     $("#miriam-model-update form").submit($.jummp.miriam.updateModels);
 };
 
 $.jummp.miriam.updateResources = function() {
+    "use strict";
     $.ajax({
         url: $.jummp.createLink("miriam", "updateResources"),
         dataType: 'json',
@@ -18,7 +20,7 @@ $.jummp.miriam.updateResources = function() {
             if (data.success) {
                 $.jummp.infoMessage($.i18n.prop("miriam.update.success"));
             } else if (data.error) {
-                if (data.error != true) {
+                if (data.error !== true) {
                     $.jummp.warningMessage(data.error);
                 }
                 $.jummp.warningMessage(data.miriamUrl);
@@ -29,6 +31,7 @@ $.jummp.miriam.updateResources = function() {
 };
 
 $.jummp.miriam.updateMiriamData = function() {
+    "use strict";
     $.ajax({
         url: $.jummp.createLink("miriam", "updateMiriamData"),
         dataType: 'json',
@@ -36,7 +39,7 @@ $.jummp.miriam.updateMiriamData = function() {
             if (data.success) {
                 $.jummp.infoMessage($.i18n.prop("miriam.data.update.success"));
             } else if (data.error) {
-                if (data.error != true) {
+                if (data.error !== true) {
                     $.jummp.warningMessage(data.error);
                 }
             }
@@ -46,6 +49,7 @@ $.jummp.miriam.updateMiriamData = function() {
 };
 
 $.jummp.miriam.updateModels = function() {
+    "use strict";
     $.ajax({
         url: $.jummp.createLink("miriam", "updateModels"),
         dataType: 'json',
@@ -53,7 +57,7 @@ $.jummp.miriam.updateModels = function() {
             if (data.success) {
                 $.jummp.infoMessage($.i18n.prop("miriam.model.update.success"));
             } else if (data.error) {
-                if (data.error != true) {
+                if (data.error !== true) {
                     $.jummp.warningMessage(data.error);
                 }
             }
