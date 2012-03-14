@@ -37,7 +37,7 @@
             <td class='value'><g:each in="${revision.model.publication.authors}">${it.firstName} ${it.lastName}, </g:each></td>
         </tr>
     </table>
-    <button type='button' class='download'><p>Download</p></button>
+    <div><p><a href="${g.createLink(controller: 'model', action: 'download', id: revision.id)}" target="_blank">Download</a></p></div>
 </div>
 <div id='overlayNav'>
     <div rel="${g.createLink(controller: 'search', action: 'publication', id: revision.id)}"><span><g:message code="model.model.publication"/></span></div>

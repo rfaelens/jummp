@@ -827,8 +827,19 @@ input.right, button.right {
         background-image: url(images/smallButton.png);
         .overlayButtons;
     }
-    p {
-        .overlayStripes;
+    div {
+        float: right;
+        p {
+            a {
+                padding-top: @modeSwitchStandardExtend/2;
+                padding-bottom: @modeSwitchStandardExtend/2;
+                background-image: url(images/smallButton.png);
+                .overlayButtons;
+                &:hover, &:active {
+                    text-decoration: none;
+                }
+            }
+        }
     }
 }
 
