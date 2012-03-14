@@ -83,6 +83,7 @@ $.jummp.showModels.showOverlay = function(overlayLink, closeCallback) {
         },
         closeOnClick: false,
         load: true,
+        fixed: false,
         onClose: closeCallback
     });
 };
