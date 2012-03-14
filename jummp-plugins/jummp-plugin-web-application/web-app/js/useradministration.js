@@ -1,21 +1,24 @@
-$.jummp.userAdministration = new Object();
+$.jummp.userAdministration = {};
 $.jummp.userAdministration.changeUser = function(userId, field, target) {
+    "use strict";
     $.ajax({
         url: target + "/" + userId,
         dataType: 'json',
-        data: {value: $("#" + field).attr("checked") == "checked" ? true : false},
+        data: {value: $("#" + field).attr("checked") === "checked" ? true : false},
         cache: 'false',
-        success: function(data) {
+        success: function() {
             // redraw the dataTable to reset all changes
             $('#userTable').dataTable().fnDraw();
         }
-    })
+    });
 };
 
 $.jummp.userAdministration.loadUserList = function() {
+    "use strict";
     var createUserChangeMarkup = function(id, target, enabled) {
-        var checkboxId = "user-change-" + id + "-" + target;
-        var html = '<input type="checkbox" id="' + checkboxId + '" ';
+        var html, checkboxId;
+        checkboxId = "user-change-" + id + "-" + target;
+        html = '<input type="checkbox" id="' + checkboxId + '" ';
         if (enabled) {
             html += 'checked="checked"';
         }
@@ -36,15 +39,16 @@ $.jummp.userAdministration.loadUserList = function() {
                 "type": "POST",
                 "url": sSource,
                 "data": aoData,
-                "error": function(jqXHR, textStatus, errorThrown) {
+                "error": function() {
                     // clear the table
                     fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
                 },
                 "success": function(json) {
-                    for (var i=0; i<json.aaData.length; i++) {
-                        var rowData = json.aaData[i];
-                        var id = rowData[0];
-                        rowData[0] = "<a href=\"show/" + id + "\">" + id + "</a>"
+                    var rowData, id, i;
+                    for (i=0; i<json.aaData.length; i++) {
+                        rowData = json.aaData[i];
+                        id = rowData[0];
+                        rowData[0] = "<a href=\"show/" + id + "\">" + id + "</a>";
                         rowData[4] = createUserChangeMarkup(id, 'enable', rowData[4]);
                         rowData[5] = createUserChangeMarkup(id, 'expireAccount', rowData[5]);
                         rowData[6] = createUserChangeMarkup(id, 'lockAccount', rowData[6]);
@@ -58,12 +62,14 @@ $.jummp.userAdministration.loadUserList = function() {
 };
 
 $.jummp.userAdministration.editUser = function() {
+    "use strict";
     $("#user-role-management table tr a").click(function() {
-        var link = $(this);
-        var id = link.prev().val();
-        var container = link.parents("div")[0];
-        var userId = $($("input", container)[0]).val();
-        var action = $($("input", container)[1]).val();
+        var link, id, container, userId, action;
+        link = $(this);
+        id = link.prev().val();
+        container = link.parents("div")[0];
+        userId = $($("input", container)[0]).val();
+        action = $($("input", container)[1]).val();
         $.ajax({
             type: 'GET',
             url: "../" + action + "/" + id + "?userId=" + userId,
@@ -73,16 +79,17 @@ $.jummp.userAdministration.editUser = function() {
                 if (data.error) {
                     $.jummp.errorMessage(data.error);
                 } else if (data.success) {
-                    var linkText = "";
-                    var divInsertId = "";
-                    if (action == "addRole") {
+                    var linkText, divInsertId, tableRow;
+                    linkText = "";
+                    divInsertId = "";
+                    if (action === "addRole") {
                         linkText = $.i18n.prop("user.administration.userRole.ui.removeRole");
                         divInsertId = "#userRoles";
-                    } else if (action == "removeRole") {
+                    } else if (action === "removeRole") {
                         linkText = $.i18n.prop("user.administration.userRole.ui.addRole");
                         divInsertId = "#availableRoles";
                     }
-                    var tableRow = link.parents("tr");
+                    tableRow = link.parents("tr");
                     $("a", tableRow).text(linkText);
                     tableRow.detach();
                     tableRow.appendTo($("table tbody", $(divInsertId)));
@@ -116,6 +123,7 @@ $.jummp.userAdministration.editUser = function() {
 };
 
 $.jummp.userAdministration.register = function() {
+    "use strict";
     $("#registerForm").submit(function(event) {
         event.preventDefault();
         $.ajax({
