@@ -1,6 +1,7 @@
-$.jummp.gotree = new Object();
+$.jummp.gotree = {};
 
 $.jummp.gotree.load = function() {
+    "use strict";
     $("#gotree").dynatree({
         imagePath: $.jummp.createURI("static/css/dynatree/"),
         initAjax: {
