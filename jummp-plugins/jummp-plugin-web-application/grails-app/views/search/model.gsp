@@ -34,7 +34,7 @@
     <table border='0'>
         <tr>
             <td class='key left'><g:message code="model.model.authors"/></td>
-            <td class='value'><g:each in="${revision.model.publication.authors}">${it.firstName} ${it.lastName}, </g:each></td>
+            <td class='value'><g:each in="${authors}">${it}</g:each></td>
         </tr>
     </table>
     <button type='button' class='download'><p>Download</p></button>
