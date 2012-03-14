@@ -1,19 +1,20 @@
-$.jummp.showModels = new Object();
+$.jummp.showModels = {};
 $.jummp.showModels.changeModel = function(userId, field, target) {
+    "use strict";
     $.ajax({
         url: target + "/" + userId,
         dataType: 'json',
-        data: {value: $("#" + field).attr("checked") == "checked" ? true : false},
+        data: {value: $("#" + field).attr("checked") === "checked" ? true : false},
         cache: 'false',
-        success: function(data) {
+        success: function() {
             // redraw the dataTable to reset all changes
             $('#modelTable').dataTable().fnDraw();
         }
-    })
+    });
 };
 
 $.jummp.showModels.loadModelList = function() {
-    var createModelChangeMarkup;
+    "use strict";
     $('#modelTable').dataTable({
         // TODO: in future it might be interesting to allow filtering
         bFilter: false,
@@ -28,14 +29,15 @@ $.jummp.showModels.loadModelList = function() {
                 "type": "POST",
                 "url": sSource,
                 "data": aoData,
-                "error": function(jqXHR, textStatus, errorThrown) {
+                "error": function() {
                     // clear the table
                     fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
                 },
                 "success": function(json) {
-                    for (var i=0; i<json.aaData.length; i++) {
-                        var rowData = json.aaData[i];
-                        var id = rowData[0];
+                    var i, rowData, id;
+                    for (i=0; i<json.aaData.length; i++) {
+                        rowData = json.aaData[i];
+                        id = rowData[0];
                         rowData[0] = "<a class='animate' onclick=\"$.jummp.showModels.showOverlay('" + $.jummp.createLink("search", "model", id) + "');\" href=\"#\">" + id + "</a>";
                         rowData[1] = rowData[1] ? rowData[1].replace(/_/g, " ") : "-";
                         rowData[2] = rowData[2] ? rowData[2].title : "-";
@@ -48,6 +50,7 @@ $.jummp.showModels.loadModelList = function() {
 };
 
 $.jummp.showModels.showOverlay = function(overlayLink) {
+    "use strict";
     $("#overlayContainer").data("linkTarget", overlayLink);
     if ($("#overlayContainer").data("overlay")) {
         $("#overlayContainer").data("overlay").load();
@@ -88,6 +91,7 @@ $.jummp.showModels.showOverlay = function(overlayLink) {
  * @param element The jQuery element which got clicked
  */
 $.jummp.showModels.loadView = function(element) {
+    "use strict";
     $("#overlayContentContainer").block();
     $.ajax({
         url: element.attr("rel"),
@@ -100,27 +104,29 @@ $.jummp.showModels.loadView = function(element) {
             $("#overlayNav div").removeClass("selected");
             element.addClass("selected");
         },
-        error: function(jqXHR) {
+        error: function() {
             $("#overlayContentContainer").unblock();
         }
     });
 };
 
 $.jummp.showModels.lastAccessedModels = function(container) {
+    "use strict";
     $.ajax({
         url: $.jummp.createLink("search", "lastAccessedModels"),
         dataType: 'JSON',
         cache: false, // makes IE happy
         success: function(data) {
-            if (data.length == 0) {
+            if (data.length === 0) {
                 $("h2", container).text($.i18n.prop("model.history.empty"));
                 $("p", container).text("");
                 return;
             }
+            var ul, i;
             $("h2", container).text($.i18n.prop("model.history.explanation"));
             $("p", container).text("");
-            var ul = $("<ul/>");
-            for (var i=0; i<data.length; i++) {
+            ul = $("<ul/>");
+            for (i=0; i<data.length; i++) {
                 ul.append("<li>" + data[i].name.replace(/_/g, " ") + "<br/>"
                 + $.i18n.prop("model.history.submitter") + " " + data[i].submitter +
                 "<br/><a href=\"#\" rel=\"" + data[i].id + "\">" + $.i18n.prop("model.history.link") + "</a></li>");
