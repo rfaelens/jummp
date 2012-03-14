@@ -61,6 +61,10 @@ $.jummp.showModels.showOverlay = function(overlayLink) {
                 $("#overlayContainer button.close").click(function() {
                     $("#overlayContainer").data("overlay").close();
                 });
+                $("#overlayNav div").click(function() {
+                    $.jummp.showModels.loadView($(this));
+                });
+                $.jummp.showModels.loadView($("#overlayNav div").first());
             });
         },
         onLoad: function() {
@@ -81,23 +85,20 @@ $.jummp.showModels.showOverlay = function(overlayLink) {
 
 /**
  * Loads a new view for the #overlayContentContainer element through AJAX.
- * @param controller The controller to be called
- * @param action The action to be executed within the controller
- * @param id The ID of the model of which content is to be loaded
- * @param loadCallback A callback to execute after successfully updating the view.
+ * @param element The jQuery element which got clicked
  */
-$.jummp.showModels.loadView = function(controller, method, id) {
-    var url = $.jummp.createLink(controller, method, id);
+$.jummp.showModels.loadView = function(element) {
     $("#overlayContentContainer").block();
     $.ajax({
-        url: url,
+        url: element.attr("rel"),
         dataType: 'HTML',
         type: 'GET',
         cache: 'false',
         success: function(data) {
             $("#overlayContentContainer").unblock();
             $("#overlayContentContainer").html(data);
-            $.jummp.showModels.loadModelTabs();
+            $("#overlayNav div").removeClass("selected");
+            element.addClass("selected");
         },
         error: function(jqXHR) {
             $("#overlayContentContainer").unblock();

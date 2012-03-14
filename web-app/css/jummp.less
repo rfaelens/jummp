@@ -757,7 +757,7 @@ input.right, button.right {
     border-bottom: @navBorder;
     box-shadow: 0px -7px 7px -7px #000000;
     clear: both;
-    background-image: url(images/background_tab_selected.png);
+    background-image: url(images/background_tab.png);
     background-repeat: repeat-x;
     div {
        height: 30px;
@@ -766,8 +766,9 @@ input.right, button.right {
         .all;
         float: left;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
+        cursor: pointer;
     }
-    div a {
+    div span {
         color: white;
         text-decoration: none;
         line-height: 30px;
@@ -776,12 +777,7 @@ input.right, button.right {
         margin-left: 10px;
         text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
     }
-    div.unselected {
-        background-repeat: repeat-x;
-        background-image: url(images/background_tab.png);
-    }
     div.selected {
-        background-repeat: repeat-x;
         background-image: url(images/background_tab_selected.png);
     }
 }

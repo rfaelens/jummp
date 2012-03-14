@@ -40,19 +40,13 @@
     <button type='button' class='download'><p>Download</p></button>
 </div>
 <div id='overlayNav'>
-    <div class='unselected'><a href='#' onclick="$.jummp.showModels.loadView('search', 'publication', ${revision.id});"><g:message code="model.model.publication"/></a></div>
-    <div class='unselected'><span><a href='#' onclick="$.jummp.showModels.loadView('search', 'annotations', ${revision.id});"><g:message code="model.model.annotations"/></a></span></div>
-    <div class='unselected'><span><a href='#' onclick="$.jummp.showModels.loadView('search', 'notes', ${revision.id});"><g:message code="model.model.notes"/></a></span></div>
-    <div class='unselected'><span><a href='#'><g:message code="model.model.reactionGraph"/></a></span></div>
-    <div class='unselected'><span><a href='#'><g:message code="model.model.curationResults"/></a></span></div>
-    <div class='selected'><span><a href='#' onclick="$.jummp.showModels.loadView('search', 'summary', ${revision.id});"><g:message code="model.model.model"/></a></span></div>
+    <div rel="${g.createLink(controller: 'search', action: 'publication', id: revision.id)}"><span><g:message code="model.model.publication"/></span></div>
+    <div rel="${g.createLink(controller: 'search', action: 'annotations', id: revision.id)}"><span><g:message code="model.model.annotations"/></span></div>
+    <div rel="${g.createLink(controller: 'search', action: 'notes', id: revision.id)}"><span><g:message code="model.model.notes"/></span></div>
+    <div style="display: none;"><span><g:message code="model.model.reactionGraph"/></span></div>
+    <div style="display: none;"><span><g:message code="model.model.curationResults"/></span></div>
+    <div rel="${g.createLink(controller: 'search', action: 'summary', id: revision.id)}"><span><g:message code="model.model.model"/></span></div>
 </div>
-<div id='overlayContentContainer'>
-    <h2>This is the core model described in the article:</h2>
-    <p class='text'>core ...</p>
-    <h2>Abstract:</h2>
-    <p class='text'>the abstract ...</p>
-    <p class='formula'>Here are the formula ...</p>
-</div>
+<div id='overlayContentContainer'></div>
 <div id='overlayLinkArea'>Here are some | links</div>
 <div id='overlayFooter'>Here is the | Impressium</div>

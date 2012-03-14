@@ -29,8 +29,6 @@
 $(function() {
     $.jummp.showModels.loadModelList();
     $.jummp.showModels.lastAccessedModels($("#sidebar-element-last-accessed-models"));
-    $.jummp.showModels.loadView();
-    $.jummp.showModels.loadModelTabs();
 });
     </r:script>
     </body>
