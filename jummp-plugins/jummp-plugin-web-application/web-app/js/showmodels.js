@@ -20,8 +20,11 @@ $.jummp.showModels.loadModelList = function() {
         bFilter: false,
         bProcessing: true,
         bServerSide: true,
-        bJQueryUI: true,
+        // TODO: reenable after backend supports it
+        bSort: false,
+        bJQueryUI: false,
         sPaginationType: "full_numbers",
+        bAutoWidth: false,
         sAjaxSource: 'dataTableSource',
         "fnServerData": function(sSource, aoData, fnCallback) {
             $.ajax({
