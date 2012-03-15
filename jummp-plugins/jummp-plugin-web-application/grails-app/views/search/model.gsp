@@ -1,6 +1,12 @@
-<div id='overlayHeadline'>
-    <h1>${revision.model.name}</h1>
-    <jummp:button class="close">Quit</jummp:button>
+<div id='overlayTable'>
+    <div id='overlayTableRow'>
+        <div id='overlayHeadline'>
+            <h1>${revision.model.name}</h1>
+        </div>
+        <div id='overlayQuit'>
+            <jummp:button class="close">Quit</jummp:button>
+        </div>
+    </div>
 </div>
 <div id='overlayInfoStripe'>
     <table border='0'>
@@ -30,14 +36,20 @@
         </tr>
     </table>
 </div>
-<div id='overlayAuthorStripe'>
-    <table border='0'>
-        <tr>
-            <td class='key left'><g:message code="model.model.authors"/></td>
-            <td class='value'><g:each in="${authors}">${it}</g:each></td>
-        </tr>
-    </table>
-    <button type='button' class='download'><p>Download</p></button>
+<div id='overlayTable'>
+    <div id='overlayTableRow'>
+        <div id='overlayAuthorStripe'>
+            <table border='0'>
+                <tr>
+                    <td class='key left'><g:message code="model.model.authors"/></td>
+                    <td class='value'><g:each in="${authors}">${it}</g:each></td>
+                </tr>
+            </table>
+        </div>
+        <div id='download'>
+            <button type='button' class='download'><p>Download</p></button>
+        </div>
+    </div>
 </div>
 <div id='overlayNav'>
     <div rel="${g.createLink(controller: 'search', action: 'publication', id: revision.id)}"><span><g:message code="model.model.publication"/></span></div>
