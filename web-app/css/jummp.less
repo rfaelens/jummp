@@ -50,26 +50,6 @@
   margin: 0px;
   font-size: 12pt;
 }
-
-/**
- * Common standards for the top parts of the model overlay
- **/
-.stripes {
-    padding-top: 15px;
-    height: 90px;
-    margin-left: @standardIndentation;
-    margin-right: @standardIndentation;
-    clear: both;
-    position: relative;
-}
-/**
- * Standards for elements of the top parts of the model overlay
- **/
-.overlayStripes {
-    background-repeat: no-repeat;
-    background-position: 50% right;
-    height: 30px;
-}
 /**
  * Standard class for buttons of the top parts of the overlay
  **/
@@ -609,7 +589,7 @@ input.right, button.right {
         clear: both;
     }
 }
-    
+
 #sideBar {
     .all;
     width: @sideBarWidth;
@@ -823,7 +803,12 @@ input.right, button.right {
 }
 
 #overlayInfoStripe {
-    .stripes;
+    padding-top: 15px;
+    height: 90px;
+    margin-left: @standardIndentation;
+    margin-right: @standardIndentation;
+    clear: both;
+    position: relative;
     border-top: @contentOverline;
     border-bottom: @contentOverline;
 }
