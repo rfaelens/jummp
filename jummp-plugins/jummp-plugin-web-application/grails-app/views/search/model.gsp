@@ -47,7 +47,7 @@
             </table>
         </div>
         <div id='download'>
-            <button type='button' class='download'><p>Download</p></button>
+            <p><a href="${g.createLink(controller: 'model', action: 'download', id: revision.id)}" target="_blank">Download</a></p>
         </div>
     </div>
 </div>

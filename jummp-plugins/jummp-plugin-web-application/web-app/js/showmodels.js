@@ -20,8 +20,11 @@ $.jummp.showModels.loadModelList = function() {
         bFilter: false,
         bProcessing: true,
         bServerSide: true,
-        bJQueryUI: true,
+        // TODO: reenable after backend supports it
+        bSort: false,
+        bJQueryUI: false,
         sPaginationType: "full_numbers",
+        bAutoWidth: false,
         sAjaxSource: 'dataTableSource',
         "fnServerData": function(sSource, aoData, fnCallback) {
             $.ajax({
@@ -49,7 +52,7 @@ $.jummp.showModels.loadModelList = function() {
     });
 };
 
-$.jummp.showModels.showOverlay = function(overlayLink) {
+$.jummp.showModels.showOverlay = function(overlayLink, closeCallback) {
     "use strict";
     $("#overlayContainer").data("linkTarget", overlayLink);
     if ($("#overlayContainer").data("overlay")) {
@@ -82,7 +85,9 @@ $.jummp.showModels.showOverlay = function(overlayLink) {
             opacity: 0.8
         },
         closeOnClick: false,
-        load: true
+        load: true,
+        fixed: false,
+        onClose: closeCallback
     });
 };
 
