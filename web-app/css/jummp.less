@@ -64,6 +64,12 @@
     font-weight: bold;
     text-shadow: @textShadow;
 }
+/**
+ * Standard class for the html tables td keys of the overlay
+ **/
+.overlayTdKeys {
+    width: 135px;
+}
 
 /***********************************************
  * Common less variables.
@@ -688,15 +694,11 @@ input.right, button.right {
     z-index: 10000;
     background-color: #FFFFFF;
     border:1px solid #804000;
-    td.left {
-        width: 115px;
-    }
     td.key {
         font-weight: bold;
     }
     td {
         padding-right: 15px;
-        max-width: 350px;
     }
     button {
         border: none;
@@ -724,7 +726,6 @@ input.right, button.right {
     h2 {
         font-size: 14pt;
         font-weight: bold;
-        //border
     }
     p.text {
       border-bottom: 12px;
@@ -774,6 +775,7 @@ input.right, button.right {
     padding-left: @standardIndentation;
     padding-right: @standardIndentation;
     display: table;
+    table-layout: fixed;
     width: @overlayWidth - (2 * @standardIndentation);
 }
 
@@ -785,11 +787,11 @@ input.right, button.right {
     display: table-cell;
     vertical-align: middle;
     width: 90%;
+    overflow: hidden;
     h1 {
         color: @highlightColor;
         font-size: 24pt;
         font-weight: bold;
-        overflow: hidden;
     }
 }
 
@@ -811,16 +813,33 @@ input.right, button.right {
     position: relative;
     border-top: @contentOverline;
     border-bottom: @contentOverline;
+    table {
+        table-layout: fixed;
+        width: @overlayWidth - (2 * @standardIndentation);
+        font-size: 11pt;
+        td {
+        overflow: hidden;
+        width: 185px;
+    }
+    td.key {
+        overflow: hidden;
+        .overlayTdKeys
+    }
+    }
 }
 
 #overlayAuthorStripe {
     display: table-cell;
-    vertical-align: middle;
     width: 85%;
     table {
-        position: relative;
-        height: 6em;
+        table-layout: fixed;
+        width: 650px;
+        height: 3em;
         float: left;
+        font-size: 11pt;
+        .key {
+            .overlayTdKeys
+        }
     }
 }
 
