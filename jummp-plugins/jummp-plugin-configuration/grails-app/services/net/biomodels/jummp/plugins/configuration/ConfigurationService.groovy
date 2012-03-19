@@ -419,6 +419,19 @@ class ConfigurationService implements InitializingBean {
         saveProperties(properties)
     }
 
+   /**
+    * Updates the branding configuration stored in the properties file.
+    * Other settings are not changed!
+    * It is important to remember that the settings will only be activated after
+    * a restart of the application!
+    * @param branding The new branding configuration
+    */
+   public void saveBrandingConfiguration(BrandingCommand branding) {
+       Properties properties = loadProperties()
+       updateBrandingConfiguration(properties, branding)
+       saveProperties(properties)
+   }
+
     /**
      * Updates the @p properties with the settings from @p bives.
      * @param properties The existing properties
