@@ -816,7 +816,6 @@ class ConfigurationServiceTests {
         // verify the configuration
         BrandingCommand branding = configurationService.loadBrandingConfiguration()
         assertEquals("#FFFFFF", branding.internalColor)
-        println("branding.externalColor: ${branding.externalColor}")
         assertEquals("null", branding.externalColor)
         // set new configuration
         branding.internalColor = "#BBBBBB"
