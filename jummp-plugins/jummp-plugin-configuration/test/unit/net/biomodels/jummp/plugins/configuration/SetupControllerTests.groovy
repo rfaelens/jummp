@@ -546,4 +546,16 @@ class SetupControllerTests  {
         cmd.clearErrors()
         assertTrue(cmd.validate())
     }
+
+    void testBrandingCommand() {
+        // test for null
+        BrandingCommand cmd = mockCommandObject(BrandingCommand)
+        cmd.internalColor = null
+        assertFalse(cmd.validate())
+        assertEquals("nullable", cmd.errors["internalColor"].code)
+        // correct value should pass
+        cmd.internalColor = "#FFFFFF"
+        cmd.clearErrors()
+        assertTrue(cmd.validate())
+    }
 }
