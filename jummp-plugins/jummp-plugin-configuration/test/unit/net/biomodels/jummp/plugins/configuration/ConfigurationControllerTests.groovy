@@ -185,4 +185,27 @@ class ConfigurationControllerTests extends GrailsUnitTestMixin {
         VcsCommand saved = this.controller.configurationService.loadVcsConfiguration()
         assertEquals("svn", saved.vcs)
     }
+
+    void testSaveBranding() {
+        // test for incorrect command
+        BrandingCommand cmd = mockCommandObject(BrandingCommand)
+        cmd.validate()
+        controller.saveBranding(cmd)
+        assertEquals("/configuration/configuration", view)
+        assertEquals("branding", model.template)
+        assertEquals(cmd, model.branding)
+        // test for correct command
+        cmd = mockCommandObject(BrandingCommand)
+        cmd.internalColor = "#FFFFFF"
+        cmd.externalColor = "#000000"
+        cmd.validate()
+        controller.saveBranding(cmd)
+        assertEquals("/configuration/saved", view)
+        assertEquals("Select Branding", model.module)
+        grailsApplication.config.jummp.branding.internalColor = "#FFFFFF"
+        grailsApplication.config.jummp.branding.externalColor = "#000000"
+        BrandingCommand saved = this.controller.configurationService.loadBrandingConfiguration()
+        assertEquals("#FFFFFF", saved.internalColor)
+        assertEquals("#000000", saved.externalColor)
+    }
 }
