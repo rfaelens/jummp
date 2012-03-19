@@ -58,7 +58,7 @@ class ConfigurationControllerTests extends GrailsUnitTestMixin {
         assertEquals("user", saved.ldapManagerDn)
     }
 
-    void testSaveMysql() {
+    void testSaveDatabase() {
         // test for incorrect command
         DatabaseCommand cmd = mockCommandObject(DatabaseCommand)
         cmd.validate()
