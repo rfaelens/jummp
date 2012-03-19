@@ -555,6 +555,7 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
     }
 
     void testLoadStoreRemoteConfiguration() {
@@ -600,6 +601,7 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
     }
 
     void testLoadStoreLdapConfiguration() {
@@ -662,6 +664,7 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
     }
 
     void testLoadStoreSvnConfiguration() {
@@ -708,6 +711,7 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
     }
 
     void testLoadStoreVcsConfiguration() {
@@ -758,6 +762,7 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
     }
 
     void testLoadStoreServerConfiguration() {
@@ -809,6 +814,7 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
     }
 
     void testLoadStoreBrandingConfiguration() {
