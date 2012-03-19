@@ -6,7 +6,7 @@ try {
     String database = databaseProperties.getProperty("jummp.database.database")
     String protocol = "mysql"
     switch (databaseProperties.getProperty("jummp.database.type")) {
-    case "POSTRGESQL":
+    case "POSTGRESQL":
         protocol = "postgresql"
         databaseProperties.setProperty("jummp.database.driver", "org.postgresql.Driver")
         databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.PostgreSQLDialect")
