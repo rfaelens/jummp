@@ -30,7 +30,7 @@ class ModelController {
     def model = {
         RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
         List<String> authors = []
-        rev.model.publication.authors.each {
+        rev.model.publication?.authors.each {
             authors.add("${it.firstName} ${it.lastName}, ")
         }
         if(!authors.empty) {
