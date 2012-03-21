@@ -52,12 +52,12 @@
     </div>
 </div>
 <div id='overlayNav'>
-    <div rel="${g.createLink(controller: 'search', action: 'publication', id: revision.id)}"><span><g:message code="model.model.publication"/></span></div>
-    <div rel="${g.createLink(controller: 'search', action: 'annotations', id: revision.id)}"><span><g:message code="model.model.annotations"/></span></div>
-    <div rel="${g.createLink(controller: 'search', action: 'notes', id: revision.id)}"><span><g:message code="model.model.notes"/></span></div>
+    <div rel="${g.createLink(controller: 'model', action: 'publication', id: revision.id)}"><span><g:message code="model.model.publication"/></span></div>
+    <div rel="${g.createLink(controller: 'model', action: 'annotations', id: revision.id)}"><span><g:message code="model.model.annotations"/></span></div>
+    <div rel="${g.createLink(controller: 'model', action: 'notes', id: revision.id)}"><span><g:message code="model.model.notes"/></span></div>
     <div style="display: none;"><span><g:message code="model.model.reactionGraph"/></span></div>
     <div style="display: none;"><span><g:message code="model.model.curationResults"/></span></div>
-    <div rel="${g.createLink(controller: 'search', action: 'summary', id: revision.id)}"><span><g:message code="model.model.model"/></span></div>
+    <div rel="${g.createLink(controller: 'model', action: 'summary', id: revision.id)}"><span><g:message code="model.model.model"/></span></div>
 </div>
 <div id='overlayContentContainer'></div>
 <div id='overlayLinkArea'>Here are some | links</div>

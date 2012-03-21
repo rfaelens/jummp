@@ -41,7 +41,7 @@ $.jummp.showModels.loadModelList = function() {
                     for (i=0; i<json.aaData.length; i++) {
                         rowData = json.aaData[i];
                         id = rowData[0];
-                        rowData[0] = "<a class='animate' onclick=\"$.jummp.showModels.showOverlay('" + $.jummp.createLink("search", "model", id) + "');\" href=\"#\">" + id + "</a>";
+                        rowData[0] = "<a class='animate' onclick=\"$.jummp.showModels.showOverlay('" + $.jummp.createLink("model", "model", id) + "');\" href=\"#\">" + id + "</a>";
                         rowData[1] = rowData[1] ? rowData[1].replace(/_/g, " ") : "-";
                         rowData[2] = rowData[2] ? rowData[2].title : "-";
                     }
@@ -138,7 +138,7 @@ $.jummp.showModels.lastAccessedModels = function(container) {
             }
             $("p", container).append(ul);
             $("p ul li a", container).click(function() {
-                $.jummp.showModels.showOverlay($.jummp.createLink("search", "model", $(this).prop("rel")));
+                $.jummp.showModels.showOverlay($.jummp.createLink("model", "model", $(this).prop("rel")));
             });
         }
     });

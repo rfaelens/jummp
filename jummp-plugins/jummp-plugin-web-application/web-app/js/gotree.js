@@ -14,7 +14,7 @@ $.jummp.gotree.load = function() {
         },
         onActivate: function(node) {
             if (!node.data.isFolder) {
-                $.jummp.showModels.showOverlay($.jummp.createLink("search", "model", node.data.modelId));
+                $.jummp.showModels.showOverlay($.jummp.createLink("model", "model", node.data.modelId));
             }
         }
     });
