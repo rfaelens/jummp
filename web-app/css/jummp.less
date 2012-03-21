@@ -50,26 +50,6 @@
   margin: 0px;
   font-size: 12pt;
 }
-
-/**
- * Common standards for the top parts of the model overlay
- **/
-.stripes {
-    padding-top: 15px;
-    height: 90px;
-    margin-left: @standardIndentation;
-    margin-right: @standardIndentation;
-    clear: both;
-    position: relative;
-}
-/**
- * Standards for elements of the top parts of the model overlay
- **/
-.overlayStripes {
-    background-repeat: no-repeat;
-    background-position: 50% right;
-    height: 30px;
-}
 /**
  * Standard class for buttons of the top parts of the overlay
  **/
@@ -83,6 +63,12 @@
     color: white;
     font-weight: bold;
     text-shadow: @textShadow;
+}
+/**
+ * Standard class for the html tables td keys of the overlay
+ **/
+.overlayTdKeys {
+    width: 135px;
 }
 
 /***********************************************
@@ -138,6 +124,10 @@
  * Border line of navigation of overlay
  **/
 @navBorder: 1px solid @highlightColor;
+/**
+ * Width of the overlay
+ **/
+ @overlayWidth: 958px;
 
 /**
  * Class for using the top background image as a background.
@@ -371,6 +361,7 @@ tr td input.ui-autocomplete-input {
 
 #loginLogout {
     .container;
+    margin-left: @standardIndentation;
     @glowSize: 100px;
     button {
         .overlayButtons;
@@ -615,7 +606,7 @@ tr td input.ui-autocomplete-input {
         clear: both;
     }
 }
-    
+
 #sideBar {
     .all;
     width: @sideBarWidth;
@@ -707,22 +698,18 @@ tr td input.ui-autocomplete-input {
     .standardMargins;
     display: none;
     opacity: 1.0;
-    width: 958px;
+    width: @overlayWidth;
     top: -75px;
     position: fixed;
     left: 50%;
     z-index: 10000;
     background-color: #FFFFFF;
     border:1px solid #804000;
-    td.left {
-        width: 115px;
-    }
     td.key {
         font-weight: bold;
     }
     td {
         padding-right: 15px;
-        max-width: 350px;
     }
     button {
         border: none;
@@ -750,7 +737,6 @@ tr td input.ui-autocomplete-input {
     h2 {
         font-size: 14pt;
         font-weight: bold;
-        //border
     }
     p.text {
       border-bottom: 12px;
@@ -796,62 +782,91 @@ tr td input.ui-autocomplete-input {
     }
 }
 
+#overlayTable {
+    padding-left: @standardIndentation;
+    padding-right: @standardIndentation;
+    display: table;
+    table-layout: fixed;
+    width: @overlayWidth - (2 * @standardIndentation);
+}
+
+#overlayTableRow {
+    display: table-row;
+}
+
 #overlayHeadline {
-    margin-top: @standardIndentation;
-    margin-left: @standardIndentation;
-    margin-right: @standardIndentation;
-    border-top: @contentOverline;
+    display: table-cell;
+    vertical-align: middle;
+    width: 90%;
+    overflow: hidden;
     h1 {
         color: @highlightColor;
-        position: relative;
         font-size: 24pt;
         font-weight: bold;
-        float: left;
-        border-bottom: 0px;
-        padding-bottom: 0px;
     }
-    form {
-        padding: 0px;
-        box-shadow: 0px 0px 0px 0px;
-        background-size: 0px;
-        width: 0px;
+}
+
+#overlayQuit {
+    display: table-cell;
+    vertical-align: middle;
+    width: 10%;
+    button {
         float: right;
-    }
-    p {
-        .overlayStripes;
     }
 }
 
 #overlayInfoStripe {
-    .stripes;
+    padding-top: 15px;
+    height: 90px;
+    margin-left: @standardIndentation;
+    margin-right: @standardIndentation;
+    clear: both;
+    position: relative;
     border-top: @contentOverline;
     border-bottom: @contentOverline;
+    table {
+        table-layout: fixed;
+        width: @overlayWidth - (2 * @standardIndentation);
+        font-size: 11pt;
+        td {
+        overflow: hidden;
+        width: 185px;
+    }
+    td.key {
+        overflow: hidden;
+        .overlayTdKeys
+    }
+    }
 }
 
 #overlayAuthorStripe {
-    .stripes;
+    display: table-cell;
+    width: 85%;
     table {
-    position: absolute;
-    top: 50%;
-    height: 10em;
-    margin-top: -5em;
-    float: left;
+        table-layout: fixed;
+        width: 650px;
+        height: 3em;
+        float: left;
+        font-size: 11pt;
+        .key {
+            .overlayTdKeys
+        }
     }
-    button {
-        background-image: url(images/smallButton.png);
-        .overlayButtons;
-    }
-    div {
+}
+
+#download {
+    display: table-cell;
+    vertical-align: middle;
+    width: 15%;
+    p {
         float: right;
-        p {
-            a {
-                padding-top: @modeSwitchStandardExtend/2;
-                padding-bottom: @modeSwitchStandardExtend/2;
-                background-image: url(images/smallButton.png);
-                .overlayButtons;
-                &:hover, &:active {
-                    text-decoration: none;
-                }
+        a {
+            padding-top: @modeSwitchStandardExtend/2;
+            padding-bottom: @modeSwitchStandardExtend/2;
+            background-image: url(images/smallButton.png);
+            .overlayButtons;
+            &:hover, &:active {
+                text-decoration: none;
             }
         }
     }

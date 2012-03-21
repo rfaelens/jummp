@@ -555,6 +555,7 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
     }
 
     void testLoadStoreRemoteConfiguration() {
@@ -600,6 +601,7 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
     }
 
     void testLoadStoreLdapConfiguration() {
@@ -662,6 +664,7 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
     }
 
     void testLoadStoreSvnConfiguration() {
@@ -708,6 +711,7 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
     }
 
     void testLoadStoreVcsConfiguration() {
@@ -758,6 +762,7 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
     }
 
     void testLoadStoreServerConfiguration() {
@@ -803,6 +808,57 @@ class ConfigurationServiceTests {
         assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("https://www.example.com/", properties.getProperty("jummp.server.url"))
         assertEquals("https://www.example.org/", properties.getProperty("jummp.server.web.url"))
+        assertEquals("true", properties.getProperty("jummp.server.protection"))
+        assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
+        assertEquals("1002",    properties.getProperty("jummp.authenticationHash.removeInterval"))
+        assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
+        assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
+        assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
+    }
+
+    void testLoadStoreBrandingConfiguration() {
+        populateProperties()
+        // verify the configuration
+        BrandingCommand branding = configurationService.loadBrandingConfiguration()
+        assertEquals("#FFFFFF", branding.internalColor)
+        assertEquals("null", branding.externalColor)
+        // set new configuration
+        branding.internalColor = "#BBBBBB"
+        branding.externalColor = "#012345"
+        configurationService.saveBrandingConfiguration(branding)
+        // verify new configuration
+        BrandingCommand branding2 = configurationService.loadBrandingConfiguration()
+        assertEquals("#BBBBBB", branding2.internalColor)
+        assertEquals("#012345", branding2.externalColor)
+        // verify that other config options are unchanged
+        Properties properties = new Properties()
+        properties.load(new FileInputStream("target/jummpProperties"))
+        assertEquals(50, properties.size())
+        assertEquals("false", properties.getProperty("jummp.firstRun"))
+        assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
+        assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
+        assertEquals("",           properties.getProperty("jummp.vcs.exchangeDirectory"))
+        assertEquals("subversion", properties.getProperty("jummp.vcs.plugin"))
+        assertEquals("ldap",     properties.getProperty("jummp.security.authenticationBackend"))
+        assertEquals("true",     properties.getProperty("jummp.security.ldap.enabled"))
+        assertEquals("true",     properties.getProperty("jummp.security.ldap.search.subTree"))
+        assertEquals("filter",   properties.getProperty("jummp.security.ldap.search.filter"))
+        assertEquals("search",   properties.getProperty("jummp.security.ldap.search.base"))
+        assertEquals("password", properties.getProperty("jummp.security.ldap.managerPw"))
+        assertEquals("manager",  properties.getProperty("jummp.security.ldap.managerDn"))
+        assertEquals("server",   properties.getProperty("jummp.security.ldap.server"))
+        assertEquals("jummp",     properties.getProperty("jummp.database.database"))
+        assertEquals("localhost", properties.getProperty("jummp.database.server"))
+        assertEquals("3306",      properties.getProperty("jummp.database.port"))
+        assertEquals("user",      properties.getProperty("jummp.database.username"))
+        assertEquals("pass",      properties.getProperty("jummp.database.password"))
+        assertEquals("jms",   properties.getProperty("jummp.remote"))
+        assertEquals("false",   properties.getProperty("jummp.export.dbus"))
+        assertEquals("true",   properties.getProperty("jummp.export.jms"))
+        assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
+        assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
+        assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
         assertEquals("true", properties.getProperty("jummp.server.protection"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
         assertEquals("1002",    properties.getProperty("jummp.authenticationHash.removeInterval"))

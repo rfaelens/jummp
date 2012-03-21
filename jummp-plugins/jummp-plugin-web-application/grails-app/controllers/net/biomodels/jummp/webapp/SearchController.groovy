@@ -37,7 +37,16 @@ class SearchController {
 
     def model = {
         RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        [revision: rev]
+        List<String> authors = []
+        rev.model.publication.authors.each {
+            authors.add("${it.firstName} ${it.lastName}, ")
+        }
+        if(!authors.empty) {
+            String auth = authors.get(authors.size() - 1)
+            authors.remove(authors.get(authors.size() - 1))
+            authors.add(authors.size(), auth.substring(0, auth.length() - 2))
+        }
+        [revision: rev, authors: authors]
     }
 
     /**
