@@ -22,12 +22,15 @@ $.jummp.showModels.loadModelList = function() {
         bServerSide: true,
         bSort: true,
         bJQueryUI: false,
-        sPaginationType: "full_numbers",
         bAutoWidth: false,
         sAjaxSource: 'dataTableSource',
         aoColumnDefs: [
             { bSortable: false, aTargets: [2] }
         ],
+        bScrollInfinite: true,
+        bScrollCollapse: true,
+        sScrollY: "400px",
+        bDeferRender: true,
         "fnServerData": function(sSource, aoData, fnCallback) {
             $.ajax({
                 "dataType": 'json',
