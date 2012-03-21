@@ -50,7 +50,7 @@ class GotreeController {
                     break
                 }
             }
-            jsonNodes << [isLazy: true, title: "${it.identifier} - ${it.name}", goid: it.id, isFolder: true, icon: icon]
+            jsonNodes << [isLazy: true, title: "${it.identifier} - ${it.name}", goid: it.id, isFolder: true, icon: icon, key: "${it.id}"]
         }
         nodes.revisions.each {
             jsonNodes << [isLazy: false, title: it.model.name, modelId: it.model.id, revisionNumber: it.revisionNumber, isFolder: false]
@@ -59,5 +59,29 @@ class GotreeController {
             jsonNodes << [isLazy: false, title: "No Model found", isFolder: false]
         }
         render jsonNodes as JSON
+    }
+
+    /**
+     * Searches Gene Ontologies for matching elements.
+     **/
+    def search = {
+        List ontologies = geneOntologyTreeService.searchOntologies(params.id)
+        List jsonElements = []
+        ontologies.each {
+            jsonElements << [
+                value: "${it.description.identifier} - ${it.description.name}",
+                id: it.id,
+                goId: it.description.identifier,
+                goTerm: it.description.name]
+        }
+        render jsonElements as JSON
+    }
+
+    /**
+     * Provides the path of the gene ontology.
+     **/
+    def path = {
+        Map data = [path: geneOntologyTreeService.findPath(params.id as Long)]
+        render data as JSON
     }
 }

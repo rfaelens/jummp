@@ -64,6 +64,51 @@ class GeneOntologyTreeService {
     }
 
     /**
+     * Searches for all GeneOntologies matching the search term.
+     * Search is performed on the GO identifier and name in case insensitive way adding wildcards
+     * before and after.
+     * @param term The search term
+     * @return List of Gene Ontologies matching the search term.
+     */
+    @Profiled(tag="GeneOntologyTreeService.searchOntologies")
+    List<GeneOntology> searchOntologies(String term) {
+        return GeneOntology.createCriteria().list {
+            description {
+                or {
+                    ilike('name', "%${term}%")
+                    ilike('identifier', "%${term}%")
+                }
+            }
+        }
+    }
+
+    /**
+     * Constructs a path from root node to the Gene Ontology with the specified id.
+     * The path consists of slashes as separators and the id of the gene ontology on the specific
+     * node. An example path string looks like "/1/2/4/6" with the last element being the passed
+     * in gene ontology id.
+     * @param id The id of the GeneOntology for which the path has to be constructed.
+     * @return Path to the specified GeneOntology
+     */
+    @Profiled(tag="GeneOntologyTreeService.findPath")
+    String findPath(Long goId) {
+        GeneOntology geneOntology = GeneOntology.get(goId)
+        String path = ""
+        while (geneOntology) {
+            path = "/${geneOntology.id}" + path
+            geneOntology = getParent(geneOntology)
+        }
+        return path
+    }
+
+    /**
+     * @return Parent GeneOntology of given GeneOntology or null if already root element.
+     **/
+    private GeneOntology getParent(geneOntology) {
+        return GeneOntologyRelationship.findByFrom(geneOntology)?.to
+    }
+
+    /**
      * Retrieves the root level
      * @return
      */

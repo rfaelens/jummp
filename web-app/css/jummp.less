@@ -196,6 +196,9 @@ li::before {
     padding-right: 6px;
     font-weight: bold;
 }
+li.ui-menu-item::before {
+    content: none;
+}
 
 /**
  * Using Arial-like fonts
@@ -301,6 +304,13 @@ form {
 input.right, button.right {
     background-position: left;
     padding-left: @modeSwitchStandardExtend;
+}
+
+/**
+ * If autocomplete list is put into a table, it takes all available width.
+ **/
+tr td input.ui-autocomplete-input {
+    width: 100%;
 }
 
 /***********************************************

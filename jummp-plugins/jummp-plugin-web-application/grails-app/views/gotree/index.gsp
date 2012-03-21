@@ -9,6 +9,14 @@
         <r:require module="gotree"/>
     </head>
     <body activetab="search">
+        <div class="ui-widget">
+            <table>
+            <tr>
+                <td><label for="gotree-filter">Filter Go Tree:</label></td>
+                <td><input id="gotree-filter"/></td>
+            </tr>
+            </table>
+        </div>
         <div id="gotree"></div>
         <r:script>
 $(function() {

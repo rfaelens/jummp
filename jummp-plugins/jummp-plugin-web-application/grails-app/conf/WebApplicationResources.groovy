@@ -12,6 +12,7 @@ modules = {
     gotree {
         dependsOn 'dynatree, core'
         resource url: '/js/gotree.js'
+        resource url: '/js/jquery/jquery.ui.autocomplete.html.js'
     }
     gotreeImages {
         resource url: '/css/dynatree/go_devfrom.gif', disposition: 'inline'
