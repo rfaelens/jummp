@@ -1,9 +1,7 @@
 package net.biomodels.jummp.webapp
 
-import java.util.List;
-import java.util.Map;
-
 import grails.converters.JSON
+import net.biomodels.jummp.core.model.ModelListSorting
 
 class SearchController {
     /**
@@ -43,8 +41,22 @@ class SearchController {
 
         dataToRender.iTotalRecords = modelService.getModelCount()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.offset = start
+        dataToRender.iSortCol_0 = params.iSortCol_0
+        dataToRender.sSortDir_0 = params.sSortDir_0
 
-        List models = modelService.getAllModels(start, length)
+        ModelListSorting sort
+        switch (params.iSortCol_0 as int) {
+        case 1:
+            sort = ModelListSorting.NAME
+            break
+        case 0: // id column is the default
+        default:
+            sort = ModelListSorting.ID
+            break
+        }
+
+        List models = modelService.getAllModels(start, length, params.sSortDir_0 == "asc", sort)
         models.each { model ->
             dataToRender.aaData << [
                 model.id,
