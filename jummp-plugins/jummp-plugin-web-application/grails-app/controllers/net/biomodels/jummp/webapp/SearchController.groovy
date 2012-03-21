@@ -39,7 +39,7 @@ class SearchController {
         dataToRender.sEcho = params.sEcho
         dataToRender.aaData = []
 
-        dataToRender.iTotalRecords = modelService.getModelCount()
+        dataToRender.iTotalRecords = modelService.getModelCount(params.sSearch)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.offset = start
         dataToRender.iSortCol_0 = params.iSortCol_0
@@ -56,7 +56,7 @@ class SearchController {
             break
         }
 
-        List models = modelService.getAllModels(start, length, params.sSortDir_0 == "asc", sort)
+        List models = modelService.getAllModels(start, length, params.sSortDir_0 == "asc", sort, params.sSearch)
         models.each { model ->
             dataToRender.aaData << [
                 model.id,

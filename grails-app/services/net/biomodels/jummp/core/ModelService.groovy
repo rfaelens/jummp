@@ -88,11 +88,12 @@ class ModelService {
     * @param count Number of models to return
     * @param sortOrder @c true for ascending, @c false for descending
     * @param sortColumn the column which should be sorted
+    * @param filter Optional filter for search
     * @return List of Models
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllModels")
-    public List<Model> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn) {
+    public List<Model> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn, String filter = null) {
         if (offset < 0 || count <= 0) {
             // safety check
             return []
@@ -103,6 +104,18 @@ class ModelService {
             def criteria = Model.createCriteria()
             return criteria.list {
                 ne("state", ModelState.DELETED)
+                if (filter && filter.length() >= 3) {
+                    or {
+                        ilike("name", "%${filter}%")
+                        publication {
+                            or {
+                                ilike("journal", "%${filter}%")
+                                ilike("title", "%${filter}%")
+                                ilike("affiliation", "%${filter}%")
+                            }
+                        }
+                    }
+                }
                 maxResults(count)
                 firstResult(offset)
                 switch (sortColumn) {
@@ -137,6 +150,7 @@ class ModelService {
         String query = '''
 SELECT DISTINCT m FROM Revision AS r, AclEntry AS ace
 JOIN r.model AS m
+JOIN m.publication AS p
 JOIN ace.aclObjectIdentity AS aoi
 JOIN aoi.aclClass AS ac
 JOIN ace.sid AS sid
@@ -148,6 +162,18 @@ AND ace.mask IN (:permissions)
 AND ace.granting = true
 AND m.state != :deleted
 AND r.deleted = false
+'''
+        if (filter && filter.length() >= 3) {
+            query += '''
+AND (
+lower(m.name) like :filter
+OR lower(p.journal) like :filter
+OR lower(p.title) like :filter
+OR lower(p.affiliation) like :filter
+)
+'''
+        }
+        query += '''
 ORDER BY
 '''
         switch (sortColumn) {
@@ -168,12 +194,16 @@ ORDER BY
             break
         }
         query += " " + sorting
-
-        return Model.executeQuery(query, [
+        Map params = [
             className: Revision.class.getName(),
             permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
             deleted: ModelState.DELETED,
-            roles: roles, max: count, offset: offset])
+            roles: roles, max: count, offset: offset]
+        if (filter && filter.length() >= 3) {
+            params.put("filter", "%${filter.toLowerCase()}%");
+        }
+
+        return Model.executeQuery(query, params)
     }
 
     /**
@@ -240,16 +270,29 @@ ORDER BY
     /**
     * Returns the number of Models the user has access to.
     *
+    * @param filter Optional filter for search
     * @see getAllModels
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getModelCount")
-    public Integer getModelCount() {
+    public Integer getModelCount(String filter = null) {
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
             // special handling for Admin - is allowed to see all (not deleted) Models
             def criteria = Model.createCriteria()
             return criteria.get {
                 ne("state", ModelState.DELETED)
+                if (filter && filter.length() >= 3) {
+                    or {
+                        ilike("name", "%${filter}%")
+                        publication {
+                            or {
+                                ilike("journal", "%${filter}%")
+                                ilike("title", "%${filter}%")
+                                ilike("affiliation", "%${filter}%")
+                            }
+                        }
+                    }
+                }
                 projections {
                     count("id")
                 }
@@ -262,9 +305,10 @@ ORDER BY
             roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
         }
 
-        return Model.executeQuery('''
+        String query = '''
 SELECT COUNT(DISTINCT m.id) FROM Revision AS r, AclEntry AS ace
 JOIN r.model AS m
+JOIN m.publication AS p
 JOIN ace.aclObjectIdentity AS aoi
 JOIN aoi.aclClass AS ac
 JOIN ace.sid AS sid
@@ -276,11 +320,27 @@ AND ace.mask IN (:permissions)
 AND ace.granting = true
 AND m.state != :deleted
 AND r.deleted = false
-''', [
-        className: Revision.class.getName(),
-        permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
-        deleted: ModelState.DELETED,
-        roles: roles])[0] as Integer
+'''
+        if (filter && filter.length() >= 3) {
+            query += '''
+AND (
+lower(m.name) like :filter
+OR lower(p.journal) like :filter
+OR lower(p.title) like :filter
+OR lower(p.affiliation) like :filter
+)
+'''
+        }
+        Map params = [
+            className: Revision.class.getName(),
+            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+            deleted: ModelState.DELETED,
+            roles: roles]
+        if (filter && filter.length() >= 3) {
+            params.put("filter", "%${filter.toLowerCase()}%");
+        }
+
+        return Model.executeQuery(query, params)[0] as Integer
     }
 
     /**

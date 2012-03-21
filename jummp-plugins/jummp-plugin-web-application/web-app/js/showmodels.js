@@ -16,8 +16,7 @@ $.jummp.showModels.changeModel = function(userId, field, target) {
 $.jummp.showModels.loadModelList = function() {
     "use strict";
     $('#modelTable').dataTable({
-        // TODO: in future it might be interesting to allow filtering
-        bFilter: false,
+        bFilter: true,
         bProcessing: true,
         bServerSide: true,
         bSort: true,
