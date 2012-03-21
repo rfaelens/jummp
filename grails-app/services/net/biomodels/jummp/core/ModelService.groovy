@@ -150,7 +150,6 @@ class ModelService {
         String query = '''
 SELECT DISTINCT m FROM Revision AS r, AclEntry AS ace
 JOIN r.model AS m
-JOIN m.publication AS p
 JOIN ace.aclObjectIdentity AS aoi
 JOIN aoi.aclClass AS ac
 JOIN ace.sid AS sid
@@ -167,9 +166,9 @@ AND r.deleted = false
             query += '''
 AND (
 lower(m.name) like :filter
-OR lower(p.journal) like :filter
-OR lower(p.title) like :filter
-OR lower(p.affiliation) like :filter
+OR lower(m.publication.journal) like :filter
+OR lower(m.publication.title) like :filter
+OR lower(m.publication.affiliation) like :filter
 )
 '''
         }
@@ -308,7 +307,6 @@ ORDER BY
         String query = '''
 SELECT COUNT(DISTINCT m.id) FROM Revision AS r, AclEntry AS ace
 JOIN r.model AS m
-JOIN m.publication AS p
 JOIN ace.aclObjectIdentity AS aoi
 JOIN aoi.aclClass AS ac
 JOIN ace.sid AS sid
@@ -325,9 +323,9 @@ AND r.deleted = false
             query += '''
 AND (
 lower(m.name) like :filter
-OR lower(p.journal) like :filter
-OR lower(p.title) like :filter
-OR lower(p.affiliation) like :filter
+OR lower(m.publication.journal) like :filter
+OR lower(m.publication.title) like :filter
+OR lower(m.publication.affiliation) like :filter
 )
 '''
         }
