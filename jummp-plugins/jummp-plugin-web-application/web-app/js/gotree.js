@@ -20,6 +20,7 @@ $.jummp.gotree.load = function () {
             }
         }
     });
+    /*jslint unparam: true*/
     $("#gotree-filter").autocomplete({
         minLength: 3,
         html: true,
