@@ -47,7 +47,7 @@ $.jummp.userAdministration.loadUserList = function() {
                 },
                 "success": function(json) {
                     var rowData, id, i;
-                    for (i=0; i<json.aaData.length; i++) {
+                    for (i=0; i<json.aaData.length; i += 1) {
                         rowData = json.aaData[i];
                         id = rowData[0];
                         rowData[0] = "<a href=\"show/" + id + "\">" + id + "</a>";

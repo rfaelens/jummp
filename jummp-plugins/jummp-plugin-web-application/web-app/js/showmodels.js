@@ -44,7 +44,7 @@ $.jummp.showModels.loadModelList = function() {
                 },
                 "success": function(json) {
                     var i, rowData, id;
-                    for (i=0; i<json.aaData.length; i++) {
+                    for (i=0; i<json.aaData.length; i += 1) {
                         rowData = json.aaData[i];
                         id = rowData[0];
                         rowData[0] = "<a class='animate' onclick=\"$.jummp.showModels.showOverlay('" + $.jummp.createLink("model", "model", id) + "');\" href=\"#\">" + id + "</a>";
@@ -137,7 +137,7 @@ $.jummp.showModels.lastAccessedModels = function(container) {
             $("h2", container).text($.i18n.prop("model.history.explanation"));
             $("p", container).text("");
             ul = $("<ul/>");
-            for (i=0; i<data.length; i++) {
+            for (i=0; i<data.length; i += 1) {
                 ul.append("<li>" + data[i].name.replace(/_/g, " ") + "<br/>"
                 + $.i18n.prop("model.history.submitter") + " " + data[i].submitter +
                 "<br/><a href=\"#\" rel=\"" + data[i].id + "\">" + $.i18n.prop("model.history.link") + "</a></li>");

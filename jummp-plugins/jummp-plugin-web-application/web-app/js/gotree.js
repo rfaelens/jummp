@@ -27,7 +27,7 @@ $.jummp.gotree.load = function() {
             // retrieves the matching search results and adds them to the list
             $.getJSON($.jummp.createLink("gotree", "search", req.term), function(data) {
                 var i;
-                for (i=0; i<data.length; i++) {
+                for (i=0; i<data.length; i += 1) {
                     data[i].label = "<strong>" + data[i].goTerm + "</strong><br/>\n" + data[i].goId;
                 }
                 add(data);
