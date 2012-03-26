@@ -24,7 +24,8 @@ $.jummp.gotree.load = function() {
         source: function(req, add) {
             // retrieves the matching search results and adds them to the list
             $.getJSON($.jummp.createLink("gotree", "search", req.term), function(data) {
-                for (var i=0; i<data.length; i++) {
+                var i;
+                for (i=0; i<data.length; i++) {
                     data[i].label = "<strong>" + data[i].goTerm + "</strong><br/>\n" + data[i].goId;
                 }
                 add(data);
@@ -35,9 +36,9 @@ $.jummp.gotree.load = function() {
             $.getJSON($.jummp.createLink("gotree", "path", ui.item.id), function(data) {
                 // based on the path we load all nodes so that the tree can be expanded
                 $("#gotree").dynatree("getTree").loadKeyPath(data.path, function(node, status) {
-                    if (status == "loaded") {
+                    if (status === "loaded") {
                         node.expand();
-                    } else if (status == "ok") {
+                    } else if (status === "ok") {
                         node.activate();
                         node.expand();
                     }
