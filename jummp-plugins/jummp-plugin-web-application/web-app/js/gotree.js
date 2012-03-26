@@ -1,3 +1,5 @@
+/*global $: false
+ */
 $.jummp.gotree = {};
 
 $.jummp.gotree.load = function() {

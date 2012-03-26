@@ -1,3 +1,5 @@
+/*global $: false
+ */
 $.jummp.showModels = {};
 $.jummp.showModels.changeModel = function(userId, field, target) {
     "use strict";

@@ -1,3 +1,5 @@
+/*global $: false
+ */
 $.jummp.miriam = {};
 
 $.jummp.miriam.init = function() {

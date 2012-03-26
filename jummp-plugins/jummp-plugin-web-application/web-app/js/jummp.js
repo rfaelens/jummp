@@ -1,3 +1,5 @@
+/*global $: false, window: false
+ */
 // TODO: create proper links
 $.i18n.properties({
     name: 'messages',

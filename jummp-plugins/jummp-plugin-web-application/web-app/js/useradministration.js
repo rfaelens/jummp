@@ -1,3 +1,5 @@
+/*global $: false
+ */
 $.jummp.userAdministration = {};
 $.jummp.userAdministration.changeUser = function(userId, field, target) {
     "use strict";
