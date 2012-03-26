@@ -1,23 +1,23 @@
 /*global $: false
  */
 $.jummp.userAdministration = {};
-$.jummp.userAdministration.changeUser = function(userId, field, target) {
+$.jummp.userAdministration.changeUser = function (userId, field, target) {
     "use strict";
     $.ajax({
         url: target + "/" + userId,
         dataType: 'json',
         data: {value: $("#" + field).attr("checked") === "checked" ? true : false},
         cache: 'false',
-        success: function() {
+        success: function () {
             // redraw the dataTable to reset all changes
             $('#userTable').dataTable().fnDraw();
         }
     });
 };
 
-$.jummp.userAdministration.loadUserList = function() {
+$.jummp.userAdministration.loadUserList = function () {
     "use strict";
-    var createUserChangeMarkup = function(id, target, enabled) {
+    var createUserChangeMarkup = function (id, target, enabled) {
         var html, checkboxId;
         checkboxId = "user-change-" + id + "-" + target;
         html = '<input type="checkbox" id="' + checkboxId + '" ';
@@ -35,19 +35,19 @@ $.jummp.userAdministration.loadUserList = function() {
         bJQueryUI: true,
         sPaginationType: "full_numbers",
         sAjaxSource: 'dataTableSource',
-        "fnServerData": function(sSource, aoData, fnCallback) {
+        "fnServerData": function (sSource, aoData, fnCallback) {
             $.ajax({
                 "dataType": 'json',
                 "type": "POST",
                 "url": sSource,
                 "data": aoData,
-                "error": function() {
+                "error": function () {
                     // clear the table
                     fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
                 },
-                "success": function(json) {
+                "success": function (json) {
                     var rowData, id, i;
-                    for (i=0; i<json.aaData.length; i += 1) {
+                    for (i = 0; i < json.aaData.length; i += 1) {
                         rowData = json.aaData[i];
                         id = rowData[0];
                         rowData[0] = "<a href=\"show/" + id + "\">" + id + "</a>";
@@ -63,9 +63,9 @@ $.jummp.userAdministration.loadUserList = function() {
     });
 };
 
-$.jummp.userAdministration.editUser = function() {
+$.jummp.userAdministration.editUser = function () {
     "use strict";
-    $("#user-role-management table tr a").click(function() {
+    $("#user-role-management table tr a").click(function () {
         var link, id, container, userId, action;
         link = $(this);
         id = link.prev().val();
@@ -99,7 +99,7 @@ $.jummp.userAdministration.editUser = function() {
             }
         });
     });
-    $("#edit-user-form").submit(function(event) {
+    $("#edit-user-form").submit(function (event) {
         event.preventDefault();
         $.ajax({
             type: 'GET',
@@ -124,9 +124,9 @@ $.jummp.userAdministration.editUser = function() {
     });
 };
 
-$.jummp.userAdministration.register = function() {
+$.jummp.userAdministration.register = function () {
     "use strict";
-    $("#registerForm").submit(function(event) {
+    $("#registerForm").submit(function (event) {
         event.preventDefault();
         $.ajax({
             type: 'GET',

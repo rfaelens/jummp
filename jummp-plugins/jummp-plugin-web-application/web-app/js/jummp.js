@@ -9,7 +9,7 @@ $.i18n.properties({
 
 $.jummp = {};
 
-$.jummp.message = function(message, warning) {
+$.jummp.message = function (message, warning) {
     "use strict";
     if (!message) {
         return;
@@ -20,7 +20,7 @@ $.jummp.message = function(message, warning) {
         classes += " warning";
     }
     button = $("<div><button class=\"close\"></button></div>");
-    $("button", button).click(function() {
+    $("button", button).click(function () {
         $(this).parent().parent().remove();
     });
     divCode = $("<div class=\"" + classes + "\"><p>" + message + "</p></div>");
@@ -28,12 +28,12 @@ $.jummp.message = function(message, warning) {
     $("#infoBox").append(divCode);
 };
 
-$.jummp.infoMessage = function(message) {
+$.jummp.infoMessage = function (message) {
     "use strict";
     this.message(message, false);
 };
 
-$.jummp.warningMessage = function(message) {
+$.jummp.warningMessage = function (message) {
     "use strict";
     this.message(message, true);
 };
@@ -44,7 +44,7 @@ $.jummp.warningMessage = function(message) {
  * @param action The optional action
  * @param id The optional id
  */
-$.jummp.createLink = function(controller, action, id) {
+$.jummp.createLink = function (controller, action, id) {
     "use strict";
     var path = controller;
     if (action !== undefined) {
@@ -60,17 +60,17 @@ $.jummp.createLink = function(controller, action, id) {
  * Creates a URI to be used in a href or src HTML attribute.
  * @param path The path
  */
-$.jummp.createURI = function(path) {
+$.jummp.createURI = function (path) {
     "use strict";
     return "/" + $.appName + "/" + path;
 };
 
-$(function() {
+$(function () {
     "use strict";
-    $("#loginLogout button.logout").click(function() {
+    $("#loginLogout button.logout").click(function () {
         window.location.pathname = $.jummp.createURI("logout");
     });
-    $("#loginLogout button.login").click(function() {
+    $("#loginLogout button.login").click(function () {
         window.location.pathname = $.jummp.createLink("login", "auth");
     });
 });
