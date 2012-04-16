@@ -1,7 +1,7 @@
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
-//grails.project.war.file = "target/${appName}-${appVersion}.war"
+grails.project.war.file = "target/${appName}.war"
 // Relative path to JUMMP core application - this can be adjusted by users if they don't use the reference filesystem layout
 grails.project.jummp.dir = "../"
 grails.project.dependency.resolution = {
