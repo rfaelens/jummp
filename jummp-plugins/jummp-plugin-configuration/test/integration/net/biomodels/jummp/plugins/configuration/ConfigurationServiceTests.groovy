@@ -72,7 +72,7 @@ class ConfigurationServiceTests {
         assertEquals("user", properties.getProperty("jummp.database.username"))
         assertEquals("pass", properties.getProperty("jummp.database.password"))
         // update values
-        database.type = "POSTRGESQL"
+        database.type = "POSTGRESQL"
         database.database = "database"
         database.server   = "host"
         database.port     = 1234
@@ -81,7 +81,7 @@ class ConfigurationServiceTests {
         configurationService.updateDatabaseConfiguration(properties, database)
         assertFalse(properties.isEmpty())
         assertEquals(6, properties.size())
-        assertEquals("POSTRGESQL", properties.getProperty("jummp.database.type"))
+        assertEquals("POSTGRESQL", properties.getProperty("jummp.database.type"))
         assertEquals("database", properties.getProperty("jummp.database.database"))
         assertEquals("host", properties.getProperty("jummp.database.server"))
         assertEquals("1234", properties.getProperty("jummp.database.port"))
@@ -91,7 +91,7 @@ class ConfigurationServiceTests {
         configurationService.updateDatabaseConfiguration(properties, database)
         assertFalse(properties.isEmpty())
         assertEquals(6, properties.size())
-        assertEquals("POSTRGESQL", properties.getProperty("jummp.database.type"))
+        assertEquals("POSTGRESQL", properties.getProperty("jummp.database.type"))
         assertEquals("database", properties.getProperty("jummp.database.database"))
         assertEquals("host", properties.getProperty("jummp.database.server"))
         assertEquals("1234", properties.getProperty("jummp.database.port"))

@@ -97,8 +97,8 @@ class ConfigurationService implements InitializingBean {
         Properties properties = loadProperties()
         DatabaseCommand database = new DatabaseCommand()
         switch (properties.getProperty("jummp.database.type")) {
-        case "POSTRGESQL":
-            database.type = DatabaseType.POSTRGESQL
+        case "POSTGRESQL":
+            database.type = DatabaseType.POSTGRESQL
             break
         case "MYSQL": // fall through
         default:

@@ -1,7 +1,7 @@
 package net.biomodels.jummp.plugins.configuration
 
 public enum DatabaseType {
-    MYSQL("MySQL"), POSTRGESQL("PostgreSQL")
+    MYSQL("MySQL"), POSTGRESQL("PostgreSQL")
 
     final String value
 
@@ -17,6 +17,6 @@ public enum DatabaseType {
     }
 
     static list() {
-        [MYSQL, POSTRGESQL]
+        [MYSQL, POSTGRESQL]
     }
 }
