@@ -49,6 +49,16 @@ class ModelController {
         [publication: modelDelegateService.getPublication(params.id as Long), revision: rev, notes: sbmlService.getNotes(rev), annotations: sbmlService.getAnnotations(rev)]
     }
 
+    def overview = {
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        [
+                    reactions: sbmlService.getReactions(rev),
+                    rules: sbmlService.getRules(rev),
+                    parameters: sbmlService.getParameters(rev),
+                    compartments: sbmlService.getCompartments(rev)
+                ]
+    }
+
     /**
      * Renders html snippet with Publication information for the current Model identified by the id.
      */
@@ -69,4 +79,16 @@ class ModelController {
         RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
         [annotations: sbmlService.getAnnotations(rev)]
     }
+
+    /**
+    * File download of the model file for a model by id
+    */
+   def downloadModelRevision = {
+       RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+       byte[] bytes = modelDelegateService.retrieveModelFile(rev)
+       response.setContentType("application/xml")
+       // TODO: set a proper name for the model
+       response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")
+       response.outputStream << new ByteArrayInputStream(bytes)
+   }
 }
