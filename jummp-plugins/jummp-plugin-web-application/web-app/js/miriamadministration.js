@@ -15,7 +15,7 @@ $.jummp.miriam.updateResources = function () {
         url: $.jummp.createLink("miriam", "updateResources"),
         dataType: 'json',
         data: {
-            miriamUrl: "Foo",//$("#miriam-update-miriam-url").val(),
+            miriamUrl: $("#miriam-update-miriam-url").val(),
             force: $("#miriam-update-force").prop("checked")
         },
         success: function (data) {
