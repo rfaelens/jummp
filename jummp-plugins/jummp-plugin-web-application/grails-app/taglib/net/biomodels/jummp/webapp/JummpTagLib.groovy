@@ -13,7 +13,7 @@ class JummpTagLib {
      * @attr class The HTML class (optional)
      **/
     def button = { attrs, body ->
-        out << render(template: "/templates/buttonTemplate", model: [attrs: attrs, body: body()])
+        out << render(template: "/templates/buttonTemplate", model: [attrs: attrs, body: body()], plugin: "jummp-plugin-web-application")
     }
 
     /**
