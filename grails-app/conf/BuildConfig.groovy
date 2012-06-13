@@ -99,7 +99,7 @@ grails.project.dependency.resolution = {
         runtime 'org.apache.commons:commons-compress:1.1'
 
         // jms
-        runtime('org.apache.activemq:activeio-core:3.1.2',
+        /*runtime('org.apache.activemq:activeio-core:3.1.2',
                 'org.apache.activemq:activemq-core:5.5.0',
                 'org.apache.activemq:activemq-spring:5.5.0',
                 'org.apache.xbean:xbean-spring:3.7') {
@@ -115,7 +115,7 @@ grails.project.dependency.resolution = {
                     'slf4j-api',
                     'xalan',
                     'xml-apis'
-        }
+        }*/
         runtime "commons-jexl:commons-jexl:1.1"
 
         // dbus
@@ -130,10 +130,10 @@ grails.project.dependency.resolution = {
 
     plugins {
         compile ":perf4j:0.1.1"
-        compile ":jms:1.2"
+        //compile ":jms:1.2"
         compile ":executor:0.3"
         compile ":mail:1.0"
-        compile ":quartz:0.4.2"
+        //compile ":quartz:0.4.2"
         compile ":spring-security-acl:1.1"
         compile ":svn:1.0.2"
         runtime ":spring-security-core:1.2.7.2"
@@ -157,7 +157,7 @@ grails.project.dependency.resolution = {
     }
 }
 
-grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
+//grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
 
 // Remove libraries not needed in productive mode
 grails.war.resources = { stagingDir ->

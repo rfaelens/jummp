@@ -472,7 +472,7 @@ weceem.default.space.template = "classpath:/weceem-jummp-default-space.zip"
 
 environments {
     development {
-        weceem.security.policy.path = "scripts/weceem-security.groovy"
+        weceem.security.policy.path = null //"scripts/weceem-security.groovy"
     }
     test {
         weceem.security.policy.path = null
