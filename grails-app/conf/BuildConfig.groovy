@@ -1,7 +1,6 @@
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
-//grails.project.war.file = "target/${appName}-${appVersion}.war"
 grails.project.war.file = "target/${appName}.war"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
@@ -84,10 +83,11 @@ grails.project.dependency.resolution = {
         runtime ":sbfc:1.1-20110624-109"
         runtime ":biojava-ontology:1.7"
         // miriam lib required by sbml converters
-        runtime 'uk.ac.ebi.miriam:miriam-lib:1.1.3'
+        runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
         // dependencies of jsbml
-        runtime 'org.codehaus.woodstox:woodstox-core-lgpl:4.0.9'
-        runtime 'org.codehaus.staxmate:staxmate:2.0.0'
+        runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
+        runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
+        runtime "org.codehaus.woodstox:stax2-api:3.1.0"
         runtime 'org.w3c.jigsaw:jigsaw:2.2.6'
         runtime 'com.thoughtworks.xstream:xstream:1.3.1'
 
@@ -98,6 +98,13 @@ grails.project.dependency.resolution = {
         runtime ":bives.diff:0.1.0"
         runtime 'org.apache.commons:commons-compress:1.1'
 
+        /*
+         * grails dependency-report still lists version 1.6.2 as a dependency of JUMMP
+         * although we don't actually explicitly require that version anywhere. It seems
+         * to be a transitive dependency of ehcache-core, which is required by hibernate-ehcache,
+         * which, in turn, is needed by hibernate.
+         */ 
+        //compile 'org.slf4j:slf4j-api:1.6.1' 
         // jms
         /*runtime('org.apache.activemq:activeio-core:3.1.2',
                 'org.apache.activemq:activemq-core:5.5.0',
@@ -116,7 +123,7 @@ grails.project.dependency.resolution = {
                     'xalan',
                     'xml-apis'
         }*/
-        runtime "commons-jexl:commons-jexl:1.1"
+        runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit' }
 
         // dbus
         runtime ":dbus:2.7"
@@ -126,6 +133,16 @@ grails.project.dependency.resolution = {
 
         //git
         runtime 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
+      
+        compile("net.sourceforge.cobertura:cobertura:1.9.4.1") { 
+            excludes 'asm',
+                      'ant',
+                      'log4j'
+        }
+
+        // cobertura
+        compile "asm:asm:3.1"
+        compile "log4j:log4j:1.2.16"
     }
 
     plugins {
@@ -134,15 +151,23 @@ grails.project.dependency.resolution = {
         compile ":executor:0.3"
         compile ":mail:1.0"
         //compile ":quartz:0.4.2"
+//        compile(":quartz:1.0-RC2") { excludes 'hibernate-core' /* don't need 3.6.10.Final */ }
+        // to see the status of quartz jobs
+//        compile(":quartz-monitor:0.2") // { excludes 'quartz' /* 0.4.2 */} 
+
         compile ":spring-security-acl:1.1"
         compile ":svn:1.0.2"
         runtime ":spring-security-core:1.2.7.2"
-        runtime ":spring-security-ldap:1.0.5"
+        runtime(":spring-security-ldap:1.0.5") { export  = false }
         compile ":lesscss:1.0.0"
         test ":code-coverage:1.2.5"
-        test ":codenarc:0.16.1"
+        test(":codenarc:0.16.1") { transitive = false }
         test ":gmetrics:0.3.1"
-        compile ":weceem:1.1.2"
+        compile(":weceem:1.1.2") { 
+            excludes 'xstream', 
+                        'jquery', 
+                        'jquery-ui' 
+        }
         compile ":jquery-datatables:1.7.5"
         compile ":jquery-ui:1.8.15"
 
@@ -160,7 +185,7 @@ grails.project.dependency.resolution = {
 //grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
 grails.plugin.location.'jummp-plugin-web-application' = 'jummp-plugins/jummp-plugin-web-application'
 
-// Remove libraries not needed in productive mode
+// Remove libraries not needed in production mode
 grails.war.resources = { stagingDir ->
   // need to remove unix socket JNI library as incompatible with placing inside web-app
   delete(file:"${stagingDir}/WEB-INF/lib/unix-0.5.jar")

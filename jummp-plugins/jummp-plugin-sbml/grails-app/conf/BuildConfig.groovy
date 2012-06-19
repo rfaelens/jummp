@@ -37,10 +37,11 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
         // miriam lib required by sbml converters
-        runtime 'uk.ac.ebi.miriam:miriam-lib:1.1.3'
+        runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
         // dependencies of jsbml
-        runtime 'org.codehaus.woodstox:woodstox-core-lgpl:4.0.9'
-        runtime 'org.codehaus.staxmate:staxmate:2.0.0'
+        runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
+        runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
+        runtime "org.codehaus.woodstox:stax2-api:3.1.0"
         runtime 'org.w3c.jigsaw:jigsaw:2.2.6'
         runtime 'com.thoughtworks.xstream:xstream:1.3.1'
         compile ":jsbml:0.8-rc1"
