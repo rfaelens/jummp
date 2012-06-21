@@ -1,11 +1,13 @@
+.*
 !.gitignore
 *.iml
+*.ipr
+*.iws
 *.log
 *.orig
 */cobertura.ser
 */web-app/WEB-INF/classes/
 *~
-.*
 CodeNarcReport.html
 \[:\]/*
 activemq-data/*
