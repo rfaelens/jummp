@@ -368,6 +368,20 @@ if (jummpConfig.jummp.firstRun instanceof ConfigObject || !Boolean.parseBoolean(
     }
 }
 
+if (!(jummpConfig.jummp.security.cms.policy instanceof ConfigObject)) {
+    jummp.security.cms.policy = jummpConfig.jummp.security.cms.policy
+} else if (System.getenv("JUMMP_SECURITY_CMS_POLICY") != null) {
+    jummp.security.cms.policy = System.getenv("JUMMP_SECURITY_CMS_POLICY")
+} else {
+    jummp.security.cms.policy = null 
+}
+
+if (jummp.security.cms.policy != null) {
+    println "Using ${jummp.security.cms.policy} to configure Weceem permissions."
+} else {
+    println "Using Weceem's default permissions."
+}
+
 // get all Plugin Configurations
 // the list of available plugins is read from the BuildConfig's plugin location
 // for each plugin it is assumed that it has a JummpPluginConfig class in the package
@@ -469,15 +483,4 @@ weceem.tools.prefix = 'wcm-tools'
 weceem.admin.prefix = 'wcm-admin'
 weceem.create.default.space = true
 weceem.default.space.template = "classpath:/weceem-jummp-default-space.zip"
-
-environments {
-    development {
-        weceem.security.policy.path = null //"scripts/weceem-security.groovy"
-    }
-    test {
-        weceem.security.policy.path = null
-    }
-    production {
-        weceem.security.policy.path = null
-    }
-}
+weceem.security.policy.path = jummp.security.cms.policy
