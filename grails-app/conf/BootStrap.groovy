@@ -73,5 +73,7 @@ class BootStrap {
 
     }
     def destroy = {
+        println "Thank you for calling BootStrap:destroy(). Wait 5 seconds."
+        Thread.sleep(5000)
     }
 }

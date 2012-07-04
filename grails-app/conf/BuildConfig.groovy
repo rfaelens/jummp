@@ -151,9 +151,9 @@ grails.project.dependency.resolution = {
         compile ":executor:0.3"
         compile ":mail:1.0"
         //compile ":quartz:0.4.2"
-//        compile(":quartz:1.0-RC2") { excludes 'hibernate-core' /* don't need 3.6.10.Final */ }
+        compile(":quartz:1.0-RC2") { excludes 'hibernate-core' /* don't need 3.6.10.Final */ }
         // to see the status of quartz jobs
-//        compile(":quartz-monitor:0.2") // { excludes 'quartz' /* 0.4.2 */} 
+        //compile(":quartz-monitor:0.2") { export = false } //requires quartz plugin version 0.4.2 
 
         compile ":spring-security-acl:1.1"
         compile ":svn:1.0.2"
@@ -165,6 +165,7 @@ grails.project.dependency.resolution = {
         test ":gmetrics:0.3.1"
         compile(":weceem:1.1.2") { 
             excludes 'xstream', 
+                        'quartz',
                         'jquery', 
                         'jquery-ui' 
         }
@@ -189,6 +190,7 @@ grails.plugin.location.'jummp-plugin-web-application' = 'jummp-plugins/jummp-plu
 grails.war.resources = { stagingDir ->
   // need to remove unix socket JNI library as incompatible with placing inside web-app
   delete(file:"${stagingDir}/WEB-INF/lib/unix-0.5.jar")
+  //copy(file:"quartz.properties", toDir:"${stagingDir}/WEB-INF/classes/")
 }
 
 codenarc.reports = {
