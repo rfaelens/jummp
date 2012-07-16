@@ -73,11 +73,22 @@ $.jummp.showModels.showOverlay = function (overlayLink, closeCallback) {
                 $("#overlayContainer button.close").click(function () {
                     $("#overlayContainer").data("overlay").close();
                 });
+                //$('overlayHeadline h1').cluetip({showTitle: false});
+                $("#modelNav").hide();
                 $("#overlayNav div").click(function () {
+                    if ($(this).hasClass("overview")) {
+                        $("#modelNav").show();
+                    } else {
+                        $("#modelNav").hide();
+                    }
                     $.jummp.showModels.loadView($(this));
                 });
-                $.jummp.showModels.loadView($("#overlayNav div").first());
-            });
+                $("#modelNav div").click(function() {
+                    $.jummp.showModels.loadModelNav($(this));
+                });
+                $.jummp.showModels.loadView(
+                    $("#overlayNav div").first());
+                });
         },
         onLoad: function () {
             if ($("#sidebar-element-last-accessed-models").get(0)) {
@@ -113,6 +124,31 @@ $.jummp.showModels.loadView = function (element) {
             $("#overlayContentContainer").unblock();
             $("#overlayContentContainer").html(data);
             $("#overlayNav div").removeClass("selected");
+            element.addClass("selected");
+        },
+        error: function () {
+            $("#overlayContentContainer").unblock();
+        }
+    });
+};
+
+/**
+ * Loads a new view of the model navigation for the #overlayContentContainer
+ * element through AJAX.
+ * @param element The jQuery element which got clicked
+ */
+$.jummp.showModels.loadModelNav = function (element) {
+    "use strict";
+    $("#overlayContentContainer").block();
+    $.ajax({
+        url: element.attr("rel"),
+        dataType: 'HTML',
+        type: 'GET',
+        cache: 'false',
+        success: function (data) {
+            $("#overlayContentContainer").unblock();
+            $("#overlayContentContainer").html(data);
+            $("#modelNav div").removeClass("selected");
             element.addClass("selected");
         },
         error: function () {
