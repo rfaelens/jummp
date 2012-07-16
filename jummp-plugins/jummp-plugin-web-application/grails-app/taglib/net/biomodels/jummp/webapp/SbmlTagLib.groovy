@@ -246,10 +246,10 @@ class SbmlTagLib {
         attrs.rules.each { rule ->
             switch (rule.type) {
                 case "rate":
-                    out << renderRateRule(rule: rule)
+                    out << "Rate rules are not parseable."
                     break
                 case "assignment":
-                    out << renderAssignmentRule(rule: rule)
+                    out << "Assignment rules are not parseable."
                     break
                 case "algebraic":
                     out << renderAlgebraicRule(rule: rule)
@@ -421,4 +421,14 @@ class SbmlTagLib {
         String metaLink = g.createLink(controller: 'sbml', action: 'speciesMeta', params: [id: params.id, speciesId: species.id, revision: params.revision])
         out << render(template: "/templates/sbml/species", model: [title: species.id, initialAmount: species.initialAmount, initialConcentration: species.initialConcentration, substanceUnits: species.substanceUnits, metaLink: metaLink])
     }
+
+   /**
+    * Renders one event assignment.
+    * @attr assignment REQUIRED Map describing the Event Assignment.
+    */
+   def renderEventAssignment = { attrs ->
+       Map assignment = attrs.assignment
+       String name = (assignment.variableName && assignment.variableName != "") ? assignment.variableName : assignment.variableId
+       out << render(template: "/templates/sbml/eventAssignment", model: [variable: name, math: assignment.math, type: assignment.variableType])
+   }
 }
