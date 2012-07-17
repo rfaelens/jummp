@@ -32,7 +32,9 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
         flatDir name: 'jummpPlugins', dirs: "./pluginlibs"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
+        mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
         mavenRepo "http://download.eclipse.org/jgit/maven"
+        mavenRepo "http://www.biojava.org/download/maven/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -79,17 +81,22 @@ grails.project.dependency.resolution = {
         }*/
         // dependencies of plugins
         // sbml
-        runtime ":jsbml:0.8-rc1"
+        runtime("org.sbml.jsbml:jsbml:1.0-SNAPSHOT") {
+            excludes 'woodstox-core-lgpl',
+                        'staxmate',
+                        'stax2-api',
+                        'log4j',
+                        'junit',
+                        'commons-pool',
+                        'commons-dbcp'
+        }
         runtime ":sbfc:1.1-20110624-109"
-        runtime ":biojava-ontology:1.7"
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
         // dependencies of jsbml
         runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
         runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"
-        runtime 'org.w3c.jigsaw:jigsaw:2.2.6'
-        runtime 'com.thoughtworks.xstream:xstream:1.3.1'
 
         // bives
         runtime ":jaxen:1.1.1"
