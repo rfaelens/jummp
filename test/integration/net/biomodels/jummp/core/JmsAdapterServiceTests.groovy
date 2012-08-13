@@ -51,6 +51,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         modelService.vcsService.vcsManager = null
     }
 
+    @Ignore
     @Test
     void testAuthenticate() {
         // test wrong parameter
@@ -73,6 +74,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(auth instanceof JummpAuthentication)
     }
 
+    @Ignore
     @Test
     void testGetAllModels() {
         // invalid parameter should end in IllegalArgumentException
@@ -136,6 +138,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(send("getAllModels", [auth3.getAuthenticationHash(), 0, 0, true, "test"]) instanceof IllegalArgumentException)
     }
 
+    @Ignore
     @Test
     void testModelCount() {
         // first test without authentication
@@ -176,6 +179,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertEquals(0, result)
     }
 
+    @Ignore
     @Test
     void testGetLatestRevision() {
         // first test a completely invalid variant
@@ -213,6 +217,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(send("getLatestRevision", [auth2.getAuthenticationHash(), model.id]) instanceof AccessDeniedException)
     }
 
+    @Ignore
     @Test
     void testGetAllRevisions() {
         // first test a completely invalid variant
@@ -255,6 +260,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(result.isEmpty())
     }
 
+    @Ignore
     @Test
     void testUploadModel() {
         // first test a completely invalid variant
@@ -316,6 +322,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(send("deleteModel", [auth.getAuthenticationHash(), result.id as Long]))
     }
 
+    @Ignore
     @Test
     void testAddRevision() {
         // first test a completely invalid variant
@@ -378,6 +385,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         modelAdminUser(false)
     }
 
+    @Ignore
     @Test
     void testRetrieveModelFile() {
         // first test a completely invalid variant
@@ -444,6 +452,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(send("deleteModel", [auth.getAuthenticationHash(), model.id as Long]))
     }
 
+    @Ignore
     @Test
     void testGrantReadAccess() {
         // first test a completely invalid variant
@@ -488,6 +497,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertEquals(0, send("getModelCount", auth2.getAuthenticationHash()))
     }
 
+    @Ignore
     @Test
     void testGrantWriteAccess() {
         // first test a completely invalid variant
@@ -533,6 +543,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(result instanceof AccessDeniedException)
     }
 
+    @Ignore
     @Test
     void testRevokeReadAccess() {
         // first test a completely invalid variant
@@ -576,6 +587,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(send("revokeReadAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("username")]) instanceof AccessDeniedException)
     }
 
+    @Ignore
     @Test
     void testRevokeWriteAccess() {
         // first test a completely invalid variant
@@ -620,6 +632,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         assertTrue(send("revokeWriteAccess", [auth.getAuthenticationHash(), model.toCommandObject(), User.findByUsername("username")]) instanceof AccessDeniedException)
     }
 
+    @Ignore
     @Test
     void testDeleteRestoreModel() {
         // first test a completely invalid variant
@@ -696,7 +709,7 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
+        .findGitDir(clone) // scan up the file system tree
         .build()
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()

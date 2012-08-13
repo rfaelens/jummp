@@ -777,7 +777,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
+        .findGitDir(clone) // scan up the file system tree
         .build()
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
