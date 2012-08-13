@@ -130,7 +130,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
+        .findGitDir(clone) // scan up the file system tree
         .build()
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
@@ -202,7 +202,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
+        .findGitDir(clone) // scan up the file system tree
         .build()
         Git git = new Git(repository)
         git.init().setDirectory(clone).call()
@@ -245,7 +245,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         assertEquals("Second Test", lines[1])
         repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
+        .findGitDir(clone) // scan up the file system tree
         .build()
         commit = repository.resolve(Constants.HEAD)
         revWalk = new RevWalk(repository)
@@ -263,7 +263,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         assertEquals("Third Test", lines[2])
         repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
+        .findGitDir(clone) // scan up the file system tree
         .build()
         commit = repository.resolve(Constants.HEAD)
         revWalk = new RevWalk(repository)
@@ -283,7 +283,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         assertEquals("Admin Test", lines[3])
         repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
+        .findGitDir(clone) // scan up the file system tree
         .build()
         commit = repository.resolve(Constants.HEAD)
         revWalk = new RevWalk(repository)

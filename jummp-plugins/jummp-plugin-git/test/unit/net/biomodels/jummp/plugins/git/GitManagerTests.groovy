@@ -29,7 +29,7 @@ class GitManagerTests extends GrailsUnitTestCase {
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
+        .findGitDir(clone) // scan up the file system tree
         .build()
         git = new Git(repository)
         git.init().setDirectory(clone).call()
@@ -110,7 +110,7 @@ class GitManagerTests extends GrailsUnitTestCase {
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
+        .findGitDir(clone) // scan up the file system tree
         .build()
         commit = repository.resolve(Constants.HEAD)
         revWalk = new RevWalk(repository)
@@ -153,7 +153,7 @@ class GitManagerTests extends GrailsUnitTestCase {
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
+        .findGitDir(clone) // scan up the file system tree
         .build()
         commit = repository.resolve(Constants.HEAD)
         revWalk = new RevWalk(repository)
@@ -167,7 +167,7 @@ class GitManagerTests extends GrailsUnitTestCase {
         revision = gitManager.updateFile(importFile, "test", "Test commit message")
         repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
+        .findGitDir(clone) // scan up the file system tree
         .build()
         commit = repository.resolve(Constants.HEAD)
         revWalk = new RevWalk(repository)
@@ -215,7 +215,7 @@ class GitManagerTests extends GrailsUnitTestCase {
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
+        .findGitDir(clone) // scan up the file system tree
         .build()
         ObjectId commit = repository.resolve(Constants.HEAD)
         RevWalk revWalk = new RevWalk(repository)

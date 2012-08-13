@@ -61,7 +61,7 @@ class GitManager implements VcsManager {
             FileRepositoryBuilder builder = new FileRepositoryBuilder()
             repository = builder.setWorkTree(clone)
             .readEnvironment() // scan environment GIT_* variables
-            .findGitDir() // scan up the file system tree
+            .findGitDir(clone) // scan up the file system tree
             .build()
             git = new Git(repository)
 
