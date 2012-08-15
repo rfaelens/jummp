@@ -389,7 +389,7 @@ OR lower(m.publication.affiliation) like :filter
             if (!result) {
                 return null
             }
-            modelHistoryService.addModelToHistory(model)
+//            modelHistoryService.addModelToHistory(model)
             return Revision.get(result[0])
         }
 
