@@ -51,7 +51,7 @@ public class ApplicationDBusAdapterImpl extends AbstractDBusAdapter implements A
     }
 
     public Map<String, String> getJummpConfig() {
-        return (Map<String, String>)((ConfigObject)grailsApplication.config.get("jummp")).flatten();
+        return (Map<String, String>)((ConfigObject)grailsApplication.config.get("jummp"))
     }
 
     public boolean isAuthenticated(String hash) {
