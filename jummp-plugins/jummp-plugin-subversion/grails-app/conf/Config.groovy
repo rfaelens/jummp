@@ -27,4 +27,4 @@ log4j = {
 grails.views.default.codec="none" // none, html, base64
 grails.views.gsp.encoding="UTF-8"
 // fails the ant test script
-grails.enable.native2ascii=false
+grails.enable.native2ascii=true
