@@ -1,3 +1,5 @@
+import java.util.jar.JarFile
+import java.util.regex.Pattern
 import org.codehaus.groovy.grails.compiler.GrailsClassLoader
 
 // locations to search for config files that get merged into the main config
@@ -404,8 +406,8 @@ if (jummp.security.cms.policy != null) {
 // * The methodMissing method looks at the method name which has been invoked and does the same game again for the
 //   dependency closure
 // * For all methods called "compile" or "runtime" the first argument is inspected, split at ":" and looked whether it
-//   refers to a JUMMP Plugin
-// * If it is a JUMMP Plugin, the name is extracted, it is tried to load a JummpPluginConfig class and it's closure is executed
+//   refers to a JUMMP Plugin. If it is the case, its name is extracted, the corresponding JummpPluginConfig class is 
+//   loaded and finally its configure closure gets executed.
 //
 // With other words: MAGIC HAPPENS HERE
 GrailsClassLoader classLoader = new GrailsClassLoader()
@@ -435,11 +437,18 @@ class BuildConfigParser {
             // this is a jar
             String jarName = (args[0] as String).split(":")[1]
             if (jarName.startsWith("grails-plugin-jummp-plugin-")) {
-                String pluginName = jarName.minus("grails-plugin-jummp-plugin-")
+                def pluginName = jarName.minus("grails-plugin-jummp-plugin-")
                 try {
-                    def pluginConfigClass = classLoader.loadClass("net.biomodels.jummp.plugins.${pluginName}.JummpPluginConfig")
+                    final File PLUGIN_LOCATION = new File("pluginlibs/")
+                    def pluginPattern = Pattern.compile("${jarName}-[0-9]+\\.[0-9]+-[0-9]+\\.jar")
+                    def pluginVersions = PLUGIN_LOCATION.listFiles().findAll { it.getName().matches(pluginPattern)}
+                    def pluginFile = pluginVersions.max {it.getName().minus("${jarName}-0.1-").minus(".jar") as int}
+                    def pluginJar = new JarFile(pluginFile)
+                    def configClass = pluginJar.entries().find{it.getName().matches(".*JummpPluginConfig\\.class")} 
+                    String className = configClass.getName().replace("${File.separator}", ".").minus(".class")
+                    def jummpPluginConfig = classLoader.loadClass(className)
                     try {
-                        pluginConfigClass.configure(jummp, jummpConfig)
+                        jummpPluginConfig.configure(jummp, jummpConfig)
                     } catch (MissingMethodException e) {
                         println "Plugin ${pluginName} does not provide the configure closure"
                     }
