@@ -7,9 +7,10 @@ package net.biomodels.jummp.plugins.bives
  * @year 2011
  */
 class JummpPluginConfig {
-	static def configure = { ConfigObject jummp, ConfigObject jummpConfig ->
+    static def configure = { ConfigObject jummp, ConfigObject jummpConfig ->
+        println("Loading configuration for module [jummp-plugin-bives]")
 //		jummpConfig.jummp.bives.plugin == "bives"
-		jummp.plugins.bives.diffdir = jummpConfig.jummp.plugins.bives.diffdir
-		println("BiVeS: Diff directory set to " + jummpConfig.jummp.plugins.bives.diffdir)
-	}
+        jummp.plugins.bives.diffdir = jummpConfig.jummp.plugins.bives.diffdir
+        println("BiVeS: Diff directory set to " + jummpConfig.jummp.plugins.bives.diffdir)
+    }
 }
