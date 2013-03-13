@@ -1,4 +1,4 @@
-package net.biomodels.jummp.plugins.dbus
+package net.biomodels.jummp.dbus
 
 class JummpPluginConfig {
     static def configure = { ConfigObject jummp, ConfigObject jummpConfig ->

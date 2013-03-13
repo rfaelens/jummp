@@ -1,4 +1,4 @@
-package net.biomodels.jummp.plugins.remote
+package net.biomodels.jummp.remote
 
 class JummpPluginConfig {
     static def configure = { ConfigObject jummp, ConfigObject jummpConfig ->
