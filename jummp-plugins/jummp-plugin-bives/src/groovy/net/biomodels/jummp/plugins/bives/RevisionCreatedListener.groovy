@@ -3,8 +3,10 @@ package net.biomodels.jummp.plugins.bives
 import net.biomodels.jummp.core.events.RevisionCreatedEvent
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
+import grails.util.Environment 
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationListener
+import org.codehaus.groovy.grails.commons.cfg.ConfigurationHelper
 
 import de.unirostock.bives.diff.model.Diff
 import de.unirostock.bives.fwk.diff.DiffGeneratorManager
@@ -14,8 +16,8 @@ import de.unirostock.bives.fwk.diff.DiffGeneratorManager
  * @short Listener for new revisions
  * 
  * @author Robert Haelke, robert.haelke@googlemail.com
- * @date 20.06.2011
- * @year 2011
+ * @author Mihai Glonț <mglont@ebi.ac.uk>
+ * @date 14/03/2013
  */
 class RevisionCreatedListener implements ApplicationListener {
 	/**
@@ -35,9 +37,19 @@ class RevisionCreatedListener implements ApplicationListener {
 				// first, map event...
 				RevisionTransportCommand command = ((RevisionCreatedEvent) event).revision
 				File testFile = ((RevisionCreatedEvent) event).file
+                ConfigObject config = ConfigurationHelper.loadConfigFromClasspath(Environment.getCurrent().getName())
+                final File location
+                if (config.containsKey("jummp.plugins.bives.diffdir")) {
+                    location = new File(config.getProperty("jummp.plugins.bives.diffdir"))
+                }
+                else {
+                    location = new File(System.getProperty("java.io.tmpdir"))
+                }
+                println "CURRENT REVISION: ${command.properties} MODEL:${command.model.properties} FORMAT:${command.format.properties}"
 				// get previous revision
-				File refFile = File.createTempFile("referenceFile", ".xml")
-				refFile.write(new String(modelDelegateService.retrieveModelFile(modelDelegateService.getRevision(command.model.id, command.revisionNumber - 1))))
+				File refFile = File.createTempFile("referenceFile", ".xml", location) 
+				refFile.write(new String(modelDelegateService.retrieveModelFile(
+                        modelDelegateService.getRevision(command.model.id, command.revisionNumber - 1))))
 				// create diff, initialize required variables
 				Diff diff = diffMan.generateDiff(refFile, testFile, true)
 				// debug

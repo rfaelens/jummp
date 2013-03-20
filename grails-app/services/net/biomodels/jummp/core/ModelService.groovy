@@ -36,7 +36,10 @@ import org.springframework.security.core.userdetails.UserDetails
  * @see Model
  * @see Revision
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mglont@ebi.ac.uk>
+ * @date 20/03/2013
  */
+@SuppressWarnings("GroovyUnusedCatchParameter")
 class ModelService {
     /**
      * Dependency Injection of Spring Security Service
@@ -67,10 +70,6 @@ class ModelService {
      * Dependency injection for ExecutorService to run threads
      */
     def executorService
-    /**
-     * Dependency injection of SessionFactory
-     */
-    def sessionFactory
     /**
      * Dependency injection of ModelHistoryService
      */
@@ -209,7 +208,7 @@ ORDER BY
     * Convenient method for sorting by the id column.
     *
     * @return List of Models sorted ascending
-    * @see getAllModels(int offset, int count, boolean sortOrder)
+    * @see ModelService#getAllModels(int offset, int count, boolean sortOrder)
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllModels")
@@ -221,7 +220,7 @@ ORDER BY
     * Convenient method for ascending sorting.
     *
     * @return List of Models sorted ascending by @p sortColumn
-    * @see getAllModels(int offset, int count, boolean sortOrder)
+    * @see ModelService#getAllModels(int offset, int count, boolean sortOrder)
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllModels")
@@ -233,7 +232,7 @@ ORDER BY
     * Convenient method for ascending sorting by id.
     *
     * @return List of Models sorted ascending by id
-    * @see getAllModels(int offset, int count, boolean sortOrder)
+    * @see ModelService#getAllModels(int offset, int count, boolean sortOrder)
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllModels")
@@ -246,7 +245,7 @@ ORDER BY
     *
     * @param sortColumn the column which should be sorted
     * @return List of first 10 Models sorted ascending by @p sortColumn
-    * @see getAllModels(int offset, int count, boolean sortOrder)
+    * @see ModelService#getAllModels(int offset, int count, boolean sortOrder)
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllModels")
@@ -258,7 +257,7 @@ ORDER BY
     * Convenient method for ascending sorting of first ten models by id.
     *
     * @return List of first 10 Models sorted ascending by id
-    * @see getAllModels(int offset, int count, boolean sortOrder)
+    * @see ModelService#getAllModels(int offset, int count, boolean sortOrder)
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllModels")
@@ -270,7 +269,7 @@ ORDER BY
     * Returns the number of Models the user has access to.
     *
     * @param filter Optional filter for search
-    * @see getAllModels
+    * @see ModelService#getAllModels()
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getModelCount")
@@ -868,7 +867,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * Deletion of @p model is only possible if the model is neither under curation nor published.
     * @param model The Model to be deleted
     * @return @c true in case the Model has been deleted, @c false otherwise.
-    * @see restoreModel
+    * @see ModelService#restoreModel(Model model)
     **/
     @PreAuthorize("hasPermission(#model, delete) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.DELETION)
@@ -892,7 +891,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * Removes the deleted flag from the model and all its Revisions.
     * @param model The deleted Model to restore
     * @return @c true, whether the state was restored, @c false otherwise.
-    * @see deleteModel
+    * @see ModelService#deleteModel(Model model)
     * @todo might belong in an administration service?
     **/
     @PreAuthorize("hasRole('ROLE_ADMIN')")
