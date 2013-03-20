@@ -129,7 +129,7 @@ public abstract class AbstractDBusAdapter extends AbstractCoreAdapter implements
         try {
             dbusManager.getConnection().exportObject(objectName, (DBusInterface)this)
         } catch (DBusException e) {
-            e.printStackTrace()
+            log.error(e.message, e)
         }
     }
 

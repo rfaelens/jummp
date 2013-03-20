@@ -1,6 +1,7 @@
 package net.biomodels.jummp.model
 
 import grails.test.*
+import grails.test.mixin.TestFor
 
 @TestFor(Model)
 class ModelTests {

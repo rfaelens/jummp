@@ -17,7 +17,7 @@ import org.codehaus.groovy.grails.compiler.GrailsClassLoader
 Properties jummpProperties = new Properties()
 try {
     jummpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"))
-} catch (Exception e) {
+} catch (Exception ignored) {
     jummpProperties.setProperty("jummp.security.ldap.enabled", "false")
     jummpProperties.setProperty("jummp.security.registration.email.send", "false")
     jummpProperties.setProperty("jummp.export.dbus", "false")
@@ -155,6 +155,7 @@ log4j = {
     ]
 
     warn   jummpAppender: 'org.mortbay.log'
+    debug  jummpAppender: ['grails.plugins.quartz', 'org.quartz']
 }
 
 // Added by the Spring Security Core plugin:
@@ -439,6 +440,38 @@ class BuildConfigParser {
             if (jarName.startsWith("grails-plugin-jummp-plugin-")) {
                 def pluginName = jarName.minus("grails-plugin-jummp-plugin-")
                 try {
+                    /*
+                     * Ideally this would work, but it is too early for the PluginManager to be created, as there is no
+                     * grailsApplication yet.
+                     */
+/*
+                    GrailsPlugin plugin = Holders.currentPluginManager().getGrailsPlugin(jarName)
+                    assertNotNull(plugin)
+                    def pluginLocation = plugin.getPluginPath()
+*/
+                    /*
+                     * We need a servlet context with the correct base path, which is not always cwd. We also run into
+                     * trouble because ctx.getResource("/WEB-INF/lib") does not exist in run-app() or run-war(), so there
+                     * is no apparent silver bullet.
+                    */
+/*
+                    final File PLUGIN_LOCATION
+                    PluginPathAwareFileSystemResourceLoader loader = new PluginPathAwareFileSystemResourceLoader()
+                    MockServletContext servletContext = new MockServletContext(loader)
+                    def pluginLibs = servletContext.getResource("/pluginlibs")?.getFile()
+                    def webInfLibs = servletContext.getResource("/WEB-INF/lib")?.getFile()
+                    if (null == pluginLibs) {
+                        if (null == webInfLibs) {
+                            println "\t catch-all rescue code needed for ${pluginName}. "
+                            PLUGIN_LOCATION = new File("/home/mglont/projects/model-repository/pluginlibs")
+                        } else {
+                            PLUGIN_LOCATION = new File(webInfLibs)
+                        }
+                    } else {
+                        PLUGIN_LOCATION = new File(pluginLibs)
+                    }
+*/
+                    // TODO This approach is know to fail in a servlet container context.
                     final File PLUGIN_LOCATION = new File("pluginlibs/")
                     def pluginPattern = Pattern.compile("${jarName}-[0-9]+\\.[0-9]+-[0-9]+\\.jar")
                     def pluginVersions = PLUGIN_LOCATION.listFiles().findAll { it.getName().matches(pluginPattern)}
@@ -449,10 +482,10 @@ class BuildConfigParser {
                     def jummpPluginConfig = classLoader.loadClass(className)
                     try {
                         jummpPluginConfig.configure(jummp, jummpConfig)
-                    } catch (MissingMethodException e) {
+                    } catch (MissingMethodException ignored) {
                         println "Plugin ${pluginName} does not provide the configure closure"
                     }
-                } catch (ClassNotFoundException e) {
+                } catch (ClassNotFoundException ignored) {
                     println "Plugin ${pluginName} does not provide a configuration"
                 }
             }
