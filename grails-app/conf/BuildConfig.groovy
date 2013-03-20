@@ -137,7 +137,7 @@ grails.project.dependency.resolution = {
         runtime ":dbus:2.7"
         runtime ":debug-disable:1.1"
         runtime ":hexdump:0.2"
-        provided ":unix:0.5"
+        runtime ":unix:0.5"
 
         //git
         runtime 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
@@ -197,8 +197,8 @@ grails.plugin.location.'jummp-plugin-web-application' = 'jummp-plugins/jummp-plu
 // Remove libraries not needed in production mode
 grails.war.resources = { stagingDir ->
   // need to remove unix socket JNI library as incompatible with placing inside web-app
-  delete(file:"${stagingDir}/WEB-INF/lib/unix-0.5.jar")
-  //copy(file:"quartz.properties", toDir:"${stagingDir}/WEB-INF/classes/")
+  // 2013-03-19 Mihai Glont: jummp-loader works fine with unix-0.5.jar in the war's WEB-INF/lib
+  // delete(file:"${stagingDir}/WEB-INF/lib/unix-0.5.jar")
 }
 
 codenarc.reports = {
