@@ -159,7 +159,7 @@ grails.project.dependency.resolution = {
         compile ":executor:0.3"
         compile ":mail:1.0"
         //compile ":quartz:0.4.2"
-        compile(":quartz:1.0-RC2") { excludes 'hibernate-core' /* don't need 3.6.10.Final */ }
+        compile(":quartz:1.0-RC6") { excludes 'hibernate-core' /* don't need 3.6.10.Final */ }
         // to see the status of quartz jobs
         //compile(":quartz-monitor:0.2") { export = false } //requires quartz plugin version 0.4.2 
 
