@@ -14,11 +14,13 @@ import grails.validation.Validateable
  * @year 2011
  */
 @Validateable
-class BivesCommand implements Serializable {
+class CmsCommand implements Serializable {
+
     private static final long serialVersionUID = 1L
-    String diffDir
+
+    String policyFile
 
     static constraints = {
-        diffDir(nullable: false, blank: false)
+        policyFile(nullable: false, blank: true)
     }
 }

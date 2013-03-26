@@ -1,9 +1,12 @@
 package net.biomodels.jummp.plugins.configuration
 
+import grails.validation.Validateable
+
 /**
  * Command Object for validating version control system settings.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
+@Validateable
 class VcsCommand implements Serializable {
     private static final long serialVersionUID = 1L
     String vcs

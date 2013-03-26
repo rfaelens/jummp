@@ -1,9 +1,12 @@
 package net.biomodels.jummp.plugins.configuration
 
+import grails.validation.Validateable
+
 /**
  * Command Object for validating change password settings.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
+@Validateable
 class ChangePasswordCommand implements Serializable {
     private static final long serialVersionUID = 1L
     Boolean changePassword

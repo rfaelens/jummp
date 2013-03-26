@@ -351,6 +351,36 @@ class ConfigurationServiceTests {
         assertEquals("false", properties.getProperty("jummp.server.protection"))
     }
 
+    void testUpdateCmsConfiguration() {
+        shouldFail(NullPointerException) {
+            configurationService.updateCmsConfiguration(null, null)
+        }
+        Properties properties = new Properties()
+        shouldFail(NullPointerException) {
+            configurationService.updateCmsConfiguration(properties, null)
+        }
+        CmsCommand cms = new CmsCommand()
+        configurationService.updateCmsConfiguration(properties, cms)
+        assertTrue(properties.isEmpty())
+        cms.policyFile = "/policy.file"
+        configurationService.updateCmsConfiguration(properties, cms)
+        assertFalse(properties.isEmpty())
+        assertEquals(1, properties.size())
+        assertEquals("/policy.file", properties.getProperty("jummp.security.cms.policy"))
+        // update configuration
+        cms.policyFile = "/policy2.file"
+        configurationService.updateCmsConfiguration(properties, cms)
+        assertFalse(properties.isEmpty())
+        assertEquals(1, properties.size())
+        assertEquals("/policy2.file", properties.getProperty("jummp.security.cms.policy"))
+        // invalid should not change
+        cms.policyFile = null
+        configurationService.updateCmsConfiguration(properties, cms)
+        assertFalse(properties.isEmpty())
+        assertEquals(1, properties.size())
+        assertEquals("/policy2.file", properties.getProperty("jummp.security.cms.policy"))
+    }
+
     void testStoreConfiguration() {
         // set a file to use
         configurationService.configurationFile = new File("target/jummpProperties")
@@ -432,12 +462,15 @@ class ConfigurationServiceTests {
         BrandingCommand branding = new BrandingCommand()
         branding.internalColor = "#FFFFFF"
         assertTrue(branding.validate())
+        CmsCommand cms = new CmsCommand()
+        cms.policyFile = "/policy.file"
+        assertTrue(cms.validate())
 
         // everything should be written to the properties file
-        configurationService.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, branding)
+        configurationService.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, cms, branding)
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(51, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -479,10 +512,10 @@ class ConfigurationServiceTests {
         vcs.vcs = "git"
         assertTrue(vcs.validate())
 
-        configurationService.storeConfiguration(database, null, vcs, null, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, branding)
+        configurationService.storeConfiguration(database, null, vcs, null, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, cms, branding)
         properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(26, properties.size())
+        assertEquals(27, properties.size())
         assertEquals("true",      properties.getProperty("jummp.firstRun"))
         assertEquals("target",    properties.getProperty("jummp.vcs.workingDirectory"))
         assertEquals("",          properties.getProperty("jummp.vcs.exchangeDirectory"))
@@ -529,7 +562,7 @@ class ConfigurationServiceTests {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(51, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -556,6 +589,7 @@ class ConfigurationServiceTests {
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
         assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
+        assertEquals("/policy.file",    properties.getProperty("jummp.security.cms.policy"))
     }
 
     void testLoadStoreRemoteConfiguration() {
@@ -579,7 +613,7 @@ class ConfigurationServiceTests {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(51, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -602,6 +636,7 @@ class ConfigurationServiceTests {
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
         assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
+        assertEquals("/policy.file",    properties.getProperty("jummp.security.cms.policy"))
     }
 
     void testLoadStoreLdapConfiguration() {
@@ -635,7 +670,7 @@ class ConfigurationServiceTests {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(51, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -665,6 +700,7 @@ class ConfigurationServiceTests {
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
         assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
+        assertEquals("/policy.file",    properties.getProperty("jummp.security.cms.policy"))
     }
 
     void testLoadStoreSvnConfiguration() {
@@ -681,8 +717,57 @@ class ConfigurationServiceTests {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(51, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
+        assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
+        assertEquals("",           properties.getProperty("jummp.vcs.exchangeDirectory"))
+        assertEquals("subversion", properties.getProperty("jummp.vcs.plugin"))
+        assertEquals("ldap",     properties.getProperty("jummp.security.authenticationBackend"))
+        assertEquals("true",     properties.getProperty("jummp.security.ldap.enabled"))
+        assertEquals("true",     properties.getProperty("jummp.security.ldap.search.subTree"))
+        assertEquals("filter",   properties.getProperty("jummp.security.ldap.search.filter"))
+        assertEquals("search",   properties.getProperty("jummp.security.ldap.search.base"))
+        assertEquals("password", properties.getProperty("jummp.security.ldap.managerPw"))
+        assertEquals("manager",  properties.getProperty("jummp.security.ldap.managerDn"))
+        assertEquals("server",   properties.getProperty("jummp.security.ldap.server"))
+        assertEquals("jummp",     properties.getProperty("jummp.database.database"))
+        assertEquals("localhost", properties.getProperty("jummp.database.server"))
+        assertEquals("3306",      properties.getProperty("jummp.database.port"))
+        assertEquals("user",      properties.getProperty("jummp.database.username"))
+        assertEquals("pass",      properties.getProperty("jummp.database.password"))
+        assertEquals("jms",   properties.getProperty("jummp.remote"))
+        assertEquals("false",   properties.getProperty("jummp.export.dbus"))
+        assertEquals("true",   properties.getProperty("jummp.export.jms"))
+        assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
+        assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
+        assertEquals("http://127.0.0.1:8080/jummp-web-application/", properties.getProperty("jummp.server.web.url"))
+        assertEquals("true", properties.getProperty("jummp.server.protection"))
+        assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
+        assertEquals("1002",    properties.getProperty("jummp.authenticationHash.removeInterval"))
+        assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
+        assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
+        assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
+        assertEquals("/policy.file",    properties.getProperty("jummp.security.cms.policy"))
+    }
+
+    void testLoadStoreCmsConfiguration() {
+        populateProperties()
+        // verify svn configuration
+        CmsCommand cms = configurationService.loadCmsConfiguration()
+        assertEquals("/policy.file", cms.policyFile)
+        // set new configuration
+        cms.policyFile = "/policy2.file"
+        configurationService.saveCmsConfiguration(cms)
+        // verify new configuration
+        CmsCommand cms2 = configurationService.loadCmsConfiguration()
+        assertEquals("/policy2.file", cms2.policyFile)
+        // verify that other config options are unchanged
+        Properties properties = new Properties()
+        properties.load(new FileInputStream("target/jummpProperties"))
+        assertEquals(51, properties.size())
+        assertEquals("false", properties.getProperty("jummp.firstRun"))
+        assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
         assertEquals("",           properties.getProperty("jummp.vcs.exchangeDirectory"))
         assertEquals("subversion", properties.getProperty("jummp.vcs.plugin"))
@@ -734,7 +819,7 @@ class ConfigurationServiceTests {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(51, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("ldap",     properties.getProperty("jummp.security.authenticationBackend"))
@@ -763,6 +848,7 @@ class ConfigurationServiceTests {
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
         assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
+        assertEquals("/policy.file",    properties.getProperty("jummp.security.cms.policy"))
     }
 
     void testLoadStoreServerConfiguration() {
@@ -783,7 +869,7 @@ class ConfigurationServiceTests {
         // verify that other configuration options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(51, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -815,6 +901,7 @@ class ConfigurationServiceTests {
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
         assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
+        assertEquals("/policy.file",    properties.getProperty("jummp.security.cms.policy"))
     }
 
     void testLoadStoreBrandingConfiguration() {
@@ -834,7 +921,7 @@ class ConfigurationServiceTests {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(51, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -865,6 +952,7 @@ class ConfigurationServiceTests {
         assertEquals("1000",    properties.getProperty("jummp.authenticationHash.maxInactiveTime"))
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
+        assertEquals("/policy.file",    properties.getProperty("jummp.security.cms.policy"))
     }
 
     private void populateProperties() {
@@ -947,12 +1035,15 @@ class ConfigurationServiceTests {
         BrandingCommand branding = new BrandingCommand()
         branding.internalColor = "#FFFFFF"
         assertTrue(branding.validate())
+        CmsCommand cms = new CmsCommand()
+        cms.policyFile = "/policy.file"
+        assertTrue(cms.validate())
 
         // everything should be written to the properties file
-        configurationService.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, branding)
+        configurationService.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, cms, branding)
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(51, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -1002,5 +1093,6 @@ class ConfigurationServiceTests {
         assertEquals("false",    properties.getProperty("jummp.plugins.sbml.validation"))
         assertEquals("/tmp/",    properties.getProperty("jummp.plugins.bives.diffdir"))
         assertEquals("#FFFFFF",    properties.getProperty("jummp.branding.internalColor"))
+        assertEquals("/policy.file",    properties.getProperty("jummp.security.cms.policy"))
     }
 }

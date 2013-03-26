@@ -195,8 +195,20 @@ class SetupController {
                 } else {
                     return success()
                 }
-            }.to("branding")
+            }.to("cms")
             on("back").to("sbml")
+        }
+
+        cms {
+            on("next") { CmsCommand cmd ->
+                flow.cms = cmd
+                if (flow.cms.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("branding")
+            on("back").to("bives")
         }
 
         branding {
@@ -205,11 +217,11 @@ class SetupController {
                 if (flow.branding.hasErrors()) {
                     return error()
                 } else {
-                    configurationService.storeConfiguration(flow.database, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote, flow.dbus, flow.trigger, flow.sbml, flow.bives, flow.branding)
+                    configurationService.storeConfiguration(flow.database, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote, flow.dbus, flow.trigger, flow.sbml, flow.bives, flow.cms, flow.branding)
                     return success()
                 }
             }.to("finish")
-            on("back").to("bives")
+            on("back").to("cms")
         }
 
         validateAuthenticationBackend {
