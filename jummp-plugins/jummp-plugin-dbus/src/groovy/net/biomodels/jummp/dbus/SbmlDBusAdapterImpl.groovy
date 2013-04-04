@@ -2,6 +2,9 @@ package net.biomodels.jummp.dbus;
 
 import net.biomodels.jummp.webapp.ast.DBusAdapter
 import net.biomodels.jummp.webapp.ast.DBusMethod
+import net.biomodels.jummp.core.IModelService
+import net.biomodels.jummp.core.ISbmlService
+
 
 /**
  * @short Concrete Implementation of SbmlDBusAdapter.
@@ -13,11 +16,12 @@ public class SbmlDBusAdapterImpl extends AbstractDBusAdapter implements SbmlDBus
     /**
      * Dependency Injection of sbmlService
      */
-    def sbmlService
+    ISbmlService sbmlService
+
     /**
      * Dependency Injection of modelDelegateService
      */
-    def modelDelegateService
+    IModelService modelDelegateService
 
     @DBusMethod(isAuthenticate = true, getRevision = [1, 2])
     public long getVersion(String authenticationHash, long modelId, int revisionNumber) {

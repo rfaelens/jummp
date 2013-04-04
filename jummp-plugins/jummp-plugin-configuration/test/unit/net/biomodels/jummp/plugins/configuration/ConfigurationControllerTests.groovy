@@ -208,4 +208,36 @@ class ConfigurationControllerTests extends GrailsUnitTestMixin {
         assertEquals("#FFFFFF", saved.internalColor)
         assertEquals("#000000", saved.externalColor)
     }
+
+    void testSaveCms() {
+        // test for incorrect command
+        CmsCommand cmd = mockCommandObject(CmsCommand)
+        cmd.validate()
+        controller.saveCms(cmd)
+        assertEquals("/configuration/configuration", view)
+        assertEquals("cms", model.template)
+        assertEquals(cmd, model.cms)
+
+        // test for correct command: blanc
+        cmd = mockCommandObject(CmsCommand)
+        cmd.policyFile = ""
+        cmd.validate()
+        controller.saveCms(cmd)
+        assertEquals("/configuration/saved", view)
+        assertEquals("Content Management System", model.module)
+        grailsApplication.config.jummp.cms.policyFile = ""
+        CmsCommand saved = this.controller.configurationService.loadCmsConfiguration()
+        assertEquals("", saved.policyFile)
+
+        //test for correct command: value
+        cmd = mockCommandObject(CmsCommand)
+        cmd.policyFile = "/file/"
+        cmd.validate()
+        controller.saveCms(cmd)
+        assertEquals("/configuration/saved", view)
+        assertEquals("Content Management System", model.module)
+        grailsApplication.config.jummp.cms.policyFile = "/file/"
+        saved = this.controller.configurationService.loadCmsConfiguration()
+        assertEquals("/file/", saved.policyFile)
+    }
 }

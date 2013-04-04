@@ -178,6 +178,20 @@ class ConfigurationController {
         }
     }
 
+    def cms = {
+        CmsCommand cmd = configurationService.loadCmsConfiguration()
+        render(view: 'configuration', model: [cms: cmd, title: "Content Management System", action: "saveCms", template: "cms"])
+    }
+
+    def saveCms = { CmsCommand cmd ->
+        if (cmd.hasErrors()) {
+            render(view: 'configuration', model: [cms: cmd, title: "Content Management System", action: "saveCms", template: "cms"])
+        } else {
+            configurationService.saveCmsConfiguration(cmd)
+            render(view: "saved", model: [module: "Content Management System"])
+        }
+    }
+
     def branding = {
         BrandingCommand cmd = configurationService.loadBrandingConfiguration()
         render(view: 'configuration', model: [branding: cmd, title: "Select Branding", action: "saveBranding", template: "branding"])

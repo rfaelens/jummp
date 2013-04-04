@@ -1,9 +1,12 @@
 package net.biomodels.jummp.plugins.configuration
 
+import grails.validation.Validateable
+
 /**
  * Command Object for validating Remote settings (JMS and D-Bus).
  * @author Jochen Schramm <j.schramm@dkfz-heidelberg.de>
  */
+@Validateable
 class RemoteCommand implements Serializable {
     private static final long serialVersionUID = 1L
     String jummpRemote

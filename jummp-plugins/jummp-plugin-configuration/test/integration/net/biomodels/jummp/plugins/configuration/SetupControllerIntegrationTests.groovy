@@ -195,6 +195,14 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         // correct value should transit to branding
         setupController.params.diffDir = "/tmp/jummp/bives/diffDir"
         signalEvent("next")
+        assertCurrentStateEquals("cms")
+        // incorrect value should fail
+        setupController.params.policyFile = null
+        signalEvent("next")
+        assertCurrentStateEquals("cms")
+        // correct value should transit to branding
+        setupController.params.policyFile = "/tmp/jummp/policy.file"
+        signalEvent("next")
         assertCurrentStateEquals("branding")
         // null should fail for this value
         setupController.params.internalColor = null
@@ -460,8 +468,14 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         assertCurrentStateEquals("bives")
         setupController.params.diffDir = "/tmp/jummp/bives/diffDir"
         signalEvent("next")
+        assertCurrentStateEquals("cms")
+        setupController.params.policyFile = "/tmp/jummp/policy.file"
+        signalEvent("next")
         assertCurrentStateEquals("branding")
         setupController.params.internalColor = "#FFFFFF"
+        // going back should end in cms
+        signalEvent("back")
+        assertCurrentStateEquals("cms")
         // going back should end in bives
         signalEvent("back")
         assertCurrentStateEquals("bives")

@@ -48,11 +48,12 @@ class ConfigurationService implements InitializingBean {
      * @param trigger The Trigger configuration
      * @param tsbml The SBML configuration
      * @param bives the BiVeS configuration
+     * @param cms the CMS configuration
      */
     public void storeConfiguration(DatabaseCommand database, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun,
                                    ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword,
                                    RemoteCommand remote, DBusCommand dbus, TriggerCommand trigger, SBMLCommand sbml, BivesCommand bives,
-                                   BrandingCommand branding) {
+                                   CmsCommand cms, BrandingCommand branding) {
         Properties properties = new Properties()
         updateDatabaseConfiguration(properties, database)
         updateRemoteConfiguration(properties, remote)
@@ -69,6 +70,7 @@ class ConfigurationService implements InitializingBean {
         updateSBMLConfiguration(properties, sbml)
         updateTriggerConfiguration(properties, trigger)
         updateBivesConfiguration(properties, bives)
+        updateCmsConfiguration(properties, cms)
         updateBrandingConfiguration(properties, branding)
         if (ldap) {
             properties.setProperty("jummp.security.authenticationBackend", "ldap")
@@ -88,6 +90,17 @@ class ConfigurationService implements InitializingBean {
         bives.diffDir   = properties.getProperty("jummp.plugins.bives.diffdir")
         return bives
     } 
+
+    /**
+     * Loads the current CMS Configuration.
+     * @return A command object encapsulating the current CMS configuration
+     */
+    public CmsCommand loadCmsConfiguration() {
+        Properties properties = loadProperties()
+        CmsCommand cmsCommand = new CmsCommand()
+        cmsCommand.policyFile = properties.getProperty("jummp.security.cms.policy")
+        return cmsCommand
+    }
 
     /**
      * Loads the current database Configuration.
@@ -275,7 +288,20 @@ class ConfigurationService implements InitializingBean {
         updateBivesConfiguration(properties, bives)
         saveProperties(properties)
     }
-    
+
+    /**
+     * Updates the CMS configuration stored in the properties file.
+     * Other settings are not changed!
+     * It is important to remember that the settings will only be activated after
+     * a restart of the application!
+     * @param cmsCommand The new CMS configuration
+     */
+    public void saveCmsConfiguration(CmsCommand cmsCommand) {
+        Properties properties = loadProperties()
+        updateCmsConfiguration(properties, cmsCommand)
+        saveProperties(properties)
+    }
+
     /**
      * Updates the database configuration stored in the properties file.
      * Other settings are not changed!
@@ -443,7 +469,19 @@ class ConfigurationService implements InitializingBean {
         }
         properties.setProperty("jummp.plugins.bives.diffdir", bives.diffDir)
     }
-    
+
+    /**
+     * Updates the @p properties with the settings from @p cms.
+     * @param properties The existing properties
+     * @param cmsCommand the cms settings
+     */
+    private void updateCmsConfiguration(Properties properties, CmsCommand cmsCommand) {
+        if(!cmsCommand.validate()) {
+            return
+        }
+        properties.setProperty("jummp.security.cms.policy", cmsCommand.policyFile)
+    }
+
     /**
      * Updates the @p properties with the settings from @p database.
      * @param properties The existing properties
