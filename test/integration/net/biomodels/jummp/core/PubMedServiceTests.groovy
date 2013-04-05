@@ -16,7 +16,7 @@ class PubMedServiceTests extends JummpIntegrationTest {
     void tearDown() {
     }
 
-    @Test
+    @Ignore @Test
     void testFetchPublicationData() {
         // publication: Science   (ISSN: 0036-8075)   (ESSN: 1095-9203)
         String id = "20488988"
