@@ -218,14 +218,6 @@ codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
                              'jummp-plugins/*/grails-app/taglib',
                              'jummp-plugins/*/grails-app/utils',
                              'jummp-plugins/*/test/unit',
-                             'jummp-plugins/*/test/integration',
-                             'jummp-web-application/src/groovy',
-                             'jummp-web-application/grails-app/controllers',
-                             'jummp-web-application/grails-app/domain',
-                             'jummp-web-application/grails-app/services',
-                             'jummp-web-application/grails-app/taglib',
-                             'jummp-web-application/grails-app/utils',
-                             'jummp-web-application/test/unit',
-                             'jummp-web-application/test/integration']
+                             'jummp-plugins/*/test/integration']
 
 grails.tomcat.jvmArgs = ["-Xmx2G", "-XX:MaxPermSize=512M", "-XX:-UseGCOverheadLimit", "-server", "-XX:+UseParallelGC", "-XX:ParallelGCThreads=8"]

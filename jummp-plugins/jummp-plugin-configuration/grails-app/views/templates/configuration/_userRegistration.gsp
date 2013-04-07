@@ -40,13 +40,15 @@
             <tr class="prop">
                 <td class="name"><label for="body">Body:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'body', 'errors')}">
-                    <textarea id="body" rows="20" cols="40" name="body">${userRegistration?.body ?: 'Example Text: New User'}</textarea>
+                    <textarea id="body" rows="20" cols="40" name="body">
+                        ${userRegistration?.body ?: 'Example Text: New User'}
+                    </textarea>
                 </td>
             </tr>
             <tr class="prop">
                 <td class="name"><label for="url">URL for Account Verification:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'url', 'errors')}">
-                    <input type="text" name="url" id="url" value="${userRegistration?.url ?: 'http://example.org:8080/jummp-web-application/'}"/><span>register/validate/{{CODE}}</span>
+                    <input type="text" name="url" id="url" value="${userRegistration?.url ?: 'http://example.org:8080/jummp/'}"/> <span>register/validate/{{CODE}}</span>
                 </td>
             </tr>
             <tr class="prop">
@@ -67,7 +69,7 @@
             <tr class="prop">
                 <td class="name"><label for="activationUrl">URL for Account Activation:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'activationUrl', 'errors')}">
-                    <input type="text" name="activationUrl" id="activationUrl" value="${userRegistration?.activationUrl ?: 'http://example.org:8080/jummp-web-application/'}"/><span>register/confirmRegistration/{{CODE}}</span>
+                    <input type="text" name="activationUrl" id="activationUrl" value="${userRegistration?.activationUrl ?: 'http://example.org:8080/jummp/'}"/><span>register/confirmRegistration/{{CODE}}</span>
                 </td>
             </tr>
         </tbody>

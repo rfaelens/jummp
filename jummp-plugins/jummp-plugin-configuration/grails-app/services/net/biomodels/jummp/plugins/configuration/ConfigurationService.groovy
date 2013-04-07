@@ -14,7 +14,7 @@ import org.springframework.beans.factory.InitializingBean
  */
 class ConfigurationService implements InitializingBean {
     /**
-     * Methods accessing the configuration files, need to be thread save, therefore using a lock.
+     * Methods accessing the configuration files, need to be thread-safe, hence the use of a lock.
      */
     private final ReentrantLock lock = new ReentrantLock()
 
@@ -34,7 +34,6 @@ class ConfigurationService implements InitializingBean {
 
     /**
      * Rewrites the complete configuration.
-     * Web application needs to be restarted after using this method.
      * @param database The database configuration
      * @param ldap The LDAP configuration, if @c null database backend is used
      * @param vcs The Version Control System configuration
@@ -198,7 +197,6 @@ class ConfigurationService implements InitializingBean {
         Properties properties = loadProperties()
         ServerCommand server = new ServerCommand()
         server.url = properties.getProperty("jummp.server.url")
-        server.weburl = properties.getProperty("jummp.server.web.url")
         server.protectEverything = Boolean.parseBoolean(properties.getProperty("jummp.server.protection"))
         return server
     }
@@ -606,7 +604,6 @@ class ConfigurationService implements InitializingBean {
             return
         }
         properties.setProperty("jummp.server.url", server.url)
-        properties.setProperty("jummp.server.web.url", server.weburl)
         properties.setProperty("jummp.server.protection", server.protectEverything ? "true" : "false")
     }
 
