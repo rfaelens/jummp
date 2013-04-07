@@ -1,17 +1,12 @@
-/**
- * This file is part of the project bives.jummp, and thus part of the
- * implementation for the diploma thesis "Versioning Concepts and Technologies
- * for Biochemical Simulation Models" by Robert Haelke, Copyright 2010.
- */
 package net.biomodels.jummp.plugins.configuration
 
 import grails.validation.Validateable
 
 /**
- * Command Object for validating BiVeS settings.
- * @author Robert Haelke, robert.haelke@googlemail.com
- * @date 26.07.2011
- * @year 2011
+ * Command Object for validating Weceem security policy settings.
+ * @author Stefan Borufka <s.borufka@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @date 07/04/2013
  */
 @Validateable
 class CmsCommand implements Serializable {
