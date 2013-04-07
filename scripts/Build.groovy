@@ -20,9 +20,6 @@ target(deleteJummpPlugins: "Deletes Jummp Plugins depending on user selection!")
         ant.propertyfile(file: "${builddir}/application.properties") {
             ant.entry(key: "plugins.jms", operation: "del")
         }
-        ant.propertyfile(file: "${builddir}/jummp-web-application/application.properties") {
-            ant.entry(key: "plugins.jms", operation: "del")
-        }
     }
     if (!properties.containsKey("dbus") || !Boolean.parseBoolean(properties.getProperty("dbus"))) {
         ant.delete(dir: "${builddir}/jummp-plugins/jummp-plugin-dbus")
