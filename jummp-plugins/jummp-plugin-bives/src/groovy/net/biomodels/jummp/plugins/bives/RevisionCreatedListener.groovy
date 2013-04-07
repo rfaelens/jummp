@@ -17,7 +17,7 @@ import de.unirostock.bives.fwk.diff.DiffGeneratorManager
  * 
  * @author Robert Haelke, robert.haelke@googlemail.com
  * @author Mihai Glonț <mglont@ebi.ac.uk>
- * @date 14/03/2013
+ * @date   7/04/2013
  */
 class RevisionCreatedListener implements ApplicationListener {
 	/**
@@ -45,7 +45,6 @@ class RevisionCreatedListener implements ApplicationListener {
                 else {
                     location = new File(System.getProperty("java.io.tmpdir"))
                 }
-                println "CURRENT REVISION: ${command.properties} MODEL:${command.model.properties} FORMAT:${command.format.properties}"
 				// get previous revision
 				File refFile = File.createTempFile("referenceFile", ".xml", location) 
 				refFile.write(new String(modelDelegateService.retrieveModelFile(
