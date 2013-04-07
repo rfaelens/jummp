@@ -156,7 +156,6 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         assertFlowExecutionActive()
         // correct value should transit to trigger state
         setupController.params.url = "http://127.0.0.1:8080/jummp/"
-        setupController.params.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         setupController.params.protectEverything = true
         signalEvent("next")
         assertCurrentStateEquals("trigger")
@@ -454,7 +453,6 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         signalEvent("next")
         assertCurrentStateEquals("server")
         setupController.params.url = "http://127.0.0.1:8080/jummp/"
-        setupController.params.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         setupController.params.protectEverything = true
         signalEvent("next")
         assertCurrentStateEquals("trigger")

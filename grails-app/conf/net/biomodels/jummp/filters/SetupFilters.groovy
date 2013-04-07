@@ -6,8 +6,8 @@ import org.springframework.beans.factory.InitializingBean
  * @short Filter to redirect to SetupController
  *
  * The filter checks whether the application instance has been configured yet.
- * That is it tests for the availability of the file @c ~/.jummp.properties.
- * When the file does not exists all requests (except Ajax requests) are redirected
+ * That is, it tests for the availability of the file @c ~/.jummp.properties.
+ * When the file does not exist, all requests (except Ajax requests) are redirected
  * to the setup webflow of SetupController.
  *
  * When the file exists but the property @c jummp.firstRun is set to true all requests

@@ -343,37 +343,15 @@ class SetupControllerTests  {
         assertEquals("url.invalid", cmd.errors["url"].code)
         assertEquals("nullable", cmd.errors["protectEverything"].code)
 
-        // tests for weburl
-        // test for null
-        cmd = mockCommandObject(ServerCommand)
-        cmd.url = "http://127.0.0.1:8080/jummp/"
-        cmd.weburl = null
-        assertFalse(cmd.validate())
-        assertEquals("nullable", cmd.errors["weburl"].code)
-        // test for blank
-        cmd = mockCommandObject(ServerCommand)
-        cmd.url = "http://127.0.0.1:8080/jummp/"
-        cmd.weburl = ""
-        assertFalse(cmd.validate())
-        assertEquals("blank", cmd.errors["weburl"].code)
-        // test for not a url
-        cmd = mockCommandObject(ServerCommand)
-        cmd.url = "http://127.0.0.1:8080/jummp/"
-        cmd.weburl = "test"
-        assertFalse(cmd.validate())
-        assertEquals("url.invalid", cmd.errors["weburl"].code)
-
         // test with proper settings
         // url fails for localhost, that's why 127.0.0.1 is used
         cmd = mockCommandObject(ServerCommand)
         cmd.url = "http://127.0.0.1:8080/jummp/"
-        cmd.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         cmd.protectEverything = true
         assertTrue(cmd.validate())
         // and the same with protectEverything as false
         cmd = mockCommandObject(ServerCommand)
         cmd.url = "http://127.0.0.1:8080/jummp/"
-        cmd.weburl = "http://127.0.0.1:8080/jummp-web-application/"
         cmd.protectEverything = false
         assertTrue(cmd.validate())
     }

@@ -266,24 +266,12 @@
             </sysprops>
         </grails>
     </target>
-    <target name="build-webapplication-war" depends="remove-grails-plugins">
-        <grails command="clean" cwd="${builddir}/jummp-web-application">
-            <sysprops>
-                <sysproperty key="grails.work.dir" value="${grailsWorkdir}"/>
-            </sysprops>
-        </grails>
-        <grails command="war ${builddir}/target/jummp-web-application.war" cwd="${builddir}/jummp-web-application">
-            <sysprops>
-                <sysproperty key="grails.work.dir" value="${grailsWorkdir}"/>
-            </sysprops>
-        </grails>
-    </target>
 
 <!-- Build war with all plugins -->
-    <target name="war" depends="build-war,build-webapplication-war">
+    <target name="war" depends="build-war">
     </target>
 
 <!-- Build war with asking for plugins to include     -->
-    <target name="interactive-war" depends="ask-for-plugins, build-war,build-webapplication-war">
+    <target name="interactive-war" depends="ask-for-plugins, build-war">
     </target>
 </project>

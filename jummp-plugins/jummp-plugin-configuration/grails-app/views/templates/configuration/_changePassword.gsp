@@ -34,7 +34,7 @@
             <tr class="prop">
                 <td class="name"><label for="url">URL for Reset Password:</label></td>
                 <td class="value ${hasErrors(bean: changePassword, field: 'url', 'errors')}">
-                    <input type="text" name="url" id="url" value="${changePassword?.url ?: 'http://example.org:8080/jummp-web-application/'}"/><span>user/resetPassword/{{CODE}}</span>
+                    <input type="text" name="url" id="url" value= "${changePassword?.url ?: 'http://example.org:8080/jummp/'}"/><span>user/resetPassword/{{CODE}}</span>
                 </td>
             </tr>
         </tbody>
