@@ -29,7 +29,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
-        flatDir name: 'jummpPlugins', dirs: "../../pluginlibs"
+        flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -39,19 +39,6 @@ grails.project.dependency.resolution = {
         compile ":debug-disable:1.1"
         compile ":hexdump:0.2"
         compile ":unix:0.5"
-        // plugin dependencies
-        compile(":grails-plugin-jummp-plugin-security:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-core-api:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-remote:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-sbml:latest.integration") {
-            changing = true
-        }
 
         test 'hsqldb:hsqldb:1.8.0.10'
     }
@@ -67,4 +54,12 @@ grails.project.dependency.resolution = {
         build ":tomcat:$grailsVersion"
     }
 }
+grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"
+grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"
+grails.plugin.location.'jummp-plugin-sbml'="../jummp-plugin-sbml"
+grails.plugin.location.'jummp-plugin-remote'="../jummp-plugin-remote"
 
+//ensure that AST.jar is put in the right place. See ../../scripts/AST.groovy
+if ("jummp-plugin-dbus".equals(appName)) {
+    System.setProperty("jummp.basePath", "${new File('../../').getAbsolutePath()}")
+}

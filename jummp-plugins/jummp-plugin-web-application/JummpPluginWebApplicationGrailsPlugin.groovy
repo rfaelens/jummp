@@ -4,7 +4,7 @@ class JummpPluginWebApplicationGrailsPlugin {
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.0 > *"
     // the other plugins this plugin depends on
-    def dependsOn = [:]
+    def loadAfter = ["jummp-plugin-security", "jummp-plugin-core-api"]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp"
@@ -20,7 +20,6 @@ Brief summary/description of the plugin.
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/jummp-plugin-web-application"
-    def packaging = "binary"
 
     // Extra (optional) plugin metadata
 

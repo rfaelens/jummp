@@ -4,15 +4,19 @@ class JummpPluginBivesGrailsPlugin {
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.7 > *"
     // the other plugins this plugin depends on
-    def dependsOn = [:]
+    def loadAfter = ["jummp-plugin-security", "jummp-plugin-core-api"]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"
     ]
 
     // TODO Fill in these fields
-    def author = "Robert Haelke"
-    def authorEmail = "robert.haelke@googlemail.com"
+    def author = ""
+    def authorEmail = ""
+    def developers = [
+        [ name: "Robert Haelke", email: "robert.haelke@googlemail.com"],
+        [ name: "Mihai Glonț", email: "mihai.glont@ebi.ac.uk" ]
+    ]
     def title = "Plugin summary/headline"
     def description = '''\\
 Brief description of the plugin.
@@ -20,13 +24,23 @@ Brief description of the plugin.
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/jummp-plugin-bives"
-    def packaging = "binary"
 
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional), this event occurs before 
     }
 
     def doWithSpring = {
+        Properties props = new Properties()
+        try {
+            props.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") +
+                    ".jummp.properties"))
+        } catch (Exception ignored) {
+        }
+        def jummpConfig = new ConfigSlurper().parse(props)
+        if (jummpConfig.jummp.plugins.bives.diffdir) {
+            application.config.jummp.plugins.bives.diffdir = jummpConfig.jummp.plugins.bives.diffdir
+            println("BiVeS: Diff directory set to " + jummpConfig.jummp.plugins.bives.diffdir)
+        }
 		bivesEventListener(net.biomodels.jummp.plugins.bives.RevisionCreatedListener) {
 			modelDelegateService = ref("modelDelegateService")
             diffDataService = ref("diffDataService")

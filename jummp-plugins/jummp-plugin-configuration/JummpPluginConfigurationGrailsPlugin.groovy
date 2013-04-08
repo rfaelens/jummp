@@ -4,7 +4,7 @@ class JummpPluginConfigurationGrailsPlugin {
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.5 > *"
     // the other plugins this plugin depends on
-    def dependsOn = [:]
+    def loadAfter = ["jummp-plugin-security", "jummp-plugin-core-api"]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"
@@ -13,6 +13,10 @@ class JummpPluginConfigurationGrailsPlugin {
     // TODO Fill in these fields
     def author = "Your name"
     def authorEmail = ""
+    def developers = [
+        [ name: "Robert Haelke", email: "robert.haelke@googlemail.com"],
+        [ name: "Mihai Glonț", email: "mihai.glont@ebi.ac.uk" ]
+    ]
     def title = "Plugin summary/headline"
     def description = '''\\
 Brief description of the plugin.
@@ -20,7 +24,6 @@ Brief description of the plugin.
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/jummp-plugin-configuration"
-    def packaging = "binary"
 
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional), this event occurs before 
@@ -28,6 +31,7 @@ Brief description of the plugin.
 
     def doWithSpring = {
         // TODO Implement runtime spring config (optional)
+        application.config.jummp.controllerAnnotations << ["/configuration/**": ['ROLE_ADMIN']]
     }
 
     def doWithDynamicMethods = { ctx ->

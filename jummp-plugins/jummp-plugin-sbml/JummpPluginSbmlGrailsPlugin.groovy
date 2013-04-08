@@ -6,7 +6,7 @@ class JummpPluginSbmlGrailsPlugin {
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.6 > *"
     // the other plugins this plugin depends on
-    def dependsOn = [:]
+    def loadAfter = ["jummp-plugin-core-api"]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"
@@ -22,15 +22,27 @@ Brief description of the plugin.
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/jummp-plugin-sbml"
-    def packaging = "binary"
 
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional), this event occurs before 
     }
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
-    }
+        Properties props = new Properties()
+        try {
+            props.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") +
+                    ".jummp.properties"))
+        } catch (Exception ignored) {
+        }
+        def jummpConfig = new ConfigSlurper().parse(props)
+ /*
+        if (jummpConfig.jummp.plugins.sbml.validation instanceof ConfigObject) {
+            application.config.jummp.plugins.sbml.validation = Boolean.parseBoolean(jummpConfig.jummp.plugins.sbml.validation)
+        } else {
+            application.config.jummp.plugins.sbml.validation = false
+        }
+*/
+   }
 
     def doWithDynamicMethods = { ctx ->
         // TODO Implement registering dynamic methods to classes (optional)

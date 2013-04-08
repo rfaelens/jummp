@@ -4,14 +4,18 @@ class JummpPluginCoreApiGrailsPlugin {
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.5 > *"
     // the other plugins this plugin depends on
-    def dependsOn = [:]
+    def loadAfter = ["jummp-plugin-security"]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"
     ]
 
-    def author = "Martin Gräßlin"
-    def authorEmail = "m.graesslin@dkfz.de"
+    def author = ""
+    def authorEmail = ""
+    def developers = [
+        [ name: "Martin Gräßlin", email: "m.graesslin@dkfz.de"],
+        [ name: "Mihai Glonț", email: "mihai.glont@ebi.ac.uk" ]
+    ]
     def title = "JUMMP Plugin Core API"
     def description = '''\\
 This plugin provides the API for the JUMMP core plugins.
@@ -20,14 +24,12 @@ All other plugins providing core functionality depend on this plugin and the cor
 
     // URL to the plugin's documentation
     def documentation = "https://bitbucket.org/jummp/jummp/wiki"
-    def packaging = "binary"
 
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional), this event occurs before 
     }
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
     }
 
     def doWithDynamicMethods = { ctx ->

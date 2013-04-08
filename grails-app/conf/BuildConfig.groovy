@@ -31,7 +31,6 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
-        flatDir name: 'jummpPlugins', dirs: "./pluginlibs"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
         mavenRepo "http://download.eclipse.org/jgit/maven"
@@ -47,39 +46,6 @@ grails.project.dependency.resolution = {
         runtime 'mysql:mysql-connector-java:5.1.17'
         runtime "postgresql:postgresql:9.1-901.jdbc4"
         // plugin dependencies
-        compile(":grails-plugin-jummp-plugin-security:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-core-api:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-git:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-subversion:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-configuration:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-sbml:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-bives:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-remote:latest.integration") {
-            changing = true
-        }
-        runtime(":grails-plugin-jummp-plugin-dbus:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-simple-logging:latest.integration") {
-            changing = true
-        }
-        /*compile(":grails-plugin-jummp-plugin-web-application:latest.integration") {
-            changing = true
-        }*/
         // dependencies of plugins
         // sbml
         runtime("org.sbml.jsbml:jsbml:1.0-SNAPSHOT") {
@@ -91,7 +57,6 @@ grails.project.dependency.resolution = {
                         'commons-pool',
                         'commons-dbcp'
         }
-        runtime ":sbfc:1.1-20110624-109"
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
         // dependencies of jsbml
@@ -100,10 +65,6 @@ grails.project.dependency.resolution = {
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"
 
         // bives
-        runtime ":jaxen:1.1.1"
-        runtime ":jdom:1.1.1"
-        runtime ":bives-fwk:0.9.0"
-        runtime ":bives.diff:0.1.0"
         runtime 'org.apache.commons:commons-compress:1.1'
 
         /*
@@ -132,12 +93,6 @@ grails.project.dependency.resolution = {
                     'xml-apis'
         }*/
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit' }
-
-        // dbus
-        runtime ":dbus:2.7"
-        runtime ":debug-disable:1.1"
-        runtime ":hexdump:0.2"
-        runtime ":unix:0.5"
 
         //git
         runtime 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
@@ -191,8 +146,19 @@ grails.project.dependency.resolution = {
     }
 }
 
+grails.plugin.location.'jummp-plugin-security' = "jummp-plugins/jummp-plugin-security"
+grails.plugin.location.'jummp-plugin-core-api' = "jummp-plugins/jummp-plugin-core-api"
+grails.plugin.location.'jummp-plugin-configuration' = "jummp-plugins/jummp-plugin-configuration"
+grails.plugin.location.'jummp-plugin-git' = "jummp-plugins/jummp-plugin-git"
+grails.plugin.location.'jummp-plugin-subversion' = "jummp-plugins/jummp-plugin-subversion"
+grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
+grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
+grails.plugin.location.'jummp-plugin-remote' = "jummp-plugins/jummp-plugin-remote"
+grails.plugin.location.'jummp-plugin-dbus' = "jummp-plugins/jummp-plugin-dbus"
+grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plugin-simple-logging"
+grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"
+//grails.plugin.location.'jummp-plugin-jms-remote' = "jummp-plugins/jummp-plugin-jms-remote"
 //grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
-grails.plugin.location.'jummp-plugin-web-application' = 'jummp-plugins/jummp-plugin-web-application'
 
 // Remove libraries not needed in production mode
 grails.war.resources = { stagingDir ->
@@ -221,3 +187,6 @@ codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
                              'jummp-plugins/*/test/integration']
 
 grails.tomcat.jvmArgs = ["-Xmx2G", "-XX:MaxPermSize=512M", "-XX:-UseGCOverheadLimit", "-server", "-XX:+UseParallelGC", "-XX:ParallelGCThreads=8"]
+
+//ensure that AST.jar is put in the right place. See scripts/AST.groovy
+System.setProperty("jummp.basePath", new File("./").getAbsolutePath())
