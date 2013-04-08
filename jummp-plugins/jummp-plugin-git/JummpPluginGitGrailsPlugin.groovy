@@ -7,7 +7,7 @@ class JummpPluginGitGrailsPlugin {
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.5 > *"
     // the other plugins this plugin depends on
-    def dependsOn = ["jummp-plugin-core-api": "0.1"]
+    def loadAfter = ["jummp-plugin-security", "jummp-plugin-core-api"]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"
@@ -23,13 +23,24 @@ Brief description of the plugin.
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/jummp-plugin-git"
-    def packaging = "binary"
 
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional), this event occurs before 
     }
 
     def doWithSpring = {
+        Properties props = new Properties()
+        try {
+            props.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") +
+                    ".jummp.properties"))
+        } catch (Exception ignored) {
+        }
+        def jummpConfig = new ConfigSlurper().parse(props)
+        if (jummpConfig.jummp.vcs.plugin == "git") {
+            println("using git as vcs backend")
+            application.config.jummp.vcs.pluginServiceName = "gitManagerFactory"
+            application.config.jummp.plugins.git.enabled = true
+        }
 
         if (Environment.getCurrent() == Environment.TEST) {
             servletContext(org.springframework.mock.web.MockServletContext)

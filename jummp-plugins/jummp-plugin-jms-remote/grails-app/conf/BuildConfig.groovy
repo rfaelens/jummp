@@ -29,7 +29,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
-        flatDir name: 'jummpPlugins', dirs: "../../pluginlibs"
+        flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -52,16 +52,6 @@ grails.project.dependency.resolution = {
                     'xalan',
                     'xml-apis'
         }
-        // plugin dependencies
-        compile(":grails-plugin-jummp-plugin-security:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-core-api:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-remote:latest.integration") {
-            changing = true
-        }
 
         test 'hsqldb:hsqldb:1.8.0.10'
     }
@@ -78,3 +68,5 @@ grails.project.dependency.resolution = {
         build ":tomcat:$grailsVersion"
     }
 }
+grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"
+grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"

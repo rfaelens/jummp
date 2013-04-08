@@ -33,7 +33,7 @@ grails.project.dependency.resolution = {
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
         mavenRepo "http://www.biojava.org/download/maven/"
-        flatDir name: 'jummpPlugins', dirs: "../../pluginlibs"
+        flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -55,11 +55,6 @@ grails.project.dependency.resolution = {
         runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"
         compile ":sbfc:1.1-20110624-109"
-
-        // plugin dependencies
-        compile(":grails-plugin-jummp-plugin-core-api:latest.integration") {
-            changing = true
-        }
     }
 
     plugins {
@@ -75,3 +70,4 @@ grails.project.dependency.resolution = {
         build ":tomcat:$grailsVersion"
     }
 }
+grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"

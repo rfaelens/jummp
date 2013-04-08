@@ -1,7 +1,3 @@
-import java.util.jar.JarFile
-import java.util.regex.Pattern
-import org.codehaus.groovy.grails.compiler.GrailsClassLoader
-
 // locations to search for config files that get merged into the main config
 // config files can either be Java properties files or ConfigSlurper scripts
 
@@ -376,7 +372,7 @@ if (!(jummpConfig.jummp.security.cms.policy instanceof ConfigObject)) {
 } else if (System.getenv("JUMMP_SECURITY_CMS_POLICY") != null) {
     jummp.security.cms.policy = System.getenv("JUMMP_SECURITY_CMS_POLICY")
 } else {
-    jummp.security.cms.policy = null 
+    jummp.security.cms.policy = null
 }
 
 if (jummp.security.cms.policy != null) {
@@ -384,117 +380,6 @@ if (jummp.security.cms.policy != null) {
 } else {
     println "Using Weceem's default permissions."
 }
-
-// get all Plugin Configurations
-// the list of available plugins is read from the BuildConfig's plugin location
-// for each plugin it is assumed that it has a JummpPluginConfig class in the package
-// net.biomodels.jummp.plugins.${short-name-of-plugin}. "short-name-of-plugin" is the
-// part of the plugin name without "jummp-plugin-". The JummpPluginConfig class needs
-// to provide a closure configure with takes two ConfigObjects as arguments. The first
-// is the ConfigObject which is just constructed, that is "jummp", the second is the
-// ConfigObject containing the externalized configuration.
-
-// Resolving the Plugins is non-trivial:
-// * We get a GrailsClassLoader and use it to parse the BuildConfig file
-// * The BuildConfig contains a closure "resolution" which contains at least one closure "dependencies"
-// * the dependencies closure calls methods "compile", "runtime" etc.
-// * We are interested in the methods of the dependencies closure
-// * for that we need to execute the resolution closure and afterwards the dependencies closure
-// * PROBLEM: we cannot execute the closure as the methods used in the closure are not known here
-// * To circumvent this problem a class "BuildConfigParser" is implemented (see below) which implements methodMissing
-// * An instance of the BuildConfigParser class is used as the delegate for the resolution closure and the closure is
-//   changed to resolve methods first through the delegate
-// * The methodMissing method looks at the method name which has been invoked and does the same game again for the
-//   dependency closure
-// * For all methods called "compile" or "runtime" the first argument is inspected, split at ":" and looked whether it
-//   refers to a JUMMP Plugin. If it is the case, its name is extracted, the corresponding JummpPluginConfig class is 
-//   loaded and finally its configure closure gets executed.
-//
-// With other words: MAGIC HAPPENS HERE
-GrailsClassLoader classLoader = new GrailsClassLoader()
-ConfigSlurper slurper = new ConfigSlurper()
-ConfigObject buildConfig = slurper.parse(classLoader.loadClass("BuildConfig"))
-resolutionClosure = buildConfig.grails.project.dependency.resolution
-
-class BuildConfigParser {
-    private ClassLoader classLoader
-    private def jummp
-    private def jummpConfig
-
-    BuildConfigParser(ClassLoader cl, def jummp, def jummpConfig) {
-        this.classLoader = cl
-        this.jummp = jummp
-        this.jummpConfig = jummpConfig
-    }
-
-    def methodMissing(String name, args) {
-        if (name == "dependencies") {
-            def dependenciesClosure = args[0]
-            dependenciesClosure.resolveStrategy = Closure.DELEGATE_FIRST
-            dependenciesClosure.delegate = this
-            dependenciesClosure.call()
-        }
-        if (name == "compile" || name == "runtime") {
-            // this is a jar
-            String jarName = (args[0] as String).split(":")[1]
-            if (jarName.startsWith("grails-plugin-jummp-plugin-")) {
-                def pluginName = jarName.minus("grails-plugin-jummp-plugin-")
-                try {
-                    /*
-                     * Ideally this would work, but it is too early for the PluginManager to be created, as there is no
-                     * grailsApplication yet.
-                     */
-/*
-                    GrailsPlugin plugin = Holders.currentPluginManager().getGrailsPlugin(jarName)
-                    assertNotNull(plugin)
-                    def pluginLocation = plugin.getPluginPath()
-*/
-                    /*
-                     * We need a servlet context with the correct base path, which is not always cwd. We also run into
-                     * trouble because ctx.getResource("/WEB-INF/lib") does not exist in run-app() or run-war(), so there
-                     * is no apparent silver bullet.
-                    */
-/*
-                    final File PLUGIN_LOCATION
-                    PluginPathAwareFileSystemResourceLoader loader = new PluginPathAwareFileSystemResourceLoader()
-                    MockServletContext servletContext = new MockServletContext(loader)
-                    def pluginLibs = servletContext.getResource("/pluginlibs")?.getFile()
-                    def webInfLibs = servletContext.getResource("/WEB-INF/lib")?.getFile()
-                    if (null == pluginLibs) {
-                        if (null == webInfLibs) {
-                            println "\t catch-all rescue code needed for ${pluginName}. "
-                            PLUGIN_LOCATION = new File("/home/mglont/projects/model-repository/pluginlibs")
-                        } else {
-                            PLUGIN_LOCATION = new File(webInfLibs)
-                        }
-                    } else {
-                        PLUGIN_LOCATION = new File(pluginLibs)
-                    }
-*/
-                    // TODO This approach is know to fail in a servlet container context.
-                    final File PLUGIN_LOCATION = new File("pluginlibs/")
-                    def pluginPattern = Pattern.compile("${jarName}-[0-9]+\\.[0-9]+-[0-9]+\\.jar")
-                    def pluginVersions = PLUGIN_LOCATION.listFiles().findAll { it.getName().matches(pluginPattern)}
-                    def pluginFile = pluginVersions.max {it.getName().minus("${jarName}-0.1-").minus(".jar") as int}
-                    def pluginJar = new JarFile(pluginFile)
-                    def configClass = pluginJar.entries().find{it.getName().matches(".*JummpPluginConfig\\.class")} 
-                    String className = configClass.getName().replace("${File.separator}", ".").minus(".class")
-                    def jummpPluginConfig = classLoader.loadClass(className)
-                    try {
-                        jummpPluginConfig.configure(jummp, jummpConfig)
-                    } catch (MissingMethodException ignored) {
-                        println "Plugin ${pluginName} does not provide the configure closure"
-                    }
-                } catch (ClassNotFoundException ignored) {
-                    println "Plugin ${pluginName} does not provide a configuration"
-                }
-            }
-        }
-    }
-}
-resolutionClosure.resolveStrategy = Closure.DELEGATE_FIRST
-resolutionClosure.delegate = new BuildConfigParser(classLoader, jummp, jummpConfig)
-resolutionClosure.call()
 
 grails.plugins.springsecurity.controllerAnnotations.staticRules = jummp.controllerAnnotations
 
@@ -515,8 +400,6 @@ environments {
 if (pluginsToExclude) {
     grails.plugin.exclude = pluginsToExclude
 }
-// fails the ant test script
-grails.enable.native2ascii=false
 
 // weceem
 grails.mime.file.extensions = false

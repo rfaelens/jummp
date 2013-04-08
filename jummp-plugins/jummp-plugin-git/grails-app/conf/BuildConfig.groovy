@@ -30,20 +30,13 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
         mavenRepo "http://download.eclipse.org/jgit/maven"
-        flatDir name: 'jummpPlugins', dirs: "../../pluginlibs"
+        flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.5'
         compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
-        // plugin dependencies
-        compile(":grails-plugin-jummp-plugin-security:latest.integration") {
-            changing = true
-        }
-        compile(":grails-plugin-jummp-plugin-core-api:latest.integration") {
-            changing = true
-        }
     }
     plugins {
         compile ":spring-security-core:1.2.7.2"
@@ -57,3 +50,5 @@ grails.project.dependency.resolution = {
         build ":tomcat:$grailsVersion"
     }
 }
+grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"
+grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"
