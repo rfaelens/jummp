@@ -14,7 +14,6 @@ class JummpPluginConfigurationGrailsPlugin {
     def author = "Your name"
     def authorEmail = ""
     def developers = [
-        [ name: "Robert Haelke", email: "robert.haelke@googlemail.com"],
         [ name: "Mihai Glonț", email: "mihai.glont@ebi.ac.uk" ]
     ]
     def title = "Plugin summary/headline"
