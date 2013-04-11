@@ -61,7 +61,7 @@ grails.project.dependency.resolution = {
     plugins {
         compile ":perf4j:0.1.1"
         compile ":spring-security-core:1.2.7.2"
-        compile(":spring-security-ldap:1.0.5") {export = false}
+        compile(":spring-security-ldap:1.0.6")
         compile ":jms:1.2"
         test ":code-coverage:1.2.5"
 
@@ -78,3 +78,8 @@ grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"
 grails.plugin.location.'jummp-plugin-bives'="../jummp-plugin-bives"
 grails.plugin.location.'jummp-plugin-sbml'="../jummp-plugin-sbml"
 grails.plugin.location.'jummp-plugin-remote'="../jummp-plugin-remote"
+
+//ensure that AST.jar is put in the right place. See ../../scripts/AST.groovy
+if ("jummp-plugin-jms".equals(appName)) {
+    System.setProperty("jummp.basePath", "${new File('../../').getAbsolutePath()}")
+}
