@@ -197,7 +197,7 @@ jummp.controllerAnnotations = [
 if ((jummpConfig.jummp.security.ldap.enabled instanceof ConfigObject) || !Boolean.parseBoolean(jummpConfig.jummp.security.ldap.enabled)) {
     jummp.security.ldap.enabled = false
     println("Excluding ldap")
-    pluginsToExclude << "spring-security-ldap"
+    pluginsToExclude << "springSecurityLdap"
 } else {
     println("using ldap")
     jummp.security.ldap.enabled = true
@@ -398,7 +398,7 @@ environments {
 }
 
 if (pluginsToExclude) {
-    grails.plugin.exclude = pluginsToExclude
+    grails.plugin.excludes = pluginsToExclude
 }
 
 // weceem

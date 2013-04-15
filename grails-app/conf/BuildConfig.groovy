@@ -22,6 +22,7 @@ grails.project.dependency.resolution = {
         grailsPlugins()
         grailsHome()
         grailsCentral()
+        ebr()
 
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
@@ -75,7 +76,7 @@ grails.project.dependency.resolution = {
          */ 
         //compile 'org.slf4j:slf4j-api:1.6.1' 
         // jms
-        /*runtime('org.apache.activemq:activeio-core:3.1.2',
+        runtime('org.apache.activemq:activeio-core:3.1.2',
                 'org.apache.activemq:activemq-core:5.5.0',
                 'org.apache.activemq:activemq-spring:5.5.0',
                 'org.apache.xbean:xbean-spring:3.7') {
@@ -91,12 +92,12 @@ grails.project.dependency.resolution = {
                     'slf4j-api',
                     'xalan',
                     'xml-apis'
-        }*/
+        }
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit' }
 
         //git
         runtime 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
-      
+
         compile("net.sourceforge.cobertura:cobertura:1.9.4.1") { 
             excludes 'asm',
                       'ant',
@@ -110,7 +111,7 @@ grails.project.dependency.resolution = {
 
     plugins {
         compile ":perf4j:0.1.1"
-        //compile ":jms:1.2"
+        compile ":jms:1.2"
         compile ":executor:0.3"
         compile ":mail:1.0"
         //compile ":quartz:0.4.2"
@@ -121,7 +122,7 @@ grails.project.dependency.resolution = {
         compile ":spring-security-acl:1.1"
         compile ":svn:1.0.2"
         runtime ":spring-security-core:1.2.7.2"
-        runtime(":spring-security-ldap:1.0.5") { export  = false }
+        runtime ":spring-security-ldap:1.0.6"
         compile ":lesscss:1.0.0"
         test ":code-coverage:1.2.5"
         test(":codenarc:0.16.1") { transitive = false }
@@ -158,7 +159,7 @@ grails.plugin.location.'jummp-plugin-dbus' = "jummp-plugins/jummp-plugin-dbus"
 grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plugin-simple-logging"
 grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"
 //grails.plugin.location.'jummp-plugin-jms-remote' = "jummp-plugins/jummp-plugin-jms-remote"
-//grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
+grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
 
 // Remove libraries not needed in production mode
 grails.war.resources = { stagingDir ->
