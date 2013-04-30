@@ -131,8 +131,11 @@ grails.project.dependency.resolution = {
             excludes 'xstream', 
                         'quartz',
                         'jquery', 
-                        'jquery-ui' 
+                        'jquery-ui',
+                        'searchable'
         }
+        // needed for compatibility with Grails 2.2+
+        compile ":searchable:0.6.4"
         compile ":jquery-datatables:1.7.5"
         compile ":jquery-ui:1.8.15"
 

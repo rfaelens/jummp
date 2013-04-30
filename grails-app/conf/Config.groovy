@@ -123,7 +123,7 @@ log4j = {
         rollingFile name: "jummpAppender", file: "logs/jummp-core.log", threshold: org.apache.log4j.Level.WARN
         rollingFile name: "eventsAppender", file: "logs/jummp-events.log", threshold: org.apache.log4j.Level.INFO
 
-        // change the threshold to DEBUG to have debug output in development modus
+        // change the threshold to DEBUG to have debug output in development mode
         console name: "stdout", threshold: org.apache.log4j.Level.ERROR
     }
 
