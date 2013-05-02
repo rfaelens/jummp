@@ -1,12 +1,19 @@
 // configuration for plugin testing - will not be included in the plugin zip
+Properties jummpProps = new Properties()
+try {
+    jummpProps.load(new FileInputStream("${userHome}${System.getProperty('file.separator')}.jummp.properties"))
+}
+catch (Exception ignored) {
+}
+def cfg = new ConfigSlurper().parse(jummpProps)
+jummp.vcs.workingDirectory = cfg.jummp.vcs.workingDirectory
+jummp.vcs.exchangeDirectory = cfg.jummp.vcs.exchangeDirectory
  
 log4j = {
-    // Example of changing the log pattern for the default console
-    // appender:
-    //
-    //appenders {
-    //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
-    //}
+    // as of Grails 2.2.2, the stacktrace goes to java.io.tmpdir or Tomcat's logs folder
+    appenders {
+        file name: "stacktrace", append: true, file: "logs/jummp-plugin-subversion_stacktrace.log"
+    }
 
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP
@@ -21,6 +28,8 @@ log4j = {
            'net.sf.ehcache.hibernate'
 
     warn   'org.mortbay.log'
+    rollingFile name: "pluginAppender", file: "logs/jummp-plugin-subversion.log", threshold: org.apache.log4j.Level.ALL
+    info  pluginAppender: [ 'grails.app', 'net.biomodels.jummp.plugins.subversion' ]
 }
 
 grails.views.default.codec="none" // none, html, base64

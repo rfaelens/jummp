@@ -40,12 +40,12 @@ Brief description of the plugin.
             println("using subversion as vcs backend")
             application.config.jummp.vcs.pluginServiceName = "svnManagerFactory"
             application.config.jummp.plugins.subversion.enabled = true
-            jummp.plugins.subversion.localRepository = jummpConfig.jummp.plugins.subversion.localRepository
+            application.config.jummp.plugins.subversion.localRepository = jummpConfig.jummp.plugins.subversion.localRepository
         }
 
-        if (Environment.getCurrent() == Environment.TEST) {
+//        if (Environment.getCurrent() == Environment.TEST) {
             servletContext(org.springframework.mock.web.MockServletContext)
-        }
+//        }
         svnManagerFactory(SvnManagerFactory) {
             grailsApplication = ref("grailsApplication")
             servletContext = ref("servletContext")

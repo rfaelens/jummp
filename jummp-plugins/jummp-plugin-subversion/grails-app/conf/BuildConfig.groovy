@@ -32,9 +32,6 @@ grails.project.dependency.resolution = {
         flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-
-        // runtime 'mysql:mysql-connector-java:5.1.5'
     }
     plugins {
         compile ":spring-security-core:1.2.7.2"
