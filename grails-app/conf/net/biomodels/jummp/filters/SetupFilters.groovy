@@ -16,7 +16,7 @@ import org.springframework.beans.factory.InitializingBean
  * When the file exists and the firstRun property is false all access to SetupController
  * are blocked as the application is already configured.
  *
- * @see net.biomodels.jummp.controllers.SetupController
+ * @see net.biomodels.jummp.plugins.configuration.SetupController
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class SetupFilters implements InitializingBean {
