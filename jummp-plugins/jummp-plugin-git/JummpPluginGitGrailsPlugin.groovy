@@ -38,6 +38,7 @@ Brief description of the plugin.
         def jummpConfig = new ConfigSlurper().parse(props)
         if (jummpConfig.jummp.vcs.plugin == "git") {
             println("using git as vcs backend")
+            application.config.jummp.vcs.plugin = "git"
             application.config.jummp.vcs.pluginServiceName = "gitManagerFactory"
             application.config.jummp.plugins.git.enabled = true
         }

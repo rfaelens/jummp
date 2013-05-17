@@ -38,6 +38,7 @@ Brief description of the plugin.
         def jummpConfig = new ConfigSlurper().parse(props)
         if (jummpConfig.jummp.vcs.plugin == "subversion") {
             println("using subversion as vcs backend")
+            application.config.jummp.vcs.plugin = "subversion"
             application.config.jummp.vcs.pluginServiceName = "svnManagerFactory"
             application.config.jummp.plugins.subversion.enabled = true
             application.config.jummp.plugins.subversion.localRepository = jummpConfig.jummp.plugins.subversion.localRepository
