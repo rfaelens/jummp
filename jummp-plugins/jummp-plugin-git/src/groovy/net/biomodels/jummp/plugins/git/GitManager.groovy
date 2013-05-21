@@ -30,8 +30,231 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
  * repository managed by the GitManger.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class GitManager implements VcsManager {
+class GitManager implements VcsManager, VcsManager_new {
+  
     private static final ReentrantLock lock = new ReentrantLock()
+    private static final AtomicInteger uid = new AtomicInteger(0)
+    private LruCache<File, Git>  initedRepositories=new LruCache<File, Git>(20);
+    private File exchangeDirectory
+    private boolean hasRemote
+
+    class LruCache<A, B> extends LinkedHashMap<A, B> {
+        private final int maxEntries;
+
+        public LruCache(final int maxEntries) {
+            super(maxEntries + 1, 1.0f, true);
+            this.maxEntries = maxEntries;
+        }
+
+        /**
+         * Returns <tt>true</tt> if this <code>LruCache</code> has more entries than the maximum specified when it was
+         * created.
+         *
+         * <p>
+         * This method <em>does not</em> modify the underlying <code>Map</code>; it relies on the implementation of
+         * <code>LinkedHashMap</code> to do that, but that behavior is documented in the JavaDoc for
+         * <code>LinkedHashMap</code>.
+         * </p>
+         *
+         * @param eldest
+         *            the <code>Entry</code> in question; this implementation doesn't care what it is, since the
+         *            implementation is only dependent on the size of the cache
+         * @return <tt>true</tt> if the oldest
+         * @see java.util.LinkedHashMap#removeEldestEntry(Map.Entry)
+         */
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry<A, B> eldest) {
+            return super.size() > maxEntries;
+        }
+    }
+    
+    public void initRepository(File modelDirectory, File exchangeDirectory) {
+        lock.lock()
+        try {
+            if (initedRepositories.containsKey(modelDirectory)) {
+                //throw new VcsAlreadyInitedException()
+                return;
+            }
+            if (!modelDirectory.isDirectory() || !modelDirectory.exists()) {
+                throw new VcsException("Local model directory " + modelDirectory.toString() + " is either not a directory or does not exist")
+            }
+            if (!exchangeDirectory.isDirectory() || !exchangeDirectory.exists()) {
+                throw new VcsException("Exchange directory " + exchangeDirectory.toString() + " is either not a directory or does not exist")
+            }
+            this.exchangeDirectory = exchangeDirectory
+            FileRepositoryBuilder builder = new FileRepositoryBuilder()
+            Repository repository = builder.setWorkTree(modelDirectory)
+            .readEnvironment() // scan environment GIT_* variables
+            .findGitDir(modelDirectory) // scan up the file system tree
+            .build()
+            Git git = new Git(repository)
+
+            String branchName
+            String fullBranch = repository.getFullBranch()
+            if (!fullBranch) {
+                
+                try
+                {
+                    createGitRepo(modelDirectory)
+                }
+                catch(Exception e)
+                {
+                    throw new VcsException(e.toString());
+                }
+                git=initRepository(modelDirectory, exchangeDirectory)
+                repository=git.getRepository();
+                fullBranch=repository.getFullBranch();
+                
+            }
+            branchName = fullBranch.substring(Constants.R_HEADS.length())
+            Config repoConfig = repository.getConfig()
+            final String remote = repoConfig.getString(
+                ConfigConstants.CONFIG_BRANCH_SECTION, branchName,
+                ConfigConstants.CONFIG_KEY_REMOTE)
+            hasRemote = (remote != null)
+            initedRepositories.put(modelDirectory,git);
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    private Git createGitRepo(File directory) {
+        InitCommand initCommand = Git.init();
+        initCommand.setDirectory(directory);
+        return initCommand.call();
+    }
+    
+    
+    public String updateModel(File modelDirectory, List<File> files, String commitMessage) {
+        String revision = null
+        lock.lock()
+        try {
+            if (!initedRepositories.containsKey(modelDirectory)) {
+                if (exchangeDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
+                initRepository(modelDirectory, exchangeDirectory);
+            }
+            revision = handleAddition(modelDirectory, files, commitMessage)
+        } finally {
+            lock.unlock()
+        }
+        return revision
+    }
+
+    public String updateModel(File modelDirectory, List<File> files) {
+        return updateFile(modelDirectory, files, "Update of ${name}")
+    }
+    
+    private void downloadFiles(File modelDirectory, List<File> addHere)
+    {
+         File[] repFiles=modelDirectory.listFiles();
+         repFiles.each
+         {
+             System.out.println(it.getName());
+             File destinationFile = new File(exchangeDirectory.absolutePath + System.getProperty("file.separator") + "git_${uid.getAndIncrement()}_" + it.getName())
+             if (!it.isDirectory())
+             {
+                 FileUtils.copyFile(it, destinationFile)
+                 addHere.add(destinationFile)
+             }
+         }
+    }
+    
+    public List<File> retrieveModel(File modelDirectory, String revision)
+    {
+        List<File> returnedFiles = new LinkedList<File>()
+        lock.lock()
+        try {
+            if (!initedRepositories.containsKey(modelDirectory)) {
+                if (workingDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
+                initRepository(modelDirectory, workingDirectory);
+            }
+            if (revision == null) {
+                // return current HEAD revision
+               downloadFiles(modelDirectory, returnedFiles);
+            } else {
+                try {
+                    // need to checkout in a temporary branch
+                    if (!getRevisions(modelDirectory).contains(revision))
+                        throw new VcsException("Revision '$revision' not found in model directory '$modelDirectory' !");
+                    String branchName = "tempa${uid.getAndIncrement()}"
+                    initedRepositories.get(modelDirectory).checkout().setName(branchName).setCreateBranch(true).setStartPoint(revision).call()
+                    downloadFiles(modelDirectory, returnedFiles);
+                    initedRepositories.get(modelDirectory).checkout().setName("master").call()
+                    initedRepositories.get(modelDirectory).branchDelete().setBranchNames(branchName).call()
+                } catch (Exception e) {
+                    throw new VcsException("Checking out file from git failed", e)
+                }
+            }
+        } finally {
+            lock.unlock()
+        }
+        return returnedFiles
+    }
+    
+    
+    
+    public List<String> getRevisions(File modelDirectory)
+    {
+        Iterator<RevCommit> log=initedRepositories.get(modelDirectory).log().call().iterator();
+        List<String> myList=new LinkedList<String>();
+        log.each
+        {
+            myList.add(it.getName())
+        }
+        return myList
+    }
+    
+
+    public void updateWorkingCopy(File modelDirectory) {
+        if (!initedRepositories.containsKey(modelDirectory)) {
+            if (exchangeDirectory==null) throw new IOException("not inited")
+            initRepository(modelDirectory, exchangeDirectory);
+        }
+        if (hasRemote) {
+            initedRepositories.get(modelDirectory).pull().call()
+        }
+    }
+
+    /**
+     * Internal implementation for git add/git commit.
+     *
+     * In git there is no difference between initial import and update of a file.
+     * This method contains the merged implementation for both import and update.
+     * It first performs a git pull, copies the file, does git add, git commit and finally a push
+     * @param source The file to copy into the clone
+     * @param destination The location inside the clone
+     * @param commitMessage The commit message 
+     */
+    private String handleAddition(File modelDirectory, List<File> files, String commitMessage) {
+        String revision
+        try {
+            updateWorkingCopy(modelDirectory)
+            Git git = initedRepositories.get(modelDirectory);
+            AddCommand add = git.add()
+            files.each
+            {
+               FileUtils.copyFile(it, new File(modelDirectory.absolutePath + File.separator + it.getName()))
+               add = add.addFilepattern(it.getName())
+            }
+            add.call()
+            RevCommit commit = git.commit().setMessage(commitMessage).call()
+            revision = commit.getId().getName()
+            if (hasRemote) {
+                git.push().call()
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new IOException("Git command could not be executed", e)
+        }
+        return revision
+    }
+    
+    
+    
+    
+    
+    
+    /*private static final ReentrantLock lock = new ReentrantLock()
     private static final AtomicInteger uid = new AtomicInteger(0)
     private File clone
     private File exchangeDirectory
@@ -42,10 +265,10 @@ class GitManager implements VcsManager {
 
     public GitManager() {
 
-    }
+    }*/
 
     public void init(File clone, File exchangeDirectory) {
-        lock.lock()
+        /*lock.lock()
         try {
             if (inited) {
                 throw new VcsAlreadyInitedException()
@@ -79,11 +302,11 @@ class GitManager implements VcsManager {
             inited = true
         } finally {
             lock.unlock()
-        }
+        }*/
     }
 
     public String importFile(File file, String name, String commitMessage) {
-        String revision = null
+        /*String revision = null
         lock.lock()
         try {
             if (!inited) {
@@ -102,7 +325,8 @@ class GitManager implements VcsManager {
         } finally {
             lock.unlock()
         }
-        return revision
+        return revision*/
+        "wont be used anymore"
     }
 
     public String importFile(File file, String name) {
@@ -110,7 +334,7 @@ class GitManager implements VcsManager {
     }
 
     public String updateFile(File file, String name, String commitMessage) {
-        String revision = null
+        /*String revision = null
         lock.lock()
         try {
             if (!inited) {
@@ -129,7 +353,8 @@ class GitManager implements VcsManager {
         } finally {
             lock.unlock()
         }
-        return revision
+        return revision*/
+        "wont be used anymore"
     }
 
     public String updateFile(File file, String name) {
@@ -137,7 +362,7 @@ class GitManager implements VcsManager {
     }
 
     public File retrieveFile(String file, String revision) {
-        File destinationFile = null
+        /*File destinationFile = null
         lock.lock()
         try {
             if (!inited) {
@@ -166,7 +391,8 @@ class GitManager implements VcsManager {
         } finally {
             lock.unlock()
         }
-        return destinationFile
+        return destinationFile*/
+        null
     }
 
     public File retrieveFile(String file) {
@@ -174,12 +400,12 @@ class GitManager implements VcsManager {
     }
 
     public void updateWorkingCopy() {
-        if (!inited) {
+        /*if (!inited) {
             throw new VcsNotInitedException()
         }
         if (hasRemote) {
             git.pull().call()
-        }
+        }*/
     }
 
     /**
@@ -193,7 +419,7 @@ class GitManager implements VcsManager {
     * @param commitMessage The commit message 
     */
     private String handleAddition(File source, String destination, String commitMessage) {
-        String revision
+        /* String revision
         try {
             updateWorkingCopy()
             FileUtils.copyFile(source, new File(clone.absolutePath + File.separator + destination))
@@ -208,6 +434,9 @@ class GitManager implements VcsManager {
         } catch (Exception e) {
             throw new VcsException("Git command could not be executed", e)
         }
-        return revision
+        return revision*/
+        return "not in use anymore"
     }
+    
+    
 }
