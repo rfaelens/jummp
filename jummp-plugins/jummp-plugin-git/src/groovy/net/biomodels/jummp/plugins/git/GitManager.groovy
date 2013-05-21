@@ -6,6 +6,9 @@ import net.biomodels.jummp.core.vcs.*
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.AddCommand
 import org.eclipse.jgit.api.Git
+import java.util.List;
+import org.eclipse.jgit.api.InitCommand
+import java.util.LinkedHashMap;
 import org.eclipse.jgit.lib.Config
 import org.eclipse.jgit.lib.ConfigConstants
 import org.eclipse.jgit.lib.Constants
@@ -158,6 +161,13 @@ class GitManager implements VcsManager, VcsManager_new {
              }
          }
     }
+    
+    
+    public List<File> retrieveModel(File modelDirectory)
+    {
+        return retrieveModel(modelDirectory, null);
+    }
+    
     
     public List<File> retrieveModel(File modelDirectory, String revision)
     {

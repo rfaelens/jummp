@@ -1,6 +1,7 @@
 package net.biomodels.jummp.core.vcs;
 
 import java.io.File;
+import java.util.List;
 
 /**
 * @short Interface for a manager of a version control system (VCS).
