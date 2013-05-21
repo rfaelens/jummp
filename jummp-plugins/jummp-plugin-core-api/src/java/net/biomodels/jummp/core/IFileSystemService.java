@@ -29,5 +29,5 @@ public interface IFileSystemService {
      *              model2001
      * this method would return the absolute path to container3
      */
-    public String getCurrentModelContainer();
+    public String findCurrentModelContainer();
 }

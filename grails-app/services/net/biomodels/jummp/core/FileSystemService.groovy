@@ -10,7 +10,7 @@ import org.springframework.beans.factory.InitializingBean
  * to fetch the location where a new repository should be created.
  *
  * @author Mihai Glonț <mglont@ebi.ac.uk>
- * @date 20130515
+ * @date 20130521
  */
 class FileSystemService implements IFileSystemService, InitializingBean {
     static transactional = true
@@ -21,22 +21,25 @@ class FileSystemService implements IFileSystemService, InitializingBean {
     /**
      * The location of the parent folder where all repositories reside.
      */
-    private File root
+    File root
+    /**
+     * The number of characters that container names have.
+     */
+    static final int CONTAINER_PATTERN_LENGTH = 3
     /**
      * The name of the first container.
      */
-    private final String containerPatternSeed = "a"*3
+    final String CONTAINER_PATTERN_SEED = "a" * CONTAINER_PATTERN_LENGTH
     /**
      * Ideally, this should be a symlink that just changes its target as needed.
-     * The path of the current container will be always absolute, but VcsManager implementations
-     * may wish to make them relative to the root folder before storing them in the database.
+     * The path of the current container is absolute.
      */
-    private String currentContainer
+    String currentModelContainer
     /**
      * The maximum number of repositories stored in the current container before a new one is
      * created.
      */
-    private final int maxContainerSize = 1000
+    int maxContainerSize = 1000
     /**
      * This class' log
      */
@@ -48,11 +51,11 @@ class FileSystemService implements IFileSystemService, InitializingBean {
      */
     void afterPropertiesSet() throws Exception {
         root = findRoot()
-        StringBuffer currentContainerPath = new StringBuffer(root.absolutePath)
-        currentContainerPath.append(File.separator).append(containerPatternSeed)
-        currentContainer = currentContainerPath.toString()
-        ensureFolderExists(currentContainer)
-        log.debug("New model to be deposited in $currentContainer")
+        StringBuffer currentModelContainerPath = new StringBuffer(root.absolutePath)
+        currentModelContainerPath.append(File.separator).append(CONTAINER_PATTERN_SEED)
+        currentModelContainer = currentModelContainerPath.toString()
+        ensureFolderExists(currentModelContainer)
+        log.debug("New model to be deposited in $currentModelContainer")
     }
 
     /**
@@ -60,13 +63,21 @@ class FileSystemService implements IFileSystemService, InitializingBean {
      *
      * This can be either the current container, or a new one, depending on the number of models we already have.
      */
-    public String getCurrentModelContainer() {
-        final int MODEL_COUNT = getModelFolders(new File(currentContainer)).length
-        if (MODEL_COUNT == maxContainerSize) {
-            currentContainer = currentContainer.next()
-            ensureFolderExists(currentContainer)
+    public String findCurrentModelContainer() {
+        final int MODEL_COUNT
+        File[] dirs = getModelFolders(new File(currentModelContainer))
+        print "dir $currentModelContainer "
+        if (dirs == null) {
+            MODEL_COUNT = 0
+        } else {
+            MODEL_COUNT = dirs.length
         }
-        return currentContainer
+        println "model count: $MODEL_COUNT"
+        if (MODEL_COUNT == maxContainerSize) {
+            currentModelContainer = currentModelContainer.next()
+            ensureFolderExists(currentModelContainer)
+        }
+        return currentModelContainer
     }
 
     /*
@@ -79,7 +90,7 @@ class FileSystemService implements IFileSystemService, InitializingBean {
             boolean accept(File root, String name) {
                 StringBuffer currentLocation = new StringBuffer(root.absolutePath)
                 currentLocation.append(File.separator).append(name)
-                final File currentEntry = new File(currentLocation)
+                final File currentEntry = new File(currentLocation.toString())
                 return (currentEntry.exists() && currentEntry.isDirectory())
             }
         })
@@ -134,7 +145,7 @@ class FileSystemService implements IFileSystemService, InitializingBean {
             return false
         }
         if (!nextContainer.exists()) {
-            boolean success = nextContainer.mkdir()
+            boolean success = nextContainer.mkdirs()
             if (!success) {
                 log.error("Cannot create directory ${nextContainer.absolutePath}. I don't know why.")
                 return false
