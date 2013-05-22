@@ -57,7 +57,7 @@ class Model implements Serializable {
     ModelTransportCommand toCommandObject() {
         // TODO: is it correct to show the latest upload date as the lastModifiedDate or does it need ACL restrictions?
         Set<String> creators = []
-        if (revisions) {
+        if (versions) {
             versions.each { version ->
                 creators.add(version.owner.userRealName)
             }

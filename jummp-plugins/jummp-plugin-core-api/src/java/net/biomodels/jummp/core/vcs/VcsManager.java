@@ -1,6 +1,7 @@
 package net.biomodels.jummp.core.vcs;
 
 import java.io.File;
+import java.util.List;
 
 /**
 * @short Interface for a manager of a version control system (VCS).
@@ -23,89 +24,87 @@ import java.io.File;
 * recommended to expect the worst and ensure locking itself, if possible. As a matter of fact
 * it is also recommended to not modify the working copy from outside the application.
 * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+* 
+* 
+* 
+* This interface has been modified from a 'file oriented' view to 'model oriented'. Here a folder 
+* is associated with a model, with files added and retrieved through specified
+* revisions of the model folder. The interface has been considerably modified including
+* the following behaviours: the initRepository no longer throws an exception if a
+* repository is already inited. Conversely, the functions that previously used to
+* throw an exception when the repository was not inited no longer do so, instead 
+* the repository should be inited. This is because repository folders are now to be
+* generated dynamically, which will make initing manually as part of the system 
+* setup infeasible.
 **/
 public interface VcsManager {
     /**
     * Initialises a working copy of the VCS.
-    * @param workingCopy The directory where the working copy should be cloned to
+    * @param modelDirectory The directory where the model repository is created
     * @param exchangeDirectory The exchange directory for retrieved files
-    * @throws VcsAlreadyInitedException If init has been called before
+    * @throws VcsException if something goes wrong (needs to be made more specific to new usage)
     **/
-    public void init(File workingCopy, File exchangeDirectory) throws VcsAlreadyInitedException;
+    public void initRepository(File modelDirectory, File exchangeDirectory) throws VcsException;
 
     /**
-    * Imports a file into the VCS.
-    * Copies @p file into the working copy of the VCS and performs an initial import
-    * to the remote location of the VCS.
-    * Use this method if the file did not exist previously.
-    * @param file The file to import
-    * @param name The name of the to be used in the VCS. If @c null the file's name is used.
+    * Imports files into the model repository
+    * Copies @p files into the model directory of the VCS, with a single commit
+    * @param modelDirectory the model directory
+    * @param files the files to import
     * @param commitMessage The commit message to be used for the import.
-    * @return Revision number of inserted file
-    * @throws FileAlreadyVersionedException If the file already exists in the working copy
-    * @see updateFile
+    * @return Revision corresponding to the commit
+    * @throws VcsException
     **/
-    public String importFile(File file, String name, String commitMessage) throws FileAlreadyVersionedException;
+    public String updateModel(File modelDirectory, List<File> files, String commitMessage) throws VcsException;
 
     /**
-     * Overloaded method for convenience using a default commit message.
-     * @param file The file to import
-     * @param name The name of the to be used in the VCS. If @c null the file's name is used.
-     * @return Revision number of inserted file
-     * @throws FileAlreadyVersionedException If the file already exists in the working copy
-     * @see importFile(File file, String name, String commitMessage)
+    * Overloaded method for convenience using a default commit message.
+    * Copies @p files into the model directory of the VCS, with a single commit
+    * @param modelDirectory the model directory
+    * @param files the files to import
+    * @return Revision corresponding to the commit
+    * @see updateModel
+    * @throws VcsException
      */
-    public String importFile(File file, String name) throws FileAlreadyVersionedException;
+    public String updateModel(File modelDirectory, List<File> files) throws VcsException;
 
     /**
-    * Updates a file previously imported to the VCS.
-    * Copies @p file into the working copy of the VCS and updates the existing file in the
-    * VCS and the remote location of the VCS.
-    * Use this method if the file had been imported previously.
-    * @param file The file to update
-    * @param name The name of the file in the VCS. If @c null the file's name is used.
-    * @param commitMessage The commit message to be used for the update.
-    * @return Revision number of updated file
-    * @throws FileNotVersionedException If the file does not exist in the working copy
-    * @see importFile
-    **/
-    public String updateFile(File file, String name, String commitMessage) throws FileNotVersionedException;
-
-    /**
-     * Overloaded method for convenience using a default commit message.
-     * @param file The file to update
-     * @param name The name of the file in the VCS. If @c null the file's name is used.
-     * @return Revision number of updated file
-     * @throws FileNotVersionedException If the file does not exist in the working copy
-     * @see updateFile(File file, String name, String commitMessage)
-     */
-    public String updateFile(File file, String name) throws FileNotVersionedException;
-
-    /**
-    * Retrieves the @p file of given @p revision.
-    * Copies the @p file from the working copy to the exchange directory. If the version is the
-    * current head this results in a single copy operation. If a previous revision is required
-    * a VCS depending operation is performed to retrieve the revision from the remote VCS.
-    * It is the responsibility of the caller to delete the file in the exchange directory, when
-    * it is not required any more.
-    * @param file The name of the file in the working copy
+    * Retrieves files at the @p modelDirectory  of given @p revision.
+    * Copies the files from @p modelDirectory to the exchange directory. If the version is the
+    * current head (specified by passing null as revision) this results in copying the 
+    * current model directory to the exchange directory. If a previous revision is required
+    * a VCS depending operation is performed to retrieve the revision from VCS.
+    * It is the responsibility of the caller to delete the files in the exchange directory, when
+    * they is not required any more.
+    * @param modelDirectory the model directory
     * @param revision The revision of the file. If @c null HEAD will be used.
-    * @return The file in the exchange location
-    * @throws FileNotVersionedException If the file does not exist in the working copy
+    * @return The list of files in the exchange location
+    * @throws VcsException if the revision is not found
     */
-    public File retrieveFile(String file, String revision) throws FileNotVersionedException;
+    public List<File> retrieveModel(File modelDirectory, String revision) throws VcsException;
 
     /**
      * Overloaded method for convenience passing null as revision
-     * @param file The name of the file in the working copy
-     * @return The file in the exchange location
-     * @throws FileNotVersionedException If the file does not exist in the working copy
+     * @param modelDirectory the model directory
+     * @return The list of files in the exchange location
+     * @throws VcsException if an error occurs (needs to be made more specific
      * @see retrieveFile(String file, String revision)
      */
-    public File retrieveFile(String file) throws FileNotVersionedException;
+    public List<File> retrieveModel(File modelDirectory) throws VcsException;
 
+    
+    /**
+    * Retrieves the revision ids from @p modelDirectory
+    * Returns the revision ids associated with the modelDirectory in the repository
+    * @param modelDirectory the model directory
+    */
+    public List<String> getRevisions(File modelDirectory);
+    
+    
     /**
     * Updates the working copy to the latest remote HEAD.
     */
-    public void updateWorkingCopy();
+    public void updateWorkingCopy(File modelDirectory);
+
+
 }
