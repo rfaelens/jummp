@@ -66,13 +66,11 @@ class FileSystemService implements IFileSystemService, InitializingBean {
     public String findCurrentModelContainer() {
         final int MODEL_COUNT
         File[] dirs = getModelFolders(new File(currentModelContainer))
-        print "dir $currentModelContainer "
         if (dirs == null) {
             MODEL_COUNT = 0
         } else {
             MODEL_COUNT = dirs.length
         }
-        println "model count: $MODEL_COUNT"
         if (MODEL_COUNT == maxContainerSize) {
             currentModelContainer = currentModelContainer.next()
             ensureFolderExists(currentModelContainer)
