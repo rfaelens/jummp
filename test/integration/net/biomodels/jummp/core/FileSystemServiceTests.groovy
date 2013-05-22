@@ -50,7 +50,6 @@ class FileSystemServiceTests {
             sb.append(File.separator).append(UUID.randomUUID().toString())
             File m = new File(sb.toString())
             boolean result = m.mkdirs()
-            println "${m.absolutePath} ${result}"
         }
     }
 }

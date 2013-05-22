@@ -98,60 +98,6 @@
         <grails command="coverage-report" cwd="${basedir}"/>
     </target>
 
-    <target name="packagePlugin">
-        <grails command="clean" cwd="${pluginBaseDir}/jummp-plugins/jummp-plugin-${plugin}"/>
-        <grails command="jummp-plugin" cwd="${pluginBaseDir}/jummp-plugins/jummp-plugin-${plugin}"/>
-    </target>
-
-    <target name="packagePlugins">
-        <antcall target="packagePlugin">
-            <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="security"/>
-        </antcall>
-        <antcall target="packagePlugin">
-            <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="core-api"/>
-        </antcall>
-        <antcall target="packagePlugin">
-            <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="sbml"/>
-        </antcall>
-        <antcall target="packagePlugin">
-            <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="simple-logging"/>
-        </antcall>
-        <antcall target="packagePlugin">
-            <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="configuration"/>
-        </antcall>
-        <antcall target="packagePlugin">
-            <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="git"/>
-        </antcall>
-<!--
-        <antcall target="packagePlugin">
-            <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="subversion"/>
-        </antcall>
--->
-        <antcall target="packagePlugin">
-            <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="remote"/>
-        </antcall>
-        <antcall target="packagePlugin">
-            <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="dbus"/>
-        </antcall>
-        <antcall target="packagePlugin">
-            <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="bives"/>
-        </antcall>
-        <antcall target="packagePlugin">
-            <param name="pluginBaseDir" value="${basedir}"/>
-            <param name="plugin" value="web-application"/>
-        </antcall>
-    </target>
-
     <!-- Copies the sources to a build directory excluding not needed files and directories -->
     <target name="copy">
         <property name="builddir" value="${basedir}/build"/>
