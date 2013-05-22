@@ -3,7 +3,7 @@ package net.biomodels.jummp.core
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
-import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.model.ModelVersion
 
 /**
  * @short Service to handle Model files.
@@ -80,6 +80,22 @@ class ModelFileFormatService {
             return false
         }
     }
+    
+    
+    /**
+     * Validates the Model file in specified @p format.
+     * @param model The Model file to validate.
+     * @param format The format of the Model file
+     * @return @c true, if the @p model is valid, @c false otherwise
+     */
+    boolean validate(final List<File> modelFiles, final ModelFormat format) {
+          boolean retval=true;
+          modelFiles.each
+          {
+             retval=retval && validate(it, format);
+          }
+          return retval
+       }
 
     /**
      * Extracts the name of the Model from the @p model in specified @p format.
@@ -102,10 +118,10 @@ class ModelFileFormatService {
      * @param rev The Revision for which all URNs should be retrieved
      * @return List of all URNs used in the Revision
      */
-    List<String> getAllAnnotationURNs(Revision rev) {
-        FileFormatService service = serviceForFormat(rev.format)
+    List<String> getAllAnnotationURNs(ModelVersion ver) {
+        FileFormatService service = serviceForFormat(ver.format)
         if (service) {
-            return service.getAllAnnotationURNs(rev.toCommandObject())
+            return service.getAllAnnotationURNs(ver.toCommandObject())
         } else {
             return []
         }
@@ -117,10 +133,10 @@ class ModelFileFormatService {
      * @param rev The Revision for which all pubmed annotations should be retrieved
      * @return List of all pubmeds used in the Revision
      */
-    List<String> getPubMedAnnotation(Revision rev) {
-        FileFormatService service = serviceForFormat(rev.format)
+    List<String> getPubMedAnnotation(ModelVersion ver) {
+        FileFormatService service = serviceForFormat(ver.format)
         if (service) {
-            return service.getPubMedAnnotation(rev.toCommandObject())
+            return service.getPubMedAnnotation(ver.toCommandObject())
         } else {
             return []
         }

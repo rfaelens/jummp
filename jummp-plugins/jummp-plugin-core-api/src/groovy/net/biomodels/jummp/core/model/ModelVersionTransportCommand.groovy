@@ -10,13 +10,13 @@ package net.biomodels.jummp.core.model
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class RevisionTransportCommand implements Serializable {
+class ModelVersionTransportCommand implements Serializable {
     private static final long serialVersionUID = 1L
     Long id
     /**
      * Revision number in reference to the Model and not to the VCS.
      */
-    Integer revisionNumber
+    Integer versionNumber
     /**
      * The real name of the user who uploaded the Revision.
      */
@@ -24,7 +24,7 @@ class RevisionTransportCommand implements Serializable {
     /**
      * Whether the revision is a minor change or not.
      */
-    Boolean minorRevision
+    Boolean minorVersion
     /**
      * The "commit message" of this revision.
      */
@@ -36,7 +36,7 @@ class RevisionTransportCommand implements Serializable {
     /**
      * The format of the file in the VCS.
      */
-    ModelFormatTransportCommand format
+    //ModelFormatTransportCommand format
     /**
      * The model the revision belongs to
      */

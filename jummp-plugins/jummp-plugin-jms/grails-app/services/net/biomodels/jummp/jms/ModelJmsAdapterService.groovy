@@ -5,7 +5,7 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
-import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ModelVersionTransportCommand
 import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.io.FileUtils
 import org.springframework.security.access.AccessDeniedException
@@ -103,14 +103,14 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      */
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long])
-    def getLatestRevision(def message) {
-        def revision = null
-        revision = modelDelegateService.getLatestRevision(message[1])
+    def getLatestVersion(def message) {
+        def version = null
+        version = modelDelegateService.getLatestVersion(message[1])
 
-        if (revision == null) {
-            return new AccessDeniedException("No access to any revision of Model ${message[1].id}")
+        if (version == null) {
+            return new AccessDeniedException("No access to any version of Model ${message[1].id}")
         } else {
-            return revision
+            return version
         }
     }
 
@@ -121,16 +121,16 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      */
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long])
-    def getAllRevisions(def message) {
+    def getAllVersions(def message) {
         def result = []
-        result = modelDelegateService.getAllRevisions(message[1])
+        result = modelDelegateService.getAllVersions(message[1])
         return result
     }
 
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Integer])
-    def getRevision(def message) {
-        return modelDelegateService.getRevision((Long)message[1], (Integer)message[2])
+    def getVersion(def message) {
+        return modelDelegateService.getVersion((Long)message[1], (Integer)message[2])
     }
 
     /**
@@ -174,12 +174,12 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      */
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long, byte[], ModelFormatTransportCommand, String])
-    def addRevision(def message) {
+    def addVersion(def message) {
         def result
 
         File file = File.createTempFile("jummpJms", null)
         file.append(message[2])
-        result = modelDelegateService.addRevision(message[1], file, message[3], (String)message[4])
+        result = modelDelegateService.addVersion(message[1], file, message[3], (String)message[4])
         FileUtils.deleteQuietly(file)
 
         return result
@@ -192,9 +192,9 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      */
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long])
-    def canAddRevision(def message) {
+    def canAddVersion(def message) {
         def result
-        result = modelDelegateService.canAddRevision(message[1])
+        result = modelDelegateService.canAddVersion(message[1])
         return result
     }
 
@@ -205,14 +205,14 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
      */
     @Queue
     def retrieveModelFile(def message) {
-        if (!verifyMessage(message, [String, RevisionTransportCommand]) &&
+        if (!verifyMessage(message, [String, ModelVersionTransportCommand]) &&
             !verifyMessage(message, [String, Long])) {
-            return new IllegalArgumentException("AuthenticationHash and Revision or Model as arguments expected")
+            return new IllegalArgumentException("AuthenticationHash and Version or Model as arguments expected")
         }
 
         setAuthentication((String)message[0])
-        if (message[1] instanceof RevisionTransportCommand) {
-            return modelDelegateService.retrieveModelFile((RevisionTransportCommand)message[1])
+        if (message[1] instanceof ModelVersionTransportCommand) {
+            return modelDelegateService.retrieveModelFile((ModelVersionTransportCommand)message[1])
         } else {
             return modelDelegateService.retrieveModelFile(message[1])
         }
@@ -288,14 +288,14 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
 
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Integer])
-    def deleteRevision(def message) {
-        return modelDelegateService.deleteRevision(modelDelegateService.getRevision(message[1], message[2]))
+    def deleteVersion(def message) {
+        return modelDelegateService.deleteVersion(modelDelegateService.getVersion(message[1], message[2]))
     }
 
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long, Integer])
-    def publishModelRevision(def message) {
-        modelDelegateService.publishModelRevision(modelDelegateService.getRevision(message[1], message[2]))
+    def publishModelVersion(def message) {
+        modelDelegateService.publishModelVersion(modelDelegateService.getVersion(message[1], message[2]))
         return true
     }
 

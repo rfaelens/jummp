@@ -1,6 +1,6 @@
 package net.biomodels.jummp.core.miriam
 
-import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ModelVersionTransportCommand
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONObject
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -55,7 +55,7 @@ class GeneOntologyTreeLevel implements Serializable {
     /**
      * List of revisions in this level
      */
-    List<RevisionTransportCommand> revisions = []
+    List<ModelVersionTransportCommand> versions = []
 
     /**
      * Adds another Gene Ontology to this level if not already present.
@@ -82,16 +82,16 @@ class GeneOntologyTreeLevel implements Serializable {
      * @param revision The Revision to add
      * @throws IllegalArgumentException Thrown if the revision has no id.
      */
-    public void addRevision(RevisionTransportCommand revision) throws IllegalArgumentException {
-        if (!revision.id) {
-            throw new IllegalArgumentException("Revision has no Id")
+    public void addVersion(ModelVersionTransportCommand version) throws IllegalArgumentException {
+        if (!version.id) {
+            throw new IllegalArgumentException("Version has no Id")
         }
-        for (RevisionTransportCommand rev in revisions) {
-            if (rev.id == revision.id) {
+        for (ModelVersionTransportCommand ver in versions) {
+            if (ver.id == version.id) {
                 return
             }
         }
-        revisions << revision
+        versions << version
     }
 
     public static GeneOntologyTreeLevel fromJSON(String json) {
@@ -104,9 +104,9 @@ class GeneOntologyTreeLevel implements Serializable {
             }
             level.addOntology(ontology.id, ontology.identifier, ontology.name, type)
         }
-        parsedJSON.revisions.each { revision ->
-            level.addRevision(new RevisionTransportCommand(id: revision.id, revisionNumber: revision.revisionNumber,
-                    model: new ModelTransportCommand(id: revision.model.id, name: revision.model.name)))
+        parsedJSON.versions.each { version ->
+            level.addVersion(new ModelVersionTransportCommand(id: version.id, versionNumber: version.versionNumber,
+                    model: new ModelTransportCommand(id: version.model.id, name: version.model.name)))
         }
         return level
     }

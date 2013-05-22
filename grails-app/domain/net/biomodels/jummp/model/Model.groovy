@@ -21,7 +21,7 @@ class Model implements Serializable {
      * IMPORTANT: never access revisions directly as this circumvents the ACL!
      * Use ModelService.getAllRevisions()
      */
-    static hasMany = [revisions: Revision]
+    static hasMany = [versions: ModelVersion]
     /**
      * The name of the Model
      */
@@ -47,8 +47,8 @@ class Model implements Serializable {
     static constraints = {
         vcsIdentifier(nullable: false, blank: false, unique: true)
         name(nullable: false, unique: true, blank: false)
-        revisions(nullable: false, validator: { revs ->
-            return !revs.isEmpty()
+        versions(nullable: false, validator: { vers ->
+            return !vers.isEmpty()
         })
         state(nullable: false)
         publication(nullable: true)
@@ -58,16 +58,16 @@ class Model implements Serializable {
         // TODO: is it correct to show the latest upload date as the lastModifiedDate or does it need ACL restrictions?
         Set<String> creators = []
         if (revisions) {
-            revisions.each { revision ->
-                creators.add(revision.owner.userRealName)
+            versions.each { version ->
+                creators.add(version.owner.userRealName)
             }
         }
         return new ModelTransportCommand(id: id, name: name, state: state,
-                lastModifiedDate: revisions ? revisions.sort{ it.revisionNumber }.last().uploadDate : null,
-                format: revisions ? revisions.sort{ it.revisionNumber }.last().format.toCommandObject() : null,
+                lastModifiedDate: versions ? versions.sort{ it.versionNumber }.last().uploadDate : null,
+                format: versions ? versions.sort{ it.versionNumber }.last().format.toCommandObject() : null,
                 publication: publication ? publication.toCommandObject() : null,
-                submitter: revisions ? revisions.sort{ it.revisionNumber }.first().owner.userRealName : null,
-                submissionDate: revisions ? revisions.sort{ it.revisionNumber }.first().uploadDate : null,
+                submitter: versions ? versions.sort{ it.versionNumber }.first().owner.userRealName : null,
+                submissionDate: versions ? versions.sort{ it.versionNumber }.first().uploadDate : null,
                 creators: creators
         )
     }

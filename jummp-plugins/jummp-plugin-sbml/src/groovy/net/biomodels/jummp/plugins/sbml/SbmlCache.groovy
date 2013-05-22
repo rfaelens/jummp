@@ -1,7 +1,7 @@
 package net.biomodels.jummp.plugins.sbml
 
 import org.sbml.jsbml.SBMLDocument
-import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ModelVersionTransportCommand
 import java.util.AbstractMap.SimpleEntry
 import java.util.concurrent.locks.ReentrantLock
 
@@ -18,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock
  *
  * @autor Martin Gräßlin <m.graesslin@dkfz.de> 
  */
-class SbmlCache<K extends RevisionTransportCommand, V extends SBMLDocument> implements Map<K, V> {
+class SbmlCache<K extends ModelVersionTransportCommand, V extends SBMLDocument> implements Map<K, V> {
 
     /**
      * Internal cache extending LinkedHashMap with the contract of a last recently used cache.
@@ -76,7 +76,7 @@ class SbmlCache<K extends RevisionTransportCommand, V extends SBMLDocument> impl
     }
 
     boolean containsKey(Object key) {
-        if (key instanceof RevisionTransportCommand) {
+        if (key instanceof ModelVersionTransportCommand) {
             boolean contains = false
             lock.lock()
             try {
@@ -106,7 +106,7 @@ class SbmlCache<K extends RevisionTransportCommand, V extends SBMLDocument> impl
     }
 
     V get(Object key) {
-        if (key instanceof RevisionTransportCommand) {
+        if (key instanceof ModelVersionTransportCommand) {
             V value = null
             lock.lock()
             try {
@@ -131,7 +131,7 @@ class SbmlCache<K extends RevisionTransportCommand, V extends SBMLDocument> impl
     }
 
     V remove(Object key) {
-        if (key instanceof RevisionTransportCommand) {
+        if (key instanceof ModelVersionTransportCommand) {
             V value = null
             lock.lock()
             try {
@@ -175,11 +175,11 @@ class SbmlCache<K extends RevisionTransportCommand, V extends SBMLDocument> impl
         } finally {
             lock.unlock()
         }
-        Set<K> revisions = []
+        Set<K> versions = []
         keys.each {
-            revisions.add((K)(new RevisionTransportCommand(id: it)))
+            versions.add((K)(new ModelVersionTransportCommand(id: it)))
         }
-        return revisions
+        return versions
     }
 
     Collection<SBMLDocument> values() {
@@ -198,7 +198,7 @@ class SbmlCache<K extends RevisionTransportCommand, V extends SBMLDocument> impl
         lock.lock()
         try {
             cache.entrySet().each {
-                entries.add(new SimpleEntry<RevisionTransportCommand, SBMLDocument>(new RevisionTransportCommand(id: it.key), it.value))
+                entries.add(new SimpleEntry<ModelVersionTransportCommand, SBMLDocument>(new ModelVersionTransportCommand(id: it.key), it.value))
             }
         } finally {
             lock.unlock()

@@ -5,10 +5,10 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
-import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ModelVersionTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
-import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.model.ModelVersion
 import net.biomodels.jummp.plugins.security.User
 
 /**
@@ -82,25 +82,25 @@ class ModelDelegateService implements IModelService {
         return modelService.getModel(modelId).toCommandObject()
     }
 
-    RevisionTransportCommand getLatestRevision(long modelId) {
-        Revision rev = modelService.getLatestRevision(Model.get(modelId))
-        if (rev) {
-            return rev.toCommandObject()
+    ModelVersionTransportCommand getLatestVersion(long modelId) {
+        ModelVersion ver = modelService.getLatestVersion(Model.get(modelId))
+        if (ver) {
+            return ver.toCommandObject()
         } else {
-            throw new AccessDeniedException("No access to any revision of Model ${modelId}")
+            throw new AccessDeniedException("No access to any version of Model ${modelId}")
         }
     }
 
-    List<RevisionTransportCommand> getAllRevisions(long modelId) {
-        List<RevisionTransportCommand> revisions = []
-        modelService.getAllRevisions(Model.get(modelId)).each {
-            revisions << it.toCommandObject()
+    List<ModelVersionTransportCommand> getAllVersions(long modelId) {
+        List<ModelVersionTransportCommand> versions = []
+        modelService.getAllVersions(Model.get(modelId)).each {
+            versions << it.toCommandObject()
         }
-        return revisions
+        return versions
     }
 
-    RevisionTransportCommand getRevision(long modelId, int revisionNumber) {
-        return modelService.getRevision(Model.get(modelId), revisionNumber).toCommandObject()
+    ModelVersionTransportCommand getVersion(long modelId, int versionNumber) {
+        return modelService.getVersion(Model.get(modelId), versionNumber).toCommandObject()
     }
 
     PublicationTransportCommand getPublication(long modelId) throws AccessDeniedException, IllegalArgumentException {
@@ -111,16 +111,16 @@ class ModelDelegateService implements IModelService {
         return modelService.uploadModel(modelFile, meta).toCommandObject()
     }
 
-    RevisionTransportCommand addRevision(long modelId, File file, ModelFormatTransportCommand format, String comment) throws ModelException {
-        return modelService.addRevision(Model.get(modelId), file, ModelFormat.findByIdentifier(format.identifier), comment).toCommandObject()
+    ModelVersionTransportCommand addVersion(long modelId, File file, ModelFormatTransportCommand format, String comment) throws ModelException {
+        return modelService.addVersion(Model.get(modelId), file, ModelFormat.findByIdentifier(format.identifier), comment).toCommandObject()
     }
 
-    Boolean canAddRevision(long modelId) {
-        return modelService.canAddRevision(Model.get(modelId))
+    Boolean canAddVersion(long modelId) {
+        return modelService.canAddVersion(Model.get(modelId))
     }
 
-    byte[] retrieveModelFile(RevisionTransportCommand revision) throws ModelException {
-        return modelService.retrieveModelFile(Revision.get(revision.id))
+    byte[] retrieveModelFile(ModelVersionTransportCommand version) throws ModelException {
+        return modelService.retrieveModelFile(ModelVersion.get(version.id))
     }
 
     byte[] retrieveModelFile(long modelId) {
@@ -155,11 +155,11 @@ class ModelDelegateService implements IModelService {
         return modelService.restoreModel(Model.get(modelId))
     }
 
-    boolean deleteRevision(RevisionTransportCommand revision) {
-        return modelService.deleteRevision(Revision.get(revision.id))
+    boolean deleteVersion(ModelVersionTransportCommand version) {
+        return modelService.deleteVersion(ModelVersion.get(version.id))
     }
 
-    void publishModelRevision(RevisionTransportCommand revision) {
-        modelService.publishModelRevision(Revision.get(revision.id))
+    void publishModelVersion(ModelVersionTransportCommand version) {
+        modelService.publishModelVersion(ModelVersion.get(version.id))
     }
 }

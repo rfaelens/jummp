@@ -10,7 +10,7 @@ import net.biomodels.jummp.core.miriam.MiriamIdentifier
 import net.biomodels.jummp.core.miriam.NameResolver
 import net.biomodels.jummp.model.Model
 import org.perf4j.aop.Profiled
-import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.model.ModelVersion
 import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.locks.Lock
 import net.biomodels.jummp.core.miriam.GeneOntology
@@ -62,7 +62,7 @@ class MiriamService implements IMiriamService {
     /**
      * Map of the current to be resolved Miriam URNs
      */
-    private final Map<String, List<Revision>> identifiersToBeResolved = [:]
+    private final Map<String, List<ModelVersion>> identifiersToBeResolved = [:]
     /**
      * List of Gene Ontology Relationships to be resolved
      */
@@ -163,7 +163,7 @@ class MiriamService implements IMiriamService {
      * @see dequeueUrnForIdentifierResolving
      */
     @Profiled(tag="MiriamService.queueUrnForIdentifierResolving")
-    void queueUrnForIdentifierResolving(String urn, Revision rev) {
+    void queueUrnForIdentifierResolving(String urn, ModelVersion ver) {
         int colonIndex = urn.lastIndexOf(':')
         String datatypeUrn = urn.substring(0, colonIndex)
         String identifier = urn.substring(colonIndex + 1)
@@ -177,8 +177,8 @@ class MiriamService implements IMiriamService {
         lock.lock()
         try {
             if (identifiersToBeResolved.containsKey(urn)) {
-                if (rev) {
-                    identifiersToBeResolved[urn] << rev
+                if (ver) {
+                    identifiersToBeResolved[urn] << ver
                 }
                 return
             }
@@ -189,9 +189,9 @@ class MiriamService implements IMiriamService {
                     found = true
                     GeneOntology geneOntology = GeneOntology.findByDescription(existingMiriamIdentifier)
                     if (geneOntology) {
-                        if (rev) {
-                            rev.refresh()
-                            geneOntology.addToRevisions(rev)
+                        if (ver) {
+                            ver.refresh()
+                            geneOntology.addToVersions(ver)
                         }
                         geneOntology.save(flush: true)
                         createGeneOntologyRelationships(geneOntology, existingMiriamIdentifier.identifier)
@@ -204,8 +204,8 @@ class MiriamService implements IMiriamService {
             // create Thread
             runnable = grailsApplication.mainContext.getBean("resolveMiriamIdentifier", urn, identifier, datatype) as Runnable
             if (runnable) {
-                if (rev) {
-                    identifiersToBeResolved[urn] = [rev]
+                if (ver) {
+                    identifiersToBeResolved[urn] = [ver]
                 } else {
                     identifiersToBeResolved[urn] = []
                 }
@@ -237,17 +237,17 @@ class MiriamService implements IMiriamService {
     void dequeueUrnForIdentifierResolving(String urn, MiriamIdentifier miriam) {
         lock.lock()
         try {
-            List<Revision> revisions = identifiersToBeResolved[urn]
+            List<ModelVersion> versions = identifiersToBeResolved[urn]
             identifiersToBeResolved.remove(urn)
             if (miriam) {
                 MiriamIdentifier.withNewSession {
                     miriam.save(flush: true)
                     if (miriam.datatype.identifier == "MIR:00000022") {
                         GeneOntology geneOntology = new GeneOntology(description: miriam)
-                        revisions.each {
+                        versions.each {
                             if (it) {
                                 it.refresh()
-                                geneOntology.addToRevisions(it)
+                                geneOntology.ads(it)
                             }
                         }
                         geneOntology = geneOntology.save(flush: true)

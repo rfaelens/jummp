@@ -6,7 +6,7 @@ import net.biomodels.jummp.core.model.*;
 import net.biomodels.jummp.dbus.authentication.AccessDeniedDBusException;
 import net.biomodels.jummp.dbus.model.DBusModel;
 import net.biomodels.jummp.dbus.model.DBusPublication;
-import net.biomodels.jummp.dbus.model.DBusRevision;
+import net.biomodels.jummp.dbus.model.DBusModelVersion;
 import net.biomodels.jummp.dbus.model.ModelDBusException;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -78,15 +78,15 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     }
 
     @DBusMethod(isAuthenticate = true)
-    public DBusRevision getLatestRevision(String authenticationHash, long id) {
+    public DBusModelVersion getLatestVersion(String authenticationHash, long id) {
     }
 
-    @DBusMethod(isAuthenticate = true, collect = "revisionNumber")
-    public List<String> getAllRevisions(String authenticationHash, long id) {
+    @DBusMethod(isAuthenticate = true, collect = "versionNumber")
+    public List<String> getAllVersions(String authenticationHash, long id) {
     }
 
     @DBusMethod(isAuthenticate = true)
-    public DBusRevision getRevision(String authenticationHash, long modelId, int revisionNumber) {
+    public DBusModelVersion getVersion(String authenticationHash, long modelId, int versionNumber) {
     }
 
     @DBusMethod(isAuthenticate = true)
@@ -113,14 +113,14 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         return uploadModel(authenticationHash, fileName, meta);
     }
 
-    public DBusRevision addRevision(String authenticationHash, long modelId, String fileName, String format, String comment) {
+    public DBusModelVersion addVersion(String authenticationHash, long modelId, String fileName, String format, String comment) {
         try {
             setAuthentication(authenticationHash);
             File file = new File(fileName);
             ModelFormatTransportCommand modelFormat = new ModelFormatTransportCommand();
             modelFormat.setIdentifier(format);
-            DBusRevision revision = DBusRevision.fromRevisionTransportCommand(modelDelegateService.addRevision(modelId, file, modelFormat, comment));
-            return revision;
+            DBusModelVersion version = DBusModelVersion.fromModelVersionTransportCommand(modelDelegateService.addVersion(modelId, file, modelFormat, comment));
+            return version;
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (ModelException e) {
@@ -131,15 +131,15 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     }
 
     @DBusMethod(isAuthenticate = true)
-    public boolean canAddRevision(String authenticationHash, long id) {
+    public boolean canAddVersion(String authenticationHash, long id) {
     }
 
-    public String retrieveModelFileByRevision(String authenticationHash, long id) {
+    public String retrieveModelFileByVersion(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
-            RevisionTransportCommand revision = new RevisionTransportCommand();
-            revision.setId(id);
-            byte[] bytes = modelDelegateService.retrieveModelFile(revision);
+            ModelVersionTransportCommand version = new ModelVersionTransportCommand();
+            version.setId(id);
+            byte[] bytes = modelDelegateService.retrieveModelFile(version);
             File file = File.createTempFile("jummp", "model");
             FileOutputStream out = new FileOutputStream(file);
             try {
@@ -215,12 +215,12 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public boolean restoreModel(String authenticationHash, long id) {
     }
 
-    @DBusMethod(isAuthenticate = true, getRevision = [1, 2])
-    public boolean deleteRevision(String authenticationHash, long modelId, int revisionNumber) {
+    @DBusMethod(isAuthenticate = true, getVersion = [1, 2])
+    public boolean deleteVersion(String authenticationHash, long modelId, int versionNumber) {
     }
 
-    @DBusMethod(isAuthenticate = true, getRevision = [1, 2])
-    public void publishModelRevision(String authenticationHash, long modelId, int revisionNumber) {
+    @DBusMethod(isAuthenticate = true, getVersion = [1, 2])
+    public void publishModelVersion(String authenticationHash, long modelId, int versionNumber) {
     }
 
     public void setModelDelegateService(IModelService modelDelegateService) {

@@ -10,7 +10,7 @@ import org.springframework.security.acls.model.Acl
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.core.model.ModelState
-import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.model.ModelVersion
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -20,12 +20,13 @@ import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.ModelCreatedEvent
-import net.biomodels.jummp.core.events.RevisionCreatedEvent
+import net.biomodels.jummp.core.events.ModelVersionCreatedEvent
 import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.model.Publication
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.core.userdetails.UserDetails
-
+import java.util.List;
+import java.util.LinkedList;
 /**
  * @short Service class for managing Models
  *
@@ -122,12 +123,12 @@ class ModelService {
                     order("name", sorting)
                     break
                 case ModelListSorting.LAST_MODIFIED:
-                    revisions {
+                    versions {
                         order("uploadDate", sorting)
                     }
                     break
                 case ModelListSorting.FORMAT:
-                    revisions {
+                    versions {
                         order("format", sorting)
                     }
                     break
@@ -147,19 +148,19 @@ class ModelService {
             roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
         }
         String query = '''
-SELECT DISTINCT m FROM Revision AS r, AclEntry AS ace
-JOIN r.model AS m
+SELECT DISTINCT m FROM ModelVersion AS v, AclEntry AS ace
+JOIN v.model AS m
 JOIN ace.aclObjectIdentity AS aoi
 JOIN aoi.aclClass AS ac
 JOIN ace.sid AS sid
 WHERE
-aoi.objectId = r.id
+aoi.objectId = v.id
 AND ac.className = :className
 AND sid.sid IN (:roles)
 AND ace.mask IN (:permissions)
 AND ace.granting = true
 AND m.state != :deleted
-AND r.deleted = false
+AND v.deleted = false
 '''
         if (filter && filter.length() >= 3) {
             query += '''
@@ -179,10 +180,10 @@ ORDER BY
             query += "m.name"
             break
         case ModelListSorting.LAST_MODIFIED:
-            query += "r.uploadDate"
+            query += "v.uploadDate"
             break
         case ModelListSorting.FORMAT:
-            query += "r.format"
+            query += "v.format"
             break
         case ModelListSorting.PUBLICATION:
             // TODO: implement, fall through to default
@@ -193,7 +194,7 @@ ORDER BY
         }
         query += " " + sorting
         Map params = [
-            className: Revision.class.getName(),
+            className: ModelVersion.class.getName(),
             permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
             deleted: ModelState.DELETED,
             roles: roles, max: count, offset: offset]
@@ -304,19 +305,19 @@ ORDER BY
         }
 
         String query = '''
-SELECT COUNT(DISTINCT m.id) FROM Revision AS r, AclEntry AS ace
-JOIN r.model AS m
+SELECT COUNT(DISTINCT m.id) FROM ModelVersion AS v, AclEntry AS ace
+JOIN v.model AS m
 JOIN ace.aclObjectIdentity AS aoi
 JOIN aoi.aclClass AS ac
 JOIN ace.sid AS sid
 WHERE
-aoi.objectId = r.id
+aoi.objectId = v.id
 AND ac.className = :className
 AND sid.sid IN (:roles)
 AND ace.mask IN (:permissions)
 AND ace.granting = true
 AND m.state != :deleted
-AND r.deleted = false
+AND v.deleted = false
 '''
         if (filter && filter.length() >= 3) {
             query += '''
@@ -329,7 +330,7 @@ OR lower(m.publication.affiliation) like :filter
 '''
         }
         Map params = [
-            className: Revision.class.getName(),
+            className: ModelVersion.class.getName(),
             permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
             deleted: ModelState.DELETED,
             roles: roles]
@@ -350,7 +351,7 @@ OR lower(m.publication.affiliation) like :filter
     public Model getModel(long id) {
         Model model = Model.get(id)
         if (model) {
-            if (!getLatestRevision(model)) {
+            if (!getLatestVersion(model)) {
                 throw new AccessDeniedException("No access to Model with Id ${id}")
             }
         } else {
@@ -365,8 +366,8 @@ OR lower(m.publication.affiliation) like :filter
     * @return Latest Revision the current user has read access to. If there is no such revision null is returned
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="modelService.getLatestRevision")
-    public Revision getLatestRevision(Model model) {
+    @Profiled(tag="modelService.getLatestVersion")
+    public ModelVersion getLatestVersion(Model model) {
         if (!model) {
             return null
         }
@@ -376,20 +377,20 @@ OR lower(m.publication.affiliation) like :filter
         }
         // admin gets max (non deleted) revision
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-            List<Long> result = Revision.executeQuery('''
-                SELECT rev.id
-                FROM Revision AS rev
-                JOIN rev.model.revisions AS revisions
+            List<Long> result = ModelVersion.executeQuery('''
+                SELECT ver.id
+                FROM ModelVersion AS ver
+                JOIN ver.model.versions AS versions
                 WHERE
-                rev.model = :model
-                AND revisions.deleted = false
-                GROUP BY rev.model, rev.id, rev.revisionNumber
-                HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [model: model]) as List
+                ver.model = :model
+                AND versions.deleted = false
+                GROUP BY ver.model, ver.id, ver.versionNumber
+                HAVING ver.versionNumber = max(versions.versionNumber)''', [model: model]) as List
             if (!result) {
                 return null
             }
 //            modelHistoryService.addModelToHistory(model)
-            return Revision.get(result[0])
+            return ModelVersion.get(result[0])
         }
 
         Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
@@ -397,32 +398,32 @@ OR lower(m.publication.affiliation) like :filter
             // anonymous users do not have a principal
             roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
         }
-        List<Long> result = Revision.executeQuery('''
-SELECT rev.id
-FROM Revision AS rev, AclEntry AS ace
-JOIN rev.model.revisions AS revisions
+        List<Long> result = ModelVersion.executeQuery('''
+SELECT ver.id
+FROM ModelVersion AS ver, AclEntry AS ace
+JOIN ver.model.versions AS version
 JOIN ace.aclObjectIdentity AS aoi
 JOIN aoi.aclClass AS ac
 JOIN ace.sid AS sid
 WHERE
-rev.model = :model
-AND revisions.deleted = false
-AND aoi.objectId = revisions.id
+ver.model = :model
+AND versions.deleted = false
+AND aoi.objectId = versions.id
 AND ac.className = :className
 AND sid.sid IN (:roles)
 AND ace.mask IN (:permissions)
 AND ace.granting = true
-GROUP BY rev.model, rev.id, rev.revisionNumber
-HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
+GROUP BY ver.model, ver.id, ver.versionNumber
+HAVING ver.versionNumber = max(versions.versionNumber)''', [
                 model: model,
-                className: Revision.class.getName(),
+                className: ModelVersion.class.getName(),
                 roles: roles,
                 permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()] ]) as List
             if (!result) {
                 return null
             }
             modelHistoryService.addModelToHistory(model)
-            return Revision.get(result[0])
+            return ModelVersion.get(result[0])
     }
 
     /**
@@ -434,13 +435,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     **/
     @PostFilter("hasPermission(filterObject, read) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="modelService.getAllRevisions")
-    public List<Revision> getAllRevisions(Model model) {
+    @Profiled(tag="modelService.getAllVersions")
+    public List<ModelVersion> getAllVersions(Model model) {
         if (model.state == ModelState.DELETED) {
             return []
         }
         // exclude deleted revisions
-        return model.revisions.toList().findAll { !it.deleted }.sort {it.revisionNumber}
+        return model.versions.toList().findAll { !it.deleted }.sort {it.versionNumber}
     }
 
     /**
@@ -453,15 +454,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      */
     @PostAuthorize("hasPermission(returnObject, read) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="modelService.getRevision")
-    public Revision getRevision(Model model, int revisionNumber) {
-        Revision revision = Revision.findByRevisionNumberAndModel(revisionNumber, model)
-        if (revision.deleted) {
+    @Profiled(tag="modelService.getVersion")
+    public ModelVersion getVersion(Model model, int versionNumber) {
+        ModelVersion version = ModelVersion.findByVersionNumberAndModel(versionNumber, model)
+        if (version.deleted) {
             return null
         } else {
             modelHistoryService.addModelToHistory(model)
-            revision.refresh()
-            return revision
+            version.refresh()
+            return version
         }
     }
 
@@ -478,10 +479,20 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (!model) {
             throw new IllegalArgumentException("Model may not be null")
         }
-        if (!getLatestRevision(model)) {
+        if (!getLatestVersion(model)) {
             throw new AccessDeniedException("You are not allowed to view Model with id ${model.id}")
         }
         return model.publication
+    }
+    
+    /*Convenience function to make overloads from file to list
+     */
+    
+    private List<File> getAsList(File file)
+    {
+        LinkedList<File> list=new LinkedList<File>();
+        list.add(file);
+        return list;
     }
 
     /**
@@ -498,48 +509,71 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     **/
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostLogging(LoggingEventType.CREATION)
-    @Profiled(tag="modelService.uploadModel")
-    public Model uploadModel(final File modelFile, ModelTransportCommand meta) throws ModelException {
+    @Profiled(tag="modelService.uploadModelAsFile")
+    public Model uploadModelAsFile(final File modelFile, ModelTransportCommand meta) throws ModelException {
+        return uploadModelAsList(getAsList(modelFile));
+    }
+
+    
+    /**
+    * Creates a new Model and stores it in the VCS.
+    *
+    * Stores the @p modelFile as a new file in the VCS and creates a Model for it.
+    * The Model will have one Revision attached to it. The MetaInformation for this
+    * Model is taken from @p meta. The user who uploads the Model becomes the owner of
+    * this Model. The new Model is not visible to anyone except the owner.
+    * @param modelFile The model file to be stored in the VCS.
+    * @param meta Meta Information to be added to the model
+    * @return The new created Model, or null if the model could not be created
+    * @throws ModelException If Model File is not valid or the Model could not be stored in VCS
+    **/
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostLogging(LoggingEventType.CREATION)
+    @Profiled(tag="modelService.uploadModelAsList")
+    public Model uploadModelAsList(final List<File> modelFiles, ModelTransportCommand meta) throws ModelException {
         // TODO: to support anonymous submissions this method has to be changed
         if (Model.findByName(meta.name)) {
             throw new ModelException(Model.findByName(meta.name).toCommandObject(), "There is already a Model with name ${meta.name}")
         }
         Model model = new Model(name: meta.name)
-        if (!modelFile) {
-            throw new ModelException(model.toCommandObject(), "File may not be null")
+        modelFiles.each
+        {
+            if (!it) {
+                throw new ModelException(model.toCommandObject(), "Null file uploaded")
+            }
+            if (!it.exists() || it.isDirectory()) {
+                throw new ModelException(model.toCommandObject(), "The file ${it.path} does not exist or is a directory")
+            }
         }
-        if (!modelFile.exists() || modelFile.isDirectory()) {
-            throw new ModelException(model.toCommandObject(), "The file ${modelFile.path} does not exist or is a directory")
+        if (!modelFileFormatService.validate(modelFiles, ModelFormat.findByIdentifier(meta.format.identifier))) {
+                throw new ModelException(model.toCommandObject(), "The file ${modelFile.path} is not a valid ${meta.format} file")
         }
-        if (!modelFileFormatService.validate(modelFile, ModelFormat.findByIdentifier(meta.format.identifier))) {
-            throw new ModelException(model.toCommandObject(), "The file ${modelFile.path} is not a valid ${meta.format} file")
-        }
-        Revision revision = new Revision(model: model,
-                revisionNumber: 1,
+        ModelVersion version = new ModelVersion(model: model,
+                versionNumber: 1,
                 owner: User.findByUsername(springSecurityService.authentication.name),
-                minorRevision: false,
-                comment: meta.comment,
+                minorVersion: false,
+                // comment: meta.comment, TODO!!!
                 uploadDate: new Date(),
                 format: ModelFormat.findByIdentifier(meta.format.identifier))
         // vcs identifier is upload date + name - this should by all means be unique
-        model.vcsIdentifier = revision.uploadDate.format("yyyy-MM-dd'T'HH-mm-ss-SSS") + "_" + model.name
-        model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
+        model.vcsIdentifier = version.uploadDate.format("yyyy-MM-dd'T'HH-mm-ss-SSS") + "_" + model.name
+   /*This probably needs to change! */     model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
         try {
-            revision.vcsId = vcsService.importFile(model, modelFile)
+            version.vcsId = vcsService.importFile(model, modelFile)
         } catch (VcsException e) {
-            revision.discard()
+            version.discard()
             model.discard()
             log.error("Exception occurred during importing a new Model to VCS: ${e.getMessage()}")
             throw new ModelException(model.toCommandObject(), "Could not store new Model ${model.name} in VCS", e)
         }
 
-        if (revision.validate()) {
-            model.addToRevisions(revision)
+        if (version.validate()) {
+            model.addToVersions(version)
             if (meta.publication && meta.publication.linkProvider == PublicationLinkProvider.PUBMED) {
                 try {
                     model.publication = pubMedService.getPublication(meta.publication.link)
                 } catch (JummpException e) {
-                    revision.discard()
+                    version.discard()
                     model.discard()
                     throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data", e)
                 }
@@ -549,21 +583,21 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
             if (!model.validate()) {
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
-                revision.discard()
+                version.discard()
                 model.discard()
                 log.error("New Model does not validate")
                 throw new ModelException(model.toCommandObject(), "Model does not validate")
             }
             model.save(flush: true)
             // let's add the required rights
-            final String username = revision.owner.username
+            final String username = version.owner.username
             aclUtilService.addPermission(model, username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(model, username, BasePermission.DELETE)
             aclUtilService.addPermission(model, username, BasePermission.READ)
             aclUtilService.addPermission(model, username, BasePermission.WRITE)
-            aclUtilService.addPermission(revision, username, BasePermission.ADMINISTRATION)
-            aclUtilService.addPermission(revision, username, BasePermission.DELETE)
-            aclUtilService.addPermission(revision, username, BasePermission.READ)
+            aclUtilService.addPermission(version, username, BasePermission.ADMINISTRATION)
+            aclUtilService.addPermission(version, username, BasePermission.DELETE)
+            aclUtilService.addPermission(version, username, BasePermission.READ)
             try {
                 if (!meta.publication) {
                     String annotation = getPubMedAnnotation(model)
@@ -585,14 +619,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFile))
         } else {
             // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
-            revision.discard()
+            version.discard()
             model.discard()
-            log.error("New Model Revision does not validate")
-            throw new ModelException(model.toCommandObject(), "New Model Revision does not validate")
+            log.error("New Model Version does not validate")
+            throw new ModelException(model.toCommandObject(), "New Model Version does not validate")
         }
         return model
     }
-
+    
+    
     /**
     * Adds a new Revision to the model.
     *
@@ -607,65 +642,91 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     **/
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
-    @Profiled(tag="modelService.addRevision")
-    public Revision addRevision(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
+    @Profiled(tag="modelService.addVersionAsFile")
+    public ModelVersion addVersionAsFile(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
+            return addVersionAsList(getAsList(file));
+    }
+    
+    
+        /**
+    * Adds a new Revision to the model.
+    *
+    * The provided @p file will be stored in the VCS as an update to an existing file of the same @p model.
+    * A new Revision will be created and appended to the list of Revisions of the @p model.
+    * @param model The Model the revision should be added
+    * @param file The model file to be stored in the VCS as a new revision
+    * @param format The format of the model file
+    * @param comment The commit message for the new revision
+    * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
+    * @throws ModelException If either @p model, @p file or @p comment are null or if the file does not exists or is a directory
+    **/
+    @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.addVersionAsList")
+    public ModelVersion addVersionAsList(Model model, final List<File> modelFiles, final ModelFormat format, final String comment) throws ModelException {
         // TODO: the method should be thread safe, add a lock
         if (!model) {
             throw new ModelException(null, "Model may not be null")
         }
         if (model.state == ModelState.DELETED) {
-            throw new ModelException(model.toCommandObject(), "A new Revision cannot be added to a deleted model")
+            throw new ModelException(model.toCommandObject(), "A new version cannot be added to a deleted model")
         }
         if (comment == null) {
             throw new ModelException(model.toCommandObject(), "Comment may not be null, empty comment is allowed")
         }
-        if (!file) {
-            throw new ModelException(model.toCommandObject(), "File may not be null")
+        modelFiles.each
+        {
+            if (!it) {
+                throw new ModelException(model.toCommandObject(), "File may not be null")
+            }
+            if (!file.exists() || file.isDirectory()) {
+                throw new ModelException(model.toCommandObject(), "The file ${it.path} does not exist or is a directory")
+            }
         }
-        if (!file.exists() || file.isDirectory()) {
-            throw new ModelException(model.toCommandObject(), "The file ${file.path} does not exist or is a directory")
-        }
-        if (!modelFileFormatService.validate(file, format)) {
-            throw new ModelException(model.toCommandObject(), "The file ${file.path} is not a valid ${format} file")
+        if (!modelFileFormatService.validate(modelFiles, format)) {
+            throw new ModelException(model.toCommandObject(), "The files are not valid ${format}")
         }
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
-        Revision revision = new Revision(model: model, comment: comment, uploadDate: new Date(), owner: currentUser, minorRevision: false, format: format)
+        ModelVersion version = new ModelVersion(model: model, /*comment: comment,*/ uploadDate: new Date(), owner: currentUser, minorVersion: false, format: format)
         // save the new file in the database
         try {
-            String vcsId = vcsService.updateFile(model, file, comment)
-            revision.vcsId = vcsId
+            //String vcsId = vcsService.updateFile(model, modelFiles, comment)
+            version.vcsId = "todo"
         } catch (VcsException e) {
-            revision.discard()
-            log.error("Exception occurred during uploading a new Model Revision to VCS: ${e.getMessage()}")
-            throw new ModelException(model.toCommandObject(), "Could not store new Model Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} in VCS", e)
+            version.discard()
+            log.error("Exception occurred during uploading a new Model Version to VCS: ${e.getMessage()}")
+            throw new ModelException(model.toCommandObject(), "Could not store new Model Version for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} in VCS", e)
         }
         // calculate the new revision number - accessing the revisions directly to circumvent ACL
-        revision.revisionNumber = model.revisions.sort {it.revisionNumber}.last().revisionNumber + 1
+        version.versionNumber = model.versions.sort {it.versionNumber}.last().versionNumber + 1
 
-        if (revision.validate()) {
-            model.addToRevisions(revision)
+        if (version.validate()) {
+            model.addToVersions(version)
             model.save(flush: true)
-            aclUtilService.addPermission(revision, currentUser.username, BasePermission.ADMINISTRATION)
-            aclUtilService.addPermission(revision, currentUser.username, BasePermission.READ)
-            aclUtilService.addPermission(revision, currentUser.username, BasePermission.DELETE)
+            aclUtilService.addPermission(version, currentUser.username, BasePermission.ADMINISTRATION)
+            aclUtilService.addPermission(version, currentUser.username, BasePermission.READ)
+            aclUtilService.addPermission(version, currentUser.username, BasePermission.DELETE)
             // grant read access to all users having read access to the model
             Acl acl = aclUtilService.readAcl(model)
             for (ace in acl.entries) {
                 if (ace.sid instanceof PrincipalSid && ace.permission == BasePermission.READ) {
-                    aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.READ)
+                    aclUtilService.addPermission(version, ace.sid.principal, BasePermission.READ)
                 }
             }
-            revision.refresh()
-            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
-            grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), file))
+            version.refresh()
+            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, version.id))
+            grailsApplication.mainContext.publishEvent(new ModelVersionCreatedEvent(this, version.toCommandObject(), modelFiles))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
-            revision.discard()
-            log.error("New Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")
-            throw new ModelException(model.toCommandObject(), "Revision stored in VCS, but not in database")
+            version.discard()
+            log.error("New Version for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")
+            throw new ModelException(model.toCommandObject(), "Version stored in VCS, but not in database")
         }
-        return revision
+        return version
     }
+
+    
+    
 
     /**
      * Returns whether the current user has the right to add a revision to the model.
@@ -673,8 +734,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * @return @c true if the user has write permission on the revision or is an admin user, @c false otherwise.
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="modelService.canAddRevision")
-    public Boolean canAddRevision(final Model model) {
+    @Profiled(tag="modelService.canAddVersion")
+    public Boolean canAddVersion(final Model model) {
         return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.WRITE))
     }
 
@@ -684,16 +745,16 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * @return Byte Array of the content of the Model file for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#version, read) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="modelService.retrieveModelFile")
-    byte[] retrieveModelFile(final Revision revision) throws ModelException {
+    @Profiled(tag="modelService.retrieveModel")
+    byte[] retrieveModel(final ModelVersion version) throws ModelException {
         File file;
         try {
-            file = vcsService.retrieveFile(revision)
+            file = vcsService.retrieveFile(version)
         } catch (VcsException e) {
-            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.model.name} from VCS failed.")
-            throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.")
+            log.error("Retrieving ModelVersion ${version.vcsId} for Model ${version.model.name} from VCS failed.")
+            throw new ModelException(version.model.toCommandObject(), "Retrieving Version ${version.vcsId} from VCS failed.")
         }
         byte[] bytes = file.getBytes()
         FileUtils.forceDelete(file)
@@ -709,11 +770,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.retrieveModelFile")
     byte[] retrieveModelFile(final Model model) throws ModelException {
-        final Revision revision = getLatestRevision(model)
-        if (!revision) {
+        final ModelVersion version = getLatestVersion(model)
+        if (!version) {
             throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
         }
-        return retrieveModelFile(revision)
+        return retrieveModelFile(version)
     }
 
     /**
@@ -735,10 +796,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         // Read access is modeled by adding read access to the model (user will get read access for future revisions)
         // and by adding read access to all revisions the user has access to
         aclUtilService.addPermission(model, collaborator.username, BasePermission.READ)
-        Set<Revision> revisions = model.revisions
-        for (Revision revision in revisions) {
-            if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
-                aclUtilService.addPermission(revision, collaborator.username, BasePermission.READ)
+        Set<ModelVersion> versions = model.versions
+        for (ModelVersion version in versions) {
+            if (aclUtilService.hasPermission(springSecurityService.authentication, version, BasePermission.READ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+                aclUtilService.addPermission(version, collaborator.username, BasePermission.READ)
             }
         }
     }
@@ -920,34 +981,34 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * @param revision The Revision to delete
      * @return @c true if revision was deleted, @c false otherwise
      */
-    @PreAuthorize("hasPermission(#revision, delete) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasPermission(#version, delete) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.DELETION)
-    @Profiled(tag="modelService.deleteRevision")
-    public boolean deleteRevision(Revision revision) {
-        if (!revision) {
-            throw new IllegalArgumentException("Revision may not be null")
+    @Profiled(tag="modelService.deleteVersion")
+    public boolean deleteVersion(ModelVersion version) {
+        if (!version) {
+            throw new IllegalArgumentException("ModelVersion may not be null")
         }
-        if (revision.deleted) {
+        if (version.deleted) {
             // revision is already deleted
             return false
         }
         // check if the revision is the latest non-deleted method
-        if (revision.id != revision.model.revisions.findAll { !it.deleted }.sort { it.revisionNumber }.last().id) {
+        if (version.id != version.model.versions.findAll { !it.deleted }.sort { it.versionNumber }.last().id) {
             // TODO: maybe better throw an exception
             return false
         }
-        if (revision.model.revisions.findAll { !it.deleted }.size() == 1) {
+        if (version.model.versions.findAll { !it.deleted }.size() == 1) {
             // only one revision, delete the Model
             // first check the ACL, has to be manual as Spring would not intercept the direct method call
             if (aclUtilService.hasPermission(springSecurityService.authentication, revision.model, BasePermission.DELETE) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
-                deleteModel(revision.model)
+                deleteModel(version.model)
             } else {
-                throw new AccessDeniedException("No permission to delete Model ${revision.model.id}")
+                throw new AccessDeniedException("No permission to delete Model ${version.model.id}")
             }
         }
         // TODO: delete the model if the revision is the first revision of the model
-        revision.deleted = true
-        revision.save(flush: true)
+        version.deleted = true
+        version.save(flush: true)
         return true
     }
 
@@ -962,16 +1023,16 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      */
     @PreAuthorize("(hasRole('ROLE_CURATOR') and hasPermission(#revision, write)) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
-    @Profiled(tag="modelService.publishModelRevision")
-    public void publishModelRevision(Revision revision) {
-        if (!revision) {
-            throw new IllegalArgumentException("Revision may not be null")
+    @Profiled(tag="modelService.publishModelVersion")
+    public void publishModelVersion(ModelVersion version) {
+        if (!version) {
+            throw new IllegalArgumentException("ModelVersion may not be null")
         }
-        if (revision.deleted) {
-            throw new IllegalArgumentException("Revision may not be deleted")
+        if (version.deleted) {
+            throw new IllegalArgumentException("Version may not be deleted")
         }
-        aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
-        aclUtilService.addPermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
+        aclUtilService.addPermission(version, "ROLE_USER", BasePermission.READ)
+        aclUtilService.addPermission(version, "ROLE_ANONYMOUS", BasePermission.READ)
     }
 
     /**
@@ -984,10 +1045,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (!model) {
             return null
         }
-        Revision revision = getLatestRevision(model)
-        if (!revision) {
+        ModelVersion version = getLatestVersion(model)
+        if (!version) {
             return null
         }
-        return modelFileFormatService.getPubMedAnnotation(revision)
+        return modelFileFormatService.getPubMedAnnotation(version)
     }
 }

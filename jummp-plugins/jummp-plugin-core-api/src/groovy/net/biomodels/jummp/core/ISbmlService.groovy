@@ -1,6 +1,6 @@
 package net.biomodels.jummp.core
 
-import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ModelVersionTransportCommand
 
 /**
  * @short Interface describing the service to access an SBML Model.
@@ -17,30 +17,30 @@ interface ISbmlService {
     /**
      * Retrieves the metaId on the Model level. Does not retrieve the metaId of child elements
      * of model such as compartment.
-     * @param revision
+     * @param version
      * @return MetaId on Model level
      */
-    public String getMetaId(RevisionTransportCommand revision)
+    public String getMetaId(ModelVersionTransportCommand version)
     /**
      *
-     * @param revision
+     * @param version
      * @return Version of the SBML file
      */
-    public long getVersion(RevisionTransportCommand revision)
+    public long getVersion(ModelVersionTransportCommand version)
     /**
      *
-     * @param revision
+     * @param version
      * @return Level of the SBML file
      */
-    public long getLevel(RevisionTransportCommand revision)
+    public long getLevel(ModelVersionTransportCommand version)
     /**
      * Retrieves the notes element as an xml String on model level.
      * It cannot be used to retrieve notes on another level. If there
      * are no notes an empty string is returned.
-     * @param revision
+     * @param version
      * @return The notes of the model.
      */
-    public String getNotes(RevisionTransportCommand revision)
+    public String getNotes(ModelVersionTransportCommand version)
 
     /**
      * Retrieves the MIRIAM annotations for the model element.
@@ -54,10 +54,10 @@ interface ISbmlService {
      * @li dataTypeName: Human readable name for the data type (optional)
      * @li url: direct URL to the website describing the resource (optional)
      * @li name: Human readable name of the resource (optional)
-     * @param revision
+     * @param version
      * @return List of all MIRIAM annotations of the model element
      */
-    public List<Map> getAnnotations(RevisionTransportCommand revision)
+    public List<Map> getAnnotations(ModelVersionTransportCommand version)
 
     /**
      * Retrieves the global parameters of the SBML Model.
@@ -69,20 +69,20 @@ interface ISbmlService {
      * @li value: The value element if set, otherwise @c null
      * @li sbo: Map describing the SBO term, like resources in @link getAnnotations
      * @li unit: The unit element
-     * @param revision
+     * @param version
      * @return List of all parameters in the Model
      */
-    public List<Map> getParameters(RevisionTransportCommand revision)
+    public List<Map> getParameters(ModelVersionTransportCommand version)
     /**
      * Retrieves the parameter with given @p id from the SBML Model.
      * The returned Map contains all the elements as explained in @link getParameters
      * with additionally the annotation and notes added to the map. The annotation
      * element follows the description of @link getAnnotations.
-     * @param revision
+     * @param version
      * @param id The unique id in the SBML Model.
      * @return Map of all parameter data
      */
-    public Map getParameter(RevisionTransportCommand revision, String id)
+    public Map getParameter(ModelVersionTransportCommand version, String id)
     /**
      * Retrieves all parameters local to the reactions in the SBML Model.
      * The parameters are sorted to the reactions. The returned list is actually a list
@@ -91,10 +91,10 @@ interface ISbmlService {
      * @li name: The name of the reaction
      * @li parameters: List of parameters as in @link getParameters with the following addition:
      * constant is always true and an additional map to identify the reaction is added.
-     * @param revision
+     * @param version
      * @return List of all reactions with their parameters
      */
-    public List<Map> getLocalParameters(RevisionTransportCommand revision)
+    public List<Map> getLocalParameters(ModelVersionTransportCommand version)
     /**
      * Retrieves all reactions in the SBML Model.
      * The returned list contains one map for each reaction with the following keys/values:
@@ -113,10 +113,10 @@ interface ISbmlService {
      * @li speciesName: The name of the referenced species
      * @li constant: boolean indicating whether the species has a constant value (only for products and reactants)
      * @li stoichiometry: The shoichiometry value (only for products and reactants
-     * @param revision
+     * @param version
      * @return  List of all reactions
      */
-    public List<Map> getReactions(RevisionTransportCommand revision)
+    public List<Map> getReactions(ModelVersionTransportCommand version)
     /**
      * Retrieves the Reaction with the given @p id from the SBML Model.
      * The returned Map contains all the elements as explained in @link getReactions
@@ -124,11 +124,11 @@ interface ISbmlService {
      * element follows teh description of @link getAnnotations. The math value is the
      * contained MathML of the kinetic law as a String or an empty string in case there
      * is no kinetic law
-     * @param revision
+     * @param version
      * @param id The id of the Reaction
      * @return Map describing the reaction
      */
-    public Map getReaction(RevisionTransportCommand revision, String id)
+    public Map getReaction(ModelVersionTransportCommand version, String id)
     /**
      * Retrieves all events in the SBML Model.
      * The returned list contains one map for each event with the following keys/values:
@@ -142,21 +142,21 @@ interface ISbmlService {
      * @li variableId: The Id of the referenced variable
      * @li variableName: The resolved name of the referenced variable
      * @li variableType: The element name of the referenced variable
-     * @param revision
+     * @param version
      * @return List of all events
      */
-    public List<Map> getEvents(RevisionTransportCommand revision)
+    public List<Map> getEvents(ModelVersionTransportCommand version)
     /**
      * Retrieves the Event with the given @p id from the SBML Model.
      * The returned map contains all the elements as explained in @link getEvents
      * with additionally the annotation, notes, sbo, trigger and delay. The
      * annotation element follows the description of @link getAnnotations. Trigger
      * and delay contain both either a Content MathML String or an empty String.
-     * @param revision
+     * @param version
      * @param id The Id of the Event
      * @return Map describing the event
      */
-    public Map getEvent(RevisionTransportCommand revision, String id)
+    public Map getEvent(ModelVersionTransportCommand version, String id)
     /**
      * Retrieves all rules in the SBML Model.
      * The returned list contains one map for each rule with the following keys/values:
@@ -166,20 +166,20 @@ interface ISbmlService {
      * @li variableId: Id element of referenced variable if present, otherwise @c null
      * @li variableId: Name element of referenced variable if present, otherwise @c null
      * @li variableType: Element name of referenced variable if present, otherwise @c null
-     * @param revision
+     * @param version
      * @return List of all rules
      */
-    public List<Map> getRules(RevisionTransportCommand revision)
+    public List<Map> getRules(ModelVersionTransportCommand version)
     /**
      * Retrieves the Rule for the given referenced @p variable in the SBML Model.
      * The returned map contains all the elements as explained in @link getRules with
      * additionally the annotation and notes string. The annotation element follows
      * the description of @link getAnnotations.
-     * @param revision
+     * @param version
      * @param variable The id of the referenced Variable
      * @return Map describing the Rule
      */
-    public Map getRule(RevisionTransportCommand revision, String variable)
+    public Map getRule(ModelVersionTransportCommand version, String variable)
     /**
      * Retrieves all function definitions in the SBML Model.
      * The returned list contains one map for each function definition with the following keys/values:
@@ -187,20 +187,20 @@ interface ISbmlService {
      * @li name The name element
      * @li metaId The metaId element
      * @li math The content MathML String
-     * @param revision
+     * @param version
      * @return List of all Function Definitions
      */
-    public List<Map> getFunctionDefinitions(RevisionTransportCommand revision)
+    public List<Map> getFunctionDefinitions(ModelVersionTransportCommand version)
     /**
      * Retrieves the Function Definition with the given @p id in the SBML Model.
      * The returned map contains all the elements as explained in @link getFunctionDefinitions with
      * additionally the annotation, notes and sbo. The annotation element follows the description
      * of @link getAnnotations.
-     * @param revision
+     * @param version
      * @param id
      * @return Map describing the Function Definition
      */
-    public Map getFunctionDefinition(RevisionTransportCommand revision, String id)
+    public Map getFunctionDefinition(ModelVersionTransportCommand version, String id)
     /**
      * Retrieves all compartments in the SBML Model.
      * The returned list contains one map for each compartment with the following keys/values:
@@ -214,20 +214,20 @@ interface ISbmlService {
      * @li notes:  The notes element
      * @li sbo: Map describing the SBO term, like resources in @link getAnnotations
      * @li allSpecies: The needed attributes of all related species
-     * @param revision
+     * @param version
      * @return List of all Compartments
      */
-    public List<Map> getCompartments(RevisionTransportCommand revision)
+    public List<Map> getCompartments(ModelVersionTransportCommand version)
     /**
      * Retrieves the Compartment with the given @p id in the SBML Model.
      * The returned map contains all the elements as explained in @link getCompartments with
      * additionally the annotation and notes. The annotation element follows the description
      * of @link getAnnotations.
-     * @param revision
+     * @param version
      * @param id
      * @return Map describing the Compartment
      */
-    public Map getCompartment(RevisionTransportCommand revision, String id)
+    public Map getCompartment(ModelVersionTransportCommand version, String id)
     /**
      * Retrieves all species in the SBML Model.
      * The returned list contains one map for each compartment with the following keys/values:
@@ -238,24 +238,24 @@ interface ISbmlService {
      * @li initialConcentration: The initial concentration element
      * @li substanceUnits: The substance units  element
      * @param modelId
-     * @param revisionNumber
+     * @param versionNumber
      * @return List of all species
      */
-    public List<Map> getAllSpecies(RevisionTransportCommand revision)
+    public List<Map> getAllSpecies(ModelVersionTransportCommand version)
     /**
      * Retrieves the Species for the given referenced @p variable in the SBML Model.
      * The returned map contains all the elements as explained in @link getAllSpecies with
      * additionally the annotation and notes string. The annotation element follows
      * the description of @link getAnnotations.
-     * @param revision
+     * @param version
      * @param id
      * @return Map describing the Species
      */
-     public Map getSpecies(RevisionTransportCommand revision, String id)
+     public Map getSpecies(ModelVersionTransportCommand version, String id)
     /**
      * Triggers the generation of a sub model taking selected parts of an existing model.
      * The returned String contains the generated SBML model.
-     * @param revision
+     * @param version
      * @param subModelId: The sub model id which can be given by a user
      * @param metaId: The given meta id
      * @param compartmentIds: The selected compartment ids
@@ -265,23 +265,23 @@ interface ISbmlService {
      * @param eventIds: The selected event ids
      * @return String containing the generated SBML model
      */
-    public String triggerSubmodelGeneration(RevisionTransportCommand revision, String subModelId, String metaId, List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds)
+    public String triggerSubmodelGeneration(ModelVersionTransportCommand version, String subModelId, String metaId, List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds)
     /**
      * Generates an SVG for the given SBML model.
-     * @param revision The Revision identifying an SBML model
+     * @param version The Revision identifying an SBML model
      * @return Content of generated SVG
      */
-    public byte[] generateSvg(RevisionTransportCommand revision)
+    public byte[] generateSvg(ModelVersionTransportCommand version)
     /**
      * Generates Octave output for the given SBML model.
-     * @param revision The Revision identifying an SBML model
+     * @param version The Revision identifying an SBML model
      * @return Content of generated Octave file
      */
-    public String generateOctave(RevisionTransportCommand revision)
+    public String generateOctave(ModelVersionTransportCommand version)
     /**
      * Generates BioPAX output for the given SBML model.
-     * @param revision The Revision identifying an SBML model
+     * @param version The Revision identifying an SBML model
      * @return Content of generated BioPAX file
      */
-    public String generateBioPax(RevisionTransportCommand revision)
+    public String generateBioPax(ModelVersionTransportCommand version)
 }

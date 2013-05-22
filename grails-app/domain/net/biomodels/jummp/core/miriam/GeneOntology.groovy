@@ -1,6 +1,6 @@
 package net.biomodels.jummp.core.miriam
 
-import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.model.ModelVersion
 
 /**
  * @short Domain class representing a Gene Ontology term.
@@ -14,7 +14,7 @@ import net.biomodels.jummp.model.Revision
  * @author Martin Gräßlin <m.graesslin@dkfz.de>
  */
 class GeneOntology implements Serializable {
-    static hasMany = [revisions: Revision, relationships: GeneOntologyRelationship]
+    static hasMany = [versions: ModelVersion, relationships: GeneOntologyRelationship]
     static mappedBy = [relationships: "from"]
     /**
      * The MiriamIdentifier describing this Gene Ontology (e.g. the name)

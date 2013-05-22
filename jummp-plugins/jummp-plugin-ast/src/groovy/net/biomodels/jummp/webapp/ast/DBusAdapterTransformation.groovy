@@ -93,13 +93,13 @@ class DBusAdapterTransformation implements ASTTransformation {
             List arguments = []
             // if there is a getRevision member in the annotation we use it to generate a getRevision call to modelDelegateService
             // the list contains the indices to the parameters which go into the getRevision call
-            List revisionParameters = dbusMethodAnnotations.first().getMember("getRevision")?.getExpressions()
-            if (revisionParameters) {
-                List revisionArguments = []
-                revisionParameters.each { id ->
-                    revisionArguments << new VariableExpression(it.parameters[id.getValue()].name)
+            List versionParameters = dbusMethodAnnotations.first().getMember("getVersion")?.getExpressions()
+            if (versionParameters) {
+                List versionArguments = []
+                versionParameters.each { id ->
+                    versionArguments << new VariableExpression(it.parameters[id.getValue()].name)
                 }
-                arguments << new MethodCallExpression(new VariableExpression("modelDelegateService"), "getRevision", new ArgumentListExpression(revisionArguments))
+                arguments << new MethodCallExpression(new VariableExpression("modelDelegateService"), "getVersion", new ArgumentListExpression(versionArguments))
             }
             // normal parameter wrapping
             it.parameters.eachWithIndex { parameter, i ->
@@ -107,7 +107,7 @@ class DBusAdapterTransformation implements ASTTransformation {
                 if (authenticate && i == 0) {
                     return
                 }
-                if (revisionParameters && revisionParameters.find { it.getValue() == i }) {
+                if (versionParameters && versionParameters.find { it.getValue() == i }) {
                     // skip parameters which are already used to get the revision
                     return
                 }
@@ -164,8 +164,8 @@ class DBusAdapterTransformation implements ASTTransformation {
         if (method.returnType.nameWithoutPackage == "DBusModel") {
             methodCall = new MethodCallExpression(new ClassExpression(method.returnType), "fromModelTransportCommand", new ArgumentListExpression(methodCall))
         }
-        if (method.returnType.nameWithoutPackage == "DBusRevision") {
-            methodCall = new MethodCallExpression(new ClassExpression(method.returnType), "fromRevisionTransportCommand", new ArgumentListExpression(methodCall))
+        if (method.returnType.nameWithoutPackage == "DBusModelVersion") {
+            methodCall = new MethodCallExpression(new ClassExpression(method.returnType), "fromModelVersionTransportCommand", new ArgumentListExpression(methodCall))
         }
         if (method.returnType.nameWithoutPackage == "DBusPublication") {
             methodCall = new MethodCallExpression(new ClassExpression(method.returnType), "fromPublicationTransportCommand", new ArgumentListExpression(methodCall))

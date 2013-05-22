@@ -1,6 +1,6 @@
 package net.biomodels.jummp.webapp
 
-import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ModelVersionTransportCommand
 
 class SbmlController {
     /**
@@ -13,53 +13,53 @@ class SbmlController {
     def sbmlService
 
     def reactionMetaOverview = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        [reaction: sbmlService.getReaction(rev)]
+        ModelVersionTransportCommand ver = modelDelegateService.getLatestVersion(params.id as Long)
+        [reaction: sbmlService.getReaction(ver)]
     }
 
     def compartmentMetaOverview = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        [compartment: sbmlService.getCompartment(rev)]
+        ModelVersionTransportCommand ver = modelDelegateService.getLatestVersion(params.id as Long)
+        [compartment: sbmlService.getCompartment(ver)]
     }
 
     def parameterMetaOverview = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        [parameter: sbmlService.getParameter(rev)]
+        ModelVersionTransportCommand ver = modelDelegateService.getLatestVersion(params.id as Long)
+        [parameter: sbmlService.getParameter(ver)]
     }
 
     def math = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        ModelVersionTransportCommand ver = modelDelegateService.getLatestVersion(params.id as Long)
         [
-                reactions: sbmlService.getReactions(rev),
-                rules: sbmlService.getRules(rev),
-                functions: sbmlService.getFunctionDefinitions(rev),
-                events: sbmlService.getEvents(rev)
+                reactions: sbmlService.getVersions(ver),
+                rules: sbmlService.getRules(ver),
+                functions: sbmlService.getFunctionDefinitions(ver),
+                events: sbmlService.getEvents(ver)
         ]
     }
 
     def entity = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        [compartments: sbmlService.getCompartments(rev)]
+        ModelVersionTransportCommand ver = modelDelegateService.getLatestVersion(params.id as Long)
+        [compartments: sbmlService.getCompartments(ver)]
     }
 
     def compartmentMeta = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        [compartment: sbmlService.getCompartment(rev)]
+        ModelVersionTransportCommand ver = modelDelegateService.getLatestVersion(params.id as Long)
+        [compartment: sbmlService.getCompartment(ver)]
     }
 
     def speciesMeta = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        [species: sbmlService.getSpecies(rev)]
+        ModelVersionTransportCommand ver = modelDelegateService.getLatestVersion(params.id as Long)
+        [species: sbmlService.getSpecies(ver)]
     }
 
     def parameterMeta = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        [parameter: sbmlService.getParameter(rev)]
+        ModelVersionTransportCommand ver = modelDelegateService.getLatestVersion(params.id as Long)
+        [parameter: sbmlService.getParameter(ver)]
     }
 
     def parameter = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        [parameters: sbmlService.getParameters(rev), reactionParameters: sbmlService.getLocalParameters(rev)]
+        ModelVersionTransportCommand ver = modelDelegateService.getLatestVersion(params.id as Long)
+        [parameters: sbmlService.getParameters(ver), reactionParameters: sbmlService.getLocalParameters(ver)]
     }
 
 }
