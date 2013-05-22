@@ -154,7 +154,8 @@ grails.plugin.location.'jummp-plugin-security' = "jummp-plugins/jummp-plugin-sec
 grails.plugin.location.'jummp-plugin-core-api' = "jummp-plugins/jummp-plugin-core-api"
 grails.plugin.location.'jummp-plugin-configuration' = "jummp-plugins/jummp-plugin-configuration"
 grails.plugin.location.'jummp-plugin-git' = "jummp-plugins/jummp-plugin-git"
-grails.plugin.location.'jummp-plugin-subversion' = "jummp-plugins/jummp-plugin-subversion"
+// Disconnect SVN for now because of the changes to the VcsManager interface and lack of time
+//grails.plugin.location.'jummp-plugin-subversion' = "jummp-plugins/jummp-plugin-subversion"
 grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
 grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
 grails.plugin.location.'jummp-plugin-remote' = "jummp-plugins/jummp-plugin-remote"

@@ -52,9 +52,11 @@
         <antcall target="test-plugin">
             <param name="plugin" value="security"/>
         </antcall>
+<!-- Leave SVN out because we currently focus on Git
         <antcall target="test-plugin">
             <param name="plugin" value="subversion"/>
         </antcall>
+-->
 <!-- Do not test jms plugin as it requires an instance of jummp running   -->
     </target>
 
@@ -126,10 +128,12 @@
             <param name="pluginBaseDir" value="${basedir}"/>
             <param name="plugin" value="git"/>
         </antcall>
+<!--
         <antcall target="packagePlugin">
             <param name="pluginBaseDir" value="${basedir}"/>
             <param name="plugin" value="subversion"/>
         </antcall>
+-->
         <antcall target="packagePlugin">
             <param name="pluginBaseDir" value="${basedir}"/>
             <param name="plugin" value="remote"/>
@@ -204,13 +208,13 @@
             <param name="propertyfile" value="${builddir}/jummp-plugins/jummp-plugin-security/application.properties"/>
         </antcall>
         <antcall target="perform-remove-grails-plugins">
-            <param name="propertyfile" value="${builddir}/jummp-plugins/jummp-plugin-subversion/application.properties"/>
+            <!--param name="propertyfile" value="${builddir}/jummp-plugins/jummp-plugin-subversion/application.properties"/-->
         </antcall>
     </target>
 
 <!--  Interactively ask for each plugin not necessarily required by JUMMP core to be included in the build    -->
     <target name="ask-for-plugins" depends="remove-grails-plugins">
-        <input message="Include Plugin Subversion, required to store model files in a Subversion repository?" validargs="y,n" addproperty="plugin.svn" defaultvalue="y"/>
+        <!--input message="Include Plugin Subversion, required to store model files in a Subversion repository?" validargs="y,n" addproperty="plugin.svn" defaultvalue="y"/-->
         <input message="Include Plugin Git, required to store model files in a git repository?" validargs="y,n" addproperty="plugin.git" defaultvalue="y"/>
         <input message="Include Plugin Configuration, required to configure the core application?" validargs="y,n" addproperty="plugin.configuration" defaultvalue="y"/>
         <input message="Include Plugin SBML, required to handle SBML files?" validargs="y,n" addproperty="plugin.sbml" defaultvalue="y"/>
@@ -241,7 +245,7 @@
         <property name="plugin.persist.jms" value="false"/>
         <property name="plugin.persist.dbus" value="false"/>
         <propertyfile file="${builddir}/jummpPlugins.properties">
-            <entry key="subversion" value="${plugin.persist.svn}"/>
+            <!--entry key="subversion" value="${plugin.persist.svn}"/-->
             <entry key="git" value="${plugin.persist.git}"/>
             <entry key="configuration" value="${plugin.persist.configuration}"/>
             <entry key="sbml" value="${plugin.persist.sbml}"/>
