@@ -268,19 +268,19 @@ interface ISbmlService {
     public String triggerSubmodelGeneration(ModelVersionTransportCommand version, String subModelId, String metaId, List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds)
     /**
      * Generates an SVG for the given SBML model.
-     * @param version The Revision identifying an SBML model
+     * @param version The ModelVersion identifying an SBML model
      * @return Content of generated SVG
      */
     public byte[] generateSvg(ModelVersionTransportCommand version)
     /**
      * Generates Octave output for the given SBML model.
-     * @param version The Revision identifying an SBML model
+     * @param version The ModelVersion identifying an SBML model
      * @return Content of generated Octave file
      */
     public String generateOctave(ModelVersionTransportCommand version)
     /**
      * Generates BioPAX output for the given SBML model.
-     * @param version The Revision identifying an SBML model
+     * @param version The ModelVersion identifying an SBML model
      * @return Content of generated BioPAX file
      */
     public String generateBioPax(ModelVersionTransportCommand version)

@@ -154,7 +154,7 @@ class MiriamService implements IMiriamService {
      * Each URN which is currently being resolved is stored in a Map. Access to the Map
      * is protected by a lock. If the URN is currently being resolved or if it is already
      * in the database, nothing is done. In case of currently being resolved, the referenced
-     * @p revision is added to the list of Revisions for this URN.
+     * @p revision is added to the list of ModelVersions for this URN.
      *
      * The actual resolving is performed by starting off a new thread. This thread will call
      * @link dequeueUrnForIdentifierResolving when the name has been resolved or failed to be resolved.

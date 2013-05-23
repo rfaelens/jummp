@@ -91,8 +91,8 @@ class DBusAdapterTransformation implements ASTTransformation {
             }
             // generate the list of arguments for the delegated method call
             List arguments = []
-            // if there is a getRevision member in the annotation we use it to generate a getRevision call to modelDelegateService
-            // the list contains the indices to the parameters which go into the getRevision call
+            // if there is a getVersion member in the annotation we use it to generate a getVersion call to modelDelegateService
+            // the list contains the indices to the parameters which go into the getVersion call
             List versionParameters = dbusMethodAnnotations.first().getMember("getVersion")?.getExpressions()
             if (versionParameters) {
                 List versionArguments = []
@@ -140,7 +140,7 @@ class DBusAdapterTransformation implements ASTTransformation {
      * Generates the call to the service.
      * The method takes care of the conversion of types to:
      * @li DBusModel
-     * @li DBusRevision
+     * @li DBusModelVersion
      * @li DBusPublication
      *
      * Additionally it also takes care of not returning anything if the method's return type is void.

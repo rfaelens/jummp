@@ -33,9 +33,9 @@ class CreateDiffThread implements Runnable {
 
 	private long modelId
 
-	private int previousRevision, recentRevision
+	private int previousVersion, recentVersion
 	/**
-	 * The Authentication of the user who uploaded the Revision
+	 * The Authentication of the user who uploaded the ModelVersion
 	 */
 	private Authentication authentication
 
@@ -45,25 +45,25 @@ class CreateDiffThread implements Runnable {
 			// set the Authentication in the Thread's SecurityContext
 			SecurityContextHolder.context.setAuthentication(authentication)
 			DiffDataProvider diffData = grailsApplication.mainContext.getBean("diffDataProvider") as DiffDataProvider
-			if(!diffData.getDiffInformation(modelId, previousRevision, recentRevision)) {
+			if(!diffData.getDiffInformation(modelId, previousVersion, recentVersion)) {
 				DiffGeneratorManager diffMan = new DiffGeneratorManager()
-				String previous = new String (modelDelegateService.retrieveModelFile(modelDelegateService.getRevision(modelId,
-						previousRevision)))
-				String recent = new String(modelDelegateService.retrieveModelFile(modelDelegateService.getRevision(modelId,
-						recentRevision)))
+				String previous = new String (modelDelegateService.retrieveModelFile(modelDelegateService.getVersion(modelId,
+						previousVersion)))
+				String recent = new String(modelDelegateService.retrieveModelFile(modelDelegateService.getVersion(modelId,
+						recentVersion)))
 				Diff diff = diffMan.generateDiff(previous, recent, true)
 				diff.setModelId(modelId as String)
-				diff.setOriginId(previousRevision)
-				diff.setSuccessorId(recentRevision)
+				diff.setOriginId(previousVersion)
+				diff.setSuccessorId(recentVersion)
 				JummpRepositoryManager repoMan = new JummpRepositoryManager()
 				repoMan.createNewRepository(diffDataService.diffDirectory())
-				repoMan.uploadDiff(diff, modelId, previousRevision, recentRevision)
-				diffDataService.unqueueDiff(modelId, previousRevision, recentRevision)
+				repoMan.uploadDiff(diff, modelId, previousVersion, recentVersion)
+				diffDataService.unqueueDiff(modelId, previousVersion, recentVersion)
 			}
 		} catch (Exception e) {
 			e.printStackTrace()
 		} finally {
-			diffDataService.unqueueDiff(modelId, previousRevision, recentRevision)
+			diffDataService.unqueueDiff(modelId, previousVersion, recentVersion)
 			SecurityContextHolder.clearContext()
 		}
 	}
@@ -71,16 +71,16 @@ class CreateDiffThread implements Runnable {
 	/**
 	 * Returns a new instance of this class
 	 * @param modelId the id of the corresponding model
-	 * @param previousRevision the number of a previous model revision
-	 * @param recentRevision a successor revision (in relation to the previous revision)
+	 * @param previousVersion the number of a previous model revision
+	 * @param recentVersion a successor revision (in relation to the previous revision)
 	 * @return
 	 */
-	static public CreateDiffThread getInstance(Long modelId, int previousRevision, int recentRevision) {
+	static public CreateDiffThread getInstance(Long modelId, int previousVersion, int recentVersion) {
 		CreateDiffThread thread = new CreateDiffThread()
 		thread.authentication = SecurityContextHolder.context.authentication
 		thread.modelId = modelId
-		thread.previousRevision = previousRevision
-		thread.recentRevision = recentRevision
+		thread.previousVersion = previousVersion
+		thread.recentVersion = recentVersion
 		return thread
 	}
 

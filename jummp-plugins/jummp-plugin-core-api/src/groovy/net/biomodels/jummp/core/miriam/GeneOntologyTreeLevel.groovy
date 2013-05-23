@@ -10,7 +10,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
  *
  * Primarily used to pass the GO Tree information from core to web application.
  * The level contains information on all the child gene ontologies (internal id,
- * name and identifier) as well as a list of Revisions using connected to the
+ * name and identifier) as well as a list of ModelVersions using connected to the
  * parent ontology this level derives from.
  *
  * @author Martin Gräßlin <m.graesslin@dkfz.de>
@@ -78,8 +78,8 @@ class GeneOntologyTreeLevel implements Serializable {
     }
 
     /**
-     * Adds another Revision to this level, if not already present.
-     * @param revision The Revision to add
+     * Adds another ModelVersion to this level, if not already present.
+     * @param revision The ModelVersion to add
      * @throws IllegalArgumentException Thrown if the revision has no id.
      */
     public void addVersion(ModelVersionTransportCommand version) throws IllegalArgumentException {

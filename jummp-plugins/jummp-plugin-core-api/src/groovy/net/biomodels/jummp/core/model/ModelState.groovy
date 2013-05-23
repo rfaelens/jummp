@@ -16,7 +16,7 @@ public enum ModelState {
      */
     UNDER_CURATION,
     /**
-     * The Model has been curated and at least one Revision is visible to all users.
+     * The Model has been curated and at least one ModelVersion is visible to all users.
      */
     PUBLISHED,
     /**

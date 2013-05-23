@@ -31,7 +31,7 @@ class GeneOntologyTreeService {
      * Retrieves the next GO tree level under the Gene Ontology with the internal @p goId.
      *
      * The returned GeneOntologyTreeLevel contains all the information about the child
-     * Gene Ontologies and the Revisions linked to this GeneOntology identified by @p goId.
+     * Gene Ontologies and the ModelVersions linked to this GeneOntology identified by @p goId.
      *
      * In case @p goId is @c null or @c 0, the root level is retrieved.
      *
@@ -136,7 +136,7 @@ class GeneOntologyTreeService {
     }
 
     private List<ModelVersion> versionsForGeneOntology(GeneOntology go) {
-        // First retrieve all IDs of the Revision which are not deleted
+        // First retrieve all IDs of the ModelVersion which are not deleted
         List<Long> ids = ModelVersion.executeQuery("SELECT ver.id FROM GeneOntology AS go LEFT JOIN go.versions AS ver WHERE ver.deleted = false AND go=:go", [go: go]) as List<Long>
         // second: restrict on the revisions the current user can see
         if (!ids.isEmpty() && SpringSecurityUtils.ifNotGranted("ROLE_ADMIN")) {

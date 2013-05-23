@@ -76,8 +76,8 @@ class DiffDataProvider implements InitializingBean {
 	 * in the the maps <code>moves</code>, <code>inserts</code>, <code>deletes</code>,
 	 * and <code>updates</code>.
 	 * @param modelId the id of the corresponding model
-	 * @param previousRevision the number of a previous model revision
-	 * @param recentRevision a successor revision (in relation to the previous revision)
+	 * @param previousVersion the number of a previous model revision
+	 * @param recentVersion a successor revision (in relation to the previous revision)
 	 * @return <code>true</code> if the {@link Diff} information was successfully retrieved, <code>false</code> otherwise
 	 */
 	public boolean getDiffInformation(long modelId, int previousVersion,  int recentVersion) {
@@ -142,7 +142,7 @@ class DiffDataProvider implements InitializingBean {
 	/**
 	 * Returns the JSBML object for the provided xpath of an element
 	 * @param xpath the XPath of the XML element
-	 * @param revision the {@link RevisionTransportCommand} resp. the Model
+	 * @param revision the {@link ModelVersionTransportCommand} resp. the Model
 	 * @return a {@link Map} containing the type of the element and its JSBML representation
 	 */
 	private Map<Map, String> getPathObject(String xpath, ModelVersionTransportCommand version) {

@@ -4,7 +4,7 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
-import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ModelVersionTransportCommand
 import net.biomodels.jummp.dbus.ModelDBusAdapter
 import net.biomodels.jummp.remote.RemoteModelAdapter
 import org.perf4j.aop.Profiled
@@ -57,25 +57,25 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteDBusAdapter implements Re
         return retrieveModels(modelDBusAdapter.getAllModels(authenticationToken()))
     }
 
-    @Profiled(tag="RemoteModelAdapterDBusImpl.getLatestRevision")
-    RevisionTransportCommand getLatestRevision(long modelId) {
-        RevisionTransportCommand revision = modelDBusAdapter.getLatestRevision(authenticationToken(), modelId)
+    @Profiled(tag="RemoteModelAdapterDBusImpl.getLatestVersion")
+    ModelVersionTransportCommand getLatestVersion(long modelId) {
+        ModelVersionTransportCommand revision = modelDBusAdapter.getLatestVersion(authenticationToken(), modelId)
         revision.model = modelDBusAdapter.getModel(authenticationToken(), modelId)
         return revision
     }
 
-    @Profiled(tag="RemoteModelAdapterDBusImpl.getRevision")
-    RevisionTransportCommand getRevision(long modelId, int revisionNumber) {
-        RevisionTransportCommand revision = modelDBusAdapter.getRevision(authenticationToken(), modelId, revisionNumber)
+    @Profiled(tag="RemoteModelAdapterDBusImpl.getModelVersion")
+    ModelVersionTransportCommand getVersion(long modelId, int revisionNumber) {
+        ModelVersionTransportCommand revision = modelDBusAdapter.getModelVersion(authenticationToken(), modelId, revisionNumber)
         revision.model = modelDBusAdapter.getModel(authenticationToken(), modelId)
         return revision
     }
 
-    @Profiled(tag="RemoteModelAdapterDBusImpl.getAllRevisions")
-    List<RevisionTransportCommand> getAllRevisions(long modelId) {
-        List<RevisionTransportCommand> revisions = []
-        modelDBusAdapter.getAllRevisions(authenticationToken(), modelId).each {
-            revisions << modelDBusAdapter.getRevision(authenticationToken(), modelId, it as int)
+    @Profiled(tag="RemoteModelAdapterDBusImpl.getAllModelVersions")
+    List<ModelVersionTransportCommand> getAllVersions(long modelId) {
+        List<ModelVersionTransportCommand> revisions = []
+        modelDBusAdapter.getAllModelVersions(authenticationToken(), modelId).each {
+            revisions << modelDBusAdapter.getModelVersion(authenticationToken(), modelId, it as int)
         }
         return revisions
     }
@@ -96,21 +96,21 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteDBusAdapter implements Re
         return model
     }
 
-    @Profiled(tag="RemoteModelAdapterDBusImpl.addRevision")
-    RevisionTransportCommand addRevision(long modelId, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException {
+    @Profiled(tag="RemoteModelAdapterDBusImpl.addVersion")
+    ModelVersionTransportCommand addVersion(long modelId, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException {
         File file = File.createTempFile("jummp", "model")
         file.withWriter {
             it.write(new String(bytes))
         }
-        RevisionTransportCommand revision = modelDBusAdapter.addRevision(authenticationToken(), modelId, file.getAbsolutePath(), format.identifier, comment)
+        ModelVersionTransportCommand revision = modelDBusAdapter.addVersion(authenticationToken(), modelId, file.getAbsolutePath(), format.identifier, comment)
         revision.model = modelDBusAdapter.getModel(authenticationToken(), modelId)
         FileUtils.deleteQuietly(file)
         return revision
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFile")
-    byte[] retrieveModelFile(RevisionTransportCommand revision) throws ModelException {
-        File file = new File(modelDBusAdapter.retrieveModelFileByRevision(authenticationToken(), revision.id))
+    byte[] retrieveModelFile(ModelVersionTransportCommand revision) throws ModelException {
+        File file = new File(modelDBusAdapter.retrieveModelFileByModelVersion(authenticationToken(), revision.id))
         byte[] bytes = file.readBytes()
         FileUtils.deleteQuietly(file)
         return bytes

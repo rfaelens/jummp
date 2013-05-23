@@ -22,7 +22,7 @@ public class DiffDataDBusAdapterImpl extends AbstractDBusAdapter implements Diff
 	def diffDataService
 	
 	@DBusMethod(isAuthenticate = true, json=true)
-	public String generateDiffData(String authenticationHash, long modelId, int predecessorRevision,  int recentRevision) throws DiffNotExistingException {
+	public String generateDiffData(String authenticationHash, long modelId, int predecessorVersion,  int recentVersion) throws DiffNotExistingException {
 	}
 	
 }

@@ -4,19 +4,19 @@ import net.biomodels.jummp.core.model.ModelVersionTransportCommand
 import java.util.List
 
 /**
- * @short Event triggered when a new Model Revision is uploaded.
+ * @short Event triggered when a new ModelVersion is uploaded.
  *
  * This event is triggered by the ModelService when a user successfully uploaded
- * a new Revision for an existing Model. It is not triggered during upload of a
+ * a new ModelVersion for an existing Model. It is not triggered during upload of a
  * new Model! Interested parties might listen to this event through an
  * ApplicationListener and use the information provided. It is not possible to
- * alter the Revision or the uploaded file in any way. Instead of the Revision
- * a RevisionTransportCommand is included in the event.
+ * alter the ModelVersion or the uploaded file in any way. Instead of the ModelVersion
+ * a ModelVersionTransportCommand is included in the event.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class ModelVersionCreatedEvent extends JummpEvent {
     /**
-     * The newly create Revision
+     * The newly created ModelVersion
      */
     final ModelVersionTransportCommand version
     /**

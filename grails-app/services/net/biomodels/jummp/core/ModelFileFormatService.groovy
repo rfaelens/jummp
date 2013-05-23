@@ -115,8 +115,8 @@ class ModelFileFormatService {
     /**
      * Retrieves all annotation URNs through the service responsible for the format used
      * by the @p revision.
-     * @param rev The Revision for which all URNs should be retrieved
-     * @return List of all URNs used in the Revision
+     * @param rev The ModelVersion for which all URNs should be retrieved
+     * @return List of all URNs used in the ModelVersion
      */
     List<String> getAllAnnotationURNs(ModelVersion ver) {
         FileFormatService service = serviceForFormat(ver.format)
@@ -130,8 +130,8 @@ class ModelFileFormatService {
     /**
      * Retrieves all pubmed annotations through the service responsible for the format used
      * by the @p revision.
-     * @param rev The Revision for which all pubmed annotations should be retrieved
-     * @return List of all pubmeds used in the Revision
+     * @param rev The ModelVersion for which all pubmed annotations should be retrieved
+     * @return List of all pubmeds used in the ModelVersion
      */
     List<String> getPubMedAnnotation(ModelVersion ver) {
         FileFormatService service = serviceForFormat(ver.format)

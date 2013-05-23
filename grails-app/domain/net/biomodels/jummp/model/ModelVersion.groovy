@@ -6,7 +6,7 @@ import net.biomodels.jummp.core.model.ModelVersionTransportCommand
 /**
  * @short A ModelVersion represents one version of a model.
  * The ModelVersion is stored in the Version Control System (VCS) and is linked
- * to the VCS through a list of Revisions. The ModelVersion is required to retrieve files corresponding to a version from
+ * to the VCS through a list of ModelVersions. The ModelVersion is required to retrieve files corresponding to a version from
  * the VCS and to store new files.
  * A ModelVersion is linked to one Model and each Model has several ModelVersions, but
  * at least one.
@@ -22,12 +22,12 @@ class ModelVersion implements Serializable {
     /**
      * The revision number in the version control system.
      * E.g. in Subversion the global revision number of the
-     * commit which stored this Model Revision or in git the
-     * Sha1-sum of the commit which stored this Model Revision.
+     * commit which stored this Model ModelVersion or in git the
+     * Sha1-sum of the commit which stored this Model ModelVersion.
      *
     String vcsId*/
     /**
-     * Revision number in reference to the Model and not to the VCS.
+     * ModelVersion number in reference to the Model and not to the VCS.
      */
     Integer versionNumber
     /**
@@ -52,7 +52,7 @@ class ModelVersion implements Serializable {
     Model model
     /**
      * The format of the file in the VCS.
-     * Kept in the Revision and not in the Model to make it possible to upload a new Revision in a different format.
+     * Kept in the ModelVersion and not in the Model to make it possible to upload a new ModelVersion in a different format.
      */
     ModelFormat format
     /*

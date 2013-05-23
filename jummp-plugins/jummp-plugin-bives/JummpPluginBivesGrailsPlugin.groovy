@@ -41,7 +41,7 @@ Brief description of the plugin.
             application.config.jummp.plugins.bives.diffdir = jummpConfig.jummp.plugins.bives.diffdir
             println("BiVeS: Diff directory set to " + jummpConfig.jummp.plugins.bives.diffdir)
         }
-		bivesEventListener(net.biomodels.jummp.plugins.bives.RevisionCreatedListener) {
+		bivesEventListener(net.biomodels.jummp.plugins.bives.ModelVersionCreatedListener) {
 			modelDelegateService = ref("modelDelegateService")
             diffDataService = ref("diffDataService")
 		}
