@@ -1,6 +1,6 @@
 package net.biomodels.jummp.core.miriam
 
-import net.biomodels.jummp.model.ModelVersion
+import net.biomodels.jummp.model.Revision
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import net.biomodels.jummp.model.Model
@@ -50,11 +50,11 @@ class FetchAnnotationsThread implements Runnable {
     /**
      * The revision on which we operate
      */
-    private ModelVersion ModelVersion
+    private Revision revision
     /**
      * Optional Id of the revision to fetch
      */
-    private Long versionId
+    private Long revisionId
 
     void run() {
         // set the Authentication in the Thread's SecurityContext
@@ -73,33 +73,33 @@ class FetchAnnotationsThread implements Runnable {
             }
             threadModel = Model.get(model)
         }
-        if (!versionId) {
-            version = modelService.getLatestVersion(threadModel)
+        if (!revisionId) {
+            revision = modelService.getLatestRevision(threadModel)
         } else {
-            version = ModelVersion.get(versionId)
-            if (!version) {
+            revision = Revision.get(revisionId)
+            if (!revision) {
                 try {
                     Thread.sleep(10000)
                 } catch (InterruptedException e) {
                     // ignore
                 }
-                version = ModelVersion.get(versionId)
+                revision = Revision.get(revisionId)
             }
         }
-        if (version) {
-            modelFileFormatService.getAllAnnotationURNs(version).each {
-                miriamService.queueUrnForIdentifierResolving(it, version)
+        if (revision) {
+            modelFileFormatService.getAllAnnotationURNs(revision).each {
+                miriamService.queueUrnForIdentifierResolving(it, revision)
             }
         }
         // clear the Authentication from the Thread's SecurityContext
         SecurityContextHolder.clearContext()
     }
 
-    static public FetchAnnotationsThread getInstance(Long model, Long version = null) {
+    static public FetchAnnotationsThread getInstance(Long model, Long revision = null) {
         FetchAnnotationsThread thread = new FetchAnnotationsThread()
         thread.authentication = SecurityContextHolder.context.authentication
         thread.model = model
-        thread.versionId = version
+        thread.revisionId = revision
         return thread
     }
 }

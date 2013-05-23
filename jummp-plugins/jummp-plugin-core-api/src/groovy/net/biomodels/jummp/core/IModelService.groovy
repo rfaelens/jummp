@@ -3,7 +3,7 @@ package net.biomodels.jummp.core
 import net.biomodels.jummp.core.model.ModelListSorting
 import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.model.ModelTransportCommand
-import net.biomodels.jummp.core.model.ModelVersionTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.plugins.security.User
@@ -86,7 +86,7 @@ public interface IModelService {
     * @param modelId The id of the Model for which the latest revision should be retrieved.
     * @return Latest ModelVersion the current user has read access to. If there is no such revision null is returned
     **/
-    public ModelVersionTransportCommand getLatestVersion(long modelId)
+    public RevisionTransportCommand getLatestRevision(long modelId)
     /**
     * Queries the model for all revisions the user has read access to.
     * The returned list is ordered by revision number of the model.
@@ -94,14 +94,14 @@ public interface IModelService {
     * @return List of ModelVersions ordered by revision numbers of underlying VCS. If the user has no access to any revision an empty list is returned
     * @todo: add paginated version with offset and count. Problem: filter
     **/
-    public List<ModelVersionTransportCommand> getAllVersions(long modelId)
+    public List<RevisionTransportCommand> getAllRevisions(long modelId)
     /**
      * Retrieves the ModelVersion for the Model identified by @p modelId and @p revisionNumber
      * @param modelId The Id of the model
      * @param revisionNumber The revision in context of the Model
      * @return The ModelVersion or @c null if there is no such ModelVersion
      */
-    public ModelVersionTransportCommand getVersion(long modelId, int versionNumber)
+    public RevisionTransportCommand getRevision(long modelId, int revisionNumber)
     /**
      * Returns the reference publication of this model.
      * @param modelId The if of the Model for which the reference publication should be returned.
@@ -135,20 +135,20 @@ public interface IModelService {
     * @return The new added ModelVersion. In case an error occurred while accessing the VCS @c null will be returned.
     * @throws ModelException If either @p model, @p file or @p comment are null or if the file does not exists or is a directory
     **/
-    public ModelVersionTransportCommand addVersion(long modelId, final File file, final ModelFormatTransportCommand format, final String comment) throws ModelException
+    public RevisionTransportCommand addRevision(long modelId, final File file, final ModelFormatTransportCommand format, final String comment) throws ModelException
     /**
      * Returns whether the current user has the right to add a revision to the model.
      * @param modelId The id of the model to check
      * @return @c true if the user has write permission on the revision or is an admin user, @c false otherwise.
      */
-    public Boolean canAddVersion(final long modelId)
+    public Boolean canAddRevision(final long modelId)
     /**
      * Retrieves the model file for the @p revision.
      * @param revision The ModelVersion for which the file should be retrieved.
      * @return Byte Array of the content of the Model file for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    byte[] retrieveModelFile(final ModelVersionTransportCommand version) throws ModelException
+    byte[] retrieveModelFile(final RevisionTransportCommand revision) throws ModelException
     /**
      * Retrieves the model file for the latest revision of the model.
      * @param modelId The id of the Model for which the file should be retrieved
@@ -250,6 +250,6 @@ public interface IModelService {
     * @todo might belong in an administration service?
     **/
     public boolean restoreModel(long modelId)
-    public boolean deleteVersion(ModelVersionTransportCommand version)
-    public void publishModelVersion(ModelVersionTransportCommand version)
+    public boolean deleteRevision(RevisionTransportCommand revision)
+    public void publishModelRevision(RevisionTransportCommand revision)
 }

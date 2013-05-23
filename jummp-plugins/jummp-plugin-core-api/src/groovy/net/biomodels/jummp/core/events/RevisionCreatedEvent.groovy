@@ -1,7 +1,6 @@
 package net.biomodels.jummp.core.events
 
-import net.biomodels.jummp.core.model.ModelVersionTransportCommand
-import java.util.List
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 /**
  * @short Event triggered when a new ModelVersion is uploaded.
@@ -14,19 +13,19 @@ import java.util.List
  * a ModelVersionTransportCommand is included in the event.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class ModelVersionCreatedEvent extends JummpEvent {
+class RevisionCreatedEvent extends JummpEvent {
     /**
      * The newly created ModelVersion
      */
-    final ModelVersionTransportCommand version
+    final RevisionTransportCommand revision
     /**
-     * The actual file(s) which was uploaded.
+     * The actual file which was uploaded.
      */
-    final List<File> files 
+    final File file
 
-    ModelVersionCreatedEvent(Object source, final ModelVersionTransportCommand version, final List<File> files) {
+    RevisionCreatedEvent(Object source, final RevisionTransportCommand revision, final File file) {
         super(source)
-        this.version = version
-        this.files = files
+        this.revision = revision
+        this.file = file
     }
 }

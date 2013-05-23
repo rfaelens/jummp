@@ -5,7 +5,7 @@ import net.biomodels.jummp.core.miriam.GeneOntologyRelationship
 import net.biomodels.jummp.core.miriam.GeneOntologyTreeLevel
 import org.springframework.security.acls.domain.BasePermission
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import net.biomodels.jummp.model.ModelVersion
+import net.biomodels.jummp.model.Revision
 import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclObjectIdentity
 import org.springframework.security.core.userdetails.UserDetails
 import org.perf4j.aop.Profiled
@@ -52,8 +52,8 @@ class GeneOntologyTreeService {
             geneOntologies.each { it ->
                 level.addOntology(it[0].id, it[0].description.identifier, it[0].description.name, it[1])
             }
-            versionsForGeneOntology(geneOntology).each {
-                level.addVersion(it.toCommandObject())
+            revisionsForGeneOntology(geneOntology).each {
+                level.addRevision(it.toCommandObject())
             }
         } else {
             geneOntologies.each { go ->
@@ -135,9 +135,9 @@ class GeneOntologyTreeService {
         return GeneOntology.executeQuery("SELECT DISTINCT rel.from, rel.type FROM GeneOntologyRelationship rel WHERE rel.to=:go", [go: go])
     }
 
-    private List<ModelVersion> versionsForGeneOntology(GeneOntology go) {
-        // First retrieve all IDs of the ModelVersion which are not deleted
-        List<Long> ids = ModelVersion.executeQuery("SELECT ver.id FROM GeneOntology AS go LEFT JOIN go.versions AS ver WHERE ver.deleted = false AND go=:go", [go: go]) as List<Long>
+    private List<Revision> revisionsForGeneOntology(GeneOntology go) {
+        // First retrieve all IDs of the Revision which are not deleted
+        List<Long> ids = Revision.executeQuery("SELECT rev.id FROM GeneOntology AS go LEFT JOIN go.revisions AS rev WHERE rev.deleted = false AND go=:go", [go: go]) as List<Long>
         // second: restrict on the revisions the current user can see
         if (!ids.isEmpty() && SpringSecurityUtils.ifNotGranted("ROLE_ADMIN")) {
             Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
@@ -164,7 +164,7 @@ class GeneOntologyTreeService {
                     AND
                     sid.sid IN (:roles)
                     ''', [
-                    className: ModelVersion.class.getName(),
+                    className: Revision.class.getName(),
                     objectIds: ids,
                     permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
                     roles: roles]) as List
@@ -172,20 +172,20 @@ class GeneOntologyTreeService {
         if (ids.isEmpty()) {
             return []
         } else if (ids.size() == 1) {
-            return [ModelVersion.get(ids[0])]
+            return [Revision.get(ids[0])]
         } else {
             // third: only one revision per Model
             // restricts on the maximum revisionNumber per Model
             // and on the Ids present in the list
-            return ModelVersion.executeQuery('''
-                SELECT ver
-                FROM ModelVersion AS ver
-                JOIN ver.model.versions AS versions
+            return Revision.executeQuery('''
+                SELECT rev
+                FROM Revision AS rev
+                JOIN rev.model.revisions AS revisions
                 WHERE
-                ver.id IN (:ids)
-                GROUP BY ver.model, ver.id
-                HAVING ver.versionNumber = max(version.versionNumber)
-                ORDER BY ver.model.name''', [ids: ids])
+                rev.id IN (:ids)
+                GROUP BY rev.model, rev.id
+                HAVING rev.revisionNumber = max(revisions.revisionNumber)
+                ORDER BY rev.model.name''', [ids: ids])
         }
     }
 }

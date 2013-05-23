@@ -2,7 +2,7 @@ package net.biomodels.jummp.remote
 
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
-import net.biomodels.jummp.core.model.ModelVersionTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
@@ -76,21 +76,21 @@ public interface RemoteModelAdapter {
     * @param modelId The Model for which the latest revision should be retrieved.
     * @return Latest ModelVersion the current user has read access to.
     **/
-    public ModelVersionTransportCommand getLatestVersion(long modelId)
+    public RevisionTransportCommand getLatestRevision(long modelId)
     /**
      * Queries the model for the revision identified with the specified revisionNumber.
      * @param modelId The Model fro which the revision should be retrieved.
      * @param revisionNumber The revision number in context to the model
      * @return The ModelVersion
      */
-    public ModelVersionTransportCommand getVersion(long modelId, int versionNumber)
+    public RevisionTransportCommand getRevision(long modelId, int revisionNumber)
     /**
     * Queries the model for all revisions the user has read access to.
     * The returned list is ordered by revision number of the model.
     * @param modelId The id of the Model for which all revisions should be retrieved
     * @return List of ModelVersions ordered by revision numbers of underlying VCS. If the user has no access to any revision an empty list is returned
     **/
-    public List<ModelVersionTransportCommand> getAllVersions(long modelId)
+    public List<RevisionTransportCommand> getAllRevisions(long modelId)
     /**
      * Returns the reference publication of this model.
      * @param modelId The id of the Model for which the reference publication should be returned.
@@ -120,20 +120,20 @@ public interface RemoteModelAdapter {
     * @param comment The commit message for the new revision
     * @return The new added ModelVersion. In case an error occurred while accessing the VCS @c null will be returned.
     **/
-    public ModelVersionTransportCommand addVersion(long modelId, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException
+    public RevisionTransportCommand addRevision(long modelId, byte[] bytes, ModelFormatTransportCommand format, String comment) throws ModelException
     /**
      * Returns whether the current user has the right to add a revision to the model.
      * @param modelId The id of the model to check
      * @return @c true if the user has write permission on the revision or is an admin user, @c false otherwise.
      */
-    public Boolean canAddVersion(final long modelId)
+    public Boolean canAddRevision(final long modelId)
     /**
      * Retrieves the model file for the @p revision.
      * @param revision The Model ModelVersion for which the file should be retrieved.
      * @return Byte Array of the content of the Model file for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    public byte[] retrieveModelFile(ModelVersionTransportCommand version)
+    public byte[] retrieveModelFile(RevisionTransportCommand revision)
     /**
      * Retrieves the model file for the latest revision of the model.
      * @param modelId The Model for which the file should be retrieved
@@ -163,6 +163,6 @@ public interface RemoteModelAdapter {
     * @see deleteModel
     **/
     public Boolean restoreModel(long modelId)
-    public Boolean deleteVersion(long modelId, int versionNumber)
-    public void publishModelVersion(long modelId, int versionNumber)
+    public Boolean deleteRevision(long modelId, int revisionNumber)
+    public void publishModelRevision(long modelId, int revisionNumber)
 }

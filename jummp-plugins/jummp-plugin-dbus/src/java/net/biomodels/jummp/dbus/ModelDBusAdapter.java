@@ -2,7 +2,7 @@ package net.biomodels.jummp.dbus;
 
 import net.biomodels.jummp.dbus.model.DBusModel;
 import net.biomodels.jummp.dbus.model.DBusPublication;
-import net.biomodels.jummp.dbus.model.DBusModelVersion;
+import net.biomodels.jummp.dbus.model.DBusRevision;
 import org.freedesktop.dbus.DBusInterface;
 import org.freedesktop.dbus.DBusInterfaceName;
 
@@ -37,15 +37,15 @@ public interface ModelDBusAdapter extends DBusInterface {
     public List<String> getAllModels(String authenticationHash);
     public int getModelCount(String authenticationHash);
     public DBusModel getModel(String authenticationHash, long id);
-    public DBusModelVersion getLatestVersion(String authenticationHash, long id);
-    public List<String> getAllVersions(String authenticationHash, long id);
-    public DBusModelVersion getVersion(String authenticationHash, long modelId, int versionNumber);
+    public DBusRevision getLatestRevision(String authenticationHash, long id);
+    public List<String> getAllRevisions(String authenticationHash, long id);
+    public DBusRevision getRevision(String authenticationHash, long modelId, int revisionNumber);
     public DBusPublication getPublication(String authenticationHash, long id);
     public DBusModel uploadModel(String authenticationHash, String fileName, DBusModel meta);
     public DBusModel uploadModelWithPublication(String authenticationHash, String fileName, DBusModel meta, DBusPublication publication);
-    public DBusModelVersion addVersion(String authenticationHash, long modelId, String fileName, String format, String comment);
-    public boolean canAddVersion(String authenticationHash, long id);
-    public String retrieveModelFileByVersion(String authenticationHash, long id);
+    public DBusRevision addRevision(String authenticationHash, long modelId, String fileName, String format, String comment);
+    public boolean canAddRevision(String authenticationHash, long id);
+    public String retrieveModelFileByRevision(String authenticationHash, long id);
     public String retrieveModelFileByModel(String authenticationHash, long id);
     public void grantReadAccess(String authenticationHash, long id, DBusUser user);
     public void grantWriteAccess(String authenticationHash, long id, DBusUser user);
@@ -54,6 +54,6 @@ public interface ModelDBusAdapter extends DBusInterface {
     public void transferOwnerShip(String authenticationHash, long id, DBusUser collaborator);
     public boolean deleteModel(String authenticationHash, long id);
     public boolean restoreModel(String authenticationHash, long id);
-    public boolean deleteVersion(String authenticationHash, long modelId, int versionNumber);
-    public void publishModelVersion(String authenticationHash, long modelId, int versionNumber);
+    public boolean deleteRevision(String authenticationHash, long modelId, int revisionNumber);
+    public void publishModelRevision(String authenticationHash, long modelId, int revisionNumber);
 }

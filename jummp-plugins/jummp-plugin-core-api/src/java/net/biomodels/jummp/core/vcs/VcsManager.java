@@ -24,9 +24,9 @@ import java.util.List;
 * recommended to expect the worst and ensure locking itself, if possible. As a matter of fact
 * it is also recommended to not modify the working copy from outside the application.
 * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
-* 
-* 
-* 
+*
+*
+*
 * This interface has been modified from a 'file oriented' view to 'model oriented'. Here a folder 
 * is associated with a model, with files added and retrieved through specified
 * revisions of the model folder. The interface has been considerably modified including
@@ -92,19 +92,15 @@ public interface VcsManager {
      */
     public List<File> retrieveModel(File modelDirectory) throws VcsException;
 
-    
     /**
     * Retrieves the revision ids from @p modelDirectory
     * Returns the revision ids associated with the modelDirectory in the repository
     * @param modelDirectory the model directory
     */
     public List<String> getRevisions(File modelDirectory);
-    
-    
+
     /**
     * Updates the working copy to the latest remote HEAD.
     */
     public void updateWorkingCopy(File modelDirectory);
-
-
 }

@@ -141,8 +141,7 @@ grails.project.dependency.resolution = {
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"
-        compile ":webflow:2.0.8.1"
-	//compile ":webflow:2.2.2"
+        compile ":webflow:2.0.0"
         compile ":jquery:1.6.1.1"
         compile ":resources:1.1.6"
 

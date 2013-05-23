@@ -1,7 +1,7 @@
 package net.biomodels.jummp.plugins.bives
 
-import net.biomodels.jummp.core.events.ModelVersionCreatedEvent
-import net.biomodels.jummp.core.model.ModelVersionTransportCommand
+import net.biomodels.jummp.core.events.RevisionCreatedEvent
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 import grails.util.Environment 
 import org.springframework.context.ApplicationEvent
@@ -19,7 +19,7 @@ import de.unirostock.bives.fwk.diff.DiffGeneratorManager
  * @author Mihai Glonț <mglont@ebi.ac.uk>
  * @date   7/04/2013
  */
-class ModelVersionCreatedListener implements ApplicationListener {
+class RevisionCreatedListener implements ApplicationListener {
 	/**
 	 * Dependency Injection of ModelDelegateService
 	 */
@@ -30,13 +30,13 @@ class ModelVersionCreatedListener implements ApplicationListener {
     def diffDataService
 
 	public void onApplicationEvent(ApplicationEvent event) {
-		if (event instanceof ModelVersionCreatedEvent) {
+		if (event instanceof RevisionCreatedEvent) {
 			try {
 				// initiate variables
 				DiffGeneratorManager diffMan = new DiffGeneratorManager()
 				// first, map event...
-				ModelVersionTransportCommand command = ((ModelVersionCreatedEvent) event).version
-				File testFile = ((ModelVersionCreatedEvent) event).file
+				RevisionTransportCommand command = ((RevisionCreatedEvent) event).revision
+				File testFile = ((RevisionCreatedEvent) event).file
                 ConfigObject config = ConfigurationHelper.loadConfigFromClasspath(Environment.getCurrent().getName())
                 final File location
                 if (config.containsKey("jummp.plugins.bives.diffdir")) {
@@ -48,12 +48,12 @@ class ModelVersionCreatedListener implements ApplicationListener {
 				// get previous revision
 				File refFile = File.createTempFile("referenceFile", ".xml", location) 
 				refFile.write(new String(modelDelegateService.retrieveModelFile(
-                        modelDelegateService.getVersion(command.model.id, command.versionNumber - 1))))
+                        modelDelegateService.getRevision(command.model.id, command.revisionNumber - 1))))
 				// create diff, initialize required variables
 				Diff diff = diffMan.generateDiff(refFile, testFile, true)
 				// debug
-				int prevRev = command.versionNumber - 1
-				int currRev = command.versionNumber
+				int prevRev = command.revisionNumber - 1
+				int currRev = command.revisionNumber
 				diff.setModelId(command.model.id as String)
 				diff.setOriginId(prevRev)
 				diff.setSuccessorId(currRev)

@@ -20,6 +20,6 @@ public @interface DBusMethod {
     boolean isAnonymous() default false
     String delegate() default ""
     String collect() default ""
-    int[] getVersion()
+    int[] getRevision()
     boolean json() default false
 }

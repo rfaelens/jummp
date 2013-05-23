@@ -5,7 +5,7 @@
  */
 package net.biomodels.jummp.plugins.bives
 
-import net.biomodels.jummp.core.model.ModelVersionTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.InitializingBean
@@ -42,8 +42,8 @@ class DiffDataProvider implements InitializingBean {
 	 */
 	List updates = []
 	// models
-	private ModelVersionTransportCommand currRev
-	private ModelVersionTransportCommand prevRev
+	private RevisionTransportCommand currRev
+	private RevisionTransportCommand prevRev
 	private JummpRepositoryManager repoMan
 	private static final String ID = "@id=";
 
@@ -80,14 +80,14 @@ class DiffDataProvider implements InitializingBean {
 	 * @param recentVersion a successor revision (in relation to the previous revision)
 	 * @return <code>true</code> if the {@link Diff} information was successfully retrieved, <code>false</code> otherwise
 	 */
-	public boolean getDiffInformation(long modelId, int previousVersion,  int recentVersion) {
-		File diffFile = repoMan.getDiffFile(modelId, previousVersion, recentVersion)
+	public boolean getDiffInformation(long modelId, int previousRevision,  int recentRevision) {
+		File diffFile = repoMan.getDiffFile(modelId, previousRevision, recentRevision)
 		Diff diff = null;
 		if(diffFile != null && diffFile.exists()) {
-			diff = repoMan.getDiff(repoMan.getDiffFile(modelId, previousVersion, recentVersion))
+			diff = repoMan.getDiff(repoMan.getDiffFile(modelId, previousRevision, recentRevision))
 			// get models
-			currRev = modelDelegateService.getVersion(modelId, recentVersion)
-			prevRev = modelDelegateService.getVersion(modelId, previousVersion)
+			currRev = modelDelegateService.getRevision(modelId, recentRevision)
+			prevRev = modelDelegateService.getRevision(modelId, previousRevision)
 			// for filtering duplicate moves
 			String currentPath = "";
 			// moves
@@ -145,7 +145,7 @@ class DiffDataProvider implements InitializingBean {
 	 * @param revision the {@link ModelVersionTransportCommand} resp. the Model
 	 * @return a {@link Map} containing the type of the element and its JSBML representation
 	 */
-	private Map<Map, String> getPathObject(String xpath, ModelVersionTransportCommand version) {
+	private Map<Map, String> getPathObject(String xpath, RevisionTransportCommand revision) {
 		try {
 			String[] nodes = xpath.split("/")
 			boolean resolved = false
@@ -157,7 +157,7 @@ class DiffDataProvider implements InitializingBean {
 					if(nodes[i].contains(ID)) {
 						String elementName = nodes[i].subSequence(nodes[i].indexOf(":") + 1, nodes[i].indexOf("[")).capitalize()
 						String id = nodes[i].subSequence(nodes[i].indexOf("'") + 1, nodes[i].lastIndexOf("'"))
-						sbmlNode = sbmlService."get${elementName}"(version, id)
+						sbmlNode = sbmlService."get${elementName}"(revision, id)
 						sbmlNode.type = elementName
 						break
 					}
