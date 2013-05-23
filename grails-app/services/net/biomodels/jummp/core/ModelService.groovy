@@ -25,18 +25,18 @@ import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.model.Publication
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.core.userdetails.UserDetails
-import java.util.List
-import java.util.LinkedList
+import java.util.List;
+import java.util.LinkedList;
 
 /**
  * @short Service class for managing Models
  *
  * This service provides the high-level API to access models and their revisions.
- * It is recommended to use this service instead of accessing Models and ModelVersions
+ * It is recommended to use this service instead of accessing Models and Revisions
  * directly through GORM. The service methods respect the ACL on the objects and by
  * that ensures that no user can perform actions he is not allowed to.
  * @see Model
- * @see ModelVersion
+ * @see Revision
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Mihai Glonț <mglont@ebi.ac.uk>
  * @date 20/03/2013
@@ -82,7 +82,7 @@ class ModelService {
     /**
     * Returns list of Models the user has access to.
     *
-    * Searches for all Models the current user has access to, that is @ref getLatestVersion
+    * Searches for all Models the current user has access to, that is @ref getLatestRevision
     * does not return @c null for any Model in the returned list.
     * This method provides pagination.
     * @param offset Offset in the list
@@ -364,7 +364,7 @@ OR lower(m.publication.affiliation) like :filter
     /**
     * Queries the @p model for the latest available revision the user has read access to.
     * @param model The Model for which the latest revision should be retrieved.
-    * @return Latest ModelVersion the current user has read access to. If there is no such revision null is returned
+    * @return Latest Revision the current user has read access to. If there is no such revision null is returned
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getLatestRevision")
@@ -431,7 +431,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * Queries the @p model for all revisions the user has read access to.
     * The returned list is ordered by revision number of the model.
     * @param model The Model for which all revisions should be retrieved
-    * @return List of ModelVersions ordered by revision numbers of underlying VCS. If the user has no access to any revision an empty list is returned
+    * @return List of Revisions ordered by revision numbers of underlying VCS. If the user has no access to any revision an empty list is returned
     * @todo: add paginated version with offset and count. Problem: filter
     **/
     @PostFilter("hasPermission(filterObject, read) or hasRole('ROLE_ADMIN')")
@@ -472,7 +472,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * @param model The Model for which the reference publication should be returned.
      * @return The reference publication
      * @throws IllegalArgumentException if @p model is null
-     * @throws AccessDeniedException if the current user is not allowed to access at least one ModelVersion
+     * @throws AccessDeniedException if the current user is not allowed to access at least one Model Revision
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getPublication")
@@ -490,7 +490,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * Creates a new Model and stores it in the VCS.
     *
     * Stores the @p modelFile as a new file in the VCS and creates a Model for it.
-    * The Model will have one ModelVersion attached to it. The MetaInformation for this
+    * The Model will have one Revision attached to it. The MetaInformation for this
     * Model is taken from @p meta. The user who uploads the Model becomes the owner of
     * this Model. The new Model is not visible to anyone except the owner.
     * @param modelFile The model file to be stored in the VCS.
@@ -509,7 +509,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * Creates a new Model and stores it in the VCS.
     *
     * Stores the @p modelFile as a new file in the VCS and creates a Model for it.
-    * The Model will have one ModelVersion attached to it. The MetaInformation for this
+    * The Model will have one Revision attached to it. The MetaInformation for this
     * Model is taken from @p meta. The user who uploads the Model becomes the owner of
     * this Model. The new Model is not visible to anyone except the owner.
     * @param modelFile The model file to be stored in the VCS.
@@ -615,40 +615,39 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Adds a new ModelVersion to the model.
+    * Adds a new Revision to the model.
     *
     * The provided @p file will be stored in the VCS as an update to an existing file of the same @p model.
-    * A new ModelVersion will be created and appended to the list of ModelVersions of the @p model.
+    * A new Revision will be created and appended to the list of Revisions of the @p model.
     * @param model The Model the revision should be added
     * @param file The model file to be stored in the VCS as a new revision
     * @param format The format of the model file
     * @param comment The commit message for the new revision
-    * @return The new added ModelVersion. In case an error occurred while accessing the VCS @c null will be returned.
+    * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
     * @throws ModelException If either @p model, @p file or @p comment are null or if the file does not exists or is a directory
     **/
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
-    @Profiled(tag="modelService.addVersionAsFile")
-    public ModelVersion addRevisionAsFile(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
+    @Profiled(tag="modelService.addRevisionAsFile")
+    public Revision addRevisionAsFile(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
             return addRevisionAsList(getAsList(file));
     }
 
-    /**
-    * Adds a new ModelVersion to the model.
-    *
+        /**
+    * Adds a new Revision to the model.
     * The provided @p file will be stored in the VCS as an update to an existing file of the same @p model.
-    * A new ModelVersion will be created and appended to the list of ModelVersions of the @p model.
+    * A new Revision will be created and appended to the list of Revisions of the @p model.
     * @param model The Model the revision should be added
     * @param file The model file to be stored in the VCS as a new revision
     * @param format The format of the model file
     * @param comment The commit message for the new revision
-    * @return The new added ModelVersion. In case an error occurred while accessing the VCS @c null will be returned.
+    * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
     * @throws ModelException If either @p model, @p file or @p comment are null or if the file does not exists or is a directory
     **/
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
-    @Profiled(tag="modelService.addVersionAsList")
-    public ModelVersion addVersionAsList(Model model, final List<File> modelFiles, final ModelFormat format, final String comment) throws ModelException {
+    @Profiled(tag="modelService.addRevisionAsList")
+    public Revision addRevisionAsList(Model model, final List<File> modelFiles, final ModelFormat format, final String comment) throws ModelException {
         // TODO: the method should be thread safe, add a lock
         if (!model) {
             throw new ModelException(null, "Model may not be null")
@@ -720,7 +719,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
 
     /**
      * Retrieves the model file for the @p revision.
-     * @param revision The ModelVersion for which the file should be retrieved.
+     * @param revision The Model Revision for which the file should be retrieved.
      * @return Byte Array of the content of the Model file for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
@@ -898,7 +897,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Deletes the @p model including all ModelVersions.
+    * Deletes the @p model including all Revisions.
     *
     * Flags the @p model and all its revisions as deleted. A deletion from VCS is for
     * technical reasons not possible and because of that a deletion of the Model object
@@ -928,7 +927,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     /**
     * Restores the deleted @p model.
     *
-    * Removes the deleted flag from the model and all its ModelVersions.
+    * Removes the deleted flag from the model and all its Revisions.
     * @param model The deleted Model to restore
     * @return @c true, whether the state was restored, @c false otherwise.
     * @see ModelService#deleteModel(Model model)
@@ -952,12 +951,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-     * Deletes the @p revision of the model if it is the latest ModelVersion of the model.
+     * Deletes the @p revision of the model if it is the latest Revision of the model.
      *
-     * This is no real deletion, but only a flag which is set on the ModelVersion. Due to
+     * This is no real deletion, but only a flag which is set on the Revision. Due to
      * technical constraints of the underlying version control system a real deletion
      * is not possible.
-     * @param revision The ModelVersion to delete
+     * @param revision The Revision to delete
      * @return @c true if revision was deleted, @c false otherwise
      */
     @PreAuthorize("hasPermission(#revision, delete) or hasRole('ROLE_ADMIN')")
@@ -992,13 +991,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-     * Makes a ModelVersion publicly available.
-     * This means that ROLE_USER and ROLE_ANONYMOUS gain read access to the ModelVersion and by that also to
+     * Makes a Model Revision publicly available.
+     * This means that ROLE_USER and ROLE_ANONYMOUS gain read access to the Revision and by that also to
      * the Model.
      *
-     * Only a Curator with write permission on the ModelVersion or an Administrator are allowed to call this
+     * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
      * method.
-     * @param revision The ModelVersion to be published
+     * @param revision The Revision to be published
      */
     @PreAuthorize("(hasRole('ROLE_CURATOR') and hasPermission(#revision, write)) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)

@@ -19,6 +19,7 @@ class Revision implements Serializable {
      * The revision belongs to one Model
      */
     static belongsTo = [model: Model]
+    static hasMany = [repFiles: RepositoryFile]
     /**
      * The revision number in the version control system.
      * E.g. in Subversion the global revision number of the
@@ -26,8 +27,9 @@ class Revision implements Serializable {
      * Sha1-sum of the commit which stored this Model Revision.
      */
     String vcsId
+
     /**
-     * ModelVersion number in reference to the Model and not to the VCS.
+     * Revision number in reference to the Model and not to the VCS.
      */
     Integer revisionNumber
     /**
@@ -52,7 +54,7 @@ class Revision implements Serializable {
     Model model
     /**
      * The format of the file in the VCS.
-     * Kept in the ModelVersion and not in the Model to make it possible to upload a new ModelVersion in a different format.
+     * Kept in the Revision and not in the Model to make it possible to upload a new Revision in a different format.
      */
     ModelFormat format
     /**

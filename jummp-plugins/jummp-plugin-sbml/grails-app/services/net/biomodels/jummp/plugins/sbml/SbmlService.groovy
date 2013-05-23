@@ -647,7 +647,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     /**
      * Resolves the SBMLModel from the given @p revision.
-     * @param revision The ModelVersionTransportCommand from which to extract the SBMLModel.
+     * @param revision The RevisionTransportCommand from which to extract the SBMLModel.
      * @return The SBMLModel to be found or an empty array if the model could not be found.
      */
     private SBMLModel resolveSbmlModel(RevisionTransportCommand revision) {

@@ -4,7 +4,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsManager
 import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.model.ModelVersion
+import net.biomodels.jummp.model.Revision
 
 /**
  * @short Service providing access to the version control system.
@@ -101,18 +101,18 @@ class VcsService {
      * @throws VcsException passes along the VcsException thrown by VcsManager
      */
     @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
-    List<File> retrieveFile(final ModelVersion version) throws VcsException {
+    List<File> retrieveFile(final Revision revision) throws VcsException {
         if (!isValid()) {
             throw new VcsException("Version Control System is not valid")
         }
-        def latestRevId = ModelVersion.createCriteria().get {
-            eq("model.id", version.model.id)
+        def latestRevId = Revision.createCriteria().get {
+            eq("model.id", revision.model.id)
             projections {
                 max("revisionNumber")
             }
         }
-        if (version.versionNumber == latestVerId) {
-            return vcsManager.retrieveModel(new File(version.model.vcsIdentifier))
+        if (revision.revisionNumber == latestRevId) {
+            return vcsManager.retrieveModel(new File(revision.model.vcsIdentifier))
         }
 
         return vcsManager.retrieveModel(revision.model.vcsIdentifier, revision.vcsId)

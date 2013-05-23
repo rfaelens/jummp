@@ -6,9 +6,9 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 
 /**
- * @short DBus Wrapper for a ModelVersionTransportCommand.
+ * @short DBus Wrapper for a RevisionTransportCommand.
  *
- * This class extends the ModelVersionTransportCommand which means that it can be
+ * This class extends the RevisionTransportCommand which means that it can be
  * used by the remote side without unwrapping.
  *
  * The ModelTransportCommand wrapped in this object only includes the model id!
@@ -44,9 +44,9 @@ class DBusRevision extends RevisionTransportCommand implements DBusSerializable 
     }
 
     /**
-     * Creates a new DBusModelVersion from a ModelVersionTransportCommand.
-     * @param rev The ModelVersionTransportCommand
-     * @return a DBusSerializable ModelVersionTransportCommand
+     * Creates a new DBusRevision from a RevisionTransportCommand.
+     * @param rev The RevisionTransportCommand
+     * @return a DBusSerializable RevisionTransportCommand
      */
     public static DBusRevision fromRevisionTransportCommand(RevisionTransportCommand rev) {
         return new DBusRevision(id: rev.id,

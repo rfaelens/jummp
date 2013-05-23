@@ -23,7 +23,7 @@ public interface IModelService {
     /**
     * Returns list of Models the user has access to.
     *
-    * Searches for all Models the current user has access to, that is @ref getLatestModelVersion
+    * Searches for all Models the current user has access to, that is @ref getLatestRevision
     * does not return @c null for any Model in the returned list.
     * This method provides pagination.
     * @param offset Offset in the list
@@ -84,22 +84,22 @@ public interface IModelService {
     /**
     * Queries the model for the latest available revision the user has read access to.
     * @param modelId The id of the Model for which the latest revision should be retrieved.
-    * @return Latest ModelVersion the current user has read access to. If there is no such revision null is returned
+    * @return Latest Revision the current user has read access to. If there is no such revision null is returned
     **/
     public RevisionTransportCommand getLatestRevision(long modelId)
     /**
     * Queries the model for all revisions the user has read access to.
     * The returned list is ordered by revision number of the model.
     * @param modelId The id of the Model for which all revisions should be retrieved
-    * @return List of ModelVersions ordered by revision numbers of underlying VCS. If the user has no access to any revision an empty list is returned
+    * @return List of Revisions ordered by revision numbers of underlying VCS. If the user has no access to any revision an empty list is returned
     * @todo: add paginated version with offset and count. Problem: filter
     **/
     public List<RevisionTransportCommand> getAllRevisions(long modelId)
     /**
-     * Retrieves the ModelVersion for the Model identified by @p modelId and @p revisionNumber
+     * Retrieves the Revision for the Model identified by @p modelId and @p revisionNumber
      * @param modelId The Id of the model
      * @param revisionNumber The revision in context of the Model
-     * @return The ModelVersion or @c null if there is no such ModelVersion
+     * @return The Revision or @c null if there is no such Revision
      */
     public RevisionTransportCommand getRevision(long modelId, int revisionNumber)
     /**
@@ -107,14 +107,14 @@ public interface IModelService {
      * @param modelId The if of the Model for which the reference publication should be returned.
      * @return The reference publication
      * @throws IllegalArgumentException if @p model is null
-     * @throws AccessDeniedException if the current user is not allowed to access at least one Model ModelVersion
+     * @throws AccessDeniedException if the current user is not allowed to access at least one Model Revision
      */
     public PublicationTransportCommand getPublication(final long modelId) throws AccessDeniedException, IllegalArgumentException
     /**
     * Creates a new Model and stores it in the VCS.
     *
     * Stores the @p modelFile as a new file in the VCS and creates a Model for it.
-    * The Model will have one ModelVersion attached to it. The MetaInformation for this
+    * The Model will have one Revision attached to it. The MetaInformation for this
     * Model is taken from @p meta. The user who uploads the Model becomes the owner of
     * this Model. The new Model is not visible to anyone except the owner.
     * @param modelFile The model file to be stored in the VCS.
@@ -124,15 +124,15 @@ public interface IModelService {
     **/
     public ModelTransportCommand uploadModel(final File modelFile, ModelTransportCommand meta) throws ModelException
     /**
-    * Adds a new ModelVersion to the model.
+    * Adds a new Revision to the model.
     *
     * The provided @p file will be stored in the VCS as an update to an existing file of the same model.
-    * A new ModelVersion will be created and appended to the list of ModelVersions of the @p model.
+    * A new Revision will be created and appended to the list of Revisions of the @p model.
     * @param modelId The id of the Model the revision should be added
     * @param file The model file to be stored in the VCS as a new revision
     * @param format The format of the model file
     * @param comment The commit message for the new revision
-    * @return The new added ModelVersion. In case an error occurred while accessing the VCS @c null will be returned.
+    * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
     * @throws ModelException If either @p model, @p file or @p comment are null or if the file does not exists or is a directory
     **/
     public RevisionTransportCommand addRevision(long modelId, final File file, final ModelFormatTransportCommand format, final String comment) throws ModelException
@@ -144,7 +144,7 @@ public interface IModelService {
     public Boolean canAddRevision(final long modelId)
     /**
      * Retrieves the model file for the @p revision.
-     * @param revision The ModelVersion for which the file should be retrieved.
+     * @param revision The Model Revision for which the file should be retrieved.
      * @return Byte Array of the content of the Model file for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
@@ -228,7 +228,7 @@ public interface IModelService {
     **/
     public void transferOwnerShip(long modelId, User collaborator)
     /**
-    * Deletes the model including all ModelVersions.
+    * Deletes the model including all Revisions.
     *
     * Flags the model and all its revisions as deleted. A deletion from VCS is for
     * technical reasons not possible and because of that a deletion of the Model object
@@ -243,7 +243,7 @@ public interface IModelService {
     /**
     * Restores the deleted model.
     *
-    * Removes the deleted flag from the model and all its ModelVersions.
+    * Removes the deleted flag from the model and all its Revisions.
     * @param modelId The id of the deleted Model to restore
     * @return @c true, whether the state was restored, @c false otherwise.
     * @see deleteModel

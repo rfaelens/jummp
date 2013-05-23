@@ -31,7 +31,7 @@ class GeneOntologyTreeService {
      * Retrieves the next GO tree level under the Gene Ontology with the internal @p goId.
      *
      * The returned GeneOntologyTreeLevel contains all the information about the child
-     * Gene Ontologies and the ModelVersions linked to this GeneOntology identified by @p goId.
+     * Gene Ontologies and the Revisions linked to this GeneOntology identified by @p goId.
      *
      * In case @p goId is @c null or @c 0, the root level is retrieved.
      *

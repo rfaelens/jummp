@@ -61,15 +61,15 @@ public class DiffDataService implements InitializingBean {
 	 * Provides the data from a generated diff for the view if present or starts a thread
 	 * for the creation of a non-existing diff
 	 * @param modelId the id of the model
-	 * @param previousVersion the number of a previous model revision
-	 * @param recentVersion a successor revision (in relation to the previous revision)
+	 * @param previousRevision the number of a previous model revision
+	 * @param recentRevision a successor revision (in relation to the previous revision)
 	 * @return a Map containing the different types of changes extracted from the diff
 	 */
-	Map generateDiffData(long modelId, int previousVersion, int recentVersion) throws DiffNotExistingException {
+	Map generateDiffData(long modelId, int previousRevision, int recentRevision) throws DiffNotExistingException {
 		DiffDataProvider diffData = grailsApplication.mainContext.getBean("diffDataProvider") as DiffDataProvider
-		if(!diffData.getDiffInformation(modelId, previousVersion, recentVersion)) {
+		if(!diffData.getDiffInformation(modelId, previousRevision, recentRevision)) {
 			Runnable runnable = null
-			String diff = modelId + ";" + previousVersion + ";" + recentVersion
+			String diff = modelId + ";" + previousRevision + ";" + recentRevision
 			// prevents the multiple generation of the same diff by locking this process and
 			// storing the information about the currently generated diff
 			lock.lock();
@@ -77,7 +77,7 @@ public class DiffDataService implements InitializingBean {
 				if(lockedDiffs.contains(diff)) {
 					throw new DiffNotExistingException()
 				}
-				runnable = grailsApplication.mainContext.getBean("createDiff", modelId, previousVersion, recentVersion) as Runnable
+				runnable = grailsApplication.mainContext.getBean("createDiff", modelId, previousRevision, recentRevision) as Runnable
 				if(runnable) {
 					lockedDiffs << diff
 				}
@@ -95,12 +95,12 @@ public class DiffDataService implements InitializingBean {
 	/**
 	 * Removes a diff from the queue
 	 * @param modelId the id of the model
-	 * @param previousVersion the number of a previous model revision
-	 * @param recentVersion a successor revision (in relation to the previous revision)
+	 * @param previousRevision the number of a previous model revision
+	 * @param recentRevision a successor revision (in relation to the previous revision)
 	 */
-	void unqueueDiff(long modelId, int previousVersion, int recentVersion) {
+	void unqueueDiff(long modelId, int previousRevision, int recentRevision) {
 		try {
-			String diff = modelId + ";" + previousVersion + ";" + recentVersion
+			String diff = modelId + ";" + previousRevision + ";" + recentRevision
 			lock.lock();
 			if(lockedDiffs.contains(diff)) {
 				lockedDiffs.remove(diff)

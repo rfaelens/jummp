@@ -9,8 +9,8 @@ package net.biomodels.jummp.model
  */
 class RepositoryFile {
 
-    static hasMany = [versions: ModelVersion]
-    static belongsTo = ModelVersion
+//    static hasMany = [revisions: Revision]
+    static belongsTo = Revision
     /**
      * The path relative to the root folder containing all models
      */
@@ -29,8 +29,8 @@ class RepositoryFile {
         path(nullable: false, blank: false, matches:
             "${File.separator}?([a-zA-Z0-9\\-_]+${File.separator})+[a-zA-Z0-9\\-_]+${File.separator}?" as String)
         description(nullable: false, blank: true, maxSize:100)
-        versions(nullable: false, validator: { v ->
+        /*versions(nullable: false, validator: { v ->
             return !v.isEmpty()
-        })
+        })*/
     }
 }

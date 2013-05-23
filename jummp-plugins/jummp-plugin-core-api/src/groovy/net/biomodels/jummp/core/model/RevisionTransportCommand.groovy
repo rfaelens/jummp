@@ -1,9 +1,9 @@
 package net.biomodels.jummp.core.model
 
 /**
- * @short Wrapper for a ModelVersion to be transported through JMS.
+ * @short Wrapper for a Revision to be transported through JMS.
  *
- * Small wrapper class to decouple the ModelVersion from the Database.
+ * Small wrapper class to decouple the Revision from the Database.
  * Changes to instances of this class are not populated to the database.
  *
  * The object can also be used as a command object for the web interface.
@@ -14,11 +14,11 @@ class RevisionTransportCommand implements Serializable {
     private static final long serialVersionUID = 1L
     Long id
     /**
-     * ModelVersion number in reference to the Model and not to the VCS.
+     * Revision number in reference to the Model and not to the VCS.
      */
     Integer revisionNumber
     /**
-     * The real name of the user who uploaded the ModelVersion.
+     * The real name of the user who uploaded the Revision.
      */
     String owner
     /**
@@ -30,7 +30,7 @@ class RevisionTransportCommand implements Serializable {
      */
     String comment
     /**
-     * The date when the ModelVersion was uploaded.
+     * The date when the Revision was uploaded.
      */
     Date uploadDate
     /**

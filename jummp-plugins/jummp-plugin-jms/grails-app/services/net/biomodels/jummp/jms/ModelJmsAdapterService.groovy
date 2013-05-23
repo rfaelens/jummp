@@ -97,9 +97,9 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     }
 
     /**
-     * Wrapper around ModelService.getLatestModelVersion
+     * Wrapper around ModelService.getLatestRevision
      * @param message List consisting of AuthenticationHash and ModelTransportCommand
-     * @return A ModelVersionTransportCommand or IllegalArgumentException or AccessDeniedException if user does not have access to any ModelVersion.
+     * @return A RevisionTransportCommand or IllegalArgumentException or AccessDeniedException if user does not have access to any Revision.
      */
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long])
@@ -115,9 +115,9 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     }
 
     /**
-     * Wrapper around ModelService.getAllModelVersions
+     * Wrapper around ModelService.getAllRevisions
      * @param message List consisting of AuthenticationHash and Model
-     * @return List of ModelVersions wrapped in ModelVersionTransportCommand or IllegalArgumentException
+     * @return List of Revisions wrapped in RevisionTransportCommand or IllegalArgumentException
      */
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long])
@@ -168,9 +168,9 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     }
 
     /**
-     * Wrapper around ModelService.addModelVersion
+     * Wrapper around ModelService.addRevision
      * @param message List consisting of AuthenticationHash, ModelTransportCommand, content of file as Byte Array, ModelFormatTransportCommand and String
-     * @return New created ModelVersion as ModelVersionTransportCommand, InvalidArgumentException, AccessDeniedException or ModelException
+     * @return New created Revision as RevisionTransportCommand, InvalidArgumentException, AccessDeniedException or ModelException
      */
     @Queue
     @JmsQueueMethod(isAuthenticate=true, arguments=[Long, byte[], ModelFormatTransportCommand, String])
@@ -186,7 +186,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     }
 
     /**
-     * Wrapper around ModelService.canAddModelVersion
+     * Wrapper around ModelService.canAddRevision
      * @param message List consisting of AuthenticationHash and ModelTransportCommand
      * @return Boolean or IllegalArgumentException
      */
@@ -200,7 +200,7 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
 
     /**
      * Wrapper around ModelService.retrieveModelFile
-     * @param message List consisting of AuthenticationHash and ModelVersion
+     * @param message List consisting of AuthenticationHash and Revision
      * @return Byte Array, InvalidArgumentException, AccessDeniedException or ModelException
      */
     @Queue

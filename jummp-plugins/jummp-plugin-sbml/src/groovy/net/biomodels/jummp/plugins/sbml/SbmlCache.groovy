@@ -10,8 +10,8 @@ import java.util.concurrent.locks.ReentrantLock
  *
  * This class provides a last recently used cache for SBMLDocuments. Internally it uses a
  * LinkedHashMap mapping ids to the SBMLDocument. It is meant to keep the SBML documents
- * belonging to a specific ModelVersion in memory. Because of that the actual class uses
- * ModelVersionTransportCommands as the key.
+ * belonging to a specific Revision in memory. Because of that the actual class uses
+ * RevisionTransportCommands as the key.
  *
  * All access to the internal cache is protected by a reentrant lock, so that the cache can
  * be accessed from multiple threads.
