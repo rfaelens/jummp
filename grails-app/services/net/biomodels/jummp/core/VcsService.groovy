@@ -101,7 +101,7 @@ class VcsService {
      * @throws VcsException passes along the VcsException thrown by VcsManager
      */
     @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
-    List<File> retrieveFile(final Revision revision) throws VcsException {
+    List<File> retrieveFiles(final Revision revision) throws VcsException {
         if (!isValid()) {
             throw new VcsException("Version Control System is not valid")
         }
@@ -115,7 +115,7 @@ class VcsService {
             return vcsManager.retrieveModel(new File(revision.model.vcsIdentifier))
         }
 
-        return vcsManager.retrieveModel(revision.model.vcsIdentifier, revision.vcsId)
+        return vcsManager.retrieveModel(new File(revision.model.vcsIdentifier), revision.vcsId)
     }
     // TODO: implement required methods
 }

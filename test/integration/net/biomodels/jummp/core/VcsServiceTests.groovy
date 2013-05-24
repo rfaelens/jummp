@@ -99,7 +99,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
     }
 
     @Test
-    void testImportFile() {
+    void testImport() {
         String modelIdentifier="target/vcs/git"
         assertFalse(vcsService.isValid())
         // first create a model
@@ -174,7 +174,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
     }
 
     @Test
-    void testUpdateFile() {
+    void testUpdate() {
         assertFalse(vcsService.isValid())
         // first create a model
         String modelIdentifier="target/vcs/git"
@@ -353,10 +353,13 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
     }
 
     @Test
-    void testRetrieveFile() {
+    void testRetrieve() {
         assertFalse(vcsService.isValid())
         // first create a model
-        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        String modelIdentifier="target/vcs/git"
+        assertFalse(vcsService.isValid())
+        // first create a model
+        Model model = new Model(name: "test", vcsIdentifier: modelIdentifier)
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
@@ -365,55 +368,68 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         // without authentication it should fail
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
-            vcsService.retrieveFile(revision)
+            vcsService.retrieveFiles(revision)
         }
         // as user it should fail - no ACL yet
         authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
-            vcsService.retrieveFile(revision)
+            vcsService.retrieveFiles(revision)
         }
         // as admin it should fail with a VcsException cause the VCS is not yet valid
         authenticateAsAdmin()
         shouldFail(VcsException) {
-            vcsService.retrieveFile(revision)
+            vcsService.retrieveFiles(revision)
         }
         modelService.grantReadAccess(model, User.findByUsername("testuser"))
         // as testuser it should fail now with a VcsException instead of AccessDeniedException
         authenticateAsTestUser()
         shouldFail(VcsException) {
-            vcsService.retrieveFile(revision)
+            vcsService.retrieveFiles(revision)
         }
         // create a git repository
-        File importFile = new File("target/vcs/exchange/test.xml")
-        FileUtils.touch(importFile)
-        importFile.append("Test\n")
+        List<File> imports=new LinkedList<File>();
+        List<Integer> numbers=new LinkedList<Integer>();
+        for (i in 0..9)
+        {
+            imports.add(new File("target/vcs/exchange/test${i}.xml"));
+            FileUtils.touch(imports.get(i));
+            imports.get(i).append("${i}\n");
+            numbers.add("${i}".toString());
+        }
         // setup VCS
-        File clone = new File("target/vcs/git")
+        File clone = new File(model.vcsIdentifier)
         clone.mkdirs()
+
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
         .findGitDir() // scan up the file system tree
         .build()
-        Git git = new Git(repository)
-        git.init().setDirectory(clone).call()
+
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
         // git is valid, but file does not yet exist
         shouldFail(VcsException) {
-            vcsService.retrieveFile(revision)
+            vcsService.retrieveFiles(revision)
         }
-        revision.vcsId = vcsService.importFile(model, importFile)
+        
+        revision.vcsId = vcsService.importModel(model, imports)
         revision.save(flush: true)
-        File exchangeFile = vcsService.retrieveFile(revision)
-        assertNotSame(exchangeFile, importFile)
-        List<String> lines = exchangeFile.readLines()
-        assertEquals(1, lines.size())
-        assertEquals("Test", lines.first())
+        List<File> exchangeFiles = vcsService.retrieveFiles(revision)
+        exchangeFiles.each
+        { exchange ->
+            imports.each
+            { imported ->
+                 assertNotSame(exchange, imported)
+            }
+            List<String> lines = exchange.readLines()
+            assertEquals(1, lines.size())
+            numbers.remove(lines.first());
+        }
+        assertTrue(numbers.isEmpty());
     }
 }

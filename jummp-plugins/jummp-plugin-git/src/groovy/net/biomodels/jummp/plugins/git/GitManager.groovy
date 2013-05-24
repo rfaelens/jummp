@@ -160,7 +160,6 @@ class GitManager implements VcsManager {
          File[] repFiles=modelDirectory.listFiles();
          repFiles.each
          {
-             System.out.println(it.getName());
              File destinationFile = new File(exchangeDirectory.absolutePath + System.getProperty("file.separator") + "git_${uid.getAndIncrement()}_" + it.getName())
              if (!it.isDirectory())
              {
@@ -168,6 +167,8 @@ class GitManager implements VcsManager {
                  addHere.add(destinationFile)
              }
          }
+         if (addHere.isEmpty()) throw new VcsException("Model directory is empty!");
+         
     }
     
     
@@ -183,24 +184,24 @@ class GitManager implements VcsManager {
         lock.lock()
         try {
             if (!initedRepositories.containsKey(modelDirectory)) {
-                if (workingDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
+                if (exchangeDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
                 initRepository(modelDirectory);
             }
             if (revision == null) {
                 // return current HEAD revision
                downloadFiles(modelDirectory, returnedFiles);
             } else {
+                  if (!getRevisions(modelDirectory).contains(revision))
+                      throw new VcsException("Revision '$revision' not found in model directory '$modelDirectory' !");
                 try {
                     // need to checkout in a temporary branch
-                    if (!getRevisions(modelDirectory).contains(revision))
-                        throw new VcsException("Revision '$revision' not found in model directory '$modelDirectory' !");
                     String branchName = "tempa${uid.getAndIncrement()}"
                     initedRepositories.get(modelDirectory).checkout().setName(branchName).setCreateBranch(true).setStartPoint(revision).call()
                     downloadFiles(modelDirectory, returnedFiles);
                     initedRepositories.get(modelDirectory).checkout().setName("master").call()
                     initedRepositories.get(modelDirectory).branchDelete().setBranchNames(branchName).call()
                 } catch (Exception e) {
-                    throw new VcsException("Checking out file from git failed", e)
+                    throw new VcsException("Checking out file from git failed: ", e)
                 }
             }
         } finally {
