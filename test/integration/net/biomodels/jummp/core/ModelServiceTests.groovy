@@ -482,9 +482,10 @@ class ModelServiceTests extends JummpIntegrationTest {
 
     @Test
     void testAddRevision() {
+        String modelIdentifier="target/vcs/git"
         modelService.modelFileFormatService = new UnknownModelFileFormatService(modelFileFormatService: modelFileFormatService)
         // create one model with one revision and no acl
-        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        Model model = new Model(name: "test", vcsIdentifier: modelIdentifier)
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
@@ -493,75 +494,83 @@ class ModelServiceTests extends JummpIntegrationTest {
         // authenticate as testuser, as there is no ACL he is not allowed to add a revision
         def auth = authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
-            modelService.addRevision(model, new File("target/test"), ModelFormat.findByIdentifier("UNKNOWN"), null)
+            modelService.addRevisionAsFile(model, new File("target/test"), ModelFormat.findByIdentifier("UNKNOWN"), null)
         }
         // give user the right to write to the model
         authenticateAsAdmin()
         modelService.grantReadAccess(model, User.findByUsername("testuser"))
         modelService.grantWriteAccess(model, User.findByUsername("testuser"))
         // model may not be null - test as admin as otherwise will throw AccessDeniedException
+        //modelService.addRevisionAsFile(null, new File("target/test"), ModelFormat.findByIdentifier("UNKNOWN"), "")
+        
         shouldFail(ModelException) {
-            modelService.addRevision(null, new File("target/test"), ModelFormat.findByIdentifier("UNKNOWN"), "")
+            modelService.addRevisionAsList(null, [new File("target/test")], ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
         // vcs is not yet setup, adding a revision should fail
         authenticateAsTestUser()
         // model may not be null - as a user this throws an AccessDeniedException
         shouldFail(AccessDeniedException) {
-            modelService.addRevision(null, new File("target/test"), ModelFormat.findByIdentifier("UNKNOWN"), "")
+            modelService.addRevisionAsFile(null, new File("target/test"), ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
+        // file list may not be null
+        shouldFail(ModelException) {
+            modelService.addRevisionAsList(model, null, ModelFormat.findByIdentifier("UNKNOWN"), "")
+        }
+        
         // file may not be null
         shouldFail(ModelException) {
-            modelService.addRevision(model, null, ModelFormat.findByIdentifier("UNKNOWN"), "")
+            modelService.addRevisionAsFile(model, null, ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
+        
         // comment may not be null
         shouldFail(ModelException) {
-            modelService.addRevision(model, new File("target/test"), ModelFormat.findByIdentifier("UNKNOWN"), null)
+            modelService.addRevisionAsFile(model, new File("target/test"), ModelFormat.findByIdentifier("UNKNOWN"), null)
         }
         // file must exist
         shouldFail(ModelException) {
-            modelService.addRevision(model, new File("target/test"), ModelFormat.findByIdentifier("UNKNOWN"), "")
+            modelService.addRevisionAsFile(model, new File("target/test/nonexistent.xml"), ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
         // file may not be a directory
         File exchangeDirectory = new File("target/vcs/exchange")
         exchangeDirectory.mkdirs()
         shouldFail(ModelException) {
-            modelService.addRevision(model, exchangeDirectory, ModelFormat.findByIdentifier("UNKNOWN"), "")
+            modelService.addRevisionAsFile(model, exchangeDirectory, ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
         File importFile = new File("target/vcs/exchange/test.xml")
         FileUtils.touch(importFile)
+
+        modelService.addRevisionAsFile(model, importFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
+
         shouldFail(ModelException) {
-            modelService.addRevision(model, importFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
+            modelService.addRevisionAsFile(model, importFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
         // setup VCS
-        File clone = new File("target/vcs/git")
+        File clone = new File(model.vcsIdentifier)
         clone.mkdirs()
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
         .findGitDir() // scan up the file system tree
         .build()
-        Git git = new Git(repository)
-        git.init().setDirectory(clone).call()
+
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         grailsApplication.config.jummp.plugins.sbml.validate = true
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
-        // import a file to the git repository, to make future updates possible
-        gitService.getInstance().importFile(importFile, "test.xml")
-        // test the real update
+        
         File updateFile = new File("target/vcs/exchange/update.xml")
         updateFile.append("Test\n")
         FileUtils.touch(updateFile)
-        Revision rev = modelService.addRevision(model, updateFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
-        assertEquals(2, rev.revisionNumber)
+        Revision rev = modelService.addRevisionAsFile(model, updateFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
+        assertEquals(1, rev.revisionNumber)
         assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.ADMINISTRATION))
         assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.READ))
         assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.DELETE))
-        File gitFile = new File("target/vcs/git/test.xml")
+        
+        File gitFile = new File("target/vcs/git/update.xml")
         List<String> lines = gitFile.readLines()
         assertEquals(1, lines.size())
         assertEquals("Test", lines[0])
@@ -574,8 +583,9 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue(aclUtilService.hasPermission(auth2, model, BasePermission.READ))
         authenticateAsTestUser()
         updateFile.append("Further Test\n")
-        Revision rev2 = modelService.addRevision(model, updateFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
-        assertEquals(3, rev2.revisionNumber)
+        
+        Revision rev2 = modelService.addRevisionAsFile(model, updateFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
+        assertEquals(2, rev2.revisionNumber)
         assertFalse(rev2.vcsId == rev.vcsId)
         assertTrue(aclUtilService.hasPermission(auth, rev2, BasePermission.ADMINISTRATION))
         assertTrue(aclUtilService.hasPermission(auth, rev2, BasePermission.READ))
@@ -588,8 +598,8 @@ class ModelServiceTests extends JummpIntegrationTest {
         // admin should also be able to import updates
         def adminAuth = authenticateAsAdmin()
         updateFile.append("Admin Test\n")
-        Revision rev3 = modelService.addRevision(model, updateFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
-        assertEquals(4, rev3.revisionNumber)
+        Revision rev3 = modelService.addRevisionAsFile(model, updateFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
+        assertEquals(3, rev3.revisionNumber)
         assertFalse(rev3.vcsId == rev2.vcsId)
         assertTrue(aclUtilService.hasPermission(adminAuth, rev3, BasePermission.ADMINISTRATION))
         assertTrue(aclUtilService.hasPermission(adminAuth, rev3, BasePermission.READ))
@@ -606,7 +616,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         FileUtils.deleteQuietly(sbmlFile)
         FileUtils.touch(sbmlFile)
         shouldFail(ModelException) {
-            modelService.addRevision(model, sbmlFile, ModelFormat.findByIdentifier("SBML"), "")
+            modelService.addRevisionAsFile(model, sbmlFile, ModelFormat.findByIdentifier("SBML"), "")
         }
         // with a valid sbml file it should be possible
         sbmlFile = new File("target/sbml/addRevisionValidSbmlFile")
@@ -634,7 +644,7 @@ class ModelServiceTests extends JummpIntegrationTest {
   </model>
 </sbml>''')
         Revision rev4 = modelService.addRevision(model, sbmlFile, ModelFormat.findByIdentifier("SBML"), "")
-        assertEquals(5, rev4.revisionNumber)
+        assertEquals(4, rev4.revisionNumber)
         assertEquals("SBML", rev4.format.identifier)
         // delete the Model - any further updates should end in a ModelException
         modelService.deleteModel(model)

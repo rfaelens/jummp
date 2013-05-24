@@ -17,7 +17,7 @@ public interface FileFormatService {
      * @param model File handle containing the Model to be validated.
      * @return @c true if the Model is valid, @c false otherwise
      */
-    public boolean validate(final File model);
+    public boolean validate(final List<File> model);
 
     /**
      * Extracts the name from the @p model.

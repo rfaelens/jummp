@@ -488,6 +488,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         return model.publication
     }
 
+    private List<File> getAsList(File modelFile)
+    {
+        LinkedList<File> list=new LinkedList<File>();
+        list.add(modelFile);
+        return list;
+    }
+    
     /**
     * Creates a new Model and stores it in the VCS.
     *
@@ -635,7 +642,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.addRevisionAsFile")
     public Revision addRevisionAsFile(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
-            return addRevisionAsList(model, getAsList(file));
+            
+            return addRevisionAsList(model, getAsList(file), format, comment)
     }
 
         /**
