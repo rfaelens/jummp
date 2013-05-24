@@ -44,7 +44,7 @@ public interface VcsManager {
     * @param exchangeDirectory The exchange directory for retrieved files
     * @throws VcsException if something goes wrong (needs to be made more specific to new usage)
     **/
-    public void initRepository(File modelDirectory, File exchangeDirectory) throws VcsException;
+    public void init(File exchangeDirectory) throws VcsException;
 
     /**
     * Imports files into the model repository

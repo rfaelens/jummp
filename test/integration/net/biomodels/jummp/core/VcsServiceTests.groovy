@@ -23,6 +23,8 @@ import org.eclipse.jgit.lib.Constants
 import net.biomodels.jummp.model.ModelFormat
 import org.springframework.mock.web.MockServletContext
 import org.springframework.core.io.FileSystemResourceLoader
+import java.util.List
+import java.util.LinkedList
 
 class VcsServiceTests extends JummpIntegrationTest implements ApplicationContextAware {
     /**
@@ -98,9 +100,10 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
 
     @Test
     void testImportFile() {
+        String modelIdentifier="target/vcs/git"
         assertFalse(vcsService.isValid())
         // first create a model
-        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        Model model = new Model(name: "test", vcsIdentifier: modelIdentifier)
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
@@ -122,43 +125,53 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
             vcsService.importModel(model, null)
         }
         // create a git repository
-      /*  File importFile = new File("target/vcs/exchange/test.xml")
-        FileUtils.touch(importFile)
-        importFile.append("Test\n")
+        List<File> imports=new LinkedList<File>();
+        for (i in 0..9)
+        {
+            imports.add(new File("target/vcs/exchange/test${i}.xml"));
+            FileUtils.touch(imports.get(i));
+            imports.get(i).append("Test - ${i}\n");
+        }
         // setup VCS
-        File clone = new File("target/vcs/git")
+        File clone = new File(model.vcsIdentifier)
         clone.mkdirs()
+ 
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
         .findGitDir(clone) // scan up the file system tree
-        .build()
-        Git git = new Git(repository)
-        git.init().setDirectory(clone).call()
+        .build() 
+        /*Git git = new Git(repository)
+        git.init().setDirectory(clone).call()*/
+
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        //grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
         // now as user we should be able to import
         authenticateAsTestUser()
-        String rev = vcsService.importFile(model, importFile)
-        File gitFile = new File("target/vcs/git/test.xml")
-        List<String> lines = gitFile.readLines()
-        assertEquals(1, lines.size())
-        assertEquals("Test", lines[0])
+        String rev= vcsService.importModel(model, imports)
+        
+        for (i in 0..9)
+        {
+            File gitFile = new File("target/vcs/git/test${i}.xml")
+            List<String> lines = gitFile.readLines()
+            assertEquals(1, lines.size())
+            assertEquals("Test - ${i}".toString(), lines[0])
+        }
         // ensure the revision and commit message is correct
         ObjectId commit = repository.resolve(Constants.HEAD)
         RevWalk revWalk = new RevWalk(repository)
         RevCommit revCommit = revWalk.parseCommit(commit)
         assertEquals(commit.getName(), rev)
         // we did not specify a commit message, so default should be used
-        assertEquals("Import of test.xml", revCommit.getShortMessage())
-        assertEquals("Import of test.xml", revCommit.getFullMessage())
+        assertEquals("Import of ${model.name}".toString(), revCommit.getShortMessage())
+        assertEquals("Import of ${model.name}".toString(), revCommit.getFullMessage())
         // importing again should fail
-        shouldFail(VcsException) {
+/*        shouldFail(VcsException) {
             vcsService.importFile(model, importFile)
         }*/
     }

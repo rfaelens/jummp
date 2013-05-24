@@ -33,7 +33,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
  * repository managed by the GitManger.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class GitManager implements VcsManager, VcsManager_new {
+class GitManager implements VcsManager {
   
     private static final ReentrantLock lock = new ReentrantLock()
     private static final AtomicInteger uid = new AtomicInteger(0)
@@ -71,12 +71,21 @@ class GitManager implements VcsManager, VcsManager_new {
         }
     }
     
-    public void initRepository(File modelDirectory, File exchangeDirectory) {
+    public void init(File exchangeDirectory)
+    {
+        this.exchangeDirectory=exchangeDirectory;
+    }
+    
+    private void initRepository(File modelDirectory) {
         lock.lock()
         try {
             if (initedRepositories.containsKey(modelDirectory)) {
                 //throw new VcsAlreadyInitedException()
                 return;
+            }
+            if (exchangeDirectory==null)
+            {
+                throw new VcsException("Exchange directory cannot be null!");
             }
             if (!modelDirectory.isDirectory() || !modelDirectory.exists()) {
                 throw new VcsException("Local model directory " + modelDirectory.toString() + " is either not a directory or does not exist")
@@ -84,7 +93,6 @@ class GitManager implements VcsManager, VcsManager_new {
             if (!exchangeDirectory.isDirectory() || !exchangeDirectory.exists()) {
                 throw new VcsException("Exchange directory " + exchangeDirectory.toString() + " is either not a directory or does not exist")
             }
-            this.exchangeDirectory = exchangeDirectory
             FileRepositoryBuilder builder = new FileRepositoryBuilder()
             Repository repository = builder.setWorkTree(modelDirectory)
             .readEnvironment() // scan environment GIT_* variables
@@ -96,15 +104,15 @@ class GitManager implements VcsManager, VcsManager_new {
             String fullBranch = repository.getFullBranch()
             if (!fullBranch) {
                 
-                try
+                /*try
                 {
                     createGitRepo(modelDirectory)
                 }
                 catch(Exception e)
                 {
                     throw new VcsException(e.toString());
-                }
-                git=initRepository(modelDirectory, exchangeDirectory)
+                }*/
+                git=createGitRepo(modelDirectory)
                 repository=git.getRepository();
                 fullBranch=repository.getFullBranch();
                 
@@ -134,7 +142,7 @@ class GitManager implements VcsManager, VcsManager_new {
         try {
             if (!initedRepositories.containsKey(modelDirectory)) {
                 if (exchangeDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
-                initRepository(modelDirectory, exchangeDirectory);
+                initRepository(modelDirectory);
             }
             revision = handleAddition(modelDirectory, files, commitMessage)
         } finally {
@@ -176,7 +184,7 @@ class GitManager implements VcsManager, VcsManager_new {
         try {
             if (!initedRepositories.containsKey(modelDirectory)) {
                 if (workingDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
-                initRepository(modelDirectory, workingDirectory);
+                initRepository(modelDirectory);
             }
             if (revision == null) {
                 // return current HEAD revision
@@ -218,7 +226,7 @@ class GitManager implements VcsManager, VcsManager_new {
     public void updateWorkingCopy(File modelDirectory) {
         if (!initedRepositories.containsKey(modelDirectory)) {
             if (exchangeDirectory==null) throw new IOException("not inited")
-            initRepository(modelDirectory, exchangeDirectory);
+            initRepository(modelDirectory);
         }
         if (hasRemote) {
             initedRepositories.get(modelDirectory).pull().call()
