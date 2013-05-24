@@ -135,15 +135,12 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         // setup VCS
         File clone = new File(model.vcsIdentifier)
         clone.mkdirs()
- 
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
         .findGitDir(clone) // scan up the file system tree
         .build() 
-        /*Git git = new Git(repository)
-        git.init().setDirectory(clone).call()*/
-
+     
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
@@ -180,83 +177,103 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
     void testUpdateFile() {
         assertFalse(vcsService.isValid())
         // first create a model
-        Model model = new Model(name: "test", vcsIdentifier: "test.xml")
+        String modelIdentifier="target/vcs/git"
+        assertFalse(vcsService.isValid())
+        // first create a model
+        Model model = new Model(name: "test", vcsIdentifier: modelIdentifier)
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())
         model.save()
-        // without authentication it should fail
+        
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
-            vcsService.updateFile(model, null, null)
+            vcsService.updateModel(model, null, null)
         }
         // as user we should get an access denied exception
         authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
-            vcsService.updateFile(model, null, null)
+            vcsService.updateModel(model, null, null)
         }
         // as admin we should get an VcsException as the vcsService is not valid
         authenticateAsAdmin()
         shouldFail(VcsException) {
-            vcsService.updateFile(model, null, null)
+            vcsService.updateModel(model, null, null)
         }
         // now also the user should get a VcsException
         modelService.grantWriteAccess(model, User.findByUsername("testuser"))
         authenticateAsTestUser()
         shouldFail(VcsException) {
-            vcsService.updateFile(model, null, null)
+            vcsService.updateModel(model, null, null)
         }
-        // create a git repository
-        File importFile = new File("target/vcs/exchange/test.xml")
-        FileUtils.touch(importFile)
+        
+        List<File> imports=new LinkedList<File>();
+        for (i in 0..9)
+        {
+            imports.add(new File("target/vcs/exchange/test${i}.xml"));
+            FileUtils.touch(imports.get(i));
+            imports.get(i).append("Test - ${i}\n");
+        }
         // setup VCS
-        File clone = new File("target/vcs/git")
+        File clone = new File(model.vcsIdentifier)
         clone.mkdirs()
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
         .findGitDir(clone) // scan up the file system tree
         .build()
-        Git git = new Git(repository)
-        git.init().setDirectory(clone).call()
+
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
 
-        // file is not yet imported, so uploading should fail with a VcsException
+       /* // file is not yet imported, so uploading should fail with a VcsException
         shouldFail(FileNotVersionedException) {
             vcsService.updateFile(model, importFile, null)
         }
         // import a file to the git repository, to make future updates possible
-        gitService.getInstance().importFile(importFile, "test.xml")
-        // now we should be able to update the file
-        File updateFile = new File("target/vcs/exchange/update.xml")
-        updateFile.append("Test\n")
-        String rev = vcsService.updateFile(model, updateFile, null)
-        File gitFile = new File("target/vcs/git/test.xml")
-        List<String> lines = gitFile.readLines()
-        assertEquals(1, lines.size())
-        assertEquals("Test", lines[0])
+        gitService.getInstance().importFile(importFile, "test.xml")*/
+        
+        
+        String rev = vcsService.updateModel(model, imports, null)
+
+        for (i in 0..9)
+        {
+            File gitFile = new File("target/vcs/git/test${i}.xml")
+            List<String> lines = gitFile.readLines()
+            assertEquals(1, lines.size())
+            assertEquals("Test - ${i}".toString(), lines[0])
+        }
+
         // ensure the revision and commit message is correct
         ObjectId commit = repository.resolve(Constants.HEAD)
         RevWalk revWalk = new RevWalk(repository)
         RevCommit revCommit = revWalk.parseCommit(commit)
         assertEquals(commit.getName(), rev)
         // we passed null as commit message, so default should be used
-        assertEquals("Update of test.xml", revCommit.getShortMessage())
-        assertEquals("Update of test.xml", revCommit.getFullMessage())
+        assertEquals("Update of $model.name".toString(), revCommit.getShortMessage())
+        assertEquals("Update of $model.name".toString(), revCommit.getFullMessage())
         // try again with an empty commit message - should also be default message
-        updateFile.append("Second Test\n")
-        rev = vcsService.updateFile(model, updateFile, null)
-        lines = gitFile.readLines()
-        assertEquals(2, lines.size())
-        assertEquals("Test", lines[0])
-        assertEquals("Second Test", lines[1])
+        imports.each
+        {
+            it.append("Second Test\n")
+        }
+        rev = vcsService.updateModel(model, imports, null)
+        
+        for (i in 0..9)
+        {
+            File gitFile = new File("target/vcs/git/test${i}.xml")
+            List<String> lines = gitFile.readLines()
+            assertEquals(2, lines.size())
+            assertEquals("Test - ${i}".toString(), lines[0])
+            assertEquals("Second Test", lines[1])
+        }
+
+        
         repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
         .findGitDir(clone) // scan up the file system tree
@@ -265,16 +282,26 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         revWalk = new RevWalk(repository)
         revCommit = revWalk.parseCommit(commit)
         assertEquals(commit.getName(), rev)
-        assertEquals("Update of test.xml", revCommit.getShortMessage())
-        assertEquals("Update of test.xml", revCommit.getFullMessage())
+        assertEquals("Update of $model.name".toString(), revCommit.getShortMessage())
+        assertEquals("Update of $model.name".toString(), revCommit.getFullMessage())
         // try with a custom commit message
-        updateFile.append("Third Test\n")
-        rev = vcsService.updateFile(model, updateFile, "Commit Message")
-        lines = gitFile.readLines()
-        assertEquals(3, lines.size())
-        assertEquals("Test", lines[0])
-        assertEquals("Second Test", lines[1])
-        assertEquals("Third Test", lines[2])
+        
+        imports.each
+        {
+            it.append("Third Test\n")
+        }
+        rev = vcsService.updateModel(model, imports, "Commit Message")
+
+        for (i in 0..9)
+        {
+            File gitFile = new File("target/vcs/git/test${i}.xml")
+            List<String> lines = gitFile.readLines()
+            assertEquals(3, lines.size())
+            assertEquals("Test - ${i}".toString(), lines[0])
+            assertEquals("Second Test", lines[1])
+            assertEquals("Third Test", lines[2])
+        }
+
         repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
         .findGitDir(clone) // scan up the file system tree
@@ -287,14 +314,27 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         assertEquals("Commit Message", revCommit.getFullMessage())
         // and finally verify as admin
         authenticateAsAdmin()
-        updateFile.append("Admin Test\n")
-        rev = vcsService.updateFile(model, updateFile, "Admin Commit Message")
-        lines = gitFile.readLines()
-        assertEquals(4, lines.size())
-        assertEquals("Test", lines[0])
-        assertEquals("Second Test", lines[1])
-        assertEquals("Third Test", lines[2])
-        assertEquals("Admin Test", lines[3])
+
+        imports.each
+        {
+            it.append("Admin Test\n")
+        }
+
+        rev = vcsService.updateModel(model, imports, "Admin Commit Message")
+
+
+        for (i in 0..9)
+        {
+            File gitFile = new File("target/vcs/git/test${i}.xml")
+            List<String> lines = gitFile.readLines()
+            assertEquals(4, lines.size())
+            assertEquals("Test - ${i}".toString(), lines[0])
+            assertEquals("Second Test", lines[1])
+            assertEquals("Third Test", lines[2])
+            assertEquals("Admin Test", lines[3])
+        }
+
+        
         repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
         .findGitDir(clone) // scan up the file system tree
@@ -308,7 +348,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         // and last but not least user should still get an AccessDeniedException
         authenticateAsUser()
         shouldFail(AccessDeniedException) {
-            vcsService.updateFile(model, updateFile, "Commit Message")
+            vcsService.updateModel(model, imports, "Commit Message")
         }
     }
 
