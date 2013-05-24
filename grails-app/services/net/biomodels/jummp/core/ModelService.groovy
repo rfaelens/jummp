@@ -619,7 +619,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         return model
     }
 
-    /**
+    /* *
     * Adds a new Revision to the model.
     *
     * The provided @p file will be stored in the VCS as an update to an existing file of the same @p model.
@@ -630,12 +630,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * @param comment The commit message for the new revision
     * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
     * @throws ModelException If either @p model, @p file or @p comment are null or if the file does not exists or is a directory
-    **/
+    */
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.addRevisionAsFile")
     public Revision addRevisionAsFile(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
-            return addRevisionAsList(getAsList(file));
+            return addRevisionAsList(model, getAsList(file));
     }
 
         /**
