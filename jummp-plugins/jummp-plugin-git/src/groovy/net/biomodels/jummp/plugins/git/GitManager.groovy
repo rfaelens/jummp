@@ -33,7 +33,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
  * repository managed by the GitManger.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class GitManager implements VcsManager, VcsManager_new {
+class GitManager implements VcsManager {
   
     private static final ReentrantLock lock = new ReentrantLock()
     private static final AtomicInteger uid = new AtomicInteger(0)
@@ -71,12 +71,21 @@ class GitManager implements VcsManager, VcsManager_new {
         }
     }
     
-    public void initRepository(File modelDirectory, File exchangeDirectory) {
+    public void init(File exchangeDirectory)
+    {
+        this.exchangeDirectory=exchangeDirectory;
+    }
+    
+    private void initRepository(File modelDirectory) {
         lock.lock()
         try {
             if (initedRepositories.containsKey(modelDirectory)) {
                 //throw new VcsAlreadyInitedException()
                 return;
+            }
+            if (exchangeDirectory==null)
+            {
+                throw new VcsException("Exchange directory cannot be null!");
             }
             if (!modelDirectory.isDirectory() || !modelDirectory.exists()) {
                 throw new VcsException("Local model directory " + modelDirectory.toString() + " is either not a directory or does not exist")
@@ -84,7 +93,6 @@ class GitManager implements VcsManager, VcsManager_new {
             if (!exchangeDirectory.isDirectory() || !exchangeDirectory.exists()) {
                 throw new VcsException("Exchange directory " + exchangeDirectory.toString() + " is either not a directory or does not exist")
             }
-            this.exchangeDirectory = exchangeDirectory
             FileRepositoryBuilder builder = new FileRepositoryBuilder()
             Repository repository = builder.setWorkTree(modelDirectory)
             .readEnvironment() // scan environment GIT_* variables
@@ -96,15 +104,15 @@ class GitManager implements VcsManager, VcsManager_new {
             String fullBranch = repository.getFullBranch()
             if (!fullBranch) {
                 
-                try
+                /*try
                 {
                     createGitRepo(modelDirectory)
                 }
                 catch(Exception e)
                 {
                     throw new VcsException(e.toString());
-                }
-                git=initRepository(modelDirectory, exchangeDirectory)
+                }*/
+                git=createGitRepo(modelDirectory)
                 repository=git.getRepository();
                 fullBranch=repository.getFullBranch();
                 
@@ -134,7 +142,7 @@ class GitManager implements VcsManager, VcsManager_new {
         try {
             if (!initedRepositories.containsKey(modelDirectory)) {
                 if (exchangeDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
-                initRepository(modelDirectory, exchangeDirectory);
+                initRepository(modelDirectory);
             }
             revision = handleAddition(modelDirectory, files, commitMessage)
         } finally {
@@ -152,14 +160,15 @@ class GitManager implements VcsManager, VcsManager_new {
          File[] repFiles=modelDirectory.listFiles();
          repFiles.each
          {
-             System.out.println(it.getName());
-             File destinationFile = new File(exchangeDirectory.absolutePath + System.getProperty("file.separator") + "git_${uid.getAndIncrement()}_" + it.getName())
+             File destinationFile = new File(exchangeDirectory.absolutePath + System.getProperty("file.separator") + it.getName())
              if (!it.isDirectory())
              {
                  FileUtils.copyFile(it, destinationFile)
                  addHere.add(destinationFile)
              }
          }
+         if (addHere.isEmpty()) throw new VcsException("Model directory is empty!");
+         
     }
     
     
@@ -175,24 +184,24 @@ class GitManager implements VcsManager, VcsManager_new {
         lock.lock()
         try {
             if (!initedRepositories.containsKey(modelDirectory)) {
-                if (workingDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
-                initRepository(modelDirectory, workingDirectory);
+                if (exchangeDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
+                initRepository(modelDirectory);
             }
             if (revision == null) {
                 // return current HEAD revision
                downloadFiles(modelDirectory, returnedFiles);
             } else {
+                  if (!getRevisions(modelDirectory).contains(revision))
+                      throw new VcsException("Revision '$revision' not found in model directory '$modelDirectory' !");
                 try {
                     // need to checkout in a temporary branch
-                    if (!getRevisions(modelDirectory).contains(revision))
-                        throw new VcsException("Revision '$revision' not found in model directory '$modelDirectory' !");
                     String branchName = "tempa${uid.getAndIncrement()}"
                     initedRepositories.get(modelDirectory).checkout().setName(branchName).setCreateBranch(true).setStartPoint(revision).call()
                     downloadFiles(modelDirectory, returnedFiles);
                     initedRepositories.get(modelDirectory).checkout().setName("master").call()
                     initedRepositories.get(modelDirectory).branchDelete().setBranchNames(branchName).call()
                 } catch (Exception e) {
-                    throw new VcsException("Checking out file from git failed", e)
+                    throw new VcsException("Checking out file from git failed: ", e)
                 }
             }
         } finally {
@@ -218,7 +227,7 @@ class GitManager implements VcsManager, VcsManager_new {
     public void updateWorkingCopy(File modelDirectory) {
         if (!initedRepositories.containsKey(modelDirectory)) {
             if (exchangeDirectory==null) throw new IOException("not inited")
-            initRepository(modelDirectory, exchangeDirectory);
+            initRepository(modelDirectory);
         }
         if (hasRemote) {
             initedRepositories.get(modelDirectory).pull().call()
@@ -259,194 +268,5 @@ class GitManager implements VcsManager, VcsManager_new {
         return revision
     }
     
-    
-    
-    
-    
-    
-    /*private static final ReentrantLock lock = new ReentrantLock()
-    private static final AtomicInteger uid = new AtomicInteger(0)
-    private File clone
-    private File exchangeDirectory
-    private boolean inited = false
-    private Repository repository
-    private Git git
-    private boolean hasRemote
-
-    public GitManager() {
-
-    }*/
-
-    public void init(File clone, File exchangeDirectory) {
-        /*lock.lock()
-        try {
-            if (inited) {
-                throw new VcsAlreadyInitedException()
-            }
-            if (!clone.isDirectory() || !clone.exists()) {
-                throw new VcsException("Local clone directory " + clone.toString() + " is either not a directory or does not exist")
-            }
-            if (!exchangeDirectory.isDirectory() || !exchangeDirectory.exists()) {
-                throw new VcsException("Exchange directory " + exchangeDirectory.toString() + " is either not a directory or does not exist")
-            }
-            this.clone = clone
-            this.exchangeDirectory = exchangeDirectory
-            FileRepositoryBuilder builder = new FileRepositoryBuilder()
-            repository = builder.setWorkTree(clone)
-            .readEnvironment() // scan environment GIT_* variables
-            .findGitDir(clone) // scan up the file system tree
-            .build()
-            git = new Git(repository)
-
-            String branchName
-            String fullBranch = repository.getFullBranch()
-            if (!fullBranch) {
-                throw new VcsException("Working directory is not a valid git repository")
-            }
-            branchName = fullBranch.substring(Constants.R_HEADS.length())
-            Config repoConfig = repository.getConfig()
-            final String remote = repoConfig.getString(
-                 ConfigConstants.CONFIG_BRANCH_SECTION, branchName,
-                  ConfigConstants.CONFIG_KEY_REMOTE)
-            hasRemote = (remote != null)
-            inited = true
-        } finally {
-            lock.unlock()
-        }*/
-    }
-
-    public String importFile(File file, String name, String commitMessage) {
-        /*String revision = null
-        lock.lock()
-        try {
-            if (!inited) {
-                throw new VcsNotInitedException()
-            }
-            if (!file.exists()) {
-                throw new VcsException(file.toString() + " does not exists and cannot be imported into SVN")
-            }
-            if (!file.isFile()) {
-                throw new VcsException(file.toString() + " is not a file and cannot be imported into SVN")
-            }
-            if (clone.list().toList().contains(name)) {
-                throw new FileAlreadyVersionedException(name)
-            }
-            revision = handleAddition(file, name, commitMessage)
-        } finally {
-            lock.unlock()
-        }
-        return revision*/
-        "wont be used anymore"
-    }
-
-    public String importFile(File file, String name) {
-        return importFile(file, name, "Import of ${name}")
-    }
-
-    public String updateFile(File file, String name, String commitMessage) {
-        /*String revision = null
-        lock.lock()
-        try {
-            if (!inited) {
-                throw new VcsNotInitedException()
-            }
-            if (!file.exists()) {
-                throw new VcsException(file.toString() + " does not exists and cannot be imported into SVN")
-            }
-            if (!file.isFile()) {
-                throw new VcsException(file.toString() + " is not a file and cannot be imported into SVN")
-            }
-            if (!clone.list().toList().contains(name)) {
-                throw new FileNotVersionedException(name)
-            }
-            revision = handleAddition(file, name, commitMessage)
-        } finally {
-            lock.unlock()
-        }
-        return revision*/
-        "wont be used anymore"
-    }
-
-    public String updateFile(File file, String name) {
-        return updateFile(file, name, "Update of ${name}")
-    }
-
-    public File retrieveFile(String file, String revision) {
-        /*File destinationFile = null
-        lock.lock()
-        try {
-            if (!inited) {
-                throw new VcsNotInitedException()
-            }
-            if (!clone.list().toList().contains(file)) {
-                throw new FileNotVersionedException(file)
-            }
-            File sourceFile = new File(clone.absolutePath + System.getProperty("file.separator") + file)
-            destinationFile = new File(exchangeDirectory.absolutePath + System.getProperty("file.separator") + "svn_${uid.getAndIncrement()}_" + file)
-            if (revision == null) {
-                // return current HEAD revision
-                FileUtils.copyFile(sourceFile, destinationFile)
-            } else {
-                try {
-                    // need to checkout in a temporary branch
-                    String branchName = "temp${uid.getAndIncrement()}"
-                    git.checkout().setName(branchName).setCreateBranch(true).setStartPoint(revision).call()
-                    FileUtils.copyFile(sourceFile, destinationFile)
-                    git.checkout().setName("master").call()
-                    git.branchDelete().setBranchNames(branchName).call()
-                } catch (Exception e) {
-                    throw new VcsException("Checking out file from git failed", e)
-                }
-            }
-        } finally {
-            lock.unlock()
-        }
-        return destinationFile*/
-        null
-    }
-
-    public File retrieveFile(String file) {
-        return retrieveFile(file, null)
-    }
-
-    public void updateWorkingCopy() {
-        /*if (!inited) {
-            throw new VcsNotInitedException()
-        }
-        if (hasRemote) {
-            git.pull().call()
-        }*/
-    }
-
-    /**
-    * Internal implementation for git add/git commit.
-    *
-    * In git there is no difference between initial import and update of a file.
-    * This method contains the merged implementation for both import and update.
-    * It first performs a git pull, copies the file, does git add, git commit and finally a push
-    * @param source The file to copy into the clone
-    * @param destination The location inside the clone
-    * @param commitMessage The commit message 
-    */
-    private String handleAddition(File source, String destination, String commitMessage) {
-        /* String revision
-        try {
-            updateWorkingCopy()
-            FileUtils.copyFile(source, new File(clone.absolutePath + File.separator + destination))
-            AddCommand add = git.add()
-            add = add.addFilepattern(destination)
-            add.call()
-            RevCommit commit = git.commit().setMessage(commitMessage).call()
-            revision = commit.getId().getName()
-            if (hasRemote) {
-                git.push().call()
-            }
-        } catch (Exception e) {
-            throw new VcsException("Git command could not be executed", e)
-        }
-        return revision*/
-        return "not in use anymore"
-    }
-    
-    
+   
 }

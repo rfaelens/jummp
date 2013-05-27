@@ -27,6 +27,8 @@ import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.core.userdetails.UserDetails
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * @short Service class for managing Models
@@ -526,14 +528,17 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(Model.findByName(meta.name).toCommandObject(), "There is already a Model with name ${meta.name}")
         }
         Model model = new Model(name: meta.name)
-        if (!modelFile) {
-            throw new ModelException(model.toCommandObject(), "File may not be null")
+        modelFiles.each
+        {              
+            if (!it) {
+                throw new ModelException(model.toCommandObject(), "File may not be null")
+            }
+            if (!it.exists() || it.isDirectory()) {
+                throw new ModelException(model.toCommandObject(), "The file ${it.path} does not exist or is a directory")
+            }
         }
-        if (!modelFile.exists() || modelFile.isDirectory()) {
-            throw new ModelException(model.toCommandObject(), "The file ${modelFile.path} does not exist or is a directory")
-        }
-        if (!modelFileFormatService.validate(modelFile, ModelFormat.findByIdentifier(meta.format.identifier))) {
-            throw new ModelException(model.toCommandObject(), "The file ${modelFile.path} is not a valid ${meta.format} file")
+        if (!modelFileFormatService.validate(modelFiles, ModelFormat.findByIdentifier(meta.format.identifier))) {
+            throw new ModelException(model.toCommandObject(), "The files $it do no comprise valid ${meta.format}")
         }
         Revision revision = new Revision(model: model,
                 revisionNumber: 1,
@@ -546,7 +551,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         model.vcsIdentifier = revision.uploadDate.format("yyyy-MM-dd'T'HH-mm-ss-SSS") + "_" + model.name
         model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
         try {
-            revision.vcsId = vcsService.importFile(model, modelFile)
+            revision.vcsId = vcsService.importModel(model, modelFiles)
         } catch (VcsException e) {
             revision.discard()
             model.discard()
@@ -614,7 +619,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         return model
     }
 
-    /**
+    /* *
     * Adds a new Revision to the model.
     *
     * The provided @p file will be stored in the VCS as an update to an existing file of the same @p model.
@@ -625,12 +630,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * @param comment The commit message for the new revision
     * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
     * @throws ModelException If either @p model, @p file or @p comment are null or if the file does not exists or is a directory
-    **/
+    */
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.addRevisionAsFile")
     public Revision addRevisionAsFile(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
-            return addRevisionAsList(getAsList(file));
+            return addRevisionAsList(model, getAsList(file));
     }
 
         /**
@@ -658,20 +663,23 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (comment == null) {
             throw new ModelException(model.toCommandObject(), "Comment may not be null, empty comment is allowed")
         }
-        if (!file) {
-            throw new ModelException(model.toCommandObject(), "File may not be null")
+        modelFiles.each
+        {
+            if (!it) {
+                throw new ModelException(model.toCommandObject(), "File may not be null")
+            }
+            if (!it.exists() || it.isDirectory()) {
+                throw new ModelException(model.toCommandObject(), "The file ${it.path} does not exist or is a directory")
+            }
         }
-        if (!file.exists() || file.isDirectory()) {
-            throw new ModelException(model.toCommandObject(), "The file ${file.path} does not exist or is a directory")
-        }
-        if (!modelFileFormatService.validate(file, format)) {
-            throw new ModelException(model.toCommandObject(), "The file ${file.path} is not a valid ${format} file")
+        if (!modelFileFormatService.validate(modelFiles, format)) {
+            throw new ModelException(model.toCommandObject(), "The file list does not comprise valid ${format}")
         }
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
         Revision revision = new Revision(model: model, comment: comment, uploadDate: new Date(), owner: currentUser, minorRevision: false, format: format)
         // save the new file in the database
         try {
-            String vcsId = vcsService.updateFile(model, file, comment)
+            String vcsId = vcsService.updateModel(model, modelFiles, comment)
             revision.vcsId = vcsId
         } catch (VcsException e) {
             revision.discard()
@@ -725,18 +733,22 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      */
     @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="modelService.retrieveModelFile")
-    byte[] retrieveModelFile(final Revision revision) throws ModelException {
-        File file;
+    @Profiled(tag="modelService.retrieveModelFiles")
+    Map<String, byte[]> retrieveModelFiles(final Revision revision) throws ModelException {
+        List<File> files;
         try {
-            file = vcsService.retrieveFile(revision)
+            files = vcsService.retrieveFiles(revision)
         } catch (VcsException e) {
             log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.model.name} from VCS failed.")
             throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.")
         }
-        byte[] bytes = file.getBytes()
-        FileUtils.forceDelete(file)
-        return bytes
+        Map<String, byte[]> returnMe=new HashMap<String, byte[]>();
+        files.each
+        {
+            returnMap.put(it.name(), it.getBytes())
+            FileUtils.forceDelete(it)
+       }
+        return returnMe;
     }
 
     /**
@@ -747,12 +759,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.retrieveModelFile")
-    byte[] retrieveModelFile(final Model model) throws ModelException {
+    Map<String, byte[]> retrieveModelFiles(final Model model) throws ModelException {
         final Revision revision = getLatestRevision(model)
         if (!revision) {
             throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
         }
-        return retrieveModelFile(revision)
+        return retrieveModelFiles(revision)
     }
 
     /**
