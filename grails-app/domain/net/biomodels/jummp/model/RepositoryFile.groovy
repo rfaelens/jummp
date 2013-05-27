@@ -3,14 +3,12 @@ package net.biomodels.jummp.model
 /**
  * @short Representation of a File belonging to a ModelVersion.
  *
- * @see net.biomodels.jummp.model.ModelVersion
+ * @see net.biomodels.jummp.model.Revision
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  * @date 20130522
  */
 class RepositoryFile {
-
-//    static hasMany = [revisions: Revision]
-    static belongsTo = Revision
+    static belongsTo = [revision:Revision]
     /**
      * The path relative to the root folder containing all models
      */
@@ -26,11 +24,13 @@ class RepositoryFile {
     boolean hidden = false
 
     static constraints = {
-        path(nullable: false, blank: false, matches:
-            "${File.separator}?([a-zA-Z0-9\\-_]+${File.separator})+[a-zA-Z0-9\\-_]+${File.separator}?" as String)
+        path(nullable: false, blank: false, unique: true,
+            validator: { p -> 
+                String sep  = File.separator
+                String pathRegex = "${sep}?([a-zA-Z0-9\\-_]+${sep})+[a-zA-Z0-9\\-_\\.]+".toString()
+                return p != null && new File(p).exists() && p.matches(pathRegex)
+            }
+        )
         description(nullable: false, blank: true, maxSize:100)
-        /*versions(nullable: false, validator: { v ->
-            return !v.isEmpty()
-        })*/
     }
 }
