@@ -43,7 +43,7 @@ import org.sbml.jsbml.SBMLWriter
 import org.sbfc.converter.sbml2biopax.SBML2BioPAX_l3
 import org.sbfc.converter.models.BioPaxModel
 import com.thoughtworks.xstream.converters.ConversionException
-
+import java.util.List;
 /**
  * Service class for handling Model files in the SBML format.
  * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
@@ -84,9 +84,9 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             //sbml2BioPaxConverter()
         }
     }
-
-    @Profiled(tag="SbmlService.validate")
-    public boolean validate(final File model) {
+    
+    private SBMLDocument getFileAsValidatedSBMLDocument(final File model)
+    {
         // TODO: we should insert the parsed model into the cache
         SBMLDocument doc
         SBMLReader reader = new SBMLReader()
@@ -94,17 +94,12 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             doc = reader.readSBML(model)
         } catch (XMLStreamException e) {
             log.error("SBMLDocument could not be read from ${model.name}")
-            return false
+            return null
         }
         if (doc == null) {
             // although the API documentation states that an Exception is thrown for incorrect files, it seems that null is returned
             log.error("SBMLDocuement is not valid for file ${model.name}")
-            return false
-        }
-        if (!grailsApplication.config.jummp.plugins.sbml.validation) {
-            log.info("Validation for ${model.name} skipped due to configuration option")
-            println("Validation for ${model.name} skipped due to configuration option")
-            return true
+            return null
         }
         // TODO: WARNING: checkConsistency uses an online validator. This might render timeouts during model upload
         try {
@@ -120,16 +115,39 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 }
                 return valid
             } else {
-                return true
+                return doc
             }
         } catch (ConversionException e) {
             log.error(e.getMessage(), e)
-            return false
+            return null
         }
+    }
+    
+
+    @Profiled(tag="SbmlService.validate")
+    public boolean validate(final List<File> model) {
+        if (!grailsApplication.config.jummp.plugins.sbml.validation) {
+            log.info("Validation for ${model.name} skipped due to configuration option")
+            println("Validation for ${model.name} skipped due to configuration option")
+            return true
+        }
+        model.each
+        {
+            try
+            {
+                SBMLDocument doc  = getFileAsValidatedSBMLDocument(it);
+                if (doc!=null) return true;
+            }
+            catch(Exception ignore)
+            {
+                
+            }
+        }
+        return false;
     }
 
     @Profiled(tag="SbmlService.extractName")
-    public String extractName(final File model) {
+    public String extractName(final List<File> model) {
         return ""
     }
 

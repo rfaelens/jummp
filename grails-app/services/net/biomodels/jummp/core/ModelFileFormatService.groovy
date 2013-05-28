@@ -4,6 +4,7 @@ import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.model.Revision
+import java.util.List
 
 /**
  * @short Service to handle Model files.
@@ -72,7 +73,7 @@ class ModelFileFormatService {
      * @param format The format of the Model file
      * @return @c true, if the @p model is valid, @c false otherwise
      */
-    boolean validate(final File model, final ModelFormat format) {
+    boolean validate(final List<File> model, final ModelFormat format) {
         FileFormatService service = serviceForFormat(format)
         if (service != null) {
             return service.validate(model)
@@ -87,7 +88,7 @@ class ModelFileFormatService {
      * @param format The format of the Model file
      * @return The name of the Model, if possible, an empty String if not possible
      */
-    String extractName(final File model, final ModelFormat format) {
+    String extractName(final List<File> model, final ModelFormat format) {
         FileFormatService service = serviceForFormat(format)
         if (service != null) {
             return service.validate(model)

@@ -24,7 +24,7 @@ public interface FileFormatService {
      * @param model File handle containing the Model whose name should be extracted.
      * @return The name of the Model, if possible, an empty String if not possible
      */
-    public String extractName(final File model);
+    public String extractName(final List<File> model);
     /**
      * Retrieves all annotation URNs in the model file referenced by @p revision.
      * @param revision The Revision identifying a model file
