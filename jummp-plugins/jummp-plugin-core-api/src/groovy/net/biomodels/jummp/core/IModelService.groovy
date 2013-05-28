@@ -7,6 +7,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.plugins.security.User
+import java.util.List
 
 /**
  * @short Service Interface for accessing the Model Service from a Remote Adapter.
@@ -122,7 +123,7 @@ public interface IModelService {
     * @return The new created Model, or null if the model could not be created
     * @throws ModelException If Model File is not valid or the Model could not be stored in VCS
     **/
-    public ModelTransportCommand uploadModel(final File modelFile, ModelTransportCommand meta) throws ModelException
+    public ModelTransportCommand uploadModel(final List<File> modelFiles, ModelTransportCommand meta) throws ModelException
     /**
     * Adds a new Revision to the model.
     *

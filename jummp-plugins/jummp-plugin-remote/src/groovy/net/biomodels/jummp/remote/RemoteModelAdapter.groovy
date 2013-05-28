@@ -6,6 +6,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import java.util.List
 
 /**
  * @short Interface describing how to access the remote Model Service.
@@ -108,7 +109,7 @@ public interface RemoteModelAdapter {
     * @param meta Meta Information to be added to the model
     * @return The new created Model as a ModelTransportCommand
     **/
-    public ModelTransportCommand uploadModel(byte[] bytes, ModelTransportCommand meta) throws ModelException
+    public ModelTransportCommand uploadModel(List<byte[]> bytes, ModelTransportCommand meta) throws ModelException
     /**
     * Adds a new Revision to the model.
     *

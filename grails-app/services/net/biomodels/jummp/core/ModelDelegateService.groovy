@@ -10,6 +10,7 @@ import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
+import java.util.List
 
 /**
  * @short Service delegating methods to ModelService.
@@ -107,8 +108,8 @@ class ModelDelegateService implements IModelService {
         return modelService.getPublication(Model.get(modelId))?.toCommandObject()
     }
 
-    ModelTransportCommand uploadModel(File modelFile, ModelTransportCommand meta) throws ModelException {
-        return modelService.uploadModel(modelFile, meta).toCommandObject()
+    ModelTransportCommand uploadModel(List<File> modelFiles, ModelTransportCommand meta) throws ModelException {
+        return modelService.uploadModelAsList(modelFiles, meta).toCommandObject()
     }
 
     RevisionTransportCommand addRevision(long modelId, File file, ModelFormatTransportCommand format, String comment) throws ModelException {

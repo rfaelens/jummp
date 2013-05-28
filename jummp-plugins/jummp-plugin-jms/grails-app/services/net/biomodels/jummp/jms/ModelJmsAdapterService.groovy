@@ -12,6 +12,8 @@ import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.IModelService
 import net.biomodels.jummp.webapp.ast.JmsAdapter
 import net.biomodels.jummp.webapp.ast.JmsQueueMethod
+import java.util.List
+import java.util.LinkedList
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -161,7 +163,9 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
 
         File file = File.createTempFile("jummpJms", null)
         file.append(message[1])
-        result = modelDelegateService.uploadModel(file, (ModelTransportCommand)message[2])
+        List<File> container=new LinkedList<File>();
+        container.add(file)
+        result = modelDelegateService.uploadModel(container, (ModelTransportCommand)message[2])
         FileUtils.deleteQuietly(file)
 
         return result

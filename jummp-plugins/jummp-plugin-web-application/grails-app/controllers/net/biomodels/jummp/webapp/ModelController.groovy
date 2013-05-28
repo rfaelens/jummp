@@ -16,6 +16,12 @@ class ModelController {
         [id: params.id]
     }
 
+    def uploadFlow = {
+        uploadWizard {
+            on("")
+        }
+    }
+    
     /**
      * File download of the model file for a model by id
      */

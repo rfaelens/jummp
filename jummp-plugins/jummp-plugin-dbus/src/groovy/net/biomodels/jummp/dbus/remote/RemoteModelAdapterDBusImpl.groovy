@@ -14,6 +14,8 @@ import net.biomodels.jummp.dbus.model.DBusModel
 import net.biomodels.jummp.dbus.model.DBusPublication
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.webapp.ast.RemoteDBusAdapter
+import java.util.List
+import java.util.LinkedList
 
 /**
  * @short DBus Implementation of RemoteModelAdapter.
@@ -80,19 +82,34 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteDBusAdapter implements Re
         return revisions
     }
 
+    private List<File> getAsFileList(List<byte[]> bytes)
+    {
+        List<File> files=new LinkedList<File>();
+        int counter=0;
+        bytes.each
+        { byteFile ->
+           File file = File.createTempFile("jummp_${counter++}", "model")
+           file.withWriter { fileWriter ->
+                fileWriter.write(new String(byteFile))
+            }
+            files.add(file)
+        }
+        return files;
+    }
+    
     @Profiled(tag="RemoteModelAdapterDBusImpl.uploadModel")
-    ModelTransportCommand uploadModel(byte[] bytes, ModelTransportCommand meta) throws ModelException {
-        File file = File.createTempFile("jummp", "model")
-        file.withWriter {
-            it.write(new String(bytes))
-        }
+    ModelTransportCommand uploadModel(List<byte[]> bytes, ModelTransportCommand meta) throws ModelException {
         ModelTransportCommand model = null
+        files=getAsFileList(bytes);
         if (meta.publication) {
-            model = modelDBusAdapter.uploadModelWithPublication(authenticationToken(), file.getAbsolutePath(), DBusModel.fromModelTransportCommand(meta), DBusPublication.fromPublicationTransportCommand(meta.publication))
+            model = modelDBusAdapter.uploadModelWithPublication(authenticationToken(), files, DBusModel.fromModelTransportCommand(meta), DBusPublication.fromPublicationTransportCommand(meta.publication))
         } else {
-            model = modelDBusAdapter.uploadModel(authenticationToken(), file.getAbsolutePath(), DBusModel.fromModelTransportCommand(meta))
+            model = modelDBusAdapter.uploadModel(authenticationToken(), files, DBusModel.fromModelTransportCommand(meta))
         }
-        FileUtils.deleteQuietly(file)
+        files.each
+        {
+            FileUtils.deleteQuietly(it)
+        }
         return model
     }
 

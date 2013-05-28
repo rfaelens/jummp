@@ -12,7 +12,8 @@ import org.springframework.security.access.AccessDeniedException;
 
 import net.biomodels.jummp.webapp.ast.DBusAdapter
 import net.biomodels.jummp.webapp.ast.DBusMethod;
-
+import java.util.List
+import java.util.LinkedList
 /**
  * @short Concrete Implementation of ModelDBusAdapter.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
@@ -93,11 +94,20 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public DBusPublication getPublication(String authenticationHash, long id) {
     }
 
-    public DBusModel uploadModel(String authenticationHash, String fileName, DBusModel meta) {
+    private List<File> getAsFileList(List<String> fileNames)
+    {
+        List<File> files=new LinkedList<File>();
+        fileNames.each
+        {
+            file.add(new File(it))
+        }
+        return files;
+    }
+    
+    public DBusModel uploadModel(String authenticationHash, List<String> fileNames, DBusModel meta) {
         try {
             setAuthentication(authenticationHash);
-            File file = new File(fileName);
-            DBusModel model = DBusModel.fromModelTransportCommand(modelDelegateService.uploadModel(file, meta));
+            DBusModel model = DBusModel.fromModelTransportCommand(modelDelegateService.uploadModel(getAsFileList(files), meta));
             return model;
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
@@ -108,9 +118,9 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         }
     }
 
-    public DBusModel uploadModelWithPublication(String authenticationHash, String fileName, DBusModel meta, DBusPublication publication) {
+    public DBusModel uploadModelWithPublication(String authenticationHash, List<String> fileNames, DBusModel meta, DBusPublication publication) {
         meta.setPublication(publication);
-        return uploadModel(authenticationHash, fileName, meta);
+        return uploadModel(authenticationHash, getAsFileList(fileName), meta);
     }
 
     public DBusRevision addRevision(String authenticationHash, long modelId, String fileName, String format, String comment) {
