@@ -149,14 +149,14 @@ public interface IModelService {
      * @return Byte Array of the content of the Model file for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    byte[] retrieveModelFile(final RevisionTransportCommand revision) throws ModelException
+    byte[] retrieveModelFiles(final RevisionTransportCommand revision) throws ModelException
     /**
      * Retrieves the model file for the latest revision of the model.
      * @param modelId The id of the Model for which the file should be retrieved
      * @return Byte Array of the content of the Model file.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    byte[] retrieveModelFile(final long modelId) throws ModelException
+    byte[] retrieveModelFiles(final long modelId) throws ModelException
 
     /**
     * Grants read access for model to @p collaborator.

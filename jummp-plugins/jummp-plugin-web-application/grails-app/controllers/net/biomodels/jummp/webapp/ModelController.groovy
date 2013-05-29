@@ -26,7 +26,7 @@ class ModelController {
      * File download of the model file for a model by id
      */
     def download = {
-        byte[] bytes = modelDelegateService.retrieveModelFile(new RevisionTransportCommand(id: params.id as int))
+        byte[] bytes = modelDelegateService.retrieveModelFiles(new RevisionTransportCommand(id: params.id as int))
         response.setContentType("application/xml")
         // TODO: set a proper name for the model
         response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")
@@ -91,7 +91,7 @@ class ModelController {
     */
    def downloadModelRevision = {
        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-       byte[] bytes = modelDelegateService.retrieveModelFile(rev)
+       byte[] bytes = modelDelegateService.retrieveModelFiles(rev)
        response.setContentType("application/xml")
        // TODO: set a proper name for the model
        response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")

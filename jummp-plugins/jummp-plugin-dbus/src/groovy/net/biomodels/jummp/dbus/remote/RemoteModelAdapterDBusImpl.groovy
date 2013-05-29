@@ -125,17 +125,17 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteDBusAdapter implements Re
         return revision
     }
 
-    @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFile")
-    byte[] retrieveModelFile(RevisionTransportCommand revision) throws ModelException {
-        File file = new File(modelDBusAdapter.retrieveModelFileByRevision(authenticationToken(), revision.id))
+    @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFiles")
+    byte[] retrieveModelFiles(RevisionTransportCommand revision) throws ModelException {
+        File file = new File(modelDBusAdapter.retrieveModelFilesByRevision(authenticationToken(), revision.id))
         byte[] bytes = file.readBytes()
         FileUtils.deleteQuietly(file)
         return bytes
     }
 
-    @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFile")
-    byte[] retrieveModelFile(long modelId) throws ModelException {
-        File file = new File(modelDBusAdapter.retrieveModelFileByModel(authenticationToken(), modelId))
+    @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFiles")
+    byte[] retrieveModelFiles(long modelId) throws ModelException {
+        File file = new File(modelDBusAdapter.retrieveModelFilesByModel(authenticationToken(), modelId))
         byte[] bytes = file.readBytes()
         FileUtils.deleteQuietly(file)
         return bytes

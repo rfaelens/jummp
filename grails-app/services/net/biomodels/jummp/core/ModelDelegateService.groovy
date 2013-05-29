@@ -120,12 +120,12 @@ class ModelDelegateService implements IModelService {
         return modelService.canAddRevision(Model.get(modelId))
     }
 
-    byte[] retrieveModelFile(RevisionTransportCommand revision) throws ModelException {
-        return modelService.retrieveModelFile(Revision.get(revision.id))
+    byte[] retrieveModelFiles(RevisionTransportCommand revision) throws ModelException {
+        return modelService.retrieveModelFiles(Revision.get(revision.id))
     }
 
-    byte[] retrieveModelFile(long modelId) {
-        return modelService.retrieveModelFile(Model.get(modelId))
+    byte[] retrieveModelFiles(long modelId) {
+        return modelService.retrieveModelFiles(Model.get(modelId))
     }
 
     void grantReadAccess(long modelId, User collaborator) {

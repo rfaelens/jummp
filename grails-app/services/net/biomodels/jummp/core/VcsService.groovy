@@ -54,8 +54,7 @@ class VcsService {
             return vcsManager.updateModel(new File(model.vcsIdentifier), files, commitMessage)
         }
     }
-    
-   
+
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
     String updateModel(final Model model, final File file, final String commitMessage) throws VcsException {
         return updateModel(model, [file], commitMessage);
@@ -75,9 +74,8 @@ class VcsService {
             throw new VcsException("Version Control System is not valid")
         }
 
-        return vcsManager.updateModel(new File(model.vcsIdentifier), files, "Import of ${model.name}");
+        return vcsManager.updateModel(new File(model.vcsIdentifier), files, "Import of ${model.name}")
     }
-
 
     /**
      * Imports a new Model file into the VCS.
@@ -90,7 +88,7 @@ class VcsService {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     String importModel(final Model model, final File file) throws VcsException {
-        return importModel(model, [file]);
+        return importModel(model, [file])
     }
 
     /**

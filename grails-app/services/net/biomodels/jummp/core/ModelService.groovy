@@ -25,10 +25,10 @@ import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.model.Publication
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.core.userdetails.UserDetails
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.List
+import java.util.LinkedList
+import java.util.Map
+import java.util.HashMap
 
 /**
  * @short Service class for managing Models
@@ -78,6 +78,10 @@ class ModelService {
      * Dependency injection of ModelHistoryService
      */
     def modelHistoryService
+    /**
+     * Dependency Injection of FileSystemService
+     */
+    def fileSystemService
 
     static transactional = true
 
@@ -494,7 +498,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         list.add(modelFile);
         return list;
     }
-    
+
     /**
     * Creates a new Model and stores it in the VCS.
     *
@@ -511,7 +515,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.CREATION)
     @Profiled(tag="modelService.uploadModelAsFile")
     public Model uploadModelAsFile(final File modelFile, ModelTransportCommand meta) throws ModelException {
-        return uploadModelAsList(getAsList(modelFile));
+        return uploadModelAsList(getAsList(modelFile), meta);
     }
 
     /**
@@ -532,21 +536,49 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     public Model uploadModelAsList(final List<File> modelFiles, ModelTransportCommand meta) throws ModelException {
         // TODO: to support anonymous submissions this method has to be changed
         if (Model.findByName(meta.name)) {
-            throw new ModelException(Model.findByName(meta.name).toCommandObject(), "There is already a Model with name ${meta.name}")
+            final ModelTransportCommand MODEL = Model.findByName(meta.name).toCommandObject()
+            final String err = "There is already a Model with name ${meta.name}".toString()
+            log.error(MODEL, err)
+            throw new ModelException(m, err)
         }
         Model model = new Model(name: meta.name)
-        modelFiles.each
-        {              
+        modelFiles.each {
             if (!it) {
-                throw new ModelException(model.toCommandObject(), "File may not be null")
+                def m = model.toCommandObject()
+                final String err = "Please specify a file"
+                log.error(m, err)
+                throw new ModelException(m, err)
             }
             if (!it.exists() || it.isDirectory()) {
-                throw new ModelException(model.toCommandObject(), "The file ${it.path} does not exist or is a directory")
+                def m = model.toCommandObject()
+                def err = "The file ${it.path} does not exist or is a directory."
+                log.error(m, err)
+                throw new ModelException(m, err)
             }
         }
         if (!modelFileFormatService.validate(modelFiles, ModelFormat.findByIdentifier(meta.format.identifier))) {
-            throw new ModelException(model.toCommandObject(), "The files $it do no comprise valid ${meta.format}")
+            def m = model.toCommandObject()
+            def err = "The files $it do no comprise valid ${meta.format}"
+            log.error(m, err)
+            throw new ModelException(m, err)
         }
+        // model is valid, create a new repository and store it as revision1
+        // vcs identifier is upload date + name - this should by all means be unique
+        String pathPrefix =
+                fileSystemService.findCurrentModelContainer() + File.separator
+        String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
+        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(model.name).
+                append(File.separator).toString()
+        boolean success = new File(modelPath).mkdirs()
+        if (!success) {
+            def m = model.toCommandObject()
+            def err = "Cannot create the directory where the ${model.name} should be stored"
+            log.error(m, err)
+            throw new ModelException(m, err)
+        }
+        model.vcsIdentifier = modelPath
+        //model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
+
         Revision revision = new Revision(model: model,
                 revisionNumber: 1,
                 owner: User.findByUsername(springSecurityService.authentication.name),
@@ -554,14 +586,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 comment: meta.comment,
                 uploadDate: new Date(),
                 format: ModelFormat.findByIdentifier(meta.format.identifier))
-        // vcs identifier is upload date + name - this should by all means be unique
-        model.vcsIdentifier = revision.uploadDate.format("yyyy-MM-dd'T'HH-mm-ss-SSS") + "_" + model.name
-        model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
         } catch (VcsException e) {
             revision.discard()
             model.discard()
+            //TODO undo the addition of the files to the VCS.
             log.error("Exception occurred during importing a new Model to VCS: ${e.getMessage()}")
             throw new ModelException(model.toCommandObject(), "Could not store new Model ${model.name} in VCS", e)
         }
@@ -615,7 +645,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
 
             // broadcast event
-            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFile))
+            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFiles))
         } else {
             // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
@@ -642,7 +672,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.addRevisionAsFile")
     public Revision addRevisionAsFile(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
-            
+            boolean validModelFile = file != null && file.isFile()
+            if (model == null || comment == null || !validModelFile) {
+                log.error("File ${file} cannot be added to model ${model}")
+                throw new ModelException("Could not create a new version of model ${model} with the files that were provided.")
+            }
             return addRevisionAsList(model, getAsList(file), format, comment)
     }
 
@@ -753,7 +787,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         Map<String, byte[]> returnMe=new HashMap<String, byte[]>();
         files.each
         {
-            returnMap.put(it.name(), it.getBytes())
+            returnMe.put(it.name, it.getBytes())
             FileUtils.forceDelete(it)
        }
         return returnMe;
@@ -766,7 +800,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * @throws ModelException In case retrieving from VCS fails.
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="modelService.retrieveModelFile")
+    @Profiled(tag="modelService.retrieveModelFiles")
     Map<String, byte[]> retrieveModelFiles(final Model model) throws ModelException {
         final Revision revision = getLatestRevision(model)
         if (!revision) {

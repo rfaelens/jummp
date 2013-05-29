@@ -462,7 +462,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             return document
         }
         // we do not have a document, so retrieve first the file
-        byte[] bytes = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFile(revision)
+        byte[] bytes = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFiles(revision)
         document = (new SBMLReader()).readSBMLFromStream(new ByteArrayInputStream(bytes))
         cache.put(revision, document)
         return document

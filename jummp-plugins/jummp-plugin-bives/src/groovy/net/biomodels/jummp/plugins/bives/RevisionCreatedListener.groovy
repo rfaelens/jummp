@@ -47,7 +47,7 @@ class RevisionCreatedListener implements ApplicationListener {
                 }
 				// get previous revision
 				File refFile = File.createTempFile("referenceFile", ".xml", location) 
-				refFile.write(new String(modelDelegateService.retrieveModelFile(
+				refFile.write(new String(modelDelegateService.retrieveModelFiles(
                         modelDelegateService.getRevision(command.model.id, command.revisionNumber - 1))))
 				// create diff, initialize required variables
 				Diff diff = diffMan.generateDiff(refFile, testFile, true)

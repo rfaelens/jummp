@@ -6,7 +6,7 @@ import net.biomodels.jummp.core.vcs.*
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.AddCommand
 import org.eclipse.jgit.api.Git
-import java.util.List;
+import java.util.List
 import org.eclipse.jgit.api.InitCommand
 import java.util.LinkedHashMap;
 import org.eclipse.jgit.lib.Config
@@ -34,7 +34,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class GitManager implements VcsManager {
-  
+
     private static final ReentrantLock lock = new ReentrantLock()
     private static final AtomicInteger uid = new AtomicInteger(0)
     private LruCache<File, Git>  initedRepositories=new LruCache<File, Git>(20);
@@ -70,12 +70,17 @@ class GitManager implements VcsManager {
             return super.size() > maxEntries;
         }
     }
-    
-    public void init(File exchangeDirectory)
-    {
-        this.exchangeDirectory=exchangeDirectory;
+
+    public void init(File exchangeDirectory) {
+        this.exchangeDirectory = exchangeDirectory
     }
-    
+
+    public String createModel(File modelDirectory, List<File> modelFiles, String commit) {
+        //FIXME this is meant to do Git-specific initialisation of the repository
+        //then execute the same logic as importModel(modelDirectory, modelFiles, commit)
+        return ""
+    }
+
     private void initRepository(File modelDirectory) {
         lock.lock()
         try {
@@ -103,7 +108,7 @@ class GitManager implements VcsManager {
             String branchName
             String fullBranch = repository.getFullBranch()
             if (!fullBranch) {
-                
+
                 /*try
                 {
                     createGitRepo(modelDirectory)
@@ -115,7 +120,7 @@ class GitManager implements VcsManager {
                 git=createGitRepo(modelDirectory)
                 repository=git.getRepository();
                 fullBranch=repository.getFullBranch();
-                
+
             }
             branchName = fullBranch.substring(Constants.R_HEADS.length())
             Config repoConfig = repository.getConfig()
@@ -134,8 +139,7 @@ class GitManager implements VcsManager {
         initCommand.setDirectory(directory);
         return initCommand.call();
     }
-    
-    
+
     public String updateModel(File modelDirectory, List<File> files, String commitMessage) {
         String revision = null
         lock.lock()
@@ -154,7 +158,7 @@ class GitManager implements VcsManager {
     public String updateModel(File modelDirectory, List<File> files) {
         return updateFile(modelDirectory, files, "Update of ${name}")
     }
-    
+
     private void downloadFiles(File modelDirectory, List<File> addHere)
     {
          File[] repFiles=modelDirectory.listFiles();
@@ -168,18 +172,17 @@ class GitManager implements VcsManager {
              }
          }
          if (addHere.isEmpty()) throw new VcsException("Model directory is empty!");
-         
+
     }
-    
-    
+
+
     public List<File> retrieveModel(File modelDirectory)
     {
         return retrieveModel(modelDirectory, null);
     }
-    
-    
-    public List<File> retrieveModel(File modelDirectory, String revision)
-    {
+
+
+    public List<File> retrieveModel(File modelDirectory, String revision) {
         List<File> returnedFiles = new LinkedList<File>()
         lock.lock()
         try {
@@ -209,9 +212,7 @@ class GitManager implements VcsManager {
         }
         return returnedFiles
     }
-    
-    
-    
+
     public List<String> getRevisions(File modelDirectory)
     {
         Iterator<RevCommit> log=initedRepositories.get(modelDirectory).log().call().iterator();
@@ -222,7 +223,6 @@ class GitManager implements VcsManager {
         }
         return myList
     }
-    
 
     public void updateWorkingCopy(File modelDirectory) {
         if (!initedRepositories.containsKey(modelDirectory)) {
@@ -267,6 +267,4 @@ class GitManager implements VcsManager {
         }
         return revision
     }
-    
-   
 }

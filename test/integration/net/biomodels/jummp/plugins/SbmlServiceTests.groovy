@@ -43,11 +43,11 @@ class SbmlServiceTests extends JummpIntegrationTest {
     @Test
     void testLevelAndVersion() {
         authenticateAsTestUser()
-        Model model = modelService.uploadModel(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
+        Model model = modelService.uploadModelAsFile(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
         assertEquals(1, sbmlService.getLevel(rev))
         assertEquals(1, sbmlService.getVersion(rev))
-        RevisionTransportCommand rev2 = modelService.addRevision(model, new File("test/files/BIOMD0000000272.xml"), ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
+        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, new File("test/files/BIOMD0000000272.xml"), ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
         assertEquals(2, sbmlService.getLevel(rev2))
         assertEquals(4, sbmlService.getVersion(rev2))
     }
@@ -55,17 +55,17 @@ class SbmlServiceTests extends JummpIntegrationTest {
     @Test
     void testModelMetaId() {
         authenticateAsTestUser()
-        Model model = modelService.uploadModel(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
+        Model model = modelService.uploadModelAsFile(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
         assertEquals("", sbmlService.getMetaId(rev))
-        RevisionTransportCommand rev2 = modelService.addRevision(model, new File("test/files/BIOMD0000000272.xml"), ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
+        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, new File("test/files/BIOMD0000000272.xml"), ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
         assertEquals("_688624", sbmlService.getMetaId(rev2))
     }
 
     @Test
     void testModelNotes() {
         authenticateAsTestUser()
-        Model model = modelService.uploadModel(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
+        Model model = modelService.uploadModelAsFile(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
         assertEquals("", sbmlService.getNotes(rev))
 
@@ -92,7 +92,7 @@ class SbmlServiceTests extends JummpIntegrationTest {
     </listOfReactions>
   </model>
 </sbml>''')
-        RevisionTransportCommand rev2 = modelService.addRevision(model, modelWithNotes, ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
+        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, modelWithNotes, ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
         assertEquals('''<notes>\n  <body xmlns="http://www.w3.org/1999/xhtml">\n<p>Test</p>\n    </body>\n  \n</notes>''', sbmlService.getNotes(rev2))
     }
 

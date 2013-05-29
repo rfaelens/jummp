@@ -134,14 +134,14 @@ public interface RemoteModelAdapter {
      * @return Byte Array of the content of the Model file for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    public byte[] retrieveModelFile(RevisionTransportCommand revision)
+    public byte[] retrieveModelFiles(RevisionTransportCommand revision)
     /**
      * Retrieves the model file for the latest revision of the model.
      * @param modelId The Model for which the file should be retrieved
      * @return Byte Array of the content of the Model file.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    public byte[] retrieveModelFile(long modelId)
+    public byte[] retrieveModelFiles(long modelId)
     /**
     * Deletes the model including all Revisions.
     *

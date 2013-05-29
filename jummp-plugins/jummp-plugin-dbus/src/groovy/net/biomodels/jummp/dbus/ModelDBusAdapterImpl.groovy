@@ -144,12 +144,12 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public boolean canAddRevision(String authenticationHash, long id) {
     }
 
-    public String retrieveModelFileByRevision(String authenticationHash, long id) {
+    public String retrieveModelFilesByRevision(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
             RevisionTransportCommand revision = new RevisionTransportCommand();
             revision.setId(id);
-            byte[] bytes = modelDelegateService.retrieveModelFile(revision);
+            byte[] bytes = modelDelegateService.retrieveModelFiles(revision);
             File file = File.createTempFile("jummp", "model");
             FileOutputStream out = new FileOutputStream(file);
             try {
@@ -172,10 +172,10 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
         }
     }
 
-    public String retrieveModelFileByModel(String authenticationHash, long id) {
+    public String retrieveModelFilesByModel(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
-            byte[] bytes = modelDelegateService.retrieveModelFile(id);
+            byte[] bytes = modelDelegateService.retrieveModelFiles(id);
             File file = File.createTempFile("jummp", "model");
             FileOutputStream out = new FileOutputStream(file);
             try {

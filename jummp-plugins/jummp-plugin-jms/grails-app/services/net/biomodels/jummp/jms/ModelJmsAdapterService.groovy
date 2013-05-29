@@ -203,12 +203,12 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     }
 
     /**
-     * Wrapper around ModelService.retrieveModelFile
+     * Wrapper around ModelService.retrieveModelFiles
      * @param message List consisting of AuthenticationHash and Revision
      * @return Byte Array, InvalidArgumentException, AccessDeniedException or ModelException
      */
     @Queue
-    def retrieveModelFile(def message) {
+    def retrieveModelFiles(def message) {
         if (!verifyMessage(message, [String, RevisionTransportCommand]) &&
             !verifyMessage(message, [String, Long])) {
             return new IllegalArgumentException("AuthenticationHash and Revision or Model as arguments expected")
@@ -216,9 +216,9 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
 
         setAuthentication((String)message[0])
         if (message[1] instanceof RevisionTransportCommand) {
-            return modelDelegateService.retrieveModelFile((RevisionTransportCommand)message[1])
+            return modelDelegateService.retrieveModelFiles((RevisionTransportCommand)message[1])
         } else {
-            return modelDelegateService.retrieveModelFile(message[1])
+            return modelDelegateService.retrieveModelFiles(message[1])
         }
     }
 

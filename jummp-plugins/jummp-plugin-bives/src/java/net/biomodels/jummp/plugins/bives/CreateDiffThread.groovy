@@ -47,9 +47,9 @@ class CreateDiffThread implements Runnable {
 			DiffDataProvider diffData = grailsApplication.mainContext.getBean("diffDataProvider") as DiffDataProvider
 			if(!diffData.getDiffInformation(modelId, previousRevision, recentRevision)) {
 				DiffGeneratorManager diffMan = new DiffGeneratorManager()
-				String previous = new String (modelDelegateService.retrieveModelFile(modelDelegateService.getRevision(modelId,
+				String previous = new String (modelDelegateService.retrieveModelFiles(modelDelegateService.getRevision(modelId,
 						previousRevision)))
-				String recent = new String(modelDelegateService.retrieveModelFile(modelDelegateService.getRevision(modelId,
+				String recent = new String(modelDelegateService.retrieveModelFiles(modelDelegateService.getRevision(modelId,
 						recentRevision)))
 				Diff diff = diffMan.generateDiff(previous, recent, true)
 				diff.setModelId(modelId as String)

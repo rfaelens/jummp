@@ -39,15 +39,23 @@ import java.util.List;
 **/
 public interface VcsManager {
     /**
-    * Initialises a working copy of the VCS.
-    * @param modelDirectory The directory where the model repository is created
+    * Initialises the exchange directory required by JUMMP.
     * @param exchangeDirectory The exchange directory for retrieved files
     * @throws VcsException if something goes wrong (needs to be made more specific to new usage)
     **/
+    //TODO replace exchangeDir with java.io.tmpdir
     public void init(File exchangeDirectory) throws VcsException;
 
     /**
-    * Imports files into the model repository
+     * Imports a new model into a given folder.
+     * @param modelDirectory    the model's folder
+     * @param files             the list of files that belong to this model
+     * @param commitMessage     a brief message describing the model.
+     */
+    public String createModel(File modelDirectory, List<File> files, String commitMessage);
+
+    /**
+    * Imports files into an existing model repository
     * Copies @p files into the model directory of the VCS, with a single commit
     * @param modelDirectory the model directory
     * @param files the files to import

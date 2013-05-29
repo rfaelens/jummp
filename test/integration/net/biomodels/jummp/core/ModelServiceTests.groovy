@@ -25,10 +25,14 @@ class ModelServiceTests extends JummpIntegrationTest {
     def aclUtilService
     def modelService
     def modelFileFormatService
+    def fileSystemService
     def grailsApplication
 
     @Before
     void setUp() {
+        def container = new File("target/vcs/git/ggg")
+        container.mkdirs()
+        fileSystemService.currentModelContainer = container.getCanonicalFile()
         createUserAndRoles()
     }
 
@@ -758,28 +762,28 @@ class ModelServiceTests extends JummpIntegrationTest {
         // anonymous user is not allowed to invoke method
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
-            modelService.uploadModel(null, null)
+            modelService.uploadModelAsFile(null, null)
         }
         // try importing with null file - should fail
         def auth = authenticateAsTestUser()
         ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "test", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"))
         shouldFail(ModelException) {
-            modelService.uploadModel(null, meta)
+            modelService.uploadModelAsFile(null, meta)
         }
         File importFile = new File("target/vcs/exchange/import.xml")
         // file does not yet exists = it should fail
         shouldFail(ModelException) {
-            modelService.uploadModel(importFile, meta)
+            modelService.uploadModelAsFile(importFile, meta)
         }
         FileUtils.touch(importFile)
         importFile.append("Test\n")
         // also for directory it should fail
         shouldFail(ModelException) {
-            modelService.uploadModel(new File("target/vcs/exchange/"), meta)
+            modelService.uploadModelAsFile(new File("target/vcs/exchange/"), meta)
         }
         // VCS system should not be valid - so it should fail
         shouldFail(ModelException) {
-            modelService.uploadModel(importFile, meta)
+            modelService.uploadModelAsFile(importFile, meta)
         }
         // now let's create the VCS
         File clone = new File("target/vcs/git")
@@ -798,10 +802,9 @@ class ModelServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         grailsApplication.config.jummp.plugins.sbml.validate = true
         modelService.vcsService.vcsManager = gitService.getInstance()
-        modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
         // import should work now
-        Model model = modelService.uploadModel(importFile, meta)
+        Model model = modelService.uploadModelAsFile(importFile, meta)
         assertTrue(model.validate())
         assertEquals(ModelFormat.findByIdentifier("UNKNOWN"), model.revisions.toList().first().format)
         // complete name cannot be tested, as it uses a generated date and we do not know the date
@@ -831,7 +834,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertFalse(aclUtilService.hasPermission(auth, revision, BasePermission.WRITE))
         // importing a model with same name should not be possible
         shouldFail(ModelException) {
-            modelService.uploadModel(importFile, meta)
+            modelService.uploadModelAsFile(importFile, meta)
         }
         // importing with invalid model file should not be possible
         meta.name = "test2"
@@ -840,7 +843,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         FileUtils.deleteQuietly(sbmlFile)
         FileUtils.touch(sbmlFile)
         shouldFail(ModelException) {
-            modelService.uploadModel(sbmlFile, meta)
+            modelService.uploadModelAsFile(sbmlFile, meta)
         }
         // importing with valid model file should be possible
         sbmlFile = new File("target/sbml/uploadModelValidSbmlFile")
@@ -867,13 +870,13 @@ class ModelServiceTests extends JummpIntegrationTest {
     </listOfReactions>
   </model>
 </sbml>''')
-        model = modelService.uploadModel(sbmlFile, meta)
+        model = modelService.uploadModelAsFile(sbmlFile, meta)
         assertTrue(model.validate())
         assertEquals(ModelFormat.findByIdentifier("SBML"), model.revisions.toList().first().format)
         assertNotNull(model.revisions.toList().first().uploadDate)
         // test strange characters in the name, which should not end in the file name
         meta.name = "test/:/test"
-        model = modelService.uploadModel(sbmlFile, meta)
+        model = modelService.uploadModelAsFile(sbmlFile, meta)
         File gitDirectory = new File("target/vcs/git/")
         gitFile = new File("target/vcs/git/${model.vcsIdentifier}")
         assertTrue(model.validate())
@@ -883,7 +886,7 @@ class ModelServiceTests extends JummpIntegrationTest {
     }
 
     @Test
-    void testRetrieveModelFile() {
+    void testRetrieveModelFiles() {
         modelService.modelFileFormatService = new UnknownModelFileFormatService(modelFileFormatService: modelFileFormatService)
         // first create the VCS
         File clone = new File("target/vcs/git")
@@ -908,25 +911,25 @@ class ModelServiceTests extends JummpIntegrationTest {
         File importFile = new File("target/vcs/exchange/import.xml")
         FileUtils.touch(importFile)
         importFile.append("Test\n")
-        Model model = modelService.uploadModel(importFile, meta)
+        Model model = modelService.uploadModelAsFile(importFile, meta)
         Revision revision = modelService.getLatestRevision(model)
         // Anonymous user should not be allowed to download the revision
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
-            modelService.retrieveModelFile(revision)
+            modelService.retrieveModelFiles(revision)
         }
         // User should not be allowed to download the revision
         authenticateAsUser()
         shouldFail(AccessDeniedException) {
-            modelService.retrieveModelFile(revision)
+            modelService.retrieveModelFiles(revision)
         }
         // as admin we should get a byte array
         authenticateAsAdmin()
-        byte[] bytes = modelService.retrieveModelFile(revision)
+        byte[] bytes = modelService.retrieveModelFiles(revision)
         assertEquals("Test\n", new String(bytes))
         // as testuser we should also get the byte array
         authenticateAsTestUser()
-        bytes = modelService.retrieveModelFile(revision)
+        bytes = modelService.retrieveModelFiles(revision)
         assertEquals("Test\n", new String(bytes))
         // create a random revision
         Revision rev = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -938,10 +941,10 @@ class ModelServiceTests extends JummpIntegrationTest {
         Revision rev4 = modelService.addRevision(model, importFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
         // retrieving the random revision should fail
         shouldFail(ModelException) {
-            modelService.retrieveModelFile(rev)
+            modelService.retrieveModelFiles(rev)
         }
         // retrieving the proper uploaded revision should work
-        bytes = modelService.retrieveModelFile(rev4)
+        bytes = modelService.retrieveModelFiles(rev4)
         assertEquals("Test\nTest\n", new String(bytes))
     }
 
@@ -1339,7 +1342,7 @@ class UnknownModelFileFormatService {
         modelFileFormatService.handleModelFormat(format, service)
     }
 
-    boolean validate(final File model, final ModelFormat format) {
+    boolean validate(final List<File> model, final ModelFormat format) {
         if (format.identifier == "UNKNOWN") {
             return true
         } else {

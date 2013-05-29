@@ -25,12 +25,9 @@ class ModelFileFormatServiceTests {
     void testServiceForFormat() {
         // unknown format should return null
         ModelFormat format = ModelFormat.findByIdentifier("SBML")
-        println "modelFormat: ${format}"
-        println "unknown format: ${ModelFormat.findByIdentifier("UNKNOWN")}"
         assertNull(modelFileFormatService.serviceForFormat(ModelFormat.findByIdentifier("UNKNOWN")))
         // for sbml it needs to be a SbmlService
         def formatService = modelFileFormatService.serviceForFormat(ModelFormat.findByIdentifier("SBML"))
-        println formatService
         assertNotNull(formatService)
         assertTrue(formatService instanceof FileFormatService)
         assertTrue(formatService instanceof SbmlService)
@@ -49,7 +46,7 @@ class ModelFileFormatServiceTests {
 <sbml level="99" version="1">
   <model/>
 </sbml>''')
-        assertFalse(modelFileFormatService.validate(invalidSbml, ModelFormat.findByIdentifier("SBML")))
+        assertFalse(modelFileFormatService.validate([invalidSbml], ModelFormat.findByIdentifier("SBML")))
         // and for a valid SBML file it should be true
         File validSbml = new File("target/sbml/validSbml")
         FileUtils.deleteQuietly(validSbml)
@@ -75,7 +72,7 @@ class ModelFileFormatServiceTests {
     </listOfReactions>
   </model>
 </sbml>''')
-        assertTrue(modelFileFormatService.validate(validSbml, ModelFormat.findByIdentifier("SBML")))
+        assertTrue(modelFileFormatService.validate([validSbml], ModelFormat.findByIdentifier("SBML")))
     }
 
     @Test
