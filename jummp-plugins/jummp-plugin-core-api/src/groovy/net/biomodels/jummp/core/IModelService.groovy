@@ -8,6 +8,7 @@ import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.plugins.security.User
 import java.util.List
+import java.util.Map
 
 /**
  * @short Service Interface for accessing the Model Service from a Remote Adapter.
@@ -149,14 +150,14 @@ public interface IModelService {
      * @return Byte Array of the content of the Model file for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    byte[] retrieveModelFiles(final RevisionTransportCommand revision) throws ModelException
+    Map<String, byte[]> retrieveModelFiles(final RevisionTransportCommand revision) throws ModelException
     /**
      * Retrieves the model file for the latest revision of the model.
      * @param modelId The id of the Model for which the file should be retrieved
      * @return Byte Array of the content of the Model file.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    byte[] retrieveModelFiles(final long modelId) throws ModelException
+    Map<String, byte[]> retrieveModelFiles(final long modelId) throws ModelException
 
     /**
     * Grants read access for model to @p collaborator.

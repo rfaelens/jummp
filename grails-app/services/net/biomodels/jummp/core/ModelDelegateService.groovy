@@ -11,6 +11,7 @@ import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
 import java.util.List
+import java.util.Map
 
 /**
  * @short Service delegating methods to ModelService.
@@ -120,11 +121,11 @@ class ModelDelegateService implements IModelService {
         return modelService.canAddRevision(Model.get(modelId))
     }
 
-    byte[] retrieveModelFiles(RevisionTransportCommand revision) throws ModelException {
+    Map<String, byte[]> retrieveModelFiles(RevisionTransportCommand revision) throws ModelException {
         return modelService.retrieveModelFiles(Revision.get(revision.id))
     }
 
-    byte[] retrieveModelFiles(long modelId) {
+    Map<String, byte[]> retrieveModelFiles(long modelId) {
         return modelService.retrieveModelFiles(Model.get(modelId))
     }
 

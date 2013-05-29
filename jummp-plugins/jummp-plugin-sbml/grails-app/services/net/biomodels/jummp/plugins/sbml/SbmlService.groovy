@@ -43,7 +43,6 @@ import org.sbml.jsbml.SBMLWriter
 import org.sbfc.converter.sbml2biopax.SBML2BioPAX_l3
 import org.sbfc.converter.models.BioPaxModel
 import com.thoughtworks.xstream.converters.ConversionException
-import java.util.List;
 /**
  * Service class for handling Model files in the SBML format.
  * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
@@ -458,9 +457,19 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             return document
         }
         // we do not have a document, so retrieve first the file
-        byte[] bytes = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFiles(revision)
-        document = (new SBMLReader()).readSBMLFromStream(new ByteArrayInputStream(bytes))
-        cache.put(revision, document)
+        Map<String, byte[]> bytes = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFiles(revision)
+        for (Map.Entry<String, byte[]> entry : bytes.entrySet())
+        {
+            System.out.println("SBML Processing: "+entry.getKey())
+            try
+            {
+                document=(new SBMLReader()).readSBMLFromStream(new ByteArrayInputStream(entry.getValue()));
+            }
+            catch(Exception ignore)
+            {
+                
+            }
+        }
         return document
     }
 
