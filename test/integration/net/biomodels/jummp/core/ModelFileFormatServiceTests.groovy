@@ -24,7 +24,6 @@ class ModelFileFormatServiceTests {
     @Test
     void testServiceForFormat() {
         // unknown format should return null
-        ModelFormat format = ModelFormat.findByIdentifier("SBML")
         assertNull(modelFileFormatService.serviceForFormat(ModelFormat.findByIdentifier("UNKNOWN")))
         // for sbml it needs to be a SbmlService
         def formatService = modelFileFormatService.serviceForFormat(ModelFormat.findByIdentifier("SBML"))

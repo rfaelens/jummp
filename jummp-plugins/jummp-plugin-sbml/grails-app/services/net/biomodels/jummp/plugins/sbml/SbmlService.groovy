@@ -131,19 +131,15 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             println("Validation for ${model.name} skipped due to configuration option")
             return true
         }
-        model.each
-        {
-            try
-            {
+        model.each {
+            try {
                 SBMLDocument doc  = getFileAsValidatedSBMLDocument(it);
                 if (doc!=null) return true;
-            }
-            catch(Exception ignore)
-            {
-                
+            } catch(Exception ignore) {
             }
         }
-        return false;
+
+        return false
     }
 
     @Profiled(tag="SbmlService.extractName")
