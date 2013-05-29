@@ -460,11 +460,15 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         Map<String, byte[]> bytes = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFiles(revision)
         for (Map.Entry<String, byte[]> entry : bytes.entrySet())
         {
-            System.out.println("SBML Processing: "+entry.getKey())
             try
             {
                 document=(new SBMLReader()).readSBMLFromStream(new ByteArrayInputStream(entry.getValue()));
-            }
+            	if (document)
+		{
+		  cache.put(revision, document)
+		  break;
+		}
+	    }
             catch(Exception ignore)
             {
                 
