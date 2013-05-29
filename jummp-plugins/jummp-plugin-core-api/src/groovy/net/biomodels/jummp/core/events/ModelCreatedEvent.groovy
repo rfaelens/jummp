@@ -8,8 +8,9 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
  * This event is triggered by the ModelService when a user successfully uploaded
  * a new Model. Interested parties might listen to this event through an ApplicationListener
  * and use the information provided. It is not possible to alter the Model or the uploaded
- * file in any way. Instead of the Model a ModelTransportCommand is included in the even.
+ * files in any way. Instead of the Model a ModelTransportCommand is included in the event.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class ModelCreatedEvent extends JummpEvent {
     /**
@@ -17,13 +18,13 @@ class ModelCreatedEvent extends JummpEvent {
      */
     final ModelTransportCommand model
     /**
-     * The actual file which was uploaded.
+     * The actual files which were uploaded.
      */
-    final File file
+    final List<File> files
 
-    ModelCreatedEvent(Object source, final ModelTransportCommand model, final File file) {
+    ModelCreatedEvent(Object source, final ModelTransportCommand model, final List<File> files) {
         super(source)
         this.model = model
-        this.file = file
+        this.files = files
     }
 }

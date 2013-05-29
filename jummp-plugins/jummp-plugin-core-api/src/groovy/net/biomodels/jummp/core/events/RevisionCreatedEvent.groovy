@@ -9,9 +9,10 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
  * a new Revision for an existing Model. It is not triggered during upload of a
  * new Model! Interested parties might listen to this event through an
  * ApplicationListener and use the information provided. It is not possible to
- * alter the Revision or the uploaded file in any way. Instead of the Revision
+ * alter the Revision or the uploaded files in any way. Instead of the Revision
  * a RevisionTransportCommand is included in the event.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class RevisionCreatedEvent extends JummpEvent {
     /**
@@ -19,13 +20,13 @@ class RevisionCreatedEvent extends JummpEvent {
      */
     final RevisionTransportCommand revision
     /**
-     * The actual file which was uploaded.
+     * The actual files which were uploaded.
      */
-    final File file
+    final List<File> files
 
-    RevisionCreatedEvent(Object source, final RevisionTransportCommand revision, final File file) {
+    RevisionCreatedEvent(Object source, final RevisionTransportCommand revision, final List<File> files) {
         super(source)
         this.revision = revision
-        this.file = file
+        this.files = files
     }
 }
