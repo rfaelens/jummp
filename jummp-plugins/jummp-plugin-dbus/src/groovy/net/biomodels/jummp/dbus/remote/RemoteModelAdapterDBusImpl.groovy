@@ -143,7 +143,7 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteDBusAdapter implements Re
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFiles")
-    byte[] retrieveModelFiles(long modelId) throws ModelException {
+    Map<String,byte[]> retrieveModelFiles(long modelId) throws ModelException {
         File directory = new File(modelDBusAdapter.retrieveModelFilesByModel(authenticationToken(), modelId))
         return getDirectoryAsByteMap(directory);
     }
