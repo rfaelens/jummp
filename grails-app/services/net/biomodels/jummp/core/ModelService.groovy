@@ -746,7 +746,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
             revision.refresh()
             executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
-            grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), file))
+            grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), modelFiles))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()

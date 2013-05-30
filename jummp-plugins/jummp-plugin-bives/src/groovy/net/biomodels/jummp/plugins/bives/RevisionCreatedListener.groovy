@@ -36,7 +36,8 @@ class RevisionCreatedListener implements ApplicationListener {
 				DiffGeneratorManager diffMan = new DiffGeneratorManager()
 				// first, map event...
 				RevisionTransportCommand command = ((RevisionCreatedEvent) event).revision
-				File testFile = ((RevisionCreatedEvent) event).file
+                //FIXME we assume there is only one file
+				File testFile = ((RevisionCreatedEvent) event).files.first()
                 ConfigObject config = ConfigurationHelper.loadConfigFromClasspath(Environment.getCurrent().getName())
                 final File location
                 if (config.containsKey("jummp.plugins.bives.diffdir")) {
@@ -46,9 +47,12 @@ class RevisionCreatedListener implements ApplicationListener {
                     location = new File(System.getProperty("java.io.tmpdir"))
                 }
 				// get previous revision
-				File refFile = File.createTempFile("referenceFile", ".xml", location) 
-				refFile.write(new String(modelDelegateService.retrieveModelFiles(
-                        modelDelegateService.getRevision(command.model.id, command.revisionNumber - 1))))
+				File refFile = File.createTempFile("referenceFile", ".xml", location)
+                //FIXME we assume there is only one file
+                 Map<String, byte[]> modelFiles = modelDelegateService.retrieveModelFiles(
+                        modelDelegateService.getRevision(command.model.id, command.revisionNumber - 1))
+                def modelByteArray = modelFiles.entrySet().first().value
+                new FileOutputStream(refFile).write(modelByteArray)
 				// create diff, initialize required variables
 				Diff diff = diffMan.generateDiff(refFile, testFile, true)
 				// debug
