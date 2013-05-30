@@ -1,6 +1,9 @@
 package net.biomodels.jummp.webapp
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
+import java.util.zip.ZipOutputStream  
+import java.util.zip.ZipEntry  
+import java.io.ByteArrayOutputStream
 
 class ModelController {
     /**
@@ -16,21 +19,26 @@ class ModelController {
         [id: params.id]
     }
 
-    def uploadFlow = {
-        uploadWizard {
-            on("")
-        }
-    }
     
     /**
      * File download of the model file for a model by id
      */
     def download = {
-        byte[] bytes = modelDelegateService.retrieveModelFiles(new RevisionTransportCommand(id: params.id as int))
-        response.setContentType("application/xml")
+        Map<String, byte[]> bytes = modelDelegateService.retrieveModelFiles(new RevisionTransportCommand(id: params.id as int))
+        ByteArrayOutputStream byteBuffer=new ByteArrayOutputStream()
+        ZipOutputStream zipFile = new ZipOutputStream()  
+        for (Map.Entry<String, byte[]> entry : bytes.entrySet())
+        {
+            zipFile.putNextEntry(new ZipEntry(entry.getKey()))  
+            zipFile.write(entry.getValue(),0,entry.getValue().length)
+            zipFile.closeEntry()  
+        }  
+        zipFile.close()  
+        
+        response.setContentType("application/zip")
         // TODO: set a proper name for the model
-        response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")
-        response.outputStream << new ByteArrayInputStream(bytes)
+        response.setHeader("Content-disposition", "attachment;filename=\"model.zip\"")
+        response.outputStream << new ByteArrayInputStream(byteBuffer.toByteArray())
     }
 
     def model = {
