@@ -925,11 +925,15 @@ class ModelServiceTests extends JummpIntegrationTest {
         }
         // as admin we should get a byte array
         authenticateAsAdmin()
-        byte[] bytes = modelService.retrieveModelFiles(revision)
+        Map<String, byte[]> importFileFromVcs = modelService.retrieveModelFiles(revision)
+        assertEquals(1, importFileFromVcs.size())
+        def bytes = importFileFromVcs.get(importFile.name)
         assertEquals("Test\n", new String(bytes))
         // as testuser we should also get the byte array
         authenticateAsTestUser()
-        bytes = modelService.retrieveModelFiles(revision)
+        Map<String, byte[]> revisionFiles = modelService.retrieveModelFiles(revision)
+        assertEquals(1, revisionFiles.size())
+        bytes = revisionFiles.get(importFile.name)
         assertEquals("Test\n", new String(bytes))
         // create a random revision
         Revision rev = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
@@ -938,13 +942,15 @@ class ModelServiceTests extends JummpIntegrationTest {
         aclUtilService.addPermission(rev, "testuser", BasePermission.READ)
         // now add another "real" revision
         importFile.append("Test\n")
-        Revision rev4 = modelService.addRevision(model, importFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
+        Revision rev4 = modelService.addRevisionAsFile(model, importFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
         // retrieving the random revision should fail
         shouldFail(ModelException) {
             modelService.retrieveModelFiles(rev)
         }
         // retrieving the proper uploaded revision should work
-        bytes = modelService.retrieveModelFiles(rev4)
+        Map<String, byte[]> files = modelService.retrieveModelFiles(rev4)
+        assertEquals(1, files.size())
+        bytes = files.get(importFile.name)
         assertEquals("Test\nTest\n", new String(bytes))
     }
 

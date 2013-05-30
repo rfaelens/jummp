@@ -672,11 +672,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.addRevisionAsFile")
     public Revision addRevisionAsFile(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
-            boolean validModelFile = file != null && file.isFile()
-            if (model == null || comment == null || !validModelFile) {
-                log.error("File ${file} cannot be added to model ${model}")
-                throw new ModelException("Could not create a new version of model ${model} with the files that were provided.")
-            }
             return addRevisionAsList(model, getAsList(file), format, comment)
     }
 
