@@ -125,20 +125,27 @@ class RemoteModelAdapterDBusImpl extends AbstractRemoteDBusAdapter implements Re
         return revision
     }
 
+    private Map<String,byte[]> getDirectoryAsByteMap(File directory)
+    {
+        Map<String, byte[]> returnMe=new HashMap<String,byte[]>()
+        directory.eachFile() { file ->
+            returnMe.put(file.getName(), file.getBytes())
+            FileUtils.deleteQuietly(file)
+        }
+        return returnMe
+    }
+    
     @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFiles")
-    byte[] retrieveModelFiles(RevisionTransportCommand revision) throws ModelException {
-        File file = new File(modelDBusAdapter.retrieveModelFilesByRevision(authenticationToken(), revision.id))
-        byte[] bytes = file.readBytes()
-        FileUtils.deleteQuietly(file)
-        return bytes
+    Map<String,byte[]> retrieveModelFiles(RevisionTransportCommand revision) throws ModelException {
+        // This should be better!
+        File directory = new File(modelDBusAdapter.retrieveModelFilesByRevision(authenticationToken(), revision.id))
+        return getDirectoryAsByteMap(directory);
     }
 
     @Profiled(tag="RemoteModelAdapterDBusImpl.retrieveModelFiles")
     byte[] retrieveModelFiles(long modelId) throws ModelException {
-        File file = new File(modelDBusAdapter.retrieveModelFilesByModel(authenticationToken(), modelId))
-        byte[] bytes = file.readBytes()
-        FileUtils.deleteQuietly(file)
-        return bytes
+        File directory = new File(modelDBusAdapter.retrieveModelFilesByModel(authenticationToken(), modelId))
+        return getDirectoryAsByteMap(directory);
     }
 
     private List<ModelTransportCommand> retrieveModels(List<String> ids) {

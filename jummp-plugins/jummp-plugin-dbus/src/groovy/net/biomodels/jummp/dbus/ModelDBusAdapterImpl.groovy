@@ -144,22 +144,23 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public boolean canAddRevision(String authenticationHash, long id) {
     }
 
+    private String writeFilesToTempDirectory(Map<String,byte[]> bytes)
+    {
+        File directory = File.createTempDir();
+        for (Map.Entry entry : bytes.entrySet())
+        {
+            File newFile=new File(directory.absolutePath + System.getProperty("file.separator") + entry.getKey());
+            newFile.setBytes(entry.getValue())
+        }
+    }
+    
     public String retrieveModelFilesByRevision(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
             RevisionTransportCommand revision = new RevisionTransportCommand();
             revision.setId(id);
-            byte[] bytes = modelDelegateService.retrieveModelFiles(revision);
-            File file = File.createTempFile("jummp", "model");
-            FileOutputStream out = new FileOutputStream(file);
-            try {
-                out.write(bytes);
-            } catch (IOException e) {
-                throw new ModelDBusException(e.getMessage());
-            } finally {
-                out.close();
-            }
-            return file.getAbsolutePath();
+            Map<String,byte[]> bytes = modelDelegateService.retrieveModelFiles(revision);
+            return writeFilesToTempDirectory(bytes);
             // TODO: change ModelService to return File handle instead of byte array
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
@@ -175,17 +176,8 @@ public class ModelDBusAdapterImpl extends AbstractDBusAdapter implements ModelDB
     public String retrieveModelFilesByModel(String authenticationHash, long id) {
         try {
             setAuthentication(authenticationHash);
-            byte[] bytes = modelDelegateService.retrieveModelFiles(id);
-            File file = File.createTempFile("jummp", "model");
-            FileOutputStream out = new FileOutputStream(file);
-            try {
-                out.write(bytes);
-            } catch (IOException e) {
-                throw new ModelDBusException(e.getMessage());
-            } finally {
-                out.close();
-            }
-            return file.getAbsolutePath();
+            Map<String,byte[]> bytes = modelDelegateService.retrieveModelFiles(id);
+            return writeFilesToTempDirectory(bytes);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedDBusException(e.getMessage());
         } catch (ModelException e) {

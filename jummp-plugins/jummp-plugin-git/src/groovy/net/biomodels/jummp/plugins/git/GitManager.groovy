@@ -109,14 +109,6 @@ class GitManager implements VcsManager {
             String fullBranch = repository.getFullBranch()
             if (!fullBranch) {
 
-                /*try
-                {
-                    createGitRepo(modelDirectory)
-                }
-                catch(Exception e)
-                {
-                    throw new VcsException(e.toString());
-                }*/
                 git=createGitRepo(modelDirectory)
                 repository=git.getRepository();
                 fullBranch=repository.getFullBranch();
