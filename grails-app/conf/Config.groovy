@@ -152,14 +152,9 @@ log4j = {
 
     warn   jummpAppender: 'org.mortbay.log'
     rollingFile name: "debugAppender", file: "logs/jummp-debug.log", threshold: org.apache.log4j.Level.ALL
-    info  debugAppender: [
-            'grails.plugins.quartz', 'org.quartz',
-            'org.codehaus.groovy.grails.plugins.web.filters.FiltersGrailsPlugin',
-            'org.codehaus.groovy.grails.web.pages',
-            'org.codehaus.groovy.grails.web.sitemesh',
-            'org.springframework'
+    trace  debugAppender: [
+            'net.biomodels.jummp'
     ]
-    trace debugAppender: [ 'org.codehaus.groovy.grails.web.mapping','org.codehaus.groovy.grails.web.mapping.filter', 'org.weceem', 'org.weceem.tags' ]
 }
 
 // Added by the Spring Security Core plugin:
