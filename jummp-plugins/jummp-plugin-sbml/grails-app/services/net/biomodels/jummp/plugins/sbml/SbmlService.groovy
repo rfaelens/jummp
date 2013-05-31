@@ -108,16 +108,15 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 for (SBMLError error in doc.getListOfErrors().validationErrors) {
                     if (error.isFatal() || error.isInternal() || error.isSystem() || error.isXML() || error.isError()) {
                         log.debug(error.getMessage())
-                        valid = false
+                        doc = null
                         break
                     }
                 }
-                return valid
-            } else {
-                return doc
             }
+            return doc
         } catch (ConversionException e) {
             log.error(e.getMessage(), e)
+        
             return null
         }
     }
@@ -130,15 +129,15 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             println("Validation for ${model.name} skipped due to configuration option")
             return true
         }
+        boolean returnVal=false;
         model.each {
             try {
                 SBMLDocument doc  = getFileAsValidatedSBMLDocument(it);
-                if (doc!=null) return true;
+                if (doc) returnVal |= true
             } catch(Exception ignore) {
             }
         }
-
-        return false
+        return returnVal
     }
 
     @Profiled(tag="SbmlService.extractName")

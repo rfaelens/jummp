@@ -515,7 +515,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.CREATION)
     @Profiled(tag="modelService.uploadModelAsFile")
     public Model uploadModelAsFile(final File modelFile, ModelTransportCommand meta) throws ModelException {
-        return uploadModelAsList(getAsList(modelFile), meta);
+        if (modelFile)
+           return uploadModelAsList(getAsList(modelFile), meta);
+        throw new ModelException(meta, "Model file cannot be null");
     }
 
     /**
@@ -538,29 +540,27 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (Model.findByName(meta.name)) {
             final ModelTransportCommand MODEL = Model.findByName(meta.name).toCommandObject()
             final String err = "There is already a Model with name ${meta.name}".toString()
-            log.error(MODEL, err)
-            throw new ModelException(m, err)
+            log.error(err)
+            throw new ModelException(meta, err)
         }
         Model model = new Model(name: meta.name)
         modelFiles.each {
             if (!it) {
                 def m = model.toCommandObject()
-                final String err = "Please specify a file"
-                log.error(m, err)
-                throw new ModelException(m, err)
+                final String err = "Please specify a file for ${model.toCommandObject()}"
+                log.error(err)
+                throw new ModelException(meta, err)
             }
             if (!it.exists() || it.isDirectory()) {
-                def m = model.toCommandObject()
-                def err = "The file ${it.path} does not exist or is a directory."
-                log.error(m, err)
-                throw new ModelException(m, err)
+                def err = "The file ${it.path}, ${model.toCommandObject()} does not exist or is a directory."
+                log.error(err)
+                throw new ModelException(meta, err)
             }
         }
         if (!modelFileFormatService.validate(modelFiles, ModelFormat.findByIdentifier(meta.format.identifier))) {
-            def m = model.toCommandObject()
-            def err = "The files $it do no comprise valid ${meta.format}"
-            log.error(m, err)
-            throw new ModelException(m, err)
+            def err = "The files $modelFiles do no comprise valid ${meta.format}"
+            log.error(err)
+            throw new ModelException(meta, err)
         }
         // model is valid, create a new repository and store it as revision1
         // vcs identifier is upload date + name - this should by all means be unique
@@ -571,10 +571,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 append(File.separator).toString()
         boolean success = new File(modelPath).mkdirs()
         if (!success) {
-            def m = model.toCommandObject()
             def err = "Cannot create the directory where the ${model.name} should be stored"
-            log.error(m, err)
-            throw new ModelException(m, err)
+            log.error(err)
+            throw new ModelException(meta, err)
         }
         model.vcsIdentifier = modelPath
         //model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')

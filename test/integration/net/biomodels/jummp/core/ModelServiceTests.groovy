@@ -543,8 +543,6 @@ class ModelServiceTests extends JummpIntegrationTest {
         File importFile = new File("target/vcs/exchange/test.xml")
         FileUtils.touch(importFile)
 
-        modelService.addRevisionAsFile(model, importFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
-
         shouldFail(ModelException) {
             modelService.addRevisionAsFile(model, importFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
@@ -758,6 +756,8 @@ class ModelServiceTests extends JummpIntegrationTest {
 
     @Test
     void testUploadModel() {
+        String modelIdentifier="target/vcs/git"
+        
         modelService.modelFileFormatService = new UnknownModelFileFormatService(modelFileFormatService: modelFileFormatService)
         // anonymous user is not allowed to invoke method
         authenticateAnonymous()
@@ -767,6 +767,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         // try importing with null file - should fail
         def auth = authenticateAsTestUser()
         ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "test", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"))
+        
         shouldFail(ModelException) {
             modelService.uploadModelAsFile(null, meta)
         }
@@ -786,7 +787,7 @@ class ModelServiceTests extends JummpIntegrationTest {
             modelService.uploadModelAsFile(importFile, meta)
         }
         // now let's create the VCS
-        File clone = new File("target/vcs/git")
+        File clone = new File(modelIdentifier)
         clone.mkdirs()
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
@@ -798,9 +799,8 @@ class ModelServiceTests extends JummpIntegrationTest {
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
-        grailsApplication.config.jummp.plugins.sbml.validate = true
+        grailsApplication.config.jummp.plugins.sbml.validation = true
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
         // import should work now
@@ -808,8 +808,9 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue(model.validate())
         assertEquals(ModelFormat.findByIdentifier("UNKNOWN"), model.revisions.toList().first().format)
         // complete name cannot be tested, as it uses a generated date and we do not know the date
-        assertTrue(model.vcsIdentifier.endsWith("test"))
-        File gitFile = new File("target/vcs/git/${model.vcsIdentifier}")
+        assertTrue(model.vcsIdentifier.endsWith("test/"))
+
+        File gitFile = new File(model.vcsIdentifier + System.getProperty("file.separator") + importFile.getName())
         List<String> lines = gitFile.readLines()
         assertEquals(1, lines.size())
         assertEquals("Test", lines[0])
@@ -820,8 +821,8 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertEquals(commit.getName(), model.revisions.toList().first().vcsId)
         assertEquals(1, model.revisions.size())
         // we did not specify a commit message, so default should be used
-        assertEquals("Import of ${model.vcsIdentifier}".toString(), revCommit.getShortMessage())
-        assertEquals("Import of ${model.vcsIdentifier}".toString(), revCommit.getFullMessage())
+        assertEquals("Import of ${model.name}".toString(), revCommit.getShortMessage())
+        assertEquals("Import of ${model.name}".toString(), revCommit.getFullMessage())
         // verify set permissions
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.READ))
         assertTrue(aclUtilService.hasPermission(auth, model, BasePermission.ADMINISTRATION))
@@ -877,8 +878,8 @@ class ModelServiceTests extends JummpIntegrationTest {
         // test strange characters in the name, which should not end in the file name
         meta.name = "test/:/test"
         model = modelService.uploadModelAsFile(sbmlFile, meta)
-        File gitDirectory = new File("target/vcs/git/")
-        gitFile = new File("target/vcs/git/${model.vcsIdentifier}")
+        File gitDirectory = new File(model.vcsIdentifier)
+        gitFile = new File(model.vcsIdentifier + System.getProperty("file.separator") + sbmlFile.getName())
         assertTrue(model.validate())
         assertEquals(gitDirectory.getPath(), gitFile.getParent())
         // TODO: somehow we need to test the failing cases, which is non-trivial
