@@ -559,6 +559,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.plugins.sbml.validate = true
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
@@ -800,6 +801,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.plugins.sbml.validation = true
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
@@ -948,7 +950,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         shouldFail(ModelException) {
             modelService.retrieveModelFiles(rev)
         }
-        // retrieving the proper uploaded revision should work
+        // retrieving the proper uploaded revision should 
         Map<String, byte[]> files = modelService.retrieveModelFiles(rev4)
         assertEquals(1, files.size())
         bytes = files.get(importFile.name)
