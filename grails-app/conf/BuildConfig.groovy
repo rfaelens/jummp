@@ -191,7 +191,7 @@ codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
                              'jummp-plugins/*/test/unit',
                              'jummp-plugins/*/test/integration']
 
-grails.tomcat.jvmArgs = ["-Xmx2G", "-XX:MaxPermSize=512M", "-XX:-UseGCOverheadLimit", "-server", "-XX:+UseParallelGC", "-XX:ParallelGCThreads=8"]
+grails.project.fork.run = [ maxMemory: 2048, minMemory: 512, debug: false, maxPerm: 512, jvmArgs: '-XX:-UseGCOverheadLimit -server -XX:+UseParallelGC -XX:ParallelGCThreads=8']
 
 //ensure that AST.jar is put in the right place. See scripts/AST.groovy
 System.setProperty("jummp.basePath", new File("./").getAbsolutePath())
