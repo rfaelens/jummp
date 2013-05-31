@@ -84,6 +84,7 @@ class GitManager implements VcsManager {
     private void initRepository(File modelDirectory) {
         lock.lock()
         try {
+            System.out.println("Initing: "+modelDirectory+" "+initedRepositories)
             if (initedRepositories.containsKey(modelDirectory)) {
                 //throw new VcsAlreadyInitedException()
                 return;
@@ -101,14 +102,16 @@ class GitManager implements VcsManager {
             FileRepositoryBuilder builder = new FileRepositoryBuilder()
             Repository repository = builder.setWorkTree(modelDirectory)
             .readEnvironment() // scan environment GIT_* variables
-            .findGitDir(modelDirectory) // scan up the file system tree
+            .setGitDir(modelDirectory) // use the current directory for the repository
             .build()
             Git git = new Git(repository)
 
             String branchName
             String fullBranch = repository.getFullBranch()
-            if (!fullBranch) {
-
+            
+            if (!fullBranch)  {
+                
+                System.out.println("No repository, initing: "+modelDirectory)
                 git=createGitRepo(modelDirectory)
                 repository=git.getRepository();
                 fullBranch=repository.getFullBranch();
@@ -121,15 +124,30 @@ class GitManager implements VcsManager {
                 ConfigConstants.CONFIG_KEY_REMOTE)
             hasRemote = (remote != null)
             initedRepositories.put(modelDirectory,git);
+            System.out.println("Inited: "+modelDirectory)
+
         } finally {
             lock.unlock()
         }
     }
 
     private Git createGitRepo(File directory) {
-        InitCommand initCommand = Git.init();
-        initCommand.setDirectory(directory);
-        return initCommand.call();
+        System.out.println("Calling init on : "+directory)
+        Git git=null;
+            
+        try
+        {
+            InitCommand initCommand = Git.init();
+            initCommand.setDirectory(directory);
+            git=initCommand.call();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            System.out.println(e);
+        }
+        System.out.println("Returning: "+git);
+        return git
     }
 
     public String updateModel(File modelDirectory, List<File> files, String commitMessage) {
@@ -240,6 +258,7 @@ class GitManager implements VcsManager {
         String revision
         try {
             updateWorkingCopy(modelDirectory)
+            System.out.println("Trying to add files to "+modelDirectory)
             Git git = initedRepositories.get(modelDirectory);
             AddCommand add = git.add()
             files.each
