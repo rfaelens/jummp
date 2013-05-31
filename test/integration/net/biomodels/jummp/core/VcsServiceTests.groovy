@@ -144,7 +144,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
-        //grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
@@ -228,6 +228,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
 
@@ -409,6 +410,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
