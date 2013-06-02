@@ -33,7 +33,7 @@ class RevisionCreatedListener implements ApplicationListener {
 		if (event instanceof RevisionCreatedEvent) {
 			try {
 				// initiate variables
-				DiffGeneratorManager diffMan = new DiffGeneratorManager()
+/*				DiffGeneratorManager diffMan = new DiffGeneratorManager()
 				// first, map event...
 				RevisionTransportCommand command = ((RevisionCreatedEvent) event).revision
                 //FIXME we assume there is only one file
@@ -68,7 +68,7 @@ class RevisionCreatedListener implements ApplicationListener {
 				// TODO database entries -> later
 
 				// TODO optional: Component extension for diffs
-				refFile.delete();
+				refFile.delete();*/
 			} catch (Exception e) {
 				e.printStackTrace()
 			}

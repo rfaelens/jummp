@@ -84,7 +84,6 @@ class GitManager implements VcsManager {
     private void initRepository(File modelDirectory) {
         lock.lock()
         try {
-            System.out.println("Initing: "+modelDirectory+" "+initedRepositories)
             if (initedRepositories.containsKey(modelDirectory)) {
                 //throw new VcsAlreadyInitedException()
                 return;
@@ -111,7 +110,6 @@ class GitManager implements VcsManager {
             
             if (!fullBranch)  {
                 
-                System.out.println("No repository, initing: "+modelDirectory)
                 git=createGitRepo(modelDirectory)
                 repository=git.getRepository();
                 fullBranch=repository.getFullBranch();
@@ -124,29 +122,17 @@ class GitManager implements VcsManager {
                 ConfigConstants.CONFIG_KEY_REMOTE)
             hasRemote = (remote != null)
             initedRepositories.put(modelDirectory,git);
-            System.out.println("Inited: "+modelDirectory)
-
+            
         } finally {
             lock.unlock()
         }
     }
 
     private Git createGitRepo(File directory) {
-        System.out.println("Calling init on : "+directory)
         Git git=null;
-            
-        try
-        {
-            InitCommand initCommand = Git.init();
-            initCommand.setDirectory(directory);
-            git=initCommand.call();
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            System.out.println(e);
-        }
-        System.out.println("Returning: "+git);
+        InitCommand initCommand = Git.init();
+        initCommand.setDirectory(directory);
+        git=initCommand.call();
         return git
     }
 
@@ -258,7 +244,6 @@ class GitManager implements VcsManager {
         String revision
         try {
             updateWorkingCopy(modelDirectory)
-            System.out.println("Trying to add files to "+modelDirectory)
             Git git = initedRepositories.get(modelDirectory);
             AddCommand add = git.add()
             files.each
