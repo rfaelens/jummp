@@ -158,9 +158,12 @@ class GitManager implements VcsManager {
     private void downloadFiles(File modelDirectory, List<File> addHere)
     {
          File[] repFiles=modelDirectory.listFiles();
+         long randomDir = Math.round(Math.random() * System.currentTimeMillis()) ;
+         File tempDir = new File (exchangeDirectory.absolutePath + System.getProperty("file.separator") + "dir" + randomDir );
+         tempDir.mkdir();
          repFiles.each
          {
-             File destinationFile = new File(exchangeDirectory.absolutePath + System.getProperty("file.separator") + it.getName())
+             File destinationFile = new File(tempDir.absolutePath + System.getProperty("file.separator") + it.getName())
              if (!it.isDirectory())
              {
                  FileUtils.copyFile(it, destinationFile)

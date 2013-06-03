@@ -740,7 +740,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
             revision.refresh()
             executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
-            grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), modelFiles))
+            grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
@@ -779,11 +779,14 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.")
         }
         Map<String, byte[]> returnMe=new HashMap<String, byte[]>();
+        File tempParentDir=null
         files.each
         {
             returnMe.put(it.name, it.getBytes())
+            tempParentDir=it.getParentFile();
             FileUtils.forceDelete(it)
-       }
+        }
+        if (tempParentDir) tempParentDir.deleteDir();
         return returnMe;
     }
 
