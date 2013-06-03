@@ -24,6 +24,7 @@ class SbmlServiceTests extends JummpIntegrationTest {
      */
     def sbmlService
     def modelService
+    def fileSystemService
     def grailsApplication
 
     @Before
@@ -31,13 +32,14 @@ class SbmlServiceTests extends JummpIntegrationTest {
         createUserAndRoles()
         setupVcs()
         // disable validation as it is broken
+        fileSystemService.root = new File("target/sbml/git/").getCanonicalFile()
+        fileSystemService.currentModelContainer = fileSystemService.root.absolutePath + "/ttt/"
         grailsApplication.config.jummp.plugins.sbml.validation = false
     }
 
     @After
     void tearDown() {
-        FileUtils.deleteDirectory(new File("target/sbml/git"))
-        FileUtils.deleteDirectory(new File("target/sbml/exchange"))
+        //FileUtils.deleteDirectory(new File("target/sbml"))
     }
 
     @Test
