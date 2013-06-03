@@ -451,11 +451,12 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
      * @return The parsed SBMLDocument
      */
     private SBMLDocument getFromCache(RevisionTransportCommand revision) throws XMLStreamException {
-        SBMLDocument document = cache.get(revision)
+        /*SBMLDocument document = cache.get(revision)
         if (document) {
             return document
-        }
+        }*/
         // we do not have a document, so retrieve first the file
+        SBMLDocument document=null;
         Map<String, byte[]> bytes = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFiles(revision)
         for (Map.Entry<String, byte[]> entry : bytes.entrySet()) {
             try {
@@ -465,6 +466,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                   break
                 }
             } catch(Exception ignore) {
+                System.out.println("Exception :"+ignore)
             }
         }
         return document
@@ -678,7 +680,9 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         SBMLModel sbmlModel = new SBMLModel()
         sbmlModel.setModelFromString(sbmlString)
         return sbmlModel
-        } catch (NoSuchElementException e) {
+        } catch (Exception e) {
+            e.printStackTrace()
+            System.out.println(e);
             return [:]
         }
     }
