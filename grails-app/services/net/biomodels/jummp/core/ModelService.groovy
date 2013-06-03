@@ -633,7 +633,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     if (annotation) {
                         if (annotation.contains(":")) {
                             pubMed = annotation.substring(annotation.lastIndexOf(":")+1, annotation.indexOf("]")).trim()
-                            model.publication = pubMedService.getPublication(pubMed)
+                            //TODO Replace CiteXplore with EuropePMC URLs
+                            //model.publication = pubMedService.getPublication(pubMed)
+                            model.publication = null
                         }
                     }
                 }
