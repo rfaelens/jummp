@@ -37,58 +37,81 @@ class JummpIntegrationTest {
      * @li admin with password 1234 and ROLE_ADMIN and ROLE_USER
      */
     protected void createUserAndRoles() {
-        User user = new User(username: "testuser",
-                password: springSecurityService.encodePassword("secret"),
-                userRealName: "Test",
-                email: "test@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(user.save())
-        assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
-        User user2 = new User(username: "username",
-                password: springSecurityService.encodePassword("verysecret"),
-                userRealName: "Test2",
-                email: "test2@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(user2.save())
-        assertNotNull(new AclSid(sid: user2.username, principal: true).save(flush: true))
-        User admin = new User(username: "admin",
-                password: springSecurityService.encodePassword("1234"),
-                userRealName: "Administrator",
-                email: "admin@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(admin.save())
-        assertNotNull(new AclSid(sid: admin.username, principal: true).save(flush: true))
-        User curator = new User(username: "curator",
-                password: springSecurityService.encodePassword("extremelysecret"),
-                userRealName: "Curator",
-                email: "curator@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(curator.save())
-        assertNotNull(new AclSid(sid: curator.username, principal: true).save(flush: true))
-        Role userRole = new Role(authority: "ROLE_USER")
-        assertNotNull(userRole.save())
+        User user, user2, admin, curator
+        if (!User.findByUsername("testuser")) {
+            user = new User(username: "testuser",
+                    password: springSecurityService.encodePassword("secret"),
+                    userRealName: "Test",
+                    email: "test@test.com",
+                    enabled: true,
+                    accountExpired: false,
+                    accountLocked: false,
+                    passwordExpired: false)
+            assertNotNull(user.save())
+            assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
+        } else {
+            user = User.findByUsername("testuser")
+        }
+        if (!User.findByUsername("username")) {
+            user2 = new User(username: "username",
+                    password: springSecurityService.encodePassword("verysecret"),
+                    userRealName: "Test2",
+                    email: "test2@test.com",
+                    enabled: true,
+                    accountExpired: false,
+                    accountLocked: false,
+                    passwordExpired: false)
+            assertNotNull(user2.save())
+            assertNotNull(new AclSid(sid: user2.username, principal: true).save(flush: true))
+        } else {
+            user2 = User.findByUsername("username")
+        }
+        if (!User.findByUsername("admin")) {
+            admin = new User(username: "admin",
+                    password: springSecurityService.encodePassword("1234"),
+                    userRealName: "Administrator",
+                    email: "admin@test.com",
+                    enabled: true,
+                    accountExpired: false,
+                    accountLocked: false,
+                    passwordExpired: false)
+            assertNotNull(admin.save())
+            assertNotNull(new AclSid(sid: admin.username, principal: true).save(flush: true))
+        } else {
+            admin = User.findByUsername("admin")
+        }
+        if (!User.findByUsername("curator")) {
+            curator = new User(username: "curator",
+                    password: springSecurityService.encodePassword("extremelysecret"),
+                    userRealName: "Curator",
+                    email: "curator@test.com",
+                    enabled: true,
+                    accountExpired: false,
+                    accountLocked: false,
+                    passwordExpired: false)
+            assertNotNull(curator.save())
+            assertNotNull(new AclSid(sid: curator.username, principal: true).save(flush: true))
+        } else {
+            curator = User.findByUsername("curator")
+        }
+        ensureRoleExists("ROLE_USER")
+        Role userRole = Role.findByAuthority("ROLE_USER")
         UserRole.create(user, userRole, false)
         UserRole.create(user2, userRole, false)
         UserRole.create(admin, userRole, false)
         UserRole.create(curator, userRole, false)
-        Role adminRole = new Role(authority: "ROLE_ADMIN")
-        assertNotNull(adminRole.save())
+        ensureRoleExists("ROLE_ADMIN")
+        Role adminRole = Role.findByAuthority("ROLE_ADMIN")
         UserRole.create(admin, adminRole, false)
-        Role curatorRole = new Role(authority: "ROLE_CURATOR")
-        assertNotNull(curatorRole.save())
+        ensureRoleExists("ROLE_CURATOR")
+        Role curatorRole = Role.findByAuthority("ROLE_CURATOR")
         UserRole.create(curator, curatorRole, false)
+    }
+
+    private def ensureRoleExists(String _authority) {
+        if (!Role.findByAuthority(_authority)) {
+            new Role(authority: _authority).save()
+        }
     }
 
     /**

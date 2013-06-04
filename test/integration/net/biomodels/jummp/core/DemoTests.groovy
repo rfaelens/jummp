@@ -30,14 +30,16 @@ class DemoTests extends JummpIntegrationTest{
         assertTrue(modelService.vcsService.isValid())
     }
 
+    @Ignore("Defend from running this test accidentally")
     @Test
     void testBatchImport() {
-        final File target = new File("/home/mglont/jummp/models/curated")
+        //this could be set via environment variables
+        final File target = new File("/home/mglont/jummp/models/curated/")
 
         authenticateAsAdmin()
         target.eachFile {
             ModelTransportCommand meta = new ModelTransportCommand(comment:
-                "model import test", name: it.name, format: new ModelFormatTransportCommand(identifier: "SBML"))
+                "model import test", name: it.name - ".xml", format: new ModelFormatTransportCommand(identifier: "SBML"))
             File tempFile = File.createTempFile("metadata", ".txt")
             tempFile.setText("Metadata for ${it.name}\n")
             modelService.uploadModelAsList([it,tempFile], meta)
