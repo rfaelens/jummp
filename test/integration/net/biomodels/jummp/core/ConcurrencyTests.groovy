@@ -52,8 +52,37 @@ class ConcurrencyTests extends JummpIntegrationTest {
 
     @Test
     void testConcurrentAccess() {
+        TestFramework.setGlobalRunLimit(120)
         TestFramework.runOnce(new DontBlockWhenYouDontNeedTo())
     }
+    
+     private File smallModel() {
+
+        File sbmlModel=File.createTempFile("model", ".xml")
+        sbmlModel.setText('''<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
+  <model>
+    <listOfCompartments>
+      <compartment name="x"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <specie name="y" compartment="x" initialAmount="1"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction name="r">
+        <listOfReactants>
+          <specieReference specie="y"/>
+        </listOfReactants>
+        <listOfProducts>
+          <specieReference specie="y"/>
+        </listOfProducts>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>''')
+        return sbmlModel
+    }
+    
     
     class DontBlockWhenYouDontNeedTo extends MultithreadedTestCase
     {
@@ -73,28 +102,30 @@ class ConcurrencyTests extends JummpIntegrationTest {
     
         public void thread1() {
             ModelTransportCommand meta = new ModelTransportCommand(comment:
-                "model import test", name: "mybigfile", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"))
-            RandomAccessFile f = new RandomAccessFile(File.createTempFile("bigfil", ".txt"), "rw");
-            f.setLength(1024 * 1024 * 1024);
+                "model import test", name: "mybigfile", format: new ModelFormatTransportCommand(identifier: "SBML"))
+            File bigFile=File.createTempFile("bigfil", ".txt")
+            RandomAccessFile f = new RandomAccessFile(bigFile, "rw")
+            f.setLength(100 * 1024 * 1024);
+            f.close()
             authenticateAsAdmin()
             System.out.println("Thread 1 stopping at"+System.currentTimeMillis())
             waitForTick(1)
-            System.out.println("Thread 2 starting at"+System.currentTimeMillis())
-            modelService.uploadModelAsList([f], meta)
+            System.out.println("Thread 1 starting at"+System.currentTimeMillis())
+            modelService.uploadModelAsList([smallModel(), bigFile], meta)
             timeWriteFinished=System.currentTimeMillis()
         }
 
         public void thread2() {       
             ModelTransportCommand meta = new ModelTransportCommand(comment:
-                "model import test", name: "mysmallfile", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"))
+                "model import test", name: "mysmallfile", format: new ModelFormatTransportCommand(identifier: "SBML"))
             File smallFile = File.createTempFile("smallfile",".txt")
             smallFile.setText("ThisIsIt")
             authenticateAsAdmin()
-            Model model= modelService.uploadModelAsList([smallFile], meta)
+            Model model= modelService.uploadModelAsList([smallModel(), smallFile], meta)
             System.out.println("Thread 2 stopping at"+System.currentTimeMillis())
             waitForTick(1);
             System.out.println("Thread 2 starting at"+System.currentTimeMillis())
-            retrieveModelFiles(model);
+            modelService.retrieveModelFiles(model);
             timeReadFinished=System.currentTimeMillis()
        }
        
