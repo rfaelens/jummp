@@ -2,6 +2,7 @@ package net.biomodels.jummp.plugins.git
 
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
+import java.util.concurrent.ConcurrentHashMap
 import net.biomodels.jummp.core.vcs.*
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.AddCommand
@@ -35,9 +36,9 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
  */
 class GitManager implements VcsManager {
 
-    private static final ReentrantLock lock = new ReentrantLock()
     private static final AtomicInteger uid = new AtomicInteger(0)
-    private LruCache<File, Git>  initedRepositories=new LruCache<File, Git>(20);
+    private final ConcurrentHashMap<String, ReentrantLock> locks= new ConcurrentHashMap<String, ReentrantLock>();
+    private final Map<File, Git>  initedRepositories=Collections.synchronizedMap(new LruCache<File, Git>(20));
     private File exchangeDirectory
     private boolean hasRemote
 
@@ -80,9 +81,27 @@ class GitManager implements VcsManager {
         //then execute the same logic as importModel(modelDirectory, modelFiles, commit)
         return ""
     }
+    
+    private void lockModelRepository(File modelDirectory)
+    {
+        if (!locks.containsKey(modelDirectory.name))
+        {
+            ReentrantLock lock = new ReentrantLock()
+            locks.put(modelDirectory.name, lock)
+        }
+        locks.get(modelDirectory.name).lock();
+    }
+    
+    private void unlockModelRepository(File modelDirectory)
+    {
+        ReentrantLock lock=locks.get(modelDirectory.name)
+        if (!lock.hasQueuedThreads()) locks.remove(modelDirectory);
+        lock.unlock()
+    }
+    
 
     private void initRepository(File modelDirectory) {
-        lock.lock()
+        lockModelRepository(modelDirectory)
         try {
             if (initedRepositories.containsKey(modelDirectory)) {
                 //throw new VcsAlreadyInitedException()
@@ -124,7 +143,7 @@ class GitManager implements VcsManager {
             initedRepositories.put(modelDirectory,git);
             
         } finally {
-            lock.unlock()
+            unlockModelRepository(modelDirectory)
         }
     }
 
@@ -138,7 +157,7 @@ class GitManager implements VcsManager {
 
     public String updateModel(File modelDirectory, List<File> files, String commitMessage) {
         String revision = null
-        lock.lock()
+        lockModelRepository(modelDirectory)
         try {
             if (!initedRepositories.containsKey(modelDirectory)) {
                 if (exchangeDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
@@ -146,7 +165,7 @@ class GitManager implements VcsManager {
             }
             revision = handleAddition(modelDirectory, files, commitMessage)
         } finally {
-            lock.unlock()
+            unlockModelRepository(modelDirectory)
         }
         return revision
     }
@@ -157,20 +176,20 @@ class GitManager implements VcsManager {
 
     private void downloadFiles(File modelDirectory, List<File> addHere)
     {
-         File[] repFiles=modelDirectory.listFiles();
-         long randomDir = Math.round(Math.random() * System.currentTimeMillis()) ;
-         File tempDir = new File (exchangeDirectory.absolutePath + System.getProperty("file.separator") + "dir" + randomDir );
-         tempDir.mkdir();
-         repFiles.each
-         {
-             File destinationFile = new File(tempDir.absolutePath + System.getProperty("file.separator") + it.getName())
-             if (!it.isDirectory())
-             {
-                 FileUtils.copyFile(it, destinationFile)
-                 addHere.add(destinationFile)
-             }
-         }
-         if (addHere.isEmpty()) throw new VcsException("Model directory is empty!");
+        File[] repFiles=modelDirectory.listFiles();
+        long randomDir = Math.round(Math.random() * System.currentTimeMillis()) ;
+        File tempDir = new File (exchangeDirectory.absolutePath + System.getProperty("file.separator") + "dir" + randomDir );
+        tempDir.mkdir();
+        repFiles.each
+        {
+            File destinationFile = new File(tempDir.absolutePath + System.getProperty("file.separator") + it.getName())
+            if (!it.isDirectory())
+            {
+                FileUtils.copyFile(it, destinationFile)
+                addHere.add(destinationFile)
+            }
+        }
+        if (addHere.isEmpty()) throw new VcsException("Model directory is empty!");
 
     }
 
@@ -183,7 +202,7 @@ class GitManager implements VcsManager {
 
     public List<File> retrieveModel(File modelDirectory, String revision) {
         List<File> returnedFiles = new LinkedList<File>()
-        lock.lock()
+        lockModelRepository(modelDirectory)
         try {
             if (!initedRepositories.containsKey(modelDirectory)) {
                 if (exchangeDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
@@ -191,10 +210,10 @@ class GitManager implements VcsManager {
             }
             if (revision == null) {
                 // return current HEAD revision
-               downloadFiles(modelDirectory, returnedFiles);
+                downloadFiles(modelDirectory, returnedFiles);
             } else {
-                  if (!getRevisions(modelDirectory).contains(revision))
-                      throw new VcsException("Revision '$revision' not found in model directory '$modelDirectory' !");
+                if (!getRevisions(modelDirectory).contains(revision))
+                throw new VcsException("Revision '$revision' not found in model directory '$modelDirectory' !");
                 try {
                     // need to checkout in a temporary branch
                     String branchName = "tempa${uid.getAndIncrement()}"
@@ -207,29 +226,41 @@ class GitManager implements VcsManager {
                 }
             }
         } finally {
-            lock.unlock()
+            unlockModelRepository(modelDirectory)
         }
         return returnedFiles
     }
 
     public List<String> getRevisions(File modelDirectory)
     {
-        Iterator<RevCommit> log=initedRepositories.get(modelDirectory).log().call().iterator();
         List<String> myList=new LinkedList<String>();
-        log.each
-        {
-            myList.add(it.getName())
+        lockModelRepository(modelDirectory)
+        try {
+            Iterator<RevCommit> log=initedRepositories.get(modelDirectory).log().call().iterator();
+            log.each
+            {
+                myList.add(it.getName())
+            }
+        }
+        finally {
+            unlockModelRepository(modelDirectory)
         }
         return myList
     }
 
     public void updateWorkingCopy(File modelDirectory) {
-        if (!initedRepositories.containsKey(modelDirectory)) {
-            if (exchangeDirectory==null) throw new IOException("not inited")
-            initRepository(modelDirectory);
+        lockModelRepository(modelDirectory)
+        try {
+            if (!initedRepositories.containsKey(modelDirectory)) {
+                if (exchangeDirectory==null) throw new IOException("not inited")
+                initRepository(modelDirectory);
+            }
+            if (hasRemote) {
+                initedRepositories.get(modelDirectory).pull().call()
+            }
         }
-        if (hasRemote) {
-            initedRepositories.get(modelDirectory).pull().call()
+        finally {
+            unlockModelRepository(modelDirectory)
         }
     }
 
@@ -251,8 +282,8 @@ class GitManager implements VcsManager {
             AddCommand add = git.add()
             files.each
             {
-               FileUtils.copyFile(it, new File(modelDirectory.absolutePath + File.separator + it.getName()))
-               add = add.addFilepattern(it.getName())
+                FileUtils.copyFile(it, new File(modelDirectory.absolutePath + File.separator + it.getName()))
+                add = add.addFilepattern(it.getName())
             }
             add.call()
             RevCommit commit = git.commit().setMessage(commitMessage).call()
