@@ -89,8 +89,8 @@ class ConcurrencyTests extends JummpIntegrationTest {
                 "model import test", name: "mysmallfile", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"))
             File smallFile = File.createTempFile("smallfile",".txt")
             smallFile.setText("ThisIsIt")
-            Model model= modelService.uploadModelAsList([smallFile], meta)
             authenticateAsAdmin()
+            Model model= modelService.uploadModelAsList([smallFile], meta)
             System.out.println("Thread 2 stopping at"+System.currentTimeMillis())
             waitForTick(1);
             System.out.println("Thread 2 starting at"+System.currentTimeMillis())
