@@ -16,6 +16,7 @@ import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import java.util.UUID
 
 /**
  * @short GitManager provides the interface to a local git clone.
@@ -173,12 +174,12 @@ class GitManager implements VcsManager {
     public String updateModel(File modelDirectory, List<File> files) {
         return updateFile(modelDirectory, files, "Update of ${name}")
     }
-
+    
+    
     private void downloadFiles(File modelDirectory, List<File> addHere)
     {
         File[] repFiles=modelDirectory.listFiles();
-        long randomDir = Math.round(Math.random() * System.currentTimeMillis()) ;
-        File tempDir = new File (exchangeDirectory.absolutePath + System.getProperty("file.separator") + "dir" + randomDir );
+        File tempDir = new File (exchangeDirectory.absolutePath + System.getProperty("file.separator") + UUID.randomUUID().toString() );
         tempDir.mkdir();
         repFiles.each
         {
@@ -189,6 +190,7 @@ class GitManager implements VcsManager {
                 addHere.add(destinationFile)
             }
         }
+        System.out.println("Copied to "+tempDir.name);
         if (addHere.isEmpty()) throw new VcsException("Model directory is empty!");
 
     }
