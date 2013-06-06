@@ -14,15 +14,18 @@ import net.biomodels.jummp.plugins.git.GitManagerFactory
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.core.model.ModelTransportCommand
-import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.eclipse.jgit.lib.ObjectId
+import org.eclipse.jgit.revwalk.RevWalk
+import org.eclipse.jgit.revwalk.RevCommit
+import org.eclipse.jgit.lib.Constants
+import net.biomodels.jummp.model.ModelFormat
 
 
 class ConcurrencyTests extends JummpIntegrationTest {
 
-    def modelService
-    def modelFileFormatService
-    def fileSystemService
+    def vcsService
     def grailsApplication
     
     
@@ -35,19 +38,22 @@ class ConcurrencyTests extends JummpIntegrationTest {
     void setUpVcs() {
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
-        grailsApplication.config.jummp.plugins.git.enabled = true 
-        modelService.vcsService.vcsManager = gitService.getInstance()
-        assertTrue(modelService.vcsService.isValid())
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        vcsService.vcsManager = gitService.getInstance()
+        File exchange=new File("target/vcs/exchange")
+        exchange.mkdirs()
+        assertTrue(vcsService.isValid())
     }
 
     @After
     void tearDown() {
-        /*FileUtils.deleteDirectory(new File("target/vcs/git"))
+        FileUtils.deleteDirectory(new File("target/vcs/git"))
         FileUtils.deleteDirectory(new File("target/vcs/resource"))
         FileUtils.deleteDirectory(new File("target/vcs/repository"))
         FileUtils.deleteDirectory(new File("target/vcs/exchange"))
         vcsService.vcsManager = null
-        appCtx.getBean("gitManagerFactory").git = null*/
     }
 
     @Test
@@ -56,8 +62,15 @@ class ConcurrencyTests extends JummpIntegrationTest {
         TestFramework.runOnce(new DontBlockWhenYouDontNeedTo())
     }
     
-     private File smallModel() {
+    private File smallModel(String name, String text) {
 
+        File nonModel=new File("target/vcs/exchange/"+name)
+        nonModel.setText(text)
+        return nonModel
+    }
+    
+    private File sbmlModel()
+    {
         File sbmlModel=File.createTempFile("model", ".xml")
         sbmlModel.setText('''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
@@ -76,12 +89,30 @@ class ConcurrencyTests extends JummpIntegrationTest {
         <listOfProducts>
           <specieReference specie="y"/>
         </listOfProducts>
+Add a comment to this line
       </reaction>
     </listOfReactions>
   </model>
 </sbml>''')
         return sbmlModel
     }
+
+    private void testRepositoryCommit(Repository repository, String rev)
+    {
+        ObjectId commit = repository.resolve(Constants.HEAD)
+        RevWalk revWalk = new RevWalk(repository)
+        RevCommit revCommit = revWalk.parseCommit(commit)
+        assertEquals(commit.getName(), rev)
+    }
+        
+    private void testFileCorrectness(String modelDirectory, String filename, String filetext)
+    {
+        File testFile=new File(modelDirectory + "/" + filename);
+        List<String> lines = testFile.readLines()
+        assertEquals(1, lines.size())
+        assertEquals(filetext, lines[0])
+    }
+    
     
     
     class DontBlockWhenYouDontNeedTo extends MultithreadedTestCase
@@ -93,16 +124,32 @@ class ConcurrencyTests extends JummpIntegrationTest {
         
         long timeWriteFinished=0;
         long timeReadFinished=1;
+        long timeSecondWrite=1;
         long base;
         
         public void initialize() {
             grailsApplication.config.jummp.plugins.sbml.validation=false
             base=System.currentTimeMillis()
         }
-    
+        
+        private Repository getModelRepository(String vcsId)
+        {
+            File directory=new File(vcsId)
+            directory.mkdirs()
+            FileRepositoryBuilder builder = new FileRepositoryBuilder()
+            Repository repository = builder.setWorkTree(directory)
+            .readEnvironment() // scan environment GIT_* variables
+            .findGitDir(directory) // scan up the file system tree
+            .build()
+            return repository
+        }
+        
         public void thread1() {
-            ModelTransportCommand meta = new ModelTransportCommand(comment:
-                "model import test", name: "mybigfile", format: new ModelFormatTransportCommand(identifier: "SBML"))
+            String modelIdentifier="target/vcs/git/bigmodel"
+            Model model = new Model(name: "bigmodel", vcsIdentifier: modelIdentifier)
+            Repository repository=getModelRepository(modelIdentifier)
+            String testName="big_file_test"
+            String testText="myTextIsNotSoBig"
             File bigFile=File.createTempFile("bigfil", ".txt")
             RandomAccessFile f = new RandomAccessFile(bigFile, "rw")
             f.setLength(100 * 1024 * 1024);
@@ -110,30 +157,59 @@ class ConcurrencyTests extends JummpIntegrationTest {
             authenticateAsAdmin()
             System.out.println("Thread 1 stopping at"+System.currentTimeMillis())
             waitForTick(1)
-            System.out.println("Thread 1 starting at"+System.currentTimeMillis())
-            modelService.uploadModelAsList([smallModel(), bigFile], meta)
-            timeWriteFinished=System.currentTimeMillis()
+            long base=System.currentTimeMillis();
+            System.out.println("Thread 1 starting at"+base)
+            String rev=vcsService.importModel(model, [smallModel(testName, testText), bigFile])
+            timeWriteFinished=System.currentTimeMillis() - base
+            testRepositoryCommit(repository, rev)
+            testFileCorrectness(modelIdentifier, testName, testText)
         }
 
         public void thread2() {       
-            ModelTransportCommand meta = new ModelTransportCommand(comment:
-                "model import test", name: "mysmallfile", format: new ModelFormatTransportCommand(identifier: "SBML"))
-            File smallFile = File.createTempFile("smallfile",".txt")
-            smallFile.setText("ThisIsIt")
+            String modelIdentifier="target/vcs/git/smallmodel"
+            Model model = new Model(name: "smallmodel", vcsIdentifier: modelIdentifier)
+            Repository rep=getModelRepository(modelIdentifier)
+            String testName="small_file_test"
+            String testText="myTextIsEquallySmall"
             authenticateAsAdmin()
-            Model model= modelService.uploadModelAsList([smallModel(), smallFile], meta)
+            String rev=vcsService.importModel(model, [smallModel(testName, testText), sbmlModel()])
             System.out.println("Thread 2 stopping at"+System.currentTimeMillis())
             waitForTick(1);
-            System.out.println("Thread 2 starting at"+System.currentTimeMillis())
-            modelService.retrieveModelFiles(model);
-            timeReadFinished=System.currentTimeMillis()
+            Thread.sleep(200)
+            long base=System.currentTimeMillis();
+            System.out.println("Thread 2 starting at"+base)
+            List<File> files=vcsService.vcsManager.retrieveModel(new File(modelIdentifier));
+            timeReadFinished=System.currentTimeMillis() - base;
+            assertEquals(2,files.size())
+            testFileCorrectness(modelIdentifier,testName,testText)
        }
+       
+        public void thread3() {
+            String modelIdentifier="target/vcs/git/mediummodel"
+            Model model = new Model(name: "mediummodel", vcsIdentifier: modelIdentifier)
+            Repository repository=getModelRepository(modelIdentifier)
+            String testName="medium_file_test"
+            String testText="myTextIsNotMedium"
+            File bigFile=File.createTempFile("medfil", ".txt")
+            RandomAccessFile f = new RandomAccessFile(bigFile, "rw")
+            f.setLength(20 * 1024 * 1024);
+            f.close()
+            authenticateAsAdmin()
+            System.out.println("Thread 3 stopping at"+System.currentTimeMillis())
+            waitForTick(1)
+            long base=System.currentTimeMillis();
+            System.out.println("Thread 3 starting at"+base)
+            String rev=vcsService.importModel(model, [smallModel(testName, testText), bigFile])
+            timeSecondWrite=System.currentTimeMillis() - base
+            testRepositoryCommit(repository, rev)
+            testFileCorrectness(modelIdentifier, testName, testText)
+        }
+
+        
        
         public void finish() {
             assertTrue(timeReadFinished < timeWriteFinished);
-            timeReadFinished-=base;
-            timeWriteFinished-=base;
-            System.out.println("${timeReadFinished}\t${timeWriteFinished}")
+            System.out.println("${timeReadFinished}\t${timeWriteFinished}\t${timeSecondWrite}")
         }
     
     }
