@@ -22,6 +22,14 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.lib.Constants
 import net.biomodels.jummp.model.ModelFormat
 
+/*These tests are written to test the concurrent use of VcsManager.
+They do not aim to test other concurrency aspects of Jummp, although
+they may be extended to do so. The tests are based on the 
+MultithreadedTestCase framework, and seek to test behaviour of the GitManager
+when threads are accessing different models (which should occur concurrently)
+and when threads are accessing the same model (which should result in sequential access)
+*/
+
 
 class ConcurrencyTests extends JummpIntegrationTest {
 
@@ -56,12 +64,20 @@ class ConcurrencyTests extends JummpIntegrationTest {
         vcsService.vcsManager = null
     }
 
+   /*Tests that multiple threads can access different models concurrently*/
     @Test
     void testConcurrentAccess() {
         TestFramework.setGlobalRunLimit(120)
         TestFramework.runOnce(new DontBlockWhenYouDontNeedTo())
     }
     
+   /*Tests that multiple threads cant access the same model concurrently*/
+    @Test
+    void testConcurrentModelAccess() {
+        TestFramework.setGlobalRunLimit(120)
+        TestFramework.runOnce(new BlockWhenYouShould())
+    }
+
     private File smallModel(String name, String text) {
 
         File nonModel=new File("target/vcs/exchange/"+name)
@@ -113,6 +129,115 @@ Add a comment to this line
         assertEquals(filetext, lines[0])
     }
     
+    private void testFileCorrectness(List<File> files, String filename, String filetext)
+    {
+        int fileIndex=-1
+        files.eachWithIndex { file, i -> 
+            if (file.name == filename) fileIndex=i
+        };
+        assertTrue(fileIndex>-1)
+        List<String> lines = files.get(fileIndex).readLines()
+        assertEquals(1, lines.size())
+        assertEquals(filetext, lines[0])
+    }
+    
+    
+    class BlockWhenYouShould extends MultithreadedTestCase
+    {
+        /*This test compares the time taken to retrieve a 
+	previous revision in two conditions: a reference
+	case where there is no blocking, and the case where
+	the thread should be blocked. Additionally, blocking
+	is checked by verifying that the time taken to retrieve
+	a small model is larger than the time taken to write a 
+	large model, if the latter thread has acquired the
+	thread first*/
+        
+        long timeWriteFinished=0;
+        long timeReadFinished=1;
+	long referenceReadTime=0;
+        String modelIdentifier="target/vcs/git/blockmodel"
+        String testName="small_file_test"
+        String finalText="myTextIsNotSoBig"
+        final String commitMsg="I should write and block reads"
+        final Model model;
+        Repository repository;
+    
+        public BlockWhenYouShould()
+        {
+            model = new Model(name: "bigmodel", vcsIdentifier: modelIdentifier)
+        }
+    
+        public void initialize() {
+            grailsApplication.config.jummp.plugins.sbml.validation=false
+            repository=getModelRepository(modelIdentifier)
+            
+        }
+        
+        private Repository getModelRepository(String vcsId)
+        {
+            File directory=new File(vcsId)
+            directory.mkdirs()
+            FileRepositoryBuilder builder = new FileRepositoryBuilder()
+            Repository repository = builder.setWorkTree(directory)
+            .readEnvironment() // scan environment GIT_* variables
+            .findGitDir(directory) // scan up the file system tree
+            .build()
+            return repository
+        }
+
+        public void thread1() {       
+            String testText="myTextIsEquallySmall"
+            authenticateAsAdmin()
+	    // Write a small text file
+            String rev=vcsService.importModel(model, [smallModel(testName, testText), sbmlModel()])
+	    // update it
+	    vcsService.vcsManager.updateModel(new File(model.vcsIdentifier),[smallModel(testName,"some other text")])
+	    // retrieve the previous revision to establish baseline
+	    long base=System.currentTimeMillis();
+	    vcsService.vcsManager.retrieveModel(new File(modelIdentifier), rev);
+	    referenceReadTime=System.currentTimeMillis() - base;
+	    // block, and begin after 50 ms to ensure you make your read request after thread2's write request
+            waitForTick(1);
+            Thread.sleep(50)
+            base=System.currentTimeMillis();
+            List<File> files=vcsService.vcsManager.retrieveModel(new File(modelIdentifier), rev);
+            timeReadFinished=System.currentTimeMillis() - base;
+            // verify that you got the same two files you wrote in that revision
+	    assertEquals(2,files.size())
+	    testFileCorrectness(files,testName,testText)
+       }
+
+        public void thread2() {
+	    // create a large file
+            File bigFile=File.createTempFile("bigfil", ".txt")
+            RandomAccessFile f = new RandomAccessFile(bigFile, "rw")
+            f.setLength(150 * 1024 * 1024);
+            f.close()
+            authenticateAsAdmin()
+	    // block, and begin immediately, updating the model with a large file
+            waitForTick(1)
+            long base=System.currentTimeMillis();
+            String rev=vcsService.vcsManager.updateModel(new File(model.vcsIdentifier), [smallModel(testName, finalText), bigFile])
+            timeWriteFinished=System.currentTimeMillis() - base
+	    // test repository integrity
+            testRepositoryCommit(repository, rev)
+        }
+       
+        public void finish() {
+	    // test that read time is greater than write time, because reader was blocked by writer
+            assertTrue(timeReadFinished > timeWriteFinished)
+	    // test that read time when blocked is greater than read time when not blocked
+ 	    assertTrue(timeReadFinished > referenceReadTime)
+	    // test that you have three files in the repository at the end
+            List<File> files=vcsService.vcsManager.retrieveModel(new File(modelIdentifier));
+            assertEquals(3, files.size())
+            testFileCorrectness(files, testName, finalText)
+        }
+    
+    }
+    
+    
     
     
     class DontBlockWhenYouDontNeedTo extends MultithreadedTestCase
@@ -120,7 +245,9 @@ Add a comment to this line
         /*This test is based around the idea that it should take
         less time to read a small file in one thread than it takes
         to write a huge file in another, assuming both start together
-         and they have concurrent access to VcsManager*/
+         and they have concurrent access to VcsManager. To make things
+	even more interesting there is a third thread concurrently
+	writing a smaller file to another model.*/
         
         long timeWriteFinished=0;
         long timeReadFinished=1;
@@ -145,6 +272,7 @@ Add a comment to this line
         }
         
         public void thread1() {
+	    //Create the big model data structure and file
             String modelIdentifier="target/vcs/git/bigmodel"
             Model model = new Model(name: "bigmodel", vcsIdentifier: modelIdentifier)
             Repository repository=getModelRepository(modelIdentifier)
@@ -152,13 +280,12 @@ Add a comment to this line
             String testText="myTextIsNotSoBig"
             File bigFile=File.createTempFile("bigfil", ".txt")
             RandomAccessFile f = new RandomAccessFile(bigFile, "rw")
-            f.setLength(100 * 1024 * 1024);
+            f.setLength(150 * 1024 * 1024);
             f.close()
             authenticateAsAdmin()
-            System.out.println("Thread 1 stopping at"+System.currentTimeMillis())
+	    // Block, and start writing immediately
             waitForTick(1)
             long base=System.currentTimeMillis();
-            System.out.println("Thread 1 starting at"+base)
             String rev=vcsService.importModel(model, [smallModel(testName, testText), bigFile])
             timeWriteFinished=System.currentTimeMillis() - base
             testRepositoryCommit(repository, rev)
@@ -166,18 +293,20 @@ Add a comment to this line
         }
 
         public void thread2() {       
+	    //Create the small model data structure and file
             String modelIdentifier="target/vcs/git/smallmodel"
             Model model = new Model(name: "smallmodel", vcsIdentifier: modelIdentifier)
             Repository rep=getModelRepository(modelIdentifier)
             String testName="small_file_test"
             String testText="myTextIsEquallySmall"
             authenticateAsAdmin()
+	    //Save small model to the repository
             String rev=vcsService.importModel(model, [smallModel(testName, testText), sbmlModel()])
-            System.out.println("Thread 2 stopping at"+System.currentTimeMillis())
+	    //Block, wait 200ms, then read the model. Your read time should be smaller than the write time
+	    //of thread1 indicating concurrent use of the VcsManager.
             waitForTick(1);
             Thread.sleep(200)
             long base=System.currentTimeMillis();
-            System.out.println("Thread 2 starting at"+base)
             List<File> files=vcsService.vcsManager.retrieveModel(new File(modelIdentifier));
             timeReadFinished=System.currentTimeMillis() - base;
             assertEquals(2,files.size())
@@ -185,6 +314,7 @@ Add a comment to this line
        }
        
         public void thread3() {
+	    //Create the medium model data structure and file
             String modelIdentifier="target/vcs/git/mediummodel"
             Model model = new Model(name: "mediummodel", vcsIdentifier: modelIdentifier)
             Repository repository=getModelRepository(modelIdentifier)
@@ -192,13 +322,14 @@ Add a comment to this line
             String testText="myTextIsNotMedium"
             File bigFile=File.createTempFile("medfil", ".txt")
             RandomAccessFile f = new RandomAccessFile(bigFile, "rw")
-            f.setLength(20 * 1024 * 1024);
+            f.setLength(10 * 1024 * 1024);
             f.close()
             authenticateAsAdmin()
-            System.out.println("Thread 3 stopping at"+System.currentTimeMillis())
+	    //block, and write the medium sized file after a very small delay.
+	    //Your time should be smaller than the large file writing thread
             waitForTick(1)
+	    Thread.sleep(50)
             long base=System.currentTimeMillis();
-            System.out.println("Thread 3 starting at"+base)
             String rev=vcsService.importModel(model, [smallModel(testName, testText), bigFile])
             timeSecondWrite=System.currentTimeMillis() - base
             testRepositoryCommit(repository, rev)
@@ -208,9 +339,11 @@ Add a comment to this line
         
        
         public void finish() {
+	    //It should take longer to write a big file than it does to read a small one, even if read started slightly later
             assertTrue(timeReadFinished < timeWriteFinished);
-            System.out.println("${timeReadFinished}\t${timeWriteFinished}\t${timeSecondWrite}")
-        }
+	    //It should take longer to write a big file than it does to write a medium one, even if the latter started later
+	    assertTrue(timeSecondWrite < timeWriteFinished);
+	}
     
     }
     

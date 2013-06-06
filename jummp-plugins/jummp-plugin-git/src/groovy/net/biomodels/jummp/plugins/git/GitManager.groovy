@@ -172,7 +172,7 @@ class GitManager implements VcsManager {
     }
 
     public String updateModel(File modelDirectory, List<File> files) {
-        return updateFile(modelDirectory, files, "Update of ${name}")
+        return updateModel(modelDirectory, files, "Update of ${modelDirectory.name}")
     }
     
     
@@ -190,7 +190,6 @@ class GitManager implements VcsManager {
                 addHere.add(destinationFile)
             }
         }
-        System.out.println("Copied to "+tempDir.name);
         if (addHere.isEmpty()) throw new VcsException("Model directory is empty!");
 
     }
