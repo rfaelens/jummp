@@ -1,6 +1,8 @@
 import static org.junit.Assert.*
 
 import grails.converters.*
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.plugins.security.UserRole
@@ -14,7 +16,6 @@ import org.springframework.security.core.authority.GrantedAuthorityImpl
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.support.TransactionSynchronizationManager
 
-includeTargets << grailsScript("_GrailsInit")
 includeTargets << grailsScript("_GrailsArgParsing")
 includeTargets << grailsScript("_GrailsBootstrap")
 
@@ -55,12 +56,12 @@ String workingDirectory
  */
 String exchangeDirectory
 /**
- * The configuration settings provided by the user via the .jummp.properties file
+ * The authentication details of the user that is logged in.
  */
-ConfigObject jummpConfig
+def userAuthenticationDetails
 
 target(main: "Puts everything together to import models from a given folder") {
-    depends(checkVersion, packageApp,configureProxy, bootstrap)
+    bootstrap()
     int inputIssues = sanitiseInput()
     if (inputIssues) {
         println "\tERROR There was a problem parsing the input parameters so I'm giving up. Sorry about that."
@@ -85,6 +86,28 @@ target(main: "Puts everything together to import models from a given folder") {
         println "\tERROR Why don't you try again?"
         return authIssues
     }
+
+    ModelTransportCommand meta
+     def sbml = Class.forName("net.biomodels.jummp.core.model.ModelFormatTransportCommand", true,
+            Thread.currentThread().getContextClassLoader()).newInstance(identifier:"SBML")
+    modelFolder.eachFileRecurse {
+        if (it.isFile()) {
+            final String MODEL_NAME = it.name - ".xml"
+            meta = Class.forName("net.biomodels.jummp.core.model.ModelTransportCommand", true,
+                    Thread.currentThread().getContextClassLoader()).newInstance(name: MODEL_NAME,
+                    submitter: userAuthenticationDetails.principal, submissionDate: new Date(), format: sbml)
+            File temp = File.createTempFile("metadata", ".xml")
+            def writer = new java.io.FileWriter(temp)
+            def xmlWriter = new groovy.xml.MarkupBuilder(writer)
+            xmlWriter.model {
+                name(MODEL_NAME)
+                date(new Date().format("DD-MM-yyyy'T'HH-mm-ss"))
+            }
+           appCtx.getBean("modelService").uploadModelAsList([it, temp], meta)
+           FileUtils.deleteQuietly(temp)
+        }
+    }
+
     return 0
 }
 
@@ -133,7 +156,7 @@ def parseJummpConfig = {
 }
 
 target(resetConfiguration: "Resets the key properties to the user-supplied defaults") {
-    jummpConfig = parseJummpConfig()
+    def jummpConfig = parseJummpConfig()
     workingDirectory = jummpConfig.jummp.vcs.workingDirectory
     def wd = new File(workingDirectory)
     if (!wd.exists() || !wd.isDirectory()) {
@@ -166,6 +189,7 @@ target(authenticate: "Attempts to authenticate the user or fails badly") {
         return 16
     }
     SecurityContextHolder.getContext().setAuthentication(auth)
+    userAuthenticationDetails = auth
     return 0
 }
 
