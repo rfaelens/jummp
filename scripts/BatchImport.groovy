@@ -87,23 +87,23 @@ target(main: "Puts everything together to import models from a given folder") {
         return authIssues
     }
 
-    ModelTransportCommand meta
-     def sbml = Class.forName("net.biomodels.jummp.core.model.ModelFormatTransportCommand", true,
-            Thread.currentThread().getContextClassLoader()).newInstance(identifier:"SBML")
+    def mtc = grailsApp.classLoader.loadClass("net.biomodels.jummp.core.model.ModelTransportCommand")
+    def model
+    def mftc = grailsApp.classLoader.loadClass("net.biomodels.jummp.core.model.ModelFormatTransportCommand")
+    def sbml = mftc.newInstance(identifier:"SBML")
     modelFolder.eachFileRecurse {
         if (it.isFile()) {
             final String MODEL_NAME = it.name - ".xml"
-            meta = Class.forName("net.biomodels.jummp.core.model.ModelTransportCommand", true,
-                    Thread.currentThread().getContextClassLoader()).newInstance(name: MODEL_NAME,
-                    submitter: userAuthenticationDetails.principal, submissionDate: new Date(), format: sbml)
+            model = mtc.newInstance(name: MODEL_NAME, submitter: userAuthenticationDetails.principal,
+                    submissionDate: new Date(), format: sbml)
             File temp = File.createTempFile("metadata", ".xml")
             def writer = new java.io.FileWriter(temp)
             def xmlWriter = new groovy.xml.MarkupBuilder(writer)
             xmlWriter.model {
                 name(MODEL_NAME)
-                date(new Date().format("DD-MM-yyyy'T'HH-mm-ss"))
+                date(new Date().format("dd-MM-yyyy'T'HH-mm-ss"))
             }
-           appCtx.getBean("modelService").uploadModelAsList([it, temp], meta)
+           appCtx.getBean("modelService").uploadModelAsList([it, temp], model)
            FileUtils.deleteQuietly(temp)
         }
     }
