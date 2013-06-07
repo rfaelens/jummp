@@ -89,7 +89,7 @@ target(main: "Puts everything together to import models from a given folder") {
         if (it.isFile()) {
             final String MODEL_NAME = it.name - ".xml"
             model = mtc.newInstance(name: MODEL_NAME, submitter: userAuthenticationDetails.principal,
-                    submissionDate: new Date(), format: sbml)
+                    submissionDate: new Date(), format: sbml, comment: "Import of $MODEL_NAME")
             File temp = File.createTempFile("metadata", ".xml")
             def writer = new java.io.FileWriter(temp)
             def xmlWriter = new groovy.xml.MarkupBuilder(writer)
