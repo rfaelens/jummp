@@ -6,6 +6,10 @@
  * This script makes it possible to test other components connected through JMS.
  * But the testing semantics changes by using this approach. An executed test does
  * not reset the database, test start to depend on each other.
+ *
+ * Note: This script is no longer useful due to the the fact that we create a dedicated
+ * folder, which is managed by a version control system, for each model. 
+ *
  * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 import org.springframework.orm.hibernate3.SessionFactoryUtils
