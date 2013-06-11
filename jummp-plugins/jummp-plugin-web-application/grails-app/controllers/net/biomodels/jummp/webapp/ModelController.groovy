@@ -18,6 +18,60 @@ class ModelController {
     def show = {
         [id: params.id]
     }
+    
+    def uploadFlow = {
+        displayDisclaimer {
+            on("Continue").to "uploadFiles"
+            on("Cancel").to "abort"
+        }
+        uploadFiles {
+            on("Upload").to "performValidation"
+            on("ProceedWithoutValidation").to "inferModelInfo"
+            on("Cancel").to "abort"
+        }
+        performValidation {
+            action {
+                boolean validationResult=true;
+                if (validationResult) Validated()
+                else NotValidated()
+            }
+            on("Validated"){
+                // set validated parameter in revision to true
+            }.to "inferModelInfo"
+            on("NotValidated") {
+                flow.showProceedWithoutValidationDialog=true
+            }.to "uploadFiles"
+        }
+        inferModelInfo {
+            action {
+                //do something useful here
+            }
+            on("success").to "displayModelInfo"
+        }
+        displayModelInfo {
+            on("Continue") {
+                // update model data here if necessary
+            }.to "displaySummaryOfChanges"
+            on("Cancel").to "abort"
+        }
+        displaySummaryOfChanges {
+            on("Continue")
+            {
+                //update revision comments
+            }.to "saveModel"
+            on("Cancel").to "abort"
+        }
+        saveModel {
+            action {
+                //create domain objects and repository etc
+            }
+            on("success").to "displayConfirmationPage"
+            on("error").to "displayErrorPage"
+        }
+        displayConfirmationPage()
+        displayErrorPage()
+        abort()
+    }
 
     
     /**
