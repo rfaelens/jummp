@@ -25,8 +25,12 @@ class ModelController {
             on("Cancel").to "abort"
         }
         uploadFiles {
-            on("Upload").to "performValidation"
-            on("ProceedWithoutValidation").to "inferModelInfo"
+            on("Upload") {
+                // Upload files here
+            }.to "performValidation"
+            on("ProceedWithoutValidation"){
+                // Upload files here
+            }.to "inferModelInfo"
             on("Cancel").to "abort"
         }
         performValidation {
@@ -39,7 +43,9 @@ class ModelController {
                 // set validated parameter in revision to true
             }.to "inferModelInfo"
             on("NotValidated") {
-                flow.showProceedWithoutValidationDialog=true
+                // read this parameter to display option to upload without 
+                // validation in upload files view
+                flow.showProceedWithoutValidationDialog=true 
             }.to "uploadFiles"
         }
         inferModelInfo {
