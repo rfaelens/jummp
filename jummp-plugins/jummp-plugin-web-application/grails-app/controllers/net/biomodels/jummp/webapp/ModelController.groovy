@@ -52,6 +52,7 @@ class ModelController {
                         submissionService.inferModelFormatType(flow.workingMemory)
                     }
                     submissionService.performValidation(flow.workingMemory)
+                    Valid()
                 }
                 catch(ModelException giveOption) {
                     ModelNotValid()
@@ -59,7 +60,6 @@ class ModelController {
                 catch(Exception forceCorrection) {
                     FilesNotValid()
                 }
-                Valid()
             }
             on("Valid"){
                 flow.workingMemory.put("Valid", true)
