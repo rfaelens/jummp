@@ -1,6 +1,7 @@
 package net.biomodels.jummp.webapp
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
+import net.biomodels.jummp.core.ModelException
 import java.util.zip.ZipOutputStream  
 import java.util.zip.ZipEntry  
 import java.io.ByteArrayOutputStream
@@ -14,62 +15,91 @@ class ModelController {
      * Dependency injection of sbmlService.
      */
     def sbmlService
+    /* 
+     * Dependency injection of submissionService
+     */
+    def submissionService
 
     def show = {
         [id: params.id]
     }
-    
+    /* The flow maintains the 'params' as flow.workingMemory (just to distinguish
+     * between request.params and our params. Flow scope does require all objects
+     * to be serializable. We need to ensure that our objects fit the bill, else
+     * store in session scope! */
     def uploadFlow = {
         displayDisclaimer {
-            on("Continue").to "uploadFiles"
+            on("Continue") {
+                Map<String, Object> workingMemory=new HashMap<String,Object>();
+                flow.workingMemory=workingMemory
+                }.to "uploadFiles"
             on("Cancel").to "abort"
         }
         uploadFiles {
             on("Upload") {
-                // Upload files here
+                Map<String,Object> inputs = new HashMap<String, Object>()
+                // add files to inputs here as appropriate
+                submissionService.handleFileUpload(flow.workingMemory,inputs)
             }.to "performValidation"
             on("ProceedWithoutValidation"){
-                // Upload files here
             }.to "inferModelInfo"
             on("Cancel").to "abort"
         }
         performValidation {
             action {
-                boolean validationResult=true;
-                if (validationResult) Validated()
-                else NotValidated()
+                try {
+                    if (!flow.workingMemory.containsKey("model_type")) {
+                        submissionService.inferModelFormatType(flow.workingMemory)
+                    }
+                    submissionService.performValidation(flow.workingMemory)
+                }
+                catch(ModelException giveOption) {
+                    ModelNotValid()
+                }
+                catch(Exception forceCorrection) {
+                    FilesNotValid()
+                }
+                Valid()
             }
-            on("Validated"){
-                // set validated parameter in revision to true
+            on("Valid"){
+                flow.workingMemory.put("Valid", true)
             }.to "inferModelInfo"
-            on("NotValidated") {
+            on("ModelNotValid") {
+                flow.workingMemory.put("Valid", false)
                 // read this parameter to display option to upload without 
                 // validation in upload files view
-                flow.showProceedWithoutValidationDialog=true 
+                flash.showProceedWithoutValidationDialog=true 
+            }.to "uploadFiles"
+            on("FilesNotValid") {
+                flash.showFileInvalidError=true;
             }.to "uploadFiles"
         }
         inferModelInfo {
             action {
-                //do something useful here
+                submissionService.inferModelInfo(flow.workingMemory)
             }
             on("success").to "displayModelInfo"
         }
         displayModelInfo {
             on("Continue") {
-                // update model data here if necessary
+                Map<String,Object> modifications=new HashMap<String,Object>()
+                //populate modifications object with form data
+                submissionService.refineModelInfo(flow.workingMemory, modifications)
             }.to "displaySummaryOfChanges"
             on("Cancel").to "abort"
         }
         displaySummaryOfChanges {
             on("Continue")
             {
-                //update revision comments
+                Map<String,String> modifications=new HashMap<String,String>();
+                //populate modifications
+                submissionService.updateRevisionComments(flow.workingMemory, modifications)
             }.to "saveModel"
             on("Cancel").to "abort"
         }
         saveModel {
             action {
-                //create domain objects and repository etc
+                submissionService.handleSubmission(flow.workingMemory)
             }
             on("success").to "displayConfirmationPage"
             on("error").to "displayErrorPage"
