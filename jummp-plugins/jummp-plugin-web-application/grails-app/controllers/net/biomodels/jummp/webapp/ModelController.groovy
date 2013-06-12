@@ -30,8 +30,9 @@ class ModelController {
     def uploadFlow = {
         displayDisclaimer {
             on("Continue") {
-                Map<String, Object> workingMemory=new HashMap<String,Object>();
+                Map<String, Object> workingMemory=new HashMap<String,Object>()
                 flow.workingMemory=workingMemory
+                flow.workingMemory.put("isUpdateOnExistingModel",false) //use subflow for updating models, todo
                 }.to "uploadFiles"
             on("Cancel").to "abort"
         }
