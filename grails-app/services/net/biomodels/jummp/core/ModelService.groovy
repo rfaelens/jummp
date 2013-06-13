@@ -680,14 +680,14 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
 
         /**
     * Adds a new Revision to the model.
-    * The provided @p file will be stored in the VCS as an update to an existing file of the same @p model.
+    * The provided @p modelFiles will be stored in the VCS as an update to the existing files of the same @p model.
     * A new Revision will be created and appended to the list of Revisions of the @p model.
     * @param model The Model the revision should be added
-    * @param file The model file to be stored in the VCS as a new revision
-    * @param format The format of the model file
+    * @param modelFiles The model files to be stored in the VCS as a new revision
+    * @param format The format of the model files
     * @param comment The commit message for the new revision
-    * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
-    * @throws ModelException If either @p model, @p file or @p comment are null or if the file does not exists or is a directory
+    * @return The newly-added Revision. In case an error occurred while accessing the VCS @c null will be returned.
+    * @throws ModelException If either @p model, @p modelFiles or @p comment are null or if the files do not exist or are directories.
     **/
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
@@ -766,38 +766,38 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-     * Retrieves the model file for the @p revision.
-     * @param revision The Model Revision for which the file should be retrieved.
-     * @return Byte Array of the content of the Model file for the revision.
+     * Retrieves the model files for the @p revision.
+     * @param revision The Model Revision for which the files should be retrieved.
+     * @return Byte Array of the content of the Model files for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
     @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.retrieveModelFiles")
     Map<String, byte[]> retrieveModelFiles(final Revision revision) throws ModelException {
-        List<File> files;
+        List<File> files
         try {
             files = vcsService.retrieveFiles(revision)
         } catch (VcsException e) {
             log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.model.name} from VCS failed.")
             throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.")
         }
-        Map<String, byte[]> returnMe=new HashMap<String, byte[]>();
+        def returnMe=new HashMap<String, byte[]>()
         File tempParentDir=null
         files.each
         {
             returnMe.put(it.name, it.getBytes())
-            tempParentDir=it.getParentFile();
+            tempParentDir=it.getParentFile()
             FileUtils.forceDelete(it)
         }
-        if (tempParentDir) tempParentDir.deleteDir();
-        return returnMe;
+        if (tempParentDir) tempParentDir.deleteDir()
+        return returnMe
     }
 
     /**
-     * Retrieves the model file for the latest revision of the @p model
-     * @param model The Model for which the file should be retrieved
-     * @return Byte Array of the content of the Model file.
+     * Retrieves the model files for the latest revision of the @p model
+     * @param model The Model for which the files should be retrieved
+     * @return Byte Array of the content of the Model files.
      * @throws ModelException In case retrieving from VCS fails.
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
