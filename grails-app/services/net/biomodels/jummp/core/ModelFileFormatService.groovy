@@ -78,6 +78,10 @@ class ModelFileFormatService {
         }
         services.put(modelFormat.identifier, service)
     }
+    
+    boolean validate(final List<File> model, String formatId) {
+        return validate(model, ModelFormat.findByIdentifier(formatId))
+    }
 
     /**
      * Validates the Model file in specified @p format.

@@ -19,7 +19,7 @@ class ModelController {
      * Dependency injection of submissionService
      */
     def submissionService
-
+    
     def show = {
         [id: params.id]
     }
@@ -41,6 +41,7 @@ class ModelController {
                 Map<String,Object> inputs = new HashMap<String, Object>()
                 // add files to inputs here as appropriate
                 submissionService.handleFileUpload(flow.workingMemory,inputs)
+                sessionFactory.currentSession.clear()
             }.to "performValidation"
             on("ProceedWithoutValidation"){
             }.to "inferModelInfo"
@@ -50,9 +51,7 @@ class ModelController {
             action {
                 try {
                     if (!flow.workingMemory.containsKey("model_type")) {
-                        //System.out.println("In ModelController Before: "+workingMemory)
                         submissionService.inferModelFormatType(flow.workingMemory)
-                        System.out.println("In ModelController After: "+workingMemory)
                     }
                     submissionService.performValidation(flow.workingMemory)
                     Valid()
