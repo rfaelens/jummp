@@ -539,7 +539,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         Model model = new Model(name: meta.name)
         modelFiles.each {
             if (!it) {
-                def m = model.toCommandObject()
                 final String err = "Please specify a file for ${model.toCommandObject()}"
                 log.error(err)
                 throw new ModelException(meta, err)
@@ -584,10 +583,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             revision.discard()
             model.discard()
             //TODO undo the addition of the files to the VCS.
-            log.error('''Exception occurred during importing a new Model to VCS: ${e.getMessage()}")
-${model.errors.allErrors.each{println it}}
-${revision.errors.allErrors.each{println it}}
-''')
+            def errMsg = new StringBuffer("Exception occurred during importing a new Model to VCS: ${e.getMessage()}") 
+            errMsg.append("${model.errors.inspect()}\n")
+            errMsg.append("${revision.errors.inspect()}\n")
+            log.error(errMsg)
             throw new ModelException(model.toCommandObject(), "Could not store new Model ${model.name} in VCS", e)
         }
 
@@ -599,10 +598,10 @@ ${revision.errors.allErrors.each{println it}}
                 } catch (JummpException e) {
                     revision.discard()
                     model.discard()
-                    log.error('''New Model does not validate:
-${model.errors.allErrors.each{println it}}
-${revision.errors.allErrors.each{println it}}
-''')
+                    def error = new StringBuffer("New Model does not validate:")
+                    error.append("${model.errors.inspect()}\n")
+                    error.append("${revision.errors.inspect()}\n")
+                    log.error(error)
                     throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data", e)
                 }
             } else if (meta.publication &&
@@ -613,10 +612,10 @@ ${revision.errors.allErrors.each{println it}}
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
                 revision.discard()
                 model.discard()
-                log.error('''New Model does not validate:
-${model.errors.allErrors.each{println it}}
-${revision.errors.allErrors.each{println it}}
-''')
+                def msg  = new StringBuffer("New Model does not validate:")
+                msg.append("${model.errors.inspect()}\n")
+                msg.append("${revision.errors.inspect()}\n")
+                log.error(msg)
                 throw new ModelException(model.toCommandObject(), "Model does not validate")
             }
             model.save(flush: true)
@@ -654,7 +653,7 @@ ${revision.errors.allErrors.each{println it}}
             // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
             model.discard()
-            log.error("New Model Revision does not validate:${revision.errors.allErrors.each{println it}}")
+            log.error("New Model Revision does not validate:${revision.errors.inspect()}")
             throw new ModelException(model.toCommandObject(), "New Model Revision does not validate")
         }
         return model
