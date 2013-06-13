@@ -492,13 +492,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         return model.publication
     }
 
-    private List<File> getAsList(File modelFile)
-    {
-        LinkedList<File> list=new LinkedList<File>();
-        list.add(modelFile);
-        return list;
-    }
-
     /**
     * Creates a new Model and stores it in the VCS.
     *
@@ -516,7 +509,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.uploadModelAsFile")
     public Model uploadModelAsFile(final File modelFile, ModelTransportCommand meta) throws ModelException {
         if (modelFile)
-           return uploadModelAsList(getAsList(modelFile), meta);
+           return uploadModelAsList([modelFile], meta);
         throw new ModelException(meta, "Model file cannot be null");
     }
 
@@ -683,7 +676,7 @@ ${revision.errors.allErrors.each{println it}}
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.addRevisionAsFile")
     public Revision addRevisionAsFile(Model model, final File file, final ModelFormat format, final String comment) throws ModelException {
-            return addRevisionAsList(model, getAsList(file), format, comment)
+            return addRevisionAsList(model, [file], format, comment)
     }
 
         /**
