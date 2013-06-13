@@ -33,7 +33,13 @@ class ModelFileFormatService {
 
     
     ModelFormatTransportCommand inferModelFormat(List<File> modelFiles) {
-        return null
+        String match=services.keySet().find {
+            if (it == "UNKNOWN") return false
+            FileFormatService ffs=grailsApplication.mainContext.getBean((String)services.getAt(it))
+            return ffs.areFilesThisFormat(modelFiles)
+        }
+        if (!match) match="UNKNOWN"
+        return ModelFormat.findByIdentifier(match).toCommandObject()
     }
     
     

@@ -121,6 +121,20 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         }
     }
     
+    /*
+     * Checks whether the files passed comprise a model of this format.
+     * Currently implement (very dumbly!) as a check on whether the files
+     * validate or not. Probably could do this much better. 
+     * @param files The files comprising a potential model of this format
+     */
+    public boolean areFilesThisFormat(List<File> files) {
+        boolean temp=grailsApplication.config.jummp.plugins.sbml.validation
+        grailsApplication.config.jummp.plugins.sbml.validation=true
+        boolean retval=validate(files)
+        grailsApplication.config.jummp.plugins.sbml.validation=temp
+        return retval
+    }
+    
 
     @Profiled(tag="SbmlService.validate")
     public boolean validate(final List<File> model) {

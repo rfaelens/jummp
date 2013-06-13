@@ -24,6 +24,7 @@ class SubmissionService {
         abstract void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications);
         MFTC inferModelFormatType(Map<String, Object> workingMemory) {
             List<RFTC> repFiles=getRepFiles(workingMemory)
+            if (!repFiles) repFiles=new LinkedList<RFTC>(); //only for testing, remove and throw exception perhaps!
             repFiles = repFiles.findAll { it.mainFile } //filter out non-main files
             MFTC format=modelFileFormatService.inferModelFormat(getFilesFromRepFiles(repFiles))
             if (format) workingMemory.put("model_type",format.identifier)
@@ -95,7 +96,9 @@ class SubmissionService {
         /* infers the model type, adds it to the workingmemory
          * needs to store the model type as 'model_type' in the
          * working memory */
+        System.out.println("Before:"+workingMemory)
         getStrategyFromContext(workingMemory).inferModelFormatType(workingMemory)
+        System.out.println("After: "+workingMemory)
     }
     
     

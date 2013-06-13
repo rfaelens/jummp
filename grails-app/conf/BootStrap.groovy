@@ -1,4 +1,5 @@
 import net.biomodels.jummp.model.ModelFormat
+import org.codehaus.groovy.grails.commons.ApplicationAttributes
 
 class BootStrap {
     def springSecurityService
@@ -10,7 +11,11 @@ class BootStrap {
             format = new ModelFormat(identifier: "UNKNOWN", name: "Unknown format")
             format.save(flush: true)
         }
-
+        def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT) 
+        def service = ctx.getBean("modelFileFormatService")
+        def modelFormat = service.registerModelFormat("UNKNOWN", "UNKNOWN")
+        service.handleModelFormat(modelFormat, "unknownFormatService")
+        
         // custom mapping for weceem as it fails to work with an LDAPUserDetailsImpl
         wcmSecurityService.securityDelegate = [
             getUserName : { ->

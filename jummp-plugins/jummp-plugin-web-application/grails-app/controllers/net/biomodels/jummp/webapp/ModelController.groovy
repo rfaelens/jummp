@@ -50,7 +50,9 @@ class ModelController {
             action {
                 try {
                     if (!flow.workingMemory.containsKey("model_type")) {
+                        //System.out.println("In ModelController Before: "+workingMemory)
                         submissionService.inferModelFormatType(flow.workingMemory)
+                        System.out.println("In ModelController After: "+workingMemory)
                     }
                     submissionService.performValidation(flow.workingMemory)
                     Valid()

@@ -37,4 +37,9 @@ public interface FileFormatService {
      * @return List of all pubmeds used in the Revision
      */
     public List<String> getPubMedAnnotation(RevisionTransportCommand revision);
+    /*
+     * Checks whether the files passed comprise a model of this format
+     * @param files The files comprising a potential model of this format
+     */
+    public boolean areFilesThisFormat(List<File> files);
 }
