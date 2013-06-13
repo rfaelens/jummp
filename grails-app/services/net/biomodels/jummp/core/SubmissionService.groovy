@@ -1,4 +1,7 @@
 package net.biomodels.jummp.core
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC //rude?
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 /* Service that provides model building functionality to
 a wizard-style model import/update implemented in the web
 app. It is currently kept in core as we may wish to reuse
@@ -13,9 +16,19 @@ class SubmissionService {
     private NewModelStateMachine newmodel=new NewModelStateMachine();
     private NewRevisionStateMachine newrevision=new NewRevisionStateMachine();
     
+    def modelFileFormatService
+    
+    def fileSystemService
+    
     abstract class StateMachineStrategy {
         abstract void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications);
-        abstract void inferModelFormatType(Map<String, Object> workingMemory);
+        MFTC inferModelFormatType(Map<String, Object> workingMemory) {
+            List<RFTC> repFiles=getRepFiles(workingMemory)
+            repFiles = repFiles.findAll { it.mainFile } //filter out non-main files
+            MFTC format=modelFileFormatService.inferModelFormat(getFilesFromRepFiles(repFiles))
+            if (format) workingMemory.put("model_type",format.identifier)
+            else workingMemory.put("model_type", "UNKNOWN")
+        }
         abstract void performValidation(Map<String,Object> workingMemory);
         abstract void inferModelInfo(Map<String,Object> workingMemory);
         abstract void refineModelInfo(Map<String,Object> workingMemory, Map<String,Object> modifications);
@@ -25,7 +38,6 @@ class SubmissionService {
 
     class NewModelStateMachine extends StateMachineStrategy {
         void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {}
-        void inferModelFormatType(Map<String, Object> workingMemory) {}
         void performValidation(Map<String,Object> workingMemory) {}
         void inferModelInfo(Map<String,Object> workingMemory) {}
         void refineModelInfo(Map<String,Object> workingMemory, Map<String,Object> modifications) {}
@@ -34,8 +46,15 @@ class SubmissionService {
     }
     
     class NewRevisionStateMachine extends StateMachineStrategy {
+        /*Include check to remove 'model_type' from memory if main file has been changed*/
         void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {}
-        void inferModelFormatType(Map<String, Object> workingMemory) {}
+        MFTC inferModelFormatType(Map<String, Object> workingMemory) {
+            MFTC format=super.inferModelFormatType(workingMemory)
+            if (workingMemory.containsKey("revisionTC")) {
+                RevisionTransportCommand revision=workingMemory.get("revisionTC") as RevisionTransportCommand
+                revision.format=format
+            }
+        }
         void performValidation(Map<String,Object> workingMemory) {}
         void inferModelInfo(Map<String,Object> workingMemory) {}
         void refineModelInfo(Map<String,Object> workingMemory, Map<String,Object> modifications) {}
@@ -49,6 +68,18 @@ class SubmissionService {
         return newmodel
     }
     
+    private List<File> getFilesFromRepFiles(List<RFTC> repFiles) {
+        //would be nice to do this in a groovier way
+        List<File> list=new LinkedList<File>()
+        repFiles.each {
+            list.add(new File(fileSystemService.root,it.path))
+        }
+        return list
+    }
+    
+    private List<RFTC> getRepFiles(Map<String, Object> workingMemory) {
+        return (List<RFTC>)workingMemory.get("repository_files")
+    }
     
     /* Called by model controller for adding/removing files from the workingmemory */
     void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {

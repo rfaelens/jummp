@@ -31,6 +31,12 @@ class ModelFileFormatService {
      */
     private final Map<String, String> services = new HashMap<String, String>()
 
+    
+    ModelFormatTransportCommand inferModelFormat(List<File> modelFiles) {
+        return null
+    }
+    
+    
     /**
      * Registers a new ModelFormat in the application if it does not yet exist.
      * If the application already knows the ModelFormat identified by @p identifier
