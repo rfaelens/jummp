@@ -10,6 +10,9 @@ Raza Ali - 12/6/13
 */
 class SubmissionService {
 
+    private NewModelStateMachine newmodel=new NewModelStateMachine();
+    private NewRevisionStateMachine newrevision=new NewRevisionStateMachine();
+    
     abstract class StateMachineStrategy {
         abstract void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications);
         abstract void inferModelFormatType(Map<String, Object> workingMemory);
@@ -42,8 +45,8 @@ class SubmissionService {
 
     private StateMachineStrategy getStrategyFromContext(Map<String,Object> workingMemory) {
         Boolean isUpdateOnExistingModel=(Boolean)workingMemory.get("isUpdateOnExistingModel");
-        if (isUpdateOnExistingModel) return new NewRevisionStateMachine()
-        return new NewModelStateMachine()
+        if (isUpdateOnExistingModel) return newrevision
+        return newmodel
     }
     
     
@@ -58,7 +61,9 @@ class SubmissionService {
     }
     
     void inferModelFormatType(Map<String, Object> workingMemory) {
-        /* infers the model type, adds it to the workingmemory */
+        /* infers the model type, adds it to the workingmemory
+         * needs to store the model type as 'model_type' in the
+         * working memory */
         getStrategyFromContext(workingMemory).inferModelFormatType(workingMemory)
     }
     
