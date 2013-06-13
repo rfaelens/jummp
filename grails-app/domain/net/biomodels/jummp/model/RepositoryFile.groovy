@@ -1,5 +1,6 @@
 package net.biomodels.jummp.model
 
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import org.apache.tika.detect.DefaultDetector
 import org.apache.tika.metadata.Metadata
 import org.apache.tika.mime.MediaType
@@ -68,5 +69,16 @@ class RepositoryFile {
             }
             return true
         })
+    }
+
+    RepositoryFileTransportCommand toCommandObject() {
+        return new RepositoryFileTransportCommand( path: path,
+                description: description,
+                hidden: hidden,
+                mainFile: mainFile,
+                userSubmitted: userSubmitted,
+                mimeType: mimeType,
+                revision: revision ? revision.toCommandObject() : null
+        )
     }
 }
