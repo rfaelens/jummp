@@ -13,7 +13,7 @@ import org.springframework.beans.factory.InitializingBean
  * @date 20130521
  */
 class FileSystemService implements IFileSystemService, InitializingBean {
-    static transactional = true
+    static transactional = false
     /*
      * Dependency Injection for Grails Application
      */

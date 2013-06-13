@@ -108,6 +108,8 @@ grails.project.dependency.resolution = {
         // cobertura
         compile "asm:asm:3.1"
         compile "log4j:log4j:1.2.16"
+
+        compile "org.apache.tika:tika-core:1.3"
     }
 
     plugins {

@@ -591,7 +591,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             revision.discard()
             model.discard()
             //TODO undo the addition of the files to the VCS.
-            log.error("Exception occurred during importing a new Model to VCS: ${e.getMessage()}")
+            log.error('''Exception occurred during importing a new Model to VCS: ${e.getMessage()}")
+${model.errors.allErrors.each{println it}}
+${revision.errors.allErrors.each{println it}}
+''')
             throw new ModelException(model.toCommandObject(), "Could not store new Model ${model.name} in VCS", e)
         }
 
@@ -603,6 +606,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 } catch (JummpException e) {
                     revision.discard()
                     model.discard()
+                    log.error('''New Model does not validate:
+${model.errors.allErrors.each{println it}}
+${revision.errors.allErrors.each{println it}}
+''')
                     throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data", e)
                 }
             } else if (meta.publication &&
@@ -613,7 +620,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
                 revision.discard()
                 model.discard()
-                log.error("New Model does not validate")
+                log.error('''New Model does not validate:
+${model.errors.allErrors.each{println it}}
+${revision.errors.allErrors.each{println it}}
+''')
                 throw new ModelException(model.toCommandObject(), "Model does not validate")
             }
             model.save(flush: true)
@@ -651,7 +661,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
             model.discard()
-            log.error("New Model Revision does not validate")
+            log.error("New Model Revision does not validate:${revision.errors.allErrors.each{println it}}")
             throw new ModelException(model.toCommandObject(), "New Model Revision does not validate")
         }
         return model

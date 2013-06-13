@@ -1,9 +1,13 @@
 package net.biomodels.jummp.core
 
+import grails.validation.Validateable
+
 /**
  * Command Object for validating User settings
  * @author Jochen Schramm <j.schramm@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
+@Validateable
 class UserCommand implements Serializable {
     private static final long serialVersionUID = 1L
     String username
