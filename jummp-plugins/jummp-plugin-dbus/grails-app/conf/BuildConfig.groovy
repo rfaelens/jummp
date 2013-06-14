@@ -43,12 +43,12 @@ grails.project.dependency.resolution = {
         test 'hsqldb:hsqldb:1.8.0.10'
     }
     plugins {
-        compile ":spring-security-core:1.2.7.2"
+        compile ":spring-security-core:1.2.7.3"
         compile ":perf4j:0.1.1"
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"
-        compile ":jquery:1.6.1.1"
+        compile ":jquery:1.10.0"
         //compile ":resources:1.0.2"
 
         build ":tomcat:$grailsVersion"
