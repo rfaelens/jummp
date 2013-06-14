@@ -78,7 +78,7 @@ class Revision implements Serializable {
         owner(nullable: false)
         minorRevision(nullable: false)
         uploadDate(nullable: false)
-        description(nullable: false, blank: true, maxSize:1000)
+        description(nullable: false, blank: true)
         comment(nullable: false, blank: true, maxSize: 1000)
         format(nullable: false)
         deleted(nullable: false)

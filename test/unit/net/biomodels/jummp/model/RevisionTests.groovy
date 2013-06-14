@@ -24,6 +24,7 @@ class RevisionTests extends GrailsUnitTestCase {
         assertEquals("nullable", revision.errors["revisionNumber"])
         assertEquals("nullable", revision.errors["minorRevision"])
         assertEquals("nullable", revision.errors["uploadDate"])
+        assertEquals("nullable", revision.errors["description"])
         assertEquals("nullable", revision.errors["comment"])
         assertEquals("nullable", revision.errors["owner"])
         assertEquals("nullable", revision.errors["format"])
@@ -59,8 +60,16 @@ class RevisionTests extends GrailsUnitTestCase {
         assertFalse(revision.validate())
         assertNull(revision.errors["comment"])
 
+        
+        // verify description constraints
+        // a comment may be blank
+        revision = new Revision(description: '')
+        assertFalse(revision.validate())
+        assertNull(revision.errors["description"])
+                
+        
         // verify that a correct Revision is valid
-        revision = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: owner, minorRevision: true, uploadDate: new Date(), comment: '', format: new ModelFormat(identifier: "UNKNOWN", name: "unknown"))
+        revision = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: owner, minorRevision: true, uploadDate: new Date(), description:'', comment: '', format: new ModelFormat(identifier: "UNKNOWN", name: "unknown"))
         assertTrue(revision.validate())
     }
 }

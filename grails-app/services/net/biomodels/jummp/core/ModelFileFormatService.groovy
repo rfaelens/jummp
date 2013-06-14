@@ -117,6 +117,23 @@ class ModelFileFormatService {
             return ""
         }
     }
+    
+    
+    /**
+     * Extracts the description of the Model from the @p model in specified @p format.
+     * @param model The Model file to use as a source
+     * @param format The format of the Model file
+     * @return The description of the Model, if possible, an empty String if not possible
+     */
+    String extractDescription(final List<File> model, final ModelFormat format) {
+        FileFormatService service = serviceForFormat(format)
+        if (service != null) {
+            return service.extractDescription(model)
+        } else {
+            return ""
+        }
+    }
+    
 
     /**
      * Retrieves all annotation URNs through the service responsible for the format used

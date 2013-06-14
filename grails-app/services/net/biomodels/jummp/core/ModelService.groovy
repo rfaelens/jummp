@@ -567,8 +567,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
             modelFiles.add(f)
         }
-
-        if (!modelFileFormatService.validate(modelFiles, ModelFormat.findByIdentifier(meta.format.identifier))) {
+        ModelFormat format=ModelFormat.findByIdentifier(meta.format.identifier)
+        if (!modelFileFormatService.validate(modelFiles, format)) {
             def err = "The files ${modelFiles.properties} do no comprise valid ${meta.format.identifier}"
             log.error(err)
             throw new ModelException(meta, "Invalid ${meta.format.identifier} submission.")
@@ -593,6 +593,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 revisionNumber: 1,
                 owner: User.findByUsername(springSecurityService.authentication.name),
                 minorRevision: false,
+                description: modelFileFormatService.extractDescription(modelFiles, format),
                 comment: meta.comment,
                 uploadDate: new Date(),
                 format: ModelFormat.findByIdentifier(meta.format.identifier))
@@ -796,7 +797,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
 
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
-        Revision revision = new Revision(model: model, comment: comment, uploadDate: new Date(), owner: currentUser,
+        Revision revision = new Revision(model: model, description: modelFileFormatService.extractDescription(modelFiles, format), comment: comment, uploadDate: new Date(), owner: currentUser,
                 minorRevision: false, format: format)
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {

@@ -136,16 +136,17 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     }
     
     private SBMLDocument getDocumentFromFiles(final List<File> model){
+        SBMLDocument retval=null
         model.each {
             try {
                 SBMLDocument doc  = getFileAsValidatedSBMLDocument(it);
                 if (doc) {
-                    return doc
+                    retval=doc
                 }
             } catch(Exception ignore) {
             }
         }
-        return null
+        return retval
     }
 
     @Profiled(tag="SbmlService.validate")
@@ -163,12 +164,20 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     @Profiled(tag="SbmlService.extractName")
     public String extractName(final List<File> model) {
-        return getDocumentFromFiles(model).model.getName()
+        SBMLDocument doc=getDocumentFromFiles(model)
+        if (doc) {
+            doc.model.getName()
+        }
+        return ""
     }
 
     @Profiled(tag="SbmlService.extractDescription")
     public String extractDescription(final List<File> model) {
-        return getDocumentFromFiles(model).model.notesString
+        SBMLDocument doc=getDocumentFromFiles(model)
+        if (doc) {
+            doc.model.notesString
+        }
+        return ""
     }
     
     @Profiled(tag="SbmlService.getMetaId")
