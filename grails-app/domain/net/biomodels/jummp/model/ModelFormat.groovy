@@ -14,7 +14,7 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
  * used in the UIs.
  * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class ModelFormat {
+class ModelFormat implements Serializable {
     /**
      * A machine readable format name, to be used in the application. E.g. SBML
      */

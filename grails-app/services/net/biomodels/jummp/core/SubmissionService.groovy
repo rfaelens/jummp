@@ -14,16 +14,14 @@ plugin.
 Raza Ali - 12/6/13
 */
 class SubmissionService {
-
-    private NewModelStateMachine newmodel=new NewModelStateMachine();
-    private NewRevisionStateMachine newrevision=new NewRevisionStateMachine();
+    // concrete strategies for the submission state machine
+    private final NewModelStateMachine newmodel=new NewModelStateMachine();
+    private final NewRevisionStateMachine newrevision=new NewRevisionStateMachine();
     
     def modelFileFormatService
-    def transient sessionFactory
-
     
-    def fileSystemService
-    
+    /*Abstract state machine strategy, to be extended by the two
+     *concrete strategy implementations */
     abstract class StateMachineStrategy {
         abstract void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications);
         MFTC inferModelFormatType(Map<String, Object> workingMemory) {
@@ -43,9 +41,15 @@ class SubmissionService {
         void performValidation(Map<String,Object> workingMemory) {
             List<File> modelFiles=getFilesFromMemory(workingMemory, false)
             modelFiles.each {
-                if (!it) throw new IOException("Null file passed!")
-                if (!it.exists()) throw new IOException("File does not exist!")
-                if (it.isDirectory()) throw new IOException("Cannot import directory..yet")
+                if (!it) {
+                    throw new IOException("Null file passed!")
+                }
+                if (!it.exists()) {
+                    throw new IOException("File does not exist!")
+                }
+                if (it.isDirectory()) {
+                    throw new IOException("Cannot import directory..yet")
+                }
             }
             if (!modelFileFormatService.validate(getFilesFromMemory(workingMemory, true), workingMemory.get("model_type") as String)) {
                 throw new ModelException("Model files do not validate!")
@@ -61,8 +65,7 @@ class SubmissionService {
         /*Include check to remove 'model_type' from memory if main file has been changed*/
         void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {}
         MFTC inferModelFormatType(Map<String, Object> workingMemory) {
-            if (workingMemory.containsKey("reprocess_files"))
-            {
+            if (workingMemory.containsKey("reprocess_files")) {
                 MFTC format=super.inferModelFormatType(workingMemory)
                 if (workingMemory.containsKey("revisionTC")) {
                     RevisionTransportCommand revision=workingMemory.get("revisionTC") as RevisionTransportCommand
@@ -99,11 +102,10 @@ class SubmissionService {
         try
         {
         getStrategyFromContext(workingMemory).inferModelFormatType(workingMemory)
-        sessionFactory.currentSession.clear() // http://jira.grails.org/browse/GRAILS-3133
-        System.out.println(workingMemory)
         }
-        catch(Exception e)
-        {
+        catch(Exception e) {
+            //The real implementation would throw the exception
+            //This is here until we actually have the files
             e.printStackTrace()
         }
     }
@@ -112,15 +114,12 @@ class SubmissionService {
     void performValidation(Map<String, Object> workingMemory) {
         /* throws an exception if files are not valid, or do not
          * comprise a valid model */
-        try
-        {
-            System.out.println(workingMemory)
+        try {
             getStrategyFromContext(workingMemory).performValidation(workingMemory)
-            sessionFactory.currentSession.clear() // http://jira.grails.org/browse/GRAILS-3133
-            System.out.println(workingMemory)
         }
-        catch(Exception e)
-        {
+        catch(Exception e) {
+            //The real implementation would throw the exception
+            //This is here until we actually have the files
             e.printStackTrace()
         }
     }
@@ -143,22 +142,27 @@ class SubmissionService {
         getStrategyFromContext(workingMemory).updateRevisionComments(workingMemory, modifications)
     }
     
-    void handleSubmission(Map<String,Object> workingMemory)
-    {
+    void handleSubmission(Map<String,Object> workingMemory) {
         /*Create or update DOM objects as necessary*/
         getStrategyFromContext(workingMemory).handleSubmission(workingMemory)
     }
 
-        private StateMachineStrategy getStrategyFromContext(Map<String,Object> workingMemory) {
+    private StateMachineStrategy getStrategyFromContext(Map<String,Object> workingMemory) {
         Boolean isUpdateOnExistingModel=(Boolean)workingMemory.get("isUpdateOnExistingModel");
-        if (isUpdateOnExistingModel) return newrevision
+        if (isUpdateOnExistingModel) {
+            return newrevision
+        }
         return newmodel
     }
     
     private List<File> getFilesFromMemory(Map<String, Object> workingMemory, boolean filterMain) {
         List<RFTC> repFiles=getRepFiles(workingMemory)
-        if (!repFiles) repFiles=new LinkedList<RFTC>(); //only for testing, remove and throw exception perhaps!
-        if (filterMain) repFiles = repFiles.findAll { it.mainFile } //filter out non-main files
+        if (!repFiles) {
+            repFiles=new LinkedList<RFTC>(); //only for testing, remove and throw exception perhaps!
+        }
+        if (filterMain) {
+            repFiles = repFiles.findAll { it.mainFile } //filter out non-main files
+        }
         return getFilesFromRepFiles(repFiles)
     }
     
@@ -166,7 +170,7 @@ class SubmissionService {
         //would be nice to do this in a groovier way
         List<File> list=new LinkedList<File>()
         repFiles.each {
-            list.add(new File(fileSystemService.root,it.path))
+            list.add(new File(it.path))
         }
         return list
     }
