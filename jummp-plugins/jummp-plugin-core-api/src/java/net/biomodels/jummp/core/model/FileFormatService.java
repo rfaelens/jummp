@@ -25,6 +25,15 @@ public interface FileFormatService {
      * @return The name of the Model, if possible, an empty String if not possible
      */
     public String extractName(final List<File> model);
+
+    /**
+     * Extracts the description from the @p model.
+     * @param model File handle containing the Model whose name should be extracted.
+     * @return The description of the Model, if possible, an empty String if not possible
+     */
+    public String extractDescription(final List<File> model);
+
+    
     /**
      * Retrieves all annotation URNs in the model file referenced by @p revision.
      * @param revision The Revision identifying a model file
@@ -41,5 +50,6 @@ public interface FileFormatService {
      * Checks whether the files passed comprise a model of this format
      * @param files The files comprising a potential model of this format
      */
-    public boolean areFilesThisFormat(List<File> files);
+    public boolean areFilesThisFormat(final List<File> files);
+    
 }

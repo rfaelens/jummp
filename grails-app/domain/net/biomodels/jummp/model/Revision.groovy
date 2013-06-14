@@ -42,6 +42,12 @@ class Revision implements Serializable {
      * Whether the revision is a minor change or not.
      */
     Boolean minorRevision
+    
+    /**
+     * The description of the 'model'. Stored in revision as it may change
+     */
+    String description
+    
     /**
      * The "commit message" of this revision.
      */
@@ -72,6 +78,7 @@ class Revision implements Serializable {
         owner(nullable: false)
         minorRevision(nullable: false)
         uploadDate(nullable: false)
+        description(nullable: false, blank: true, maxSize:1000)
         comment(nullable: false, blank: true, maxSize: 1000)
         format(nullable: false)
         deleted(nullable: false)
@@ -87,6 +94,7 @@ class Revision implements Serializable {
                 revisionNumber: revisionNumber,
                 owner: owner.userRealName,
                 minorRevision: minorRevision,
+                description: description,
                 comment: comment,
                 uploadDate: uploadDate,
                 format: format.toCommandObject(),

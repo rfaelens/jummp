@@ -26,6 +26,13 @@ class UnknownFormatService implements FileFormatService {
     public String extractName(final List<File> model) {
         return ""
     }
+    
+    /**
+     * Extracts the descrition from the @p model.
+     */
+    public String extractDescription(final List<File> model) {
+        return ""
+    }
     /**
      * Retrieves all annotation URNs in the model file referenced by @p revision.
      * @param revision The Revision identifying a model file
@@ -46,7 +53,7 @@ class UnknownFormatService implements FileFormatService {
      * Checks whether the files passed comprise a model of this format
      * @param files The files comprising a potential model of this format
      */
-    public boolean areFilesThisFormat(List<File> files) {
+    public boolean areFilesThisFormat(final List<File> files) {
         if (files) {
             return true
         } 

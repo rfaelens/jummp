@@ -127,7 +127,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
      * validate or not. Probably could do this much better. 
      * @param files The files comprising a potential model of this format
      */
-    public boolean areFilesThisFormat(List<File> files) {
+    public boolean areFilesThisFormat(final List<File> files) {
         boolean temp=grailsApplication.config.jummp.plugins.sbml.validation
         grailsApplication.config.jummp.plugins.sbml.validation=true
         boolean retval=validate(files)
@@ -135,6 +135,18 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         return retval
     }
     
+    private SBMLDocument getDocumentFromFiles(final List<File> model){
+        model.each {
+            try {
+                SBMLDocument doc  = getFileAsValidatedSBMLDocument(it);
+                if (doc) {
+                    return doc
+                }
+            } catch(Exception ignore) {
+            }
+        }
+        return null
+    }
 
     @Profiled(tag="SbmlService.validate")
     public boolean validate(final List<File> model) {
@@ -143,22 +155,22 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             println("Validation for ${model.name} skipped due to configuration option")
             return true
         }
-        boolean returnVal=false;
-        model.each {
-            try {
-                SBMLDocument doc  = getFileAsValidatedSBMLDocument(it);
-                if (doc) returnVal |= true
-            } catch(Exception ignore) {
-            }
+        if (getDocumentFromFiles(model)) {
+            return true
         }
-        return returnVal
+        return false
     }
 
     @Profiled(tag="SbmlService.extractName")
     public String extractName(final List<File> model) {
-        return ""
+        return getDocumentFromFiles(model).model.getName()
     }
 
+    @Profiled(tag="SbmlService.extractDescription")
+    public String extractDescription(final List<File> model) {
+        return getDocumentFromFiles(model).model.notesString
+    }
+    
     @Profiled(tag="SbmlService.getMetaId")
     public String getMetaId(RevisionTransportCommand revision) {
         return getFromCache(revision).model.metaId
@@ -465,12 +477,12 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
      * @return The parsed SBMLDocument
      */
     private SBMLDocument getFromCache(RevisionTransportCommand revision) throws XMLStreamException {
-        /*SBMLDocument document = cache.get(revision)
+        SBMLDocument document = cache.get(revision)
         if (document) {
             return document
-        }*/
+        }
+        //SBMLDocument document=null;
         // we do not have a document, so retrieve first the file
-        SBMLDocument document=null;
         Map<String, byte[]> bytes = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFiles(revision)
         for (Map.Entry<String, byte[]> entry : bytes.entrySet()) {
             try {

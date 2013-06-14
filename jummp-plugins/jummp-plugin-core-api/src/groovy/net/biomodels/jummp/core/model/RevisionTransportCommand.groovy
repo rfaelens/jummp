@@ -27,6 +27,10 @@ class RevisionTransportCommand implements Serializable {
      */
     Boolean minorRevision
     /**
+     * The description of this revision.
+     */
+    String description
+    /**
      * The "commit message" of this revision.
      */
     String comment
