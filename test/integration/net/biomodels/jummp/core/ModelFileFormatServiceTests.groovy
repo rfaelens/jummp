@@ -5,7 +5,9 @@ import org.junit.*
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.plugins.sbml.SbmlService
 import net.biomodels.jummp.core.model.FileFormatService
+import net.biomodels.jummp.core.model.UnknownFormatService
 import org.apache.commons.io.FileUtils
+
 
 class ModelFileFormatServiceTests {
     def modelFileFormatService
@@ -24,12 +26,14 @@ class ModelFileFormatServiceTests {
     @Test
     void testServiceForFormat() {
         // unknown format should return null
-        assertNull(modelFileFormatService.serviceForFormat(ModelFormat.findByIdentifier("UNKNOWN")))
+        def dontKnowThisFormatService=modelFileFormatService.serviceForFormat(ModelFormat.findByIdentifier("UNKNOWN"))
+        assertNotNull(dontKnowThisFormatService)
         // for sbml it needs to be a SbmlService
         def formatService = modelFileFormatService.serviceForFormat(ModelFormat.findByIdentifier("SBML"))
         assertNotNull(formatService)
         assertTrue(formatService instanceof FileFormatService)
         assertTrue(formatService instanceof SbmlService)
+        assertTrue(dontKnowThisFormatService instanceof UnknownFormatService)
     }
 
     @Test
