@@ -593,6 +593,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 revisionNumber: 1,
                 owner: User.findByUsername(springSecurityService.authentication.name),
                 minorRevision: false,
+                name: modelFileFormatService.extractName(modelFiles, format),
                 description: modelFileFormatService.extractDescription(modelFiles, format),
                 comment: meta.comment,
                 uploadDate: new Date(),
@@ -797,7 +798,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
 
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
-        Revision revision = new Revision(model: model, description: modelFileFormatService.extractDescription(modelFiles, format), comment: comment, uploadDate: new Date(), owner: currentUser,
+        Revision revision = new Revision(model: model, name: modelFileFormatService.extractName(modelFiles, format), description: modelFileFormatService.extractDescription(modelFiles, format), comment: comment, uploadDate: new Date(), owner: currentUser,
                 minorRevision: false, format: format)
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
