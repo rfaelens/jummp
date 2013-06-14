@@ -605,7 +605,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
              * we generate the correct path when the RepositoryFileTransportCommand wrapper is created
              */
             String fileName = rf.path.split(File.separator).last()
-            final def domain = new RepositoryFile(path: fileName, description: rf.description,
+            final def domain = new RepositoryFile(path: rf.path, description: rf.description,
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
                 domain.mainFile = rf.mainFile
@@ -801,7 +801,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
             final String fileName = rf.path.split(File.separator).last()
-            final def domain = new RepositoryFile(path: fileName, description: rf.description, 
+            final def domain = new RepositoryFile(path: rf.path, description: rf.description, 
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
                 domain.mainFile = rf.mainFile

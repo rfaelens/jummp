@@ -19,7 +19,10 @@ class RepositoryFile implements Serializable {
      */
     def fileSystemService
     /**
-     * The path relative to the root folder containing all models
+     * The path to the file associated with this file. Although in the database we
+     * only store the name of the file, we know the unique vcsIdentifier of the 
+     * model folder that contains it. When an instance of this class is wrapped in a 
+     * corresponding command object, we work out the absolute location of the file.
      */
     String path
     /**
@@ -59,6 +62,7 @@ class RepositoryFile implements Serializable {
                 def sherlock = new DefaultDetector()
                 String properType = sherlock.detect(new BufferedInputStream(
                         new FileInputStream(f)), new Metadata()).toString()
+                p = f.name
                 if (!rf.mimeType.equals(properType)) {
                     rf.mimeType = properType
                     return true
