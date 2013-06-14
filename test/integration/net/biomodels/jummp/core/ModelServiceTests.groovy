@@ -1,25 +1,26 @@
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
-import org.junit.*
-import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelState
+import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
+import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
-import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import org.eclipse.jgit.lib.Repository
-import org.apache.commons.io.FileUtils
-import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.plugins.git.GitManagerFactory
+import net.biomodels.jummp.plugins.security.User
+import org.apache.commons.io.FileUtils
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.lib.Constants
+import org.eclipse.jgit.lib.ObjectId
+import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.revwalk.RevWalk
-import org.eclipse.jgit.lib.ObjectId
-import org.eclipse.jgit.lib.Constants
-import net.biomodels.jummp.model.ModelFormat
-import net.biomodels.jummp.core.model.ModelTransportCommand
-import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.junit.*
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.acls.domain.BasePermission
+import static org.junit.Assert.*
 
 class ModelServiceTests extends JummpIntegrationTest {
     def aclUtilService
@@ -516,7 +517,8 @@ class ModelServiceTests extends JummpIntegrationTest {
         shouldFail(AccessDeniedException) {
             File modelFile = new File("${rootPath}/${modelIdentifier}/testMe".toString()).getCanonicalFile()
             FileUtils.touch(modelFile)
-            modelService.addRevisionAsFile(model, modelFile, ModelFormat.findByIdentifier("UNKNOWN"), null)
+            def rf = new RepositoryFileTransportCommand(path: modelFile.absolutePath, description: "")
+            modelService.addRevisionAsFile(model, rf, ModelFormat.findByIdentifier("UNKNOWN"), null)
         }
         // give user the right to write to the model
         authenticateAsAdmin()
@@ -527,44 +529,51 @@ class ModelServiceTests extends JummpIntegrationTest {
 
         File fileForNullModel = new File("${rootPath}/${modelIdentifier}/test_null".toString()).getCanonicalFile()
         FileUtils.touch(fileForNullModel)
+        def rf = new RepositoryFileTransportCommand(path: fileForNullModel.absolutePath, description: "")
         shouldFail(ModelException) {
-            modelService.addRevisionAsList(null, [fileForNullModel], ModelFormat.findByIdentifier("UNKNOWN"), "")
+            modelService.addRevisionAsList(null, [rf], ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
         // vcs is not yet setup, adding a revision should fail
         authenticateAsTestUser()
         // model may not be null - as a user this throws an AccessDeniedException
         shouldFail(AccessDeniedException) {
-            modelService.addRevisionAsFile(null, fileForNullModel, ModelFormat.findByIdentifier("UNKNOWN"), "")
+            modelService.addRevisionAsFile(null, rf, ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
         // file list may not be null
         shouldFail(ModelException) {
             modelService.addRevisionAsList(model, null, ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
-        
+
         // file may not be null
         shouldFail(ModelException) {
             modelService.addRevisionAsFile(model, null, ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
-        
+
         // comment may not be null
         shouldFail(ModelException) {
-            modelService.addRevisionAsFile(model, fileForNullModel, ModelFormat.findByIdentifier("UNKNOWN"), null)
+            modelService.addRevisionAsFile(model, rf, ModelFormat.findByIdentifier("UNKNOWN"), null)
         }
         // file must exist
         shouldFail(ModelException) {
-            modelService.addRevisionAsFile(model, new File("target/test/nonexistent.xml"), ModelFormat.findByIdentifier("UNKNOWN"), "")
+            modelService.addRevisionAsFile(model,
+                    new RepositoryFileTransportCommand(path: "target/test/nonexistent.xml", description: ""),
+                    ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
         // file may not be a directory
         File exchangeDirectory = new File("target/vcs/exchange")
         exchangeDirectory.mkdirs()
         shouldFail(ModelException) {
-            modelService.addRevisionAsFile(model, exchangeDirectory, ModelFormat.findByIdentifier("UNKNOWN"), "")
+            modelService.addRevisionAsFile(model,
+                new RepositoryFileTransportCommand(path: exchangeDirectory.path, description: ""),
+                    ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
         File importFile = new File("target/vcs/exchange/test.xml")
         FileUtils.touch(importFile)
 
         shouldFail(ModelException) {
-            modelService.addRevisionAsFile(model, importFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
+            modelService.addRevisionAsFile(model,
+                new RepositoryFileTransportCommand(path: importFile.path, description: ""),
+                    ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
         // setup VCS
         File clone = new File("${rootPath}/${model.vcsIdentifier}".toString())
@@ -590,7 +599,8 @@ class ModelServiceTests extends JummpIntegrationTest {
         File updateFile = new File("target/vcs/exchange/update.xml")
         updateFile.append("Test\n")
         FileUtils.touch(updateFile)
-        Revision rev = modelService.addRevisionAsFile(model, updateFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
+        rf = new RepositoryFileTransportCommand(updateFile.path, description: "")
+        Revision rev = modelService.addRevisionAsFile(model, rf, ModelFormat.findByIdentifier("UNKNOWN"), "")
         assertEquals(2, rev.revisionNumber)
         assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.ADMINISTRATION))
         assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.READ))
@@ -610,7 +620,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         authenticateAsTestUser()
         updateFile.append("Further Test\n")
 
-        Revision rev2 = modelService.addRevisionAsFile(model, updateFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
+        Revision rev2 = modelService.addRevisionAsFile(model, rf, ModelFormat.findByIdentifier("UNKNOWN"), "")
         assertEquals(3, rev2.revisionNumber)
         assertFalse(rev2.vcsId == rev.vcsId)
         assertTrue(aclUtilService.hasPermission(auth, rev2, BasePermission.ADMINISTRATION))
@@ -624,7 +634,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         // admin should also be able to import updates
         def adminAuth = authenticateAsAdmin()
         updateFile.append("Admin Test\n")
-        Revision rev3 = modelService.addRevisionAsFile(model, updateFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
+        Revision rev3 = modelService.addRevisionAsFile(model, rf, ModelFormat.findByIdentifier("UNKNOWN"), "")
         assertEquals(4, rev3.revisionNumber)
         assertFalse(rev3.vcsId == rev2.vcsId)
         assertTrue(aclUtilService.hasPermission(adminAuth, rev3, BasePermission.ADMINISTRATION))
@@ -641,8 +651,9 @@ class ModelServiceTests extends JummpIntegrationTest {
         File sbmlFile = new File("target/sbml/addRevisionSbmlFile")
         FileUtils.deleteQuietly(sbmlFile)
         FileUtils.touch(sbmlFile)
+        rf = new RepositoryFileTransportCommand(path: sbmlFile.path, description: "")
         shouldFail(ModelException) {
-            modelService.addRevisionAsFile(model, sbmlFile, ModelFormat.findByIdentifier("SBML"), "")
+            modelService.addRevisionAsFile(model, rf, ModelFormat.findByIdentifier("SBML"), "")
         }
         // with a valid sbml file it should be possible
         sbmlFile = new File("target/sbml/addRevisionValidSbmlFile")
@@ -669,13 +680,14 @@ class ModelServiceTests extends JummpIntegrationTest {
     </listOfReactions>
   </model>
 </sbml>''')
-        Revision rev4 = modelService.addRevisionAsFile(model, sbmlFile, ModelFormat.findByIdentifier("SBML"), "")
+        rf = new RepositoryFileTransportCommand(path: sbmlFile.path, description: "")
+        Revision rev4 = modelService.addRevisionAsFile(model, rf, ModelFormat.findByIdentifier("SBML"), "")
         assertEquals(5, rev4.revisionNumber)
         assertEquals("SBML", rev4.format.identifier)
         // delete the Model - any further updates should end in a ModelException
         modelService.deleteModel(model)
         shouldFail(ModelException) {
-            modelService.addRevisionAsFile(model, updateFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
+            modelService.addRevisionAsFile(model, rf, ModelFormat.findByIdentifier("UNKNOWN"), "")
         }
 */
     }
@@ -796,19 +808,21 @@ class ModelServiceTests extends JummpIntegrationTest {
             modelService.uploadModelAsFile(null, meta)
         }
         File importFile = new File("target/vcs/exchange/import.xml")
+        def rf = new RepositoryFileTransportCommand(path: importFile.absolutePath, description: "")
         // file does not yet exists = it should fail
         shouldFail(ModelException) {
-            modelService.uploadModelAsFile(importFile, meta)
+            modelService.uploadModelAsFile(rf, meta)
         }
         FileUtils.touch(importFile)
         importFile.append("Test\n")
         // also for directory it should fail
         shouldFail(ModelException) {
-            modelService.uploadModelAsFile(new File("target/vcs/exchange/"), meta)
+            rf.path = "target/vcs/exchange/"
+            modelService.uploadModelAsFile(rf, meta)
         }
         // VCS system should not be valid - so it should fail
         shouldFail(ModelException) {
-            modelService.uploadModelAsFile(importFile, meta)
+            modelService.uploadModelAsFile(rf, meta)
         }
         // now let's create the VCS
         GitManagerFactory gitService = new GitManagerFactory()
@@ -819,8 +833,9 @@ class ModelServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.plugins.sbml.validation = true
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
+        rf.path = importFile.absolutePath
         // import should work now
-        Model model = modelService.uploadModelAsFile(importFile, meta)
+        Model model = modelService.uploadModelAsFile(rf, meta)
         assertTrue(model.validate())
         assertEquals(ModelFormat.findByIdentifier("UNKNOWN"), model.revisions.toList().first().format)
         // complete name cannot be tested, as it uses a generated date and we do not know the date
@@ -857,7 +872,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertFalse(aclUtilService.hasPermission(auth, revision, BasePermission.WRITE))
         // importing a model with same name should not be possible
         shouldFail(ModelException) {
-            modelService.uploadModelAsFile(importFile, meta)
+            modelService.uploadModelAsFile(rf, meta)
         }
         // importing with invalid model file should not be possible
         meta.name = "test2"
@@ -865,8 +880,9 @@ class ModelServiceTests extends JummpIntegrationTest {
         File sbmlFile = new File("target/sbml/sbmlTestFile")
         FileUtils.deleteQuietly(sbmlFile)
         FileUtils.touch(sbmlFile)
+        rf.path = sbmlFile.absolutePath
         shouldFail(ModelException) {
-            modelService.uploadModelAsFile(sbmlFile, meta)
+            modelService.uploadModelAsFile(rf, meta)
         }
         // importing with valid model file should be possible
         sbmlFile = new File("target/sbml/uploadModelValidSbmlFile")
@@ -893,13 +909,14 @@ class ModelServiceTests extends JummpIntegrationTest {
     </listOfReactions>
   </model>
 </sbml>''')
-        model = modelService.uploadModelAsFile(sbmlFile, meta)
+        rf.path = sbmlFile.absolutePath
+        model = modelService.uploadModelAsFile(rf, meta)
         assertTrue(model.validate())
         assertEquals(ModelFormat.findByIdentifier("SBML"), model.revisions.toList().first().format)
         assertNotNull(model.revisions.toList().first().uploadDate)
         // test strange characters in the name, which should not end in the file name
         meta.name = "test/:/test"
-        model = modelService.uploadModelAsFile(sbmlFile, meta)
+        model = modelService.uploadModelAsFile(rf, meta)
         File gitDirectory = new File(model.vcsIdentifier)
         gitFile = new File(model.vcsIdentifier + System.getProperty("file.separator") + sbmlFile.getName())
         assertTrue(model.validate())
@@ -934,7 +951,8 @@ class ModelServiceTests extends JummpIntegrationTest {
         File importFile = new File("target/vcs/exchange/import.xml")
         FileUtils.touch(importFile)
         importFile.append("Test\n")
-        Model model = modelService.uploadModelAsFile(importFile, meta)
+        def rf = new RepositoryFileTransportCommand(path: importFile.absolutePath, description: "")
+        Model model = modelService.uploadModelAsFile(rf, meta)
         Revision revision = modelService.getLatestRevision(model)
         // Anonymous user should not be allowed to download the revision
         authenticateAnonymous()
@@ -967,7 +985,8 @@ class ModelServiceTests extends JummpIntegrationTest {
         importFile = new File("target/vcs/exchange/import.xml")
         FileUtils.touch(importFile)
         importFile.setText("Test\nline2\n")
-        Revision rev4 = modelService.addRevisionAsFile(model, importFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
+        def repoFile = new RepositoryFileTransportCommand(path: importFile.absolutePath, description: "")
+        Revision rev4 = modelService.addRevisionAsFile(model, repoFile, ModelFormat.findByIdentifier("UNKNOWN"), "")
         // retrieving the random revision should fail
         shouldFail(ModelException) {
             modelService.retrieveModelFiles(rev)
