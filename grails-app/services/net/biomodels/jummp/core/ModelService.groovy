@@ -600,7 +600,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         // keep a list of RFs closeby, as we may need to discard all of them
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
-            final def domain = new RepositoryFile(path: rf.path, description: rf.description,
+            /*
+             * only store the name of the file in the database, as the location can change and
+             * we generate the correct path when the RepositoryFileTransportCommand wrapper is created
+             */
+            String fileName = rf.path.split(File.separator).last()
+            final def domain = new RepositoryFile(path: fileName, description: rf.description,
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
                 domain.mainFile = rf.mainFile
@@ -615,8 +620,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the creation of model ${meta}.")
                 msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
                 log.error(msg)
-                final String culprit = new File(rf.path).name
-                throw new ModelException(meta, "The submission appears to contain invalid file ${culprit}. Please review it and try again.")
+                throw new ModelException(meta, "The submission appears to contain invalid file ${fileName}. Please review it and try again.")
             } else {
                 domainObjects.add(domain)
             }
@@ -796,7 +800,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 minorRevision: false, format: format)
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
-            final def domain = new RepositoryFile(path: rf.path, description: rf.description, 
+            final String fileName = rf.path.split(File.separator).last()
+            final def domain = new RepositoryFile(path: fileName, description: rf.description, 
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
                 domain.mainFile = rf.mainFile
@@ -813,7 +818,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
                 log.error(msg)
                 final String culprit = new File(rf.path).name
-                throw new ModelException(m, "Your submission appears to contain invalid file ${culprit}. Please review it and try again.")
+                throw new ModelException(m, "Your submission appears to contain invalid file ${fileName}. Please review it and try again.")
             } else {
                 domainObjects.add(domain)
             }

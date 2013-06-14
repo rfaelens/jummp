@@ -15,6 +15,10 @@ import org.apache.tika.mime.MediaType
 class RepositoryFile {
     static belongsTo = [revision:Revision]
     /**
+     * Dependency Injection of FileSystemService
+     */
+    def fileSystemService
+    /**
      * The path relative to the root folder containing all models
      */
     String path
@@ -71,8 +75,17 @@ class RepositoryFile {
         })
     }
 
+    /**
+     * Comply with the need to provide the absolute file paths in RepositoryFileTransportCommand objects
+     * while also being flexible about the location of the root folder where all models are stored.
+     */
     RepositoryFileTransportCommand toCommandObject() {
-        return new RepositoryFileTransportCommand( path: path,
+        final String sep = File.separator
+        def realPath = new StringBuffer(fileSystemService.root.absolutePath)
+        realPath.append(sep).append(revision.model.vcsIdentifier).append(sep)
+        realPath.append(path)
+        return new RepositoryFileTransportCommand(
+                path: realPath.toString(),
                 description: description,
                 hidden: hidden,
                 mainFile: mainFile,
