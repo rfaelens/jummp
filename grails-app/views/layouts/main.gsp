@@ -3,15 +3,13 @@
 <head>
     <title><g:layoutTitle default="${g.message(code: 'jummp.main.title') }"/></title>
     <link rel="shortcut icon" href="${g.createLink(uri: '/images/favicon.ico')}"/>
-    <less:stylesheet name="jummp"/>
-    <less:scripts />
-    <r:require module="jquery"/>
-    <r:require module="core"/>
-    <r:layoutResources/>
-    <g:layoutHead/>
     <r:script>
         $.appName = "${grailsApplication.metadata["app.name"]}";
     </r:script>
+    <r:require module="style"/>
+    <r:require module="core"/>
+    <r:layoutResources/>
+    <g:layoutHead/>
 </head>
 <body>
     <div class='modal' id='overlayContainer'><div class="contentWrap"></div></div>

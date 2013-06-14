@@ -108,6 +108,7 @@ grails.project.dependency.resolution = {
         // cobertura
         compile "asm:asm:3.1"
         compile "log4j:log4j:1.2.16"
+        compile "com.thoughtworks.xstream:xstream:1.4.3"
 
         compile "org.apache.tika:tika-core:1.3"
     }
@@ -116,19 +117,19 @@ grails.project.dependency.resolution = {
         compile ":perf4j:0.1.1"
         compile ":jms:1.2"
         compile ":executor:0.3"
-        compile ":mail:1.0"
+        compile ":mail:1.0.1"
         //compile ":quartz:0.4.2"
         compile(":quartz:1.0-RC6") { excludes 'hibernate-core' /* don't need 3.6.10.Final */ }
         // to see the status of quartz jobs
         //compile(":quartz-monitor:0.2") { export = false } //requires quartz plugin version 0.4.2 
 
-        compile ":spring-security-acl:1.1"
+        compile ":spring-security-acl:1.1.1"
         compile ":svn:1.0.2"
-        runtime ":spring-security-core:1.2.7.2"
-        runtime ":spring-security-ldap:1.0.6"
-        compile ":lesscss:1.0.0"
-        test ":code-coverage:1.2.5"
-        test(":codenarc:0.16.1") { transitive = false }
+        runtime ":spring-security-core:1.2.7.3"
+        runtime(":spring-security-ldap:1.0.6"){ export = false }
+        compile ":lesscss-resources:1.3.3"
+        test ":code-coverage:1.2.6"
+        test(":codenarc:0.18.1") { transitive = false }
         test ":gmetrics:0.3.1"
         compile(":weceem:1.1.2") { 
             excludes 'xstream', 
@@ -140,13 +141,13 @@ grails.project.dependency.resolution = {
         // needed for compatibility with Grails 2.2+
         compile ":searchable:0.6.4"
         compile ":jquery-datatables:1.7.5"
-        compile ":jquery-ui:1.8.15"
+        compile ":jquery-ui:1.8.24"
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"
         compile ":webflow:2.0.8.1"
-        compile ":jquery:1.6.1.1"
-        compile ":resources:1.1.6"
+        compile ":jquery:1.10.0"
+        compile ":resources:1.2.RC2"
 
         build ":tomcat:$grailsVersion"
 

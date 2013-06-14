@@ -1,4 +1,7 @@
 modules = {
+    style {
+        resource url: '/css/jummp.less'
+    }
     core {
         dependsOn 'jquery'
         resource url: '/js/jquery/jquery.i18n.properties-min-1.0.9.js'
