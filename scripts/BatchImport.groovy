@@ -1,6 +1,7 @@
 import grails.converters.*
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.plugins.security.UserRole
 import org.apache.commons.io.FileUtils
 import org.codehaus.groovy.grails.web.json.*
@@ -82,6 +83,7 @@ target(main: "Puts everything together to import models from a given folder") {
     }
 
     def mtc = grailsApp.classLoader.loadClass("net.biomodels.jummp.core.model.ModelTransportCommand")
+    def rftc = grailsApp.classLoader.loadClass("net.biomodels.jummp.core.model.RepositoryFileTransportCommand")
     def model
     def mftc = grailsApp.classLoader.loadClass("net.biomodels.jummp.core.model.ModelFormatTransportCommand")
     def sbml = mftc.newInstance(identifier:"SBML")
@@ -97,8 +99,12 @@ target(main: "Puts everything together to import models from a given folder") {
                 name(MODEL_NAME)
                 date(new Date().format("dd-MM-yyyy'T'HH-mm-ss"))
             }
-           appCtx.getBean("modelService").uploadModelAsList([it, temp], model)
-           FileUtils.deleteQuietly(temp)
+            def modelWrapper = rtfc.newInstance(path: it.absolutePath, description: "$MODEL_NAME", mainFile: true,
+                    userSubmitted: true, hidden: false)
+            def tempWrapper = rtfc.newInstance(path: temp.absolutePath, description "Sample additional file", mainFile: false,
+                    userSubmitted: true, hidden: false)
+            appCtx.getBean("modelService").uploadModelAsList([modelWrapper, tempWrapper], model)
+            FileUtils.deleteQuietly(temp)
         }
     }
 
