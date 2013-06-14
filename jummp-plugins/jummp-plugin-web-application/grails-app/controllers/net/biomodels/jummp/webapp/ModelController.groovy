@@ -2,9 +2,8 @@ package net.biomodels.jummp.webapp
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.ModelException
-import java.util.zip.ZipOutputStream  
-import java.util.zip.ZipEntry  
-import java.io.ByteArrayOutputStream
+import java.util.zip.ZipOutputStream
+import java.util.zip.ZipEntry
 
 class ModelController {
     /**
@@ -19,7 +18,7 @@ class ModelController {
      * Dependency injection of submissionService
      */
     def submissionService
-    
+
     def show = {
         [id: params.id]
     }
@@ -111,22 +110,22 @@ class ModelController {
         abort()
     }
 
-    
+
     /**
      * File download of the model file for a model by id
      */
     def download = {
         Map<String, byte[]> bytes = modelDelegateService.retrieveModelFiles(new RevisionTransportCommand(id: params.id as int))
         ByteArrayOutputStream byteBuffer=new ByteArrayOutputStream()
-        ZipOutputStream zipFile = new ZipOutputStream()  
+        ZipOutputStream zipFile = new ZipOutputStream()
         for (Map.Entry<String, byte[]> entry : bytes.entrySet())
         {
-            zipFile.putNextEntry(new ZipEntry(entry.getKey()))  
+            zipFile.putNextEntry(new ZipEntry(entry.getKey()))
             zipFile.write(entry.getValue(),0,entry.getValue().length)
-            zipFile.closeEntry()  
-        }  
-        zipFile.close()  
-        
+            zipFile.closeEntry()
+        }
+        zipFile.close()
+
         response.setContentType("application/zip")
         // TODO: set a proper name for the model
         response.setHeader("Content-disposition", "attachment;filename=\"model.zip\"")
@@ -158,11 +157,11 @@ class ModelController {
     def overview = {
         RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
         [
-                    reactions: sbmlService.getReactions(rev),
-                    rules: sbmlService.getRules(rev),
-                    parameters: sbmlService.getParameters(rev),
-                    compartments: sbmlService.getCompartments(rev)
-                ]
+            reactions: sbmlService.getReactions(rev),
+            rules: sbmlService.getRules(rev),
+            parameters: sbmlService.getParameters(rev),
+            compartments: sbmlService.getCompartments(rev)
+        ]
     }
 
     /**

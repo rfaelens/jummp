@@ -1,27 +1,31 @@
 package net.biomodels.jummp.core
-import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
-import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC //rude?
-import net.biomodels.jummp.core.model.RevisionTransportCommand
+
 import net.biomodels.jummp.core.ModelException
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC //rude?
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 
-/* Service that provides model building functionality to
-a wizard-style model import/update implemented in the web
-app. It is currently kept in core as we may wish to reuse
-some of it when we build the curation pipeline. If it is
-found to be unsuitable for reuse, please move to the web-app
-plugin. 
-
-Raza Ali - 12/6/13
+/**
+ * Service that provides model building functionality to a wizard-style model
+ * import or update implemented in the web app. It is currently kept in core as
+ * we may wish to reuse some of it when we build the curation pipeline. If it is
+ * found to be unsuitable for reuse, please move to the web-app plugin.
+ * 
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @author 20130614
 */
 class SubmissionService {
     // concrete strategies for the submission state machine
-    private final NewModelStateMachine newmodel=new NewModelStateMachine();
-    private final NewRevisionStateMachine newrevision=new NewRevisionStateMachine();
-    
+    private final NewModelStateMachine newmodel=new NewModelStateMachine()
+    private final NewRevisionStateMachine newrevision=new NewRevisionStateMachine()
+
     def modelFileFormatService
-    
-    /*Abstract state machine strategy, to be extended by the two
-     *concrete strategy implementations */
+
+    /*
+     * Abstract state machine strategy, to be extended by the two
+     * concrete strategy implementations
+     */
     abstract class StateMachineStrategy {
         abstract void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications);
         MFTC inferModelFormatType(Map<String, Object> workingMemory) {
@@ -60,7 +64,7 @@ class SubmissionService {
         void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {}
         void handleSubmission(Map<String,Object> params) {}
     }
-    
+
     class NewRevisionStateMachine extends StateMachineStrategy {
         /*Include check to remove 'model_type' from memory if main file has been changed*/
         void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {}
@@ -84,17 +88,17 @@ class SubmissionService {
         void handleSubmission(Map<String,Object> params) {}
     }
 
-    
-    /* Called by model controller for adding/removing files from the workingmemory */
+
+    /* Called by model controller for adding or removing files from the working memory */
     void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
         /*  The second parameter needs to contain the following:
          *   a - The files to be *modified* - imported or removed
          *   b - Possibly a map from filename to properties including:
          *   whether this file is being added or removed, whether it is
-         *   the main file, and an optional description parameter */                                                
+         *   the main file, and an optional description parameter */
         getStrategyFromContext(workingMemory).handleFileUpload(workingMemory, modifications)
     }
-    
+
     void inferModelFormatType(Map<String, Object> workingMemory) {
         /* infers the model type, adds it to the workingmemory
          * needs to store the model type as 'model_type' in the
@@ -109,11 +113,11 @@ class SubmissionService {
             e.printStackTrace()
         }
     }
-    
-    
+
     void performValidation(Map<String, Object> workingMemory) {
-        /* throws an exception if files are not valid, or do not
-         * comprise a valid model */
+        /*
+         * Throws an exception if files are not valid, or do not comprise a valid model
+         */
         try {
             getStrategyFromContext(workingMemory).performValidation(workingMemory)
         }
@@ -123,25 +127,29 @@ class SubmissionService {
             e.printStackTrace()
         }
     }
-    
+
     void inferModelInfo(Map<String, Object> workingMemory) {
         /* create RevisionTC, ModelTC, populate fields */
         getStrategyFromContext(workingMemory).inferModelInfo(workingMemory)
     }
-    
+
     void refineModelInfo(Map<String, Object> workingMemory, Map<String, Object> modifications) {
-        /* update the working memory with user specified modifications
+        /* 
+         * update the working memory with user specified modifications
          * creating separate objects where necessary to ensure that
-         * the modifications are performed as separate commits/revisions */
+         * the modifications are performed as separate commits or revisions
+         */
         getStrategyFromContext(workingMemory).refineModelInfo(workingMemory, modifications)
     }
-    
+
     void updateRevisionComments(Map<String, Object> workingMemory, Map<String, String> modifications) {
-        /* update the working memory with revision specific comments
-         * parameter left as a map<string,string> for forward-compatibility */
+        /*
+         * update the working memory with revision specific comments
+         * parameter left as a map<string,string> for forward-compatibility
+         */
         getStrategyFromContext(workingMemory).updateRevisionComments(workingMemory, modifications)
     }
-    
+
     void handleSubmission(Map<String,Object> workingMemory) {
         /*Create or update DOM objects as necessary*/
         getStrategyFromContext(workingMemory).handleSubmission(workingMemory)
@@ -154,7 +162,7 @@ class SubmissionService {
         }
         return newmodel
     }
-    
+
     private List<File> getFilesFromMemory(Map<String, Object> workingMemory, boolean filterMain) {
         List<RFTC> repFiles=getRepFiles(workingMemory)
         if (!repFiles) {
@@ -165,7 +173,7 @@ class SubmissionService {
         }
         return getFilesFromRepFiles(repFiles)
     }
-    
+
     private List<File> getFilesFromRepFiles(List<RFTC> repFiles) {
         //would be nice to do this in a groovier way
         List<File> list=new LinkedList<File>()
@@ -174,10 +182,8 @@ class SubmissionService {
         }
         return list
     }
-    
+
     private List<RFTC> getRepFiles(Map<String, Object> workingMemory) {
         return (List<RFTC>)workingMemory.get("repository_files")
-    }                                                                                                                                                                                                                                                                                                                                                                       
-
-
+    }
 }
