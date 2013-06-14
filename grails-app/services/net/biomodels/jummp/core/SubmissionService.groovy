@@ -99,11 +99,10 @@ class SubmissionService {
         try
         {
         getStrategyFromContext(workingMemory).inferModelFormatType(workingMemory)
-        sessionFactory.currentSession.clear() // http://jira.grails.org/browse/GRAILS-3133
-        System.out.println(workingMemory)
         }
-        catch(Exception e)
-        {
+        catch(Exception e) {
+            //The real implementation would throw the exception
+            //This is here until we actually have the files
             e.printStackTrace()
         }
     }
@@ -112,15 +111,12 @@ class SubmissionService {
     void performValidation(Map<String, Object> workingMemory) {
         /* throws an exception if files are not valid, or do not
          * comprise a valid model */
-        try
-        {
-            System.out.println(workingMemory)
+        try {
             getStrategyFromContext(workingMemory).performValidation(workingMemory)
-            sessionFactory.currentSession.clear() // http://jira.grails.org/browse/GRAILS-3133
-            System.out.println(workingMemory)
         }
-        catch(Exception e)
-        {
+        catch(Exception e) {
+            //The real implementation would throw the exception
+            //This is here until we actually have the files
             e.printStackTrace()
         }
     }

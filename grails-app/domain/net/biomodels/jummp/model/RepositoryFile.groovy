@@ -12,7 +12,7 @@ import org.apache.tika.mime.MediaType
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  * @date 20130612
  */
-class RepositoryFile {
+class RepositoryFile implements Serializable {
     static belongsTo = [revision:Revision]
     /**
      * The path relative to the root folder containing all models

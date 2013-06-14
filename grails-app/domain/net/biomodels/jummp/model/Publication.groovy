@@ -11,7 +11,7 @@ import net.biomodels.jummp.core.model.AuthorTransportCommand
  * @see Model
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class Publication {
+class Publication implements Serializable {
     /**
      * A Publication is part of a Model.
      */

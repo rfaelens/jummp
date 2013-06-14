@@ -6,7 +6,7 @@ import net.biomodels.jummp.core.model.AuthorTransportCommand
  * @short Representation of an author of a publication.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class Author {
+class Author implements Serializable {
     String lastName
     String firstName
     String initials
