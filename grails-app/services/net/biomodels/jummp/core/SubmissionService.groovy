@@ -26,7 +26,7 @@ class SubmissionService {
     def modelFileFormatService
 
     def modelService
-    
+
     /*
      * Abstract state machine strategy, to be extended by the two
      * concrete strategy implementations
@@ -84,14 +84,13 @@ class SubmissionService {
                 throw new ModelException(null,"Model files do not validate!")
             }
         }
-      
+
         protected void createTransportObjects(Map<String,Object> workingMemory) {
             MTC model=new MTC() //no need for it currently, later on, store publication details
             RTC revision=new RTC(files: getRepFiles(workingMemory), model: model)
             storeTCs(workingMemory, model, revision)
         }
-        
-        
+
         void refineModelInfo(Map<String,Object> workingMemory, Map<String,Object> modifications) {}
         void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {}
         void handleSubmission(Map<String,Object> params) {}
@@ -110,20 +109,18 @@ class SubmissionService {
                 newmodel.performValidation(workingMemory)
             }
         }
-        
+
         protected void createTransportObjects(Map<String,Object> workingMemory) {
             Model modelDom=Model.get(workingMemory.get("model_id") as Long)
             MTC model=modelDom.toCommandObject()
             RTC revision=modelService.getLatestRevision(model)
             storeTCs(workingMemory, model, revision)
         }
-        
-        
+
         void refineModelInfo(Map<String,Object> workingMemory, Map<String,Object> modifications) {}
         void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {}
         void handleSubmission(Map<String,Object> params) {}
     }
-
 
     /* Called by model controller for adding or removing files from the working memory */
     void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
