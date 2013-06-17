@@ -56,7 +56,7 @@ class ModelController {
                 }
                 else
                 {
-                    String errorAsString=flow.workingMemory.get("validation_error") as String
+                    String errorAsString=flow.workingMemory.remove("validation_error") as String
                     if (errorAsString.contains("ModelValidationError")) {
                         ModelNotValid()
                     }

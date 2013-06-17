@@ -26,7 +26,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     
     @Test
     void testUploadFilesContinue() {
-        new TestUploadFilesContinue().runTest()
+        new testUploadFilesContinue().runTest()
     }
     
     @Test
@@ -88,16 +88,16 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         }
     }
     
-    class TestUploadFilesEmptyList extends TestUploadFiles {
+    class testUploadFilesContinue extends TestUploadFiles {
         void performRemainingTest() {
             // empty files list shouldnt validate!
             signalEvent("Upload")
             assert "uploadFiles" == flowExecution.activeSession.state.id
-           /* // random files should validate as unknown
+            //random files should validate as unknown
             flowScope.workingMemory.put("repository_files", getRandomModel())
             signalEvent("Upload")
             assert "displayModelInfo" == flowExecution.activeSession.state.id
-            assert "UNKNOWN" == flowScope.workingMemory.get("model_type") as String */
+            assert "UNKNOWN" == flowScope.workingMemory.get("model_type") as String
         }
     }
     
