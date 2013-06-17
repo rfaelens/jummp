@@ -37,8 +37,7 @@ class SubmissionService {
         void inferModelFormatType(Map<String, Object> workingMemory) {
             MFTC format=modelFileFormatService.inferModelFormat(getFilesFromMemory(workingMemory, true))
             if (format) workingMemory.put("model_type",format.identifier)
-            else workingMemory.put("model_type", "UNKNOWN")
-        }
+         }
 
         abstract void performValidation(Map<String,Object> workingMemory);
 
@@ -71,17 +70,20 @@ class SubmissionService {
             List<File> modelFiles=getFilesFromMemory(workingMemory, false)
             modelFiles.each {
                 if (!it) {
-                    throw new IOException("Null file passed!")
+                    workingMemory.put("validation_error", "Null file passed!")
                 }
                 if (!it.exists()) {
-                    throw new IOException("File does not exist!")
+                    workingMemory.put("validation_error", "File does not exist")
                 }
                 if (it.isDirectory()) {
-                    throw new IOException("Cannot import directory..yet")
+                    workingMemory.put("validation_error", "Directory passed as input")
                 }
             }
-            if (!modelFileFormatService.validate(getFilesFromMemory(workingMemory, true), workingMemory.get("model_type") as String)) {
-                throw new ModelException(null,"Model files do not validate!")
+            if (!workingMemory.containsKey("model_type")) {
+                workingMemory.put("validation_error", "Missing Format Error: Validation could not be performed, format unknown")
+            }
+            else if (!modelFileFormatService.validate(getFilesFromMemory(workingMemory, true), workingMemory.get("model_type") as String)) {
+                workingMemory.put("validation_error", "ModelValidationError")
             }
         }
       
@@ -139,38 +141,19 @@ class SubmissionService {
         /* infers the model type, adds it to the workingmemory
          * needs to store the model type as 'model_type' in the
          * working memory */
-        try {
-            getStrategyFromContext(workingMemory).inferModelFormatType(workingMemory)
-        }
-        catch(Exception e) {
-            //The real implementation would throw the exception
-            //This is here until we actually have the files
-            e.printStackTrace()
-        }
+        getStrategyFromContext(workingMemory).inferModelFormatType(workingMemory)
     }
 
-    void performValidation(Map<String, Object> workingMemory) {
+    void performValidation(Map<String, Object> workingMemory) throws Exception {
         /*
          * Throws an exception if files are not valid, or do not comprise a valid model
          */
-        try {
-            getStrategyFromContext(workingMemory).performValidation(workingMemory)
-        }
-        catch(Exception e) {
-            //The real implementation would throw the exception
-            //This is here until we actually have the files
-            e.printStackTrace()
-        }
+         getStrategyFromContext(workingMemory).performValidation(workingMemory)
     }
 
     void inferModelInfo(Map<String, Object> workingMemory) {
         /* create RevisionTC, ModelTC, populate fields */
-        try {
-            getStrategyFromContext(workingMemory).inferModelInfo(workingMemory)
-        }
-        catch(Exception e) {
-            e.printStackTrace()
-        }
+          getStrategyFromContext(workingMemory).inferModelInfo(workingMemory)
     }
 
     void refineModelInfo(Map<String, Object> workingMemory, Map<String, Object> modifications) {
