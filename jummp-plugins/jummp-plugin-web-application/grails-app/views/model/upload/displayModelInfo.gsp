@@ -4,7 +4,7 @@
 -->
 
 <%@ page contentType="text/html;charset=UTF-8" %>
-
+<%@ page import="net.biomodels.jummp.core.model.RevisionTransportCommand" %>
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -12,8 +12,23 @@
   </head>
   <body>
     <g:form>
-      <g:submitButton name="Continue" value="Continue" />
-      <g:submitButton name="Cancel" value="Abort" />
+      
+      <table class="formtable">
+        <tbody>
+            <tr class="prop">
+                <td class="name"> <label for="name">Name:</label></td>
+                <td class="value"><g:textField name="name" maxlength="50" value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}"/></td>
+            </tr>
+            <tr class="prop">
+                <td class="name"><label for="description">Description:</label></td>
+                <td class="value"><g:textField name="description" maxlength="5000" value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}"/></td>
+            </tr>
+            <tr>
+              <td><g:submitButton name="Continue" value="Continue" /></td>
+              <td><g:submitButton name="Cancel" value="Abort" /></tr>
+
+        </tbody>
+    </table>
     </g:form>
   </body>
 </html>

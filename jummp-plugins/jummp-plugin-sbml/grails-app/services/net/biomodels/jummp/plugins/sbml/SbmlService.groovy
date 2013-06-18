@@ -166,7 +166,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     public String extractName(final List<File> model) {
         SBMLDocument doc=getDocumentFromFiles(model)
         if (doc) {
-            doc.model.getName()
+            return doc.model.getName()
         }
         return ""
     }
@@ -175,7 +175,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     public String extractDescription(final List<File> model) {
         SBMLDocument doc=getDocumentFromFiles(model)
         if (doc) {
-            doc.model.notesString
+            return doc.model.notesString
         }
         return ""
     }
@@ -501,7 +501,6 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                   break
                 }
             } catch(Exception ignore) {
-                System.out.println("Exception :"+ignore)
             }
         }
         return document
@@ -717,7 +716,6 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         return sbmlModel
         } catch (Exception e) {
             e.printStackTrace()
-            System.out.println(e);
             return [:]
         }
     }

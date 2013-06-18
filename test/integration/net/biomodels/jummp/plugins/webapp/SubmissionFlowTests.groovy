@@ -5,6 +5,7 @@ import org.junit.*
 import grails.test.WebFlowTestCase
 import net.biomodels.jummp.webapp.ModelController
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
+import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.core.JummpIntegrationTest
 
 class SubmissionFlowTests extends JummpIntegrationTest {
@@ -37,7 +38,14 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     
     /* WebFlowTestCase seems unable to cope with branching/different routes
     in the same test class. Therefore theres multiple classes implementing
-    the routes we want to be able to test*/
+    the routes we want to be able to test
+     *
+     *Update: See SetupControllerIntegrationTests.groovy for a solution. Current
+     *implementation left in to avoid recoding. The issue with the current version
+     *is unnecessary instantiation of flows (just one class could be used). On
+     *the other hand it is a little bit more modular than it might otherwise have
+     *been. Raza Ali: 18/6/13
+     */
     abstract class FlowUnitTest extends WebFlowTestCase {
         def getFlow() { new ModelController().uploadFlow }
         abstract void performTest()
@@ -108,6 +116,16 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             signalEvent("Upload")
             assert "displayModelInfo" == flowExecution.activeSession.state.id
             assert "SBML" == flowScope.workingMemory.get("model_type") as String
+            RTC revision=flowScope.workingMemory.get("RevisionTC") as RTC
+            //test name
+            assert "Becker2010_EpoR_AuxiliaryModel" == revision.name
+            //test that the very long description contains known strings
+            assert revision.description.contains("Verena Becker, Marcel Schilling, Julie Bachmann, Ute Baumann, Andreas Raue, Thomas Maiwald, Jens Timmer and Ursula Klingmüller")
+            assert revision.description.contains("This relation solely depends on EpoR turnover independent of ligand binding, suggesting an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system")
+            assert revision.description.contains("%% Default sampling time points")
+            assert revision.description.contains("BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models")
+
+            //good enough
         }
     }
     
@@ -129,7 +147,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     }
     
     private List<RFTC> getSbmlModel() {
-        return createRFTCList(smallModel("sbmlModel.xml"), [getFileForTest("additionalFile.txt", "heres some randomText")])
+        return createRFTCList(bigModel(), [getFileForTest("additionalFile.txt", "heres some randomText")])
     }
     
     private File getFileForTest(String filename, String text)
@@ -140,6 +158,9 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         return testFile
     }
     
+    private File bigModel() {
+        return new File("test/files/BIOMD0000000272.xml")
+    }
     
     private File smallModel(String filename) {
 
