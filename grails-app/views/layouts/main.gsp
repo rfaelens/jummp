@@ -18,8 +18,8 @@
     <div id="logo"></div>
     <div id="modeSwitch">
         <!-- TODO: active class has to be set on really selected mode -->
-        <jummp:button class="left active"><g:message code="jummp.main.search"/></jummp:button>
-        <jummp:button class="right"><g:message code="jummp.main.submit"/></jummp:button>
+        <a href="${g.createLink(controller: 'search', action: 'list')}"><jummp:button class="left"><g:message code="jummp.main.search"/></jummp:button></a>
+        <a href="${g.createLink(controller: 'model', action: 'upload')}"><jummp:button class="right"><g:message code="jummp.main.submit"/></jummp:button></a>
     </div>
     <div id="container">
         <div id='overlayTable'>
