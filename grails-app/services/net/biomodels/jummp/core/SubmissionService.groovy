@@ -100,7 +100,7 @@ class SubmissionService {
 
         protected void createTransportObjects(Map<String,Object> workingMemory) {
             MTC model=new MTC() //no need for it currently, later on, store publication details
-            RTC revision=new RTC(files: getRepFiles(workingMemory), model: model)
+            RTC revision=new RTC(files: getRepFiles(workingMemory), model: model) 
             storeTCs(workingMemory, model, revision)
         }
 
@@ -113,13 +113,13 @@ class SubmissionService {
         }
 
         void handleSubmission(Map<String,Object> workingMemory) {
-            List<RFTC> repoFiles = getRepFiles(params)
+            List<RFTC> repoFiles = getRepFiles(workingMemory)
             MTC model=(MTC) workingMemory.get("ModelTC") as MTC
             RTC revision=workingMemory.get("RevisionTC") as RTC
 
             model.name=revision.name
             model.format=ModelFormat.findByIdentifier(workingMemory.get("model_type") as String).toCommandObject()
-            model.comment=revision.comment
+            model.comment="Import of ${revision.name}".toString()
             modelService.uploadModelAsList(repoFiles, model)
 
             //This should be done much better! Model Service.uploadModel

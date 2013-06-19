@@ -121,7 +121,7 @@ class ModelController {
 
     
     private RFTC createRFTC(File file, boolean isMain) {
-        new RFTC(path: file.getCanonicalPath(), mainFile: isMain, userSubmitted: true, hidden: isMain, description:file.getName())
+        new RFTC(path: file.getCanonicalPath(), mainFile: isMain, userSubmitted: true, hidden: false, description:file.getName())
     }
     
     private File getFileForTest(String filename, String text)

@@ -22,6 +22,9 @@ class Revision implements Serializable {
      */
     static belongsTo = [model: Model]
     static hasMany = [repoFiles: RepositoryFile]
+    static mapping = {
+        description type: 'text'
+    }
     /**
      * The revision number in the version control system.
      * E.g. in Subversion the global revision number of the

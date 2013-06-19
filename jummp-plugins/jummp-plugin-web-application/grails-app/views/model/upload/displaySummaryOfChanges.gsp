@@ -18,7 +18,7 @@
                                 <label for="name">Name:</label>
                             </td>
                             <td class="value">
-                                <label name="name" maxlength="50" value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}"/>
+                                <g:textField readonly="readonly" name="name" maxlength="50" value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}"/>
                             </td>
                         </tr>
                         <tr class="prop">
@@ -26,7 +26,7 @@
                                 <label for="description">Description:</label>
                             </td>
                             <td class="value">
-                                <label name="description" maxlength="5000" value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}"/>
+                                <g:textArea id="description" name="description" readonly="readonly" maxlength="5000" value='${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}'/>
                             </td>
                         </tr>
                         <g:if test="${workingMemory.get("isUpdateOnExistingModel") as Boolean}">

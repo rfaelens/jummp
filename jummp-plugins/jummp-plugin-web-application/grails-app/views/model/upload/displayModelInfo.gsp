@@ -27,7 +27,7 @@
                                 <label for="description">Description:</label>
                             </td>
                             <td class="value">
-                                <g:textField name="description" maxlength="5000" value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}"/>
+                                <g:textArea id="description" name="description" readonly="readonly" maxlength="5000" value='${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}'/>
                             </td>
                         </tr>
                     </tbody>

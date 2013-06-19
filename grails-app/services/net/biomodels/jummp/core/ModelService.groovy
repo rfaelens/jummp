@@ -709,7 +709,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             revision.discard()
             domainObjects.each {it.discard()}
             model.discard()
-            log.error("New Model ${model.properties} does not validate:${revision.errors.allErrors.inspect()}")
+            log.error("New Model ${model.properties} with properties ${meta.properties} does not validate:${revision.errors.allErrors.inspect()}")
             throw new ModelException(model.toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
         }
         return model
@@ -861,7 +861,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
             final def m = model.toCommandObject()
-            log.error("New Revision for Model ${m} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")
+            log.error("New Revision containing ${repoFiles.inspect()} for Model ${m} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")
             throw new ModelException(m, "Revision stored in VCS, but not in database")
         }
         return revision

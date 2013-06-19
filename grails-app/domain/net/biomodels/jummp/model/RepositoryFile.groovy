@@ -71,12 +71,13 @@ class RepositoryFile implements Serializable {
         description(blank: true, maxSize:500)
         //content type detection is performed above, when we validate the path of the file
         mimeType(nullable: true, blank: true)
-        mainFile(validator: { main, rf ->
+/*        mainFile(validator: { main, rf ->
             if (main) {
                 return !rf.hidden
             }
             return true
         })
+*/
     }
 
     /**
