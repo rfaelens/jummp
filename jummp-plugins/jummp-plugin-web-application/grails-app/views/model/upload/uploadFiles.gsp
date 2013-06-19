@@ -7,7 +7,7 @@
         <title>Upload Files</title>
         <style>
             .normalAnchor {
-                color: #CCCC00
+                color: #CCCC00;
             }
         </style>
     </head>
@@ -32,19 +32,12 @@
                 <a href="#" id="removeFiles" class="normalAnchor">Remove all supplementary files</a>
                 <fieldset>
                     <legend>Additional files</legend>
-                    <table class='formtable'>
+                    <table class='formtable' id="additionalFiles">
                         <tbody>
-                            <tr class="fileEntry">
-                                <td>File</td>
-                                <td>Desc</td>
-                                <td>RM Me</td>
-                            </tr>
                         </tbody>
                     </table>
                 </fieldset>
                 <div class="buttons">
-                    <%--jummp:button id="uploadButton" name="Upload">Upload</jummp:button --%>
-                    <%--jummp:button id="cancelButton" name="Cancel">Cancel</jummp:button --%>
                     <g:submitButton name="Upload" value="Upload" />
                     <g:submitButton name="Cancel" value="Cancel" />
                 </div>
@@ -62,33 +55,46 @@
                 });
                 $("#addFile").click(function (evt) {
                     evt.preventDefault();
-                    //todo: change the DOM elements that get created
-                    $('<span>', {
-                        class: 'fix'
+                    $('<tr>', {
+                        class: 'fileEntry'
                     }).append(
-                        $("<input>", {
-                            type: 'file',
-                            class: "oneLiner"
-                        }),
-                        $('<input>', {
-                            type: 'text',
-                            value: 'Description',
-                            class: "oneLiner"
-                        }),
-                        $('<a>', {
-                            href: "javascript:alert('fail')",
-                            class: 'oneLiner',
-                            text: 'Remove file'
-                        })
-                    ).appendTo('#result')
+                        $('<td>').append(
+                            $('<input>', {
+                                type: 'file'
+                            })
+                        ),
+                        $('<td>').append(
+                            $('<input>', {
+                                type: 'text',
+                                class: 'description',
+                                value: 'Description'
+                            })
+                        ),
+                        $('<td>').append(
+                            $('<a>', {
+                                href: "javascript:alert('fail')",
+                                class: 'killer normalAnchor',
+                                text: 'Discard'
+                            })
+                        )
+                    ).appendTo('table#additionalFiles')
                 });
-            }); 
-$("#uploadButton").click( function() {
-    $("#fileUpload").submit();
-});
-$("#cancelButton").click( function() {
-    $("#fileUpload").reset();
-});
+            });
+
+            $("#uploadButton").click( function() {
+                $("#fileUpload").submit();
+            });
+
+            $("#cancelButton").click( function() {
+                $("#fileUpload").reset();
+            });
+
+            $(document).on("focus", ".description", function(){
+                if ($(this).data("reset") === undefined) {
+                    $(this).val("");
+                    $(this).data("reset", true);
+                }
+            });
         </g:javascript>
     </body>
 </html>
