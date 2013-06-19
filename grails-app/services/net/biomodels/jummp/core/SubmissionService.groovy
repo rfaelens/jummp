@@ -73,10 +73,28 @@ class SubmissionService {
         protected abstract void handleModificationsToSubmissionInfo(Map<String, Object> workingMemory, Map<String,Object> modifications);
         abstract void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications);
         abstract void handleSubmission(Map<String,Object> workingMemory);
+        protected List<RFTC> createRFTCList(List<File> mainFiles, Map<File,String> additionalFiles) {
+            List<RFTC> returnMe=new LinkedList<RFTC>()
+            mainFiles.each {
+                returnMe.add(createRFTC(it, true,""))
+            }
+            additionalFiles.keySet().each {
+                returnMe.add(createRFTC(it, false, additionalFiles.get(it)))
+            }
+            returnMe
+        }
+        private RFTC createRFTC(File file, boolean isMain, String description) {
+            new RFTC(path: file.getCanonicalPath(), mainFile: isMain, userSubmitted: true, hidden: false, description:description)
+        }
+    
     }
 
     class NewModelStateMachine extends StateMachineStrategy {
-        void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {}
+        void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
+            List<File> mainFiles=workingMemory.remove("submitted_mains") as List<File>
+            Map<File,String> additionals=workingMemory.remove("submitted_additionals") as Map<File, String>
+            workingMemory.put("repository_files", createRFTCList(mainFiles, additionalFiles))
+        }
         void performValidation(Map<String,Object> workingMemory) {
             List<File> modelFiles=getFilesFromMemory(workingMemory, false)
             modelFiles.each {
@@ -128,8 +146,10 @@ class SubmissionService {
     }
 
     class NewRevisionStateMachine extends StateMachineStrategy {
+        void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
         /*Include check to remove 'model_type' from memory if main file has been changed*/
-        void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {}
+        
+        }
         void inferModelFormatType(Map<String, Object> workingMemory) {
             if (workingMemory.containsKey("reprocess_files")) {
                 super.inferModelFormatType(workingMemory)
