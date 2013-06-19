@@ -11,7 +11,7 @@ class UnknownFormatService implements FileFormatService {
      * @return @c true if the Model is valid, @c false otherwise
      */
     public boolean validate(final List<File> model) {
-        if (model) 
+        if (model && !model.isEmpty()) 
         {
             return true
         }
@@ -54,7 +54,7 @@ class UnknownFormatService implements FileFormatService {
      * @param files The files comprising a potential model of this format
      */
     public boolean areFilesThisFormat(final List<File> files) {
-        if (files) {
+        if (files && !files.isEmpty()) {
             return true
         } 
         return false

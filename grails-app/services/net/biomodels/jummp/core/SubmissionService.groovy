@@ -7,6 +7,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.ModelFormat
 
 /**
  * Service that provides model building functionality to a wizard-style model
@@ -16,7 +17,7 @@ import net.biomodels.jummp.model.Model
  * 
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @author 20130614
+ * @author 20130619
 */
 class SubmissionService {
     // concrete strategies for the submission state machine
@@ -37,8 +38,7 @@ class SubmissionService {
         void inferModelFormatType(Map<String, Object> workingMemory) {
             MFTC format=modelFileFormatService.inferModelFormat(getFilesFromMemory(workingMemory, true))
             if (format) workingMemory.put("model_type",format.identifier)
-            else workingMemory.put("model_type", "UNKNOWN")
-        }
+         }
 
         abstract void performValidation(Map<String,Object> workingMemory);
 
@@ -50,8 +50,8 @@ class SubmissionService {
         protected abstract void createTransportObjects(Map<String,Object> workingMemory);
         protected void updateRevisionFromFiles(Map<String,Object> workingMemory) {
             RTC revision=workingMemory.get("RevisionTC") as RTC
-            revision.name=modelFileFormatService.extractName(getFilesFromMemory(workingMemory,true), revision.format)
-            revision.description=modelFileFormatService.extractDescription(getFilesFromMemory(workingMemory,true), revision.format)
+            revision.name=modelFileFormatService.extractName(getFilesFromMemory(workingMemory,true), ModelFormat.findByIdentifier(workingMemory.get("model_type") as String))
+            revision.description=modelFileFormatService.extractDescription(getFilesFromMemory(workingMemory,true), ModelFormat.findByIdentifier(workingMemory.get("model_type") as String))
         }
         void inferModelInfo(Map<String,Object> workingMemory) {
             if (!workingMemory.containsKey("RevisionTC")) {
@@ -60,9 +60,19 @@ class SubmissionService {
             updateRevisionFromFiles(workingMemory)
         }
 
-        abstract void refineModelInfo(Map<String,Object> workingMemory, Map<String,Object> modifications);
+        void refineModelInfo(Map<String,Object> workingMemory, Map<String,Object> modifications) {
+            RTC revision=workingMemory.get("RevisionTC") as RTC
+            if (revision.name == modifications.get("new_name") as String) {
+                if (revision.description == modifications.get("new_description") as String) {
+                    return
+                }
+            }
+            handleModificationsToSubmissionInfo(workingMemory, modifications)
+        }
+        
+        protected abstract void handleModificationsToSubmissionInfo(Map<String, Object> workingMemory, Map<String,Object> modifications);
         abstract void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications);
-        abstract void handleSubmission(Map<String,Object> params);
+        abstract void handleSubmission(Map<String,Object> workingMemory);
     }
 
     class NewModelStateMachine extends StateMachineStrategy {
@@ -71,17 +81,20 @@ class SubmissionService {
             List<File> modelFiles=getFilesFromMemory(workingMemory, false)
             modelFiles.each {
                 if (!it) {
-                    throw new IOException("Null file passed!")
+                    workingMemory.put("validation_error", "Null file passed!")
                 }
                 if (!it.exists()) {
-                    throw new IOException("File does not exist!")
+                    workingMemory.put("validation_error", "File does not exist")
                 }
                 if (it.isDirectory()) {
-                    throw new IOException("Cannot import directory..yet")
+                    workingMemory.put("validation_error", "Directory passed as input")
                 }
             }
-            if (!modelFileFormatService.validate(getFilesFromMemory(workingMemory, true), workingMemory.get("model_type") as String)) {
-                throw new ModelException(null,"Model files do not validate!")
+            if (!workingMemory.containsKey("model_type")) {
+                workingMemory.put("validation_error", "Missing Format Error: Validation could not be performed, format unknown")
+            }
+            else if (!modelFileFormatService.validate(getFilesFromMemory(workingMemory, true), workingMemory.get("model_type") as String)) {
+                workingMemory.put("validation_error", "ModelValidationError")
             }
         }
 
@@ -91,9 +104,27 @@ class SubmissionService {
             storeTCs(workingMemory, model, revision)
         }
 
-        void refineModelInfo(Map<String,Object> workingMemory, Map<String,Object> modifications) {}
-        void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {}
-        void handleSubmission(Map<String,Object> params) {}
+        void handleModificationsToSubmissionInfo(Map<String, Object> workingMemory, Map<String,Object> modifications) {
+            // todo
+        }
+
+        void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {
+            // does nothing
+        }
+
+        void handleSubmission(Map<String,Object> workingMemory) {
+            List<RFTC> repoFiles = getRepFiles(params)
+            MTC model=(MTC) workingMemory.get("ModelTC") as MTC
+            RTC revision=workingMemory.get("RevisionTC") as RTC
+
+            model.name=revision.name
+            model.format=ModelFormat.findByIdentifier(workingMemory.get("model_type") as String).toCommandObject()
+            model.comment=revision.comment
+            modelService.uploadModelAsList(repoFiles, model)
+
+            //This should be done much better! Model Service.uploadModel
+            //validates. Not needed. 
+        }
     }
 
     class NewRevisionStateMachine extends StateMachineStrategy {
@@ -115,11 +146,22 @@ class SubmissionService {
             MTC model=modelDom.toCommandObject()
             RTC revision=modelService.getLatestRevision(model)
             storeTCs(workingMemory, model, revision)
+            //ensure that a new revision tc is used for submission, use 
+            //this one for copying info!
         }
 
-        void refineModelInfo(Map<String,Object> workingMemory, Map<String,Object> modifications) {}
-        void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {}
-        void handleSubmission(Map<String,Object> params) {}
+        void handleModificationsToSubmissionInfo(Map<String, Object> workingMemory, Map<String,Object> modifications) {
+            // todo
+        }
+
+        void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {
+            RTC revision=workingMemory.get("RevisionTC") as RTC
+            revision.comment=workingMemory.get("RevisionComments") as String
+        }
+
+        void handleSubmission(Map<String,Object> workingMemory) {
+            //todo
+        }
     }
 
     /* Called by model controller for adding or removing files from the working memory */
@@ -136,38 +178,19 @@ class SubmissionService {
         /* infers the model type, adds it to the workingmemory
          * needs to store the model type as 'model_type' in the
          * working memory */
-        try {
-            getStrategyFromContext(workingMemory).inferModelFormatType(workingMemory)
-        }
-        catch(Exception e) {
-            //The real implementation would throw the exception
-            //This is here until we actually have the files
-            e.printStackTrace()
-        }
+        getStrategyFromContext(workingMemory).inferModelFormatType(workingMemory)
     }
 
-    void performValidation(Map<String, Object> workingMemory) {
+    void performValidation(Map<String, Object> workingMemory) throws Exception {
         /*
          * Throws an exception if files are not valid, or do not comprise a valid model
          */
-        try {
-            getStrategyFromContext(workingMemory).performValidation(workingMemory)
-        }
-        catch(Exception e) {
-            //The real implementation would throw the exception
-            //This is here until we actually have the files
-            e.printStackTrace()
-        }
+         getStrategyFromContext(workingMemory).performValidation(workingMemory)
     }
 
     void inferModelInfo(Map<String, Object> workingMemory) {
         /* create RevisionTC, ModelTC, populate fields */
-        try {
-            getStrategyFromContext(workingMemory).inferModelInfo(workingMemory)
-        }
-        catch(Exception e) {
-            e.printStackTrace()
-        }
+          getStrategyFromContext(workingMemory).inferModelInfo(workingMemory)
     }
 
     void refineModelInfo(Map<String, Object> workingMemory, Map<String, Object> modifications) {

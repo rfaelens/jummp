@@ -9,11 +9,13 @@
     <body>
         <h1>Submission Guidelines</h1>
         <p>Accepted formats, general submission tips.</p>
-        <div class="buttons">
-            <g:form>
-                <g:submitButton name="Continue" value="Continue" />
-                <g:submitButton name="Cancel" value="Abort" />
-            </g:form>
-        </div>
+        <g:form>
+            <div class="dialog">
+                <div class="buttons">
+                    <g:submitButton name="Continue" value="Continue" />
+                    <g:submitButton name="Cancel" value="Abort" />
+                </div>
+            </div>
+        </g:form>
     </body>
 </html>

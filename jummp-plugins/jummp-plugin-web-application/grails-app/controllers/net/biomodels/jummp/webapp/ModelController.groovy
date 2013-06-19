@@ -1,5 +1,6 @@
 package net.biomodels.jummp.webapp
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.ModelException
 import java.util.zip.ZipOutputStream
@@ -32,7 +33,7 @@ class ModelController {
                 Map<String, Object> workingMemory=new HashMap<String,Object>()
                 flow.workingMemory=workingMemory
                 flow.workingMemory.put("isUpdateOnExistingModel",false) //use subflow for updating models, todo
-                }.to "uploadFiles"
+            }.to "uploadFiles"
             on("Cancel").to "abort"
         }
         uploadFiles {
@@ -40,7 +41,6 @@ class ModelController {
                 Map<String,Object> inputs = new HashMap<String, Object>()
                 // add files to inputs here as appropriate
                 submissionService.handleFileUpload(flow.workingMemory,inputs)
-                sessionFactory.currentSession.clear()
             }.to "performValidation"
             on("ProceedWithoutValidation"){
             }.to "inferModelInfo"
@@ -48,18 +48,24 @@ class ModelController {
         }
         performValidation {
             action {
-                try {
-                    if (!flow.workingMemory.containsKey("model_type")) {
-                        submissionService.inferModelFormatType(flow.workingMemory)
-                    }
-                    submissionService.performValidation(flow.workingMemory)
+                //temporarily add an sbml model to allow execution to proceed
+                flow.workingMemory.put("repository_files", getSbmlModel())
+                if (!flow.workingMemory.containsKey("model_type")) {
+                    submissionService.inferModelFormatType(flow.workingMemory)
+                }
+                submissionService.performValidation(flow.workingMemory)
+                if (!flow.workingMemory.containsKey("validation_error")) {
                     Valid()
                 }
-                catch(ModelException giveOption) {
-                    ModelNotValid()
-                }
-                catch(Exception forceCorrection) {
-                    FilesNotValid()
+                else
+                {
+                    String errorAsString=flow.workingMemory.remove("validation_error") as String
+                    if (errorAsString.contains("ModelValidationError")) {
+                        ModelNotValid()
+                    }
+                    else {
+                        FilesNotValid()
+                    }
                 }
             }
             on("Valid"){
@@ -83,8 +89,10 @@ class ModelController {
         }
         displayModelInfo {
             on("Continue") {
-                Map<String,Object> modifications=new HashMap<String,Object>()
                 //populate modifications object with form data
+                Map<String,Object> modifications=new HashMap<String,Object>()
+                modifications.put("new_name", params.name)
+                modifications.put("new_description", params.description)
                 submissionService.refineModelInfo(flow.workingMemory, modifications)
             }.to "displaySummaryOfChanges"
             on("Cancel").to "abort"
@@ -92,7 +100,8 @@ class ModelController {
         displaySummaryOfChanges {
             on("Continue")
             {
-                Map<String,String> modifications=new HashMap<String,String>();
+                Map<String,String> modifications=new HashMap<String,String>()
+                modifications.put("RevisionComments", params.RevisionComments)
                 //populate modifications
                 submissionService.updateRevisionComments(flow.workingMemory, modifications)
             }.to "saveModel"
@@ -110,6 +119,36 @@ class ModelController {
         abort()
     }
 
+    
+    private RFTC createRFTC(File file, boolean isMain) {
+        new RFTC(path: file.getCanonicalPath(), mainFile: isMain, userSubmitted: true, hidden: isMain, description:file.getName())
+    }
+    
+    private File getFileForTest(String filename, String text)
+    {
+        File tempFile=File.createTempFile("nothing",null)
+        def testFile=new File(tempFile.getParent()+File.separator+filename)
+        if (text) testFile.setText(text)
+        return testFile
+    }
+   
+    
+    private List<RFTC> createRFTCList(File mainFile, List<File> additionalFiles) {
+        List<RFTC> returnMe=new LinkedList<RFTC>()
+        returnMe.add(createRFTC(mainFile, true))
+        additionalFiles.each {
+            returnMe.add(createRFTC(it, false))
+        }
+        returnMe
+    }
+    
+    private File bigModel() {
+        return new File("test/files/BIOMD0000000272.xml")
+    }
+    
+    private List<RFTC> getSbmlModel() {
+        return createRFTCList(bigModel(), [getFileForTest("additionalFile.txt", "heres some randomText")])
+    }
 
     /**
      * File download of the model file for a model by id
@@ -186,14 +225,14 @@ class ModelController {
     }
 
     /**
-    * File download of the model file for a model by id
-    */
-   def downloadModelRevision = {
-       RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-       byte[] bytes = modelDelegateService.retrieveModelFiles(rev)
-       response.setContentType("application/xml")
-       // TODO: set a proper name for the model
-       response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")
-       response.outputStream << new ByteArrayInputStream(bytes)
-   }
+     * File download of the model file for a model by id
+     */
+    def downloadModelRevision = {
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        byte[] bytes = modelDelegateService.retrieveModelFiles(rev)
+        response.setContentType("application/xml")
+        // TODO: set a proper name for the model
+        response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")
+        response.outputStream << new ByteArrayInputStream(bytes)
+    }
 }
