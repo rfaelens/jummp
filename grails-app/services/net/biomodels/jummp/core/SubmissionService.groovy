@@ -91,9 +91,18 @@ class SubmissionService {
 
     class NewModelStateMachine extends StateMachineStrategy {
         void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
-            List<File> mainFiles=workingMemory.remove("submitted_mains") as List<File>
-            Map<File,String> additionals=workingMemory.remove("submitted_additionals") as Map<File, String>
-            workingMemory.put("repository_files", createRFTCList(mainFiles, additionalFiles))
+            if (workingMemory.containsKey("submitted_mains"))
+            {
+                List<File> mainFiles=workingMemory.remove("submitted_mains") as List<File>
+                Map<File,String> additionals=null;
+                if (workingMemory.containsKey("submitted_additionals")) {
+                    additionals=workingMemory.remove("submitted_additionals") as Map<File, String>
+                }
+                else {
+                    additionals=new HashMap<File,String>()
+                }
+                workingMemory.put("repository_files", createRFTCList(mainFiles, additionalFiles))
+            }
         }
         void performValidation(Map<String,Object> workingMemory) {
             List<File> modelFiles=getFilesFromMemory(workingMemory, false)
