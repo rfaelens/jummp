@@ -8,6 +8,6 @@
     </head>
     <body>
         <h1>Model Submission Cancelled</h1>
-        <p>You can always restart the submission process by  clicking on <a href="${g.createLink(controller: 'model', action: 'upload')}">Submit model</a>
+        <p>You can always restart the submission process by  clicking on <a href="${g.createLink(controller: 'model', action: 'upload')}">Submit model</a>.</p>
     </body>
 </html>
