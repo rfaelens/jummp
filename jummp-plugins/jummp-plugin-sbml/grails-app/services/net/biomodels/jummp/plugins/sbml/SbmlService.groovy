@@ -43,9 +43,12 @@ import org.sbml.jsbml.SBMLWriter
 import org.sbfc.converter.sbml2biopax.SBML2BioPAX_l3
 import org.sbfc.converter.models.BioPaxModel
 import com.thoughtworks.xstream.converters.ConversionException
+
 /**
  * Service class for handling Model files in the SBML format.
  * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author  Raza Ali <raza.ali@ebi.ac.uk>
+ * @author  Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
@@ -83,7 +86,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             //sbml2BioPaxConverter()
         }
     }
-    
+
     private SBMLDocument getFileAsValidatedSBMLDocument(final File model)
     {
         // TODO: we should insert the parsed model into the cache
@@ -97,7 +100,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         }
         if (doc == null) {
             // although the API documentation states that an Exception is thrown for incorrect files, it seems that null is returned
-            log.error("SBMLDocuement is not valid for file ${model.name}")
+            log.error("SBMLDocument is not valid for file ${model.name}")
             return null
         }
         // TODO: WARNING: checkConsistency uses an online validator. This might render timeouts during model upload
@@ -116,11 +119,10 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             return doc
         } catch (ConversionException e) {
             log.error(e.getMessage(), e)
-        
             return null
         }
     }
-    
+
     /*
      * Checks whether the files passed comprise a model of this format.
      * Currently implement (very dumbly!) as a check on whether the files
@@ -128,13 +130,13 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
      * @param files The files comprising a potential model of this format
      */
     public boolean areFilesThisFormat(final List<File> files) {
-        boolean temp=grailsApplication.config.jummp.plugins.sbml.validation
-        grailsApplication.config.jummp.plugins.sbml.validation=true
-        boolean retval=validate(files)
-        grailsApplication.config.jummp.plugins.sbml.validation=temp
+        boolean temp = grailsApplication.config.jummp.plugins.sbml.validation
+        grailsApplication.config.jummp.plugins.sbml.validation = true
+        boolean retval = validate(files)
+        grailsApplication.config.jummp.plugins.sbml.validation = temp
         return retval
     }
-    
+
     private SBMLDocument getDocumentFromFiles(final List<File> model){
         SBMLDocument retval=null
         model.each {
@@ -164,7 +166,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     @Profiled(tag="SbmlService.extractName")
     public String extractName(final List<File> model) {
-        SBMLDocument doc=getDocumentFromFiles(model)
+        SBMLDocument doc = getDocumentFromFiles(model)
         if (doc) {
             return doc.model.getName()
         }
@@ -173,13 +175,13 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     @Profiled(tag="SbmlService.extractDescription")
     public String extractDescription(final List<File> model) {
-        SBMLDocument doc=getDocumentFromFiles(model)
+        SBMLDocument doc = getDocumentFromFiles(model)
         if (doc) {
             return doc.model.notesString
         }
         return ""
     }
-    
+
     @Profiled(tag="SbmlService.getMetaId")
     public String getMetaId(RevisionTransportCommand revision) {
         return getFromCache(revision).model.metaId
@@ -720,8 +722,17 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         }
     }
 
-    public String triggerSubmodelGeneration(RevisionTransportCommand revision, String subModelId, String metaId, List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds) {
+    /**
+     * Triggers the generation of a sub model for an existing model encoded in SBML.
+     *
+     * @return A String representation of the new model encoded in SBML.
+     */
+    public String triggerSubmodelGeneration(
+            RevisionTransportCommand revision, String subModelId, String metaId, 
+            List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds,
+            List<String> ruleIds, List<String> eventIds) {
         Model model = getFromCache(revision).model
-        return new SubmodelGenerator().generateSubModel(model, subModelId, metaId, compartmentIds, speciesIds, reactionIds, ruleIds, eventIds)
+        return new SubmodelGenerator().generateSubModel(
+                model, subModelId, metaId, compartmentIds, speciesIds, reactionIds, ruleIds, eventIds)
     }
 }
