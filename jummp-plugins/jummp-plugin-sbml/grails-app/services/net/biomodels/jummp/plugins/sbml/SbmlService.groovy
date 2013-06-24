@@ -1,5 +1,6 @@
 package net.biomodels.jummp.plugins.sbml
 
+import java.util.regex.Pattern
 import javax.xml.stream.XMLStreamException
 import net.biomodels.jummp.core.model.FileFormatService
 import org.sbml.jsbml.SBMLDocument
@@ -123,18 +124,55 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         }
     }
 
-    /*
+    /**
      * Checks whether the files passed comprise a model of this format.
-     * Currently implement (very dumbly!) as a check on whether the files
-     * validate or not. Probably could do this much better. 
+     *
      * @param files The files comprising a potential model of this format
      */
     public boolean areFilesThisFormat(final List<File> files) {
-        boolean temp = grailsApplication.config.jummp.plugins.sbml.validation
-        grailsApplication.config.jummp.plugins.sbml.validation = true
-        boolean retval = validate(files)
-        grailsApplication.config.jummp.plugins.sbml.validation = temp
-        return retval
+        if (files == null || files.size() == 0) {
+            return false
+        }
+
+        // let us assume that they are, and change our minds as soon as we discover the contrary
+        boolean areAllSbml = true
+        int iFiles = 0
+        final fileCount = files.size()
+        //should work with any value above 2, but sometimes there are comments at the start of the file
+        final int DEPTH_LIMIT = 15
+        BufferedReader reader
+        final def p = Pattern.compile(".*<sbml xmlns=\"http://www\\.sbml\\.org/sbml/level.*\".*")
+
+        while (areAllSbml && iFiles < fileCount) {
+            try {
+                reader = new BufferedReader(new FileReader(files[iFiles]))
+                boolean foundSbmlDeclarationLine = false
+                int iLine = 0
+                while (!foundSbmlDeclarationLine && iLine < DEPTH_LIMIT) {
+                    final String currentLine = reader.readLine()
+                    if (currentLine == null) {
+                        areAllSbml = false
+                        break
+                    }
+                    if (Pattern.matches(p.toString(), currentLine)) {
+                        foundSbmlDeclarationLine = true
+                    }
+                    else {
+                        iLine++
+                    }
+                }
+                areAllSbml &= foundSbmlDeclarationLine
+            } catch(IOException ex) {
+                def msg = new StringBuffer("Could not check if files ${files.inspect()} are valid SBML.")
+                msg.append(" Encountered ${ex.message} while reading line $currentLine of file ${files[iFiles]}")
+                log.error(msg.toString())
+                return false
+            } finally {
+                reader.close()
+                iFiles++
+            }
+        }
+        return areAllSbml
     }
 
     private SBMLDocument getDocumentFromFiles(final List<File> model){

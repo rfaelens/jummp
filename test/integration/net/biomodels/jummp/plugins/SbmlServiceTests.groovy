@@ -44,6 +44,30 @@ class SbmlServiceTests extends JummpIntegrationTest {
     }
 
     @Test
+    void testAreFilesThisFormat() {
+        File file = new File("target/sbml/test")
+        FileUtils.deleteQuietly(file)
+        FileUtils.touch(file)
+        assertFalse(sbmlService.areFilesThisFormat([file]))
+
+        // unknown sbml
+        File unknown = new File("target/sbml/unknown")
+        FileUtils.deleteQuietly(unknown)
+        FileUtils.touch(unknown)
+        unknown.append('''\
+<?xml version='1.0' encoding='UTF-8'?>
+<model/>''')
+        assertFalse(sbmlService.areFilesThisFormat([unknown]))
+
+        File properSbml = new File("test/files/BIOMD0000000272.xml")
+        assertTrue(sbmlService.areFilesThisFormat([properSbml]))
+
+        assertTrue(sbmlService.areFilesThisFormat([properSbml,smallModel("validSbml.xml")]))
+        assertFalse(sbmlService.areFilesThisFormat([properSbml, unknown]))
+    }
+
+
+    @Test
     void testLevelAndVersion() {
         authenticateAsTestUser()
         def rf = new RepositoryFileTransportCommand(path: smallModel("BIOMD0000000272.xml").absolutePath,description: "")
@@ -75,9 +99,11 @@ class SbmlServiceTests extends JummpIntegrationTest {
 
     private File getFileForTest(String filename, String text)
     {
-        def tempDir=FileUtils.getTempDirectory()
-        def testFile=new File(tempDir.absolutePath+File.separator+filename)
-        if (text) testFile.setText(text)
+        def tempDir = FileUtils.getTempDirectory()
+        def testFile = new File(tempDir.absolutePath + File.separator + filename)
+        if (text) {
+            testFile.setText(text)
+        }
         return testFile
     }
 
@@ -137,8 +163,8 @@ class SbmlServiceTests extends JummpIntegrationTest {
     }
 
     private File smallModel(String filename) {
-
-        return getFileForTest(filename, '''<?xml version="1.0" encoding="UTF-8"?>
+        return getFileForTest(filename, '''\
+<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>
     <listOfCompartments>
