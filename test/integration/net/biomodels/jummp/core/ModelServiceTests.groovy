@@ -868,10 +868,8 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue(aclUtilService.hasPermission(auth, revision, BasePermission.ADMINISTRATION))
         assertTrue(aclUtilService.hasPermission(auth, revision, BasePermission.DELETE))
         assertFalse(aclUtilService.hasPermission(auth, revision, BasePermission.WRITE))
-        // importing a model with same name should not be possible
-        shouldFail(ModelException) {
-            modelService.uploadModelAsFile(rf, meta)
-        }
+        // importing a model with same name should be possible
+        assertTrue((modelService.uploadModelAsFile(rf, meta)).validate())
         // importing with invalid model file should not be possible
         meta.name = "test2"
         meta.format = ModelFormat.findByIdentifier("SBML").toCommandObject()
