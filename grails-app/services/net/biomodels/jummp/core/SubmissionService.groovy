@@ -148,9 +148,6 @@ class SubmissionService {
             model.format=ModelFormat.findByIdentifier(workingMemory.get("model_type") as String).toCommandObject()
             model.comment="Import of ${revision.name}".toString()
             modelService.uploadModelAsList(repoFiles, model)
-
-            //This should be done much better! Model Service.uploadModel
-            //validates. Not needed. 
         }
     }
 
