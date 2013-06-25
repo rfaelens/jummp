@@ -42,8 +42,9 @@
                     </tbody>
                 </table>
                 <div class="buttons">
-                    <g:submitButton name="Continue" value="Continue" />
                     <g:submitButton name="Cancel" value="Abort" />
+                    <g:submitButton name="Back" value="Back" />
+                    <g:submitButton name="Continue" value="Continue" />
                 </div>
             </div>
         </g:form>
