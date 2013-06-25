@@ -9,42 +9,50 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.core.JummpIntegrationTest
 
 class SubmissionFlowTests extends JummpIntegrationTest {
-    
+    protected void setUp() {
+        super.createUserAndRoles()
+    }
+
     @Test
     void testDisclaimerAbort() {
+        assertNotNull(authenticateAsTestUser())
         new TestDisclaimerAbort().runTest()
     }
-    
+
     @Test
     void testDisclaimerContinue() {
+        assertNotNull(authenticateAsTestUser())
         new TestDisclaimerContinue().runTest()
     }
-    
+
     @Test
     void testUploadFilesAbort() {
+        assertNotNull(authenticateAsTestUser())
         new TestUploadFilesCancel().runTest()
     }
-    
+
     @Test
     void testUploadFilesContinue() {
+        assertNotNull(authenticateAsTestUser())
         new testUploadFilesContinue().runTest()
     }
-    
+
     @Test
     void testSubmitSBML() {
+        assertNotNull(authenticateAsTestUser())
         new TestSubmitSBML().runTest()
     }
-    
-    
-    /* WebFlowTestCase seems unable to cope with branching/different routes
-    in the same test class. Therefore theres multiple classes implementing
-    the routes we want to be able to test
+
+    /**
+     * WebFlowTestCase seems unable to cope with branching(different routes)
+     * in the same test class. Therefore theres multiple classes implementing
+     * the routes we want to be able to test
      *
-     *Update: See SetupControllerIntegrationTests.groovy for a solution. Current
-     *implementation left in to avoid recoding. The issue with the current version
-     *is unnecessary instantiation of flows (just one class could be used). On
-     *the other hand it is a little bit more modular than it might otherwise have
-     *been. Raza Ali: 18/6/13
+     * Update: See SetupControllerIntegrationTests.groovy for a solution. Current
+     * implementation left in to avoid recoding. The issue with the current version
+     * is unnecessary instantiation of flows (just one class could be used). On
+     * the other hand it is a little bit more modular than it might otherwise have
+     * been. Raza Ali: 18/6/13
      */
     abstract class FlowUnitTest extends WebFlowTestCase {
         def getFlow() { new ModelController().uploadFlow }
@@ -64,7 +72,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             catch(Exception happy) {}
         }
     }
-    
+
     class TestDisclaimerContinue extends FlowUnitTest {
         void performTest() {
             def viewSelection = startFlow()
@@ -80,7 +88,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             clickCancelEndFlow()
         }
     }
-    
+
     abstract class TestUploadFiles extends FlowUnitTest {
         void performTest() {
             def viewSelection = startFlow()
@@ -95,7 +103,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             clickCancelEndFlow()
         }
     }
-    
+
     class testUploadFilesContinue extends TestUploadFiles {
         void performRemainingTest() {
             // empty files list shouldnt validate!
@@ -108,7 +116,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             assert "UNKNOWN" == flowScope.workingMemory.get("model_type") as String
         }
     }
-    
+
     class TestSubmitSBML extends TestUploadFiles {
         void performRemainingTest() {
         // valid sbml should proceed
@@ -128,11 +136,11 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             //good enough
         }
     }
-    
+
     RFTC createRFTC(File file, boolean isMain) {
         new RFTC(path: file.getCanonicalPath(), mainFile: isMain, userSubmitted: true, hidden: isMain, description:file.getName())
     }
-    
+
     List<RFTC> createRFTCList(File mainFile, List<File> additionalFiles) {
         List<RFTC> returnMe=new LinkedList<RFTC>()
         returnMe.add(createRFTC(mainFile, true))
@@ -141,15 +149,15 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         }
         returnMe
     }
-    
+
     private List<RFTC> getRandomModel() {
         return createRFTCList(getFileForTest("modelfile.txt","hello world"),[getFileForTest("additional.txt","hello world")])
     }
-    
+
     private List<RFTC> getSbmlModel() {
         return createRFTCList(bigModel(), [getFileForTest("additionalFile.txt", "heres some randomText")])
     }
-    
+
     private File getFileForTest(String filename, String text)
     {
         File tempFile=File.createTempFile("nothing",null)
@@ -157,13 +165,12 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         if (text) testFile.setText(text)
         return testFile
     }
-    
+
     private File bigModel() {
         return new File("test/files/BIOMD0000000272.xml")
     }
-    
-    private File smallModel(String filename) {
 
+    private File smallModel(String filename) {
         return getFileForTest(filename, '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>
@@ -186,7 +193,4 @@ class SubmissionFlowTests extends JummpIntegrationTest {
   </model>
 </sbml>''')
     }
-    
-    
-    
 }

@@ -1,10 +1,13 @@
 package net.biomodels.jummp.webapp
-import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
-import net.biomodels.jummp.core.model.PublicationTransportCommand
-import net.biomodels.jummp.core.ModelException
-import java.util.zip.ZipOutputStream
+
+import grails.plugins.springsecurity.Secured
 import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
+import net.biomodels.jummp.core.ModelException
+import net.biomodels.jummp.core.model.PublicationTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
+import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.webapp.UploadFilesCommand
 
 class ModelController {
     /**
@@ -15,7 +18,7 @@ class ModelController {
      * Dependency injection of sbmlService.
      */
     def sbmlService
-    /* 
+    /**
      * Dependency injection of submissionService
      */
     def submissionService
@@ -23,10 +26,17 @@ class ModelController {
     def show = {
         [id: params.id]
     }
-    /* The flow maintains the 'params' as flow.workingMemory (just to distinguish
-     * between request.params and our params. Flow scope does require all objects
-     * to be serializable. We need to ensure that our objects fit the bill, else
-     * store in session scope! */
+
+    /*
+     * The flow maintains the 'params' as flow.workingMemory (just to distinguish
+     * between request.params and our params. Flow scope requires all objects
+     * to be serializable. If this is not possible, there are two solutions:
+     *   1) store in session scope 
+     *   2) evict the objects in question from the Hibernate session before the
+     * end of the session using <tt>flow.persistenceContext.evict(it)</tt>.
+     * See http://grails.org/grails/latest/doc/guide/theWebLayer.html#flowScopes
+     */
+    @Secured(["isAuthenticated()"])
     def uploadFlow = {
         displayDisclaimer {
             on("Continue") {
@@ -37,14 +47,21 @@ class ModelController {
             on("Cancel").to "abort"
         }
         uploadFiles {
-            on("Upload") {
-                Map<String,Object> inputs = new HashMap<String, Object>()
-                // add files to inputs here as appropriate
-                submissionService.handleFileUpload(flow.workingMemory,inputs)
+            on("Upload") { UploadFilesCommand cmd ->
+                if (cmd.hasErrors()) {
+                    return error()
+                }
+                else {
+                    Map<String, Object> inputs = new HashMap<String, Object>()
+                    def mainFile = request.getFile('mainFile')
+                    // add files to inputs here as appropriate
+                    submissionService.handleFileUpload(flow.workingMemory,inputs)
+                }
             }.to "performValidation"
             on("ProceedWithoutValidation"){
             }.to "inferModelInfo"
             on("Cancel").to "abort"
+            on("Back"){}.to "displayDisclaimer"
         }
         performValidation {
             action {
@@ -73,12 +90,12 @@ class ModelController {
             }.to "inferModelInfo"
             on("ModelNotValid") {
                 flow.workingMemory.put("Valid", false)
-                // read this parameter to display option to upload without 
+                // read this parameter to display option to upload without
                 // validation in upload files view
-                flash.showProceedWithoutValidationDialog=true 
+                flash.showProceedWithoutValidationDialog = true
             }.to "uploadFiles"
             on("FilesNotValid") {
-                flash.showFileInvalidError=true;
+                flash.showFileInvalidError = true
             }.to "uploadFiles"
         }
         inferModelInfo {
@@ -90,12 +107,13 @@ class ModelController {
         displayModelInfo {
             on("Continue") {
                 //populate modifications object with form data
-                Map<String,Object> modifications=new HashMap<String,Object>()
+                Map<String,Object> modifications = new HashMap<String,Object>()
                 modifications.put("new_name", params.name)
                 modifications.put("new_description", params.description)
                 submissionService.refineModelInfo(flow.workingMemory, modifications)
             }.to "displaySummaryOfChanges"
             on("Cancel").to "abort"
+            on("Back"){}.to "uploadFiles"
         }
         displaySummaryOfChanges {
             on("Continue")
@@ -106,6 +124,7 @@ class ModelController {
                 submissionService.updateRevisionComments(flow.workingMemory, modifications)
             }.to "saveModel"
             on("Cancel").to "abort"
+            on("Back"){}.to "displayModelInfo"
         }
         saveModel {
             action {
@@ -119,11 +138,10 @@ class ModelController {
         abort()
     }
 
-    
     private RFTC createRFTC(File file, boolean isMain) {
         new RFTC(path: file.getCanonicalPath(), mainFile: isMain, userSubmitted: true, hidden: false, description:file.getName())
     }
-    
+
     private File getFileForTest(String filename, String text)
     {
         File tempFile=File.createTempFile("nothing",null)
@@ -131,8 +149,7 @@ class ModelController {
         if (text) testFile.setText(text)
         return testFile
     }
-   
-    
+
     private List<RFTC> createRFTCList(File mainFile, List<File> additionalFiles) {
         List<RFTC> returnMe=new LinkedList<RFTC>()
         returnMe.add(createRFTC(mainFile, true))
@@ -141,11 +158,11 @@ class ModelController {
         }
         returnMe
     }
-    
+
     private File bigModel() {
         return new File("test/files/BIOMD0000000272.xml")
     }
-    
+
     private List<RFTC> getSbmlModel() {
         return createRFTCList(bigModel(), [getFileForTest("additionalFile.txt", "heres some randomText")])
     }
