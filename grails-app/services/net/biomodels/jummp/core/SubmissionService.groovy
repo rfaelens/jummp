@@ -2,10 +2,9 @@ package net.biomodels.jummp.core
 
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC //rude?
+import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
-import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
-import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 
@@ -14,45 +13,98 @@ import net.biomodels.jummp.model.ModelFormat
  * import or update implemented in the web app. It is currently kept in core as
  * we may wish to reuse some of it when we build the curation pipeline. If it is
  * found to be unsuitable for reuse, please move to the web-app plugin.
- * 
+ *
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @author 20130619
+ * @author 20130625
 */
 class SubmissionService {
     // concrete strategies for the submission state machine
-    private final NewModelStateMachine newmodel=new NewModelStateMachine()
-    private final NewRevisionStateMachine newrevision=new NewRevisionStateMachine()
-
+    private final NewModelStateMachine newModel = new NewModelStateMachine()
+    private final NewRevisionStateMachine newrevision = new NewRevisionStateMachine()
+    /**
+     * Dependency Injection of ModelFileFormatService
+     */
     def modelFileFormatService
-
+    /**
+     * Dependency Injection of ModelService
+     */
     def modelService
 
     /*
-     * Abstract state machine strategy, to be extended by the two
-     * concrete strategy implementations
+     * Abstract state machine strategy, to be extended by the two concrete
+     * strategy implementations
      */
     abstract class StateMachineStrategy {
+
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         * @param modifications
+         */
         abstract void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications);
 
+        /**
+         * Detects the format of the model and stores this information in the working memory
+         * using the key <tt>model_type</tt>
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
         void inferModelFormatType(Map<String, Object> workingMemory) {
             MFTC format=modelFileFormatService.inferModelFormat(getFilesFromMemory(workingMemory, true))
-            if (format) workingMemory.put("model_type",format.identifier)
+            if (format) {
+                workingMemory.put("model_type",format.identifier)
+            }
          }
 
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
         abstract void performValidation(Map<String,Object> workingMemory);
 
-        /* related functions for inferModelInfo, following template method pattern */
+        /**
+         * Related functions for inferModelInfo, following template method pattern
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         * @param model             a @link{net.biomodels.jummp.core.model.ModelTransportCommand} 
+         *                          representing the model.
+         * @param revision          a @link{net.biomodels.jummp.core.model.RevisionTransportCommand}
+         *                          representing the revision.
+         */
         protected void storeTCs(Map<String,Object> workingMemory, MTC model, RTC revision) {
              workingMemory.put("ModelTC", model)
              workingMemory.put("RevisionTC", revision)
         }
+
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
         protected abstract void createTransportObjects(Map<String,Object> workingMemory);
+
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
         protected void updateRevisionFromFiles(Map<String,Object> workingMemory) {
-            RTC revision=workingMemory.get("RevisionTC") as RTC
-            revision.name=modelFileFormatService.extractName(getFilesFromMemory(workingMemory,true), ModelFormat.findByIdentifier(workingMemory.get("model_type") as String))
-            revision.description=modelFileFormatService.extractDescription(getFilesFromMemory(workingMemory,true), ModelFormat.findByIdentifier(workingMemory.get("model_type") as String))
+            RTC revision = workingMemory.get("RevisionTC") as RTC
+            List<File> files = getFilesFromMemory(workingMemory, true)
+            revision.name = modelFileFormatService.extractName(files,
+                    ModelFormat.findByIdentifier(workingMemory.get("model_type") as String))
+            revision.description=modelFileFormatService.extractDescription(files,
+                    ModelFormat.findByIdentifier(workingMemory.get("model_type") as String))
         }
+
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
         void inferModelInfo(Map<String,Object> workingMemory) {
             if (!workingMemory.containsKey("RevisionTC")) {
                 createTransportObjects(workingMemory)
@@ -60,6 +112,12 @@ class SubmissionService {
             updateRevisionFromFiles(workingMemory)
         }
 
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         * @param modifications     a Map containing the user's modifications to the model information we extracted.
+         */
         void refineModelInfo(Map<String,Object> workingMemory, Map<String,Object> modifications) {
             RTC revision=workingMemory.get("RevisionTC") as RTC
             if (revision.name == modifications.get("new_name") as String) {
@@ -69,10 +127,38 @@ class SubmissionService {
             }
             handleModificationsToSubmissionInfo(workingMemory, modifications)
         }
-        
-        protected abstract void handleModificationsToSubmissionInfo(Map<String, Object> workingMemory, Map<String,Object> modifications);
+
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         * @param modifications     a Map containing the user's modifications to the model information we extracted.
+         */
+        protected abstract void handleModificationsToSubmissionInfo(Map<String, Object> workingMemory,
+                Map<String,Object> modifications);
+
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         * @param modifications     a Map containing the user's modifications to the model information we extracted.
+         */
         abstract void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications);
+
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
         abstract void handleSubmission(Map<String,Object> workingMemory);
+
+        /**
+         * Purpose
+         *
+         * @param mainFiles         a List of all the main files associated with the model.
+         * @param additionalFiles   a Map comprising any supplementary files and corresponding descriptions
+         *                          that are also part of the model that is submitted.
+         */
         protected List<RFTC> createRFTCList(List<File> mainFiles, Map<File,String> additionalFiles) {
             List<RFTC> returnMe=new LinkedList<RFTC>()
             mainFiles.each {
@@ -83,13 +169,29 @@ class SubmissionService {
             }
             returnMe
         }
+
+        /*
+         * Convenience method for creating 
+         * @link{net.biomodels.jummp.core.model.RepositoryFileTransportCommand} objects
+         */
         private RFTC createRFTC(File file, boolean isMain, String description) {
-            new RFTC(path: file.getCanonicalPath(), mainFile: isMain, userSubmitted: true, hidden: false, description:description)
+            new RFTC(path: file.getCanonicalPath(), mainFile: isMain, userSubmitted: true,
+                    hidden: false, description:description)
         }
-    
     }
 
+    /**
+     * Provides a concrete implementation of the @link{StateMachineStrategy} that is responsible 
+     * for handling the submission of new models to JUMMP.
+     */
     class NewModelStateMachine extends StateMachineStrategy {
+
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         * @param modifications     a Map describing the list of existing files that should be added or removed.
+         */
         void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
             if (workingMemory.containsKey("submitted_mains"))
             {
@@ -104,6 +206,12 @@ class SubmissionService {
                 workingMemory.put("repository_files", createRFTCList(mainFiles, additionalFiles))
             }
         }
+
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
         void performValidation(Map<String,Object> workingMemory) {
             List<File> modelFiles=getFilesFromMemory(workingMemory, false)
             modelFiles.each {
@@ -117,28 +225,56 @@ class SubmissionService {
                     workingMemory.put("validation_error", "Directory passed as input")
                 }
             }
+            boolean modelsAreValid = modelFileFormatService.validate(
+                        getFilesFromMemory(workingMemory, true),
+                        workingMemory.get("model_type") as String)
             if (!workingMemory.containsKey("model_type")) {
-                workingMemory.put("validation_error", "Missing Format Error: Validation could not be performed, format unknown")
+                workingMemory.put("validation_error",
+                    "Missing Format Error: Validation could not be performed, format unknown")
             }
-            else if (!modelFileFormatService.validate(getFilesFromMemory(workingMemory, true), workingMemory.get("model_type") as String)) {
+            else if (!modelsAreValid) {
+                //TODO be more specific to the user about what went wrong.
                 workingMemory.put("validation_error", "ModelValidationError")
             }
         }
 
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
         protected void createTransportObjects(Map<String,Object> workingMemory) {
             MTC model=new MTC() //no need for it currently, later on, store publication details
             RTC revision=new RTC(files: getRepFiles(workingMemory), model: model) 
             storeTCs(workingMemory, model, revision)
         }
 
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         * @param modifications     a Map containing the user's modifications to the model information we extracted.
+         */
         void handleModificationsToSubmissionInfo(Map<String, Object> workingMemory, Map<String,Object> modifications) {
             // todo
         }
 
-        void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {
+        /**
+         * Implementation of @link{StateMachineStrategy#updateRevisionComments(Map workingMemory, Map modifications)}
+         * This method is final so that subclasses can not alter its behaviour.
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         * @param modifications     a Map containing the user's modifications to the model information we extracted.
+         */
+        final void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {
             // does nothing
         }
 
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
         void handleSubmission(Map<String,Object> workingMemory) {
             List<RFTC> repoFiles = getRepFiles(workingMemory)
             MTC model=(MTC) workingMemory.get("ModelTC") as MTC
@@ -154,11 +290,22 @@ class SubmissionService {
         }
     }
 
+    /**
+     * Provides a concrete implementation of the @link{StateMachineStrategy} that is responsible 
+     * for handling the submission of updated versions of existing models.
+     */
     class NewRevisionStateMachine extends StateMachineStrategy {
         void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
         /*Include check to remove 'model_type' from memory if main file has been changed*/
-        
+
         }
+
+        /**
+         * Detects the format of the model and stores this information in the working memory
+         * using the key <tt>model_type</tt>
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
         void inferModelFormatType(Map<String, Object> workingMemory) {
             if (workingMemory.containsKey("reprocess_files")) {
                 super.inferModelFormatType(workingMemory)
@@ -166,7 +313,7 @@ class SubmissionService {
         }
         void performValidation(Map<String,Object> workingMemory) {
             if (workingMemory.containsKey("reprocess_files")) {
-                newmodel.performValidation(workingMemory)
+                newModel.performValidation(workingMemory)
             }
         }
 
@@ -193,20 +340,31 @@ class SubmissionService {
         }
     }
 
-    /* Called by model controller for adding or removing files from the working memory */
+
+    /**
+     * Called by ModelController for adding or removing files from the working memory
+     *
+     * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+     * @param modifications
+     */
     void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
-        /*  The second parameter needs to contain the following:
+        /*
+         * The second parameter needs to contain the following:
          *   a - The files to be *modified* - imported or removed
          *   b - Possibly a map from filename to properties including:
          *   whether this file is being added or removed, whether it is
-         *   the main file, and an optional description parameter */
+         *   the main file, and an optional description parameter
+         */
         getStrategyFromContext(workingMemory).handleFileUpload(workingMemory, modifications)
     }
 
+    /**
+     * Detects the format of the model and stores this information in the working memory
+     * using the key <tt>model_type</tt>
+     *
+     * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+     */
     void inferModelFormatType(Map<String, Object> workingMemory) {
-        /* infers the model type, adds it to the workingmemory
-         * needs to store the model type as 'model_type' in the
-         * working memory */
         getStrategyFromContext(workingMemory).inferModelFormatType(workingMemory)
     }
 
@@ -239,6 +397,11 @@ class SubmissionService {
         getStrategyFromContext(workingMemory).updateRevisionComments(workingMemory, modifications)
     }
 
+    /**
+     * Purpose
+     *
+     * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+     */
     void handleSubmission(Map<String,Object> workingMemory) {
         /*Create or update DOM objects as necessary*/
         getStrategyFromContext(workingMemory).handleSubmission(workingMemory)
@@ -249,7 +412,7 @@ class SubmissionService {
         if (isUpdateOnExistingModel) {
             return newrevision
         }
-        return newmodel
+        return newModel
     }
 
     private List<File> getFilesFromMemory(Map<String, Object> workingMemory, boolean filterMain) {
