@@ -65,11 +65,8 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         }
         protected void clickCancelEndFlow() {
             signalEvent("Cancel")
-            try {
-                def state=flowExecution.activeSession.state.id
-                fail("Shouldnt be able to access session state after aborting!")
-            }
-            catch(Exception happy) {}
+            assert !flowExecution.isActive()
+            assert flowExecution.outcome.getId() == "abort"
         }
     }
 
@@ -77,7 +74,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         void performTest() {
             def viewSelection = startFlow()
             signalEvent("Continue")
-            assert "uploadFiles" == flowExecution.activeSession.state.id
+            assertFlowState("uploadFiles")
             assert false == (Boolean) flowScope.workingMemory.get("isUpdateOnExistingModel")
         }
     }
@@ -108,11 +105,11 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         void performRemainingTest() {
             // empty files list shouldnt validate!
             signalEvent("Upload")
-            assert "uploadFiles" == flowExecution.activeSession.state.id
+            assertFlowState("uploadFiles")
             //random files should validate as unknown
             flowScope.workingMemory.put("repository_files", getRandomModel())
             signalEvent("Upload")
-            assert "displayModelInfo" == flowExecution.activeSession.state.id
+            assertFlowState("displayModelInfo")
             assert "UNKNOWN" == flowScope.workingMemory.get("model_type") as String
         }
     }
@@ -122,7 +119,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         // valid sbml should proceed
             flowScope.workingMemory.put("repository_files", getSbmlModel())
             signalEvent("Upload")
-            assert "displayModelInfo" == flowExecution.activeSession.state.id
+            assertFlowState("displayModelInfo")
             assert "SBML" == flowScope.workingMemory.get("model_type") as String
             RTC revision=flowScope.workingMemory.get("RevisionTC") as RTC
             //test name
@@ -133,7 +130,18 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             assert revision.description.contains("%% Default sampling time points")
             assert revision.description.contains("BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models")
 
+            //add tests for when displayModelInfo does something interesting
+            signalEvent("Continue")
+            assertFlowState("displaySummaryOfChanges")
+            
+            //add tests for when displayModelInfo does something interesting
+            signalEvent("Continue")
+            
+            assert !flowExecution.isActive()
+            assert flowExecution.outcome.getId() == "displayConfirmationPage"
+            
             //good enough
+            
         }
     }
 
@@ -168,6 +176,10 @@ class SubmissionFlowTests extends JummpIntegrationTest {
 
     private File bigModel() {
         return new File("test/files/BIOMD0000000272.xml")
+    }
+    
+    void assertFlowState(String state) {
+        assert state == flowExecution.activeSession.state.id
     }
 
     private File smallModel(String filename) {

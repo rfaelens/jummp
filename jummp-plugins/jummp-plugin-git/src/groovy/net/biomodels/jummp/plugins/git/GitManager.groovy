@@ -22,18 +22,19 @@ import java.util.UUID
  * @short GitManager provides the interface to a local git clone.
  *
  * This class is the concrete implementation of the VcsManager for git. It manages importing files,
- * updating files and retrieving files. The clone needs to be checkout before using this manager.
- * It uses the high level API of JGit for managing the clone.
+ * updating files and retrieving files. Each model is stored as a separate directory with its own repository.
+ * If a model repository does not exist, it is created. It uses the high level 
+ * API of JGit for managing the clone.
  *
- * GitManager uses a ReentrantLock in all of its method to make it thread safe. Nevertheless this does not ensure
- * that the clone is kept in a correct state. If two GitManager access the same clone, the lock cannot
- * protect and GitManager is also not able to detect whether the clone has been changed outside the class.
- * It is important to let the instance of the GitManager be the only resource accessing the clone!
- * GitManager should be able to handle situations that the remote repository changes. Before any change to the
- * clone is done, a pull from remote repository is performed to ensure that the later push won't fail.
- * Of course there is still the chance of race conditions. The best way is to not interfer at all with the
- * repository managed by the GitManger.
+ * GitManager uses ReentrantLocks in all of its method to make it thread safe
+ * These locks are at the level of model repositories. 
+ * Nevertheless this does not ensure that the clone is kept in a correct state. 
+ * If two GitManager access the same model, the lock cannot protect and 
+ * GitManager is also not able to detect whether the model has been changed 
+ * outside the class. It is important to let the instance of the GitManager be 
+ * the only resource accessing the model repositories! 
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class GitManager implements VcsManager {
 
