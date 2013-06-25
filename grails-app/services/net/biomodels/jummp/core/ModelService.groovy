@@ -38,8 +38,8 @@ import org.springframework.security.core.userdetails.UserDetails
  * @see Model
  * @see Revision
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
- * @author Mihai Glonț <mglont@ebi.ac.uk>
- * @date 20130614
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @date 20130625
  */
 @SuppressWarnings("GroovyUnusedCatchParameter")
 class ModelService {
@@ -534,9 +534,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         // TODO: to support anonymous submissions this method has to be changed
         if (Model.findByName(meta.name)) {
             final ModelTransportCommand MODEL = Model.findByName(meta.name).toCommandObject()
-            final String err = "There is already a Model with name ${meta.name}".toString()
-            log.error(err)
-            throw new ModelException(meta, err)
+            final String msg = "There is already a Model with name ${meta.name}".toString()
+            log.warn(msg)
+            /*log.error(msg)
+            throw new ModelException(meta, msg)*/
         }
         if (!repoFiles || repoFiles.size() == 0) {
             log.error("No files were provided as part of the submission of model ${meta.properties}")
