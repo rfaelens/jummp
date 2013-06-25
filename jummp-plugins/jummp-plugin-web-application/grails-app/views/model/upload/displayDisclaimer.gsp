@@ -12,8 +12,8 @@
         <g:form>
             <div class="dialog">
                 <div class="buttons">
-                    <g:submitButton name="Continue" value="Continue" />
                     <g:submitButton name="Cancel" value="Abort" />
+                    <g:submitButton name="Continue" value="Continue" />
                 </div>
             </div>
         </g:form>

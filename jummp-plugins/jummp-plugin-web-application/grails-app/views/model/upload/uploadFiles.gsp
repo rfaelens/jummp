@@ -38,8 +38,9 @@
                     </table>
                 </fieldset>
                 <div class="buttons">
+                    <g:submitButton name="Cancel" value="Abort" />
+                    <g:submitButton name="Back" value="Back" />
                     <g:submitButton name="Upload" value="Upload" />
-                    <g:submitButton name="Cancel" value="Cancel" />
                 </div>
             </div>
         </g:uploadForm>
