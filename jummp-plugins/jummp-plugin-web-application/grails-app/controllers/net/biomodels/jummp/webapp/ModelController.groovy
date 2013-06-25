@@ -22,6 +22,10 @@ class ModelController {
      * Dependency injection of submissionService
      */
     def submissionService
+    /**
+     * Dependency Injection of grailsApplication
+     */
+    def grailsApplication
 
     def show = {
         [id: params.id]
@@ -47,13 +51,30 @@ class ModelController {
             on("Cancel").to "abort"
         }
         uploadFiles {
-            on("Upload") { UploadFilesCommand cmd ->
-                if (cmd.hasErrors()) {
-                    return error()
-                }
-                else {
-                    Map<String, Object> inputs = new HashMap<String, Object>()
+            on("Upload") {
+                withForm {
+                    def inputs = new HashMap<String, Object>()
+
                     def mainFile = request.getFile('mainFile')
+                    if (mainFile.empty) {
+                        flash.message = "Please select a main file"
+                        render(uploadFiles)
+                        return
+                    }
+
+                    def uuid = UUID.randomUUID().toString()
+                    //pray that exchangeDirectory has been defined
+                    def exchangeDir =
+                            grailsApplication.config.jummp.vcs.exchangeDirectory
+                    def sep = File.separator
+                    def filePath = exchangeDir + sep + uuid + sep + f.getName()
+                    println "transferring $filePath"
+                    def transferredFile = new File(filePath)
+                    f.transferTo(transferredFile)
+                    //do something with request.getFileMap(), but what?
+                    def repoFiles = 
+                            createRFTCList(transferredFile.canonicalPath, [])
+                    flow.workingMemory["repository_files"] = repoFiles
                     // add files to inputs here as appropriate
                     submissionService.handleFileUpload(flow.workingMemory,inputs)
                 }
@@ -66,7 +87,7 @@ class ModelController {
         performValidation {
             action {
                 //temporarily add an sbml model to allow execution to proceed
-                flow.workingMemory.put("repository_files", getSbmlModel())
+                //flow.workingMemory.put("repository_files", getSbmlModel())
                 if (!flow.workingMemory.containsKey("model_type")) {
                     submissionService.inferModelFormatType(flow.workingMemory)
                 }
@@ -151,7 +172,7 @@ class ModelController {
     }
 
     private List<RFTC> createRFTCList(File mainFile, List<File> additionalFiles) {
-        List<RFTC> returnMe=new LinkedList<RFTC>()
+        def returnMe = new LinkedList<RFTC>()
         returnMe.add(createRFTC(mainFile, true))
         additionalFiles.each {
             returnMe.add(createRFTC(it, false))
