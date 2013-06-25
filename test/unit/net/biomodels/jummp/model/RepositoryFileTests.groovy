@@ -66,6 +66,7 @@ class RepositoryFileTests {
         assertEquals("maxSize", repositoryFile2.errors["description"])
 
         //main submission entries cannot be hidden from the user
+        /* disabled because the corresponding constraint is temporarily commented out.
         def mainFile = createFile("target/vcs/aaa/model1/m1b.xml")
         def rf = new RepositoryFile(path: mainFile.absolutePath, description: "Silly model",
                 mainFile: true, mimeType: "", hidden: true, revision: new Revision())
@@ -77,6 +78,7 @@ class RepositoryFileTests {
         rf.mainFile = true
         rf.hidden = false
         assertTrue(rf.validate())
+        */
     }
 
     private File createFile(String path) {
