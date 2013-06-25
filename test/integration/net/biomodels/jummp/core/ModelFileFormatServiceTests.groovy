@@ -41,12 +41,11 @@ class ModelFileFormatServiceTests {
     void testInfer() {
         // for null, there is no format
         assertNull(modelFileFormatService.inferModelFormat(null))
-        
+
         // an unknown format file
         File validUnknown = new File("target/sbml/unknown")
         validUnknown.setText('What is my name')
         assertEquals(modelFileFormatService.inferModelFormat([validUnknown]).identifier, "UNKNOWN")
-
 
         // an SBML file should be detected. Make less restrictive to accept invalid SBML files
         File validSbml = new File("target/sbml/validSbml")
@@ -73,21 +72,17 @@ class ModelFileFormatServiceTests {
 </sbml>''')
         assertEquals(modelFileFormatService.inferModelFormat([validSbml]).identifier, "SBML")
     }
-    
-    
-    
-    
+
     @Test
     void testValidate() {
         grailsApplication.config.jummp.plugins.sbml.validation = true
         // for unknown file type this should evaluate to false
         assertFalse(modelFileFormatService.validate(null, ModelFormat.findByIdentifier("UNKNOWN")))
-        
+
         // a valid unknown format file
         File validUnknown = new File("target/sbml/unknown")
         validUnknown.setText('What is my name')
         assertTrue(modelFileFormatService.validate([validUnknown], ModelFormat.findByIdentifier("UNKNOWN")))
-
 
         // for an invalid sbml file it should also evaluate to false
         File invalidSbml = new File("target/sbml/unknown")
