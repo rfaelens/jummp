@@ -12,6 +12,14 @@
         </style>
     </head>
     <body>
+        <g:hasErrors>
+            <div class="errors">
+                <g:renderErrors/>
+                <g:if test="${flash.invalidToken}">
+                    Please do not submit your model multiple times.
+                </g:if>
+            </div>
+        </g:hasErrors>
         <h1>Upload Files</h1>
         <p style="padding-bottom:1em">Can I has files plz?</p>
         <g:uploadForm id="fileUpload" useToken="true" novalidate="false" autocomplete="false">

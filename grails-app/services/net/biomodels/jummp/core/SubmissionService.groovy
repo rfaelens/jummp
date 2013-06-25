@@ -420,6 +420,7 @@ class SubmissionService {
         if (filterMain) {
             repFiles = repFiles.findAll { it.mainFile } //filter out non-main files
         }
+        println "looking at ${repFiles.properties}"
         return getFilesFromRepFiles(repFiles)
     }
 
