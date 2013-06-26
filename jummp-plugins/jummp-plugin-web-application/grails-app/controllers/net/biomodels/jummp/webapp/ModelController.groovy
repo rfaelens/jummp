@@ -58,8 +58,7 @@ class ModelController {
                     def mainFile = request.getFile('mainFile')
                     if (mainFile.empty) {
                         flash.message = "Please select a main file"
-                        render(uploadFiles)
-                        return
+                        //todo
                     }
 
                     def uuid = UUID.randomUUID().toString()
@@ -67,14 +66,16 @@ class ModelController {
                     def exchangeDir =
                             grailsApplication.config.jummp.vcs.exchangeDirectory
                     def sep = File.separator
-                    def filePath = exchangeDir + sep + uuid + sep + f.getName()
+                    new File(exchangeDir + sep + uuid).mkdirs()
+                    def filePath = exchangeDir + sep + uuid + sep + mainFile.getName()
                     println "transferring $filePath"
                     def transferredFile = new File(filePath)
-                    f.transferTo(transferredFile)
+                    mainFile.transferTo(transferredFile)
                     //do something with request.getFileMap(), but what?
-                    def repoFiles = 
-                            createRFTCList(transferredFile.canonicalPath, [])
-                    flow.workingMemory["repository_files"] = repoFiles
+                    def mains = [transferredFile]
+                    def additionals = [:]
+                    flow.workingMemory["submitted_mains"] = mains
+                    flow.workingMemory["submitted_additionals"] = additionals
                     // add files to inputs here as appropriate
                     submissionService.handleFileUpload(flow.workingMemory,inputs)
                 }

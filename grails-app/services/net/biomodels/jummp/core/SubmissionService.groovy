@@ -203,7 +203,7 @@ class SubmissionService {
                 else {
                     additionals=new HashMap<File,String>()
                 }
-                workingMemory.put("repository_files", createRFTCList(mainFiles, additionalFiles))
+                workingMemory.put("repository_files", createRFTCList(mainFiles, additionals))
             }
         }
 
