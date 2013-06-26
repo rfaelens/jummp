@@ -37,13 +37,22 @@ import java.util.UUID
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class GitManager implements VcsManager {
-
+    // uid for generating unique checkout directory names
     private static final AtomicInteger uid = new AtomicInteger(0)
+    // locks to ensure model directories are not accessed concurrently
     private final ConcurrentHashMap<String, ReentrantLock> locks= new ConcurrentHashMap<String, ReentrantLock>();
+    // cache of initialised repositories
     private final Map<File, Git>  initedRepositories=Collections.synchronizedMap(new LruCache<File, Git>(20));
+    // exchange directory
     private File exchangeDirectory
+    // legacy parameter specifying remoteness. Probably useless.
     private boolean hasRemote
 
+    /* 
+     * This internal class is a standard implementation of a cached hashmap
+     * of fixed size, to avoid creating the repository related structures
+     * repeatedly with the standard LRU caching policy
+     * */
     class LruCache<A, B> extends LinkedHashMap<A, B> {
         private final int maxEntries;
 
@@ -74,6 +83,10 @@ class GitManager implements VcsManager {
         }
     }
 
+    /**
+     * Initialises the GitManager. Sets the exchangedirectory for temporary
+     * storage of model files
+     **/
     public void init(File exchangeDirectory) {
         this.exchangeDirectory = exchangeDirectory
     }
@@ -84,6 +97,14 @@ class GitManager implements VcsManager {
         return ""
     }
     
+    /**
+     * Lock a model repository
+     *
+     * Checks whether a lock for the directory exists. If it does not exist
+     * then it associates a lock with the model directory. It then acquires
+     * the model directory lock
+     * @param modelDirectory The directory to lock
+     */
     private void lockModelRepository(File modelDirectory)
     {
         if (!locks.containsKey(modelDirectory.name))
@@ -94,6 +115,13 @@ class GitManager implements VcsManager {
         locks.get(modelDirectory.name).lock();
     }
     
+    /**
+     * Unlock a model repository
+     *
+     * Unlocks the model directory, and if no other threads are waiting on it
+     * the lock is removed from the locks container
+     * @param modelDirectory The directory to unlock
+     */
     private void unlockModelRepository(File modelDirectory)
     {
         ReentrantLock lock=locks.get(modelDirectory.name)
@@ -101,6 +129,14 @@ class GitManager implements VcsManager {
         lock.unlock()
     }
     
+    /**
+     * Initialise a model directory
+     *
+     * Creates a repository in the model directory if the directory is valid
+     * and the repository does not already exist. Caches the repository data
+     * structures.
+     * @param modelDirectory The model directory
+     */
 
     private void initRepository(File modelDirectory) {
         lockModelRepository(modelDirectory)
@@ -129,6 +165,7 @@ class GitManager implements VcsManager {
             String branchName
             String fullBranch = repository.getFullBranch()
             
+            //create the repository if it doesnt exist
             if (!fullBranch)  {
                 
                 git=createGitRepo(modelDirectory)
@@ -138,6 +175,8 @@ class GitManager implements VcsManager {
             }
             branchName = fullBranch.substring(Constants.R_HEADS.length())
             Config repoConfig = repository.getConfig()
+            
+            //this bit is probably unnecessary
             final String remote = repoConfig.getString(
                 ConfigConstants.CONFIG_BRANCH_SECTION, branchName,
                 ConfigConstants.CONFIG_KEY_REMOTE)
@@ -149,6 +188,10 @@ class GitManager implements VcsManager {
         }
     }
 
+    /*
+     * Equivalent to running git init on the directory supplied.
+     * @param modelDirectory The model directory
+     **/
     private Git createGitRepo(File directory) {
         Git git=null;
         InitCommand initCommand = Git.init();
@@ -157,6 +200,15 @@ class GitManager implements VcsManager {
         return git
     }
 
+    /*
+     * Updates a model with the suppled files and commit message
+     * 
+     * Locks model, initialises the repository if necessary and adds
+     * the supplied files to the repository with the supplied message
+     * @param modelDirectory The model directory
+     * @param files A list of files to be put into the repository
+     * @param commitMessage The commit message for this revision
+     **/
     public String updateModel(File modelDirectory, List<File> files, String commitMessage) {
         String revision = null
         lockModelRepository(modelDirectory)
@@ -172,11 +224,25 @@ class GitManager implements VcsManager {
         return revision
     }
 
+    /*
+     * Updates a model with the suppled files and default commit message
+     * 
+     * Overload of updateModel with a default message
+     * @param modelDirectory The model directory
+     * @param files A list of files to be put into the repository
+     **/
     public String updateModel(File modelDirectory, List<File> files) {
         return updateModel(modelDirectory, files, "Update of ${modelDirectory.name}")
     }
     
     
+    /*
+     * Convenience function for copying files from a given directory
+     * to exchange, and passing the file objects back
+     * 
+     * @param modelDirectory The model directory where files are to be copied from
+     * @param addHere a list object where the created file objects are stored
+     **/
     private void downloadFiles(File modelDirectory, List<File> addHere)
     {
         File[] repFiles=modelDirectory.listFiles();
@@ -195,13 +261,28 @@ class GitManager implements VcsManager {
 
     }
 
-
+    /*
+     * Retrieves files associated with the latest revision of a model
+     * 
+     * Same as calling retrieveModel(modelDirectory, null)
+     * @param modelDirectory The model directory
+     **/
     public List<File> retrieveModel(File modelDirectory)
     {
         return retrieveModel(modelDirectory, null);
     }
 
-
+    /*
+     * Retrieves files associated with the specified revision of a model
+     * 
+     * Locks model directory. If the current revision is requested (by specifying
+     * null as the revision) the files currently in the model directory are
+     * copied into the exchange directory. If an earlier revision is requested
+     * the repository is first set to the requested revision, the files are downloaded
+     * to exchange, before the repository is set back to the latest revision.
+     * @param modelDirectory The model directory
+     * @param revision The revision of the model requested
+     **/
     public List<File> retrieveModel(File modelDirectory, String revision) {
         List<File> returnedFiles = new LinkedList<File>()
         lockModelRepository(modelDirectory)
@@ -233,6 +314,13 @@ class GitManager implements VcsManager {
         return returnedFiles
     }
 
+    /*
+     * Retrieves the revisions associated with the model by looking at the git log
+     * 
+     * Locks model directory. Iterates through the git log, adding the revision
+     * id associated with each commit to the returned list.
+     * @param modelDirectory The model directory
+     **/
     public List<String> getRevisions(File modelDirectory)
     {
         List<String> myList=new LinkedList<String>();
@@ -250,6 +338,16 @@ class GitManager implements VcsManager {
         return myList
     }
 
+    /*
+     * Multi-file per model version of legacy remote repository implementation
+     * 
+     * This is currently untested. The logic is the same as the single repository
+     * implementation, however it is currently only acting on the cached repositories.
+     * DO NOT USE AS IS FOR REMOTE REPOSITORIES. Untested mapping of legacy code
+     * to new data structures, mainly for the purposes of keeping interfaces 
+     * current and compiling.
+     * @param modelDirectory The model directory
+     **/
     public void updateWorkingCopy(File modelDirectory) {
         lockModelRepository(modelDirectory)
         try {
@@ -271,9 +369,10 @@ class GitManager implements VcsManager {
      *
      * In git there is no difference between initial import and update of a file.
      * This method contains the merged implementation for both import and update.
-     * It first performs a git pull, copies the file, does git add, git commit and finally a push
-     * @param source The file to copy into the clone
-     * @param destination The location inside the clone
+     * It locks the model directory, initialises if necessary
+     * copies the files, does git add, git commit and finally a push
+     * @param modelDirectory The model directory
+     * @param files The files to copy into the directory
      * @param commitMessage The commit message 
      */
     private String handleAddition(File modelDirectory, List<File> files, String commitMessage) {
