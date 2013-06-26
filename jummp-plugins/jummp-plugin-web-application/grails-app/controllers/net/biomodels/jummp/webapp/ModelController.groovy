@@ -52,38 +52,41 @@ class ModelController {
         }
         uploadFiles {
             on("Upload") {
-                withForm {
-                    def inputs = new HashMap<String, Object>()
+                //withForm {
+                def inputs = new HashMap<String, Object>()
 
-                    def mainFile = request.getFile('mainFile')
-                    if (mainFile.empty) {
-                        flash.message = "Please select a main file"
-                        render(uploadFiles)
-                        return
-                    }
-
-                    def uuid = UUID.randomUUID().toString()
-                    //pray that exchangeDirectory has been defined
-                    def exchangeDir =
-                            grailsApplication.config.jummp.vcs.exchangeDirectory
-                    def sep = File.separator
-                    def filePath = exchangeDir + sep + uuid + sep + f.getName()
-                    println "transferring $filePath"
-                    def transferredFile = new File(filePath)
-                    f.transferTo(transferredFile)
-                    //do something with request.getFileMap(), but what?
-                    def repoFiles = 
-                            createRFTCList(transferredFile.canonicalPath, [])
-                    flow.workingMemory["repository_files"] = repoFiles
-                    // add files to inputs here as appropriate
-                    submissionService.handleFileUpload(flow.workingMemory,inputs)
+                def mainFile = request.getFile('mainFile')
+                if (mainFile.empty) {
+                    flash.message = "Please select a main file"
+                    return error()
                 }
+
+                def uuid = UUID.randomUUID().toString()
+                //pray that exchangeDirectory has been defined
+                def exchangeDir =
+                        grailsApplication.config.jummp.vcs.exchangeDirectory
+                def sep = File.separator
+                def submission_folder = new File(exchangeDir + uuid)
+                submission_folder.mkdirs()
+                def filePath =
+                    submission_folder.canonicalPath + mainFile.getOriginalName()
+                def transferredFile = new File(filePath)
+                mainFile.transferTo(transferredFile)
+                //do something with request.getFileMap(), but what?
+                def mains = [transferredFile]
+                def additionals = [:]
+                flow.workingMemory["submitted_mains"] = mains
+                flow.workingMemory["submitted_additionals"] = additionals
+                // add files to inputs here as appropriate
+                submissionService.handleFileUpload(flow.workingMemory,inputs)
+                //}
             }.to "performValidation"
             on("ProceedWithoutValidation"){
             }.to "inferModelInfo"
             on("Cancel").to "abort"
             on("Back"){}.to "displayDisclaimer"
         }
+
         performValidation {
             action {
                 //temporarily add an sbml model to allow execution to proceed

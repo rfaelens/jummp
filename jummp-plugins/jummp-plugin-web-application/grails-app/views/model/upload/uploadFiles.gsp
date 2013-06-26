@@ -22,7 +22,7 @@
         </g:hasErrors>
         <h1>Upload Files</h1>
         <p style="padding-bottom:1em">Can I has files plz?</p>
-        <g:uploadForm id="fileUpload" useToken="true" novalidate="false" autocomplete="false">
+        <g:uploadForm id="fileUpload" novalidate="false" autocomplete="false">
             <div class="dialog">
                 <table class="formtable">
                     <tbody>
