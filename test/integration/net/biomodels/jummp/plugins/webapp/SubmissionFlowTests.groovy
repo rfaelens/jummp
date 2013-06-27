@@ -1,5 +1,8 @@
 package net.biomodels.jummp.plugins.webapp
 
+import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
+import org.springframework.mock.web.MockMultipartHttpServletRequest
+import org.springframework.web.context.request.RequestContextHolder
 import static org.junit.Assert.*
 import org.junit.*
 import grails.test.WebFlowTestCase
@@ -7,6 +10,7 @@ import net.biomodels.jummp.webapp.ModelController
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.core.JummpIntegrationTest
+import org.codehaus.groovy.grails.plugins.testing.GrailsMockMultipartFile
 
 class SubmissionFlowTests extends JummpIntegrationTest {
     protected void setUp() {
@@ -57,6 +61,17 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     abstract class FlowUnitTest extends WebFlowTestCase {
         def getFlow() { new ModelController().uploadFlow }
         abstract void performTest()
+        
+        /*
+         * WebFlowTestCase doesnt support file uploads. Modify request
+         * property to change that.  
+        **/
+        protected void setUp() {
+           super.setUp()
+           mockRequest = new MockMultipartHttpServletRequest()
+           RequestContextHolder.setRequestAttributes(new GrailsWebRequest(mockRequest,mockResponse,mockServletContext,applicationContext))
+       }
+        
         void runTest()
         {
             setUp()
@@ -67,6 +82,18 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             signalEvent("Cancel")
             assert "abort" == flowExecutionOutcome.id
         }
+        protected void assertFlowState(String state) {
+            assert state == flowExecution.activeSession.state.id
+        }
+        
+        protected void addFileToRequest(File modelFile, String formID, String contentType) {
+            final file = new GrailsMockMultipartFile(formID, 
+                                                     modelFile.getName(),
+                                                     "application/xml",
+                                                     modelFile.getBytes())
+            (mockRequest as MockMultipartHttpServletRequest).addFile(file)
+        }
+
     }
 
     class TestDisclaimerContinue extends FlowUnitTest {
@@ -74,7 +101,9 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             def viewSelection = startFlow()
             signalEvent("Continue")
             assertFlowState("uploadFiles")
-            assert false == (Boolean) flowScope.workingMemory.get("isUpdateOnExistingModel")
+            assert false == (Boolean) flowScope.
+                                        workingMemory.
+                                        get("isUpdateOnExistingModel")
         }
     }
 
@@ -106,6 +135,9 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             signalEvent("Upload")
             assertFlowState("uploadFiles")
             //random files should validate as unknown
+            addFileToRequest(getFileForTest("modelfile.xml","hello world"), 
+                            "mainFile", 
+                            "application/xml")
             flowScope.workingMemory.put("repository_files", getRandomModel())
             signalEvent("Upload")
             assertFlowState("displayModelInfo")
@@ -116,7 +148,10 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     class TestSubmitSBML extends TestUploadFiles {
         void performRemainingTest() {
         // valid sbml should proceed
-            flowScope.workingMemory.put("repository_files", getSbmlModel())
+            addFileToRequest(bigModel(), "mainFile", "application/xml")
+            //add additional files here when ready!
+            
+//            flowScope.workingMemory.put("repository_files", getSbmlModel())
             signalEvent("Upload")
             assertFlowState("displayModelInfo")
             assert "SBML" == flowScope.workingMemory.get("model_type") as String
@@ -177,10 +212,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         return new File("test/files/BIOMD0000000272.xml")
     }
     
-    void assertFlowState(String state) {
-        assert state == flowExecution.activeSession.state.id
-    }
-
+    
     private File smallModel(String filename) {
         return getFileForTest(filename, '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">

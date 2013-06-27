@@ -56,7 +56,7 @@ class ModelController {
                 def inputs = new HashMap<String, Object>()
 
                 def mainFile = request.getFile('mainFile')
-                if (mainFile.empty) {
+                if (!mainFile || mainFile.empty) {
                     flash.message = "Please select a main file"
                     return error()
                 }
@@ -66,17 +66,19 @@ class ModelController {
                 def exchangeDir =
                         grailsApplication.config.jummp.vcs.exchangeDirectory
                 def sep = File.separator
-                def submission_folder = new File(exchangeDir + uuid)
+                def submission_folder = new File(exchangeDir + sep + uuid)
                 submission_folder.mkdirs()
                 def filePath =
-                    submission_folder.canonicalPath + mainFile.getOriginalName()
+                    submission_folder.canonicalPath + sep + mainFile.getOriginalFilename()
                 def transferredFile = new File(filePath)
-                mainFile.transferTo(transferredFile)
+                transferredFile.append(mainFile.bytes)
+                //mainFile.transferTo(transferredFile)
                 //do something with request.getFileMap(), but what?
                 def mains = [transferredFile]
                 def additionals = [:]
                 flow.workingMemory["submitted_mains"] = mains
                 flow.workingMemory["submitted_additionals"] = additionals
+                flow.workingMemory["file_passed"] = mainFile
                 // add files to inputs here as appropriate
                 submissionService.handleFileUpload(flow.workingMemory,inputs)
                 //}
