@@ -65,8 +65,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         }
         protected void clickCancelEndFlow() {
             signalEvent("Cancel")
-            assert !flowExecution.isActive()
-            assert flowExecution.outcome.getId() == "abort"
+            assert "abort" == flowExecutionOutcome.id
         }
     }
 
