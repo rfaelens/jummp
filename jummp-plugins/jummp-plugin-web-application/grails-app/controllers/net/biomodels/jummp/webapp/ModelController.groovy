@@ -77,7 +77,6 @@ class ModelController {
                 def additionals = [:]
                 flow.workingMemory["submitted_mains"] = mains
                 flow.workingMemory["submitted_additionals"] = additionals
-                flow.workingMemory["file_passed"] = mainFile
                 // add files to inputs here as appropriate
                 submissionService.handleFileUpload(flow.workingMemory,inputs)
                 //}
