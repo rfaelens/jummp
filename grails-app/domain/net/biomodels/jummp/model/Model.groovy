@@ -47,7 +47,7 @@ class Model implements Serializable {
 
     static constraints = {
         vcsIdentifier(nullable: false, blank: false, unique: true)
-        name(nullable: false, /*unique: true,*/ blank: false)
+        name(nullable: false, /*unique: true,*/ blank: true)
         revisions(nullable: false, validator: { revs ->
             return !revs.isEmpty()
         })

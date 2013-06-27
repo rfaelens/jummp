@@ -11,10 +11,29 @@ import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.core.JummpIntegrationTest
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockMultipartFile
+import org.apache.commons.io.FileUtils
+
 
 class SubmissionFlowTests extends JummpIntegrationTest {
-    protected void setUp() {
+    
+    def grailsApplication
+    def fileSystemService
+    
+    @Before
+    void setUp() {
         super.createUserAndRoles()
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        File parentLocation = new File(grailsApplication.config.jummp.vcs.workingDirectory )
+        parentLocation.mkdir()
+        fileSystemService.root = parentLocation
+        fileSystemService.currentModelContainer = parentLocation.absolutePath+File.separator+"ttt"
+    }
+    
+    @After
+    void tearDown() {
+        FileUtils.deleteDirectory(new File("target/vcs/git"))
+        FileUtils.deleteDirectory(new File("target/vcs/exchange"))
     }
 
     @Test
@@ -171,9 +190,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             //add tests for when displayModelInfo does something interesting
             signalEvent("Continue")
             
-            assert !flowExecution.isActive()
-            assert flowExecution.outcome.getId() == "displayConfirmationPage"
-            
+            assert flowExecutionOutcome.id == "displayConfirmationPage"
             //good enough
             
         }

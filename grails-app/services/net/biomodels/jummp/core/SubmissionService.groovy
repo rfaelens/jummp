@@ -283,7 +283,8 @@ class SubmissionService {
             model.name=revision.name
             model.format=ModelFormat.findByIdentifier(workingMemory.get("model_type") as String).toCommandObject()
             model.comment="Import of ${revision.name}".toString()
-            modelService.uploadModelAsList(repoFiles, model)
+            workingMemory.put("model_id",
+                modelService.uploadModelAsList(repoFiles, model).id)
         }
     }
 

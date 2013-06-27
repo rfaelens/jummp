@@ -153,11 +153,15 @@ class ModelController {
         saveModel {
             action {
                 submissionService.handleSubmission(flow.workingMemory)
+                session.result_submission=flow.workingMemory.get("model_id")
             }
             on("success").to "displayConfirmationPage"
             on("error").to "displayErrorPage"
         }
         displayConfirmationPage()
+/*        displayConfirmationPage {
+            render(view:"displayConfirmationPage", model: [model_id: flow.workingMemory.get("model_id")])
+        }*/
         displayErrorPage()
         abort()
     }
