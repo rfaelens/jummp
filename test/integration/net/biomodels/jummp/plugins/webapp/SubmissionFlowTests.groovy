@@ -89,7 +89,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         protected void addFileToRequest(File modelFile, String formID, String contentType) {
             final file = new GrailsMockMultipartFile(formID, 
                                                      modelFile.getName(),
-                                                     "application/xml",
+                                                     contentType,
                                                      modelFile.getBytes())
             (mockRequest as MockMultipartHttpServletRequest).addFile(file)
         }
