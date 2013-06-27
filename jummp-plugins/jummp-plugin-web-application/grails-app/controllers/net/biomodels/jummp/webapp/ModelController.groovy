@@ -7,7 +7,6 @@ import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.webapp.UploadFilesCommand
 
 class ModelController {
     /**
@@ -68,8 +67,8 @@ class ModelController {
                 def sep = File.separator
                 def submission_folder = new File(exchangeDir + sep + uuid)
                 submission_folder.mkdirs()
-                def filePath =
-                    submission_folder.canonicalPath + sep + mainFile.getOriginalFilename()
+                def filePath = submission_folder.canonicalPath + 
+                                sep + mainFile.getOriginalFilename()
                 def transferredFile = new File(filePath)
                 transferredFile.append(mainFile.bytes)
                 //mainFile.transferTo(transferredFile)
