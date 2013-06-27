@@ -69,7 +69,7 @@ class ModelController {
                 def submission_folder = new File(exchangeDir + uuid)
                 submission_folder.mkdirs()
                 def filePath =
-                    submission_folder.canonicalPath + mainFile.getOriginalName()
+                    submission_folder.canonicalPath + mainFile.getOriginalFilename()
                 def transferredFile = new File(filePath)
                 mainFile.transferTo(transferredFile)
                 //do something with request.getFileMap(), but what?
