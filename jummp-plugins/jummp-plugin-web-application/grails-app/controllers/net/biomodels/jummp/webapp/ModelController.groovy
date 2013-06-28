@@ -152,8 +152,13 @@ class ModelController {
         }
         saveModel {
             action {
-                submissionService.handleSubmission(flow.workingMemory)
-                session.result_submission=flow.workingMemory.get("model_id")
+                try {
+                    submissionService.handleSubmission(flow.workingMemory)
+                    session.result_submission=flow.workingMemory.get("model_id")
+                }
+                catch(Exception ignore) {
+                    error()
+                }
             }
             on("success").to "displayConfirmationPage"
             on("error").to "displayErrorPage"

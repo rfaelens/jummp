@@ -7,6 +7,7 @@ import net.biomodels.jummp.core.events.RevisionCreatedEvent
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.vcs.VcsException
@@ -514,6 +515,192 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         throw new ModelException(meta, "The new version of the model does not have any files.")
     }
 
+    
+    /**
+    * Creates a new Model and stores it in the VCS. Stripped down version suitable
+    * for calling from SubmissionService, where model has already been validated
+    *
+    * Stores the @p modelFile as a new file in the VCS and creates a Model for it.
+    * The Model will have one Revision attached to it. The MetaInformation for this
+    * Model is taken from @p meta. The user who uploads the Model becomes the owner of
+    * this Model. The new Model is not visible to anyone except the owner.
+    * @param repoFiles The list of command objects corresponding to the files of the model that is to be stored in the VCS.
+    * @param meta Meta Information to be added to the model
+    * @return The new created Model, or null if the model could not be created
+    * @throws ModelException If Model File is not valid or the Model could not be stored in VCS
+    **/
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostLogging(LoggingEventType.CREATION)
+    @Profiled(tag="modelService.uploadValidatedModel")
+    public Model uploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles, RevisionTransportCommand rev)
+            throws ModelException {
+        // TODO: to support anonymous submissions this method has to be changed
+        if (Model.findByName(rev.model.name)) {
+            final ModelTransportCommand MODEL = Model.findByName(rev.model.name).toCommandObject()
+            final String msg = "There is already a Model with name ${rev.model.name}".toString()
+            log.warn(msg)
+            /*log.error(msg)
+            throw new ModelException(rev.model, msg)*/
+        }
+        Model model = new Model(name: rev.model.name)
+        List<File> modelFiles = []
+        for (rf in repoFiles) {
+            final String path = rf.path
+            final def f = new File(path)
+            modelFiles.add(f)
+        }
+        ModelFormat format=ModelFormat.findByIdentifier(rev.model.format.identifier)
+
+        // vcs identifier is upload date + name - this should by all means be unique
+        String pathPrefix =
+                fileSystemService.findCurrentModelContainer() + File.separator
+        String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
+        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(model.name).
+                append(File.separator).toString()
+        boolean success = new File(modelPath).mkdirs()
+        if (!success) {
+            def err = "Cannot create the directory where the ${model.name} should be stored"
+            log.error(err)
+            throw new ModelException(rev.model, err)
+        }
+        model.vcsIdentifier = modelPath
+        //model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
+
+        Revision revision = new Revision(model: model,
+                revisionNumber: 1,
+                owner: User.findByUsername(springSecurityService.authentication.name),
+                minorRevision: false,
+                validated: rev.validated,
+                name: rev.name,
+                description: rev.description,
+                comment: rev.comment,
+                uploadDate: new Date(),
+                format: ModelFormat.findByIdentifier(rev.model.format.identifier))
+
+        // keep a list of RFs closeby, as we may need to discard all of them
+        List<RepositoryFile> domainObjects = []
+        for (rf in repoFiles) {
+            /*
+             * only store the name of the file in the database, as the location can change and
+             * we generate the correct path when the RepositoryFileTransportCommand wrapper is created
+             */
+            String fileName = rf.path.split(File.separator).last()
+            final def domain = new RepositoryFile(path: rf.path, description: rf.description,
+                    mimeType: rf.mimeType, revision: revision)
+            if (rf.mainFile) {
+                domain.mainFile = rf.mainFile
+            }
+            if (rf.userSubmitted) {
+                domain.userSubmitted = rf.userSubmitted
+            }
+            if (rf.hidden) {
+                domain.hidden = rf.hidden
+            }
+            if (!domain.validate()) {
+                def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the creation of model ${rev.model}.")
+                msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
+                log.error(msg)
+                throw new ModelException(rev.model, "The submission appears to contain invalid file ${fileName}. Please review it and try again.")
+            } else {
+                domainObjects.add(domain)
+            }
+        }
+
+        try {
+            revision.vcsId = vcsService.importModel(model, modelFiles)
+        } catch (VcsException e) {
+            revision.discard()
+            domainObjects.each { it.discard() }
+            model.discard()
+            //TODO undo the addition of the files to the VCS.
+            def errMsg = new StringBuffer("Exception occurred while storing new Model ")
+            errMsg.append("${model.toCommandObject().properties} to VCS: ${e.getMessage()}.\n")
+            errMsg.append("${model.errors.allErrors.inspect()}\n")
+            errMsg.append("${revision.errors.allErrors.inspect()}\n")
+            log.error(errMsg)
+            throw new ModelException(model.toCommandObject(),
+                "Could not store new Model ${model.toCommandObject().properties} in VCS", e)
+        }
+
+        if (revision.validate()) {
+            model.addToRevisions(revision)
+            if (rev.model.publication && rev.model.publication.linkProvider == PublicationLinkProvider.PUBMED) {
+                try {
+                    model.publication = pubMedService.getPublication(rev.model.publication.link)
+                } catch (JummpException e) {
+                    revision.discard()
+                    domainObjects.each { it.discard() }
+                    model.discard()
+                    def error = new StringBuffer("New Model ${model.name} does not validate:")
+                    error.append("${model.errors.allErrors.inspect()}\n")
+                    error.append("${revision.errors.allErrors.inspect()}\n")
+                    log.error(error)
+                    throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data for ${model.name}", e)
+                }
+            } else if (rev.model.publication &&
+                    (rev.model.publication.linkProvider == PublicationLinkProvider.DOI || rev.model.publication.linkProvider == PublicationLinkProvider.URL)) {
+                model.publication = Publication.fromCommandObject(rev.model.publication)
+            }
+            if (!model.validate()) {
+                // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
+                revision.discard()
+                model.discard()
+                def msg  = new StringBuffer("New Model ${model.name} does not validate:\n")
+                msg.append("${model.errors.allErrors.inspect()}\n")
+                msg.append("${revision.errors.allErrors.inspect()}\n")
+                log.error(msg)
+                throw new ModelException(model.toCommandObject(), "New model does not validate")
+            }
+            model.save(flush: true)
+            // let's add the required rights
+            final String username = revision.owner.username
+            aclUtilService.addPermission(model, username, BasePermission.ADMINISTRATION)
+            aclUtilService.addPermission(model, username, BasePermission.DELETE)
+            aclUtilService.addPermission(model, username, BasePermission.READ)
+            aclUtilService.addPermission(model, username, BasePermission.WRITE)
+            aclUtilService.addPermission(revision, username, BasePermission.ADMINISTRATION)
+            aclUtilService.addPermission(revision, username, BasePermission.DELETE)
+            aclUtilService.addPermission(revision, username, BasePermission.READ)
+            try {
+                if (!rev.model.publication) {
+                    String annotation = getPubMedAnnotation(model)
+                    String pubMed
+                    if (annotation) {
+                        if (annotation.contains(":")) {
+                            pubMed = annotation.substring(annotation.lastIndexOf(":")+1, annotation.indexOf("]")).trim()
+                            //TODO Replace CiteXplore with EuropePMC URLs
+                            //model.publication = pubMedService.getPublication(pubMed)
+                            model.publication = null
+                        }
+                    }
+                }
+            } catch (JummpException e) {
+                log.debug(e.message, e)
+            }
+
+            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
+
+            // broadcast event
+            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFiles))
+        } else {
+            System.out.println(revision.errors)
+            // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
+            revision.discard()
+            domainObjects.each {it.discard()}
+            model.discard()
+            log.error("New Model ${model.properties} with properties ${rev.model.properties} does not validate:${revision.errors.allErrors.inspect()}")
+            throw new ModelException(model.toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
+        }
+        return model
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     /**
     * Creates a new Model and stores it in the VCS.
     *
@@ -568,11 +755,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
             modelFiles.add(f)
         }
+        boolean valid=true
         ModelFormat format=ModelFormat.findByIdentifier(meta.format.identifier)
         if (!modelFileFormatService.validate(modelFiles, format)) {
             def err = "The files ${modelFiles.properties} do no comprise valid ${meta.format.identifier}"
             log.error(err)
-            throw new ModelException(meta, "Invalid ${meta.format.identifier} submission.")
+       //     throw new ModelException(meta, "Invalid ${meta.format.identifier} submission.")
+            valid=false
         }
         // model is valid, create a new repository and store it as revision1
         // vcs identifier is upload date + name - this should by all means be unique
@@ -594,6 +783,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 revisionNumber: 1,
                 owner: User.findByUsername(springSecurityService.authentication.name),
                 minorRevision: false,
+                valid: validated,
                 name: modelFileFormatService.extractName(modelFiles, format),
                 description: modelFileFormatService.extractDescription(modelFiles, format),
                 comment: meta.comment,
@@ -761,7 +951,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         if (comment == null) {
             throw new ModelException(model.toCommandObject(), "Comment may not be null, empty comment is allowed")
- A       }
+        }
         if (!repoFiles || repoFiles.size() == 0) {
             log.error("No files were provided as part of the update of model ${model.properties}")
             throw new ModelException(model.toCommandObject(), "A new version of the model must contain at least one file.")
@@ -791,16 +981,17 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
             modelFiles.add(f)
         }
-
+        boolean valid=true
         if (!modelFileFormatService.validate(modelFiles, format)) {
             final def m = model.toCommandObject()
             log.warn("New revision of model ${m.properties} containing ${modelFiles.properties} does not comprise valid ${format.identifier}")
-            throw new ModelException(m, "The file list does not comprise valid ${format.identifier}")
+            //throw new ModelException(m, "The file list does not comprise valid ${format.identifier}")
+            valid=false;
         }
 
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
         Revision revision = new Revision(model: model, name: modelFileFormatService.extractName(modelFiles, format), description: modelFileFormatService.extractDescription(modelFiles, format), comment: comment, uploadDate: new Date(), owner: currentUser,
-                minorRevision: false, format: format)
+                minorRevision: false, validated:valid, format: format)
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
             final String fileName = rf.path.split(File.separator).last()

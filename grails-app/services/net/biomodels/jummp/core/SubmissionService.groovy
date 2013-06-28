@@ -98,6 +98,7 @@ class SubmissionService {
                     ModelFormat.findByIdentifier(workingMemory.get("model_type") as String))
             revision.description=modelFileFormatService.extractDescription(files,
                     ModelFormat.findByIdentifier(workingMemory.get("model_type") as String))
+            revision.validated=workingMemory.get("model_validation_result") as Boolean
         }
 
         /**
@@ -228,6 +229,7 @@ class SubmissionService {
             boolean modelsAreValid = modelFileFormatService.validate(
                         getFilesFromMemory(workingMemory, true),
                         workingMemory.get("model_type") as String)
+            workingMemory.put("model_validation_result", modelsAreValid)
             if (!workingMemory.containsKey("model_type")) {
                 workingMemory.put("validation_error",
                     "Missing Format Error: Validation could not be performed, format unknown")
@@ -277,14 +279,13 @@ class SubmissionService {
          */
         void handleSubmission(Map<String,Object> workingMemory) {
             List<RFTC> repoFiles = getRepFiles(workingMemory)
-            MTC model=(MTC) workingMemory.get("ModelTC") as MTC
             RTC revision=workingMemory.get("RevisionTC") as RTC
-
+            MTC model=revision.model
             model.name=revision.name
             model.format=ModelFormat.findByIdentifier(workingMemory.get("model_type") as String).toCommandObject()
-            model.comment="Import of ${revision.name}".toString()
+            revision.comment="Import of ${revision.name}".toString()
             workingMemory.put("model_id",
-                modelService.uploadModelAsList(repoFiles, model).id)
+                    modelService.uploadValidatedModel(repoFiles, revision).id)
         }
     }
 
