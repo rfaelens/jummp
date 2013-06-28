@@ -525,7 +525,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * Model is taken from @p meta. The user who uploads the Model becomes the owner of
     * this Model. The new Model is not visible to anyone except the owner.
     * @param repoFiles The list of command objects corresponding to the files of the model that is to be stored in the VCS.
-    * @param meta Meta Information to be added to the model
+    * @param rev Meta Information to be added to the model
     * @return The new created Model, or null if the model could not be created
     * @throws ModelException If Model File is not valid or the Model could not be stored in VCS
     **/
