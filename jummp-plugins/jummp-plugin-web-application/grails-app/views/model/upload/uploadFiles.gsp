@@ -16,19 +16,31 @@
             <div class="errors">
                 <g:renderErrors/>
                 <g:if test="${flash.invalidToken}">
-                    Please do not submit your model multiple times.
+                    <g:message code="flash.invalidToken"/>
                 </g:if>
             </div>
         </g:hasErrors>
-        <h1>Upload Files</h1>
-        <p style="padding-bottom:1em">Can I has files plz?</p>
+        <h1><g:message code="submission.upload.header"/></h1>
+        <p style="padding-bottom:1em"><g:message code="submission.upload.explanation"/></p>
         <g:uploadForm id="fileUpload" novalidate="false" autocomplete="false">
             <div class="dialog">
                 <table class="formtable">
                     <tbody>
                         <tr class="prop">
                             <td class="name">
-                                <label for="mainFile">Main Submission File</label>
+                                <label for="mainFile">
+                                    <g:message code="submission.uploadForm.mainFile.label"/>
+                                </label>
+                            </td>
+                            <td class="value">
+                                <input type="file" id="mainFile" name="mainFile"/>
+                            </td>
+                        </tr>
+                        <tr class="prop">
+                            <td class="name">
+                                <label for="mainFile">
+                                    <g:message code="submission.uploadForm.mainFile.label"/>
+                                </label>
                             </td>
                             <td class="value">
                                 <input type="file" id="mainFile" name="mainFile"/>
@@ -36,19 +48,21 @@
                         </tr>
                     </tbody>
                 </table>
-                <a href="#" id="addFile" class="normalAnchor">Add a supplementary file</a>
-                <a href="#" id="removeFiles" class="normalAnchor">Remove all supplementary files</a>
+                <a href="#" id="addFile" class="normalAnchor"><g:message code="submission.upload.additionalFiles.addButton" /></a>
+                <a href="#" id="removeFiles" class="normalAnchor"><g:message code="submission.upload.additionalFiles.removeAllButton" /></a>
                 <fieldset>
-                    <legend>Additional files</legend>
+                    <legend>
+                        <g:message code="submission.upload.additionalFiles.legend"/>
+                    </legend>
                     <table class='formtable' id="additionalFiles">
                         <tbody>
                         </tbody>
                     </table>
                 </fieldset>
                 <div class="buttons">
-                    <g:submitButton name="Cancel" value="Abort" />
-                    <g:submitButton name="Back" value="Back" />
-                    <g:submitButton name="Upload" value="Upload" />
+                    <g:submitButton name="Cancel" value="${g.message(code: 'submission.upload.cancelButton')}" />
+                    <g:submitButton name="Back" value="${g.message(code: 'submission.upload.backButton')}" />
+                    <g:submitButton name="Upload" value="${g.message(code: 'submission.upload.uploadButton')}" />
                 </div>
             </div>
         </g:uploadForm>
@@ -58,10 +72,12 @@
                     e.preventDefault();
                     $('tr.fileEntry').empty();
                 });
+
                 $(document).on("click", 'a.killer', function (e) {
                     e.preventDefault();
                     $(this).parent().parent().empty();
                 });
+
                 $("#addFile").click(function (evt) {
                     evt.preventDefault();
                     $('<tr>', {
@@ -69,40 +85,37 @@
                     }).append(
                         $('<td>').append(
                             $('<input>', {
-                                type: 'file'
+                                type: 'file',
+                                name: 'extra.file',
+                                class: extraFile
                             })
                         ),
                         $('<td>').append(
                             $('<input>', {
                                 type: 'text',
+                                name: 'extra.description',
                                 class: 'description',
-                                value: 'Description'
+                                placeholder: 'Description'
                             })
                         ),
                         $('<td>').append(
                             $('<a>', {
-                                href: "javascript:alert('fail')",
+                                href: "#",
                                 class: 'killer normalAnchor',
                                 text: 'Discard'
                             })
                         )
-                    ).appendTo('table#additionalFiles')
+                    ).appendTo('table#additionalFiles');
                 });
-            });
 
-            $("#uploadButton").click( function() {
-                $("#fileUpload").submit();
-            });
+                $("#uploadButton").click( function() {
+                    $("input.extraFile:not(:valid)").parent().parent().empty();
+                    $("#fileUpload").submit();
+                });
 
-            $("#cancelButton").click( function() {
-                $("#fileUpload").reset();
-            });
-
-            $(document).on("focus", ".description", function(){
-                if ($(this).data("reset") === undefined) {
-                    $(this).val("");
-                    $(this).data("reset", true);
-                }
+                $("#cancelButton").click( function() {
+                    $("#fileUpload").reset();
+                });
             });
         </g:javascript>
     </body>

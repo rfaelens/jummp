@@ -11,6 +11,10 @@ import net.biomodels.jummp.webapp.UploadFilesCommand
 
 class ModelController {
     /**
+     * Flag that checks whether the dynamically-inserted logger is set to DEBUG or higher.
+     */
+    private boolean isDebugEnabled = log.isDebugEnabled()
+    /**
      * Dependency injection of modelDelegateService.
      **/
     def modelDelegateService
@@ -45,7 +49,7 @@ class ModelController {
         displayDisclaimer {
             on("Continue") {
                 Map<String, Object> workingMemory=new HashMap<String,Object>()
-                flow.workingMemory=workingMemory
+                flow.workingMemory = workingMemory
                 flow.workingMemory.put("isUpdateOnExistingModel",false) //use subflow for updating models, todo
             }.to "uploadFiles"
             on("Cancel").to "abort"
@@ -55,30 +59,61 @@ class ModelController {
                 //withForm {
                 def inputs = new HashMap<String, Object>()
 
-                def mainFile = request.getFile('mainFile')
-                if (mainFile.empty) {
-                    flash.message = "Please select a main file"
-                    return error()
+                def mainFileList = request.getMultiFileMap().mainFile
+                if (mainFileList.size() == 1) {
+                    if (isDebugEnabled) {
+                        log.debug "New submission started.The main file supplied:".plus(mainFileList.properties)
+                    }
+                } else {
+                    if (isDebugEnabled) {
+                        log.debug "New submission started.Main files: ".plus(mainFileList.inspect())
+                    }
                 }
+                def cmd = new UploadFilesCommand()
+                bindData(cmd, mainFileList)
+                if (isDebugEnabled) {
+                    log.debug "Data binding and validation done. :${cmd.properties}"
+                }
+                if (!cmd.validate()) {
+                    log.error "Files are invalid."
+                    log.error "Errors: ${cmd.errors.allErrors.inspect()}.\n"
+                    error()
+                } else {
+                    if (isDebugEnabled) {
+                        log.debug("The files are valid.")
+                    }
 
-                def uuid = UUID.randomUUID().toString()
-                //pray that exchangeDirectory has been defined
-                def exchangeDir =
-                        grailsApplication.config.jummp.vcs.exchangeDirectory
-                def sep = File.separator
-                def submission_folder = new File(exchangeDir + uuid)
-                submission_folder.mkdirs()
-                def filePath =
-                    submission_folder.canonicalPath + mainFile.getOriginalFilename()
-                def transferredFile = new File(filePath)
-                mainFile.transferTo(transferredFile)
-                //do something with request.getFileMap(), but what?
-                def mains = [transferredFile]
-                def additionals = [:]
-                flow.workingMemory["submitted_mains"] = mains
-                flow.workingMemory["submitted_additionals"] = additionals
-                // add files to inputs here as appropriate
-                submissionService.handleFileUpload(flow.workingMemory,inputs)
+                    //should this be in a separate action state?
+                    def uuid = UUID.randomUUID().toString()
+                    if (isDebugEnabled) {
+                        log.debug "Generated submission UUID: ${uuid}"
+                    }
+
+                    //pray that exchangeDirectory has been defined
+                    def exchangeDir = grailsApplication.config.jummp.vcs.exchangeDirectory
+                    def sep = File.separator
+                    def submission_folder = new File(exchangeDir + uuid)
+                    submission_folder.mkdirs()
+                    def parent = submission_folder.canonicalPath + sep
+                    List<File> transferredMains = []
+                    cmd.mainFile.each { f ->
+                        final originalFilename = f.getOriginalFilename()
+                        if (!originalFilename.isEmpty()) {
+                            final File transferredFile = new File(parent + f.getOriginalFilename())
+                            if (isDebugEnabled) {
+                                log.debug "Transferring file ${transferredFile}."
+                            }
+                            f.transferTo(transferredFile)
+                            transferredMains << transferredFile
+                        }
+                    } //TODO
+                    //do something with request.getFileMap(), but what?
+                    def additionals = [:]
+                    flow.workingMemory["submitted_mains"] = transferredMains
+                    flow.workingMemory["submitted_additionals"] = additionals
+                    // add files to inputs here as appropriate
+                    submissionService.handleFileUpload(flow.workingMemory,inputs)
+                }
                 //}
             }.to "performValidation"
             on("ProceedWithoutValidation"){
