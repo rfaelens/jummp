@@ -167,7 +167,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         // What the concrete class wants to test
         abstract void performRemainingTest();
         // Click through the upload pipeline with the supplied file
-        // and test strings
+        // and test name/description strings
         void fileUploadPipeline(File file,
                                 String format,
                                 String mname,
