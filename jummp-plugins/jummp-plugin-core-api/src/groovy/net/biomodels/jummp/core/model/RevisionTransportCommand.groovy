@@ -27,6 +27,10 @@ class RevisionTransportCommand implements Serializable {
      */
     Boolean minorRevision
     /**
+     * Whether the revision has been validated
+     */
+    Boolean validated
+    /**
      * The name of this revision.
      */
     String name

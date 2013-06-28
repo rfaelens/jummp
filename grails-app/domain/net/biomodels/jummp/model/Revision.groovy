@@ -47,6 +47,10 @@ class Revision implements Serializable {
     Boolean minorRevision
     
     /**
+     * Whether the revision has been validated
+     */
+    Boolean validated = false
+    /**
      * The name of the 'model'. Stored in revision as it may change. Annoying.
      */
     String name
@@ -85,6 +89,7 @@ class Revision implements Serializable {
         revisionNumber(nullable: false, unique: 'model')
         owner(nullable: false)
         minorRevision(nullable: false)
+        validated(nullable: false)
         uploadDate(nullable: false)
         name(nullable:false, blank: true)
         description(nullable: false, blank: true)
@@ -103,6 +108,7 @@ class Revision implements Serializable {
                 revisionNumber: revisionNumber,
                 owner: owner.userRealName,
                 minorRevision: minorRevision,
+                validated: validated,
                 name: name,
                 description: description,
                 comment: comment,
