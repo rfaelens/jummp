@@ -12,7 +12,7 @@ import net.biomodels.jummp.core.JummpIntegrationTest
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockMultipartFile
 import org.apache.commons.io.FileUtils
 import net.biomodels.jummp.model.Model
-
+import net.biomodels.jummp.model.Revision
 
 class SubmissionFlowTests extends JummpIntegrationTest {
     
@@ -177,11 +177,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             //test name
             assert mname == revision.name
             //test that the description contains known strings
-            if (descriptionStrings) {
-                descriptionStrings.each {
-                    assert revision.description.contains(it)
-                }
-            }
+            checkDescription(revision.description, descriptionStrings)
             //add tests for when displayModelInfo does something interesting
             signalEvent("Continue")
             assertFlowState("displaySummaryOfChanges")
@@ -195,6 +191,10 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             int modelId=Integer.parseInt(mockRequest.session.result_submission as String)
             Model model=Model.findById(modelId)
             assert model
+            Revision rev=modelService.getLatestRevision(model)
+            assert rev
+            assert mname == rev.name
+            checkDescription(rev.description, descriptionStrings)
             
             //test that the model is saved in the repository
             Map<String, byte[]> files=modelService.retrieveModelFiles(Model.findById(modelId))
@@ -202,6 +202,14 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             byte[] savedFile=files.get(file.getName())
             assert savedFile
             assert savedFile == file.getBytes()
+        }
+        
+        private void checkDescription(String description, String[] descriptionStrings) {
+            if (descriptionStrings) {
+                descriptionStrings.each {
+                    assert description.contains(it)
+                }
+            }
         }
         
     }
