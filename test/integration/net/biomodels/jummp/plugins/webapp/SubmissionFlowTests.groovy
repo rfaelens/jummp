@@ -7,17 +7,18 @@ import static org.junit.Assert.*
 import org.junit.*
 import grails.test.WebFlowTestCase
 import net.biomodels.jummp.webapp.ModelController
-import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.core.JummpIntegrationTest
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockMultipartFile
 import org.apache.commons.io.FileUtils
+import net.biomodels.jummp.model.Model
 
 
 class SubmissionFlowTests extends JummpIntegrationTest {
     
     def grailsApplication
     def fileSystemService
+    def modelService
     
     @Before
     void setUp() {
@@ -36,30 +37,38 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         FileUtils.deleteDirectory(new File("target/vcs/exchange"))
     }
 
+    /* Aborts at the first step */
     @Test
     void testDisclaimerAbort() {
         assertNotNull(authenticateAsTestUser())
         new TestDisclaimerAbort().runTest()
     }
 
+    /* Continues after the disclaimer */
     @Test
     void testDisclaimerContinue() {
         assertNotNull(authenticateAsTestUser())
         new TestDisclaimerContinue().runTest()
     }
 
+    /* Tests upload page, then clicks abort
+     */ 
     @Test
     void testUploadFilesAbort() {
         assertNotNull(authenticateAsTestUser())
         new TestUploadFilesCancel().runTest()
     }
 
+    /* Tests upload pipeline, first with an empty list, 
+     * then with an unknown model */
     @Test
     void testUploadFilesContinue() {
         assertNotNull(authenticateAsTestUser())
         new testUploadFilesContinue().runTest()
     }
 
+    /* Tests upload pipeline, first with an empty list, 
+     * then with a known SBML model */
     @Test
     void testSubmitSBML() {
         assertNotNull(authenticateAsTestUser())
@@ -91,20 +100,26 @@ class SubmissionFlowTests extends JummpIntegrationTest {
            RequestContextHolder.setRequestAttributes(new GrailsWebRequest(mockRequest,mockResponse,mockServletContext,applicationContext))
        }
         
+        /* Main Template method for testing. */
         void runTest()
         {
             setUp()
             performTest()
             tearDown()
         }
+        
+        /* Clicks cancel, checks that flow is aborted. */
         protected void clickCancelEndFlow() {
             signalEvent("Cancel")
             assert "abort" == flowExecutionOutcome.id
         }
+        
+        /* Checks the current state against the supplied state id */
         protected void assertFlowState(String state) {
             assert state == flowExecution.activeSession.state.id
         }
-        
+
+        /* Adds the supplied file with parameters as a mock multipart file */
         protected void addFileToRequest(File modelFile, String formID, String contentType) {
             final file = new GrailsMockMultipartFile(formID, 
                                                      modelFile.getName(),
@@ -118,6 +133,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     class TestDisclaimerContinue extends FlowUnitTest {
         void performTest() {
             def viewSelection = startFlow()
+            // Click continue on disclaimer, test memory variables
             signalEvent("Continue")
             assertFlowState("uploadFiles")
             assert false == (Boolean) flowScope.
@@ -129,60 +145,43 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     class TestDisclaimerAbort extends FlowUnitTest {
         void performTest() {
             def viewSelection = startFlow()
+            // Click cancel on the first step
             clickCancelEndFlow()
         }
     }
 
+    /* Base class for the classes testing upload pipeline. Navigates to the 
+     * upload files page, then allows implementing classes to define further
+     * behaviour. Includes a method for clicking through the pipeline with
+     * supplied files
+     * */
     abstract class TestUploadFiles extends FlowUnitTest {
         void performTest() {
             def viewSelection = startFlow()
             signalEvent("Continue")
             performRemainingTest()
         }
+        // What the concrete class wants to test
         abstract void performRemainingTest();
-    }
-
-    class TestUploadFilesCancel extends TestUploadFiles {
-        void performRemainingTest() {
-            clickCancelEndFlow()
-        }
-    }
-
-    class testUploadFilesContinue extends TestUploadFiles {
-        void performRemainingTest() {
-            // empty files list shouldnt validate!
-            signalEvent("Upload")
-            assertFlowState("uploadFiles")
-            //random files should validate as unknown
-            addFileToRequest(getFileForTest("modelfile.xml","hello world"), 
-                            "mainFile", 
-                            "application/xml")
-            flowScope.workingMemory.put("repository_files", getRandomModel())
+        // Click through the upload pipeline with the supplied file
+        // and test strings
+        void fileUploadPipeline(File file,
+                                String format,
+                                String mname,
+                                String[] descriptionStrings) {
+            addFileToRequest(file, "mainFile", "application/xml")
             signalEvent("Upload")
             assertFlowState("displayModelInfo")
-            assert "UNKNOWN" == flowScope.workingMemory.get("model_type") as String
-        }
-    }
-
-    class TestSubmitSBML extends TestUploadFiles {
-        void performRemainingTest() {
-        // valid sbml should proceed
-            addFileToRequest(bigModel(), "mainFile", "application/xml")
-            //add additional files here when ready!
-            
-//            flowScope.workingMemory.put("repository_files", getSbmlModel())
-            signalEvent("Upload")
-            assertFlowState("displayModelInfo")
-            assert "SBML" == flowScope.workingMemory.get("model_type") as String
+            assert format == flowScope.workingMemory.get("model_type") as String
             RTC revision=flowScope.workingMemory.get("RevisionTC") as RTC
             //test name
-            assert "Becker2010_EpoR_AuxiliaryModel" == revision.name
-            //test that the very long description contains known strings
-            assert revision.description.contains("Verena Becker, Marcel Schilling, Julie Bachmann, Ute Baumann, Andreas Raue, Thomas Maiwald, Jens Timmer and Ursula Klingmüller")
-            assert revision.description.contains("This relation solely depends on EpoR turnover independent of ligand binding, suggesting an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system")
-            assert revision.description.contains("%% Default sampling time points")
-            assert revision.description.contains("BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models")
-
+            assert mname == revision.name
+            //test that the description contains known strings
+            if (descriptionStrings) {
+                descriptionStrings.each {
+                    assert revision.description.contains(it)
+                }
+            }
             //add tests for when displayModelInfo does something interesting
             signalEvent("Continue")
             assertFlowState("displaySummaryOfChanges")
@@ -191,30 +190,55 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             signalEvent("Continue")
             
             assert flowExecutionOutcome.id == "displayConfirmationPage"
-            //good enough
             
+            //test that the model is infact saved in the database
+            int modelId=Integer.parseInt(mockRequest.session.result_submission as String)
+            Model model=Model.findById(modelId)
+            assert model
+            
+            //test that the model is saved in the repository
+            Map<String, byte[]> files=modelService.retrieveModelFiles(Model.findById(modelId))
+            assert files
+            byte[] savedFile=files.get(file.getName())
+            assert savedFile
+            assert savedFile == file.getBytes()
+        }
+        
+    }
+
+    /* Clicks cancel as soon as you get to the upload files page */
+    class TestUploadFilesCancel extends TestUploadFiles {
+        void performRemainingTest() {
+            clickCancelEndFlow()
+        }
+    }
+    
+    class testUploadFilesContinue extends TestUploadFiles {
+        void performRemainingTest() {
+            // empty files list shouldnt validate!
+            signalEvent("Upload")
+            assertFlowState("uploadFiles")
+            //random files should validate as unknown
+            fileUploadPipeline(getFileForTest("modelfile.xml","hello world"), 
+                               "UNKNOWN", 
+                               "",
+                               null)
         }
     }
 
-    RFTC createRFTC(File file, boolean isMain) {
-        new RFTC(path: file.getCanonicalPath(), mainFile: isMain, userSubmitted: true, hidden: isMain, description:file.getName())
-    }
-
-    List<RFTC> createRFTCList(File mainFile, List<File> additionalFiles) {
-        List<RFTC> returnMe=new LinkedList<RFTC>()
-        returnMe.add(createRFTC(mainFile, true))
-        additionalFiles.each {
-            returnMe.add(createRFTC(it, false))
+    /* Tests the SBML functionality with the known SBML file */
+    class TestSubmitSBML extends TestUploadFiles {
+        void performRemainingTest() {
+            String[] descriptionTests = new String[4];
+            descriptionTests[0]="Verena Becker, Marcel Schilling, Julie Bachmann, Ute Baumann, Andreas Raue, Thomas Maiwald, Jens Timmer and Ursula Klingmüller"
+            descriptionTests[1]="This relation solely depends on EpoR turnover independent of ligand binding, suggesting an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system"
+            descriptionTests[2]="%% Default sampling time points"
+            descriptionTests[3]="BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models"
+            fileUploadPipeline(bigModel(), 
+                               "SBML", 
+                               "Becker2010_EpoR_AuxiliaryModel",
+                               descriptionTests)
         }
-        returnMe
-    }
-
-    private List<RFTC> getRandomModel() {
-        return createRFTCList(getFileForTest("modelfile.txt","hello world"),[getFileForTest("additional.txt","hello world")])
-    }
-
-    private List<RFTC> getSbmlModel() {
-        return createRFTCList(bigModel(), [getFileForTest("additionalFile.txt", "heres some randomText")])
     }
 
     private File getFileForTest(String filename, String text)
@@ -227,30 +251,5 @@ class SubmissionFlowTests extends JummpIntegrationTest {
 
     private File bigModel() {
         return new File("test/files/BIOMD0000000272.xml")
-    }
-    
-    
-    private File smallModel(String filename) {
-        return getFileForTest(filename, '''<?xml version="1.0" encoding="UTF-8"?>
-<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
-  <model>
-    <listOfCompartments>
-      <compartment name="x"/>
-    </listOfCompartments>
-    <listOfSpecies>
-      <specie name="y" compartment="x" initialAmount="1"/>
-    </listOfSpecies>
-    <listOfReactions>
-      <reaction name="r">
-        <listOfReactants>
-          <specieReference specie="y"/>
-        </listOfReactants>
-        <listOfProducts>
-          <specieReference specie="y"/>
-        </listOfProducts>
-      </reaction>
-    </listOfReactions>
-  </model>
-</sbml>''')
     }
 }
