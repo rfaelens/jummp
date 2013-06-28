@@ -87,7 +87,9 @@ class SubmissionFlowTests extends JummpIntegrationTest {
      * been. Raza Ali: 18/6/13
      */
     abstract class FlowUnitTest extends WebFlowTestCase {
-        def getFlow() { new ModelController().uploadFlow }
+        def getFlow() { 
+            new ModelController().createFlow 
+        }
         abstract void performTest()
         
         /*
@@ -98,7 +100,8 @@ class SubmissionFlowTests extends JummpIntegrationTest {
            super.setUp()
            mockRequest = new MockMultipartHttpServletRequest()
            RequestContextHolder.setRequestAttributes(new GrailsWebRequest(mockRequest,mockResponse,mockServletContext,applicationContext))
-       }
+           registerFlow("model/upload", new ModelController().uploadFlow)
+        }
         
         /* Main Template method for testing. */
         void runTest()

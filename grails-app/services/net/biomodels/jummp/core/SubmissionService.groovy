@@ -41,9 +41,37 @@ class SubmissionService {
          * Purpose
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
-         * @param modifications
+         * @param modifications     a Map containing the existing files in the model, to be modified
          */
-        abstract void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications);
+        void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
+            handleModifications(workingMemory, modifications)
+            if (workingMemory.containsKey("submitted_mains"))
+            {
+                List<File> mainFiles=workingMemory.remove("submitted_mains") as List<File>
+                Map<File,String> additionals=null;
+                if (workingMemory.containsKey("submitted_additionals")) {
+                    additionals=workingMemory.remove("submitted_additionals") as Map<File, String>
+                }
+                else {
+                    additionals=new HashMap<File,String>()
+                }
+                List<RFTC> tobeAdded=createRFTCList(mainFiles, additionals)
+                if (workingMemory.containsKey("repository_files")) {
+                    (workingMemory.get("repository_files") as List<RFTC>).addAll(tobeAdded)
+                }
+                else {
+                    workingMemory.put("repository_files", tobeAdded)
+                }
+            }
+        }
+        
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         * @param modifications     a Map containing the existing files in the model, to be modified
+         */
+        protected abstract void handleModifications(Map<String, Object> workingMemory, Map<String, Object> modifications);
 
         /**
          * Detects the format of the model and stores this information in the working memory
@@ -187,27 +215,18 @@ class SubmissionService {
      */
     class NewModelStateMachine extends StateMachineStrategy {
 
+
         /**
-         * Purpose
+         * Purpose modify existing files in working memory
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
-         * @param modifications     a Map describing the list of existing files that should be added or removed.
+         * @param modifications     a Map containing the existing files in the model, to be modified
          */
-        void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
-            if (workingMemory.containsKey("submitted_mains"))
-            {
-                List<File> mainFiles=workingMemory.remove("submitted_mains") as List<File>
-                Map<File,String> additionals=null;
-                if (workingMemory.containsKey("submitted_additionals")) {
-                    additionals=workingMemory.remove("submitted_additionals") as Map<File, String>
-                }
-                else {
-                    additionals=new HashMap<File,String>()
-                }
-                workingMemory.put("repository_files", createRFTCList(mainFiles, additionals))
-            }
+        protected void handleModifications(Map<String, Object> workingMemory, Map<String, Object> modifications) {
+            
         }
 
+        
         /**
          * Purpose
          *
@@ -294,7 +313,24 @@ class SubmissionService {
      * for handling the submission of updated versions of existing models.
      */
     class NewRevisionStateMachine extends StateMachineStrategy {
+
+        /**
+         * Purpose modify existing files in working memory and repository
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         * @param modifications     a Map containing the existing files in the model, to be modified
+         */
+        protected void handleModifications(Map<String, Object> workingMemory, Map<String, Object> modifications) {
+            // handle removal of files from repository
+        }
+
+
+
         void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
+            if (workingMemory.containsKey("submitted_mains")) {
+                workingMemory.put("reprocess_files", true)
+            }
+            super.handleFileUpload(workingMemory, modifications)
         /*Include check to remove 'model_type' from memory if main file has been changed*/
 
         }
