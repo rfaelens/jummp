@@ -30,17 +30,21 @@ class ModelController {
         [id: params.id]
     }
 
+    @Secured(["isAuthenticated()"])
     def updateFlow = {
+        start {
+            action {
+                conversation.model_id=params.id
+            }
+            on("success").to "displayDisclaimer"
+        }
         displayDisclaimer {
             on("Continue").to "uploadPipeline"
             on("Cancel").to "abort"
         }
         uploadPipeline {
-            Map<String, Object> workingMemory=new HashMap<String,Object>()
-            workingMemory.put("isUpdateOnExistingModel",true) //use subflow for updating models, todo
-            workingMemory.put("model_revised", params.id)
-            
-            subflow(controller: "model", action: "upload", input: [workingMemory: workingMemory])
+            //System.out.println("UploadPipeline: "+flow.workingMemory)
+            subflow(controller: "model", action: "upload", input: [isUpdate: true])
             on("abort").to "abort"
             on("displayConfirmationPage").to "displayConfirmationPage"
             on("displayErrorPage").to "displayErrorPage"
@@ -51,17 +55,14 @@ class ModelController {
     }
     
     
+    @Secured(["isAuthenticated()"])
     def createFlow = {
         displayDisclaimer {
             on("Continue").to "uploadPipeline"
             on("Cancel").to "abort"
         }
         uploadPipeline {
-            Map<String, Object> workingMemory=new HashMap<String,Object>()
-            workingMemory=workingMemory
-            workingMemory.put("isUpdateOnExistingModel",false) //use subflow for updating models, todo
-          
-            subflow(controller: "model", action: "upload", input: [workingMemory: workingMemory])
+            subflow(controller: "model", action: "upload", input: [isUpdate:true])
             on("abort").to "abort"
             on("displayConfirmationPage").to "displayConfirmationPage"
             on("displayErrorPage").to "displayErrorPage"
@@ -84,11 +85,18 @@ class ModelController {
     @Secured(["isAuthenticated()"])
     def uploadFlow = {
         input {
-            workingMemory(required: true)
+            isUpdate(required: true)
         }
         uploadFiles {
             on("Upload") {
                 //withForm {
+                Map<String, Object> workingMemory=new HashMap<String,Object>()
+                workingMemory.put("isUpdateOnExistingModel",flow.isUpdate) //use subflow for updating models, todo
+                if (flow.isUpdate) {
+                    workingMemory.put("model_id", conversation.model_id)
+                }
+                flow.workingMemory=workingMemory
+                println flow.workingMemory
                 def inputs = new HashMap<String, Object>()
 
                 def mainFile = request.getFile('mainFile')

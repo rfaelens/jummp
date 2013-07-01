@@ -122,10 +122,9 @@ class SubmissionService {
         protected void updateRevisionFromFiles(Map<String,Object> workingMemory) {
             RTC revision = workingMemory.get("RevisionTC") as RTC
             List<File> files = getFilesFromMemory(workingMemory, true)
-            revision.name = modelFileFormatService.extractName(files,
-                    ModelFormat.findByIdentifier(workingMemory.get("model_type") as String))
-            revision.description=modelFileFormatService.extractDescription(files,
-                    ModelFormat.findByIdentifier(workingMemory.get("model_type") as String))
+            ModelFormat modelFormat=ModelFormat.findByIdentifier(revision.format.identifier)
+            revision.name = modelFileFormatService.extractName(files,modelFormat)
+            revision.description=modelFileFormatService.extractDescription(files, modelFormat)
             revision.validated=workingMemory.get("model_validation_result") as Boolean
         }
 
@@ -266,7 +265,9 @@ class SubmissionService {
          */
         protected void createTransportObjects(Map<String,Object> workingMemory) {
             MTC model=new MTC() //no need for it currently, later on, store publication details
-            RTC revision=new RTC(files: getRepFiles(workingMemory), model: model) 
+            RTC revision=new RTC(files: getRepFiles(workingMemory), 
+                                model: model,
+                                format: ModelFormat.findByIdentifier(workingMemory.get("model_type") as String)) 
             storeTCs(workingMemory, model, revision)
         }
 
@@ -331,8 +332,6 @@ class SubmissionService {
                 workingMemory.put("reprocess_files", true)
             }
             super.handleFileUpload(workingMemory, modifications)
-        /*Include check to remove 'model_type' from memory if main file has been changed*/
-
         }
 
         /**
@@ -346,6 +345,7 @@ class SubmissionService {
                 super.inferModelFormatType(workingMemory)
             }
         }
+        
         void performValidation(Map<String,Object> workingMemory) {
             if (workingMemory.containsKey("reprocess_files")) {
                 newModel.performValidation(workingMemory)
@@ -353,10 +353,14 @@ class SubmissionService {
         }
 
         protected void createTransportObjects(Map<String,Object> workingMemory) {
-            Model modelDom=Model.get(workingMemory.get("model_id") as Long)
-            MTC model=modelDom.toCommandObject()
-            RTC revision=modelService.getLatestRevision(model)
-            storeTCs(workingMemory, model, revision)
+            long modelID=(workingMemory.get("model_id") as Long).longValue()
+            System.out.println("Model Id: "+modelID)
+            Model modelDom=modelService.getModel(modelID)
+            System.out.println("Model: "+modelDom.getProperties())
+            RTC revision=modelService.getLatestRevision(modelDom).toCommandObject()
+            System.out.println("RTC: "+revision.getProperties())
+            workingMemory.put("model_type",revision.format.identifier)
+            storeTCs(workingMemory, revision.model, revision)
             //ensure that a new revision tc is used for submission, use 
             //this one for copying info!
         }
@@ -367,11 +371,22 @@ class SubmissionService {
 
         void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {
             RTC revision=workingMemory.get("RevisionTC") as RTC
-            revision.comment=workingMemory.get("RevisionComments") as String
+            revision.comment=modifications.get("RevisionComments")
         }
 
         void handleSubmission(Map<String,Object> workingMemory) {
             //todo
+            List<RFTC> repoFiles = getRepFiles(workingMemory)
+            RTC revision=workingMemory.get("RevisionTC") as RTC
+            System.out.println("About to submit revision: "+revision.getProperties())
+            try
+                {workingMemory.put("model_id",
+                    modelService.addValidatedRevision(repoFiles, revision).id)
+                }
+                catch(Exception e) {
+                    e.printStackTrace()
+                }
+    
         }
     }
 

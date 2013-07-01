@@ -8,7 +8,7 @@
     </head>
     <body>
         <h1>Submission Guidelines</h1>
-        <p>This will modify model ${params.id}. Are you sure?</p>
+        <p>This will now modify model ${params.id}. Are you sure?</p>
         <g:form>
             <div class="dialog">
                 <div class="buttons">

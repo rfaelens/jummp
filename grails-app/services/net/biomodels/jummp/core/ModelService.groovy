@@ -491,6 +491,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         return model.publication
     }
 
+    
+    
+    
+    
     /**
     * Creates a new Model and stores it in the VCS.
     *
@@ -515,6 +519,114 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         throw new ModelException(meta, "The new version of the model does not have any files.")
     }
 
+    
+    
+        /**
+    * Adds a new Revision to the model, to be used by SubmissionService
+    * The provided @p modelFiles will be stored in the VCS as an update to the existing files of the same @p model.
+    * A new Revision will be created and appended to the list of Revisions of the @p model. 
+    * The revision will not be validated, as the checks are assumed to have been conducted
+    * already
+    * @param model The Model the revision should be added
+    * @param modelFiles The model files to be stored in the VCS as a new revision
+    * @param format The format of the model files
+    * @param comment The commit message for the new revision
+    * @return The newly-added Revision. In case an error occurred while accessing the VCS @c null will be returned.
+    * @throws ModelException If either @p model, @p modelFiles or @p comment are null or if the files do not exist or are directories.
+    **/
+    @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.addRevisionAsList")
+    public Revision addValidatedRevision(final List<RepositoryFileTransportCommand> repoFiles, RevisionTransportCommand rev) throws ModelException {
+        // TODO: the method should be thread safe, add a lock
+        if (!rev.model) {
+            throw new ModelException(null, "Model may not be null")
+        }
+        if (rev.model.state == ModelState.DELETED) {
+            throw new ModelException(rev.model.toCommandObject(), "A new Revision cannot be added to a deleted model")
+        }
+        if (rev.comment == null) {
+            throw new ModelException(rev.model.toCommandObject(), "Comment may not be null, empty comment is allowed")
+        }
+        List<File> modelFiles = []
+        for (rf in repoFiles) {
+            final def f = new File(rf.path)
+            modelFiles.add(f)
+        }
+        final User currentUser = User.findByUsername(springSecurityService.authentication.name)
+        Model model=getModel(rev.model.id)
+        Revision revision = new Revision(model: model, name: rev.name, description: rev.description, comment: rev.comment, uploadDate: new Date(), owner: currentUser,
+                minorRevision: false, validated:rev.validated, format: ModelFormat.findByIdentifier(rev.format.identifier))
+        List<RepositoryFile> domainObjects = []
+        for (rf in repoFiles) {
+            final String fileName = rf.path.split(File.separator).last()
+            final def domain = new RepositoryFile(path: rf.path, description: rf.description, 
+                    mimeType: rf.mimeType, revision: revision)
+            if (rf.mainFile) {
+                domain.mainFile = rf.mainFile
+            }
+            if (rf.userSubmitted) {
+                domain.userSubmitted = rf.userSubmitted
+            }
+            if (rf.hidden) {
+                domain.hidden = rf.hidden
+            }
+            if (!domain.validate()) {
+                final def m = model.toCommandObject()
+                def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the update of model ${m.properties}.")
+                msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
+                log.error(msg)
+                final String culprit = new File(rf.path).name
+                throw new ModelException(m, "Your submission appears to contain invalid file ${fileName}. Please review it and try again.")
+            } else {
+                domainObjects.add(domain)
+            }
+        }
+
+        // save the new model in the database
+        try {
+            String vcsId = vcsService.updateModel(model, modelFiles, revision.comment)
+            revision.vcsId = vcsId
+        } catch (VcsException e) {
+            revision.discard()
+            domainObjects.each{ it.discard() }
+            log.error("Exception occurred during uploading a new Model Revision to VCS: ${e.getMessage()}")
+            throw new ModelException(model.toCommandObject(),
+                "Could not store new Model Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} in VCS", e)
+        }
+        // calculate the new revision number - accessing the revisions directly to circumvent ACL
+        revision.revisionNumber = model.revisions.sort {it.revisionNumber}.last().revisionNumber + 1
+
+        if (revision.validate()) {
+            model.addToRevisions(revision)
+            //save repoFiles, revision and model in one go
+            model.save(flush: true)
+            aclUtilService.addPermission(revision, currentUser.username, BasePermission.ADMINISTRATION)
+            aclUtilService.addPermission(revision, currentUser.username, BasePermission.READ)
+            aclUtilService.addPermission(revision, currentUser.username, BasePermission.DELETE)
+            // grant read access to all users having read access to the model
+            Acl acl = aclUtilService.readAcl(model)
+            for (ace in acl.entries) {
+                if (ace.sid instanceof PrincipalSid && ace.permission == BasePermission.READ) {
+                    aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.READ)
+                }
+            }
+            revision.refresh()
+            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
+            grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), vcsService.retrieveFiles(revision)))
+        } else {
+            System.out.println(revision.errors)
+            
+            // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
+            revision.discard()
+            final def m = model.toCommandObject()
+            log.error("New Revision containing ${repoFiles.inspect()} for Model ${m} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")
+            throw new ModelException(m, "Revision stored in VCS, but not in database")
+        }
+        return revision
+    }
+
+    
     
     /**
     * Creates a new Model and stores it in the VCS. Stripped down version suitable
@@ -549,7 +661,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             final def f = new File(path)
             modelFiles.add(f)
         }
-        ModelFormat format=ModelFormat.findByIdentifier(rev.model.format.identifier)
+        ModelFormat format=ModelFormat.findByIdentifier(rev.format.identifier)
 
         // vcs identifier is upload date + name - this should by all means be unique
         String pathPrefix =
@@ -697,7 +809,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     
     
     
-    
+   
     
     
     

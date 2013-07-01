@@ -44,7 +44,7 @@ class BootStrap {
         wcmSecurityService.securityDelegate = [
             getUserName : { ->
                 if (springSecurityService.isLoggedIn()) {
-                    System.out.println(springSecurityService.principal.username)
+                    //System.out.println(springSecurityService.principal.username)
                     return springSecurityService.principal.username
                 } else {
                     return null
@@ -55,7 +55,7 @@ class BootStrap {
             },
             getUserRoles : { ->
                 if (springSecurityService.isLoggedIn()) {
-                    System.out.println(springSecurityService.principal.authorities)
+                    //System.out.println(springSecurityService.principal.authorities)
                     return springSecurityService.principal.authorities
                 } else {
                     return ['ROLE_GUEST']
