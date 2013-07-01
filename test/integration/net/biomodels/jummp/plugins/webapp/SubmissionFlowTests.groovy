@@ -139,9 +139,6 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             // Click continue on disclaimer, test memory variables
             signalEvent("Continue")
             assertFlowState("uploadFiles")
-            assert false == (Boolean) flowScope.
-                                        workingMemory.
-                                        get("isUpdateOnExistingModel")
         }
     }
 
@@ -162,6 +159,9 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         void performTest() {
             def viewSelection = startFlow()
             signalEvent("Continue")
+            assert false == (Boolean) flowScope.
+                                        workingMemory.
+                                        get("isUpdateOnExistingModel")
             performRemainingTest()
         }
         // What the concrete class wants to test
