@@ -159,9 +159,6 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         void performTest() {
             def viewSelection = startFlow()
             signalEvent("Continue")
-            assert false == (Boolean) flowScope.
-                                        workingMemory.
-                                        get("isUpdateOnExistingModel")
             performRemainingTest()
         }
         // What the concrete class wants to test
@@ -175,6 +172,9 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             addFileToRequest(file, "mainFile", "application/xml")
             signalEvent("Upload")
             assertFlowState("displayModelInfo")
+            assert false == (Boolean) flowScope.
+                                        workingMemory.
+                                        get("isUpdateOnExistingModel")
             assert format == flowScope.workingMemory.get("model_type") as String
             RTC revision=flowScope.workingMemory.get("RevisionTC") as RTC
             //test name

@@ -267,7 +267,9 @@ class SubmissionService {
             MTC model=new MTC() //no need for it currently, later on, store publication details
             RTC revision=new RTC(files: getRepFiles(workingMemory), 
                                 model: model,
-                                format: ModelFormat.findByIdentifier(workingMemory.get("model_type") as String)) 
+                                format: ModelFormat.
+                                            findByIdentifier(workingMemory.get("model_type") as String).
+                                            toCommandObject()) 
             storeTCs(workingMemory, model, revision)
         }
 
@@ -302,7 +304,7 @@ class SubmissionService {
             RTC revision=workingMemory.get("RevisionTC") as RTC
             MTC model=revision.model
             model.name=revision.name
-            model.format=ModelFormat.findByIdentifier(workingMemory.get("model_type") as String).toCommandObject()
+            model.format=revision.format
             revision.comment="Import of ${revision.name}".toString()
             workingMemory.put("model_id",
                     modelService.uploadValidatedModel(repoFiles, revision).id)
@@ -405,6 +407,7 @@ class SubmissionService {
          *   whether this file is being added or removed, whether it is
          *   the main file, and an optional description parameter
          */
+        System.out.println(workingMemory)
         getStrategyFromContext(workingMemory).handleFileUpload(workingMemory, modifications)
     }
 

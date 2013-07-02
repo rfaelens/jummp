@@ -62,7 +62,7 @@ class ModelController {
             on("Cancel").to "abort"
         }
         uploadPipeline {
-            subflow(controller: "model", action: "upload", input: [isUpdate:true])
+            subflow(controller: "model", action: "upload", input: [isUpdate:false])
             on("abort").to "abort"
             on("displayConfirmationPage").to "displayConfirmationPage"
             on("displayErrorPage").to "displayErrorPage"
