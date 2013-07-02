@@ -9,7 +9,7 @@
     <body>
         <h1>A star was born</h1>
         <p>Thank you for submitting your model.</p>
-        <p>You can access your model <a href="http://${request.serverName}:${request.serverPort}${request.forwardURI.split("upload")[0]}model/${session.result_submission}">here</a>
+        <p>You can access your model <a href="http://${request.serverName}:${request.serverPort}${request.forwardURI.split("create")[0]}model/${session.result_submission}">here</a>
         </p>
     </body>
 </html>

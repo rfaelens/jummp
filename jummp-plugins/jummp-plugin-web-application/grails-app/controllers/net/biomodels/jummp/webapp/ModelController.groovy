@@ -188,8 +188,12 @@ class ModelController {
             on("Continue")
             {
                 Map<String,String> modifications=new HashMap<String,String>()
-                modifications.put("RevisionComments", params.RevisionComments)
-                //populate modifications
+                if (params.RevisionComments) {
+                    modifications.put("RevisionComments", params.RevisionComments)
+                }
+                else {
+                    modifications.put("RevisionComments", "Model revised without commit message")
+                }
                 submissionService.updateRevisionComments(flow.workingMemory, modifications)
             }.to "saveModel"
             on("Cancel").to "abort"

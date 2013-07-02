@@ -120,12 +120,14 @@ class SubmissionService {
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
         protected void updateRevisionFromFiles(Map<String,Object> workingMemory) {
+            System.out.println("UPDATING REVISION OBJECTS!!")
             RTC revision = workingMemory.get("RevisionTC") as RTC
             List<File> files = getFilesFromMemory(workingMemory, true)
             ModelFormat modelFormat=ModelFormat.findByIdentifier(revision.format.identifier)
             revision.name = modelFileFormatService.extractName(files,modelFormat)
             revision.description=modelFileFormatService.extractDescription(files, modelFormat)
             revision.validated=workingMemory.get("model_validation_result") as Boolean
+            System.out.println("RTC: "+revision.getProperties())
         }
 
         /**
@@ -333,6 +335,7 @@ class SubmissionService {
             if (workingMemory.containsKey("submitted_mains")) {
                 workingMemory.put("reprocess_files", true)
             }
+            System.out.println(workingMemory)
             super.handleFileUpload(workingMemory, modifications)
         }
 
@@ -344,12 +347,14 @@ class SubmissionService {
          */
         void inferModelFormatType(Map<String, Object> workingMemory) {
             if (workingMemory.containsKey("reprocess_files")) {
+                System.out.println("Inferring model format")
                 super.inferModelFormatType(workingMemory)
             }
         }
         
         void performValidation(Map<String,Object> workingMemory) {
             if (workingMemory.containsKey("reprocess_files")) {
+                System.out.println("Revalidating! ")
                 newModel.performValidation(workingMemory)
             }
         }
@@ -361,6 +366,14 @@ class SubmissionService {
             System.out.println("Model: "+modelDom.getProperties())
             RTC revision=modelService.getLatestRevision(modelDom).toCommandObject()
             System.out.println("RTC: "+revision.getProperties())
+            if (workingMemory.containsKey("reprocess_files")) {
+                revision.format=ModelFormat.
+                                            findByIdentifier(workingMemory.get("model_type") as String).
+                                            toCommandObject()
+            }
+            else {
+                workingMemory.put("model_type",format.identifier)
+            }
             workingMemory.put("model_type",revision.format.identifier)
             storeTCs(workingMemory, revision.model, revision)
             //ensure that a new revision tc is used for submission, use 
@@ -382,11 +395,13 @@ class SubmissionService {
             RTC revision=workingMemory.get("RevisionTC") as RTC
             System.out.println("About to submit revision: "+revision.getProperties())
             try
-                {workingMemory.put("model_id",
-                    modelService.addValidatedRevision(repoFiles, revision).id)
+                {
+                    workingMemory.put("model_id",
+                    modelService.addValidatedRevision(repoFiles, revision).model.id)
                 }
                 catch(Exception e) {
                     e.printStackTrace()
+                    throw e
                 }
     
         }

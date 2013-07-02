@@ -8,6 +8,9 @@ import org.junit.*
 import grails.test.WebFlowTestCase
 import net.biomodels.jummp.webapp.ModelController
 import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
+import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.JummpIntegrationTest
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockMultipartFile
 import org.apache.commons.io.FileUtils
@@ -41,14 +44,14 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     @Test
     void testDisclaimerAbort() {
         assertNotNull(authenticateAsTestUser())
-        new TestDisclaimerAbort().runTest()
+        new TestDisclaimerAbort().testrun()
     }
 
     /* Continues after the disclaimer */
     @Test
     void testDisclaimerContinue() {
         assertNotNull(authenticateAsTestUser())
-        new TestDisclaimerContinue().runTest()
+        new TestDisclaimerContinue().testrun()
     }
 
     /* Tests upload page, then clicks abort
@@ -56,7 +59,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     @Test
     void testUploadFilesAbort() {
         assertNotNull(authenticateAsTestUser())
-        new TestUploadFilesCancel().runTest()
+        new TestUploadFilesCancel().testrun()
     }
 
     /* Tests upload pipeline, first with an empty list, 
@@ -64,15 +67,31 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     @Test
     void testUploadFilesContinue() {
         assertNotNull(authenticateAsTestUser())
-        new testUploadFilesContinue().runTest()
+        TestUploadFilesContinue continued=new TestUploadFilesContinue()
+        continued.testrun()
     }
+    
+    
+    @Test
+    void testUpdateUploadedModel() {
+        assertNotNull(authenticateAsAdmin())
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "test", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"))
+        File importFile = new File("target/vcs/exchange/import.xml")
+        FileUtils.touch(importFile)
+        importFile.append("Test\n")
+        def rf = new RepositoryFileTransportCommand(path: importFile.absolutePath, description: "")
+        Model model = modelService.uploadModelAsFile(rf, meta)
+        assertTrue(model.validate())
+        new TestUpdateSbml(model.id, importFile).testrun()
+    }
+    
 
     /* Tests upload pipeline, first with an empty list, 
      * then with a known SBML model */
     @Test
     void testSubmitSBML() {
         assertNotNull(authenticateAsTestUser())
-        new TestSubmitSBML().runTest()
+        new TestSubmitSBML().testrun()
     }
 
     /**
@@ -85,13 +104,14 @@ class SubmissionFlowTests extends JummpIntegrationTest {
      * is unnecessary instantiation of flows (just one class could be used). On
      * the other hand it is a little bit more modular than it might otherwise have
      * been. Raza Ali: 18/6/13
+     * 
+     * Base class for the different webflow tests for both create and update
      */
-    abstract class FlowUnitTest extends WebFlowTestCase {
-        def getFlow() { 
-            new ModelController().createFlow 
-        }
+    
+    abstract class FlowBase extends WebFlowTestCase {
+        abstract def getFlow(); 
         abstract void performTest()
-        
+
         /*
          * WebFlowTestCase doesnt support file uploads. Modify request
          * property to change that.  
@@ -104,7 +124,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         }
         
         /* Main Template method for testing. */
-        void runTest()
+        public void testrun()
         {
             setUp()
             performTest()
@@ -131,9 +151,96 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             (mockRequest as MockMultipartHttpServletRequest).addFile(file)
         }
 
+        /* Convenience function to compare a map of String->byte[] retrieved from
+         * the repository with the supplied list of files*/
+        protected void validateFiles(Map<String,byte[]> files, List<File> testFiles) {
+            assert files
+            testFiles.each {
+                assert files.containsKey(it.getName())
+                byte[] savedFile=files.get(it.getName())
+                assert savedFile == it.getBytes()
+            }
+        }
+
+    }
+    
+    /* Base class for Update flow tests. Sets the model id in the request
+     * params as supplied in the constructor*/
+    abstract class UpdateBase extends FlowBase {
+        long modelid
+        UpdateBase(long m) {
+            modelid=m
+        }
+        protected void setUp() {
+           super.setUp()
+           mockRequest.setParameter("id",""+modelid)
+        }
+        def getFlow() {
+            new ModelController().updateFlow
+        }
+    }
+    
+    /* Base class for the create flows*/
+    abstract class CreateBase extends FlowBase {
+        def getFlow() { 
+            new ModelController().createFlow 
+        }
+    }
+    
+
+    /* Class for testing out the update mechanism. Creates a model with an
+     * unknown file format. Then updates the model with an sbml file thereby
+     * changing the model type. Ensures that the revision reflects the new
+     * model's name and description (from the sbml file), and contains both
+     * the original and the new model files*/
+    class TestUpdateSbml extends UpdateBase {
+        File existing
+        TestUpdateSbml(long m, File uploaded) {
+            super(m)
+            existing=uploaded
+        }
+        void performTest() {
+            def viewSelection = startFlow()
+            signalEvent("Continue")
+            assertFlowState("uploadFiles")
+            File newFile=bigModel()
+            addFileToRequest(newFile, "mainFile", "application/xml")
+            signalEvent("Upload")
+            assertFlowState("displayModelInfo")
+            assert true == (Boolean) flowScope.
+                                        workingMemory.
+                                        get("isUpdateOnExistingModel")
+            
+            assert "SBML" == flowScope.workingMemory.get("model_type") as String
+            RTC revision=flowScope.workingMemory.get("RevisionTC") as RTC
+            //test name
+            assert "Becker2010_EpoR_AuxiliaryModel" == revision.name
+            assert revision.description.contains("This relation solely depends on EpoR turnover independent of ligand binding, suggesting an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system")
+            
+            //add tests for when displayModelInfo does something interesting
+            signalEvent("Continue")
+            assertFlowState("displaySummaryOfChanges")
+            Model model=modelService.getModel(modelid)
+            Revision prev=modelService.getLatestRevision(model)
+            assert prev
+            signalEvent("Continue")
+            assert flowExecutionOutcome.id == "displayConfirmationPage"
+            
+            
+            //test that the model is infact saved in the database
+            Revision rev=modelService.getLatestRevision(model)
+            //test that revision is saved correctly
+            assert rev
+            assert rev.comment.contains("Model revised without commit message")
+            assert rev.revisionNumber==prev.revisionNumber+1
+            
+            //test that files are updated in the repository correctly
+            Map<String, byte[]> files=modelService.retrieveModelFiles(model)
+            validateFiles(files, [existing, newFile])
+        }
     }
 
-    class TestDisclaimerContinue extends FlowUnitTest {
+    class TestDisclaimerContinue extends CreateBase {
         void performTest() {
             def viewSelection = startFlow()
             // Click continue on disclaimer, test memory variables
@@ -142,7 +249,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         }
     }
 
-    class TestDisclaimerAbort extends FlowUnitTest {
+    class TestDisclaimerAbort extends CreateBase {
         void performTest() {
             def viewSelection = startFlow()
             // Click cancel on the first step
@@ -155,7 +262,13 @@ class SubmissionFlowTests extends JummpIntegrationTest {
      * behaviour. Includes a method for clicking through the pipeline with
      * supplied files
      * */
-    abstract class TestUploadFiles extends FlowUnitTest {
+    abstract class TestUploadFiles extends CreateBase {
+        int modelId=0;
+        
+        int getModel() {
+            return modelId
+        }
+        
         void performTest() {
             def viewSelection = startFlow()
             signalEvent("Continue")
@@ -191,7 +304,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             assert flowExecutionOutcome.id == "displayConfirmationPage"
             
             //test that the model is infact saved in the database
-            int modelId=Integer.parseInt(mockRequest.session.result_submission as String)
+            modelId=Integer.parseInt(mockRequest.session.result_submission as String)
             Model model=Model.findById(modelId)
             assert model
             Revision rev=modelService.getLatestRevision(model)
@@ -201,10 +314,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             
             //test that the model is saved in the repository
             Map<String, byte[]> files=modelService.retrieveModelFiles(Model.findById(modelId))
-            assert files
-            byte[] savedFile=files.get(file.getName())
-            assert savedFile
-            assert savedFile == file.getBytes()
+            validateFiles(files, [file])
         }
         
         private void checkDescription(String description, String[] descriptionStrings) {
@@ -224,7 +334,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         }
     }
     
-    class testUploadFilesContinue extends TestUploadFiles {
+    class TestUploadFilesContinue extends TestUploadFiles {
         void performRemainingTest() {
             // empty files list shouldnt validate!
             signalEvent("Upload")
@@ -251,6 +361,9 @@ class SubmissionFlowTests extends JummpIntegrationTest {
                                descriptionTests)
         }
     }
+    
+    
+    
 
     private File getFileForTest(String filename, String text)
     {

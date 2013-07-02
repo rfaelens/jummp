@@ -534,7 +534,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * @return The newly-added Revision. In case an error occurred while accessing the VCS @c null will be returned.
     * @throws ModelException If either @p model, @p modelFiles or @p comment are null or if the files do not exist or are directories.
     **/
-    @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
+//    @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.addRevisionAsList")
     public Revision addValidatedRevision(final List<RepositoryFileTransportCommand> repoFiles, RevisionTransportCommand rev) throws ModelException {
@@ -543,10 +544,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(null, "Model may not be null")
         }
         if (rev.model.state == ModelState.DELETED) {
-            throw new ModelException(rev.model.toCommandObject(), "A new Revision cannot be added to a deleted model")
+            throw new ModelException(rev.model, "A new Revision cannot be added to a deleted model")
         }
         if (rev.comment == null) {
-            throw new ModelException(rev.model.toCommandObject(), "Comment may not be null, empty comment is allowed")
+            throw new ModelException(rev.model, "Comment may not be null, empty comment is allowed")
         }
         List<File> modelFiles = []
         for (rf in repoFiles) {
@@ -895,7 +896,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 revisionNumber: 1,
                 owner: User.findByUsername(springSecurityService.authentication.name),
                 minorRevision: false,
-                valid: validated,
+                validated: valid,
                 name: modelFileFormatService.extractName(modelFiles, format),
                 description: modelFileFormatService.extractDescription(modelFiles, format),
                 comment: meta.comment,
