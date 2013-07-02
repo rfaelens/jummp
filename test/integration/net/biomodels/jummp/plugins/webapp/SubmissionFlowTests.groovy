@@ -36,8 +36,8 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     
     @After
     void tearDown() {
-        //FileUtils.deleteDirectory(new File("target/vcs/git"))
-        //FileUtils.deleteDirectory(new File("target/vcs/exchange"))
+        FileUtils.deleteDirectory(new File("target/vcs/git"))
+        FileUtils.deleteDirectory(new File("target/vcs/exchange"))
     }
 
     /* Aborts at the first step */
