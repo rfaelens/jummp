@@ -41,9 +41,37 @@ class SubmissionService {
          * Purpose
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
-         * @param modifications
+         * @param modifications     a Map containing the existing files in the model, to be modified
          */
-        abstract void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications);
+        void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
+            handleModifications(workingMemory, modifications)
+            if (workingMemory.containsKey("submitted_mains"))
+            {
+                List<File> mainFiles=workingMemory.remove("submitted_mains") as List<File>
+                Map<File,String> additionals=null;
+                if (workingMemory.containsKey("submitted_additionals")) {
+                    additionals=workingMemory.remove("submitted_additionals") as Map<File, String>
+                }
+                else {
+                    additionals=new HashMap<File,String>()
+                }
+                List<RFTC> tobeAdded=createRFTCList(mainFiles, additionals)
+                if (workingMemory.containsKey("repository_files")) {
+                    (workingMemory.get("repository_files") as List<RFTC>).addAll(tobeAdded)
+                }
+                else {
+                    workingMemory.put("repository_files", tobeAdded)
+                }
+            }
+        }
+        
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         * @param modifications     a Map containing the existing files in the model, to be modified
+         */
+        protected abstract void handleModifications(Map<String, Object> workingMemory, Map<String, Object> modifications);
 
         /**
          * Detects the format of the model and stores this information in the working memory
@@ -92,12 +120,14 @@ class SubmissionService {
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
         protected void updateRevisionFromFiles(Map<String,Object> workingMemory) {
+            System.out.println("UPDATING REVISION OBJECTS!!")
             RTC revision = workingMemory.get("RevisionTC") as RTC
             List<File> files = getFilesFromMemory(workingMemory, true)
-            revision.name = modelFileFormatService.extractName(files,
-                    ModelFormat.findByIdentifier(workingMemory.get("model_type") as String))
-            revision.description=modelFileFormatService.extractDescription(files,
-                    ModelFormat.findByIdentifier(workingMemory.get("model_type") as String))
+            ModelFormat modelFormat=ModelFormat.findByIdentifier(revision.format.identifier)
+            revision.name = modelFileFormatService.extractName(files,modelFormat)
+            revision.description=modelFileFormatService.extractDescription(files, modelFormat)
+            revision.validated=workingMemory.get("model_validation_result") as Boolean
+            System.out.println("RTC: "+revision.getProperties())
         }
 
         /**
@@ -186,27 +216,18 @@ class SubmissionService {
      */
     class NewModelStateMachine extends StateMachineStrategy {
 
+
         /**
-         * Purpose
+         * Purpose modify existing files in working memory
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
-         * @param modifications     a Map describing the list of existing files that should be added or removed.
+         * @param modifications     a Map containing the existing files in the model, to be modified
          */
-        void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
-            if (workingMemory.containsKey("submitted_mains"))
-            {
-                List<File> mainFiles=workingMemory.remove("submitted_mains") as List<File>
-                Map<File,String> additionals=null;
-                if (workingMemory.containsKey("submitted_additionals")) {
-                    additionals=workingMemory.remove("submitted_additionals") as Map<File, String>
-                }
-                else {
-                    additionals=new HashMap<File,String>()
-                }
-                workingMemory.put("repository_files", createRFTCList(mainFiles, additionals))
-            }
+        protected void handleModifications(Map<String, Object> workingMemory, Map<String, Object> modifications) {
+            
         }
 
+        
         /**
          * Purpose
          *
@@ -228,6 +249,7 @@ class SubmissionService {
             boolean modelsAreValid = modelFileFormatService.validate(
                         getFilesFromMemory(workingMemory, true),
                         workingMemory.get("model_type") as String)
+            workingMemory.put("model_validation_result", modelsAreValid)
             if (!workingMemory.containsKey("model_type")) {
                 workingMemory.put("validation_error",
                     "Missing Format Error: Validation could not be performed, format unknown")
@@ -245,7 +267,11 @@ class SubmissionService {
          */
         protected void createTransportObjects(Map<String,Object> workingMemory) {
             MTC model=new MTC() //no need for it currently, later on, store publication details
-            RTC revision=new RTC(files: getRepFiles(workingMemory), model: model) 
+            RTC revision=new RTC(files: getRepFiles(workingMemory), 
+                                model: model,
+                                format: ModelFormat.
+                                            findByIdentifier(workingMemory.get("model_type") as String).
+                                            toCommandObject()) 
             storeTCs(workingMemory, model, revision)
         }
 
@@ -277,13 +303,13 @@ class SubmissionService {
          */
         void handleSubmission(Map<String,Object> workingMemory) {
             List<RFTC> repoFiles = getRepFiles(workingMemory)
-            MTC model=(MTC) workingMemory.get("ModelTC") as MTC
             RTC revision=workingMemory.get("RevisionTC") as RTC
-
+            MTC model=revision.model
             model.name=revision.name
-            model.format=ModelFormat.findByIdentifier(workingMemory.get("model_type") as String).toCommandObject()
-            model.comment="Import of ${revision.name}".toString()
-            modelService.uploadModelAsList(repoFiles, model)
+            model.format=revision.format
+            revision.comment="Import of ${revision.name}".toString()
+            workingMemory.put("model_id",
+                    modelService.uploadValidatedModel(repoFiles, revision).id)
         }
     }
 
@@ -292,9 +318,25 @@ class SubmissionService {
      * for handling the submission of updated versions of existing models.
      */
     class NewRevisionStateMachine extends StateMachineStrategy {
-        void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
-        /*Include check to remove 'model_type' from memory if main file has been changed*/
 
+        /**
+         * Purpose modify existing files in working memory and repository
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         * @param modifications     a Map containing the existing files in the model, to be modified
+         */
+        protected void handleModifications(Map<String, Object> workingMemory, Map<String, Object> modifications) {
+            // handle removal of files from repository
+        }
+
+
+
+        void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
+            if (workingMemory.containsKey("submitted_mains")) {
+                workingMemory.put("reprocess_files", true)
+            }
+            System.out.println(workingMemory)
+            super.handleFileUpload(workingMemory, modifications)
         }
 
         /**
@@ -305,20 +347,35 @@ class SubmissionService {
          */
         void inferModelFormatType(Map<String, Object> workingMemory) {
             if (workingMemory.containsKey("reprocess_files")) {
+                System.out.println("Inferring model format")
                 super.inferModelFormatType(workingMemory)
             }
         }
+        
         void performValidation(Map<String,Object> workingMemory) {
             if (workingMemory.containsKey("reprocess_files")) {
+                System.out.println("Revalidating! ")
                 newModel.performValidation(workingMemory)
             }
         }
 
         protected void createTransportObjects(Map<String,Object> workingMemory) {
-            Model modelDom=Model.get(workingMemory.get("model_id") as Long)
-            MTC model=modelDom.toCommandObject()
-            RTC revision=modelService.getLatestRevision(model)
-            storeTCs(workingMemory, model, revision)
+            long modelID=(workingMemory.get("model_id") as Long).longValue()
+            System.out.println("Model Id: "+modelID)
+            Model modelDom=modelService.getModel(modelID)
+            System.out.println("Model: "+modelDom.getProperties())
+            RTC revision=modelService.getLatestRevision(modelDom).toCommandObject()
+            System.out.println("RTC: "+revision.getProperties())
+            if (workingMemory.containsKey("reprocess_files")) {
+                revision.format=ModelFormat.
+                                            findByIdentifier(workingMemory.get("model_type") as String).
+                                            toCommandObject()
+            }
+            else {
+                workingMemory.put("model_type",format.identifier)
+            }
+            workingMemory.put("model_type",revision.format.identifier)
+            storeTCs(workingMemory, revision.model, revision)
             //ensure that a new revision tc is used for submission, use 
             //this one for copying info!
         }
@@ -329,11 +386,24 @@ class SubmissionService {
 
         void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {
             RTC revision=workingMemory.get("RevisionTC") as RTC
-            revision.comment=workingMemory.get("RevisionComments") as String
+            revision.comment=modifications.get("RevisionComments")
         }
 
         void handleSubmission(Map<String,Object> workingMemory) {
             //todo
+            List<RFTC> repoFiles = getRepFiles(workingMemory)
+            RTC revision=workingMemory.get("RevisionTC") as RTC
+            System.out.println("About to submit revision: "+revision.getProperties())
+            try
+                {
+                    workingMemory.put("model_id",
+                    modelService.addValidatedRevision(repoFiles, revision).model.id)
+                }
+                catch(Exception e) {
+                    e.printStackTrace()
+                    throw e
+                }
+    
         }
     }
 
@@ -352,6 +422,7 @@ class SubmissionService {
          *   whether this file is being added or removed, whether it is
          *   the main file, and an optional description parameter
          */
+        System.out.println(workingMemory)
         getStrategyFromContext(workingMemory).handleFileUpload(workingMemory, modifications)
     }
 

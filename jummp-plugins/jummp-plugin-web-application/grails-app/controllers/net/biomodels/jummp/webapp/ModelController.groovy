@@ -36,6 +36,49 @@ class ModelController {
         [id: params.id]
     }
 
+    @Secured(["isAuthenticated()"])
+    def updateFlow = {
+        start {
+            action {
+                conversation.model_id=params.id
+            }
+            on("success").to "displayDisclaimer"
+        }
+        displayDisclaimer {
+            on("Continue").to "uploadPipeline"
+            on("Cancel").to "abort"
+        }
+        uploadPipeline {
+            //System.out.println("UploadPipeline: "+flow.workingMemory)
+            subflow(controller: "model", action: "upload", input: [isUpdate: true])
+            on("abort").to "abort"
+            on("displayConfirmationPage").to "displayConfirmationPage"
+            on("displayErrorPage").to "displayErrorPage"
+        }
+        abort()
+        displayConfirmationPage()
+        displayErrorPage()
+    }
+    
+    
+    @Secured(["isAuthenticated()"])
+    def createFlow = {
+        displayDisclaimer {
+            on("Continue").to "uploadPipeline"
+            on("Cancel").to "abort"
+        }
+        uploadPipeline {
+            subflow(controller: "model", action: "upload", input: [isUpdate:false])
+            on("abort").to "abort"
+            on("displayConfirmationPage").to "displayConfirmationPage"
+            on("displayErrorPage").to "displayErrorPage"
+        }
+        abort()
+        displayConfirmationPage()
+        displayErrorPage()
+    }
+    
+    
     /*
      * The flow maintains the 'params' as flow.workingMemory (just to distinguish
      * between request.params and our params. Flow scope requires all objects
@@ -47,17 +90,19 @@ class ModelController {
      */
     @Secured(["isAuthenticated()"])
     def uploadFlow = {
-        displayDisclaimer {
-            on("Continue") {
-                Map<String, Object> workingMemory=new HashMap<String,Object>()
-                flow.workingMemory = workingMemory
-                flow.workingMemory.put("isUpdateOnExistingModel",false) //use subflow for updating models, todo
-            }.to "uploadFiles"
-            on("Cancel").to "abort"
+        input {
+            isUpdate(required: true)
         }
         uploadFiles {
             on("Upload") {
                 //withForm {
+                Map<String, Object> workingMemory=new HashMap<String,Object>()
+                workingMemory.put("isUpdateOnExistingModel",flow.isUpdate) //use subflow for updating models, todo
+                if (flow.isUpdate) {
+                    workingMemory.put("model_id", conversation.model_id)
+                }
+                flow.workingMemory=workingMemory
+                println flow.workingMemory
                 def inputs = new HashMap<String, Object>()
 
                 def mainMultipartList = request.getMultiFileMap().mainFile
@@ -189,8 +234,12 @@ class ModelController {
             on("Continue")
             {
                 Map<String,String> modifications=new HashMap<String,String>()
-                modifications.put("RevisionComments", params.RevisionComments)
-                //populate modifications
+                if (params.RevisionComments) {
+                    modifications.put("RevisionComments", params.RevisionComments)
+                }
+                else {
+                    modifications.put("RevisionComments", "Model revised without commit message")
+                }
                 submissionService.updateRevisionComments(flow.workingMemory, modifications)
             }.to "saveModel"
             on("Cancel").to "abort"
@@ -198,64 +247,48 @@ class ModelController {
         }
         saveModel {
             action {
-                submissionService.handleSubmission(flow.workingMemory)
+                try {
+                    submissionService.handleSubmission(flow.workingMemory)
+                    session.result_submission=flow.workingMemory.get("model_id")
+                }
+                catch(Exception ignore) {
+                    error()
+                }
             }
             on("success").to "displayConfirmationPage"
             on("error").to "displayErrorPage"
         }
+        abort()
         displayConfirmationPage()
         displayErrorPage()
-        abort()
-    }
-
-    private RFTC createRFTC(File file, boolean isMain) {
-        new RFTC(path: file.getCanonicalPath(), mainFile: isMain, userSubmitted: true, hidden: false, description:file.getName())
-    }
-
-    private File getFileForTest(String filename, String text)
-    {
-        File tempFile=File.createTempFile("nothing",null)
-        def testFile=new File(tempFile.getParent()+File.separator+filename)
-        if (text) testFile.setText(text)
-        return testFile
-    }
-
-    private List<RFTC> createRFTCList(File mainFile, List<File> additionalFiles) {
-        def returnMe = new LinkedList<RFTC>()
-        returnMe.add(createRFTC(mainFile, true))
-        additionalFiles.each {
-            returnMe.add(createRFTC(it, false))
-        }
-        returnMe
-    }
-
-    private File bigModel() {
-        return new File("test/files/BIOMD0000000272.xml")
-    }
-
-    private List<RFTC> getSbmlModel() {
-        return createRFTCList(bigModel(), [getFileForTest("additionalFile.txt", "heres some randomText")])
     }
 
     /**
      * File download of the model file for a model by id
      */
     def download = {
-        Map<String, byte[]> bytes = modelDelegateService.retrieveModelFiles(new RevisionTransportCommand(id: params.id as int))
-        ByteArrayOutputStream byteBuffer=new ByteArrayOutputStream()
-        ZipOutputStream zipFile = new ZipOutputStream()
-        for (Map.Entry<String, byte[]> entry : bytes.entrySet())
+        try
         {
-            zipFile.putNextEntry(new ZipEntry(entry.getKey()))
-            zipFile.write(entry.getValue(),0,entry.getValue().length)
-            zipFile.closeEntry()
-        }
-        zipFile.close()
+            Map<String, byte[]> bytes = modelDelegateService.retrieveModelFiles(new RevisionTransportCommand(id: params.id as int))
+            ByteArrayOutputStream byteBuffer=new ByteArrayOutputStream()
+            ZipOutputStream zipFile = new ZipOutputStream(byteBuffer)
+            for (Map.Entry<String, byte[]> entry : bytes.entrySet())
+            {
+                zipFile.putNextEntry(new ZipEntry(entry.getKey()))
+                zipFile.write(entry.getValue(),0,entry.getValue().length)
+                zipFile.closeEntry()
+            }
+            zipFile.close()
 
-        response.setContentType("application/zip")
-        // TODO: set a proper name for the model
-        response.setHeader("Content-disposition", "attachment;filename=\"model.zip\"")
-        response.outputStream << new ByteArrayInputStream(byteBuffer.toByteArray())
+            response.setContentType("application/zip")
+            // TODO: set a proper name for the model
+            response.setHeader("Content-disposition", "attachment;filename=\"model.zip\"")
+            response.outputStream << new ByteArrayInputStream(byteBuffer.toByteArray())
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace()
+        }
     }
 
     def model = {

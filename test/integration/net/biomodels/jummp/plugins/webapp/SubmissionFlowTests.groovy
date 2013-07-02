@@ -1,46 +1,97 @@
 package net.biomodels.jummp.plugins.webapp
 
-import static org.junit.Assert.*
-import org.junit.*
 import grails.test.WebFlowTestCase
-import net.biomodels.jummp.webapp.ModelController
-import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
-import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.core.JummpIntegrationTest
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
+import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.webapp.ModelController
+import org.apache.commons.io.FileUtils
+import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
+import org.junit.*
+import org.springframework.mock.web.MockMultipartFile
+import org.springframework.mock.web.MockMultipartHttpServletRequest
+import org.springframework.web.context.request.RequestContextHolder
+import static org.junit.Assert.*
 
 class SubmissionFlowTests extends JummpIntegrationTest {
-    protected void setUp() {
+    
+    def grailsApplication
+    def fileSystemService
+    def modelService
+    
+    @Before
+    void setUp() {
         super.createUserAndRoles()
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange/"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git/"
+        File parentLocation = new File(grailsApplication.config.jummp.vcs.workingDirectory )
+        parentLocation.mkdir()
+        fileSystemService.root = parentLocation
+        fileSystemService.currentModelContainer = parentLocation.absolutePath+File.separator+"ttt"
+    }
+    
+    @After
+    void tearDown() {
+        //FileUtils.deleteDirectory(new File("target/vcs/git"))
+        //FileUtils.deleteDirectory(new File("target/vcs/exchange"))
     }
 
+    /* Aborts at the first step */
     @Test
     void testDisclaimerAbort() {
         assertNotNull(authenticateAsTestUser())
-        new TestDisclaimerAbort().runTest()
+        new TestDisclaimerAbort().testrun()
     }
 
+    /* Continues after the disclaimer */
     @Test
     void testDisclaimerContinue() {
         assertNotNull(authenticateAsTestUser())
-        new TestDisclaimerContinue().runTest()
+        new TestDisclaimerContinue().testrun()
     }
 
+    /* Tests upload page, then clicks abort
+     */ 
     @Test
     void testUploadFilesAbort() {
         assertNotNull(authenticateAsTestUser())
-        new TestUploadFilesCancel().runTest()
+        new TestUploadFilesCancel().testrun()
     }
 
+    /* Tests upload pipeline, first with an empty list, 
+     * then with an unknown model */
     @Test
     void testUploadFilesContinue() {
         assertNotNull(authenticateAsTestUser())
-        new testUploadFilesContinue().runTest()
+        TestUploadFilesContinue continued=new TestUploadFilesContinue()
+        continued.testrun()
     }
+    
+    
+    @Test
+    void testUpdateUploadedModel() {
+        assertNotNull(authenticateAsAdmin())
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "test", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"))
+        File importFile = new File("target/vcs/exchange/import.xml")
+        FileUtils.touch(importFile)
+        importFile.append("Test\n")
+        def rf = new RepositoryFileTransportCommand(path: importFile.absolutePath, description: "")
+        Model model = modelService.uploadModelAsFile(rf, meta)
+        assertTrue(model.validate())
+        new TestUpdateSbml(model.id, importFile).testrun()
+    }
+    
 
+    /* Tests upload pipeline, first with an empty list, 
+     * then with a known SBML model */
     @Test
     void testSubmitSBML() {
         assertNotNull(authenticateAsTestUser())
-        new TestSubmitSBML().runTest()
+        new TestSubmitSBML().testrun()
     }
 
     /**
@@ -53,156 +104,273 @@ class SubmissionFlowTests extends JummpIntegrationTest {
      * is unnecessary instantiation of flows (just one class could be used). On
      * the other hand it is a little bit more modular than it might otherwise have
      * been. Raza Ali: 18/6/13
+     * 
+     * Base class for the different webflow tests for both create and update
      */
-    abstract class FlowUnitTest extends WebFlowTestCase {
-        def getFlow() { new ModelController().uploadFlow }
+    
+    abstract class FlowBase extends WebFlowTestCase {
+        abstract def getFlow(); 
         abstract void performTest()
-        void runTest()
+
+        /*
+         * WebFlowTestCase doesnt support file uploads. Modify request
+         * property to change that.  
+        **/
+        protected void setUp() {
+           super.setUp()
+           mockRequest = new MockMultipartHttpServletRequest()
+           RequestContextHolder.setRequestAttributes(new GrailsWebRequest(mockRequest,mockResponse,mockServletContext,applicationContext))
+           registerFlow("model/upload", new ModelController().uploadFlow)
+        }
+        
+        /* Main Template method for testing. */
+        public void testrun()
         {
             setUp()
             performTest()
             tearDown()
         }
+        
+        /* Clicks cancel, checks that flow is aborted. */
         protected void clickCancelEndFlow() {
             signalEvent("Cancel")
-            assert !flowExecution.isActive()
-            assert flowExecution.outcome.getId() == "abort"
+            assert "abort" == flowExecutionOutcome.id
+        }
+        
+        /* Checks the current state against the supplied state id */
+        protected void assertFlowState(String state) {
+            assert state == flowExecution.activeSession.state.id
+        }
+
+        /* Adds the supplied file with parameters as a mock multipart file */
+        protected void addFileToRequest(File modelFile, String formID, String contentType) {
+            final file = new MockMultipartFile(formID, 
+                                                     modelFile.getName(),
+                                                     contentType,
+                                                     modelFile.getBytes())
+            (mockRequest as MockMultipartHttpServletRequest).addFile(file)
+        }
+
+        /* Convenience function to compare a map of String->byte[] retrieved from
+         * the repository with the supplied list of files*/
+        protected void validateFiles(Map<String,byte[]> files, List<File> testFiles) {
+            assert files
+            testFiles.each {
+                assert files.containsKey(it.getName())
+                byte[] savedFile=files.get(it.getName())
+                assert savedFile == it.getBytes()
+            }
+        }
+
+    }
+    
+    /* Base class for Update flow tests. Sets the model id in the request
+     * params as supplied in the constructor*/
+    abstract class UpdateBase extends FlowBase {
+        long modelid
+        UpdateBase(long m) {
+            modelid=m
+        }
+        protected void setUp() {
+           super.setUp()
+           mockRequest.setParameter("id",""+modelid)
+        }
+        def getFlow() {
+            new ModelController().updateFlow
         }
     }
+    
+    /* Base class for the create flows*/
+    abstract class CreateBase extends FlowBase {
+        def getFlow() { 
+            new ModelController().createFlow 
+        }
+    }
+    
 
-    class TestDisclaimerContinue extends FlowUnitTest {
+    /* Class for testing out the update mechanism. Creates a model with an
+     * unknown file format. Then updates the model with an sbml file thereby
+     * changing the model type. Ensures that the revision reflects the new
+     * model's name and description (from the sbml file), and contains both
+     * the original and the new model files*/
+    class TestUpdateSbml extends UpdateBase {
+        File existing
+        TestUpdateSbml(long m, File uploaded) {
+            super(m)
+            existing=uploaded
+        }
         void performTest() {
             def viewSelection = startFlow()
             signalEvent("Continue")
             assertFlowState("uploadFiles")
-            assert false == (Boolean) flowScope.workingMemory.get("isUpdateOnExistingModel")
+            File newFile=bigModel()
+            addFileToRequest(newFile, "mainFile", "application/xml")
+            signalEvent("Upload")
+            assertFlowState("displayModelInfo")
+            assert true == (Boolean) flowScope.
+                                        workingMemory.
+                                        get("isUpdateOnExistingModel")
+            
+            assert "SBML" == flowScope.workingMemory.get("model_type") as String
+            RTC revision=flowScope.workingMemory.get("RevisionTC") as RTC
+            //test name
+            assert "Becker2010_EpoR_AuxiliaryModel" == revision.name
+            assert revision.description.contains("This relation solely depends on EpoR turnover independent of ligand binding, suggesting an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system")
+            
+            //add tests for when displayModelInfo does something interesting
+            signalEvent("Continue")
+            assertFlowState("displaySummaryOfChanges")
+            Model model=modelService.getModel(modelid)
+            Revision prev=modelService.getLatestRevision(model)
+            assert prev
+            signalEvent("Continue")
+            assert flowExecutionOutcome.id == "displayConfirmationPage"
+            
+            
+            //test that the model is infact saved in the database
+            Revision rev=modelService.getLatestRevision(model)
+            //test that revision is saved correctly
+            assert rev
+            assert rev.comment.contains("Model revised without commit message")
+            assert rev.revisionNumber==prev.revisionNumber+1
+            
+            //test that files are updated in the repository correctly
+            Map<String, byte[]> files=modelService.retrieveModelFiles(model)
+            validateFiles(files, [existing, newFile])
         }
     }
 
-    class TestDisclaimerAbort extends FlowUnitTest {
+    class TestDisclaimerContinue extends CreateBase {
         void performTest() {
             def viewSelection = startFlow()
+            // Click continue on disclaimer, test memory variables
+            signalEvent("Continue")
+            assertFlowState("uploadFiles")
+        }
+    }
+
+    class TestDisclaimerAbort extends CreateBase {
+        void performTest() {
+            def viewSelection = startFlow()
+            // Click cancel on the first step
             clickCancelEndFlow()
         }
     }
 
-    abstract class TestUploadFiles extends FlowUnitTest {
+    /* Base class for the classes testing upload pipeline. Navigates to the 
+     * upload files page, then allows implementing classes to define further
+     * behaviour. Includes a method for clicking through the pipeline with
+     * supplied files
+     * */
+    abstract class TestUploadFiles extends CreateBase {
+        int modelId=0;
+
+        int getModel() {
+            return modelId
+        }
+
         void performTest() {
             def viewSelection = startFlow()
             signalEvent("Continue")
             performRemainingTest()
         }
+        // What the concrete class wants to test
         abstract void performRemainingTest();
+        // Click through the upload pipeline with the supplied file
+        // and test name/description strings
+        void fileUploadPipeline(File file,
+                                String format,
+                                String mname,
+                                String[] descriptionStrings) {
+            addFileToRequest(file, "mainFile", "application/xml")
+            signalEvent("Upload")
+            assertFlowState("displayModelInfo")
+            assert false == (Boolean) flowScope.
+                                        workingMemory.
+                                        get("isUpdateOnExistingModel")
+            assert format == flowScope.workingMemory.get("model_type") as String
+            RTC revision=flowScope.workingMemory.get("RevisionTC") as RTC
+            //test name
+            assert mname == revision.name
+            //test that the description contains known strings
+            checkDescription(revision.description, descriptionStrings)
+            //add tests for when displayModelInfo does something interesting
+            signalEvent("Continue")
+            assertFlowState("displaySummaryOfChanges")
+
+            //add tests for when displayModelInfo does something interesting
+            signalEvent("Continue")
+
+            assert flowExecutionOutcome.id == "displayConfirmationPage"
+
+            //test that the model is infact saved in the database
+            modelId=Integer.parseInt(mockRequest.session.result_submission as String)
+            Model model=Model.findById(modelId)
+            assert model
+            Revision rev=modelService.getLatestRevision(model)
+            assert rev
+            assert mname == rev.name
+            checkDescription(rev.description, descriptionStrings)
+            
+            //test that the model is saved in the repository
+            Map<String, byte[]> files=modelService.retrieveModelFiles(Model.findById(modelId))
+            validateFiles(files, [file])
+        }
+        
+        private void checkDescription(String description, String[] descriptionStrings) {
+            if (descriptionStrings) {
+                descriptionStrings.each {
+                    assert description.contains(it)
+                }
+            }
+        }
+        
     }
 
+    /* Clicks cancel as soon as you get to the upload files page */
     class TestUploadFilesCancel extends TestUploadFiles {
         void performRemainingTest() {
             clickCancelEndFlow()
         }
     }
-
-    class testUploadFilesContinue extends TestUploadFiles {
+    
+    class TestUploadFilesContinue extends TestUploadFiles {
         void performRemainingTest() {
             // empty files list shouldnt validate!
             signalEvent("Upload")
             assertFlowState("uploadFiles")
             //random files should validate as unknown
-            flowScope.workingMemory.put("repository_files", getRandomModel())
-            signalEvent("Upload")
-            assertFlowState("displayModelInfo")
-            assert "UNKNOWN" == flowScope.workingMemory.get("model_type") as String
+            fileUploadPipeline(getFileForTest("modelfile.xml","hello world"), 
+                               "UNKNOWN", 
+                               "",
+                               null)
         }
     }
 
+    /* Tests the SBML functionality with the known SBML file */
     class TestSubmitSBML extends TestUploadFiles {
         void performRemainingTest() {
-        // valid sbml should proceed
-            flowScope.workingMemory.put("repository_files", getSbmlModel())
-            signalEvent("Upload")
-            assertFlowState("displayModelInfo")
-            assert "SBML" == flowScope.workingMemory.get("model_type") as String
-            RTC revision=flowScope.workingMemory.get("RevisionTC") as RTC
-            //test name
-            assert "Becker2010_EpoR_AuxiliaryModel" == revision.name
-            //test that the very long description contains known strings
-            assert revision.description.contains("Verena Becker, Marcel Schilling, Julie Bachmann, Ute Baumann, Andreas Raue, Thomas Maiwald, Jens Timmer and Ursula Klingmüller")
-            assert revision.description.contains("This relation solely depends on EpoR turnover independent of ligand binding, suggesting an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system")
-            assert revision.description.contains("%% Default sampling time points")
-            assert revision.description.contains("BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models")
-
-            //add tests for when displayModelInfo does something interesting
-            signalEvent("Continue")
-            assertFlowState("displaySummaryOfChanges")
-            
-            //add tests for when displayModelInfo does something interesting
-            signalEvent("Continue")
-            
-            assert !flowExecution.isActive()
-            assert flowExecution.outcome.getId() == "displayConfirmationPage"
-            
-            //good enough
-            
+            String[] descriptionTests = new String[4]
+            descriptionTests[0]="Verena Becker, Marcel Schilling, Julie Bachmann, Ute Baumann, Andreas Raue, Thomas Maiwald, Jens Timmer and Ursula Klingmüller"
+            descriptionTests[1]="This relation solely depends on EpoR turnover independent of ligand binding, suggesting an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system"
+            descriptionTests[2]="%% Default sampling time points"
+            descriptionTests[3]="BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models"
+            fileUploadPipeline(bigModel(), 
+                               "SBML", 
+                               "Becker2010_EpoR_AuxiliaryModel",
+                               descriptionTests)
         }
-    }
-
-    RFTC createRFTC(File file, boolean isMain) {
-        new RFTC(path: file.getCanonicalPath(), mainFile: isMain, userSubmitted: true, hidden: isMain, description:file.getName())
-    }
-
-    List<RFTC> createRFTCList(File mainFile, List<File> additionalFiles) {
-        List<RFTC> returnMe=new LinkedList<RFTC>()
-        returnMe.add(createRFTC(mainFile, true))
-        additionalFiles.each {
-            returnMe.add(createRFTC(it, false))
-        }
-        returnMe
-    }
-
-    private List<RFTC> getRandomModel() {
-        return createRFTCList(getFileForTest("modelfile.txt","hello world"),[getFileForTest("additional.txt","hello world")])
-    }
-
-    private List<RFTC> getSbmlModel() {
-        return createRFTCList(bigModel(), [getFileForTest("additionalFile.txt", "heres some randomText")])
     }
 
     private File getFileForTest(String filename, String text)
     {
-        File tempFile=File.createTempFile("nothing",null)
-        def testFile=new File(tempFile.getParent()+File.separator+filename)
-        if (text) testFile.setText(text)
+        def tmp = System.getProperty("java.io.tmpdir")
+        def testFile=new File(tmp + File.separator + filename)
+        testFile.setText(text?: "")
         return testFile
     }
 
     private File bigModel() {
         return new File("test/files/BIOMD0000000272.xml")
-    }
-    
-    void assertFlowState(String state) {
-        assert state == flowExecution.activeSession.state.id
-    }
-
-    private File smallModel(String filename) {
-        return getFileForTest(filename, '''<?xml version="1.0" encoding="UTF-8"?>
-<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
-  <model>
-    <listOfCompartments>
-      <compartment name="x"/>
-    </listOfCompartments>
-    <listOfSpecies>
-      <specie name="y" compartment="x" initialAmount="1"/>
-    </listOfSpecies>
-    <listOfReactions>
-      <reaction name="r">
-        <listOfReactants>
-          <specieReference specie="y"/>
-        </listOfReactants>
-        <listOfProducts>
-          <specieReference specie="y"/>
-        </listOfProducts>
-      </reaction>
-    </listOfReactions>
-  </model>
-</sbml>''')
     }
 }

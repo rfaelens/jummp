@@ -141,6 +141,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         //should work with any value above 2, but sometimes there are comments at the start of the file
         final int DEPTH_LIMIT = 15
         BufferedReader reader
+        String currentLine
         final def p = Pattern.compile(".*<sbml xmlns=\"http://www\\.sbml\\.org/sbml/level.*\".*")
 
         while (areAllSbml && iFiles < fileCount) {
@@ -149,7 +150,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 boolean foundSbmlDeclarationLine = false
                 int iLine = 0
                 while (!foundSbmlDeclarationLine && iLine < DEPTH_LIMIT) {
-                    final String currentLine = reader.readLine()
+                    currentLine = reader.readLine()
                     if (currentLine == null) {
                         areAllSbml = false
                         break
@@ -168,7 +169,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 log.error(msg.toString())
                 return false
             } finally {
-                reader.close()
+                reader?.close()
                 iFiles++
             }
         }
