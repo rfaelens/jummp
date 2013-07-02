@@ -8,12 +8,13 @@ import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.webapp.UploadFilesCommand
+import org.springframework.web.multipart.MultipartFile
 
 class ModelController {
     /**
      * Flag that checks whether the dynamically-inserted logger is set to DEBUG or higher.
      */
-    private boolean isDebugEnabled = log.isDebugEnabled()
+    private final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
     /**
      * Dependency injection of modelDelegateService.
      **/
@@ -59,33 +60,48 @@ class ModelController {
                 //withForm {
                 def inputs = new HashMap<String, Object>()
 
-                def mainFileList = request.getMultiFileMap().mainFile
-                if (mainFileList.size() == 1) {
-                    if (isDebugEnabled) {
-                        log.debug "New submission started.The main file supplied:".plus(mainFileList.properties)
-                    }
-                } else {
-                    if (isDebugEnabled) {
-                        log.debug "New submission started.Main files: ".plus(mainFileList.inspect())
-                    }
+                def mainMultipartList = request.getMultiFileMap().mainFile
+                def extraFileField = request.getMultiFileMap().extraFile
+                List<MultipartFile> extraMultipartList = []
+                if (extraFileField instanceof MultipartFile) {
+                    extraMultipartList = [extraFileField]
+                }else {
+                    extraMultipartList = extraFileField
                 }
+                def descriptionFields = params["description"]
+                if (descriptionFields instanceof String) {
+                    descriptionFields = [descriptionFields]
+                }
+
+                if (IS_DEBUG_ENABLED) {
+                    if (mainMultipartList.size() == 1) {
+                        log.debug("New submission started.The main file supplied is {}.",
+                                        mainMultipartList.properties)
+                    } else {
+                        log.debug("New submission started. Main files: {}.", mainMultipartList.inspect())
+                    }
+                    log.debug("Additional files supplied: {} .\n", extraMultipartList.inspect())
+                }
+
                 def cmd = new UploadFilesCommand()
-                bindData(cmd, mainFileList)
-                if (isDebugEnabled) {
-                    log.debug "Data binding and validation done. :${cmd.properties}"
+                bindData(cmd, mainMultipartList, [include: ['mainFile']])
+                bindData(cmd, extraMultipartList, [include: ['extraFiles']])
+                bindData(cmd, descriptionFields)
+                if (IS_DEBUG_ENABLED) {
+                    log.debug "Data binding done :${cmd.properties}"
                 }
                 if (!cmd.validate()) {
-                    log.error "Files are invalid."
-                    log.error "Errors: ${cmd.errors.allErrors.inspect()}.\n"
+                    log.error "Submission is invalid: ${cmd.properties}."
+                    log.error "Errors: ${cmd.errors.allErrors.inspect()}."
                     error()
                 } else {
-                    if (isDebugEnabled) {
+                    if (IS_DEBUG_ENABLED) {
                         log.debug("The files are valid.")
                     }
 
                     //should this be in a separate action state?
                     def uuid = UUID.randomUUID().toString()
-                    if (isDebugEnabled) {
+                    if (IS_DEBUG_ENABLED) {
                         log.debug "Generated submission UUID: ${uuid}"
                     }
 
@@ -95,23 +111,18 @@ class ModelController {
                     def submission_folder = new File(exchangeDir + uuid)
                     submission_folder.mkdirs()
                     def parent = submission_folder.canonicalPath + sep
-                    List<File> transferredMains = []
-                    cmd.mainFile.each { f ->
-                        final originalFilename = f.getOriginalFilename()
-                        if (!originalFilename.isEmpty()) {
-                            final File transferredFile = new File(parent + f.getOriginalFilename())
-                            if (isDebugEnabled) {
-                                log.debug "Transferring file ${transferredFile}."
-                            }
-                            f.transferTo(transferredFile)
-                            transferredMains << transferredFile
-                        }
-                    } //TODO
-                    //do something with request.getFileMap(), but what?
-                    def additionals = [:]
-                    flow.workingMemory["submitted_mains"] = transferredMains
-                    flow.workingMemory["submitted_additionals"] = additionals
-                    // add files to inputs here as appropriate
+                    List<File> mainFileList = transferFiles(parent, cmd.mainFile)
+                    List<File> extraFileList = transferFiles(parent, cmd.extraFiles)
+                    List<String> descriptionList  = cmd.description
+                    def additionalsMap = [:]
+                    extraFileList.eachWithIndex{ file, i ->
+                        additionalsMap[file] = descriptionList[i]
+                    }
+                    if (IS_DEBUG_ENABLED) {
+                        log.debug "About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."
+                    }
+                    flow.workingMemory["submitted_mains"] = mainFileList
+                    flow.workingMemory["submitted_additionals"] = additionalsMap
                     submissionService.handleFileUpload(flow.workingMemory,inputs)
                 }
                 //}
@@ -310,5 +321,21 @@ class ModelController {
         // TODO: set a proper name for the model
         response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")
         response.outputStream << new ByteArrayInputStream(bytes)
+    }
+
+    private List<File> transferFiles(String parent, List multipartFiles) {
+        List<File> outcome = []
+        multipartFiles.each { f ->
+            final String originalFilename = f.getOriginalFilename()
+            if (!originalFilename.isEmpty()) {
+                final def transferredFile = new File(parent + originalFilename)
+                if (IS_DEBUG_ENABLED) {
+                    log.debug "Transferring file ${transferredFile}"
+                }
+                f.transferTo(transferredFile)
+                outcome << transferredFile
+            }
+        }
+        outcome
     }
 }

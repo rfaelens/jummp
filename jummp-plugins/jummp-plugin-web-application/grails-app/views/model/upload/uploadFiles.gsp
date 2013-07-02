@@ -29,17 +29,7 @@
                         <tr class="prop">
                             <td class="name">
                                 <label for="mainFile">
-                                    <g:message code="submission.uploadForm.mainFile.label"/>
-                                </label>
-                            </td>
-                            <td class="value">
-                                <input type="file" id="mainFile" name="mainFile"/>
-                            </td>
-                        </tr>
-                        <tr class="prop">
-                            <td class="name">
-                                <label for="mainFile">
-                                    <g:message code="submission.uploadForm.mainFile.label"/>
+                                    <g:message code="submission.upload.mainFile.label"/>
                                 </label>
                             </td>
                             <td class="value">
@@ -86,16 +76,14 @@
                         $('<td>').append(
                             $('<input>', {
                                 type: 'file',
-                                name: 'extra.file',
-                                class: extraFile
+                                name: "extraFiles",
                             })
                         ),
                         $('<td>').append(
                             $('<input>', {
                                 type: 'text',
-                                name: 'extra.description',
-                                class: 'description',
-                                placeholder: 'Description'
+                                name: "description",
+                                placeholder: "Please enter a description"
                             })
                         ),
                         $('<td>').append(
@@ -109,7 +97,6 @@
                 });
 
                 $("#uploadButton").click( function() {
-                    $("input.extraFile:not(:valid)").parent().parent().empty();
                     $("#fileUpload").submit();
                 });
 
