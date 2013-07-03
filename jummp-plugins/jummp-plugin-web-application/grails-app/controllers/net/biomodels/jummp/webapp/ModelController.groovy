@@ -153,7 +153,7 @@ class ModelController {
                     //pray that exchangeDirectory has been defined
                     def exchangeDir = grailsApplication.config.jummp.vcs.exchangeDirectory
                     def sep = File.separator
-                    def submission_folder = new File(exchangeDir + uuid)
+                    def submission_folder = new File(exchangeDir, uuid)
                     submission_folder.mkdirs()
                     def parent = submission_folder.canonicalPath + sep
                     List<File> mainFileList = transferFiles(parent, cmd.mainFile)
