@@ -20,7 +20,7 @@ class ModelTests {
         model.vcsIdentifier = ""
         assertFalse(model.validate())
         assertEquals("blank", model.errors["vcsIdentifier"])
-        assertEquals("blank", model.errors["name"])
+        assertNull("blank", model.errors["name"])
         assertEquals("nullable", model.errors["revisions"])
         // test for uniqueness
         model = new Model()
