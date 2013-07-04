@@ -93,15 +93,19 @@ class ModelController {
         input {
             isUpdate(required: true)
         }
-        uploadFiles {
-            on("Upload") {
-                //withForm {
+        start {
+            action {
                 Map<String, Object> workingMemory=new HashMap<String,Object>()
                 workingMemory.put("isUpdateOnExistingModel",flow.isUpdate) //use subflow for updating models, todo
                 if (flow.isUpdate) {
-                    workingMemory.put("model_id", conversation.model_id)
+                        workingMemory.put("model_id", conversation.model_id)
                 }
                 flow.workingMemory=workingMemory
+            }
+            on("success").to "uploadFiles"
+        }
+        uploadFiles {
+            on("Upload") {
                 println flow.workingMemory
                 def inputs = new HashMap<String, Object>()
 
@@ -151,10 +155,17 @@ class ModelController {
                     }
 
                     //pray that exchangeDirectory has been defined
-                    def exchangeDir = grailsApplication.config.jummp.vcs.exchangeDirectory
+                    File submission_folder=null
                     def sep = File.separator
-                    def submission_folder = new File(exchangeDir, uuid)
-                    submission_folder.mkdirs()
+                    if (!flow.workingMemory.containsKey("repository_files")) {
+                          def exchangeDir = grailsApplication.config.jummp.vcs.exchangeDirectory
+                          submission_folder = new File(exchangeDir, uuid)
+                          submission_folder.mkdirs()
+                    }
+                    else {
+                        RFTC existing=flow.workingMemory.get("repository_files").get(0) as RFTC
+                        submission_folder=(new File(existing.path)).getParentFile()
+                    }
                     def parent = submission_folder.canonicalPath + sep
                     List<File> mainFileList = transferFiles(parent, cmd.mainFile)
                     List<File> extraFileList = transferFiles(parent, cmd.extraFiles)

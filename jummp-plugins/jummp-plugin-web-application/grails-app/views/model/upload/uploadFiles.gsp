@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-
+<%@ page import="net.biomodels.jummp.core.model.RepositoryFileTransportCommand" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -54,6 +54,20 @@
             <div class="dialog">
                 <table class="formtable">
                     <tbody>
+                        <g:if test="${workingMemory.containsKey("repository_files")}">
+                          <tr class="prop">
+                            <td class="name">
+                              <p>Uploaded Files:</p>
+                            </td>
+                          </tr>
+                          <g:each in="${workingMemory.get("repository_files")}">
+                                <tr class="prop">
+                                    <td class="name">
+                                      <p>${(new File((it as RepositoryFileTransportCommand).path)).getName()}</p>
+                                    </td>
+                                </tr>
+                          </g:each>
+                        </g:if>
                         <tr class="prop">
                             <td class="name">
                                 <label for="mainFile">
