@@ -870,16 +870,18 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertFalse(aclUtilService.hasPermission(auth, revision, BasePermission.WRITE))
         // importing a model with same name should be possible
         assertTrue((modelService.uploadModelAsFile(rf, meta)).validate())
-        // importing with invalid model file should not be possible
+        // an invalid submission should yield a model with validated flag set to false
         meta.name = "test2"
         meta.format = ModelFormat.findByIdentifier("SBML").toCommandObject()
         File sbmlFile = new File("target/sbml/sbmlTestFile")
         FileUtils.deleteQuietly(sbmlFile)
         FileUtils.touch(sbmlFile)
         rf.path = sbmlFile.absolutePath
-        shouldFail(ModelException) {
-            modelService.uploadModelAsFile(rf, meta)
-        }
+        Model theModel = modelService.uploadModelAsFile(rf, meta)
+        assertNotNull(theModel)
+        Revision theRevision = modelService.getLatestRevision(theModel)
+        assertNotNull(theRevision)
+        assertFalse(theRevision.validated)
         // importing with valid model file should be possible
         sbmlFile = new File("target/sbml/uploadModelValidSbmlFile")
         FileUtils.deleteQuietly(sbmlFile)

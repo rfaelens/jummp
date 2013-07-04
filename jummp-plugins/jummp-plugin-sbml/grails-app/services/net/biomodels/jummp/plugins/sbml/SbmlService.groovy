@@ -505,8 +505,8 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     @Profiled(tag="SbmlService.getPubMedAnnotation")
     public List<List<String>> getPubMedAnnotation(RevisionTransportCommand revision) {
-        Model model = getFromCache(revision).model
-        Annotation annotation = model.annotation
+        Model model = getFromCache(revision)?.model
+        Annotation annotation = model?.annotation
         if(!annotation) {
             return null
         }
