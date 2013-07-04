@@ -10,7 +10,7 @@
                 color: #CCCC00;
             }
         </style>
-        <g:if test ="${workingMemory && workingMemory.containsKey("Valid") && (workingMemory.get("Valid") as Boolean)==false}">
+        <g:if test ="${showProceedWithoutValidationDialog}">
           <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
           <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
           <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
@@ -35,7 +35,7 @@
       </g:if>
     </head>
     <body>
-        <g:if test ="${workingMemory && workingMemory.containsKey("Valid") && (workingMemory.get("Valid") as Boolean)==false}">
+        <g:if test ="${showProceedWithoutValidationDialog}">
           <div id="dialog-confirm" title="Validation Error">
             <p>The model files did not pass validation. Would you like to proceed?</p>
           </div>
@@ -81,7 +81,7 @@
                     <g:submitButton name="Cancel" value="${g.message(code: 'submission.upload.cancelButton')}" />
                     <g:submitButton name="Back" value="${g.message(code: 'submission.upload.backButton')}" />
                     <g:submitButton name="Upload" value="${g.message(code: 'submission.upload.uploadButton')}" />
-                    <g:if test ="${workingMemory && workingMemory.containsKey("Valid") && (workingMemory.get("Valid") as Boolean)==false}">
+                    <g:if test ="${showProceedWithoutValidationDialog}">
                       <g:submitButton name="ProceedWithoutValidation" value="ProceedWithoutValidation" hidden="true"/> 
                     </g:if>
                 </div>
