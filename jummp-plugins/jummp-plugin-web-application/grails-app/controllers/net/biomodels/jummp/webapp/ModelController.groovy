@@ -98,9 +98,12 @@ class ModelController {
                 Map<String, Object> workingMemory=new HashMap<String,Object>()
                 workingMemory.put("isUpdateOnExistingModel",flow.isUpdate) //use subflow for updating models, todo
                 if (flow.isUpdate) {
-                        workingMemory.put("model_id", conversation.model_id)
+                    Long model_id=conversation.model_id as Long
+                    workingMemory.put("model_id", model_id)
+                    workingMemory.put("LastRevision", modelDelegateService.getLatestRevision(model_id))
                 }
                 flow.workingMemory=workingMemory
+                submissionService.initialise(flow.workingMemory)
             }
             on("success").to "uploadFiles"
         }
@@ -157,13 +160,16 @@ class ModelController {
                     //pray that exchangeDirectory has been defined
                     File submission_folder=null
                     def sep = File.separator
+                    System.out.println(flow.workingMemory)
                     if (!flow.workingMemory.containsKey("repository_files")) {
                           def exchangeDir = grailsApplication.config.jummp.vcs.exchangeDirectory
                           submission_folder = new File(exchangeDir, uuid)
                           submission_folder.mkdirs()
                     }
                     else {
+                        System.out.println("In else now: "+flow.workingMemory)
                         RFTC existing=flow.workingMemory.get("repository_files").get(0) as RFTC
+                        System.out.println("In else now: "+existing.getProperties())
                         submission_folder=(new File(existing.path)).getParentFile()
                     }
                     def parent = submission_folder.canonicalPath + sep

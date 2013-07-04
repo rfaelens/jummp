@@ -55,11 +55,6 @@
                 <table class="formtable">
                     <tbody>
                         <g:if test="${workingMemory.containsKey("repository_files")}">
-                          <tr class="prop">
-                            <td class="name">
-                              <p>Uploaded Files:</p>
-                            </td>
-                          </tr>
                           <g:each in="${workingMemory.get("repository_files")}">
                                 <tr class="prop">
                                     <td class="name">

@@ -595,6 +595,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(model.toCommandObject(),
                 "Could not store new Model Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} in VCS", e)
         }
+        domainObjects.each {
+            revision.addToRepoFiles(it)
+        }
         // calculate the new revision number - accessing the revisions directly to circumvent ACL
         revision.revisionNumber = model.revisions.sort {it.revisionNumber}.last().revisionNumber + 1
 
@@ -734,7 +737,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(model.toCommandObject(),
                 "Could not store new Model ${model.toCommandObject().properties} in VCS", e)
         }
-
+        domainObjects.each {
+               revision.addToRepoFiles(it)
+        }
         if (revision.validate()) {
             model.addToRevisions(revision)
             if (rev.model.publication && rev.model.publication.linkProvider == PublicationLinkProvider.PUBMED) {
@@ -947,7 +952,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(model.toCommandObject(),
                 "Could not store new Model ${model.toCommandObject().properties} in VCS", e)
         }
-
+        domainObjects.each {
+            revision.addToRepoFiles(it)
+        }
         if (revision.validate()) {
             model.addToRevisions(revision)
             if (meta.publication && meta.publication.linkProvider == PublicationLinkProvider.PUBMED) {
@@ -1142,6 +1149,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(model.toCommandObject(),
                 "Could not store new Model Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} in VCS", e)
         }
+        domainObjects.each {
+            revision.addToRepoFiles(it)
+        }
+
         // calculate the new revision number - accessing the revisions directly to circumvent ACL
         revision.revisionNumber = model.revisions.sort {it.revisionNumber}.last().revisionNumber + 1
 
@@ -1183,6 +1194,31 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.WRITE))
     }
 
+    
+    
+    /**
+     * Retrieves the model files for the @p revision.
+     * @param revision The Model Revision for which the files should be retrieved.
+     * @return Byte Array of the content of the Model files for the revision.
+     * @throws ModelException In case retrieving from VCS fails.
+     */
+    @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.retrieveModelFiles")
+    List<File> retrieveModelRepFiles(final Revision revision) throws ModelException {
+        List<File> files
+        try {
+            files = vcsService.retrieveFiles(revision)
+        } catch (VcsException e) {
+            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.model.name} from VCS failed.")
+            throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.")
+        }
+        return files
+    }
+
+    
+    
+    
     /**
      * Retrieves the model files for the @p revision.
      * @param revision The Model Revision for which the files should be retrieved.
