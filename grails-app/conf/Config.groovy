@@ -16,7 +16,6 @@ try {
 } catch (Exception ignored) {
     jummpProperties.setProperty("jummp.security.ldap.enabled", "false")
     jummpProperties.setProperty("jummp.security.registration.email.send", "false")
-    jummpProperties.setProperty("jummp.export.dbus", "false")
     jummpProperties.setProperty("jummp.server.url", "http://localhost:8080/${appName}")
 }
 def jummpConfig = new ConfigSlurper().parse(jummpProperties)
@@ -269,12 +268,6 @@ if (jummp.security.ldap.enabled) {
     jummp.security.ui.changePassword = false
 }
 
-if (!(jummpConfig.jummp.export.dbus instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.export.dbus)) {
-    jummp.plugin.dbus.export = true
-} else {
-    jummp.plugin.dbus.export = false
-}
-
 // In case of LDAP there is no need to allow users to register with a password as we cannot (yet) add anything to the LDAP
 jummp.security.registration.ui.userPassword = !jummp.security.ldap.enabled
 
@@ -395,8 +388,6 @@ environments {
         // disable registration mail sending
         jummp.security.registration.email.send = false
         jummp.security.resetPassword.email.send = false
-        // disable dbus
-//        jummp.plugin.dbus.export = true
     }
 }
 
