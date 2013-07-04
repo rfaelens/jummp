@@ -20,7 +20,7 @@ class BootStrap {
         def service = ctx.getBean("modelFileFormatService")
         def modelFormat = service.registerModelFormat("UNKNOWN", "UNKNOWN")
         service.handleModelFormat(modelFormat, "unknownFormatService")
-        
+        /* ONLY NEEDED FOR USER ACCOUNT CREATION.
         if (!User.findByUsername("user")) {
            def user = new User(username: "user",
                     password: springSecurityService.encodePassword("secret"),
@@ -38,8 +38,8 @@ class BootStrap {
             Role userRole = Role.findByAuthority("ROLE_USER")
             UserRole.create(user, userRole, true)
         } 
-        
-        
+        */
+
         // custom mapping for weceem as it fails to work with an LDAPUserDetailsImpl
         wcmSecurityService.securityDelegate = [
             getUserName : { ->
