@@ -193,7 +193,35 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
-        abstract void handleSubmission(Map<String,Object> workingMemory);
+        void handleSubmission(Map<String,Object> workingMemory) {
+            try {
+                completeSubmission(workingMemory)
+            }
+            catch(Exception e) {
+                e.printStackTrace()
+                throw e
+            }
+            finally {
+                try
+                {
+                    List<RFTC> repoFiles = getRepFiles(workingMemory)
+                    File parent=null
+                    repoFiles.each {
+                        File deleteMe=new File(it.path)
+                        if (!parent) {
+                            parent=deleteMe.getParentFile()
+                        }
+                        deleteMe.delete()
+                    }
+                    System.out.println("Deleting: "+parent)
+                }
+                catch(Exception e) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        
+        protected abstract void completeSubmission(Map<String, Object> workingMemory);
 
         /**
          * Purpose
@@ -322,21 +350,15 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
-        void handleSubmission(Map<String,Object> workingMemory) {
+        void completeSubmission(Map<String,Object> workingMemory) {
             List<RFTC> repoFiles = getRepFiles(workingMemory)
             RTC revision=workingMemory.get("RevisionTC") as RTC
             MTC model=revision.model
             model.name=revision.name
             model.format=revision.format
             revision.comment="Import of ${revision.name}".toString()
-            try {
-                workingMemory.put("model_id",
+            workingMemory.put("model_id",
                     modelService.uploadValidatedModel(repoFiles, revision).id)
-            }
-            catch(Exception e) {
-                e.printStackTrace()
-                throw e
-            }
         }
     }
 
@@ -429,21 +451,13 @@ class SubmissionService {
             revision.comment=modifications.get("RevisionComments")
         }
 
-        void handleSubmission(Map<String,Object> workingMemory) {
+        void completeSubmission(Map<String,Object> workingMemory) {
             RTC revision=workingMemory.get("RevisionTC") as RTC
             System.out.println("About to submit revision: "+revision.getProperties())
             List<RFTC> repoFiles = getRepFiles(workingMemory)
-            try
-                {
-                    System.out.println("Going to call model service: "+revision.getProperties())
-                    workingMemory.put("model_id",
-                    modelService.addValidatedRevision(repoFiles, revision).model.id)
-                }
-                catch(Exception e) {
-                    e.printStackTrace()
-                    throw e
-                }
-    
+            System.out.println("Going to call model service: "+revision.getProperties())
+            workingMemory.put("model_id",
+            modelService.addValidatedRevision(repoFiles, revision).model.id)
         }
     }
 
