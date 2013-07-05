@@ -202,27 +202,31 @@ class SubmissionService {
                 throw e
             }
             finally {
-                try
-                {
-                    List<RFTC> repoFiles = getRepFiles(workingMemory)
-                    File parent=null
-                    repoFiles.each {
-                        File deleteMe=new File(it.path)
-                        if (!parent) {
-                            parent=deleteMe.getParentFile()
-                        }
-                        deleteMe.delete()
-                    }
-                    System.out.println("Deleting: "+parent)
-                }
-                catch(Exception e) {
-                    e.printStackTrace()
-                }
+                cleanup(workingMemory)
             }
         }
         
         protected abstract void completeSubmission(Map<String, Object> workingMemory);
 
+        void cleanup(Map<String,Object> workingMemory) {
+            try
+            {
+                List<RFTC> repoFiles = getRepFiles(workingMemory)
+                File parent=null
+                repoFiles.each {
+                    File deleteMe=new File(it.path)
+                    if (!parent) {
+                         parent=deleteMe.getParentFile()
+                    }
+                    deleteMe.delete()
+                }
+                parent.delete()
+            }
+            catch(Exception e) {
+                e.printStackTrace()
+            }
+        }
+        
         /**
          * Purpose
          *
@@ -548,6 +552,18 @@ class SubmissionService {
         getStrategyFromContext(workingMemory).handleSubmission(workingMemory)
     }
 
+    
+    /**
+     * Purpose
+     *
+     * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+     */
+    void cleanup(Map<String,Object> workingMemory) {
+        /*Create or update DOM objects as necessary*/
+        getStrategyFromContext(workingMemory).cleanup(workingMemory)
+    }
+
+    
     private StateMachineStrategy getStrategyFromContext(Map<String,Object> workingMemory) {
         Boolean isUpdateOnExistingModel=(Boolean)workingMemory.get("isUpdateOnExistingModel");
         if (isUpdateOnExistingModel) {

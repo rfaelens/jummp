@@ -197,8 +197,6 @@ class ModelController {
 
         performValidation {
             action {
-                //temporarily add an sbml model to allow execution to proceed
-                //flow.workingMemory.put("repository_files", getSbmlModel())
                 if (!flow.workingMemory.containsKey("model_type")) {
                     submissionService.inferModelFormatType(flow.workingMemory)
                 }
@@ -244,7 +242,7 @@ class ModelController {
                 modifications.put("new_description", params.description)
                 submissionService.refineModelInfo(flow.workingMemory, modifications)
             }.to "displaySummaryOfChanges"
-            on("Cancel").to "abort"
+            on("Cancel").to "cleanUpAndTerminate"
             on("Back"){}.to "uploadFiles"
         }
         displaySummaryOfChanges {
@@ -259,7 +257,7 @@ class ModelController {
                 }
                 submissionService.updateRevisionComments(flow.workingMemory, modifications)
             }.to "saveModel"
-            on("Cancel").to "abort"
+            on("Cancel").to "cleanUpAndTerminate"
             on("Back"){}.to "displayModelInfo"
         }
         saveModel {
@@ -274,6 +272,12 @@ class ModelController {
             }
             on("success").to "displayConfirmationPage"
             on("error").to "displayErrorPage"
+        }
+        cleanUpAndTerminate {
+            action {
+                submissionService.cleanup(flow.workingMemory)
+            }
+            on("success").to "abort"
         }
         abort()
         displayConfirmationPage()
