@@ -32,7 +32,8 @@ class ModelServiceTests extends JummpIntegrationTest {
     @Before
     void setUp() {
         def container = new File("target/vcs/git/ggg/")
-        container.mkdirs()
+        assertTrue(container.mkdirs())
+        assertTrue(new File("target/vcs/exchange/").mkdirs())
         fileSystemService.currentModelContainer = container.getCanonicalPath()
         fileSystemService.root = container.getParentFile()
         createUserAndRoles()

@@ -32,15 +32,15 @@ class SbmlServiceTests extends JummpIntegrationTest {
     void setUp() {
         createUserAndRoles()
         setupVcs()
-        // disable validation as it is broken
         fileSystemService.root = new File("target/sbml/git/").getCanonicalFile()
         fileSystemService.currentModelContainer = fileSystemService.root.absolutePath + "/ttt/"
+        // disable validation as it is broken
         grailsApplication.config.jummp.plugins.sbml.validation = false
     }
 
     @After
     void tearDown() {
-        //FileUtils.deleteDirectory(new File("target/sbml"))
+        FileUtils.deleteDirectory(new File("target/sbml"))
     }
 
     @Test
@@ -145,7 +145,7 @@ class SbmlServiceTests extends JummpIntegrationTest {
 
     private void setupVcs() {
         // setup VCS
-        File clone = new File("target/sbml/git")
+        File clone = new File("target/sbml/git/")
         clone.mkdirs()
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
@@ -157,8 +157,10 @@ class SbmlServiceTests extends JummpIntegrationTest {
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.workingDirectory = "target/sbml/git"
-        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/sbml/exchange"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/sbml/git/"
+        File exchangeDir = new File("target/sbml/exchange/")
+        exchangeDir.mkdirs()
+        grailsApplication.config.jummp.vcs.exchangeDirectory = exchangeDir.path
         modelService.vcsService.vcsManager = gitService.getInstance()
     }
 

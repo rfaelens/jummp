@@ -54,6 +54,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         vcsService.vcsManager = null
         appCtx.getBean("gitManagerFactory").servletContext = new MockServletContext("./target", new FileSystemResourceLoader())
         //appCtx.getBean("svnManagerFactory").servletContext = new MockServletContext("./target", new FileSystemResourceLoader())
+        assertTrue(new File("target/vcs/exchange/").mkdirs())
     }
 
     @After
@@ -72,7 +73,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         grailsApplication.config.jummp.vcs.pluginServiceName="gitManagerFactory"
         grailsApplication.config.jummp.plugins.git.enabled=true
         grailsApplication.config.jummp.vcs.workingDirectory="target/vcs/git"
-        File gitDirectory = new File("target/vcs/git")
+        File gitDirectory = new File("target/vcs/git/")
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(gitDirectory)
         .readEnvironment() // scan environment GIT_* variables
@@ -91,8 +92,8 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         // verifies that the service is valid, if svn backend is configured correctly
         grailsApplication.config.jummp.vcs.pluginServiceName = "svnManagerFactory"
         grailsApplication.config.jummp.plugins.subversion.enabled = true
-        grailsApplication.config.jummp.plugins.subversion.localRepository = "target/vcs/repository"
-        SVNRepositoryFactory.createLocalRepository(new File("target/vcs/repository"), true, false)
+        grailsApplication.config.jummp.plugins.subversion.localRepository = "target/vcs/repository/"
+        SVNRepositoryFactory.createLocalRepository(new File("target/vcs/repository/"), true, false)
         assertFalse(vcsService.isValid())
         vcsService.vcsManager = appCtx.getBean("svnManagerFactory").getInstance()
         assertTrue(vcsService.isValid())

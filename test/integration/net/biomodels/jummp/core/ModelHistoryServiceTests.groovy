@@ -183,7 +183,7 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
     // TODO: remove this copy from JmsAdapterServiceTest
     private void setupVcs() {
         File clone = new File("target/vcs/git")
-        clone.mkdirs()
+        assertTrue(clone.mkdirs())
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
@@ -196,6 +196,7 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.plugins.git.enabled = true
         grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        assertTrue(new File("target/vcs/exchange/").mkdirs())
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
     }

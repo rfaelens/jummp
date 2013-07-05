@@ -13,8 +13,9 @@ class FileSystemServiceTests {
     @Override
     @Before
     void setUp() {
-        parentLocation = new File("target/workingDirectory")
-        parentLocation.mkdir()
+        parentLocation = new File("target/workingDirectory/")
+        FileUtils.deleteDirectory(parentLocation)
+        assertTrue(parentLocation.mkdir())
         fileSystemService.root = parentLocation
         fileSystemService.currentModelContainer = parentLocation.absolutePath+File.separator+"ttt"
         fileSystemService.maxContainerSize = 10
