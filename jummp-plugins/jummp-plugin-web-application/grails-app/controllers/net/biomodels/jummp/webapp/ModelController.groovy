@@ -109,9 +109,7 @@ class ModelController {
         }
         uploadFiles {
             on("Upload") {
-                println flow.workingMemory
-                def inputs = new HashMap<String, Object>()
-
+                
                 def mainMultipartList = request.getMultiFileMap().mainFile
                 def extraFileField = request.getMultiFileMap().extraFile
                 List<MultipartFile> extraMultipartList = []
@@ -134,72 +132,111 @@ class ModelController {
                     }
                     log.debug("Additional files supplied: {} .\n", extraMultipartList.inspect())
                 }
-
+                
                 def cmd = new UploadFilesCommand()
                 bindData(cmd, mainMultipartList, [include: ['mainFile']])
                 bindData(cmd, extraMultipartList, [include: ['extraFiles']])
                 bindData(cmd, descriptionFields)
+                System.out.println("cmd is: "+cmd.getProperties())
                 if (IS_DEBUG_ENABLED) {
                     log.debug "Data binding done :${cmd.properties}"
                 }
+                flow.workingMemory.put("UploadCommand", cmd)
                 if (!cmd.validate()) {
-                    log.error "Submission is invalid: ${cmd.properties}."
+                    log.error "Submission did not validate: ${cmd.properties}."
                     log.error "Errors: ${cmd.errors.allErrors.inspect()}."
-                    error()
+                    // No main file! This must be an error!
+                    flow.workingMemory.put("file_validation_error",true)
+                    // Unless there was one all along
+                    if (cmd.errors["mainFile"].codes.contains("mainFile.blank")) {
+                        if (flow.workingMemory.containsKey("repository_files")) {
+                            List<RFTC> uploaded=flow.workingMemory.get("repository_files") as List<RFTC>
+                            if (uploaded.find { it.mainFile }) {
+                                flow.workingMemory.put("file_validation_error",false)
+                                
+                                //if there are no main or additional files, remove upload command
+                                if (!cmd.extraFiles || cmd.extraFiles.isEmpty()) {
+                                    flow.workingMemory.remove("UploadCommand")
+                                }
+                            }
+                        }
+                    }
                 } else {
+                    flow.workingMemory.put("file_validation_error",false)
                     if (IS_DEBUG_ENABLED) {
                         log.debug("The files are valid.")
                     }
-
-                    //should this be in a separate action state?
-                    def uuid = UUID.randomUUID().toString()
-                    if (IS_DEBUG_ENABLED) {
-                        log.debug "Generated submission UUID: ${uuid}"
-                    }
-
-                    //pray that exchangeDirectory has been defined
-                    File submission_folder=null
-                    def sep = File.separator
-                    System.out.println(flow.workingMemory)
-                    if (!flow.workingMemory.containsKey("repository_files")) {
-                          def exchangeDir = grailsApplication.config.jummp.vcs.exchangeDirectory
-                          submission_folder = new File(exchangeDir, uuid)
-                          submission_folder.mkdirs()
-                    }
-                    else {
-                        System.out.println("In else now: "+flow.workingMemory)
-                        RFTC existing=flow.workingMemory.get("repository_files").get(0) as RFTC
-                        System.out.println("In else now: "+existing.getProperties())
-                        submission_folder=(new File(existing.path)).getParentFile()
-                    }
-                    def parent = submission_folder.canonicalPath + sep
-                    List<File> mainFileList = transferFiles(parent, cmd.mainFile)
-                    List<File> extraFileList = transferFiles(parent, cmd.extraFiles)
-                    List<String> descriptionList  = cmd.description
-                    def additionalsMap = [:]
-                    extraFileList.eachWithIndex{ file, i ->
-                        additionalsMap[file] = descriptionList[i]
-                    }
-                    if (IS_DEBUG_ENABLED) {
-                        log.debug "About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."
-                    }
-                    flow.workingMemory["submitted_mains"] = mainFileList
-                    flow.workingMemory["submitted_additionals"] = additionalsMap
-                    submissionService.handleFileUpload(flow.workingMemory,inputs)
                 }
                 //}
-            }.to "performValidation"
+            }.to "transferFilesToService"
             on("ProceedWithoutValidation"){
             }.to "inferModelInfo"
             on("Cancel").to "abort"
             on("Back"){}.to "displayDisclaimer"
         }
-
+        transferFilesToService {
+            action {
+                    if (flow.workingMemory.remove("file_validation_error") as Boolean) {
+                        System.out.println("I should go back.. really")
+                        return GoBackToUploader()
+                    }
+                    System.out.println("Upload Command: "+flow.workingMemory.containsKey("UploadCommand"))
+                    if (flow.workingMemory.containsKey("UploadCommand")) {
+                        //should this be in a separate action state?
+                        UploadFilesCommand cmd = flow.workingMemory.remove("UploadCommand") as UploadFilesCommand
+                        def uuid = UUID.randomUUID().toString()
+                        if (IS_DEBUG_ENABLED) {
+                            log.debug "Generated submission UUID: ${uuid}"
+                        }
+                        //pray that exchangeDirectory has been defined
+                        File submission_folder=null
+                        def sep = File.separator
+                        System.out.println(flow.workingMemory)
+                        if (!flow.workingMemory.containsKey("repository_files")) {
+                          def exchangeDir = grailsApplication.config.jummp.vcs.exchangeDirectory
+                          submission_folder = new File(exchangeDir, uuid)
+                          submission_folder.mkdirs()
+                        }
+                        else {
+                            System.out.println("In else now: "+flow.workingMemory)
+                            RFTC existing=flow.workingMemory.get("repository_files").get(0) as RFTC
+                            System.out.println("In else now: "+existing.getProperties())
+                            submission_folder=(new File(existing.path)).getParentFile()
+                        }
+                        def parent = submission_folder.canonicalPath + sep
+                        List<File> mainFileList;
+                        if (cmd.mainFile) {
+                            mainFileList=transferFiles(parent, cmd.mainFile)
+                        }
+                        else {
+                            mainFileList=new LinkedList<File>()
+                        }
+                        List<File> extraFileList = transferFiles(parent, cmd.extraFiles)
+                        List<String> descriptionList  = cmd.description
+                        def additionalsMap = [:]
+                        extraFileList.eachWithIndex{ file, i ->
+                        additionalsMap[file] = descriptionList[i]
+                        }
+                        if (IS_DEBUG_ENABLED) {
+                            log.debug "About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."
+                        }
+                        flow.workingMemory["submitted_mains"] = mainFileList
+                        flow.workingMemory["submitted_additionals"] = additionalsMap
+                        def inputs = new HashMap<String, Object>()
+                        submissionService.handleFileUpload(flow.workingMemory,inputs)
+                    }
+                    PerformValidation()
+            }
+            on("GoBackToUploader").to "uploadFiles"
+            on("PerformValidation").to "performValidation"
+        }
+        
         performValidation {
             action {
                 if (!flow.workingMemory.containsKey("model_type")) {
                     submissionService.inferModelFormatType(flow.workingMemory)
                 }
+                System.out.println("Model Type is:" +flow.workingMemory.get("model_type"))
                 submissionService.performValidation(flow.workingMemory)
                 if (!flow.workingMemory.containsKey("validation_error")) {
                     Valid()
@@ -207,6 +244,7 @@ class ModelController {
                 else
                 {
                     String errorAsString=flow.workingMemory.remove("validation_error") as String
+                    System.out.println("Heres the validation error: "+errorAsString)
                     if (errorAsString.contains("ModelValidationError")) {
                         ModelNotValid()
                     }

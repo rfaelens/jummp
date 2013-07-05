@@ -438,9 +438,8 @@ class SubmissionService {
                                             toCommandObject()
             }
             else {
-                workingMemory.put("model_type",format.identifier)
+               workingMemory.put("model_type",revision.format.identifier)
             }
-            workingMemory.put("model_type",revision.format.identifier)
             storeTCs(workingMemory, revision.model, revision)
             //ensure that a new revision tc is used for submission, use 
             //this one for copying info!
