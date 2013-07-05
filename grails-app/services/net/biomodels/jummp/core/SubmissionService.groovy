@@ -7,6 +7,7 @@ import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
+import net.biomodels.jummp.model.Revision
 
 /**
  * Service that provides model building functionality to a wizard-style model
@@ -30,6 +31,8 @@ class SubmissionService {
      * Dependency Injection of ModelService
      */
     def modelService
+    
+    def transient sessionFactory
 
     /*
      * Abstract state machine strategy, to be extended by the two concrete
@@ -37,6 +40,12 @@ class SubmissionService {
      */
     abstract class StateMachineStrategy {
 
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
+        abstract void initialise(Map<String, Object> workingMemory);
         /**
          * Purpose
          *
@@ -56,12 +65,16 @@ class SubmissionService {
                     additionals=new HashMap<File,String>()
                 }
                 List<RFTC> tobeAdded=createRFTCList(mainFiles, additionals)
-                if (workingMemory.containsKey("repository_files")) {
-                    (workingMemory.get("repository_files") as List<RFTC>).addAll(tobeAdded)
+                storeRFTC(workingMemory, tobeAdded) 
+            }
+        }
+        
+        protected void storeRFTC(Map<String,Object> workingMemory, List<RFTC> tobeAdded) {
+            if (workingMemory.containsKey("repository_files")) {
+                (workingMemory.get("repository_files") as List<RFTC>).addAll(tobeAdded)
                 }
-                else {
-                    workingMemory.put("repository_files", tobeAdded)
-                }
+            else {
+                workingMemory.put("repository_files", tobeAdded)
             }
         }
         
@@ -216,7 +229,15 @@ class SubmissionService {
      */
     class NewModelStateMachine extends StateMachineStrategy {
 
-
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
+        void initialise(Map<String, Object> workingMemory) {
+            //need to do nothing
+        }
+        
         /**
          * Purpose modify existing files in working memory
          *
@@ -308,8 +329,14 @@ class SubmissionService {
             model.name=revision.name
             model.format=revision.format
             revision.comment="Import of ${revision.name}".toString()
-            workingMemory.put("model_id",
+            try {
+                workingMemory.put("model_id",
                     modelService.uploadValidatedModel(repoFiles, revision).id)
+            }
+            catch(Exception e) {
+                e.printStackTrace()
+                throw e
+            }
         }
     }
 
@@ -319,6 +346,23 @@ class SubmissionService {
      */
     class NewRevisionStateMachine extends StateMachineStrategy {
 
+        /**
+         * Purpose
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
+        void initialise(Map<String, Object> workingMemory) {
+            //fetch files from repository, make RFTCs out of them
+            RTC rev=workingMemory.get("LastRevision") as RTC
+            List<RFTC> repFiles=rev.getFiles()
+            System.out.println("RepFiles: "+rev.getProperties())
+            storeRFTC(workingMemory, repFiles)
+            workingMemory.put("existing_files", repFiles)
+            sessionFactory.currentSession.clear()
+            System.out.println(workingMemory)
+        }
+
+        
         /**
          * Purpose modify existing files in working memory and repository
          *
@@ -360,11 +404,7 @@ class SubmissionService {
         }
 
         protected void createTransportObjects(Map<String,Object> workingMemory) {
-            long modelID=(workingMemory.get("model_id") as Long).longValue()
-            System.out.println("Model Id: "+modelID)
-            Model modelDom=modelService.getModel(modelID)
-            System.out.println("Model: "+modelDom.getProperties())
-            RTC revision=modelService.getLatestRevision(modelDom).toCommandObject()
+            RTC revision=workingMemory.remove("LastRevision") as RTC
             System.out.println("RTC: "+revision.getProperties())
             if (workingMemory.containsKey("reprocess_files")) {
                 revision.format=ModelFormat.
@@ -390,12 +430,12 @@ class SubmissionService {
         }
 
         void handleSubmission(Map<String,Object> workingMemory) {
-            //todo
-            List<RFTC> repoFiles = getRepFiles(workingMemory)
             RTC revision=workingMemory.get("RevisionTC") as RTC
             System.out.println("About to submit revision: "+revision.getProperties())
+            List<RFTC> repoFiles = getRepFiles(workingMemory)
             try
                 {
+                    System.out.println("Going to call model service: "+revision.getProperties())
                     workingMemory.put("model_id",
                     modelService.addValidatedRevision(repoFiles, revision).model.id)
                 }
@@ -407,7 +447,26 @@ class SubmissionService {
         }
     }
 
+    /**
+     * Called by ModelController to initialise working memory
+     *
+     * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+     * @param modifications
+     */
+    void initialise(Map<String, Object> workingMemory) {
+        /*
+         * The second parameter needs to contain the following:
+         *   a - The files to be *modified* - imported or removed
+         *   b - Possibly a map from filename to properties including:
+         *   whether this file is being added or removed, whether it is
+         *   the main file, and an optional description parameter
+         */
+        System.out.println(workingMemory)
+        getStrategyFromContext(workingMemory).initialise(workingMemory)
+    }
 
+    
+    
     /**
      * Called by ModelController for adding or removing files from the working memory
      *

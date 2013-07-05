@@ -93,15 +93,22 @@ class ModelController {
         input {
             isUpdate(required: true)
         }
-        uploadFiles {
-            on("Upload") {
-                //withForm {
+        start {
+            action {
                 Map<String, Object> workingMemory=new HashMap<String,Object>()
                 workingMemory.put("isUpdateOnExistingModel",flow.isUpdate) //use subflow for updating models, todo
                 if (flow.isUpdate) {
-                    workingMemory.put("model_id", conversation.model_id)
+                    Long model_id=conversation.model_id as Long
+                    workingMemory.put("model_id", model_id)
+                    workingMemory.put("LastRevision", modelDelegateService.getLatestRevision(model_id))
                 }
                 flow.workingMemory=workingMemory
+                submissionService.initialise(flow.workingMemory)
+            }
+            on("success").to "uploadFiles"
+        }
+        uploadFiles {
+            on("Upload") {
                 println flow.workingMemory
                 def inputs = new HashMap<String, Object>()
 
@@ -151,10 +158,20 @@ class ModelController {
                     }
 
                     //pray that exchangeDirectory has been defined
-                    def exchangeDir = grailsApplication.config.jummp.vcs.exchangeDirectory
+                    File submission_folder=null
                     def sep = File.separator
-                    def submission_folder = new File(exchangeDir + uuid)
-                    submission_folder.mkdirs()
+                    System.out.println(flow.workingMemory)
+                    if (!flow.workingMemory.containsKey("repository_files")) {
+                          def exchangeDir = grailsApplication.config.jummp.vcs.exchangeDirectory
+                          submission_folder = new File(exchangeDir, uuid)
+                          submission_folder.mkdirs()
+                    }
+                    else {
+                        System.out.println("In else now: "+flow.workingMemory)
+                        RFTC existing=flow.workingMemory.get("repository_files").get(0) as RFTC
+                        System.out.println("In else now: "+existing.getProperties())
+                        submission_folder=(new File(existing.path)).getParentFile()
+                    }
                     def parent = submission_folder.canonicalPath + sep
                     List<File> mainFileList = transferFiles(parent, cmd.mainFile)
                     List<File> extraFileList = transferFiles(parent, cmd.extraFiles)

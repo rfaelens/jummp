@@ -83,7 +83,12 @@ class RepositoryFile implements Serializable {
     /**
      * Comply with the need to provide the absolute file paths in RepositoryFileTransportCommand objects
      * while also being flexible about the location of the root folder where all models are stored.
+     *
+     * Edit: Disabled to prevent RepositoryFile belonging to previous revision referring
+     * to a file in the current model directory.
      */
+
+/*
     RepositoryFileTransportCommand toCommandObject() {
         final String sep = File.separator
         def realPath = new StringBuffer(fileSystemService.root.absolutePath)
@@ -98,5 +103,5 @@ class RepositoryFile implements Serializable {
                 mimeType: mimeType,
                 revision: revision ? revision.toCommandObject() : null
         )
-    }
+    }*/
 }

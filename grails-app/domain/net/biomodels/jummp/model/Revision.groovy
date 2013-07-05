@@ -2,6 +2,7 @@ package net.biomodels.jummp.model
 
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 
 /**
  * @short A Revision represents one version of a Model.
@@ -17,6 +18,9 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
  */
 class Revision implements Serializable {
     private static final long serialVersionUID = 1L
+    
+    def modelService
+    
     /**
      * The revision belongs to one Model
      */
@@ -97,13 +101,32 @@ class Revision implements Serializable {
         format(nullable: false)
         deleted(nullable: false)
     }
+    
+    
+    List<RFTC> getRepositoryFilesForRevision() {
+        List<RFTC> repFiles=new LinkedList<RFTC>()
+        List<File> files=modelService.retrieveModelRepFiles(this)
+        System.out.println(files)
+        repoFiles.each { rf ->
+            System.out.println("Adding: "+rf.toString())
+            File tmpFile=files.find { it.getName() == (new File(rf.path)).getName() }
+            RFTC rftc=new RFTC(
+                path: tmpFile.getCanonicalPath(),
+                description: rf.description,
+                hidden: rf.hidden,
+                mainFile: rf.mainFile,
+                userSubmitted: rf.userSubmitted,
+                mimeType: rf.mimeType)
+            System.out.println(rftc.getProperties())
+            repFiles.add(rftc)
+        }
+        return repFiles
+    }
 
     RevisionTransportCommand toCommandObject() {
-        def theFiles = []
-        repoFiles.each {
-            theFiles.add(it.toCommandObject())
-        }
-        return new RevisionTransportCommand(
+        def files=getRepositoryFilesForRevision()
+        System.out.println("Revision DOM: "+files)
+        RevisionTransportCommand rev=new RevisionTransportCommand(
                 id: id,
                 revisionNumber: revisionNumber,
                 owner: owner.userRealName,
@@ -115,7 +138,11 @@ class Revision implements Serializable {
                 uploadDate: uploadDate,
                 format: format.toCommandObject(),
                 model: model.toCommandObject(),
-                files: theFiles
+                files: files
         )
+        rev.files.each {
+            it.revision=rev
+        }
+        return rev
     }
 }
