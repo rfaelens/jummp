@@ -51,7 +51,7 @@ class RepositoryFile implements Serializable {
     String mimeType
 
     static constraints = {
-        path(blank: false, unique: true,
+        path(blank: false, /*unique: true,*/
             validator: { p, rf -> 
                 String sep  = File.separator
                 String pathRegex = "${sep}?([a-zA-Z0-9\\-_]+${sep})+[a-zA-Z0-9\\-_\\.]+".toString()

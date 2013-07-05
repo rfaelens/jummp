@@ -31,7 +31,7 @@ class SbmlServiceTests extends JummpIntegrationTest {
     @Before
     void setUp() {
         createUserAndRoles()
-        setupVcs()
+        //setupVcs()
         fileSystemService.root = new File("target/sbml/git/").getCanonicalFile()
         fileSystemService.currentModelContainer = fileSystemService.root.absolutePath + "/ttt/"
         // disable validation as it is broken

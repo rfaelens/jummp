@@ -870,7 +870,10 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue(aclUtilService.hasPermission(auth, revision, BasePermission.DELETE))
         assertFalse(aclUtilService.hasPermission(auth, revision, BasePermission.WRITE))
         // importing a model with same name should be possible
-        assertTrue((modelService.uploadModelAsFile(rf, meta)).validate())
+        File importFile2 = new File("target/vcs/exchange/import2.xml")
+        importFile2.setText("I shouldnt need to do this.")
+        def rf2 = new RepositoryFileTransportCommand(path: importFile2.absolutePath, description: "")
+        assertTrue((modelService.uploadModelAsFile(rf2, meta)).validate())
         // an invalid submission should yield a model with validated flag set to false
         meta.name = "test2"
         meta.format = ModelFormat.findByIdentifier("SBML").toCommandObject()
@@ -884,10 +887,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertNotNull(theRevision)
         assertFalse(theRevision.validated)
         // importing with valid model file should be possible
-        sbmlFile = new File("target/sbml/uploadModelValidSbmlFile")
-        FileUtils.deleteQuietly(sbmlFile)
-        FileUtils.touch(sbmlFile)
-        sbmlFile.append('''<?xml version="1.0" encoding="UTF-8"?>
+        String sbmlText= '''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>
     <listOfCompartments>
@@ -907,13 +907,22 @@ class ModelServiceTests extends JummpIntegrationTest {
       </reaction>
     </listOfReactions>
   </model>
-</sbml>''')
+</sbml>'''
+        sbmlFile = new File("target/sbml/uploadModelValidSbmlFile")
+        FileUtils.deleteQuietly(sbmlFile)
+        FileUtils.touch(sbmlFile)
+        sbmlFile.append(sbmlText)
         rf.path = sbmlFile.absolutePath
         model = modelService.uploadModelAsFile(rf, meta)
         assertTrue(model.validate())
         assertEquals(ModelFormat.findByIdentifier("SBML"), model.revisions.toList().first().format)
         assertNotNull(model.revisions.toList().first().uploadDate)
         // test strange characters in the name, which should not end in the file name
+        sbmlFile = new File("target/sbml/uploadModelValidSbmlFile2")
+        FileUtils.deleteQuietly(sbmlFile)
+        FileUtils.touch(sbmlFile)
+        sbmlFile.append(sbmlText)
+        rf.path = sbmlFile.absolutePath
         meta.name = "test/:/test"
         model = modelService.uploadModelAsFile(rf, meta)
         File gitDirectory = new File(model.vcsIdentifier)

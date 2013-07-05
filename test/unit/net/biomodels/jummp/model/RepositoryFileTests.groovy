@@ -48,13 +48,13 @@ class RepositoryFileTests {
                 mimeType: "", hidden: false, revision: new Revision())
         assertTrue(repositoryFile2.validate())
 
-        //paths must be unique
+       /* //paths must be unique
         mockForConstraintsTests(RepositoryFile, [repositoryFile2])
         def duplicateFile = new RepositoryFile(path: newPath, description: "",
             mainFile: true, hidden: false, mimeType: "text/plain", revision: rev)
         assertFalse(duplicateFile.validate())
         assertEquals(1, duplicateFile.errors.getErrorCount())
-        assertEquals("unique", duplicateFile.errors["path"])
+        assertEquals("unique", duplicateFile.errors["path"])*/
 
         //descriptions can have at-most 500 characters
         repositoryFile2.description = "a"*500
