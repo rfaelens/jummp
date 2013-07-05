@@ -69,6 +69,12 @@ class SubmissionService {
             }
         }
         
+        /**
+         * Purpose Append supplied RFTC list to those in workingMemory (if any, otherwise create)
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         * @param modifications     a Map containing the existing files in the model, to be modified
+         */
         protected void storeRFTC(Map<String,Object> workingMemory, List<RFTC> tobeAdded) {
             if (workingMemory.containsKey("repository_files")) {
                 (workingMemory.get("repository_files") as List<RFTC>).addAll(tobeAdded)
@@ -79,7 +85,8 @@ class SubmissionService {
         }
         
         /**
-         * Purpose
+         * Purpose Method called from handleFileUpload that is responsible for
+         * handling modifications (e.g. deletion, when supported)
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          * @param modifications     a Map containing the existing files in the model, to be modified
@@ -100,20 +107,16 @@ class SubmissionService {
          }
 
         /**
-         * Purpose
+         * Perform validation on the model
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
         abstract void performValidation(Map<String,Object> workingMemory);
 
         /**
-         * Related functions for inferModelInfo, following template method pattern
+         * Convenience function to store the supplied DOMs in working memory
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
-         * @param model             a @link{net.biomodels.jummp.core.model.ModelTransportCommand} 
-         *                          representing the model.
-         * @param revision          a @link{net.biomodels.jummp.core.model.RevisionTransportCommand}
-         *                          representing the revision.
          */
         protected void storeTCs(Map<String,Object> workingMemory, MTC model, RTC revision) {
              workingMemory.put("ModelTC", model)
@@ -128,7 +131,7 @@ class SubmissionService {
         protected abstract void createTransportObjects(Map<String,Object> workingMemory);
 
         /**
-         * Purpose
+         * Purpose Convenience function to update the revision dom from the files
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
@@ -144,7 +147,7 @@ class SubmissionService {
         }
 
         /**
-         * Purpose
+         * Purpose Extract information about the model.
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
@@ -156,7 +159,7 @@ class SubmissionService {
         }
 
         /**
-         * Purpose
+         * Purpose Update the name/description in the model datastructures and files
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          * @param modifications     a Map containing the user's modifications to the model information we extracted.
@@ -172,7 +175,7 @@ class SubmissionService {
         }
 
         /**
-         * Purpose
+         * Purpose Handle changes made at the submission summary. Basically the commit message
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          * @param modifications     a Map containing the user's modifications to the model information we extracted.
@@ -189,7 +192,7 @@ class SubmissionService {
         abstract void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications);
 
         /**
-         * Purpose
+         * Purpose submit files, remove intermediate files from disk
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
@@ -205,10 +208,17 @@ class SubmissionService {
                 cleanup(workingMemory)
             }
         }
-        
+        /*
+         * Concrete implementations perform the actual submission
+         **/
         protected abstract void completeSubmission(Map<String, Object> workingMemory);
 
-        void cleanup(Map<String,Object> workingMemory) {
+       /**
+         * Purpose Remove intermediate files from disk
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
+         void cleanup(Map<String,Object> workingMemory) {
             try
             {
                 List<RFTC> repoFiles = getRepFiles(workingMemory)
@@ -512,6 +522,12 @@ class SubmissionService {
         getStrategyFromContext(workingMemory).inferModelFormatType(workingMemory)
     }
 
+    /**
+     * Performs validation on the supplied model and stores the result in 
+     * <tt>model_validation_result</tt>
+     *
+     * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+     */
     void performValidation(Map<String, Object> workingMemory) throws Exception {
         /*
          * Throws an exception if files are not valid, or do not comprise a valid model
@@ -519,50 +535,65 @@ class SubmissionService {
          getStrategyFromContext(workingMemory).performValidation(workingMemory)
     }
 
+    /**
+     * Extracts the model's information and creates transport command
+     * objects for Revision, stored in <tt>RevisionTC</tt>
+     *
+     * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+     */
     void inferModelInfo(Map<String, Object> workingMemory) {
         /* create RevisionTC, ModelTC, populate fields */
           getStrategyFromContext(workingMemory).inferModelInfo(workingMemory)
     }
 
+    /**
+     * update the working memory with user specified modifications
+     * creating separate objects where necessary to ensure that
+     * the modifications are performed as separate commits or revisions
+     *
+     * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+     */
     void refineModelInfo(Map<String, Object> workingMemory, Map<String, Object> modifications) {
         /* 
-         * update the working memory with user specified modifications
-         * creating separate objects where necessary to ensure that
-         * the modifications are performed as separate commits or revisions
          */
         getStrategyFromContext(workingMemory).refineModelInfo(workingMemory, modifications)
     }
 
+    /**
+     * update the working memory with revision specific comments
+     * parameter left as a map<string,string> for forward-compatibility
+     *
+     * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+     */
     void updateRevisionComments(Map<String, Object> workingMemory, Map<String, String> modifications) {
-        /*
-         * update the working memory with revision specific comments
-         * parameter left as a map<string,string> for forward-compatibility
-         */
         getStrategyFromContext(workingMemory).updateRevisionComments(workingMemory, modifications)
     }
 
     /**
-     * Purpose
+     * Purpose Create or update DOM objects as necessary
      *
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      */
     void handleSubmission(Map<String,Object> workingMemory) {
-        /*Create or update DOM objects as necessary*/
         getStrategyFromContext(workingMemory).handleSubmission(workingMemory)
     }
 
     
     /**
-     * Purpose
+     * Purpose: Remove the intermediate files from the disk
      *
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      */
     void cleanup(Map<String,Object> workingMemory) {
-        /*Create or update DOM objects as necessary*/
         getStrategyFromContext(workingMemory).cleanup(workingMemory)
     }
 
     
+    /**
+     * Purpose: Get the appropriate strategy for the flow (update or create)
+     *
+     * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+     */
     private StateMachineStrategy getStrategyFromContext(Map<String,Object> workingMemory) {
         Boolean isUpdateOnExistingModel=(Boolean)workingMemory.get("isUpdateOnExistingModel");
         if (isUpdateOnExistingModel) {
