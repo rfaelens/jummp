@@ -165,7 +165,6 @@
         <input message="Include Plugin Configuration, required to configure the core application?" validargs="y,n" addproperty="plugin.configuration" defaultvalue="y"/>
         <input message="Include Plugin SBML, required to handle SBML files?" validargs="y,n" addproperty="plugin.sbml" defaultvalue="y"/>
         <input message="Include Plugin JMS, required to communicate with a Web Application through JMS?" validargs="y,n" addproperty="plugin.jms" defaultvalue="y"/>
-        <input message="Include Plugin D-Dbus, required to export the Application Interface to D-Bus?" validargs="y,n" addproperty="plugin.dbus" defaultvalue="y"/>
         <condition property="plugin.persist.svn">
             <equals arg1="${plugin.svn}" arg2="y"/>
         </condition>
@@ -181,22 +180,17 @@
         <condition property="plugin.persist.jms">
             <equals arg1="${plugin.jms}" arg2="y"/>
         </condition>
-        <condition property="plugin.persist.dbus">
-            <equals arg1="${plugin.dbus}" arg2="y"/>
-        </condition>
         <property name="plugin.persist.svn" value="false"/>
         <property name="plugin.persist.git" value="false"/>
         <property name="plugin.persist.configuration" value="false"/>
         <property name="plugin.persist.sbml" value="false"/>
         <property name="plugin.persist.jms" value="false"/>
-        <property name="plugin.persist.dbus" value="false"/>
         <propertyfile file="${builddir}/jummpPlugins.properties">
             <!--entry key="subversion" value="${plugin.persist.svn}"/-->
             <entry key="git" value="${plugin.persist.git}"/>
             <entry key="configuration" value="${plugin.persist.configuration}"/>
             <entry key="sbml" value="${plugin.persist.sbml}"/>
             <entry key="jms" value="${plugin.persist.jms}"/>
-            <entry key="dbus" value="${plugin.persist.dbus}"/>
         </propertyfile>
         <gant file="${builddir}/scripts/Build.groovy" target="deleteJummpPlugins">
             <definition name="builddir" value="${builddir}"/>

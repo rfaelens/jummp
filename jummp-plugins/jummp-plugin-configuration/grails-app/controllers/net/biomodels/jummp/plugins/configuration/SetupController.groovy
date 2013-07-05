@@ -16,6 +16,8 @@ import net.biomodels.jummp.core.UserCommand
  * is configured.
  * @see net.biomodels.jummp.filters.SetupFilters
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @date 20130705
  */
 class SetupController {
     def configurationService
@@ -126,7 +128,6 @@ class SetupController {
 
         remoteRemote {
             on("next") { RemoteCommand cmd ->
-                cmd.jummpExportDbus = flow.remote.jummpExportDbus
                 cmd.jummpExportJms = flow.remote.jummpExportJms
                 flow.remote = cmd
                 flow.remote.validate()
@@ -135,20 +136,8 @@ class SetupController {
                 } else  {
                     return success()
                 }
-            }.to("validateDBus")
-            on("back").to("remoteExport")
-        }
-
-        dbus {
-            on("next") { DBusCommand cmd ->
-                flow.dbus = cmd
-                if(flow.dbus.hasErrors()) {
-                    return error()
-                } else {
-                    return success()
-                }
             }.to("server")
-            on("back").to("remoteRemote")
+            on("back").to("remoteExport")
         }
 
         server {
@@ -217,7 +206,7 @@ class SetupController {
                 if (flow.branding.hasErrors()) {
                     return error()
                 } else {
-                    configurationService.storeConfiguration(flow.database, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote, flow.dbus, flow.trigger, flow.sbml, flow.bives, flow.cms, flow.branding)
+                    configurationService.storeConfiguration(flow.database, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword, flow.remote, flow.trigger, flow.sbml, flow.bives, flow.cms, flow.branding)
                     return success()
                 }
             }.to("finish")
@@ -243,31 +232,14 @@ class SetupController {
 
         validateRemote {
             action {
-                if (flow.remote.jummpExportDbus && flow.remote.jummpExportJms) {
+                if (flow.remote.jummpExportJms) {
                     remote()
-                } else if(!flow.remote.jummpExportJms) {
-                    flow.remote.jummpRemote = "dbus"
-                    dbus()
                 }
                 else {
-                    flow.remote.jummpRemote = "jms"
                     server()
                 }
             }
             on("remote").to("remoteRemote")
-            on("dbus").to("dbus")
-            on("server").to("server")
-        }
-
-        validateDBus {
-            action {
-                if(params.jummpRemote == "dbus") {
-                    dbus()
-                } else {
-                    server()
-                }
-            }
-            on("dbus").to("dbus")
             on("server").to("server")
         }
 
