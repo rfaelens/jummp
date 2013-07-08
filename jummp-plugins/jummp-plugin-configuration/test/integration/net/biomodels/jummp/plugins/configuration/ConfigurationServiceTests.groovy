@@ -113,31 +113,23 @@ class ConfigurationServiceTests {
         // set values
         //remote = mockCommandObject(RemoteCommand)
         remote.jummpRemote = "jms"
-        remote.jummpExportDbus=false
         remote.jummpExportJms=true
         configurationService.updateRemoteConfiguration(properties, remote)
         assertFalse(properties.isEmpty())
-        assertEquals(3, properties.size())
+        assertEquals(2, properties.size())
         assertEquals("jms", properties.getProperty("jummp.remote"))
-        assertEquals("false", properties.getProperty("jummp.export.dbus"))
         assertEquals("true", properties.getProperty("jummp.export.jms"))
         // update values
         //remote = mockCommandObject(RemoteCommand)
-        remote.jummpRemote = "dbus"
-        remote.jummpExportDbus=true
         remote.jummpExportJms=false
         configurationService.updateRemoteConfiguration(properties, remote)
         assertFalse(properties.isEmpty())
-        assertEquals(3, properties.size())
-        assertEquals("dbus", properties.getProperty("jummp.remote"))
-        assertEquals("true", properties.getProperty("jummp.export.dbus"))
+        assertEquals(2, properties.size())
         assertEquals("false", properties.getProperty("jummp.export.jms"))
         // invalid command should not change
         configurationService.updateRemoteConfiguration(properties, remote)
         assertFalse(properties.isEmpty())
-        assertEquals(3, properties.size())
-        assertEquals("dbus", properties.getProperty("jummp.remote"))
-        assertEquals("true", properties.getProperty("jummp.export.dbus"))
+        assertEquals(2, properties.size())
         assertEquals("false", properties.getProperty("jummp.export.jms"))
     }
 
@@ -392,12 +384,8 @@ class ConfigurationServiceTests {
         assertTrue(database.validate())
         RemoteCommand remote = new RemoteCommand()
         remote.jummpRemote="jms"
-        remote.jummpExportDbus=false
         remote.jummpExportJms=true
         assertTrue(remote.validate())
-        DBusCommand dbus = new DBusCommand()
-        dbus.systemBus = false
-        assertTrue(dbus.validate())
         LdapCommand ldap = new LdapCommand()
         ldap.ldapManagerDn       = "manager"
         ldap.ldapManagerPassword = "password"
@@ -461,10 +449,10 @@ class ConfigurationServiceTests {
         assertTrue(cms.validate())
 
         // everything should be written to the properties file
-        configurationService.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, cms, branding)
+        configurationService.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, trigger, sbml, bives, cms, branding)
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(48, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -485,9 +473,7 @@ class ConfigurationServiceTests {
         assertEquals("user",      properties.getProperty("jummp.database.username"))
         assertEquals("pass",      properties.getProperty("jummp.database.password"))
         assertEquals("jms",      properties.getProperty("jummp.remote"))
-        assertEquals("false",      properties.getProperty("jummp.export.dbus"))
         assertEquals("true",      properties.getProperty("jummp.export.jms"))
-        assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
         assertEquals("true", properties.getProperty("jummp.server.protection"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
@@ -505,10 +491,10 @@ class ConfigurationServiceTests {
         vcs.vcs = "git"
         assertTrue(vcs.validate())
 
-        configurationService.storeConfiguration(database, null, vcs, null, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, cms, branding)
+        configurationService.storeConfiguration(database, null, vcs, null, firstRun, server, userRegistration, changePassword, remote, trigger, sbml, bives, cms, branding)
         properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(26, properties.size())
+        assertEquals(24, properties.size())
         assertEquals("true",      properties.getProperty("jummp.firstRun"))
         assertEquals("target",    properties.getProperty("jummp.vcs.workingDirectory"))
         assertEquals("",          properties.getProperty("jummp.vcs.exchangeDirectory"))
@@ -554,7 +540,7 @@ class ConfigurationServiceTests {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(48, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -569,9 +555,7 @@ class ConfigurationServiceTests {
         assertEquals("manager",  properties.getProperty("jummp.security.ldap.managerDn"))
         assertEquals("server",   properties.getProperty("jummp.security.ldap.server"))
         assertEquals("jms",   properties.getProperty("jummp.remote"))
-        assertEquals("false",   properties.getProperty("jummp.export.dbus"))
         assertEquals("true",   properties.getProperty("jummp.export.jms"))
-        assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
         assertEquals("true", properties.getProperty("jummp.server.protection"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
@@ -588,23 +572,18 @@ class ConfigurationServiceTests {
         // now load the data from the service
         RemoteCommand remote = configurationService.loadRemoteConfiguration()
         assertEquals("jms",  remote.jummpRemote)
-        assertFalse(remote.jummpExportDbus)
         assertTrue( remote.jummpExportJms)
 
         // store a new configuration
-        remote.jummpRemote="dbus"
-        remote.jummpExportDbus=true
         remote.jummpExportJms=false
         configurationService.saveRemoteConfiguration(remote)
         // verify the configuration
         RemoteCommand config = configurationService.loadRemoteConfiguration()
-        assertEquals("dbus", config.jummpRemote)
-        assertEquals(true,   config.jummpExportDbus)
         assertEquals(false,       config.jummpExportJms)
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(48, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -660,7 +639,7 @@ class ConfigurationServiceTests {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(48, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -677,10 +656,7 @@ class ConfigurationServiceTests {
         assertEquals("3306",      properties.getProperty("jummp.database.port"))
         assertEquals("user",      properties.getProperty("jummp.database.username"))
         assertEquals("pass",      properties.getProperty("jummp.database.password"))
-        assertEquals("dbus",   properties.getProperty("jummp.remote"))
-        assertEquals("true",   properties.getProperty("jummp.export.dbus"))
         assertEquals("false",   properties.getProperty("jummp.export.jms"))
-        assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
         assertEquals("true", properties.getProperty("jummp.server.protection"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
@@ -706,7 +682,7 @@ class ConfigurationServiceTests {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(48, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
         assertEquals("",           properties.getProperty("jummp.vcs.exchangeDirectory"))
@@ -725,9 +701,7 @@ class ConfigurationServiceTests {
         assertEquals("user",      properties.getProperty("jummp.database.username"))
         assertEquals("pass",      properties.getProperty("jummp.database.password"))
         assertEquals("jms",   properties.getProperty("jummp.remote"))
-        assertEquals("false",   properties.getProperty("jummp.export.dbus"))
         assertEquals("true",   properties.getProperty("jummp.export.jms"))
-        assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
         assertEquals("true", properties.getProperty("jummp.server.protection"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
@@ -753,7 +727,7 @@ class ConfigurationServiceTests {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(48, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -773,9 +747,7 @@ class ConfigurationServiceTests {
         assertEquals("user",      properties.getProperty("jummp.database.username"))
         assertEquals("pass",      properties.getProperty("jummp.database.password"))
         assertEquals("jms",   properties.getProperty("jummp.remote"))
-        assertEquals("false",   properties.getProperty("jummp.export.dbus"))
         assertEquals("true",   properties.getProperty("jummp.export.jms"))
-        assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
         assertEquals("true", properties.getProperty("jummp.server.protection"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
@@ -806,7 +778,7 @@ class ConfigurationServiceTests {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(48, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("ldap",     properties.getProperty("jummp.security.authenticationBackend"))
@@ -823,9 +795,7 @@ class ConfigurationServiceTests {
         assertEquals("user",      properties.getProperty("jummp.database.username"))
         assertEquals("pass",      properties.getProperty("jummp.database.password"))
         assertEquals("jms",   properties.getProperty("jummp.remote"))
-        assertEquals("false",   properties.getProperty("jummp.export.dbus"))
         assertEquals("true",   properties.getProperty("jummp.export.jms"))
-        assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
         assertEquals("true", properties.getProperty("jummp.server.protection"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
@@ -853,7 +823,7 @@ class ConfigurationServiceTests {
         // verify that other configuration options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(48, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -873,9 +843,7 @@ class ConfigurationServiceTests {
         assertEquals("user",      properties.getProperty("jummp.database.username"))
         assertEquals("pass",      properties.getProperty("jummp.database.password"))
         assertEquals("jms",   properties.getProperty("jummp.remote"))
-        assertEquals("false",   properties.getProperty("jummp.export.dbus"))
         assertEquals("true",   properties.getProperty("jummp.export.jms"))
-        assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("https://www.example.com/", properties.getProperty("jummp.server.url"))
         assertEquals("true", properties.getProperty("jummp.server.protection"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
@@ -904,7 +872,7 @@ class ConfigurationServiceTests {
         // verify that other config options are unchanged
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(48, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -924,9 +892,7 @@ class ConfigurationServiceTests {
         assertEquals("user",      properties.getProperty("jummp.database.username"))
         assertEquals("pass",      properties.getProperty("jummp.database.password"))
         assertEquals("jms",   properties.getProperty("jummp.remote"))
-        assertEquals("false",   properties.getProperty("jummp.export.dbus"))
         assertEquals("true",   properties.getProperty("jummp.export.jms"))
-        assertEquals("false",      properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
         assertEquals("true", properties.getProperty("jummp.server.protection"))
         assertEquals("1001",    properties.getProperty("jummp.authenticationHash.startRemoveOffset"))
@@ -952,12 +918,8 @@ class ConfigurationServiceTests {
         assertTrue(database.validate())
         RemoteCommand remote = new RemoteCommand()
         remote.jummpRemote="jms"
-        remote.jummpExportDbus=false
         remote.jummpExportJms=true
         assertTrue(remote.validate())
-        DBusCommand dbus = new DBusCommand()
-        dbus.systemBus = false
-        assertTrue(dbus.validate())
         LdapCommand ldap = new LdapCommand()
         ldap.ldapManagerDn       = "manager"
         ldap.ldapManagerPassword = "password"
@@ -1021,10 +983,10 @@ class ConfigurationServiceTests {
         assertTrue(cms.validate())
 
         // everything should be written to the properties file
-        configurationService.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, dbus, trigger, sbml, bives, cms, branding)
+        configurationService.storeConfiguration(database, ldap, vcs, svn, firstRun, server, userRegistration, changePassword, remote, trigger, sbml, bives, cms, branding)
         Properties properties = new Properties()
         properties.load(new FileInputStream("target/jummpProperties"))
-        assertEquals(50, properties.size())
+        assertEquals(48, properties.size())
         assertEquals("false", properties.getProperty("jummp.firstRun"))
         assertEquals("target", properties.getProperty("jummp.plugins.subversion.localRepository"))
         assertEquals("",           properties.getProperty("jummp.vcs.workingDirectory"))
@@ -1045,9 +1007,7 @@ class ConfigurationServiceTests {
         assertEquals("user",      properties.getProperty("jummp.database.username"))
         assertEquals("pass",      properties.getProperty("jummp.database.password"))
         assertEquals("jms",   properties.getProperty("jummp.remote"))
-        assertEquals("false",   properties.getProperty("jummp.export.dbus"))
         assertEquals("true",   properties.getProperty("jummp.export.jms"))
-        assertEquals("false",   properties.getProperty("jummp.plugins.dbus.systemBus"))
         assertEquals("http://127.0.0.1:8080/jummp/", properties.getProperty("jummp.server.url"))
         assertEquals("true", properties.getProperty("jummp.server.protection"))
         assertEquals("true",                  properties.getProperty("jummp.security.anonymousRegistration"))

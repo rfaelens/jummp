@@ -14,7 +14,7 @@ import java.util.Map
  * @short Service Interface for accessing the Model Service from a Remote Adapter.
  *
  * The Service defined by this interface can be injected into any Remote Adapter such as
- * JMS or DBus to communicate with JUMMP core.
+ * JMS to communicate with JUMMP core.
  *
  * All methods may throw AccessDeniedExceptions as JUMMP core is ACL protected. This interface
  * defines methods only with the TransportCommand wrappers - direct access to the underlying

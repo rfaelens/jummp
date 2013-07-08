@@ -104,18 +104,15 @@ class ConfigurationControllerTests extends GrailsUnitTestMixin {
         // test for correct command
         cmd = mockCommandObject(RemoteCommand)
         cmd.jummpRemote="jms"
-        cmd.jummpExportDbus=false
         cmd.jummpExportJms=true
         cmd.validate()
         controller.saveRemote(cmd)
         assertEquals("/configuration/saved", view)
         assertEquals("Remote", model.module)
         grailsApplication.config.jummp.remote = "jms"
-        grailsApplication.config.jummp.export.dbus = "false"
         grailsApplication.config.jummp.export.jms = "true"
         RemoteCommand saved = this.controller.configurationService.loadRemoteConfiguration()
         assertEquals("jms", saved.jummpRemote)
-        assertFalse(saved.jummpExportDbus)
         assertTrue(saved.jummpExportJms)
     }
 

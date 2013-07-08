@@ -11,6 +11,8 @@ import org.springframework.beans.factory.InitializingBean
  * influence to the runtime behavior of the currently running application.
  * The application needs to be restarted, whenever the configuration changes.
  * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @date 20130705
  */
 class ConfigurationService implements InitializingBean {
     /**
@@ -43,7 +45,6 @@ class ConfigurationService implements InitializingBean {
      * @param userRegistration the user registration configuration
      * @param changePassword the change/reset password configuration
      * @param remote The Remote configuration
-     * @param dbus The DBus configuration
      * @param trigger The Trigger configuration
      * @param tsbml The SBML configuration
      * @param bives the BiVeS configuration
@@ -51,14 +52,11 @@ class ConfigurationService implements InitializingBean {
      */
     public void storeConfiguration(DatabaseCommand database, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun,
                                    ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword,
-                                   RemoteCommand remote, DBusCommand dbus, TriggerCommand trigger, SBMLCommand sbml, BivesCommand bives,
+                                   RemoteCommand remote, TriggerCommand trigger, SBMLCommand sbml, BivesCommand bives,
                                    CmsCommand cms, BrandingCommand branding) {
         Properties properties = new Properties()
         updateDatabaseConfiguration(properties, database)
         updateRemoteConfiguration(properties, remote)
-        if(dbus) {
-             updateDBusConfiguration(properties, dbus)
-        }
         updateLdapConfiguration(properties, ldap)
         updateVcsConfiguration(properties, vcs)
         updateSvnConfiguration(properties, svn)
@@ -133,20 +131,8 @@ class ConfigurationService implements InitializingBean {
         Properties properties = loadProperties()
         RemoteCommand remote = new RemoteCommand()
         remote.jummpRemote = properties.getProperty("jummp.remote")
-        remote.jummpExportDbus = Boolean.parseBoolean(properties.getProperty("jummp.export.dbus"))
         remote.jummpExportJms = Boolean.parseBoolean(properties.getProperty("jummp.export.jms"))
         return remote
-    }
-
-    /**
-     * Loads the current DBus Configuration.
-     * @return A command object encapsulating the current DBus Configuration
-     */
-    public DBusCommand loadDBusConfiguration() {
-        Properties properties = loadProperties()
-        DBusCommand dbus = new DBusCommand()
-        dbus.systemBus = Boolean.parseBoolean(properties.getProperty("jummp.plugins.dbus.systemBus"))
-        return dbus
     }
 
     /**
@@ -327,19 +313,6 @@ class ConfigurationService implements InitializingBean {
     }
 
     /**
-     * Updates the DBus configuration stored in the properties file.
-     * Other settings are not changed!
-     * It is important to remember that the settings will only be activated after
-     * a restart of the application!
-     * @param dbus The new DBus configuration
-     */
-    public void saveDBusConfiguration(DBusCommand dbus) {
-        Properties properties = loadProperties()
-        updateDBusConfiguration(properties, dbus)
-        saveProperties(properties)
-    }
-
-    /**
      * Updates the LDAP configuration stored in the properties file.
      * Other settings are not changed!
      * It is important to remember that the settings will only be activated after
@@ -507,20 +480,7 @@ class ConfigurationService implements InitializingBean {
             return
         }
         properties.setProperty("jummp.remote",   remote.jummpRemote)
-        properties.setProperty("jummp.export.dbus",     remote.jummpExportDbus.toString())
         properties.setProperty("jummp.export.jms", remote.jummpExportJms.toString())
-    }
-
-    /**
-     * Updates the @p properties with the settings from @p remoteDBus.
-     * @param properties The existing properties
-     * @param remoteDBus.The new remoteDBus.settings
-     */
-    private void updateDBusConfiguration(Properties properties, DBusCommand dbus) {
-        if (!dbus.validate()) {
-            return
-        }
-        properties.setProperty("jummp.plugins.dbus.systemBus",   dbus.systemBus.toString())
     }
 
     /**
