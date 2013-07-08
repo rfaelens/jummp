@@ -379,6 +379,9 @@ if (jummp.security.cms.policy != null) {
 
 grails.plugins.springsecurity.controllerAnnotations.staticRules = jummp.controllerAnnotations
 
+if (!"jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
+    jms.disabled = true
+}
 environments {
     test {
         // need to disable the plugins or tests may fail

@@ -10,5 +10,7 @@ astScriptLocation = Metadata.current.'app.name'.matches("jummp-plugin-jms") ?
 includeTargets << new File(astScriptLocation)
 
 eventSetClasspath = { rootLoader ->
-    ast()
+    if ("jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
+        ast()
+    }
 }
