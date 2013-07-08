@@ -49,7 +49,6 @@ class ModelController {
             on("Cancel").to "abort"
         }
         uploadPipeline {
-            //System.out.println("UploadPipeline: "+flow.workingMemory)
             subflow(controller: "model", action: "upload", input: [isUpdate: true])
             on("abort").to "abort"
             on("displayConfirmationPage").to "displayConfirmationPage"
@@ -137,7 +136,6 @@ class ModelController {
                 bindData(cmd, mainMultipartList, [include: ['mainFile']])
                 bindData(cmd, extraMultipartList, [include: ['extraFiles']])
                 bindData(cmd, descriptionFields)
-                System.out.println("cmd is: "+cmd.getProperties())
                 if (IS_DEBUG_ENABLED) {
                     log.debug "Data binding done :${cmd.properties}"
                 }
@@ -177,10 +175,8 @@ class ModelController {
         transferFilesToService {
             action {
                     if (flow.workingMemory.remove("file_validation_error") as Boolean) {
-                        System.out.println("I should go back.. really")
                         return GoBackToUploader()
                     }
-                    System.out.println("Upload Command: "+flow.workingMemory.containsKey("UploadCommand"))
                     if (flow.workingMemory.containsKey("UploadCommand")) {
                         //should this be in a separate action state?
                         UploadFilesCommand cmd = flow.workingMemory.remove("UploadCommand") as UploadFilesCommand
@@ -191,16 +187,13 @@ class ModelController {
                         //pray that exchangeDirectory has been defined
                         File submission_folder=null
                         def sep = File.separator
-                        System.out.println(flow.workingMemory)
                         if (!flow.workingMemory.containsKey("repository_files")) {
                           def exchangeDir = grailsApplication.config.jummp.vcs.exchangeDirectory
                           submission_folder = new File(exchangeDir, uuid)
                           submission_folder.mkdirs()
                         }
                         else {
-                            System.out.println("In else now: "+flow.workingMemory)
                             RFTC existing=flow.workingMemory.get("repository_files").get(0) as RFTC
-                            System.out.println("In else now: "+existing.getProperties())
                             submission_folder=(new File(existing.path)).getParentFile()
                         }
                         def parent = submission_folder.canonicalPath + sep
@@ -236,7 +229,6 @@ class ModelController {
                 if (!flow.workingMemory.containsKey("model_type")) {
                     submissionService.inferModelFormatType(flow.workingMemory)
                 }
-                System.out.println("Model Type is:" +flow.workingMemory.get("model_type"))
                 submissionService.performValidation(flow.workingMemory)
                 if (!flow.workingMemory.containsKey("validation_error")) {
                     Valid()
@@ -244,7 +236,6 @@ class ModelController {
                 else
                 {
                     String errorAsString=flow.workingMemory.remove("validation_error") as String
-                    System.out.println("Heres the validation error: "+errorAsString)
                     if (errorAsString.contains("ModelValidationError")) {
                         ModelNotValid()
                     }
