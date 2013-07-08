@@ -122,81 +122,6 @@
         </copy>
     </target>
 
-    <!-- Performs the actual removal of grails plugins not needed in productive environment. -->
-    <target name="perform-remove-grails-plugins">
-        <propertyfile file="${propertyfile}">
-            <entry key="plugins.code-coverage" operation="del"/>
-            <entry key="plugins.codenarc" operation="del"/>
-        </propertyfile>
-    </target>
-
-    <!-- Removes grails plugins not needed in productive environment from core app and all plugins-->
-    <target name="remove-grails-plugins" depends="copy">
-        <antcall target="perform-remove-grails-plugins">
-            <param name="propertyfile" value="${builddir}/application.properties"/>
-        </antcall>
-        <antcall target="perform-remove-grails-plugins">
-            <param name="propertyfile" value="${builddir}/jummp-plugins/jummp-plugin-configuration/application.properties"/>
-        </antcall>
-        <antcall target="perform-remove-grails-plugins">
-            <param name="propertyfile" value="${builddir}/jummp-plugins/jummp-plugin-core-api/application.properties"/>
-        </antcall>
-        <antcall target="perform-remove-grails-plugins">
-            <param name="propertyfile" value="${builddir}/jummp-plugins/jummp-plugin-git/application.properties"/>
-        </antcall>
-        <antcall target="perform-remove-grails-plugins">
-            <param name="propertyfile" value="${builddir}/jummp-plugins/jummp-plugin-jms/application.properties"/>
-        </antcall>
-        <antcall target="perform-remove-grails-plugins">
-            <param name="propertyfile" value="${builddir}/jummp-plugins/jummp-plugin-sbml/application.properties"/>
-        </antcall>
-        <antcall target="perform-remove-grails-plugins">
-            <param name="propertyfile" value="${builddir}/jummp-plugins/jummp-plugin-security/application.properties"/>
-        </antcall>
-        <antcall target="perform-remove-grails-plugins">
-            <!--param name="propertyfile" value="${builddir}/jummp-plugins/jummp-plugin-subversion/application.properties"/-->
-        </antcall>
-    </target>
-
-<!--  Interactively ask for each plugin not necessarily required by JUMMP core to be included in the build    -->
-    <target name="ask-for-plugins" depends="remove-grails-plugins">
-        <!--input message="Include Plugin Subversion, required to store model files in a Subversion repository?" validargs="y,n" addproperty="plugin.svn" defaultvalue="y"/-->
-        <input message="Include Plugin Git, required to store model files in a git repository?" validargs="y,n" addproperty="plugin.git" defaultvalue="y"/>
-        <input message="Include Plugin Configuration, required to configure the core application?" validargs="y,n" addproperty="plugin.configuration" defaultvalue="y"/>
-        <input message="Include Plugin SBML, required to handle SBML files?" validargs="y,n" addproperty="plugin.sbml" defaultvalue="y"/>
-        <input message="Include Plugin JMS, required to communicate with a Web Application through JMS?" validargs="y,n" addproperty="plugin.jms" defaultvalue="y"/>
-        <condition property="plugin.persist.svn">
-            <equals arg1="${plugin.svn}" arg2="y"/>
-        </condition>
-        <condition property="plugin.persist.git">
-            <equals arg1="${plugin.git}" arg2="y"/>
-        </condition>
-        <condition property="plugin.persist.configuration">
-            <equals arg1="${plugin.configuration}" arg2="y"/>
-        </condition>
-        <condition property="plugin.persist.sbml">
-            <equals arg1="${plugin.sbml}" arg2="y"/>
-        </condition>
-        <condition property="plugin.persist.jms">
-            <equals arg1="${plugin.jms}" arg2="y"/>
-        </condition>
-        <property name="plugin.persist.svn" value="false"/>
-        <property name="plugin.persist.git" value="false"/>
-        <property name="plugin.persist.configuration" value="false"/>
-        <property name="plugin.persist.sbml" value="false"/>
-        <property name="plugin.persist.jms" value="false"/>
-        <propertyfile file="${builddir}/jummpPlugins.properties">
-            <!--entry key="subversion" value="${plugin.persist.svn}"/-->
-            <entry key="git" value="${plugin.persist.git}"/>
-            <entry key="configuration" value="${plugin.persist.configuration}"/>
-            <entry key="sbml" value="${plugin.persist.sbml}"/>
-            <entry key="jms" value="${plugin.persist.jms}"/>
-        </propertyfile>
-        <gant file="${builddir}/scripts/Build.groovy" target="deleteJummpPlugins">
-            <definition name="builddir" value="${builddir}"/>
-        </gant>
-    </target>
-
 <!-- Performs the actual building of war file using grails war. Cleans before building -->
     <target name="build-war" depends="remove-grails-plugins">
         <grails command="clean" cwd="${builddir}">
@@ -213,9 +138,5 @@
 
 <!-- Build war with all plugins -->
     <target name="war" depends="build-war">
-    </target>
-
-<!-- Build war with asking for plugins to include     -->
-    <target name="interactive-war" depends="ask-for-plugins, build-war">
     </target>
 </project>
