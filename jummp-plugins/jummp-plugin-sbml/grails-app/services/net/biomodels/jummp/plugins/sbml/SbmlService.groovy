@@ -44,6 +44,7 @@ import org.sbml.jsbml.SBMLWriter
 import org.sbfc.converter.sbml2biopax.SBML2BioPAX_l3
 import org.sbfc.converter.models.BioPaxModel
 import com.thoughtworks.xstream.converters.ConversionException
+import net.biomodels.jummp.plugins.sbml.SbmlCache
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -73,10 +74,15 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     @SuppressWarnings("GrailsStatelessService")
     private def biopaxConverter = null
 
-    // TODO: move initialization into afterPropertiesSet and make it configuration dependent
+    /* SbmlCache causes reflection exceptions in Java7 (java.lang.reflect.MalformedParameterizedTypeException)
+     * Therefore it has currently been disabled, until a java7 compliant implementation
+     * can be provided
+     * 
+     *   TODO: move initialization into afterPropertiesSet and make it configuration dependent
     @SuppressWarnings("GrailsStatelessService")
     SbmlCache<RevisionTransportCommand, SBMLDocument> cache = new SbmlCache(100)
-
+    */
+   
     public void afterPropertiesSet() {
         if (Environment.current == Environment.PRODUCTION) {
             // only initialize the SBML2* Converters during startup in production mode
@@ -527,20 +533,20 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
      * @return The parsed SBMLDocument
      */
     private SBMLDocument getFromCache(RevisionTransportCommand revision) throws XMLStreamException {
-        SBMLDocument document = cache.get(revision)
+        /*SBMLDocument document = cache.get(revision)
         if (document) {
             return document
-        }
-        //SBMLDocument document=null;
+        }*/
+        SBMLDocument document=null;
         // we do not have a document, so retrieve first the file
         Map<String, byte[]> bytes = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFiles(revision)
         for (Map.Entry<String, byte[]> entry : bytes.entrySet()) {
             try {
                 document=(new SBMLReader()).readSBMLFromStream(new ByteArrayInputStream(entry.getValue()));
-            	if (document) {
+            	/*if (document) {
                   cache.put(revision, document)
                   break
-                }
+                }*/
             } catch(Exception ignore) {
             }
         }

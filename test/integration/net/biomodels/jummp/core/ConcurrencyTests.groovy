@@ -189,8 +189,9 @@ Add a comment to this line
         public void thread1() {       
             String testText="myTextIsEquallySmall"
             authenticateAsAdmin()
+            List<File> importMe=[smallModel(testName, testText), sbmlModel()]
 	    // Write a small text file
-            String rev=vcsService.importModel(model, [smallModel(testName, testText), sbmlModel()])
+            String rev=vcsService.importModel(model, importMe)
 	    // update it
 	    vcsService.vcsManager.updateModel(new File(model.vcsIdentifier),[smallModel(testName,"some other text")])
 	    // retrieve the previous revision to establish baseline
@@ -206,7 +207,10 @@ Add a comment to this line
             // verify that you got the same two files you wrote in that revision
 	    assertEquals(2,files.size())
 	    testFileCorrectness(files,testName,testText)
-       }
+            importMe.each {
+                it.delete()
+            }
+        }
 
         public void thread2() {
 	    // create a large file
@@ -218,10 +222,14 @@ Add a comment to this line
 	    // block, and begin immediately, updating the model with a large file
             waitForTick(1)
             long base=System.currentTimeMillis();
-            String rev=vcsService.vcsManager.updateModel(new File(model.vcsIdentifier), [smallModel(testName, finalText), bigFile])
+            List<File> importMe=[smallModel(testName, finalText), bigFile]
+            String rev=vcsService.vcsManager.updateModel(new File(model.vcsIdentifier), importMe)
             timeWriteFinished=System.currentTimeMillis() - base
 	    // test repository integrity
             testRepositoryCommit(repository, rev)
+            importMe.each {
+                it.delete()
+            }
         }
        
         public void finish() {
@@ -286,10 +294,14 @@ Add a comment to this line
 	    // Block, and start writing immediately
             waitForTick(1)
             long base=System.currentTimeMillis();
-            String rev=vcsService.importModel(model, [smallModel(testName, testText), bigFile])
+            List<File> importMe=[smallModel(testName, testText), bigFile]
+            String rev=vcsService.importModel(model, importMe)
             timeWriteFinished=System.currentTimeMillis() - base
             testRepositoryCommit(repository, rev)
             testFileCorrectness(modelIdentifier, testName, testText)
+            importMe.each {
+                it.delete()
+            }
         }
 
         public void thread2() {       
@@ -301,7 +313,8 @@ Add a comment to this line
             String testText="myTextIsEquallySmall"
             authenticateAsAdmin()
 	    //Save small model to the repository
-            String rev=vcsService.importModel(model, [smallModel(testName, testText), sbmlModel()])
+            List<File> importMe=[smallModel(testName, testText), sbmlModel()]
+            String rev=vcsService.importModel(model, importMe)
 	    //Block, wait 200ms, then read the model. Your read time should be smaller than the write time
 	    //of thread1 indicating concurrent use of the VcsManager.
             waitForTick(1);
@@ -311,6 +324,10 @@ Add a comment to this line
             timeReadFinished=System.currentTimeMillis() - base;
             assertEquals(2,files.size())
             testFileCorrectness(modelIdentifier,testName,testText)
+            importMe.each {
+                it.delete()
+            }
+
        }
        
         public void thread3() {
@@ -329,11 +346,16 @@ Add a comment to this line
 	    //Your time should be smaller than the large file writing thread
             waitForTick(1)
 	    Thread.sleep(50)
+            List<File> importMe=[smallModel(testName, testText), bigFile]
             long base=System.currentTimeMillis();
-            String rev=vcsService.importModel(model, [smallModel(testName, testText), bigFile])
+            String rev=vcsService.importModel(model, importMe)
             timeSecondWrite=System.currentTimeMillis() - base
             testRepositoryCommit(repository, rev)
             testFileCorrectness(modelIdentifier, testName, testText)
+            importMe.each {
+                it.delete()
+            }
+
         }
 
         
