@@ -120,22 +120,23 @@ log4j = {
         appender name: 'performanceStatsAppender', performanceStatsAppender
 
         rollingFile name: "jummpAppender", file: "logs/jummp-core.log", threshold: org.apache.log4j.Level.WARN
-        rollingFile name: "eventsAppender", file: "logs/jummp-events.log", threshold: org.apache.log4j.Level.INFO
+        rollingFile name: "eventsAppender", file: "logs/jummp-events.log", threshold: org.apache.log4j.Level.DEBUG
 
         // change the threshold to DEBUG to have debug output in development mode
-        console name: "stdout", threshold: org.apache.log4j.Level.ERROR
+        console name: "stdout", threshold: org.apache.log4j.Level.ALL
     }
 
     // configure the performanceStatsAppender to log at INFO level
     info   performanceStatsAppender: 'org.perf4j.TimingLogger'
-    warn  jummpAppender: [
+    all  jummpAppender: [
             'grails.app', //everything provided by grails-app, e.g. services
             'net.biomodels.jummp' // everything from jummp
     ]
     // Simple Logging goes to its own file
     info   eventsAppender: 'net.biomodels.jummp.plugins.simplelogging'
 
-    error  jummpAppender: [
+    rollingFile name: "debugAppender", file: "logs/jummp-debug.log", threshold: org.apache.log4j.Level.ALL
+    info  debugAppender: [
             'org.codehaus.groovy.grails.web.servlet',  //  controllers
             'org.codehaus.groovy.grails.web.pages', //  GSP
             'org.codehaus.groovy.grails.web.sitemesh', //  layouts
@@ -143,16 +144,11 @@ log4j = {
             'org.codehaus.groovy.grails.web.mapping', // URL mapping
             'org.codehaus.groovy.grails.commons', // core / classloading
             'org.codehaus.groovy.grails.plugins', // plugins
-            'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
-            'org.springframework',
-            'org.hibernate',
-            'net.sf.ehcache.hibernate'
     ]
 
-    warn   jummpAppender: 'org.mortbay.log'
-    rollingFile name: "debugAppender", file: "logs/jummp-debug.log", threshold: org.apache.log4j.Level.ALL
+    warn   debugAppender: 'org.mortbay.log'
     trace  debugAppender: [
-            'net.biomodels.jummp'
+            'org.weceem'
     ]
 }
 

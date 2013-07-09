@@ -3,6 +3,7 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/${appName}.war"
 grails.project.groupId = "net.biomodels.jummp"
+grails.script.profile = true
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -115,6 +116,7 @@ grails.project.dependency.resolution = {
 
     plugins {
         compile ":perf4j:0.1.1"
+        compile ":grails-melody:1.45"
         compile ":jms:1.2"
         compile ":executor:0.3"
         compile ":mail:1.0.1"
@@ -199,7 +201,7 @@ codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
                              'jummp-plugins/*/test/unit',
                              'jummp-plugins/*/test/integration']
 
-grails.tomcat.jvmArgs = ["-Xmx2G", "-XX:MaxPermSize=512M", "-XX:-UseGCOverheadLimit", "-server", "-XX:+UseParallelGC", "-XX:ParallelGCThreads=8"]
+grails.tomcat.jvmArgs = ["-Xmx2G", "-XX:MaxPermSize=512M", "-XX:-UseGCOverheadLimit", "-server", "-XX:+UseParallelGC", "-XX:ParallelGCThreads=8", "-Xverify:none"]
 
 //ensure that AST.jar is put in the right place. See scripts/AST.groovy
 System.setProperty("jummp.basePath", new File("./").getAbsolutePath())
