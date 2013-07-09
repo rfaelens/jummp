@@ -126,7 +126,7 @@ Add a comment to this line
         File testFile=new File(modelDirectory + "/" + filename);
         List<String> lines = testFile.readLines()
         assertEquals(1, lines.size())
-        assertEquals(filetext, lines[0])
+        assertEquals(lines[0],filetext)
     }
     
     private void testFileCorrectness(List<File> files, String filename, String filetext)
@@ -157,12 +157,11 @@ Add a comment to this line
         long timeReadFinished=1;
 	long referenceReadTime=0;
         String modelIdentifier="target/vcs/git/blockmodel"
-        String testName="small_file_test"
-        String finalText="myTextIsNotSoBig"
         final String commitMsg="I should write and block reads"
         final Model model;
         Repository repository;
-    
+        Set<String> delete = Collections.synchronizedSet(new HashSet<String>());
+        
         public BlockWhenYouShould()
         {
             model = new Model(name: "bigmodel", vcsIdentifier: modelIdentifier)
@@ -187,8 +186,9 @@ Add a comment to this line
         }
 
         public void thread1() {       
-            String testText="myTextIsEquallySmall"
             authenticateAsAdmin()
+            String testName="small_file_test"
+            String testText="myTextIsEquallySmall"
             List<File> importMe=[smallModel(testName, testText), sbmlModel()]
 	    // Write a small text file
             String rev=vcsService.importModel(model, importMe)
@@ -208,7 +208,7 @@ Add a comment to this line
 	    assertEquals(2,files.size())
 	    testFileCorrectness(files,testName,testText)
             importMe.each {
-                it.delete()
+                delete.add(it.getName())
             }
         }
 
@@ -218,6 +218,8 @@ Add a comment to this line
             RandomAccessFile f = new RandomAccessFile(bigFile, "rw")
             f.setLength(150 * 1024 * 1024);
             f.close()
+            String testName="small_file_test"
+            String finalText="myTextIsNotSoBig"
             authenticateAsAdmin()
 	    // block, and begin immediately, updating the model with a large file
             waitForTick(1)
@@ -228,7 +230,7 @@ Add a comment to this line
 	    // test repository integrity
             testRepositoryCommit(repository, rev)
             importMe.each {
-                it.delete()
+                delete.add(it.getName())
             }
         }
        
@@ -240,7 +242,12 @@ Add a comment to this line
 	    // test that you have three files in the repository at the end
             List<File> files=vcsService.vcsManager.retrieveModel(new File(modelIdentifier));
             assertEquals(3, files.size())
+            String testName="small_file_test"
+            String finalText="myTextIsNotSoBig"
             testFileCorrectness(files, testName, finalText)
+            delete.each {
+                new File(it).delete()
+            }
         }
     
     }
