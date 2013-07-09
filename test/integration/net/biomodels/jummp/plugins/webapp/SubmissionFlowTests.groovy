@@ -14,6 +14,7 @@ import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.junit.*
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.mock.web.MockMultipartHttpServletRequest
+import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import static org.junit.Assert.*
 
@@ -143,18 +144,51 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         protected void assertFlowState(String state) {
             assert state == flowExecution.activeSession.state.id
         }
+        
+        /* 
+         * Convenience function to add the supplied main and additional files
+         * to submission
+         * */
+        protected void addSubmissionFiles(List<File> mainFiles, Map<File, String> additionalFiles) {
+            mainFiles.each {
+                addFileToRequest(it, "mainFile", "application/xml")
+            }
+            additionalFiles.keySet().each {
+                addFileToRequest(it, "extraFiles", "application/xml")
+                (mockRequest as MockHttpServletRequest).addParameter("description",
+                                                                     additionalFiles.get(it))
+            }
+        }
 
-        /* Adds the supplied file with parameters as a mock multipart file */
-        protected void addFileToRequest(File modelFile, String formID, String contentType) {
+        /* 
+         * Adds the supplied file with parameters as a mock multipart file 
+         * 
+         **/
+        private void addFileToRequest(File modelFile, String formID, String contentType) {
             final file = new MockMultipartFile(formID, 
                                                      modelFile.getName(),
                                                      contentType,
                                                      modelFile.getBytes())
             (mockRequest as MockMultipartHttpServletRequest).addFile(file)
         }
+        
+        /* 
+         * Convenience function to create arbitrary additional files with corresponding
+         * descriptions. 
+         **/
+        protected Map<File,String> getRandomAdditionalFiles(int num) {
+            Map<File,String> returnMe=new HashMap<File,String>()
+            for (int i=0; i<num; i++) {
+                returnMe.put(getFileForTest("add_file_"+i+".xml", "my text is "+num),
+                             "this is a description for file "+i)
+            }
+            return returnMe
+        }
 
-        /* Convenience function to compare a map of String->byte[] retrieved from
-         * the repository with the supplied list of files*/
+        /* 
+         * Convenience function to compare a map of String->byte[] retrieved from
+         * the repository with the supplied list of files
+         * */
         protected void validateFiles(Map<String,byte[]> files, List<File> testFiles) {
             assert files
             testFiles.each {
@@ -206,13 +240,13 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             signalEvent("Continue")
             assertFlowState("uploadFiles")
             File newFile=bigModel()
-            addFileToRequest(newFile, "mainFile", "application/xml")
+            Map<File,String> additionalFiles=getRandomAdditionalFiles(10)
+            addSubmissionFiles([newFile], additionalFiles)
             signalEvent("Upload")
             assertFlowState("displayModelInfo")
             assert true == (Boolean) flowScope.
                                         workingMemory.
                                         get("isUpdateOnExistingModel")
-            
             assert "SBML" == flowScope.workingMemory.get("model_type") as String
             RTC revision=flowScope.workingMemory.get("RevisionTC") as RTC
             //test name
@@ -238,7 +272,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             
             //test that files are updated in the repository correctly
             Map<String, byte[]> files=modelService.retrieveModelFiles(model)
-            validateFiles(files, [existing, newFile])
+            validateFiles(files, [existing, newFile]+additionalFiles.keySet())
         }
     }
 
@@ -284,7 +318,8 @@ class SubmissionFlowTests extends JummpIntegrationTest {
                                 String format,
                                 String mname,
                                 String[] descriptionStrings) {
-            addFileToRequest(file, "mainFile", "application/xml")
+            Map<File,String> additionalFiles=getRandomAdditionalFiles(10)
+            addSubmissionFiles([file], additionalFiles)
             signalEvent("Upload")
             assertFlowState("displayModelInfo")
             assert false == (Boolean) flowScope.
@@ -316,7 +351,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             
             //test that the model is saved in the repository
             Map<String, byte[]> files=modelService.retrieveModelFiles(Model.findById(modelId))
-            validateFiles(files, [file])
+            validateFiles(files, [file]+additionalFiles.keySet())
         }
         
         private void checkDescription(String description, String[] descriptionStrings) {

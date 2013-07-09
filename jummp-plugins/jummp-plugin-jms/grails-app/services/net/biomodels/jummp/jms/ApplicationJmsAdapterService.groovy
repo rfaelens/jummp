@@ -5,7 +5,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.perf4j.aop.Profiled
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
 import org.springframework.security.authentication.BadCredentialsException
 import net.biomodels.jummp.core.IAuthenticationHashService
 import net.biomodels.jummp.core.user.JummpAuthenticationImpl
@@ -71,14 +70,21 @@ class ApplicationJmsAdapterService extends AbstractJmsAdapter {
         if (message instanceof Authentication) {
             try {
                 Authentication auth = authenticationManager.authenticate(message)
-                if (auth.principal instanceof LdapUserDetailsImpl) {
-                    // verify that we have a user with same name in database
-                    if (!User.findByUsername(auth.principal.getUsername())) {
-                        throw new BadCredentialsException("User does not have an account in the database")
+                boolean springSecurityLdapOn = 
+                            !grailsApplication.config.grails.plugin.excludes.contains("springSecurityLdap")
+                if (springSecurityLdapOn) {
+                    //cannot import LdapUserDetailsImpl because it may not exist. use full name instead
+                    if (auth.principal instanceof
+                            org.springframework.security.ldap.userdetails.LdapUserDetailsImpl) {
+
+                        // verify that we have a user with same name in database
+                        if (!User.findByUsername(auth.principal.getUsername())) {
+                            throw new BadCredentialsException("User does not have an account in the database")
+                        }
                     }
+                    String hash = authenticationHashService.hashAuthentication(auth)
+                    return JummpAuthenticationImpl.fromAuthentication(auth, hash)
                 }
-                String hash = authenticationHashService.hashAuthentication(auth)
-                return JummpAuthenticationImpl.fromAuthentication(auth, hash)
             } catch (AuthenticationException e) {
                 return e
             }
