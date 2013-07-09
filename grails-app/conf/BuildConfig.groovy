@@ -162,11 +162,16 @@ grails.plugin.location.'jummp-plugin-git' = "jummp-plugins/jummp-plugin-git"
 //grails.plugin.location.'jummp-plugin-subversion' = "jummp-plugins/jummp-plugin-subversion"
 grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
 grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
-grails.plugin.location.'jummp-plugin-remote' = "jummp-plugins/jummp-plugin-remote"
 grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plugin-simple-logging"
 grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"
 //grails.plugin.location.'jummp-plugin-jms-remote' = "jummp-plugins/jummp-plugin-jms-remote"
-grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
+if ("jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
+    println "Enabling JMS remoting..."
+    grails.plugin.location.'jummp-plugin-remote' = "jummp-plugins/jummp-plugin-remote"
+    grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
+} else {
+    println "JMS disabled"
+}
 
 // Remove libraries not needed in production mode
 grails.war.resources = { stagingDir ->
