@@ -3,7 +3,10 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/${appName}.war"
 grails.project.groupId = "net.biomodels.jummp"
+// Profile the execution of Grails tasks
 grails.script.profile = true
+// Disable auto-reloading as it biases benchmarks
+disable.auto.recompile = true
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
