@@ -6,7 +6,7 @@ grails.project.groupId = "net.biomodels.jummp"
 // Profile the execution of Grails tasks
 grails.script.profile = true
 // Disable auto-reloading as it biases benchmarks
-disable.auto.recompile = true
+auto.recompile.disable = true
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
