@@ -119,7 +119,6 @@ grails.project.dependency.resolution = {
 
     plugins {
         compile ":perf4j:0.1.1"
-        compile ":grails-melody:1.45"
         compile ":jms:1.2"
         compile ":executor:0.3"
         compile ":mail:1.0.1"
