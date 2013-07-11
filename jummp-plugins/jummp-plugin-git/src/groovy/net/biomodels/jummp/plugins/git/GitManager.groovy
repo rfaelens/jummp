@@ -20,6 +20,7 @@ import java.util.UUID
 import java.nio.channels.FileChannel
 import java.nio.channels.FileLock
 import java.io.RandomAccessFile
+import java.nio.ByteBuffer
 
 /**
  * @short GitManager provides the interface to a local git clone.
@@ -102,32 +103,35 @@ class GitManager implements VcsManager {
     }
     
     private FileChannel getRepositoryChannel(File modelDirectory) {
-        File repositoryFile=new File(modelDirectory, ".git/HEAD")
+        File repositoryFile=new File(modelDirectory, ".git/.locker.txt")
         FileChannel channel=new RandomAccessFile(repositoryFile, "rw").getChannel();
         return channel
     }
     
-    private FileLock obtainExclusiveLock(FileChannel channel) {
+    private FileLock obtainExclusiveLock(File modelDirectory) {
         FileLock lock=null
         long accumulate=0
         try
         {
-            /*while (accumulate<60000) {
+            while (accumulate<300000) {
                 try
                 {
+                    FileChannel channel=getRepositoryChannel(modelDirectory)
                     lock=channel.tryLock()
+                    //Write something to file, otherwise file isnt really locked
+                    channel.write(ByteBuffer.wrap("\n".getBytes())) 
                 }
                 catch(Exception ignore) {
-                    
+                    ignore.printStackTrace()
                 }
-                System.out.println("LOCK ACQUIRED FOR "+Thread.currentThread().getId()+" : "+lock)
                 if (lock) {
                     return lock
                 }
+                System.out.println("Could not get lock.. waiting")
                 Thread.sleep(100)
                 accumulate+=100
-            }*/
-            lock=channel.lock()
+            }
+            //lock=channel.lock()
         }
         catch(Exception e) {
             e.printStackTrace()
@@ -154,9 +158,8 @@ class GitManager implements VcsManager {
             locks.put(modelDirectory.name, lock)
         }
         locks.get(modelDirectory.name).lock();
-        FileLock fileLock=obtainExclusiveLock(getRepositoryChannel(modelDirectory))
+        FileLock fileLock=obtainExclusiveLock(modelDirectory)
         diskLocks.put(modelDirectory.name, fileLock)
-        long endTime=System.currentTimeMillis()+1000
     }
     
     /**
@@ -171,6 +174,7 @@ class GitManager implements VcsManager {
         ReentrantLock lock=locks.get(modelDirectory.name)
         if (!lock.hasQueuedThreads()) locks.remove(modelDirectory);
         FileLock removing=diskLocks.remove(modelDirectory.name)
+        new File(modelDirectory, ".git/.locker.txt").setText("")
         removing.release()
         lock.unlock()
     }
@@ -351,7 +355,7 @@ class GitManager implements VcsManager {
                 throw new VcsException("Revision '$revision' not found in model directory '$modelDirectory' !");
                 try {
                     // need to checkout in a temporary branch
-                    String branchName = "tempa${uid.getAndIncrement()}"
+                    String branchName = UUID.randomUUID()
                     initedRepositories.get(modelDirectory).
                                        checkout().
                                        setName(branchName).

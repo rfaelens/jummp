@@ -10,7 +10,6 @@ import org.springframework.orm.hibernate3.SessionHolder
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.support.TransactionSynchronizationManager
-import net.biomodels.jummp.util.InterJummpSync
 
 includeTargets << grailsScript("_GrailsInit")
 includeTargets << grailsScript("_GrailsBootstrap")
@@ -32,7 +31,7 @@ target(main: "The description of the script goes here!") {
         return vcsIssues
     }
 
-    def syncClass = grailsApp.classLoader.loadClass("net.biomodels.jummp.util.InterJummpSync")
+    def syncClass = grailsApp.classLoader.loadClass("net.biomodels.jummp.util.interprocess.InterJummpSync")
     
     def sync=syncClass.newInstance()
     
@@ -68,17 +67,21 @@ Add a comment to this line
     
     sync.sendMessage("DoneStartup")
     
-        
-    sync.terminate()
-    /*
-    def list=appCtx
-    .getBean("vcsService")
-    .vcsManager
-    .retrieveModel(new File("/home/raza/reps/working/aaa/2013-06-27T13-34-11-329_Becker2010_EpoR_AuxiliaryModel"))
+    def repTest= grailsApp.
+    			classLoader.
+    			loadClass("net.biomodels.jummp.util.interprocess.UpdateAndTest").
+    			newInstance()
+
+    repTest.init(new File("target/vcs/exchange"), 100)
+    repTest.setModel(modelFolder)
+    repTest.setManager(appCtx.getBean("vcsService").vcsManager)
+    repTest.run()
+    sync.sendMessage("TestResult: ${repTest.dotestsPass()}")
+    sync.sendMessage("DoneTesting")
+    Thread.sleep(500)
     
-    System.out.println(list)
-    sync.terminate()
-    */
+    //sync.terminate()
+ 
 }
 
 target(vcsSetup: "Ensures Git is in charge of versioning models") {
