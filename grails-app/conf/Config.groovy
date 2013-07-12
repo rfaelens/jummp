@@ -310,6 +310,11 @@ if (!(jummpConfig.model.history.maxElements instanceof ConfigObject)) {
     jummp.model.history.maxElements = 10
 }
 
+// To specify the project using jummp, to customise messages e.g. biomodels/ddmore
+if (!(jummpConfig.jummp.branding.internalColor instanceof ConfigObject)) {
+    jummp.branding.deployment = jummpConfig.jummp.branding.deployment
+}
+
 // For the appearance of the web front-end defines the color for internal usage
 if (!(jummpConfig.jummp.branding.internalColor instanceof ConfigObject)) {
     jummp.branding.internalColor = jummpConfig.jummp.branding.internalColor
