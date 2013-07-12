@@ -177,11 +177,8 @@ if ("jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
     println "JMS disabled"
 }
 
-// Remove libraries not needed in production mode
+// Remove any files not needed in production mode
 grails.war.resources = { stagingDir ->
-  // need to remove unix socket JNI library as incompatible with placing inside web-app
-  // 2013-03-19 Mihai Glont: jummp-loader works fine with unix-0.5.jar in the war's WEB-INF/lib
-  // delete(file:"${stagingDir}/WEB-INF/lib/unix-0.5.jar")
 }
 
 codenarc.reports = {
