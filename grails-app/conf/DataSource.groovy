@@ -38,7 +38,6 @@ try {
 def databaseConfig = new ConfigSlurper().parse(databaseProperties)
 
 dataSource {
-    loggingSql = true
     pooled = Boolean.parseBoolean(databaseConfig.jummp.database.pooled)
     driverClassName = databaseConfig.jummp.database.driver
     username = databaseConfig.jummp.database.username
@@ -58,7 +57,6 @@ hibernate {
     cache.use_second_level_cache = true
     cache.use_query_cache = true
     cache.region.factory_class = 'net.sf.ehcache.hibernate.EhCacheRegionFactory'
-    format_sql = true
     //cache.provider_class = 'net.sf.ehcache.hibernate.EhCacheProvider'
 }
 // environment specific settings
