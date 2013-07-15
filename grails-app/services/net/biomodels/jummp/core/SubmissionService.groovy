@@ -314,7 +314,7 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
-        @Profiled(tag = "submissionService.NewModelStateMachine.performValidation"
+        @Profiled(tag = "submissionService.NewModelStateMachine.performValidation")
         void performValidation(Map<String,Object> workingMemory) {
             List<File> modelFiles=getFilesFromMemory(workingMemory, false)
             modelFiles.each {

@@ -747,7 +747,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(model.toCommandObject(),
                 "Could not store new Model ${model.toCommandObject().properties} in VCS", e)
         }
-        stopWatch.lap(Finished importing the model into the VCS.)
+        stopWatch.lap("Finished importing the model into the VCS.")
         stopWatch.setTag("modelService.uploadValidatedModel.gormValidation")
         domainObjects.each {
                revision.addToRepoFiles(it)
