@@ -108,7 +108,7 @@ class ModelController {
         }
         uploadFiles {
             on("Upload") {
-                
+
                 def mainMultipartList = request.getMultiFileMap().mainFile
                 def extraFileField = request.getMultiFileMap().extraFile
                 List<MultipartFile> extraMultipartList = []
@@ -124,14 +124,13 @@ class ModelController {
 
                 if (IS_DEBUG_ENABLED) {
                     if (mainMultipartList.size() == 1) {
-                        log.debug("New submission started.The main file supplied is {}.",
-                                        mainMultipartList.properties)
+                        log.debug("New submission started.The main file supplied is ${mainMultipartList.properties}.")
                     } else {
-                        log.debug("New submission started. Main files: {}.", mainMultipartList.inspect())
+                        log.debug("New submission started. Main files: ${mainMultipartList.inspect()}.")
                     }
-                    log.debug("Additional files supplied: {} .\n", extraMultipartList.inspect())
+                    log.debug("Additional files supplied: ${extraMultipartList.inspect()}.\n")
                 }
-                
+
                 def cmd = new UploadFilesCommand()
                 bindData(cmd, mainMultipartList, [include: ['mainFile']])
                 bindData(cmd, extraMultipartList, [include: ['extraFiles']])
@@ -151,7 +150,7 @@ class ModelController {
                             List<RFTC> uploaded=flow.workingMemory.get("repository_files") as List<RFTC>
                             if (uploaded.find { it.mainFile }) {
                                 flow.workingMemory.put("file_validation_error",false)
-                                
+
                                 //if there are no main or additional files, remove upload command
                                 if (!cmd.extraFiles || cmd.extraFiles.isEmpty()) {
                                     flow.workingMemory.remove("UploadCommand")
