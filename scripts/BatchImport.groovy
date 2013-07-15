@@ -99,9 +99,9 @@ target(main: "Puts everything together to import models from a given folder") {
                 name(MODEL_NAME)
                 date(new Date().format("dd-MM-yyyy'T'HH-mm-ss"))
             }
-            def modelWrapper = rtfc.newInstance(path: it.absolutePath, description: "$MODEL_NAME", mainFile: true,
+            def modelWrapper = rftc.newInstance(path: it.absolutePath, description: "$MODEL_NAME", mainFile: true,
                     userSubmitted: true, hidden: false)
-            def tempWrapper = rtfc.newInstance(path: temp.absolutePath, description "Sample additional file", mainFile: false,
+            def tempWrapper = rftc.newInstance(path: temp.absolutePath, description: "Sample additional file", mainFile: false,
                     userSubmitted: true, hidden: false)
             appCtx.getBean("modelService").uploadModelAsList([modelWrapper, tempWrapper], model)
             FileUtils.deleteQuietly(temp)

@@ -6,7 +6,7 @@ grails.project.groupId = "net.biomodels.jummp"
 // Profile the execution of Grails tasks
 grails.script.profile = true
 // Disable auto-reloading as it biases benchmarks
-disable.auto.recompile = true
+auto.recompile.disable = true
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -119,7 +119,6 @@ grails.project.dependency.resolution = {
 
     plugins {
         compile ":perf4j:0.1.1"
-        compile ":grails-melody:1.45"
         compile ":jms:1.2"
         compile ":executor:0.3"
         compile ":mail:1.0.1"
@@ -178,11 +177,8 @@ if ("jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
     println "JMS disabled"
 }
 
-// Remove libraries not needed in production mode
+// Remove any files not needed in production mode
 grails.war.resources = { stagingDir ->
-  // need to remove unix socket JNI library as incompatible with placing inside web-app
-  // 2013-03-19 Mihai Glont: jummp-loader works fine with unix-0.5.jar in the war's WEB-INF/lib
-  // delete(file:"${stagingDir}/WEB-INF/lib/unix-0.5.jar")
 }
 
 codenarc.reports = {
@@ -204,7 +200,14 @@ codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
                              'jummp-plugins/*/test/unit',
                              'jummp-plugins/*/test/integration']
 
-grails.tomcat.jvmArgs = ["-Xmx4G", "-XX:MaxPermSize=512M", "-XX:-UseGCOverheadLimit", "-server", "-XX:+UseParallelGC", "-XX:ParallelGCThreads=8"]
+grails.tomcat.jvmArgs = ["-Xmx4G",
+                        "-Xss512M",
+                        "-XX:MaxPermSize=256M",
+                        "-server",
+                        "-noverify",
+                        "-XX:+UseConcMarkSweepGC",
+                        "-XX:+UseParNewGC"
+]
 
 //ensure that AST.jar is put in the right place. See scripts/AST.groovy
 System.setProperty("jummp.basePath", new File("./").getAbsolutePath())
