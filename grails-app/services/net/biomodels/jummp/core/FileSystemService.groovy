@@ -4,6 +4,7 @@ import grails.util.Holders
 import java.io.FilenameFilter
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
+import org.perf4j.aop.Profiled
 import org.springframework.beans.factory.InitializingBean
 /**
  * Provides an implementation of IFileSystemService. VcsManager implementations should use it
@@ -63,6 +64,7 @@ class FileSystemService implements IFileSystemService, InitializingBean {
      *
      * This can be either the current container, or a new one, depending on the number of models we already have.
      */
+    @Profiled(tag = "fileSystemService.findCurrentModelContainer")
     public String findCurrentModelContainer() {
         final int MODEL_COUNT
         File[] dirs = getModelFolders(new File(currentModelContainer))

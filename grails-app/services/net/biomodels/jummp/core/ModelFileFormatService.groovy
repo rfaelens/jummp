@@ -5,6 +5,7 @@ import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.model.Revision
 import java.util.List
+import org.perf4j.aop.Profiled
 
 /**
  * @short Service to handle Model files.
@@ -31,7 +32,7 @@ class ModelFileFormatService {
      */
     private final Map<String, String> services = new HashMap<String, String>()
 
-    
+    @Profiled(tag = "modelFileFormatService.inferModelFormat")
     ModelFormatTransportCommand inferModelFormat(List<File> modelFiles) {
         if (!modelFiles) {
             return null
@@ -58,6 +59,7 @@ class ModelFileFormatService {
      * @param name A human readable name of the ModelFormat to be used in UIs.
      * @return Existing or new ModelFormat represented in a ModelFormatTransportCommand
      */
+    @Profiled(tag = "modelFileFormatService.registerModelFormat")
     ModelFormatTransportCommand registerModelFormat(String identifier, String name) {
         ModelFormat modelFormat = ModelFormat.findByIdentifier(identifier)
         if (modelFormat) {
@@ -77,6 +79,7 @@ class ModelFileFormatService {
      * @param service The name of the service which handles the ModelFormat.
      * @throws IllegalArgumentException if the @p format has not been registered yet
      */
+    @Profiled(tag = "modelFileFormatService.handleModelFormat")
     void handleModelFormat(ModelFormatTransportCommand format, String service) {
         ModelFormat modelFormat = ModelFormat.get(format.id)
         if (!modelFormat) {
@@ -85,6 +88,7 @@ class ModelFileFormatService {
         services.put(modelFormat.identifier, service)
     }
     
+
     boolean validate(final List<File> model, String formatId) {
         return validate(model, ModelFormat.findByIdentifier(formatId))
     }

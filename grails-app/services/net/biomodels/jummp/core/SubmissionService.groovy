@@ -8,6 +8,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
+import org.perf4j.aop.Profiled
 
 /**
  * Service that provides model building functionality to a wizard-style model
@@ -56,6 +57,7 @@ class SubmissionService {
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          * @param modifications     a Map containing the existing files in the model, to be modified
          */
+        @Profiled(tag = "submissionService.handleFileUpload")
         void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
             handleModifications(workingMemory, modifications)
             if (workingMemory.containsKey("submitted_mains"))
@@ -79,6 +81,7 @@ class SubmissionService {
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          * @param modifications     a Map containing the existing files in the model, to be modified
          */
+        @Profiled(tag = "submissionService.storeRFTC")
         protected void storeRFTC(Map<String,Object> workingMemory, List<RFTC> tobeAdded) {
             if (workingMemory.containsKey("repository_files")) {
                 (workingMemory.get("repository_files") as List<RFTC>).addAll(tobeAdded)
@@ -103,6 +106,7 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
+        @Profiled(tag = "submissionService.inferModelFormatType")
         void inferModelFormatType(Map<String, Object> workingMemory) {
             MFTC format=modelFileFormatService.inferModelFormat(getFilesFromMemory(workingMemory, true))
             if (format) {
@@ -122,6 +126,7 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
+        @Profiled( tag = "submissionService.storeTCs")
         protected void storeTCs(Map<String,Object> workingMemory, MTC model, RTC revision) {
              workingMemory.put("ModelTC", model)
              workingMemory.put("RevisionTC", revision)
@@ -139,6 +144,7 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
+        @Profiled(tag = "submissionService.updateRevisionComments")
         protected void updateRevisionFromFiles(Map<String,Object> workingMemory) {
             System.out.println("UPDATING REVISION OBJECTS!!")
             RTC revision = workingMemory.get("RevisionTC") as RTC
@@ -155,6 +161,7 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
+        @Profiled(tag = "submissionService.inferModelInfo")
         void inferModelInfo(Map<String,Object> workingMemory) {
             if (!workingMemory.containsKey("RevisionTC")) {
                 createTransportObjects(workingMemory)
@@ -168,6 +175,7 @@ class SubmissionService {
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          * @param modifications     a Map containing the user's modifications to the model information we extracted.
          */
+        @Profiled(tag = "submissionService.refineModelInfo")
         void refineModelInfo(Map<String,Object> workingMemory, Map<String,Object> modifications) {
             RTC revision=workingMemory.get("RevisionTC") as RTC
             if (revision.name == modifications.get("new_name") as String) {
@@ -200,6 +208,7 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
+        @Profiled(tag = "submissionService.handleSubmission")
         void handleSubmission(Map<String,Object> workingMemory) {
             try {
                 completeSubmission(workingMemory)
@@ -217,12 +226,13 @@ class SubmissionService {
          **/
         protected abstract void completeSubmission(Map<String, Object> workingMemory);
 
-       /**
+        /**
          * Purpose Remove intermediate files from disk
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
-         void cleanup(Map<String,Object> workingMemory) {
+        @Profiled(tag = "submissionService.cleanup")
+        void cleanup(Map<String,Object> workingMemory) {
             try
             {
                 List<RFTC> repoFiles = getRepFiles(workingMemory)
@@ -248,6 +258,7 @@ class SubmissionService {
          * @param additionalFiles   a Map comprising any supplementary files and corresponding descriptions
          *                          that are also part of the model that is submitted.
          */
+        @Profiled(tag = "submissionService.createRFTCList")
         protected List<RFTC> createRFTCList(List<File> mainFiles, Map<File,String> additionalFiles) {
             List<RFTC> returnMe=new LinkedList<RFTC>()
             mainFiles.each {
@@ -291,6 +302,7 @@ class SubmissionService {
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          * @param modifications     a Map containing the existing files in the model, to be modified
          */
+        @Profiled(tag = "submissionService.NewModelStateMachine.handleModifications")
         protected void handleModifications(Map<String, Object> workingMemory, Map<String, Object> modifications) {
             
         }
@@ -302,6 +314,7 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
+        @Profiled(tag = "submissionService.NewModelStateMachine.performValidation"
         void performValidation(Map<String,Object> workingMemory) {
             List<File> modelFiles=getFilesFromMemory(workingMemory, false)
             modelFiles.each {
@@ -334,6 +347,7 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
+        @Profiled(tag = "submissionService.NewModelStateMachine.createTransportObjects")
         protected void createTransportObjects(Map<String,Object> workingMemory) {
             MTC model=new MTC() //no need for it currently, later on, store publication details
             RTC revision=new RTC(files: getRepFiles(workingMemory), 
@@ -371,6 +385,7 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
+        @Profiled(tag = "submissionService.NewModelStateMachine.completeSubmission")
         void completeSubmission(Map<String,Object> workingMemory) {
             List<RFTC> repoFiles = getRepFiles(workingMemory)
             RTC revision=workingMemory.get("RevisionTC") as RTC
@@ -395,6 +410,7 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
+        @Profiled(tag = "submissionService.NewRevisionStateMachine.initialise")
         void initialise(Map<String, Object> workingMemory) {
             //fetch files from repository, make RFTCs out of them
             RTC rev=workingMemory.get("LastRevision") as RTC
@@ -413,6 +429,7 @@ class SubmissionService {
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          * @param modifications     a Map containing the existing files in the model, to be modified
          */
+        @Profiled(tag = "submissionService.NewRevisionStateMachine.handleModifications")
         protected void handleModifications(Map<String, Object> workingMemory, Map<String, Object> modifications) {
             // handle removal of files from repository
         }
@@ -423,6 +440,7 @@ class SubmissionService {
          * If the files include additional files, set parameter in the working memory
          * to ensure that they are reprocessed (validation etc)
          * */
+        @Profiled(tag = "submissionService.NewRevisionStateMachine.handleFileUpload")
         void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
             if (workingMemory.containsKey("submitted_mains")) {
                 workingMemory.put("reprocess_files", true)
@@ -438,6 +456,7 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
+        @Profiled(tag = "submissionService.NewRevisionStateMachine.inferModelFormatType")
         void inferModelFormatType(Map<String, Object> workingMemory) {
             if (workingMemory.containsKey("reprocess_files")) {
                 System.out.println("Inferring model format")
@@ -452,6 +471,7 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
+        @Profiled(tag = "submissionService.NewRevisionStateMachine.performValidation")
         void performValidation(Map<String,Object> workingMemory) {
             if (workingMemory.containsKey("reprocess_files")) {
                 System.out.println("Revalidating! ")
@@ -465,12 +485,12 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
+        @Profiled(tag = "submissionService.NewRevisionStateMachine.createTransportObjects")
         protected void createTransportObjects(Map<String,Object> workingMemory) {
             RTC revision=workingMemory.remove("LastRevision") as RTC
             System.out.println("RTC: "+revision.getProperties())
             if (workingMemory.containsKey("reprocess_files")) {
-                revision.format=ModelFormat.
-                                            findByIdentifier(workingMemory.get("model_type") as String).
+                revision.format=ModelFormat.findByIdentifier(workingMemory.get("model_type") as String).
                                             toCommandObject()
             }
             else {
@@ -496,6 +516,7 @@ class SubmissionService {
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          * @param modifications     the revision comments (and any other info to be updated)
          */
+        @Profiled(tag = "submissionService.NewRevisionStateMachine.updateRevisionComments")
         void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {
             RTC revision=workingMemory.get("RevisionTC") as RTC
             revision.comment=modifications.get("RevisionComments")
@@ -504,6 +525,7 @@ class SubmissionService {
         /* Submits the revision to modelservice 
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
+        @Profiled(tag = "submissionService.NewRevisionStateMachine.completeSubmission")
         void completeSubmission(Map<String,Object> workingMemory) {
             RTC revision=workingMemory.get("RevisionTC") as RTC
             System.out.println("About to submit revision: "+revision.getProperties())
@@ -520,6 +542,7 @@ class SubmissionService {
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      * @param modifications
      */
+    @Profiled(tag = "submissionService.initialise")
     void initialise(Map<String, Object> workingMemory) {
         /*
          * The second parameter needs to contain the following:
@@ -540,6 +563,7 @@ class SubmissionService {
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      * @param modifications
      */
+    @Profiled(tag = "submissionService.handleFileUpload")
     void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
         /*
          * The second parameter needs to contain the following:
@@ -558,6 +582,7 @@ class SubmissionService {
      *
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      */
+    @Profiled(tag = "submissionService.inferModelFormatType")
     void inferModelFormatType(Map<String, Object> workingMemory) {
         getStrategyFromContext(workingMemory).inferModelFormatType(workingMemory)
     }
@@ -568,6 +593,7 @@ class SubmissionService {
      *
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      */
+    @Profiled(tag = "submissionService.performValidation")
     void performValidation(Map<String, Object> workingMemory) throws Exception {
         /*
          * Throws an exception if files are not valid, or do not comprise a valid model
@@ -581,6 +607,7 @@ class SubmissionService {
      *
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      */
+    @Profiled(tag = "submissionService.inferModelInfo")
     void inferModelInfo(Map<String, Object> workingMemory) {
         /* create RevisionTC, ModelTC, populate fields */
           getStrategyFromContext(workingMemory).inferModelInfo(workingMemory)
@@ -593,6 +620,7 @@ class SubmissionService {
      *
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      */
+    @Profiled(tag = "submissionService.refineModelInfo")
     void refineModelInfo(Map<String, Object> workingMemory, Map<String, Object> modifications) {
         /* 
          */
@@ -605,6 +633,7 @@ class SubmissionService {
      *
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      */
+    @Profiled(tag = "submissionService.updateRevisionComments")
     void updateRevisionComments(Map<String, Object> workingMemory, Map<String, String> modifications) {
         getStrategyFromContext(workingMemory).updateRevisionComments(workingMemory, modifications)
     }
@@ -614,6 +643,7 @@ class SubmissionService {
      *
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      */
+    @Profiled(tag = "submissionService.handleSubmission")
     void handleSubmission(Map<String,Object> workingMemory) {
         getStrategyFromContext(workingMemory).handleSubmission(workingMemory)
     }
@@ -624,6 +654,7 @@ class SubmissionService {
      *
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      */
+    @Profiled(tag = "submissionService.cleanup")
     void cleanup(Map<String,Object> workingMemory) {
         getStrategyFromContext(workingMemory).cleanup(workingMemory)
     }

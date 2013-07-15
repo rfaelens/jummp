@@ -20,6 +20,7 @@ import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.io.FileUtils
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
+import org.perf4j.log4j.Log4JStopWatch
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PostFilter
@@ -40,7 +41,7 @@ import org.springframework.security.core.userdetails.UserDetails
  * @see Revision
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @date 20130625
+ * @date 20130715
  */
 @SuppressWarnings("GroovyUnusedCatchParameter")
 class ModelService {
@@ -99,7 +100,8 @@ class ModelService {
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllModels")
-    public List<Model> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn, String filter = null) {
+    public List<Model> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn,
+    			String filter = null) {
         if (offset < 0 || count <= 0) {
             // safety check
             return []
@@ -491,10 +493,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         return model.publication
     }
 
-    
-    
-    
-    
     /**
     * Creates a new Model and stores it in the VCS.
     *
@@ -537,7 +535,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
 //    @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostLogging(LoggingEventType.UPDATE)
-    @Profiled(tag="modelService.addRevisionAsList")
+    @Profiled(tag="modelService.addValidatedRevision")
     public Revision addValidatedRevision(final List<RepositoryFileTransportCommand> repoFiles, RevisionTransportCommand rev) throws ModelException {
         // TODO: the method should be thread safe, add a lock
         if (!rev.model) {
@@ -558,6 +556,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         Model model=getModel(rev.model.id)
         Revision revision = new Revision(model: model, name: rev.name, description: rev.description, comment: rev.comment, uploadDate: new Date(), owner: currentUser,
                 minorRevision: false, validated:rev.validated, format: ModelFormat.findByIdentifier(rev.format.identifier))
+        def stopWatch = new Log4JStopWatch("modelService.addValidatedRevision.rftcCreation")
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
             final String fileName = rf.path.split(File.separator).last()
@@ -583,8 +582,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 domainObjects.add(domain)
             }
         }
-
+		stopWatch.lap("RepositoryFileTransportCommands created.")
         // save the new model in the database
+		stopWatch.setTag("modelService.addValidatedRevision.persistModel")
         try {
             String vcsId = vcsService.updateModel(model, modelFiles, revision.comment)
             revision.vcsId = vcsId
@@ -592,6 +592,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             revision.discard()
             domainObjects.each{ it.discard() }
             log.error("Exception occurred during uploading a new Model Revision to VCS: ${e.getMessage()}")
+            stopWatch.stop()
             throw new ModelException(model.toCommandObject(),
                 "Could not store new Model Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} in VCS", e)
         }
@@ -605,6 +606,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             model.addToRevisions(revision)
             //save repoFiles, revision and model in one go
             model.save(flush: true)
+            stopWatch.lap("Model persisted to the database.")
+            stopWatch.setTag("modelService.addValidatedRevision.grantPermissions")
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.READ)
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.DELETE)
@@ -615,16 +618,16 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.READ)
                 }
             }
+            stopWatch.stop()
             revision.refresh()
             executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
-            System.out.println(revision.errors)
-            
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
             final def m = model.toCommandObject()
             log.error("New Revision containing ${repoFiles.inspect()} for Model ${m} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")
+            stopWatch.stop()
             throw new ModelException(m, "Revision stored in VCS, but not in database")
         }
         return revision
@@ -650,6 +653,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.uploadValidatedModel")
     public Model uploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles, RevisionTransportCommand rev)
             throws ModelException {
+        def stopWatch = new Log4JStopWatch("modelService.uploadValidatedModel.catchDuplicate")
         // TODO: to support anonymous submissions this method has to be changed
         if (Model.findByName(rev.model.name)) {
             final ModelTransportCommand MODEL = Model.findByName(rev.model.name).toCommandObject()
@@ -658,6 +662,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             /*log.error(msg)
             throw new ModelException(rev.model, msg)*/
         }
+        stopWatch.lap("Finished checking for model duplicates.")
+        stopWatch.setTag("modelService.uploadValidatedModel.addFiles")
         Model model = new Model(name: rev.model.name)
         List<File> modelFiles = []
         for (rf in repoFiles) {
@@ -665,6 +671,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             final def f = new File(path)
             modelFiles.add(f)
         }
+        stopWatch.lap("Finished adding RepositoryFiles to the Model")
+        stopWatch.setTag("modelService.uploadValidatedModel.prepareVcsStorage")
         ModelFormat format=ModelFormat.findByIdentifier(rev.format.identifier)
 
         // vcs identifier is upload date + name - this should by all means be unique
@@ -721,7 +729,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 domainObjects.add(domain)
             }
         }
-
+        stopWatch.lap("Finished preparing what to store in the VCS.")
+        stopWatch.setTag("modelService.uploadValidatedModel.doVcsStorage")
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
         } catch (VcsException e) {
@@ -734,9 +743,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             errMsg.append("${model.errors.allErrors.inspect()}\n")
             errMsg.append("${revision.errors.allErrors.inspect()}\n")
             log.error(errMsg)
+            stopWatch.stop()
             throw new ModelException(model.toCommandObject(),
                 "Could not store new Model ${model.toCommandObject().properties} in VCS", e)
         }
+        stopWatch.lap(Finished importing the model into the VCS.)
+        stopWatch.setTag("modelService.uploadValidatedModel.gormValidation")
         domainObjects.each {
                revision.addToRepoFiles(it)
         }
@@ -753,6 +765,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     error.append("${model.errors.allErrors.inspect()}\n")
                     error.append("${revision.errors.allErrors.inspect()}\n")
                     log.error(error)
+                    stopWatch.stop()
                     throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data for ${model.name}", e)
                 }
             } else if (rev.model.publication &&
@@ -767,9 +780,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 msg.append("${model.errors.allErrors.inspect()}\n")
                 msg.append("${revision.errors.allErrors.inspect()}\n")
                 log.error(msg)
+                stopWatch.stop()
                 throw new ModelException(model.toCommandObject(), "New model does not validate")
             }
             model.save(flush: true)
+            stopWatch.lap("Finished GORM validation.")
+            stopWatch.setTag("modelService.uploadValidatedModel.grantPermissions")
             // let's add the required rights
             final String username = revision.owner.username
             aclUtilService.addPermission(model, username, BasePermission.ADMINISTRATION)
@@ -779,6 +795,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             aclUtilService.addPermission(revision, username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, username, BasePermission.DELETE)
             aclUtilService.addPermission(revision, username, BasePermission.READ)
+            stopWatch.stop()
             try {
                 if (!rev.model.publication) {
                     String annotation = getPubMedAnnotation(model)
@@ -801,12 +818,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             // broadcast event
             grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFiles))
         } else {
-            System.out.println(revision.errors)
             // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
             domainObjects.each {it.discard()}
             model.discard()
             log.error("New Model ${model.properties} with properties ${rev.model.properties} does not validate:${revision.errors.allErrors.inspect()}")
+            stopWatch.stop()
             throw new ModelException(model.toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
         }
         return model
@@ -829,6 +846,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.uploadModelAsList")
     public Model uploadModelAsList(final List<RepositoryFileTransportCommand> repoFiles, ModelTransportCommand meta)
             throws ModelException {
+        def stopWatch = new Log4JStopWatch("modelService.uploadModelAsList.sanityChecks")
         // TODO: to support anonymous submissions this method has to be changed
         if (Model.findByName(meta.name)) {
             final ModelTransportCommand MODEL = Model.findByName(meta.name).toCommandObject()
@@ -866,7 +884,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
             modelFiles.add(f)
         }
-        boolean valid=true
+        stopWatch.lap("Finished performing sanity checks.")
+        stopWatch.setTag("modelService.uploadModelAsList.prepareVcsStorage")
+        boolean valid = true
         ModelFormat format=ModelFormat.findByIdentifier(meta.format.identifier)
         if (!modelFileFormatService.validate(modelFiles, format)) {
             def err = "The files ${modelFiles.properties} do no comprise valid ${meta.format.identifier}"
@@ -924,6 +944,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the creation of model ${meta}.")
                 msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
                 log.error(msg)
+                stopWatch.stop()
                 throw new ModelException(meta, "The submission appears to contain invalid file ${fileName}. Please review it and try again.")
             } else {
                 domainObjects.add(domain)
@@ -942,9 +963,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             errMsg.append("${model.errors.allErrors.inspect()}\n")
             errMsg.append("${revision.errors.allErrors.inspect()}\n")
             log.error(errMsg)
+            stopWatch.stop()
             throw new ModelException(model.toCommandObject(),
                 "Could not store new Model ${model.toCommandObject().properties} in VCS", e)
         }
+        stopWatch.lap("Finished importing model in VCS.")
+        stopWatch.setTag("modelService.uploadModelAsList.gormValidation")
         domainObjects.each {
             revision.addToRepoFiles(it)
         }
@@ -961,6 +985,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     error.append("${model.errors.allErrors.inspect()}\n")
                     error.append("${revision.errors.allErrors.inspect()}\n")
                     log.error(error)
+                    stopWatch.stop()
                     throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data for ${model.name}", e)
                 }
             } else if (meta.publication &&
@@ -975,9 +1000,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 msg.append("${model.errors.allErrors.inspect()}\n")
                 msg.append("${revision.errors.allErrors.inspect()}\n")
                 log.error(msg)
+                stopWatch.stop()
                 throw new ModelException(model.toCommandObject(), "New model does not validate")
             }
             model.save(flush: true)
+            stopWatch.lap("Finished GORM validation.")
+            stopWatch.setTag("modelService.uploadModelAsList.grantPermissions")
             // let's add the required rights
             final String username = revision.owner.username
             aclUtilService.addPermission(model, username, BasePermission.ADMINISTRATION)
@@ -987,6 +1015,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             aclUtilService.addPermission(revision, username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, username, BasePermission.DELETE)
             aclUtilService.addPermission(revision, username, BasePermission.READ)
+            stopWatch.stop()
             try {
                 if (!meta.publication) {
                     String annotation = getPubMedAnnotation(model)
