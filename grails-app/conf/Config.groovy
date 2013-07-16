@@ -411,3 +411,12 @@ weceem.admin.prefix = 'wcm-admin'
 weceem.create.default.space = true
 weceem.default.space.template = "classpath:/weceem-jummp-default-space.zip"
 weceem.security.policy.path = jummp.security.cms.policy
+//resources plugin
+grails.resources.modules = {
+    style_biomodels {
+        resource url:'/css/biomodels.css' 
+    }
+    style_ddmore {
+        resource url:'/css/ddmore.css' 
+    }
+}
