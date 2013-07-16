@@ -1,50 +1,60 @@
 package net.biomodels.jummp.plugins.sbml
 
-import java.util.regex.Pattern
-import javax.xml.stream.XMLStreamException
+import net.biomodels.jummp.core.ISbmlService
 import net.biomodels.jummp.core.model.FileFormatService
+import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.plugins.sbml.SbmlCache
+import com.thoughtworks.xstream.converters.ConversionException
+
+import grails.util.Environment
+import java.util.regex.Pattern
+import javax.xml.stream.XMLInputFactory
+import javax.xml.stream.XMLStreamException
+import javax.xml.stream.XMLStreamReader
+import org.apache.commons.io.FileUtils
+import org.codehaus.groovy.grails.plugins.codecs.URLCodec
+import org.jdom.Document
+import org.jdom.Element
+import org.jdom.JDOMException
+import org.jdom.Namespace
+import org.jdom.input.SAXBuilder
+import org.jdom.output.XMLOutputter
+import org.jdom.xpath.XPath
+import org.perf4j.aop.Profiled
+import org.sbfc.converter.models.BioPaxModel
+import org.sbfc.converter.models.OctaveModel
+import org.sbfc.converter.models.SBMLModel
+import org.sbfc.converter.sbml2biopax.SBML2BioPAX_l3
+import org.sbfc.converter.sbml2dot.SBML2Dot
+import org.sbfc.converter.sbml2octave.SBML2Octave
+import org.sbml.jsbml.AlgebraicRule
+import org.sbml.jsbml.Annotation
+import org.sbml.jsbml.AssignmentRule
+import org.sbml.jsbml.CVTerm
+import org.sbml.jsbml.Compartment
+import org.sbml.jsbml.Event
+import org.sbml.jsbml.EventAssignment
+import org.sbml.jsbml.ExplicitRule
+import org.sbml.jsbml.FunctionDefinition
+import org.sbml.jsbml.ListOf
+import org.sbml.jsbml.Model
+import org.sbml.jsbml.Parameter
+import org.sbml.jsbml.QuantityWithUnit
+import org.sbml.jsbml.RateRule
+import org.sbml.jsbml.Reaction
+import org.sbml.jsbml.Rule
 import org.sbml.jsbml.SBMLDocument
 import org.sbml.jsbml.SBMLError
 import org.sbml.jsbml.SBMLReader
-import net.biomodels.jummp.core.model.RevisionTransportCommand
-import org.sbml.jsbml.Model
-import net.biomodels.jummp.core.ISbmlService
-import org.sbml.jsbml.ListOf
-import org.sbml.jsbml.Parameter
-import org.sbml.jsbml.Annotation
-import org.sbml.jsbml.QuantityWithUnit
-import org.sbml.jsbml.SpeciesReference
-import org.sbml.jsbml.SimpleSpeciesReference
-import org.sbml.jsbml.Reaction
-import org.sbml.jsbml.Event
-import org.sbml.jsbml.EventAssignment
-import org.sbml.jsbml.Symbol
-import org.sbml.jsbml.Rule
-import org.sbml.jsbml.RateRule
-import org.sbml.jsbml.AlgebraicRule
-import org.sbml.jsbml.AssignmentRule
-import org.sbml.jsbml.ExplicitRule
-import org.sbml.jsbml.Variable
-import org.perf4j.aop.Profiled
-import org.sbml.jsbml.FunctionDefinition
-import org.sbml.jsbml.SBO
-import org.sbml.jsbml.Compartment
-import org.sbml.jsbml.Species
-import org.sbml.jsbml.SBase
-import org.sbfc.converter.sbml2dot.SBML2Dot
-import org.sbfc.converter.sbml2octave.SBML2Octave
-import org.apache.commons.io.FileUtils
-import org.springframework.beans.factory.InitializingBean
-import grails.util.Environment
-import org.codehaus.groovy.grails.plugins.codecs.URLCodec
-import org.sbml.jsbml.CVTerm
-import org.sbfc.converter.models.SBMLModel
-import org.sbfc.converter.models.OctaveModel
 import org.sbml.jsbml.SBMLWriter
-import org.sbfc.converter.sbml2biopax.SBML2BioPAX_l3
-import org.sbfc.converter.models.BioPaxModel
-import com.thoughtworks.xstream.converters.ConversionException
-import net.biomodels.jummp.plugins.sbml.SbmlCache
+import org.sbml.jsbml.SBO
+import org.sbml.jsbml.SBase
+import org.sbml.jsbml.SimpleSpeciesReference
+import org.sbml.jsbml.Species
+import org.sbml.jsbml.SpeciesReference
+import org.sbml.jsbml.Symbol
+import org.sbml.jsbml.Variable
+import org.springframework.beans.factory.InitializingBean
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -209,22 +219,103 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         return false
     }
 
+    /**
+     * Extracts the name of a model from a list of SBML files.
+     *
+     * Note that all files with the exception of the first one are ignored.
+     * @param model A list of files in SBML format
+     * @return the name of the model or an empty string if no file is supplied.
+     */
     @Profiled(tag="SbmlService.extractName")
     public String extractName(final List<File> model) {
-        SBMLDocument doc = getDocumentFromFiles(model)
-        if (doc) {
-            return doc.model.getName()
+        if (!model) {
+            return ""
         }
-        return ""
+        String theName
+        def fileReader = new FileReader(model.first())
+        XMLInputFactory factory = XMLInputFactory.newInstance()
+        factory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.FALSE)
+        XMLStreamReader xmlReader
+        try {
+            xmlReader = factory.createXMLStreamReader(fileReader)
+            boolean found = false
+            while (xmlReader.hasNext() && !found) {
+                xmlReader.next()
+                if (xmlReader.startElement) {
+                    String result = processXmlElement(xmlReader)
+                    if (result) {
+                        theName = result
+                        found = true
+                    } else {
+                        xmlReader.next()
+                    }
+                }
+            }
+        } catch (XMLStreamException e) {
+            def errorMsg = new StringBuffer("Error while extracting the name from ${model.inspect()}. ")
+            errorMsg.append("Offending file ${model.first().properties} caused ${e.message}.\n")
+            log.error (errorMsg.toString(), e)
+        } finally {
+            xmlReader?.close()
+            fileReader?.close()
+            return theName.toString()
+        }
     }
 
+    /**
+     * Extracts the SBML model notes.
+     *
+     * Note that all files with the exception of the first one are ignored.
+     * @param model A list of files in SBML format
+     * @return the description of the model or an empty string if no file is supplied.
+     */
     @Profiled(tag="SbmlService.extractDescription")
     public String extractDescription(final List<File> model) {
-        SBMLDocument doc = getDocumentFromFiles(model)
-        if (doc) {
-            return doc.model.notesString
+        if (!model) {
+            def errMsg = new StringBuffer("Cannot extract the description from undefined file ${model.properties}")
+            log.warn errMsg.toString()
+            return ""
         }
-        return ""
+        def description = new StringBuffer()
+        def nsList = [ "http://www.sbml.org/sbml/level3/version1/core",
+                        "http://www.sbml.org/sbml/level2/version4",
+                        "http://www.sbml.org/sbml/level2/version3",
+                        "http://www.sbml.org/sbml/level2/version2",
+                        "http://www.sbml.org/sbml/level2",
+                        "http://www.sbml.org/sbml/level1"
+        ]
+        try {
+            // find the namespace without loading the file
+            def builder = new SAXBuilder()
+            Document doc = builder.build(model.first())
+
+            for (String namespace: nsList) {
+                Namespace ns = Namespace.getNamespace("ns", namespace)
+                XPath xpath = XPath.newInstance("/ns:sbml/ns:model/ns:notes")
+                xpath.addNamespace(ns)
+                List<Element> noteElements = xpath.selectNodes(doc)
+                if (! noteElements.isEmpty()) {
+                    for (Element elt: noteElements) {
+                        // required step as 'notes' contains further XML tags
+                        XMLOutputter xmlOut = new XMLOutputter()
+                        description.append(xmlOut.outputString(elt))
+                    }
+                    // no need to try other namespaces
+                    break
+                }
+            }
+        } catch (JDOMException e) {
+            def errMsg = new StringBuffer("Exception encountered while extracting description from ${model.inspect()}")
+            errMsg.append(": ${e.message}")
+            log.error(errMsg.toString(), e)
+            return ""
+        } catch (IOException e) {
+            def errMsg = new StringBuffer("IOException encountered while extracting description from ${model.inspect()}")
+            errMsg.append(": ${e.message}")
+            log.error(errMsg.toString(), e)
+            return ""
+        }
+        return description.toString()
     }
 
     @Profiled(tag="SbmlService.getMetaId")
@@ -746,6 +837,13 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             biopaxConverter = new SBML2BioPAX_l3()
         }
         return biopaxConverter
+    }
+
+    private String processXmlElement(XMLStreamReader reader) {
+        if ("model".equals(reader.getLocalName())) {
+            return reader.getAttributeValue(null, "name")
+        }
+        return null
     }
 
     /**
