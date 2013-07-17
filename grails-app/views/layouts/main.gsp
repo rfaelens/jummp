@@ -6,7 +6,7 @@
     <r:script>
         $.appName = "${grailsApplication.metadata["app.name"]}";
     </r:script>
-    <r:require module="style_${grailsApplication.config.jummp.branding.deployment}"/>
+    <r:require module="branding_style"/>
     <r:require module="core"/>
     <r:layoutResources/>
     <g:layoutHead/>
