@@ -1,10 +1,11 @@
 package net.biomodels.jummp.core
 
-import org.springframework.security.access.prepost.PreAuthorize
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsManager
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
+import org.perf4j.aop.Profiled
+import org.springframework.security.access.prepost.PreAuthorize
 
 /**
  * @short Service providing access to the version control system.
@@ -43,6 +44,7 @@ class VcsService {
     * @throws VcsException passes along the VcsException thrown by VcsManager
     **/
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
+    @Profiled(tag = "vcsService.updateModel")
     String updateModel(final Model model, final List<File> files, final String commitMessage) throws VcsException {
         if (!isValid()) {
             throw new VcsException("Version Control System is not valid")
@@ -56,6 +58,7 @@ class VcsService {
     }
 
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
+    @Profiled(tag = "vcsService.updateModel")
     String updateModel(final Model model, final File file, final String commitMessage) throws VcsException {
         return updateModel(model, [file], commitMessage);
     }
@@ -69,6 +72,7 @@ class VcsService {
      * @throws VcsException passes along the VcsException thrown by VcsManager
      */
     @PreAuthorize("hasRole('ROLE_USER')")
+    @Profiled(tag = "vcsService.importModel")
     String importModel(final Model model, final List<File> files) throws VcsException {
         if (!isValid()) {
             throw new VcsException("Version Control System is not valid")
@@ -87,6 +91,7 @@ class VcsService {
      * @throws VcsException passes along the VcsException thrown by VcsManager
      */
     @PreAuthorize("hasRole('ROLE_USER')")
+    @Profiled(tag = "vcsService.importModel")
     String importModel(final Model model, final File file) throws VcsException {
         return importModel(model, [file])
     }
@@ -99,6 +104,7 @@ class VcsService {
      * @throws VcsException passes along the VcsException thrown by VcsManager
      */
     @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
+    @Profiled(tag = "vcsService.retrieveFiles")
     List<File> retrieveFiles(final Revision revision) throws VcsException {
         if (!isValid()) {
             throw new VcsException("Version Control System is not valid")

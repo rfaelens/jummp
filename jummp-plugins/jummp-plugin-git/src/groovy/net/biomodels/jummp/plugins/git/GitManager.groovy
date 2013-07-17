@@ -1,22 +1,23 @@
 package net.biomodels.jummp.plugins.git
 
+import java.util.LinkedHashMap;
+import java.util.List
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
-import java.util.concurrent.ConcurrentHashMap
 import net.biomodels.jummp.core.vcs.*
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.AddCommand
 import org.eclipse.jgit.api.Git
-import java.util.List
 import org.eclipse.jgit.api.InitCommand
-import java.util.LinkedHashMap;
 import org.eclipse.jgit.lib.Config
 import org.eclipse.jgit.lib.ConfigConstants
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import java.util.UUID
+import org.perf4j.aop.Profiled
 
 /**
  * @short GitManager provides the interface to a local git clone.
@@ -87,10 +88,12 @@ class GitManager implements VcsManager {
      * Initialises the GitManager. Sets the exchangedirectory for temporary
      * storage of model files
      **/
+    @Profiled(tag = "gitManager.init")
     public void init(File exchangeDirectory) {
         this.exchangeDirectory = exchangeDirectory
     }
 
+    @Profiled(tag = "gitManager.createModel")
     public String createModel(File modelDirectory, List<File> modelFiles, String commit) {
         //FIXME this is meant to do Git-specific initialisation of the repository
         //then execute the same logic as importModel(modelDirectory, modelFiles, commit)
@@ -105,6 +108,7 @@ class GitManager implements VcsManager {
      * the model directory lock
      * @param modelDirectory The directory to lock
      */
+    @Profiled(tag = "gitManager.lockModelRepository")
     private void lockModelRepository(File modelDirectory)
     {
         if (!locks.containsKey(modelDirectory.name))
@@ -122,6 +126,7 @@ class GitManager implements VcsManager {
      * the lock is removed from the locks container
      * @param modelDirectory The directory to unlock
      */
+    @Profiled(tag = "gitManager.unlockModelRepository")
     private void unlockModelRepository(File modelDirectory)
     {
         ReentrantLock lock=locks.get(modelDirectory.name)
@@ -137,7 +142,7 @@ class GitManager implements VcsManager {
      * structures.
      * @param modelDirectory The model directory
      */
-
+    @Profiled(tag = "gitManager.initRepository")
     private void initRepository(File modelDirectory) {
         lockModelRepository(modelDirectory)
         try {
@@ -192,6 +197,7 @@ class GitManager implements VcsManager {
      * Equivalent to running git init on the directory supplied.
      * @param modelDirectory The model directory
      **/
+    @Profiled(tag = "gitManager.createGitRepo")
     private Git createGitRepo(File directory) {
         Git git=null;
         InitCommand initCommand = Git.init();
@@ -209,6 +215,7 @@ class GitManager implements VcsManager {
      * @param files A list of files to be put into the repository
      * @param commitMessage The commit message for this revision
      **/
+    @Profiled(tag = "gitManager.updateModel")
     public String updateModel(File modelDirectory, List<File> files, String commitMessage) {
         String revision = null
         lockModelRepository(modelDirectory)
@@ -231,11 +238,11 @@ class GitManager implements VcsManager {
      * @param modelDirectory The model directory
      * @param files A list of files to be put into the repository
      **/
+    @Profiled(tag = "gitManager.updateModel")
     public String updateModel(File modelDirectory, List<File> files) {
         return updateModel(modelDirectory, files, "Update of ${modelDirectory.name}")
     }
-    
-    
+
     /*
      * Convenience function for copying files from a given directory
      * to exchange, and passing the file objects back
@@ -243,6 +250,7 @@ class GitManager implements VcsManager {
      * @param modelDirectory The model directory where files are to be copied from
      * @param addHere a list object where the created file objects are stored
      **/
+    @Profiled(tag = "gitManager.downloadFiles")
     private void downloadFiles(File modelDirectory, List<File> addHere)
     {
         File[] repFiles=modelDirectory.listFiles();
@@ -267,6 +275,7 @@ class GitManager implements VcsManager {
      * Same as calling retrieveModel(modelDirectory, null)
      * @param modelDirectory The model directory
      **/
+    @Profiled(tag = "gitManager.retrieveModel")
     public List<File> retrieveModel(File modelDirectory)
     {
         return retrieveModel(modelDirectory, null);
@@ -283,6 +292,7 @@ class GitManager implements VcsManager {
      * @param modelDirectory The model directory
      * @param revision The revision of the model requested
      **/
+    @Profiled(tag = "gitManager.retrieveModel")
     public List<File> retrieveModel(File modelDirectory, String revision) {
         List<File> returnedFiles = new LinkedList<File>()
         lockModelRepository(modelDirectory)
@@ -321,6 +331,7 @@ class GitManager implements VcsManager {
      * id associated with each commit to the returned list.
      * @param modelDirectory The model directory
      **/
+    @Profiled(tag = "gitManager.getRevisions")
     public List<String> getRevisions(File modelDirectory)
     {
         List<String> myList=new LinkedList<String>();
@@ -348,6 +359,7 @@ class GitManager implements VcsManager {
      * current and compiling.
      * @param modelDirectory The model directory
      **/
+    @Profiled(tag = "gitManager.updateWorkingCopy")
     public void updateWorkingCopy(File modelDirectory) {
         lockModelRepository(modelDirectory)
         try {
@@ -375,6 +387,7 @@ class GitManager implements VcsManager {
      * @param files The files to copy into the directory
      * @param commitMessage The commit message 
      */
+    @Profiled(tag = "gitManager.handleAddition")
     private String handleAddition(File modelDirectory, List<File> files, String commitMessage) {
         String revision
         try {
