@@ -414,9 +414,9 @@ weceem.security.policy.path = jummp.security.cms.policy
 //resources plugin
 grails.resources.modules = {
     style_biomodels {
-        resource url:'/css/biomodels.css' 
+        resource url:'/css/biomodels.less' 
     }
     style_ddmore {
-        resource url:'/css/ddmore.css' 
+        resource url:'/css/ddmore.less' 
     }
 }
