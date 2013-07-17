@@ -123,7 +123,7 @@ class ModelController {
                 }
 
                 if (IS_DEBUG_ENABLED) {
-                    if (mainMultipartList.size() == 1) {
+                    if (mainMultipartList?.size() == 1) {
                         log.debug("New submission started.The main file supplied is ${mainMultipartList.properties}.")
                     } else {
                         log.debug("New submission started. Main files: ${mainMultipartList.inspect()}.")
