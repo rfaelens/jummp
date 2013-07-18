@@ -142,7 +142,8 @@ grails.project.dependency.resolution = {
         compile ":searchable:0.6.4"
         compile ":jquery-datatables:1.7.5"
         compile ":jquery-ui:1.8.24"
-
+	// Locale plugin
+	compile ":locale-variant:0.1"
         // default grails plugins
         compile ":hibernate:$grailsVersion"
         compile ":webflow:2.0.8.1"

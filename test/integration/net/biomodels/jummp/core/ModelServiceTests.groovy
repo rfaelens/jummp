@@ -32,8 +32,8 @@ class ModelServiceTests extends JummpIntegrationTest {
     @Before
     void setUp() {
         def container = new File("target/vcs/git/ggg/")
-        assertTrue(container.mkdirs())
-        assertTrue(new File("target/vcs/exchange/").mkdirs())
+        container.mkdirs()
+        new File("target/vcs/exchange/").mkdirs()
         fileSystemService.currentModelContainer = container.getCanonicalPath()
         fileSystemService.root = container.getParentFile()
         createUserAndRoles()
@@ -41,8 +41,12 @@ class ModelServiceTests extends JummpIntegrationTest {
 
     @After
      void tearDown() {
-        FileUtils.deleteDirectory(new File("target/vcs/git"))
-        FileUtils.deleteDirectory(new File("target/vcs/exchange"))
+        try {
+     	     FileUtils.deleteDirectory(new File("target/vcs/git"))
+     	     FileUtils.deleteDirectory(new File("target/vcs/exchange"))
+     	}
+     	catch(Exception ignore) {
+     	}
         modelService.vcsService.vcsManager = null
         modelService.modelFileFormatService = modelFileFormatService
     }

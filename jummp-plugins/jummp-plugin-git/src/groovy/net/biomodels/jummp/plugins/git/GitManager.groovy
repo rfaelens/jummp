@@ -17,6 +17,10 @@ import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import java.util.UUID
+import java.nio.channels.FileChannel
+import java.nio.channels.FileLock
+import java.io.RandomAccessFile
+import java.nio.ByteBuffer
 
 /**
  * @short GitManager provides the interface to a local git clone.
@@ -40,7 +44,8 @@ class GitManager implements VcsManager {
     // uid for generating unique checkout directory names
     private static final AtomicInteger uid = new AtomicInteger(0)
     // locks to ensure model directories are not accessed concurrently
-    private final ConcurrentHashMap<String, ReentrantLock> locks= new ConcurrentHashMap<String, ReentrantLock>();
+    private final ConcurrentHashMap<String, ReentrantLock> locks= new ConcurrentHashMap<String, ReentrantLock>()
+    private final ConcurrentHashMap<String, FileLock> diskLocks=new ConcurrentHashMap<String, FileLock>()
     // cache of initialised repositories
     private final Map<File, Git>  initedRepositories=Collections.synchronizedMap(new LruCache<File, Git>(20));
     // exchange directory
@@ -97,6 +102,46 @@ class GitManager implements VcsManager {
         return ""
     }
     
+    private FileChannel getRepositoryChannel(File modelDirectory) {
+        File repositoryFile=new File(modelDirectory, ".git/.locker.txt")
+        FileChannel channel=new RandomAccessFile(repositoryFile, "rw").getChannel();
+        return channel
+    }
+    
+    private FileLock obtainExclusiveLock(File modelDirectory) {
+        FileLock lock=null
+        long accumulate=0
+        try
+        {
+            while (accumulate<300000) {
+                try
+                {
+                    FileChannel channel=getRepositoryChannel(modelDirectory)
+                    lock=channel.tryLock()
+                    //Write something to file, otherwise file isnt really locked
+                    channel.write(ByteBuffer.wrap("\n".getBytes())) 
+                }
+                catch(Exception ignore) {
+                    ignore.printStackTrace()
+                }
+                if (lock) {
+                    return lock
+                }
+                System.out.println("Could not get lock.. waiting")
+                Thread.sleep(100)
+                accumulate+=100
+            }
+            //lock=channel.lock()
+        }
+        catch(Exception e) {
+            e.printStackTrace()
+        }
+        if (!lock) {
+            throw new Exception("Error obtaining disk based lock, waited "+accumulate+" ms")
+        }
+        return lock
+    }
+    
     /**
      * Lock a model repository
      *
@@ -113,6 +158,8 @@ class GitManager implements VcsManager {
             locks.put(modelDirectory.name, lock)
         }
         locks.get(modelDirectory.name).lock();
+        FileLock fileLock=obtainExclusiveLock(modelDirectory)
+        diskLocks.put(modelDirectory.name, fileLock)
     }
     
     /**
@@ -126,7 +173,17 @@ class GitManager implements VcsManager {
     {
         ReentrantLock lock=locks.get(modelDirectory.name)
         if (!lock.hasQueuedThreads()) locks.remove(modelDirectory);
+        FileLock removing=diskLocks.remove(modelDirectory.name)
+        new File(modelDirectory, ".git/.locker.txt").setText("")
+        removing.release()
         lock.unlock()
+    }
+    
+    private void ensureRepInited(File modelDirectory) {
+        if (!initedRepositories.containsKey(modelDirectory)) {
+            if (exchangeDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
+            initRepository(modelDirectory);
+        }
     }
     
     /**
@@ -139,7 +196,6 @@ class GitManager implements VcsManager {
      */
 
     private void initRepository(File modelDirectory) {
-        lockModelRepository(modelDirectory)
         try {
             if (initedRepositories.containsKey(modelDirectory)) {
                 //throw new VcsAlreadyInitedException()
@@ -184,7 +240,6 @@ class GitManager implements VcsManager {
             initedRepositories.put(modelDirectory,git);
             
         } finally {
-            unlockModelRepository(modelDirectory)
         }
     }
 
@@ -210,13 +265,17 @@ class GitManager implements VcsManager {
      * @param commitMessage The commit message for this revision
      **/
     public String updateModel(File modelDirectory, List<File> files, String commitMessage) {
+        ensureRepInited(modelDirectory)
+        files.each {
+            if (it.getName()== "small_file_test") {
+                System.out.println("small file: "+Thread.currentThread().getId())
+                List<String> lines = it.readLines()
+                System.out.println(lines)
+            }
+        }
         String revision = null
         lockModelRepository(modelDirectory)
         try {
-            if (!initedRepositories.containsKey(modelDirectory)) {
-                if (exchangeDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
-                initRepository(modelDirectory);
-            }
             revision = handleAddition(modelDirectory, files, commitMessage)
         } finally {
             unlockModelRepository(modelDirectory)
@@ -284,13 +343,10 @@ class GitManager implements VcsManager {
      * @param revision The revision of the model requested
      **/
     public List<File> retrieveModel(File modelDirectory, String revision) {
+        ensureRepInited(modelDirectory)
         List<File> returnedFiles = new LinkedList<File>()
         lockModelRepository(modelDirectory)
         try {
-            if (!initedRepositories.containsKey(modelDirectory)) {
-                if (exchangeDirectory==null) throw new VcsException("init error: exchange directory cannot be null")
-                initRepository(modelDirectory);
-            }
             if (revision == null) {
                 // return current HEAD revision
                 downloadFiles(modelDirectory, returnedFiles);
@@ -299,8 +355,13 @@ class GitManager implements VcsManager {
                 throw new VcsException("Revision '$revision' not found in model directory '$modelDirectory' !");
                 try {
                     // need to checkout in a temporary branch
-                    String branchName = "tempa${uid.getAndIncrement()}"
-                    initedRepositories.get(modelDirectory).checkout().setName(branchName).setCreateBranch(true).setStartPoint(revision).call()
+                    String branchName = UUID.randomUUID()
+                    initedRepositories.get(modelDirectory).
+                                       checkout().
+                                       setName(branchName).
+                                       setCreateBranch(true).
+                                       setStartPoint(revision).
+                                       call()
                     downloadFiles(modelDirectory, returnedFiles);
                     initedRepositories.get(modelDirectory).checkout().setName("master").call()
                     initedRepositories.get(modelDirectory).branchDelete().setBranchNames(branchName).call()
@@ -323,8 +384,8 @@ class GitManager implements VcsManager {
      **/
     public List<String> getRevisions(File modelDirectory)
     {
+        ensureRepInited(modelDirectory)
         List<String> myList=new LinkedList<String>();
-        lockModelRepository(modelDirectory)
         try {
             Iterator<RevCommit> log=initedRepositories.get(modelDirectory).log().call().iterator();
             log.each
@@ -333,7 +394,6 @@ class GitManager implements VcsManager {
             }
         }
         finally {
-            unlockModelRepository(modelDirectory)
         }
         return myList
     }
@@ -349,12 +409,9 @@ class GitManager implements VcsManager {
      * @param modelDirectory The model directory
      **/
     public void updateWorkingCopy(File modelDirectory) {
+        ensureRepInited(modelDirectory)
         lockModelRepository(modelDirectory)
         try {
-            if (!initedRepositories.containsKey(modelDirectory)) {
-                if (exchangeDirectory==null) throw new IOException("not inited")
-                initRepository(modelDirectory);
-            }
             if (hasRemote) {
                 initedRepositories.get(modelDirectory).pull().call()
             }
@@ -378,7 +435,7 @@ class GitManager implements VcsManager {
     private String handleAddition(File modelDirectory, List<File> files, String commitMessage) {
         String revision
         try {
-            updateWorkingCopy(modelDirectory)
+            //updateWorkingCopy(modelDirectory)
             Git git = initedRepositories.get(modelDirectory);
             AddCommand add = git.add()
             files.each
@@ -389,9 +446,9 @@ class GitManager implements VcsManager {
             add.call()
             RevCommit commit = git.commit().setMessage(commitMessage).call()
             revision = commit.getId().getName()
-            if (hasRemote) {
+            /*if (hasRemote) {
                 git.push().call()
-            }
+            }*/
         } catch (Exception e) {
             e.printStackTrace();
             throw new IOException("Git command could not be executed", e)

@@ -174,7 +174,7 @@ class ModelController {
         transferFilesToService {
             action {
                     if (flow.workingMemory.remove("file_validation_error") as Boolean) {
-                        return GoBackToUploader()
+                    	    return GoBackToUploader()
                     }
                     if (flow.workingMemory.containsKey("UploadCommand")) {
                         //should this be in a separate action state?
@@ -219,7 +219,9 @@ class ModelController {
                     }
                     PerformValidation()
             }
-            on("GoBackToUploader").to "uploadFiles"
+            on("GoBackToUploader") {
+            	    flash.error="submission.upload.error.fileerror"
+            }.to "uploadFiles"
             on("PerformValidation").to "performValidation"
         }
         
@@ -253,7 +255,7 @@ class ModelController {
                 flash.showProceedWithoutValidationDialog = true
             }.to "uploadFiles"
             on("FilesNotValid") {
-                flash.showFileInvalidError = true
+                flash.error="submission.upload.error.fileerror"
             }.to "uploadFiles"
         }
         inferModelInfo {
