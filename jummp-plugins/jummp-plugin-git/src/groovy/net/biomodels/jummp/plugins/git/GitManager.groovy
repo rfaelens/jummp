@@ -37,7 +37,7 @@ import java.nio.ByteBuffer
  * GitManager is also not able to detect whether the model has been changed 
  * outside the class. It is important to let the instance of the GitManager be 
  * the only resource accessing the model repositories! 
- * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Martin GrÃ¤ÃŸlin <m.graesslin@dkfz-heidelberg.de>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class GitManager implements VcsManager {
@@ -123,11 +123,12 @@ class GitManager implements VcsManager {
                 }
                 catch(Exception ignore) {
                     ignore.printStackTrace()
+                    log.error(ignore.toString())
                 }
                 if (lock) {
                     return lock
                 }
-                System.out.println("Could not get lock.. waiting")
+                log.error("Could not get lock.. waiting "+accumulate)
                 Thread.sleep(100)
                 accumulate+=100
             }
@@ -176,6 +177,7 @@ class GitManager implements VcsManager {
         FileLock removing=diskLocks.remove(modelDirectory.name)
         new File(modelDirectory, ".git/.locker.txt").setText("")
         removing.release()
+        removing.channel().close()
         lock.unlock()
     }
     
