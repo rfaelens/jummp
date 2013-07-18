@@ -74,7 +74,9 @@ environments {
     }
 
 }
-
+//branding
+jummp.branding.deployment="biomodels" //used to select messages,and style if jummp.branding.style is not specified 
+jummp.branding.style="ddmore" //used to specify any other name for the css file
 // log4j configuration
 log4j = {
     // Example of changing the log pattern for the default console
@@ -310,11 +312,6 @@ if (!(jummpConfig.model.history.maxElements instanceof ConfigObject)) {
     jummp.model.history.maxElements = 10
 }
 
-// To specify the project using jummp, to customise messages e.g. biomodels/ddmore
-if (!(jummpConfig.jummp.branding.deployment instanceof ConfigObject)) {
-    jummp.branding.deployment = jummpConfig.jummp.branding.deployment
-}
-
 // For the appearance of the web front-end defines the color for internal usage
 if (!(jummpConfig.jummp.branding.internalColor instanceof ConfigObject)) {
     jummp.branding.internalColor = jummpConfig.jummp.branding.internalColor
@@ -414,11 +411,12 @@ weceem.security.policy.path = jummp.security.cms.policy
 //resources plugin
 grails.resources.modules = {
     branding_style {
-        if (!(jummpConfig.jummp.branding.style instanceof ConfigObject)) {
-        	resource url:"/css/${jummpConfig.jummp.branding.style}.less"
+        if (jummp.branding.style) {
+        	resource url:"/css/${jummp.branding.style}.less"
         }
     	else {
     		resource url:"/css/${jummp.branding.deployment}.less" 
     	}
     }
 }
+//grails.resources.adhoc.excludes.patterns=["/wcm-admin/*","wcm-admin/*"]
