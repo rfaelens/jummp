@@ -42,7 +42,7 @@ grails.project.dependency.resolution = {
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
         // dependencies of jsbml
-        compile("org.sbml.jsbml:jsbml:1.0-SNAPSHOT") {
+        compile("org.sbml.jsbml:jsbml:1.0-a2") {
             excludes 'woodstox-core-lgpl',
                         'staxmate',
                         'stax2-api',
