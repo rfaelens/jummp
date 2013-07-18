@@ -147,7 +147,7 @@ log4j = {
     ]
 
     warn   debugAppender: 'org.mortbay.log'
-    trace  debugAppender: [
+    info  debugAppender: [
             'org.weceem'
     ]
 }
