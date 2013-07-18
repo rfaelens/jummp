@@ -60,6 +60,7 @@ class UpdateAndTest implements Runnable {
         {
         	boolean testResult=true
         	int fileIndex=-1
+        	System.out.println("Testing "+files+" with inputs "+filename+" "+filetext)
         	files.eachWithIndex { file, i -> 
         		if (file.name == filename) fileIndex=i
         	};
