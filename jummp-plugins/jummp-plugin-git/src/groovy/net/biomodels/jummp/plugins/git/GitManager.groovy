@@ -1,12 +1,8 @@
 package net.biomodels.jummp.plugins.git
 
-import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.channels.FileLock
-import java.util.LinkedHashMap;
-import java.util.List
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
@@ -21,6 +17,7 @@ import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.perf4j.aop.Profiled
 
 /**
  * @short GitManager provides the interface to a local git clone.
