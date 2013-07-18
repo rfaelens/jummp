@@ -39,8 +39,8 @@ class ConcurrencyTests extends JummpIntegrationTest {
     
     @Before
     void setUp() {
-       createUserAndRoles()
-       setUpVcs()
+    	    createUserAndRoles()
+    	    setUpVcs()
     }
     
     void setUpVcs() {
@@ -208,13 +208,13 @@ Add a comment to this line
 	    assertEquals(2,files.size())
 	    testFileCorrectness(files,testName,testText)
             importMe.each {
-                delete.add(it.getName())
+                delete.add(it.getCanonicalPath())
             }
         }
 
         public void thread2() {
 	    // create a large file
-            File bigFile=File.createTempFile("bigfil", ".txt")
+            File bigFile=File.createTempFile("bigfil_block_when_should", ".txt")
             RandomAccessFile f = new RandomAccessFile(bigFile, "rw")
             f.setLength(150 * 1024 * 1024);
             f.close()
@@ -230,7 +230,7 @@ Add a comment to this line
 	    // test repository integrity
             testRepositoryCommit(repository, rev)
             importMe.each {
-                delete.add(it.getName())
+            	delete.add(it.getCanonicalPath())
             }
         }
        
@@ -246,7 +246,7 @@ Add a comment to this line
             String finalText="myTextIsNotSoBig"
             testFileCorrectness(files, testName, finalText)
             delete.each {
-                new File(it).delete()
+            	deleteFile(new File(it))
             }
         }
     
@@ -293,7 +293,7 @@ Add a comment to this line
             Repository repository=getModelRepository(modelIdentifier)
             String testName="big_file_test"
             String testText="myTextIsNotSoBig"
-            File bigFile=File.createTempFile("bigfil", ".txt")
+            File bigFile=File.createTempFile("bigfil_dont_block", ".txt")
             RandomAccessFile f = new RandomAccessFile(bigFile, "rw")
             f.setLength(150 * 1024 * 1024);
             f.close()
@@ -307,7 +307,7 @@ Add a comment to this line
             testRepositoryCommit(repository, rev)
             testFileCorrectness(modelIdentifier, testName, testText)
             importMe.each {
-                it.delete()
+            	deleteFile(it)
             }
         }
 
@@ -332,7 +332,7 @@ Add a comment to this line
             assertEquals(2,files.size())
             testFileCorrectness(modelIdentifier,testName,testText)
             importMe.each {
-                it.delete()
+            	deleteFile(it)
             }
 
        }
@@ -360,7 +360,7 @@ Add a comment to this line
             testRepositoryCommit(repository, rev)
             testFileCorrectness(modelIdentifier, testName, testText)
             importMe.each {
-                it.delete()
+            	deleteFile(it)
             }
 
         }
@@ -374,6 +374,17 @@ Add a comment to this line
 	    assertTrue(timeSecondWrite < timeWriteFinished);
 	}
     
+    }
+    
+    void deleteFile(File file) {
+            try
+            {
+            	    System.out.println("deleting: "+file)
+            	    FileUtils.forceDelete(file)
+            }
+            catch(Exception logMe) {
+            	    log.error(logMe.getMessage())
+            }
     }
     
 }
