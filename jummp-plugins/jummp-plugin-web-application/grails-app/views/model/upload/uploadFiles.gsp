@@ -40,6 +40,7 @@
             <p>The model files did not pass validation. Would you like to proceed?</p>
           </div>
         </g:if>
+        <g:render template="/templates/errorMessage"/>
         <g:hasErrors>
             <div class="errors">
                 <g:renderErrors/>
