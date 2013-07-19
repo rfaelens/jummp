@@ -42,10 +42,8 @@ class InterJummpSync {
                messageLoop(socket)
             }
             else {
-                System.out.println("Accepting connection")
                 ServerSocket server = new ServerSocket(port)
                 server.accept { socket ->
-                    System.out.println("Accepted connection")
                     messageLoop(socket)
                 }
             }
@@ -59,7 +57,6 @@ class InterJummpSync {
                 while (true) {
                 	// send all the messages currently buffered
                         messagesToSend.each {
-                            System.out.println("Sending: "+it)
                             output<<it+"\n"
                             output.flush()
                         }
@@ -73,7 +70,6 @@ class InterJummpSync {
                                 char readme=(char) reader.read()
                                 if (readme=='\n') {
                                     String msg=buffer.toString()
-                                    System.out.println(msg+" comm: "+messagesToCommunicator)
                                     messageBuffer.put(msg)
                                     buffer=new StringBuilder();
                                 }
@@ -119,10 +115,8 @@ class InterJummpSync {
         // and adding the latest message to the messagesRecieved
         // collection, until it contains what we are looking for
     	while (!messagesRecieved.contains(msg)) {
-            System.out.println("STILL WAITING FOR "+msg)
             messagesRecieved.add(messageBuffer.take())
         }
-        System.out.println("WAIT FOR "+msg+" ENDED")
         messagesRecieved.remove(msg)
     }
     
@@ -139,7 +133,6 @@ class InterJummpSync {
     }
     
     public void terminate() {
-            System.out.println("TERMINATING!!")
             messagesToCommunicator.add("terminate")
     }
     
