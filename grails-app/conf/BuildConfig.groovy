@@ -3,10 +3,6 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/${appName}.war"
 grails.project.groupId = "net.biomodels.jummp"
-// Profile the execution of Grails tasks
-grails.script.profile = true
-// Disable auto-reloading as it biases benchmarks
-auto.recompile.disable = true
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -201,7 +197,7 @@ codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
                              'jummp-plugins/*/test/unit',
                              'jummp-plugins/*/test/integration']
 
-grails.tomcat.jvmArgs = ["-Xmx4G",
+grails.tomcat.jvmArgs = ["-Xmx2G",
                         "-Xss512M",
                         "-XX:MaxPermSize=256M",
                         "-server",

@@ -125,32 +125,21 @@ log4j = {
         rollingFile name: "eventsAppender", file: "logs/jummp-events.log", threshold: org.apache.log4j.Level.DEBUG
 
         // change the threshold to DEBUG to have debug output in development mode
-        console name: "stdout", threshold: org.apache.log4j.Level.ALL
+        console name: "stdout", threshold: org.apache.log4j.Level.WARN
     }
 
     // configure the performanceStatsAppender to log at INFO level
     info   performanceStatsAppender: 'org.perf4j.TimingLogger'
-    all  jummpAppender: [
+    info  jummpAppender: [
             'grails.app', //everything provided by grails-app, e.g. services
             'net.biomodels.jummp' // everything from jummp
     ]
     // Simple Logging goes to its own file
     info   eventsAppender: 'net.biomodels.jummp.plugins.simplelogging'
 
-    rollingFile name: "debugAppender", file: "logs/jummp-debug.log", threshold: org.apache.log4j.Level.ALL
-    info  debugAppender: [
-            'org.codehaus.groovy.grails.web.servlet',  //  controllers
-            'org.codehaus.groovy.grails.web.pages', //  GSP
-            'org.codehaus.groovy.grails.web.sitemesh', //  layouts
-            'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
-            'org.codehaus.groovy.grails.web.mapping', // URL mapping
-            'org.codehaus.groovy.grails.commons', // core / classloading
-            'org.codehaus.groovy.grails.plugins', // plugins
-    ]
-
-    warn   debugAppender: 'org.mortbay.log'
-    info  debugAppender: [
-            'org.weceem'
+    rollingFile name: "debugAppender", file: "logs/jummp-debug.log", threshold: org.apache.log4j.Level.DEBUG
+    debug  debugAppender: [
+        'net.biomodels.jummp'
     ]
 }
 
