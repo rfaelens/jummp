@@ -42,11 +42,7 @@ class ModelController {
             action {
                 conversation.model_id=params.id
             }
-            on("success").to "displayDisclaimer"
-        }
-        displayDisclaimer {
-            on("Continue").to "uploadPipeline"
-            on("Cancel").to "abort"
+            on("success").to "uploadPipeline"
         }
         uploadPipeline {
             subflow(controller: "model", action: "upload", input: [isUpdate: true])
@@ -62,10 +58,6 @@ class ModelController {
     
     @Secured(["isAuthenticated()"])
     def createFlow = {
-        displayDisclaimer {
-            on("Continue").to "uploadPipeline"
-            on("Cancel").to "abort"
-        }
         uploadPipeline {
             subflow(controller: "model", action: "upload", input: [isUpdate:false])
             on("abort").to "abort"
@@ -104,7 +96,11 @@ class ModelController {
                 flow.workingMemory=workingMemory
                 submissionService.initialise(flow.workingMemory)
             }
-            on("success").to "uploadFiles"
+            on("success").to "displayDisclaimer"
+        }
+        displayDisclaimer {
+            on("Continue").to "uploadFiles"
+            on("Cancel").to "abort"
         }
         uploadFiles {
             on("Upload") {
