@@ -60,25 +60,19 @@ class UpdateAndTest implements Runnable {
         {
         	boolean testResult=true
         	int fileIndex=-1
-        	//System.out.println("Testing "+files+" with inputs "+filename+" "+filetext)
         	files.eachWithIndex { file, i -> 
         		if (file.name == filename) fileIndex=i
         	};
         	testResult= testResult & fileIndex>-1
         	if (!testResult) {
-        		//System.out.println("FILE ERROR: Could not find the file "+filename+" in "+files)
         		return testResult
         	}
         	List<String> lines = files.get(fileIndex).readLines()
         	testResult = testResult & lines.size()==1
         	if (!testResult) {
-        		//System.out.println("FILE ERROR: Got more than 1 line in "+filename+": "+lines)
         		return testResult
         	}
         	testResult = testResult & filetext==lines[0]
-        	if (!testResult) {
-        		//System.out.println("FILE ERROR: Expected "+filetext+" got "+lines[0])
-        	}
         	return testResult
         }
 }

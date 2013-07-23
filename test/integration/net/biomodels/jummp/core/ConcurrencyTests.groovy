@@ -365,8 +365,6 @@ Add a comment to this line
 
         }
 
-        
-       
         public void finish() {
 	    //It should take longer to write a big file than it does to read a small one, even if read started slightly later
             assertTrue(timeReadFinished < timeWriteFinished);
@@ -379,12 +377,10 @@ Add a comment to this line
     void deleteFile(File file) {
             try
             {
-            	    System.out.println("deleting: "+file)
-            	    FileUtils.forceDelete(file)
+                FileUtils.forceDelete(file)
             }
             catch(Exception logMe) {
-            	    log.error(logMe.getMessage())
+                log.error(logMe.getMessage())
             }
-    }
-    
+    } 
 }

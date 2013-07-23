@@ -15,22 +15,22 @@
           <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
           <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
           <script>
-          $(function() {
-              $( "#dialog-confirm" ).dialog({
-                                resizable: false,
-                                height:300,
-                                modal: true,
-                                buttons: {
-                                  "Proceed Without Validation": function() {
-                                                document.getElementById('_eventId_ProceedWithoutValidation').click();
-                                                $( this ).dialog( "close" );
-                                  },
-                                  Cancel: function() {
-                                                $( this ).dialog( "close" );
-                               }
-                        }
-              });
-          });
+              $(function() {
+                  $( "#dialog-confirm" ).dialog({
+                        resizable: false,
+                        height:300,
+                        modal: true,
+                        buttons: {
+                            "Proceed Without Validation": function() {
+                                document.getElementById('_eventId_ProceedWithoutValidation').click();
+                                $( this ).dialog( "close" );
+                            },
+                            Cancel: function() {
+                                $( this ).dialog( "close" );
+                       }
+                    }
+                });
+            });
         </script>
       </g:if>
     </head>
@@ -41,14 +41,6 @@
           </div>
         </g:if>
         <g:render template="/templates/errorMessage"/>
-        <g:hasErrors>
-            <div class="errors">
-                <g:renderErrors/>
-                <g:if test="${flash.invalidToken}">
-                    <g:message code="flash.invalidToken"/>
-                </g:if>
-            </div>
-        </g:hasErrors>
         <h1><g:message code="submission.upload.header"/></h1>
         <p style="padding-bottom:1em"><g:message code="submission.upload.explanation"/></p>
         <g:uploadForm id="fileUpload" novalidate="false" autocomplete="false">

@@ -37,7 +37,6 @@ class ModelFileFormatService {
         if (!modelFiles) {
             return null
         }
-        System.out.println("INFERRING FORMAT FOR "+modelFiles)
         String match=services.keySet().find {
             if (it == "UNKNOWN") return false
             FileFormatService ffs=grailsApplication.mainContext.getBean((String)services.getAt(it))

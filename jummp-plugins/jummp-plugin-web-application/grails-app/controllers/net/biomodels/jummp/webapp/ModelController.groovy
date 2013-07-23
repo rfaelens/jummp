@@ -87,7 +87,7 @@ class ModelController {
         start {
             action {
                 Map<String, Object> workingMemory=new HashMap<String,Object>()
-                workingMemory.put("isUpdateOnExistingModel",flow.isUpdate) //use subflow for updating models, todo
+                workingMemory.put("isUpdateOnExistingModel",flow.isUpdate)
                 if (flow.isUpdate) {
                     Long model_id=conversation.model_id as Long
                     workingMemory.put("model_id", model_id)

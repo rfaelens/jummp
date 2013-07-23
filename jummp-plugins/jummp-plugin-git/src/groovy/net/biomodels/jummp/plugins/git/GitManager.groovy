@@ -34,7 +34,7 @@ import org.perf4j.aop.Profiled
  * GitManager is also not able to detect whether the model has been changed 
  * outside the class. It is important to let the instance of the GitManager be 
  * the only resource accessing the model repositories! 
- * @author Martin GrÃ¤ÃŸlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class GitManager implements VcsManager {
@@ -273,9 +273,7 @@ class GitManager implements VcsManager {
         ensureRepInited(modelDirectory)
         files.each {
             if (it.getName()== "small_file_test") {
-                System.out.println("small file: "+Thread.currentThread().getId())
                 List<String> lines = it.readLines()
-                System.out.println(lines)
             }
         }
         String revision = null
