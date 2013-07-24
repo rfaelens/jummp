@@ -23,7 +23,6 @@ class PubMedServiceTests extends JummpIntegrationTest {
         Publication publication = pubMedService.fetchPublicationData(id)
         assertNotNull(publication)
         publication.validate()
-        println publication.errors
         assertTrue(publication.validate())
         assertEquals("Science", publication.journal)
         assertEquals(2010, publication.year)

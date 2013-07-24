@@ -106,9 +106,7 @@ class Revision implements Serializable {
     List<RFTC> getRepositoryFilesForRevision() {
         List<RFTC> repFiles=new LinkedList<RFTC>()
         List<File> files=modelService.retrieveModelRepFiles(this)
-        System.out.println(files)
         repoFiles.each { rf ->
-            System.out.println("Adding: "+rf.toString())
             File tmpFile=files.find { it.getName() == (new File(rf.path)).getName() }
             RFTC rftc=new RFTC(
                 path: tmpFile.getCanonicalPath(),
@@ -117,7 +115,6 @@ class Revision implements Serializable {
                 mainFile: rf.mainFile,
                 userSubmitted: rf.userSubmitted,
                 mimeType: rf.mimeType)
-            System.out.println(rftc.getProperties())
             repFiles.add(rftc)
         }
         return repFiles
@@ -125,7 +122,6 @@ class Revision implements Serializable {
 
     RevisionTransportCommand toCommandObject() {
         def files=getRepositoryFilesForRevision()
-        System.out.println("Revision DOM: "+files)
         RevisionTransportCommand rev=new RevisionTransportCommand(
                 id: id,
                 revisionNumber: revisionNumber,

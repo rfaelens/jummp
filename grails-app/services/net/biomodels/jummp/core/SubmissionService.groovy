@@ -146,14 +146,12 @@ class SubmissionService {
          */
         @Profiled(tag = "submissionService.updateRevisionComments")
         protected void updateRevisionFromFiles(Map<String,Object> workingMemory) {
-            System.out.println("UPDATING REVISION OBJECTS!!")
             RTC revision = workingMemory.get("RevisionTC") as RTC
             List<File> files = getFilesFromMemory(workingMemory, true)
             ModelFormat modelFormat=ModelFormat.findByIdentifier(revision.format.identifier)
             revision.name = modelFileFormatService.extractName(files,modelFormat)
             revision.description=modelFileFormatService.extractDescription(files, modelFormat)
             revision.validated=workingMemory.get("model_validation_result") as Boolean
-            System.out.println("RTC: "+revision.getProperties())
         }
 
         /**
@@ -415,11 +413,9 @@ class SubmissionService {
             //fetch files from repository, make RFTCs out of them
             RTC rev=workingMemory.get("LastRevision") as RTC
             List<RFTC> repFiles=rev.getFiles()
-            System.out.println("RepFiles: "+rev.getProperties())
             storeRFTC(workingMemory, repFiles)
             workingMemory.put("existing_files", repFiles)
             sessionFactory.currentSession.clear()
-            System.out.println(workingMemory)
         }
 
         
@@ -445,7 +441,6 @@ class SubmissionService {
             if (workingMemory.containsKey("submitted_mains")) {
                 workingMemory.put("reprocess_files", true)
             }
-            System.out.println(workingMemory)
             super.handleFileUpload(workingMemory, modifications)
         }
 
@@ -459,7 +454,6 @@ class SubmissionService {
         @Profiled(tag = "submissionService.NewRevisionStateMachine.inferModelFormatType")
         void inferModelFormatType(Map<String, Object> workingMemory) {
             if (workingMemory.containsKey("reprocess_files")) {
-                System.out.println("Inferring model format")
                 super.inferModelFormatType(workingMemory)
             }
         }
@@ -474,7 +468,6 @@ class SubmissionService {
         @Profiled(tag = "submissionService.NewRevisionStateMachine.performValidation")
         void performValidation(Map<String,Object> workingMemory) {
             if (workingMemory.containsKey("reprocess_files")) {
-                System.out.println("Revalidating! ")
                 newModel.performValidation(workingMemory)
             }
         }
@@ -488,7 +481,6 @@ class SubmissionService {
         @Profiled(tag = "submissionService.NewRevisionStateMachine.createTransportObjects")
         protected void createTransportObjects(Map<String,Object> workingMemory) {
             RTC revision=workingMemory.remove("LastRevision") as RTC
-            System.out.println("RTC: "+revision.getProperties())
             if (workingMemory.containsKey("reprocess_files")) {
                 revision.format=ModelFormat.findByIdentifier(workingMemory.get("model_type") as String).
                                             toCommandObject()
@@ -528,9 +520,7 @@ class SubmissionService {
         @Profiled(tag = "submissionService.NewRevisionStateMachine.completeSubmission")
         void completeSubmission(Map<String,Object> workingMemory) {
             RTC revision=workingMemory.get("RevisionTC") as RTC
-            System.out.println("About to submit revision: "+revision.getProperties())
             List<RFTC> repoFiles = getRepFiles(workingMemory)
-            System.out.println("Going to call model service: "+revision.getProperties())
             workingMemory.put("model_id",
             modelService.addValidatedRevision(repoFiles, revision).model.id)
         }
@@ -544,14 +534,6 @@ class SubmissionService {
      */
     @Profiled(tag = "submissionService.initialise")
     void initialise(Map<String, Object> workingMemory) {
-        /*
-         * The second parameter needs to contain the following:
-         *   a - The files to be *modified* - imported or removed
-         *   b - Possibly a map from filename to properties including:
-         *   whether this file is being added or removed, whether it is
-         *   the main file, and an optional description parameter
-         */
-        System.out.println(workingMemory)
         getStrategyFromContext(workingMemory).initialise(workingMemory)
     }
 
@@ -572,7 +554,6 @@ class SubmissionService {
          *   whether this file is being added or removed, whether it is
          *   the main file, and an optional description parameter
          */
-        System.out.println(workingMemory)
         getStrategyFromContext(workingMemory).handleFileUpload(workingMemory, modifications)
     }
 

@@ -629,7 +629,6 @@ class ConfigurationServiceTests {
         configurationService.saveLdapConfiguration(ldap3)
         // verify new configuration
         LdapCommand ldap2 = configurationService.loadLdapConfiguration()
-        //println(ldap2.)
         assertFalse(ldap2.ldapSearchSubtree)
         assertEquals("*",         ldap2.ldapSearchFilter)
         assertEquals("base",      ldap2.ldapSearchBase)
@@ -905,7 +904,6 @@ class ConfigurationServiceTests {
 
     private void populateProperties() {
         configurationService.configurationFile = new File("target/jummpProperties")
-        println configurationService.configurationFile
         //configurationService.afterPropertiesSet()
         assertEquals(new File("target/jummpProperties"), configurationService.configurationFile)
         DatabaseCommand database = new DatabaseCommand()

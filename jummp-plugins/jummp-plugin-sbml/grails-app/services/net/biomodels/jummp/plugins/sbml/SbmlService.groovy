@@ -210,7 +210,6 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     public boolean validate(final List<File> model) {
         if (!grailsApplication.config.jummp.plugins.sbml.validation) {
             log.info("Validation for ${model.name} skipped due to configuration option")
-            println("Validation for ${model.name} skipped due to configuration option")
             return true
         }
         if (getDocumentFromFiles(model)) {

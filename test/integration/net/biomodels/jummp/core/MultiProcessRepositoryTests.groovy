@@ -44,20 +44,6 @@ class MultiProcessRepositoryTests  {
         sync.start(false, 50000)
         
         //launch concurrent tester grails script and wait for it to be ready
-        /*String[] command=new String[3]
-        command[0]="grails"
-        command[1]="test"
-        command[2]="ConcurrentRepositoryTester"
-        command[3]=">"
-       
-        try
-        {
-            Process process = Runtime.getRuntime().exec(command,null);
-        }
-        catch(Exception e) {
-            e.printStackTrace()
-        }*/
-        
         String childProcess="grails test ConcurrentRepositoryTester"
         childProcess.execute()
         
@@ -89,7 +75,6 @@ class MultiProcessRepositoryTests  {
         log.error("Waiting for child process message")
         sync.waitForMessage("DoneTesting")
         assertTrue(sync.getMessages().contains("TestResult: true"))
-        System.out.println("Messages: "+sync.getMessages())
         // terminate server
         sync.terminate()
     }

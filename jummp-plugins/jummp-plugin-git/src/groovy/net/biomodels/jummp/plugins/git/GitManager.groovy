@@ -34,7 +34,7 @@ import org.perf4j.aop.Profiled
  * GitManager is also not able to detect whether the model has been changed 
  * outside the class. It is important to let the instance of the GitManager be 
  * the only resource accessing the model repositories! 
- * @author Martin GrÃ¤ÃŸlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class GitManager implements VcsManager {
@@ -273,9 +273,7 @@ class GitManager implements VcsManager {
         ensureRepInited(modelDirectory)
         files.each {
             if (it.getName()== "small_file_test") {
-                System.out.println("small file: "+Thread.currentThread().getId())
                 List<String> lines = it.readLines()
-                System.out.println(lines)
             }
         }
         String revision = null
@@ -359,7 +357,7 @@ class GitManager implements VcsManager {
                 // return current HEAD revision
                 downloadFiles(modelDirectory, returnedFiles);
             } else {
-                if (!getRevisions(modelDirectory).contains(revision))
+                if (!getRevisionsPrivate(modelDirectory,false).contains(revision))
                 throw new VcsException("Revision '$revision' not found in model directory '$modelDirectory' !");
                 try {
                     // need to checkout in a temporary branch
@@ -393,8 +391,26 @@ class GitManager implements VcsManager {
     @Profiled(tag = "gitManager.getRevisions")
     public List<String> getRevisions(File modelDirectory)
     {
+        return getRevisionsPrivate(modelDirectory, true)
+    }
+
+    /*
+     * Retrieves the revisions associated with the model by looking at the git log with optional locking
+     * 
+     * Convenience function with flag for specifying whether or not to lock model directory. 
+     * As FileLocks are not re-entrant, when the function is called from within the class
+     * where the lock has already been acquired, set the flag false. 
+     * @param modelDirectory The model directory
+     * @param acquireLocks Whether or not to acquire locks.
+     **/
+    @Profiled(tag = "gitManager.getRevisionsPrivate")
+    private List<String> getRevisionsPrivate(File modelDirectory, boolean acquireLocks)
+    {
         ensureRepInited(modelDirectory)
         List<String> myList=new LinkedList<String>();
+        if (acquireLocks) {
+        	lockModelRepository(modelDirectory)
+        }
         try {
             Iterator<RevCommit> log=initedRepositories.get(modelDirectory).log().call().iterator();
             log.each
@@ -403,10 +419,15 @@ class GitManager implements VcsManager {
             }
         }
         finally {
+        	if (acquireLocks) {
+        		unlockModelRepository(modelDirectory)
+        	}
         }
         return myList
     }
 
+    
+    
     /*
      * Multi-file per model version of legacy remote repository implementation
      * 

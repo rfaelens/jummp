@@ -37,7 +37,6 @@ class UserAdministrationController {
      * Action returning the DataTable content as JSON
      */
     def dataTableSource = {
-        println "dataTableSource"
         int start = 0
         int length = 10
         if (params.iDisplayStart) {

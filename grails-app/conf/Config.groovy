@@ -115,7 +115,7 @@ log4j = {
         // this is the most important appender and first in the appender chain. it aggregates all profiling data withing a certain time frame.
         // the GraphingStatisticsAppender is attached as a child to this appender and uses its aggregated data.
         def performanceStatsAppender = new org.perf4j.log4j.AsyncCoalescingStatisticsAppender(
-            timeSlice: 10000    // ms
+            timeSlice: 30 * 60 * 1000    // 30 minutes in ms
         )
         performanceStatsAppender.addAppender(performanceStatsFileAppender)
         performanceStatsAppender.addAppender(performanceGraphAppender)

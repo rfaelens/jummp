@@ -44,7 +44,6 @@ class BootStrap {
         wcmSecurityService.securityDelegate = [
             getUserName : { ->
                 if (springSecurityService.isLoggedIn()) {
-                    //System.out.println(springSecurityService.principal.username)
                     return springSecurityService.principal.username
                 } else {
                     return null
@@ -55,7 +54,6 @@ class BootStrap {
             },
             getUserRoles : { ->
                 if (springSecurityService.isLoggedIn()) {
-                    //System.out.println(springSecurityService.principal.authorities)
                     return springSecurityService.principal.authorities
                 } else {
                     return ['ROLE_GUEST']
@@ -104,7 +102,5 @@ class BootStrap {
         
     }
     def destroy = {
-        println "Thank you for calling BootStrap:destroy(). Wait 5 seconds."
-        Thread.sleep(5000)
     }
 }

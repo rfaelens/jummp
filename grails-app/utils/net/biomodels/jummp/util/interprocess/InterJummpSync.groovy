@@ -36,7 +36,6 @@ class InterJummpSync {
         void run() {
             // Establish the connection according to whether you are client or server
             // and enter the messageLoop
-            System.out.println(client)
             if (client) {
                Socket socket=new Socket("localhost", port) 
                messageLoop(socket)
