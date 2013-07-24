@@ -131,24 +131,21 @@ grails.project.dependency.resolution = {
         test ":code-coverage:1.2.6"
         test(":codenarc:0.18.1") { transitive = false }
         test ":gmetrics:0.3.1"
-        compile(":weceem:1.1.2") { 
-            excludes 'xstream', 
+        runtime(":weceem:1.1.3-SNAPSHOT") {
+            excludes 'xstream',
                         'quartz',
-                        'jquery', 
-                        'jquery-ui',
-                        'searchable'
+                        'jquery',
+                        'jquery-ui'
         }
-        // needed for compatibility with Grails 2.2+
-        compile ":searchable:0.6.4"
         compile ":jquery-datatables:1.7.5"
         compile ":jquery-ui:1.8.24"
-	// Locale plugin
-	compile ":locale-variant:0.1"
+        // Locale plugin
+        compile ":locale-variant:0.1"
         // default grails plugins
         compile ":hibernate:$grailsVersion"
         compile ":webflow:2.0.8.1"
         compile ":jquery:1.10.0"
-        compile ":resources:1.2.RC2"
+        compile ":resources:1.2"
 
         build ":tomcat:$grailsVersion"
 
