@@ -357,7 +357,7 @@ class GitManager implements VcsManager {
                 // return current HEAD revision
                 downloadFiles(modelDirectory, returnedFiles);
             } else {
-                if (!getRevisions(modelDirectory).contains(revision))
+                if (!getRevisionsPrivate(modelDirectory,false).contains(revision))
                 throw new VcsException("Revision '$revision' not found in model directory '$modelDirectory' !");
                 try {
                     // need to checkout in a temporary branch
@@ -391,8 +391,26 @@ class GitManager implements VcsManager {
     @Profiled(tag = "gitManager.getRevisions")
     public List<String> getRevisions(File modelDirectory)
     {
+        return getRevisionsPrivate(modelDirectory, true)
+    }
+
+    /*
+     * Retrieves the revisions associated with the model by looking at the git log with optional locking
+     * 
+     * Convenience function with flag for specifying whether or not to lock model directory. 
+     * As FileLocks are not re-entrant, when the function is called from within the class
+     * where the lock has already been acquired, set the flag false. 
+     * @param modelDirectory The model directory
+     * @param acquireLocks Whether or not to acquire locks.
+     **/
+    @Profiled(tag = "gitManager.getRevisionsPrivate")
+    private List<String> getRevisionsPrivate(File modelDirectory, boolean acquireLocks)
+    {
         ensureRepInited(modelDirectory)
         List<String> myList=new LinkedList<String>();
+        if (acquireLocks) {
+        	lockModelRepository(modelDirectory)
+        }
         try {
             Iterator<RevCommit> log=initedRepositories.get(modelDirectory).log().call().iterator();
             log.each
@@ -401,10 +419,15 @@ class GitManager implements VcsManager {
             }
         }
         finally {
+        	if (acquireLocks) {
+        		unlockModelRepository(modelDirectory)
+        	}
         }
         return myList
     }
 
+    
+    
     /*
      * Multi-file per model version of legacy remote repository implementation
      * 
