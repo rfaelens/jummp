@@ -37,4 +37,12 @@ modules = {
         dependsOn 'core'
         resource url: '/js/miriamadministration.js'
     }
+    branding_style {
+        if (grails.util.Holders.getGrailsApplication().config.jummp.branding.style) {
+        	resource url:"/css/${grails.util.Holders.getGrailsApplication().config.jummp.branding.style}.less"
+        }
+    	else {
+    		resource url:"/css/${grails.util.Holders.getGrailsApplication().config.jummp.branding.deployment}.less" 
+    	}
+    }
 }

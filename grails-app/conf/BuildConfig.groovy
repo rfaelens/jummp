@@ -131,7 +131,7 @@ grails.project.dependency.resolution = {
         test ":code-coverage:1.2.6"
         test(":codenarc:0.18.1") { transitive = false }
         test ":gmetrics:0.3.1"
-        compile(":weceem:1.1.2") { 
+        compile(":weceem:1.1.3-SNAPSHOT") { 
             excludes 'xstream', 
                         'quartz',
                         'jquery', 
