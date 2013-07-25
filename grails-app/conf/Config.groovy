@@ -393,15 +393,4 @@ weceem.admin.prefix = 'wcm-admin'
 weceem.create.default.space = true
 weceem.default.space.template = "classpath:/weceem-jummp-default-space.zip"
 weceem.security.policy.path = jummp.security.cms.policy
-//resources plugin
-/* grails.resources.modules = {
-    branding_style {
-        if (jummp.branding.style) {
-        	resource url:"/css/${jummp.branding.style}.less"
-        }
-    	else {
-    		resource url:"/css/${jummp.branding.deployment}.less" 
-    	}
-    }
-} */
 //grails.resources.adhoc.excludes.patterns=["/wcm-admin/*","wcm-admin/*"]
