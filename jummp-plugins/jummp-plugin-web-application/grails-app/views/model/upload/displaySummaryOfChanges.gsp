@@ -8,7 +8,7 @@
         <title>Submission Summary</title>
     </head>
     <body>
-        <h1>Summary of Your Submission</h1>
+    	<h1><g:message code="submission.summary.header"/></h1>
         <g:form>
             <div class="dialog">
                 <table class="formtable">
@@ -46,9 +46,9 @@
                     </tbody>
                 </table>
                 <div class="buttons">
-                    <g:submitButton name="Cancel" value="Abort" />
-                    <g:submitButton name="Back" value="Back" />
-                    <g:submitButton name="Continue" value="Continue" />
+                    <g:submitButton name="Cancel" value="${g.message(code: 'submission.common.cancelButton')}" />
+                    <g:submitButton name="Back" value="${g.message(code: 'submission.common.backButton')}" />
+                    <g:submitButton name="Continue" value="${g.message(code: 'submission.summary.submitButton')}"/>
                 </div>
             </div>
         </g:form>

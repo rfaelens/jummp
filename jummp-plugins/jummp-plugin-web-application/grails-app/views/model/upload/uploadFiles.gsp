@@ -79,8 +79,8 @@
                     </table>
                 </fieldset>
                 <div class="buttons">
-                    <g:submitButton name="Cancel" value="${g.message(code: 'submission.upload.cancelButton')}" />
-                    <g:submitButton name="Back" value="${g.message(code: 'submission.upload.backButton')}" />
+                    <g:submitButton name="Cancel" value="${g.message(code: 'submission.common.cancelButton')}" />
+                    <g:submitButton name="Back" value="${g.message(code: 'submission.common.backButton')}" />
                     <g:submitButton name="Upload" value="${g.message(code: 'submission.upload.uploadButton')}" />
                     <g:if test ="${showProceedWithoutValidationDialog}">
                       <g:submitButton name="ProceedWithoutValidation" value="ProceedWithoutValidation" hidden="true"/> 

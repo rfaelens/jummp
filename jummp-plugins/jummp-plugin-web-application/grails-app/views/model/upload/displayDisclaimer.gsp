@@ -17,8 +17,8 @@
         <g:form>
             <div class="dialog">
                 <div class="buttons">
-                    <g:submitButton name="Cancel" value="Abort" />
-                    <g:submitButton name="Continue" value="Continue" />
+                    <g:submitButton name="Cancel" value="${g.message(code: 'submission.common.cancelButton')}" />
+                    <g:submitButton name="Continue" value="${g.message(code: 'submission.disclaimer.continueButton')}" />
                 </div>
             </div>
         </g:form>
