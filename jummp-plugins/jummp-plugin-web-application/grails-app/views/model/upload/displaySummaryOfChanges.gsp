@@ -14,19 +14,23 @@
                 <table class="formtable">
                     <tbody>
                         <tr class="prop">
-                            <td class="name">
+                            <td class="name" style="vertical-align:top;">
                                 <label for="name">Name:</label>
                             </td>
-                            <td class="value">
-                                <g:textField readonly="readonly" name="name" maxlength="50" value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}"/>
+                            <td class="value" style="vertical-align:top;">
+                       <%--          <g:textField readonly="readonly" name="name" maxlength="50" value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}"/>
+                        --%>
+                        	     <label name="name">${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}</label>
                             </td>
                         </tr>
                         <tr class="prop">
-                            <td class="name">
+                            <td class="name" style="vertical-align:top;">
                                 <label for="description">Description:</label>
                             </td>
-                            <td class="value">
-                                <g:textArea id="description" name="description" readonly="readonly" maxlength="5000" value='${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}'/>
+                            <td class="value" style="vertical-align:top;">
+                            	<div class="displayDescription">
+                                	<label name="description">${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}</label>
+                                </div>
                             </td>
                         </tr>
                         <g:if test="${workingMemory.get("isUpdateOnExistingModel") as Boolean}">
