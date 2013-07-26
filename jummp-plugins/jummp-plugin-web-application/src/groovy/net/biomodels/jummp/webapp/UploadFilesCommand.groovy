@@ -126,6 +126,13 @@ class UploadFilesCommand implements Serializable {
                     // the descriptions of the duplicates are not of interest to us
                     cmd.description = additionalFilesMap.values() as List
 
+                    //now ensure that no additional file has the same name as the main
+                    duplicateList = []
+                    def mainNamesList = []
+                    cmd.mainFile.each { mainNamesList << it.getOriginalFilename() }
+                    supplements = supplements.findAll { !mainNamesList.contains(it.getOriginalFilename()) }
+
+                    //finally, log which additional files do not have a description
                     supplements.eachWithIndex{ file, i ->
                         if (!cmd.description[i]) {
                             if (IS_DEBUG_ENABLED) {
@@ -134,6 +141,17 @@ class UploadFilesCommand implements Serializable {
                             }
                         }
                     }
+                }
+                //almost done, log the end result
+                if (IS_INFO_ENABLED) {
+                    StringBuilder sb = new StringBuilder("\nData binding for submission complete.")
+                    sb.append("\nMain file:").append(cmd.mainFile.inspect()).append("\nAdditional files:\n")
+                    cmd.additionalFilesAsMap().each {
+                        String name = (it.key as MultipartFile).getOriginalFilename()
+                        sb.append(name).append(":").append(it.value).append("\n")
+                    }
+
+                    log.info sb.toString()
                 }
                 return true
             }
