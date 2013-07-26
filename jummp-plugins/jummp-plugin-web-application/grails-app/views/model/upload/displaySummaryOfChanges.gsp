@@ -5,7 +5,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
-        <title>Submission Summary</title>
+        <title><g:message code="submission.summary.header"/></title>
     </head>
     <body>
     	<h1><g:message code="submission.summary.header"/></h1>
@@ -15,17 +15,19 @@
                     <tbody>
                         <tr class="prop">
                             <td class="name" style="vertical-align:top;">
-                                <label for="name">Name:</label>
+                                <label for="name">
+                                    <g:message code="submission.summary.nameLabel"/>
+                                </label>
                             </td>
                             <td class="value" style="vertical-align:top;">
-                       <%--          <g:textField readonly="readonly" name="name" maxlength="50" value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}"/>
-                        --%>
-                        	     <label name="name">${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}</label>
+                          	<label name="name">${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}</label>
                             </td>
                         </tr>
                         <tr class="prop">
                             <td class="name" style="vertical-align:top;">
-                                <label for="description">Description:</label>
+                                <label for="description">
+                                    <g:message code="submission.summary.descriptionLabel"/>
+                                </label>
                             </td>
                             <td class="value" style="vertical-align:top;">
                             	<div class="displayDescription">
@@ -36,7 +38,9 @@
                         <g:if test="${workingMemory.get("isUpdateOnExistingModel") as Boolean}">
                             <tr class="prop">
                                 <td class="name">
-                                    <label for="RevisionComments">Summary of the changes</label>
+                                    <label for="RevisionComments">
+                                    	<g:message code="submission.summary.revisionLabel"/>
+                                    </label>
                                 </td>
                                 <td class="value">
                                     <g:textField name="RevisionComments" maxlength="50"/>
