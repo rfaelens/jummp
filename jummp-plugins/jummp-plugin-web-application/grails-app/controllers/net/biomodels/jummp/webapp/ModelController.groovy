@@ -262,8 +262,9 @@ class ModelController {
             action {
                 submissionService.inferModelInfo(flow.workingMemory)
             }
-            on("success").to "displayModelInfo"
+            on("success").to "displaySummaryOfChanges"
         }
+        /** Temporarily disabled state while we arent able to modify the model
         displayModelInfo {
             on("Continue") {
                 //populate modifications object with form data
@@ -275,6 +276,7 @@ class ModelController {
             on("Cancel").to "cleanUpAndTerminate"
             on("Back"){}.to "uploadFiles"
         }
+        */
         displaySummaryOfChanges {
             on("Continue")
             {
@@ -288,7 +290,8 @@ class ModelController {
                 submissionService.updateRevisionComments(flow.workingMemory, modifications)
             }.to "saveModel"
             on("Cancel").to "cleanUpAndTerminate"
-            on("Back"){}.to "displayModelInfo"
+            //on("Back"){}.to "displayModelInfo" //To be set back when model editing is enabled
+            on("Back"){}.to "uploadFiles"
         }
         saveModel {
             action {
