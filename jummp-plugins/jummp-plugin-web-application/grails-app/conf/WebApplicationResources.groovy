@@ -45,4 +45,7 @@ modules = {
     		resource url:"/css/${grails.util.Holders.getGrailsApplication().config.jummp.branding.deployment}.less" 
     	}
     }
+    jqueryui_latest {
+    	resource url:'/js/jquery/jquery-ui-v1.10.3.js'
+    }
 }
