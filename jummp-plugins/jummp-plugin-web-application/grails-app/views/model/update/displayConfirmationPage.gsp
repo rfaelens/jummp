@@ -4,12 +4,11 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
-        <title>Confirmation Summary</title>
+        <title><g:message code="submission.confirmation.common.title"/></title>
     </head>
     <body>
-        <h1>A star was born</h1>
-        <p>Thank you for submitting your model.</p>
-        <p>You can access your model <a href="http://${request.serverName}:${request.serverPort}${request.forwardURI.split("update")[0]}model/${session.result_submission}">here</a>
-        </p>
-    </body>
+        <h1><g:message code="submission.confirmation.update.header"/></h1>
+        <p><g:message code="submission.confirmation.update.first.message"/></p>
+        <p><g:message code="submission.confirmation.update.second.message" args="${[createLink(action:"model", id:session.result_submission)]}"/></p>        
+   </body>
 </html>

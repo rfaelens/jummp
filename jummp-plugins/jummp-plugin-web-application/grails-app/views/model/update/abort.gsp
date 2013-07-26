@@ -4,10 +4,10 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
-        <title>Submission cancelled</title>
+        <title><g:message code="submission.abort.common.title"/></title>
     </head>
     <body>
-        <h1>Model Submission Cancelled</h1>
-        <p>You can always restart the submission process by  clicking on <a href="${g.createLink(controller: 'model', action: 'create')}">Submit model</a>.</p>
+        <h1><g:message code="submission.abort.update.header"/></h1>
+        <p><g:message code="submission.abort.update.message" args="${[session.result_submission, g.createLink(controller: 'model', action: 'update', id:session.result_submission)]}"/></p>
     </body>
 </html>
