@@ -8,7 +8,12 @@
     </head>
     <body>
         <h1>Submission Guidelines</h1>
-        <p>This will now modify model ${params.id}. Are you sure?</p>
+        <g:if test="${isUpdate}">
+        	<p>This will be modifying model ${params.id}. Are you sure?</p>
+        </g:if>
+        <g:else>
+        	<p>This will create a new model. Are you sure?</p>
+        </g:else>
         <g:form>
             <div class="dialog">
                 <div class="buttons">
