@@ -40,9 +40,13 @@ class ModelController {
     def updateFlow = {
         start {
             action {
+            	if (!params.id) {
+            		return error()
+            	}
                 conversation.model_id=params.id
             }
             on("success").to "uploadPipeline"
+            on("error").to "displayErrorPage"
         }
         uploadPipeline {
             subflow(controller: "model", action: "upload", input: [isUpdate: true])
