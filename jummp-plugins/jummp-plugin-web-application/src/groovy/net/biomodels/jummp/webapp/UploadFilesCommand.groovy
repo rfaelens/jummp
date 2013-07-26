@@ -82,11 +82,12 @@ class UploadFilesCommand implements Serializable {
                     log.error "\tPlease give me some files."
                     return ['mainFile.blank']
                 }
-                /*boolean duplicatesExist = containsDuplicates(mf)
-                if (haveDuplicates) {
-                    log.error "${mf.inspect()} contains main files uploaded multiple times."
-                    return ['mainFile.duplicate']
-                }*/
+                //process mains in reverse so that the latest submitted one is kept.
+                // unique accepts a comparator closure that returns -1,0,1, but we only care about equality
+                mf = mf.reverse().unique { self, other ->
+                    self.getOriginalFilename().equals(other.getOriginalFilename()) ? 0 :
+                        self.getSize() > other.getSize() ? -1 : 1
+                }
                 return true
             }
         )
@@ -103,23 +104,37 @@ class UploadFilesCommand implements Serializable {
                 }
                 // purge empty files
                 supplements = supplements.findAll {it && !it.isEmpty()}
+                int supplementCount = supplements.size()
                 if (IS_DEBUG_ENABLED) {
                     log.debug(String.format("There are %s supplementary files in this submission: %s.",
-                           supplements.size(), supplements.inspect()))
+                            supplementCount, supplements.inspect()))
                 }
-                supplements.eachWithIndex{ file, i ->
-                    if (!cmd.description[i]) {
-                        if (IS_DEBUG_ENABLED) {
-                            log.debug(String.format("Supplementary file %s does not have a description.",
-                                        file.getOriginalFilename()))
+                if (supplementCount > 0) {
+                    //discard files with the same name while keeping the most recent entries
+                    def duplicateList = []
+                    def additionalFilesMap = cmd.additionalFilesAsMap()
+                    additionalFilesMap.keySet().toList().reverse().unique { self, other ->
+                        if(self.getOriginalFilename().equals(other.getOriginalFilename())) {
+                            duplicateList << self
+                            return 0
+                        }
+                        //ignore order if file names are unique
+                        return -1
+                    }
+                    additionalFilesMap.additionalFilesMap.findAll { !duplicateList.contains(it.key) }
+                    supplements = additionalFilesMap.keySet()
+                    // the descriptions of the duplicates are not of interest to us
+                    cmd.description = additionalFilesMap.values() as List
+
+                    supplements.eachWithIndex{ file, i ->
+                        if (!cmd.description[i]) {
+                            if (IS_DEBUG_ENABLED) {
+                                log.debug(String.format("Supplementary file %s does not have a description.",
+                                            file.getOriginalFilename()))
+                            }
                         }
                     }
                 }
-                /*boolean duplicatesExist = containsDuplicates(supplements + cmd.mainFile)
-                if (duplicatesExist) {
-                    log.error("Found duplicate supplementary files. Rejecting this submission.")
-                    return ['additionalFile.duplicate']
-                }*/
                 return true
             }
         )
