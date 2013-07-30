@@ -243,7 +243,8 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             Map<File,String> additionalFiles=getRandomAdditionalFiles(10)
             addSubmissionFiles([newFile], additionalFiles)
             signalEvent("Upload")
-            assertFlowState("displayModelInfo")
+            
+            //assertFlowState("displayModelInfo") currently disabled
             assert true == (Boolean) flowScope.
                                         workingMemory.
                                         get("isUpdateOnExistingModel")
@@ -254,7 +255,8 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             assert revision.description.contains("This relation solely depends on EpoR turnover independent of ligand binding, suggesting an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system")
             
             //add tests for when displayModelInfo does something interesting
-            signalEvent("Continue")
+            //signalEvent("Continue") display model info disabled
+            
             assertFlowState("displaySummaryOfChanges")
             Model model=modelService.getModel(modelid)
             Revision prev=modelService.getLatestRevision(model)
@@ -321,7 +323,10 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             Map<File,String> additionalFiles=getRandomAdditionalFiles(10)
             addSubmissionFiles([file], additionalFiles)
             signalEvent("Upload")
-            assertFlowState("displayModelInfo")
+           /* 	Temporarily disabled states as editing model info is not implemented
+           	assertFlowState("displayModelInfo") 
+           	signalEvent("Continue")
+            */
             assert false == (Boolean) flowScope.
                                         workingMemory.
                                         get("isUpdateOnExistingModel")
@@ -332,7 +337,6 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             //test that the description contains known strings
             checkDescription(revision.description, descriptionStrings)
             //add tests for when displayModelInfo does something interesting
-            signalEvent("Continue")
             assertFlowState("displaySummaryOfChanges")
 
             //add tests for when displayModelInfo does something interesting
