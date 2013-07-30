@@ -147,7 +147,6 @@ class ModelController {
                     // Unless there was one all along
                     if (cmd.errors["mainFile"].codes.contains("mainFile.blank")) {
                         if (flow.workingMemory.containsKey("repository_files")) {
-                            log.error("CHECKING EXISTING REP FILES")
                             List mainFiles=getMainFiles(flow.workingMemory)
                             if (mainFiles && !mainFiles.isEmpty())
                             {
@@ -179,9 +178,7 @@ class ModelController {
         }
         transferFilesToService {
             action {
-            	    log.error(flow.workingMemory)
-                    if (flow.workingMemory.remove("file_validation_error") as Boolean) {
-                    	    log.error("FILE ERROR. GOING BACK TO UPLOADING")
+            	    if (flow.workingMemory.remove("file_validation_error") as Boolean) {
                     	    if (flow.workingMemory.containsKey("overwriting_main_with_additional")) {
                     	    	    flow.workingMemory.remove("overwriting_main_with_additional")
                     	    	    flow.workingMemory.remove("UploadCommand")
@@ -236,11 +233,9 @@ class ModelController {
             }
             on("MainFileMissingError") {
             	    flash.error="submission.upload.error.fileerror"
-            	    log.error("SHOUlD BE GOING BACK TO FILE UPLOADER")
             }.to "uploadFiles"
             on("AdditionalReplacingMainError") {
             	    flash.error="submission.upload.error.additional_replacing_main"
-            	    log.error("NOW SHOULD REALLY GO BACK TO FILE UPLOADER")
             }.to "uploadFiles"
             on("PerformValidation").to "performValidation"
         }
@@ -458,13 +453,11 @@ class ModelController {
     	mainFiles.each { mainFile ->
     		String name=(new File(mainFile.path)).getName()
     		multipartFiles.each { uploaded ->
-    			log.error("Comparing ${uploaded.getOriginalFilename()} with ${name}")
     			if (uploaded.getOriginalFilename() == name) {
     				returnVal=true
     			}
     		}
 	}
-    	log.error("returning ${returnVal}")
     	return returnVal
     }
 }
