@@ -52,6 +52,9 @@
                                     <td class="name">
                                       <p>${(new File((it as RepositoryFileTransportCommand).path)).getName()}</p>
                                     </td>
+                                    <td class="classification">
+                                      <p>${(it as RepositoryFileTransportCommand).mainFile ? "(main file)" : "(additional file)"}</p>
+                                    </td>
                                 </tr>
                           </g:each>
                         </g:if>

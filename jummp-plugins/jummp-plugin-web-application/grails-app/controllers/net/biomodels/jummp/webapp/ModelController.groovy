@@ -147,14 +147,20 @@ class ModelController {
                     // Unless there was one all along
                     if (cmd.errors["mainFile"].codes.contains("mainFile.blank")) {
                         if (flow.workingMemory.containsKey("repository_files")) {
-                            List<RFTC> uploaded=flow.workingMemory.get("repository_files") as List<RFTC>
-                            if (uploaded.find { it.mainFile }) {
-                                flow.workingMemory.put("file_validation_error",false)
-
-                                //if there are no main or additional files, remove upload command
-                                if (!cmd.extraFiles || cmd.extraFiles.isEmpty()) {
-                                    flow.workingMemory.remove("UploadCommand")
-                                }
+                            log.error("CHECKING EXISTING REP FILES")
+                            List mainFiles=getMainFiles(flow.workingMemory)
+                            if (mainFiles && !mainFiles.isEmpty())
+                            {
+                            	    if (!mainFileOverwritten(mainFiles, cmd.extraFiles)) {
+                            	    	    flow.workingMemory.put("file_validation_error",false)
+                            	    	    //if there are no main or additional files, remove upload command
+                            	    	    if (!cmd.extraFiles || cmd.extraFiles.isEmpty()) {
+                            	    	    	    flow.workingMemory.remove("UploadCommand")
+                            	    	    }
+                            	    }
+                            	    else {
+                            	    	    flow.workingMemory.put("overwriting_main_with_additional",true)
+                            	    }
                             }
                         }
                     }
@@ -173,10 +179,19 @@ class ModelController {
         }
         transferFilesToService {
             action {
+            	    log.error(flow.workingMemory)
                     if (flow.workingMemory.remove("file_validation_error") as Boolean) {
-                    	    return GoBackToUploader()
+                    	    log.error("FILE ERROR. GOING BACK TO UPLOADING")
+                    	    if (flow.workingMemory.containsKey("overwriting_main_with_additional")) {
+                    	    	    flow.workingMemory.remove("overwriting_main_with_additional")
+                    	    	    flow.workingMemory.remove("UploadCommand")
+                    	    	    AdditionalReplacingMainError()
+                    	    }
+            	    	    else {
+            	    	    	    MainFileMissingError()
+            	    	    }
                     }
-                    if (flow.workingMemory.containsKey("UploadCommand")) {
+                    else if (flow.workingMemory.containsKey("UploadCommand")) {
                         //should this be in a separate action state?
                         UploadFilesCommand cmd = flow.workingMemory.remove("UploadCommand") as UploadFilesCommand
                         def uuid = UUID.randomUUID().toString()
@@ -216,11 +231,16 @@ class ModelController {
                         flow.workingMemory["submitted_additionals"] = additionalsMap
                         def inputs = new HashMap<String, Object>()
                         submissionService.handleFileUpload(flow.workingMemory,inputs)
+                        PerformValidation()
                     }
-                    PerformValidation()
             }
-            on("GoBackToUploader") {
+            on("MainFileMissingError") {
             	    flash.error="submission.upload.error.fileerror"
+            	    log.error("SHOUlD BE GOING BACK TO FILE UPLOADER")
+            }.to "uploadFiles"
+            on("AdditionalReplacingMainError") {
+            	    flash.error="submission.upload.error.additional_replacing_main"
+            	    log.error("NOW SHOULD REALLY GO BACK TO FILE UPLOADER")
             }.to "uploadFiles"
             on("PerformValidation").to "performValidation"
         }
@@ -253,7 +273,7 @@ class ModelController {
                 // read this parameter to display option to upload without
                 // validation in upload files view
                 flash.showProceedWithoutValidationDialog = true
-            }.to "uploadFiles"
+            }.to "inferModelInfo"
             on("FilesNotValid") {
                 flash.error="submission.upload.error.fileerror"
             }.to "uploadFiles"
@@ -424,5 +444,27 @@ class ModelController {
             }
         }
         outcome
+    }
+    
+    private List getMainFiles(Map<String,Object> workingMemory) {
+    	    List<RFTC> uploaded=workingMemory.get("repository_files") as List<RFTC>
+            return uploaded.findAll {
+            	    it.mainFile
+            }
+    }
+    
+    private boolean mainFileOverwritten(List mainFiles, List multipartFiles) {
+    	boolean returnVal=false
+    	mainFiles.each { mainFile ->
+    		String name=(new File(mainFile.path)).getName()
+    		multipartFiles.each { uploaded ->
+    			log.error("Comparing ${uploaded.getOriginalFilename()} with ${name}")
+    			if (uploaded.getOriginalFilename() == name) {
+    				returnVal=true
+    			}
+    		}
+	}
+    	log.error("returning ${returnVal}")
+    	return returnVal
     }
 }

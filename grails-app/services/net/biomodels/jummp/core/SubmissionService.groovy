@@ -8,6 +8,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.model.RepositoryFile
 import org.perf4j.aop.Profiled
 
 /**
@@ -84,8 +85,20 @@ class SubmissionService {
         @Profiled(tag = "submissionService.storeRFTC")
         protected void storeRFTC(Map<String,Object> workingMemory, List<RFTC> tobeAdded) {
             if (workingMemory.containsKey("repository_files")) {
-                (workingMemory.get("repository_files") as List<RFTC>).addAll(tobeAdded)
+                List<RFTC> existing=(workingMemory.get("repository_files") as List<RFTC>)
+                Set<RFTC> toDelete=new HashSet<RFTC>()
+                existing.each { oldfile ->
+                	String oldname=(new File(oldfile.path)).getName()
+                	tobeAdded.each { newfile ->
+                		String newname=(new File(newfile.path)).getName()
+                		if (newname==oldname) {
+                			toDelete.add(oldfile)
+                		}
+                	}
                 }
+                existing.removeAll(toDelete)
+                existing.addAll(tobeAdded)
+            }
             else {
                 workingMemory.put("repository_files", tobeAdded)
             }
