@@ -109,6 +109,7 @@ class Revision implements Serializable {
         repoFiles.each { rf ->
             File tmpFile=files.find { it.getName() == (new File(rf.path)).getName() }
             RFTC rftc=new RFTC(
+            	id: rf.id,
                 path: tmpFile.getCanonicalPath(),
                 description: rf.description,
                 hidden: rf.hidden,
