@@ -55,6 +55,7 @@ grails.project.dependency.resolution = {
         runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"
         compile ":sbfc:1.1-20110624-109"
+        compile ":jdom:1.1.1"
     }
 
     plugins {
@@ -64,7 +65,7 @@ grails.project.dependency.resolution = {
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"
-        compile ":jquery:1.10.1"
+        compile ":jquery:1.10.0"
         //compile ":resources:1.0.2"
 
         build ":tomcat:$grailsVersion"
