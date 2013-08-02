@@ -123,7 +123,7 @@
     </target>
 
 <!-- Performs the actual building of war file using grails war. Cleans before building -->
-    <target name="build-war" depends="remove-grails-plugins">
+    <target name="build-war" >
         <grails command="clean" cwd="${builddir}">
             <sysprops>
                 <sysproperty key="grails.work.dir" value="${grailsWorkdir}"/>
