@@ -397,11 +397,11 @@ weceem.security.policy.path = jummp.security.cms.policy
 grails.resources.modules = {
     branding_style {
         if (jummp.branding.style) {
-        	resource url:"/css/${jummp.branding.style}.less"
+            resource url:"/css/${jummp.branding.style}.less"
         }
-    	else {
-    		resource url:"/css/${jummp.branding.deployment}.less" 
-    	}
+        else {
+            resource url:"/css/${jummp.branding.deployment}.less" 
+        }
     }
 }
-//grails.resources.adhoc.excludes.patterns=["/wcm-admin/*","wcm-admin/*"]
+grails.resources.adhoc.excludes=["/content/*"]
