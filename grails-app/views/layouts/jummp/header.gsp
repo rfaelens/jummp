@@ -1,8 +1,5 @@
-<title><g:layoutTitle default="${g.message(code: 'jummp.main.title') }"/></title>
-<link rel="shortcut icon" href="${g.createLink(uri: '/images/favicon.ico')}"/>
-<r:script>
-    $.appName = "${grailsApplication.metadata["app.name"]}";
-</r:script>
-<r:require module="branding_style"/>
-<r:require module="core"/>
+<div class='modal' id='overlayContainer'><div class="contentWrap"></div></div>
+<div id="topBackground"></div>
+<div id="middleBackground"></div>
+<div id="logo"></div>
     

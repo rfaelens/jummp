@@ -1,20 +1,13 @@
 <!doctype html>
 <html>
 <head>
-    <g:applyLayout name="${grailsApplication.config.jummp.branding.style}/header"/>
+    <g:applyLayout name="${grailsApplication.config.jummp.branding.style}/head"/>
     <r:layoutResources/>
     <g:layoutHead/>
 </head>
 <body>
-    <div class='modal' id='overlayContainer'><div class="contentWrap"></div></div>
-    <div id="topBackground"></div>
-    <div id="middleBackground"></div>
-    <div id="logo"></div>
-    <div id="modeSwitch">
-        <!-- TODO: active class has to be set on really selected mode -->
-        <a href="${g.createLink(controller: 'search', action: 'list')}"><jummp:button class="left"><g:message code="jummp.main.search"/></jummp:button></a>
-        <a href="${g.createLink(controller: 'model', action: 'create')}"><jummp:button class="right"><g:message code="jummp.main.submit"/></jummp:button></a>
-    </div>
+    <g:applyLayout name="${grailsApplication.config.jummp.branding.style}/header"/>
+    <g:applyLayout name="${grailsApplication.config.jummp.branding.style}/displayOptions"/>
     <div id="container">
         <div id='overlayTable'>
             <div id='overlayTableRow'>
@@ -28,6 +21,8 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div id="container">
         <div id="loginLogout">
             <sec:ifLoggedIn>
                 <jummp:button class="close logout"><g:message code="jummp.main.logout"/></jummp:button>
@@ -36,6 +31,8 @@
                 <jummp:button class="login"><g:message code="jummp.main.login"/></jummp:button>
             </sec:ifNotLoggedIn>
         </div>
+    </div>
+    <div id="container">
         <div id="nav">
             <!-- TODO: active class has to be set on really selected mode -->
             <div class="left ${pageProperty(name: 'body.activetab') ? (pageProperty(name: 'body.activetab') == 'about' ? 'active' : '') : 'active'}"><a href="${g.createLink(uri: '/')}"><g:message code="jummp.main.tabs.about"/></a></div>
@@ -59,7 +56,7 @@
             <wcm:render path="links"/>
         </div>
     </div>
-    <wcm:render path="footer"/>
+    <g:applyLayout name="${grailsApplication.config.jummp.branding.style}/footer"/>
     <r:layoutResources/>
 </body>
 </html>
