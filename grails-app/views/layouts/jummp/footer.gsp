@@ -1,2 +1,0 @@
-<wcm:render path="footer"/>
-
