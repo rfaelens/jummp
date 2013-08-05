@@ -26,6 +26,7 @@ grails.project.dependency.resolution = {
         }
         //test "org.junit:junit:4.10"
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit' }
+        compile "commons-io:commons-io:2.4"
     }
 
     plugins {
