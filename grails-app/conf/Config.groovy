@@ -76,7 +76,7 @@ environments {
 }
 //branding
 jummp.branding.deployment="biomodels" //used to select messages,and style if jummp.branding.style is not specified 
-jummp.branding.style="jummp" //used to specify any other name for the css file
+jummp.branding.style="biomodels" //used to specify any other name for the css file
 // log4j configuration
 log4j = {
     // Example of changing the log pattern for the default console
