@@ -161,6 +161,7 @@ grails.plugin.location.'jummp-plugin-git' = "jummp-plugins/jummp-plugin-git"
 // Disconnect SVN for now because of the changes to the VcsManager interface and lack of time
 //grails.plugin.location.'jummp-plugin-subversion' = "jummp-plugins/jummp-plugin-subversion"
 grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
+grails.plugin.location.'jummp-plugin-combine-archive' = "jummp-plugins/jummp-plugin-combine-archive"
 grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
 grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plugin-simple-logging"
 grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"

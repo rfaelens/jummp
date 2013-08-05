@@ -1,3 +1,5 @@
+import org.springframework.beans.factory.NoSuchBeanDefinitionException
+
 class JummpPluginCombineArchiveGrailsPlugin {
     // the plugin version
     def version = "0.1"
@@ -11,10 +13,10 @@ class JummpPluginCombineArchiveGrailsPlugin {
 
     // TODO Fill in these fields
     def title = "Jummp Plugin Combine Archive Plugin" // Headline display name of the plugin
-    def author = "Your name"
+    def author = "European Bioinformatics Institute (EMBL-EBI)"
     def authorEmail = ""
     def description = '''\
-Brief summary/description of the plugin.
+Adds support for the COMBINE archive into JUMMP.
 '''
 
     // URL to the plugin's documentation
@@ -30,7 +32,7 @@ Brief summary/description of the plugin.
         url: "http://www.ebi.ac.uk/"
     ]
 
-    def developers = [ 
+    def developers = [
         [ name: "Mihai Glonț", email: "mihai.glont@ebi.ac.uk" ]
     ]
 
@@ -52,7 +54,13 @@ Brief summary/description of the plugin.
     }
 
     def doWithApplicationContext = { applicationContext ->
-        // TODO Implement post initialization spring config (optional)
+         try {
+            def service = applicationContext.getBean("modelFileFormatService")
+            def modelFormat = service.registerModelFormat("OMEX", "COMBINE archive")
+            service.handleModelFormat(modelFormat, "omexService")
+        } catch(NoSuchBeanDefinitionException e) {
+            println("ModelFileFormatService is not available!")
+        }
     }
 
     def onChange = { event ->
