@@ -22,8 +22,10 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") {
-            excludes 'junit', 'slf4j-api', 'slf4j-log4j12'
+            excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4'
         }
+        //test "org.junit:junit:4.10"
+        runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit' }
     }
 
     plugins {
