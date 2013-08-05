@@ -16,7 +16,7 @@
             <td class='key'><g:message code="model.model.version"/></td>
             <td class='value'>${revision.revisionNumber}</td>
             <td class='key'><g:message code="model.model.format"/></td>
-            <td class='value'>${revision.format.identifier}</td>
+            <td class='value'>${revision.format.name}</td>
         </tr>
         <tr>
             <td class='key left'><g:message code="model.model.biomodelsId"/></td>
