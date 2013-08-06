@@ -31,7 +31,7 @@
 <!-- local-title -->
 <!-- NB: for additional title style patterns, see http://frontier.ebi.ac.uk/web/style/patterns -->
 <div id="local-title" class="grid_12 alpha logo-title"> 
-	<a href="[service-url]" title="Back to Biomodels homepage">
+	<a href="${createLink(uri: '/', absolute: true)}" title="Back to Biomodels homepage">
 		<r:img uri="/images/biomodels/logo_small.png"/>
 		<%-- <img src="[service-logo]" alt="[service-name] logo" width="x" height="y"> --%>
 	</a> 
