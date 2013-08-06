@@ -121,6 +121,7 @@ class GitManager implements VcsManager {
                     channel.write(ByteBuffer.wrap("\n".getBytes())) 
                 }
                 catch(Exception ignore) {
+                }
                 if (lock) {
                     return lock
                 }
