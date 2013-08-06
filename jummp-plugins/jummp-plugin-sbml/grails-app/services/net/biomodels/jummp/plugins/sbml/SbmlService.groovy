@@ -12,6 +12,8 @@ import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamException
 import javax.xml.stream.XMLStreamReader
 import org.apache.commons.io.FileUtils
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.plugins.codecs.URLCodec
 import org.jdom.Document
 import org.jdom.Element
@@ -65,6 +67,8 @@ import org.springframework.beans.factory.InitializingBean
 class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     static transactional = true
+    private static final Log log = LogFactory.getLog(this)
+    private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
 
     /**
      * Dependency Injection of MiriamService
@@ -226,39 +230,13 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
      * @return the name of the model or an empty string if no file is supplied.
      */
     @Profiled(tag="SbmlService.extractName")
-    public String extractName(final List<File> model) {
+    public String extractName(List<File> model) {
+        model = model.findAll{it && it.exists() && it.canRead()}
         if (!model) {
             return ""
         }
-        String theName
-        def fileReader = new FileReader(model.first())
-        XMLInputFactory factory = XMLInputFactory.newInstance()
-        factory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.FALSE)
-        XMLStreamReader xmlReader
-        try {
-            xmlReader = factory.createXMLStreamReader(fileReader)
-            boolean found = false
-            while (xmlReader.hasNext() && !found) {
-                xmlReader.next()
-                if (xmlReader.startElement) {
-                    String result = processXmlElement(xmlReader)
-                    if (result) {
-                        theName = result
-                        found = true
-                    } else {
-                        xmlReader.next()
-                    }
-                }
-            }
-        } catch (XMLStreamException e) {
-            def errorMsg = new StringBuffer("Error while extracting the name from ${model.inspect()}. ")
-            errorMsg.append("Offending file ${model.first().properties} caused ${e.message}.\n")
-            log.error (errorMsg.toString(), e)
-        } finally {
-            xmlReader?.close()
-            fileReader?.close()
-            return theName.toString()
-        }
+        String name = findModelAttribute(model.first(), "model", "name")
+        return name ? name : ""
     }
 
     /**
@@ -324,12 +302,12 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     @Profiled(tag="SbmlService.getVersion")
     public long getVersion(RevisionTransportCommand revision) {
-        return getFromCache(revision).version
+        return fetchModelAttributeFromRevision(revision, "version")
     }
 
     @Profiled(tag="SbmlService.getLevel")
     public long getLevel(RevisionTransportCommand revision) {
-        return getFromCache(revision).level
+        return fetchModelAttributeFromRevision(revision, "level")
     }
 
     @Profiled(tag="SbmlService.getNotes")
@@ -838,11 +816,101 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         return biopaxConverter
     }
 
-    private String processXmlElement(XMLStreamReader reader) {
-        if ("model".equals(reader.getLocalName())) {
-            return reader.getAttributeValue(null, "name")
+    private long fetchModelAttributeFromRevision(RevisionTransportCommand revision, String attributeName) {
+        File mainFile = fetchMainFileFromRevision(revision)
+        if (!mainFile) {
+            //we have already logged this error, just return
+            return 0
+        }
+        String attributeValue = findModelAttribute(mainFile, "sbml", attributeName)
+        return longFromString(attributeValue, attributeName, mainFile)
+    }
+
+    private File fetchMainFileFromRevision(RevisionTransportCommand revision) {
+        final String mainFileLocation = revision?.files?.find {it.mainFile}.path
+        if (!mainFileLocation) {
+            log.error "The main file of revision ${revision.properties} is undefined."
+            return null
+        }
+        File mainFile = new File(mainFileLocation)
+        if (!mainFile || !mainFile.canRead()) {
+            def errMsg = new StringBuilder("None of the files ").append(revision?.files?.inspect()).
+                        append(" of revision ").append(revision.properties).append("is a main file.")
+            log.error errMsg.toString()
+            return null
+        }
+        return mainFile
+    }
+
+    private String findModelAttribute(final File model, String elementName, String attributeName) {
+        if (null == elementName) {
+            elementName = ""
+        }
+        if (null == attributeName) {
+            attributeName = ""
+        }
+        if (IS_INFO_ENABLED) {
+            def info = new StringBuilder("Extracting attribute ").append(attributeName).
+                        append(" of element ").append(elementName).append(" from ").append(model.properties)
+            log.info(info.toString())
+        }
+        String theResult
+        def fileReader = new FileReader(model)
+        XMLInputFactory factory = XMLInputFactory.newInstance()
+        factory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.FALSE)
+        XMLStreamReader xmlReader
+        try {
+            xmlReader = factory.createXMLStreamReader(fileReader)
+            boolean found = false
+            while (xmlReader.hasNext() && !found) {
+                xmlReader.next()
+                if (xmlReader.startElement) {
+                    String result = processXmlElement(xmlReader, elementName, attributeName)
+                    if (result) {
+                        theResult = result
+                        found = true
+                    } else {
+                        xmlReader.next()
+                    }
+                }
+            }
+        } catch (XMLStreamException e) {
+            def errorMsg = new StringBuilder("Error while extracting property ").append(elementName).
+                        append(".").append(attributeName).append(" from ").append(model.properties)
+            errorMsg.append(". The offending file caused ${e.message}.\n")
+            log.error (errorMsg.toString(), e)
+        } finally {
+            xmlReader?.close()
+            fileReader?.close()
+            return theResult
+        }
+    }
+
+    private String processXmlElement(XMLStreamReader reader, String element, String attribute) {
+        if (element.equals(reader.getLocalName())) {
+            return reader.getAttributeValue(null, attribute)
         }
         return null
+    }
+
+    /*
+     * Convenience method for handling conversions from String to long.
+     * @param value the value that should be converted to long
+     * @param name the name of attribute whose value is being converted. Used in the log messages.
+     * @param mainFile the name of the file from which the attribute was extracted. Used in the log messages.
+     * @return the value of the attribute as a long, or zero if the conversion fails.
+     */
+    private long longFromString(String value, String name, File mainFile) {
+        long level = 0
+        try {
+            level = value as long
+        } catch (NumberFormatException e) {
+            def errMsg = new StringBuilder("Error extracting model attribute from ").append(mainFile.properties).
+                        append(". ").append(name). append(" ").append(value).append(" is not a number.")
+            log.error errMsg.toString(), e
+        } finally {
+            return level
+        }
     }
 
     /**

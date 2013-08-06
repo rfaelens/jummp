@@ -44,6 +44,18 @@ class SbmlServiceTests extends JummpIntegrationTest {
     }
 
     @Test
+    void testExtractName() {
+        File myModel = null
+        assertEquals("", sbmlService.extractName([myModel]))
+        myModel = new File("target/sbml/myModel")
+        FileUtils.deleteQuietly(myModel)
+        assertEquals("", sbmlService.extractName([myModel]))
+        assertEquals("", sbmlService.extractName([myModel, myModel]))
+        myModel = new File("test/files/BIOMD0000000272.xml")
+        assertEquals("Becker2010_EpoR_AuxiliaryModel", sbmlService.extractName([myModel]))
+    }
+
+    @Test
     void testAreFilesThisFormat() {
         File file = new File("target/sbml/test")
         FileUtils.deleteQuietly(file)
@@ -70,7 +82,8 @@ class SbmlServiceTests extends JummpIntegrationTest {
     @Test
     void testLevelAndVersion() {
         authenticateAsTestUser()
-        def rf = new RepositoryFileTransportCommand(path: smallModel("BIOMD0000000272.xml").absolutePath,description: "")
+        def rf = new RepositoryFileTransportCommand(path: smallModel("BIOMD0000000272.xml").absolutePath,
+                    description: "", mainFile: true)
         Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
