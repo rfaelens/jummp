@@ -49,6 +49,6 @@ modules = {
     	resource url:'/js/jquery/jquery-ui-v1.10.3.js'
     }
     ddmore_style {
-    	resource url:'/css/ddm.css'
+    	resource url:'/css/ddmorestyle.css'
     }
 }

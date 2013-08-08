@@ -1,6 +1,6 @@
 <div id="wrapper" class="container_24">
 <header>
-<div id="global-ddmore-masthead" class="masthead grid_24">
+<div id="global-masthead" class="masthead grid_24">
 <!--This has to be one line and no newline characters-->
 <a href="//ddmore.eu/" title="Go to the DDMoRe homepage"><r:img uri="/images/ddmore/logo-small.png"/></a>
 <nav>
