@@ -1,7 +1,7 @@
 <nav>
 <ul class="grid_24" id="local-nav">
   <li class="first"><a href="${g.createLink(controller: 'search', action: 'list')}">Browse</a></li>
-  <li class="active"><a href="${g.createLink(controller: 'model', action: 'create')}">Submit</a></li>
+  <li><a href="${g.createLink(controller: 'model', action: 'create')}">Submit</a></li>
   <li><a href="#">Help</a></li>
   <li class="last"><a href="#">About Biomodels</a></li>
   <!-- If you need to include functional (as opposed to purely navigational) links in your local menu,
