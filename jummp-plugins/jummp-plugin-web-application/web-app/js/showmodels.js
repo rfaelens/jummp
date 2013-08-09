@@ -18,19 +18,22 @@ $.jummp.showModels.changeModel = function (userId, field, target) {
 $.jummp.showModels.loadModelList = function () {
     "use strict";
     $('#modelTable').dataTable({
-        bFilter: true,
+        bFilter: false,
         bProcessing: true,
         bServerSide: true,
         bSort: true,
-        bJQueryUI: false,
+        bJQueryUI: true,
         bAutoWidth: false,
         sAjaxSource: 'dataTableSource',
         aoColumnDefs: [
             { bSortable: false, aTargets: [2] }
         ],
-        bScrollInfinite: true,
+        sPaginationType: "full_numbers",
+        iDisplayLength: 10,
+        bLengthChange: false,
+        bScrollInfinite: false,
         bScrollCollapse: true,
-        sScrollY: "400px",
+        sScrollY: "500px",
         bDeferRender: true,
         "fnServerData": function (sSource, aoData, fnCallback) {
             $.ajax({
