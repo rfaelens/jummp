@@ -2,6 +2,7 @@ package net.biomodels.jummp.webapp
 
 import grails.converters.JSON
 import net.biomodels.jummp.core.model.ModelListSorting
+import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
 
 class SearchController {
     /**
@@ -58,10 +59,12 @@ class SearchController {
 
         List models = modelService.getAllModels(start, length, params.sSortDir_0 == "asc", sort, params.sSearch)
         models.each { model ->
+            MTC modelTC=model.toCommandObject()
             dataToRender.aaData << [
                 model.id,
                 model.name,
-                model.publication
+                modelTC.submitter,
+                modelTC.submissionDate.getTime()
             ]
         }
         render dataToRender as JSON

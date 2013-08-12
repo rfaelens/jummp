@@ -3,7 +3,7 @@
     <head>
         <title>Model Listing</title>
         <meta name="layout" content="main" />
-        <r:require modules="showModels,jqueryui_latest"/>
+        <r:require modules="showModels"/>
         <jqDT:resources/>
         <g:render template="/templates/search/tablestyles"/>
     </head>
@@ -13,7 +13,8 @@
             <tr>
                 <th><b><g:message code="model.list.modelId"/></b></th>
                 <th><b><g:message code="model.list.name"/></b></th>
-                <th><b><g:message code="model.list.publicationId"/></b></th>
+                <th><b><g:message code="model.list.submitter"/></b></th>
+                <th><b><g:message code="model.list.submissionDate"/></b></th>
             </tr>
             </thead>
             <tbody></tbody>

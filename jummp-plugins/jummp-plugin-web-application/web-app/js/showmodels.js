@@ -24,7 +24,7 @@ $.jummp.showModels.loadModelList = function () {
         bSort: true,
         bJQueryUI: true,
         bAutoWidth: false,
-        sAjaxSource: 'dataTableSource',
+        sSource: 'search',
         aoColumnDefs: [
             { bSortable: false, aTargets: [2] }
         ],
@@ -39,7 +39,7 @@ $.jummp.showModels.loadModelList = function () {
             $.ajax({
                 "dataType": 'json',
                 "type": "POST",
-                "url": sSource,
+                "url": $.jummp.createLink("search", "dataTableSource"),
                 "data": aoData,
                 "error": function () {
                     // clear the table
@@ -52,7 +52,8 @@ $.jummp.showModels.loadModelList = function () {
                         id = rowData[0];
                         rowData[0] = "<a class='animate' onclick=\"$.jummp.showModels.showOverlay('" + $.jummp.createLink("model", "model", id) + "');\" href=\"#\">" + id + "</a>";
                         rowData[1] = rowData[1] ? rowData[1].replace(/_/g, " ") : "-";
-                        rowData[2] = rowData[2] ? rowData[2].title : "-";
+                        var date=new Date(rowData[3]);
+                        rowData[3]=date.toUTCString();
                     }
                     fnCallback(json);
                 }
