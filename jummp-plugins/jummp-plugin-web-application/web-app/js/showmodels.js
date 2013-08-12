@@ -52,7 +52,8 @@ $.jummp.showModels.loadModelList = function () {
                         id = rowData[0];
                         rowData[0] = "<a class='animate' onclick=\"$.jummp.showModels.showOverlay('" + $.jummp.createLink("model", "model", id) + "');\" href=\"#\">" + id + "</a>";
                         rowData[1] = rowData[1] ? rowData[1].replace(/_/g, " ") : "-";
-                        rowData[2] = rowData[2] ? rowData[2].title : "-";
+                        var date=new Date(rowData[3]);
+                        rowData[3]=date.toUTCString();
                     }
                     fnCallback(json);
                 }
