@@ -4,7 +4,6 @@
        More info: h5bp.com/b/378 -->
   <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> --> <!-- Not yet implemented -->
 
-  <title>BioModels &lt; Database &lt; EMBL-EBI</title>
   <meta name="description" content="EMBL-EBI"><!-- Describe what this page is about -->
   <meta name="keywords" content="bioinformatics, europe, institute"><!-- A few keywords that relate to the content of THIS PAGE (not the whol project) -->
   <meta name="jummp" content="EMBL-EBI"><!-- Your [project-name] here -->
