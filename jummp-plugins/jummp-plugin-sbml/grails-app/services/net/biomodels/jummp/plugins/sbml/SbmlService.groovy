@@ -310,6 +310,13 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         return fetchModelAttributeFromRevision(revision, "level")
     }
 
+    @Profiled(tag="SbmlService.getFormatVersion")
+    public String getFormatVersion(RevisionTransportCommand revision) {
+        final long LEVEL = getLevel(revision)
+        final long VERSION = getVersion(revision)
+        return "L${LEVEL}V${VERSION}"
+    }
+
     @Profiled(tag="SbmlService.getNotes")
     public String getNotes(RevisionTransportCommand revision) {
         // JSBML may return null - see https://sourceforge.net/tracker/?func=detail&aid=3300490&group_id=279608&atid=1186776
