@@ -8,7 +8,7 @@
         <title><g:message code="submission.summary.header"/></title>
     </head>
     <body>
-    	<h1><g:message code="submission.summary.header"/></h1>
+    	<h2><g:message code="submission.summary.header"/></h2>
         <g:form>
             <div class="dialog">
                 <table class="formtable">

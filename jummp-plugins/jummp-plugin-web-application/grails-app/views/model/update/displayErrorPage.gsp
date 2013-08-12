@@ -7,7 +7,7 @@
         <title>Error Page</title>
     </head>
     <body>
-        <h1>Oh, snap</h1>
+        <h2>Oh, snap</h2>
         <p>Something bad happened. That is all we know. Sorry 'bout that.</p>
     </body>
 </html>

@@ -121,13 +121,10 @@ class GitManager implements VcsManager {
                     channel.write(ByteBuffer.wrap("\n".getBytes())) 
                 }
                 catch(Exception ignore) {
-                    ignore.printStackTrace()
-                    log.error(ignore.toString())
                 }
                 if (lock) {
                     return lock
                 }
-                log.error("Could not get lock.. waiting "+accumulate)
                 Thread.sleep(100)
                 accumulate+=100
             }

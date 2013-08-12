@@ -40,7 +40,7 @@
           </div>
         </g:if>
         <g:render template="/templates/errorMessage"/>
-        <h1><g:message code="submission.upload.header"/></h1>
+        <h2><g:message code="submission.upload.header"/></h2>
         <p style="padding-bottom:1em"><g:message code="submission.upload.explanation"/></p>
         <g:uploadForm id="fileUpload" novalidate="false" autocomplete="false">
             <div class="dialog">
