@@ -24,7 +24,7 @@ $.jummp.showModels.loadModelList = function () {
         bSort: true,
         bJQueryUI: true,
         bAutoWidth: false,
-        sAjaxSource: 'dataTableSource',
+        sSource: 'search',
         aoColumnDefs: [
             { bSortable: false, aTargets: [2] }
         ],
@@ -39,7 +39,7 @@ $.jummp.showModels.loadModelList = function () {
             $.ajax({
                 "dataType": 'json',
                 "type": "POST",
-                "url": sSource,
+                "url": $.jummp.createLink("search", "dataTableSource"),
                 "data": aoData,
                 "error": function () {
                     // clear the table
