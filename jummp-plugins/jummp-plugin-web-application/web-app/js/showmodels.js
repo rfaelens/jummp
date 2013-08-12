@@ -168,12 +168,12 @@ $.jummp.showModels.lastAccessedModels = function (container) {
         cache: false, // makes IE happy
         success: function (data) {
             if (data.length === 0) {
-                $("h2", container).text($.i18n.prop("model.history.empty"));
+                $("h3", container).text($.i18n.prop("model.history.empty"));
                 $("p", container).text("");
                 return;
             }
             var ul, i;
-            $("h2", container).text($.i18n.prop("model.history.explanation"));
+            $("h3", container).text($.i18n.prop("model.history.explanation"));
             $("p", container).text("");
             ul = $("<ul/>");
             for (i = 0; i < data.length; i += 1) {
