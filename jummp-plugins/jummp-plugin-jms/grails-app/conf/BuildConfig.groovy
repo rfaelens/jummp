@@ -43,6 +43,7 @@ grails.project.dependency.resolution = {
                 'org.apache.xbean:xbean-spring:3.7') {
 /*            excludes 'commons-logging',
                     'commons-pool',
+                    'commons-io',
                     'groovy-all',
                     'howl-logger',
                     'log4j',
@@ -51,8 +52,8 @@ grails.project.dependency.resolution = {
                     'spring-core',
                     'spring-test',
                     'slf4j-api',
-                    'xalan',
-                    'xml-apis'
+                    'xalan'
+                    //'xml-apis'
 */
         }
 
@@ -67,7 +68,7 @@ grails.project.dependency.resolution = {
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"
-        compile ":jquery:1.6.1.1"
+        compile ":jquery:1.10.0"
         //compile ":resources:1.0.2"
 
         build ":tomcat:$grailsVersion"

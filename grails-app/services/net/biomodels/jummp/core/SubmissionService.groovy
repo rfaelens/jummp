@@ -161,7 +161,8 @@ class SubmissionService {
         protected void updateRevisionFromFiles(Map<String,Object> workingMemory) {
             RTC revision = workingMemory.get("RevisionTC") as RTC
             List<File> files = getFilesFromMemory(workingMemory, true)
-            ModelFormat modelFormat=ModelFormat.findByIdentifier(revision.format.identifier)
+            final String formatVersion = revision.format.formatVersion ? revision.format.formatVersion : ""
+            ModelFormat modelFormat=ModelFormat.findByIdentifierAndFormatVersion(revision.format.identifier, formatVersion)
             revision.name = modelFileFormatService.extractName(files,modelFormat)
             revision.description=modelFileFormatService.extractDescription(files, modelFormat)
             revision.validated=workingMemory.get("model_validation_result") as Boolean
@@ -495,8 +496,10 @@ class SubmissionService {
         protected void createTransportObjects(Map<String,Object> workingMemory) {
             RTC revision=workingMemory.remove("LastRevision") as RTC
             if (workingMemory.containsKey("reprocess_files")) {
-                revision.format=ModelFormat.findByIdentifier(workingMemory.get("model_type") as String).
-                                            toCommandObject()
+                String formatId = workingMemory["model_type"] as String
+                final String formatVersion = revision.format.formatVersion ? revision.format.formatVersion : ""
+                revision.format =
+                        ModelFormat.findByIdentifierAndFormatVersion(formatId, formatVersion).toCommandObject()
             }
             else {
                workingMemory.put("model_type",revision.format.identifier)

@@ -10,9 +10,10 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
  * So it is possible to extend JUMMP to support more formats by just installing a new
  * plugin without any needs to adjust the core application.
  *
- * A ModelFormat consists of a unique identifier and a human readable name which can be
- * used in the UIs.
- * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * A ModelFormat consists of a unique identifier, a human readable name which can be
+ * used in the UIs and a version that records the precise version of the format's schema.
+ * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class ModelFormat implements Serializable {
     /**
@@ -23,13 +24,28 @@ class ModelFormat implements Serializable {
      * A human readable more spoken name. E.g. Systems Biology Markup Language
      */
     String name
+    /**
+     * A unique identifier of the version of the format in which this revision is encoded.
+     */
+    String formatVersion
+
+    // keep this closure transient to avoid flow scope errors
+    transient beforeInsert() {
+        formatVersion = formatVersion == null ? "" : formatVersion
+    }
+
+    // DRY is nice, but duplicating one line is more efficient than another method call
+    transient beforeUpdate() {
+        formatVersion = formatVersion == null ? "" : formatVersion
+    }
 
     static constraints = {
-        identifier(unique: true, blank: false, nullable: false)
+        identifier(unique: false, blank: false, nullable: false)
         name(blank: false, nullable: false)
+        formatVersion(blank: true, unique: "identifier")
     }
 
     ModelFormatTransportCommand toCommandObject() {
-        return new ModelFormatTransportCommand(id: id, identifier: identifier, name: name)
+        return new ModelFormatTransportCommand(id: id, identifier: identifier, name: name, formatVersion: formatVersion)
     }
 }

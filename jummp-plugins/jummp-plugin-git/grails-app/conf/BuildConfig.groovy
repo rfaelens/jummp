@@ -44,7 +44,7 @@ grails.project.dependency.resolution = {
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"
-        compile ":jquery:1.10.1"
+        compile ":jquery:1.10.0"
         //compile ":resources:1.0.2"
 
         build ":tomcat:$grailsVersion"

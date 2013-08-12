@@ -553,9 +553,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             modelFiles.add(f)
         }
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
-        Model model=getModel(rev.model.id)
+        Model model = getModel(rev.model.id)
+        final String formatVersion = rev.format.formatVersion ? rev.format.formatVersion : ""
         Revision revision = new Revision(model: model, name: rev.name, description: rev.description, comment: rev.comment, uploadDate: new Date(), owner: currentUser,
-                minorRevision: false, validated:rev.validated, format: ModelFormat.findByIdentifier(rev.format.identifier))
+                minorRevision: false, validated:rev.validated, format: ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion))
         def stopWatch = new Log4JStopWatch("modelService.addValidatedRevision.rftcCreation")
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
@@ -673,7 +674,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         stopWatch.lap("Finished adding RepositoryFiles to the Model")
         stopWatch.setTag("modelService.uploadValidatedModel.prepareVcsStorage")
-        ModelFormat format=ModelFormat.findByIdentifier(rev.format.identifier)
+        final String formatVersion = rev.format.formatVersion ? rev.format.formatVersion : ""
+        ModelFormat format=ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion)
 
         // vcs identifier is upload date + name - this should by all means be unique
         String pathPrefix =
@@ -699,7 +701,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 description: rev.description,
                 comment: rev.comment,
                 uploadDate: new Date(),
-                format: ModelFormat.findByIdentifier(rev.model.format.identifier))
+                format: format)
 
         // keep a list of RFs closeby, as we may need to discard all of them
         List<RepositoryFile> domainObjects = []
@@ -750,7 +752,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         stopWatch.lap("Finished importing the model into the VCS.")
         stopWatch.setTag("modelService.uploadValidatedModel.gormValidation")
         domainObjects.each {
-               revision.addToRepoFiles(it)
+           revision.addToRepoFiles(it)
         }
         if (revision.validate()) {
             model.addToRevisions(revision)
@@ -887,7 +889,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         stopWatch.lap("Finished performing sanity checks.")
         stopWatch.setTag("modelService.uploadModelAsList.prepareVcsStorage")
         boolean valid = true
-        ModelFormat format=ModelFormat.findByIdentifier(meta.format.identifier)
+        ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(meta.format.identifier, "")
         if (!modelFileFormatService.validate(modelFiles, format)) {
             def err = "The files ${modelFiles.properties} do no comprise valid ${meta.format.identifier}"
             log.error(err)
@@ -918,8 +920,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 name: modelFileFormatService.extractName(modelFiles, format),
                 description: modelFileFormatService.extractDescription(modelFiles, format),
                 comment: meta.comment,
-                uploadDate: new Date(),
-                format: ModelFormat.findByIdentifier(meta.format.identifier))
+                uploadDate: new Date())
 
         // keep a list of RFs closeby, as we may need to discard all of them
         List<RepositoryFile> domainObjects = []
@@ -950,7 +951,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 domainObjects.add(domain)
             }
         }
-
+        String formatVersion = modelFileFormatService.getFormatVersion(revision)
+        revision.format = ModelFormat.findByIdentifierAndFormatVersion(meta.format.identifier, formatVersion)
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
         } catch (VcsException e) {
@@ -1132,8 +1134,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
 
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
-        Revision revision = new Revision(model: model, name: modelFileFormatService.extractName(modelFiles, format), description: modelFileFormatService.extractDescription(modelFiles, format), comment: comment, uploadDate: new Date(), owner: currentUser,
-                minorRevision: false, validated:valid, format: format)
+        Revision revision = new Revision(model: model, name: modelFileFormatService.extractName(modelFiles, format),
+                        description: modelFileFormatService.extractDescription(modelFiles, format), comment: comment,
+                        uploadDate: new Date(), owner: currentUser,
+                minorRevision: false, validated:valid)
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
             final String fileName = rf.path.split(File.separator).last()
@@ -1159,6 +1163,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 domainObjects.add(domain)
             }
         }
+        String formatVersion = modelFileFormatService.getFormatVersion(revision)
+        revision.format = ModelFormat.findByIdentifierAndFormatVersion(format.identifier, formatVersion)
 
         // save the new model in the database
         try {
@@ -1216,8 +1222,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.WRITE))
     }
 
-    
-    
     /**
      * Retrieves the model files for the @p revision.
      * @param revision The Model Revision for which the files should be retrieved.
@@ -1238,9 +1242,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         return files
     }
 
-    
-    
-    
     /**
      * Retrieves the model files for the @p revision.
      * @param revision The Model Revision for which the files should be retrieved.

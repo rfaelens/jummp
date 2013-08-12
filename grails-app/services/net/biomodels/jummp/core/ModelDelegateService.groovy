@@ -114,7 +114,8 @@ class ModelDelegateService implements IModelService {
     }
 
     RevisionTransportCommand addRevision(long modelId, File file, ModelFormatTransportCommand format, String comment) throws ModelException {
-        return modelService.addRevision(Model.get(modelId), file, ModelFormat.findByIdentifier(format.identifier), comment).toCommandObject()
+        return modelService.addRevision(Model.get(modelId), file,
+                ModelFormat.findByIdentifierAndFormatVersion(format.identifier, format.formatVersion), comment).toCommandObject()
     }
 
     Boolean canAddRevision(long modelId) {
