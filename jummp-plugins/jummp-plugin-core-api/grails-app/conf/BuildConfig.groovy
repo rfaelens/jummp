@@ -37,7 +37,7 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.5'
         // perf4j dependency
         compile "org.perf4j:perf4j:0.9.13"
-        runtime "commons-jexl:commons-jexl:1.1"
+        runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
 
         // plugin dependencies
     }

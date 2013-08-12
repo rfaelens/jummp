@@ -59,7 +59,8 @@ grails.project.dependency.resolution = {
                         'log4j',
                         'junit',
                         'commons-pool',
-                        'commons-dbcp'
+                        'commons-dbcp',
+                        'xstream'
         }
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
@@ -68,22 +69,20 @@ grails.project.dependency.resolution = {
         runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"
 
-        // bives
-        runtime 'org.apache.commons:commons-compress:1.1'
+        compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") { 
+            excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4' 
+        }
 
-        /*
-         * grails dependency-report still lists version 1.6.2 as a dependency of JUMMP
-         * although we don't actually explicitly require that version anywhere. It seems
-         * to be a transitive dependency of ehcache-core, which is required by hibernate-ehcache,
-         * which, in turn, is needed by hibernate.
-         */ 
-        //compile 'org.slf4j:slf4j-api:1.6.1' 
+        // bives
+        runtime('org.apache.commons:commons-compress:1.1') { excludes 'commons-io' }
+
         // jms
         runtime('org.apache.activemq:activeio-core:3.1.2',
                 'org.apache.activemq:activemq-core:5.5.0',
                 'org.apache.activemq:activemq-spring:5.5.0',
                 'org.apache.xbean:xbean-spring:3.7') {
             excludes 'commons-logging',
+                    'commons-io',
                     'commons-pool',
                     'groovy-all',
                     'howl-logger',
@@ -96,7 +95,8 @@ grails.project.dependency.resolution = {
                     'xalan',
                     'xml-apis'
         }
-        runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit' }
+        compile "xml-apis:xml-apis:1.4.01"
+        runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
 
         //git
         runtime 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
@@ -106,6 +106,10 @@ grails.project.dependency.resolution = {
                       'ant',
                       'log4j'
         }
+        //weceem, feeds
+        runtime("rome:rome:1.0RC2") { excludes 'junit', 'jdom' }
+        //lesscss
+        compile "commons-io:commons-io:2.4"
 
         // cobertura
         compile "asm:asm:3.1"
@@ -116,6 +120,7 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
+        compile ":webxml:1.4.1"
         compile ":perf4j:0.1.1"
         compile ":jms:1.2"
         compile ":executor:0.3"
@@ -129,7 +134,7 @@ grails.project.dependency.resolution = {
         compile ":svn:1.0.2"
         runtime ":spring-security-core:1.2.7.3"
         runtime(":spring-security-ldap:1.0.6"){ export = false }
-        compile ":lesscss-resources:1.3.3"
+        compile(":lesscss-resources:1.3.3") { excludes 'commons-io' }
         test ":code-coverage:1.2.6"
         test(":codenarc:0.18.1") { transitive = false }
         test ":gmetrics:0.3.1"
@@ -137,8 +142,13 @@ grails.project.dependency.resolution = {
             excludes 'xstream',
                      'quartz',
                      'jquery',
-                     'jquery-ui'
+                     'jquery-ui',
+                     //also exclude java feeds API rome in order to avoid conflicting revisions
+                     'feeds',
+                     'ckeditor'
         }
+        runtime(":feeds:1.6") { excludes 'rome', 'jdom' }
+        runtime(":ckeditor:3.6.3.0") { excludes 'svn' }
         compile ":jquery-datatables:1.7.5"
         compile ":jquery-ui:1.8.24"
         // Locale plugin

@@ -40,6 +40,7 @@ grails.project.dependency.resolution = {
                 'org.apache.activemq:activemq-spring:5.5.0',
                 'org.apache.xbean:xbean-spring:3.7') {
             excludes 'commons-logging',
+                    'commons-io',
                     'commons-pool',
                     'groovy-all',
                     'howl-logger',
@@ -49,9 +50,9 @@ grails.project.dependency.resolution = {
                     'spring-core',
                     'spring-test',
                     'slf4j-api',
-                    'xalan',
-                    'xml-apis'
+                    'xalan'//, 'xml-apis'
         }
+        runtime 'commons-io:commons-io:2.4'
 
         test 'hsqldb:hsqldb:1.8.0.10'
     }
