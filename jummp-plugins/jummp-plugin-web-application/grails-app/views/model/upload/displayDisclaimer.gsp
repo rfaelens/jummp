@@ -14,7 +14,7 @@
         </title>
     </head>
     <body>
-        <h1>Submission Guidelines</h1>
+        <h2>Submission Guidelines</h2>
         <g:if test="${isUpdate}">
         	<g:message code="submission.disclaimer.updateMessage" args="${ [params.id] }" />
         </g:if>

@@ -7,7 +7,7 @@
         <title>Model Information</title>
     </head>
     <body>
-        <h1>Model Information</h1>
+        <h2>Model Information</h2>
         <p>Please ensure the following fields are correctly filled in.</p>
 
         <g:form>

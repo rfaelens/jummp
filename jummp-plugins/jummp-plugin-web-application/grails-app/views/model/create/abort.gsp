@@ -7,7 +7,7 @@
         <title><g:message code="submission.abort.common.title"/></title>
     </head>
     <body>
-        <h1><g:message code="submission.abort.create.header"/></h1>
+        <h2><g:message code="submission.abort.create.header"/></h2>
         <p><g:message code="submission.abort.create.message" args="${[createLink(controller: 'model', action: 'create')]}"/></p>
     </body>
 </html>
