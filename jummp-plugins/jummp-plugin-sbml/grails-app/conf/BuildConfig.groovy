@@ -49,8 +49,10 @@ grails.project.dependency.resolution = {
                         'log4j',
                         'junit',
                         'commons-pool',
-                        'commons-dbcp'
+                        'commons-dbcp',
+                        'xstream'
         }
+        compile "com.thoughtworks.xstream:xstream:1.4.3"
         runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
         runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"

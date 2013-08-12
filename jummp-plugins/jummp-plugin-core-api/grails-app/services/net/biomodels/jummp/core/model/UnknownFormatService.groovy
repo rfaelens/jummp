@@ -10,7 +10,7 @@ class UnknownFormatService implements FileFormatService {
      * @param model File handle containing the Model to be validated.
      * @return @c true if the Model is valid, @c false otherwise
      */
-    public boolean validate(final List<File> model) {
+    public final boolean validate(final List<File> model) {
         return areFilesThisFormat(model)
     }
 
@@ -19,14 +19,23 @@ class UnknownFormatService implements FileFormatService {
      * @param model File handle containing the Model whose name should be extracted.
      * @return The name of the Model, if possible, an empty String if not possible
      */
-    public String extractName(final List<File> model) {
+    public final String extractName(final List<File> model) {
         return ""
     }
-    
+
+    /**
+     * Implementation of {@link net.biomodels.jummp.core.model.FileFormatService}
+     * Does not make any attempt extract the version of an unknown model as it is undefined.
+     * @param revision a revision of a model in a format that has not been recognised.
+     * @return an empty String.
+     */
+    public final String getFormatVersion(RevisionTransportCommand revision) {
+        return ""
+    }
     /**
      * Extracts the descrition from the @p model.
      */
-    public String extractDescription(final List<File> model) {
+    public final String extractDescription(final List<File> model) {
         return ""
     }
     /**
@@ -34,7 +43,7 @@ class UnknownFormatService implements FileFormatService {
      * @param revision The Revision identifying a model file
      * @return List of all URNs in the model file.
      */
-    public List<String> getAllAnnotationURNs(RevisionTransportCommand revision) {
+    public final List<String> getAllAnnotationURNs(RevisionTransportCommand revision) {
         return new LinkedList<String>()
     }
     /**
@@ -42,14 +51,14 @@ class UnknownFormatService implements FileFormatService {
      * @param revision  The Revision identifying a model file
      * @return List of all pubmeds used in the Revision
      */
-    public List<String> getPubMedAnnotation(RevisionTransportCommand revision) {
+    public final List<String> getPubMedAnnotation(RevisionTransportCommand revision) {
         return new LinkedList<String>()
     }
     /*
      * Checks whether the files passed comprise a model of this format
      * @param files The files comprising a potential model of this format
      */
-    public boolean areFilesThisFormat(final List<File> files) {
+    public final boolean areFilesThisFormat(final List<File> files) {
         if (files && !files.isEmpty()) {
             return true
         } 

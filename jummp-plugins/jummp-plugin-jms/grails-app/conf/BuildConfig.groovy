@@ -43,6 +43,7 @@ grails.project.dependency.resolution = {
                 'org.apache.xbean:xbean-spring:3.7') {
 /*            excludes 'commons-logging',
                     'commons-pool',
+                    'commons-io',
                     'groovy-all',
                     'howl-logger',
                     'log4j',
@@ -51,8 +52,8 @@ grails.project.dependency.resolution = {
                     'spring-core',
                     'spring-test',
                     'slf4j-api',
-                    'xalan',
-                    'xml-apis'
+                    'xalan'
+                    //'xml-apis'
 */
         }
 

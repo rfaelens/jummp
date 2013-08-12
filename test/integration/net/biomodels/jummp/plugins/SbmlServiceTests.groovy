@@ -89,11 +89,13 @@ class SbmlServiceTests extends JummpIntegrationTest {
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
         assertEquals(1, sbmlService.getLevel(rev))
         assertEquals(1, sbmlService.getVersion(rev))
+        assertEquals("L1V1", sbmlService.getFormatVersion(rev))
         rf.path = "test/files/BIOMD0000000272.xml"
         RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf,
-                ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L2V4"), "test").toCommandObject()
         assertEquals(2, sbmlService.getLevel(rev2))
         assertEquals(4, sbmlService.getVersion(rev2))
+        assertEquals("L2V4", sbmlService.getFormatVersion(rev2))
     }
 
     @Test
@@ -106,7 +108,7 @@ class SbmlServiceTests extends JummpIntegrationTest {
         assertEquals("", sbmlService.getMetaId(rev))
         rf.path = "test/files/BIOMD0000000272.xml"
         RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf,
-                ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L2V4"), "test").toCommandObject()
         assertEquals("_688624", sbmlService.getMetaId(rev2))
     }
 
@@ -152,7 +154,8 @@ class SbmlServiceTests extends JummpIntegrationTest {
   </model>
 </sbml>''')
         rf.path = modelWithNotes.absolutePath
-        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf, ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
+        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf, 
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L1V1"), "test").toCommandObject()
         assertEquals('''<notes>\n  <body xmlns="http://www.w3.org/1999/xhtml">\n<p>Test</p>\n    </body>\n  \n</notes>''', sbmlService.getNotes(rev2))
     }
 

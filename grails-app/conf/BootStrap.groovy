@@ -11,9 +11,9 @@ class BootStrap {
     def wcmSecurityService
 
     def init = { servletContext ->
-        ModelFormat format = ModelFormat.findByIdentifier("UNKNWON")
+        ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion("UNKNWON", "")
         if (!format) {
-            format = new ModelFormat(identifier: "UNKNOWN", name: "Unknown format")
+            format = new ModelFormat(identifier: "UNKNOWN", name: "Unknown format", formatVersion: "")
             format.save(flush: true)
         }
         def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT) 

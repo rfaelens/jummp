@@ -57,6 +57,10 @@ class OmexService implements FileFormatService {
         return allGood
     }
 
+    public String getFormatVersion(RevisionTransportCommand revision) {
+        return revision ? "0.1" : ""
+    }
+
     /*
      * Helper method that checks if a file appears to be a valid COMBINE archive.
      * @param f the file in question

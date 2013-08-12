@@ -9,6 +9,7 @@ package net.biomodels.jummp.core.model
  * The object can also be used as a command object for the web interface.
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Mihai Glonț  <mihai.glont@ebi.ac.uk>
  */
 class ModelFormatTransportCommand implements Serializable {
     private static final long serialVersionUID = 1L
@@ -24,4 +25,8 @@ class ModelFormatTransportCommand implements Serializable {
      * A human readable more spoken name. E.g. Systems Biology Markup Language
      */
     String name
+    /**
+     * The version of the format in question.
+     */
+    String formatVersion
 }
