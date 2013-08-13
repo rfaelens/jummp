@@ -36,7 +36,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         fileSystemService.root = parentLocation
         fileSystemService.currentModelContainer = parentLocation.absolutePath + File.separator + "ttt"
     }
-    
+
     @After
     void tearDown() {
         FileUtils.deleteDirectory(new File("target/vcs/git"))
@@ -73,8 +73,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         TestUploadFilesContinue continued=new TestUploadFilesContinue()
         continued.testrun()
     }
-    
-    
+
     @Test
     void testUpdateUploadedModel() {
         assertNotNull(authenticateAsAdmin())
@@ -87,7 +86,6 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         assertTrue(model.validate())
         new TestUpdateSbml(model.id, importFile).testrun()
     }
-    
 
     /* Tests upload pipeline, first with an empty list, 
      * then with a known SBML model */
@@ -95,6 +93,12 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     void testSubmitSBML() {
         assertNotNull(authenticateAsTestUser())
         new TestSubmitSBML().testrun()
+    }
+
+    @Test
+    void testSubmitOmex() {
+        authenticateAsTestUser()
+        new TestSubmitOmex().testrun()
     }
 
     /**
@@ -215,14 +219,13 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             new ModelController().updateFlow
         }
     }
-    
+
     /* Base class for the create flows*/
     abstract class CreateBase extends FlowBase {
         def getFlow() { 
             new ModelController().createFlow 
         }
     }
-    
 
     /* Class for testing out the update mechanism. Creates a model with an
      * unknown file format. Then updates the model with an sbml file thereby
@@ -400,6 +403,13 @@ class SubmissionFlowTests extends JummpIntegrationTest {
                                "SBML", 
                                "Becker2010_EpoR_AuxiliaryModel",
                                descriptionTests)
+        }
+    }
+
+    class TestSubmitOmex extends TestUploadFiles {
+        void performRemainingTest() {
+            final File MODEL_FILE = new File("jummp-plugins/jummp-plugin-combine-archive/test/files/sample.omex")
+            fileUploadPipeline(MODEL_FILE, "OMEX", "", [""] as String[])
         }
     }
 

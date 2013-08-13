@@ -891,7 +891,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         boolean valid = true
         ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(meta.format.identifier, "")
         if (!modelFileFormatService.validate(modelFiles, format)) {
-            def err = "The files ${modelFiles.properties} do no comprise valid ${meta.format.identifier}"
+            def err = "The files ${modelFiles.inspect()} do no comprise valid ${meta.format.identifier}"
             log.error(err)
        //     throw new ModelException(meta, "Invalid ${meta.format.identifier} submission.")
             valid=false
@@ -1128,7 +1128,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         boolean valid=true
         if (!modelFileFormatService.validate(modelFiles, format)) {
             final def m = model.toCommandObject()
-            log.warn("New revision of model ${m.properties} containing ${modelFiles.properties} does not comprise valid ${format.identifier}")
+            log.warn("New revision of model ${m.properties} containing ${modelFiles.inspect()} does not comprise valid ${format.identifier}")
             //throw new ModelException(m, "The file list does not comprise valid ${format.identifier}")
             valid=false;
         }

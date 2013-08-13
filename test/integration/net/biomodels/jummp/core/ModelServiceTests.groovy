@@ -603,8 +603,9 @@ class ModelServiceTests extends JummpIntegrationTest {
         File updateFile = new File("target/vcs/exchange/update.xml")
         updateFile.append("Test\n")
         FileUtils.touch(updateFile)
-        rf = new RepositoryFileTransportCommand(updateFile.path, description: "")
-        Revision rev = modelService.addRevisionAsFile(model, rf, ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", ""), "")
+        rf = new RepositoryFileTransportCommand(path: updateFile.path, description: "")
+        Revision rev = modelService.addRevisionAsFile(model, rf,
+                ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", ""), "")
         assertEquals(2, rev.revisionNumber)
         assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.ADMINISTRATION))
         assertTrue(aclUtilService.hasPermission(auth, rev, BasePermission.READ))
