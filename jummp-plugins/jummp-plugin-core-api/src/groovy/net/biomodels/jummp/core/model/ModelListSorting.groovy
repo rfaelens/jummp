@@ -13,5 +13,7 @@ public enum ModelListSorting {
     NAME, ///< sort by Model.name in alphanumerical order
     PUBLICATION, ///< sort by the Model's publication, TODO: what to sort on directly
     LAST_MODIFIED, ///< sort by the last modification date, that is latest revision
-    FORMAT ///< sort by the name of the format
+    FORMAT, ///< sort by the name of the format
+    SUBMITTER, ///< sort by the submitter
+    SUBMISSION_DATE ///< sort by the submission date
 }

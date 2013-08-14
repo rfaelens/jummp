@@ -39,32 +39,46 @@ class SearchController {
         def dataToRender = [:]
         dataToRender.sEcho = params.sEcho
         dataToRender.aaData = []
+        dataToRender.modelIDs= []
 
         dataToRender.iTotalRecords = modelService.getModelCount(params.sSearch)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.offset = start
         dataToRender.iSortCol_0 = params.iSortCol_0
         dataToRender.sSortDir_0 = params.sSortDir_0
-
+        
+        
         ModelListSorting sort
         switch (params.iSortCol_0 as int) {
-        case 1:
+        case 0:
             sort = ModelListSorting.NAME
             break
-        case 0: // id column is the default
+        case 1:
+            sort = ModelListSorting.FORMAT
+            break
+        case 2:
+            sort = ModelListSorting.SUBMITTER
+            break
+        case 3:
+            sort = ModelListSorting.SUBMISSION_DATE
+            break
+        case 4:
+            sort = ModelListSorting.LAST_MODIFIED
+            break
         default:
             sort = ModelListSorting.ID
             break
         }
-
         List models = modelService.getAllModels(start, length, params.sSortDir_0 == "asc", sort, params.sSearch)
         models.each { model ->
             MTC modelTC=model.toCommandObject()
+            dataToRender.modelIDs << [ model.id ]
             dataToRender.aaData << [
-                model.id,
                 model.name,
+                modelTC.format.name,
                 modelTC.submitter,
-                modelTC.submissionDate.getTime()
+                modelTC.submissionDate.getTime(),
+                modelTC.lastModifiedDate.getTime()
             ]
         }
         render dataToRender as JSON

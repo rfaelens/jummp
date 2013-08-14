@@ -140,6 +140,18 @@ class ModelService {
                         order("format", sorting)
                     }
                     break
+                case ModelListSorting.SUBMITTER:
+                    revisions {
+                        order("owner", sorting)
+                    }
+                    break
+                case ModelListSorting.SUBMISSION_DATE:
+                    /*
+                    * Hard to get to model submission date directly. However as model ids
+                    * are sequentially generated, they are used as a surrogate.
+                    */
+                    order("id", sorting)
+                    break
                 case ModelListSorting.PUBLICATION:
                     // TODO: implement, fall through to default
                 case ModelListSorting.ID: // Id is the default
@@ -192,6 +204,16 @@ ORDER BY
             break
         case ModelListSorting.FORMAT:
             query += "r.format"
+            break
+        case ModelListSorting.SUBMITTER:
+            query += "r.owner"
+            break
+       case ModelListSorting.SUBMISSION_DATE:
+       	    /*
+       	    * Hard to get to model submission date directly. However as model ids
+       	    * are sequentially generated, they are used as a surrogate.
+       	    */
+            query += "m.id"  
             break
         case ModelListSorting.PUBLICATION:
             // TODO: implement, fall through to default
