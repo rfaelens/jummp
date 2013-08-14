@@ -32,8 +32,7 @@
                     	</td>
                    </tr>
                     <tr>
-  	                <td class="name" style="vertical-align:top;">
-                        </td>
+  	                <td/>
                     	<td>
                     		<button>LOGIN</button>
                     	</td>
@@ -59,11 +58,6 @@
         $("#login div.loginButton button").click(function() {
         	$("#loginForm").submit();
         });
-        $("#login div.loginButton button").hover(function() {
-        	$("#login div.glow").show();
-        }, function() {
-        	$("#login div.glow").hide();
-        	});
     </script>
     </body>
 </html
