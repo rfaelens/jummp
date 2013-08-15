@@ -228,7 +228,6 @@ class ModelController {
                         flow.workingMemory["submitted_additionals"] = additionalsMap
                         def inputs = new HashMap<String, Object>()
                         submissionService.handleFileUpload(flow.workingMemory,inputs)
-                        PerformValidation()
                     }
             }
             on("MainFileMissingError") {
@@ -237,7 +236,7 @@ class ModelController {
             on("AdditionalReplacingMainError") {
             	    flash.error="submission.upload.error.additional_replacing_main"
             }.to "uploadFiles"
-            on("PerformValidation").to "performValidation"
+            on("success").to "performValidation"
         }
         
         performValidation {
@@ -311,6 +310,8 @@ class ModelController {
         saveModel {
             action {
                 try {
+                    System.out.println(flow.workingMemory)
+                    System.out.println(flow.workingMemory.get("RevisionTC").inspect())
                     submissionService.handleSubmission(flow.workingMemory)
                     session.result_submission=flow.workingMemory.get("model_id")
                 }

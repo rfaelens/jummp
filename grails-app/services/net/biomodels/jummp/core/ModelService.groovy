@@ -647,6 +647,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
+            revision.errors.allErrors.each {
+               log.error(it)
+            }
             revision.discard()
             final def m = model.toCommandObject()
             log.error("New Revision containing ${repoFiles.inspect()} for Model ${m} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")

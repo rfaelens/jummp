@@ -503,6 +503,7 @@ class SubmissionService {
             }
             else {
                workingMemory.put("model_type",revision.format.identifier)
+               workingMemory.put("model_validation_result",revision.validated)
             }
             storeTCs(workingMemory, revision.model, revision)
             //ensure that a new revision tc is used for submission, use 
