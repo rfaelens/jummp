@@ -310,8 +310,6 @@ class ModelController {
         saveModel {
             action {
                 try {
-                    System.out.println(flow.workingMemory)
-                    System.out.println(flow.workingMemory.get("RevisionTC").inspect())
                     submissionService.handleSubmission(flow.workingMemory)
                     session.result_submission=flow.workingMemory.get("model_id")
                 }
