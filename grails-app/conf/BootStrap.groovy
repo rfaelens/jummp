@@ -19,7 +19,7 @@ class BootStrap {
         def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT) 
         def service = ctx.getBean("modelFileFormatService")
         def modelFormat = service.registerModelFormat("UNKNOWN", "UNKNOWN")
-        service.handleModelFormat(modelFormat, "unknownFormatService")
+        service.handleModelFormat(modelFormat, "unknownFormatService", "jummp-plugin-core-api")
         /* ONLY NEEDED FOR USER ACCOUNT CREATION.
         if (!User.findByUsername("user")) {
            def user = new User(username: "user",

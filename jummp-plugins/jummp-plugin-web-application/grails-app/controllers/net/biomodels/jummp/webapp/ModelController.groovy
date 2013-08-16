@@ -361,16 +361,9 @@ class ModelController {
 
     def model = {
         RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        List<String> authors = []
-        rev.model.publication?.authors.each {
-            authors.add("${it.firstName} ${it.lastName}, ")
-        }
-        if(!authors.empty) {
-            String auth = authors.get(authors.size() - 1)
-            authors.remove(authors.get(authors.size() - 1))
-            authors.add(authors.size(), auth.substring(0, auth.length() - 2))
-        }
-        [revision: rev, authors: authors]
+        System.out.println("FORMAT: ${modelDelegateService.getPluginForFormat(rev.format)}")
+        System.out.println(org.codehaus.groovy.grails.plugins.PluginManagerHolder.getPluginManager().getAllPlugins().inspect()) 
+        [revision: rev, authors: rev.model.creators, format: modelDelegateService.getPluginForFormat(rev.format)]
     }
 
     /**

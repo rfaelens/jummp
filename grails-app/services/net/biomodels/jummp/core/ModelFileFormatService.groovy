@@ -30,10 +30,16 @@ class ModelFileFormatService {
     def grailsApplication
 
     /**
-     * The registered services to handle ModelFormats
-     */
-      private final Map<String, String> services = new HashMap()
+    * The registered services to handle ModelFormats
+    */
+    private final Map<String, String> services = new HashMap()
 
+    
+    /**
+    * The registered plugins to handle ModelFormats visualisations
+    */
+    private final Map<String, String> plugins = new HashMap()
+      
     /**
      * Extracts the format of the supplied @p modelFiles.
      * Returns the default ModelFormat representation with an empty formatVersion, since this is expected to exist 
@@ -91,15 +97,17 @@ class ModelFileFormatService {
      * file format.
      * @param format The ModelFormat to be registered as a ModelFormatTransportCommand
      * @param service The name of the service which handles the ModelFormat.
+     * @param plugin The name of the plugin (determines how the templates for the model display are loaded)
      * @throws IllegalArgumentException if the @p format has not been registered yet
      */
     @Profiled(tag = "modelFileFormatService.handleModelFormat")
-    void handleModelFormat(ModelFormatTransportCommand format, String service) {
+    void handleModelFormat(ModelFormatTransportCommand format, String service, String plugin) {
         ModelFormat modelFormat = ModelFormat.findByIdentifierAndFormatVersion(format.identifier, "")
         if (!modelFormat) {
             throw new IllegalArgumentException("ModelFormat ${format.properties} not registered in database")
         }
         services.put(format.identifier, service)
+        plugins.put(format.identifier, plugin)
     }
 
     boolean validate(final List<File> model, String formatId) {
@@ -191,6 +199,11 @@ class ModelFileFormatService {
         }
     }
 
+    String getPluginForFormat(final ModelFormatTransportCommand format) {
+    	    System.out.println(plugins)
+    	    return plugins.get(format.identifier)
+    }
+    
     /**
      * Helper function to get the proper service for @p format.
      * @param format The ModelFormat for which the service should be returned.

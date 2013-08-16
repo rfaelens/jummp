@@ -27,7 +27,12 @@ class ModelDelegateService implements IModelService {
 
     static transactional = true
     def modelService
+    def modelFileFormatService
 
+    String getPluginForFormat(ModelFormatTransportCommand format) {
+    	    return modelFileFormatService.getPluginForFormat(format)
+    }
+    
     List<ModelTransportCommand> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn) {
         List<ModelTransportCommand> models = []
         modelService.getAllModels(offset, count, sortOrder, sortColumn).each {
