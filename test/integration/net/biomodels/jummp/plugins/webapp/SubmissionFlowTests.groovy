@@ -386,7 +386,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             //random files should validate as unknown
             fileUploadPipeline(getFileForTest("modelfile.xml","hello world"), 
                                "UNKNOWN", 
-                               "",
+                               "modelfile",
                                null)
         }
     }
@@ -409,7 +409,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     class TestSubmitOmex extends TestUploadFiles {
         void performRemainingTest() {
             final File MODEL_FILE = new File("jummp-plugins/jummp-plugin-combine-archive/test/files/sample.omex")
-            fileUploadPipeline(MODEL_FILE, "OMEX", "", [""] as String[])
+            fileUploadPipeline(MODEL_FILE, "OMEX", "sample", ["sample.omex"] as String[])
         }
     }
 
