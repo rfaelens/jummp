@@ -94,7 +94,8 @@ class ModelFileFormatService {
     /**
      * Registers @p service to be responsible for ModelFormat identified by @p format.
      * This method can be used by a Plugin to register its service to be responsible for a
-     * file format.
+     * file format. The convention is to place templates used to display a model of
+     * @p format in views/model/@p plugin
      * @param format The ModelFormat to be registered as a ModelFormatTransportCommand
      * @param service The name of the service which handles the ModelFormat.
      * @param plugin The name of the plugin (determines how the templates for the model display are loaded)
@@ -199,8 +200,14 @@ class ModelFileFormatService {
         }
     }
 
+    /**
+     * Used to select the templates used to display the model of the @p format provided. 
+     * The convention is to place the templates inside views/model/"uniquelabel". The uniquelabel
+     * is specified by the format plugin during registration.
+     * @param rev The Revision for which all pubmed annotations should be retrieved
+     * @return List of all pubmeds used in the Revision
+     */
     String getPluginForFormat(final ModelFormatTransportCommand format) {
-    	    System.out.println(plugins)
     	    return plugins.get(format.identifier)
     }
     

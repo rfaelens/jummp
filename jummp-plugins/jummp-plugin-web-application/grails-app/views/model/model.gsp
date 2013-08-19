@@ -38,8 +38,7 @@
 		</tr>
 	    </table>
 	</div>
-	<p>plugin="${format}"></p>
-	<g:render template="showModel" plugin="jummpPluginSbml:0.1"/>
+	<g:render template="${format}/showModel"/>
 </body>
 </html
 

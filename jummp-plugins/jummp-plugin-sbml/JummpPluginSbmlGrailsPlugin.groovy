@@ -53,7 +53,7 @@ Brief description of the plugin.
             def service = applicationContext.getBean("modelFileFormatService")
             ["", "L1V1", "L1V2", "L2V1", "L2V2", "L2V3", "L2V4", "L3V1"].each {
                 def modelFormat = service.registerModelFormat("SBML", "SBML", it)
-                service.handleModelFormat(modelFormat, "sbmlService", "jummp-plugin-sbml")
+                service.handleModelFormat(modelFormat, "sbmlService", "sbml")
             }
         } catch(NoSuchBeanDefinitionException e) {
             println("ModelFileFormatService is not available!")
