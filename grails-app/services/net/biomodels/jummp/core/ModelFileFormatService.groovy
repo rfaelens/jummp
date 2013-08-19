@@ -205,7 +205,7 @@ class ModelFileFormatService {
      * The convention is to place the templates inside views/model/"uniquelabel". The uniquelabel
      * is specified by the format plugin during registration.
      * @param rev The Revision for which all pubmed annotations should be retrieved
-     * @return List of all pubmeds used in the Revision
+     * @return The folder where template for the model display can be found
      */
     String getPluginForFormat(final ModelFormatTransportCommand format) {
     	    return plugins.get(format.identifier)

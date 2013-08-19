@@ -33,7 +33,8 @@ class ModelController {
     def grailsApplication
 
     def show = {
-        [id: params.id]
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        [revision: rev, authors: rev.model.creators, format: modelDelegateService.getPluginForFormat(rev.format)]
     }
 
     @Secured(["isAuthenticated()"])
@@ -357,13 +358,6 @@ class ModelController {
         {
             e.printStackTrace()
         }
-    }
-
-    def model = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        System.out.println("FORMAT: ${modelDelegateService.getPluginForFormat(rev.format)}")
-        System.out.println(org.codehaus.groovy.grails.plugins.PluginManagerHolder.getPluginManager().getAllPlugins().inspect()) 
-        [revision: rev, authors: rev.model.creators, format: modelDelegateService.getPluginForFormat(rev.format)]
     }
 
     /**
