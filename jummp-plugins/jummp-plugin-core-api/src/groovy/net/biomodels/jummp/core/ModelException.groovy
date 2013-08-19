@@ -25,9 +25,9 @@ class ModelException extends JummpException implements Serializable {
         this.model = model
     }
 
-    /*public ModelException(ModelTransportCommand model, Throwable cause) {
+    public ModelException(ModelTransportCommand model, Throwable cause) {
         this(model, "Failed to manipulate Model ${model?.id}".toString(), cause)
-    }*/
+    }
 
     public ModelException(ModelTransportCommand model, String message, Throwable cause) {
         super(message, cause)

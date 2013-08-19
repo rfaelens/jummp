@@ -42,29 +42,32 @@ grails.project.dependency.resolution = {
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
         // dependencies of jsbml
-        compile("org.sbml.jsbml:jsbml:1.0-SNAPSHOT") {
+        compile("org.sbml.jsbml:jsbml:1.0-a2") {
             excludes 'woodstox-core-lgpl',
                         'staxmate',
                         'stax2-api',
                         'log4j',
                         'junit',
                         'commons-pool',
-                        'commons-dbcp'
+                        'commons-dbcp',
+                        'xstream'
         }
+        compile "com.thoughtworks.xstream:xstream:1.4.3"
         runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
         runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"
         compile ":sbfc:1.1-20110624-109"
+        compile ":jdom:1.1.1"
     }
 
     plugins {
         compile ":perf4j:0.1.1"
-        compile ":spring-security-core:1.2.7.2"
+        compile ":spring-security-core:1.2.7.3"
         test ":code-coverage:1.2.5"
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"
-        compile ":jquery:1.6.1.1"
+        compile ":jquery:1.10.0"
         //compile ":resources:1.0.2"
 
         build ":tomcat:$grailsVersion"

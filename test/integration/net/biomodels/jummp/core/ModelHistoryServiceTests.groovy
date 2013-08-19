@@ -8,6 +8,7 @@ import net.biomodels.jummp.plugins.security.User
 
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
 
@@ -182,7 +183,7 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
     // TODO: remove this copy from JmsAdapterServiceTest
     private void setupVcs() {
         File clone = new File("target/vcs/git")
-        clone.mkdirs()
+        assertTrue(clone.mkdirs())
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
         .readEnvironment() // scan environment GIT_* variables
@@ -195,6 +196,7 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.plugins.git.enabled = true
         grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        assertTrue(new File("target/vcs/exchange/").mkdirs())
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
     }
@@ -228,29 +230,41 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
   </model>
 </sbml>'''
         File file = File.createTempFile("jummpJms", null)
+        def rf = new RepositoryFileTransportCommand(path: file.absolutePath, description: "")
         file.append(modelSource)
-        Model model = modelService.uploadModel(file, new ModelTransportCommand(comment: "Test Comment", name: "model1", format: new ModelFormatTransportCommand(identifier: "SBML")))
+        Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(comment: "Test Comment",
+                name: "model1", format: new ModelFormatTransportCommand(identifier: "SBML")))
         aclUtilService.addPermission(modelService.getLatestRevision(model), "ROLE_ANONYMOUS", BasePermission.READ)
         aclUtilService.addPermission(modelService.getLatestRevision(model), "ROLE_ANONYMOUS", BasePermission.READ)
-        model = modelService.uploadModel(file, new ModelTransportCommand(comment: "Test Comment", name: "model2", format: new ModelFormatTransportCommand(identifier: "SBML")))
+        model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(comment: "Test Comment",
+                name: "model2", format: new ModelFormatTransportCommand(identifier: "SBML")))
         aclUtilService.addPermission(modelService.getLatestRevision(model), "ROLE_ANONYMOUS", BasePermission.READ)
-        model = modelService.uploadModel(file, new ModelTransportCommand(comment: "Test Comment", name: "model3", format: new ModelFormatTransportCommand(identifier: "SBML")))
+        model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(comment: "Test Comment",
+                name: "model3", format: new ModelFormatTransportCommand(identifier: "SBML")))
         aclUtilService.addPermission(modelService.getLatestRevision(model), "ROLE_ANONYMOUS", BasePermission.READ)
-        model = modelService.uploadModel(file, new ModelTransportCommand(comment: "Test Comment", name: "model4", format: new ModelFormatTransportCommand(identifier: "SBML")))
+        model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(comment: "Test Comment",
+                name: "model4", format: new ModelFormatTransportCommand(identifier: "SBML")))
         aclUtilService.addPermission(modelService.getLatestRevision(model), "ROLE_ANONYMOUS", BasePermission.READ)
-        model = modelService.uploadModel(file, new ModelTransportCommand(comment: "Test Comment", name: "model5", format: new ModelFormatTransportCommand(identifier: "SBML")))
+        model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(comment: "Test Comment",
+                name: "model5", format: new ModelFormatTransportCommand(identifier: "SBML")))
         aclUtilService.addPermission(modelService.getLatestRevision(model), "ROLE_ANONYMOUS", BasePermission.READ)
-        model = modelService.uploadModel(file, new ModelTransportCommand(comment: "Test Comment", name: "model6", format: new ModelFormatTransportCommand(identifier: "SBML")))
+        model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(comment: "Test Comment",
+                name: "model6", format: new ModelFormatTransportCommand(identifier: "SBML")))
         aclUtilService.addPermission(modelService.getLatestRevision(model), "ROLE_ANONYMOUS", BasePermission.READ)
-        model = modelService.uploadModel(file, new ModelTransportCommand(comment: "Test Comment", name: "model7", format: new ModelFormatTransportCommand(identifier: "SBML")))
+        model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(comment: "Test Comment",
+                name: "model7", format: new ModelFormatTransportCommand(identifier: "SBML")))
         aclUtilService.addPermission(modelService.getLatestRevision(model), "ROLE_ANONYMOUS", BasePermission.READ)
-        model = modelService.uploadModel(file, new ModelTransportCommand(comment: "Test Comment", name: "model8", format: new ModelFormatTransportCommand(identifier: "SBML")))
+        model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(comment: "Test Comment",
+                name: "model8", format: new ModelFormatTransportCommand(identifier: "SBML")))
         aclUtilService.addPermission(modelService.getLatestRevision(model), "ROLE_ANONYMOUS", BasePermission.READ)
-        model = modelService.uploadModel(file, new ModelTransportCommand(comment: "Test Comment", name: "model9", format: new ModelFormatTransportCommand(identifier: "SBML")))
+        model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(comment: "Test Comment",
+                name: "model9", format: new ModelFormatTransportCommand(identifier: "SBML")))
         aclUtilService.addPermission(modelService.getLatestRevision(model), "ROLE_ANONYMOUS", BasePermission.READ)
-        model = modelService.uploadModel(file, new ModelTransportCommand(comment: "Test Comment", name: "model10", format: new ModelFormatTransportCommand(identifier: "SBML")))
+        model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(comment: "Test Comment",
+                name: "model10", format: new ModelFormatTransportCommand(identifier: "SBML")))
         aclUtilService.addPermission(modelService.getLatestRevision(model), "ROLE_ANONYMOUS", BasePermission.READ)
-        model = modelService.uploadModel(file, new ModelTransportCommand(comment: "Test Comment", name: "model11", format: new ModelFormatTransportCommand(identifier: "SBML")))
+        model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(comment: "Test Comment",
+                name: "model11", format: new ModelFormatTransportCommand(identifier: "SBML")))
         aclUtilService.addPermission(modelService.getLatestRevision(model), "ROLE_ANONYMOUS", BasePermission.READ)
         FileUtils.deleteQuietly(file)
     }

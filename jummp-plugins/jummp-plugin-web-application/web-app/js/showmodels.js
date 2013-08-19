@@ -18,25 +18,28 @@ $.jummp.showModels.changeModel = function (userId, field, target) {
 $.jummp.showModels.loadModelList = function () {
     "use strict";
     $('#modelTable').dataTable({
-        bFilter: true,
+        bFilter: false,
         bProcessing: true,
         bServerSide: true,
         bSort: true,
-        bJQueryUI: false,
+        bJQueryUI: true,
         bAutoWidth: false,
-        sAjaxSource: 'dataTableSource',
+        sSource: 'search',
         aoColumnDefs: [
             { bSortable: false, aTargets: [2] }
         ],
-        bScrollInfinite: true,
+        sPaginationType: "full_numbers",
+        iDisplayLength: 10,
+        bLengthChange: false,
+        bScrollInfinite: false,
         bScrollCollapse: true,
-        sScrollY: "400px",
+        sScrollY: "500px",
         bDeferRender: true,
         "fnServerData": function (sSource, aoData, fnCallback) {
             $.ajax({
                 "dataType": 'json',
                 "type": "POST",
-                "url": sSource,
+                "url": $.jummp.createLink("search", "dataTableSource"),
                 "data": aoData,
                 "error": function () {
                     // clear the table
@@ -49,7 +52,8 @@ $.jummp.showModels.loadModelList = function () {
                         id = rowData[0];
                         rowData[0] = "<a class='animate' onclick=\"$.jummp.showModels.showOverlay('" + $.jummp.createLink("model", "model", id) + "');\" href=\"#\">" + id + "</a>";
                         rowData[1] = rowData[1] ? rowData[1].replace(/_/g, " ") : "-";
-                        rowData[2] = rowData[2] ? rowData[2].title : "-";
+                        var date=new Date(rowData[3]);
+                        rowData[3]=date.toUTCString();
                     }
                     fnCallback(json);
                 }
@@ -165,12 +169,12 @@ $.jummp.showModels.lastAccessedModels = function (container) {
         cache: false, // makes IE happy
         success: function (data) {
             if (data.length === 0) {
-                $("h2", container).text($.i18n.prop("model.history.empty"));
+                $("h3", container).text($.i18n.prop("model.history.empty"));
                 $("p", container).text("");
                 return;
             }
             var ul, i;
-            $("h2", container).text($.i18n.prop("model.history.explanation"));
+            $("h3", container).text($.i18n.prop("model.history.explanation"));
             $("p", container).text("");
             ul = $("<ul/>");
             for (i = 0; i < data.length; i += 1) {

@@ -5,7 +5,9 @@ import org.junit.*
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.plugins.sbml.SbmlService
 import net.biomodels.jummp.core.model.FileFormatService
+import net.biomodels.jummp.core.model.UnknownFormatService
 import org.apache.commons.io.FileUtils
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 
 class ModelFileFormatServiceTests {
     def modelFileFormatService
@@ -13,27 +15,66 @@ class ModelFileFormatServiceTests {
     @Override
     @Before
     void setUp() {
+        FileUtils.deleteDirectory(new File("target/sbml"))
+        assertTrue(new File("target/sbml").mkdirs())
     }
 
     @Override
     @After
     void tearDown() {
+        FileUtils.deleteDirectory(new File("target/sbml"))
         grailsApplication.config.jummp.plugins.sbml.validation = false
     }
 
     @Test
     void testServiceForFormat() {
         // unknown format should return null
-        ModelFormat format = ModelFormat.findByIdentifier("SBML")
-        println "modelFormat: ${format}"
-        println "unknown format: ${ModelFormat.findByIdentifier("UNKNOWN")}"
-        assertNull(modelFileFormatService.serviceForFormat(ModelFormat.findByIdentifier("UNKNOWN")))
+        def dontKnowThisFormatService = modelFileFormatService.serviceForFormat(
+                ModelFormat.findByIdentifier("UNKNOWN"))
+        assertNotNull(dontKnowThisFormatService)
         // for sbml it needs to be a SbmlService
-        def formatService = modelFileFormatService.serviceForFormat(ModelFormat.findByIdentifier("SBML"))
-        println formatService
+        def formatService = modelFileFormatService.serviceForFormat(
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", ""))
         assertNotNull(formatService)
         assertTrue(formatService instanceof FileFormatService)
         assertTrue(formatService instanceof SbmlService)
+        assertTrue(dontKnowThisFormatService instanceof UnknownFormatService)
+    }
+
+    @Test
+    void testInfer() {
+        // for null, there is no format
+        assertNull(modelFileFormatService.inferModelFormat(null))
+
+        // an unknown format file
+        File validUnknown = new File("target/sbml/unknown")
+        validUnknown.setText('What is my name')
+        assertEquals(modelFileFormatService.inferModelFormat([validUnknown]).identifier, "UNKNOWN")
+
+        // an SBML file should be detected. Make less restrictive to accept invalid SBML files
+        File validSbml = new File("target/sbml/validSbml")
+        validSbml.setText('''<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
+  <model>
+    <listOfCompartments>
+      <compartment name="x"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <specie name="y" compartment="x" initialAmount="1"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction name="r">
+        <listOfReactants>
+          <specieReference specie="y"/>
+        </listOfReactants>
+        <listOfProducts>
+          <specieReference specie="y"/>
+        </listOfProducts>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>''')
+        assertEquals("SBML", modelFileFormatService.inferModelFormat([validSbml]).identifier)
     }
 
     @Test
@@ -41,6 +82,12 @@ class ModelFileFormatServiceTests {
         grailsApplication.config.jummp.plugins.sbml.validation = true
         // for unknown file type this should evaluate to false
         assertFalse(modelFileFormatService.validate(null, ModelFormat.findByIdentifier("UNKNOWN")))
+
+        // a valid unknown format file
+        File validUnknown = new File("target/sbml/unknown")
+        validUnknown.setText('What is my name')
+        assertTrue(modelFileFormatService.validate([validUnknown], ModelFormat.findByIdentifier("UNKNOWN")))
+
         // for an invalid sbml file it should also evaluate to false
         File invalidSbml = new File("target/sbml/unknown")
         FileUtils.deleteQuietly(invalidSbml)
@@ -49,7 +96,8 @@ class ModelFileFormatServiceTests {
 <sbml level="99" version="1">
   <model/>
 </sbml>''')
-        assertFalse(modelFileFormatService.validate(invalidSbml, ModelFormat.findByIdentifier("SBML")))
+        assertFalse(modelFileFormatService.validate([invalidSbml],
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "")))
         // and for a valid SBML file it should be true
         File validSbml = new File("target/sbml/validSbml")
         FileUtils.deleteQuietly(validSbml)
@@ -75,13 +123,17 @@ class ModelFileFormatServiceTests {
     </listOfReactions>
   </model>
 </sbml>''')
-        assertTrue(modelFileFormatService.validate(validSbml, ModelFormat.findByIdentifier("SBML")))
-    }
+        assertTrue(modelFileFormatService.validate([validSbml], ModelFormat.findByIdentifierAndFormatVersion("SBML", "L1V1"))) }
 
     @Test
     void testExtractName() {
         // for unknown format it's empty
         assertEquals("", modelFileFormatService.extractName(null, ModelFormat.findByIdentifier("UNKNOWN")))
-        // TODO: in sbmlService it's not yet implemented and needs a test file
+        File sbmlModel = new File("test/files/BIOMD0000000272.xml")
+        assertEquals("Becker2010_EpoR_AuxiliaryModel", modelFileFormatService.extractName([sbmlModel],
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "")))
+        File omexModel = new File("jummp-plugins/jummp-plugin-combine-archive/test/files/sample.omex")
+        assertEquals("", modelFileFormatService.extractName([omexModel],
+                ModelFormat.findByIdentifierAndFormatVersion("OMEX", "")))
     }
 }

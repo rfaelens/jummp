@@ -7,12 +7,14 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.plugins.security.User
+import java.util.List
+import java.util.Map
 
 /**
  * @short Service Interface for accessing the Model Service from a Remote Adapter.
  *
  * The Service defined by this interface can be injected into any Remote Adapter such as
- * JMS or DBus to communicate with JUMMP core.
+ * JMS to communicate with JUMMP core.
  *
  * All methods may throw AccessDeniedExceptions as JUMMP core is ACL protected. This interface
  * defines methods only with the TransportCommand wrappers - direct access to the underlying
@@ -122,7 +124,7 @@ public interface IModelService {
     * @return The new created Model, or null if the model could not be created
     * @throws ModelException If Model File is not valid or the Model could not be stored in VCS
     **/
-    public ModelTransportCommand uploadModel(final File modelFile, ModelTransportCommand meta) throws ModelException
+    public ModelTransportCommand uploadModel(final List<File> modelFiles, ModelTransportCommand meta) throws ModelException
     /**
     * Adds a new Revision to the model.
     *
@@ -148,14 +150,14 @@ public interface IModelService {
      * @return Byte Array of the content of the Model file for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    byte[] retrieveModelFile(final RevisionTransportCommand revision) throws ModelException
+    Map<String, byte[]> retrieveModelFiles(final RevisionTransportCommand revision) throws ModelException
     /**
      * Retrieves the model file for the latest revision of the model.
      * @param modelId The id of the Model for which the file should be retrieved
      * @return Byte Array of the content of the Model file.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    byte[] retrieveModelFile(final long modelId) throws ModelException
+    Map<String, byte[]> retrieveModelFiles(final long modelId) throws ModelException
 
     /**
     * Grants read access for model to @p collaborator.

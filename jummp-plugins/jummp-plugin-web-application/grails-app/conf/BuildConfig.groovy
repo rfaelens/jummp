@@ -40,13 +40,14 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
+        compile ":svn:1.0.2"
         build(":tomcat:$grailsVersion",
               ":release:1.0.0") {
             export = false
         }
-        compile ":jquery:1.6.1.1"
+        compile ":jquery:1.10.0"
         compile ":jquery-datatables:1.7.5"
-        compile ":spring-security-core:1.2.7.2"
+        compile ":spring-security-core:1.2.7.3"
     }
 }
 grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"

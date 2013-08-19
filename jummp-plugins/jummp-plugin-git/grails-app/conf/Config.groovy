@@ -1,5 +1,13 @@
 // configuration for plugin testing - will not be included in the plugin zip
- 
+Properties jummpProps = new Properties()
+try {
+    jummpProps.load(new FileInputStream("${userHome}${System.getProperty('file.separator')}.jummp.properties"))
+}
+catch (Exception ignored) {
+}
+def cfg = new ConfigSlurper().parse(jummpProps)
+jummp.vcs.workingDirectory = cfg.jummp.vcs.workingDirectory
+jummp.vcs.exchangeDirectory = cfg.jummp.vcs.exchangeDirectory
 log4j = {
     // Example of changing the log pattern for the default console
     // appender:
@@ -24,5 +32,4 @@ log4j = {
 }
 grails.views.default.codec="none" // none, html, base64
 grails.views.gsp.encoding="UTF-8"
-// fails the ant test script
 grails.enable.native2ascii=true

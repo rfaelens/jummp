@@ -121,33 +121,20 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         signalEvent("next")
         assertCurrentStateEquals("remoteExport")
          // incorrect values should fail
-        setupController.params.jummpExportDbus = false
-        setupController.params.jummpExportJms = false
+        setupController.params.jummpExportJms = "thisIsWrong"
         signalEvent("next")
         assertCurrentStateEquals("remoteExport")
-        assertTrue(getFlowScope().remote.hasErrors())
         // correct values should transit to remote Remote state
-        setupController.params.jummpExportDbus = true
         setupController.params.jummpExportJms = true
         signalEvent("next")
         assertCurrentStateEquals("remoteRemote")
         // incorrect value should fail
+        assertCurrentStateEquals("remoteRemote")
         setupController.params.jummpRemote = "smj"
         signalEvent("next")
-        assertCurrentStateEquals("remoteRemote")
         assertTrue(getFlowScope().remote.hasErrors())
-        // correct values should transit to dbus state
-        setupController.params.jummpRemote = "dbus"
+        setupController.params.jummpRemote = "jms"
         signalEvent("next")
-        assertCurrentStateEquals("dbus")
-        // incorrect value should fail
-        setupController.params.systemBus = null
-        signalEvent("next")
-        assertCurrentStateEquals("dbus")
-        // correct value should transit to server state
-        setupController.params.systemBus = false
-        signalEvent("next")
-        assertCurrentStateEquals("server")
         // incorrect value should fail
         setupController.params.url = "test"
         signalEvent("next")
@@ -169,7 +156,6 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         setupController.params.maxInactiveTime = 123
         setupController.params.removeInterval = 456
         setupController.params.startRemoveOffset = 789
-        // correct values should transit to dbus state
         setupController.params.maxInactiveTime = 1230
         setupController.params.removeInterval = 4560
         setupController.params.startRemoveOffset = 7890
@@ -270,29 +256,11 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         // no remoteExport info should stay in current state
         signalEvent("next")
         assertCurrentStateEquals("remoteExport")
-        setupController.params.jummpExportDbus = false
         setupController.params.jummpExportJms = false
         signalEvent("next")
-        assertCurrentStateEquals("remoteExport")
+        assertCurrentStateEquals("server")
         // the correct values should transit to remoteRemote state
-        setupController.params.jummpExportDbus = true
         setupController.params.jummpExportJms = true
-        signalEvent("next")
-        assertCurrentStateEquals("remoteRemote")
-        // wrong value should not transit
-        setupController.params.jummpRemote = "smj"
-        signalEvent("next")
-        assertCurrentStateEquals("remoteRemote")
-        // this value should transit
-        setupController.params.jummpRemote = "dbus"
-        signalEvent("next")
-        assertCurrentStateEquals("dbus")
-        // wrong value should not transit
-        setupController.params.systemBus =
-        signalEvent("next")
-        assertCurrentStateEquals("dbus")
-        // this value should transit
-        setupController.params.systemBus = false
         signalEvent("next")
         assertCurrentStateEquals("server")
     }
@@ -442,14 +410,9 @@ class SetupControllerIntegrationTests extends WebFlowTestCase {
         setupController.params.senderAddress = ""
         signalEvent("next")
         assertCurrentStateEquals("remoteExport")
-        setupController.params.jummpExportDbus = true
         setupController.params.jummpExportJms = true
         signalEvent("next")
         assertCurrentStateEquals("remoteRemote")
-        setupController.params.jummpRemote = "dbus"
-        signalEvent("next")
-        assertCurrentStateEquals("dbus")
-        setupController.params.systemBus = false
         signalEvent("next")
         assertCurrentStateEquals("server")
         setupController.params.url = "http://127.0.0.1:8080/jummp/"

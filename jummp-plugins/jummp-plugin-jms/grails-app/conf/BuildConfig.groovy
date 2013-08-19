@@ -9,7 +9,7 @@ grails.project.dependency.resolution = {
         // uncomment to disable ehcache
         // excludes 'ehcache'
     }
-    log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    log "info" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {
         if (System.getenv("JUMMP_ARTIFACTORY_URL")) {
             mavenRepo "${System.getenv('JUMMP_ARTIFACTORY_URL')}"
@@ -17,6 +17,8 @@ grails.project.dependency.resolution = {
         if (System.getenv("JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL")) {
             grailsRepo "${System.getenv('JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL')}"
         }
+        //needed by spring-security-ldap
+        ebr()
         grailsPlugins()
         grailsHome()
         grailsCentral()
@@ -39,8 +41,9 @@ grails.project.dependency.resolution = {
                 'org.apache.activemq:activemq-core:5.5.0',
                 'org.apache.activemq:activemq-spring:5.5.0',
                 'org.apache.xbean:xbean-spring:3.7') {
-            excludes 'commons-logging',
+/*            excludes 'commons-logging',
                     'commons-pool',
+                    'commons-io',
                     'groovy-all',
                     'howl-logger',
                     'log4j',
@@ -49,8 +52,9 @@ grails.project.dependency.resolution = {
                     'spring-core',
                     'spring-test',
                     'slf4j-api',
-                    'xalan',
-                    'xml-apis'
+                    'xalan'
+                    //'xml-apis'
+*/
         }
 
         test 'hsqldb:hsqldb:1.8.0.10'
@@ -58,13 +62,13 @@ grails.project.dependency.resolution = {
     plugins {
         compile ":perf4j:0.1.1"
         compile ":spring-security-core:1.2.7.2"
-        compile ":spring-security-ldap:1.0.5"
+        compile(":spring-security-ldap:1.0.6")
         compile ":jms:1.2"
         test ":code-coverage:1.2.5"
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"
-        compile ":jquery:1.6.1.1"
+        compile ":jquery:1.10.0"
         //compile ":resources:1.0.2"
 
         build ":tomcat:$grailsVersion"
@@ -75,3 +79,8 @@ grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"
 grails.plugin.location.'jummp-plugin-bives'="../jummp-plugin-bives"
 grails.plugin.location.'jummp-plugin-sbml'="../jummp-plugin-sbml"
 grails.plugin.location.'jummp-plugin-remote'="../jummp-plugin-remote"
+
+//ensure that AST.jar is put in the right place. See ../../scripts/AST.groovy
+if ("jummp-plugin-jms".equals(appName)) {
+    System.setProperty("jummp.basePath", "${new File('../../').getAbsolutePath()}")
+}

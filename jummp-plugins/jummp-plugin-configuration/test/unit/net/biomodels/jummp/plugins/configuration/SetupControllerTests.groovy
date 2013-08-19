@@ -64,7 +64,6 @@ class SetupControllerTests  {
         // null should fail
         RemoteCommand cmd = mockCommandObject(RemoteCommand)
         assertFalse(cmd.validate())
-        assertEquals("nullable", cmd.errors["jummpExportDbus"].code)
         assertEquals("nullable", cmd.errors["jummpExportJms"].code)
         // test for blanks
         cmd = mockCommandObject(RemoteCommand)
@@ -84,36 +83,10 @@ class SetupControllerTests  {
         cmd.jummpRemote="jms"
         assertFalse(cmd.validate())
         assertNull(cmd.errors["jummpRemote"])
-        cmd = mockCommandObject(RemoteCommand)
-        cmd.jummpRemote="Dbus"
-        assertFalse(cmd.validate())
         // and one test that should work
         cmd = mockCommandObject(RemoteCommand)
         cmd.jummpRemote="jms"
-        cmd.jummpExportDbus=false
         cmd.jummpExportJms=true
-        assertTrue(cmd.validate())
-    }
-
-    void testDBusCommand() {
-        // null should fail
-        DBusCommand cmd = mockCommandObject(DBusCommand)
-        cmd.systemBus = null
-        assertFalse(cmd.validate())
-        assertEquals("nullable", cmd.errors["systemBus"].code)
-        // test for blanks
-        cmd = mockCommandObject(DBusCommand)
-        cmd.systemBus
-        assertFalse(cmd.validate())
-        assertEquals("nullable", cmd.errors["systemBus"].code)
-        // test for null
-        cmd = mockCommandObject(DBusCommand)
-        cmd.systemBus = null
-        assertFalse(cmd.validate())
-        assertEquals("nullable", cmd.errors["systemBus"].code)
-        // this test should work
-        cmd = mockCommandObject(DBusCommand)
-        cmd.systemBus = false
         assertTrue(cmd.validate())
     }
 

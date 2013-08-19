@@ -37,16 +37,16 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.5'
         // perf4j dependency
         compile "org.perf4j:perf4j:0.9.13"
-        runtime "commons-jexl:commons-jexl:1.1"
+        runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
 
         // plugin dependencies
     }
     plugins {
-        compile ":spring-security-core:1.2.7.2"
+        compile ":spring-security-core:1.2.7.3"
 
         // default grails plugins
         compile ":hibernate:$grailsVersion"
-        compile ":jquery:1.6.1.1"
+        compile ":jquery:1.10.0"
         //compile ":resources:1.0.2"
 
         build ":tomcat:$grailsVersion"

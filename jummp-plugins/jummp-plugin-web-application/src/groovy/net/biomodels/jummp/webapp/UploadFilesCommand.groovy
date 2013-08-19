@@ -1,0 +1,160 @@
+package net.biomodels.jummp.webapp
+
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.springframework.web.multipart.MultipartFile
+
+/**
+ * Command object for validating the files supplied by the user as part of a
+ * model submission.
+ *
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @date 20130701
+ */
+@grails.validation.Validateable
+class UploadFilesCommand implements Serializable {
+    private static final long serialVersionUID = 1L
+    private static final Log log = LogFactory.getLog(this)
+    private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
+    private static final boolean IS_INFO_ENABLED  = log.isInfoEnabled()
+
+    List<MultipartFile> mainFile
+    /**
+     * The additional files belonging to a model.
+     */
+     List<MultipartFile> extraFiles
+     /**
+      * The descriptions associated with each additional file
+      */
+     List<String> description
+
+    /**
+     * Provides the additional files along with their descriptions in a map.
+     *
+     * @return a Map with entries of type Map.MapEntry<MultipartFile, String>.
+     */
+    public Map<MultipartFile, String> additionalFilesAsMap() {
+        if (IS_DEBUG_ENABLED) {
+            log.debug(String.format("Providing %s additional files as a map", extraFiles.size()))
+        }
+        def result = [:]
+        extraFiles?.eachWithIndex { f, i ->
+            result[f] = description[i]
+        }
+        result
+    }
+
+    public static boolean containsDuplicates(List<MultipartFile> files) {
+        if (!files) {
+            // deal with null and empty elsewhere
+            return false
+        } else {
+            def fileProperties = []
+            files.each { it ->
+                final def currentFileProperties = [
+                    it.getOriginalFilename(),
+                    it.getSize(),
+                    it.getContentType()
+                ]
+                if (fileProperties.contains(currentFileProperties)) {
+                    return true
+                } else {
+                    fileProperties << currentFileProperties
+                }
+            }
+            return false
+        }
+    }
+
+    static constraints = {
+        mainFile(nullable: false,
+            validator: { mf ->
+                if (IS_INFO_ENABLED) {
+                    log.info("\nSubmission started. Inspecting ${mf.inspect()}")
+                }
+                if (mf.findAll {!it || it.isEmpty()}.size() > 0 ){
+                    if (IS_DEBUG_ENABLED) {
+                        log.debug("Some main file fields were blank. Current main file(s): ${mf.inspect()}.")
+                    }
+                }
+                mf = mf.findAll{ it && !it.isEmpty() }
+                if (mf.size() < 1) {
+                    log.error "\tPlease give me some files."
+                    return ['mainFile.blank']
+                }
+                //process mains in reverse so that the latest submitted one is kept.
+                // unique accepts a comparator closure that returns -1,0,1, but we only care about equality
+                mf = mf.reverse().unique { self, other ->
+                    self.getOriginalFilename().equals(other.getOriginalFilename()) ? 0 :
+                        self.getSize() > other.getSize() ? -1 : 1
+                }
+                return true
+            }
+        )
+        extraFiles(nullable: true,
+            validator: { supplements, cmd ->
+                if (!supplements) {
+                    if (IS_INFO_ENABLED) {
+                        log.info "No additional files were provided for ${cmd.inspect()}."
+                        return true
+                    }
+                }
+                if (IS_DEBUG_ENABLED) {
+                    log.debug("Validating additional files ${supplements.inspect()}.")
+                }
+                // purge empty files
+                supplements = supplements.findAll {it && !it.isEmpty()}
+                int supplementCount = supplements.size()
+                if (IS_DEBUG_ENABLED) {
+                    log.debug(String.format("There are %s supplementary files in this submission: %s.",
+                            supplementCount, supplements.inspect()))
+                }
+                if (supplementCount > 0) {
+                    //discard files with the same name while keeping the most recent entries
+                    def duplicateList = []
+                    def additionalFilesMap = cmd.additionalFilesAsMap()
+                    additionalFilesMap.keySet().toList().reverse().unique { self, other ->
+                        if(self.getOriginalFilename().equals(other.getOriginalFilename())) {
+                            duplicateList << self
+                            return 0
+                        }
+                        //ignore order if file names are unique
+                        return -1
+                    }
+                    additionalFilesMap.additionalFilesMap.findAll { !duplicateList.contains(it.key) }
+                    supplements = additionalFilesMap.keySet()
+                    // the descriptions of the duplicates are not of interest to us
+                    cmd.description = additionalFilesMap.values() as List
+
+                    //now ensure that no additional file has the same name as the main
+                    duplicateList = []
+                    def mainNamesList = []
+                    cmd.mainFile.each { mainNamesList << it.getOriginalFilename() }
+                    supplements = supplements.findAll { !mainNamesList.contains(it.getOriginalFilename()) }
+
+                    //finally, log which additional files do not have a description
+                    supplements.eachWithIndex{ file, i ->
+                        if (!cmd.description[i]) {
+                            if (IS_DEBUG_ENABLED) {
+                                log.debug(String.format("Supplementary file %s does not have a description.",
+                                            file.getOriginalFilename()))
+                            }
+                        }
+                    }
+                }
+                //almost done, log the end result
+                if (IS_INFO_ENABLED) {
+                    StringBuilder sb = new StringBuilder("\nData binding for submission complete.")
+                    sb.append("\nMain file:").append(cmd.mainFile.inspect()).append("\nAdditional files:\n")
+                    cmd.additionalFilesAsMap().each {
+                        String name = (it.key as MultipartFile).getOriginalFilename()
+                        sb.append(name).append(":").append(it.value).append("\n")
+                    }
+
+                    log.info sb.toString()
+                }
+                return true
+            }
+        )
+    }
+}

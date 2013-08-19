@@ -27,7 +27,8 @@ class Model implements Serializable {
      */
     String name
     /**
-     * The name of the corresponding file in the Version Control System.
+     * The path, relative to the folder containing all models,
+     * of the folder dedicated to this model
      */
     String vcsIdentifier
     /**
@@ -45,8 +46,8 @@ class Model implements Serializable {
     }
 
     static constraints = {
+        name(nullable: false)
         vcsIdentifier(nullable: false, blank: false, unique: true)
-        name(nullable: false, unique: true, blank: false)
         revisions(nullable: false, validator: { revs ->
             return !revs.isEmpty()
         })

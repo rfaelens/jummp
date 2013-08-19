@@ -4,6 +4,8 @@ import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.model.Revision
+import java.util.List
+import org.perf4j.aop.Profiled
 
 /**
  * @short Service to handle Model files.
@@ -14,7 +16,9 @@ import net.biomodels.jummp.model.Revision
  *
  * Additionally the service provides methods to allow a plugin to register a new ModelFormat
  * and to tell the application which service is responsible for a format.
- * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class ModelFileFormatService {
 
@@ -28,26 +32,57 @@ class ModelFileFormatService {
     /**
      * The registered services to handle ModelFormats
      */
-    private final Map<String, String> services = new HashMap<String, String>()
+      private final Map<String, String> services = new HashMap()
+
+    /**
+     * Extracts the format of the supplied @p modelFiles.
+     * Returns the default ModelFormat representation with an empty formatVersion, since this is expected to exist 
+     * for every format that is handled.
+     * @param modelFiles the list of files corresponding to a model
+     * @returns the corresponding model format, or unknown if this cannot be inferred. 
+     */
+    @Profiled(tag = "modelFileFormatService.inferModelFormat")
+    ModelFormatTransportCommand inferModelFormat(List<File> modelFiles) {
+        if (!modelFiles) {
+            return null
+        }
+        String match = services.keySet().find {
+            if (it == "UNKNOWN") return false
+            String serviceName = services.getAt(it)
+            def ffs = grailsApplication.mainContext.getBean(serviceName)
+            return ffs.areFilesThisFormat(modelFiles)
+        }
+        if (!match) {
+            return ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "").toCommandObject()
+        } else {
+            return ModelFormat.findByIdentifierAndFormatVersion(match, "").toCommandObject()
+        }
+    }
 
     /**
      * Registers a new ModelFormat in the application if it does not yet exist.
-     * If the application already knows the ModelFormat identified by @p identifier
+     * If the application already knows the ModelFormat identified by @p identifier and @version
      * the existing ModelFormat is returned, otherwise a new ModelFormat is created
      * and stored in the database.
      * @param identifier The machine readable name of the ModelFormat, e.g. SBML
      * @param name A human readable name of the ModelFormat to be used in UIs.
+     * @param version The version of the @p format in which the model is encoded.
      * @return Existing or new ModelFormat represented in a ModelFormatTransportCommand
      */
-    ModelFormatTransportCommand registerModelFormat(String identifier, String name) {
-        ModelFormat modelFormat = ModelFormat.findByIdentifier(identifier)
+    @Profiled(tag = "modelFileFormatService.registerModelFormat")
+    ModelFormatTransportCommand registerModelFormat(final String identifier, final String name, String version) {
+        ModelFormat modelFormat = ModelFormat.findByIdentifierAndFormatVersion(identifier, version)
         if (modelFormat) {
             return modelFormat.toCommandObject()
         } else {
-            modelFormat = new ModelFormat(identifier: identifier, name: name)
+            modelFormat = new ModelFormat(identifier: identifier, name: name, formatVersion: version)
             modelFormat.save(flush: true)
             return modelFormat.toCommandObject()
         }
+    }
+
+    ModelFormatTransportCommand registerModelFormat(final String identifier, final String name) {
+        return registerModelFormat(identifier, name, "")
     }
 
     /**
@@ -58,12 +93,17 @@ class ModelFileFormatService {
      * @param service The name of the service which handles the ModelFormat.
      * @throws IllegalArgumentException if the @p format has not been registered yet
      */
+    @Profiled(tag = "modelFileFormatService.handleModelFormat")
     void handleModelFormat(ModelFormatTransportCommand format, String service) {
-        ModelFormat modelFormat = ModelFormat.get(format.id)
+        ModelFormat modelFormat = ModelFormat.findByIdentifierAndFormatVersion(format.identifier, "")
         if (!modelFormat) {
-            throw new IllegalArgumentException("ModelFormat ${format} not registered in database")
+            throw new IllegalArgumentException("ModelFormat ${format.properties} not registered in database")
         }
-        services.put(modelFormat.identifier, service)
+        services.put(format.identifier, service)
+    }
+
+    boolean validate(final List<File> model, String formatId) {
+        return validate(model, ModelFormat.findByIdentifier(formatId))
     }
 
     /**
@@ -72,7 +112,7 @@ class ModelFileFormatService {
      * @param format The format of the Model file
      * @return @c true, if the @p model is valid, @c false otherwise
      */
-    boolean validate(final File model, final ModelFormat format) {
+    boolean validate(final List<File> model, final ModelFormat format) {
         FileFormatService service = serviceForFormat(format)
         if (service != null) {
             return service.validate(model)
@@ -87,13 +127,38 @@ class ModelFileFormatService {
      * @param format The format of the Model file
      * @return The name of the Model, if possible, an empty String if not possible
      */
-    String extractName(final File model, final ModelFormat format) {
+    String extractName(final List<File> model, final ModelFormat format) {
         FileFormatService service = serviceForFormat(format)
         if (service != null) {
-            return service.validate(model)
+            return service.extractName(model)
         } else {
             return ""
         }
+    }
+
+    /**
+     * Extracts the description of the Model from the @p model in specified @p format.
+     * @param model The Model file to use as a source
+     * @param format The format of the Model file
+     * @return The description of the Model, if possible, an empty String if not possible
+     */
+    String extractDescription(final List<File> model, final ModelFormat format) {
+        FileFormatService service = serviceForFormat(format)
+        if (service != null) {
+            return service.extractDescription(model)
+        } else {
+            return ""
+        }
+    }
+
+    /**
+     * Retrieves the version of the format in which @p revision is encoded.
+     * @param revision the Revision for which to extract the format version.
+     * @return The format version, or an empty String if this cannot be extracted.
+     */
+    String getFormatVersion(Revision revision) {
+        FileFormatService service = serviceForFormat(revision?.format)
+        return service ? service.getFormatVersion(revision.toCommandObject()) : ""
     }
 
     /**
@@ -132,8 +197,10 @@ class ModelFileFormatService {
      * @return The service which handles the format.
      */
     private FileFormatService serviceForFormat(final ModelFormat format) {
-        if (format && services.containsKey(format.identifier)) {
-            return grailsApplication.mainContext.getBean((String)services.getAt(format.identifier))
+        if (format) {
+             if (services.containsKey(format.identifier)) {
+                return grailsApplication.mainContext.getBean((String)services.getAt(format.identifier))
+            }
         } else {
             return null
         }

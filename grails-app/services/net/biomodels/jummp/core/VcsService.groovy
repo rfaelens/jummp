@@ -1,10 +1,11 @@
 package net.biomodels.jummp.core
 
-import org.springframework.security.access.prepost.PreAuthorize
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsManager
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
+import org.perf4j.aop.Profiled
+import org.springframework.security.access.prepost.PreAuthorize
 
 /**
  * @short Service providing access to the version control system.
@@ -43,16 +44,23 @@ class VcsService {
     * @throws VcsException passes along the VcsException thrown by VcsManager
     **/
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
-    String updateFile(final Model model, final File file, final String commitMessage) throws VcsException {
+    @Profiled(tag = "vcsService.updateModel")
+    String updateModel(final Model model, final List<File> files, final String commitMessage) throws VcsException {
         if (!isValid()) {
             throw new VcsException("Version Control System is not valid")
         }
 
         if (commitMessage == null || commitMessage.isEmpty()) {
-            return vcsManager.updateFile(file, model.vcsIdentifier)
+            return vcsManager.updateModel(new File(model.vcsIdentifier), files, "Update of $model.name")
         } else {
-            return vcsManager.updateFile(file, model.vcsIdentifier, commitMessage)
+            return vcsManager.updateModel(new File(model.vcsIdentifier), files, commitMessage)
         }
+    }
+
+    @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
+    @Profiled(tag = "vcsService.updateModel")
+    String updateModel(final Model model, final File file, final String commitMessage) throws VcsException {
+        return updateModel(model, [file], commitMessage);
     }
     /**
      * Imports a new Model file into the VCS.
@@ -64,12 +72,28 @@ class VcsService {
      * @throws VcsException passes along the VcsException thrown by VcsManager
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    String importFile(final Model model, final File file) throws VcsException {
+    @Profiled(tag = "vcsService.importModel")
+    String importModel(final Model model, final List<File> files) throws VcsException {
         if (!isValid()) {
             throw new VcsException("Version Control System is not valid")
         }
 
-        return vcsManager.importFile(file, model.vcsIdentifier)
+        return vcsManager.updateModel(new File(model.vcsIdentifier), files, "Import of ${model.name}")
+    }
+
+    /**
+     * Imports a new Model file into the VCS.
+     * Copies @p file into the working copy of the VCS and performs an initial import.
+     * Use this method if the file has not been imported previously.
+     * @param model The Model representing the new file in the VCS
+     * @param file The file to import
+     * @return Revision number of imported file.
+     * @throws VcsException passes along the VcsException thrown by VcsManager
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @Profiled(tag = "vcsService.importModel")
+    String importModel(final Model model, final File file) throws VcsException {
+        return importModel(model, [file])
     }
 
     /**
@@ -80,7 +104,8 @@ class VcsService {
      * @throws VcsException passes along the VcsException thrown by VcsManager
      */
     @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
-    File retrieveFile(final Revision revision) throws VcsException {
+    @Profiled(tag = "vcsService.retrieveFiles")
+    List<File> retrieveFiles(final Revision revision) throws VcsException {
         if (!isValid()) {
             throw new VcsException("Version Control System is not valid")
         }
@@ -91,10 +116,10 @@ class VcsService {
             }
         }
         if (revision.revisionNumber == latestRevId) {
-            return vcsManager.retrieveFile(revision.model.vcsIdentifier)
+            return vcsManager.retrieveModel(new File(revision.model.vcsIdentifier))
         }
 
-        return vcsManager.retrieveFile(revision.model.vcsIdentifier, revision.vcsId)
+        return vcsManager.retrieveModel(new File(revision.model.vcsIdentifier), revision.vcsId)
     }
     // TODO: implement required methods
 }

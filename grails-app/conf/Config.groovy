@@ -16,7 +16,6 @@ try {
 } catch (Exception ignored) {
     jummpProperties.setProperty("jummp.security.ldap.enabled", "false")
     jummpProperties.setProperty("jummp.security.registration.email.send", "false")
-    jummpProperties.setProperty("jummp.export.dbus", "false")
     jummpProperties.setProperty("jummp.server.url", "http://localhost:8080/${appName}")
 }
 def jummpConfig = new ConfigSlurper().parse(jummpProperties)
@@ -75,7 +74,9 @@ environments {
     }
 
 }
-
+//branding
+jummp.branding.deployment="biomodels" //used to select messages,and style if jummp.branding.style is not specified 
+jummp.branding.style="biomodels" //used to specify any other name for the css file
 // log4j configuration
 log4j = {
     // Example of changing the log pattern for the default console
@@ -114,44 +115,32 @@ log4j = {
         // this is the most important appender and first in the appender chain. it aggregates all profiling data withing a certain time frame.
         // the GraphingStatisticsAppender is attached as a child to this appender and uses its aggregated data.
         def performanceStatsAppender = new org.perf4j.log4j.AsyncCoalescingStatisticsAppender(
-            timeSlice: 10000    // ms
+            timeSlice: 30 * 60 * 1000    // 30 minutes in ms
         )
         performanceStatsAppender.addAppender(performanceStatsFileAppender)
         performanceStatsAppender.addAppender(performanceGraphAppender)
         appender name: 'performanceStatsAppender', performanceStatsAppender
 
         rollingFile name: "jummpAppender", file: "logs/jummp-core.log", threshold: org.apache.log4j.Level.WARN
-        rollingFile name: "eventsAppender", file: "logs/jummp-events.log", threshold: org.apache.log4j.Level.INFO
+        rollingFile name: "eventsAppender", file: "logs/jummp-events.log", threshold: org.apache.log4j.Level.DEBUG
 
-        // change the threshold to DEBUG to have debug output in development modus
-        console name: "stdout", threshold: org.apache.log4j.Level.ERROR
+        // change the threshold to DEBUG to have debug output in development mode
+        console name: "stdout", threshold: org.apache.log4j.Level.WARN
     }
 
     // configure the performanceStatsAppender to log at INFO level
     info   performanceStatsAppender: 'org.perf4j.TimingLogger'
-    warn  jummpAppender: [
+    info  jummpAppender: [
             'grails.app', //everything provided by grails-app, e.g. services
             'net.biomodels.jummp' // everything from jummp
     ]
     // Simple Logging goes to its own file
     info   eventsAppender: 'net.biomodels.jummp.plugins.simplelogging'
 
-    error  jummpAppender: [
-            'org.codehaus.groovy.grails.web.servlet',  //  controllers
-            'org.codehaus.groovy.grails.web.pages', //  GSP
-            'org.codehaus.groovy.grails.web.sitemesh', //  layouts
-            'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
-            'org.codehaus.groovy.grails.web.mapping', // URL mapping
-            'org.codehaus.groovy.grails.commons', // core / classloading
-            'org.codehaus.groovy.grails.plugins', // plugins
-            'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
-            'org.springframework',
-            'org.hibernate',
-            'net.sf.ehcache.hibernate'
+    rollingFile name: "debugAppender", file: "logs/jummp-debug.log", threshold: org.apache.log4j.Level.DEBUG
+    debug  debugAppender: [
+        'net.biomodels.jummp'
     ]
-
-    warn   jummpAppender: 'org.mortbay.log'
-    debug  jummpAppender: ['grails.plugins.quartz', 'org.quartz']
 }
 
 // Added by the Spring Security Core plugin:
@@ -197,7 +186,7 @@ jummp.controllerAnnotations = [
 if ((jummpConfig.jummp.security.ldap.enabled instanceof ConfigObject) || !Boolean.parseBoolean(jummpConfig.jummp.security.ldap.enabled)) {
     jummp.security.ldap.enabled = false
     println("Excluding ldap")
-    pluginsToExclude << "spring-security-ldap"
+    pluginsToExclude << "springSecurityLdap"
 } else {
     println("using ldap")
     jummp.security.ldap.enabled = true
@@ -264,12 +253,6 @@ if (!(jummpConfig.jummp.security.ui.changePassword instanceof ConfigObject)) {
 if (jummp.security.ldap.enabled) {
     // as long as our LDAP implementation does not support changing passwords we need to disable
     jummp.security.ui.changePassword = false
-}
-
-if (!(jummpConfig.jummp.export.dbus instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.export.dbus)) {
-    jummp.plugin.dbus.export = true
-} else {
-    jummp.plugin.dbus.export = false
 }
 
 // In case of LDAP there is no need to allow users to register with a password as we cannot (yet) add anything to the LDAP
@@ -383,6 +366,9 @@ if (jummp.security.cms.policy != null) {
 
 grails.plugins.springsecurity.controllerAnnotations.staticRules = jummp.controllerAnnotations
 
+if (!"jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
+    jms.disabled = true
+}
 environments {
     test {
         // need to disable the plugins or tests may fail
@@ -392,13 +378,11 @@ environments {
         // disable registration mail sending
         jummp.security.registration.email.send = false
         jummp.security.resetPassword.email.send = false
-        // disable dbus
-//        jummp.plugin.dbus.export = true
     }
 }
 
 if (pluginsToExclude) {
-    grails.plugin.exclude = pluginsToExclude
+    grails.plugin.excludes = pluginsToExclude
 }
 
 // weceem
@@ -409,3 +393,4 @@ weceem.admin.prefix = 'wcm-admin'
 weceem.create.default.space = true
 weceem.default.space.template = "classpath:/weceem-jummp-default-space.zip"
 weceem.security.policy.path = jummp.security.cms.policy
+grails.resources.adhoc.excludes=["/content/*"]

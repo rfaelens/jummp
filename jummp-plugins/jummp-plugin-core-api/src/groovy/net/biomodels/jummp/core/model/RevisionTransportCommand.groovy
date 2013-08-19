@@ -9,6 +9,7 @@ package net.biomodels.jummp.core.model
  * The object can also be used as a command object for the web interface.
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class RevisionTransportCommand implements Serializable {
     private static final long serialVersionUID = 1L
@@ -26,6 +27,18 @@ class RevisionTransportCommand implements Serializable {
      */
     Boolean minorRevision
     /**
+     * Whether the revision has been validated
+     */
+    Boolean validated
+    /**
+     * The name of this revision.
+     */
+    String name
+    /**
+     * The description of this revision.
+     */
+    String description
+    /**
      * The "commit message" of this revision.
      */
     String comment
@@ -41,4 +54,8 @@ class RevisionTransportCommand implements Serializable {
      * The model the revision belongs to
      */
     ModelTransportCommand model
+    /**
+     * The list of files associated with this revision
+     */
+    List<RepositoryFileTransportCommand> files
 }

@@ -16,7 +16,7 @@ import org.springframework.beans.factory.InitializingBean
  * When the file exists and the firstRun property is false all access to SetupController
  * are blocked as the application is already configured.
  *
- * @see net.biomodels.jummp.controllers.SetupController
+ * @see net.biomodels.jummp.plugins.configuration.SetupController
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class SetupFilters implements InitializingBean {
@@ -38,7 +38,7 @@ class SetupFilters implements InitializingBean {
     def filters = {
         if (configFileExists) {
             if (firstRun) {
-                setupFilter(controllerExclude: 'setup') {
+                setupFilter1(controllerExclude: 'setup') {
                     before = {
                         redirect(controller: 'setup', action: "firstRun")
                         return true
@@ -52,7 +52,7 @@ class SetupFilters implements InitializingBean {
                 }
 
             } else {
-                setupFilter(controller: 'setup', action: '*') {
+                setupFilter2(controller: 'setup', action: '*') {
                     before = {
                         redirect(uri: '/')
                         return false
@@ -60,7 +60,7 @@ class SetupFilters implements InitializingBean {
                 }
             }
         } else {
-            setupFilter(controllerExclude: 'setup') {
+            setupFilter3(controllerExclude: 'setup') {
                 before = {
                     redirect(controller: 'setup')
                     return true

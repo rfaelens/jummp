@@ -1,4 +1,7 @@
 modules = {
+    style {
+        resource url: '/css/jummp.less'
+    }
     core {
         dependsOn 'jquery'
         resource url: '/js/jquery/jquery.i18n.properties-min-1.0.9.js'
@@ -33,5 +36,19 @@ modules = {
     miriamAdministration {
         dependsOn 'core'
         resource url: '/js/miriamadministration.js'
+    }
+    branding_style {
+        if (grails.util.Holders.getGrailsApplication().config.jummp.branding.style) {
+        	resource url:"/css/${grails.util.Holders.getGrailsApplication().config.jummp.branding.style}.less"
+        }
+    	else {
+    		resource url:"/css/${grails.util.Holders.getGrailsApplication().config.jummp.branding.deployment}.less" 
+    	}
+    }
+    jqueryui_latest {
+    	resource url:'/js/jquery/jquery-ui-v1.10.3.js'
+    }
+    ddmore_style {
+    	resource url:'/css/ddmorestyle.css'
     }
 }

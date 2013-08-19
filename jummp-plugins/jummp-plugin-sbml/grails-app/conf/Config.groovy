@@ -22,7 +22,6 @@ log4j = {
 
     warn   'org.mortbay.log'
 }
-// fails the ant test script
 grails.enable.native2ascii=true
 grails.views.default.codec="none" // none, html, base64
 grails.views.gsp.encoding="UTF-8"

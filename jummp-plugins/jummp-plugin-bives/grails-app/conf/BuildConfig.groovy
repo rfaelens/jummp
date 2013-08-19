@@ -35,7 +35,8 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
-        runtime 'org.apache.commons:commons-compress:1.1'
+        runtime('org.apache.commons:commons-compress:1.1') {excludes 'commons-io'}
+        runtime "commons-io:commons-io:2.4"
         compile ":jaxen:1.1.1"
         compile ":jdom:1.1.1"
         compile ":bives-fwk:0.9.0"
@@ -47,7 +48,7 @@ grails.project.dependency.resolution = {
         compile ":spring-security-core:1.2.7.2"
         // default grails plugins
         compile ":hibernate:$grailsVersion"
-        compile ":jquery:1.6.1.1"
+        compile ":jquery:1.10.0"
         //compile ":resources:1.0.2"
 
         build ":tomcat:$grailsVersion"

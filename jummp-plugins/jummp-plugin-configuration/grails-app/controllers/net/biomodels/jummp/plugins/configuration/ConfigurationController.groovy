@@ -38,19 +38,6 @@ class ConfigurationController {
         }
     }
 
-    def dbus = {
-        render(view: 'configuration', model: [dbus: configurationService.loadDBusConfiguration(), title: "DBus", action: "saveDBus", template: 'dbus'])
-    }
-
-    def saveDBus = { DBusCommand dbus  ->
-        if (remote.hasErrors()) {
-            render(view: 'configuration', model: [dbus: remote, title: "DBus", action: "saveDBus", template: 'dbus'])
-        } else {
-            configurationService.saveDBusConfiguration(dbus)
-            render(view: "saved", model: [module: "DBus"])
-        }
-    }
-
     def ldap = {
         render(view: 'configuration', model: [ldap: configurationService.loadLdapConfiguration(), title: "LDAP", action: "saveLdap", template: 'ldap'])
     }

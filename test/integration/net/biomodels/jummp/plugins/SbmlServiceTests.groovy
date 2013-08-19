@@ -1,19 +1,20 @@
 package net.biomodels.jummp.plugins
 
-import static org.junit.Assert.*
-import org.junit.*
 import net.biomodels.jummp.core.JummpIntegrationTest
-import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
-import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import org.eclipse.jgit.lib.Repository
+import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.ModelFormat
+import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.git.GitManagerFactory
 import org.apache.commons.io.FileUtils
-import net.biomodels.jummp.model.ModelFormat
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.junit.*
+import static org.junit.Assert.*
 
 /**
  * Test for SbmlService parts which require a running core to retrieve Models.
@@ -24,53 +25,113 @@ class SbmlServiceTests extends JummpIntegrationTest {
      */
     def sbmlService
     def modelService
+    def fileSystemService
     def grailsApplication
 
     @Before
     void setUp() {
         createUserAndRoles()
-        setupVcs()
+        //setupVcs()
+        fileSystemService.root = new File("target/sbml/git/").getCanonicalFile()
+        fileSystemService.currentModelContainer = fileSystemService.root.absolutePath + "/ttt/"
         // disable validation as it is broken
         grailsApplication.config.jummp.plugins.sbml.validation = false
     }
 
     @After
     void tearDown() {
-        FileUtils.deleteDirectory(new File("target/sbml/git"))
-        FileUtils.deleteDirectory(new File("target/sbml/exchange"))
+        FileUtils.deleteDirectory(new File("target/sbml"))
     }
+
+    @Test
+    void testExtractName() {
+        File myModel = null
+        assertEquals("", sbmlService.extractName([myModel]))
+        myModel = new File("target/sbml/myModel")
+        FileUtils.deleteQuietly(myModel)
+        assertEquals("", sbmlService.extractName([myModel]))
+        assertEquals("", sbmlService.extractName([myModel, myModel]))
+        myModel = new File("test/files/BIOMD0000000272.xml")
+        assertEquals("Becker2010_EpoR_AuxiliaryModel", sbmlService.extractName([myModel]))
+    }
+
+    @Test
+    void testAreFilesThisFormat() {
+        File file = new File("target/sbml/test")
+        FileUtils.deleteQuietly(file)
+        FileUtils.touch(file)
+        assertFalse(sbmlService.areFilesThisFormat([file]))
+
+        // unknown sbml
+        File unknown = new File("target/sbml/unknown")
+        FileUtils.deleteQuietly(unknown)
+        FileUtils.touch(unknown)
+        unknown.append('''\
+<?xml version='1.0' encoding='UTF-8'?>
+<model/>''')
+        assertFalse(sbmlService.areFilesThisFormat([unknown]))
+
+        File properSbml = new File("test/files/BIOMD0000000272.xml")
+        assertTrue(sbmlService.areFilesThisFormat([properSbml]))
+
+        assertTrue(sbmlService.areFilesThisFormat([properSbml,smallModel("validSbml.xml")]))
+        assertFalse(sbmlService.areFilesThisFormat([properSbml, unknown]))
+    }
+
 
     @Test
     void testLevelAndVersion() {
         authenticateAsTestUser()
-        Model model = modelService.uploadModel(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
+        def rf = new RepositoryFileTransportCommand(path: smallModel("BIOMD0000000272.xml").absolutePath,
+                    description: "", mainFile: true)
+        Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
+                new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
         assertEquals(1, sbmlService.getLevel(rev))
         assertEquals(1, sbmlService.getVersion(rev))
-        RevisionTransportCommand rev2 = modelService.addRevision(model, new File("test/files/BIOMD0000000272.xml"), ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
+        assertEquals("L1V1", sbmlService.getFormatVersion(rev))
+        rf.path = "test/files/BIOMD0000000272.xml"
+        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf,
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L2V4"), "test").toCommandObject()
         assertEquals(2, sbmlService.getLevel(rev2))
         assertEquals(4, sbmlService.getVersion(rev2))
+        assertEquals("L2V4", sbmlService.getFormatVersion(rev2))
     }
 
     @Test
     void testModelMetaId() {
         authenticateAsTestUser()
-        Model model = modelService.uploadModel(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
+        def rf = new RepositoryFileTransportCommand(path: smallModel("BIOMD0000000272.xml"), description: "")
+        Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
+                new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
         assertEquals("", sbmlService.getMetaId(rev))
-        RevisionTransportCommand rev2 = modelService.addRevision(model, new File("test/files/BIOMD0000000272.xml"), ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
+        rf.path = "test/files/BIOMD0000000272.xml"
+        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf,
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L2V4"), "test").toCommandObject()
         assertEquals("_688624", sbmlService.getMetaId(rev2))
+    }
+
+    private File getFileForTest(String filename, String text)
+    {
+        def tempDir = FileUtils.getTempDirectory()
+        def testFile = new File(tempDir.absolutePath + File.separator + filename)
+        if (text) {
+            testFile.setText(text)
+        }
+        return testFile
     }
 
     @Test
     void testModelNotes() {
         authenticateAsTestUser()
-        Model model = modelService.uploadModel(smallModel(), new ModelTransportCommand(format: new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
+        def rf = new RepositoryFileTransportCommand(path: smallModel("testModelNotes.xml").absolutePath, description: "")
+        Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format: 
+                new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
         assertEquals("", sbmlService.getNotes(rev))
 
-        File modelWithNotes =  File.createTempFile("jummp", null)
-        modelWithNotes.append('''<?xml version="1.0" encoding="UTF-8"?>
+        File modelWithNotes = getFileForTest("testModelNotes.xml",'''<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>
     <notes><body xmlns="http://www.w3.org/1999/xhtml"><p>Test</p></body></notes>
@@ -92,13 +153,15 @@ class SbmlServiceTests extends JummpIntegrationTest {
     </listOfReactions>
   </model>
 </sbml>''')
-        RevisionTransportCommand rev2 = modelService.addRevision(model, modelWithNotes, ModelFormat.findByIdentifier("SBML"), "test").toCommandObject()
+        rf.path = modelWithNotes.absolutePath
+        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf, 
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L1V1"), "test").toCommandObject()
         assertEquals('''<notes>\n  <body xmlns="http://www.w3.org/1999/xhtml">\n<p>Test</p>\n    </body>\n  \n</notes>''', sbmlService.getNotes(rev2))
     }
 
     private void setupVcs() {
         // setup VCS
-        File clone = new File("target/sbml/git")
+        File clone = new File("target/sbml/git/")
         clone.mkdirs()
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
@@ -110,14 +173,16 @@ class SbmlServiceTests extends JummpIntegrationTest {
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.workingDirectory = "target/sbml/git"
-        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/sbml/exchange"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/sbml/git/"
+        File exchangeDir = new File("target/sbml/exchange/")
+        exchangeDir.mkdirs()
+        grailsApplication.config.jummp.vcs.exchangeDirectory = exchangeDir.path
         modelService.vcsService.vcsManager = gitService.getInstance()
     }
 
-    private File smallModel() {
-        File modelFile = File.createTempFile("jummp", null)
-        modelFile.append('''<?xml version="1.0" encoding="UTF-8"?>
+    private File smallModel(String filename) {
+        return getFileForTest(filename, '''\
+<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
   <model>
     <listOfCompartments>
@@ -138,6 +203,5 @@ class SbmlServiceTests extends JummpIntegrationTest {
     </listOfReactions>
   </model>
 </sbml>''')
-        return modelFile
     }
 }

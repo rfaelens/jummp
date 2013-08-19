@@ -38,13 +38,14 @@ Brief description of the plugin.
         def jummpConfig = new ConfigSlurper().parse(props)
         if (jummpConfig.jummp.vcs.plugin == "git") {
             println("using git as vcs backend")
+            application.config.jummp.vcs.plugin = "git"
             application.config.jummp.vcs.pluginServiceName = "gitManagerFactory"
             application.config.jummp.plugins.git.enabled = true
         }
 
-        if (Environment.getCurrent() == Environment.TEST) {
+//        if (Environment.getCurrent() == Environment.TEST) {
             servletContext(org.springframework.mock.web.MockServletContext)
-        }
+ //       }
         gitManagerFactory(GitManagerFactory) {
             grailsApplication = ref("grailsApplication")
             servletContext = ref("servletContext")

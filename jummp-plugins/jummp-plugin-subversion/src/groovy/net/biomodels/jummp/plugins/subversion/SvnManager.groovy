@@ -4,6 +4,8 @@ import net.biomodels.jummp.core.vcs.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
 import org.apache.commons.io.FileUtils
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.tmatesoft.svn.core.SVNCommitInfo
 import org.tmatesoft.svn.core.SVNDepth
 import org.tmatesoft.svn.core.SVNException
@@ -27,11 +29,13 @@ import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl
  * protect and SvnManager is also not able to detect whether the working copy has been changed outside the class.
  * It is important to let the instance of the SvnManager be the only resource accessing the working copy!
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 public class SvnManager implements VcsManager {
     // TODO: we need some way of authentication
     private static final ReentrantLock lock = new ReentrantLock()
     private static final AtomicInteger uid = new AtomicInteger(0)
+    private static final Log log = LogFactory.getLog(this)
     /**
      * Whether SvnManager is correctly inited or not
      */
@@ -64,7 +68,7 @@ public class SvnManager implements VcsManager {
             repositoryUrl = SVNURL.fromFile(localRepo)
             manager = SVNClientManager.newInstance()
         } catch (SVNException e) {
-            throw new VcsException(e)
+            log.error(e.message, e)
         }
     }
 
@@ -257,5 +261,6 @@ public class SvnManager implements VcsManager {
          * For using over file:///
          */
         FSRepositoryFactory.setup()
+        log.debug("SVNKit setup complete.")
     }
 }

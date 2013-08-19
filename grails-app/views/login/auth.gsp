@@ -3,9 +3,8 @@
 <head>
     <title>Login</title>
     <link rel="shortcut icon" href="${g.createLink(uri: '/images/favicon.ico')}"/>
-    <less:stylesheet name="jummp"/>
-    <less:scripts />
-    <r:require module="jquery"/>
+    <r:require module="style"/>
+    <r:require module="core"/>
     <r:layoutResources/>
 </head>
 

@@ -10,6 +10,8 @@ import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
+import java.util.List
+import java.util.Map
 
 /**
  * @short Service delegating methods to ModelService.
@@ -107,24 +109,25 @@ class ModelDelegateService implements IModelService {
         return modelService.getPublication(Model.get(modelId))?.toCommandObject()
     }
 
-    ModelTransportCommand uploadModel(File modelFile, ModelTransportCommand meta) throws ModelException {
-        return modelService.uploadModel(modelFile, meta).toCommandObject()
+    ModelTransportCommand uploadModel(List<File> modelFiles, ModelTransportCommand meta) throws ModelException {
+        return modelService.uploadModelAsList(modelFiles, meta).toCommandObject()
     }
 
     RevisionTransportCommand addRevision(long modelId, File file, ModelFormatTransportCommand format, String comment) throws ModelException {
-        return modelService.addRevision(Model.get(modelId), file, ModelFormat.findByIdentifier(format.identifier), comment).toCommandObject()
+        return modelService.addRevision(Model.get(modelId), file,
+                ModelFormat.findByIdentifierAndFormatVersion(format.identifier, format.formatVersion), comment).toCommandObject()
     }
 
     Boolean canAddRevision(long modelId) {
         return modelService.canAddRevision(Model.get(modelId))
     }
 
-    byte[] retrieveModelFile(RevisionTransportCommand revision) throws ModelException {
-        return modelService.retrieveModelFile(Revision.get(revision.id))
+    Map<String, byte[]> retrieveModelFiles(RevisionTransportCommand revision) throws ModelException {
+        return modelService.retrieveModelFiles(Revision.get(revision.id))
     }
 
-    byte[] retrieveModelFile(long modelId) {
-        return modelService.retrieveModelFile(Model.get(modelId))
+    Map<String, byte[]> retrieveModelFiles(long modelId) {
+        return modelService.retrieveModelFiles(Model.get(modelId))
     }
 
     void grantReadAccess(long modelId, User collaborator) {

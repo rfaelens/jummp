@@ -387,9 +387,9 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
 
     @Ignore
     @Test
-    void testRetrieveModelFile() {
+    void testRetrieveModelFiles() {
         // first test a completely invalid variant
-        assertTrue(send("retrieveModelFile", "test") instanceof IllegalArgumentException)
+        assertTrue(send("retrieveModelFiles", "test") instanceof IllegalArgumentException)
         // setup VCS
         setupVcs()
         // try uploading a valid model
@@ -427,18 +427,18 @@ class JmsAdapterServiceTests extends JummpIntegrationTest {
         def revision = send("getLatestRevision", [auth.getAuthenticationHash(), model.id])
         assertTrue(revision instanceof RevisionTransportCommand)
         // get the file
-        def result = send("retrieveModelFile", [auth.getAuthenticationHash(), revision])
+        def result = send("retrieveModelFiles", [auth.getAuthenticationHash(), revision])
         assertTrue(result instanceof byte[])
         assertEquals(modelSource.bytes.toString(), result.toString())
         // other user should get an AccessDeniedException
         def auth2 = send2("authenticate", new UsernamePasswordAuthenticationToken("username", "verysecret"))
         assertNotNull(auth2)
         assertTrue(auth2 instanceof JummpAuthentication)
-        assertTrue(send("retrieveModelFile", [auth2.getAuthenticationHash(), revision]) instanceof AccessDeniedException)
+        assertTrue(send("retrieveModelFiles", [auth2.getAuthenticationHash(), revision]) instanceof AccessDeniedException)
 
         // test illegal argument exceptions
-        assertTrue(send("retrieveModelFile", [auth.getAuthenticationHash()]) instanceof IllegalArgumentException)
-        assertTrue(send("retrieveModelFile", [auth.getAuthenticationHash(), revision, "Test"]) instanceof IllegalArgumentException)
+        assertTrue(send("retrieveModelFiles", [auth.getAuthenticationHash()]) instanceof IllegalArgumentException)
+        assertTrue(send("retrieveModelFiles", [auth.getAuthenticationHash(), revision, "Test"]) instanceof IllegalArgumentException)
 
         // need to delete the ACL or following tests will fail
         modelAdminUser(true)

@@ -38,12 +38,8 @@ rankdir=BT;
     "webapp" -> "security";
 
     // plugins depending core-api, security and remote
-    "dbus" [label=dBus];
     "jmsRemote" [label="JMS-Remote"];
 
-    "dbus" -> "coreApi";
-    "dbus" -> "security";
-    "dbus" -> "remote";
     "jmsRemote" -> "coreApi";
     "jmsRemote" -> "security";
     "jmsRemote" -> "remote";
@@ -54,5 +50,4 @@ rankdir=BT;
     "jms" -> "security";
     "jms" -> "remote";
     "jms" -> "bives";
-    
 }

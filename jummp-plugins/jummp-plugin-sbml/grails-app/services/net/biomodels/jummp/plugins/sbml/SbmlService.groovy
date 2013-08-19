@@ -1,56 +1,74 @@
 package net.biomodels.jummp.plugins.sbml
 
-import javax.xml.stream.XMLStreamException
+import net.biomodels.jummp.core.ISbmlService
 import net.biomodels.jummp.core.model.FileFormatService
+import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.plugins.sbml.SbmlCache
+import com.thoughtworks.xstream.converters.ConversionException
+
+import grails.util.Environment
+import java.util.regex.Pattern
+import javax.xml.stream.XMLInputFactory
+import javax.xml.stream.XMLStreamException
+import javax.xml.stream.XMLStreamReader
+import org.apache.commons.io.FileUtils
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.codehaus.groovy.grails.plugins.codecs.URLCodec
+import org.jdom.Document
+import org.jdom.Element
+import org.jdom.JDOMException
+import org.jdom.Namespace
+import org.jdom.input.SAXBuilder
+import org.jdom.output.XMLOutputter
+import org.jdom.xpath.XPath
+import org.perf4j.aop.Profiled
+import org.sbfc.converter.models.BioPaxModel
+import org.sbfc.converter.models.OctaveModel
+import org.sbfc.converter.models.SBMLModel
+import org.sbfc.converter.sbml2biopax.SBML2BioPAX_l3
+import org.sbfc.converter.sbml2dot.SBML2Dot
+import org.sbfc.converter.sbml2octave.SBML2Octave
+import org.sbml.jsbml.AlgebraicRule
+import org.sbml.jsbml.Annotation
+import org.sbml.jsbml.AssignmentRule
+import org.sbml.jsbml.CVTerm
+import org.sbml.jsbml.Compartment
+import org.sbml.jsbml.Event
+import org.sbml.jsbml.EventAssignment
+import org.sbml.jsbml.ExplicitRule
+import org.sbml.jsbml.FunctionDefinition
+import org.sbml.jsbml.ListOf
+import org.sbml.jsbml.Model
+import org.sbml.jsbml.Parameter
+import org.sbml.jsbml.QuantityWithUnit
+import org.sbml.jsbml.RateRule
+import org.sbml.jsbml.Reaction
+import org.sbml.jsbml.Rule
 import org.sbml.jsbml.SBMLDocument
 import org.sbml.jsbml.SBMLError
 import org.sbml.jsbml.SBMLReader
-import net.biomodels.jummp.core.model.RevisionTransportCommand
-import org.sbml.jsbml.Model
-import net.biomodels.jummp.core.ISbmlService
-import org.sbml.jsbml.ListOf
-import org.sbml.jsbml.Parameter
-import org.sbml.jsbml.Annotation
-import org.sbml.jsbml.QuantityWithUnit
-import org.sbml.jsbml.SpeciesReference
-import org.sbml.jsbml.SimpleSpeciesReference
-import org.sbml.jsbml.Reaction
-import org.sbml.jsbml.Event
-import org.sbml.jsbml.EventAssignment
-import org.sbml.jsbml.Symbol
-import org.sbml.jsbml.Rule
-import org.sbml.jsbml.RateRule
-import org.sbml.jsbml.AlgebraicRule
-import org.sbml.jsbml.AssignmentRule
-import org.sbml.jsbml.ExplicitRule
-import org.sbml.jsbml.Variable
-import org.perf4j.aop.Profiled
-import org.sbml.jsbml.FunctionDefinition
-import org.sbml.jsbml.SBO
-import org.sbml.jsbml.Compartment
-import org.sbml.jsbml.Species
-import org.sbml.jsbml.SBase
-import org.sbfc.converter.sbml2dot.SBML2Dot
-import org.sbfc.converter.sbml2octave.SBML2Octave
-import org.apache.commons.io.FileUtils
-import org.springframework.beans.factory.InitializingBean
-import grails.util.Environment
-import org.codehaus.groovy.grails.plugins.codecs.URLCodec
-import org.sbml.jsbml.CVTerm
-import org.sbfc.converter.models.SBMLModel
-import org.sbfc.converter.models.OctaveModel
 import org.sbml.jsbml.SBMLWriter
-import org.sbfc.converter.sbml2biopax.SBML2BioPAX_l3
-import org.sbfc.converter.models.BioPaxModel
-import com.thoughtworks.xstream.converters.ConversionException
+import org.sbml.jsbml.SBO
+import org.sbml.jsbml.SBase
+import org.sbml.jsbml.SimpleSpeciesReference
+import org.sbml.jsbml.Species
+import org.sbml.jsbml.SpeciesReference
+import org.sbml.jsbml.Symbol
+import org.sbml.jsbml.Variable
+import org.springframework.beans.factory.InitializingBean
 
 /**
  * Service class for handling Model files in the SBML format.
  * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author  Raza Ali <raza.ali@ebi.ac.uk>
+ * @author  Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     static transactional = true
+    private static final Log log = LogFactory.getLog(this)
+    private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
 
     /**
      * Dependency Injection of MiriamService
@@ -70,10 +88,15 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     @SuppressWarnings("GrailsStatelessService")
     private def biopaxConverter = null
 
-    // TODO: move initialization into afterPropertiesSet and make it configuration dependent
+    /* SbmlCache causes reflection exceptions in Java7 (java.lang.reflect.MalformedParameterizedTypeException)
+     * Therefore it has currently been disabled, until a java7 compliant implementation
+     * can be provided
+     * 
+     *   TODO: move initialization into afterPropertiesSet and make it configuration dependent
     @SuppressWarnings("GrailsStatelessService")
     SbmlCache<RevisionTransportCommand, SBMLDocument> cache = new SbmlCache(100)
-
+    */
+   
     public void afterPropertiesSet() {
         if (Environment.current == Environment.PRODUCTION) {
             // only initialize the SBML2* Converters during startup in production mode
@@ -85,8 +108,8 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         }
     }
 
-    @Profiled(tag="SbmlService.validate")
-    public boolean validate(final File model) {
+    private SBMLDocument getFileAsValidatedSBMLDocument(final File model)
+    {
         // TODO: we should insert the parsed model into the cache
         SBMLDocument doc
         SBMLReader reader = new SBMLReader()
@@ -94,17 +117,12 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             doc = reader.readSBML(model)
         } catch (XMLStreamException e) {
             log.error("SBMLDocument could not be read from ${model.name}")
-            return false
+            return null
         }
         if (doc == null) {
             // although the API documentation states that an Exception is thrown for incorrect files, it seems that null is returned
-            log.error("SBMLDocuement is not valid for file ${model.name}")
-            return false
-        }
-        if (!grailsApplication.config.jummp.plugins.sbml.validation) {
-            log.info("Validation for ${model.name} skipped due to configuration option")
-            println("Validation for ${model.name} skipped due to configuration option")
-            return true
+            log.error("SBMLDocument is not valid for file ${model.name}")
+            return null
         }
         // TODO: WARNING: checkConsistency uses an online validator. This might render timeouts during model upload
         try {
@@ -114,23 +132,167 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 for (SBMLError error in doc.getListOfErrors().validationErrors) {
                     if (error.isFatal() || error.isInternal() || error.isSystem() || error.isXML() || error.isError()) {
                         log.debug(error.getMessage())
-                        valid = false
+                        doc = null
                         break
                     }
                 }
-                return valid
-            } else {
-                return true
             }
+            return doc
         } catch (ConversionException e) {
             log.error(e.getMessage(), e)
-            return false
+            return null
         }
     }
 
+    /**
+     * Checks whether the files passed comprise a model of this format.
+     *
+     * @param files The files comprising a potential model of this format
+     */
+    public boolean areFilesThisFormat(final List<File> files) {
+        if (files == null || files.size() == 0) {
+            return false
+        }
+
+        // let us assume that they are, and change our minds as soon as we discover the contrary
+        boolean areAllSbml = true
+        int iFiles = 0
+        final fileCount = files.size()
+        //should work with any value above 2, but sometimes there are comments at the start of the file
+        final int DEPTH_LIMIT = 15
+        BufferedReader reader
+        String currentLine
+        final def p = Pattern.compile(".*<sbml xmlns=\"http://www\\.sbml\\.org/sbml/level.*\".*")
+
+        while (areAllSbml && iFiles < fileCount) {
+            try {
+                reader = new BufferedReader(new FileReader(files[iFiles]))
+                boolean foundSbmlDeclarationLine = false
+                int iLine = 0
+                while (!foundSbmlDeclarationLine && iLine < DEPTH_LIMIT) {
+                    currentLine = reader.readLine()
+                    if (currentLine == null) {
+                        areAllSbml = false
+                        break
+                    }
+                    if (Pattern.matches(p.toString(), currentLine)) {
+                        foundSbmlDeclarationLine = true
+                    }
+                    else {
+                        iLine++
+                    }
+                }
+                areAllSbml &= foundSbmlDeclarationLine
+            } catch(IOException ex) {
+                def msg = new StringBuffer("Could not check if files ${files.inspect()} are valid SBML.")
+                msg.append(" Encountered ${ex.message} while reading line $currentLine of file ${files[iFiles]}")
+                log.error(msg.toString())
+                return false
+            } finally {
+                reader?.close()
+                iFiles++
+            }
+        }
+        return areAllSbml
+    }
+
+    private SBMLDocument getDocumentFromFiles(final List<File> model){
+        SBMLDocument retval=null
+        model.each {
+            try {
+                SBMLDocument doc  = getFileAsValidatedSBMLDocument(it);
+                if (doc) {
+                    retval=doc
+                }
+            } catch(Exception ignore) {
+            }
+        }
+        return retval
+    }
+
+    @Profiled(tag="SbmlService.validate")
+    public boolean validate(final List<File> model) {
+        if (!grailsApplication.config.jummp.plugins.sbml.validation) {
+            log.info("Validation for ${model.name} skipped due to configuration option")
+            return true
+        }
+        if (getDocumentFromFiles(model)) {
+            return true
+        }
+        return false
+    }
+
+    /**
+     * Extracts the name of a model from a list of SBML files.
+     *
+     * Note that all files with the exception of the first one are ignored.
+     * @param model A list of files in SBML format
+     * @return the name of the model or an empty string if no file is supplied.
+     */
     @Profiled(tag="SbmlService.extractName")
-    public String extractName(final File model) {
-        return ""
+    public String extractName(List<File> model) {
+        model = model.findAll{it && it.exists() && it.canRead()}
+        if (!model) {
+            return ""
+        }
+        String name = findModelAttribute(model.first(), "model", "name")
+        return name ? name : ""
+    }
+
+    /**
+     * Extracts the SBML model notes.
+     *
+     * Note that all files with the exception of the first one are ignored.
+     * @param model A list of files in SBML format
+     * @return the description of the model or an empty string if no file is supplied.
+     */
+    @Profiled(tag="SbmlService.extractDescription")
+    public String extractDescription(final List<File> model) {
+        if (!model) {
+            def errMsg = new StringBuffer("Cannot extract the description from undefined file ${model.properties}")
+            log.warn errMsg.toString()
+            return ""
+        }
+        def description = new StringBuffer()
+        def nsList = [ "http://www.sbml.org/sbml/level3/version1/core",
+                        "http://www.sbml.org/sbml/level2/version4",
+                        "http://www.sbml.org/sbml/level2/version3",
+                        "http://www.sbml.org/sbml/level2/version2",
+                        "http://www.sbml.org/sbml/level2",
+                        "http://www.sbml.org/sbml/level1"
+        ]
+        try {
+            // find the namespace without loading the file
+            def builder = new SAXBuilder()
+            Document doc = builder.build(model.first())
+
+            for (String namespace: nsList) {
+                Namespace ns = Namespace.getNamespace("ns", namespace)
+                XPath xpath = XPath.newInstance("/ns:sbml/ns:model/ns:notes")
+                xpath.addNamespace(ns)
+                List<Element> noteElements = xpath.selectNodes(doc)
+                if (! noteElements.isEmpty()) {
+                    for (Element elt: noteElements) {
+                        // required step as 'notes' contains further XML tags
+                        XMLOutputter xmlOut = new XMLOutputter()
+                        description.append(xmlOut.outputString(elt))
+                    }
+                    // no need to try other namespaces
+                    break
+                }
+            }
+        } catch (JDOMException e) {
+            def errMsg = new StringBuffer("Exception encountered while extracting description from ${model.inspect()}")
+            errMsg.append(": ${e.message}")
+            log.error(errMsg.toString(), e)
+            return ""
+        } catch (IOException e) {
+            def errMsg = new StringBuffer("IOException encountered while extracting description from ${model.inspect()}")
+            errMsg.append(": ${e.message}")
+            log.error(errMsg.toString(), e)
+            return ""
+        }
+        return description.toString()
     }
 
     @Profiled(tag="SbmlService.getMetaId")
@@ -140,12 +302,19 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     @Profiled(tag="SbmlService.getVersion")
     public long getVersion(RevisionTransportCommand revision) {
-        return getFromCache(revision).version
+        return fetchModelAttributeFromRevision(revision, "version")
     }
 
     @Profiled(tag="SbmlService.getLevel")
     public long getLevel(RevisionTransportCommand revision) {
-        return getFromCache(revision).level
+        return fetchModelAttributeFromRevision(revision, "level")
+    }
+
+    @Profiled(tag="SbmlService.getFormatVersion")
+    public String getFormatVersion(RevisionTransportCommand revision) {
+        final long LEVEL = getLevel(revision)
+        final long VERSION = getVersion(revision)
+        return "L${LEVEL}V${VERSION}"
     }
 
     @Profiled(tag="SbmlService.getNotes")
@@ -417,8 +586,8 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     @Profiled(tag="SbmlService.getPubMedAnnotation")
     public List<List<String>> getPubMedAnnotation(RevisionTransportCommand revision) {
-        Model model = getFromCache(revision).model
-        Annotation annotation = model.annotation
+        Model model = getFromCache(revision)?.model
+        Annotation annotation = model?.annotation
         if(!annotation) {
             return null
         }
@@ -439,14 +608,23 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
      * @return The parsed SBMLDocument
      */
     private SBMLDocument getFromCache(RevisionTransportCommand revision) throws XMLStreamException {
-        SBMLDocument document = cache.get(revision)
+        /*SBMLDocument document = cache.get(revision)
         if (document) {
             return document
-        }
+        }*/
+        SBMLDocument document=null;
         // we do not have a document, so retrieve first the file
-        byte[] bytes = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFile(revision)
-        document = (new SBMLReader()).readSBMLFromStream(new ByteArrayInputStream(bytes))
-        cache.put(revision, document)
+        Map<String, byte[]> bytes = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFiles(revision)
+        for (Map.Entry<String, byte[]> entry : bytes.entrySet()) {
+            try {
+                document=(new SBMLReader()).readSBMLFromStream(new ByteArrayInputStream(entry.getValue()));
+            	/*if (document) {
+                  cache.put(revision, document)
+                  break
+                }*/
+            } catch(Exception ignore) {
+            }
+        }
         return document
     }
 
@@ -645,6 +823,103 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         return biopaxConverter
     }
 
+    private long fetchModelAttributeFromRevision(RevisionTransportCommand revision, String attributeName) {
+        File mainFile = fetchMainFileFromRevision(revision)
+        if (!mainFile) {
+            //we have already logged this error, just return
+            return 0
+        }
+        String attributeValue = findModelAttribute(mainFile, "sbml", attributeName)
+        return longFromString(attributeValue, attributeName, mainFile)
+    }
+
+    private File fetchMainFileFromRevision(RevisionTransportCommand revision) {
+        final String mainFileLocation = revision?.files?.find {it.mainFile}.path
+        if (!mainFileLocation) {
+            log.error "The main file of revision ${revision.properties} is undefined."
+            return null
+        }
+        File mainFile = new File(mainFileLocation)
+        if (!mainFile || !mainFile.canRead()) {
+            def errMsg = new StringBuilder("None of the files ").append(revision?.files?.inspect()).
+                        append(" of revision ").append(revision.properties).append("is a main file.")
+            log.error errMsg.toString()
+            return null
+        }
+        return mainFile
+    }
+
+    private String findModelAttribute(final File model, String elementName, String attributeName) {
+        if (null == elementName) {
+            elementName = ""
+        }
+        if (null == attributeName) {
+            attributeName = ""
+        }
+        if (IS_INFO_ENABLED) {
+            def info = new StringBuilder("Extracting attribute ").append(attributeName).
+                        append(" of element ").append(elementName).append(" from ").append(model.properties)
+            log.info(info.toString())
+        }
+        String theResult
+        def fileReader = new FileReader(model)
+        XMLInputFactory factory = XMLInputFactory.newInstance()
+        factory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.FALSE)
+        XMLStreamReader xmlReader
+        try {
+            xmlReader = factory.createXMLStreamReader(fileReader)
+            boolean found = false
+            while (xmlReader.hasNext() && !found) {
+                xmlReader.next()
+                if (xmlReader.startElement) {
+                    String result = processXmlElement(xmlReader, elementName, attributeName)
+                    if (result) {
+                        theResult = result
+                        found = true
+                    } else {
+                        xmlReader.next()
+                    }
+                }
+            }
+        } catch (XMLStreamException e) {
+            def errorMsg = new StringBuilder("Error while extracting property ").append(elementName).
+                        append(".").append(attributeName).append(" from ").append(model.properties)
+            errorMsg.append(". The offending file caused ${e.message}.\n")
+            log.error (errorMsg.toString(), e)
+        } finally {
+            xmlReader?.close()
+            fileReader?.close()
+            return theResult
+        }
+    }
+
+    private String processXmlElement(XMLStreamReader reader, String element, String attribute) {
+        if (element.equals(reader.getLocalName())) {
+            return reader.getAttributeValue(null, attribute)
+        }
+        return null
+    }
+
+    /*
+     * Convenience method for handling conversions from String to long.
+     * @param value the value that should be converted to long
+     * @param name the name of attribute whose value is being converted. Used in the log messages.
+     * @param mainFile the name of the file from which the attribute was extracted. Used in the log messages.
+     * @return the value of the attribute as a long, or zero if the conversion fails.
+     */
+    private long longFromString(String value, String name, File mainFile) {
+        long level = 0
+        try {
+            level = value as long
+        } catch (NumberFormatException e) {
+            def errMsg = new StringBuilder("Error extracting model attribute from ").append(mainFile.properties).
+                        append(". ").append(name). append(" ").append(value).append(" is not a number.")
+            log.error errMsg.toString(), e
+        } finally {
+            return level
+        }
+    }
+
     /**
      * Resolves the SBMLModel from the given @p revision.
      * @param revision The RevisionTransportCommand from which to extract the SBMLModel.
@@ -658,13 +933,23 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         SBMLModel sbmlModel = new SBMLModel()
         sbmlModel.setModelFromString(sbmlString)
         return sbmlModel
-        } catch (NoSuchElementException e) {
+        } catch (Exception e) {
+            e.printStackTrace()
             return [:]
         }
     }
 
-    public String triggerSubmodelGeneration(RevisionTransportCommand revision, String subModelId, String metaId, List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds) {
+    /**
+     * Triggers the generation of a sub model for an existing model encoded in SBML.
+     *
+     * @return A String representation of the new model encoded in SBML.
+     */
+    public String triggerSubmodelGeneration(
+            RevisionTransportCommand revision, String subModelId, String metaId, 
+            List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds,
+            List<String> ruleIds, List<String> eventIds) {
         Model model = getFromCache(revision).model
-        return new SubmodelGenerator().generateSubModel(model, subModelId, metaId, compartmentIds, speciesIds, reactionIds, ruleIds, eventIds)
+        return new SubmodelGenerator().generateSubModel(
+                model, subModelId, metaId, compartmentIds, speciesIds, reactionIds, ruleIds, eventIds)
     }
 }

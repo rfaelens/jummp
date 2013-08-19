@@ -12,6 +12,8 @@ import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.IModelService
 import net.biomodels.jummp.webapp.ast.JmsAdapter
 import net.biomodels.jummp.webapp.ast.JmsQueueMethod
+import java.util.List
+import java.util.LinkedList
 
 /**
  * @short Wrapper class around the ModelService exposed to JMS.
@@ -161,7 +163,9 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
 
         File file = File.createTempFile("jummpJms", null)
         file.append(message[1])
-        result = modelDelegateService.uploadModel(file, (ModelTransportCommand)message[2])
+        List<File> container=new LinkedList<File>();
+        container.add(file)
+        result = modelDelegateService.uploadModel(container, (ModelTransportCommand)message[2])
         FileUtils.deleteQuietly(file)
 
         return result
@@ -199,12 +203,12 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
     }
 
     /**
-     * Wrapper around ModelService.retrieveModelFile
+     * Wrapper around ModelService.retrieveModelFiles
      * @param message List consisting of AuthenticationHash and Revision
      * @return Byte Array, InvalidArgumentException, AccessDeniedException or ModelException
      */
     @Queue
-    def retrieveModelFile(def message) {
+    def retrieveModelFiles(def message) {
         if (!verifyMessage(message, [String, RevisionTransportCommand]) &&
             !verifyMessage(message, [String, Long])) {
             return new IllegalArgumentException("AuthenticationHash and Revision or Model as arguments expected")
@@ -212,9 +216,9 @@ class ModelJmsAdapterService extends AbstractJmsAdapter {
 
         setAuthentication((String)message[0])
         if (message[1] instanceof RevisionTransportCommand) {
-            return modelDelegateService.retrieveModelFile((RevisionTransportCommand)message[1])
+            return modelDelegateService.retrieveModelFiles((RevisionTransportCommand)message[1])
         } else {
-            return modelDelegateService.retrieveModelFile(message[1])
+            return modelDelegateService.retrieveModelFiles(message[1])
         }
     }
 

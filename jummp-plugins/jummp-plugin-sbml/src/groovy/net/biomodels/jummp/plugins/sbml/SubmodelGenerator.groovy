@@ -6,11 +6,13 @@ import org.sbml.jsbml.*
  * Class generating a sub model of an existing SBML model.
  *
  * @author Jochen Schramm <j.schramm@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class SubmodelGenerator {
 
     /**
      * Generates a new SBML model as sub model of an existing one.
+     *
      * @param existingModel: The existing Model
      * @param subModelId: The given sub model's id element
      * @param metaId: The meta id element
@@ -21,7 +23,9 @@ class SubmodelGenerator {
      * @param eventIds: The selected event ids
      * @return Generated SBMLDocument
      */
-    protected String generateSubModel(Model existingModel, String subModelId, String metaId, List<String> compartmentIds, List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds) {
+    protected String generateSubModel(
+            Model existingModel, String subModelId, String metaId, List<String> compartmentIds,
+            List<String> speciesIds, List<String> reactionIds, List<String> ruleIds, List<String> eventIds) {
         Model subModel = new Model(subModelId)
         subModel.setMetaId(metaId)
         SBMLDocument subModelSbmlDocument = new SBMLDocument()
