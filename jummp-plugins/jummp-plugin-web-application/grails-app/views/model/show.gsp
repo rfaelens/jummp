@@ -4,6 +4,7 @@
         <meta name="layout" content="main"/>
         <title>${revision.model.name}</title>
         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+        <script src="http://www.ebi.ac.uk/~rali/js/jstree/jquery.jstree.js" type="text/javascript" ></script>
         <r:require module="jqueryui_latest"/>
         <style>
         #topBar {
@@ -30,19 +31,77 @@
 	    border:none;
 	    float: right;
 	}
-
 	#submit:hover {
 	    border: none;
 	    background:#339966;
 	    box-shadow: 0px 0px 1px #777;
 	
 	}
+	#Files {
+	    display: inline-block;
+	    height: 100%;
+	    width:100%;
+	}
+	#treeView {
+	    float:left;
+	    margin:5px;
+	}
+	#resizable { 
+	    width: 70%; height: 150px; padding: 0.5em; border=0px; margin-left:5%;	  
+	    float:left;
+	 }
 	</style>
 	<script>
+		var fileData=new Array();
+		<g:each in="${revision.files}">
+		 	<%
+		 		File file=new File(it.path)
+		 	%>
+		 	fileData["${file.name}"]=new Object();
+		 	fileData["${file.name}"].description="${it.description};"
+		 	fileData["${file.name}"].mimeType="${it.mimeType};"
+		 </g:each>
+		 var abcd="abcd"
+		 
+		 
 		$(function() {
 			$( "#tabs" ).tabs()
-			$("#tabs ul li a").click(function () {location.hash = $(this).attr('href');});
+			$("#tabs ul li a").click(function () {
+				var anchor=$(this).attr('href');
+				if (typeof(anchor) != "undefined") {
+					location.hash = anchor;
+				}
+			});
 		});
+		
+		function updateFileDetailsPanel(fileProps) {
+			if (typeof(fileProps) != "undefined") {
+				$("#Files #resizable #detailsBox").html(fileProps.mimeType);
+			}
+			else {
+				$("#Files #resizable #detailsBox").html("");
+			}
+		}
+		
+		$(document).ready(function() {
+			// Handler for .ready() called.
+			$("#Files #treeView").bind("select_node.jstree", function(event, data) {
+					var clickedOn=$(data.args[0]).text()
+					clickedOn = clickedOn.replace(/^\s+|\s+$/g,'')
+					var fileProps=fileData[clickedOn]
+					updateFileDetailsPanel(fileProps)
+				}).jstree({
+				"ui" : {
+					"select_limit" : 1
+				},
+				"themes" : {
+					    "theme" : "classic",
+					    "icons" : false
+				},
+				"plugins" : [ "themes", "html_data", "ui"]
+			});
+		});
+	
 	</script>
     </head>
     <body>
@@ -88,23 +147,40 @@
 	
 	  </div>
 	  <div id="Files">
-	  	<table>
-			  	<tr>
-	  				<td><b>File Name</b></td>
-	  				<td><b>Is Main?</b></td>
-	  				<td><b>Mime Type</b></td>
-	  				<td><b>Description</b></td>
-	  			</tr>
-	  			<g:each in="${revision.files}" var="item">
-	  			<tr>
-	  				<td>${(new File(item.path)).getName()}</td>
-	  				<td>${item.mainFile}</td>
-	  				<td>${item.mimeType}</td>
-	  				<td>${item.description}</td>
-	  			</tr>
-	  			</g:each>
-	  	</table>	
-	  </div>
+	  	<div id="treeView">
+	  		<ul>
+	  		   <li rel="folder"><a>Main Files</a>
+	  		   	<ul>
+	  		   	   <g:each in="${revision.files}">	
+	  		   	   	<g:if test="${it.mainFile}">
+	  		   	   		<li rel="file"><a>
+	  		   	   			<%File f=new File(it.path);%>
+	  		   	   			${f.name}
+	  		   	   		</a></li>
+	  		   	   	</g:if>
+	  		   	   </g:each>
+	  		   	</ul>
+	  		   </li>
+	  		</ul>
+	  		<ul>
+	  		   <li><a>Additional Files</a>
+   	  		   	<ul>
+	  		   	   <g:each in="${revision.files}">	
+	  		   	   	<g:if test="${!it.mainFile}">
+	  		   	   		<li rel="file"><a>
+	  		   	   			<%File f=new File(it.path);%>
+	  		   	   			${f.name}
+	  		   	   		</a></li>
+	  		   	   	</g:if>
+	  		   	   </g:each>
+	  		   	</ul>
+	  		   </li>
+	  		</ul>
+  		</div>
+  		<div id="resizable" class="ui-widget-content">
+  			<div id="detailsBox" class="detailsBox"></div>
+  		</div>
+  	  </div>
 	  <div id="History">
 	  	<p>todo</p>
 	  </div>
