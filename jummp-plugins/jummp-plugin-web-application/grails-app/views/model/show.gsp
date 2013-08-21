@@ -1,5 +1,17 @@
-<html>
-    <head>
+<%@ page import="java.nio.file.Files"%>
+<%@ page import="java.nio.file.attribute.BasicFileAttributes"%>
+<%@ page import="java.nio.file.FileSystem"%>
+<%@ page import="java.nio.file.FileSystems"%>
+<%@ page import="java.nio.file.Path"%>
+<%@ page import="java.nio.file.Paths"%>
+<%@ page import="java.nio.file.SimpleFileVisitor"%>
+<%@ page import="java.nio.file.FileVisitResult"%>
+<%@ page import="org.apache.commons.io.FilenameUtils"%>
+<%
+	def loadedZips=new HashMap();		
+%>
+		
+<head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
         <title>${revision.model.name}</title>
@@ -39,29 +51,65 @@
 	}
 	#Files {
 	    display: inline-block;
+	    margin-left:5%;
 	    height: 100%;
-	    width:100%;
+	    width:90%;
 	}
 	#treeView {
 	    float:left;
 	    margin:5px;
 	}
 	#resizable { 
-	    width: 70%; height: 150px; padding: 0.5em; border=0px; margin-left:5%;	  
+	    height: 100%; padding: 0.5em; border=none; margin-left:30px;	  
 	    float:left;
 	 }
 	</style>
 	<script>
 		var fileData=new Array();
 		<g:each in="${revision.files}">
-		 	<%
-		 		File file=new File(it.path)
-		 	%>
-		 	fileData["${file.name}"]=new Object();
-		 	fileData["${file.name}"].description="${it.description};"
-		 	fileData["${file.name}"].mimeType="${it.mimeType};"
-		 </g:each>
-		 var abcd="abcd"
+			<%
+	 		File file=new File(it.path)
+	 		BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class)
+	 		%>
+	 		fileData["${file.name}"]=new Object();
+	 		fileData["${file.name}"].Name="${FilenameUtils.getName(it.path)}";
+	 		fileData["${file.name}"].Extension="${FilenameUtils.getExtension(it.path)}";
+	 		fileData["${file.name}"].Description="${it.description}";
+	 		fileData["${file.name}"].Type="${it.mimeType}";
+	 		fileData["${file.name}"].Size=readablizeBytes(${attr.size()});
+	 		fileData["${file.name}"].Created="${new Date(attr.creationTime().toMillis())}";
+	 		fileData["${file.name}"].Accessed="${new Date(attr.lastAccessTime().toMillis())}";
+	 		fileData["${file.name}"].Modified="${new Date(attr.lastModifiedTime().toMillis())}";
+
+	 		<g:if test="${it.mimeType.contains('zip')}">
+	 			<%
+	 			     Path zipfile = Paths.get(it.path);
+	 			     final URI uri = URI.create("jar:file:" + zipfile.toUri().getPath());
+	 			     final Map<String, String> env = new HashMap<>();
+  	 			     FileSystem fs = FileSystems.newFileSystem(uri, env);
+  	 			     loadedZips.put(uri, fs)
+  	 			     final Path root = fs.getPath("/");
+	 			     Files.walkFileTree(root, new SimpleFileVisitor<Path>(){
+	 				@Override
+	 				public FileVisitResult visitFile(Path visiting, BasicFileAttributes attrs) throws IOException {
+	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"]=new Object();'<<'\n';
+	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Name="'<<FilenameUtils.getName(visiting.toString())<<'";'<<'\n';
+	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Extension="'<<FilenameUtils.getExtension(visiting.toString())<<'";'<<'\n';
+	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Size=readablizeBytes('<<attrs.size()<<');'<<'\n';
+	 					if (attrs.lastAccessTime()) {
+	 						out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Accessed="'<<new Date(attrs.lastAccessTime().toMillis())<<'";'<<'\n';
+	 					}
+	 					if (attrs.lastModifiedTime()) {
+	 						out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Modified="'<<new Date(attrs.lastModifiedTime().toMillis())<<'";'<<'\n';
+	 					}
+	 					return FileVisitResult.CONTINUE;
+	 				}
+	 			     });
+	 			%>
+	 		
+	 		</g:if>
+	 	</g:each>
+		 
 		 
 		 
 		$(function() {
@@ -74,9 +122,22 @@
 			});
 		});
 		
+		
+		function readablizeBytes(bytes) {
+			var s = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
+			var e = Math.floor(Math.log(bytes) / Math.log(1024));
+			return (bytes / Math.pow(1024, e)).toFixed(2) + " " + s[e]; 
+		}
+		
 		function updateFileDetailsPanel(fileProps) {
 			if (typeof(fileProps) != "undefined") {
-				$("#Files #resizable #detailsBox").html(fileProps.mimeType);
+				var content=[];
+				content.push("<table>")
+				for (var prop in fileProps) {
+					content.push("<tr><td><b>",prop,"</b></td><td>",fileProps[prop],"</td></tr>");
+				}
+				content.push("</table>");
+				$("#Files #resizable #detailsBox").html(content.join(""));
 			}
 			else {
 				$("#Files #resizable #detailsBox").html("");
@@ -99,6 +160,10 @@
 					    "icons" : false
 				},
 				"plugins" : [ "themes", "html_data", "ui"]
+			});
+			var tree = $("#Files #treeView");
+			tree.bind("loaded.jstree", function (event, data) {
+				tree.jstree("open_all");
 			});
 		});
 	
@@ -151,12 +216,31 @@
 	  		<ul>
 	  		   <li rel="folder"><a>Main Files</a>
 	  		   	<ul>
-	  		   	   <g:each in="${revision.files}">	
+	  		   	   <g:each in="${revision.files}">
 	  		   	   	<g:if test="${it.mainFile}">
 	  		   	   		<li rel="file"><a>
 	  		   	   			<%File f=new File(it.path);%>
-	  		   	   			${f.name}
-	  		   	   		</a></li>
+	  		   	   			${f.name}</a>
+	  		   	   			<g:if test="${it.mimeType.contains('zip')}">
+  		   	   				  <ul>
+ 	  		   	   			  <%
+	  		   	   				Path zipfile = Paths.get(it.path);
+	  		   	   				final URI uri = URI.create("jar:file:" + zipfile.toUri().getPath());
+	  		   	   				final Map<String, String> env = new HashMap<>();
+	  		   	   				//FileSystem fs = FileSystems.newFileSystem(uri, env);
+	  		   	   				FileSystem fs=loadedZips.get(uri);
+	  		   	   				final Path root = fs.getPath("/");
+	  		   	   				Files.walkFileTree(root, new SimpleFileVisitor<Path>(){
+	  		   	   					@Override
+	  		   	   					public FileVisitResult visitFile(Path visiting, BasicFileAttributes attrs) throws IOException {
+	  		   	   						out<<'<li><a>'<<zipfile.getFileName().toString()<<visiting.toString()<<'</a></li>';
+	  		   	   						return FileVisitResult.CONTINUE;
+	  		   	   					}
+	  		   	   				});
+	  		   	   			  %>
+	  		   	   			  </ul>
+	  		   	   			</g:if>
+	  		   	   		</li>
 	  		   	   	</g:if>
 	  		   	   </g:each>
 	  		   	</ul>
@@ -169,15 +253,34 @@
 	  		   	   	<g:if test="${!it.mainFile}">
 	  		   	   		<li rel="file"><a>
 	  		   	   			<%File f=new File(it.path);%>
-	  		   	   			${f.name}
-	  		   	   		</a></li>
+	  		   	   			${f.name}</a>
+	  		   	   			<g:if test="${it.mimeType.contains('zip')}">
+  		   	   				  <ul>
+ 	  		   	   			  <%
+	  		   	   				Path zipfile = Paths.get(it.path);
+	  		   	   				final URI uri = URI.create("jar:file:" + zipfile.toUri().getPath());
+	  		   	   				final Map<String, String> env = new HashMap<>();
+	  		   	   				//FileSystem fs = FileSystems.newFileSystem(uri, env);
+	  		   	   				FileSystem fs=loadedZips.get(uri);
+	  		   	   				final Path root = fs.getPath("/");
+	  		   	   				Files.walkFileTree(root, new SimpleFileVisitor<Path>(){
+	  		   	   					@Override
+	  		   	   					public FileVisitResult visitFile(Path visiting, BasicFileAttributes attrs) throws IOException {
+	  		   	   						out<<'<li><a>'<<zipfile.getFileName().toString()<<visiting.toString()<<'</a></li>';
+	  		   	   						return FileVisitResult.CONTINUE;
+	  		   	   					}
+	  		   	   				});
+	  		   	   			  %>
+	  		   	   			  </ul>
+	  		   	   			</g:if>
+	  		   	   		</li>
 	  		   	   	</g:if>
 	  		   	   </g:each>
 	  		   	</ul>
 	  		   </li>
 	  		</ul>
   		</div>
-  		<div id="resizable" class="ui-widget-content">
+  		<div id="resizable">
   			<div id="detailsBox" class="detailsBox"></div>
   		</div>
   	  </div>
@@ -189,5 +292,4 @@
         </div>
 
 </body>
-</html
 

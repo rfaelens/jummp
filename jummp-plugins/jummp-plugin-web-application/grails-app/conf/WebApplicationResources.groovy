@@ -48,6 +48,9 @@ modules = {
     jqueryui_latest {
     	resource url:'/js/jquery/jquery-ui-v1.10.3.js'
     }
+    jtree {
+    	resource url:'/js/jquery.jstree.js'
+    }
     ddmore_style {
     	resource url:'/css/ddmorestyle.css'
     }

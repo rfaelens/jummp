@@ -46,7 +46,7 @@ grails.project.dependency.resolution = {
         // required by OntologyLookupResolver
         compile "org.ccil.cowan.tagsoup:tagsoup:1.2"
         compile "com.googlecode.multithreadedtc:multithreadedtc:1.01"
-        runtime 'hsqldb:hsqldb:1.8.0.10'
+	runtime 'hsqldb:hsqldb:1.8.0.10'
         runtime 'mysql:mysql-connector-java:5.1.17'
         runtime "postgresql:postgresql:9.1-901.jdbc4"
         // plugin dependencies
