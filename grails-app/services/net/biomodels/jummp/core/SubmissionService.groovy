@@ -10,6 +10,7 @@ import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.model.RepositoryFile
 import org.perf4j.aop.Profiled
+import org.apache.commons.io.FilenameUtils
 
 /**
  * Service that provides model building functionality to a wizard-style model
@@ -152,6 +153,33 @@ class SubmissionService {
          */
         protected abstract void createTransportObjects(Map<String,Object> workingMemory);
 
+        protected String getModelNameFromFiles(List<File> mainFiles) {
+        	StringBuilder name=new StringBuilder()
+        	boolean first=true
+        	mainFiles.each {
+        		if (!first) {
+        			name.append(", ")
+        		}        		
+        		name.append(FilenameUtils.getBaseName(it.name))
+        		first=false
+        	}
+        	return name.toString()
+        }
+
+        protected String getModelDescriptionFromFiles(List<File> allFiles) {
+        	StringBuilder desc=new StringBuilder("Model comprised of files: ")
+        	boolean first=true
+        	allFiles.each {
+        		if (!first) {
+        			desc.append(", ")
+        		}        		
+        		desc.append(it.name)
+        		first=false
+        	}
+        	return desc.toString()
+        }
+        
+
         /**
          * Purpose Convenience function to update the revision dom from the files
          *
@@ -164,7 +192,13 @@ class SubmissionService {
             final String formatVersion = revision.format.formatVersion ? revision.format.formatVersion : ""
             ModelFormat modelFormat=ModelFormat.findByIdentifierAndFormatVersion(revision.format.identifier, formatVersion)
             revision.name = modelFileFormatService.extractName(files,modelFormat)
+            if (!revision.name) {
+            	    revision.name=getModelNameFromFiles(files)
+            }
             revision.description=modelFileFormatService.extractDescription(files, modelFormat)
+            if (!revision.description) {
+            	    revision.description=getModelDescriptionFromFiles(getFilesFromMemory(workingMemory, false))
+            }
             revision.validated=workingMemory.get("model_validation_result") as Boolean
         }
 
@@ -503,6 +537,7 @@ class SubmissionService {
             }
             else {
                workingMemory.put("model_type",revision.format.identifier)
+               workingMemory.put("model_validation_result",revision.validated)
             }
             storeTCs(workingMemory, revision.model, revision)
             //ensure that a new revision tc is used for submission, use 

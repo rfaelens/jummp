@@ -1,10 +1,8 @@
  <footer>
     <!-- Optional local footer (insert citation / project-specific copyright / etc here -->
-      <!--
       <div id="local-footer" class="grid_24 clearfix">
-        <p>How to reference this page: ...</p>
+        <wcm:render path="footer"/>
       </div>
-      -->
     <!-- End optional local footer -->
     
     <div id="global-footer" class="grid_24">

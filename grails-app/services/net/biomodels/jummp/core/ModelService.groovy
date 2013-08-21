@@ -140,6 +140,18 @@ class ModelService {
                         order("format", sorting)
                     }
                     break
+                case ModelListSorting.SUBMITTER:
+                    revisions {
+                        order("owner", sorting)
+                    }
+                    break
+                case ModelListSorting.SUBMISSION_DATE:
+                    /*
+                    * Hard to get to model submission date directly. However as model ids
+                    * are sequentially generated, they are used as a surrogate.
+                    */
+                    order("id", sorting)
+                    break
                 case ModelListSorting.PUBLICATION:
                     // TODO: implement, fall through to default
                 case ModelListSorting.ID: // Id is the default
@@ -192,6 +204,16 @@ ORDER BY
             break
         case ModelListSorting.FORMAT:
             query += "r.format"
+            break
+        case ModelListSorting.SUBMITTER:
+            query += "r.owner"
+            break
+       case ModelListSorting.SUBMISSION_DATE:
+       	    /*
+       	    * Hard to get to model submission date directly. However as model ids
+       	    * are sequentially generated, they are used as a surrogate.
+       	    */
+            query += "m.id"  
             break
         case ModelListSorting.PUBLICATION:
             // TODO: implement, fall through to default
@@ -625,6 +647,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
+            revision.errors.allErrors.each {
+               log.error(it)
+            }
             revision.discard()
             final def m = model.toCommandObject()
             log.error("New Revision containing ${repoFiles.inspect()} for Model ${m} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")

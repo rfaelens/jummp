@@ -8,8 +8,7 @@ class UrlMappings {
 		}
 
 		"/"(view:"/index")
-	"/models"(controller: "search", action: "list")
-        "403"(controller: "errors", action: "error403")
+	"403"(controller: "errors", action: "error403")
         "404"(controller: "errors", action: "error404")
         "500"(controller: "errors", action: "error500")
         "500"(controller: "errors", action: "error403", exception: org.springframework.security.access.AccessDeniedException)

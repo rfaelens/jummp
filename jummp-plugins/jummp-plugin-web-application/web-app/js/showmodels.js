@@ -25,15 +25,11 @@ $.jummp.showModels.loadModelList = function () {
         bJQueryUI: true,
         bAutoWidth: false,
         sSource: 'search',
-        aoColumnDefs: [
-            { bSortable: false, aTargets: [2] }
-        ],
         sPaginationType: "full_numbers",
         iDisplayLength: 10,
         bLengthChange: false,
         bScrollInfinite: false,
         bScrollCollapse: true,
-        sScrollY: "500px",
         bDeferRender: true,
         "fnServerData": function (sSource, aoData, fnCallback) {
             $.ajax({
@@ -48,12 +44,13 @@ $.jummp.showModels.loadModelList = function () {
                 "success": function (json) {
                     var i, rowData, id;
                     for (i = 0; i < json.aaData.length; i += 1) {
-                        rowData = json.aaData[i];
-                        id = rowData[0];
-                        rowData[0] = "<a class='animate' onclick=\"$.jummp.showModels.showOverlay('" + $.jummp.createLink("model", "model", id) + "');\" href=\"#\">" + id + "</a>";
-                        rowData[1] = rowData[1] ? rowData[1].replace(/_/g, " ") : "-";
+                    	rowData = json.aaData[i];
+                        id = json.modelIDs[i]
+                        rowData[0] = "<a href=\"" + $.jummp.createLink("model", "show", id) + "\">" + (rowData[0] ? rowData[0].replace(/_/g, " ") : "-") + "</a>";
                         var date=new Date(rowData[3]);
                         rowData[3]=date.toUTCString();
+                        date=new Date(rowData[4]);
+                        rowData[4]=date.toUTCString();
                     }
                     fnCallback(json);
                 }
@@ -178,11 +175,11 @@ $.jummp.showModels.lastAccessedModels = function (container) {
             $("p", container).text("");
             ul = $("<ul/>");
             for (i = 0; i < data.length; i += 1) {
-                ul.append("<li>" + data[i].name.replace(/_/g, " ") + "<br/>" + $.i18n.prop("model.history.submitter") + " " + data[i].submitter + "<br/><a href=\"#\" rel=\"" + data[i].id + "\">" + $.i18n.prop("model.history.link") + "</a></li>");
+                ul.append("<li><a href=\"" + $.jummp.createLink("model", "show", data[i].id) + "\">" + data[i].name.replace(/_/g, " ") + "</a><br/>" + $.i18n.prop("model.history.submitter") + " " + data[i].submitter+"</li>");
             }
             $("p", container).append(ul);
             $("p ul li a", container).click(function () {
-                $.jummp.showModels.showOverlay($.jummp.createLink("model", "model", $(this).prop("rel")));
+                $.jummp.showModels.showOverlay($.jummp.createLink("model", "show", $(this).prop("rel")));
             });
         }
     });

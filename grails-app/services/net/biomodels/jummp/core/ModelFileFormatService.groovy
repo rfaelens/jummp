@@ -30,10 +30,16 @@ class ModelFileFormatService {
     def grailsApplication
 
     /**
-     * The registered services to handle ModelFormats
-     */
-      private final Map<String, String> services = new HashMap()
+    * The registered services to handle ModelFormats
+    */
+    private final Map<String, String> services = new HashMap()
 
+    
+    /**
+    * The registered plugins to handle ModelFormats visualisations
+    */
+    private final Map<String, String> plugins = new HashMap()
+      
     /**
      * Extracts the format of the supplied @p modelFiles.
      * Returns the default ModelFormat representation with an empty formatVersion, since this is expected to exist 
@@ -88,18 +94,21 @@ class ModelFileFormatService {
     /**
      * Registers @p service to be responsible for ModelFormat identified by @p format.
      * This method can be used by a Plugin to register its service to be responsible for a
-     * file format.
+     * file format. The convention is to place templates used to display a model of
+     * @p format in views/model/@p plugin
      * @param format The ModelFormat to be registered as a ModelFormatTransportCommand
      * @param service The name of the service which handles the ModelFormat.
+     * @param plugin The name of the plugin (determines how the templates for the model display are loaded)
      * @throws IllegalArgumentException if the @p format has not been registered yet
      */
     @Profiled(tag = "modelFileFormatService.handleModelFormat")
-    void handleModelFormat(ModelFormatTransportCommand format, String service) {
+    void handleModelFormat(ModelFormatTransportCommand format, String service, String plugin) {
         ModelFormat modelFormat = ModelFormat.findByIdentifierAndFormatVersion(format.identifier, "")
         if (!modelFormat) {
             throw new IllegalArgumentException("ModelFormat ${format.properties} not registered in database")
         }
         services.put(format.identifier, service)
+        plugins.put(format.identifier, plugin)
     }
 
     boolean validate(final List<File> model, String formatId) {
@@ -191,6 +200,17 @@ class ModelFileFormatService {
         }
     }
 
+    /**
+     * Used to select the templates used to display the model of the @p format provided. 
+     * The convention is to place the templates inside views/model/"uniquelabel". The uniquelabel
+     * is specified by the format plugin during registration.
+     * @param rev The Revision for which all pubmed annotations should be retrieved
+     * @return The folder where template for the model display can be found
+     */
+    String getPluginForFormat(final ModelFormatTransportCommand format) {
+    	    return plugins.get(format.identifier)
+    }
+    
     /**
      * Helper function to get the proper service for @p format.
      * @param format The ModelFormat for which the service should be returned.

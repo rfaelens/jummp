@@ -33,7 +33,14 @@ class ModelController {
     def grailsApplication
 
     def show = {
-        [id: params.id]
+    	Long modelID=params.id as Long;
+    	List<RevisionTransportCommand> revs=modelDelegateService.getAllRevisions(modelID)
+    	[	
+    		revision: revs.last(), 
+    		authors: revs.last().model.creators, 
+    		format: modelDelegateService.getPluginForFormat(revs.last().format), 
+    		allRevs:revs
+    	]
     }
 
     @Secured(["isAuthenticated()"])
@@ -228,7 +235,6 @@ class ModelController {
                         flow.workingMemory["submitted_additionals"] = additionalsMap
                         def inputs = new HashMap<String, Object>()
                         submissionService.handleFileUpload(flow.workingMemory,inputs)
-                        PerformValidation()
                     }
             }
             on("MainFileMissingError") {
@@ -237,7 +243,7 @@ class ModelController {
             on("AdditionalReplacingMainError") {
             	    flash.error="submission.upload.error.additional_replacing_main"
             }.to "uploadFiles"
-            on("PerformValidation").to "performValidation"
+            on("success").to "performValidation"
         }
         
         performValidation {
@@ -358,20 +364,6 @@ class ModelController {
         {
             e.printStackTrace()
         }
-    }
-
-    def model = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        List<String> authors = []
-        rev.model.publication?.authors.each {
-            authors.add("${it.firstName} ${it.lastName}, ")
-        }
-        if(!authors.empty) {
-            String auth = authors.get(authors.size() - 1)
-            authors.remove(authors.get(authors.size() - 1))
-            authors.add(authors.size(), auth.substring(0, auth.length() - 2))
-        }
-        [revision: rev, authors: authors]
     }
 
     /**
