@@ -1,19 +1,22 @@
+import org.springframework.beans.factory.NoSuchBeanDefinitionException
+
 class JummpPluginPharmmlGrailsPlugin {
     // the plugin version
     def version = "0.1"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.2 > *"
+    def loadAfter = ['jummp-plugin-security', 'jummp-plugin-core-api', 'jummp-plugin-sbml']
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp"
     ]
 
     // TODO Fill in these fields
-    def title = "Jummp Plugin Pharmml Plugin" // Headline display name of the plugin
-    def author = "Your name"
+    def title = "Jummp Plugin PharmML Plugin" // Headline display name of the plugin
+    def author = "European Bioinformatics Institute (EMBL-EBI)"
     def authorEmail = ""
     def description = '''\
-Brief summary/description of the plugin.
+Provides functionality to support models encoded in PharmML.
 '''
 
     // URL to the plugin's documentation
@@ -24,17 +27,19 @@ Brief summary/description of the plugin.
     // License: one of 'APACHE', 'GPL2', 'GPL3'
 //    def license = "APACHE"
 
-    // Details of company behind the plugin (if there is one)
-//    def organization = [ name: "My Company", url: "http://www.my-company.com/" ]
+    def organization = [
+        name: "EMBL-European Bioinformatics Institute",
+        url: "http://www.ebi.ac.uk/"
+    ]
 
-    // Any additional developers beyond the author specified above.
-//    def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
+    def developers = [
+        [ name: "Mihai Glonț", email: "mihai.glont@ebi.ac.uk" ]
+    ]
 
     // Location of the plugin's issue tracker.
 //    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]
 
-    // Online location of the plugin's browseable source code.
-//    def scm = [ url: "http://svn.codehaus.org/grails-plugins/" ]
+    def scm = [ url: "http://bitbucket.org/jummp/jummp/" ]
 
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional), this event occurs before
@@ -49,7 +54,16 @@ Brief summary/description of the plugin.
     }
 
     def doWithApplicationContext = { applicationContext ->
-        // TODO Implement post initialization spring config (optional)
+          try {
+            def service = applicationContext.getBean("modelFileFormatService")
+            ["", "0.1"].each {
+                def modelFormat = service.registerModelFormat("PharmML", 
+                        "Pharmacometrics Markup Language", it)
+                service.handleModelFormat(modelFormat, "pharmMlService")
+            }
+        } catch(NoSuchBeanDefinitionException e) {
+            println("Cannot register PharmML handler because ModelFileFormatService is not available!")
+        }
     }
 
     def onChange = { event ->

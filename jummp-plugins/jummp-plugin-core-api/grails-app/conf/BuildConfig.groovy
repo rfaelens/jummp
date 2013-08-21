@@ -38,6 +38,7 @@ grails.project.dependency.resolution = {
         // perf4j dependency
         compile "org.perf4j:perf4j:0.9.13"
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
+        compile "xml-apis:xml-apis:1.4.01"
 
         // plugin dependencies
     }

@@ -69,8 +69,12 @@ grails.project.dependency.resolution = {
         runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"
 
-        compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") { 
-            excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4' 
+        compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") {
+            excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4', 'xercesImpl'
+        }
+
+        compile("eu.ddmore.pharmml:libPharmML:0.1-SNAPSHOT"){
+            excludes 'junit-dep'
         }
 
         // bives
@@ -172,6 +176,7 @@ grails.plugin.location.'jummp-plugin-git' = "jummp-plugins/jummp-plugin-git"
 //grails.plugin.location.'jummp-plugin-subversion' = "jummp-plugins/jummp-plugin-subversion"
 grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
 grails.plugin.location.'jummp-plugin-combine-archive' = "jummp-plugins/jummp-plugin-combine-archive"
+grails.plugin.location.'jummp-plugin-pharmml' = "jummp-plugins/jummp-plugin-pharmml"
 grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
 grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plugin-simple-logging"
 grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"
