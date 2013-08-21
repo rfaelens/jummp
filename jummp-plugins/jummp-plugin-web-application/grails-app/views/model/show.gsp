@@ -9,7 +9,8 @@
 <%@ page import="org.apache.commons.io.FilenameUtils"%>
 <%@ page import="java.text.DateFormat"%>
 <%
-	def loadedZips=new HashMap();		
+	def loadedZips=new HashMap();
+	def zipSupported=[:]
 %>
 		
 <head>
@@ -75,7 +76,9 @@
 	 		fileData["${file.name}"]=new Object();
 	 		fileData["${file.name}"].Name="${FilenameUtils.getName(it.path)}";
 	 		fileData["${file.name}"].Extension="${FilenameUtils.getExtension(it.path)}";
-	 		fileData["${file.name}"].Description="${it.description}";
+	 		<g:if test="${!it.mainFile}">
+	 			fileData["${file.name}"].Description="${it.description}";
+	 		</g:if>
 	 		fileData["${file.name}"].Type="${it.mimeType}";
 	 		fileData["${file.name}"].Size=readablizeBytes(${attr.size()});
 	 		fileData["${file.name}"].Created="${new Date(attr.creationTime().toMillis())}";
@@ -87,6 +90,7 @@
 	 			     Path zipfile = Paths.get(it.path);
 	 			     final URI uri = URI.create("jar:file:" + zipfile.toUri().getPath());
 	 			     final Map<String, String> env = new HashMap<>();
+	 			     try {
   	 			     FileSystem fs = FileSystems.newFileSystem(uri, env);
   	 			     loadedZips.put(uri, fs)
   	 			     final Path root = fs.getPath("/");
@@ -106,6 +110,11 @@
 	 					return FileVisitResult.CONTINUE;
 	 				}
 	 			     });
+		 			     zipSupported[it.path]=true;
+	 			     }
+	 			     catch(Exception unsupportedZip) { 
+	 			     	     zipSupported[it.path]=false;
+	 			     }
 	 			%>
 	 		
 	 		</g:if>
@@ -222,7 +231,7 @@
 	  		   	   		<li rel="file"><a>
 	  		   	   			<%File f=new File(it.path);%>
 	  		   	   			${f.name}</a>
-	  		   	   			<g:if test="${it.mimeType.contains('zip')}">
+	  		   	   			<g:if test="${it.mimeType.contains('zip') && zipSupported[it.path]}">
   		   	   				  <ul>
  	  		   	   			  <%
 	  		   	   				Path zipfile = Paths.get(it.path);
@@ -255,7 +264,7 @@
 	  		   	   		<li rel="file"><a>
 	  		   	   			<%File f=new File(it.path);%>
 	  		   	   			${f.name}</a>
-	  		   	   			<g:if test="${it.mimeType.contains('zip')}">
+	  		   	   			<g:if test="${it.mimeType.contains('zip') && zipSupported[it.path]}">
   		   	   				  <ul>
  	  		   	   			  <%
 	  		   	   				Path zipfile = Paths.get(it.path);
