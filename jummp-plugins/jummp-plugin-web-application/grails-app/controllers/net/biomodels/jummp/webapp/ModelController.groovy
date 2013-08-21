@@ -33,8 +33,14 @@ class ModelController {
     def grailsApplication
 
     def show = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        [revision: rev, authors: rev.model.creators, format: modelDelegateService.getPluginForFormat(rev.format)]
+    	Long modelID=params.id as Long;
+    	List<RevisionTransportCommand> revs=modelDelegateService.getAllRevisions(modelID)
+    	[	
+    		revision: revs.last(), 
+    		authors: revs.last().model.creators, 
+    		format: modelDelegateService.getPluginForFormat(revs.last().format), 
+    		allRevs:revs
+    	]
     }
 
     @Secured(["isAuthenticated()"])

@@ -7,6 +7,7 @@
 <%@ page import="java.nio.file.SimpleFileVisitor"%>
 <%@ page import="java.nio.file.FileVisitResult"%>
 <%@ page import="org.apache.commons.io.FilenameUtils"%>
+<%@ page import="java.text.DateFormat"%>
 <%
 	def loadedZips=new HashMap();		
 %>
@@ -285,7 +286,18 @@
   		</div>
   	  </div>
 	  <div id="History">
-	  	<p>todo</p>
+	  	<h5>Model owned by ${revision.model.submitter}</h5>
+	  	<% DateFormat dateFormat = DateFormat.getDateTimeInstance(); %>
+	  	<ul>
+	  		<li>Submitted: ${dateFormat.format(allRevs.first().uploadDate)}</li>
+	  		<li>Last Modified: ${dateFormat.format(allRevs.last().uploadDate)}</li>
+	  	</ul>
+	  	<h5>Revisions</h5>
+	  	<ul>
+	  	     <g:each in="${allRevs}">
+	  	     	<li>Submitted by ${it.owner} on ${dateFormat.format(it.uploadDate)}, with comment: ${it.comment}</li>  
+	  	     </g:each>
+  		</ul>
 	  </div>
     	  <g:render template="${format}/modelSpecificTabImpl"/>
 	</div>
