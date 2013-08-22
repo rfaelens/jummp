@@ -274,7 +274,7 @@ h6 a span.link-pdf {
   pre,
   blockquote {
     border: 1px
-  solid #999;
+    solid #999;
     page-break-inside: avoid;
   }
   thead {
@@ -424,46 +424,25 @@ div#global-masthead ul li.active-trail a {
   border-top: 3px solid white;
   height: 20px;
 }
-div#global-masthead ul li#services a:hover,
-div#global-masthead ul li#services a:active,
-div#global-masthead ul li#services a:focus,
-div#global-masthead ul li.active#services a,
-div#global-masthead ul li.active-trail#services a {
-  border-top-color: #207a7a;
-}
-div#global-masthead ul li#research a:hover,
-div#global-masthead ul li#research a:active,
-div#global-masthead ul li#research a:focus,
-div#global-masthead ul li#research.active a,
-div#global-masthead ul li#research.active-trail a {
+div#global-masthead ul li#project a:hover,
+div#global-masthead ul li#project a:active,
+div#global-masthead ul li#project a:focus,
+div#global-masthead ul li.active#project a,
+div#global-masthead ul li.active-trail#project a {
   border-top-color: #71b360;
 }
-div#global-masthead ul li#training a:hover,
-div#global-masthead ul li#training a:active,
-div#global-masthead ul li#training a:focus,
-div#global-masthead ul li#training.active a,
-div#global-masthead ul li#training.active-trail a {
+div#global-masthead ul li#partners a:hover,
+div#global-masthead ul li#partners a:active,
+div#global-masthead ul li#partners a:focus,
+div#global-masthead ul li#partners.active a,
+div#global-masthead ul li#partners.active-trail a {
   border-top-color: #fab700;
-}
-div#global-masthead ul li#industry a:hover,
-div#global-masthead ul li#industry a:active,
-div#global-masthead ul li#industry a:focus,
-div#global-masthead ul li#industry.active a,
-div#global-masthead ul li#industry.active-trail a {
-  border-top-color: #346189;
 }
 div#global-masthead ul li#about a:hover,
 div#global-masthead ul li#about a:active,
 div#global-masthead ul li#about a:focus,
 div#global-masthead ul li#about.active a,
 div#global-masthead ul li#about.active-trail a {
-  border-top-color: #207a7a;
-}
-div#global-masthead ul li#about-us a:hover,
-div#global-masthead ul li#about-us a:active,
-div#global-masthead ul li#about-us a:focus,
-div#global-masthead ul li#about-us.active a,
-div#global-masthead ul li#about-us.active-trail a {
   border-top-color: #207a7a;
 }
 form#global-search {
@@ -493,28 +472,6 @@ form#global-search input#global-searchbox {
   margin: 0
 0.3em;
   width: 140px;
-}
-form#global-search input.submit {
-  padding: 0.25em;
-  margin: 0;
-  display: inline;
-  background: url(/web_guidelines/images/global/search-button.png) no-repeat;
-  background-position: 0 0;
-  width: 24px;
-  height: 24px;
-  -moz-box-shadow: 0 0 0 transparent;
-  -webkit-box-shadow: 0 0 0 transparent;
-  box-shadow: 0 0 0 transparent;
-  border: 0
-none;
-  float: left;
-}
-form#global-search input.submit:hover,
-form#global-search input.submit:focus,
-form#global-search input.submit:active {
-  background-position: -24px 0;
-  width: 24px;
-  height: 24px;
 }
 div#local-masthead {
   border-bottom: 3px solid #eeeeee;
@@ -590,13 +547,13 @@ body div#local-title a {
   text-shadow: 1px 1px #666666;
 }
 body.section-about div#local-masthead {
-  background: #60bdc4 url(/web_guidelines/images/banners/EBI_ABOUT_Banner.jpg) top right no-repeat;
+  background: #60bdc4;
 }
 body.section-industry div#local-masthead {
-  background: #83a3c9 url(/web_guidelines/images/banners/EBI_INDUSTRY_Banner.jpg) top right no-repeat;
+  background: #83a3c9;
 }
 body.section-research div#local-masthead {
-  background: #a8d793 url(/web_guidelines/images/banners/EBI_RESEARCH_Banner.jpg) top right no-repeat;
+  background: #a8d793;
 }
 body.section-research div#local-title h1,
 body.section-research div#local-title p,
@@ -605,10 +562,10 @@ body.section-research div#local-title a {
   text-shadow: 1px 1px #cccccc;
 }
 body.section-services div#local-masthead {
-  background: #60bdc4 url(/web_guidelines/images/banners/EBI_SERVICES_Banner.jpg) top right no-repeat;
+  background: #60bdc4;
 }
 body.section-training div#local-masthead {
-  background: #f9e292 url(/web_guidelines/images/banners/EBI_TRAINING_Banner.jpg) top right no-repeat;
+  background: #f9e292;
 }
 body.section-training div#local-title h1,
 body.section-training div#local-title p,
@@ -617,7 +574,7 @@ body.section-training div#local-title a {
   text-shadow: 1px 1px #cccccc;
 }
 body.section-home div#local-masthead {
-  background: #1d8086 url(/web_guidelines/images/banners/EBI_HOMEPAGE_Banner.jpg) top right no-repeat;
+  background: #1d8086;
 }
 ul#local-nav li.functional {
   float: right;
@@ -787,7 +744,6 @@ div#local-footer {
 #global-nav-expanded img {
   padding-left: 0.7em;
   margin: 29px
-0 0 0;
   border: none;
 }
 #global-nav-expanded h3 {
@@ -795,17 +751,11 @@ div#local-footer {
   margin-bottom: 5px;
   line-height: 1.538;
 }
-#global-nav-expanded h3.services {
+#global-nav-expanded h3.project {
   border-bottom: 2px solid #207a7a;
 }
-#global-nav-expanded h3.research {
+#global-nav-expanded h3.partners {
   border-bottom: 2px solid #71b360;
-}
-#global-nav-expanded h3.training {
-  border-bottom: 2px solid #fab700;
-}
-#global-nav-expanded h3.industry {
-  border-bottom: 2px solid #346189;
 }
 #global-nav-expanded h3.about {
   border-bottom: 2px solid #207a7a;

@@ -52,6 +52,6 @@ modules = {
     	resource url:'/js/jquery.jstree.js'
     }
     ddmore_style {
-    	resource url:'/css/ddmorestyle.css'
+    	resource url:'/css/ddmore.less'
     }
 }

@@ -4,40 +4,24 @@
        More info: h5bp.com/b/378 -->
   <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> --> <!-- Not yet implemented -->
 
-  <title>BioModels &lt; Database &lt; EMBL-EBI</title>
-  <meta name="description" content="EMBL-EBI"><!-- Describe what this page is about -->
-  <meta name="keywords" content="bioinformatics, europe, institute"><!-- A few keywords that relate to the content of THIS PAGE (not the whol project) -->
-  <meta name="jummp" content="EMBL-EBI"><!-- Your [project-name] here -->
-
-  <!-- Mobile viewport optimized: j.mp/bplateviewport -->
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-
-  <!-- Place favicon.ico and apple-touch-icon.png in the root directory: mathiasbynens.be/notes/touch-icons -->
-
-  <!-- CSS: implied media=all -->
-  <!-- CSS concatenated and minified via ant build script-->
-  <link rel="stylesheet" href="//www.ebi.ac.uk/~rali/ddmorestyle.css">
-  <r:require module="jquery"/>
+  <title>DDMoRe Model Repository</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="shortcut icon" href="http://www.ddmore.eu/sites/ddmore/themes/ddmore/favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta content="About DDMoRe" about="http://www.ddmore.eu/content/about-ddmore" property="dc:title" />
   
-  <!-- for production the above can be replaced with -->
-  <!--
-  <link rel="stylesheet" href="//www.ebi.ac.uk/web_guidelines/css/compliance/mini/ebi-fluid-embl.css">
-  -->
-  <style type="text/css">
-    /* You have the option of setting a maximum width for your page, and making sure everything is centered */
-    /* body { max-width: 1600px; margin: 0 auto; } */
-  </style>
+  <link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_pbm0lsQQJ7A7WCCIMgxLho6mI_kBNgznNUWmTWcnfoE.css" media="all" />
+  <link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_9sxGDGiqoYoSx7kdDQ6i_fK7j8yl_iw4SeDX9fKzAHQ.css" media="all" />
+  <link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_Wu8npAzy16WmnnnWKxpexfgsAryolGGaX6yO3GWA5bU.css" media="all" />
+  <link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_5up_iUuGdJV91x0h3Qz49z75LWIj8-EvxqwvfpipcuI.css" media="all" />
+  <link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_e0Oi8I1L8cGJ7KxcUbimLkO-ivlPDoZXuBZMWKAz5GY.css" media="print" />
   
-  <!-- end CSS-->
+  <!--[if lte IE 7]>
+<link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_sIsRwCKuAMZS6YJIMFqPXNCtZHxV56wN2ePifCvkLYc.css" media="all" />
+<![endif]-->
 
-
-  <!-- All JavaScript at the bottom, except for Modernizr / Respond.
-       Modernizr enables HTML5 elements & feature detects; Respond is a polyfill for min/max-width CSS3 Media Queries
-       For optimal performance, use a custom Modernizr build: www.modernizr.com/download/ -->
-  
-  <!-- Full build -->
-  <!-- <script src="//www.ebi.ac.uk/web_guidelines/js/libs/modernizr.minified.2.1.6.js"></script> -->
-  
-  <!-- custom build (lacks most of the "advanced" HTML5 support -->
-  <script src="//www.ebi.ac.uk/web_guidelines/js/libs/modernizr.custom.49274.js"></script>    
+<!--[if lte IE 6]>
+<link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_N0EHcRmGNgF6d_odKVbSBNnBtfyz9Ndtm25vvkPxWcQ.css" media="all" />
+<![endif]-->
+  <script type="text/javascript" src="http://www.ddmore.eu/sites/ddmore/files/js/js_xAPl0qIk9eowy_iS9tNkCWXLUVoat94SQT48UBCFkyQ.js"></script>
+ <script type="text/javascript" src="http://www.ddmore.eu/sites/ddmore/files/js/js_IDBX5SzkJ9gGNq7x-qOE_2DZsexqguTJQGMKvi4w-Uw.js"></script>
 
