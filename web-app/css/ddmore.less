@@ -1,947 +1,1510 @@
-/***********************************************
- * Common less classes.
- ***********************************************/
-
 /**
- * Class which renders the element as a block element.
- **/
-.all {
-    display: block;
+ * Copyright (c) EMBL-EBI 2013
+ * Authors: Francis Rowland, Peter Walter, Glen van Ginkel, Nicola Buso
+ */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+nav,
+section {
+  display: block;
 }
-
-/**
- * Standard margins setting left and right margin to auto.
- **/
-.standardMargins {
-    margin-left: auto;
-    margin-right: auto;
+audio,
+canvas,
+video {
+  display: inline-block;
 }
-
-/**
- * The JUMMP container elements:
- * @li block
- * @li standardMargins
- * @li width of 1024px
- **/
-@standardWidth: 1024px;
-.container {
-    .all;
-    .standardMargins;
-    width: @standardWidth;
-    left: 0px;
-    right: 0px;
-    position: absolute;
-    z-index: 2;
+audio:not([controls]) {
+  display: none;
 }
-
-/**
- * Standard class for anything setting a "real" background.
- **/
-.backgrounds {
-  width: 100%;
-  z-index: 1;
-  position: absolute;
+[hidden] {
+  display: none;
 }
-
-/**
- * Standard text with no margin and Arial 12pt
- **/
-.standardText {
-  margin: 0px;
-  font-size: 12pt;
-}
-/**
- * Standard class for buttons of the top parts of the overlay
- **/
-.overlayButtons {
-    background-color: transparent;
-    background-repeat: no-repeat;
-    height: @modeSwitchStandardExtend;
-    padding-right: @modeSwitchStandardExtend;
-    background-position: right;
-    border-style: none;
-    color: white;
-    font-weight: bold;
-    text-shadow: @textShadow;
-}
-/**
- * Standard class for the html tables td keys of the overlay
- **/
-.overlayTdKeys {
-    width: 135px;
-}
-
-/***********************************************
- * Common less variables.
- ***********************************************/
-
-/**
- * Background color for top background area.
- **/
-@topBackgroundColor: #000000;
-/**
- * Text color which works with the top background area.
- **/
-@topBackgroundHighlightColor: white;
-/**
- * Border between top and middle background
- **/
-@middleBackgroundBorderTop: 1px solid #FFFFFF;
-
-/**
- * Standard color for highlighted text.
- **/
-@highlightColor: #0060AE;
-@h2Overline: 1px solid #009EE1;
-@contentOverline: 1px solid #BAB5A6;
-@LinkAreaBorderTop: 1px solid #e0dee7;
-
-@sideBarColorExternal: #EF8C0B;
-@sideBarColor: #0060AD;
-
-@standardIndentation: 18px;
-/**
- * Height of the top background area.
- **/
-@topBackgroundHeight: 251px;
-@highMargin: 30px;
-/**
- * General text shadow.
- **/
-@textShadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
-
-/**
- * Size of mode switch button. To be used for padding.
- **/
-@modeSwitchStandardExtend: 42px;
-
-@mainAreaWidth: 602px;
-/**
- * Width of the Sidebar.
- **/
-@sideBarWidth: 368px;
-/**
- * Border line of navigation of overlay
- **/
-@navBorder: 1px solid @highlightColor;
-/**
- * Width of the overlay
- **/
- @overlayWidth: 958px;
-
-/**
- * Class for using the top background image as a background.
- **/
-.backgroundImage {
-    background-color: @topBackgroundColor;
-    background-image:  url(images/background_top.png);
-    background-repeat: no-repeat;
-    background-position: top center;
-    color: @topBackgroundHighlightColor;
-}
-
-/***********************************************
- * Global element styling
- ***********************************************/
-
-/**
- * All paragraphs have standard text.
- **/
-p {
-    .standardText;
+html {
+  font-size: 100%;
+  overflow-y: scroll;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
 }
 body {
-    background-color: #BBB5A7;
-    margin: 0px;
-    /**
-    * Background of login page is top background color.
-    **/
-    &.login {
-        background-color: @topBackgroundColor;
-    }
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.538;
 }
-
-/**
- * All links have the highlight color and are not underlined.
- **/
+body,
+button,
+input,
+select,
+textarea {
+  font-family: sans-serif;
+  color: #222222;
+}
+::-moz-selection {
+  background: #71b360;
+  color: #fff;
+  text-shadow: none;
+}
 a {
-    color: @highlightColor;
-    text-decoration: none;
-    /**
-    * Active and hovered links are underlined.
-    **/
-    &:active, &:hover {
-        text-decoration: underline;
-    }
+  color: #0000ee;
 }
-/**
- * All lists have a "normal" style, but in highlight color.
- **/
-ul {
-    list-style-type: none;
+a:visited {
+  color: #551a8b;
 }
-li::before {
-    color: @highlightColor;
-    content: "\2022";
-    padding-right: 6px;
-    font-weight: bold;
+a:hover {
+  color: #0066ee;
 }
-li.ui-menu-item::before {
-    content: none;
+a:focus {
+  outline: thin dotted;
 }
-
-/**
- * Using Arial-like fonts
- **/
-* {
- font-family: sans-serif;
+a:hover,
+a:active {
+  outline: 0;
 }
-
-/**
- * Standard design for any button (either an input reset, input submit or button) in JUMMP.
- * Uses an image as background positioned to the right, with text on left.
- **/
-input[type="reset"], input[type="submit"], button {
-    background-color: transparent;
-    background-image: url(images/button.png);
-    background-repeat: no-repeat;
-    height: @modeSwitchStandardExtend;
-    padding-right: @modeSwitchStandardExtend + 4;
-    background-position: right;
-    border-style: none;
-    color: white;
-    font-weight: bold;
-    text-shadow: @textShadow;
-    @glowSize: 100px;
-    margin-top: @glowSize/2 - @modeSwitchStandardExtend;
-    /**
-    * Active state overlay for the standard buttons. Triggered either by pseudo-class "hover"
-    * or class "active" on any input or button element.
-    * The overlay is achived by using two background images put on top of each other. This might not
-    * be supported by legacy browsers.
-    **/
-    &:hover, &.active {
-        background-image: url(images/button_active_overlay.png), url(images/button.png);
-        background-position: right, right;
-    }
-    div.glow {
-        .container;
-        top: -1*(@glowSize/2) - @modeSwitchStandardExtend/2;
-        left: @glowSize - @modeSwitchStandardExtend/2 - 2;
-        position: relative;
-        width: @glowSize;
-        height: @glowSize;
-        pointer-events:none;
-        background-position: center;
-        background-size: 100%;
-    }
-    &:hover div.glow {
-        background-image: url(images/button_glow.png);
-    }
-    p {
-        line-height: @modeSwitchStandardExtend;
-    }
-    &.close {
-        @glowSize: 77px;
-        @offset: 30px;
-        height: @offset;
-        padding-right: @offset + 4;
-        margin-top: @glowSize/2 - @offset;
-        background-image: url(images/quitButton.png);
-        &:hover, &.active {
-            background-image: url(images/quitButton_active.png);
-        }
-        div.glow {
-            top: -1*(@glowSize/2) - @offset/2;
-            left: @glowSize - @offset/2 - 2;
-            width: @glowSize;
-            height: @glowSize;
-        }
-        &:hover div.glow {
-            background-image: url(images/button_glow_red.png);
-        }
-        p {
-            line-height: @offset;
-        }
-    }
+abbr[title] {
+  border-bottom: 1px dotted;
+  cursor: help;
 }
-
-/**
- * Removes dotted outline of clicked (active) buttons in Firefox
- **/
-button::-moz-focus-inner, input::-moz-focus-inner {
-    border: 0;
+b,
+strong {
+  font-weight: bold;
 }
-
-/**
- * Each Form element has the same background as the top area with a drop shadow behind.
- * The background image is slightly scaled in x-direction to not start in the black area.
- * The form is floating left to get the buttons to float right.
- **/
-form {
-    padding: @standardIndentation;
-    box-shadow: 0px 0px 18px rgba(0, 0, 0, 0.75);
-    background-size: 110% 100%;
-    float: left;
-    width: @mainAreaWidth - 2 * @standardIndentation;
-    .backgroundImage;
+blockquote {
+  margin: 1em 40px;
 }
-
-/**
- * Adjustments for a button on the right. Puts the background image to the left. Apart from the
- * no further changes.
- **/
-input.right, button.right {
-    background-position: left;
-    padding-left: @modeSwitchStandardExtend;
+dfn {
+  font-style: italic;
 }
-
-/**
- * If autocomplete list is put into a table, it takes all available width.
- **/
-tr td input.ui-autocomplete-input {
-    width: 100%;
+hr {
+  display: block;
+  height: 1px;
+  border: 0;
+  border-top: 1px solid #ccc;
+  margin: 1em
+0;
+  padding: 0;
 }
-
-/***********************************************
- * Id based styling
- ***********************************************/
-
-/**
- * Style for the top background area consisting of an absolut positioned image.
- **/
-#topBackground {
-    height: @topBackgroundHeight;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    .backgrounds;
-    .backgroundImage;
+del {
+  text-decoration: line-through;
 }
-
-/**
- * The middle background starts below the top background and consists of a repeated image.
- **/
-#middleBackground {
-    border-top: @middleBackgroundBorderTop;
-    background-image: url(images/background_diagonal.png);
-    background-repeat: repeat;
-    height: 300px;
-    top: @topBackgroundHeight;
-    .backgrounds;
+ins {
+  background: #ff9;
+  color: #000;
+  text-decoration: none;
 }
-
-/**
- * The Logo is placed on top of the top background.
- **/
-#logo {
-    background-image: url(images/jummp_logo.png);
-    background-repeat: no-repeat;
-    height: 100px;
-    .container;
+mark {
+  background: #ff0;
+  color: #000;
+  font-style: italic;
+  font-weight: bold;
 }
-
-/**
- * The background of the login page is a variant of the middle background.
- * It uses the repeating stripe image as well as the top background behind.
- **/
-#loginBackground {
-    background-color: @topBackgroundColor;
-    background-image: url(images/background_diagonal.png), url(images/background_top.png);
-    background-repeat: repeat, no-repeat;
-    background-size: auto, 1624px 100%;
-    border-top: @middleBackgroundBorderTop;
-    top: @topBackgroundHeight;
-    left: 0px;
-    right: 0px;
-    height: 599px;
-    background-position: top center;
-    .backgrounds;
+pre,
+code,
+kbd,
+samp {
+  font-family: monospace,monospace;
+  _font-family: 'courier new', monospace;
+  font-size: 1em;
 }
-
-#loginLogout {
-    .container;
-    margin-left: @standardIndentation;
-    @glowSize: 100px;
-    button {
-        .overlayButtons;
-        background-position: left;
-        padding-left: @modeSwitchStandardExtend + 4;
-        padding-right: 10px;
-        div.glow {
-            left: -1 * (@glowSize - @modeSwitchStandardExtend/2 - 2);
-        }
-    }
-    button.close {
-        @glowSize: 77px;
-        @offset: 30px;
-        padding-left: @offset + 4;
-        div.glow {
-            left: -1 * (@glowSize - @offset/2) + 4;
-            top: -1*(@glowSize/2) - @offset/2 + 4;
-        }
-    }
-}
-
-#login {
-    top: @topBackgroundHeight;
-    .container;
-    height: 600px;
-    width: 100%;
-    @firstStop: 1599px;
-    @secondStop: 1600px;
-    @gradientOffset: -1300px;
-    background-image: radial-gradient(50% @gradientOffset, circle farthest-side, rgba(0,0,0,0), rgba(0,0,0,0) @firstStop,#000000 @secondStop);
-    background-image: -moz-radial-gradient(50% @gradientOffset, circle farthest-corner, rgba(0,0,0,0), rgba(0,0,0,0) @firstStop,#000000 @secondStop);
-    background-image: -webkit-radial-gradient(50% @gradientOffset, circle farthest-side, rgba(0,0,0,0), rgba(0,0,0,0) @firstStop,#000000 @secondStop);
-    background-image: -o-radial-gradient(50% @gradientOffset, circle farthest-side, rgba(0,0,0,0), rgba(0,0,0,0) @firstStop,#000000 @secondStop);
-    background-image: -ms-radial-gradient(50% @gradientOffset, circle farthest-side, rgba(0,0,0,0), rgba(0,0,0,0) @firstStop,#000000 @secondStop);
-
-    div.loginButton {
-        .container;
-        @buttonSize: 208px;
-        top: 300px - @buttonSize/2;
-        button {
-            width: @buttonSize;
-            height: @buttonSize;
-            position: relative;
-            left: @standardWidth/2 - @buttonSize/2;
-            background-image: url(images/button_large.png);
-            background-position: center;
-            color: @topBackgroundHighlightColor;
-            font-weight: bold;
-            text-align: center;
-            padding: 0px;
-            font-size: 20pt;
-            text-shadow: @textShadow;
-            &:hover, &:active {
-                background-image: url(images/button_active_overlay.png), url(images/button_large.png);
-                background-size: 100%, auto;
-            }
-        }
-    }
-    div.glow {
-        .container;
-        display: none;
-        @glowSize: 495px;
-        top: -143px;
-        width: @glowSize;
-        height: @glowSize;
-        pointer-events:none;
-        background-image: url(images/button_glow.png);
-        background-position: center;
-        background-size: 100%;
-    }
-    form {
-        .container;
-        background-image: none;
-        background-color: transparent;
-        box-shadow: none;
-        table {
-            width: 100%;
-            td {
-                padding: 15px;
-            }
-        }
-        .formElement {
-            position: relative;
-            left: @standardWidth/3;
-            right: @standardWidth/3;
-            width: @standardWidth/3;
-            font-weight: bold;
-        }
-        p {
-            .formElement;
-            text-shadow: 0px 0px 10px rgba(1, 1, 1, 0.75);
-            text-align: center;
-        }
-        input {
-            .formElement;
-            margin: 0px;
-            padding: 0px;
-            padding-left: 12px;
-            background-color: #004b93;
-            color: @topBackgroundHighlightColor;
-            box-shadow: 0px 0px 21px 5px rgba(0, 152, 217, 0.75), inset 5px 5px 5px 0px rgba(0, 0, 0, 0.75);
-            border-style: none;
-            height: 30px;
-            border: none;
-            outline-style: none;
-            text-shadow: @textShadow;
-        }
-    }
-}
-
-/**
- * Mode Switch are the buttons to switch between search and submit mode.
- * The buttons are absolut positioned on top of the top background.
- **/
-#modeSwitch {
-    height: 47px;
-    top: 45px;
-    left: 0px;
-    right: 0px;
-    text-align: right;
-    .container;
-    button {
-        @glowSize: 100px;
-        color: @topBackgroundHighlightColor;
-        text-shadow: @textShadow;
-        font-weight: bold;
-        div.glow {
-            .container;
-            top: -1*(@glowSize/2)-@modeSwitchStandardExtend/2 + 1;
-            position: relative;
-            width: @glowSize;
-            height: @glowSize;
-            pointer-events:none;
-            background-position: center;
-            background-size: 100%;
-        }
-        &.left div {
-            left: @glowSize - @modeSwitchStandardExtend/2 - 2;
-        }
-        &.right div {
-            left: -1*@glowSize + @modeSwitchStandardExtend/2 + 8;
-        }
-        &.active div {
-            background-image: url(images/button_glow.png);
-        }
-        p {
-            line-height: normal;
-        }
-    }
-}
-
-#container {
-    background-color: #FFFFFF;
-    top: 99px;
-    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
-    .container;
-    position: relative;
-}
-
-#nav {
-    .all;
-    height: 30px;
-    float: left;
-    margin-top: 70px;
-    margin-left: 0px;
-    margin-right: 0px;
-    position: relative;
-    box-shadow: 0px -2px 4px #000000;
-    div {
-        width: 200px;
-        position: relative;
-        float: left;
-        text-align: center;
-        background-image: url(images/background_tab.png);
-        background-repeat: repeat-x;
-        a {
-            color: white;
-            text-decoration: none;
-            line-height: 30px;
-            font-weight: bold;
-            text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
-        }
-    }
-    div.active {
-        background-image: url(images/background_tab_selected.png);
-    }
-}
-
-#branding {
-    .all;
-    height: 70px;
-    float: right;
-    padding: 15px;
-}
-
-#contentContainer {
-    clear: both;
-    .all;
-    padding-right: @standardIndentation;
-    padding-left: @standardIndentation;
-    border-top: 1px solid #0061B2;
-    box-shadow: 0px -2px 8px #000000;
-    .overlayimg
-    {
-      position: absolute;
-      z-index: 11;
-      left: 50px;
-      top: 50px;
-    }
-}
-
-#socialMedia {
-    .all;
-    text-align: right;
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-#main {
-    .all;
-    width: @mainAreaWidth;
-    float: left;
-    border-top: @contentOverline;
-    padding-right: @standardIndentation;
-    margin-bottom: @standardIndentation;
-    h1 {
-        color: @highlightColor;
-        margin-top: @highMargin;
-        padding-bottom: 15px;
-        border-bottom: @h2Overline;
-        font-size: 24pt;
-        font-weight: bold;
-    }
-    h2 {
-        margin-top: 0px;
-        padding-top: 12px;
-        font-size: 14pt;
-        font-weight: bold;
-    }
-    table {
-        width: 100%;
-        clear: both;
-    }
-}
-
-#sideBar {
-    .all;
-    width: @sideBarWidth;
-    float: right;
-    border-top: @contentOverline;
-    div.element {
-        background-color: #F2F1EE;
-        padding-bottom: @standardIndentation;
-        padding-left: @standardIndentation;
-        padding-right: @standardIndentation;
-        a {
-            color: @sideBarColor;
-            font-variant: small-caps;
-        }
-        p {
-            clear: both;
-            img {
-                float: right;
-            }
-        }
-        div.rss {
-            float: right;
-            margin-top: @highMargin;
-            img {
-                width: 18px;
-                height: 18px;
-            }
-        }
-        h1 {
-            float: left;
-            margin: @highMargin @standardIndentation 15px 0px;
-            color: @highlightColor;
-            font-size: 18pt;
-            font-weight: bold;
-        }
-        h2 {
-            clear: both;
-            border-top: @h2Overline;
-            .standardText;
-            padding-top: 12px;
-            font-weight: bold;
-        }
-    }
-    div:nth-child(n+2) {
-        margin-top: @standardIndentation;
-    }
-    div.element.external {
-        a, h1, h2 {
-            color: @sideBarColorExternal;
-            border-color: @sideBarColorExternal;
-        }
-        li::before {
-            color: @sideBarColorExternal;
-        }
-    }
-    /**
-    * No indentation for list elements in side bar boxes.
-    **/
-    ul {
-        padding-left: 0px;
-    }
-}
-
-#linkArea {
-    clear: both;
-    .all;
-    color: @sideBarColor;
-    border-top: @LinkAreaBorderTop;
-    padding-bottom: @standardIndentation;
-}
-
-#footer {
-    .all;
-    background-color: #FFFFFF;
-    position: relative;
-    width: 988px;
-    .standardMargins;
-    z-index: -1;
-    padding-left: @standardIndentation;
-    padding-right: @standardIndentation;
-    top: 99px;
-    box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.3);
-    font-size: 10pt;
-}
-/**
- * The container of the overlay
- **/
-#overlayContainer {
-    .standardMargins;
-    display: none;
-    opacity: 1.0;
-    width: @overlayWidth;
-    top: -75px;
-    position: fixed;
-    left: 50%;
-    z-index: 10000;
-    background-color: #FFFFFF;
-    border:1px solid #804000;
-    td.key {
-        font-weight: bold;
-    }
-    td {
-        padding-right: 15px;
-    }
-    button {
-        border: none;
-        background-color: rgba(0, 0, 0, 0);
-        color: white;
-        text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.90);
-        font-weight: bold;
-        font-size: 14pt;
-        margin: 0px;
-        float: right;
-    }
-    button div {
-        position: relative;
-    }
-}
-
-/**
- * The content container of the overlay
- **/
-#overlayContentContainer {
-    position: relative;
-    margin-left: @standardIndentation;
-    margin-right: @standardIndentation;
-    margin-top: 30px;
-    h2 {
-        font-size: 14pt;
-        font-weight: bold;
-    }
-    p.text {
-      border-bottom: 12px;
-    }
-    p.formula {
-        margin-top: 30px;
-        margin-bottom: 30px;
-        font-size: 8pt;
-        font-family: monospace;
-        white-space: pre;
-    }
-}
-
-#overlayNav, #modelNav {
-    position: relative;
-    height: 31px;
-    border-top: @navBorder;
-    border-bottom: @navBorder;
-    box-shadow: 0px -7px 7px -7px #000000;
-    clear: both;
-    background-image: url(images/background_tab.png);
-    background-repeat: repeat-x;
-    div {
-       height: 30px;
-        width: 155px;
-        position: relative;
-        .all;
-        float: left;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
-        cursor: pointer;
-    }
-    div span {
-        color: white;
-        text-decoration: none;
-        line-height: 30px;
-        font-weight: bold;
-        font-size: 10pt;
-        margin-left: 10px;
-        text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.75);
-    }
-    div.selected {
-        background-image: url(images/background_tab_selected.png);
-    }
-}
-
-#overlayTable {
-    padding-left: @standardIndentation;
-    padding-right: @standardIndentation;
-    display: table;
-    table-layout: fixed;
-    width: @overlayWidth - (2 * @standardIndentation);
-}
-
-#overlayTableRow {
-    display: table-row;
-}
-
-#overlayHeadline {
-    display: table-cell;
-    vertical-align: middle;
-    width: 90%;
-    overflow: hidden;
-    h1 {
-        color: @highlightColor;
-        font-size: 24pt;
-        font-weight: bold;
-    }
-}
-
-#overlayQuit {
-    display: table-cell;
-    vertical-align: middle;
-    width: 10%;
-    button {
-        float: right;
-    }
-}
-
-#overlayInfoStripe {
-    padding-top: 15px;
-    height: 90px;
-    margin-left: @standardIndentation;
-    margin-right: @standardIndentation;
-    clear: both;
-    position: relative;
-    border-top: @contentOverline;
-    border-bottom: @contentOverline;
-    table {
-        table-layout: fixed;
-        width: @overlayWidth - (2 * @standardIndentation);
-        font-size: 11pt;
-        td {
-        overflow: hidden;
-        width: 185px;
-    }
-    td.key {
-        overflow: hidden;
-        .overlayTdKeys
-    }
-    }
-}
-
-#overlayAuthorStripe {
-    display: table-cell;
-    width: 85%;
-    table {
-        table-layout: fixed;
-        width: 650px;
-        height: 3em;
-        float: left;
-        font-size: 11pt;
-        .key {
-            .overlayTdKeys
-        }
-    }
-}
-
-#download {
-    display: table-cell;
-    vertical-align: middle;
-    width: 15%;
-    p {
-        float: right;
-        a {
-            padding-top: @modeSwitchStandardExtend/2;
-            padding-bottom: @modeSwitchStandardExtend/2;
-            background-image: url(images/smallButton.png);
-            .overlayButtons;
-            &:hover, &:active {
-                text-decoration: none;
-            }
-        }
-    }
-}
-
-#overlayLinkArea {
-    clear: both;
-    .all;
-    color: @sideBarColor;
-    border-top: @LinkAreaBorderTop;
-    padding-bottom: @standardIndentation;
-    padding-left: @standardIndentation;
-    padding-right: @standardIndentation;
-}
-
-#overlayFooter {
-    clear: both;
-    .all;
-    padding-left: @standardIndentation;
-    padding-right: @standardIndentation;
-    box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.3);
-    font-size: 10pt;
-}
-
-/***********************************************
- * Class based styling
- ***********************************************/
-
-div.dialog {
-    width: 100%;
-    table {
-        width: 100%;
-        /**
-        * Name elements in tabular layouts are right aligned.
-
-        * (following the common pattern of form layouts).
-        **/
-        td.name {
-            text-align: right;
-        }
-        /**
-        * Give maximum available width to input elements in our forms.
-        **/
-        td.value input[type="text"], td.value input[type="password"], td.value textarea {
-            width: 100%;
-        }
-    }
-}
-
-/**
- * The button area should be on the right side of a form.
- **/
-div.buttons {
-    float: right;
-    /**
-    * Buttons of a form have to be with highlight text color (because of top background), with
-    * a text shadow, bold and capitalized.
-    **/
-    input {
-        color: @topBackgroundHighlightColor;
-        text-shadow: @textShadow;
-        font-variant: small-caps;
-        font-weight: bold;
-    }
-}
-
-.warning {
-color: #9F6000;
-background-color: #FEEFB3;
-}
-/* How to display the description */
-div.displayDescription {
-  width:470px; 
-  height:350px; 
-  overflow-y:auto;
-  overflow-x:auto;
+pre {
+  white-space: pre;
+  white-space: pre-wrap;
   word-wrap: break-word;
-} 
+}
+q {
+  quotes: none;
+}
+q:before,
+q:after {
+  content: "";
+  content: none;
+}
+small {
+  font-size: 85%;
+}
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+sup {
+  top: -0.5em;
+}
+sub {
+  bottom: -0.25em;
+}
+ul,
+ol {
+  margin: 1em
+0;
+  padding: 0 0 0 40px;
+}
+dd {
+  margin: 0 0 0 40px;
+}
+nav ul,
+nav ol {
+  list-style: none;
+  list-style-image: none;
+  margin: 0;
+  padding: 0;
+}
+img {
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+  vertical-align: middle;
+}
+svg:not(:root) {
+  overflow: hidden;
+}
+figure {
+  margin: 0;
+}
+form {
+  margin: 0;
+}
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+label {
+  cursor: pointer;
+}
+legend {
+  border: 0;
+  margin-left: -7px;
+  padding: 0;
+}
+button,
+input,
+select,
+textarea {
+  font-size: 100%;
+  margin: 0;
+  vertical-align: baseline;
+  vertical-align: middle;
+}
+button,
+input {
+  line-height: normal;
+  overflow: visible;
+}
+table button,
+table br {
+  display: none;
+}
+.hidden {
+  display: none !important;
+  visibility: hidden;
+}
+.visuallyhidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+.visuallyhidden.focusable:active,
+.visuallyhidden.focusable:focus {
+  clip: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  position: static;
+  width: auto;
+}
+.invisible {
+  visibility: hidden;
+}
+.clearfix:before,
+.clearfix:after {
+  content: "";
+  display: table;
+}
+.clearfix:after {
+  clear: both;
+}
+a span.link-pdf {
+  background: url(http://www.ebi.ac.uk/inc/images/icon_pdf.gif) right center no-repeat;
+  padding: 0 18px 0 0;
+}
+h1 a span.link-pdf,
+h2 a span.link-pdf,
+h3 a span.link-pdf,
+h4 a span.link-pdf,
+h5 a span.link-pdf,
+h6 a span.link-pdf {
+  display: none;
+}
+@media only screen and (min-width: 480px) {
+  
+}
+@media only screen and (min-width: 768px) {
+  
+}
+@media print {
+  * {
+    background: transparent !important;
+    color: black !important;
+    text-shadow: none !important;
+    -ms-filter: none !important;
+  }
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+  abbr[title]:after {
+    content: " (" attr(title) ")";
+  }
+  .ir a:after,
+  a[href^="javascript:"]:after,
+  a[href^="#"]:after {
+    content: "";
+  }
+  pre,
+  blockquote {
+    border: 1px
+  solid #999;
+    page-break-inside: avoid;
+  }
+  thead {
+    display: table-header-group;
+  }
+  th {
+    font-weight: bold;
+  }
+  tr,
+  img {
+    page-break-inside: avoid;
+  }
+  img {
+    max-width: 100% !important;
+  }
+  page {
+    margin: 0.5cm;
+  }
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    widows: 3;
+  }
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+  div#skip-to,
+  div#global-masthead nav,
+  div#local-masthead nav,
+  form#local-search,
+  div#global-footer,
+  div#search_ebi,
+  div#shortcuts,
+  div#ebi_search_results {
+    display: none;
+  }
+  .float-l {
+    float: left;
+    margin: 0 9pt 20pt 0;
+  }
+  .float-r {
+    float: right;
+    margin: 0 0 20pt 9pt;
+  }
+  img.float-l,
+  img.float-r {
+    margin-bottom: 0;
+  }
+  .center {
+    margin: 0 auto;
+  }
+  div.panels-flexible-column-last,
+  div.panels-flexible-region-last {
+    display: none;
+  }
+  div.panels-flexible-column-first,
+  div.panels-flexible-region-first {
+    width: 100%;
+  }
+}
+/**
+ * Copyright (c) EMBL-EBI 2013
+ * Authors: Francis Rowland, Peter Walter, Glen van Ginkel, Nicola Buso
+ */
+div#global-masthead,
+div#global-masthead nav {
+  height: auto;
+}
+div#global-masthead nav {
+  float: right;
+}
+div#global-masthead p {
+  margin: 0;
+}
+div.masthead ul {
+  margin: 0;
+  padding: 0;
+  float: left;
+  list-style: none;
+}
+div.masthead ul li {
+  float: left;
+}
+div.masthead ul a {
+  display: block;
+}
+div.masthead ul li a,
+div.masthead ul li a {
+  padding: 0.2em 0.6em;
+}
+div.masthead ul li abbr {
+  border-bottom: 0 none;
+}
+div#global-masthead {
+  border-bottom: 1px solid #e3e3e3;
+}
+div#global-masthead p,
+div#global-masthead img {
+  float: left;
+}
+div#global-masthead img {
+  padding-left: 0.69em;
+}
+div#global-masthead p#logo a,
+div#global-masthead p#logo a:link,
+div#global-masthead p#logo a:visited {
+  border: 0 none;
+}
+div#local-footer p {
+  padding-top: 10px;
+  margin: 0;
+}
+div#global-masthead ul {
+  float: right;
+  font-size: 93%;
+}
+div#global-masthead ul li a {
+  display: block;
+  border-right: 1px solid #000;
+  border-left: 1px solid #666;
+  padding-top: 5px;
+  height: 23px;
+}
+.oldie div#global-masthead ul li a {
+  width: 5em;
+  text-align: center;
+}
+div#global-masthead ul li.first a {
+  border-left: 0 none;
+}
+div#global-masthead ul li.last a {
+  border-right: 0 none;
+}
+div#global-masthead ul li a,
+div#global-masthead ul li a:link,
+div#global-masthead ul li a:visited {
+  color: white;
+  border-bottom: 0 none;
+}
+div#global-masthead ul li a:hover,
+div#global-masthead ul li a:active,
+div#global-masthead ul li a:focus,
+div#global-masthead ul li.active a,
+div#global-masthead ul li.active-trail a {
+  border-top: 3px solid white;
+  height: 20px;
+}
+div#global-masthead ul li#services a:hover,
+div#global-masthead ul li#services a:active,
+div#global-masthead ul li#services a:focus,
+div#global-masthead ul li.active#services a,
+div#global-masthead ul li.active-trail#services a {
+  border-top-color: #207a7a;
+}
+div#global-masthead ul li#research a:hover,
+div#global-masthead ul li#research a:active,
+div#global-masthead ul li#research a:focus,
+div#global-masthead ul li#research.active a,
+div#global-masthead ul li#research.active-trail a {
+  border-top-color: #71b360;
+}
+div#global-masthead ul li#training a:hover,
+div#global-masthead ul li#training a:active,
+div#global-masthead ul li#training a:focus,
+div#global-masthead ul li#training.active a,
+div#global-masthead ul li#training.active-trail a {
+  border-top-color: #fab700;
+}
+div#global-masthead ul li#industry a:hover,
+div#global-masthead ul li#industry a:active,
+div#global-masthead ul li#industry a:focus,
+div#global-masthead ul li#industry.active a,
+div#global-masthead ul li#industry.active-trail a {
+  border-top-color: #346189;
+}
+div#global-masthead ul li#about a:hover,
+div#global-masthead ul li#about a:active,
+div#global-masthead ul li#about a:focus,
+div#global-masthead ul li#about.active a,
+div#global-masthead ul li#about.active-trail a {
+  border-top-color: #207a7a;
+}
+div#global-masthead ul li#about-us a:hover,
+div#global-masthead ul li#about-us a:active,
+div#global-masthead ul li#about-us a:focus,
+div#global-masthead ul li#about-us.active a,
+div#global-masthead ul li#about-us.active-trail a {
+  border-top-color: #207a7a;
+}
+form#global-search {
+  float: right;
+  margin: 3px
+0;
+  padding: 0;
+  height: 24px;
+  vertical-align: top;
+}
+form#global-search fieldset {
+  padding: 0;
+  margin: 0
+9px;
+  border: 0
+none;
+  background-color: transparent;
+}
+form#global-search label {
+  display: inline;
+  margin-right: 0;
+  float: left;
+  margin-top: 0.1em;
+}
+form#global-search input#global-searchbox {
+  font-size: 100%;
+  margin: 0
+0.3em;
+  width: 140px;
+}
+form#global-search input.submit {
+  padding: 0.25em;
+  margin: 0;
+  display: inline;
+  background: url(/web_guidelines/images/global/search-button.png) no-repeat;
+  background-position: 0 0;
+  width: 24px;
+  height: 24px;
+  -moz-box-shadow: 0 0 0 transparent;
+  -webkit-box-shadow: 0 0 0 transparent;
+  box-shadow: 0 0 0 transparent;
+  border: 0
+none;
+  float: left;
+}
+form#global-search input.submit:hover,
+form#global-search input.submit:focus,
+form#global-search input.submit:active {
+  background-position: -24px 0;
+  width: 24px;
+  height: 24px;
+}
+div#local-masthead {
+  border-bottom: 3px solid #eeeeee;
+}
+div#skip-to,
+div#local-title-logo h1 {
+  left: -5000px;
+  top: -5000px;
+  position: absolute;
+}
+div#local-masthead h1 span {
+  font-size: 49.2%;
+  margin-left: 32px;
+  letter-spacing: normal;
+  color: inherit;
+}
+.level1 div#local-masthead h1 span {
+  font-size: 75%;
+  margin-left: 18px;
+  letter-spacing: normal;
+  color: inherit;
+}
+div#local-masthead ul {
+  margin-top: -5px;
+  height: auto;
+  width: 100%;
+  background-color: #111;
+  background-color: rgba(17, 17, 17, 0.4);
+}
+.oldie div#local-masthead ul {
+  background-color: transparent;
+}
+div#local-masthead ul li {
+  border-color: transparent;
+  border-right: 1px dotted #f8f8f8;
+}
+div#local-masthead ul li.active,
+div#local-masthead ul li.active-trail {
+  background-color: #111111;
+}
+div#local-masthead ul li.last {
+  border-right: 0 none;
+}
+div#local-masthead ul li a,
+div#local-masthead ul li a:link,
+div#local-masthead ul li a:visited {
+  border-bottom: 3px solid transparent;
+  color: #f6f6f6;
+}
+div#local-masthead ul li.active a,
+div#local-masthead ul li.active a:link,
+div#local-masthead ul li.active-trail a:link,
+div#local-masthead ul li.active a:visited,
+div#local-masthead ul li.active-trail a:visited {
+  padding-top: 2px;
+  border-bottom: 3px solid #666;
+  background-color: #111111;
+}
+div#local-masthead ul li a:hover,
+div#local-masthead ul li a:focus,
+div#local-masthead ul li a:active {
+  border-bottom: 3px solid #71b360;
+  color: #fff;
+  background-color: #333333;
+}
+div#local-masthead p {
+  margin: 20px 0;
+}
+body div#local-title h1,
+body div#local-title p,
+body div#local-title a {
+  color: #fff;
+  text-shadow: 1px 1px #666666;
+}
+body.section-about div#local-masthead {
+  background: #60bdc4 url(/web_guidelines/images/banners/EBI_ABOUT_Banner.jpg) top right no-repeat;
+}
+body.section-industry div#local-masthead {
+  background: #83a3c9 url(/web_guidelines/images/banners/EBI_INDUSTRY_Banner.jpg) top right no-repeat;
+}
+body.section-research div#local-masthead {
+  background: #a8d793 url(/web_guidelines/images/banners/EBI_RESEARCH_Banner.jpg) top right no-repeat;
+}
+body.section-research div#local-title h1,
+body.section-research div#local-title p,
+body.section-research div#local-title a {
+  color: #222;
+  text-shadow: 1px 1px #cccccc;
+}
+body.section-services div#local-masthead {
+  background: #60bdc4 url(/web_guidelines/images/banners/EBI_SERVICES_Banner.jpg) top right no-repeat;
+}
+body.section-training div#local-masthead {
+  background: #f9e292 url(/web_guidelines/images/banners/EBI_TRAINING_Banner.jpg) top right no-repeat;
+}
+body.section-training div#local-title h1,
+body.section-training div#local-title p,
+body.section-training div#local-title a {
+  color: #222;
+  text-shadow: 1px 1px #cccccc;
+}
+body.section-home div#local-masthead {
+  background: #1d8086 url(/web_guidelines/images/banners/EBI_HOMEPAGE_Banner.jpg) top right no-repeat;
+}
+ul#local-nav li.functional {
+  float: right;
+}
+div#local-title a {
+  border: 0 none;
+}
+div#local-title.logo-only img,
+div#local-title.logo-title img,
+div#local-title.logo-title-strapline img {
+  float: left;
+  margin: 1em 0.69em 0.69em;
+}
+div#local-title.logo-title span,
+div#local-title.logo-title-strapline span {
+  display: block;
+  margin: 1em
+0 0.69em 0;
+  float: left;
+}
+div#local-title.logo-title span {
+  margin-top: 2.3em;
+}
+div#local-title.logo-title h1,
+div#local-title.logo-title-strapline h1 {
+  display: inline;
+  line-height: 100%;
+}
+div#local-title.logo-title-strapline h1 {
+  font-size: 270%;
+}
+div#local-title.logo-title-strapline p {
+  display: inline;
+  font-size: 123.1%;
+}
+div#local-search form fieldset,
+form#local-search fieldset {
+  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 0.5em 2em 0.5em 0.3em;
+}
+.oldie div#local-search form fieldset,
+.oldie form#local-search fieldset {
+  background-color: transparent;
+}
+div#local-search form fieldset div.left,
+form#local-search fieldset div.left {
+  width: 80%;
+  margin-right: 2%;
+  float: left;
+}
+div#local-search form fieldset div.right,
+form#local-search fieldset div.right {
+  width: 18%;
+  float: left;
+  text-align: center;
+}
+@media only screen and (min-width: 1100px) {
+  div#local-search form,
+  form#local-search {
+    float: right;
+  }
+  div#local-search form fieldset,
+  form#local-search fieldset {
+    max-width: 440px;
+  }
+}
+div#local-search form fieldset input.form-submit,
+div#local-search form fieldset input.submit,
+form#local-search fieldset input.submit {
+  display: inline;
+  margin: 0.3em 0.2em 0.1em 0.2em;
+}
+div#local-search form fieldset input.form-text,
+div#local-search form fieldset input#local-searchbox,
+form#local-search fieldset input#local-searchbox {
+  font-size: 123.1%;
+  width: 95%;
+}
+div#local-search form fieldset span.examples,
+form#local-search fieldset span.examples {
+  margin: 0
+0 0 0.3em;
+  font-size: 80%;
+}
+div#local-search form fieldset span.adv,
+form#local-search fieldset span.adv {
+  margin: 0;
+  font-size: 80%;
+}
+div#content {
+  padding-top: 9px;
+  padding-bottom: 40px;
+}
+ul#secondary-nav li.active a {
+  font-weight: bold;
+}
+nav#breadcrumb {
+  margin-top: 4px;
+}
+div#local-footer,
+div#global-footer {
+  background-color: white;
+  background-color: rgba(255, 255, 255, 0.85);
+}
+.oldie div#local-footer,
+.oldie div#global-footer {
+  background-color: transparent;
+}
+#ebi-footer-meta {
+  padding-bottom: 1px;
+  clear: both;
+}
+div#local-footer {
+  background-color: #fff;
+  border-top: 2px solid #eeeeee;
+}
+#global-footer {
+  border-top: 5px solid #eeeeee;
+}
+#global-footer h3 {
+  font-size: 123.1%;
+  margin-bottom: 5px;
+  color: #333333;
+}
+#global-footer p {
+  font-size: 100%;
+  margin: 0 0 5px 0;
+}
+#global-footer ul {
+  font-size: 85%;
+  padding: 0
+0 0 9px;
+  list-style: none;
+}
+#global-footer a {
+  border-bottom: 0 none;
+}
+#global-footer ul li a,
+#ebi-footer-meta p a {
+  padding: 2px 4px 2px 0;
+}
+#ebi-footer-meta p a {
+  margin-left: 0;
+}
+#global-footer ul li a:hover,
+#global-footer ul li a:focus,
+#global-footer ul li a:active,
+#ebi-footer-meta p a:hover,
+#ebi-footer-meta p a:focus,
+#ebi-footer-meta p a:active {
+  -moz-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #e4e4e4;
+}
+#ebi-footer-meta {
+  font-size: 85%;
+}
+#ebi-footer-meta p.address {
+  color: #888888;
+}
+#ebi-footer-meta p.legal {
+  margin-bottom: 9px;
+}
+#global-nav-expanded img {
+  padding-left: 0.7em;
+  margin: 29px
+0 0 0;
+  border: none;
+}
+#global-nav-expanded h3 {
+  margin-top: 20px;
+  margin-bottom: 5px;
+  line-height: 1.538;
+}
+#global-nav-expanded h3.services {
+  border-bottom: 2px solid #207a7a;
+}
+#global-nav-expanded h3.research {
+  border-bottom: 2px solid #71b360;
+}
+#global-nav-expanded h3.training {
+  border-bottom: 2px solid #fab700;
+}
+#global-nav-expanded h3.industry {
+  border-bottom: 2px solid #346189;
+}
+#global-nav-expanded h3.about {
+  border-bottom: 2px solid #207a7a;
+}
+#global-nav-expanded .grid_4 h3 {
+  padding: 0;
+}
+#global-nav-expanded .grid_4 h3 a {
+  display: block;
+  padding: 0.5em 0.3em 0 0.3em;
+}
+#global-nav-expanded .grid_4 h3 a:hover,
+#global-nav-expanded .grid_4 h3 a:focus,
+#global-nav-expanded .grid_4 h3 a:active {
+  background-color: #dddddd;
+}
+@media screen and (min-height: 600px) {
+  div#content {
+    min-height: 250px;
+  }
+}
+@media screen and (min-height: 1000px) {
+  div#content {
+    min-height: 450px;
+  }
+}
+/**
+ * Copyright (c) EMBL-EBI 2013
+ * Authors: Francis Rowland, Peter Walter, Glen van Ginkel, Nicola Buso
+ */
+.container_24 {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.grid_1,
+.grid_2,
+.grid_3,
+.grid_4,
+.grid_5,
+.grid_6,
+.grid_7,
+.grid_8,
+.grid_9,
+.grid_10,
+.grid_11,
+.grid_12,
+.grid_13,
+.grid_14,
+.grid_15,
+.grid_16,
+.grid_17,
+.grid_18,
+.grid_19,
+.grid_20,
+.grid_21,
+.grid_22,
+.grid_23,
+.grid_24 {
+  display: inline;
+  float: left;
+  position: relative;
+  margin-left: 1%;
+  margin-right: 1%;
+}
+.oldie .grid_1,
+.oldie .grid_2,
+.oldie .grid_3,
+.oldie .grid_4,
+.oldie .grid_5,
+.oldie .grid_6,
+.oldie .grid_7,
+.oldie .grid_8,
+.oldie .grid_9,
+.oldie .grid_10,
+.oldie .grid_11,
+.oldie .grid_12,
+.oldie .grid_13,
+.oldie .grid_14,
+.oldie .grid_15,
+.oldie .grid_16,
+.oldie .grid_17,
+.oldie .grid_18,
+.oldie .grid_19,
+.oldie .grid_20,
+.oldie .grid_21,
+.oldie .grid_22,
+.oldie .grid_23,
+.oldie .grid_24 {
+  margin-left: 0.9%;
+  margin-right: 0.9%;
+}
+.alpha,
+.oldie .alpha {
+  margin-left: 0;
+}
+.omega,
+.oldie .omega {
+  margin-right: 0;
+}
+.container_24 .grid_1 {
+  width: 2.1666%;
+}
+.container_24 .alpha.grid_1,
+.container_24 .omega.grid_1 {
+  width: 3.1666%;
+}
+.container_24 .grid_2 {
+  width: 6.3333%;
+}
+.container_24 .alpha.grid_2,
+.container_24 .omega.grid_2 {
+  width: 7.3333%;
+}
+.container_24 .grid_3 {
+  width: 10.5%;
+}
+.container_24 .alpha.grid_3,
+.container_24 .omega.grid_3 {
+  width: 11.5%;
+}
+.container_24 .grid_4 {
+  width: 14.6666%;
+}
+.container_24 .alpha.grid_4,
+.container_24 .omega.grid_4 {
+  width: 15.6666%;
+}
+.container_24 .grid_5 {
+  width: 18.8333%;
+}
+.container_24 .alpha.grid_5,
+.container_24 .omega.grid_5 {
+  width: 19.8333%;
+}
+.container_24 .grid_6 {
+  width: 23%;
+}
+.container_24 .alpha.grid_6,
+.container_24 .omega.grid_6 {
+  width: 24%;
+}
+.container_24 .grid_7 {
+  width: 27.1666%;
+}
+.container_24 .alpha.grid_7,
+.container_24 .omega.grid_7 {
+  width: 28.1666%;
+}
+.container_24 .grid_8 {
+  width: 31.3333%;
+}
+.container_24 .alpha.grid_8,
+.container_24 .omega.grid_8 {
+  width: 32.3333%;
+}
+.container_24 .grid_9 {
+  width: 35.5%;
+}
+.container_24 .alpha.grid_9,
+.container_24 .omega.grid_9 {
+  width: 36.5%;
+}
+.container_24 .grid_10 {
+  width: 39.6666%;
+}
+.container_24 .alpha.grid_10,
+.container_24 .omega.grid_10 {
+  width: 40.6666%;
+}
+.container_24 .grid_11 {
+  width: 43.8333%;
+}
+.container_24 .alpha.grid_11,
+.container_24 .omega.grid_11 {
+  width: 44.8333%;
+}
+.container_24 .grid_12 {
+  width: 48%;
+}
+.container_24 .alpha.grid_12,
+.container_24 .omega.grid_12 {
+  width: 49%;
+}
+.container_24 .grid_13 {
+  width: 52.1666%;
+}
+.container_24 .alpha.grid_13,
+.container_24 .omega.grid_13 {
+  width: 53.1666%;
+}
+.container_24 .grid_14 {
+  width: 56.3333%;
+}
+.container_24 .alpha.grid_14,
+.container_24 .omega.grid_14 {
+  width: 57.3333%;
+}
+.container_24 .grid_15 {
+  width: 60.5%;
+}
+.container_24 .alpha.grid_15,
+.container_24 .omega.grid_15 {
+  width: 61.5%;
+}
+.container_24 .grid_16 {
+  width: 64.6666%;
+}
+.container_24 .alpha.grid_16,
+.container_24 .omega.grid_16 {
+  width: 65.6666%;
+}
+.container_24 .grid_17 {
+  width: 68.8333%;
+}
+.container_24 .alpha.grid_17,
+.container_24 .omega.grid_17 {
+  width: 69.8333%;
+}
+.container_24 .grid_18 {
+  width: 73%;
+}
+.container_24 .alpha.grid_18,
+.container_24 .omega.grid_18 {
+  width: 74%;
+}
+.container_24 .grid_19 {
+  width: 77.1666%;
+}
+.container_24 .alpha.grid_19,
+.container_24 .omega.grid_19 {
+  width: 78.1666%;
+}
+.container_24 .grid_20 {
+  width: 81.3333%;
+}
+.container_24 .alpha.grid_20,
+.container_24 .omega.grid_20 {
+  width: 82.3333%;
+}
+.container_24 .grid_21 {
+  width: 85.5%;
+}
+.container_24 .alpha.grid_21,
+.container_24 .omega.grid_21 {
+  width: 86.5%;
+}
+.container_24 .grid_22 {
+  width: 89.6666%;
+}
+.container_24 .alpha.grid_22,
+.container_24 .omega.grid_22 {
+  width: 90.6666%;
+}
+.container_24 .grid_23 {
+  width: 93.8333%;
+}
+.container_24 .alpha.grid_23,
+.container_24 .omega.grid_23 {
+  width: 94.8333%;
+}
+.container_24 .grid_24 {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+.container_24 .prefix_1 {
+  padding-left: 4.167%;
+}
+.container_24 .prefix_2 {
+  padding-left: 8.333%;
+}
+.container_24 .prefix_3 {
+  padding-left: 12.5%;
+}
+.container_24 .prefix_4 {
+  padding-left: 16.667%;
+}
+.container_24 .prefix_5 {
+  padding-left: 20.833%;
+}
+.container_24 .prefix_6 {
+  padding-left: 25%;
+}
+.container_24 .prefix_7 {
+  padding-left: 29.167%;
+}
+.container_24 .prefix_8 {
+  padding-left: 33.333%;
+}
+.container_24 .prefix_9 {
+  padding-left: 37.5%;
+}
+.container_24 .prefix_10 {
+  padding-left: 41.667%;
+}
+.container_24 .prefix_11 {
+  padding-left: 45.833%;
+}
+.container_24 .prefix_12 {
+  padding-left: 50%;
+}
+.container_24 .prefix_13 {
+  padding-left: 54.167%;
+}
+.container_24 .prefix_14 {
+  padding-left: 58.333%;
+}
+.container_24 .prefix_15 {
+  padding-left: 62.5%;
+}
+.container_24 .prefix_16 {
+  padding-left: 66.667%;
+}
+.container_24 .prefix_17 {
+  padding-left: 70.833%;
+}
+.container_24 .prefix_18 {
+  padding-left: 75%;
+}
+.container_24 .prefix_19 {
+  padding-left: 79.167%;
+}
+.container_24 .prefix_20 {
+  padding-left: 83.333%;
+}
+.container_24 .prefix_21 {
+  padding-left: 87.5%;
+}
+.container_24 .prefix_22 {
+  padding-left: 91.667%;
+}
+.container_24 .prefix_23 {
+  padding-left: 95.833%;
+}
+.container_24 .suffix_1 {
+  padding-right: 4.167%;
+}
+.container_24 .suffix_2 {
+  padding-right: 8.333%;
+}
+.container_24 .suffix_3 {
+  padding-right: 12.5%;
+}
+.container_24 .suffix_4 {
+  padding-right: 16.667%;
+}
+.container_24 .suffix_5 {
+  padding-right: 20.833%;
+}
+.container_24 .suffix_6 {
+  padding-right: 25%;
+}
+.container_24 .suffix_7 {
+  padding-right: 29.167%;
+}
+.container_24 .suffix_8 {
+  padding-right: 33.333%;
+}
+.container_24 .suffix_9 {
+  padding-right: 37.5%;
+}
+.container_24 .suffix_10 {
+  padding-right: 41.667%;
+}
+.container_24 .suffix_11 {
+  padding-right: 45.833%;
+}
+.container_24 .suffix_12 {
+  padding-right: 50%;
+}
+.container_24 .suffix_13 {
+  padding-right: 54.167%;
+}
+.container_24 .suffix_14 {
+  padding-right: 58.333%;
+}
+.container_24 .suffix_15 {
+  padding-right: 62.5%;
+}
+.container_24 .suffix_16 {
+  padding-right: 66.667%;
+}
+.container_24 .suffix_17 {
+  padding-right: 70.833%;
+}
+.container_24 .suffix_18 {
+  padding-right: 75%;
+}
+.container_24 .suffix_19 {
+  padding-right: 79.167%;
+}
+.container_24 .suffix_20 {
+  padding-right: 83.333%;
+}
+.container_24 .suffix_21 {
+  padding-right: 87.5%;
+}
+.container_24 .suffix_22 {
+  padding-right: 91.667%;
+}
+.container_24 .suffix_23 {
+  padding-right: 95.833%;
+}
+.container_24 .push_1 {
+  left: 4.167%;
+}
+.container_24 .push_2 {
+  left: 8.333%;
+}
+.container_24 .push_3 {
+  left: 12.5%;
+}
+.container_24 .push_4 {
+  left: 16.667%;
+}
+.container_24 .push_5 {
+  left: 20.833%;
+}
+.container_24 .push_6 {
+  left: 25%;
+}
+.container_24 .push_7 {
+  left: 29.167%;
+}
+.container_24 .push_8 {
+  left: 33.333%;
+}
+.container_24 .push_9 {
+  left: 37.5%;
+}
+.container_24 .push_10 {
+  left: 41.667%;
+}
+.container_24 .push_11 {
+  left: 45.833%;
+}
+.container_24 .push_12 {
+  left: 50%;
+}
+.container_24 .push_13 {
+  left: 54.167%;
+}
+.container_24 .push_14 {
+  left: 58.333%;
+}
+.container_24 .push_15 {
+  left: 62.5%;
+}
+.container_24 .push_16 {
+  left: 66.667%;
+}
+.container_24 .push_17 {
+  left: 70.833%;
+}
+.container_24 .push_18 {
+  left: 75%;
+}
+.container_24 .push_19 {
+  left: 79.167%;
+}
+.container_24 .push_20 {
+  left: 83.333%;
+}
+.container_24 .push_21 {
+  left: 87.5%;
+}
+.container_24 .push_22 {
+  left: 91.667%;
+}
+.container_24 .push_23 {
+  left: 95.833%;
+}
+.container_24 .pull_1 {
+  left: -4.167%;
+}
+.container_24 .pull_2 {
+  left: -8.333%;
+}
+.container_24 .pull_3 {
+  left: -12.5%;
+}
+.container_24 .pull_4 {
+  left: -16.667%;
+}
+.container_24 .pull_5 {
+  left: -20.833%;
+}
+.container_24 .pull_6 {
+  left: -25%;
+}
+.container_24 .pull_7 {
+  left: -29.167%;
+}
+.container_24 .pull_8 {
+  left: -33.333%;
+}
+.container_24 .pull_9 {
+  left: -37.5%;
+}
+.container_24 .pull_10 {
+  left: -41.667%;
+}
+.container_24 .pull_11 {
+  left: -45.833%;
+}
+.container_24 .pull_12 {
+  left: -50%;
+}
+.container_24 .pull_13 {
+  left: -54.167%;
+}
+.container_24 .pull_14 {
+  left: -58.333%;
+}
+.container_24 .pull_15 {
+  left: -62.5%;
+}
+.container_24 .pull_16 {
+  left: -66.667%;
+}
+.container_24 .pull_17 {
+  left: -70.833%;
+}
+.container_24 .pull_18 {
+  left: -75%;
+}
+.container_24 .pull_19 {
+  left: -79.167%;
+}
+.container_24 .pull_20 {
+  left: -83.333%;
+}
+.container_24 .pull_21 {
+  left: -87.5%;
+}
+.container_24 .pull_22 {
+  left: -91.667%;
+}
+.container_24 .pull_23 {
+  left: -95.833%;
+}
+.clear {
+  clear: both;
+  display: block;
+  overflow: hidden;
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}
+.clearfix:after {
+  clear: both;
+  content: ' ';
+  display: block;
+  font-size: 0;
+  line-height: 0;
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}
+.clearfix {
+  display: inline-block;
+}
+* html .clearfix {
+  height: 1%;
+}
+.clearfix {
+  display: block;
+}
+/**
+ * Copyright (c) EMBL-EBI 2013
+ * Authors: Francis Rowland, Peter Walter, Glen van Ginkel
+ */
+div#topbar {
+  background-color: #207a7a;
+  border-bottom: 1px solid #222222;
+}
+a,
+a:link {
+  color: #0f2559;
+}
+a:hover,
+a:focus,
+a:active {
+  color: #0e6a0e;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #222222;
+}
+h1 {
+  color: #f7f7f7;
+}
+h2 {
+  color: #207a7a;
+}
+h3 {
+  color: #996a44;
+}
+th {
+  background-color: #70BDBD;
+  background-color: rgba(112, 189, 189, 0.5);
+}
+a.special {
+  background-color: #7cd17c;
+}
+form input.submit {
+  border-color: #295c5c;
+  background-color: #207a7a;
+  color: #f8f8f8;
+  text-shadow: #145251 0 1px 1px;
+}
+form input.submit:hover,
+form input.submit:focus,
+form input.submit:active {
+  background: #207a7a;
+}
+div#local-masthead {
+  background-color: #70bdbd;
+}
+div#local-masthead.gradient {
+  background-color: #70bdbd;
+}
+div#local-masthead ul li a:hover,
+div#local-masthead ul li a:focus,
+div#local-masthead ul li a:active {
+  border-bottom: 3px solid #207a7a;
+}
+div#mastheads div#local h1 {
+  color: #222222;
+}
+body.expander div#global {
+  border-bottom: 1px solid #111111;
+}
+body.expander div#local {
+  border-top: 1px solid #70d3d3;
+}
+.primary-1 {
+  background-color: #207a7a;
+}
+.primary-2 {
+  background-color: #295c5c;
+}
+.primary-3 {
+  background-color: #0a4f4f;
+}
+.primary-4 {
+  background-color: #54bdbd;
+}
+.primary-5 {
+  background-color: #70bdbd;
+}
+.secondary-a-1 {
+  background-color: #2e4988;
+}
+.secondary-a-2 {
+  background-color: #344366;
+}
+.secondary-a-3 {
+  background-color: #0f2559;
+}
+.secondary-a-4 {
+  background-color: #6380c4;
+}
+.secondary-a-5 {
+  background-color: #7d92c4;
+}
+.secondary-b-1 {
+  background-color: #2ba32b;
+}
+.secondary-b-2 {
+  background-color: #377a37;
+}
+.secondary-b-3 {
+  background-color: #0e6a0e;
+}
+.secondary-b-4 {
+  background-color: #5dd15d;
+}
+.secondary-b-5 {
+  background-color: #7cd17c;
+}
+.complement-1 {
+  background-color: #cb7935;
+}
+.complement-2 {
+  background-color: #996a44;
+}
+.complement-3 {
+  background-color: #844511;
+}
+.complement-4 {
+  background-color: #e5a066;
+}
+.complement-5 {
+  background-color: #e5b288;
+}
+
