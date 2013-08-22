@@ -49,7 +49,7 @@ class ModelFileFormatServiceTests {
         // an unknown format file
         File validUnknown = new File("target/sbml/unknown")
         validUnknown.setText('What is my name')
-        assertEquals(modelFileFormatService.inferModelFormat([validUnknown]).identifier, "UNKNOWN")
+        assertEquals("UNKNOWN", modelFileFormatService.inferModelFormat([validUnknown]).identifier)
 
         // an SBML file should be detected. Make less restrictive to accept invalid SBML files
         File validSbml = new File("target/sbml/validSbml")
