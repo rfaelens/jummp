@@ -11,6 +11,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.perf4j.aop.Profiled
 
 /**
  * Service class containing the logic to handle models encoded in PharmML.
@@ -21,11 +22,13 @@ class PharmMlService implements FileFormatService {
     private static final Log log = LogFactory.getLog(this)
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
 
+    @Profiled(tag="pharmMlService.validate")
     public boolean validate(final List<File> model) {
         //delegate to libPharmML
         return areFilesThisFormat(model)
     }
 
+    @Profiled(tag="pharmMlService.extractName")
     public String extractName(List<File> model) {
         StringBuffer theName = new StringBuffer()
         if (!model) {
@@ -46,14 +49,17 @@ class PharmMlService implements FileFormatService {
         return theName.toString()
     }
 
+    @Profiled(tag="pharmMlService.extractDescription")
     public String extractDescription(final List<File> model) {
         return ""
     }
 
+    @Profiled(tag="pharmMlService.getAllAnnotationURNs")
     public List<String> getAllAnnotationURNs(RevisionTransportCommand revision) {
         return []
     }
 
+    @Profiled(tag="pharmMlService.getPubMedAnnotation")
     public List<String> getPubMedAnnotation(RevisionTransportCommand revision) {
         return []
     }
@@ -64,6 +70,7 @@ class PharmMlService implements FileFormatService {
      * @return true if all files are supported, false otherwise.
      * @see net.biomodels.jummp.core.model.FileFormatService#areFilesThisFormat(List files)
      */
+    @Profiled(tag="pharmMlService.areFilesThisFormat")
     public boolean areFilesThisFormat(List<File> files) {
         if (!files) {
             return false
@@ -117,6 +124,7 @@ class PharmMlService implements FileFormatService {
         return !(outcomes.values().find{!it})
     }
 
+    @Profiled(tag="pharmMlService.getFormatVersion")
     public String getFormatVersion(RevisionTransportCommand revision) {
         //return PharmML writtenVersion
         return revision ? "0.1" : ""
