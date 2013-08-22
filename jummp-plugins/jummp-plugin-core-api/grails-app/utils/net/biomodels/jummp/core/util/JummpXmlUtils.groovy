@@ -61,17 +61,15 @@ public class JummpXmlUtils {
     }
 
     private static String processXmlElement(XMLStreamReader reader, String element, String attribute) {
-        if (attribute.startsWith("xmlns")) {
-            if (!attribute.contains(":")) {
+        if (element.equals(reader.getLocalName())) {
+            if (attribute.startsWith("xmlns")) {
+                if (attribute.contains(":")) {
+                    //Strings no longer have an internal reference to arrays, so substring() is out of the question
+                    String ns = attribute.dropWhile{it != ':'}.drop(1)
+                    return reader.getNamespaceURI(ns)
+                }
                 return reader.getNamespaceURI()
             }
-            else {
-                //Strings no longer have an internal reference to arrays, so substring() is out of the question
-                String ns = attribute.dropWhile{it != ':'}.drop(1)
-                return reader.getNamespaceURI(ns)
-            }
-        }
-        if (element.equals(reader.getLocalName())) {
             return reader.getAttributeValue(null, attribute)
         }
         return null
