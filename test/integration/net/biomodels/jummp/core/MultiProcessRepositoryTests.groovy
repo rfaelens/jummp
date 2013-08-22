@@ -32,9 +32,9 @@ class MultiProcessRepositoryTests  {
 
     @After
     void tearDown() {
-        // Delete exchange/model folders
-        FileUtils.deleteDirectory(new File("target/vcs/exchange"))
-        FileUtils.deleteDirectory(new File("target/vcs/modelfolder"))
+       // Delete exchange/model folders
+       FileUtils.deleteDirectory(new File("target/vcs/exchange"))
+       FileUtils.deleteDirectory(new File("target/vcs/modelfolder"))
     }
 
     @Test
@@ -73,9 +73,11 @@ class MultiProcessRepositoryTests  {
         assertTrue(test3.dotestsPass())
         // wait for grails script to report its done, and test its result message
         log.error("Waiting for child process message")
-        sync.waitForMessage("DoneTesting")
-        assertTrue(sync.getMessages().contains("TestResult: true"))
+        String errorMessage=sync.waitForMessageContaining("Error");
+        assertTrue(errorMessage.contains("[]"))
         // terminate server
+        sync.sendMessage("donetesting")
+        Thread.sleep(200)
         sync.terminate()
     }
     

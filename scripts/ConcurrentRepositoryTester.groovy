@@ -77,8 +77,10 @@ Add a comment to this line
     repTest.setManager(appCtx.getBean("vcsService").vcsManager)
     repTest.run()
     sync.sendMessage("TestResult: ${repTest.dotestsPass()}")
+    sync.sendMessage("Errors: ${repTest.getAllErrors()}")
     sync.sendMessage("DoneTesting")
-    Thread.sleep(500)
+    sync.waitForMessage("donetesting")
+    Thread.sleep(2000)
     
     //sync.terminate()
  

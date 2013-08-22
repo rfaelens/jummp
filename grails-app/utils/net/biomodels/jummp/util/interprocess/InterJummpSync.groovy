@@ -9,6 +9,7 @@ import java.net.Socket
 import java.net.SocketTimeoutException
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 
 /**
  * Small utility class for coordinating execution between two processes. Allows
@@ -23,7 +24,8 @@ class InterJummpSync {
     BlockingQueue<String> messageBuffer = new LinkedBlockingQueue<String>()
     Set<String> messagesToCommunicator = Collections.synchronizedSet(new HashSet<String>())
     Set<String> messagesRecieved=new HashSet<String>()
-    
+    boolean isActive=true
+        
     
     class Communicator implements Runnable {
         
@@ -46,6 +48,7 @@ class InterJummpSync {
                     messageLoop(socket)
                 }
             }
+            
         }
         
         void messageLoop(def socket) {
@@ -91,6 +94,7 @@ class InterJummpSync {
                     // Be nice and relinquish CPU
                     Thread.sleep(100)
                 }
+               isActive=false;
             }
         }
     }
@@ -113,10 +117,30 @@ class InterJummpSync {
         // Keep looping and taking from the (blocking) messageBuffer
         // and adding the latest message to the messagesRecieved
         // collection, until it contains what we are looking for
-    	while (!messagesRecieved.contains(msg)) {
-            messagesRecieved.add(messageBuffer.take())
+    	while (isActive) {
+    	    String recv=messageBuffer.poll(500, TimeUnit.MILLISECONDS)
+    	    if (recv==msg) {
+    	    	    break
+    	    }
+    	    messagesRecieved.add(recv)
         }
-        messagesRecieved.remove(msg)
+    }
+    
+    public String waitForMessageContaining(String msg) {
+        // Keep looping and taking from the (blocking) messageBuffer
+        // and adding the latest message to the messagesRecieved
+        // collection, until it contains what we are looking for
+    	while (isActive) {
+    	    String recv=messageBuffer.poll(500, TimeUnit.MILLISECONDS)
+    	    if (recv && recv.contains(msg)) {
+    	    	    return recv;
+    	    }
+    	    else if (recv) {
+    	    	    System.out.println("WAITING FOR: "+msg+" GOT "+recv)
+    	    }
+    	    messagesRecieved.add(recv)
+        }
+        return null;
     }
     
     public Set<String> getMessages() {

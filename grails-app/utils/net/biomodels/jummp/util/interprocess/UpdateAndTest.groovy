@@ -8,6 +8,7 @@ class UpdateAndTest implements Runnable {
         File modelFolder
         def manager
         boolean allTestsPass=false
+        List<String> errorMessages=new LinkedList<String>()
         
         public void setModel(File model) {
         	modelFolder=model
@@ -35,6 +36,7 @@ class UpdateAndTest implements Runnable {
         }
         
         boolean dotestsPass() {
+        	System.out.println("TEST PASSED: "+allTestsPass)
         	return allTestsPass
         }
         
@@ -55,9 +57,15 @@ class UpdateAndTest implements Runnable {
             }
             allTestsPass=testResult
         }
+        
+        List getAllErrors() {
+        	return errorMessages;
+        }
 
         boolean testFileCorrectness(List<File> files, String filename, String filetext)
         {
+        	try
+        	{
         	boolean testResult=true
         	int fileIndex=-1
         	files.eachWithIndex { file, i -> 
@@ -65,15 +73,26 @@ class UpdateAndTest implements Runnable {
         	};
         	testResult= testResult & fileIndex>-1
         	if (!testResult) {
+        		errorMessages.add("File: "+filename+" was not found, but was expected")
         		return testResult
         	}
         	List<String> lines = files.get(fileIndex).readLines()
         	testResult = testResult & lines.size()==1
         	if (!testResult) {
+        		errorMessages.add("File: "+filename+" had a different number of lines than expected")
         		return testResult
         	}
         	testResult = testResult & filetext==lines[0]
+        	if (!testResult) {
+        		errorMessages.add("File: "+filename+" had a different text, expected "+filetext+" got "+lines[0])
+        	}
         	return testResult
+        	}
+        	catch(Exception e) {
+        		e.printStackTrace()
+        		errorMessages.add("EXCEPTION: "+e.toString())
+        		return false;
+        	}
         }
 }
     
