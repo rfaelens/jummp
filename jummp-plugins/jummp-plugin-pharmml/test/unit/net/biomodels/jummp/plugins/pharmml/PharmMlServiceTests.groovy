@@ -4,8 +4,7 @@ import grails.test.mixin.*
 import groovy.io.FileType
 import org.junit.*
 import net.biomodels.jummp.plugins.pharmml.PharmMlDetector
-/** * See the API for {@link grails.test.mixin.services.ServiceUnitTestMixin} for usage instructions
- */
+
 @TestFor(PharmMlService)
 class PharmMlServiceTests {
 
@@ -39,6 +38,17 @@ class PharmMlServiceTests {
     }
 
     @Test
+    void youShallNotPass() {
+        def bigModel = [ new File("test/files/iov1_data.txt"),
+            new File("test/files/pkmodel_sbml.xml"),
+            new File("test/files/pdmodel_sbml.xml")
+        ]
+        assertFalse service.areFilesThisFormat(bigModel)
+        bigModel << new File("test/files/example9.xml")
+        assertTrue service.areFilesThisFormat(bigModel)
+    }
+
+    @Test
     void pharmMLsCanIncludeSbmlAndTxt() {
         def bigModel = []
         def baseFolder = new File("test/files/")
@@ -68,8 +78,17 @@ class PharmMlServiceTests {
         model = []
         def baseFolder = new File("test/files/")
         baseFolder.eachFileMatch FileType.FILES, ~/.*\.xml/, { File f -> model << f; }
-        String mergedNames = '''\
-IOV1 with covariates CTS1 example - continuous PK/PD Warfarin example Corresponds to WP3 PK_PRED use case Chan, Nutt, Holford 2005 Parkinson paper IOV1 with covariates BradshawPierce IOV1 with covariates'''
-        assertEquals mergedNames, service.extractName(model)
+        def mergedNames = [ "IOV1 with covariates",
+                "CTS1 example - continuous PK/PD", 
+                "Warfarin example Corresponds to WP3 PK_PRED use case",
+                "Chan, Nutt, Holford 2005 Parkinson paper",
+                "IOV1 with covariates",
+                "BradshawPierce"
+        ]
+        // the order of the files may not be preserved.
+        String result = service.extractName(model)
+        mergedNames.each { name ->
+            assertTrue result.contains(name)
+        }
     }
 }

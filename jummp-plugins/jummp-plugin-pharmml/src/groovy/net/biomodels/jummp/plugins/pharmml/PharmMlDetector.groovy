@@ -5,8 +5,12 @@ import java.nio.file.Path
 import net.biomodels.jummp.core.RunnableModelFormatDetector
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import net.biomodels.jummp.plugins.sbml.SbmlService
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
 public class PharmMlDetector implements RunnableModelFormatDetector {
+    private static final Log log = LogFactory.getLog(this)
+    private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
     /**
      * The file to perform the checks on.
      */
@@ -57,27 +61,22 @@ public class PharmMlDetector implements RunnableModelFormatDetector {
         final Path path = theFile.toPath()
         final String CONTENT_TYPE = Files.probeContentType(path)
         if ("application/xml".equals(CONTENT_TYPE)) {
-            String acceptedNamespace = JummpXmlUtils.findModelAttribute theFile, "PharmML", "xmlns"
-            if (!acceptedNamespace) {
-                acceptedNamespace = JummpXmlUtils.findModelAttribute theFile, "sbml", "xmlns"
-            }
-            if (!acceptedNamespace) {
+            String acceptedNs = JummpXmlUtils.findModelAttribute(theFile, "PharmML", "xmlns")
+            if (!acceptedNs) {
                 if (IS_INFO_ENABLED) {
-                    log.info "File ${theFile.name} does not include PharmML or SBML namespace declaration."
+                    log.info "File ${theFile.name} does not include PharmML namespace declaration."
                 }
                 hasBeenRun = true
                 isPharmML = false
                 return false
             }
-        } else if ((!"text/plain".equals(CONTENT_TYPE)) && (!"text/csv".equals(CONTENT_TYPE))) {
-            //data sources include CSV and TSV files
+            //set these to these true so that we don't need to run multiple times
             hasBeenRun = true
-            isPharmML = false
-            return false
+            isPharmML = true
+            return true
         }
-        //set these to these true so that we don't need to run multiple times
         hasBeenRun = true
-        isPharmML = true
-        return true
+        isPharmML = false
+        return false
     }
 }
