@@ -1,9 +1,24 @@
 package net.biomodels.jummp.plugins.pharmml
 
+import eu.ddmore.libpharmml.IErrorHandler;
+import eu.ddmore.libpharmml.IMarshaller;
+import eu.ddmore.libpharmml.dom.PharmML;
 import grails.test.mixin.*
 import groovy.io.FileType
-import org.junit.*
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.ValidationEvent;
+import javax.xml.bind.ValidationEventHandler;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 import net.biomodels.jummp.plugins.pharmml.PharmMlDetector
+import org.apache.xerces.util.XMLCatalogResolver;
+import org.junit.*
+import org.xml.sax.SAXException;
 
 @TestFor(PharmMlService)
 class PharmMlServiceTests {
@@ -89,6 +104,23 @@ class PharmMlServiceTests {
         String result = service.extractName(model)
         mergedNames.each { name ->
             assertTrue result.contains(name)
+        }
+    }
+
+    @Test
+    void onlyPharmMLsCanBeValidated() {
+        assertFalse service.validate(null)
+        def model = []
+        assertFalse service.validate(model)
+        model = [new File("test/files/iov1_data.txt")]
+        assertFalse service.validate(model)
+
+        model = []
+        def baseFolder = new File("test/files/")
+        baseFolder.eachFileMatch ~/example.*\.xml/, { File f -> model << f; }
+        //test them sequentially because the API only handles resources individually
+        model.each { pharmML ->
+            assertTrue(service.validate([pharmML]))
         }
     }
 }

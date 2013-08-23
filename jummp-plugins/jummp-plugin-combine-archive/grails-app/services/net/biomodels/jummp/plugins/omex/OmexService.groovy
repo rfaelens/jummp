@@ -7,6 +7,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import org.perf4j.aop.Profiled
 
 /**
  * Provides methods to handle the COMBINE archive format.
@@ -15,23 +16,28 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
  */
 class OmexService implements FileFormatService {
 
+    @Profiled(tag="omexService.validate")
     public boolean validate(final List<File> model) {
         //TODO delegate the validation to libCombineArchive API
         return areFilesThisFormat(model)
     }
 
+    @Profiled(tag="omexService.extractName")
     public String extractName(final List<File> model) {
         return ""
     }
 
+    @Profiled(tag="omexService.extractDescription")
     public String extractDescription(final List<File> model) {
         return ""
     }
 
+    @Profiled(tag="omexService.getAllAnnotationURNs")
     public List<String> getAllAnnotationURNs(RevisionTransportCommand revision) {
         return []
     }
 
+    @Profiled(tag="omexService.getPubMedAnnotation")
     public List<String> getPubMedAnnotation(RevisionTransportCommand revision) {
         return []
     }
@@ -42,6 +48,7 @@ class OmexService implements FileFormatService {
      * @return true if all files are supported, false otherwise.
      * @see net.biomodels.jummp.core.model.FileFormatService#areFilesThisFormat(List files)
      */
+    @Profiled(tag="omexService.areFilesThisFormat")
     public boolean areFilesThisFormat(final List<File> files) {
         if (!files) {
             return false
@@ -57,6 +64,7 @@ class OmexService implements FileFormatService {
         return allGood
     }
 
+    @Profiled(tag="omexService.getFormatVersion")
     public String getFormatVersion(RevisionTransportCommand revision) {
         return revision ? "0.1" : ""
     }

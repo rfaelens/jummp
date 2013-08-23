@@ -1,7 +1,10 @@
 package net.biomodels.jummp.plugins.pharmml
 
+import eu.ddmore.libpharmml.*
+import eu.ddmore.libpharmml.impl.*
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.Executors
@@ -11,6 +14,10 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.perf4j.aop.Profiled
+import org.apache.xerces.util.XMLCatalogResolver;
+import org.xml.sax.SAXException;
+
 
 /**
  * Service class containing the logic to handle models encoded in PharmML.
@@ -21,11 +28,84 @@ class PharmMlService implements FileFormatService {
     private static final Log log = LogFactory.getLog(this)
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
 
-    public boolean validate(final List<File> model) {
-        //delegate to libPharmML
-        return areFilesThisFormat(model)
+    @Profiled(tag="pharmMlService.validate")
+    public boolean validate(List<File> model) {
+        if (!model) {
+            if (IS_INFO_ENABLED) {
+                log.info "Refusing to validate an undefined list of files as a PharmML submission."
+            }
+            return false
+        }
+        model = model.findAll{it && it.canRead()}
+        if (IS_INFO_ENABLED) {
+            log.info "Validating ${model.inspect()} as a PharmML submission."
+        }
+
+        //temporarily ignore everything else apart from the PharmML file as current libPharmML implementation can't cope
+        def fileQueue = new ConcurrentLinkedQueue(model)
+        AtomicBoolean stillLooking = new AtomicBoolean(true)
+        ThreadFactory threadFactory = Executors.defaultThreadFactory()
+        def iFiles = fileQueue.iterator()
+        File pharmMlFile
+        while (iFiles.hasNext() && stillLooking.get()) {
+            final File file = iFiles.next()
+            PharmMlDetector detective = new PharmMlDetector(file)
+            Thread detectiveThread = threadFactory.newThread(detective)
+            if (detectiveThread) {
+                detectiveThread.setName("pharmML validation for ${file.name}")
+                detectiveThread.start()
+                detectiveThread.join()
+                if (detective.isRecognisedFormat(file)) {
+                    stillLooking.set(true)
+                    pharmMlFile = file
+                }
+            } else {
+                log.error "pharmMlService.validate: Cannot start detection thread for file ${file.name}"
+                throw new RuntimeException("Something went wrong when we tried to validate ${file.name}")
+                return false
+            }
+        }
+
+        if (!pharmMlFile) {
+            if (IS_INFO_ENABLED) {
+                log.info "No PharmML to validate in ${model.inspect()}"
+            }
+            return false
+        }
+        if (IS_INFO_ENABLED) {
+            log.info "Asking libPharmML to validate ${pharmMlFile}."
+        }
+        assert pharmMlFile!= null && pharmMlFile.exists() && pharmMlFile.canRead()
+        LibPharmMLImpl api = PharmMlFactory.getInstance().createLibPharmML()
+        def stream = null
+        IPharmMLResource resource = null 
+        try {
+            stream = new BufferedInputStream(new FileInputStream(pharmMlFile))
+            resource = api.createDomFromResource(stream)
+        } catch(IOException x) {
+            log.error(x.message, x)
+            throw new RuntimeException(x.message, x)
+        } finally {
+            stream?.close()
+        }
+        IValidationReport report = resource.getCreationReport()
+        if (IS_INFO_ENABLED) {
+            final int ERR_COUNT = report.numErrors()
+            if (ERR_COUNT) {
+                def err = []
+                Iterator<IValidationError> iErr = report.errorIterator()
+                while (iErr.hasNext()) {
+                    IValidationError e = iErr.next()
+                    err << new StringBuffer(e.getRuleId()).append(':').append(e.getErrorMsg()).
+                            append(System.getProperty("line.separator")).toString()
+                }
+                log.info "err.inspect()"
+            }
+        }
+        return report.isValid()
     }
 
+    @Profiled(tag="pharmMlService.extractName")
     public String extractName(List<File> model) {
         StringBuffer theName = new StringBuffer()
         if (!model) {
@@ -46,14 +126,17 @@ class PharmMlService implements FileFormatService {
         return theName.toString()
     }
 
+    @Profiled(tag="pharmMlService.extractDescription")
     public String extractDescription(final List<File> model) {
         return ""
     }
 
+    @Profiled(tag="pharmMlService.getAllAnnotationURNs")
     public List<String> getAllAnnotationURNs(RevisionTransportCommand revision) {
         return []
     }
 
+    @Profiled(tag="pharmMlService.getPubMedAnnotation")
     public List<String> getPubMedAnnotation(RevisionTransportCommand revision) {
         return []
     }
@@ -64,6 +147,7 @@ class PharmMlService implements FileFormatService {
      * @return true if all files are supported, false otherwise.
      * @see net.biomodels.jummp.core.model.FileFormatService#areFilesThisFormat(List files)
      */
+    @Profiled(tag="pharmMlService.areFilesThisFormat")
     public boolean areFilesThisFormat(List<File> files) {
         if (!files) {
             return false
@@ -117,6 +201,7 @@ class PharmMlService implements FileFormatService {
         return !(outcomes.values().find{!it})
     }
 
+    @Profiled(tag="pharmMlService.getFormatVersion")
     public String getFormatVersion(RevisionTransportCommand revision) {
         //return PharmML writtenVersion
         return revision ? "0.1" : ""

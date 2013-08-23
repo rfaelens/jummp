@@ -75,6 +75,29 @@ class PharmMlServiceTests extends JummpIntegrationTest {
         assertEquals "0.1", pharmMlService.getFormatVersion(revision)
     }
 
+    @Test
+    void testValidate() {
+        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/example6.xml")
+        authenticateAsTestUser()
+        def rf = new RepositoryFileTransportCommand(path: modelFile.absolutePath,
+                    description: "A very interesting model.", mainFile: true)
+        def defaultFormat = new ModelFormatTransportCommand(identifier: "PharmML")
+        def modelCommand = new ModelTransportCommand(format: defaultFormat, comment: "First commit", name: "Foo")
+        Model model = modelService.uploadModelAsFile(rf, modelCommand)
+        def revision = modelService.getLatestRevision(model).toCommandObject()
+        List<String> locations = []
+        revision.files?.findAll{it.mainFile}.each { locations << it.path}
+        List<File> files = []
+        locations.each { l ->
+            File f = new File(l)
+            if (f && f.exists() && f.canRead()) {
+                files << f
+            }
+        }
+        assertTrue !!files
+        assertTrue pharmMlService.validate(files)
+    }
+
     private void setupVcs() {
         // setup VCS
         File clone = new File("target/pharmml/git/")

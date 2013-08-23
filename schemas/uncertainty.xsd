@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://www.pharmml.org/2013/03/Uncertainty"
+    xmlns:uncert="http://www.pharmml.org/2013/03/Uncertainty"
+    xmlns:math="http://www.pharmml.org/2013/03/Maths" version="0.1" elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import namespace="http://www.pharmml.org/2013/03/Maths"
+        schemaLocation="http://www.pharmml.org/2013/03/Maths"/>
+
+    <xs:complexType name="DistributionParamType">
+        <xs:choice>
+            <xs:element ref="math:Equation">
+                <xs:annotation>
+                    <xs:documentation>Maths expression defining a parameter value.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="math:Scalar">
+                <xs:annotation>
+                    <xs:documentation>A parameter value.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="math:Var">
+                <xs:annotation>
+                    <xs:documentation>Variable reference to a symbold defining a parameter value.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:choice>
+    </xs:complexType>
+    <xs:complexType name="MeanParamType">
+        <xs:complexContent>
+            <xs:extension base="uncert:DistributionParamType"> </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="ParameterDefinitionType">
+        <xs:attribute name="id" type="math:BlockNameType" use="required">
+            <xs:annotation>
+                <xs:documentation>Identifier of the parameter.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="name" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>Human readable name of the parameter.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+    <xs:element name="Normal">
+        <xs:annotation>
+            <xs:documentation>A normal distribution.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="Mean" type="uncert:MeanParamType"> </xs:element>
+                <xs:choice>
+                    <xs:element minOccurs="1" name="StdDev" type="uncert:DistributionParamType"/>
+                    <xs:element minOccurs="1" name="Variance" type="uncert:DistributionParamType"/>
+                    <xs:element name="CoefficientOfVariation" type="uncert:DistributionParamType"/>
+                </xs:choice>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Poisson">
+        <xs:annotation>
+            <xs:documentation>Poisson distribution.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="Rate" type="uncert:DistributionParamType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Student-t">
+        <xs:annotation>
+            <xs:documentation>Student-t distribution.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="Location" type="uncert:DistributionParamType"/>
+                <xs:element name="Scale" type="uncert:DistributionParamType"/>
+                <xs:element name="DegreesOfFreedom" type="uncert:DistributionParamType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="PDF">
+        <xs:annotation>
+            <xs:documentation>A user-defined PDF.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="FunctionParameter"
+                    type="uncert:ParameterDefinitionType"/>
+                <xs:element ref="math:Equation"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Uniform">
+        <xs:annotation>
+            <xs:documentation>A uniform distribution.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="Distribution">
+        <xs:annotation>
+            <xs:documentation>Defined a probability distribution.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:choice>
+                <xs:element ref="uncert:Normal"/>
+                <xs:element ref="uncert:PDF"/>
+                <xs:element ref="uncert:Poisson"/>
+                <xs:element ref="uncert:Student-t"/>
+                <xs:element ref="uncert:Uniform"/>
+            </xs:choice>
+            <xs:attribute name="writtenVersion" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation>The version of the schema this was written with.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

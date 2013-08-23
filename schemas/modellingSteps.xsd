@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:msteps="http://www.pharmml.org/2013/03/ModellingSteps"
+    xmlns:math="http://www.pharmml.org/2013/03/Maths"
+    xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes"
+    targetNamespace="http://www.pharmml.org/2013/03/ModellingSteps" version="0.1"
+    elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+    <xs:import namespace="http://www.pharmml.org/2013/03/CommonTypes"
+        schemaLocation="http://www.pharmml.org/2013/03/CommonTypes"/>
+
+    <xs:import namespace="http://www.pharmml.org/2013/03/Maths"
+        schemaLocation="http://www.pharmml.org/2013/03/Maths"/>
+
+    <xs:complexType name="SimulationStepType">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="Description" type="ct:AnnotationType">
+                <xs:annotation>
+                    <xs:documentation>The description of the simulation step.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Replicates" type="msteps:ReplicatesType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Defines the number of tmes to repeat this operaton - an integer number of times.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="InitialValue"
+                type="ct:VariableAssignmentType">
+                <xs:annotation>
+                    <xs:documentation>Initial assignments to be applied before the simulation.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" name="SimDataSet" type="msteps:DatasetMappingType">
+                <xs:annotation>
+                    <xs:documentation>Simulation dataset that can be used to drive the simulation.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Observations" minOccurs="0" maxOccurs="unbounded"
+                type="msteps:ObservationsType">
+                <xs:annotation>
+                    <xs:documentation>The observation produced by the simulation.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="id" type="ct:BlockNameType" use="required">
+            <xs:annotation>
+                <xs:documentation>The id of the simulation step.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+    <xs:complexType name="ObservationsType">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="Timepoints" type="ct:Rhs">
+                <xs:annotation>
+                    <xs:documentation>The timepoints of the observations.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="Output" type="msteps:OutputType">
+                <xs:annotation>
+                    <xs:documentation>An output variable to be observed.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="WriteTo" type="msteps:WriteToType">
+                <xs:annotation>
+                    <xs:documentation>An output variabe to be written to the dataset.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="OutputType">
+        <xs:sequence>
+            <xs:element ref="math:Var">
+                <xs:annotation>
+                    <xs:documentation>The reference to the output variable.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="WriteToType">
+        <xs:sequence>
+            <xs:element ref="math:Var">
+                <xs:annotation>
+                    <xs:documentation>The column to write to.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" name="Mapping" type="msteps:ColumnMappingType">
+                <xs:annotation>
+                    <xs:documentation>The mapping from the model symbols to the data column.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="UseIndividualType">
+        <xs:attribute name="levelId" type="ct:BlockNameType" use="required"/>
+    </xs:complexType>
+    <xs:complexType name="ReplicatesType">
+        <xs:complexContent>
+            <xs:extension base="ct:Rhs">
+                <xs:attribute name="symbId" type="ct:SymbolNameType" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="StepType">
+        <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="DependantStep">
+                <xs:annotation>
+                    <xs:documentation>The step dependent on this one.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:attribute name="idRef" type="ct:BlockNameType" use="required">
+                        <xs:annotation>
+                            <xs:documentation>The refernece of the dependent step.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="idRef" type="math:BlockNameType" use="required">
+            <xs:annotation>
+                <xs:documentation>Reference to the step identifier.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+    <xs:complexType name="StepDependencyType">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="Description" type="ct:AnnotationType">
+                <xs:annotation>
+                    <xs:documentation>Describes the dependencies.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" name="Step" type="msteps:StepType">
+                <xs:annotation>
+                    <xs:documentation>Defines a step in the dependency graph.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="ColumnMappingType">
+        <xs:sequence>
+            <xs:choice>
+                <xs:element minOccurs="1" ref="math:Var">
+                    <xs:annotation>
+                        <xs:documentation>Reference to the symbol to map the column data to.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="UseVariabilityLevel" type="msteps:UseIndividualType">
+                    <xs:annotation>
+                        <xs:documentation>Use the given variability level when the restriction is true or in all cases.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="UseVariabilityNode" type="math:VarType">
+                    <xs:annotation>
+                        <xs:documentation>Map this data to the given variabiity node in the Design element.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="TargetVar" type="math:VarType">
+                    <xs:annotation>
+                        <xs:documentation>The target variable to assign values in this column to. usual used for dosing.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="DoseVar" type="math:VarType">
+                    <xs:annotation>
+                        <xs:documentation>The dosing variable to use with values from this column.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="Assign">
+                    <xs:annotation>
+                        <xs:documentation>Assign a value for rows matching the given restriction.</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:complexContent>
+                            <xs:extension base="ct:Rhs">
+                                <xs:attribute name="block" type="ct:BlockNameType"/>
+                                <xs:attribute name="symbId" type="ct:SymbolNameType" use="required"
+                                />
+                            </xs:extension>
+                        </xs:complexContent>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="Output" type="msteps:OutputType">
+                    <xs:annotation>
+                        <xs:documentation>Maps the column to an output variable in th strcutural model. Typically used during simulation and informs the suimulation to define an observation at the given time.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:choice>
+            <xs:element minOccurs="0" name="Restriction" type="ct:RestrictionType">
+                <xs:annotation>
+                    <xs:documentation>the resitrction used to filter rows in the dataset.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="columnName" type="ct:SymbolNameType" use="required">
+            <xs:annotation>
+                <xs:documentation>The name of the column to map.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+    <xs:complexType name="EstimationStepType">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="Description" type="ct:AnnotationType">
+                <xs:annotation>
+                    <xs:documentation>The description of the estimation step.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="InitialValue"
+                type="ct:VariableAssignmentType">
+                <xs:annotation>
+                    <xs:documentation>Defines initial values of symbols prior to execuion of the step.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="ObjectiveDataSet" type="msteps:DatasetMappingType">
+                <xs:annotation>
+                    <xs:documentation>Defines the objective data to use in the estimation.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="1" minOccurs="1" name="ParametersToEstimate"
+                type="msteps:ToEstimateType">
+                <xs:annotation>
+                    <xs:documentation>Specified the parameters of the model to be estimated.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" name="EstimationOperation"
+                type="msteps:EstimationOperationType">
+                <xs:annotation>
+                    <xs:documentation>The estimation operation to be carried out.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="id" type="ct:BlockNameType" use="required">
+            <xs:annotation>
+                <xs:documentation>The estimation step identifier.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+    <xs:complexType name="ToEstimateType">
+        <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="Variable"
+                type="msteps:VariableEstimateType">
+                <xs:annotation>
+                    <xs:documentation>Defines a symbol to be estimated.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="EstimationOperationType">
+        <xs:attribute name="opType" use="required">
+            <xs:annotation>
+                <xs:documentation>The estimation operation type.</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+                <xs:restriction base="ct:SymbolNameType">
+                    <xs:enumeration value="estPop"/>
+                    <xs:enumeration value="estFIM"/>
+                    <xs:enumeration value="estIndiv"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+    <xs:complexType name="DatasetMappingType">
+        <xs:sequence>
+            <xs:element maxOccurs="unbounded" name="Mapping" type="msteps:ColumnMappingType">
+                <xs:annotation>
+                    <xs:documentation>Defines mappings between the dataset and the model.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="dataSetRef" type="ct:SymbolNameType" use="required">
+            <xs:annotation>
+                <xs:documentation>the dataset to use.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+    <xs:complexType name="VariableEstimateType">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="InitialEstimate" type="ct:ScalarRhs">
+                <xs:annotation>
+                    <xs:documentation>The initial estimate to use.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" name="LowerBound" type="ct:ScalarRhs">
+                <xs:annotation>
+                    <xs:documentation>The lower bounds of the estimate.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" name="UpperBound" type="ct:ScalarRhs">
+                <xs:annotation>
+                    <xs:documentation>The upper bounds of the estimate.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="block" type="ct:BlockNameType" use="optional">
+            <xs:annotation>
+                <xs:documentation>The block id of the symbol to be estimated.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="symbId" type="ct:SymbolNameType" use="required">
+            <xs:annotation>
+                <xs:documentation>The symbol id of the symbol to be estimated.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="fixed" type="xs:boolean" use="required">
+            <xs:annotation>
+                <xs:documentation>Is this fixed or to be estimated.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+    <xs:element name="ModellingSteps">
+        <xs:annotation>
+            <xs:documentation>The modelling steps of the model.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="Variable"
+                    type="ct:VariableDefinitionType">
+                    <xs:annotation>
+                        <xs:documentation>A variable definition with global scope.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:choice maxOccurs="unbounded" minOccurs="1">
+                    <xs:element maxOccurs="1" minOccurs="1" name="EstimationStep"
+                        type="msteps:EstimationStepType">
+                        <xs:annotation>
+                            <xs:documentation>Describes  a parameter estimation tasks.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element minOccurs="1" name="SimulationStep" maxOccurs="1"
+                        type="msteps:SimulationStepType">
+                        <xs:annotation>
+                            <xs:documentation>Describes a simulation task.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:choice>
+                <xs:element name="StepDependencies" type="msteps:StepDependencyType">
+                    <xs:annotation>
+                        <xs:documentation>Defines dependencies between steps.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
