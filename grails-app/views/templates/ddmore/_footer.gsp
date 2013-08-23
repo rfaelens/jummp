@@ -161,7 +161,7 @@
 
       
   <div class="content">
-    <p>© 2012 | DDMoRe, all rights reserved.  <a href="http://efpia.eu" rel="nofollow"><img alt="" src="/sites/ddmore/files/EFPIA.jpg" style="width:50px; height:32px" /></a>  <a href="http://ec.europa.eu/research/index.cfm" rel="nofollow"><img alt="" src="/sites/ddmore/files/EU.jpg" style="width:50px; height:32px" /></a>  <a href="http://www.imi.europa.eu/#&amp;panel1-9" rel="nofollow"><img alt="" src="/sites/ddmore/files/IMI.jpg" style="width:50px; height:32px" /></a></p>
+    <p>© 2012 | DDMoRe, all rights reserved.  <a href="http://efpia.eu" rel="nofollow"><img alt="" src="http://ddmore.eu/sites/ddmore/files/EFPIA.jpg" style="width:50px; height:32px" /></a>  <a href="http://ec.europa.eu/research/index.cfm" rel="nofollow"><img alt="" src="http://ddmore.eu/sites/ddmore/files/EU.jpg" style="width:50px; height:32px" /></a>  <a href="http://www.imi.europa.eu/#&amp;panel1-9" rel="nofollow"><img alt="" src="http://ddmore.eu/sites/ddmore/files/IMI.jpg" style="width:50px; height:32px" /></a></p>
   </div>
 
 </div><!-- /.block -->
