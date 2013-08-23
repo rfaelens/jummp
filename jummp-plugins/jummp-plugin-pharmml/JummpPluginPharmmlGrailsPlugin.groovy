@@ -59,7 +59,7 @@ Provides functionality to support models encoded in PharmML.
             ["", "0.1"].each {
                 def modelFormat = service.registerModelFormat("PharmML",
                         "Pharmacometrics Markup Language", it)
-                service.handleModelFormat(modelFormat, "pharmMlService", "pharmml")
+                service.handleModelFormat(modelFormat, "pharmMlService", "pharmMl")
             }
         } catch(NoSuchBeanDefinitionException e) {
             println("Cannot register PharmML handler because ModelFileFormatService is not available!")

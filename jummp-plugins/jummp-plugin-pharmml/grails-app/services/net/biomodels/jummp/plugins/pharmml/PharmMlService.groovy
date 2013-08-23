@@ -1,6 +1,7 @@
 package net.biomodels.jummp.plugins.pharmml
 
 import eu.ddmore.libpharmml.*
+import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.impl.*
 import java.nio.file.Files
 import java.nio.file.Path
@@ -9,22 +10,20 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
+import net.biomodels.jummp.core.IPharmMlService
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.perf4j.aop.Profiled
-import org.apache.xerces.util.XMLCatalogResolver;
-import org.xml.sax.SAXException;
-
 
 /**
  * Service class containing the logic to handle models encoded in PharmML.
  * @see net.biomodels.jummp.core.model.FileFormatService
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-class PharmMlService implements FileFormatService {
+class PharmMlService implements FileFormatService, IPharmMlService {
     private static final Log log = LogFactory.getLog(this)
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
 
@@ -40,45 +39,14 @@ class PharmMlService implements FileFormatService {
         if (IS_INFO_ENABLED) {
             log.info "Validating ${model.inspect()} as a PharmML submission."
         }
-
-        //temporarily ignore everything else apart from the PharmML file as current libPharmML implementation can't cope
-        def fileQueue = new ConcurrentLinkedQueue(model)
-        AtomicBoolean stillLooking = new AtomicBoolean(true)
-        ThreadFactory threadFactory = Executors.defaultThreadFactory()
-        def iFiles = fileQueue.iterator()
-        File pharmMlFile
-        while (iFiles.hasNext() && stillLooking.get()) {
-            final File file = iFiles.next()
-            PharmMlDetector detective = new PharmMlDetector(file)
-            Thread detectiveThread = threadFactory.newThread(detective)
-            if (detectiveThread) {
-                detectiveThread.setName("pharmML validation for ${file.name}")
-                detectiveThread.start()
-                detectiveThread.join()
-                if (detective.isRecognisedFormat(file)) {
-                    stillLooking.set(true)
-                    pharmMlFile = file
-                }
-            } else {
-                log.error "pharmMlService.validate: Cannot start detection thread for file ${file.name}"
-                throw new RuntimeException("Something went wrong when we tried to validate ${file.name}")
-                return false
-            }
-        }
-
-        if (!pharmMlFile) {
-            if (IS_INFO_ENABLED) {
-                log.info "No PharmML to validate in ${model.inspect()}"
-            }
-            return false
-        }
+        File pharmMlFile = findPharmML(model)
         if (IS_INFO_ENABLED) {
             log.info "Asking libPharmML to validate ${pharmMlFile}."
         }
         assert pharmMlFile!= null && pharmMlFile.exists() && pharmMlFile.canRead()
         LibPharmMLImpl api = PharmMlFactory.getInstance().createLibPharmML()
         def stream = null
-        IPharmMLResource resource = null 
+        IPharmMLResource resource = null
         try {
             stream = new BufferedInputStream(new FileInputStream(pharmMlFile))
             resource = api.createDomFromResource(stream)
@@ -205,5 +173,123 @@ class PharmMlService implements FileFormatService {
     public String getFormatVersion(RevisionTransportCommand revision) {
         //return PharmML writtenVersion
         return revision ? "0.1" : ""
+    }
+
+    @Profiled(tag="pharmMlService.getDomFromRevision")
+    PharmML getDomFromRevision(RevisionTransportCommand revision) {
+    if (!revision) {
+            log.error "Cannot get PharmML model definition from undefined revision."
+            return ""
+        }
+        assert revision.format.identifier == "PharmML"
+        List<File> revisionFiles = fetchMainFilesFromRevision(revision)
+        final File pharmML = findPharmML(revisionFiles)
+        return getDomFromPharmML(pharmML)
+    }
+
+    String getIndependentVariable(PharmML dom) {
+        return dom?.independentVar
+    }
+
+    List getSymbolDefinitions(PharmML dom) {
+        return dom?.symbolDefinition
+    }
+
+    @Profiled(tag="pharmMlService.getModelDefinition")
+    List getModelDefinition(RevisionTransportCommand revision) {
+        PharmML dom = getDomFromRevision(revision)
+        return dom.getModelDefinition()
+    }
+
+    List getCovariateModel(PharmML dom) {
+        return dom?.getModelDefinition().getCovariateModel()
+    }
+
+    List getVariabilityLevel(PharmML dom) {
+        return dom?.getModelDefinition().getVariabilityLevel()
+    }
+
+    List getParameterModel(PharmML dom) {
+        return dom?.getModelDefinition().getParameterModel()
+    }
+
+    @Profiled(tag="pharmMlService.getTrialDesign")
+    List getTrialDesign(RevisionTransportCommand revision) {
+        return ["TODO"]
+    }
+
+    @Profiled(tag="pharmMlService.getModellingSteps")
+    List getModellingSteps(RevisionTransportCommand revision) {
+        return ["TODO"]
+    }
+
+    /*
+     * Helper function that finds the PharmML file from a selection of files
+     * corresponding to a revision. This is necessary because libPharmML only
+     * deals with the PharmML file rather than including the externalised structural
+     * model, or clinical trial data.
+     *
+     * @param  submission the list of files containing a PharmML file.
+     * @return the PharmML file, or null if @p submission had no PharmML files.In the case of 
+     * multiple PharmML files being present, only the first one is returned.
+     */
+    private File findPharmML(List<File> submission) {
+        def fileQueue = new ConcurrentLinkedQueue(submission)
+        AtomicBoolean stillLooking = new AtomicBoolean(true)
+        ThreadFactory threadFactory = Executors.defaultThreadFactory()
+        def iFiles = fileQueue.iterator()
+        final File pharmMlFile = null
+        while (iFiles.hasNext() && stillLooking.get()) {
+            final File file = iFiles.next()
+            PharmMlDetector detective = new PharmMlDetector(file)
+            Thread detectiveThread = threadFactory.newThread(detective)
+            if (detectiveThread) {
+                detectiveThread.setName("pharmML validation for ${file.name}")
+                detectiveThread.start()
+                detectiveThread.join()
+                if (detective.isRecognisedFormat(file)) {
+                    stillLooking.set(true)
+                    pharmMlFile = file
+                }
+            } else {
+                log.error "pharmMlService.validate: Cannot start detection thread for file ${file.name}"
+                throw new RuntimeException("Something went wrong when we tried to validate ${file.name}")
+                return pharmMlFile
+            }
+        }
+
+        if (!pharmMlFile && IS_INFO_ENABLED) {
+            log.info "No PharmML to validate in ${submission.inspect()}"
+        }
+        return pharmMlFile
+    }
+
+    private List<Files> fetchMainFilesFromRevision(RevisionTransportCommand rev) {
+        List<File> files = []
+        List<File> locations = []
+        rev?.files?.findAll{it.mainFile}.each{locations << it.path}
+        locations.each { l ->
+            File f = new File(l)
+            if (f && f.exists() && f.canRead()) {
+                files << f
+            }
+        }
+        return files
+    }
+
+    private PharmML getDomFromPharmML(File f) {
+        LibPharmMLImpl api = PharmMlFactory.getInstance().createLibPharmML()
+        def stream = null
+        IPharmMLResource resource = null
+        try {
+            stream = new BufferedInputStream(new FileInputStream(f))
+            resource = api.createDomFromResource(stream)
+        } catch(IOException x) {
+            log.error(x.message, x)
+            throw new RuntimeException(x.message, x)
+        } finally {
+            stream?.close()
+        }
+        return resource.getDom()
     }
 }
