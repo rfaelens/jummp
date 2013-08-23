@@ -25,7 +25,5 @@
 		<g:message code="jummp.main.login"/>
 	</a>
     </sec:ifNotLoggedIn></a></li>
-  <li class="functional"><a href="#" class="icon icon-generic" data-icon="\">Feedback</a></li>
-  <li class="functional"><a href="#" class="icon icon-functional" data-icon="r">Share</a></li>
 </ul>
 </nav>    
