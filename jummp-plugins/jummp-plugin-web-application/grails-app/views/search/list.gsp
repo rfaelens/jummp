@@ -1,5 +1,4 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<html>
     <head>
         <title>Model Listing</title>
         <meta name="layout" content="main" />
@@ -47,4 +46,6 @@ $(function() {
             <p><g:link controller="gotree">link</g:link></p>
         </div> --%>
     </content>
-</html>
+    <content tag="browse">
+    	selected
+    </content>

@@ -1,6 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="net.biomodels.jummp.core.model.RepositoryFileTransportCommand" %>
-<html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
@@ -141,4 +140,6 @@
             });
         </g:javascript>
     </body>
-</html>
+    <content tag="submit">
+    	selected
+    </content>

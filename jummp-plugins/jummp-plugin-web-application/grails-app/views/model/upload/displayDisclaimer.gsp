@@ -1,8 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-
-<html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
         <title>
         	<g:if test="${isUpdate}">
@@ -30,4 +27,6 @@
             </div>
         </g:form>
     </body>
-</html>
+    <content tag="submit">
+    	selected
+    </content>

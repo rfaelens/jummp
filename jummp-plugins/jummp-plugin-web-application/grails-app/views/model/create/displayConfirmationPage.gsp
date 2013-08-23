@@ -1,6 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 
-<html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
@@ -11,4 +10,6 @@
         <p><g:message code="submission.confirmation.create.first.message"/></p>
         <p><g:message code="submission.confirmation.create.second.message" args="${[createLink(action:"show", id:session.result_submission)]}"/></p>        
     </body>
-</html>
+    <content tag="submit">
+    	selected
+    </content>

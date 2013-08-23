@@ -2,7 +2,6 @@
 <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/precursor" />
 <html>
 <head>
-    <title><g:layoutTitle default="${g.message(code: 'jummp.main.title') }"/></title>
     <r:script>
     	$.appName = "${grailsApplication.metadata["app.name"]}";
     </r:script>
