@@ -7,6 +7,7 @@ import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
 
@@ -19,6 +20,11 @@ class ModelController {
      * Dependency injection of modelDelegateService.
      **/
     def modelDelegateService
+    /**
+     * Dependency injection of modelFileFormatService
+     **/
+    def modelFileFormatService
+
     /**
      * Dependency injection of sbmlService.
      */
@@ -33,14 +39,8 @@ class ModelController {
     def grailsApplication
 
     def show = {
-    	Long modelID=params.id as Long;
-    	List<RevisionTransportCommand> revs=modelDelegateService.getAllRevisions(modelID)
-    	[	
-    		revision: revs.last(), 
-    		authors: revs.last().model.creators, 
-    		format: modelDelegateService.getPluginForFormat(revs.last().format), 
-    		allRevs:revs
-    	]
+    	    ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
+    	    forward controller:modelFileFormatService.getPluginForFormat(model.format), action:"show", id: params.id
     }
 
     @Secured(["isAuthenticated()"])

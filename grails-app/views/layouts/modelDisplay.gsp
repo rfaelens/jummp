@@ -1,3 +1,4 @@
+<g:applyLayout name="main">
 <%@ page import="java.nio.file.Files"%>
 <%@ page import="java.nio.file.attribute.BasicFileAttributes"%>
 <%@ page import="java.nio.file.FileSystem"%>
@@ -12,10 +13,7 @@
 	def loadedZips=new HashMap();
 	def zipSupported=[:]
 %>
-		
 <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta name="layout" content="main"/>
         <title>${revision.model.name}</title>
         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
         <script src="http://www.ebi.ac.uk/~rali/js/jstree/jquery.jstree.js" type="text/javascript" ></script>
@@ -178,6 +176,7 @@
 		});
 	
 	</script>
+	<g:layoutHead/>
     </head>
     <body>
     	<div id="topBar">
@@ -190,7 +189,7 @@
 	    <li><a href="#Overview">Overview</a></li>
 	    <li><a href="#Files">Files</a></li>
 	    <li><a href="#History">History</a></li>
-	    <g:render template="${format}/modelSpecificTabs"/>
+	    <g:pageProperty name="page.modelspecifictabs" />
 	  </ul>
 	  <div id="Overview">
 	    ${revision.description}
@@ -308,9 +307,10 @@
 	  	     </g:each>
   		</ul>
 	  </div>
-    	  <g:render template="${format}/modelSpecificTabImpl"/>
+	  <g:pageProperty name="page.modelspecifictabscontent" />
+    	  <%-- <g:render template="${format}/modelSpecificTabImpl"/> --%>
 	</div>
         </div>
 
 </body>
-
+</g:applyLayout>
