@@ -51,6 +51,13 @@
 	    	</g:if>
     		title="submit a model">Submit</a>
     	</li>
+    	<li class="expanded">
+    		<a href="${g.createLink(controller: 'jummp', action: 'feedback')}" 
+    		<g:if test="${g.pageProperty(name:'page.feedback')?.length()}">
+	    		class="active-trail active"
+	    	</g:if>
+    		title="submit a model">Feedback</a>
+    	</li>
     	<li class="leaf">
     		<a href="//ddmore.eu" title="about ddmore">About DDMoRe</a>
     	</li>

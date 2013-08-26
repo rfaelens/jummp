@@ -8,8 +8,11 @@
   	<g:if test="${g.pageProperty(name:'page.submit')?.length()}">
 	    	class="active"
 	</g:if>><a href="${g.createLink(controller: 'model', action: 'create')}">Submit</a></li>
-  <li><a href="#">Help</a></li>
-  <li class="last"><a href="#">About Biomodels</a></li>
+  <li>
+  <li
+  	<g:if test="${g.pageProperty(name:'page.feedback')?.length()}">
+	    	class="active"
+	</g:if>><a href="${g.createLink(controller: 'jummp', action: 'feedback')}">Feedback</a></li>
   <!-- If you need to include functional (as opposed to purely navigational) links in your local menu,
        add them here, and give them a class of "functional". Remember: you'll need a class of "last" for
        whichever one will show up last... 
