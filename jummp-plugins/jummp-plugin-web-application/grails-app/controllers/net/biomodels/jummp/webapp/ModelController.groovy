@@ -338,27 +338,48 @@ class ModelController {
         displayErrorPage()
     }
 
+    private void serveModelAsZip(List<RFTC> files, def resp) {
+    	    ByteArrayOutputStream byteBuffer=new ByteArrayOutputStream()
+            ZipOutputStream zipFile = new ZipOutputStream(byteBuffer)
+            files.each
+            {
+            	File file=new File(it.path)
+                zipFile.putNextEntry(new ZipEntry(file.getName()))
+                byte[] fileData=file.getBytes()
+                zipFile.write(fileData,0,fileData.length)
+                zipFile.closeEntry()
+            }
+            zipFile.close()
+            resp.setContentType("application/zip")
+            // TODO: set a proper name for the model
+            resp.setHeader("Content-disposition", "attachment;filename=\"model.zip\"")
+            resp.outputStream << new ByteArrayInputStream(byteBuffer.toByteArray())
+    }
+    
+    private void serveModelAsFile(RFTC rf, def resp) {
+            File file=new File(rf.path)
+            resp.setContentType(rf.mimeType)
+            resp.setHeader("Content-disposition", "attachment;filename=\"${file.getName()}\"")
+            resp.outputStream<< new ByteArrayInputStream(file.getBytes())
+    }
+
     /**
      * File download of the model file for a model by id
      */
     def download = {
         try
         {
-            Map<String, byte[]> bytes = modelDelegateService.retrieveModelFiles(new RevisionTransportCommand(id: params.id as int))
-            ByteArrayOutputStream byteBuffer=new ByteArrayOutputStream()
-            ZipOutputStream zipFile = new ZipOutputStream(byteBuffer)
-            for (Map.Entry<String, byte[]> entry : bytes.entrySet())
-            {
-                zipFile.putNextEntry(new ZipEntry(entry.getKey()))
-                zipFile.write(entry.getValue(),0,entry.getValue().length)
-                zipFile.closeEntry()
+            List<RFTC> files = modelDelegateService.retrieveModelFiles(new RevisionTransportCommand(id: params.id as int))
+            List<RFTC> mainFiles = files.findAll { it.mainFile }
+            if (files.size() == 1) {
+            	    serveModelAsFile(files.first(), response)
             }
-            zipFile.close()
-
-            response.setContentType("application/zip")
-            // TODO: set a proper name for the model
-            response.setHeader("Content-disposition", "attachment;filename=\"model.zip\"")
-            response.outputStream << new ByteArrayInputStream(byteBuffer.toByteArray())
+            else if (mainFiles.size() == 1) {
+            	    serveModelAsFile(mainFiles.first(), response)
+            }
+            else {
+            	    serveModelAsZip(files, response)
+            }
         }
         catch(Exception e)
         {

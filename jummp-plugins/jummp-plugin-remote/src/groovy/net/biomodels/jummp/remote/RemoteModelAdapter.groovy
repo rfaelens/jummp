@@ -3,6 +3,7 @@ package net.biomodels.jummp.remote
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
@@ -134,14 +135,14 @@ public interface RemoteModelAdapter {
      * @return Byte Array of the content of the Model file for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    public Map<String,byte[]> retrieveModelFiles(RevisionTransportCommand revision)
+    List<RepositoryFileTransportCommand> retrieveModelFiles(RevisionTransportCommand revision)
     /**
      * Retrieves the model file for the latest revision of the model.
      * @param modelId The Model for which the file should be retrieved
      * @return Byte Array of the content of the Model file.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    public Map<String,byte[]> retrieveModelFiles(long modelId)
+    List<RepositoryFileTransportCommand> retrieveModelFiles(long modelId)
     /**
     * Deletes the model including all Revisions.
     *

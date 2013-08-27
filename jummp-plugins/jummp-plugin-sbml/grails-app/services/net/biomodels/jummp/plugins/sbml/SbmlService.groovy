@@ -3,6 +3,7 @@ package net.biomodels.jummp.plugins.sbml
 import net.biomodels.jummp.core.ISbmlService
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.plugins.sbml.SbmlCache
 import com.thoughtworks.xstream.converters.ConversionException
 
@@ -614,10 +615,14 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         }*/
         SBMLDocument document=null;
         // we do not have a document, so retrieve first the file
-        Map<String, byte[]> bytes = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFiles(revision)
-        for (Map.Entry<String, byte[]> entry : bytes.entrySet()) {
+        //List<RepositoryFileTransportCommand> files = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFiles(revision)
+        List<RepositoryFileTransportCommand> files=revision.files
+        files = files.findAll { it.mainFile }
+        
+        files.each {
             try {
-                document=(new SBMLReader()).readSBMLFromStream(new ByteArrayInputStream(entry.getValue()));
+            	File file=new File(it.path)
+                document=(new SBMLReader()).readSBMLFromStream(new ByteArrayInputStream(file.getBytes()));
             	/*if (document) {
                   cache.put(revision, document)
                   break

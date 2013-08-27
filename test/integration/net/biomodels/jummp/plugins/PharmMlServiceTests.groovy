@@ -46,7 +46,7 @@ class PharmMlServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.vcs.workingDirectory  = defaultWorkingDir
         grailsApplication.config.jummp.vcs.exchangeDirectory = defaultExchangeDir
         modelService.vcsService.vcsManager = defaultVcsManager
-        FileUtils.deleteDirectory(new File("target/pharmml/"))
+        FileUtils.deleteQuietly(new File("target/pharmml/"))
     }
 
     @Test

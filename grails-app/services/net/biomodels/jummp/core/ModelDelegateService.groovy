@@ -6,6 +6,7 @@ import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
@@ -127,11 +128,11 @@ class ModelDelegateService implements IModelService {
         return modelService.canAddRevision(Model.get(modelId))
     }
 
-    Map<String, byte[]> retrieveModelFiles(RevisionTransportCommand revision) throws ModelException {
+    List<RepositoryFileTransportCommand> retrieveModelFiles(RevisionTransportCommand revision) throws ModelException {
         return modelService.retrieveModelFiles(Revision.get(revision.id))
     }
 
-    Map<String, byte[]> retrieveModelFiles(long modelId) {
+    List<RepositoryFileTransportCommand> retrieveModelFiles(long modelId) {
         return modelService.retrieveModelFiles(Model.get(modelId))
     }
 
