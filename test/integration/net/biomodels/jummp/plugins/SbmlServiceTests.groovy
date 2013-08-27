@@ -101,7 +101,7 @@ class SbmlServiceTests extends JummpIntegrationTest {
     @Test
     void testModelMetaId() {
         authenticateAsTestUser()
-        def rf = new RepositoryFileTransportCommand(path: smallModel("BIOMD0000000272.xml"), description: "")
+        def rf = new RepositoryFileTransportCommand(path: smallModel("BIOMD0000000272.xml"), mainFile:true, description: "")
         Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
@@ -125,7 +125,7 @@ class SbmlServiceTests extends JummpIntegrationTest {
     @Test
     void testModelNotes() {
         authenticateAsTestUser()
-        def rf = new RepositoryFileTransportCommand(path: smallModel("testModelNotes.xml").absolutePath, description: "")
+        def rf = new RepositoryFileTransportCommand(path: smallModel("testModelNotes.xml").absolutePath, mainFile:true, description: "")
         Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format: 
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()

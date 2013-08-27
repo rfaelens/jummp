@@ -978,15 +978,15 @@ class ModelServiceTests extends JummpIntegrationTest {
         }
         // as admin we should get a byte array
         authenticateAsAdmin()
-        Map<String, byte[]> importFileFromVcs = modelService.retrieveModelFiles(revision)
+        List<RepositoryFileTransportCommand> importFileFromVcs = modelService.retrieveModelFiles(revision)
         assertEquals(1, importFileFromVcs.size())
-        def bytes = importFileFromVcs.get(importFile.name)
+        def bytes = (new File(importFileFromVcs.first().path)).getBytes()
         assertEquals("Test\n", new String(bytes))
         // as testuser we should also get the byte array
         authenticateAsTestUser()
-        Map<String, byte[]> revisionFiles = modelService.retrieveModelFiles(revision)
+        List<RepositoryFileTransportCommand> revisionFiles = modelService.retrieveModelFiles(revision)
         assertEquals(1, revisionFiles.size())
-        bytes = revisionFiles.get(importFile.name)
+        bytes = (new File(revisionFiles.first().path)).getBytes()
         assertEquals("Test\n", new String(bytes))
         // create a random revision
         Revision rev = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", ""))
@@ -1004,9 +1004,9 @@ class ModelServiceTests extends JummpIntegrationTest {
             modelService.retrieveModelFiles(rev)
         }
         // retrieving the proper uploaded revision should 
-        Map<String, byte[]> files = modelService.retrieveModelFiles(rev4)
+        List<RepositoryFileTransportCommand> files = modelService.retrieveModelFiles(rev4)
         assertEquals(1, files.size())
-        bytes = files.get(importFile.name)
+        bytes = (new File(files.first().path)).getBytes()
         assertEquals("Test\nline2\n", new String(bytes))
     }
 

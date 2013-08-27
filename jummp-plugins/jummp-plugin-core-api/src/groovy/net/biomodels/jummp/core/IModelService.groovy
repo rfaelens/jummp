@@ -4,6 +4,7 @@ import net.biomodels.jummp.core.model.ModelListSorting
 import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.plugins.security.User
@@ -150,14 +151,14 @@ public interface IModelService {
      * @return Byte Array of the content of the Model file for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    Map<String, byte[]> retrieveModelFiles(final RevisionTransportCommand revision) throws ModelException
+    List<RepositoryFileTransportCommand> retrieveModelFiles(final RevisionTransportCommand revision) throws ModelException
     /**
      * Retrieves the model file for the latest revision of the model.
      * @param modelId The id of the Model for which the file should be retrieved
      * @return Byte Array of the content of the Model file.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    Map<String, byte[]> retrieveModelFiles(final long modelId) throws ModelException
+    List<RepositoryFileTransportCommand> retrieveModelFiles(final long modelId) throws ModelException
 
     /**
     * Grants read access for model to @p collaborator.

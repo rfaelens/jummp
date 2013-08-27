@@ -2,7 +2,7 @@ package net.biomodels.jummp.plugins.bives
 
 import net.biomodels.jummp.core.events.RevisionCreatedEvent
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import grails.util.Environment 
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationListener
@@ -49,10 +49,11 @@ class RevisionCreatedListener implements ApplicationListener {
                 }
 				// get previous revision
 				File refFile = File.createTempFile("referenceFile", ".xml", location)
-                //FIXME we assume there is only one file
-                 Map<String, byte[]> modelFiles = modelDelegateService.retrieveModelFiles(
+                List<RepositoryFileTransportCommand> modelFiles = modelDelegateService.retrieveModelFiles(
                         modelDelegateService.getRevision(command.model.id, command.revisionNumber - 1))
-                def modelByteArray = modelFiles.entrySet().first().value
+                modelFiles=modelFiles.findAll {it.mainFile }
+                File file=new File(modelFiles.first().path)
+                def modelByteArray = file.getBytes()
                 new FileOutputStream(refFile).write(modelByteArray)
 				// create diff, initialize required variables
 				Diff diff = diffMan.generateDiff(refFile, testFile, true)

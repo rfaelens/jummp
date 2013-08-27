@@ -193,8 +193,13 @@ class SubmissionFlowTests extends JummpIntegrationTest {
          * Convenience function to compare a map of String->byte[] retrieved from
          * the repository with the supplied list of files
          * */
-        protected void validateFiles(Map<String,byte[]> files, List<File> testFiles) {
-            assert files
+        protected void validateFiles(List<RepositoryFileTransportCommand> retrieved, List<File> testFiles) {
+            assert retrieved
+            Map<String,byte[]> files=new HashMap<String,byte[]>()
+            retrieved.each {
+            	    File file=new File(it.path)
+            	    files.put(file.getName(), file.getBytes())
+            }
             testFiles.each {
                 assert files.containsKey(it.getName())
                 byte[] savedFile=files.get(it.getName())
@@ -276,7 +281,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             assert rev.revisionNumber==prev.revisionNumber+1
             
             //test that files are updated in the repository correctly
-            Map<String, byte[]> files=modelService.retrieveModelFiles(model)
+            List<RepositoryFileTransportCommand> files=modelService.retrieveModelFiles(model)
             validateFiles(files, [existing, newFile]+additionalFiles.keySet())
         }
     }
@@ -357,7 +362,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             checkDescription(rev.description, descriptionStrings)
             
             //test that the model is saved in the repository
-            Map<String, byte[]> files=modelService.retrieveModelFiles(Model.findById(modelId))
+            List<RepositoryFileTransportCommand> files=modelService.retrieveModelFiles(Model.findById(modelId))
             validateFiles(files, [file]+additionalFiles.keySet())
         }
         

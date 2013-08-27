@@ -46,7 +46,7 @@ class OmexServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.vcs.workingDirectory  = defaultWorkingDir
         grailsApplication.config.jummp.vcs.exchangeDirectory = defaultExchangeDir
         modelService.vcsService.vcsManager = defaultVcsManager
-        FileUtils.deleteDirectory(new File("target/omex/"))
+        FileUtils.deleteQuietly(new File("target/omex/"))
     }
 
     @Test
