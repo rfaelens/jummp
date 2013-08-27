@@ -1,6 +1,8 @@
 package net.biomodels.jummp.core
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 
 /**
  * @short Interface describing the service to access a model encoded in PharmML.
@@ -11,6 +13,6 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
  */
 interface IPharmMlService {
     public List getModelDefinition(RevisionTransportCommand rev)
-    public List getTrialDesign(RevisionTransportCommand rev)
-    public List getModellingSteps(RevisionTransportCommand rev)
+    public TrialDesignType getTrialDesign(RevisionTransportCommand rev)
+    public ModellingSteps getModellingSteps(RevisionTransportCommand rev)
 }

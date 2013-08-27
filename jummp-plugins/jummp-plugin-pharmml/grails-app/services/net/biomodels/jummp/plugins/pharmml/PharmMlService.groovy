@@ -2,14 +2,16 @@ package net.biomodels.jummp.plugins.pharmml
 
 import eu.ddmore.libpharmml.*
 import eu.ddmore.libpharmml.dom.PharmML
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 import eu.ddmore.libpharmml.impl.*
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
+import java.util.concurrent.atomic.AtomicBoolean
 import net.biomodels.jummp.core.IPharmMlService
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.RevisionTransportCommand
@@ -213,14 +215,36 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         return dom?.getModelDefinition().getParameterModel()
     }
 
+    List getStructuralModel(PharmML dom) {
+        return dom?.getModelDefinition().getStructuralModel()
+    }
+
+    List getObservationModel(PharmML dom) {
+        return dom?.getModelDefinition().getObservationModel()
+    }
+
     @Profiled(tag="pharmMlService.getTrialDesign")
-    List getTrialDesign(RevisionTransportCommand revision) {
-        return ["TODO"]
+    TrialDesignType getTrialDesign(RevisionTransportCommand revision) {
+        PharmML dom = getDomFromRevision(revision)
+        return dom?.design
+    }
+
+    List getTreatment(TrialDesignType design) {
+        return design?.treatment
+    }
+
+    List getTreatmentEpoch(TrialDesignType design) {
+        return design?.treatmentEpoch
+    }
+
+    List getGroup(TrialDesignType design) {
+        return design?.group
     }
 
     @Profiled(tag="pharmMlService.getModellingSteps")
-    List getModellingSteps(RevisionTransportCommand revision) {
-        return ["TODO"]
+    ModellingSteps getModellingSteps(RevisionTransportCommand revision) {
+        PharmML dom = getDomFromRevision(revision)
+        return dom?.modellingSteps
     }
 
     /*

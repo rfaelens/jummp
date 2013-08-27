@@ -2,6 +2,7 @@ package net.biomodels.jummp.plugins.pharmml
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.PharmML
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 
 /**
  * Controller for handling Model files in the PharmML format.
@@ -18,6 +19,7 @@ class PharmMlController {
         List<RevisionTransportCommand> revs = modelDelegateService.getAllRevisions(modelID)
         final RevisionTransportCommand revision = revs.last()
         PharmML dom = pharmMlService.getDomFromRevision(revision)
+        TrialDesignType design = dom?.design
 
         render(view:"/model/pharmml/show", model: [
                 revision: revision,
@@ -28,7 +30,11 @@ class PharmMlController {
                 variabilityLevel: pharmMlService.getVariabilityLevel(dom),
                 covariateModel: pharmMlService.getCovariateModel(dom),
                 parameterModel: pharmMlService.getParameterModel(dom),
-                trialDesign: pharmMlService.getTrialDesign(revision),
+                structuralModel: pharmMlService.getStructuralModel(dom),
+                observationModel: pharmMlService.getObservationModel(dom),
+                treatment: pharmMlService.getTreatment(design),
+                treatmentEpoch: pharmMlService.getTreatmentEpoch(design),
+                group: pharmMlService.getGroup(design),
                 modellingSteps: pharmMlService.getModellingSteps(revision)
             ]
         )
