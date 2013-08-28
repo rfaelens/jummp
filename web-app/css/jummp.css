@@ -1,0 +1,794 @@
+.all {
+    display: block;
+}
+.standardMargins {
+    margin-left: auto;
+    margin-right: auto;
+}
+.container {
+    display: block;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+    right: 0;
+    width: 1024px;
+    z-index: 2;
+}
+.backgrounds {
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+}
+.standardText {
+    font-size: 12pt;
+    margin: 0;
+}
+.overlayButtons {
+    background-color: transparent;
+    background-position: right center;
+    background-repeat: no-repeat;
+    border-style: none;
+    color: white;
+    font-weight: bold;
+    height: 42px;
+    padding-right: 42px;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+.overlayTdKeys {
+    width: 135px;
+}
+.backgroundImage {
+    background-color: #000000;
+    background-image: url("images/background_top.png");
+    background-position: center top;
+    background-repeat: no-repeat;
+    color: #FFFFFF;
+}
+p {
+    font-size: 12pt;
+    margin: 0;
+}
+body {
+    background-color: #BBB5A7;
+    margin: 0;
+}
+body.login {
+    background-color: #000000;
+}
+a {
+    color: #0060AE;
+    text-decoration: none;
+}
+a:active, a:hover {
+    text-decoration: underline;
+}
+ul {
+    list-style-type: none;
+}
+li:before {
+    color: #0060AE;
+    content: "•";
+    font-weight: bold;
+    padding-right: 6px;
+}
+li.ui-menu-item:before {
+    content: none;
+}
+* {
+    font-family: sans-serif;
+}
+input[type="reset"], input[type="submit"], button {
+    background-color: transparent;
+    background-image: url("images/button.png");
+    background-position: right center;
+    background-repeat: no-repeat;
+    border-style: none;
+    color: white;
+    font-weight: bold;
+    height: 42px;
+    margin-top: 8px;
+    padding-right: 46px;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+input[type="reset"]:hover, input[type="submit"]:hover, button:hover, input.active[type="reset"], input.active[type="submit"], button.active {
+    background-image: url("images/button_active_overlay.png"), url("images/button.png");
+    background-position: right center, right center;
+}
+input[type="reset"] div.glow, input[type="submit"] div.glow, button div.glow {
+    background-position: center center;
+    background-size: 100% auto;
+    display: block;
+    height: 100px;
+    left: 77px;
+    margin-left: auto;
+    margin-right: auto;
+    pointer-events: none;
+    position: relative;
+    right: 0;
+    top: -71px;
+    width: 100px;
+    z-index: 2;
+}
+input[type="reset"]:hover div.glow, input[type="submit"]:hover div.glow, button:hover div.glow {
+    background-image: url("images/button_glow.png");
+}
+input[type="reset"] p, input[type="submit"] p, button p {
+    line-height: 42px;
+}
+input.close[type="reset"], input.close[type="submit"], button.close {
+    background-image: url("images/quitButton.png");
+    height: 30px;
+    margin-top: 8.5px;
+    padding-right: 34px;
+}
+input.close[type="reset"]:hover, input.close[type="submit"]:hover, button.close:hover, input.close.active[type="reset"], input.close.active[type="submit"], button.close.active {
+    background-image: url("images/quitButton_active.png");
+}
+input.close[type="reset"] div.glow, input.close[type="submit"] div.glow, button.close div.glow {
+    height: 77px;
+    left: 60px;
+    top: -53.5px;
+    width: 77px;
+}
+input.close[type="reset"]:hover div.glow, input.close[type="submit"]:hover div.glow, button.close:hover div.glow {
+    background-image: url("images/button_glow_red.png");
+}
+input.close[type="reset"] p, input.close[type="submit"] p, button.close p {
+    line-height: 30px;
+}
+button::-moz-focus-inner, input::-moz-focus-inner {
+    border: 0 none;
+}
+form {
+    background-color: #000000;
+    background-image: url("images/background_top.png");
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-size: 110% 100%;
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.75);
+    color: #FFFFFF;
+    float: left;
+    padding: 18px;
+    width: 566px;
+}
+input.right, button.right {
+    background-position: left center;
+    padding-left: 42px;
+}
+tr td input.ui-autocomplete-input {
+    width: 100%;
+}
+#topBackground {
+    background-color: #000000;
+    background-image: url("images/background_top.png");
+    background-position: center top;
+    background-repeat: no-repeat;
+    color: #FFFFFF;
+    height: 251px;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+}
+#middleBackground {
+    background-image: url("images/background_diagonal.png");
+    background-repeat: repeat;
+    border-top: 1px solid #FFFFFF;
+    height: 300px;
+    position: absolute;
+    top: 251px;
+    width: 100%;
+    z-index: 1;
+}
+#logo {
+    background-image: url("images/jummp_logo.png");
+    background-repeat: no-repeat;
+    display: block;
+    height: 100px;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+    right: 0;
+    width: 1024px;
+    z-index: 2;
+}
+#loginBackground {
+    background-color: #000000;
+    background-image: url("images/background_diagonal.png"), url("images/background_top.png");
+    background-position: center top;
+    background-repeat: repeat, no-repeat;
+    background-size: auto auto, 1624px 100%;
+    border-top: 1px solid #FFFFFF;
+    height: 599px;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 251px;
+    width: 100%;
+    z-index: 1;
+}
+#loginLogout {
+    display: block;
+    left: 0;
+    margin-left: 18px;
+    margin-right: auto;
+    position: absolute;
+    right: 0;
+    width: 1024px;
+    z-index: 2;
+}
+#loginLogout button {
+    background-color: transparent;
+    background-position: left center;
+    background-repeat: no-repeat;
+    border-style: none;
+    color: white;
+    font-weight: bold;
+    height: 42px;
+    padding-left: 46px;
+    padding-right: 10px;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+#loginLogout button div.glow {
+    left: -77px;
+}
+#loginLogout button.close {
+    padding-left: 34px;
+}
+#loginLogout button.close div.glow {
+    left: -58px;
+    top: -49.5px;
+}
+#login {
+    background-image: radial-gradient(circle farthest-corner at 50% -1300px , transparent, transparent 1599px, #000000 1600px);
+    display: block;
+    height: 600px;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+    right: 0;
+    top: 251px;
+    width: 100%;
+    z-index: 2;
+}
+#login div.loginButton {
+    display: block;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+    right: 0;
+    top: 196px;
+    width: 1024px;
+    z-index: 2;
+}
+#login div.loginButton button {
+    background-image: url("images/button_large.png");
+    background-position: center center;
+    color: #FFFFFF;
+    font-size: 20pt;
+    font-weight: bold;
+    height: 208px;
+    left: 408px;
+    padding: 0;
+    position: relative;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+    width: 208px;
+}
+#login div.loginButton button:hover, #login div.loginButton button:active {
+    background-image: url("images/button_active_overlay.png"), url("images/button_large.png");
+    background-size: 100% auto, auto auto;
+}
+#login div.glow {
+    background-image: url("images/button_glow.png");
+    background-position: center center;
+    background-size: 100% auto;
+    display: none;
+    height: 495px;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    top: -143px;
+    width: 495px;
+    z-index: 2;
+}
+#login form {
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    display: block;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+    right: 0;
+    width: 1024px;
+    z-index: 2;
+}
+#login form table {
+    width: 100%;
+}
+#login form table td {
+    padding: 15px;
+}
+#login form .formElement {
+    font-weight: bold;
+    left: 341.333px;
+    position: relative;
+    right: 341.333px;
+    width: 341.333px;
+}
+#login form p {
+    font-weight: bold;
+    left: 341.333px;
+    position: relative;
+    right: 341.333px;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(1, 1, 1, 0.75);
+    width: 341.333px;
+}
+#login form input {
+    background-color: #004B93;
+    border: medium none;
+    box-shadow: 0 0 21px 5px rgba(0, 152, 217, 0.75), 5px 5px 5px 0 rgba(0, 0, 0, 0.75) inset;
+    color: #FFFFFF;
+    font-weight: bold;
+    height: 30px;
+    left: 341.333px;
+    margin: 0;
+    outline-style: none;
+    padding: 0 0 0 12px;
+    position: relative;
+    right: 341.333px;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+    width: 341.333px;
+}
+#modeSwitch {
+    display: block;
+    height: 47px;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+    right: 0;
+    text-align: right;
+    top: 45px;
+    width: 1024px;
+    z-index: 2;
+}
+#modeSwitch button {
+    color: #FFFFFF;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+#modeSwitch button div.glow {
+    background-position: center center;
+    background-size: 100% auto;
+    display: block;
+    height: 100px;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
+    pointer-events: none;
+    position: relative;
+    right: 0;
+    top: -70px;
+    width: 100px;
+    z-index: 2;
+}
+#modeSwitch button.left div {
+    left: 77px;
+}
+#modeSwitch button.right div {
+    left: -71px;
+}
+#modeSwitch button.active div {
+    background-image: url("images/button_glow.png");
+}
+#modeSwitch button p {
+    line-height: normal;
+}
+#container {
+    background-color: #FFFFFF;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    display: block;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    right: 0;
+    top: 99px;
+    width: 1024px;
+    z-index: 2;
+}
+#nav {
+    box-shadow: 0 -2px 4px #000000;
+    display: block;
+    float: left;
+    height: 30px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 70px;
+    position: relative;
+}
+#nav div {
+    background-image: url("images/background_tab.png");
+    background-repeat: repeat-x;
+    float: left;
+    position: relative;
+    text-align: center;
+    width: 200px;
+}
+#nav div a {
+    color: white;
+    font-weight: bold;
+    line-height: 30px;
+    text-decoration: none;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+#nav div.active {
+    background-image: url("images/background_tab_selected.png");
+}
+#branding {
+    display: block;
+    float: right;
+    height: 70px;
+    padding: 15px;
+}
+#contentContainer {
+    border-top: 1px solid #0061B2;
+    box-shadow: 0 -2px 8px #000000;
+    clear: both;
+    display: block;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+#contentContainer .overlayimg {
+    left: 50px;
+    position: absolute;
+    top: 50px;
+    z-index: 11;
+}
+#socialMedia {
+    display: block;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    text-align: right;
+}
+#main {
+    border-top: 1px solid #BAB5A6;
+    display: block;
+    float: left;
+    margin-bottom: 18px;
+    padding-right: 18px;
+    width: 602px;
+}
+#main h1 {
+    border-bottom: 1px solid #009EE1;
+    color: #0060AE;
+    font-size: 24pt;
+    font-weight: bold;
+    margin-top: 30px;
+    padding-bottom: 15px;
+}
+#main h2 {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 0;
+    padding-top: 12px;
+}
+#main table {
+    clear: both;
+    width: 100%;
+}
+#sideBar {
+    border-top: 1px solid #BAB5A6;
+    display: block;
+    float: right;
+    width: 368px;
+}
+#sideBar div.element {
+    background-color: #F2F1EE;
+    padding-bottom: 18px;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+#sideBar div.element a {
+    color: #0060AD;
+    font-variant: small-caps;
+}
+#sideBar div.element p {
+    clear: both;
+}
+#sideBar div.element p img {
+    float: right;
+}
+#sideBar div.element div.rss {
+    float: right;
+    margin-top: 30px;
+}
+#sideBar div.element div.rss img {
+    height: 18px;
+    width: 18px;
+}
+#sideBar div.element h1 {
+    color: #0060AE;
+    float: left;
+    font-size: 18pt;
+    font-weight: bold;
+    margin: 30px 18px 15px 0;
+}
+#sideBar div.element h2 {
+    border-top: 1px solid #009EE1;
+    clear: both;
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 0;
+    padding-top: 12px;
+}
+#sideBar div:nth-child(n+2) {
+    margin-top: 18px;
+}
+#sideBar div.element.external a, #sideBar div.element.external h1, #sideBar div.element.external h2 {
+    border-color: #EF8C0B;
+    color: #EF8C0B;
+}
+#sideBar div.element.external li:before {
+    color: #EF8C0B;
+}
+#sideBar ul {
+    padding-left: 0;
+}
+#linkArea {
+    border-top: 1px solid #E0DEE7;
+    clear: both;
+    color: #0060AD;
+    display: block;
+    padding-bottom: 18px;
+}
+#footer {
+    background-color: #FFFFFF;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    display: block;
+    font-size: 10pt;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 18px;
+    padding-right: 18px;
+    position: relative;
+    top: 99px;
+    width: 988px;
+    z-index: -1;
+}
+#overlayContainer {
+    background-color: #FFFFFF;
+    border: 1px solid #804000;
+    display: none;
+    left: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    opacity: 1;
+    position: fixed;
+    top: -75px;
+    width: 958px;
+    z-index: 10000;
+}
+#overlayContainer td.key {
+    font-weight: bold;
+}
+#overlayContainer td {
+    padding-right: 15px;
+}
+#overlayContainer button {
+    background-color: transparent;
+    border: medium none;
+    color: white;
+    float: right;
+    font-size: 14pt;
+    font-weight: bold;
+    margin: 0;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+}
+#overlayContainer button div {
+    position: relative;
+}
+#overlayContentContainer {
+    margin-left: 18px;
+    margin-right: 18px;
+    margin-top: 30px;
+    position: relative;
+}
+#overlayContentContainer h2 {
+    font-size: 14pt;
+    font-weight: bold;
+}
+#overlayContentContainer p.text {
+    border-bottom: 12px none;
+}
+#overlayContentContainer p.formula {
+    font-family: monospace;
+    font-size: 8pt;
+    margin-bottom: 30px;
+    margin-top: 30px;
+    white-space: pre;
+}
+#overlayNav, #modelNav {
+    background-image: url("images/background_tab.png");
+    background-repeat: repeat-x;
+    border-bottom: 1px solid #0060AE;
+    border-top: 1px solid #0060AE;
+    box-shadow: 0 -7px 7px -7px #000000;
+    clear: both;
+    height: 31px;
+    position: relative;
+}
+#overlayNav div, #modelNav div {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+    cursor: pointer;
+    display: block;
+    float: left;
+    height: 30px;
+    position: relative;
+    width: 155px;
+}
+#overlayNav div span, #modelNav div span {
+    color: white;
+    font-size: 10pt;
+    font-weight: bold;
+    line-height: 30px;
+    margin-left: 10px;
+    text-decoration: none;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+#overlayNav div.selected, #modelNav div.selected {
+    background-image: url("images/background_tab_selected.png");
+}
+#overlayTable {
+    display: table;
+    padding-left: 18px;
+    padding-right: 18px;
+    table-layout: fixed;
+    width: 922px;
+}
+#overlayTableRow {
+    display: table-row;
+}
+#overlayHeadline {
+    display: table-cell;
+    overflow: hidden;
+    vertical-align: middle;
+    width: 90%;
+}
+#overlayHeadline h1 {
+    color: #0060AE;
+    font-size: 24pt;
+    font-weight: bold;
+}
+#overlayQuit {
+    display: table-cell;
+    vertical-align: middle;
+    width: 10%;
+}
+#overlayQuit button {
+    float: right;
+}
+#overlayInfoStripe {
+    border-bottom: 1px solid #BAB5A6;
+    border-top: 1px solid #BAB5A6;
+    clear: both;
+    height: 90px;
+    margin-left: 18px;
+    margin-right: 18px;
+    padding-top: 15px;
+    position: relative;
+}
+#overlayInfoStripe table {
+    font-size: 11pt;
+    table-layout: fixed;
+    width: 922px;
+}
+#overlayInfoStripe table td {
+    overflow: hidden;
+    width: 185px;
+}
+#overlayInfoStripe table td.key {
+    overflow: hidden;
+    width: 135px;
+}
+#overlayAuthorStripe {
+    display: table-cell;
+    width: 85%;
+}
+#overlayAuthorStripe table {
+    float: left;
+    font-size: 11pt;
+    height: 3em;
+    table-layout: fixed;
+    width: 650px;
+}
+#overlayAuthorStripe table .key {
+    width: 135px;
+}
+#download {
+    display: table-cell;
+    vertical-align: middle;
+    width: 15%;
+}
+#download p {
+    float: right;
+}
+#download p a {
+    background-color: transparent;
+    background-image: url("images/smallButton.png");
+    background-position: right center;
+    background-repeat: no-repeat;
+    border-style: none;
+    color: white;
+    font-weight: bold;
+    height: 42px;
+    padding-bottom: 21px;
+    padding-right: 42px;
+    padding-top: 21px;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+#download p a:hover, #download p a:active {
+    text-decoration: none;
+}
+#overlayLinkArea {
+    border-top: 1px solid #E0DEE7;
+    clear: both;
+    color: #0060AD;
+    display: block;
+    padding-bottom: 18px;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+#overlayFooter {
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    clear: both;
+    display: block;
+    font-size: 10pt;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+div.dialog {
+    width: 100%;
+}
+div.dialog table {
+    width: 100%;
+}
+div.dialog table td.name {
+    text-align: right;
+}
+div.dialog table td.value input[type="text"], div.dialog table td.value input[type="password"], div.dialog table td.value textarea {
+    width: 100%;
+}
+div.buttons {
+    float: right;
+}
+div.buttons input {
+    color: #FFFFFF;
+    font-variant: small-caps;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+}
+.warning {
+    background-color: #FEEFB3;
+    color: #9F6000;
+}
+div.displayDescription {
+    height: 350px;
+    overflow-y: scroll;
+    width: 470px;
+    word-wrap: break-word;
+}
+
