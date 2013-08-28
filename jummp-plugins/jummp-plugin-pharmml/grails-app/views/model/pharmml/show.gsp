@@ -83,6 +83,6 @@
     </div>
 
     <div id="modellingSteps">
-       <p>${modellingSteps}</p>
+       <pharmml:modellingSteps steps="${modellingSteps}"/>
     </div>
 </content>

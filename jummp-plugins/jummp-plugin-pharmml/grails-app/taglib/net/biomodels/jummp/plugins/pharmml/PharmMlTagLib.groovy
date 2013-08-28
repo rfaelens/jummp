@@ -194,10 +194,10 @@ class PharmMlTagLib {
     }
 
     StringBuilder doseAmount = { a ->
-        def amt = rhs(a.amount, new StringBuilder("<p>Dose amount:")).append("</p>")
-        def d = variable(a.doseVar, new StringBuilder("<p>Dose variable:")).append("</p>")
+        def amt = rhs(a?.amount, new StringBuilder("<p>Dose amount:")).append("</p>")
+        def d = variable(a?.doseVar, new StringBuilder("<p>Dose variable:")).append("</p>")
         def t
-        if (a.targetVar) {
+        if (a?.targetVar) {
             t = variable(a.targetVar, new StringBuilder("<p>Target variable:")).append("</p>")
         }
         return  t ? amt.append(d).append(t) : amt.append(d)
@@ -234,11 +234,11 @@ class PharmMlTagLib {
     def constant = { c -> c.op }
 
     def variable(VarType v) {
-        v.symbId
+        v?.symbId
     }
 
     StringBuilder variable(VarType v, StringBuilder text) {
-        text.append(v.symbId)
+        text.append(v?.symbId ? v.symbId : " undefined.")
     }
 
     def scalar = { s -> s.value }
@@ -246,7 +246,8 @@ class PharmMlTagLib {
     def string = { s -> s.value }
 
     def sequence = { s ->
-        new StringBuilder("[").append(a.amount.begin).append(":").append(a.amount.stepSize).append(":").append(a.amount.end).append("]")
+        new StringBuilder("[").append(s.begin).append(":").append(s.stepSize).append(":").append(s.end).
+                append("]")
     }
 
     def regimenDuration = { d ->
@@ -292,14 +293,14 @@ class PharmMlTagLib {
             return
         }
         def result = new StringBuilder("<table><thead>\n<tr><th>Identifier</th><th>Name</th>")
-        result.append("<th>Start</th><th>End</th><th>Occasions</th><th>Treatment</th></tr></thead>\n<tbody>\n<tr><td>")
+        result.append("<th>Start</th><th>End</th><th>Occasions</th><th>Treatment</th></tr></thead>\n<tbody>\n")
         def td = new StringBuilder("</td><td>")
         attrs.epoch.each { e ->
-            result.append(e.id).append(td).append(e.name ? e.name : "&nbsp;")
-            result.append( e.start ? scalarRhs(e.start, td) : "&nbsp;</td><td>")
-            result.append( e.end ? scalarRhs(e.end, td) : "&nbsp;</td><td>")
-            result.append( e.occasion ? occasions(e.occasion, td) : "&nbsp;</td><td>")
-            result.append(treatmentRef(e.treatmentRef, td)).append("</td></tr>")
+            result.append("<tr><td>").append(e.id).append(td).append(e.name ? e.name : "&nbsp;")
+            result.append( e.start ? scalarRhs(e.start, new StringBuilder("</td><td>")) : "&nbsp;</td><td>")
+            result.append( e.end ? scalarRhs(e.end, new StringBuilder("</td><td>")) : "&nbsp;</td><td>")
+            result.append( e.occasion ? occasions(e.occasion, new StringBuilder("</td><td>")) : "&nbsp;</td><td>")
+            result.append(treatmentRef(e.treatmentRef, new StringBuilder("</td><td>"))).append("</td></tr>")
         }
         out << result.append("\n</tbody></table>").toString()
     }
@@ -324,15 +325,20 @@ class PharmMlTagLib {
     def group = { attrs ->
         if (!attrs.group) {
             out << "No treatment groups defined in the model."
-            return 
+            return
         }
-        def td = new StringBuilder("</td><td>")
+        new StringBuilder("</td><td>")
         def result = new StringBuilder("<table><thead>\n<tr><th>Identifier</th><th>Name</th>")
-        result.append("<th>Treatment</th><th>Individuals</th></tr></thead>\n<tbody>\n<tr><td>")
+        result.append("<th>Treatment</th><th>Individuals</th></tr></thead>\n<tbody>\n")
+
         attrs.group.each { g ->
-            result.append(g.id).append("</td><td>").append(g.name ? g.name : "&nbsp;")
-            result.append(g.treatmentEpochRefOrWashout ? treatmentEpochRefs(g.treatmentEpochRefOrWashout, td) : "&nbsp;")
-            result.append(g.individuals ? individuals(g.individuals) : "&nbsp;").append("</td></tr>")
+            result.append("<tr><td>").append(g.id).append("</td><td>").append(g.name ? g.name : "&nbsp;")
+            result.append(
+                    g.treatmentEpochRefOrWashout ?
+                        treatmentEpochRefs(g.treatmentEpochRefOrWashout, new StringBuilder("</td><td>")) :
+                        "</td><td>&nbsp;")
+            result.append("</td><td>").append(g.individuals ? individuals(g.individuals) : "&nbsp;")
+            result.append("</td></tr>")
         }
         out << result.append("\n</tbody></table>").toString()
     }
@@ -351,7 +357,7 @@ class PharmMlTagLib {
     }
 
     StringBuilder individuals = { i ->
-        def result = new StringBuilder("[")
+        def result = new StringBuilder()
         i.each {
             StringBuilder sb = new StringBuilder("(symbolIdentifier:")
             sb.append(it.symbId).append(", levelIdentifier:").append(it.levelId)
@@ -359,18 +365,59 @@ class PharmMlTagLib {
                 sb.append(", name:").append(it.name)
             }
             if (it.constant) {
-                sb.append(", constant: ").append(constant(it.constant))
+                sb.append(", value: ").append(constant(it.constant))
             } else if (it.scalar) {
-                sb.append(", scalar: ").append(scalar(it.scalar))
+                sb.append(", value: ").append(scalar(it.scalar))
             } else if (it.string) {
-                sb.append(", string: ").append(string(it.string))
+                sb.append(", value: ").append(string(it.string))
             } else if (it.sequence) {
-                sb.append(", sequence: ").append(sequence(it.sequence))
+                sb.append(", value: ").append(sequence(it.sequence))
             } else if (it.var) {
-                sb.append(", variable: ").append(variable(it.var))
+                sb.append(", value: ").append(variable(it.var))
             }
             result.append(sb.append(")"))
         }
-        result.append("]")
+        result
+    }
+
+    def modellingSteps = { attrs ->
+        if (!attrs.steps) {
+            out << "No modelling steps defined in the model."
+            return
+        }
+        def variableList = attrs.steps.variable
+        def stepList = attrs.steps.estimationStepOrSimulationStep
+        def deps = attrs.steps.stepDependencies
+
+        StringBuilder result = new StringBuilder()
+        if (variableList) {
+            result.append("<h3>Variables</h3>")
+            variableDef(variableList, result)
+        }
+        out << result.toString()
+    }
+
+    def variableDef = { variables, text ->
+        if (!variables) {
+            return text
+        }
+
+        def result = new StringBuilder("<table><thead><tr>")
+        result.append("<th>Identifier</th><th>Independent Variable</th><th>Symbol Type</th><th>Value</th>")
+        result.append("</tr></thead><tbody>")
+        variables.each { v ->
+            result.append("<tr><td>").append(v?.symbId).append("</td><td>")
+            result.append(v.independentVar ? v.independentVar : "&nbsp;").append("</td><td>")
+            result.append(v.symbolType.value()).append("</td><td>")
+            if (v.dataSet) {
+                result.append("&nbsp;")
+            }
+            if (v.scalar) {
+                text.append(scalar(v.scalar))
+            }
+            result.append("</td></tr>")
+        }
+        result.append("</tbody></table>")
+        text.append(result)
     }
 }
