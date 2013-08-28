@@ -3,7 +3,7 @@
     <head>
         <title><g:message code="user.administration.ui.heading.user"/></title>
         <meta name="layout" content="main" />
-        <r:require module="userAdministration"/>
+        <g:javascript src="js/userAdministration.js"/>
     </head>
     <body>
         <h1><g:message code="user.administration.ui.heading.user"/></h1>

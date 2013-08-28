@@ -3,7 +3,7 @@
     <head>
         <title><g:message code="miriam.title"/></title>
         <meta name="layout" content="main" />
-        <r:require module="miriamAdministration"/>
+        <g:javascript src="js/miriamadministration.js"/>
     </head>
     <body>
         <h1><g:message code="miriam.title"/></h1>

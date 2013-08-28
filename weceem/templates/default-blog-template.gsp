@@ -60,6 +60,5 @@
         </div>
     </div>
     <wcm:widget path="widgets/footer"/>
-    <r:layoutResources/>
 </body>
 </html>

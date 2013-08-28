@@ -22,6 +22,4 @@
 <!--[if lte IE 6]>
 <link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_N0EHcRmGNgF6d_odKVbSBNnBtfyz9Ndtm25vvkPxWcQ.css" media="all" />
 <![endif]-->
-  <script type="text/javascript" src="http://www.ddmore.eu/sites/ddmore/files/js/js_xAPl0qIk9eowy_iS9tNkCWXLUVoat94SQT48UBCFkyQ.js"></script>
-  <r:require module="jquery"/>
   

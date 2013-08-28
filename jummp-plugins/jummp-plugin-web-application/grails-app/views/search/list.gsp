@@ -2,8 +2,16 @@
     <head>
         <title>Model Listing</title>
         <meta name="layout" content="main" />
-        <r:require modules="showModels"/>
-        <jqDT:resources/>
+        <g:javascript contextPath="" src="jquery/jquery.dataTables.js"/>
+        <link rel="stylesheet" href="${resource(dir: 'css/jqueryui/smoothness', file: 'jquery-ui-1.10.3.custom.css')}" />
+        <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
+        <g:javascript>
+        	$(document).ready(function() {
+        		 $.jummp.showModels.loadModelList();
+        		 $.jummp.showModels.lastAccessedModels($("#sidebar-element-last-accessed-models"));
+        	} );
+        </g:javascript>
+        <g:javascript contextPath="" src="showmodels.js"/>
         <g:render template="/templates/search/tablestyles"/>
     </head>
     <body activetab="search">
@@ -25,12 +33,6 @@
             </tfoot>
         </table>
 
-    <r:script>
-$(function() {
-    $.jummp.showModels.loadModelList();
-    $.jummp.showModels.lastAccessedModels($("#sidebar-element-last-accessed-models"));
-});
-    </r:script>
     </body>
     <content tag="sidebar">
         <div class="element" id="sidebar-element-last-accessed-models">

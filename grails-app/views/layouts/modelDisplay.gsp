@@ -15,10 +15,11 @@
 %>
 <head>
         <title>${revision.model.name}</title>
-        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-        <script src="http://www.ebi.ac.uk/~rali/js/jstree/jquery.jstree.js" type="text/javascript" ></script>
-        <r:require module="jqueryui_latest"/>
-        <style>
+        <link rel="stylesheet" href="${resource(dir: 'css/jqueryui/smoothness', file: 'jquery-ui-1.10.3.custom.css')}" />
+        <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
+        <g:javascript src="jstree/jquery.jstree.js"/>
+<%--         <script src="http://www.ebi.ac.uk/~rali/js/jstree/jquery.jstree.js" type="text/javascript" ></script>
+ --%>        <style>
         #topBar {
             border-radius:6px;
 	    padding: 8px;

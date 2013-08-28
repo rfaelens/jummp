@@ -4,9 +4,8 @@
         <title>Gene Ontology Tree</title>
         <meta name="layout" content="main" />
         <link rel="stylesheet" href="${resource(dir:'css/dynatree', file:'ui.dynatree.css')}" type="text/css"/>
-        <r:require module="jquery-ui"/>
-        <r:require module="showModels"/>
-        <r:require module="gotree"/>
+        <g:javascript src="js/showModels.js"/>
+        <g:javascript src="js/gotree.js"/>
     </head>
     <body activetab="search">
         <div class="ui-widget">
@@ -18,11 +17,11 @@
             </table>
         </div>
         <div id="gotree"></div>
-        <r:script>
+        <g:javascript>
 $(function() {
     $.jummp.gotree.load();
 });
-        </r:script>
+        </g:javascript>
     </body>
     <content tag="sidebar">
         <div class="element">
