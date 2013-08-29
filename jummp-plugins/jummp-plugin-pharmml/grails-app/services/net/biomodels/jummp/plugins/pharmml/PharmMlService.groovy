@@ -3,6 +3,7 @@ package net.biomodels.jummp.plugins.pharmml
 import eu.ddmore.libpharmml.*
 import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
+import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 import eu.ddmore.libpharmml.impl.*
 import java.nio.file.Files
@@ -189,10 +190,12 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         return getDomFromPharmML(pharmML)
     }
 
+    @Profiled(tag="pharmMlService.getIndependentVariable")
     String getIndependentVariable(PharmML dom) {
         return dom?.independentVar
     }
 
+    @Profiled(tag="pharmMlService.getSymbolDefinitions")
     List getSymbolDefinitions(PharmML dom) {
         return dom?.symbolDefinition
     }
@@ -203,22 +206,27 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         return dom.getModelDefinition()
     }
 
+    @Profiled(tag="pharmMlService.getCovariateModel")
     List getCovariateModel(PharmML dom) {
         return dom?.getModelDefinition().getCovariateModel()
     }
 
+    @Profiled(tag="pharmMlService.getVariabilityLevel")
     List getVariabilityLevel(PharmML dom) {
         return dom?.getModelDefinition().getVariabilityLevel()
     }
 
+    @Profiled(tag="pharmMlService.getParameterModel")
     List getParameterModel(PharmML dom) {
         return dom?.getModelDefinition().getParameterModel()
     }
 
+    @Profiled(tag="pharmMlService.getStructuralModel")
     List getStructuralModel(PharmML dom) {
         return dom?.getModelDefinition().getStructuralModel()
     }
 
+    @Profiled(tag="pharmMlService.getObservationModel")
     List getObservationModel(PharmML dom) {
         return dom?.getModelDefinition().getObservationModel()
     }
@@ -229,14 +237,17 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         return dom?.design
     }
 
+    @Profiled(tag="pharmMlService.getTreatment")
     List getTreatment(TrialDesignType design) {
         return design?.treatment
     }
 
+    @Profiled(tag="pharmMlService.getTreatmentEpoch")
     List getTreatmentEpoch(TrialDesignType design) {
         return design?.treatmentEpoch
     }
 
+    @Profiled(tag="pharmMlService.getGroup")
     List getGroup(TrialDesignType design) {
         return design?.group
     }
@@ -245,6 +256,21 @@ class PharmMlService implements FileFormatService, IPharmMlService {
     ModellingSteps getModellingSteps(RevisionTransportCommand revision) {
         PharmML dom = getDomFromRevision(revision)
         return dom?.modellingSteps
+    }
+
+    @Profiled(tag="pharmMlService.getVariableDefinitions")
+    List getVariableDefinitions(ModellingSteps steps) {
+        return steps?.variable
+    }
+
+    @Profiled(tag="pharmMlService.getEstimationOrSimulationSteps")
+    List getEstimationOrSimulationSteps(ModellingSteps steps) {
+        return steps?.estimationStepOrSimulationStep
+    }
+
+    @Profiled(tag="pharmMlService.getStepDependencies")
+    StepDependencyType getStepDependencies(ModellingSteps steps) {
+        return steps?.stepDependencies
     }
 
     /*
@@ -257,6 +283,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
      * @return the PharmML file, or null if @p submission had no PharmML files.In the case of 
      * multiple PharmML files being present, only the first one is returned.
      */
+    @Profiled(tag="pharmMlService.findPharmML")
     private File findPharmML(List<File> submission) {
         def fileQueue = new ConcurrentLinkedQueue(submission)
         AtomicBoolean stillLooking = new AtomicBoolean(true)
@@ -288,6 +315,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         return pharmMlFile
     }
 
+    @Profiled(tag="pharmMlService.fetchMainFilesFromRevision")
     private List<Files> fetchMainFilesFromRevision(RevisionTransportCommand rev) {
         List<File> files = []
         List<File> locations = []
@@ -301,6 +329,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         return files
     }
 
+    @Profiled(tag="pharmMlService.getDomFromPharmML")
     private PharmML getDomFromPharmML(File f) {
         LibPharmMLImpl api = PharmMlFactory.getInstance().createLibPharmML()
         def stream = null
