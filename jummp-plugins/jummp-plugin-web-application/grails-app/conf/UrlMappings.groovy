@@ -6,10 +6,5 @@ class UrlMappings {
 				// apply constraints here
 			}
 		}
-		"/models"(controller: "search", action: "list")
-		"/models/model"(controller:"model", action="model")
-
-		"/"(view:"/index")
-		"500"(view:'/error')
 	}
 }

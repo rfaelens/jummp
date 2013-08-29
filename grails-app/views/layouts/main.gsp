@@ -2,16 +2,16 @@
 <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/precursor" />
 <html>
 <head>
-    <title><g:layoutTitle default="${g.message(code: 'jummp.main.title') }"/></title>
-    <r:script>
+    <g:javascript library="jquery" plugin="jquery"/>
+    <g:javascript src="jquery/jquery.i18n.properties-min-1.0.9.js"/>
+    <g:javascript>
     	$.appName = "${grailsApplication.metadata["app.name"]}";
-    </r:script>
+    </g:javascript>
+    <g:javascript src="jummp.js"/>
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/head" />
-    <r:layoutResources/>
     <g:layoutHead/>
 </head>
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/header"/>
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/mainbody"/>
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/footer"/>
-    <r:layoutResources/>
 </html>

@@ -1,4 +1,9 @@
-<body class="html front not-logged-in no-sidebars page-node page-node- page-node-1 node-type-page" >
+<g:if test="${g.pageProperty(name:'page.sidebar')?.length()}">
+    <body class="html not-front not-logged-in one-sidebar sidebar-second page-node page-node- page-node-37 node-type-webform section-content">
+</g:if>
+<g:else>
+    <body class="html front not-logged-in no-sidebars page-node page-node- page-node-1 node-type-page" >
+</g:else>
   <div id="skip-link">
     <a href="#main-menu" class="element-invisible element-focusable">Jump to Navigation</a>
   </div>
@@ -31,13 +36,34 @@
 
       
   <div class="content">
-    <ul class="menu"><li class="first expanded"><a href="${g.createLink(controller: 'search', action: 'list')}" title="browse models">Browse</a><ul class="menu"><li class="first last leaf"><a href="/content/what-do-workpackages-do">WP overview</a></li>
-</ul></li>
-<li class="expanded"><a href="${g.createLink(controller: 'model', action: 'create')}" title="submit a model">Submit</a><ul class="menu"><li class="first last leaf"><a href="/partners/people" title="People">People</a></li>
-</ul></li>
-<li class="leaf"><a href="//ddmore.eu" title="about ddmore">About DDMoRe</a></li>
-</ul>  </div>
-
+    <ul class="menu">
+    	<li class="first expanded active-trail">
+    		<a href="${g.createLink(controller: 'search', action: 'list')}" 
+    		<g:if test="${g.pageProperty(name:'page.browse')?.length()}">
+	    		class="active-trail active"
+	    	</g:if>
+    		title="browse models">Browse</a>
+    	</li>
+    	<li class="expanded">
+    		<a href="${g.createLink(controller: 'model', action: 'create')}" 
+    		<g:if test="${g.pageProperty(name:'page.submit')?.length()}">
+	    		class="active-trail active"
+	    	</g:if>
+    		title="submit a model">Submit</a>
+    	</li>
+    	<li class="expanded">
+    		<a href="${g.createLink(controller: 'jummp', action: 'feedback')}" 
+    		<g:if test="${g.pageProperty(name:'page.feedback')?.length()}">
+	    		class="active-trail active"
+	    	</g:if>
+    		title="submit a model">Feedback</a>
+    	</li>
+    	<li class="leaf">
+    		<a href="//ddmore.eu" title="about ddmore">About DDMoRe</a>
+    	</li>
+    </ul>  
+</div>
+<p>${g.pageProperty(name:'page.selectedtab')}</p>
 </div><!-- /.block -->
   </div><!-- /.region -->
 

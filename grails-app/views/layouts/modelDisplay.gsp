@@ -15,56 +15,11 @@
 %>
 <head>
         <title>${revision.model.name}</title>
-        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-        <script src="http://www.ebi.ac.uk/~rali/js/jstree/jquery.jstree.js" type="text/javascript" ></script>
-        <r:require module="jqueryui_latest"/>
-        <style>
-        #topBar {
-            border-radius:6px;
-	    padding: 8px;
-	    float: top;
-        }
-        #tablewrapper {
-            margin-top: 60px;
-        }
-        #submit {
-	    background-color: #5CAD85;
-	    -moz-border-radius: 5px;
-	    -webkit-border-radius: 5px;
-	    border-radius:6px;
-	    margin-top:3px;
-	    margin-right:8px;
-	    color: #fff;
-	    font-family: 'Verdana';
-	    font-size: 20px;
-	    text-decoration: none;
-	    cursor: pointer;
-	    padding: 8px;
-	    border:none;
-	    float: right;
-	}
-	#submit:hover {
-	    border: none;
-	    background:#339966;
-	    box-shadow: 0px 0px 1px #777;
-	
-	}
-	#Files {
-	    display: inline-block;
-	    margin-left:5%;
-	    height: 100%;
-	    width:90%;
-	}
-	#treeView {
-	    float:left;
-	    margin:5px;
-	}
-	#resizable { 
-	    height: 100%; padding: 0.5em; border=none; margin-left:30px;	  
-	    float:left;
-	 }
-	</style>
-	<script>
+        <link rel="stylesheet" href="${resource(dir: 'css/jqueryui/smoothness', file: 'jquery-ui-1.10.3.custom.css')}" />
+        <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
+        <g:javascript src="jstree/jquery.jstree.js"/>
+        <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
+        <script>
 		var fileData=new Array();
 		<g:each in="${revision.files}">
 			<%
@@ -308,7 +263,6 @@
   		</ul>
 	  </div>
 	  <g:pageProperty name="page.modelspecifictabscontent" />
-    	  <%-- <g:render template="${format}/modelSpecificTabImpl"/> --%>
 	</div>
         </div>
 

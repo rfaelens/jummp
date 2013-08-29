@@ -1,11 +1,19 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<html>
     <head>
         <title>Model Listing</title>
         <meta name="layout" content="main" />
-        <r:require modules="showModels"/>
-        <jqDT:resources/>
-        <g:render template="/templates/search/tablestyles"/>
+        <g:javascript contextPath="" src="jquery/jquery.dataTables.js"/>
+        <%-- <link rel="stylesheet" href="${resource(contextPath: "/jummp", dir: '/css/jqueryui/smoothness', file: 'jquery-ui-1.10.3.custom.css')}" />
+         --%>
+         <link rel="stylesheet" href="${resource(contextPath: "/jummp", dir: '/css', file: 'datatablestyle.css')}" />
+        <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
+        <g:javascript>
+        	$(document).ready(function() {
+        		 $.jummp.showModels.loadModelList();
+        		 $.jummp.showModels.lastAccessedModels($("#sidebar-element-last-accessed-models"));
+        	} );
+        </g:javascript>
+        <g:javascript contextPath="" src="showmodels.js"/>
     </head>
     <body activetab="search">
     	<h2><g:message code="model.list.heading"/></h2>
@@ -26,12 +34,6 @@
             </tfoot>
         </table>
 
-    <r:script>
-$(function() {
-    $.jummp.showModels.loadModelList();
-    $.jummp.showModels.lastAccessedModels($("#sidebar-element-last-accessed-models"));
-});
-    </r:script>
     </body>
     <content tag="sidebar">
         <div class="element" id="sidebar-element-last-accessed-models">
@@ -47,4 +49,6 @@ $(function() {
             <p><g:link controller="gotree">link</g:link></p>
         </div> --%>
     </content>
-</html>
+    <content tag="browse">
+    	selected
+    </content>

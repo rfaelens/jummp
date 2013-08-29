@@ -1276,24 +1276,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.retrieveModelFiles")
-    Map<String, byte[]> retrieveModelFiles(final Revision revision) throws ModelException {
-        List<File> files
-        try {
-            files = vcsService.retrieveFiles(revision)
-        } catch (VcsException e) {
-            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.model.name} from VCS failed.")
-            throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.")
-        }
-        def returnMe=new HashMap<String, byte[]>()
-        File tempParentDir=null
-        files.each
-        {
-            returnMe.put(it.name, it.getBytes())
-            tempParentDir=it.getParentFile()
-            FileUtils.forceDelete(it)
-        }
-        if (tempParentDir) tempParentDir.deleteDir()
-        return returnMe
+    List<RepositoryFileTransportCommand> retrieveModelFiles(final Revision revision) throws ModelException {
+    	    RevisionTransportCommand rtc=revision.toCommandObject()
+    	    return rtc.files
     }
 
     /**
@@ -1304,7 +1289,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.retrieveModelFiles")
-    Map<String, byte[]> retrieveModelFiles(final Model model) throws ModelException {
+    List<RepositoryFileTransportCommand> retrieveModelFiles(final Model model) throws ModelException {
         final Revision revision = getLatestRevision(model)
         if (!revision) {
             throw new AccessDeniedException("Sorry you are not allowed to download this Model.")

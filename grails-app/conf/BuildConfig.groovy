@@ -138,7 +138,7 @@ grails.project.dependency.resolution = {
         compile ":svn:1.0.2"
         runtime ":spring-security-core:1.2.7.3"
         runtime(":spring-security-ldap:1.0.6"){ export = false }
-        compile(":lesscss-resources:1.3.3") { excludes 'commons-io' }
+        //compile(":lesscss-resources:1.3.3") { excludes 'commons-io' }
         test ":code-coverage:1.2.6"
         test(":codenarc:0.18.1") { transitive = false }
         test ":gmetrics:0.3.1"
@@ -160,8 +160,8 @@ grails.project.dependency.resolution = {
         // default grails plugins
         compile ":hibernate:$grailsVersion"
         compile ":webflow:2.0.8.1"
-        compile ":jquery:1.10.0"
-        compile ":resources:1.2"
+        compile ":jquery:1.10.2"
+        //compile ":resources:1.2"
 
         build ":tomcat:$grailsVersion"
 

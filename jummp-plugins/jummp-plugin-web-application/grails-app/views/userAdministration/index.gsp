@@ -3,7 +3,7 @@
     <head>
         <title>User Administration</title>
         <meta name="layout" content="main" />
-        <r:require module="userAdministration"/>
+        <g:javascript src="userAdministration.js"/>
         <jqDT:resources/>
     </head>
     <body>

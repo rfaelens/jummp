@@ -1,9 +1,18 @@
 <nav>
 <ul class="grid_24" id="local-nav">
-  <li class="first"><a href="${g.createLink(controller: 'search', action: 'list')}">Browse</a></li>
-  <li><a href="${g.createLink(controller: 'model', action: 'create')}">Submit</a></li>
-  <li><a href="#">Help</a></li>
-  <li class="last"><a href="#">About Biomodels</a></li>
+  <li 
+  	<g:if test="${g.pageProperty(name:'page.browse')?.length()}">
+	    	class="active"
+	</g:if>><a href="${g.createLink(controller: 'search', action: 'list')}">Browse</a></li>
+  <li
+  	<g:if test="${g.pageProperty(name:'page.submit')?.length()}">
+	    	class="active"
+	</g:if>><a href="${g.createLink(controller: 'model', action: 'create')}">Submit</a></li>
+  <li>
+  <li
+  	<g:if test="${g.pageProperty(name:'page.feedback')?.length()}">
+	    	class="active"
+	</g:if>><a href="${g.createLink(controller: 'jummp', action: 'feedback')}">Feedback</a></li>
   <!-- If you need to include functional (as opposed to purely navigational) links in your local menu,
        add them here, and give them a class of "functional". Remember: you'll need a class of "last" for
        whichever one will show up last... 
@@ -19,7 +28,5 @@
 		<g:message code="jummp.main.login"/>
 	</a>
     </sec:ifNotLoggedIn></a></li>
-  <li class="functional"><a href="#" class="icon icon-generic" data-icon="\">Feedback</a></li>
-  <li class="functional"><a href="#" class="icon icon-functional" data-icon="r">Share</a></li>
 </ul>
 </nav>    

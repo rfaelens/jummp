@@ -17,23 +17,12 @@
       
   <div class="content">
     
-  <g:if test="${g.pageProperty(name:'page.sidebar')?.length()}">
   	<div class="content">
   		<g:pageProperty name="page.main-content" />
   		<g:layoutBody/>
   	</div>
-  </g:if>
-  <g:else>
-  	<div class="content">
-  		<g:pageProperty name="page.main-content" />
-  		<g:layoutBody/>
-  	</div>
-  </g:else>
-  
-  
   </div>
 
-</div><!-- /.block -->
   </div><!-- /.region -->
           </div>
 
@@ -42,7 +31,15 @@
     
     
     
-  </div></div><!-- /#main, /#main-wrapper -->
+  </div>
+  <g:if test="${g.pageProperty(name:'page.sidebar')?.length()}">
+ <div class="region region-sidebar-second column sidebar">
+ 	<g:pageProperty name="page.sidebar" />
+ </div>
+ </g:if> 
+ 
+  
+  </div><!-- /#main, /#main-wrapper -->
   
   
 

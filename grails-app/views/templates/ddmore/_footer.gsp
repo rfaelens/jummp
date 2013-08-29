@@ -74,9 +74,9 @@
   
       <div class="view-content">
       <div class="item-list">    <ul>          <li class="views-row views-row-1 views-row-odd views-row-first views-row-last assoc-member-cats">  
-  <div class="views-field views-field-title">        <h4 class="field-content"><a href="/news/publication-cancer-chemother-pharmacol-supported-ddmore">Publication in Cancer Chemother. Pharmacol. supported by DDM...</a></h4>  </div>  
+  <div class="views-field views-field-title">        <h4 class="field-content"><a href="//ddmore.eu/news/publication-cancer-chemother-pharmacol-supported-ddmore">Publication in Cancer Chemother. Pharmacol. supported by DDM...</a></h4>  </div>  
   <div class="views-field views-field-body">        <div class="field-content"><div><strong>A predictive pharmacokinetic–pharmacodynamic model of tumor <span>growth kinetics in xenograft mice after administration </span><span>of anticancer agents given in combination. </span>...</div>  </div>  
-  <div class="views-field views-field-view-node">        <span class="field-content"><a href="/news/publication-cancer-chemother-pharmacol-supported-ddmore">Read whole article</a></span>  </div></li>
+  <div class="views-field views-field-view-node">        <span class="field-content"><a href="//ddmore.eu/news/publication-cancer-chemother-pharmacol-supported-ddmore">Read whole article</a></span>  </div></li>
       </ul></div>    </div>
   
   
@@ -112,10 +112,10 @@
   
       <div class="view-content">
       <div class="item-list">    <ul>          <li class="views-row views-row-1 views-row-odd views-row-first views-row-last assoc-member-cats">  
-  <div class="views-field views-field-title">        <h4 class="field-content"><a href="/events/49th-easd-annual-meeting">49th EASD Annual Meeting</a></h4>  </div>  
+  <div class="views-field views-field-title">        <h4 class="field-content"><a href="//ddmore.eu/events/49th-easd-annual-meeting">49th EASD Annual Meeting</a></h4>  </div>  
   <div class="views-field views-field-body">        <div class="field-content"><p>September <span>23 - 27</span><span>, 2013, Barcelona, Spain</span></p>
 <p><a href="http://www.easd.org/" rel="nofollow">European Association for the study of diabetes (EASD)</a>, at their 49th...</div>  </div>  
-  <div class="views-field views-field-view-node">        <span class="field-content"><a href="/events/49th-easd-annual-meeting">Read whole article</a></span>  </div></li>
+  <div class="views-field views-field-view-node">        <span class="field-content"><a href="//ddmore.eu/events/49th-easd-annual-meeting">Read whole article</a></span>  </div></li>
       </ul></div>    </div>
   
   
@@ -130,9 +130,9 @@
 
       
   <div class="content">
-    <ul class="menu"><li class="first leaf"><a href="/" title="DDMoRe front page" class="active">Home</a></li>
-<li class="leaf"><a href="/content/privacy-policy">Privacy policy</a></li>
-<li class="last leaf"><a href="/content/disclaimer">Disclaimer</a></li>
+    <ul class="menu"><li class="first leaf"><a href="//ddmore.eu/" title="DDMoRe front page" class="active">Home</a></li>
+<li class="leaf"><a href="//ddmore.eu/content/privacy-policy">Privacy policy</a></li>
+<li class="last leaf"><a href="//ddmore.eu/content/disclaimer">Disclaimer</a></li>
 </ul>  </div>
 
 </div><!-- /.block -->
