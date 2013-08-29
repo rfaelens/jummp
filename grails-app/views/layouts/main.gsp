@@ -7,8 +7,7 @@
     <g:javascript>
     	$.appName = "${grailsApplication.metadata["app.name"]}";
     </g:javascript>
-    <%-- <jqui:resources themeCss="css/jqueryui/smoothness/jquery-ui-1.10.3.custom.min.css"/>
-     --%><g:javascript src="jummp.js"/>
+    <g:javascript src="jummp.js"/>
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/head" />
     <g:layoutHead/>
 </head>
