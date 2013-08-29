@@ -8,13 +8,9 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <link rel="shortcut icon" href="http://www.ddmore.eu/sites/ddmore/themes/ddmore/favicon.ico" type="image/vnd.microsoft.icon" />
   <meta content="About DDMoRe" about="http://www.ddmore.eu/content/about-ddmore" property="dc:title" />
-  
-  <link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_pbm0lsQQJ7A7WCCIMgxLho6mI_kBNgznNUWmTWcnfoE.css" media="all" />
-  <link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_9sxGDGiqoYoSx7kdDQ6i_fK7j8yl_iw4SeDX9fKzAHQ.css" media="all" />
-  <link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_Wu8npAzy16WmnnnWKxpexfgsAryolGGaX6yO3GWA5bU.css" media="all" />
-  <link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_5up_iUuGdJV91x0h3Qz49z75LWIj8-EvxqwvfpipcuI.css" media="all" />
-  <link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_e0Oi8I1L8cGJ7KxcUbimLkO-ivlPDoZXuBZMWKAz5GY.css" media="print" />
-  
+ 
+ <link rel="stylesheet" href="${resource(dir: 'css', file: 'ddmore.css')}" />
+ 
   <!--[if lte IE 7]>
 <link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_sIsRwCKuAMZS6YJIMFqPXNCtZHxV56wN2ePifCvkLYc.css" media="all" />
 <![endif]-->
