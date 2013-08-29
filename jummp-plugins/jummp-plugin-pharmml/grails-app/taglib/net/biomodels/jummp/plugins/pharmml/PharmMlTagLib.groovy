@@ -597,4 +597,35 @@ class PharmMlTagLib {
             return result.append("]")
         }
     }
+
+    def stepDeps = { attrs ->
+        StringBuilder result = new StringBuilder("<h3>Step Dependencies</h3>")
+        if (!attrs.deps || !attrs.deps.step) {
+            return result.append("<p>There are no step dependencies defined in the model.</p>")
+        }
+        result.append("[")
+        def iterator = attrs.deps.step.iterator()
+        while (iterator.hasNext()) {
+            def s = iterator.next()
+            // each step has a list of dependencies, need to fetch those as well.
+            result.append(s.idRef)
+            if (s.dependantStep) {
+                StringBuilder dependenciesOfThisStep = transitiveStepDeps(s.dependantStep)
+                result.append(",&nbsp;").append(dependenciesOfThisStep)
+            }
+
+            if (iterator.hasNext()) {
+                result.append(",&nbsp;")
+            }
+        }
+        out << result.append("]").toString()
+    }
+
+    StringBuilder transitiveStepDeps = { ds ->
+        StringBuilder result = new StringBuilder()
+        if (!ds) {
+            return result
+        }
+        result.append(ds.join(",&nbsp;"))
+    }
 }
