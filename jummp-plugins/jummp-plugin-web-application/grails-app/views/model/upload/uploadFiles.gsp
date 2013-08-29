@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
         <title><g:message code="submission.upload.header"/></title>
-        <link rel="stylesheet" href="${resource(dir: 'css/jqueryui/smoothness', file: 'jquery-ui-1.10.3.custom.css')}" />
+        <link rel="stylesheet" href="<g:resource dir="css/jqueryui/smoothness" file="jquery-ui-1.10.3.custom.css"/>" />
         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <style>
             .normalAnchor {
