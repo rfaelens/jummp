@@ -3,7 +3,7 @@
     <head>
         <title>User Administration</title>
         <meta name="layout" content="main" />
-        <g:javascript src="userAdministration.js"/>
+        <g:javascript contextPath="" src="useradministration.js"/>
         <jqDT:resources/>
     </head>
     <body>
@@ -34,10 +34,10 @@
             </tr>
             </tfoot>
         </table>
-        <r:script>
+        <g:javascript>
 $(function() {
     $.jummp.userAdministration.loadUserList();
 });
-        </r:script>
+        </g:javascript>
     </body>
 </html>

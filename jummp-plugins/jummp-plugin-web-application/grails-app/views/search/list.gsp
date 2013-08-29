@@ -4,9 +4,11 @@
         <meta name="layout" content="main" />
         <g:javascript contextPath="" src="jquery/jquery.dataTables.js"/>
         <%-- <link rel="stylesheet" href="${resource(contextPath: "/jummp", dir: '/css/jqueryui/smoothness', file: 'jquery-ui-1.10.3.custom.css')}" />
-         --%>
          <link rel="stylesheet" href="${resource(contextPath: "/jummp", dir: '/css', file: 'datatablestyle.css')}" />
-        <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
+         --%>
+        <link rel="stylesheet" href="${resource(contextPath: "/jummp", dir: '/css', file: 'datatablestyle.css')}" />
+         
+         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript>
         	$(document).ready(function() {
         		 $.jummp.showModels.loadModelList();

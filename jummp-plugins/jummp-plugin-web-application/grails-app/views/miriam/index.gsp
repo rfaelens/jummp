@@ -3,7 +3,7 @@
     <head>
         <title><g:message code="miriam.title"/></title>
         <meta name="layout" content="main" />
-        <g:javascript src="js/miriamadministration.js"/>
+        <g:javascript contextPath="" src="js/miriamadministration.js"/>
     </head>
     <body>
         <h1><g:message code="miriam.title"/></h1>
@@ -41,10 +41,10 @@
             </div>
             </form>
         </div>
-        <r:script>
+        <g:javascript>
 $(function() {
     $.jummp.miriam.init();
 });
-        </r:script>
+        </g:javascript>
     </body>
 </html>

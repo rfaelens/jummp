@@ -15,7 +15,8 @@
 %>
 <head>
         <title>${revision.model.name}</title>
-        <link rel="stylesheet" href="${resource(dir: 'css/jqueryui/smoothness', file: 'jquery-ui-1.10.3.custom.css')}" />
+        <link rel="stylesheet" href="<g:resource dir="css/jqueryui/smoothness" file="jquery-ui-1.10.3.custom.css"/>" />
+ 
         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript src="jstree/jquery.jstree.js"/>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
