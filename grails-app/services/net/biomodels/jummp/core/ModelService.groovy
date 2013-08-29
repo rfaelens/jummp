@@ -471,6 +471,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             return []
         }
         // exclude deleted revisions
+        modelHistoryService.addModelToHistory(model)
         return model.revisions.toList().findAll { !it.deleted }.sort {it.revisionNumber}
     }
 
