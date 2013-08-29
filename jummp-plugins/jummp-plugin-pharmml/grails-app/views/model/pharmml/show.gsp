@@ -86,5 +86,6 @@
        <pharmml:checkModellingSteps steps="${modellingSteps}"/>
        <pharmml:variableDefs variables="${variableDefinitions}"/>
        <pharmml:estSimSteps steps="${estSimSteps}"/>
+       <pharmml:stepDeps deps="${stepDeps}"/>
     </div>
 </content>
