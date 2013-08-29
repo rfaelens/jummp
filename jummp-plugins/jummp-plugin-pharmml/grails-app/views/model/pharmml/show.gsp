@@ -11,16 +11,16 @@
     </style>
 </head>
 <content tag="modelspecifictabs">
-    <li><a href="#symbols">Symbols</a></li>
+    <li><a href="#customDefinitions">Custom Definitions</a></li>
     <li><a href="#modelDefinition">Model Definition</a></li>
     <li><a href="#trialDesign">Trial Design</a></li>
-    <li><a href="#modellingSteps">Tasks</a></li>
+    <li><a href="#modellingSteps">Modelling Steps</a></li>
 </content>
 <content tag="modelspecifictabscontent">
-    <div id="symbols">
+    <div id="customDefinitions">
+        <p><strong>Independent variable</strong>&nbsp;${independentVar}</p>
         <h3>Symbol Definitions</h3>
             <pharmml:symbolDefinitions symbolDefs="${symbolDefs}"/>
-         <p>Independent variable - ${independentVar}</p>
    </div>
 
     <div id="modelDefinition">
@@ -83,6 +83,8 @@
     </div>
 
     <div id="modellingSteps">
-       <pharmml:modellingSteps steps="${modellingSteps}"/>
+       <pharmml:checkModellingSteps steps="${modellingSteps}"/>
+       <pharmml:variableDefs variables="${variableDefinitions}"/>
+       <pharmml:estSimSteps steps="${estSimSteps}"/>
     </div>
 </content>

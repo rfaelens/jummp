@@ -3,6 +3,7 @@ package net.biomodels.jummp.plugins.pharmml
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.maths.ScalarType
 import eu.ddmore.libpharmml.dom.maths.VarType
+import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 
@@ -224,8 +225,10 @@ class PharmMlTagLib {
         } else if (r.getVar()) {
             text.append(variable(r))
         } else if (r.getSequence()) {
-            text.append(sequence(r))
-        } else { // equation, vector, dataset, distribution or function call
+            text.append(sequence(r.sequence))
+        } else if (r.getVector()) {
+            text.append(vector(r))
+        }else { // equation, dataset, distribution or function call
             text.append(" cannot be extracted, sorry.")
         }
         return text
@@ -250,6 +253,31 @@ class PharmMlTagLib {
                 append("]")
     }
 
+    StringBuilder vector = { v ->
+        def result = new StringBuilder()
+        if (!v) {
+            return result.append("&nbsp;")
+        }
+        result.append("[")
+        def iterator = v.vector.sequenceOrScalar.iterator()
+        while (iterator.hasNext()) {
+            //can be a scalar or a sequence
+            def vectorElement = iterator.next()
+            def item
+            try {
+                item = vectorElement as ScalarType
+                result.append(item.value.toPlainString())
+            } catch (ClassCastException ignored) {
+                item = vectorElement as SequenceType
+                result.append(sequence(item))
+            }
+            if (iterator.hasNext()) {
+                result.append(",")
+            }
+        }
+        result.append("]")
+    }
+
     def regimenDuration = { d ->
         if (d.equation || d.functionCall) {
             return "Regimen duration cannot be extracted, sorry."
@@ -267,7 +295,7 @@ class PharmMlTagLib {
 
     StringBuilder dosingTimes = { dt ->
         def result = new StringBuilder("Dosing Times:")
-        dt.sequenceOrScalar.each{ t ->
+        dt.sequenceOrScalar.each { t ->
             def time
             try {
                 time = t as ScalarType
@@ -329,7 +357,8 @@ class PharmMlTagLib {
         }
         new StringBuilder("</td><td>")
         def result = new StringBuilder("<table><thead>\n<tr><th>Identifier</th><th>Name</th>")
-        result.append("<th>Treatment</th><th>Individuals</th></tr></thead>\n<tbody>\n")
+        result.append("<th>Treatment</th><th>Individuals</th><th>Variability</th></tr>")
+        result.append("</thead>\n<tbody>\n")
 
         attrs.group.each { g ->
             result.append("<tr><td>").append(g.id).append("</td><td>").append(g.name ? g.name : "&nbsp;")
@@ -337,7 +366,8 @@ class PharmMlTagLib {
                     g.treatmentEpochRefOrWashout ?
                         treatmentEpochRefs(g.treatmentEpochRefOrWashout, new StringBuilder("</td><td>")) :
                         "</td><td>&nbsp;")
-            result.append("</td><td>").append(g.individuals ? individuals(g.individuals) : "&nbsp;")
+            result.append("</td><td>").append(g.individuals ? individuals(g.individuals) :
+                        "&nbsp;</td><td>&nbsp;")
             result.append("</td></tr>")
         }
         out << result.append("\n</tbody></table>").toString()
@@ -357,55 +387,55 @@ class PharmMlTagLib {
     }
 
     StringBuilder individuals = { i ->
-        def result = new StringBuilder()
+        List<String> indivCounts = []
+        def indivVars = []
         i.each {
-            StringBuilder sb = new StringBuilder("(symbolIdentifier:")
-            sb.append(it.symbId).append(", levelIdentifier:").append(it.levelId)
-            if (it.name) {
-                sb.append(", name:").append(it.name)
+            indivVars << it.levelId
+            def individualCount = it.scalar ? it.scalar.value.toPlainString() : "undefined"
+            indivCounts << individualCount
+        }
+
+        def result = new StringBuilder()
+        if (indivCounts.size() == 1) {
+            return result.append(indivCounts[0]).append("</td><td>").append(indivVars[0])
+        } else {
+            def indivCountsIterator = indivCounts.iterator()
+            while (indivCountsIterator.hasNext()) {
+                result.append(indivCountsIterator.next())
+                if (indivCountsIterator.hasNext()) {
+                    result.append("<br/>")
+                }
             }
-            if (it.constant) {
-                sb.append(", value: ").append(constant(it.constant))
-            } else if (it.scalar) {
-                sb.append(", value: ").append(scalar(it.scalar))
-            } else if (it.string) {
-                sb.append(", value: ").append(string(it.string))
-            } else if (it.sequence) {
-                sb.append(", value: ").append(sequence(it.sequence))
-            } else if (it.var) {
-                sb.append(", value: ").append(variable(it.var))
+            result.append("</td><td>")
+            def indivVarsIterator = indivVars.iterator()
+            while (indivVarsIterator.hasNext()) {
+                result.append(indivVarsIterator.next())
+                if (indivVarsIterator.hasNext()) {
+                    result.append("<br/>")
+                }
             }
-            result.append(sb.append(")"))
         }
         result
     }
 
-    def modellingSteps = { attrs ->
+    def checkModellingSteps = { attrs ->
         if (!attrs.steps) {
             out << "No modelling steps defined in the model."
             return
         }
-        def variableList = attrs.steps.variable
-        def stepList = attrs.steps.estimationStepOrSimulationStep
-        def deps = attrs.steps.stepDependencies
-
-        StringBuilder result = new StringBuilder()
-        if (variableList) {
-            result.append("<h3>Variables</h3>")
-            variableDef(variableList, result)
-        }
-        out << result.toString()
     }
 
-    def variableDef = { variables, text ->
-        if (!variables) {
-            return text
+    def variableDefs = { attrs ->
+        if (!attrs.variables) {
+            // there may not be any variables in the modelling steps
+            return
         }
 
-        def result = new StringBuilder("<table><thead><tr>")
+        def result = new StringBuilder("<h3>Variables</h3>")
+        result.append("<table><thead><tr>")
         result.append("<th>Identifier</th><th>Independent Variable</th><th>Symbol Type</th><th>Value</th>")
         result.append("</tr></thead><tbody>")
-        variables.each { v ->
+        attrs.variables.each { v ->
             result.append("<tr><td>").append(v?.symbId).append("</td><td>")
             result.append(v.independentVar ? v.independentVar : "&nbsp;").append("</td><td>")
             result.append(v.symbolType.value()).append("</td><td>")
@@ -413,11 +443,158 @@ class PharmMlTagLib {
                 result.append("&nbsp;")
             }
             if (v.scalar) {
-                text.append(scalar(v.scalar))
+                result.append(scalar(v.scalar))
             }
             result.append("</td></tr>")
         }
         result.append("</tbody></table>")
-        text.append(result)
+        out << result.toString()
+    }
+
+    def estSimSteps = { attrs ->
+        if (!attrs.steps) {
+            return
+        }
+        /*
+        * Check which kind of step we are dealing with.
+        * Estimation and simulation steps cannot be mixed, hence only look at the first one to decide.
+        */
+        boolean areSimulations = true
+        def step = attrs.steps.first()
+        if (step instanceof EstimationStepType) {
+            areSimulations = false
+        }
+        areSimulations ? simulationSteps(attrs.steps) : estimationSteps(attrs.steps)
+    }
+
+    def simulationSteps = { steps ->
+        if (!steps) {
+            return
+        }
+        def result = new StringBuilder("<h3>Simulation Steps</h3>\n")
+        result.append("<table><thead><tr>").append("<th>Identifier</th>")
+        result.append("<th>Replicates</th><th>Initial Values</th>")
+        result.append("<th>Output variable</th><th>Observation times</th></tr>")
+        result.append("</thead><tbody>")
+        steps.each { s ->
+            result.append("\n<tr><td>").append(s.id).append("</td><td>")
+            result.append(s.replicates.scalar.value).append("</td><td>")
+            result.append(initialValues(s.initialValue)).append("</td><td>")
+            result.append(simulationObservations(s.observations)).append("</td></tr>")
+        }
+        out << result.append("</tbody></table>").toString()
+    }
+
+    StringBuilder initialValues = {
+        def result  = new StringBuilder()
+        if (!it) {
+            return result.append("&nbsp;")
+        }
+        def iValues = it.iterator()
+        while (iValues.hasNext()) {
+            def v = iValues.next()
+            if (v.block) {
+                result.append(v.block).append(".")
+            }
+            result.append(v.symbId).append("=")
+            if (v.scalar) {
+                result.append(v.scalar.value.toPlainString())
+            }
+            if (iValues.hasNext()) {
+                result.append(",<br/>")
+            }
+        }
+        result
+    }
+
+    StringBuilder simulationObservations = {
+        if (!it) {
+            return new StringBuilder("None.</td><td>&nbsp;")
+        }
+        def timepointList = []
+        def outputList = []
+        it.each {
+            outputList << it.output
+            timepointList << it.timepoints
+        }
+        def result = new StringBuilder()
+        def iterator = outputList.iterator()
+        while (iterator.hasNext()) {
+            def o = iterator.next()
+            //each observation has variables and timepoints
+            if (o.var) {
+                o.var.each { v ->
+                    if (v.block) {
+                        result.append(v.block).append(".")
+                    }
+                    result.append(v.symbId)
+                    if (iterator.hasNext()) {
+                        result.append("<br/>")
+                    }
+                }
+            } else {
+                return new StringBuilder("None.")
+            }
+        }
+
+        result.append("</td><td>")
+        if (!timepointList) {
+            return result.append("None.")
+        } else {
+            result.append("[")
+        }
+        iterator = timepointList.iterator()
+        while(iterator.hasNext()) {
+            def t = iterator.next()
+            result.append(rhs(t, new StringBuilder()))
+            if (iterator.hasNext()) {
+                result.append(",<br/>")
+            }
+        }
+        result.append("]")
+    }
+
+    def estimationSteps = { steps ->
+        if (!steps) {
+            return
+        }
+        def result = new StringBuilder("<h3>Estimation Steps</h3>")
+        result.append("\n<table><thead><tr><th>Identifier</th>")
+        result.append("<th>Initial Values</th><th>Estimation Operations</th></tr></thead><tbody>")
+        steps.each { s ->
+            result.append("<tr><td>").append(s.id).append("</td><td>")
+            if (s.initialValue) {
+                result.append(initialValues(s.initialValue)).append("</td><td>")
+            } else {
+                result.append("&nbsp;</td><td>")
+            }
+            if (s.estimationOperation) {
+                result.append(estimationOps(s.estimationOperation))
+            } else {
+                result.append("&nbsp;")
+            }
+            result.append("</td></tr>")
+        }
+        out << result.append("</tbody></table>").toString()
+    }
+
+    StringBuilder estimationOps = { operations ->
+        def result = new StringBuilder()
+        if (!operations) {
+            return result
+        }
+        if ( operations.size() == 1 ) {
+            return result.append(operations[0].opType)
+        } else {
+            result.append("[")
+            def iOperations = operations.iterator()
+            while (iOperations.hasNext()) {
+                result.append(iOperations.next().opType)
+                if (iOperations.hasNext()){
+                    result.append(",&nbsp;")
+                }
+            }
+            return result.append("]")
+        }
     }
 }
