@@ -77,14 +77,28 @@
 		 
 		 
 		$(function() {
-			$( "#tabs" ).tabs()
-			$("#tabs ul li a").click(function () {
+			$( "#tabs" ).tabs({
+				fx: { opacity: 'toggle' },
+				select: function(event, ui) {
+					jQuery(this).css('height', jQuery(this).height());
+					jQuery(this).css('overflow', 'hidden');
+				},
+				show: function(event, ui) {
+					jQuery(this).css('height', 'auto');
+					jQuery(this).css('overflow', 'visible');
+					}
+			});
+			$("#tabs ul li a").click(function (e) {
 				var anchor=$(this).attr('href');
 				if (typeof(anchor) != "undefined") {
+					e.preventDefault();
 					location.hash = anchor;
+					window.scrollTo(0, 0);
 				}
 			});
+			
 		});
+		
 		
 		
 		function readablizeBytes(bytes) {
@@ -142,9 +156,9 @@
     	<div id="tablewrapper">
 	<div id="tabs">
 	  <ul>
-	    <li><a href="#Overview">Overview</a></li>
-	    <li><a href="#Files">Files</a></li>
-	    <li><a href="#History">History</a></li>
+	    <li class="modeltab"><a href="#Overview">Overview</a></li>
+	    <li class="modeltab"><a href="#Files">Files</a></li>
+	    <li class="modeltab"><a href="#History">History</a></li>
 	    <g:pageProperty name="page.modelspecifictabs" />
 	  </ul>
 	  <div id="Overview">
