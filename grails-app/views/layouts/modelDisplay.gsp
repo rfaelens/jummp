@@ -156,9 +156,9 @@
     	<div id="tablewrapper">
 	<div id="tabs">
 	  <ul>
-	    <li class="modeltab"><a href="#Overview">Overview</a></li>
-	    <li class="modeltab"><a href="#Files">Files</a></li>
-	    <li class="modeltab"><a href="#History">History</a></li>
+	    <li><a href="#Overview">Overview</a></li>
+	    <li><a href="#Files">Files</a></li>
+	    <li><a href="#History">History</a></li>
 	    <g:pageProperty name="page.modelspecifictabs" />
 	  </ul>
 	  <div id="Overview">
