@@ -38,6 +38,7 @@
 	 		fileData["${file.name}"].Created="${new Date(attr.creationTime().toMillis())}";
 	 		fileData["${file.name}"].Accessed="${new Date(attr.lastAccessTime().toMillis())}";
 	 		fileData["${file.name}"].Modified="${new Date(attr.lastModifiedTime().toMillis())}";
+	 		fileData["${file.name}"].isInternal=false;
 
 	 		<g:if test="${it.mimeType.contains('zip')}">
 	 			<%
@@ -52,6 +53,7 @@
 	 				@Override
 	 				public FileVisitResult visitFile(Path visiting, BasicFileAttributes attrs) throws IOException {
 	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"]=new Object();'<<'\n';
+	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].isInternal=true'<<'\n';
 	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Name="'<<FilenameUtils.getName(visiting.toString())<<'";'<<'\n';
 	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Extension="'<<FilenameUtils.getExtension(visiting.toString())<<'";'<<'\n';
 	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Size=readablizeBytes('<<attrs.size()<<');'<<'\n';
@@ -112,9 +114,16 @@
 				var content=[];
 				content.push("<table>")
 				for (var prop in fileProps) {
-					content.push("<tr><td><b>",prop,"</b></td><td>",fileProps[prop],"</td></tr>");
+					if (prop!="isInternal") {
+						content.push("<tr><td><b>",prop,"</b></td><td>",fileProps[prop],"</td></tr>");
+					}
 				}
 				content.push("</table>");
+				if (fileProps.isInternal==false) {
+					content.push("<div class='centeringContainer'>");
+					content.push("<a class='downloadFile' href='","${g.createLink(controller: 'model', action: 'downloadFile', id: revision.id)}");
+					content.push("?filename=",encodeURIComponent(fileProps.Name),"'>Download</a></div>");
+				}
 				$("#Files #resizable #detailsBox").html(content.join(""));
 			}
 			else {

@@ -362,6 +362,29 @@ class ModelController {
             resp.setHeader("Content-disposition", "attachment;filename=\"${file.getName()}\"")
             resp.outputStream<< new ByteArrayInputStream(file.getBytes())
     }
+    
+    
+    /**
+     * File download of the model file for a model by id
+     */
+    def downloadFile = {
+        try
+        {
+            List<RFTC> files = modelDelegateService.retrieveModelFiles(new RevisionTransportCommand(id: params.id as int))
+            RFTC requested=files.find {
+            	    File file=new File(it.path)
+            	    file.getName()==params.filename
+            }
+            if (requested) {
+            	    serveModelAsFile(requested, response)
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace()
+        }
+    }
+    
 
     /**
      * File download of the model file for a model by id

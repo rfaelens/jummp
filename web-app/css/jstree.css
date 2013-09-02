@@ -28,6 +28,31 @@
 	    box-shadow: 0px 0px 1px #777;
 	
 	}
+	.centeringContainer {
+	    display: block;
+	    margin-left:auto;
+	    margin-right:auto;
+	    text-align:center;
+	}
+        .downloadFile {
+	    background-color: #5CAD85;
+	    -moz-border-radius: 5px;
+	    -webkit-border-radius: 5px;
+	    border-radius:6px;
+	    color: #fff;
+	    font-family: 'Verdana';
+	    font-size: 20px;
+	    text-decoration: none;
+	    cursor: pointer;
+	    padding: 8px;
+	    border:none;
+	}
+	.downloadFile:hover {
+	    border: none;
+	    background:#339966;
+	    box-shadow: 0px 0px 1px #777;
+	
+	}
 	#Files {
 	    display: inline-block;
 	    margin-left:5%;
