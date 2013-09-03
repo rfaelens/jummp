@@ -7,6 +7,8 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.perf4j.aop.Profiled
 
 /**
@@ -15,6 +17,8 @@ import org.perf4j.aop.Profiled
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class OmexService implements FileFormatService {
+    private static final Log log = LogFactory.getLog(this)
+    private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
 
     @Profiled(tag="omexService.validate")
     public boolean validate(final List<File> model) {
@@ -78,14 +82,23 @@ class OmexService implements FileFormatService {
         if (!f || !f.canRead()) {
             return false
         }
+        if (IS_INFO_ENABLED) {
+            log.info "Validating ${f.properties}"
+        }
         def path = f.toPath()
         //TODO if null, we need a custom FileTypeDetector
         boolean correctMIME = "application/zip".equals(Files.probeContentType(path))
         if (!correctMIME) {
+            if (IS_INFO_ENABLED) {
+                log.info "Not treating ${f.name} as COMBINE archive because of incorrect content type."
+            }
             return false
         }
         boolean correctExtension = path.toString().endsWith(".omex")
         if (!correctExtension) {
+            if (IS_INFO_ENABLED) {
+                log.info "Not treating ${f.name} as COMBINE archive because of incorrect file extension."
+            }
             return false
         }
         def pathURI = new URI(new StringBuilder("jar:").append(path.toUri()).toString())
@@ -101,6 +114,13 @@ class OmexService implements FileFormatService {
             fs?.close()
         }
 
+            if (IS_INFO_ENABLED) {
+                StringBuilder msg = new StringBuilder("File ")
+                msg.append(f.name).append(" is")
+                msg.append(containsManifest ? "" : " not").append(" a COMBINE archive.")
+                msg.append(containsManifest ?: " The manifest file is missing.")
+                log.info(msg.toString())
+            }
         return containsManifest
     }
 }
