@@ -55,6 +55,7 @@
 	#Files {
 	    display: inline-block;
 	    margin-left:5%;
+	    cursor: pointer;
 	    height: 100%;
 	    width:90%;
 	}

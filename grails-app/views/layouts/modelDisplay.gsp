@@ -283,7 +283,7 @@
 	  	<h5>Revisions</h5>
 	  	<ul>
 	  	     <g:each in="${allRevs}">
-	  	     	<li>Submitted by ${it.owner} on ${dateFormat.format(it.uploadDate)}, with comment: ${it.comment}
+	  	     	<li>${dateFormat.format(it.uploadDate)} - Version: ${it.revisionNumber}, submitted by ${it.owner} with comment: ${it.comment}
 	  	     		<div title="Download version ${it.revisionNumber}" class="arrow-down" onclick='window.location = "${g.createLink(controller: 'model', action: 'download', id: it.id)}"'/>
 	  	     	</li>
 	  	     </g:each>
