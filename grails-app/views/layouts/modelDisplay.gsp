@@ -160,7 +160,8 @@
     <body>
     	<div id="topBar">
     	        <h2 style="float: left;">${revision.model.name}</h2>
-        	<a id="submit" href="${g.createLink(controller: 'model', action: 'download', id: revision.id)}">Download</a> 	
+        	<a class="submit" href="${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}">Update</a> 	
+        	<a class="submit" href="${g.createLink(controller: 'model', action: 'download', id: revision.id)}">Download</a> 	
 	</div>
     	<div id="tablewrapper">
 	<div id="tabs">
