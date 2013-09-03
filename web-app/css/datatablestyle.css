@@ -3,7 +3,6 @@
 	margin: 0;
 	cursor: pointer;
 	* cursor: hand;
-	color: #333;
 }
 
 .paging_full_numbers .ui-button {
@@ -11,7 +10,10 @@
 	margin: 0;
 	cursor: pointer;
 	* cursor: hand;
-	color: #333;
+}
+
+#modelTable {
+	margin-top:-10px;
 }
 
 table thead th {
@@ -36,7 +38,6 @@ thead th {
 		
 	thead th[colspan],
 	thead th[rowspan] {
-		background:#66a9bd;
 	}
 	
 tbody th,
@@ -46,25 +47,21 @@ tfoot td {
 	}
 	
 tfoot th {
-	background:#b0cc7f;
 	}
 	
 tfoot td {
-	background:#d7e1c5;
 	font-weight:bold;
 	}
 		
 tbody tr.odd td { 
-	background:#E0F8F7;
 	}
 
 .dataTables thead th {
     text-align: center;
-    background: #66a9bd;
 }
 
 .dataTables_info {
-	width: 50%;
+	width: 30%;
 	float: left;
 }
 
@@ -73,11 +70,7 @@ tbody tr.odd td {
 	text-align: right;
 }
 
-tr.odd {
-	background-color: #E0F8F7;
-}
-
 tr.even {
-	background-color: #CEF6EC;
+	background-color: #d0d0d0;
 }
 

@@ -112,7 +112,7 @@
 		function updateFileDetailsPanel(fileProps) {
 			if (typeof(fileProps) != "undefined") {
 				var content=[];
-				content.push("<table>")
+				content.push("<table cellpadding='2' cellspacing='5'>")
 				for (var prop in fileProps) {
 					if (prop!="isInternal") {
 						content.push("<tr><td><b>",prop,"</b></td><td>",fileProps[prop],"</td></tr>");

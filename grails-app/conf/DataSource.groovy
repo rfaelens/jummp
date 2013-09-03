@@ -43,7 +43,8 @@ dataSource {
     username = databaseConfig.jummp.database.username
     password = databaseConfig.jummp.database.password
     dialect  = databaseConfig.jummp.database.dialect
-    properties {
+    /* properties {
+            pooled = true
             maxActive = 50
             maxIdle = 25
             minIdle = 5
@@ -51,7 +52,7 @@ dataSource {
             minEvictableIdleTimeMillis = 60000
             timeBetweenEvictionRunsMillis = 60000
             maxWait = 10000
-        }
+        } */
 }
 hibernate {
     cache.use_second_level_cache = true
