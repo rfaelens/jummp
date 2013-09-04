@@ -129,7 +129,11 @@ class ModelDelegateService implements IModelService {
     }
 
     List<RepositoryFileTransportCommand> retrieveModelFiles(RevisionTransportCommand revision) throws ModelException {
-        return modelService.retrieveModelFiles(Revision.get(revision.id))
+        List<RepositoryFileTransportCommand> files=modelService.retrieveModelFiles(Revision.get(revision.id))
+        files.each {
+        	it.revision=revision
+        }
+        return files
     }
 
     List<RepositoryFileTransportCommand> retrieveModelFiles(long modelId) {

@@ -122,7 +122,6 @@ class Revision implements Serializable {
     }
 
     RevisionTransportCommand toCommandObject() {
-        def files=getRepositoryFilesForRevision()
         RevisionTransportCommand rev=new RevisionTransportCommand(
                 id: id,
                 revisionNumber: revisionNumber,
@@ -135,11 +134,7 @@ class Revision implements Serializable {
                 uploadDate: uploadDate,
                 format: format.toCommandObject(),
                 model: model.toCommandObject(),
-                files: files
         )
-        rev.files.each {
-            it.revision=rev
-        }
         return rev
     }
 }

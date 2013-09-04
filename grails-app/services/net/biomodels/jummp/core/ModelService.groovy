@@ -1278,8 +1278,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.retrieveModelFiles")
     List<RepositoryFileTransportCommand> retrieveModelFiles(final Revision revision) throws ModelException {
-    	    RevisionTransportCommand rtc=revision.toCommandObject()
-    	    return rtc.files
+    	    return revision.getRepositoryFilesForRevision()
     }
 
     /**

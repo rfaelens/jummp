@@ -1,5 +1,6 @@
 package net.biomodels.jummp.core.model
-
+import org.codehaus.groovy.grails.web.context.ServletContextHolder as SCH
+import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes as GA
 /**
  * @short Wrapper for a Revision to be transported through JMS.
  *
@@ -57,5 +58,17 @@ class RevisionTransportCommand implements Serializable {
     /**
      * The list of files associated with this revision
      */
-    List<RepositoryFileTransportCommand> files
+     List<RepositoryFileTransportCommand> files = null;
+     
+     List<RepositoryFileTransportCommand> getFiles() {
+     	     if (!files) {
+     	     	     def ctx = SCH.servletContext.getAttribute(GA.APPLICATION_CONTEXT)
+     	     	     files=ctx.modelDelegateService.retrieveModelFiles(this)
+     	     }
+     	     return files
+     }
+     
+     void setFiles(List<RepositoryFileTransportCommand> f) {
+     	     files=f;
+     }
 }
