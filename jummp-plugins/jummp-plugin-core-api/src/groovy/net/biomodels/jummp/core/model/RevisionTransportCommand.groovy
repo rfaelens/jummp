@@ -62,6 +62,7 @@ class RevisionTransportCommand implements Serializable {
      
      List<RepositoryFileTransportCommand> getFiles() {
      	     if (!files) {
+     	     	     // See: http://grails.org/FAQ#Q: How do I get access to the application context from sources in src/groovy?
      	     	     def ctx = SCH.servletContext.getAttribute(GA.APPLICATION_CONTEXT)
      	     	     files=ctx.modelDelegateService.retrieveModelFiles(this)
      	     }
