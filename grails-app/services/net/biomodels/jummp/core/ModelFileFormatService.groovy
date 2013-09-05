@@ -162,21 +162,11 @@ class ModelFileFormatService {
     }
 
     /**
-     * Retrieves the version of the format in which @p revision is encoded.
-     * @param revision the Revision for which to extract the format version.
-     * @return The format version, or an empty String if this cannot be extracted.
-     */
-    String getFormatVersion(Revision revision) {
-        FileFormatService service = serviceForFormat(revision?.format)
-        return service ? service.getFormatVersion(revision.toCommandObject()) : ""
-    }
-
-    /**
      * Retrieves the version of the format in which @p revisiontransportcommand is encoded.
-     * @param revision the RevisionTransportCommand for which to extract the format version.
+     * @param revision the RevisionTransportCommand/Revision for which to extract the format version.
      * @return The format version, or an empty String if this cannot be extracted.
      */
-    String getFormatVersion(RevisionTransportCommand revision) {
+    String getFormatVersion(def revision) {
         FileFormatService service = serviceForFormat(revision?.format)
         return service ? service.getFormatVersion(revision) : ""
     }
@@ -224,25 +214,10 @@ class ModelFileFormatService {
     
     /**
      * Helper function to get the proper service for @p format.
-     * @param format The ModelFormat for which the service should be returned.
+     * @param format The ModelFormatTransportCommand/ModelFormat identifier for which the service should be returned.
      * @return The service which handles the format.
      */
-    private FileFormatService serviceForFormat(final ModelFormat format) {
-        if (format) {
-             if (services.containsKey(format.identifier)) {
-                return grailsApplication.mainContext.getBean((String)services.getAt(format.identifier))
-            }
-        } else {
-            return null
-        }
-    }
-    
-    /**
-     * Helper function to get the proper service for @p format.
-     * @param format The ModelFormatTransportCommand identifier for which the service should be returned.
-     * @return The service which handles the format.
-     */
-    private FileFormatService serviceForFormat(final ModelFormatTransportCommand format) {
+    private FileFormatService serviceForFormat(final def format) {
         if (format) {
              if (services.containsKey(format.identifier)) {
                 return grailsApplication.mainContext.getBean((String)services.getAt(format.identifier))
