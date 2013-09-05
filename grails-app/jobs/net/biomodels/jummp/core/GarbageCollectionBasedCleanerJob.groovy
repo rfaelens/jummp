@@ -18,8 +18,8 @@ class GarbageCollectionBasedCleanerJob {
     def modelDelegateService;
 	
     static triggers = {
-    	    //Run every five minutes
-    	    simple name: 'GarbageCollectionBasedCleanerTrigger', startDelay: 1000*60*5, repeatInterval: 1000*60*5  
+    	    //Run every three minutes
+    	    simple name: 'GarbageCollectionBasedCleanerTrigger', startDelay: 30000, repeatInterval: 1000*60*3  
     }
   
     def execute() {

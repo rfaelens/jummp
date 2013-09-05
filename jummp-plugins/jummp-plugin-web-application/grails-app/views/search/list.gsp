@@ -4,9 +4,9 @@
         <meta name="layout" content="main" />
         <g:javascript contextPath="" src="jquery/jquery.dataTables.js"/>
         <%-- 
-         --%>
          <link rel="stylesheet" href="${resource(contextPath: "/jummp", dir: '/css/jqueryui/south-street', file: 'jquery-ui-1.10.3.custom.css')}" />
-        <link rel="stylesheet" href="${resource(contextPath: "/jummp", dir: '/css', file: 'datatablestyle.css')}" />
+        --%>
+         <link rel="stylesheet" href="${resource(contextPath: "/jummp", dir: '/css', file: 'datatablestyle.css')}" />
          
          <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript>
@@ -19,7 +19,10 @@
     </head>
     <body activetab="search">
     	<h2><g:message code="model.list.heading"/></h2>
-        <table id="modelTable">
+    	  <div class="content">
+    	  <div class="view view-dom-id-9c00a92f557689f996511ded36a88594">
+    	<div class="view-content">
+        <table id="modelTable" class="views-table cols-4">
             <thead>
             <tr>
                 <th><b><g:message code="model.list.name"/></b></th>
@@ -35,7 +38,9 @@
             </tr>
             </tfoot>
         </table>
-
+        </div>
+        </div>
+        </div>
     </body>
     <content tag="sidebar">
         <div class="element" id="sidebar-element-last-accessed-models">
