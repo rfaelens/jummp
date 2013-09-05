@@ -579,7 +579,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
         Model model = getModel(rev.model.id)
-        final String formatVersion = rev.format.formatVersion ? rev.format.formatVersion : ""
+        final String formatVersion = modelFileFormatService.getFormatVersion(rev)
         Revision revision = new Revision(model: model, name: rev.name, description: rev.description, comment: rev.comment, uploadDate: new Date(), owner: currentUser,
                 minorRevision: false, validated:rev.validated, format: ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion))
         def stopWatch = new Log4JStopWatch("modelService.addValidatedRevision.rftcCreation")
@@ -702,7 +702,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         stopWatch.lap("Finished adding RepositoryFiles to the Model")
         stopWatch.setTag("modelService.uploadValidatedModel.prepareVcsStorage")
-        final String formatVersion = rev.format.formatVersion ? rev.format.formatVersion : ""
+        final String formatVersion = modelFileFormatService.getFormatVersion(rev)
         ModelFormat format=ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion)
 
         // vcs identifier is upload date + name - this should by all means be unique

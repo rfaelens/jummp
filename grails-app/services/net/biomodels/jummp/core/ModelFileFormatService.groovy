@@ -3,6 +3,7 @@ package net.biomodels.jummp.core
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.Revision
 import java.util.List
 import org.perf4j.aop.Profiled
@@ -171,6 +172,16 @@ class ModelFileFormatService {
     }
 
     /**
+     * Retrieves the version of the format in which @p revisiontransportcommand is encoded.
+     * @param revision the RevisionTransportCommand for which to extract the format version.
+     * @return The format version, or an empty String if this cannot be extracted.
+     */
+    String getFormatVersion(RevisionTransportCommand revision) {
+        FileFormatService service = serviceForFormat(revision?.format)
+        return service ? service.getFormatVersion(revision) : ""
+    }
+
+    /**
      * Retrieves all annotation URNs through the service responsible for the format used
      * by the @p revision.
      * @param rev The Revision for which all URNs should be retrieved
@@ -217,6 +228,21 @@ class ModelFileFormatService {
      * @return The service which handles the format.
      */
     private FileFormatService serviceForFormat(final ModelFormat format) {
+        if (format) {
+             if (services.containsKey(format.identifier)) {
+                return grailsApplication.mainContext.getBean((String)services.getAt(format.identifier))
+            }
+        } else {
+            return null
+        }
+    }
+    
+    /**
+     * Helper function to get the proper service for @p format.
+     * @param format The ModelFormatTransportCommand identifier for which the service should be returned.
+     * @return The service which handles the format.
+     */
+    private FileFormatService serviceForFormat(final ModelFormatTransportCommand format) {
         if (format) {
              if (services.containsKey(format.identifier)) {
                 return grailsApplication.mainContext.getBean((String)services.getAt(format.identifier))
