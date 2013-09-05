@@ -29,7 +29,6 @@ import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
-import java.lang.ref.ReferenceQueue
 
 /**
  * @short Service class for managing Models
