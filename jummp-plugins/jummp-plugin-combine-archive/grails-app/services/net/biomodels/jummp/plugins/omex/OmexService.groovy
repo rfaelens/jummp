@@ -10,6 +10,9 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.perf4j.aop.Profiled
+import org.apache.tika.detect.DefaultDetector
+import org.apache.tika.metadata.Metadata
+import org.apache.tika.mime.MediaType
 
 /**
  * Provides methods to handle the COMBINE archive format.
@@ -87,12 +90,16 @@ class OmexService implements FileFormatService {
         }
         def path = f.toPath()
         //TODO if null, we need a custom FileTypeDetector
-        boolean correctMIME = "application/zip".equals(Files.probeContentType(path))
+        def sherlock = new DefaultDetector()
+        String properType = sherlock.detect(new BufferedInputStream(
+                        new FileInputStream(f)), new Metadata()).toString()
+                
+        boolean correctMIME = "application/zip".equals(properType)
         if (!correctMIME) {
             if (IS_INFO_ENABLED) {
-                log.info "Not treating ${f.name} as COMBINE archive because of incorrect content type."
+                log.info "Not treating ${f.name} as COMBINE archive because of incorrect content type. ${Files.probeContentType(path)}"
             }
-            return false
+          //  return false
         }
         boolean correctExtension = path.toString().endsWith(".omex")
         if (!correctExtension) {
