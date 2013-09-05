@@ -97,9 +97,9 @@ class OmexService implements FileFormatService {
         boolean correctMIME = "application/zip".equals(properType)
         if (!correctMIME) {
             if (IS_INFO_ENABLED) {
-                log.info "Not treating ${f.name} as COMBINE archive because of incorrect content type. ${Files.probeContentType(path)}"
+                log.info "Not treating ${f.name} as COMBINE archive because of incorrect content type. ${properType}"
             }
-          //  return false
+            return false
         }
         boolean correctExtension = path.toString().endsWith(".omex")
         if (!correctExtension) {
