@@ -41,6 +41,13 @@ class ModelFileFormatService {
     */
     private final Map<String, String> plugins = new HashMap()
       
+    
+    public void status() {
+    	    System.out.println("MODEL FILE FORMAT SERVICE STATUS:")
+    	    System.out.println("SERVICES: "+services.inspect())
+    	    System.out.println("PLUGINS: "+plugins.inspect())
+    }
+    
     /**
      * Extracts the format of the supplied @p modelFiles.
      * Returns the default ModelFormat representation with an empty formatVersion, since this is expected to exist 
