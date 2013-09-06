@@ -21,13 +21,16 @@ class OldFilesExchangeCleanerJob {
     }
   
     def execute() {
+    	    System.out.println("RUNNING OLD FILES EXCHANGE CLEANER")
+    	    System.out.println("Looking in "+grailsApplication.config.jummp.vcs.exchangeDirectory)
     	    new File(grailsApplication.config.jummp.vcs.exchangeDirectory).eachFile({f ->
+    	    	    System.out.println("Processing "+f.getName()+" last modified at "+f.lastModified())
     	    	    if (f.lastModified() <= veryOld) {
     	    	    	    if (f.isFile()) {
     	    	    	    	    f.delete()
     	    	    	    }
     	    	    	    else {
-    	    	    	    	    f.deleteDir()
+    	    	    	    	    System.out.println("GC Cleaner deleting: "+f.getName()+" ..."+f.deleteDir())
     	    	    	    }
     	    	    }
     	    })

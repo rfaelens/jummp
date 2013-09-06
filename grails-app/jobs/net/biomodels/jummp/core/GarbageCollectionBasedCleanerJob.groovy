@@ -16,20 +16,24 @@ import net.biomodels.jummp.core.WrappedRevisionReference
 class GarbageCollectionBasedCleanerJob {
     
     def modelDelegateService;
+    boolean forcedGC=false;
 	
     static triggers = {
     	    //Run every three minutes
-    	    simple name: 'GarbageCollectionBasedCleanerTrigger', startDelay: 30000, repeatInterval: 1000*60*3  
+    	    simple name: 'GarbageCollectionBasedCleanerTrigger', startDelay: 1000*60*3, repeatInterval: 1000*60*3  
     }
   
     def execute() {
+   	    if (forcedGC) {
+   	    	    System.gc()
+   	    }
     	    ReferenceQueue queue=modelDelegateService.getRefQueue()
     	    while (true) {
     	    	   WrappedRevisionReference ref=(WrappedRevisionReference) queue.poll()
     	    	   if (!ref) {
     	    	   	   break
     	    	   }
-    	    	   ref.deleteFolder()
+    	    	   System.out.println("GC Cleaner deleting: "+ref.id()+" ..."+ref.deleteFolder())
     	    	   modelDelegateService.clearReference(ref.id())
     	    }
     }

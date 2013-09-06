@@ -17,8 +17,8 @@ class WrappedRevisionReference extends WeakReference {
 		revisionFolder=folder;
 	}
 	
-	void deleteFolder() {
-		(new File(revisionFolder)).deleteDir()
+	boolean deleteFolder() {
+		return (new File(revisionFolder)).deleteDir()
 	}
 	
 	String id() {
