@@ -46,6 +46,14 @@ beans = {
         resourceIdentifier = "MIR:00100012"
     }
 
+    indexingEventListener(net.biomodels.jummp.search.UpdatedRepositoryListener) { bean ->
+			bean.autowire = "byName"
+			bean.singleton = true
+    }
+    searchEngine(net.biomodels.jummp.search.SearchProvider) { bean ->
+			bean.autowire = "byName"
+			bean.singleton = true
+    }
     ontologyLookupServiceResolver(net.biomodels.jummp.core.miriam.OntologyLookupResolver) { bean ->
         bean.scope = "prototype"
         supportedIdentifiers = [

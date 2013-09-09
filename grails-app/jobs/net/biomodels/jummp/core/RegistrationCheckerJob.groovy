@@ -13,6 +13,7 @@ import org.quartz.JobExecutionContext
 class RegistrationCheckerJob {
     
     def modelFileFormatService
+    def grailsApplication
 	
     static triggers = {
     	    //run on startup, and then every six hours.
@@ -21,6 +22,7 @@ class RegistrationCheckerJob {
   
     def execute() {
     	    System.out.println(modelFileFormatService.status())
+    	    grailsApplication.mainContext.getBean("searchEngine").refreshIndex()
     }
 
 }

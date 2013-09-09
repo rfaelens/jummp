@@ -51,6 +51,27 @@ grails.project.dependency.resolution = {
         runtime "postgresql:postgresql:9.1-901.jdbc4"
         // plugin dependencies
         // dependencies of plugins
+        // miriam lib required by sbml converters
+        runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
+        // dependencies of jsbml
+        runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
+        runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
+        runtime "org.codehaus.woodstox:stax2-api:3.1.0"
+	compile ('org.apache.lucene:lucene-core:4.4.0') 
+	compile ('org.apache.lucene:lucene-analyzers-common:4.4.0')
+        compile ('org.apache.lucene:lucene-queryparser:4.4.0')
+        compile ('org.apache.lucene:lucene-misc:4.4.0')
+          
+        
+
+        compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") {
+            excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4', 'xercesImpl'
+        }
+
+        compile("eu.ddmore.pharmml:libPharmML:0.1-SNAPSHOT"){
+            excludes 'junit-dep'
+        }
+
         // sbml
         runtime("org.sbml.jsbml:jsbml:1.0-a2") {
             excludes 'woodstox-core-lgpl',
@@ -62,21 +83,8 @@ grails.project.dependency.resolution = {
                         'commons-dbcp',
                         'xstream'
         }
-        // miriam lib required by sbml converters
-        runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
-        // dependencies of jsbml
-        runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
-        runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
-        runtime "org.codehaus.woodstox:stax2-api:3.1.0"
 
-        compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") {
-            excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4', 'xercesImpl'
-        }
-
-        compile("eu.ddmore.pharmml:libPharmML:0.1-SNAPSHOT"){
-            excludes 'junit-dep'
-        }
-
+        
         // bives
         runtime('org.apache.commons:commons-compress:1.1') { excludes 'commons-io' }
 
@@ -149,7 +157,8 @@ grails.project.dependency.resolution = {
                      'jquery-ui',
                      //also exclude java feeds API rome in order to avoid conflicting revisions
                      'feeds',
-                     'ckeditor'
+                     'ckeditor',
+                     'searchable'
         }
         runtime(":feeds:1.6") { excludes 'rome', 'jdom' }
         runtime(":ckeditor:3.6.3.0") { excludes 'svn' }
@@ -178,6 +187,7 @@ grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
 grails.plugin.location.'jummp-plugin-combine-archive' = "jummp-plugins/jummp-plugin-combine-archive"
 grails.plugin.location.'jummp-plugin-pharmml' = "jummp-plugins/jummp-plugin-pharmml"
 grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
+//grails.plugin.location.'jummp-plugin-search' = "jummp-plugins/jummp-plugin-search"
 grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plugin-simple-logging"
 grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"
 //grails.plugin.location.'jummp-plugin-jms-remote' = "jummp-plugins/jummp-plugin-jms-remote"

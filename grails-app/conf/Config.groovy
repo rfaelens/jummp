@@ -210,6 +210,10 @@ if (jummpConfig.jummp.vcs.exchangeDirectory) {
 if (jummpConfig.jummp.vcs.workingDirectory) {
     jummp.vcs.workingDirectory = jummpConfig.jummp.vcs.workingDirectory
 }
+// search plugin
+if (jummpConfig.jummp.plugins.search.index) {
+    jummp.plugins.search.index = jummpConfig.jummp.plugins.search.index
+}
 
 // registration settings
 if (!(jummpConfig.jummp.security.registration.email.send instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.send)) {
