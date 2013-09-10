@@ -17,21 +17,39 @@
     
     
       <div class="region region-header">
-    <div style="float:right;margin-top:5px;">
+      	<div id="block-system-user-menu" class="block block-system user-menu block-menu first odd">      
+      		<div class="content">
+      			<ul class="menu"><li class="first last leaf">
+      			<sec:ifLoggedIn>
+      				<a href="/jummp/logout" class="icon icon-functional" data-icon="l">
+      					<g:message code="jummp.main.logout"/>
+      				</a>
+      			</sec:ifLoggedIn>
+      			<sec:ifNotLoggedIn>
+      				<a href="/jummp/login" class="icon icon-functional" data-icon="l">
+      				<g:message code="jummp.main.login"/>
+      			</a>
+      			</sec:ifNotLoggedIn>
+      			</li>
+      		</div><!-- /.block -->
+      	</div>
+      <div id="block-search-form" class="block block-search search even">
+      	 <div class="content">
+      	 	<g:form controller="search" action="search">
+      	 	<%-- <form action="/" method="post" id="search-block-form" accept-charset="UTF-8"> --%><div><div class="container-inline">
+      	 		<h2 class="element-invisible">Search form</h2>
+      	 		<div class="form-item form-type-textfield form-item-search-block-form">
+      	 			<label class="element-invisible" for="edit-search-block-form--2">Search </label>
+      	 			<input title="Enter the terms you wish to search for." type="text" id="edit-search-block-form--2" name="search_block_form" value="" size="15" maxlength="128" class="form-text" />
+      	 		</div>
+      	 		<div class="form-actions form-wrapper" id="edit-actions">
+      	 			<input type="submit" id="edit-submit" name="op" value="Search" class="form-submit" />
+      	 		</div>
+			</div>
+</div></g:form>  </div>
 
-      
-  <div class="content">
-     <sec:ifLoggedIn>
-    	<a href="/jummp/logout" class="icon icon-functional" data-icon="l">
-		<g:message code="jummp.main.logout"/>
-	</a>
-    </sec:ifLoggedIn>
-    <sec:ifNotLoggedIn>
-	<a href="/jummp/login" class="icon icon-functional" data-icon="l">
-		<g:message code="jummp.main.login"/>
-	</a>
-    </sec:ifNotLoggedIn>
-</div><!-- /.block -->
+</div>
+      	 		
 <div id="block-system-main-menu" class="block block-system main-menu block-menu last odd">
 
       

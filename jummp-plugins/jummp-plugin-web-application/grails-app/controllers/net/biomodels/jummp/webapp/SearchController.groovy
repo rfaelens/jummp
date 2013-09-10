@@ -23,6 +23,13 @@ class SearchController {
      */
     def list = {
     }
+    
+    /**
+     * Default action showing a list view
+     */
+    def search = {
+    	   [query:params.search_block_form]
+    }
 
     /**
      * Action returning the DataTable content as JSON
