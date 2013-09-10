@@ -59,4 +59,11 @@ public interface FileFormatService {
      * @return the textual representation of the format's version - e.g. L3V2 for SBML.
      */
     public String getFormatVersion(RevisionTransportCommand revision);
+    
+    /**
+     * Retrieves content associated with a particular @p revision of a model
+     * @param revision the Revision of a model
+     * @return the textual representation of the format indexing content
+     */
+    public String getSearchIndexingContent(RevisionTransportCommand revision);
 }

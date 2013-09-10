@@ -328,6 +328,11 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             return notesString
         }
     }
+    
+    @Profiled(tag="SbmlService.getSearchIndexingContent")
+    public String getSearchIndexingContent(RevisionTransportCommand revision) {
+    	    return ""
+    }
 
     @Profiled(tag="SbmlService.getAnnotations")
     public List<Map> getAnnotations(RevisionTransportCommand revision) {

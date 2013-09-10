@@ -170,6 +170,10 @@ class ModelDelegateService implements IModelService {
     void grantReadAccess(long modelId, User collaborator) {
         modelService.grantReadAccess(Model.get(modelId), User.get(collaborator.id))
     }
+    
+    String getSearchIndexingContent(RevisionTransportCommand revision) {
+    	    modelService.getSearchIndexingContent(revision)
+    }
 
     void grantWriteAccess(long modelId, User collaborator) {
         modelService.grantWriteAccess(Model.get(modelId), User.get(collaborator.id))

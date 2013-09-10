@@ -64,5 +64,9 @@ class UnknownFormatService implements FileFormatService {
         } 
         return false
     }
+    
+    public String getSearchIndexingContent(RevisionTransportCommand revision) {
+    	    return ""
+    }
 }
 

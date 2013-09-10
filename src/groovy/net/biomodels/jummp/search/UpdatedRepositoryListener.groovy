@@ -68,20 +68,27 @@ class UpdatedRepositoryListener implements ApplicationListener {
 		
 		String name = revision.name
 		String description = revision.description
-
+		String content=modelDelegateService.getSearchIndexingContent(revision)
 
 		Field nameField =
 			new Field("name",name,Field.Store.YES,Field.Index.NOT_ANALYZED);
 		Field descriptionField = 
 			new Field("description",description,Field.Store.NO,Field.Index.ANALYZED); 
+		Field contentField = 
+			new Field("content",content,Field.Store.NO,Field.Index.ANALYZED); 
 		Field idField = 
-			new Field("id",""+revision.id,Field.Store.YES,Field.Index.NO); 
+			new Field("model_id",""+revision.model.id,Field.Store.YES,Field.Index.NO); 
+		Field versionField = 
+			new Field("versionNumber",""+revision.revisionNumber,Field.Store.YES,Field.Index.NO);
+		
 
 		Document doc = new Document();
 		// Add these fields to a Lucene Document
 		doc.add(idField);
+		doc.add(versionField);
 		doc.add(nameField);
 		doc.add(descriptionField);
+		doc.add(contentField)
 
 		//Step 3: Add this document to Lucene Index.
 		indexWriter.addDocument(doc);

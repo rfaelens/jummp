@@ -96,6 +96,11 @@ class PharmMlService implements FileFormatService, IPharmMlService {
 
         return theName.toString()
     }
+    
+    @Profiled(tag="pharmMlService.getSearchIndexingContent")
+    public String getSearchIndexingContent(RevisionTransportCommand revision) {
+    	    return ""
+    }
 
     @Profiled(tag="pharmMlService.extractDescription")
     public String extractDescription(final List<File> model) {

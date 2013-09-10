@@ -178,6 +178,12 @@ class ModelFileFormatService {
         return service ? service.getFormatVersion(revision) : ""
     }
 
+    
+    String getSearchIndexingContent(RevisionTransportCommand revision) {
+    	FileFormatService service = serviceForFormat(revision?.format)
+        return service ? service.getSearchIndexingContent(revision) : ""
+    }
+    
     /**
      * Retrieves all annotation URNs through the service responsible for the format used
      * by the @p revision.
