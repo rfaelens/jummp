@@ -22,7 +22,7 @@ import org.apache.lucene.index.IndexWriterConfig
 import org.apache.lucene.search.SearcherManager
 import org.apache.lucene.search.SearcherFactory
 import org.apache.lucene.search.IndexSearcher
-
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 /**
  * @short Listener for new revisions and models for indexing
  * 
@@ -33,10 +33,10 @@ class UpdatedRepositoryListener implements ApplicationListener {
 
 	IndexWriter indexWriter
 	def modelDelegateService
-	def grailsApplication
+	def grailsApplication = ApplicationHolder.application
 	
 	public UpdatedRepositoryListener() {
-		File location=new File("/home/raza/reps/search")
+		File location=new File(grailsApplication.config.jummp.search.index)
 		location.mkdirs()
 		System.out.println("USING ${location} for directory!")
 		//Create instance of Directory where index files will be stored
