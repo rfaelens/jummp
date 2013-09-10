@@ -211,8 +211,8 @@ if (jummpConfig.jummp.vcs.workingDirectory) {
     jummp.vcs.workingDirectory = jummpConfig.jummp.vcs.workingDirectory
 }
 // search plugin
-if (jummpConfig.jummp.plugins.search.index) {
-    jummp.plugins.search.index = jummpConfig.jummp.plugins.search.index
+if (jummpConfig.jummp.search.index) {
+    jummp.search.index = jummpConfig.jummp.search.index
 }
 
 // registration settings

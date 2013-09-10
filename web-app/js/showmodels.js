@@ -15,6 +15,51 @@ $.jummp.showModels.changeModel = function (userId, field, target) {
     });
 };
 
+$.jummp.showModels.searchModels = function (query) {
+    "use strict";
+    $('#modelTable').dataTable({
+        bFilter: false,
+        bProcessing: true,
+        bServerSide: true,
+        bSort: true,
+        bJQueryUI: true,
+        bAutoWidth: false,
+        sSource: 'search',
+        sPaginationType: "full_numbers",
+        iDisplayLength: 10,
+        bLengthChange: false,
+        bScrollInfinite: false,
+        bScrollCollapse: true,
+        bDeferRender: true,
+        "fnServerData": function (sSource, aoData, fnCallback) {
+            $.ajax({
+                "dataType": 'json',
+                "type": "POST",
+                "url": $.jummp.createLink("search", "executeSearch", query),
+                "data": aoData,
+                "error": function () {
+                    // clear the table
+                    fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
+                },
+                "success": function (json) {
+                    var i, rowData, id;
+                    for (i = 0; i < json.aaData.length; i += 1) {
+                    	rowData = json.aaData[i];
+                        id = json.modelIDs[i]
+                        rowData[0] = "<a href=\"" + $.jummp.createLink("model", "show", id) + "\">" + (rowData[0] ? rowData[0].replace(/_/g, " ") : "-") + "</a>";
+                        var date=new Date(rowData[3]);
+                        rowData[3]=date.toUTCString();
+                        date=new Date(rowData[4]);
+                        rowData[4]=date.toUTCString();
+                    }
+                    fnCallback(json);
+                }
+            });
+        }
+    });
+};
+
+
 $.jummp.showModels.loadModelList = function () {
     "use strict";
     $('#modelTable').dataTable({
@@ -48,16 +93,14 @@ $.jummp.showModels.loadModelList = function () {
                         id = json.modelIDs[i]
                         rowData[0] = "<a href=\"" + $.jummp.createLink("model", "show", id) + "\">" + (rowData[0] ? rowData[0].replace(/_/g, " ") : "-") + "</a>";
                         var date=new Date(rowData[3]);
-                        rowData[3]=date.toDateString();
+                        rowData[3]=date.toUTCString();
                         date=new Date(rowData[4]);
-                        rowData[4]=date.toDateString();
+                        rowData[4]=date.toUTCString();
                     }
                     fnCallback(json);
                 }
             });
         }
-        
-        
     });
 };
 

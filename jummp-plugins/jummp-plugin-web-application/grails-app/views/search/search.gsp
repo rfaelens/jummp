@@ -11,7 +11,7 @@
          <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript>
         	$(document).ready(function() {
-        		 $.jummp.showModels.loadModelList();
+        		 $.jummp.showModels.searchModels('${query}');
         	} );
         </g:javascript>
         <g:javascript contextPath="" src="showmodels.js"/>

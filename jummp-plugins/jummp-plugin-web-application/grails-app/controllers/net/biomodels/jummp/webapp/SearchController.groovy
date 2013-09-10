@@ -31,6 +31,69 @@ class SearchController {
     	   [query:params.search_block_form]
     }
 
+        /**
+     * Action returning the DataTable content as JSON
+     */
+    def executeSearch = {
+        System.out.println("SEARCH QUERY FOR: "+params.id)
+    	int start = 0
+        int length = 10
+        if (params.iDisplayStart) {
+            start = params.iDisplayStart as int
+        }
+        if (params.iDisplayLength) {
+            length = Math.min(100, params.iDisplayLength as int)
+        }
+        def dataToRender = [:]
+        dataToRender.sEcho = params.sEcho
+        dataToRender.aaData = []
+        dataToRender.modelIDs= []
+
+        Set models = modelService.searchModels(params.id)
+        
+        switch (params.iSortCol_0 as int) {
+        case 0:
+            models = models.sort{ m1, m2 -> m1.name.compareTo(m2.name)  }
+            break
+        case 1:
+            models = models.sort{ m1, m2 -> m1.format.name.compareTo(m2.format.name)  }
+            break
+        case 2:
+            models = models.sort{ m1, m2 -> m1.submitter.compareTo(m2.submitter)  }
+            break
+        case 3:
+            models = models.sort{ m1, m2 -> m1.submissionDate.getTime() - m2.submissionDate.getTime()  }
+            break
+        case 4:
+            models = models.sort{ m1, m2 -> m1.lastModifiedDate.getTime() - m2.lastModifiedDate.getTime()  }
+            break
+        default:
+            models = models.sort{ m1, m2 -> m1.id - m2.id  }
+            break
+        }
+        
+        dataToRender.iTotalRecords = models.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.offset = start
+        dataToRender.iSortCol_0 = params.iSortCol_0
+        dataToRender.sSortDir_0 = params.sSortDir_0
+        
+        models.each { modelTC ->
+            dataToRender.modelIDs << [ modelTC.id ]
+            dataToRender.aaData << [
+                modelTC.name,
+                modelTC.format.name,
+                modelTC.submitter,
+                modelTC.submissionDate.getTime(),
+                modelTC.lastModifiedDate.getTime()
+            ]
+        }
+        render dataToRender as JSON
+    }
+
+    
+    
+    
     /**
      * Action returning the DataTable content as JSON
      */

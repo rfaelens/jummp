@@ -29,7 +29,7 @@ import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
-
+import org.apache.lucene.document.Document
 /**
  * @short Service class for managing Models
  *
@@ -85,6 +85,27 @@ class ModelService {
 
     static transactional = true
 
+    
+    public Set<ModelTransportCommand> searchModels(String query) {
+    	    System.out.println("SEARCHING FOR: "+query)
+    	    def searchEngine=grailsApplication.mainContext.getBean("searchEngine")
+    	    Set<Document> results=searchEngine.performSearch("name", query)
+    	    results.addAll(searchEngine.performSearch("description", query))
+    	    results.addAll(searchEngine.performSearch("content", query))
+    	    Set<ModelTransportCommand> returnVals=new HashSet<ModelTransportCommand>()
+    	    results.each {
+    	    	    try
+    	    	    {
+    	    	    	    Model returned=getModel(Integer.parseInt(it.get("model_id")))
+    	    	    	    if (returned) {
+    	    	    	    	    returnVals.add(returned.toCommandObject())
+    	    	    	    }
+    	    	    }
+    	    	    catch(Exception ignore) {
+    	    	    }
+    	    }
+    	    return returnVals
+    }
     
     
     /**
