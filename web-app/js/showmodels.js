@@ -48,9 +48,9 @@ $.jummp.showModels.searchModels = function (query) {
                         id = json.modelIDs[i]
                         rowData[0] = "<a href=\"" + $.jummp.createLink("model", "show", id) + "\">" + (rowData[0] ? rowData[0].replace(/_/g, " ") : "-") + "</a>";
                         var date=new Date(rowData[3]);
-                        rowData[3]=date.toUTCString();
+                        rowData[3]=date.toDateString();
                         date=new Date(rowData[4]);
-                        rowData[4]=date.toUTCString();
+                        rowData[4]=date.toDateString();
                     }
                     fnCallback(json);
                 }
@@ -93,9 +93,9 @@ $.jummp.showModels.loadModelList = function () {
                         id = json.modelIDs[i]
                         rowData[0] = "<a href=\"" + $.jummp.createLink("model", "show", id) + "\">" + (rowData[0] ? rowData[0].replace(/_/g, " ") : "-") + "</a>";
                         var date=new Date(rowData[3]);
-                        rowData[3]=date.toUTCString();
+                        rowData[3]=date.toDateString();
                         date=new Date(rowData[4]);
-                        rowData[4]=date.toUTCString();
+                        rowData[4]=date.toDateString();
                     }
                     fnCallback(json);
                 }
