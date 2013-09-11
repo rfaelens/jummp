@@ -31,6 +31,9 @@ $.jummp.showModels.searchModels = function (query) {
         bScrollInfinite: false,
         bScrollCollapse: true,
         bDeferRender: true,
+        aoColumnDefs: [
+			{ "sWidth": "10%", "aTargets": [ -1 ] }
+	],
         "fnServerData": function (sSource, aoData, fnCallback) {
             $.ajax({
                 "dataType": 'json',
@@ -76,6 +79,9 @@ $.jummp.showModels.loadModelList = function () {
         bScrollInfinite: false,
         bScrollCollapse: true,
         bDeferRender: true,
+        aoColumnDefs: [
+			{ "sWidth": "10%", "aTargets": [ -1 ] }
+	],
         "fnServerData": function (sSource, aoData, fnCallback) {
             $.ajax({
                 "dataType": 'json',
