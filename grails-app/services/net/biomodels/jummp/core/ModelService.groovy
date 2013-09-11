@@ -87,11 +87,12 @@ class ModelService {
 
     
     public Set<ModelTransportCommand> searchModels(String query) {
-    	    System.out.println("SEARCHING FOR: "+query)
     	    def searchEngine=grailsApplication.mainContext.getBean("searchEngine")
-    	    Set<Document> results=searchEngine.performSearch("name", query)
+    	    /*Set<Document> results=searchEngine.performSearch("name", query)
     	    results.addAll(searchEngine.performSearch("description", query))
-    	    results.addAll(searchEngine.performSearch("content", query))
+    	    results.addAll(searchEngine.performSearch("content", query))*/
+    	    Set<Document> results=searchEngine.performSearch(["name","description","content"] as String[], query)
+    	    
     	    Set<ModelTransportCommand> returnVals=new HashSet<ModelTransportCommand>()
     	    results.each {
     	    	    try

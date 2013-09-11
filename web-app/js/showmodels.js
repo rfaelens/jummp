@@ -26,7 +26,7 @@ $.jummp.showModels.searchModels = function (query) {
         bAutoWidth: false,
         sSource: 'search',
         sPaginationType: "full_numbers",
-        iDisplayLength: 10,
+        iDisplayLength: 5,
         bLengthChange: false,
         bScrollInfinite: false,
         bScrollCollapse: true,

@@ -35,8 +35,7 @@ class SearchController {
      * Action returning the DataTable content as JSON
      */
     def executeSearch = {
-        System.out.println("SEARCH QUERY FOR: "+params.id)
-    	int start = 0
+        int start = 0
         int length = 10
         if (params.iDisplayStart) {
             start = params.iDisplayStart as int
@@ -74,15 +73,20 @@ class SearchController {
             models = models.sort{ m1, m2 -> sortDir * m1.lastModifiedDate.getTime() - m2.lastModifiedDate.getTime()  }
             break
         default:
-            models = models.sort{ m1, m2 -> sortDir * m1.id - m2.id  }
+            models = models.sort{ m1, m2 -> sortDir * m1.name.compareTo(m2.name)  }
             break
         }
-        
         dataToRender.iTotalRecords = models.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.offset = start
         dataToRender.iSortCol_0 = params.iSortCol_0
         dataToRender.sSortDir_0 = params.sSortDir_0
+        if (start>0 && start<models.size()) {
+        	models = models[start..-1]
+        }
+        if (models.size() > length) {
+        	models = models[0..length-1]
+        }
         
         models.each { modelTC ->
             dataToRender.modelIDs << [ modelTC.id ]

@@ -4,6 +4,7 @@ import net.biomodels.jummp.core.events.RevisionCreatedEvent
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.search.IndexSearcher
 import org.apache.lucene.queryparser.classic.QueryParser
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser
 import org.apache.lucene.search.Query
 import org.apache.lucene.search.SearcherManager
 import org.apache.lucene.search.TopDocs
@@ -22,17 +23,14 @@ class SearchProvider {
 	
 	SearcherManager mgr
 	
-	public Set<Document> performSearch(String field, String query) {
+	private Set<Document> search(Query q) {
 		Set<Document> docs=new HashSet<Document>()
 		if (!mgr) {
 			mgr=grailsApplication.mainContext.getBean("indexingEventListener").getSearcherManager()
 		}
-		System.out.println("Got search query: "+query)
 		IndexSearcher indexSearcher = mgr.acquire();
 		try {
-			QueryParser queryParser = new QueryParser(Version.LUCENE_44,field,new StandardAnalyzer(Version.LUCENE_44));
-			Query termQuery = queryParser.parse(query);
-			TopDocs topDocs = indexSearcher.search(termQuery,10);
+			TopDocs topDocs = indexSearcher.search(q,10);
 			for (int i=0; i<topDocs.totalHits; i++) {
 				docs.add(indexSearcher.doc(topDocs.scoreDocs[i].doc))
 			}
@@ -42,6 +40,17 @@ class SearchProvider {
 			indexSearcher = null;
 		}
 		return docs
+		
+	}
+	
+	public Set<Document> performSearch(String[] fields, String query) {
+		QueryParser queryParser=new MultiFieldQueryParser(Version.LUCENE_44, fields, new StandardAnalyzer(Version.LUCENE_44))		
+		return search(queryParser.parse(query))
+	}
+	
+	public Set<Document> performSearch(String field, String query) {
+		QueryParser queryParser = new QueryParser(Version.LUCENE_44,field,new StandardAnalyzer(Version.LUCENE_44));
+		return search(queryParser.parse(query))
 	}
 	
 	public void refreshIndex() {
