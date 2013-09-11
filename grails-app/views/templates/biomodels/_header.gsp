@@ -46,6 +46,30 @@
 <!-- local-search -->
 <!-- NB: if you do not have a local-search, delete the following div, and drop the class="grid_12 alpha" class from local-title above -->
 
+<div class="grid_12 omega">
+        <form id="local-search" name="local-search" action="${createLink(controller: 'search', action: 'search')}" method="post">
+                
+          <fieldset>
+          
+          <div class="left">
+            <label>
+            <input type="text" name="search_block_form" id="local-searchbox">
+            </label>
+          </div>
+          
+          <div class="right">
+            <input type="submit" name="submit" value="Search" class="submit">          
+            <!-- If your search is more complex than just a keyword search, you can link to an Advanced Search,
+                 with whatever features you want available 
+            <span class="adv"><a href="../search" id="adv-search" title="Advanced">Advanced</a></span>-->
+          </div>                  
+          
+          </fieldset>
+          
+        </form>
+      </div>
+
+
 
 <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/navbar"/>
 </div>
