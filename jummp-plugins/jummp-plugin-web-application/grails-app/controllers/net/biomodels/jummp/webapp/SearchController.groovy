@@ -49,26 +49,32 @@ class SearchController {
         dataToRender.aaData = []
         dataToRender.modelIDs= []
 
-        Set models = modelService.searchModels(params.id)
+        List models = new LinkedList()
+        models.addAll(modelService.searchModels(params.id))
+        
+        int sortDir=1;
+        if (params.sSortDir_0=="asc") {
+        	sortDir=-1;
+        }
         
         switch (params.iSortCol_0 as int) {
         case 0:
-            models = models.sort{ m1, m2 -> m1.name.compareTo(m2.name)  }
+            models = models.sort{ m1, m2 -> sortDir * m1.name.compareTo(m2.name)  }
             break
         case 1:
-            models = models.sort{ m1, m2 -> m1.format.name.compareTo(m2.format.name)  }
+            models = models.sort{ m1, m2 -> sortDir * m1.format.name.compareTo(m2.format.name)  }
             break
         case 2:
-            models = models.sort{ m1, m2 -> m1.submitter.compareTo(m2.submitter)  }
+            models = models.sort{ m1, m2 -> sortDir * m1.submitter.compareTo(m2.submitter)  }
             break
         case 3:
-            models = models.sort{ m1, m2 -> m1.submissionDate.getTime() - m2.submissionDate.getTime()  }
+            models = models.sort{ m1, m2 -> sortDir * m1.submissionDate.getTime() - m2.submissionDate.getTime()  }
             break
         case 4:
-            models = models.sort{ m1, m2 -> m1.lastModifiedDate.getTime() - m2.lastModifiedDate.getTime()  }
+            models = models.sort{ m1, m2 -> sortDir * m1.lastModifiedDate.getTime() - m2.lastModifiedDate.getTime()  }
             break
         default:
-            models = models.sort{ m1, m2 -> m1.id - m2.id  }
+            models = models.sort{ m1, m2 -> sortDir * m1.id - m2.id  }
             break
         }
         
