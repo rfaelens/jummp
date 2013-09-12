@@ -69,28 +69,44 @@ class UpdatedRepositoryListener implements ApplicationListener {
 		String name = revision.name
 		String description = revision.description
 		String content=modelDelegateService.getSearchIndexingContent(revision)
-
+		Document doc = new Document();
+		
+		/*
+		*	Indexed fields
+		*/
 		Field nameField =
-			new Field("name",name,Field.Store.YES,Field.Index.NOT_ANALYZED);
+			new Field("name",name,Field.Store.YES,Field.Index.ANALYZED);
 		Field descriptionField = 
 			new Field("description",description,Field.Store.NO,Field.Index.ANALYZED); 
+		Field formatField = 
+			new Field("format",""+revision.format.name,Field.Store.YES,Field.Index.NOT_ANALYZED);
 		Field contentField = 
 			new Field("content",content,Field.Store.NO,Field.Index.ANALYZED); 
+		
+		doc.add(nameField);
+		doc.add(descriptionField);
+		doc.add(formatField)
+		doc.add(contentField)
+			
+			
+		/*
+		*	Stored fields. Hopefully will be used to display the search results one day
+		*	instead of going to the database for each model. When we find a solution to needing to
+		*	look in the database to figure out if the user has access to a model. 
+		*/
 		Field idField = 
 			new Field("model_id",""+revision.model.id,Field.Store.YES,Field.Index.NO); 
 		Field versionField = 
 			new Field("versionNumber",""+revision.revisionNumber,Field.Store.YES,Field.Index.NO);
-		
-
-		Document doc = new Document();
-		// Add these fields to a Lucene Document
+		Field submittedField = 
+			new Field("submissionDate",""+revision.model.submissionDate,Field.Store.YES,Field.Index.NO);
+		Field submitterField = 
+			new Field("submitter",""+revision.model.submitter,Field.Store.YES,Field.Index.NOT_ANALYZED);
 		doc.add(idField);
 		doc.add(versionField);
-		doc.add(nameField);
-		doc.add(descriptionField);
-		doc.add(contentField)
-
-		//Step 3: Add this document to Lucene Index.
+		doc.add(submittedField)
+		doc.add(submitterField)
+		
 		indexWriter.addDocument(doc);
 		indexWriter.commit();
 	}

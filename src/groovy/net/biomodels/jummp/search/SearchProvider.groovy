@@ -30,7 +30,7 @@ class SearchProvider {
 		}
 		IndexSearcher indexSearcher = mgr.acquire();
 		try {
-			TopDocs topDocs = indexSearcher.search(q,10);
+			TopDocs topDocs = indexSearcher.search(q,1000);
 			for (int i=0; i<topDocs.totalHits; i++) {
 				docs.add(indexSearcher.doc(topDocs.scoreDocs[i].doc))
 			}

@@ -86,11 +86,17 @@ class ModelService {
     static transactional = true
 
     
+    /**
+    * Returns search results for query restricted Models the user has access to.
+    *
+    * Executes the @p query, restricting results to Models the current user has access to, 
+    * @param query freetext search on models
+    * @return List of Models
+    **/
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getAllModels")
     public Set<ModelTransportCommand> searchModels(String query) {
     	    def searchEngine=grailsApplication.mainContext.getBean("searchEngine")
-    	    /*Set<Document> results=searchEngine.performSearch("name", query)
-    	    results.addAll(searchEngine.performSearch("description", query))
-    	    results.addAll(searchEngine.performSearch("content", query))*/
     	    Set<Document> results=searchEngine.performSearch(["name","description","content"] as String[], query)
     	    
     	    Set<ModelTransportCommand> returnVals=new HashSet<ModelTransportCommand>()
