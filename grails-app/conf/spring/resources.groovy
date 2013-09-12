@@ -54,6 +54,10 @@ beans = {
 			bean.autowire = "byName"
 			bean.singleton = true
     }
+    referenceTracker(net.biomodels.jummp.core.ReferenceTracker) { bean ->
+			bean.autowire = "byName"
+			bean.singleton = true
+    }
     ontologyLookupServiceResolver(net.biomodels.jummp.core.miriam.OntologyLookupResolver) { bean ->
         bean.scope = "prototype"
         supportedIdentifiers = [

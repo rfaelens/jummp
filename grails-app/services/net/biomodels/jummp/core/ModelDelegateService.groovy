@@ -13,8 +13,6 @@ import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
 import java.util.List
 import java.util.Map
-import java.lang.ref.ReferenceQueue
-import net.biomodels.jummp.core.WrappedRevisionReference
 
 /**
  * @short Service delegating methods to ModelService.
@@ -31,26 +29,10 @@ class ModelDelegateService implements IModelService {
     static transactional = true
     def modelService
     def modelFileFormatService
-
-    /*
-    * Weak references to revision transport command objects, so that files can be deleted from exchange.
-    */
-    private final static Map<String,WrappedRevisionReference> weakRefs = new HashMap<String,WrappedRevisionReference>()
-    private final static ReferenceQueue referenceQueue = new ReferenceQueue()
-    
+    def grailsApplication
+        
     String getPluginForFormat(ModelFormatTransportCommand format) {
     	    return modelFileFormatService.getPluginForFormat(format)
-    }
-    
-    /*
-    * Functions used by the quartz job for removing files from the exchange
-    */
-    ReferenceQueue getRefQueue() {
-    	    return referenceQueue
-    }
-    
-    void clearReference(String id) {
-    	    weakRefs.remove(id)
     }
     
     List<ModelTransportCommand> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn) {
@@ -156,9 +138,7 @@ class ModelDelegateService implements IModelService {
         	/*
         	* Add revision to the weak reference data structures, so its files are released from disk.
         	*/
-        	String folder=(new File(files.first().path)).getParent()
-        	WrappedRevisionReference ref=new WrappedRevisionReference(revision, folder, referenceQueue)
-        	weakRefs.put(folder,ref)
+        	grailsApplication.mainContext.getBean("referenceTracker").addReference(revision, files.first().path) 
         }
         return files
     }

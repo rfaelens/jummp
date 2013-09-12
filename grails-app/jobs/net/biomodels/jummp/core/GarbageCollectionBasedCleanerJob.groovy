@@ -15,7 +15,7 @@ import net.biomodels.jummp.core.WrappedRevisionReference
  */
 class GarbageCollectionBasedCleanerJob {
     
-    def modelDelegateService;
+    def grailsApplication;
     boolean forcedGC=false;
 	
     static triggers = {
@@ -27,14 +27,15 @@ class GarbageCollectionBasedCleanerJob {
    	    if (forcedGC) {
    	    	    System.gc()
    	    }
-    	    ReferenceQueue queue=modelDelegateService.getRefQueue()
+   	    def refTracker=grailsApplication.mainContext.getBean("referenceTracker")
+    	    ReferenceQueue queue=refTracker.getRefQueue()
     	    while (true) {
     	    	   WrappedRevisionReference ref=(WrappedRevisionReference) queue.poll()
     	    	   if (!ref) {
     	    	   	   break
     	    	   }
     	    	   System.out.println("GC Cleaner deleting: "+ref.id()+" ..."+ref.deleteFolder())
-    	    	   modelDelegateService.clearReference(ref.id())
+    	    	   refTracker.clearReference(ref.id())
     	    }
     }
 
