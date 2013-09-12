@@ -12,7 +12,6 @@ import org.quartz.JobExecutionContext
  */
 class RegistrationCheckerJob {
     
-    def modelFileFormatService
     def grailsApplication
 	
     static triggers = {
@@ -21,7 +20,7 @@ class RegistrationCheckerJob {
     }
   
     def execute() {
-    	    System.out.println(modelFileFormatService.status())
+    	    grailsApplication.mainContext.getBean("modelFileFormatConfig").status()
     	    grailsApplication.mainContext.getBean("searchEngine").refreshIndex()
     }
 

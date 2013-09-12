@@ -30,23 +30,14 @@ class ModelFileFormatService {
     @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
-    /**
-    * The registered services to handle ModelFormats
-    */
-    private final Map<String, String> services = new HashMap()
-
-    
-    /**
-    * The registered plugins to handle ModelFormats visualisations
-    */
-    private final Map<String, String> plugins = new HashMap()
-      
-    
-    public void status() {
-    	    System.out.println("MODEL FILE FORMAT SERVICE STATUS:")
-    	    System.out.println("SERVICES: "+services.inspect())
-    	    System.out.println("PLUGINS: "+plugins.inspect())
+    private Map<String,String> getServices() {
+    	    grailsApplication.mainContext.getBean("modelFileFormatConfig").getServices()
     }
+
+    private Map<String,String> getControllers() {
+    	    grailsApplication.mainContext.getBean("modelFileFormatConfig").getControllers()
+    }
+
     
     /**
      * Extracts the format of the supplied @p modelFiles.
@@ -60,6 +51,8 @@ class ModelFileFormatService {
         if (!modelFiles) {
             return null
         }
+        Map<String, String> services=getServices()
+
         String match = services.keySet().find {
             if (it == "UNKNOWN") return false
             String serviceName = services.getAt(it)
@@ -110,13 +103,13 @@ class ModelFileFormatService {
      * @throws IllegalArgumentException if the @p format has not been registered yet
      */
     @Profiled(tag = "modelFileFormatService.handleModelFormat")
-    void handleModelFormat(ModelFormatTransportCommand format, String service, String plugin) {
+    void handleModelFormat(ModelFormatTransportCommand format, String service, String controller) {
         ModelFormat modelFormat = ModelFormat.findByIdentifierAndFormatVersion(format.identifier, "")
         if (!modelFormat) {
             throw new IllegalArgumentException("ModelFormat ${format.properties} not registered in database")
         }
-        services.put(format.identifier, service)
-        plugins.put(format.identifier, plugin)
+        getServices().put(format.identifier, service)
+        getControllers().put(format.identifier, controller)
     }
 
     boolean validate(final List<File> model, String formatId) {
@@ -222,7 +215,7 @@ class ModelFileFormatService {
      * @return The folder where template for the model display can be found
      */
     String getPluginForFormat(final ModelFormatTransportCommand format) {
-    	    return plugins.get(format.identifier)
+    	    return getControllers().get(format.identifier)
     }
     
     /**
@@ -232,7 +225,8 @@ class ModelFileFormatService {
      */
     private FileFormatService serviceForFormat(final def format) {
         if (format) {
-             if (services.containsKey(format.identifier)) {
+            Map<String,String> services=getServices() 
+            if (services.containsKey(format.identifier)) {
                 return grailsApplication.mainContext.getBean((String)services.getAt(format.identifier))
             }
         } else {
