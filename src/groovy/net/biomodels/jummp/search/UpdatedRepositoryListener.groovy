@@ -40,6 +40,8 @@ class UpdatedRepositoryListener implements ApplicationListener {
 		String path=grailsApplication.config.jummp.search.index
 		if (Environment.current == Environment.TEST) {
 			path = "target/search/index"
+			File deleteMe=new File(path)
+			deleteMe.deleteDir()
 		}
 		File location=new File(path)
 		location.mkdirs()
@@ -70,6 +72,8 @@ class UpdatedRepositoryListener implements ApplicationListener {
 	}
 	
 	public void updateIndex(RevisionTransportCommand revision) {
+		System.out.println("UPDATING INDEX WITH ${revision.inspect()}")
+		System.out.println("UPDATING INDEX WITH ${revision.getProperties()}")
 		
 		String name = revision.name
 		String description = revision.description
