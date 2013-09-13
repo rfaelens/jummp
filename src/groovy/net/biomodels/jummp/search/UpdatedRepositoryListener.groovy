@@ -72,8 +72,6 @@ class UpdatedRepositoryListener implements ApplicationListener {
 	}
 	
 	public void updateIndex(RevisionTransportCommand revision) {
-		System.out.println("UPDATING INDEX WITH ${revision.inspect()}")
-		System.out.println("UPDATING INDEX WITH ${revision.getProperties()}")
 		
 		String name = revision.name
 		String description = revision.description
