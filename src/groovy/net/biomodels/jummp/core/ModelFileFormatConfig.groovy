@@ -1,5 +1,13 @@
 package net.biomodels.jummp.core
-
+/**
+ * @short Class written as a spring-bean singleton to hold modelfileformatservice config data
+ * 
+ * The class exists to store config required by the modelfileformatservice, which was getting lost
+ * after jummp was left running for a long time.
+ *
+ * @author Raza Ali, raza.ali@ebi.ac.uk
+ * @date   9/09/2013
+ */
 class ModelFileFormatConfig {
     /**
     * The registered services to handle ModelFormats

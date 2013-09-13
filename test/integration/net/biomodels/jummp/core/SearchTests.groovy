@@ -16,6 +16,33 @@ class SearchTests extends JummpIntegrationTest {
     def fileSystemService
     def grailsApplication
 
+    @Test
+    void testGetLatestRevision() {
+    	    
+    	// generate unique ids for the name and description
+        String nameTag=UUID.randomUUID().toString()
+        String descriptionTag=UUID.randomUUID().toString()
+        authenticateAsTestUser()
+        GitManagerFactory gitService = new GitManagerFactory()
+        gitService.grailsApplication = grailsApplication
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.plugins.sbml.validation = false
+        modelService.vcsService.vcsManager = gitService.getInstance()
+
+    	// upload the model
+        def rf = new RepositoryFileTransportCommand(path: smallModel("importModel.xml", nameTag, descriptionTag).absolutePath, mainFile:true, description: "")
+        Model upped = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
+                new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
+        // refresh the search index (we dont want to wait 5 mins)       
+        grailsApplication.mainContext.getBean("searchEngine").refreshIndex()
+        
+        // Search for the model using the unique name and description, and ensure its the same we uploaded       
+        assertSame(upped.id,searchForModel(nameTag).id)
+        assertSame(upped.id, searchForModel(descriptionTag).id)
+    }
+
     @Before
     void setUp() {
         def container = new File("target/vcs/git/ggg/")
@@ -44,30 +71,10 @@ class SearchTests extends JummpIntegrationTest {
     	 }
     	 return mods.first()
     }
-    
-    @Test
-    void testGetLatestRevision() {
-        // create Model with one revision, without ACL
-        String nameTag=UUID.randomUUID().toString()
-        String descriptionTag=UUID.randomUUID().toString()
-        authenticateAsTestUser()
-        GitManagerFactory gitService = new GitManagerFactory()
-        gitService.grailsApplication = grailsApplication
-        grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
-        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
-        grailsApplication.config.jummp.plugins.sbml.validation = false
-        modelService.vcsService.vcsManager = gitService.getInstance()
 
-        def rf = new RepositoryFileTransportCommand(path: smallModel("importModel.xml", nameTag, descriptionTag).absolutePath, mainFile:true, description: "")
-        Model upped = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
-                new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
-        grailsApplication.mainContext.getBean("searchEngine").refreshIndex()
-        
-        
-        assertSame(upped.id,searchForModel(nameTag).id)
-        assertSame(upped.id, searchForModel(descriptionTag).id)
-    }
+    
+    // Convenience functions follow..
+    
     
     private File smallModel(String filename, String id, String desc) {
         return getFileForTest(filename, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><sbml xmlns=\"http://www.sbml.org/sbml/level1\" level=\"1\" version=\"1\">  <model name=\"${id}\">"
