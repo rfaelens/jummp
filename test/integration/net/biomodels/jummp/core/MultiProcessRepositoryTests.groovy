@@ -37,7 +37,7 @@ class MultiProcessRepositoryTests  {
        FileUtils.deleteDirectory(new File("target/vcs/modelfolder"))
     }
 
-    @Test
+    @Ignore @Test
     void testConcurrent() {
     	//start up sync server
         InterJummpSync sync=new InterJummpSync()

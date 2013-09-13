@@ -23,6 +23,7 @@ import org.apache.lucene.search.SearcherManager
 import org.apache.lucene.search.SearcherFactory
 import org.apache.lucene.search.IndexSearcher
 import org.codehaus.groovy.grails.commons.ApplicationHolder
+import grails.util.Environment
 /**
  * @short Listener for new revisions and models for indexing
  * 
@@ -36,7 +37,11 @@ class UpdatedRepositoryListener implements ApplicationListener {
 	def grailsApplication = ApplicationHolder.application
 	
 	public UpdatedRepositoryListener() {
-		File location=new File(grailsApplication.config.jummp.search.index)
+		String path=grailsApplication.config.jummp.search.index
+		if (Environment.current == Environment.TEST) {
+			path = "target/search/index"
+		}
+		File location=new File(path)
 		location.mkdirs()
 		System.out.println("USING ${location} for directory!")
 		//Create instance of Directory where index files will be stored
