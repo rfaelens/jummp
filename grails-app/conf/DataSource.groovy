@@ -43,16 +43,23 @@ dataSource {
     username = databaseConfig.jummp.database.username
     password = databaseConfig.jummp.database.password
     dialect  = databaseConfig.jummp.database.dialect
-    /* properties {
-            pooled = true
-            maxActive = 50
-            maxIdle = 25
-            minIdle = 5
-            initialSize = 5
-            minEvictableIdleTimeMillis = 60000
-            timeBetweenEvictionRunsMillis = 60000
-            maxWait = 10000
-        } */
+    properties 
+            { 
+                maxActive = 50 
+                maxIdle = 25 
+                minIdle =1 
+                initialSize = 1 
+                minEvictableIdleTimeMillis = 60000 
+                timeBetweenEvictionRunsMillis = 60000 
+                numTestsPerEvictionRun = 3 
+                maxWait = 10000 
+
+                testOnBorrow = true 
+                testWhileIdle = true 
+                testOnReturn = false 
+
+                validationQuery = "SELECT 1" 
+    } 
 }
 hibernate {
     cache.use_second_level_cache = true
@@ -84,6 +91,7 @@ environments {
         dataSource {
             dbCreate = databaseConfig.jummp.database.dbCreate
             url = databaseConfig.jummp.database.url
+            
         }
     }
 }
