@@ -1,6 +1,7 @@
 package net.biomodels.jummp.core.model
-import org.codehaus.groovy.grails.web.context.ServletContextHolder as SCH
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes as GA
+
+import grails.util.Holders
+
 /**
  * @short Wrapper for a Revision to be transported through JMS.
  *
@@ -11,6 +12,7 @@ import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes as GA
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class RevisionTransportCommand implements Serializable {
     private static final long serialVersionUID = 1L
@@ -59,17 +61,16 @@ class RevisionTransportCommand implements Serializable {
      * The list of files associated with this revision
      */
      List<RepositoryFileTransportCommand> files = null;
-     
+
      List<RepositoryFileTransportCommand> getFiles() {
-     	     if (!files) {
-     	     	     // See: http://grails.org/FAQ#Q: How do I get access to the application context from sources in src/groovy?
-     	     	     def ctx = SCH.servletContext.getAttribute(GA.APPLICATION_CONTEXT)
-     	     	     files=ctx.modelDelegateService.retrieveModelFiles(this)
-     	     }
-     	     return files
+         if (!files) {
+             def ctx = Holders.getApplicationContext()
+             files=ctx.modelDelegateService.retrieveModelFiles(this)
+         }
+         return files
      }
-     
+
      void setFiles(List<RepositoryFileTransportCommand> f) {
-     	     files=f;
+         files=f;
      }
 }
