@@ -231,7 +231,7 @@ if (jummp.search.index instanceof ConfigObject) {
     // prefer StringBuffer to StringBuilder just to be defensive
     StringBuffer tmp = new StringBuffer(System.getProperty("java.io.tmpdir"))
     File idx = new File(tmp.append(File.separator).append("search_index").toString())
-    assert idx.mkdirs()
+    idx.mkdirs()
     jummp.search.index = idx.canonicalPath
 }
 println "INFO\t Using ${jummp.search.index} for storing the search index."
