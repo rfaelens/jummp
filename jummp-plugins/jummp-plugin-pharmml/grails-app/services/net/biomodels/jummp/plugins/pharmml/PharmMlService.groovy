@@ -96,10 +96,10 @@ class PharmMlService implements FileFormatService, IPharmMlService {
 
         return theName.toString()
     }
-    
+
     @Profiled(tag="pharmMlService.getSearchIndexingContent")
     public String getSearchIndexingContent(RevisionTransportCommand revision) {
-    	    return ""
+        return ""
     }
 
     @Profiled(tag="pharmMlService.extractDescription")
@@ -138,14 +138,25 @@ class PharmMlService implements FileFormatService, IPharmMlService {
             final PharmMlDetector detector = new PharmMlDetector(theFile)
             def modelDetectorThread = threadFactory.newThread(detector)
             if (modelDetectorThread) {
+                if (IS_INFO_ENABLED) {
+                    log.info("Testing ${theFile.name} for pharmML.")
+                }
                 modelDetectorThread.setName("pharmML detector for ${theFile.name}")
                 modelDetectorThread.start()
+                modelDetectorThread.join()
+                boolean status = detector.isRecognisedFormat(theFile)
+                outcomes.put(theFile, status)
             } else {
-                //todo retry or at least log
-                println "cannot start a detector thread for $theFile"
+                //todo retry
+                log.error("cannot start a detector thread for $theFile")
+                outcomes.put(theFile, false)
             }
-            modelDetectorThread.join()
-            outcomes.put(theFile, detector.isRecognisedFormat(theFile))
+
+            boolean status = detector.isRecognisedFormat(theFile)
+            outcomes.put(theFile, status)
+            if (IS_INFO_ENABLED) {
+                log.info("PharmML detection status for ${theFile.name}: ${status}")
+            }
         }
         List<Boolean> outcomeValues = outcomes.values().toList()
         boolean pharmmlFound = !!outcomeValues.find{it}

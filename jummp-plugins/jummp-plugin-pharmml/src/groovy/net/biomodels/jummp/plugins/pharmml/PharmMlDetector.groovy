@@ -7,6 +7,8 @@ import net.biomodels.jummp.core.util.JummpXmlUtils
 import net.biomodels.jummp.plugins.sbml.SbmlService
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.apache.tika.detect.DefaultDetector
+import org.apache.tika.metadata.Metadata
 
 public class PharmMlDetector implements RunnableModelFormatDetector {
     private static final Log log = LogFactory.getLog(this)
@@ -58,8 +60,9 @@ public class PharmMlDetector implements RunnableModelFormatDetector {
     private boolean determineFormat(final File theFile) {
         //validation has already been done
         assert theFile && theFile.canRead()
-        final Path path = theFile.toPath()
-        final String CONTENT_TYPE = Files.probeContentType(path)
+        def sherlock = new DefaultDetector()
+        final String CONTENT_TYPE = sherlock.detect(new BufferedInputStream(
+                new FileInputStream(theFile)), new Metadata()).toString()
         if ("application/xml".equals(CONTENT_TYPE)) {
             String acceptedNs = JummpXmlUtils.findModelAttribute(theFile, "PharmML", "xmlns")
             if (!acceptedNs) {
@@ -74,6 +77,10 @@ public class PharmMlDetector implements RunnableModelFormatDetector {
             hasBeenRun = true
             isPharmML = true
             return true
+        } else {
+            if (IS_INFO_ENABLED) {
+                log.info "File ${theFile.name} is not of type application/xml, but ${CONTENT_TYPE}."
+            }
         }
         hasBeenRun = true
         isPharmML = false
