@@ -211,9 +211,30 @@ if (jummpConfig.jummp.vcs.workingDirectory) {
     jummp.vcs.workingDirectory = jummpConfig.jummp.vcs.workingDirectory
 }
 // search plugin
-if (jummpConfig.jummp.search.index) {
-    jummp.search.index = jummpConfig.jummp.search.index
+if (!(jummpConfig.jummp.search.index instanceof ConfigObject)) {
+    String indexLocation = jummpConfig.jummp.search.index
+    final File indexFolder = new File(indexLocation)
+    if (indexFolder.exists()) {
+        if (indexFolder.isDirectory() && indexFolder.canRead() && indexFolder.canWrite() && indexFolder.canExecute()) {
+            jummp.search.index = indexLocation
+        } else {
+            //permission issues
+            println "ERROR\t Cannot use ${indexLocation} for storing the search index. Please review the folder's permissions."
+        }
+    } else {
+        // location does not exist
+            println "ERROR\t Cannot use ${indexLocation} for storing the search index because the folder does not exist. Please create it."
+    }
 }
+// handle the situation gracefully
+if (jummp.search.index instanceof ConfigObject) {
+    // prefer StringBuffer to StringBuilder just to be defensive
+    StringBuffer tmp = new StringBuffer(System.getProperty("java.io.tmpdir"))
+    File idx = new File(tmp.append(File.separator).append("search_index").toString())
+    assert idx.mkdirs()
+    jummp.search.index = idx.canonicalPath
+}
+println "INFO\t Using ${jummp.search.index} for storing the search index."
 
 // registration settings
 if (!(jummpConfig.jummp.security.registration.email.send instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.send)) {
