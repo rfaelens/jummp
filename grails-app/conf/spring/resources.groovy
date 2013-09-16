@@ -1,11 +1,11 @@
 import grails.util.Environment
+import grails.util.Holders
 import java.util.concurrent.Executors
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 // Place your Spring DSL code here
 beans = {
     xmlns aop: "http://www.springframework.org/schema/aop"
-    def grailsApplication = ApplicationHolder.application
+    def grailsApplication = Holders.grailsApplication
 
     aop.config {
         // intercept all methods annotated with PostLogging annotation
