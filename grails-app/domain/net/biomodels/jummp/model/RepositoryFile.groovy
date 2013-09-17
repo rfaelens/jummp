@@ -49,13 +49,12 @@ class RepositoryFile implements Serializable {
     String mimeType
 
     static constraints = {
-        path(blank: false, /*unique: true,*/
-            validator: { p, rf -> 
+        path(blank: false,
+            validator: { p, rf ->
                 String sep  = File.separator
-                String pathRegex = "${sep}?([a-zA-Z0-9\\-_]+${sep})+[a-zA-Z0-9\\-_\\.]+".toString()
-                if (p == null || !new File(p).exists() || ! p.matches(pathRegex)) {
+                if (p == null || !new File(p).exists()) {
                     return false
-                } 
+                }
                 def f = new File(p).getCanonicalFile()
                 def sherlock = new DefaultDetector()
                 String properType = sherlock.detect(new BufferedInputStream(
