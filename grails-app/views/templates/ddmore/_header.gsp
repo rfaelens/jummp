@@ -74,7 +74,7 @@
     		<g:if test="${g.pageProperty(name:'page.feedback')?.length()}">
 	    		class="active-trail active"
 	    	</g:if>
-    		title="submit a model">Feedback</a>
+    		title="give feedback">Feedback</a>
     	</li>
     	<li class="leaf">
     		<a href="//ddmore.eu" title="about ddmore">About DDMoRe</a>

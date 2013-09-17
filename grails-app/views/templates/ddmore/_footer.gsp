@@ -5,7 +5,7 @@
 
       
   <div class="content">
-    <ul class="menu"><li class="first leaf"><a href="//ddmore.eu/" title="DDMoRe front page" class="active">Home</a></li>
+    <ul class="menu"><li class="first leaf"><a href="//ddmore.eu/" title="DDMoRe front page" class="active">DDMoRe</a></li>
 <li class="leaf"><a href="//ddmore.eu/content/privacy-policy">Privacy policy</a></li>
 <li class="last leaf"><a href="//ddmore.eu/content/disclaimer">Disclaimer</a></li>
 </ul>  </div>
