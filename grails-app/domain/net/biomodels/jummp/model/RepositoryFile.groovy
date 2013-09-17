@@ -3,14 +3,12 @@ package net.biomodels.jummp.model
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import org.apache.tika.detect.DefaultDetector
 import org.apache.tika.metadata.Metadata
-import org.apache.tika.mime.MediaType
 
 /**
  * @short Representation of a File belonging to a ModelVersion.
  *
  * @see net.biomodels.jummp.model.Revision
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @date 20130612
  */
 class RepositoryFile implements Serializable {
     static belongsTo = [revision:Revision]

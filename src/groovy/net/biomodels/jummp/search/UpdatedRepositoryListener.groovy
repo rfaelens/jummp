@@ -55,7 +55,7 @@ class UpdatedRepositoryListener implements ApplicationListener {
 		}
 		File location=new File(path)
 		location.mkdirs()
-		System.out.println("USING ${location} for directory!")
+		System.out.println("USING ${location} for index directory!")
 		//Create instance of Directory where index files will be stored
 		Directory fsDirectory =  FSDirectory.open(location);
 		/* Create instance of analyzer, which will be used to tokenize
