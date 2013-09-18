@@ -98,16 +98,23 @@ class ModelController {
         start {
             action {
                 Map<String, Object> workingMemory=new HashMap<String,Object>()
-                workingMemory.put("isUpdateOnExistingModel",flow.isUpdate)
+                flow.workingMemory=workingMemory
+                flow.workingMemory.put("isUpdateOnExistingModel",flow.isUpdate)
                 if (flow.isUpdate) {
                     Long model_id=conversation.model_id as Long
-                    workingMemory.put("model_id", model_id)
-                    workingMemory.put("LastRevision", modelDelegateService.getLatestRevision(model_id))
+                    flow.workingMemory.put("model_id", model_id)
+                    flow.workingMemory.put("LastRevision", modelDelegateService.getLatestRevision(model_id))
                 }
-                flow.workingMemory=workingMemory
                 submissionService.initialise(flow.workingMemory)
+                if (flow.isUpdate) {
+                	skipDisclaimer()
+                }
+                else {
+                	goToDisclaimer()
+                }
             }
-            on("success").to "displayDisclaimer"
+            on("skipDisclaimer").to "uploadFiles"
+            on("goToDisclaimer").to "displayDisclaimer"
         }
         displayDisclaimer {
             on("Continue").to "uploadFiles"
