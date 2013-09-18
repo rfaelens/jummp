@@ -81,7 +81,7 @@ environments {
             cache.use_query_cache = false
         }
         dataSource {
-            dbCreate = "create"
+            dbCreate = "update"
             url = "jdbc:hsqldb:mem:testDb"
             dialect = ""
             driverClassName = "org.hsqldb.jdbcDriver"
