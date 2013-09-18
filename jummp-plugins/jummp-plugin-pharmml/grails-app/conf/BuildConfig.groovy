@@ -26,6 +26,7 @@ grails.project.dependency.resolution = {
             excludes 'junit-dep'
         }
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
+        compile "org.apache.tika:tika-core:1.3"
     }
 
     plugins {
