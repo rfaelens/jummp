@@ -59,7 +59,7 @@ class PharmMlServiceTests {
             new File("test/files/pdmodel_sbml.xml")
         ]
         assertFalse service.areFilesThisFormat(bigModel)
-        bigModel << new File("test/files/example9.xml")
+        bigModel << new File("test/files/example2.xml")
         assertTrue service.areFilesThisFormat(bigModel)
     }
 
@@ -89,16 +89,14 @@ class PharmMlServiceTests {
         def model = [new File("test/files/pdmodel_sbml.xml"), new File("test/files/iov1_data.txt")]
         assertEquals "", service.extractName(model)
         model = [new File("test/files/example2.xml")]
-        assertEquals "CTS1 example - continuous PK/PD", service.extractName(model)
+        assertEquals("Warfarin example - basic PK with covariate W", service.extractName(model))
         model = []
         def baseFolder = new File("test/files/")
         baseFolder.eachFileMatch FileType.FILES, ~/.*\.xml/, { File f -> model << f; }
-        def mergedNames = [ "IOV1 with covariates",
-                "CTS1 example - continuous PK/PD", 
-                "Warfarin example Corresponds to WP3 PK_PRED use case",
-                "Chan, Nutt, Holford 2005 Parkinson paper",
+        def mergedNames = [ "Example 1 - continuous PK/PD",
+                "Warfarin example - basic PK with covariate W",
                 "IOV1 with covariates",
-                "BradshawPierce"
+                "Ribba et al. 2012 - growth tumor model"
         ]
         // the order of the files may not be preserved.
         String result = service.extractName(model)
@@ -112,15 +110,17 @@ class PharmMlServiceTests {
         assertFalse service.validate(null)
         def model = []
         assertFalse service.validate(model)
-        model = [new File("test/files/iov1_data.txt")]
+        model = [new File("../../test/files/BIOMD0000000272.xml")]
         assertFalse service.validate(model)
 
-        model = []
-        def baseFolder = new File("test/files/")
-        baseFolder.eachFileMatch ~/example.*\.xml/, { File f -> model << f; }
+        model = [ "test/files/example1.xml",
+            "test/files/example2.xml",
+            "test/files/example3.xml",
+            "test/files/RibbaCCR2012.xml",
+        ]
         //test them sequentially because the API only handles resources individually
         model.each { pharmML ->
-            assertTrue(service.validate([pharmML]))
+            assertTrue(service.validate([new File(pharmML)]))
         }
     }
 }

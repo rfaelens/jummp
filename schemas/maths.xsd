@@ -1,50 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    targetNamespace="http://www.pharmml.org/2013/03/Maths" version="0.1"
+    targetNamespace="http://www.pharmml.org/2013/03/Maths" version="0.2"
     xmlns:math="http://www.pharmml.org/2013/03/Maths" elementFormDefault="qualified"
-    attributeFormDefault="unqualified">
+    attributeFormDefault="unqualified" xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes">
 
-    <xs:simpleType name="SymbolNameType">
-        <xs:restriction base="xs:Name"/>
-    </xs:simpleType>
-    <xs:simpleType name="BlockNameType">
-        <xs:restriction base="xs:Name"/>
-    </xs:simpleType>
-    <xs:complexType mixed="false" name="VarType">
-        <xs:attribute name="block" type="math:BlockNameType">
-            <xs:annotation>
-                <xs:documentation>The reference to the block identifier of the given variable. May be undefined in which case the reference is to a variable in the current scope or a global variable.</xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="symbId" type="math:SymbolNameType" use="required">
-            <xs:annotation>
-                <xs:documentation>The symbol identifier of the symbol.</xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:complexType>
-    <xs:complexType name="ScalarType">
-        <xs:attribute name="value" type="xs:decimal" use="required">
-            <xs:annotation>
-                <xs:documentation>The value of th scalar.</xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:complexType>
-    <xs:complexType name="StringType">
-        <xs:attribute name="value" type="xs:string" use="required"/>
-    </xs:complexType>
+    <xs:import namespace="http://www.pharmml.org/2013/03/CommonTypes"
+        schemaLocation="http://www.pharmml.org/2013/03/CommonTypes"/>
+
     <xs:complexType name="BinopType">
         <xs:sequence>
             <xs:choice maxOccurs="1" minOccurs="1">
-                <xs:element ref="math:Scalar"/>
-                <xs:element maxOccurs="1" minOccurs="1" ref="math:Var"/>
+                <xs:element ref="ct:Scalar"/>
+                <xs:element maxOccurs="1" minOccurs="1" ref="ct:SymbRef"/>
                 <xs:element ref="math:Constant"/>
                 <xs:element ref="math:Binop"/>
                 <xs:element ref="math:Uniop"/>
                 <xs:element ref="math:FunctionCall"/>
             </xs:choice>
             <xs:choice maxOccurs="1" minOccurs="1">
-                <xs:element ref="math:Scalar"/>
-                <xs:element maxOccurs="1" minOccurs="1" ref="math:Var"/>
+                <xs:element ref="ct:Scalar"/>
+                <xs:element maxOccurs="1" minOccurs="1" ref="ct:SymbRef"/>
                 <xs:element ref="math:Constant"/>
                 <xs:element ref="math:Binop"/>
                 <xs:element ref="math:Uniop"/>
@@ -62,7 +37,7 @@
                     <xs:enumeration value="times"/>
                     <xs:enumeration value="divide"/>
                     <xs:enumeration value="power"/>
-                    <xs:enumeration value="log"/>
+                    <xs:enumeration value="logx"/>
                     <xs:enumeration value="root"/>
                 </xs:restriction>
             </xs:simpleType>
@@ -78,7 +53,7 @@
                     <xs:simpleType>
                         <xs:restriction base="xs:Name">
                             <xs:enumeration value="exp"/>
-                            <xs:enumeration value="ln"/>
+                            <xs:enumeration value="log"/>
                             <xs:enumeration value="minus"/>
                             <xs:enumeration value="factorial"/>
                             <xs:enumeration value="sin"/>
@@ -88,6 +63,9 @@
                             <xs:enumeration value="csc"/>
                             <xs:enumeration value="cot"/>
                             <xs:enumeration value="sinh"/>
+                            <xs:enumeration value="cosh"/>
+                            <xs:enumeration value="tanh"/>
+                            <xs:enumeration value="sech"/>
                             <xs:enumeration value="csch"/>
                             <xs:enumeration value="coth"/>
                             <xs:enumeration value="arcsin"/>
@@ -105,7 +83,9 @@
                             <xs:enumeration value="floor"/>
                             <xs:enumeration value="abs"/>
                             <xs:enumeration value="ceiling"/>
+                            <xs:enumeration value="logistic"/>
                             <xs:enumeration value="logit"/>
+                            <xs:enumeration value="probit"/>
                         </xs:restriction>
                     </xs:simpleType>
                 </xs:attribute>
@@ -147,8 +127,8 @@
     </xs:complexType>
     <xs:complexType name="ExprType">
         <xs:choice maxOccurs="1" minOccurs="1">
-            <xs:element ref="math:Scalar"/>
-            <xs:element maxOccurs="1" minOccurs="1" ref="math:Var"/>
+            <xs:element ref="ct:Scalar"/>
+            <xs:element maxOccurs="1" minOccurs="1" ref="ct:SymbRef"/>
             <xs:element ref="math:Constant"/>
             <xs:element ref="math:Binop"/>
             <xs:element ref="math:Uniop"/>
@@ -159,8 +139,7 @@
         <xs:choice maxOccurs="1">
             <xs:element ref="math:LogicBinop"/>
             <xs:element ref="math:LogicUniop"/>
-            <xs:element ref="math:True"/>
-            <xs:element ref="math:False"/>
+            <xs:element ref="ct:Boolean"/>
             <xs:element ref="math:Otherwise"/>
         </xs:choice>
     </xs:complexType>
@@ -169,27 +148,21 @@
             <xs:choice>
                 <xs:element ref="math:LogicBinop"/>
                 <xs:element ref="math:LogicUniop"/>
-                <xs:element ref="math:True"/>
-                <xs:element ref="math:False"/>
-                <xs:element ref="math:Scalar"/>
+                <xs:element ref="ct:Scalar"/>
                 <xs:element ref="math:Constant"/>
-                <xs:element ref="math:Var"/>
+                <xs:element ref="ct:SymbRef"/>
                 <xs:element ref="math:Binop"/>
                 <xs:element ref="math:Uniop"/>
-                <xs:element ref="math:String"/>
                 <xs:element ref="math:FunctionCall"/>
             </xs:choice>
             <xs:choice>
                 <xs:element ref="math:LogicBinop"/>
                 <xs:element ref="math:LogicUniop"/>
-                <xs:element ref="math:True"/>
-                <xs:element ref="math:False"/>
-                <xs:element ref="math:Scalar"/>
+                <xs:element ref="ct:Scalar"/>
                 <xs:element ref="math:Constant"/>
-                <xs:element ref="math:Var"/>
+                <xs:element ref="ct:SymbRef"/>
                 <xs:element ref="math:Binop"/>
                 <xs:element ref="math:Uniop"/>
-                <xs:element ref="math:String"/>
                 <xs:element ref="math:FunctionCall"/>
             </xs:choice>
         </xs:sequence>
@@ -216,14 +189,11 @@
         <xs:choice maxOccurs="1">
             <xs:element ref="math:LogicBinop"/>
             <xs:element ref="math:LogicUniop"/>
-            <xs:element ref="math:True"/>
-            <xs:element ref="math:False"/>
-            <xs:element ref="math:Scalar"/>
+            <xs:element ref="ct:Scalar"/>
             <xs:element ref="math:Constant"/>
-            <xs:element ref="math:Var"/>
+            <xs:element ref="ct:SymbRef"/>
             <xs:element ref="math:Binop"/>
             <xs:element ref="math:Uniop"/>
-            <xs:element ref="math:String"/>
             <xs:element ref="math:FunctionCall"/>
         </xs:choice>
     </xs:complexType>
@@ -246,8 +216,8 @@
     </xs:complexType>
     <xs:complexType name="EquationType">
         <xs:choice maxOccurs="unbounded">
-            <xs:element ref="math:Scalar"/>
-            <xs:element maxOccurs="1" minOccurs="1" ref="math:Var"/>
+            <xs:element ref="ct:Scalar"/>
+            <xs:element maxOccurs="1" minOccurs="1" ref="ct:SymbRef"/>
             <xs:element ref="math:Binop"/>
             <xs:element ref="math:Uniop"/>
             <xs:element name="Piecewise" type="math:PiecewiseType">
@@ -260,56 +230,39 @@
     </xs:complexType>
     <xs:complexType name="FunctionCallType">
         <xs:sequence>
-            <xs:element ref="math:Var"/>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="FunctionArgument"
-                type="math:FunctionArgumentType">
+            <xs:element ref="ct:SymbRef"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="FunctionArgument">
                 <xs:annotation>
                     <xs:documentation>An argument of the function.</xs:documentation>
                 </xs:annotation>
+                <xs:complexType>
+                    <xs:complexContent>
+                        <xs:extension base="math:FunctionArgumentType"/>
+                    </xs:complexContent>
+                </xs:complexType>
             </xs:element>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="FunctionArgumentType">
-        <xs:choice>
-            <xs:element maxOccurs="1" ref="math:Equation"/>
-            <xs:element ref="math:Scalar"/>
-            <xs:element ref="math:Constant"/>
-            <xs:element ref="math:Var"/>
-        </xs:choice>
-        <xs:attribute name="symbId" type="math:SymbolNameType" use="required">
+        <xs:sequence>
+            <xs:element minOccurs="0" ref="ct:Symbol"/>
+            <xs:element minOccurs="0" ref="ct:Description"/>
+            <xs:choice>
+                <xs:element maxOccurs="1" ref="math:Equation"/>
+                <xs:element ref="ct:Scalar"/>
+                <xs:element ref="math:Constant"/>
+                <xs:element ref="ct:SymbRef"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="symbId" type="ct:SymbolIdType" use="required">
             <xs:annotation>
                 <xs:documentation>The symbold ID of the argument.</xs:documentation>
             </xs:annotation>
         </xs:attribute>
     </xs:complexType>
-    <xs:element name="True">
-        <xs:annotation>
-            <xs:documentation>Boolean True.</xs:documentation>
-        </xs:annotation>
-    </xs:element>
-    <xs:element name="False">
-        <xs:annotation>
-            <xs:documentation>Boolean False.</xs:documentation>
-        </xs:annotation>
-    </xs:element>
     <xs:element name="Otherwise">
         <xs:annotation>
             <xs:documentation>The otherwise case in a piecewise function.</xs:documentation>
-        </xs:annotation>
-    </xs:element>
-    <xs:element name="Scalar" type="math:ScalarType">
-        <xs:annotation>
-            <xs:documentation>A scalar value.</xs:documentation>
-        </xs:annotation>
-    </xs:element>
-    <xs:element name="Var" type="math:VarType">
-        <xs:annotation>
-            <xs:documentation>A variable reference.</xs:documentation>
-        </xs:annotation>
-    </xs:element>
-    <xs:element name="String" type="math:StringType">
-        <xs:annotation>
-            <xs:documentation>A string value.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="Constant" type="math:ConstantType">
@@ -348,13 +301,7 @@
         </xs:annotation>
         <xs:complexType>
             <xs:complexContent>
-                <xs:extension base="math:LogicConditionType">
-                    <xs:attribute name="writtenVersion" type="xs:string" use="required">
-                        <xs:annotation>
-                            <xs:documentation>The version of this schema used when writing the document.</xs:documentation>
-                        </xs:annotation>
-                    </xs:attribute>
-                </xs:extension>
+                <xs:extension base="math:LogicConditionType"> </xs:extension>
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
@@ -364,13 +311,7 @@
         </xs:annotation>
         <xs:complexType>
             <xs:complexContent>
-                <xs:extension base="math:EquationType">
-                    <xs:attribute name="writtenVersion" type="xs:string" use="required">
-                        <xs:annotation>
-                            <xs:documentation>The version of this schema used when writing the document.</xs:documentation>
-                        </xs:annotation>
-                    </xs:attribute>
-                </xs:extension>
+                <xs:extension base="math:EquationType"> </xs:extension>
             </xs:complexContent>
         </xs:complexType>
     </xs:element>

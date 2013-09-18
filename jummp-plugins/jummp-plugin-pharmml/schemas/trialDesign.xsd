@@ -3,283 +3,543 @@
     targetNamespace="http://www.pharmml.org/2013/03/TrialDesign"
     xmlns:design="http://www.pharmml.org/2013/03/TrialDesign"
     xmlns:maths="http://www.pharmml.org/2013/03/Maths"
+    xmlns:mdef="http://www.pharmml.org/2013/03/ModelDefinition"
+    xmlns:ds="http://www.pharmml.org/2013/08/Dataset"
     xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes" version="0.1"
     elementFormDefault="qualified" attributeFormDefault="unqualified">
-
     <xs:annotation>
-        <xs:documentation/>
+        <xs:documentation>
+            Defines trial design section of PharmML.
+        </xs:documentation>
     </xs:annotation>
+
+    <!--
+        Imports
+        -->
     <xs:import namespace="http://www.pharmml.org/2013/03/CommonTypes"
         schemaLocation="http://www.pharmml.org/2013/03/CommonTypes"/>
 
-    <xs:import namespace="http://www.pharmml.org/2013/03/Maths"
-        schemaLocation="http://www.pharmml.org/2013/03/Maths"/>
+    <xs:import namespace="http://www.pharmml.org/2013/08/Dataset"
+        schemaLocation="http://www.pharmml.org/2013/08/Dataset"/>
+
+
+    <!--
+        Simple Types
+        -->
+
+    <xs:simpleType name="DoseInputTypeType">
+        <xs:annotation>
+            <xs:documentation>
+                Defines the dosing input type.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:NCName">
+            <xs:enumeration value="dose">
+                <xs:annotation>
+                    <xs:documentation>
+                        Dose is assigned to a dosing variable.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="target">
+                <xs:annotation>
+                    <xs:documentation>
+                        Dose is an input to a system of ODEs. 
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+
+    <!--
+        Complex Types
+        -->
+
     <xs:complexType name="DosingVariableType">
+        <xs:annotation>
+            <xs:documentation>
+                The type that specifies a dosing variable.
+            </xs:documentation>
+        </xs:annotation>
         <xs:sequence>
-            <xs:choice minOccurs="1">
-                <xs:element name="DoseVar" type="maths:VarType">
-                    <xs:annotation>
-                        <xs:documentation>Defines the dosing variable. This is the variable that explicitly defines the dose - often D in a PK model.</xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-                <xs:element name="TargetVar" type="maths:VarType">
-                    <xs:annotation>
-                        <xs:documentation>Defines the variable (or compartment) that the dose will be added to at the specified dosing times. This is typically used when the structural model is a system of ODEs and the taregt variable is a derivative.</xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-            </xs:choice>
-            <xs:element name="Amount" type="ct:Rhs" minOccurs="0">
+            <xs:element ref="ct:SymbRef">
+                <xs:annotation>
+                    <xs:documentation>
+                        The name of the variable that is the dose administered to.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" ref="ct:Assign">
                 <xs:annotation>
                     <xs:documentation>The amount of dose to be applied at dosing time.</xs:documentation>
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
+        <xs:attributeGroup ref="design:doseVarAttGroup"/>
     </xs:complexType>
-    <xs:complexType name="SteadyStateType">
+    <xs:complexType name="TreatmentType">
+        <xs:annotation>
+            <xs:documentation>Describes a treatment, by which we mean one or more regimens that can be appied to a subject.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="design:ActivityType">
+                <xs:sequence>
+                    <xs:element minOccurs="0" ref="ct:Name"/>
+                    <xs:element minOccurs="0" ref="ct:Description"/>
+                    <xs:element maxOccurs="unbounded" ref="design:DosingRegimen">
+                        <xs:annotation>
+                            <xs:documentation>The dosing regimen to apply to a subject.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="DosingRegimenType" abstract="true">
+        <xs:annotation>
+            <xs:documentation>
+                Defines a dosing regimen type.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:complexType>
+    <xs:complexType name="DosingTimesPointsType">
+        <xs:annotation>
+            <xs:documentation>
+                Defines the dosing timepoints.
+            </xs:documentation>
+        </xs:annotation>
         <xs:sequence>
-            <xs:element minOccurs="0" name="EndTime" type="ct:ScalarRhs">
+            <xs:element minOccurs="0" ref="ct:SymbRef">
                 <xs:annotation>
-                    <xs:documentation>The start of dosing.</xs:documentation>
+                    <xs:documentation>
+                        References the variable to be assigned the dosing time.
+                    </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="Interval" type="ct:ScalarRhs">
+            <xs:element ref="ct:Assign">
+                <xs:annotation>
+                    <xs:documentation>
+                        The dosing time or times to be assigned to the dosing regimen.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="BolusType">
+        <xs:annotation>
+            <xs:documentation>
+                Type the defines bolus dosing. 
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="design:DosingRegimenType">
+                <xs:sequence>
+                    <xs:element name="DoseAmount" type="design:DosingVariableType" minOccurs="1">
+                        <xs:annotation>
+                            <xs:documentation>Dosing information.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:choice minOccurs="0">
+                        <xs:element name="SteadyState" type="design:SteadyStateType">
+                            <xs:annotation>
+                                <xs:documentation>Steady state bolus dosing.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="DosingTimes" type="design:DosingTimesPointsType">
+                            <xs:annotation>
+                                <xs:documentation>The dosing times.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:choice>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="InfusionType">
+        <xs:annotation>
+            <xs:documentation>
+                Type the defines infusion dosing. 
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="design:DosingRegimenType">
+                <xs:sequence>
+                    <xs:element name="DoseAmount" minOccurs="1">
+                        <xs:annotation>
+                            <xs:documentation>Dosing information.</xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:complexContent>
+                                <xs:extension base="design:DosingVariableType"> </xs:extension>
+                            </xs:complexContent>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:choice minOccurs="0">
+                        <xs:element name="SteadyState" type="design:SteadyStateType">
+                            <xs:annotation>
+                                <xs:documentation>Steady state infusion dosing.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="DosingTimes" type="design:DosingTimesPointsType">
+                            <xs:annotation>
+                                <xs:documentation>The dosing times.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:choice>
+                    <xs:choice minOccurs="0">
+                        <xs:element name="Duration" type="design:SteadyStateParameterType"
+                            minOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>The duration of the infusion.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="Rate" type="design:SteadyStateParameterType"/>
+                    </xs:choice>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="SteadyStateParameterType">
+        <xs:annotation>
+            <xs:documentation>
+                Type that defines a paremeter used by steady state dosing.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element minOccurs="0" ref="ct:SymbRef">
+                <xs:annotation>
+                    <xs:documentation>
+                        Reference to a dteady state dosing time variable. 
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="ct:Assign"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="SteadyStateType">
+        <xs:annotation>
+            <xs:documentation>
+               Type that specifies steady state dosing.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element minOccurs="1" name="EndTime" type="design:SteadyStateParameterType">
+                <xs:annotation>
+                    <xs:documentation>The last dosing time.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Interval" type="design:SteadyStateParameterType" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>The dosing period.</xs:documentation>
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="DosingTimesType">
-        <xs:complexContent>
-            <xs:extension base="ct:VectorType"/>
-        </xs:complexContent>
-    </xs:complexType>
-    <xs:complexType name="TrialDesignType">
-        <xs:sequence maxOccurs="1">
-            <xs:element maxOccurs="unbounded" name="Treatment" type="design:TreatmentType">
-                <xs:annotation>
-                    <xs:documentation>The treatment to be applied to a subject.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element maxOccurs="unbounded" minOccurs="1" name="TreatmentEpoch"
-                type="design:TreatmentEpochType">
-                <xs:annotation>
-                    <xs:documentation>The Treatment Epoch that defines the time frame for treatments.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element maxOccurs="unbounded" name="Group" type="design:GroupType">
-                <xs:annotation>
-                    <xs:documentation>The trial group definition.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-        </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="GroupType">
-        <xs:sequence>
-            <xs:choice maxOccurs="unbounded">
-                <xs:element name="TreatmentEpochRef" type="design:TreatmentRefType">
-                    <xs:annotation>
-                        <xs:documentation>A reference to the treatment epoch.</xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-                <xs:element name="Washout" type="design:WashoutType">
-                    <xs:annotation>
-                        <xs:documentation>Defined a washout period in which all values in the structural model are reset to their values.</xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-            </xs:choice>
-            <xs:element maxOccurs="1" minOccurs="1" name="Individuals" type="design:IndividualType">
-                <xs:annotation>
-                    <xs:documentation>The definition of the subjects in this group.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-        </xs:sequence>
-        <xs:attribute name="id" type="ct:BlockNameType" use="required">
-            <xs:annotation>
-                <xs:documentation>The identifier of th group.</xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="name" type="xs:string">
-            <xs:annotation>
-                <xs:documentation>The human readible name of the group.</xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:complexType>
-    <xs:complexType name="TreatmentEpochType">
-        <xs:sequence>
-            <xs:element maxOccurs="unbounded" name="TreatmentRef" type="design:TreatmentRefType">
-                <xs:annotation>
-                    <xs:documentation>Reference to a treatment to use in this epoch.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element minOccurs="0" name="Start" type="ct:ScalarRhs">
-                <xs:annotation>
-                    <xs:documentation>The start time of the epoch.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element minOccurs="0" name="End" type="ct:ScalarRhs">
-                <xs:annotation>
-                    <xs:documentation>The end time of the epoch.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="Occasion"
-                type="design:OccasionType">
-                <xs:annotation>
-                    <xs:documentation>An occasion defined in this epoch.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-        </xs:sequence>
-        <xs:attribute name="id" type="ct:BlockNameType" use="required">
-            <xs:annotation>
-                <xs:documentation>The id of the treatment epoch.</xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="name" type="xs:string">
-            <xs:annotation>
-                <xs:documentation>The human readable name of the treatment epoch.</xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:complexType>
-    <xs:complexType name="TreatmentRefType">
-        <xs:attribute name="idRef" type="maths:BlockNameType" use="required">
-            <xs:annotation>
-                <xs:documentation>The reference to the treatment id.</xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:complexType>
-    <xs:complexType name="WashoutType"/>
-    <xs:complexType name="DosingRegimenType">
-        <xs:choice maxOccurs="unbounded">
-            <xs:element maxOccurs="1" minOccurs="1" name="Bolus" type="design:BolusType">
-                <xs:annotation>
-                    <xs:documentation>Bolus dosing. This is doscing of dicrete amounts of drug at specific periods.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element maxOccurs="1" minOccurs="0" name="Infusion" type="design:InfusionType">
-                <xs:annotation>
-                    <xs:documentation>Infusion dosing. A dose is administered over a period of time.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-        </xs:choice>
-    </xs:complexType>
-    <xs:complexType name="BolusType">
-        <xs:sequence>
-            <xs:element name="DoseAmount" type="design:DosingVariableType">
-                <xs:annotation>
-                    <xs:documentation>Dosing information.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:choice minOccurs="0">
-                <xs:element name="SteadyState" type="design:SteadyStateType">
-                    <xs:annotation>
-                        <xs:documentation>Steady state bolus dosing.</xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-                <xs:element name="DosingTimes" type="design:DosingTimesType">
-                    <xs:annotation>
-                        <xs:documentation>The dosing times.</xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-            </xs:choice>
-        </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="InfusionType">
-        <xs:sequence>
-            <xs:element name="DoseAmount" type="design:DosingVariableType">
-                <xs:annotation>
-                    <xs:documentation>Dosing information.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:choice minOccurs="0">
-                <xs:element name="SteadyState" type="design:SteadyStateType">
-                    <xs:annotation>
-                        <xs:documentation>Steady state infusion dosing.</xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-                <xs:element name="DosingTimes" type="design:DosingTimesType">
-                    <xs:annotation>
-                        <xs:documentation>The dosing times.</xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-            </xs:choice>
-            <xs:element name="Duration" type="ct:ScalarRhs">
-                <xs:annotation>
-                    <xs:documentation>The duration of the infusion.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-        </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="TreatmentType">
+    <xs:complexType name="WashoutType">
         <xs:annotation>
-            <xs:documentation>Describes a treatment, by which we mean one or more regimens that can be appied to a subject.</xs:documentation>
+            <xs:documentation>
+                A type that defines a washout epoch. When this applies the system is reinitialised.
+            </xs:documentation>
         </xs:annotation>
+    </xs:complexType>
+    <xs:complexType name="ActivityType" abstract="false">
+        <xs:annotation>
+            <xs:documentation>
+                An activity that occurs during dosing. 
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice>
+            <xs:element ref="design:DosingRegimen"/>
+            <xs:element ref="design:Washout"/>
+        </xs:choice>
+        <xs:attributeGroup ref="ct:OidDefnGroup"/>
+    </xs:complexType>
+    <xs:complexType abstract="true" name="StudyEventType">
         <xs:sequence>
-            <xs:element maxOccurs="unbounded" name="DosingRegimen" type="design:DosingRegimenType">
+            <xs:element maxOccurs="unbounded" name="ArmRef" type="ct:OidRefType"/>
+        </xs:sequence>
+        <xs:attributeGroup ref="ct:OidDefnGroup"/>
+    </xs:complexType>
+    <xs:complexType name="OutputType">
+        <xs:sequence>
+            <xs:element ref="ct:SymbRef">
                 <xs:annotation>
-                    <xs:documentation>The dosing regimen to apply to a subject.</xs:documentation>
+                    <xs:documentation>The reference to the output variable.</xs:documentation>
                 </xs:annotation>
             </xs:element>
         </xs:sequence>
-        <xs:attribute name="id" type="maths:BlockNameType" use="required">
-            <xs:annotation>
-                <xs:documentation>The identifier of the treatment.</xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="name" type="xs:string">
-            <xs:annotation>
-                <xs:documentation>The human readable name of the treatment.</xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
     </xs:complexType>
-    <xs:complexType name="OccasionType">
-        <xs:sequence minOccurs="0">
-            <xs:element name="Begin" type="ct:ScalarRhs">
-                <xs:annotation>
-                    <xs:documentation>The start time of the occasion.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-            <xs:element name="End" type="ct:ScalarRhs">
-                <xs:annotation>
-                    <xs:documentation>The end time of the occasion.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
-        </xs:sequence>
-        <xs:attribute name="symbId" type="ct:SymbolNameType" use="required">
-            <xs:annotation>
-                <xs:documentation>The symbol id defining this occasion.</xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="name" type="xs:string">
-            <xs:annotation>
-                <xs:documentation>A human readable name for this epoch.</xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="levelId" type="ct:BlockNameType" use="required">
-            <xs:annotation>
-                <xs:documentation>The levelId referring to the variability level define in the model definition.</xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-    </xs:complexType>
-    <xs:complexType name="IndividualType">
+    <xs:element abstract="true" name="StudyEvent" type="design:StudyEventType"/>
+    <xs:complexType name="ObservationsType">
         <xs:complexContent>
-            <xs:extension base="ct:Rhs">
-                <xs:attribute name="symbId" type="ct:SymbolNameType" use="required">
-                    <xs:annotation>
-                        <xs:documentation>The symbol identifier used to identify the individuals in this group.</xs:documentation>
-                    </xs:annotation>
-                </xs:attribute>
-                <xs:attribute name="name" type="xs:string">
-                    <xs:annotation>
-                        <xs:documentation>The human readible name of this set of individuals.</xs:documentation>
-                    </xs:annotation>
-                </xs:attribute>
-                <xs:attribute name="levelId" type="ct:BlockNameType" use="required">
-                    <xs:annotation>
-                        <xs:documentation>The variability level that this individual is applied to.</xs:documentation>
-                    </xs:annotation>
-                </xs:attribute>
+            <xs:extension base="design:StudyEventType">
+                <xs:sequence>
+                    <xs:element minOccurs="0" ref="ct:Name"/>
+                    <xs:element minOccurs="0" ref="ct:Description"/>
+                    <xs:element minOccurs="0" ref="ct:VariabilityReference"/>
+                    <xs:element maxOccurs="unbounded" name="ObservationGroup">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:choice>
+                                    <xs:element minOccurs="1" name="EpochRef" type="ct:OidRefType"/>
+                                    <xs:element name="Period">
+                                        <xs:complexType>
+                                            <xs:sequence>
+                                                <xs:element minOccurs="1" name="Start">
+                                                  <xs:complexType>
+                                                  <xs:sequence>
+                                                  <xs:element ref="ct:Real"/>
+                                                  </xs:sequence>
+                                                  </xs:complexType>
+                                                </xs:element>
+                                                <xs:element minOccurs="1" name="End">
+                                                  <xs:complexType>
+                                                  <xs:sequence>
+                                                  <xs:element ref="ct:Real"/>
+                                                  </xs:sequence>
+                                                  </xs:complexType>
+                                                </xs:element>
+                                            </xs:sequence>
+                                        </xs:complexType>
+                                    </xs:element>
+                                </xs:choice>
+                            </xs:sequence>
+                            <xs:attributeGroup ref="ct:OidDefnGroup"/>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
-    <xs:element name="Design" type="design:TrialDesignType"> </xs:element>
+    <xs:complexType name="TrialStructureType">
+        <xs:complexContent>
+            <xs:extension base="ct:PharmMLRootType">
+                <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="Epoch">
+                        <xs:complexType>
+                            <xs:sequence minOccurs="1">
+                                <xs:element minOccurs="1" name="Start">
+                                    <xs:complexType>
+                                        <xs:sequence>
+                                            <xs:element ref="ct:Real"/>
+                                        </xs:sequence>
+                                    </xs:complexType>
+                                </xs:element>
+                                <xs:element minOccurs="1" name="End">
+                                    <xs:complexType>
+                                        <xs:sequence>
+                                            <xs:element ref="ct:Real"/>
+                                        </xs:sequence>
+                                    </xs:complexType>
+                                </xs:element>
+                                <xs:element ref="design:Order"/>
+                            </xs:sequence>
+                            <xs:attributeGroup ref="ct:OidDefnGroup"/>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element maxOccurs="unbounded" name="Arm">
+                        <xs:complexType>
+                            <xs:attributeGroup ref="ct:OidDefnGroup"/>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element maxOccurs="unbounded" name="Cell">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="EpochRef" type="ct:OidRefType"> </xs:element>
+                                <xs:element maxOccurs="unbounded" minOccurs="1" name="ArmRef"
+                                    type="ct:OidRefType"> </xs:element>
+                                <xs:element maxOccurs="unbounded" name="SegmentRef"
+                                    type="ct:OidRefType"/>
+                            </xs:sequence>
+                            <xs:attributeGroup ref="ct:OidDefnGroup"/>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Segment" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element maxOccurs="unbounded" name="ActivityRef"
+                                    type="ct:OidRefType"/>
+                            </xs:sequence>
+                            <xs:attributeGroup ref="ct:OidDefnGroup"/>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element maxOccurs="unbounded" ref="design:Activity"/>
+                    <xs:element maxOccurs="unbounded" ref="design:StudyEvent" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="TrialDesignType">
+        <xs:complexContent>
+            <xs:extension base="ct:PharmMLRootType">
+                <xs:sequence>
+                    <xs:element name="Structure" type="design:TrialStructureType"> </xs:element>
+                    <xs:element name="Population" type="design:PopulationType"> </xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="IndividualDosing"
+                        type="design:IndividualDosingType"> </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="PopulationType">
+        <xs:complexContent>
+            <xs:extension base="ct:PharmMLRootType">
+                <xs:sequence>
+                    <xs:element minOccurs="0" ref="ct:VariabilityReference"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="Demographic"
+                        type="design:DemographicType"> </xs:element>
+                    <xs:element maxOccurs="1" name="IndividualTemplate"
+                        type="design:IndividualDefinitionType"> </xs:element>
+                    <xs:element ref="ds:DataSet"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="DemographicType">
+        <xs:complexContent>
+            <xs:extension base="ct:PharmMLRootType">
+                <xs:sequence>
+                    <xs:element minOccurs="0" ref="ct:Name"/>
+                    <xs:element ref="ct:VariabilityReference"/>
+                    <xs:element maxOccurs="unbounded" ref="ct:Scalar"/>
+                </xs:sequence>
+                <xs:attributeGroup ref="ct:OidDefnGroup"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType abstract="true" name="PopulationMappingType">
+        <xs:complexContent>
+            <xs:extension base="ct:PharmMLRootType">
+                <xs:sequence>
+                    <xs:element ref="ds:ColumnRef"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="IndividualMappingType">
+        <xs:complexContent>
+            <xs:extension base="design:PopulationMappingType"/>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="ArmMappingType">
+        <xs:complexContent>
+            <xs:extension base="design:PopulationMappingType"> </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="IndependentVariableDependentMappingType">
+        <xs:sequence>
+            <xs:element ref="ds:ColumnRef"/>
+            <xs:choice>
+                <xs:element name="IndependentVariableMapping"
+                    type="design:IndependentVariableMappingType"/>
+                <xs:element name="EpochMapping" type="design:EpochMappingType"/>
+            </xs:choice>
+            <xs:element maxOccurs="unbounded" ref="design:AttributeMapping"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="IndependentVariableMappingType">
+        <xs:complexContent>
+            <xs:extension base="design:PopulationMappingType"/>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="EpochMappingType">
+        <xs:complexContent>
+            <xs:extension base="design:PopulationMappingType"/>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="CovariateMappingType">
+        <xs:complexContent>
+            <xs:extension base="design:PopulationMappingType">
+                <xs:sequence>
+                    <xs:element ref="ct:SymbRef"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="DemographicMappingType">
+        <xs:complexContent>
+            <xs:extension base="design:PopulationMappingType">
+                <xs:sequence>
+                    <xs:element ref="ct:OidRef"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="ReplicateMappingType">
+        <xs:complexContent>
+            <xs:extension base="design:PopulationMappingType"/>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="IndividualDefinitionType">
+        <xs:complexContent>
+            <xs:extension base="ct:PharmMLRootType">
+                <xs:sequence>
+                    <xs:element minOccurs="0" ref="ct:Name"/>
+                    <xs:element ref="design:IndividualMapping"/>
+                    <xs:element ref="design:ArmMapping"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" ref="design:AttributeMapping"> </xs:element>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="IVDependentMapping"
+                        type="design:IndependentVariableDependentMappingType"/>
+                    <xs:element minOccurs="0" ref="design:ReplicateMapping"> </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="IndividualDosingType">
+        <xs:complexContent>
+            <xs:extension base="ct:PharmMLRootType">
+                <xs:sequence>
+                    <xs:element name="ActivityRef" type="ct:OidRefType"/>
+                    <xs:element name="IndividualRef" type="ds:ColumnRefType"/>
+                    <xs:element minOccurs="0" name="DoseAmount" type="ds:ColumnRefType"/>
+                    <xs:element minOccurs="0" name="DosingTime" type="ds:ColumnRefType"/>
+                    <xs:element minOccurs="0" name="Rate" type="ds:ColumnRefType"/>
+                    <xs:element minOccurs="0" name="Duration" type="ds:ColumnRefType"/>
+                    <xs:element minOccurs="0" name="SSEndTime" type="ds:ColumnRefType"/>
+                    <xs:element minOccurs="0" name="SSPeriod" type="ds:ColumnRefType"/>
+                    <xs:element ref="ds:DataSet"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+
+    <!--
+        Attribute Groups
+        -->
+
+    <xs:attributeGroup name="doseVarAttGroup">
+        <xs:attribute name="inputType" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="dose"/>
+                    <xs:enumeration value="target"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:attributeGroup>
+
+
+    <!--
+        Elements
+        -->
+
+    <xs:element abstract="true" name="DosingRegimen" type="design:DosingRegimenType"/>
+    <xs:element name="Bolus" substitutionGroup="design:DosingRegimen" type="design:BolusType"/>
+    <xs:element name="Infusion" substitutionGroup="design:DosingRegimen" type="design:InfusionType"/>
+    <xs:element name="Order" type="ct:IntValueType"/>
+    <xs:element abstract="false" name="Activity" type="design:ActivityType"/>
+    <xs:element name="Washout" type="design:WashoutType"/>
+    <xs:element name="ObservationsEvent" substitutionGroup="design:StudyEvent"
+        type="design:ObservationsType"/>
+    <xs:element name="IndividualMapping" type="design:IndividualMappingType"/>
+    <xs:element name="ArmMapping" type="design:ArmMappingType"/>
+    <xs:element abstract="true" name="AttributeMapping"/>
+    <xs:element name="CovariateMapping" type="design:CovariateMappingType" abstract="false"
+        substitutionGroup="design:AttributeMapping"/>
+    <xs:element name="DemographicMapping" type="design:DemographicMappingType"
+        substitutionGroup="design:AttributeMapping"/>
+    <xs:element name="ReplicateMapping" type="design:ReplicateMappingType"/>
+    <xs:element name="TrialDesign" type="design:TrialDesignType"> </xs:element>
 </xs:schema>
