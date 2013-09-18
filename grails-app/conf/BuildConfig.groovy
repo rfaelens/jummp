@@ -46,7 +46,7 @@ grails.project.dependency.resolution = {
         // required by OntologyLookupResolver
         compile "org.ccil.cowan.tagsoup:tagsoup:1.2"
         compile "com.googlecode.multithreadedtc:multithreadedtc:1.01"
-	runtime 'hsqldb:hsqldb:1.8.0.10'
+        runtime 'hsqldb:hsqldb:1.8.0.10'
         runtime 'mysql:mysql-connector-java:5.1.17'
         runtime "postgresql:postgresql:9.1-901.jdbc4"
         // plugin dependencies
@@ -57,12 +57,10 @@ grails.project.dependency.resolution = {
         runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
         runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"
-	compile ('org.apache.lucene:lucene-core:4.4.0') 
-	compile ('org.apache.lucene:lucene-analyzers-common:4.4.0')
+        compile ('org.apache.lucene:lucene-core:4.4.0')
+        compile ('org.apache.lucene:lucene-analyzers-common:4.4.0')
         compile ('org.apache.lucene:lucene-queryparser:4.4.0')
         compile ('org.apache.lucene:lucene-misc:4.4.0')
-          
-        
 
         compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") {
             excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4', 'xercesImpl'
@@ -84,7 +82,6 @@ grails.project.dependency.resolution = {
                         'xstream'
         }
 
-        
         // bives
         runtime('org.apache.commons:commons-compress:1.1') { excludes 'commons-io' }
 
