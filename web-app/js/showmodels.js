@@ -218,11 +218,12 @@ $.jummp.showModels.lastAccessedModels = function (container) {
         success: function (data) {
             if (data.length === 0) {
                 $("h3", container).text($.i18n.prop("model.history.empty"));
+                $("h3", container).show();
                 $("p", container).text("");
                 return;
             }
             var ul, i;
-            $("h3", container).text($.i18n.prop("model.history.explanation"));
+            $("h3", container).hide();
             $("p", container).text("");
             ul = $("<ul/>");
             for (i = 0; i < data.length; i += 1) {

@@ -17,7 +17,7 @@
         <g:javascript contextPath="" src="showmodels.js"/>
     </head>
     <body activetab="search">
-    	<h2>Search Results for ${query}</h2>
+    	<g:render template="/templates/${grailsApplication.config.jummp.branding.style}/searchBox"/>
     	  <div class="content">
     	  <div class="view view-dom-id-9c00a92f557689f996511ded36a88594">
     	<div class="view-content">
@@ -41,4 +41,7 @@
         </div>
         </div>
     </body>
+    <content tag="searchQuery">
+    		${query}
+    </content>
     

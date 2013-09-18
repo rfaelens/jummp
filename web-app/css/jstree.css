@@ -55,12 +55,13 @@
 	#Files {
 	    display: inline-block;
 	    margin-left:5%;
-	    cursor: pointer;
+	    /* cursor: pointer; */
 	    height: 100%;
 	    width:90%;
 	}
 	#treeView {
 	    float:left;
+	    cursor: pointer;
 	    margin:5px;
 	}
 	#resizable { 
