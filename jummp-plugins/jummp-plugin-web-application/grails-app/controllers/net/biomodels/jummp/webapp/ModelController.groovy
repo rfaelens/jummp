@@ -326,6 +326,9 @@ class ModelController {
                 try {
                     submissionService.handleSubmission(flow.workingMemory)
                     session.result_submission=flow.workingMemory.get("model_id")
+                    if (flow.isUpdate) {
+                    	    redirect(controller:'model', action:'show', id:session.result_submission)
+                    }
                 }
                 catch(Exception ignore) {
                     error()
@@ -337,6 +340,9 @@ class ModelController {
         cleanUpAndTerminate {
             action {
                 submissionService.cleanup(flow.workingMemory)
+                if (flow.isUpdate) {
+                    	    redirect(controller:'model', action:'show', id:session.result_submission)
+                }
             }
             on("success").to "abort"
         }

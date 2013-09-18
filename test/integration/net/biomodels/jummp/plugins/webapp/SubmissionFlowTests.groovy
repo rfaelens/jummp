@@ -270,7 +270,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             Revision prev=modelService.getLatestRevision(model)
             assert prev
             signalEvent("Continue")
-            assert flowExecutionOutcome.id == "displayConfirmationPage"
+            //assert flowExecutionOutcome.id == "displayConfirmationPage"
             
             
             //test that the model is infact saved in the database
