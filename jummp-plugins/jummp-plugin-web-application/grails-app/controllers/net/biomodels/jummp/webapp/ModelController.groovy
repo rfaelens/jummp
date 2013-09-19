@@ -43,8 +43,61 @@ class ModelController {
     	    redirect(action: show, id:params.id)
     }
     
+    void prefixToInfix(StringBuilder builder, List<String> stack) {
+    	    if (stack.isEmpty()) {
+    	    	    return;
+    	    }
+    	    String line=stack.pop().trim()
+    	    if (line.contains("Equation") ) {
+    	    	    prefixToInfix(builder, stack)
+    	    	    return
+    	    }
+    	    if (line.contains("Binop")) {
+    	    	    builder.append("<mrow>")
+    	    	    prefixToInfix(builder,stack)
+    	    	    if (line.contains("plus")) {
+    	    	    	    builder.append("<mo>+</mo>")
+    	    	    }
+    	    	    else if (line.contains("minus")) {
+    	    	    	    builder.append("<mo>-</mo>")
+    	    	    }
+    	    	    else if (line.contains("times")) {
+    	    	    	    builder.append("<mo>x</mo>")
+    	    	    }
+    	    	    else if (line.contains("divide")) {
+    	    	    	    builder.append("<mo>/</mo>")
+    	    	    }
+    	    	    prefixToInfix(builder,stack)
+    	    	    builder.append("</mrow>")
+    	    	    return;
+    	    }
+    	    else if (line.contains("ct")) {
+    	    	    builder.append("<mi>")
+    	    	    builder.append(line.split(">")[1])
+    	    	    builder.append("</mi>")
+    	    	    return;
+    	    }
+    	    if (!stack.isEmpty()) {
+    	    	    prefixToInfix(builder, stack)
+    	    }
+    }
+    
     String convertToMathML(String ph) {
-    	    List<Character> stack=new LinkedList<Character>()
+    	    String[] split=ph.split("<")
+    	    split=split.reverse()
+    	    StringBuilder builder=new StringBuilder("")
+    	    List<String> stack=new LinkedList<String>()
+    	    split.each {
+    	    	    if (it.contains("/") && !it.contains("/>")) {
+    	    	    }
+    	    	    else if (it.contains("Equation")) {
+    	    	    }
+    	    	    else {
+    	    	    	    stack.push(it)
+    	    	    }
+    	    }
+    	    prefixToInfix(builder, stack)
+    	    return builder.toString()
     }
     
     def mathsTest = {
@@ -60,7 +113,7 @@ class ModelController {
     	    if (params.maths) {
     	    	    maths=params.maths
     	    }
-    	    [maths:maths]
+    	    [inputString: maths, maths:convertToMathML(maths)]
     }
     
     def show = {
