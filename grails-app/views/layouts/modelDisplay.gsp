@@ -149,6 +149,11 @@
 			tree.bind("loaded.jstree", function (event, data) {
 				tree.jstree("open_all");
 			});
+			
+			setTimeout(function(){
+					$(".flash").fadeOut("slow", function () {
+							$(".flash").remove();
+					}); }, 4000);
 		});
 	
 	</script>
@@ -156,6 +161,9 @@
     </head>
     <body>
     	<div id="topBar">
+    		<g:if test="${flashMessage && flashMessage.length()>0}">
+	    		<div class='flash'>${flashMessage}</div>
+	    	</g:if>
     	        <h2 style="float: left;">${revision.model.name}</h2>
         	<a class="submit" title="Update Model" href="${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}">Update</a> 	
         	<a class="submit" title="Download Model" href="${g.createLink(controller: 'model', action: 'download', id: revision.id)}">Download</a> 	

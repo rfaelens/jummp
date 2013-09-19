@@ -40,7 +40,8 @@ class PharmMlController {
                 modellingSteps: pharmMlService.getModellingSteps(revision),
                 variableDefinitions: pharmMlService.getVariableDefinitions(steps),
                 estSimSteps: pharmMlService.getEstimationOrSimulationSteps(steps),
-                stepDeps: pharmMlService.getStepDependencies(steps)
+                stepDeps: pharmMlService.getStepDependencies(steps),
+                flashMessage: params.flashMessage
             ]
         )
     }

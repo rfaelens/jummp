@@ -40,7 +40,11 @@ class ModelController {
 
     def show = {
     	    ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
-    	    forward controller:modelFileFormatService.getPluginForFormat(model.format), action:"show", id: params.id
+    	    String flashMessage=""
+    	    if (params.flashMessage) {
+    	    	    flashMessage=params.flashMessage
+    	    }
+    	    forward controller:modelFileFormatService.getPluginForFormat(model.format), action:"show", id: params.id, params:[flashMessage:params.flashMessage]
     }
 
     @Secured(["isAuthenticated()"])
@@ -118,7 +122,7 @@ class ModelController {
         }
         displayDisclaimer {
             on("Continue").to "uploadFiles"
-            on("Cancel").to "abort"
+            on("Cancel").to "cleanUpAndTerminate"
         }
         uploadFiles {
             on("Upload") {
@@ -187,7 +191,7 @@ class ModelController {
             }.to "transferFilesToService"
             on("ProceedWithoutValidation"){
             }.to "inferModelInfo"
-            on("Cancel").to "abort"
+            on("Cancel").to "cleanUpAndTerminate"
             on("Back"){}.to "displayDisclaimer"
         }
         transferFilesToService {
@@ -327,7 +331,7 @@ class ModelController {
                     submissionService.handleSubmission(flow.workingMemory)
                     session.result_submission=flow.workingMemory.get("model_id")
                     if (flow.isUpdate) {
-                    	    redirect(controller:'model', action:'show', id:session.result_submission)
+                    	    redirect(controller:'model', action:'show', id:session.result_submission, params: [flashMessage: "Model ${session.result_submission} has been updated."])
                     }
                 }
                 catch(Exception ignore) {
@@ -341,7 +345,7 @@ class ModelController {
             action {
                 submissionService.cleanup(flow.workingMemory)
                 if (flow.isUpdate) {
-                    	    redirect(controller:'model', action:'show', id:session.result_submission)
+                    	    redirect(controller:'model', action:'show', id:session.result_submission, params: [flashMessage: "Model update was cancelled."])
                 }
             }
             on("success").to "abort"
