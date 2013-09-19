@@ -149,7 +149,6 @@
 			tree.bind("loaded.jstree", function (event, data) {
 				tree.jstree("open_all");
 			});
-			
 			setTimeout(function(){
 					$(".flash").fadeOut("slow", function () {
 							$(".flash").remove();
