@@ -43,6 +43,26 @@ class ModelController {
     	    redirect(action: show, id:params.id)
     }
     
+    String convertToMathML(String ph) {
+    	    List<Character> stack=new LinkedList<Character>()
+    }
+    
+    def mathsTest = {
+    	    String maths='''<Equation xmlns="http://www.pharmml.org/2013/03/Maths"/>
+<Binop op="times">
+<Binop op="minus">
+<ct:Real>9</ct:Real>
+<ct:Real>5</ct:Real>
+</Binop>
+<ct:Int>2</ct:Int>
+</Binop>
+</Equation>'''
+    	    if (params.maths) {
+    	    	    maths=params.maths
+    	    }
+    	    [maths:maths]
+    }
+    
     def show = {
     	    ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
     	    String flashMessage=""
