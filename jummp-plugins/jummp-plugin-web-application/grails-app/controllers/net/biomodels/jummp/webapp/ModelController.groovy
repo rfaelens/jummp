@@ -38,20 +38,18 @@ class ModelController {
      */
     def grailsApplication
 
-    def showAbort = {
-    	    flash.giveMessage="Aborted!"
+    def showWithMessage = {
+    	    flash["giveMessage"]=params.flashMessage
     	    redirect(action: show, id:params.id)
     }
     
     def show = {
     	    ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
-    	    System.out.println(params.getProperties())
-    	    System.out.println(flash.getProperties())
     	    String flashMessage=""
-    	    if (flash.giveMessage) {
-    	    	    flashMessage=flash.giveMessage
+    	    if (flash.now["giveMessage"]) {
+    	    	    flashMessage=flash.now["giveMessage"]
     	    }
-    	    forward controller:modelFileFormatService.getPluginForFormat(model.format), action:"show", id: params.id, params:[flashMessage:params.flashMessage]
+    	    forward controller:modelFileFormatService.getPluginForFormat(model.format), action:"show", id: params.id, params:[flashMessage:flashMessage]
     }
 
     @Secured(["isAuthenticated()"])
@@ -338,7 +336,7 @@ class ModelController {
                     submissionService.handleSubmission(flow.workingMemory)
                     session.result_submission=flow.workingMemory.get("model_id")
                     if (flow.isUpdate) {
-                    	    redirect(controller:'model', action:'show', id:conversation.model_id, params: [flashMessage: "Model ${session.result_submission} has been updated."])
+                    	    redirect(controller:'model', action:'showWithMessage', id:conversation.model_id, params: [flashMessage: "Model ${session.result_submission} has been updated."])
                     }
                 }
                 catch(Exception ignore) {
@@ -352,7 +350,7 @@ class ModelController {
             action {
                 submissionService.cleanup(flow.workingMemory)
                 if (flow.isUpdate) {
-                    	    redirect(controller:'model', action:'showAbort', id:conversation.model_id, params: [flashMessage: "Model update was cancelled."])
+                    	    redirect(controller:'model', action:'showWithMessage', id:conversation.model_id, params: [flashMessage: "Model update was cancelled."])
                 }
             }
             on("success").to "abort"
