@@ -64,18 +64,6 @@ class PharmMlServiceTests {
     }
 
     @Test
-    void pharmMLsCanIncludeSbmlAndTxt() {
-        def bigModel = []
-        def baseFolder = new File("test/files/")
-        //includes two sbml files
-        baseFolder.eachFileMatch FileType.FILES, ~/.*\.xml/, { File f -> bigModel << f; }
-        bigModel << new File("test/files/iov1_data.txt")
-        assertTrue service.areFilesThisFormat(bigModel)
-        bigModel << new File("test/files/warfarin_conc_pca.csv")
-        assertTrue service.areFilesThisFormat(bigModel)
-    }
-
-    @Test
     void modelNameHandlesGarbage() {
         assertEquals "", service.extractName(null)
         assertEquals "", service.extractName([])
@@ -85,7 +73,7 @@ class PharmMlServiceTests {
 
     @Test
     void modelNameGetsRetrived() {
-        //falls-back to empty when no name is provided
+        //falls back to empty when no name is provided
         def model = [new File("test/files/pdmodel_sbml.xml"), new File("test/files/iov1_data.txt")]
         assertEquals "", service.extractName(model)
         model = [new File("test/files/example2.xml")]
@@ -100,9 +88,13 @@ class PharmMlServiceTests {
         ]
         // the order of the files may not be preserved.
         String result = service.extractName(model)
-        mergedNames.each { name ->
-            assertTrue result.contains(name)
-        }
+        mergedNames.each { name -> assertTrue result.contains(name) }
+    }
+
+    @Test
+    void modelDescriptionGetsExtracted() {
+        assertEquals "", service.extractDescription(null)
+        assertEquals "based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemotherapy or Radiotherapy\n        Benjamin Ribba, Gentian Kaloshi, Mathieu Peyre, et al. Clin Cancer Res Published OnlineFirst July 3, 2012.", service.extractDescription([new File("test/files/Ribba_CCR2012.xml")])
     }
 
     @Test
@@ -116,11 +108,10 @@ class PharmMlServiceTests {
         model = [ "test/files/example1.xml",
             "test/files/example2.xml",
             "test/files/example3.xml",
-            "test/files/RibbaCCR2012.xml",
+            "test/files/Ribba_CCR2012.xml",
         ]
-        //test them sequentially because the API only handles resources individually
         model.each { pharmML ->
-            assertTrue(service.validate([new File(pharmML)]))
+            println "${pharmML}: ${service.validate([new File(pharmML)])}"
         }
     }
 }

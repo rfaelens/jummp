@@ -39,4 +39,3 @@ grails.project.dependency.resolution = {
 }
 grails.plugin.location.'jummp-plugin-security' = "../jummp-plugin-security"
 grails.plugin.location.'jummp-plugin-core-api' = "../jummp-plugin-core-api"
-grails.plugin.location.'jummp-plugin-sbml'     = "../jummp-plugin-sbml"

@@ -77,7 +77,7 @@ class PharmMlServiceTests extends JummpIntegrationTest {
 
     @Test
     void testValidate() {
-        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/example6.xml")
+        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/example1.xml")
         authenticateAsTestUser()
         def rf = new RepositoryFileTransportCommand(path: modelFile.absolutePath,
                     description: "A very interesting model.", mainFile: true)

@@ -2,14 +2,13 @@ package net.biomodels.jummp.plugins.pharmml
 
 import eu.ddmore.libpharmml.*
 import eu.ddmore.libpharmml.dom.PharmML
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 import eu.ddmore.libpharmml.impl.*
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicBoolean
@@ -19,6 +18,8 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.apache.tika.detect.DefaultDetector
+import org.apache.tika.metadata.Metadata
 import org.perf4j.aop.Profiled
 
 /**
@@ -32,6 +33,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
 
     @Profiled(tag="pharmMlService.validate")
     public boolean validate(List<File> model) {
+        long start = System.nanoTime()
         if (!model) {
             if (IS_INFO_ENABLED) {
                 log.info "Refusing to validate an undefined list of files as a PharmML submission."
@@ -41,6 +43,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         model = model.findAll{it && it.canRead()}
         if (IS_INFO_ENABLED) {
             log.info "Validating ${model.inspect()} as a PharmML submission."
+            println "Validating ${model.inspect()} as a PharmML submission."
         }
         File pharmMlFile = findPharmML(model)
         if (!pharmMlFile) {
@@ -53,6 +56,8 @@ class PharmMlService implements FileFormatService, IPharmMlService {
             log.info "Asking libPharmML to validate ${pharmMlFile}."
         }
         assert pharmMlFile!= null && pharmMlFile.exists() && pharmMlFile.canRead()
+        long step1 = System.nanoTime()
+        println "step 1 done in ${(step1-start)/1000000.0}ms."
         LibPharmMLImpl api = PharmMlFactory.getInstance().createLibPharmML()
         def stream = null
         IPharmMLResource resource = null
@@ -61,12 +66,13 @@ class PharmMlService implements FileFormatService, IPharmMlService {
             resource = api.createDomFromResource(stream)
         } catch(IOException x) {
             log.error(x.message, x)
-            throw new RuntimeException(x.message, x)
         } finally {
             stream?.close()
         }
+        long step2 = System.nanoTime()
+        println "step 2 done in ${(step2-step1)/1000000.0}ms."
         IValidationReport report = resource.getCreationReport()
-        if (IS_INFO_ENABLED) {
+//        if (IS_INFO_ENABLED) {
             final int ERR_COUNT = report.numErrors()
             if (ERR_COUNT) {
                 def err = []
@@ -74,33 +80,39 @@ class PharmMlService implements FileFormatService, IPharmMlService {
                 while (iErr.hasNext()) {
                     IValidationError e = iErr.next()
                     err << new StringBuffer(e.getRuleId()).append(':').append(e.getErrorMsg()).
-                            append(System.getProperty("line.separator")).toString()
+                            append("\n").toString()
                 }
-                log.info "err.inspect()"
+                log.info(err.inspect())
+                err.each { println it}
+                println ERR_COUNT
             }
-        }
+ //       }
+        println "step 3 done in ${(System.nanoTime()-step2)/1000000.0}ms."
         return report.isValid()
     }
 
     @Profiled(tag="pharmMlService.extractName")
     public String extractName(List<File> model) {
-        StringBuffer theName = new StringBuffer()
         if (!model) {
             return ""
         }
-        model = model.findAll{ f -> f.canRead() && "application/xml".equals(Files.probeContentType(f.toPath())) }
-        model.each {
-            String mName = JummpXmlUtils.findModelAttribute(it, "PharmML", "name")
-            if (mName) {
-                if (theName) {
-                    log.info "${model.inspect()} already has name set to ${theName}. Appending ${mName} to it."
-                    theName.append(" ")
-                }
-                theName.append(mName)
+        def sherlock = new DefaultDetector()
+        def noMetadata = new Metadata()
+        model = model.findAll{ f ->
+            if (!f.canRead()) {
+                log.error "Cannot read file ${f.inspect()} while extracting PharmML model name."
+                return false
             }
+            String mime = sherlock.detect(new BufferedInputStream(new FileInputStream(f)), noMetadata).toString()
+            return "application/xml".equals(mime)
         }
-
-        return theName.toString()
+        String theName = model.inject(new StringBuilder()) { name, f ->
+            name.append(JummpXmlUtils.findModelElement(f, "Name")).append(" ")
+        }.toString().trim()
+        if (IS_INFO_ENABLED) {
+            log.info("PharmML model ${model.inspect()} is entitled ${theName}")
+        }
+        return theName
     }
 
     @Profiled(tag="pharmMlService.getSearchIndexingContent")
@@ -108,9 +120,25 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         return ""
     }
 
+    /**
+     * Retrieves the description element from a file encoded PharmML.
+     *
+     * The implementation may be subject to change if the description contains additional XML elements.
+     * @see net.biomodels.jummp.core.model.FileFormatService#extractDescription(List)
+     */
     @Profiled(tag="pharmMlService.extractDescription")
     public String extractDescription(final List<File> model) {
-        return ""
+        if (!model) {
+            return ""
+        }
+        String theDescription = model.inject(new StringBuilder()) { desc, m ->
+            desc.append(JummpXmlUtils.findModelElement(m, "Description")).append(
+                    System.properties["line.separator"])
+        }.toString().trim()
+        if (IS_INFO_ENABLED) {
+            log.info("PharmML model ${model.inspect()} has description ${theDescription}.")
+        }
+        return theDescription
     }
 
     @Profiled(tag="pharmMlService.getAllAnnotationURNs")
@@ -136,7 +164,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         }
         files = files.findAll {it && it.canRead()}
         def fileQueue = new ConcurrentLinkedQueue(files)
-        def outcomes = new ConcurrentSkipListMap<File, Boolean>()
+        def outcomes = new AtomicBoolean(false)
         def iFiles = fileQueue.iterator()
         def threadFactory = Executors.defaultThreadFactory()
         while (iFiles.hasNext()) {
@@ -150,48 +178,18 @@ class PharmMlService implements FileFormatService, IPharmMlService {
                 modelDetectorThread.setName("pharmML detector for ${theFile.name}")
                 modelDetectorThread.start()
                 modelDetectorThread.join()
-                boolean status = detector.isRecognisedFormat(theFile)
-                outcomes.put(theFile, status)
+                if (detector.isRecognisedFormat(theFile)) {
+                    if (IS_INFO_ENABLED) {
+                        log.info("Found PharmML namespace in ${theFile.name}")
+                    }
+                    return true
+                }
             } else {
                 //todo retry
-                log.error("cannot start a detector thread for $theFile")
-                outcomes.put(theFile, false)
-            }
-
-            boolean status = detector.isRecognisedFormat(theFile)
-            outcomes.put(theFile, status)
-            if (IS_INFO_ENABLED) {
-                log.info("PharmML detection status for ${theFile.name}: ${status}")
+                log.error("Cannot start a PharmML detector thread for ${theFile.properties}")
             }
         }
-        List<Boolean> outcomeValues = outcomes.values().toList()
-        boolean pharmmlFound = !!outcomeValues.find{it}
-        if (!pharmmlFound) {
-            if (IS_INFO_ENABLED) {
-                log.info("No PharmML file was found in ${files.inspect()}")
-            }
-            return false
-        }
-        // see if non-PharmML files are in SBML or clinical trial data
-        if (outcomeValues.find{!it}) {
-            def iOutcomes = outcomes.entrySet().iterator()
-            while (iOutcomes.hasNext()) {
-                def entry = iOutcomes.next()
-                if (!entry.getValue()) {
-                    final File NON_PHARMML_FILE = entry.getKey()
-                    final String CONTENT = Files.probeContentType(NON_PHARMML_FILE.toPath())
-                    if ("application/xml".equals(CONTENT)) {
-                        if (JummpXmlUtils.findModelAttribute(theFile, "sbml", "xmlns")) {
-                            entry.setValue(true)
-                        }
-                    } else if (["text/plain", "text/csv"].contains(CONTENT)) {
-                        entry.setValue(true)
-                    }
-                }
-            }
-        }
-        //we're okay as long as no value is set to false
-        return !(outcomes.values().find{!it})
+        return false
     }
 
     @Profiled(tag="pharmMlService.getFormatVersion")
@@ -214,12 +212,13 @@ class PharmMlService implements FileFormatService, IPharmMlService {
 
     @Profiled(tag="pharmMlService.getIndependentVariable")
     String getIndependentVariable(PharmML dom) {
-        return dom?.independentVar
+        return dom?.independentVariable
     }
 
+    //todo change method name
     @Profiled(tag="pharmMlService.getSymbolDefinitions")
     List getSymbolDefinitions(PharmML dom) {
-        return dom?.symbolDefinition
+        return dom?.functionDefinition
     }
 
     @Profiled(tag="pharmMlService.getModelDefinition")
@@ -234,8 +233,8 @@ class PharmMlService implements FileFormatService, IPharmMlService {
     }
 
     @Profiled(tag="pharmMlService.getVariabilityLevel")
-    List getVariabilityLevel(PharmML dom) {
-        return dom?.getModelDefinition().getVariabilityLevel()
+    List getVariabilityModel(PharmML dom) {
+        return dom?.getModelDefinition().getVariabilityModel()
     }
 
     @Profiled(tag="pharmMlService.getParameterModel")
@@ -256,53 +255,52 @@ class PharmMlService implements FileFormatService, IPharmMlService {
     @Profiled(tag="pharmMlService.getTrialDesign")
     TrialDesignType getTrialDesign(RevisionTransportCommand revision) {
         PharmML dom = getDomFromRevision(revision)
-        return dom?.design
+        return dom?.trialDesign
     }
 
+    //todo incomplete
     @Profiled(tag="pharmMlService.getTreatment")
     List getTreatment(TrialDesignType design) {
-        return design?.treatment
+        return design?.individualDosing
     }
 
+    //todo: incomplete
     @Profiled(tag="pharmMlService.getTreatmentEpoch")
     List getTreatmentEpoch(TrialDesignType design) {
-        return design?.treatmentEpoch
+        return design?.structure.epoch
     }
 
     @Profiled(tag="pharmMlService.getGroup")
     List getGroup(TrialDesignType design) {
-        return design?.group
+        return design?.population
     }
 
     @Profiled(tag="pharmMlService.getModellingSteps")
-    ModellingSteps getModellingSteps(RevisionTransportCommand revision) {
+    ModellingStepsType getModellingSteps(RevisionTransportCommand revision) {
         PharmML dom = getDomFromRevision(revision)
         return dom?.modellingSteps
     }
 
     @Profiled(tag="pharmMlService.getVariableDefinitions")
-    List getVariableDefinitions(ModellingSteps steps) {
+    List getVariableDefinitions(ModellingStepsType steps) {
         return steps?.variable
     }
 
     @Profiled(tag="pharmMlService.getEstimationOrSimulationSteps")
-    List getEstimationOrSimulationSteps(ModellingSteps steps) {
+    List getEstimationOrSimulationSteps(ModellingStepsType steps) {
         return steps?.estimationStepOrSimulationStep
     }
 
     @Profiled(tag="pharmMlService.getStepDependencies")
-    StepDependencyType getStepDependencies(ModellingSteps steps) {
+    StepDependencyType getStepDependencies(ModellingStepsType steps) {
         return steps?.stepDependencies
     }
 
     /*
-     * Helper function that finds the PharmML file from a selection of files
-     * corresponding to a revision. This is necessary because libPharmML only
-     * deals with the PharmML file rather than including the externalised structural
-     * model, or clinical trial data.
+     * Helper function that finds the PharmML file from a selection of files.
      *
      * @param  submission the list of files containing a PharmML file.
-     * @return the PharmML file, or null if @p submission had no PharmML files.In the case of 
+     * @return the PharmML file, or null if @p submission had no PharmML files.In the case of
      * multiple PharmML files being present, only the first one is returned.
      */
     @Profiled(tag="pharmMlService.findPharmML")
@@ -326,7 +324,6 @@ class PharmMlService implements FileFormatService, IPharmMlService {
                 }
             } else {
                 log.error "pharmMlService.validate: Cannot start detection thread for file ${file.name}"
-                throw new RuntimeException("Something went wrong when we tried to validate ${file.name}")
                 return pharmMlFile
             }
         }
@@ -361,7 +358,6 @@ class PharmMlService implements FileFormatService, IPharmMlService {
             resource = api.createDomFromResource(stream)
         } catch(IOException x) {
             log.error(x.message, x)
-            throw new RuntimeException(x.message, x)
         } finally {
             stream?.close()
         }
