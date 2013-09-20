@@ -47,38 +47,24 @@ class ModelController {
     }
     
     
-    void prefixToInfix(StringBuilder builder, List<String> stack) {
+    void prefixToInfix(StringBuilder builder, List<MathsSymbol> stack) {
     	    if (stack.isEmpty()) {
     	    	    return;
     	    }
-    	    String line=stack.pop().trim()
-    	    if (line.contains("Equation") ) {
-    	    	    prefixToInfix(builder, stack)
-    	    	    return
-    	    }
-    	    if (line.contains("Binop")) {
-    	    	    builder.append("<mrow>")
-    	    	    prefixToInfix(builder,stack)
-    	    	    if (line.contains("plus")) {
-    	    	    	    builder.append("<mo>+</mo>")
-    	    	    }
-    	    	    else if (line.contains("minus")) {
-    	    	    	    builder.append("<mo>-</mo>")
-    	    	    }
-    	    	    else if (line.contains("times")) {
-    	    	    	    builder.append("<mo>x</mo>")
-    	    	    }
-    	    	    else if (line.contains("divide")) {
-    	    	    	    builder.append("<mo>/</mo>")
-    	    	    }
-    	    	    prefixToInfix(builder,stack)
-    	    	    builder.append("</mrow>")
+    	    MathsSymbol symbol=stack.pop()
+    	    if (symbol instanceof OperatorSymbol) {
+    	    	    OperatorSymbol operator=symbol as OperatorSymbol
+    	    	    if (operator.type==OperatorSymbol.OperatorType.BINARY) {
+			    builder.append("<mrow>")
+			    prefixToInfix(builder,stack)
+			    builder.append("<mo>${operator.mapTo}</mo>")
+			    prefixToInfix(builder,stack)
+			    builder.append("</mrow>")
+		    }
     	    	    return;
     	    }
-    	    else if (line.contains("ct")) {
-    	    	    builder.append("<mi>")
-    	    	    builder.append(line.split(">")[1])
-    	    	    builder.append("</mi>")
+    	    else {
+		    builder.append("<mi>${operator.mapTo}</mi>")
     	    	    return;
     	    }
     	    if (!stack.isEmpty()) {
@@ -87,19 +73,11 @@ class ModelController {
     }
     
     String convertToMathML(String ph) {
-    	    System.out.println(MathsUtil.convertToSymbols(ph))
-    	    String[] split=ph.split("<")
-    	    split=split.reverse()
+    	    List<MathsSymbol> symbols=MathsUtil.convertToSymbols(ph).reverse()
     	    StringBuilder builder=new StringBuilder("")
     	    List<String> stack=new LinkedList<String>()
-    	    split.each {
-    	    	    if (it.contains("/") && !it.contains("/>")) {
-    	    	    }
-    	    	    else if (it.contains("Equation")) {
-    	    	    }
-    	    	    else {
-    	    	    	    stack.push(it)
-    	    	    }
+    	    symbols.each {
+    	    	   stack.push(it)
     	    }
     	    prefixToInfix(builder, stack)
     	    return builder.toString()
