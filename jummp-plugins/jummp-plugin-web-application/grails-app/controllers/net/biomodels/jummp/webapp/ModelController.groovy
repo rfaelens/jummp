@@ -55,16 +55,16 @@ class ModelController {
     	    if (symbol instanceof OperatorSymbol) {
     	    	    OperatorSymbol operator=symbol as OperatorSymbol
     	    	    if (operator.type==OperatorSymbol.OperatorType.BINARY) {
-			    builder.append("<mrow>")
+			    builder.append("<mrow><mo>(</mo>")
 			    prefixToInfix(builder,stack)
-			    builder.append("<mo>${operator.mapTo}</mo>")
+			    builder.append("<mo>${operator.mapsTo}</mo>")
 			    prefixToInfix(builder,stack)
-			    builder.append("</mrow>")
+			    builder.append("<mo>)</mo></mrow>")
 		    }
     	    	    return;
     	    }
     	    else {
-		    builder.append("<mi>${operator.mapTo}</mi>")
+		    builder.append("<mi>${symbol.mapsTo}</mi>")
     	    	    return;
     	    }
     	    if (!stack.isEmpty()) {
