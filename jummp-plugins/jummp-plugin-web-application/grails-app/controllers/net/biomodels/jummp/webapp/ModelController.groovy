@@ -10,6 +10,9 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
+import net.biomodels.jummp.maths.MathsSymbol
+import net.biomodels.jummp.maths.OperatorSymbol
+import net.biomodels.jummp.maths.MathsUtil
 
 class ModelController {
     /**
@@ -42,6 +45,7 @@ class ModelController {
     	    flash["giveMessage"]=params.flashMessage
     	    redirect(action: show, id:params.id)
     }
+    
     
     void prefixToInfix(StringBuilder builder, List<String> stack) {
     	    if (stack.isEmpty()) {
@@ -83,6 +87,7 @@ class ModelController {
     }
     
     String convertToMathML(String ph) {
+    	    System.out.println(MathsUtil.convertToSymbols(ph))
     	    String[] split=ph.split("<")
     	    split=split.reverse()
     	    StringBuilder builder=new StringBuilder("")
