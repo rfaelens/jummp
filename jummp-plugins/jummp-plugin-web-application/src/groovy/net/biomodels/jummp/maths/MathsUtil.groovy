@@ -11,7 +11,10 @@ class MathsUtil {
     	    	    else if (it.contains("Equation")) {
     	    	    }
     	    	    else {
-    	    	    	    if (it.contains("Binop")) {
+    	    	    	    if (it.contains("Uniop")) {
+    	    	    	    	    symbols.add(new OperatorSymbol(it.split("op=")[1], it.split("op=")[1], OperatorSymbol.OperatorType.UNARY));
+    	    	    	    }
+    	    	    	    else if (it.contains("Binop")) {
     	    	    	    	 if (it.contains("plus")) {
     	    	    	    	 	 symbols.add(new OperatorSymbol("+", "+", OperatorSymbol.OperatorType.BINARY));
     	    	    	    	 }
@@ -26,7 +29,12 @@ class MathsUtil {
     	    	    	    	 }
     	    	    	    }
     	    	    	    else if (it.contains("ct")) {
-    	    	    	    	 symbols.add(new MathsSymbol(it.split(">")[1], it.split(">")[1]));
+    	    	    	    	    if (it.contains("SymbRef")) {
+    	    	    	    	    	    symbols.add(new MathsSymbol(it.split("symbIdRef=")[1], it.split("symbIdRef=")[1]));
+    	    	    	    	    }
+    	    	    	    	    else {
+    	    	    	    	    	    symbols.add(new MathsSymbol(it.split(">")[1], it.split(">")[1]));
+    	    	    	    	    }
     	    	    	    }
    	    	    }
     	    	}

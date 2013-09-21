@@ -8,4 +8,27 @@ class OperatorSymbol extends MathsSymbol {
 		super(text,mapsTo);
 		type=t;
 	}
+	
+	public String getOpening() {
+		if (format==MathsSymbol.OutputFormat.MATHML) {
+			return "<mo>(</mo>"
+		}
+		return null
+		
+	}
+	
+	public String getClosing() {
+		if (format==MathsSymbol.OutputFormat.MATHML) {
+			return "<mo>)</mo>"
+		}
+		return null
+		
+	}
+
+	public String getMapping() {
+		if (format==MathsSymbol.OutputFormat.MATHML) {
+			return "<mo>${mapsTo}</mo>"
+		}
+		return null
+	}
 }

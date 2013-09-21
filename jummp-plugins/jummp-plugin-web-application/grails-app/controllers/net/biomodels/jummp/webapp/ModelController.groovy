@@ -55,21 +55,25 @@ class ModelController {
     	    if (symbol instanceof OperatorSymbol) {
     	    	    OperatorSymbol operator=symbol as OperatorSymbol
     	    	    if (operator.type==OperatorSymbol.OperatorType.BINARY) {
-			    builder.append("<mrow><mo>(</mo>")
+			    builder.append(operator.getOpening())
 			    prefixToInfix(builder,stack)
-			    builder.append("<mo>${operator.mapsTo}</mo>")
+			    builder.append(operator.getMapping())
 			    prefixToInfix(builder,stack)
-			    builder.append("<mo>)</mo></mrow>")
+			    builder.append(operator.getClosing())
+		    }
+    	    	    else {
+			    builder.append(operator.getMapping())
+			    builder.append(operator.getOpening())
+			    prefixToInfix(builder,stack)
+			    builder.append(operator.getClosing())
 		    }
     	    	    return;
     	    }
     	    else {
-		    builder.append("<mi>${symbol.mapsTo}</mi>")
+		    builder.append(symbol.getMapping())
     	    	    return;
     	    }
-    	    if (!stack.isEmpty()) {
-    	    	    prefixToInfix(builder, stack)
-    	    }
+    	    prefixToInfix(builder, stack)
     }
     
     String convertToMathML(String ph) {
