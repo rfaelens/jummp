@@ -70,25 +70,40 @@ class MathsUtil {
 			symbols.add(symbol)
 		}
 		List<JAXBElement> subtree=getSubTree(jaxObject)
-		if (subtree) {
+		if (!subtree.isEmpty()) {
 			subtree.each {
-				convertJAX(symbols, it.getValue());
+				convertJAX(symbols, it);
 			}
 		}
 	}
 	
-	private static List<JAXBElement> getSubTree(def jaxObject) {
+	private static List getSubTree(def jaxObject) {
+		List subTree=new LinkedList()
 		if (jaxObject instanceof EquationType || jaxObject instanceof Equation) {
-			return jaxObject.getScalarOrSymbRefOrBinop()
+			jaxObject.getScalarOrSymbRefOrBinop().each {
+				subTree.add(it.getValue())
+			}
 		}
-		if (jaxObject instanceof BinopType) {
-			return jaxObject.getContent()
+		else if (jaxObject instanceof BinopType) {
+			jaxObject.getContent().each {
+				subTree.add(it.getValue())
+			}
 		}
-		if (jaxObject instanceof UniopType) {
-			System.out.println(jaxObject.getProperties())
-			System.out.println(jaxObject.inspect())
+		else if (jaxObject instanceof UniopType) {
+			addIfExists(jaxObject.binop, subTree)
+			addIfExists(jaxObject.uniop, subTree)
+			addIfExists(jaxObject.symbRef, subTree)
+			addIfExists(jaxObject.functionCall, subTree)
+			addIfExists(jaxObject.scalar, subTree)
+			addIfExists(jaxObject.constant, subTree)
 		}
-		return null
+		return subTree
+	}
+	
+	private static void addIfExists(Object object, List list) {
+		if (object) {
+			list.add(object)
+		}
 	}
 	
 	private static MathsSymbol getSymbol(def jaxObject) {
@@ -105,9 +120,6 @@ class MathsUtil {
 		if (jaxObject instanceof eu.ddmore.libpharmml.dom.commontypes.Boolean) { //NEEDS TO BE LOOKED AT!
 			return new MathsSymbol(""+jaxObject.getId(), ""+jaxObject.getId())
 		}
-		if (jaxObject.getClass().getCanonicalName().contains("eu.ddmore.libpharmml.dom.commontypes")) {
-			return new MathsSymbol(""+jaxObject.getValue(), ""+jaxObject.getValue())
-		}
 		if (jaxObject instanceof SymbolRefType) {
 			String varName="";
 			if (jaxObject.getBlkIdRef()) {
@@ -115,6 +127,9 @@ class MathsUtil {
 			}
 			varName+=jaxObject.getSymbIdRef();
 			return new MathsSymbol(varName, varName)
+		}
+		if (jaxObject.getClass().getCanonicalName().contains("eu.ddmore.libpharmml.dom.commontypes")) {
+			return new MathsSymbol(""+jaxObject.getValue(), ""+jaxObject.getValue())
 		}
 		
 		return null
