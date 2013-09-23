@@ -212,12 +212,12 @@ class PharmMlService implements FileFormatService, IPharmMlService {
 
     @Profiled(tag="pharmMlService.getIndependentVariable")
     String getIndependentVariable(PharmML dom) {
-        return dom?.independentVariable
+        return dom?.independentVariable.symbId
     }
 
-    //todo change method name
-    @Profiled(tag="pharmMlService.getSymbolDefinitions")
-    List getSymbolDefinitions(PharmML dom) {
+    //todo change display format
+    @Profiled(tag="pharmMlService.getFunctionDefinitions")
+    List getFunctionDefinitions(PharmML dom) {
         return dom?.functionDefinition
     }
 
@@ -257,7 +257,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         PharmML dom = getDomFromRevision(revision)
         return dom?.trialDesign
     }
-
+/*
     //todo incomplete
     @Profiled(tag="pharmMlService.getTreatment")
     List getTreatment(TrialDesignType design) {
@@ -274,15 +274,15 @@ class PharmMlService implements FileFormatService, IPharmMlService {
     List getGroup(TrialDesignType design) {
         return design?.population
     }
-
+*/
     @Profiled(tag="pharmMlService.getModellingSteps")
     ModellingStepsType getModellingSteps(RevisionTransportCommand revision) {
         PharmML dom = getDomFromRevision(revision)
         return dom?.modellingSteps
     }
-
+/*
     @Profiled(tag="pharmMlService.getVariableDefinitions")
-    List getVariableDefinitions(ModellingStepsType steps) {
+    List getVariableAssignments(ModellingStepsType steps) {
         return steps?.variable
     }
 
@@ -290,7 +290,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
     List getEstimationOrSimulationSteps(ModellingStepsType steps) {
         return steps?.estimationStepOrSimulationStep
     }
-
+*/
     @Profiled(tag="pharmMlService.getStepDependencies")
     StepDependencyType getStepDependencies(ModellingStepsType steps) {
         return steps?.stepDependencies

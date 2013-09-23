@@ -3,6 +3,7 @@ package net.biomodels.jummp.plugins.pharmml
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
@@ -10,47 +11,70 @@ import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 class PharmMlTagLib {
     static namespace = "pharmml"
 
-    def covariateParameters = { attrs ->
+    def simpleParams = { attrs ->
         if (!attrs.parameter) {
-            out << "None"
             return
         }
-        def s = new StringBuilder()
-        attrs.parameter.each { p ->
-            s.append(p.symbId).append(" ")
+        def s = attrs.parameter.inject(new StringBuilder()) { s, p ->
+            s.append(p.symbId)
+            return (p.assign ? rhs(p.assign, s.append("=")) : s).append("&nbsp;")
         }
         out << s.toString()
     }
 
     def covariates = { attrs ->
         if (!attrs.covariate) {
-            out << "<td class=\"value\" colspan=\"4\">None</td>"
             return
         }
-
+        out.println("<h3>Covariate Model</h3>")
+        def result = new StringBuilder()
         attrs.covariate.each { c ->
-            def thisCovariate = new StringBuilder()
-            def type = c.continuous ? "continuous" : "categorical"
-            thisCovariate.append("<td>").append(type).append("</td>")
-            thisCovariate.append("<td>").append(c.symbId).append("</td>")
-            String covName = c.name? c.name: "&nbsp;"
-            thisCovariate.append("<td>").append(covName).append("</td>")
-            String covTransf = c.transformation ? c.transformation : "&nbsp;"
-            thisCovariate.append("<td>").append(covTransf).append("</td>")
-            out << thisCovariate.toString()
+            result.append("<div>")
+            if (c.simpleParameter) {
+                result.append("<p><span class=\"bold\">Simple parameters:</span>&nbsp;")
+                c.simpleParameter.inject(result) { r, p ->
+                    r.append(p.symbId)
+                    return (p.assign ? rhs(p.assign, r.append("=")) : r).append("&nbsp;")
+                }
+                result.append("</p>")
+            }
+            if (c.covariate) {
+                c.covariate.each {
+                    result.append(it.getCategorical() ?
+                            categCov(it, it.symbId) : contCov(it, it.symbId))
+                }
+            }
+            result.append("</div>")
         }
+        out << result.toString()
     }
 
-    def symbolDefinitions = { attrs ->
-        if (!attrs.symbolDefs || attrs.symbolDefs.size() == 0) {
-            out << "No symbol definitions were found."
+    StringBuilder categCov = { c, symbId ->
+        def result = new StringBuilder("<p>")
+        result.append("<span class=\"bold\"Type: Categorical</span>").append("&nbsp;")
+        result.append(symbId).append("~")
+        result.append(distribution(c.probability))
+        return result.append("</p>")
+    }
+
+    StringBuilder contCov = { c, symbId ->
+        def result = new StringBuilder("<p>")
+        result.append("<span class=\"bold\">Type: Continuous</span>").append("&nbsp;")
+        result.append(symbId).append("~")
+        result.append(distribution(c.probability))
+        return result.append("</p>")
+    }
+
+    def functionDefinitions = { attrs ->
+        if (!attrs.functionDefs) {
+            out << "No function definitions were found."
             return
         }
         def result = new StringBuilder("<table>\n\t")
         result.append("<thead>\n")
         result.append("<tr>\n<th>Identifier</th><th>Type</th></tr>\n")
         result.append("</thead>\n<tbody>\n")
-        attrs.symbolDefs.each { d ->
+        attrs.functionDefs.each { d ->
             result.append("<tr><td class=\"value\">")
             result.append(d.symbId)
             result.append("</td><td class=\"value\">")
@@ -61,22 +85,47 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    def variabilityLevel = { attrs ->
-        if (!attrs.level || attrs.level.size() == 0) {
-            out << "No variability levels defined in the model."
+    def variabilityModel = { attrs ->
+        if (!attrs.variabilityModel) {
             return
         }
-        def result = new StringBuilder("<table>\n")
-        result.append("<thead>\n<tr><th>Identifier</th><th>Name</th></tr>\n</thead>\n<tbody>\n")
-        attrs.level.each { l ->
+        def result = new StringBuilder("<h3>Variability Model</h3>\n<table>\n<thead><tr>")
+        result.append("<th>Identifier</th><th>Name</th><th>Levels</th><th>Type</th></tr>")
+        result.append("\n</thead>\n<tbody>\n")
+        attrs.variabilityModel.each { m ->
             result.append("<tr><td class=\"value\">")
-            result.append(l.id)
+            result.append(m.blkId)
             result.append("</td><td class=\"value\">")
-            String levelName = l.name ? l.name : "&nbsp;"
-            result.append(levelName)
+            String modelName = m.name ? m.name : "&nbsp;"
+            result.append(modelName)
+            result.append("</td><td class=\"value\">")
+            result.append(variabilityLevel(m.level))
+            result.append("</td><td class=\"value\">")
+            result.append(m.type.value())
             result.append("</td></tr>\n")
         }
         out << result.append("</tbody>\n</table>").toString()
+    }
+
+    StringBuilder variabilityLevel(VariabilityLevelDefnType variabilityLevels) {
+        def result = new StringBuilder()
+        if (!variabilityLevels) {
+            return result.append("&nbsp;")
+        }
+        variabilityLevels.each { l ->
+            result.append("<p class=\"default\">")
+            if (l.name) {
+                result.append(l.name.value)
+            } else {
+                result.append(l.symbId)
+            }
+            if (l.parentLevel) {
+                result.append(",&nbsp;")
+                result.append("parent level:").append(l.parentLevel.symbRef)
+            }
+            result.append("</p>")
+        }
+        return result
     }
 
     def observations = { attrs ->
