@@ -106,7 +106,7 @@ class UpdatedRepositoryListener implements ApplicationListener {
 	public void updateIndex(RevisionTransportCommand revision) {
 		
 		Analyzer standardAnalyzer = new StandardAnalyzer();
-		IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer, true);
+		IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer);
 		indexWriter.setMaxFieldLength(25000);
 		
 		String name = revision.name
@@ -122,15 +122,20 @@ class UpdatedRepositoryListener implements ApplicationListener {
 		Field descriptionField = 
 			new Field("description",description,Field.Store.NO,Field.Index.ANALYZED); 
 		Field formatField = 
-			new Field("format",""+revision.format.name,Field.Store.YES,Field.Index.NOT_ANALYZED);
+			new Field("modelFormat",""+revision.format.name,Field.Store.YES,Field.Index.ANALYZED);
+		Field levelVersionField = 
+			new Field("levelVersion",""+revision.format.formatVersion,Field.Store.NO,Field.Index.ANALYZED);
+		Field submitterField = 
+			new Field("submitter",""+revision.owner,Field.Store.YES,Field.Index.ANALYZED);
 		Field contentField = 
 			new Field("content",content,Field.Store.NO,Field.Index.ANALYZED); 
 		
 		doc.add(nameField);
 		doc.add(descriptionField);
 		doc.add(formatField)
+		doc.add(levelVersionField)
+		doc.add(submitterField)
 		doc.add(contentField)
-			
 			
 		/*
 		*	Stored fields. Hopefully will be used to display the search results one day
@@ -143,12 +148,9 @@ class UpdatedRepositoryListener implements ApplicationListener {
 			new Field("versionNumber",""+revision.revisionNumber,Field.Store.YES,Field.Index.NO);
 		Field submittedField = 
 			new Field("submissionDate",""+revision.model.submissionDate,Field.Store.YES,Field.Index.NO);
-		Field submitterField = 
-			new Field("submitter",""+revision.model.submitter,Field.Store.YES,Field.Index.NOT_ANALYZED);
 		doc.add(idField);
 		doc.add(versionField);
 		doc.add(submittedField)
-		doc.add(submitterField)
 		
 		indexWriter.addDocument(doc);
 		//indexWriter.commit(); // To do: investigate a more optimised commit mechanism (4.4)

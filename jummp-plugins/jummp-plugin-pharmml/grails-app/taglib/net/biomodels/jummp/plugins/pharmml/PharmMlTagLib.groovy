@@ -8,10 +8,56 @@ import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
+import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
+import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
+import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
+import eu.ddmore.libpharmml.dom.maths.EquationType
+
 
 class PharmMlTagLib {
     static namespace = "pharmml"
 
+    private void prefixToInfix(StringBuilder builder, List<MathsSymbol> stack) {
+    	    if (stack.isEmpty()) {
+    	    	    return;
+    	    }
+    	    MathsSymbol symbol=stack.pop()
+    	    if (symbol instanceof OperatorSymbol) {
+    	    	    OperatorSymbol operator=symbol as OperatorSymbol
+    	    	    if (operator.type==OperatorSymbol.OperatorType.BINARY) {
+			    builder.append(operator.getOpening())
+			    prefixToInfix(builder,stack)
+			    builder.append(operator.getMapping())
+			    prefixToInfix(builder,stack)
+			    builder.append(operator.getClosing())
+		    }
+    	    	    else {
+			    builder.append(operator.getMapping())
+			    builder.append(operator.getOpening())
+			    prefixToInfix(builder,stack)
+			    builder.append(operator.getClosing())
+		    }
+    	    	    return;
+    	    }
+    	    else {
+		    builder.append(symbol.getMapping())
+    	    	    return;
+    	    }
+    	    prefixToInfix(builder, stack)
+    }
+    
+    private String convertToMathML(def equation) {
+    	    List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equation).reverse()
+    	    StringBuilder builder=new StringBuilder("")
+    	    List<String> stack=new LinkedList<String>()
+    	    symbols.each {
+    	    	   stack.push(it)
+    	    }
+    	    prefixToInfix(builder, stack)
+    	    return builder.toString()
+    }
+    
+    
     def simpleParams = { attrs ->
         if (!attrs.parameter) {
             return
@@ -74,7 +120,8 @@ class PharmMlTagLib {
         if (variance) {
             result.append(variance)
         }
-        return result.append(")</p>")
+        result.append(")</p>")
+        return result.append(convertToMathML(c.transformation.equation))
     }
 
     def functionDefinitions = { attrs ->

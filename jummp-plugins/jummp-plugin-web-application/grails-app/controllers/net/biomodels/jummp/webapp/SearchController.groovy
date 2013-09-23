@@ -30,6 +30,10 @@ class SearchController {
     def search = {
     	   [query:params.search_block_form]
     }
+    
+    def regen = {
+    	    
+    }
 
         /**
      * Action returning the DataTable content as JSON
