@@ -28,18 +28,18 @@ class PharmMlController {
                 authors: revision.model.creators,
                 allRevs: revs,
                 independentVar: pharmMlService.getIndependentVariable(dom),
-                symbolDefs: pharmMlService.getSymbolDefinitions(dom),
-                variabilityLevel: pharmMlService.getVariabilityModel(dom),
+                functionDefs: pharmMlService.getFunctionDefinitions(dom),
+                structuralModel: pharmMlService.getStructuralModel(dom),
+                variabilityModel: pharmMlService.getVariabilityModel(dom),
                 covariateModel: pharmMlService.getCovariateModel(dom),
                 parameterModel: pharmMlService.getParameterModel(dom),
-                structuralModel: pharmMlService.getStructuralModel(dom),
                 observationModel: pharmMlService.getObservationModel(dom),
-                treatment: pharmMlService.getTreatment(design),
+                /*treatment: pharmMlService.getTreatment(design),
                 treatmentEpoch: pharmMlService.getTreatmentEpoch(design),
-                group: pharmMlService.getGroup(design),
+                group: pharmMlService.getGroup(design),*/
                 modellingSteps: pharmMlService.getModellingSteps(revision),
-                variableDefinitions: pharmMlService.getVariableDefinitions(steps),
-                estSimSteps: pharmMlService.getEstimationOrSimulationSteps(steps),
+//                variableAssignments: pharmMlService.getVariableAssignments(steps),
+//                estSimSteps: pharmMlService.getEstimationOrSimulationSteps(steps),
                 stepDeps: pharmMlService.getStepDependencies(steps)
             ]
         )
