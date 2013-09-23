@@ -15,7 +15,8 @@ class UnknownController {
 		 
 		render(view:"/model/unknown/show", model: [revision: revs.last(), 
     		 authors: revs.last().model.creators,
-    		 allRevs: revs
+    		 allRevs: revs,
+    		 flashMessage: params.flashMessage
     		]
     		)
 	}

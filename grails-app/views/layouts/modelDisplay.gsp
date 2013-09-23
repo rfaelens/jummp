@@ -29,15 +29,14 @@
 	 		%>
 	 		fileData["${file.name}"]=new Object();
 	 		fileData["${file.name}"].Name="${FilenameUtils.getName(it.path)}";
-	 		fileData["${file.name}"].Extension="${FilenameUtils.getExtension(it.path)}";
 	 		<g:if test="${!it.mainFile}">
 	 			fileData["${file.name}"].Description="${it.description}";
 	 		</g:if>
 	 		fileData["${file.name}"].Type="${it.mimeType}";
 	 		fileData["${file.name}"].Size=readablizeBytes(${attr.size()});
 	 		fileData["${file.name}"].Created="${new Date(attr.creationTime().toMillis())}";
-	 		fileData["${file.name}"].Accessed="${new Date(attr.lastAccessTime().toMillis())}";
-	 		fileData["${file.name}"].Modified="${new Date(attr.lastModifiedTime().toMillis())}";
+	 		fileData["${file.name}"].Last_Accessed="${new Date(attr.lastAccessTime().toMillis())}";
+	 		fileData["${file.name}"].Last_Modified="${new Date(attr.lastModifiedTime().toMillis())}";
 	 		fileData["${file.name}"].isInternal=false;
 
 	 		<g:if test="${it.mimeType.contains('zip')}">
@@ -55,13 +54,12 @@
 	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"]=new Object();'<<'\n';
 	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].isInternal=true'<<'\n';
 	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Name="'<<FilenameUtils.getName(visiting.toString())<<'";'<<'\n';
-	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Extension="'<<FilenameUtils.getExtension(visiting.toString())<<'";'<<'\n';
 	 					out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Size=readablizeBytes('<<attrs.size()<<');'<<'\n';
 	 					if (attrs.lastAccessTime()) {
-	 						out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Accessed="'<<new Date(attrs.lastAccessTime().toMillis())<<'";'<<'\n';
+	 						out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Last_Accessed="'<<new Date(attrs.lastAccessTime().toMillis())<<'";'<<'\n';
 	 					}
 	 					if (attrs.lastModifiedTime()) {
-	 						out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Modified="'<<new Date(attrs.lastModifiedTime().toMillis())<<'";'<<'\n';
+	 						out<<'fileData[\"'<<zipfile.getFileName().toString()<<visiting.toString()<<'\"].Last_Modified="'<<new Date(attrs.lastModifiedTime().toMillis())<<'";'<<'\n';
 	 					}
 	 					return FileVisitResult.CONTINUE;
 	 				}
@@ -114,9 +112,8 @@
 				var content=[];
 				content.push("<table cellpadding='2' cellspacing='5'>")
 				for (var prop in fileProps) {
-					if (prop!="isInternal") {
-						content.push("<tr><td><b>",prop,"</b></td><td>",fileProps[prop],"</td></tr>");
-					}
+					if (prop!="isInternal" && fileProps[prop]) {
+						content.push("<tr><td><b>",prop.replace("_"," "),"</b></td><td>",fileProps[prop],"</td></tr>");					}
 				}
 				content.push("</table>");
 				if (fileProps.isInternal==false) {
@@ -152,6 +149,10 @@
 			tree.bind("loaded.jstree", function (event, data) {
 				tree.jstree("open_all");
 			});
+			setTimeout(function(){
+					$(".flash").fadeOut("slow", function () {
+							$(".flash").remove();
+					}); }, 4000);
 		});
 	
 	</script>
@@ -159,9 +160,12 @@
     </head>
     <body>
     	<div id="topBar">
+    		<g:if test="${flashMessage && flashMessage.length()>0}">
+	    		<div class='flash'>${flashMessage}</div>
+	    	</g:if>
     	        <h2 style="float: left;">${revision.model.name}</h2>
-        	<a class="submit" href="${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}">Update</a> 	
-        	<a class="submit" href="${g.createLink(controller: 'model', action: 'download', id: revision.id)}">Download</a> 	
+        	<a class="submit" title="Update Model" href="${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}">Update</a> 	
+        	<a class="submit" title="Download Model" href="${g.createLink(controller: 'model', action: 'download', id: revision.id)}">Download</a> 	
 	</div>
     	<div id="tablewrapper">
 	<div id="tabs">

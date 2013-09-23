@@ -57,10 +57,10 @@ grails.project.dependency.resolution = {
         runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
         runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"
-        compile ('org.apache.lucene:lucene-core:4.4.0')
-        compile ('org.apache.lucene:lucene-analyzers-common:4.4.0')
-        compile ('org.apache.lucene:lucene-queryparser:4.4.0')
-        compile ('org.apache.lucene:lucene-misc:4.4.0')
+        //compile ('org.apache.lucene:lucene-core:4.4.0')
+        //compile ('org.apache.lucene:lucene-analyzers-common:4.4.0')
+        //compile ('org.apache.lucene:lucene-queryparser:4.4.0')
+        //compile ('org.apache.lucene:lucene-misc:4.4.0')
 
         compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") {
             excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4', 'xercesImpl'
@@ -154,8 +154,8 @@ grails.project.dependency.resolution = {
                      'jquery-ui',
                      //also exclude java feeds API rome in order to avoid conflicting revisions
                      'feeds',
-                     'ckeditor',
-                     'searchable'
+                     'ckeditor'
+               //      'searchable'
         }
         runtime(":feeds:1.6") { excludes 'rome', 'jdom' }
         runtime(":ckeditor:3.6.3.0") { excludes 'svn' }

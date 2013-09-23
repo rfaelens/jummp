@@ -11,6 +11,8 @@
                   
             <a id="main-content"></a>
                     <h1 class="title" id="page-title">Model Repository</h1>
+                    <div class="content">
+                     </div>
                                 <div class="region region-content">
     <div id="block-system-main" class="block block-system first last odd">
 

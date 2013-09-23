@@ -290,7 +290,7 @@ class PharmMlTagLib {
         } else if (r.getVector()) {
             text.append(vector(r))
         }else { // equation, dataset, distribution or function call
-            text.append(" cannot be extracted, sorry.")
+            text.append(" cannot be extracted, sorry. ${r.inspect()}")
         }
         return text
     }

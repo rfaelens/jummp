@@ -10,6 +10,10 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
+import net.biomodels.jummp.maths.MathsSymbol
+import net.biomodels.jummp.maths.OperatorSymbol
+import net.biomodels.jummp.maths.MathsUtil
+import eu.ddmore.libpharmml.dom.maths.EquationType
 
 class ModelController {
     /**
@@ -38,9 +42,76 @@ class ModelController {
      */
     def grailsApplication
 
+    def showWithMessage = {
+    	    flash["giveMessage"]=params.flashMessage
+    	    redirect(action: show, id:params.id)
+    }
+    
+    
+    private void prefixToInfix(StringBuilder builder, List<MathsSymbol> stack) {
+    	    if (stack.isEmpty()) {
+    	    	    return;
+    	    }
+    	    MathsSymbol symbol=stack.pop()
+    	    if (symbol instanceof OperatorSymbol) {
+    	    	    OperatorSymbol operator=symbol as OperatorSymbol
+    	    	    if (operator.type==OperatorSymbol.OperatorType.BINARY) {
+			    builder.append(operator.getOpening())
+			    prefixToInfix(builder,stack)
+			    builder.append(operator.getMapping())
+			    prefixToInfix(builder,stack)
+			    builder.append(operator.getClosing())
+		    }
+    	    	    else {
+			    builder.append(operator.getMapping())
+			    builder.append(operator.getOpening())
+			    prefixToInfix(builder,stack)
+			    builder.append(operator.getClosing())
+		    }
+    	    	    return;
+    	    }
+    	    else {
+		    builder.append(symbol.getMapping())
+    	    	    return;
+    	    }
+    	    prefixToInfix(builder, stack)
+    }
+    
+    private String convertToMathML(List<MathsSymbol> symbols) {
+    	    StringBuilder builder=new StringBuilder("")
+    	    List<String> stack=new LinkedList<String>()
+    	    symbols.each {
+    	    	   stack.push(it)
+    	    }
+    	    prefixToInfix(builder, stack)
+    	    return builder.toString()
+    }
+    
+    def mathsTest = {
+    /*	    String maths='''<Equation xmlns="http://www.pharmml.org/2013/03/Maths"/>
+<Binop op="times">
+<Binop op="minus">
+<ct:Real>9</ct:Real>
+<ct:Real>5</ct:Real>
+</Binop>
+<ct:Int>2</ct:Int>
+</Binop>
+</Equation>'''*/
+	    List<MathsSymbol> symbols;
+    	    if (params.maths) {
+    	    	    symbols=MathsUtil.convertToSymbols(params.maths as EquationType).reverse()
+    	    }
+    	    
+    	    [inputString: "Passed equation object: "+params.maths.inspect(), maths:convertToMathML(symbols)]
+    }
+    
     def show = {
     	    ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
-    	    forward controller:modelFileFormatService.getPluginForFormat(model.format), action:"show", id: params.id
+    	    String flashMessage=""
+    	    if (flash.now["giveMessage"]) {
+    	    	    flashMessage=flash.now["giveMessage"]
+    	    }
+    	    forward controller:modelFileFormatService.getPluginForFormat(model.format), action:"show", id: params.id, params:[flashMessage:flashMessage]
     }
 
     @Secured(["isAuthenticated()"])
@@ -98,20 +169,27 @@ class ModelController {
         start {
             action {
                 Map<String, Object> workingMemory=new HashMap<String,Object>()
-                workingMemory.put("isUpdateOnExistingModel",flow.isUpdate)
+                flow.workingMemory=workingMemory
+                flow.workingMemory.put("isUpdateOnExistingModel",flow.isUpdate)
                 if (flow.isUpdate) {
                     Long model_id=conversation.model_id as Long
-                    workingMemory.put("model_id", model_id)
-                    workingMemory.put("LastRevision", modelDelegateService.getLatestRevision(model_id))
+                    flow.workingMemory.put("model_id", model_id)
+                    flow.workingMemory.put("LastRevision", modelDelegateService.getLatestRevision(model_id))
                 }
-                flow.workingMemory=workingMemory
                 submissionService.initialise(flow.workingMemory)
+                if (flow.isUpdate) {
+                	skipDisclaimer()
+                }
+                else {
+                	goToDisclaimer()
+                }
             }
-            on("success").to "displayDisclaimer"
+            on("skipDisclaimer").to "uploadFiles"
+            on("goToDisclaimer").to "displayDisclaimer"
         }
         displayDisclaimer {
             on("Continue").to "uploadFiles"
-            on("Cancel").to "abort"
+            on("Cancel").to "cleanUpAndTerminate"
         }
         uploadFiles {
             on("Upload") {
@@ -180,7 +258,7 @@ class ModelController {
             }.to "transferFilesToService"
             on("ProceedWithoutValidation"){
             }.to "inferModelInfo"
-            on("Cancel").to "abort"
+            on("Cancel").to "cleanUpAndTerminate"
             on("Back"){}.to "displayDisclaimer"
         }
         transferFilesToService {
@@ -319,6 +397,9 @@ class ModelController {
                 try {
                     submissionService.handleSubmission(flow.workingMemory)
                     session.result_submission=flow.workingMemory.get("model_id")
+                    if (flow.isUpdate) {
+                    	    redirect(controller:'model', action:'showWithMessage', id:conversation.model_id, params: [flashMessage: "Model ${session.result_submission} has been updated."])
+                    }
                 }
                 catch(Exception ignore) {
                     error()
@@ -330,6 +411,9 @@ class ModelController {
         cleanUpAndTerminate {
             action {
                 submissionService.cleanup(flow.workingMemory)
+                if (flow.isUpdate) {
+                    	    redirect(controller:'model', action:'showWithMessage', id:conversation.model_id, params: [flashMessage: "Model update was cancelled."])
+                }
             }
             on("success").to "abort"
         }

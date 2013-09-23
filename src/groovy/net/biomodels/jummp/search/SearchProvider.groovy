@@ -3,13 +3,14 @@ package net.biomodels.jummp.search
 import net.biomodels.jummp.core.events.RevisionCreatedEvent
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.search.IndexSearcher
-import org.apache.lucene.queryparser.classic.QueryParser
-import org.apache.lucene.queryparser.classic.MultiFieldQueryParser
+import org.apache.lucene.queryParser.QueryParser
+import org.apache.lucene.queryParser.MultiFieldQueryParser
 import org.apache.lucene.search.Query
-import org.apache.lucene.search.SearcherManager
 import org.apache.lucene.search.TopDocs
-import org.apache.lucene.util.Version
 import org.apache.lucene.document.Document
+
+//import org.apache.lucene.search.SearcherManager LUCENE 4.4
+
 /**
  * @short Class written as a spring-bean singleton to execute search queries using lucene
  * 
@@ -23,9 +24,6 @@ class SearchProvider {
 
 	
 	def grailsApplication
-	
-	SearcherManager mgr
-	
 	/**
 	* Internal method to executes a query 
 	*
@@ -38,10 +36,12 @@ class SearchProvider {
 	**/
 	private Set<Document> search(Query q) {
 		Set<Document> docs=new HashSet<Document>()
-		if (!mgr) {
+		IndexSearcher indexSearcher = new IndexSearcher(
+				grailsApplication.mainContext.getBean("indexingEventListener").getDirectory());
+		/*if (!mgr) { 4.4
 			mgr=grailsApplication.mainContext.getBean("indexingEventListener").getSearcherManager()
 		}
-		IndexSearcher indexSearcher = mgr.acquire();
+		IndexSearcher indexSearcher = mgr.acquire();*/
 		try {
 			TopDocs topDocs = indexSearcher.search(q,1000); //make less arbitrary
 			for (int i=0; i<topDocs.totalHits; i++) {
@@ -49,8 +49,9 @@ class SearchProvider {
 			}
 			
 		} finally {
-			mgr.release(indexSearcher);
-			indexSearcher = null;
+			/*mgr.release(indexSearcher); 4.4
+			indexSearcher = null; */
+			indexSearcher.close()
 		}
 		return docs
 	}
@@ -66,7 +67,7 @@ class SearchProvider {
 	* @return A set of documents corresponding to search results
 	**/
 	public Set<Document> performSearch(String[] fields, String query) {
-		QueryParser queryParser=new MultiFieldQueryParser(Version.LUCENE_44, fields, new StandardAnalyzer(Version.LUCENE_44))		
+		QueryParser queryParser=new MultiFieldQueryParser(fields, new StandardAnalyzer())		
 		return search(queryParser.parse(query))
 	}
 	
@@ -80,17 +81,18 @@ class SearchProvider {
 	* @return A set of documents corresponding to search results
 	**/
 	public Set<Document> performSearch(String field, String query) {
-		QueryParser queryParser = new QueryParser(Version.LUCENE_44,field,new StandardAnalyzer(Version.LUCENE_44));
+		QueryParser queryParser = new QueryParser(new StandardAnalyzer());
 		return search(queryParser.parse(query))
 	}
 	
-	/**
+	/** LUCENE 4.4
 	* Gets the searcher to update its view of the index, if necessary
-	**/
+	*
 	public void refreshIndex() {
 		if (mgr) {
 			mgr.maybeRefresh()
 		}
 	}
+	*/
 
 }

@@ -35,8 +35,8 @@ class SearchTests extends JummpIntegrationTest {
         def rf = new RepositoryFileTransportCommand(path: smallModel("importModel.xml", nameTag, descriptionTag).absolutePath, mainFile:true, description: "")
         Model upped = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
-        // refresh the search index (we dont want to wait 5 mins)       
-        grailsApplication.mainContext.getBean("searchEngine").refreshIndex()
+        // refresh the search index (we dont want to wait 5 mins) (once we switch to 4.4)       
+        //grailsApplication.mainContext.getBean("searchEngine").refreshIndex()
         
         // Search for the model using the unique name and description, and ensure its the same we uploaded       
         assertSame(upped.id,searchForModel(nameTag).id)

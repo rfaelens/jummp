@@ -51,7 +51,12 @@
                 <div class="buttons">
                     <g:submitButton name="Cancel" value="${g.message(code: 'submission.common.cancelButton')}" />
                     <g:submitButton name="Back" value="${g.message(code: 'submission.common.backButton')}" />
-                    <g:submitButton name="Continue" value="${g.message(code: 'submission.summary.submitButton')}"/>
+                    <g:if test="${workingMemory.get("isUpdateOnExistingModel") as Boolean}">
+                    	<g:submitButton name="Continue" value="${g.message(code: 'submission.summary.update.submitButton')}"/>
+                    </g:if>
+                    <g:else>
+                    	<g:submitButton name="Continue" value="${g.message(code: 'submission.summary.create.submitButton')}"/>
+                    </g:else>
                 </div>
             </div>
         </g:form>
