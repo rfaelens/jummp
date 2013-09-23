@@ -7,6 +7,7 @@ import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
+import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
 
 class PharmMlTagLib {
     static namespace = "pharmml"
@@ -40,8 +41,9 @@ class PharmMlTagLib {
             }
             if (c.covariate) {
                 c.covariate.each {
-                    result.append(it.getCategorical() ?
-                            categCov(it, it.symbId) : contCov(it, it.symbId))
+                    result.append(
+                        it.getCategorical() ? categCov(it.getCategorical(), it.symbId) :
+                                contCov(it.getContinuous(), it.symbId))
                 }
             }
             result.append("</div>")
@@ -60,9 +62,19 @@ class PharmMlTagLib {
     StringBuilder contCov = { c, symbId ->
         def result = new StringBuilder("<p>")
         result.append("<span class=\"bold\">Type: Continuous</span>").append("&nbsp;")
-        result.append(symbId).append("~")
-        result.append(distribution(c.probability))
-        return result.append("</p>")
+        result.append(symbId).append("~").append("&nbsp;N(")
+        NormalDistribution distrib= c.abstractContinuousUnivariateDistribution.value
+        String mean = distrib.mean.var.varId
+        result.append(mean).append(",&nbsp;")
+        String stdDev = distrib.stddev?.var?.varId
+        if (stdDev) {
+            result.append(stdDev).append(",&nbsp;")
+        }
+        String variance = distrib.variance?.var?.varId
+        if (variance) {
+            result.append(variance)
+        }
+        return result.append(")</p>")
     }
 
     def functionDefinitions = { attrs ->
