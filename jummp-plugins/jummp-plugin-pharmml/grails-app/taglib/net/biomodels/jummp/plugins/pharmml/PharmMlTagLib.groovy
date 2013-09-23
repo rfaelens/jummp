@@ -66,55 +66,6 @@ class PharmMlTagLib {
         out << s.toString()
     }
 
-    def covariates = { attrs ->
-        if (!attrs.covariate) {
-            return
-        }
-        out.println("<h3>Covariate Model</h3>")
-        def result = new StringBuilder()
-        attrs.covariate.each { c ->
-            result.append("<div>")
-            if (c.simpleParameter) {
-                result.append("<p><span class=\"bold\">Simple parameters:</span>&nbsp;")
-                c.simpleParameter.inject(result) { r, p ->
-                    r.append(p.symbId)
-                    return (p.assign ? rhs(p.assign, r.append("=")) : r).append("&nbsp;")
-                }
-                result.append("</p>")
-            }
-            if (c.covariate) {
-                c.covariate.each {
-                    result.append(
-                        it.getCategorical() ? categCov(it.getCategorical(), it.symbId) :
-                                contCov(it.getContinuous(), it.symbId))
-                }
-            }
-            result.append("</div>")
-        }
-        out << result.toString()
-    }
-
-    StringBuilder categCov = { c, symbId ->
-        def result = new StringBuilder("<p>")
-        result.append("<span class=\"bold\"Type: Categorical</span>").append("&nbsp;")
-        result.append(symbId).append("~")
-        result.append(distribution(c.probability))
-        return result.append("</p>")
-    }
-
-    StringBuilder contCov = { c, symbId ->
-        def result = new StringBuilder("<p>")
-        result.append("<span class=\"bold\">Type:</span>").append("&nbsp;Continuous</p>\n<p>")
-        result.append(symbId)
-        if (c.abstractContinuousUnivariateDistribution) {
-            result.append(distribution(c.abstractContinuousUnivariateDistribution))
-            result.append("</p><p>")
-        }
-        result.append("<span class=\"bold\">Transformation:</span>")
-        result.append(convertToMathML(c.transformation.equation))
-        return result.append("</p>")
-    }
-
     def functionDefinitions = { attrs ->
         if (!attrs.functionDefs) {
             out << "No function definitions were found."
@@ -176,6 +127,55 @@ class PharmMlTagLib {
             result.append("</p>")
         }
         return result
+    }
+
+    def covariates = { attrs ->
+        if (!attrs.covariate) {
+            return
+        }
+        out.println("<h3>Covariate Model</h3>")
+        def result = new StringBuilder()
+        attrs.covariate.each { c ->
+            result.append("<div>")
+            if (c.simpleParameter) {
+                result.append("<p><span class=\"bold\">Simple parameters:</span>&nbsp;")
+                c.simpleParameter.inject(result) { r, p ->
+                    r.append(p.symbId)
+                    return (p.assign ? rhs(p.assign, r.append("=")) : r).append("&nbsp;")
+                }
+                result.append("</p>")
+            }
+            if (c.covariate) {
+                c.covariate.each {
+                    result.append(
+                        it.getCategorical() ? categCov(it.getCategorical(), it.symbId) :
+                                contCov(it.getContinuous(), it.symbId))
+                }
+            }
+            result.append("</div>")
+        }
+        out << result.toString()
+    }
+
+    StringBuilder categCov = { c, symbId ->
+        def result = new StringBuilder("<p>")
+        result.append("<span class=\"bold\"Type: Categorical</span>").append("&nbsp;")
+        result.append(symbId).append("~")
+        result.append(distribution(c.probability))
+        return result.append("</p>")
+    }
+
+    StringBuilder contCov = { c, symbId ->
+        def result = new StringBuilder("<p>")
+        result.append("<span class=\"bold\">Type:</span>").append("&nbsp;Continuous</p>\n<p>")
+        result.append(symbId)
+        if (c.abstractContinuousUnivariateDistribution) {
+            result.append(distribution(c.abstractContinuousUnivariateDistribution))
+            result.append("</p><p>")
+        }
+        result.append("<span class=\"bold\">Transformation:</span>")
+        result.append(convertToMathML(c.transformation.equation))
+        return result.append("</p>")
     }
 
     def observations = { attrs ->
