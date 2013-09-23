@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile
 import net.biomodels.jummp.maths.MathsSymbol
 import net.biomodels.jummp.maths.OperatorSymbol
 import net.biomodels.jummp.maths.MathsUtil
+import eu.ddmore.libpharmml.dom.maths.EquationType
 
 class ModelController {
     /**
@@ -47,7 +48,7 @@ class ModelController {
     }
     
     
-    void prefixToInfix(StringBuilder builder, List<MathsSymbol> stack) {
+    private void prefixToInfix(StringBuilder builder, List<MathsSymbol> stack) {
     	    if (stack.isEmpty()) {
     	    	    return;
     	    }
@@ -76,8 +77,7 @@ class ModelController {
     	    prefixToInfix(builder, stack)
     }
     
-    String convertToMathML(String ph) {
-    	    List<MathsSymbol> symbols=MathsUtil.convertToSymbols(ph).reverse()
+    private String convertToMathML(List<MathsSymbol> symbols) {
     	    StringBuilder builder=new StringBuilder("")
     	    List<String> stack=new LinkedList<String>()
     	    symbols.each {
@@ -88,7 +88,7 @@ class ModelController {
     }
     
     def mathsTest = {
-    	    String maths='''<Equation xmlns="http://www.pharmml.org/2013/03/Maths"/>
+    /*	    String maths='''<Equation xmlns="http://www.pharmml.org/2013/03/Maths"/>
 <Binop op="times">
 <Binop op="minus">
 <ct:Real>9</ct:Real>
@@ -96,11 +96,13 @@ class ModelController {
 </Binop>
 <ct:Int>2</ct:Int>
 </Binop>
-</Equation>'''
+</Equation>'''*/
+	    List<MathsSymbol> symbols;
     	    if (params.maths) {
-    	    	    maths=params.maths
+    	    	    symbols=MathsUtil.convertToSymbols(params.maths as EquationType).reverse()
     	    }
-    	    [inputString: maths, maths:convertToMathML(maths)]
+    	    
+    	    [inputString: "Passed equation object: "+params.maths.inspect(), maths:convertToMathML(symbols)]
     }
     
     def show = {
