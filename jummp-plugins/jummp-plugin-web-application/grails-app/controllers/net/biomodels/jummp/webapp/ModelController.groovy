@@ -10,10 +10,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
-import net.biomodels.jummp.maths.MathsSymbol
-import net.biomodels.jummp.maths.OperatorSymbol
-import net.biomodels.jummp.maths.MathsUtil
-import eu.ddmore.libpharmml.dom.maths.EquationType
+
 
 class ModelController {
     /**
@@ -48,45 +45,6 @@ class ModelController {
     }
     
     
-    private void prefixToInfix(StringBuilder builder, List<MathsSymbol> stack) {
-    	    if (stack.isEmpty()) {
-    	    	    return;
-    	    }
-    	    MathsSymbol symbol=stack.pop()
-    	    if (symbol instanceof OperatorSymbol) {
-    	    	    OperatorSymbol operator=symbol as OperatorSymbol
-    	    	    if (operator.type==OperatorSymbol.OperatorType.BINARY) {
-			    builder.append(operator.getOpening())
-			    prefixToInfix(builder,stack)
-			    builder.append(operator.getMapping())
-			    prefixToInfix(builder,stack)
-			    builder.append(operator.getClosing())
-		    }
-    	    	    else {
-			    builder.append(operator.getMapping())
-			    builder.append(operator.getOpening())
-			    prefixToInfix(builder,stack)
-			    builder.append(operator.getClosing())
-		    }
-    	    	    return;
-    	    }
-    	    else {
-		    builder.append(symbol.getMapping())
-    	    	    return;
-    	    }
-    	    prefixToInfix(builder, stack)
-    }
-    
-    private String convertToMathML(List<MathsSymbol> symbols) {
-    	    StringBuilder builder=new StringBuilder("")
-    	    List<String> stack=new LinkedList<String>()
-    	    symbols.each {
-    	    	   stack.push(it)
-    	    }
-    	    prefixToInfix(builder, stack)
-    	    return builder.toString()
-    }
-    
     def mathsTest = {
     /*	    String maths='''<Equation xmlns="http://www.pharmml.org/2013/03/Maths"/>
 <Binop op="times">
@@ -96,13 +54,13 @@ class ModelController {
 </Binop>
 <ct:Int>2</ct:Int>
 </Binop>
-</Equation>'''*/
+</Equation>'''
 	    List<MathsSymbol> symbols;
     	    if (params.maths) {
     	    	    symbols=MathsUtil.convertToSymbols(params.maths as EquationType).reverse()
     	    }
     	    
-    	    [inputString: "Passed equation object: "+params.maths.inspect(), maths:convertToMathML(symbols)]
+    	    [inputString: "Passed equation object: "+params.maths.inspect(), maths:convertToMathML(symbols)]*/
     }
     
     def show = {

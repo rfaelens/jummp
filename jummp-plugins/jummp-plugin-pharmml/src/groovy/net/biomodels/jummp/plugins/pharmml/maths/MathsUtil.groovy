@@ -1,10 +1,12 @@
-package net.biomodels.jummp.maths
+package net.biomodels.jummp.plugins.pharmml.maths
+
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.Equation
 import javax.xml.bind.JAXBElement
 import eu.ddmore.libpharmml.dom.maths.BinopType
 import eu.ddmore.libpharmml.dom.maths.UniopType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
+
 
 class MathsUtil {
 	private static def pharmMap = [ "plus":"+",
@@ -81,6 +83,10 @@ class MathsUtil {
 		}
 		if (jaxObject instanceof BinopType) {
 			return jaxObject.getContent()
+		}
+		if (jaxObject instanceof UniopType) {
+			System.out.println(jaxObject.getProperties())
+			System.out.println(jaxObject.inspect())
 		}
 		return null
 	}

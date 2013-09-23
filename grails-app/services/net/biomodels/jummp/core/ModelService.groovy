@@ -97,7 +97,7 @@ class ModelService {
     @Profiled(tag="modelService.getAllModels")
     public Set<ModelTransportCommand> searchModels(String query) {
     	    def searchEngine=grailsApplication.mainContext.getBean("searchEngine")
-    	    Set<Document> results=searchEngine.performSearch(["name","description","content"] as String[], query)
+    	    Set<Document> results=searchEngine.performSearch(["name","description","content","modelFormat", "levelVersion", "submitter"] as String[], query)
     	    
     	    Set<ModelTransportCommand> returnVals=new HashSet<ModelTransportCommand>()
     	    results.each {

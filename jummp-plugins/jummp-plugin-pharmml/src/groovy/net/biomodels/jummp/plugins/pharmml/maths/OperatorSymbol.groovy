@@ -1,4 +1,4 @@
-package net.biomodels.jummp.maths
+package net.biomodels.jummp.plugins.pharmml.maths
 
 class OperatorSymbol extends MathsSymbol {
 	public enum OperatorType {BINARY,UNARY};

@@ -1,4 +1,4 @@
-package net.biomodels.jummp.maths
+package net.biomodels.jummp.plugins.pharmml.maths
 
 class MathsSymbol {
 	public enum OutputFormat {MATHML, LATEX}
