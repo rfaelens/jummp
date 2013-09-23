@@ -6,11 +6,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.events.ModelCreatedEvent
 import org.apache.lucene.store.FSDirectory
 import org.apache.lucene.store.Directory
-import org.apache.lucene.index.IndexDeletionPolicy
 import org.apache.lucene.index.IndexWriter
-import org.apache.lucene.index.IndexWriterConfig
-import org.apache.lucene.util.Version
-import org.apache.lucene.index.IndexWriterConfig.OpenMode
 import org.codehaus.groovy.grails.commons.cfg.ConfigurationHelper
 import grails.util.Environment
 import org.apache.lucene.document.Document
@@ -18,12 +14,19 @@ import org.apache.lucene.document.Field
 import org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.analysis.Analyzer
+import org.codehaus.groovy.grails.commons.ApplicationHolder
+import grails.util.Environment
+
+/* Lucene 4.4 imports
+import org.apache.lucene.index.IndexDeletionPolicy
 import org.apache.lucene.index.IndexWriterConfig
+import org.apache.lucene.util.Version
+import org.apache.lucene.index.IndexWriterConfig.OpenMode
 import org.apache.lucene.search.SearcherManager
 import org.apache.lucene.search.SearcherFactory
 import org.apache.lucene.search.IndexSearcher
-import org.codehaus.groovy.grails.commons.ApplicationHolder
-import grails.util.Environment
+*/
+
 /**
  * @short Listener for new revisions and models for indexing
  *
@@ -38,9 +41,9 @@ import grails.util.Environment
  */
 class UpdatedRepositoryListener implements ApplicationListener {
 
-	IndexWriter indexWriter
 	def modelDelegateService
 	def grailsApplication = ApplicationHolder.application
+	Directory fsDirectory
 	
 	/**
 	* Creates/Opens a lucene index based on the config properties (unless test, 
@@ -57,17 +60,23 @@ class UpdatedRepositoryListener implements ApplicationListener {
 		location.mkdirs()
 		System.out.println("USING ${location} for index directory!")
 		//Create instance of Directory where index files will be stored
-		Directory fsDirectory =  FSDirectory.open(location);
+		fsDirectory =  FSDirectory.getDirectory(location);
 		/* Create instance of analyzer, which will be used to tokenize
 		the input data */
-		Analyzer standardAnalyzer = new StandardAnalyzer(Version.LUCENE_44);
+		
+		/*
+		LUCENE 4.4 CODE.
+		
 		//Create the instance of deletion policy
+		Analyzer standardAnalyzer = new StandardAnalyzer(Version.LUCENE_44);
 		IndexDeletionPolicy deletionPolicy = new KeepOnlyLastCommitDeletionPolicy(); 
 		
 		IndexWriterConfig conf=new IndexWriterConfig(Version.LUCENE_44,standardAnalyzer)
 		conf.setIndexDeletionPolicy(deletionPolicy)
 		conf.setOpenMode(OpenMode.CREATE_OR_APPEND)
 		indexWriter =new IndexWriter(fsDirectory,conf);
+		*/
+		
 	}
 	
 	/**
@@ -95,6 +104,10 @@ class UpdatedRepositoryListener implements ApplicationListener {
 	* @param revision The revision to be indexed
 	**/
 	public void updateIndex(RevisionTransportCommand revision) {
+		
+		Analyzer standardAnalyzer = new StandardAnalyzer();
+		IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer, true);
+		indexWriter.setMaxFieldLength(25000);
 		
 		String name = revision.name
 		String description = revision.description
@@ -138,20 +151,27 @@ class UpdatedRepositoryListener implements ApplicationListener {
 		doc.add(submitterField)
 		
 		indexWriter.addDocument(doc);
-		indexWriter.commit(); // To do: investigate a more optimised commit mechanism
+		//indexWriter.commit(); // To do: investigate a more optimised commit mechanism (4.4)
+		indexWriter.optimize()
+		indexWriter.close()
+	}
+	
+	
+	public Directory getDirectory() {
+		return fsDirectory
 	}
 	
 	/**
-	* Gets a searchermanager linked to the indexwriter
+	* Gets a searchermanager linked to the indexwriter (4.4)
 	*
 	* @returns A searchermanager linked to the indexwriter, so that changes made in the writer will be
 	* reflected in the searcher.
-	**/
 	public SearcherManager getSearcherManager() {
 		boolean applyAllDeletes = true;
 		SearcherManager mgr = new SearcherManager(indexWriter, true, new SearcherFactory());
                 return mgr
 	}
+	*/
 	
 	
 }

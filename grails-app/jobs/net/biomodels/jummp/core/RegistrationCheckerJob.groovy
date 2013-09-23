@@ -20,7 +20,7 @@ class RegistrationCheckerJob {
   
     def execute() {
     	    grailsApplication.mainContext.getBean("modelFileFormatConfig").status()
-    	    grailsApplication.mainContext.getBean("searchEngine").refreshIndex()
+    	    //grailsApplication.mainContext.getBean("searchEngine").refreshIndex()
     }
 
 }
