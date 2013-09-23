@@ -3,9 +3,15 @@ package net.biomodels.jummp.webapp
 import grails.converters.JSON
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
+import grails.plugins.springsecurity.Secured
 
 class SearchController {
-    /**
+    
+     /**
+     * Dependency Injection of Spring Security Service
+     */
+     def springSecurityService
+     /**
      * Dependency injection of modelService.
      **/
     def modelService
@@ -24,15 +30,22 @@ class SearchController {
     def list = {
     }
     
+    def searchRedir = {
+    	    redirect action: 'search', params: [query:params.search_block_form]
+    }
+    
     /**
      * Default action showing a list view
      */
-    def search = {
-    	   [query:params.search_block_form]
+     def search = {
+    	   [query:params.query]
     }
     
+    @Secured(['ROLE_ADMIN'])
     def regen = {
-    	    
+    	long start=System.currentTimeMillis()
+    	modelService.regenerateIndices()
+    	[regenTime:System.currentTimeMillis() - start]
     }
 
         /**
