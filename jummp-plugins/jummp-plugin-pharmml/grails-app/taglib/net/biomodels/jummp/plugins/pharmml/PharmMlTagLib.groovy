@@ -62,17 +62,20 @@ class PharmMlTagLib {
     StringBuilder contCov = { c, symbId ->
         def result = new StringBuilder("<p>")
         result.append("<span class=\"bold\">Type: Continuous</span>").append("&nbsp;")
-        result.append(symbId).append("~").append("&nbsp;N(")
-        NormalDistribution distrib= c.abstractContinuousUnivariateDistribution.value
-        String mean = distrib.mean.var.varId
-        result.append(mean).append(",&nbsp;")
-        String stdDev = distrib.stddev?.var?.varId
-        if (stdDev) {
-            result.append(stdDev).append(",&nbsp;")
-        }
-        String variance = distrib.variance?.var?.varId
-        if (variance) {
-            result.append(variance)
+        result.append(symbId)
+        if (c.abstractContinuousUnivariateDistribution) {
+            result.append("~").append("N(")
+            NormalDistribution distrib= c.abstractContinuousUnivariateDistribution?.value
+            String mean = distrib.mean.var.varId
+            result.append(mean).append(",&nbsp;")
+            String stdDev = distrib.stddev?.var?.varId
+            if (stdDev) {
+                result.append(stdDev).append(",&nbsp;")
+            }
+            String variance = distrib.variance?.var?.varId
+            if (variance) {
+                result.append(variance)
+            }
         }
         return result.append(")</p>")
     }
