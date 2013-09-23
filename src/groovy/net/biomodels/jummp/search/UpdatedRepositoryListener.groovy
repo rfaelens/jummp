@@ -44,7 +44,7 @@ class UpdatedRepositoryListener implements ApplicationListener {
 	def modelDelegateService
 	def grailsApplication = ApplicationHolder.application
 	Directory fsDirectory
-	
+	File location
 	/**
 	* Creates/Opens a lucene index based on the config properties (unless test, 
 	* otherwise a default location is used, to avoid corrupting the index). 
@@ -56,7 +56,7 @@ class UpdatedRepositoryListener implements ApplicationListener {
 			File deleteMe=new File(path)
 			deleteMe.deleteDir()
 		}
-		File location=new File(path)
+		location=new File(path)
 		location.mkdirs()
 		System.out.println("USING ${location} for index directory!")
 		//Create instance of Directory where index files will be stored
@@ -95,6 +95,20 @@ class UpdatedRepositoryListener implements ApplicationListener {
 						getLatestRevision((event as ModelCreatedEvent).model.id))
 													
 		}
+	}
+	
+	/*
+		Clears the index. Handle with care.
+	*/
+	public void clearIndex() {
+		/*Analyzer standardAnalyzer = new StandardAnalyzer();
+		IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer);
+		indexWriter.deleteAll()
+		indexWriter.optimize()
+		indexWriter.close()*/
+		location.deleteDir();
+		location.mkdirs();
+		fsDirectory =  FSDirectory.getDirectory(location);
 	}
 	
 	/**

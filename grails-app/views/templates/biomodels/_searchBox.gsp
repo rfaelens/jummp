@@ -1,4 +1,4 @@
- <form id="local-search" name="local-search" action="${createLink(controller: 'search', action: 'search')}" method="post">
+ <form id="local-search" name="local-search" action="${createLink(controller: 'search', action: 'searchRedir')}" method="post">
                 
           <fieldset>
           

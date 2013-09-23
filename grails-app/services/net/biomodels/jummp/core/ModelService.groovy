@@ -94,7 +94,7 @@ class ModelService {
     * @return List of Models
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="modelService.getAllModels")
+    @Profiled(tag="modelService.searchModels")
     public Set<ModelTransportCommand> searchModels(String query) {
     	    def searchEngine=grailsApplication.mainContext.getBean("searchEngine")
     	    Set<Document> results=searchEngine.performSearch(["name","description","content","modelFormat", "levelVersion", "submitter"] as String[], query)
@@ -112,6 +112,32 @@ class ModelService {
     	    	    }
     	    }
     	    return returnVals
+    }
+    
+     /**
+    * Returns search results for query restricted Models the user has access to.
+    *
+    * Executes the @p query, restricting results to Models the current user has access to, 
+    * @param query freetext search on models
+    * @return List of Models
+    **/
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.regenerateIndices")
+    public void regenerateIndices() {
+    	    def searchEngine=grailsApplication.mainContext.getBean("indexingEventListener")
+    	    searchEngine.clearIndex()
+    	    int offset=0
+    	    int count=10
+    	    while (true) {
+    	    	    List<Model> models=getAllModels(offset, count)
+    	    	    models.each {
+    	    	    	    searchEngine.updateIndex(getLatestRevision(it).toCommandObject())
+    	    	    }
+    	    	    if (models.size() < count) {
+    	    	    	    break;
+    	    	    }
+    	    	    offset+=count
+    	    }
     }
     
     

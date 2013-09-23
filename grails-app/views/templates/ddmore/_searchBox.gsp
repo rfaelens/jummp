@@ -1,4 +1,4 @@
-<form action="${createLink(controller: 'search', action: 'search')}" method="post" id="search-block-form" accept-charset="UTF-8"><div><div class="container-inline">
+<form action="${createLink(controller: 'search', action: 'searchRedir')}" method="post" id="search-block-form" accept-charset="UTF-8"><div><div class="container-inline">
                     	<h2 class="element-invisible">Search form</h2>
                     	<div class="form-item form-type-textfield form-item-search-block-form">
                     	<label class="element-invisible" for="edit-search-block-form--2">Search </label>

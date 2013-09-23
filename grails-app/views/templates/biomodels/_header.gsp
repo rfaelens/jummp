@@ -47,7 +47,7 @@
 <!-- NB: if you do not have a local-search, delete the following div, and drop the class="grid_12 alpha" class from local-title above -->
 
 <div class="grid_12 omega">
-        <form id="local-search" name="local-search" action="${createLink(controller: 'search', action: 'search')}" method="post">
+        <form id="local-search" name="local-search" action="${createLink(controller: 'search', action: 'searchRedir')}" method="post">
                 
           <fieldset>
           
