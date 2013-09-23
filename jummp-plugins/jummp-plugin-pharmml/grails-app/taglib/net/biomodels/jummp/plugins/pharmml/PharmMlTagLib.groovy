@@ -104,22 +104,11 @@ class PharmMlTagLib {
 
     StringBuilder contCov = { c, symbId ->
         def result = new StringBuilder("<p>")
-        result.append("<span class=\"bold\">Type: Continuous</span>").append("&nbsp;")
+        result.append("<span class=\"bold\">Type:</span>").append("&nbsp;Continuous</p>\n<p>")
         result.append(symbId)
         if (c.abstractContinuousUnivariateDistribution) {
-            result.append("~").append("N(")
-            NormalDistribution distrib= c.abstractContinuousUnivariateDistribution?.value
-            String mean = distrib.mean.var.varId
-            result.append(mean).append(",&nbsp;")
-            String stdDev = distrib.stddev?.var?.varId
-            if (stdDev) {
-                result.append(stdDev).append(",&nbsp;")
-            }
-            String variance = distrib.variance?.var?.varId
-            if (variance) {
-                result.append(variance)
-            }
-            result.append(")&nbsp;")
+            result.append(distribution(c.abstractContinuousUnivariateDistribution))
+            result.append("</p><p>")
         }
         result.append("<span class=\"bold\">Transformation:</span>")
         result.append(convertToMathML(c.transformation.equation))
@@ -216,48 +205,30 @@ class PharmMlTagLib {
 
     def distribution = { d ->
         if (!d) {
-            return "No distribution to render."
+            return
         }
-        if ( !!(d.getNormal())) {
-            return normalDistribution(d.normal)
+        def StringBuilder result = new StringBuilder("&nbsp;~&nbsp;N(")
+        def distributionType = d.value
+        if (distributionType instanceof NormalDistribution) {
+            return result.append(normalDistribution(d))
         }
-        if ( !!(d.getPDF())) {
-            return pdfDistribution(d.pdf)
-        }
-        if (!!(d.getPoisson())) {
-            return poissonDistribution(d.poisson)
-        }
-        if (!!(d.getStudentT())) {
-            return studentTDistribution(d.studentT)
-        }
-        if (!!(d.getUniform())) {
-            return uniformDistribution(d.uniform)
-        }
-        return "Cannot render this distribution because it is not defined in this version of PharmML.\n"
     }
 
     def normalDistribution = { d ->
-        StringBuilder result = new StringBuilder("<p>This is a normal distribution.</p>")
-        return result.toString()
-    }
+        StringBuilder result = new StringBuilder()
+        NormalDistribution distrib = d.value
+        String mean = distrib.mean.var.varId
+        result.append(mean).append(",&nbsp;")
+        String stdDev = distrib.stddev?.var?.varId
+        if (stdDev) {
+            result.append(stdDev).append(",&nbsp;")
+        }
+        String variance = distrib.variance?.var?.varId
+        if (variance) {
+            result.append(variance)
+        }
+        result.append(")&nbsp;")
 
-    def pdfDistribution = { d ->
-        StringBuilder result = new StringBuilder("<p>This is a PDF distribution.</p>")
-        return result.toString()
-    }
-
-    def poissonDistribution = { d ->
-        StringBuilder result = new StringBuilder("<p>This is a Poisson distribution.</p>")
-        return result.toString()
-    }
-
-    def studentTDistribution = { d ->
-        StringBuilder result = new StringBuilder("<p>This is a StudentT distribution.</p>")
-        return result.toString()
-    }
-
-    def uniformDistribution = { d ->
-        StringBuilder result = new StringBuilder("<p>This is a uniform distribution.</p>")
         return result.toString()
     }
 
