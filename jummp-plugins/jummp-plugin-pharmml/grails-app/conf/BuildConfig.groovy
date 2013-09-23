@@ -22,10 +22,11 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
     dependencies {
-        compile("eu.ddmore.pharmml:libPharmML:0.1-SNAPSHOT") { 
+        compile("eu.ddmore.pharmml:libPharmML:0.1-SNAPSHOT") {
             excludes 'junit-dep'
         }
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
+        compile "org.apache.tika:tika-core:1.3"
     }
 
     plugins {
@@ -38,4 +39,3 @@ grails.project.dependency.resolution = {
 }
 grails.plugin.location.'jummp-plugin-security' = "../jummp-plugin-security"
 grails.plugin.location.'jummp-plugin-core-api' = "../jummp-plugin-core-api"
-grails.plugin.location.'jummp-plugin-sbml'     = "../jummp-plugin-sbml"

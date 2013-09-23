@@ -1,8 +1,8 @@
 package net.biomodels.jummp.plugins.pharmml
 
+import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
-import eu.ddmore.libpharmml.dom.maths.ScalarType
-import eu.ddmore.libpharmml.dom.maths.VarType
+import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
@@ -236,11 +236,12 @@ class PharmMlTagLib {
 
     def constant = { c -> c.op }
 
-    def variable(VarType v) {
+    def variable(VariableDefinitionType v) {
         v?.symbId
     }
 
-    StringBuilder variable(VarType v, StringBuilder text) {
+    //TODO HANDLE VariableAssignmentType too
+    StringBuilder variable(VariableDefinitionType v, StringBuilder text) {
         text.append(v?.symbId ? v.symbId : " undefined.")
     }
 
@@ -265,7 +266,7 @@ class PharmMlTagLib {
             def vectorElement = iterator.next()
             def item
             try {
-                item = vectorElement as ScalarType
+                item = vectorElement as ScalarRhs
                 result.append(item.value.toPlainString())
             } catch (ClassCastException ignored) {
                 item = vectorElement as SequenceType
@@ -298,7 +299,7 @@ class PharmMlTagLib {
         dt.sequenceOrScalar.each { t ->
             def time
             try {
-                time = t as ScalarType
+                time = t as ScalarRhs
                 result.append(scalar(time))
             } catch(ClassCastException ignored) {
                 time = t as SequenceType

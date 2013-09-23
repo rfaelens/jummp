@@ -59,19 +59,7 @@ class PharmMlServiceTests {
             new File("test/files/pdmodel_sbml.xml")
         ]
         assertFalse service.areFilesThisFormat(bigModel)
-        bigModel << new File("test/files/example9.xml")
-        assertTrue service.areFilesThisFormat(bigModel)
-    }
-
-    @Test
-    void pharmMLsCanIncludeSbmlAndTxt() {
-        def bigModel = []
-        def baseFolder = new File("test/files/")
-        //includes two sbml files
-        baseFolder.eachFileMatch FileType.FILES, ~/.*\.xml/, { File f -> bigModel << f; }
-        bigModel << new File("test/files/iov1_data.txt")
-        assertTrue service.areFilesThisFormat(bigModel)
-        bigModel << new File("test/files/warfarin_conc_pca.csv")
+        bigModel << new File("test/files/example2.xml")
         assertTrue service.areFilesThisFormat(bigModel)
     }
 
@@ -85,26 +73,28 @@ class PharmMlServiceTests {
 
     @Test
     void modelNameGetsRetrived() {
-        //falls-back to empty when no name is provided
+        //falls back to empty when no name is provided
         def model = [new File("test/files/pdmodel_sbml.xml"), new File("test/files/iov1_data.txt")]
         assertEquals "", service.extractName(model)
         model = [new File("test/files/example2.xml")]
-        assertEquals "CTS1 example - continuous PK/PD", service.extractName(model)
+        assertEquals("Warfarin example - basic PK with covariate W", service.extractName(model))
         model = []
         def baseFolder = new File("test/files/")
         baseFolder.eachFileMatch FileType.FILES, ~/.*\.xml/, { File f -> model << f; }
-        def mergedNames = [ "IOV1 with covariates",
-                "CTS1 example - continuous PK/PD", 
-                "Warfarin example Corresponds to WP3 PK_PRED use case",
-                "Chan, Nutt, Holford 2005 Parkinson paper",
+        def mergedNames = [ "Example 1 - continuous PK/PD",
+                "Warfarin example - basic PK with covariate W",
                 "IOV1 with covariates",
-                "BradshawPierce"
+                "Ribba et al. 2012 - growth tumor model"
         ]
         // the order of the files may not be preserved.
         String result = service.extractName(model)
-        mergedNames.each { name ->
-            assertTrue result.contains(name)
-        }
+        mergedNames.each { name -> assertTrue result.contains(name) }
+    }
+
+    @Test
+    void modelDescriptionGetsExtracted() {
+        assertEquals "", service.extractDescription(null)
+        assertEquals "based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemotherapy or Radiotherapy\n        Benjamin Ribba, Gentian Kaloshi, Mathieu Peyre, et al. Clin Cancer Res Published OnlineFirst July 3, 2012.", service.extractDescription([new File("test/files/Ribba_CCR2012.xml")])
     }
 
     @Test
@@ -112,15 +102,16 @@ class PharmMlServiceTests {
         assertFalse service.validate(null)
         def model = []
         assertFalse service.validate(model)
-        model = [new File("test/files/iov1_data.txt")]
+        model = [new File("../../test/files/BIOMD0000000272.xml")]
         assertFalse service.validate(model)
 
-        model = []
-        def baseFolder = new File("test/files/")
-        baseFolder.eachFileMatch ~/example.*\.xml/, { File f -> model << f; }
-        //test them sequentially because the API only handles resources individually
+        model = [ "test/files/example1.xml",
+            "test/files/example2.xml",
+            "test/files/example3.xml",
+            "test/files/Ribba_CCR2012.xml",
+        ]
         model.each { pharmML ->
-            assertTrue(service.validate([pharmML]))
+            println "${pharmML}: ${service.validate([new File(pharmML)])}"
         }
     }
 }

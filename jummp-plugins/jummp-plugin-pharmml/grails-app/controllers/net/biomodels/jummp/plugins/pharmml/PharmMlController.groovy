@@ -2,7 +2,7 @@ package net.biomodels.jummp.plugins.pharmml
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.PharmML
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 
 /**
@@ -20,8 +20,8 @@ class PharmMlController {
         List<RevisionTransportCommand> revs = modelDelegateService.getAllRevisions(modelID)
         final RevisionTransportCommand revision = revs.last()
         PharmML dom = pharmMlService.getDomFromRevision(revision)
-        TrialDesignType design = dom?.design
-        ModellingSteps steps = pharmMlService.getModellingSteps(revision)
+        TrialDesignType design = dom?.trialDesign
+        ModellingStepsType steps = pharmMlService.getModellingSteps(revision)
 
         render(view:"/model/pharmml/show", model: [
                 revision: revision,
@@ -29,7 +29,7 @@ class PharmMlController {
                 allRevs: revs,
                 independentVar: pharmMlService.getIndependentVariable(dom),
                 symbolDefs: pharmMlService.getSymbolDefinitions(dom),
-                variabilityLevel: pharmMlService.getVariabilityLevel(dom),
+                variabilityLevel: pharmMlService.getVariabilityModel(dom),
                 covariateModel: pharmMlService.getCovariateModel(dom),
                 parameterModel: pharmMlService.getParameterModel(dom),
                 structuralModel: pharmMlService.getStructuralModel(dom),
