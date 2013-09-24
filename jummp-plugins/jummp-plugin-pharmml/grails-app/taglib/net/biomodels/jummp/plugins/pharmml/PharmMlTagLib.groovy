@@ -76,9 +76,9 @@ class PharmMlTagLib {
         if (!attrs.parameter) {
             return
         }
-        def s = attrs.parameter.inject(new StringBuilder()) { s, p ->
-            s.append(p.symbId)
-            return (p.assign ? rhs(p.assign, s.append("=")) : s).append("&nbsp;")
+        def s = attrs.parameter.inject(new StringBuilder()) { sb, p ->
+            sb.append(p.symbId)
+            return (p.assign ? rhs(p.assign, sb.append("=")) : sb).append(" ")
         }
         out << s.toString()
     }
@@ -114,7 +114,7 @@ class PharmMlTagLib {
             result.append("<tr><td class=\"value\">")
             result.append(m.blkId)
             result.append("</td><td class=\"value\">")
-            String modelName = m.name ? m.name : "&nbsp;"
+            String modelName = m.name ? m.name : " "
             result.append(modelName)
             result.append("</td><td class=\"value\">")
             result.append(variabilityLevel(m.level))
@@ -128,7 +128,7 @@ class PharmMlTagLib {
     StringBuilder variabilityLevel(List variabilityLevels) {
         def result = new StringBuilder()
         if (!variabilityLevels) {
-            return result.append("&nbsp;")
+            return result.append(" ")
         }
         variabilityLevels.each { l ->
             result.append("<p class=\"default\">")
@@ -138,7 +138,7 @@ class PharmMlTagLib {
                 result.append(l.symbId)
             }
             if (l.parentLevel) {
-                result.append(",&nbsp;")
+                result.append(", ")
                 result.append("parent level:").append(l.parentLevel.symbRef.symbIdRef)
             }
             result.append("</p>")
@@ -155,10 +155,10 @@ class PharmMlTagLib {
         attrs.covariate.each { c ->
             result.append("<div>")
             if (c.simpleParameter) {
-                result.append("<p><span class=\"bold\">Simple parameters:</span>&nbsp;")
+                result.append("<p><span class=\"bold\">Simple parameters:</span> ")
                 c.simpleParameter.inject(result) { r, p ->
                     r.append(p.symbId)
-                    return (p.assign ? rhs(p.assign, r.append("=")) : r).append("&nbsp;")
+                    return (p.assign ? rhs(p.assign, r.append("=")) : r).append(" ")
                 }
                 result.append("</p>")
             }
@@ -192,7 +192,7 @@ class PharmMlTagLib {
             if (cat.name) {
                 sb.append("(").append(cat.name.value).append(")")
             }
-            sb.append("&nbsp;")
+            sb.append(" ")
         }
         result.append("</p>\n")
         return result
@@ -217,20 +217,21 @@ class PharmMlTagLib {
         }
 
         StringBuilder result = new StringBuilder()
-        result.append("<h3>Observations</h3>")
+        result.append("<h3>Observation Model</h3>")
+        println "rendering " + attrs.observations.size()
         attrs.observations.each { om ->
-            result.append("<p><span class=\"bold\">Observation error:</span>")
+            println om.properties
+            result.append("<p><span class=\"bold\">Observation error ")
             // the API returns a JAXBElement, not ObservationErrorType
             def obsErr = om.observationError.value
-            result.append(obsErr.symbId).append("&nbsp;")
+            result.append(obsErr.symbId).append("</span>\n")
             if (obsErr.symbol?.value) {
                 result.append(obsErr.symbol.value)
             }
-            result.append("</p><p>")
             if (obsErr instanceof GaussianObsError) {
-                result.append(gaussianObsErr(obsErr)).append("</p>").append("&nbsp;")
+                result.append(gaussianObsErr(obsErr)).append(" ")
             } else { // can only be GeneralObsError
-                result.append(generalObsErr(obsErr)).append("</p>").append("&nbsp;")
+                result.append(generalObsErr(obsErr)).append(" ")
             }
         }
         out << result.toString()
@@ -239,15 +240,14 @@ class PharmMlTagLib {
     StringBuilder gaussianObsErr(GaussianObsError e) {
         def result = new StringBuilder()
         if (e.transformation) {
-            result.append("<span class=\"bold\">Transformation:</span>")
-            result.append(e.transformation.value())
+            result.append("<p> <span class=\"bold\">Transformation:</span>")
+            result.append(e.transformation.value()).append("</p>")
         }
-        result.append(";&nbsp;")
+        result.append("<p>")
         result.append(e.output.symbRef.symbIdRef).append("=")
-        result.append(rhs(e.errorModel.assign, result))
-        result.append("&nbsp;<span class=\"bold\">Residual error:</span>")
-        result.append(e.residualError.symbRef.symbIdRef)
-        return result
+        rhs(e.errorModel.assign, result).append("</p>")
+        result.append("<p><span class=\"bold\">Residual error:</span>")
+        return result.append(e.residualError.symbRef.symbIdRef).append("</p>")
     }
 
     StringBuilder generalObsErr(GeneralObsError e) {
@@ -277,16 +277,16 @@ class PharmMlTagLib {
         StringBuilder result = new StringBuilder()
         NormalDistribution distrib = d.value
         String mean = distrib.mean.var.varId
-        result.append(mean).append(",&nbsp;")
+        result.append(mean).append(", ")
         String stdDev = distrib.stddev?.var?.varId
         if (stdDev) {
-            result.append(stdDev).append(",&nbsp;")
+            result.append(stdDev).append(", ")
         }
         String variance = distrib.variance?.var?.varId
         if (variance) {
             result.append(variance)
         }
-        result.append(")&nbsp;")
+        result.append(") ")
 
         return result.toString()
     }
@@ -299,7 +299,7 @@ class PharmMlTagLib {
         def result = new StringBuilder("<table>\n<thead>\n<tr><th>Identifier</th><th>Name</th><th>Dosing Regimen</th></tr></thead><tbody>\n")
         attrs.treatment.each { t ->
             result.append("<tr><td>")
-            result.append(t.id).append("</td><td>").append(t.name? t.name : "&nbsp;").append("</td><td>").append(dosingRegimen(t.dosingRegimen))
+            result.append(t.id).append("</td><td>").append(t.name? t.name : " ").append("</td><td>").append(dosingRegimen(t.dosingRegimen))
             result.append("</td>\n</tr>\n")
         }
         result.append("</tbody></table>")
@@ -389,7 +389,7 @@ class PharmMlTagLib {
     StringBuilder vector = { v ->
         def result = new StringBuilder()
         if (!v) {
-            return result.append("&nbsp;")
+            return result.append(" ")
         }
         result.append("[")
         def iterator = v.vector.sequenceOrScalar.iterator()
@@ -445,7 +445,7 @@ class PharmMlTagLib {
         def result = new StringBuilder("Steady state:")
         def interval = scalarRhs(ss.interval, new StringBuilder("Interval:"))
         def endTime = scalarRhs(ss.endTime, new StringBuilder("End time:"))
-        return result.append(interval).append("&nbsp;").append(endTime)
+        return result.append(interval).append(" ").append(endTime)
     }
 
     def treatmentEpoch = { attrs ->
@@ -457,7 +457,7 @@ class PharmMlTagLib {
         result.append("<th>Start</th><th>End</th><th>Occasions</th><th>Treatment</th></tr></thead>\n<tbody>\n")
         def td = new StringBuilder("</td><td>")
         attrs.epoch.each { e ->
-            result.append("<tr><td>").append(e.id).append(td).append(e.name ? e.name : "&nbsp;")
+            result.append("<tr><td>").append(e.id).append(td).append(e.name ? e.name : " ")
             result.append( e.start ? scalarRhs(e.start, new StringBuilder("</td><td>")) : "&nbsp;</td><td>")
             result.append( e.end ? scalarRhs(e.end, new StringBuilder("</td><td>")) : "&nbsp;</td><td>")
             result.append( e.occasion ? occasions(e.occasion, new StringBuilder("</td><td>")) : "&nbsp;</td><td>")
@@ -514,7 +514,7 @@ class PharmMlTagLib {
             } else {
                 text.append("Washout")
             }
-            text.append("&nbsp;")
+            text.append(" ")
         }
         text
     }
@@ -573,7 +573,7 @@ class PharmMlTagLib {
             result.append(v.independentVar ? v.independentVar : "&nbsp;").append("</td><td>")
             result.append(v.symbolType.value()).append("</td><td>")
             if (v.dataSet) {
-                result.append("&nbsp;")
+                result.append(" ")
             }
             if (v.scalar) {
                 result.append(scalar(v.scalar))
@@ -724,7 +724,7 @@ class PharmMlTagLib {
             while (iOperations.hasNext()) {
                 result.append(iOperations.next().opType)
                 if (iOperations.hasNext()){
-                    result.append(",&nbsp;")
+                    result.append(", ")
                 }
             }
             return result.append("]")
@@ -744,11 +744,11 @@ class PharmMlTagLib {
             result.append(s.idRef)
             if (s.dependantStep) {
                 StringBuilder dependenciesOfThisStep = transitiveStepDeps(s.dependantStep)
-                result.append(",&nbsp;").append(dependenciesOfThisStep)
+                result.append(", ").append(dependenciesOfThisStep)
             }
 
             if (iterator.hasNext()) {
-                result.append(",&nbsp;")
+                result.append(", ")
             }
         }
         out << result.append("]").toString()
@@ -759,6 +759,6 @@ class PharmMlTagLib {
         if (!ds) {
             return result
         }
-        result.append(ds.join(",&nbsp;"))
+        result.append(ds.join(", "))
     }
 }
