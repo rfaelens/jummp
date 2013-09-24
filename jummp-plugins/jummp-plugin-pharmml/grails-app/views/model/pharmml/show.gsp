@@ -52,8 +52,7 @@
             </tr>
         </table>
 
-        <h3>Observations</h3>
-        <%--pharmml:observations observations="${observationModel}"/--%>
+        <pharmml:observations observations="${observationModel}"/>
  </div>
 
     <div id="trialDesign">
