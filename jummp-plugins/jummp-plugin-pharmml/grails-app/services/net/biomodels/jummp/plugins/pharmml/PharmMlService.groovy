@@ -43,7 +43,6 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         model = model.findAll{it && it.canRead()}
         if (IS_INFO_ENABLED) {
             log.info "Validating ${model.inspect()} as a PharmML submission."
-            println "Validating ${model.inspect()} as a PharmML submission."
         }
         File pharmMlFile = findPharmML(model)
         if (!pharmMlFile) {
@@ -57,7 +56,9 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         }
         assert pharmMlFile!= null && pharmMlFile.exists() && pharmMlFile.canRead()
         long step1 = System.nanoTime()
-        println "step 1 done in ${(step1-start)/1000000.0}ms."
+        if (IS_INFO_ENABLED) {
+            log.info"Pre-validation checks completed in ${(step1-start)/1000000.0}ms."
+        }
         LibPharmMLImpl api = PharmMlFactory.getInstance().createLibPharmML()
         def stream = null
         IPharmMLResource resource = null
@@ -70,24 +71,26 @@ class PharmMlService implements FileFormatService, IPharmMlService {
             stream?.close()
         }
         long step2 = System.nanoTime()
-        println "step 2 done in ${(step2-step1)/1000000.0}ms."
+        if (IS_INFO_ENABLED) {
+            log.infoi("libPharmML validation took ${(step2-step1)/1000000.0}ms.")
+        }
         IValidationReport report = resource.getCreationReport()
-//        if (IS_INFO_ENABLED) {
+        if (IS_INFO_ENABLED) {
             final int ERR_COUNT = report.numErrors()
             if (ERR_COUNT) {
                 def err = []
                 Iterator<IValidationError> iErr = report.errorIterator()
                 while (iErr.hasNext()) {
                     IValidationError e = iErr.next()
-                    err << new StringBuffer(e.getRuleId()).append(':').append(e.getErrorMsg()).
-                            append("\n").toString()
+                    err << new StringBuffer(e.getRuleId()).append(':')
+                            .append(e.getErrorMsg()).append("\n").toString()
                 }
                 log.info(err.inspect())
-                err.each { println it}
-                println ERR_COUNT
             }
- //       }
-        println "step 3 done in ${(System.nanoTime()-step2)/1000000.0}ms."
+        }
+        if (IS_INFO_ENABLED) {
+            println "Validation report check took ${(System.nanoTime()-step2)/1000000.0}ms."
+        }
         return report.isValid()
     }
 
