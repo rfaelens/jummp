@@ -21,12 +21,12 @@
       		<div class="content">
       			<ul class="menu"><li class="first last leaf">
       			<sec:ifLoggedIn>
-      				<a href="/jummp/logout" class="icon icon-functional" data-icon="l">
+      				<a href="${grailsApplication.config.grails.serverURL}/logout" class="icon icon-functional" data-icon="l">
       					<g:message code="jummp.main.logout"/>
       				</a>
       			</sec:ifLoggedIn>
       			<sec:ifNotLoggedIn>
-      				<a href="/jummp/login" class="icon icon-functional" data-icon="l">
+      				<a href="${grailsApplication.config.grails.serverURL}/login" class="icon icon-functional" data-icon="l">
       				<g:message code="jummp.main.login"/>
       			</a>
       			</sec:ifNotLoggedIn>
