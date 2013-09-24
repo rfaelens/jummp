@@ -17,6 +17,17 @@
         <title>${revision.model.name}</title>
         <link rel="stylesheet" href="<g:resource dir="css/jqueryui/smoothness" file="jquery-ui-1.10.3.custom.css"/>" />
  
+        <script type='text/javascript' src='http://www.mathjax.org/wp-content/plugins/syntax-highlighter-mt/scripts/shCore.js'></script>
+        <script type='text/javascript' src='http://www.mathjax.org/wp-content/plugins/syntax-highlighter-mt/scripts/shAutoloader.js'></script>
+	<link type='text/css' rel='stylesheet' href='http://www.mathjax.org/wp-content/plugins/syntax-highlighter-mt/styles/shCore.css'/>
+	<link type='text/css' rel='stylesheet' href='http://www.mathjax.org/wp-content/plugins/syntax-highlighter-mt/styles/shThemeDefault.css'/>
+	<script type="text/x-mathjax-config">
+  		MathJax.Hub.Config({
+    		tex2jax: { inlineMath: [['$','$'],['\\(','\\)']] }
+    	});
+  	</script>
+	<script type='text/javascript' src='http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+        
         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript src="jstree/jquery.jstree.js"/>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 

@@ -31,11 +31,11 @@ class PharmMlTagLib {
         if (symbol instanceof OperatorSymbol) {
             OperatorSymbol operator=symbol as OperatorSymbol
             if (operator.type==OperatorSymbol.OperatorType.BINARY) {
-                //builder.append(operator.getOpening())
+                builder.append(operator.getOpening())
                 prefixToInfix(builder,stack)
                 builder.append(operator.getMapping())
                 prefixToInfix(builder,stack)
-                //builder.append(operator.getClosing())
+                builder.append(operator.getClosing())
             } else {
                 builder.append(operator.getMapping())
                 builder.append(operator.getOpening())

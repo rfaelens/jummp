@@ -17,7 +17,7 @@ import eu.ddmore.libpharmml.dom.maths.Condition
 class MathsUtil {
 	private static def pharmMap = [ "plus":"+",
 					"minus":"-",
-					"times":"x",
+					"times":" &InvisibleTimes;",
 					"divide":"/",
 					"power":"^",
 					"lt": "<",
@@ -140,9 +140,9 @@ class MathsUtil {
 		}
 		if (jaxObject instanceof SymbolRefType) {
 			String varName="";
-			if (jaxObject.getBlkIdRef()) {
+			/*if (jaxObject.getBlkIdRef()) {
 				varName=jaxObject.getBlkIdRef()+":";
-			}
+			}*/
 			varName+=jaxObject.getSymbIdRef();
 			return new MathsSymbol(varName, varName)
 		}

@@ -10,7 +10,7 @@ class PiecewiseSymbol extends MathsSymbol {
 	
 	public String getOpening() {
 		if (format==MathsSymbol.OutputFormat.MATHML) {
-			return "<mrow><m:mo>{</m:mo><m:mtable>"
+			return "<mrow><mo>{</mo><mtable>"
 		}
 		return null
 		
@@ -18,7 +18,7 @@ class PiecewiseSymbol extends MathsSymbol {
 	
 	public String getClosing() {
 		if (format==MathsSymbol.OutputFormat.MATHML) {
-			return "</m:mtable></m:mrow>"
+			return "</mtable></mrow>"
 		}
 		return null
 	}
