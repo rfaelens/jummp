@@ -3,20 +3,21 @@ package net.biomodels.jummp.plugins.pharmml
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
+import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
-import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
-import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
+import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
+import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariableType
+import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
+import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
-import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
-import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.FunctionSymbol
+import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
-import eu.ddmore.libpharmml.dom.maths.EquationType
-
+import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
 
 class PharmMlTagLib {
     static namespace = "pharmml"
@@ -72,15 +73,30 @@ class PharmMlTagLib {
         return builder.toString()
     }
 
-    def simpleParams = { attrs ->
-        if (!attrs.parameter) {
-            return
+    StringBuilder simpleParams(List<SimpleParameterType> parameters) {
+        def outcome = new StringBuilder()
+        if (!parameters) {
+            return outcome
         }
-        def s = attrs.parameter.inject(new StringBuilder()) { sb, p ->
+        parameters.inject(outcome) { sb, p ->
             sb.append(p.symbId)
             return (p.assign ? rhs(p.assign, sb.append("=")) : sb).append(" ")
         }
-        out << s.toString()
+        return outcome
+    }
+
+    StringBuilder randomVariables(List<ParameterRandomVariableType> rv) {
+        def output = new StringBuilder()
+        rv.inject(output) { o, i ->
+            if (i.abstractContinuousUnivariateDistribution) {
+                o.append("[")
+                o.append(i.symbId)
+                o.append(distribution(i.abstractContinuousUnivariateDistribution))
+                o.append(" variability: ").append(i.variabilityReference.symbRef.symbIdRef)
+                o.append("]")
+            }
+        }
+        return output
     }
 
     def functionDefinitions = { attrs ->
@@ -155,11 +171,8 @@ class PharmMlTagLib {
         attrs.covariate.each { c ->
             result.append("<div>")
             if (c.simpleParameter) {
-                result.append("<p><span class=\"bold\">Simple parameters:</span> ")
-                c.simpleParameter.inject(result) { r, p ->
-                    r.append(p.symbId)
-                    return (p.assign ? rhs(p.assign, r.append("=")) : r).append(" ")
-                }
+                result.append("<p><span class=\"bold\">Parameters:</span> ")
+                result.append(simpleParams(c.simpleParameter))
                 result.append("</p>")
             }
             if (c.covariate) {
@@ -218,13 +231,21 @@ class PharmMlTagLib {
 
         StringBuilder result = new StringBuilder()
         result.append("<h3>Observation Model</h3>")
-        println "rendering " + attrs.observations.size()
         attrs.observations.each { om ->
-            println om.properties
-            result.append("<p><span class=\"bold\">Observation error ")
+            result.append("<h4>Observation error ")
             // the API returns a JAXBElement, not ObservationErrorType
             def obsErr = om.observationError.value
-            result.append(obsErr.symbId).append("</span>\n")
+            result.append(obsErr.symbId).append("</h4>\n<p>")
+            result.append("<span class=\"bold\">Parameters: ")
+            def simpleParameters = om.commonParameterElement.value.findAll {
+                it instanceof SimpleParameterType
+            }
+            def rv = om.commonParameterElement.value.findAll {
+                it instanceof ParameterRandomVariableType
+            }
+            result.append(simpleParams(simpleParameters))
+            result.append(randomVariables(rv))
+            result.append("</span></p>\n<p>")
             if (obsErr.symbol?.value) {
                 result.append(obsErr.symbol.value)
             }
@@ -245,13 +266,20 @@ class PharmMlTagLib {
         }
         result.append("<p>")
         result.append(e.output.symbRef.symbIdRef).append("=")
-        rhs(e.errorModel.assign, result).append("</p>")
+        result.append(convertToMathML(e.errorModel.assign.equation)).append("</p>")
         result.append("<p><span class=\"bold\">Residual error:</span>")
         return result.append(e.residualError.symbRef.symbIdRef).append("</p>")
     }
 
     StringBuilder generalObsErr(GeneralObsError e) {
-        def result = new StringBuilder("todo")
+        def result = new StringBuilder()
+        if (!e) {
+            return result
+        }
+        if (e.assign) {
+            result.append(e.symbId)
+            rhs(e.assign, result.append("="))
+        }
         return result
     }
 
@@ -273,18 +301,18 @@ class PharmMlTagLib {
         }
     }
 
-    def normalDistribution = { d ->
+    def normalDistribution = { dist ->
         StringBuilder result = new StringBuilder()
-        NormalDistribution distrib = d.value
-        String mean = distrib.mean.var.varId
-        result.append(mean).append(", ")
-        String stdDev = distrib.stddev?.var?.varId
+        NormalDistribution d= dist.value
+        String mean = d.mean.var?.varId ? d.mean.var.varId : d.mean.rVal
+        result.append(mean)
+        String stdDev = d.stddev?.var?.varId ? d.stddev.var.varId : d.stddev?.prVal
         if (stdDev) {
-            result.append(stdDev).append(", ")
+            result.append(", ").append(stdDev)
         }
-        String variance = distrib.variance?.var?.varId
+        String variance = d.variance?.var?.varId ? d.variance.var.varId : d.variance?.prVal
         if (variance) {
-            result.append(variance)
+            result.append(", ").append(variance)
         }
         result.append(") ")
 
