@@ -288,7 +288,7 @@
 	  	<ul>
 	  	     <g:each in="${allRevs.sort{a,b -> a.revisionNumber > b.revisionNumber ? -1 : 1}}">
 	  	     	<li>${dateFormat.format(it.uploadDate)} - Version: ${it.revisionNumber}, submitted by ${it.owner} with comment: ${it.comment}
-	  	     		<div title="Download version ${it.revisionNumber}" class="arrow-down" onclick='window.location = "${g.createLink(controller: 'model', action: 'download', id: it.id)}"'/>
+	  	     		<div title="Download version ${it.revisionNumber}" class="arrow-down" onclick='window.location = "${g.createLink(controller: 'model', action: 'download', id: it.id)}"'></div>
 	  	     	</li>
 	  	     </g:each>
   		</ul>

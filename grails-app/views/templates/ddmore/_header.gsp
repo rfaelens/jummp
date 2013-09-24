@@ -30,7 +30,7 @@
       				<g:message code="jummp.main.login"/>
       			</a>
       			</sec:ifNotLoggedIn>
-      			</li>
+      			</li></ul>
       		</div><!-- /.block -->
       	</div>
       <div id="block-search-form" class="block block-search search even">
