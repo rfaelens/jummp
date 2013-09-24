@@ -18,6 +18,8 @@ import net.biomodels.jummp.plugins.pharmml.maths.FunctionSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
 import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
+import net.biomodels.jummp.plugins.pharmml.maths.PieceSymbol
+import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 
 class PharmMlTagLib {
     static namespace = "pharmml"
@@ -31,9 +33,21 @@ class PharmMlTagLib {
             OperatorSymbol operator=symbol as OperatorSymbol
             if (operator.type==OperatorSymbol.OperatorType.BINARY) {
                 builder.append(operator.getOpening())
+                if (operator.needsTermSeparation) {
+                	builder.append("<mrow>")
+                }
                 prefixToInfix(builder,stack)
+                if (operator.needsTermSeparation) {
+                	builder.append("</mrow>")
+                }
                 builder.append(operator.getMapping())
+                if (operator.needsTermSeparation) {
+                	builder.append("<mrow>")
+                }
                 prefixToInfix(builder,stack)
+                if (operator.needsTermSeparation) {
+                	builder.append("</mrow>")
+                }
                 builder.append(operator.getClosing())
             } else {
                 builder.append(operator.getMapping())
@@ -41,9 +55,8 @@ class PharmMlTagLib {
                 prefixToInfix(builder,stack)
                 builder.append(operator.getClosing())
             }
-            return;
         } 
-        if (symbol instanceof FunctionSymbol) {
+        else if (symbol instanceof FunctionSymbol) {
         	FunctionSymbol function=symbol as FunctionSymbol
         	builder.append(function.getMapping())
                 builder.append(function.getOpening())
@@ -55,21 +68,46 @@ class PharmMlTagLib {
                 }
                 builder.append(function.getClosing())
         }
+        else if (symbol instanceof PiecewiseSymbol) {
+        	PiecewiseSymbol piecewise=symbol as PiecewiseSymbol
+        	builder.append(piecewise.getOpening())
+        	for (int i=0; i<piecewise.getPieceCount(); i++) {
+        		prefixToInfix(builder, stack)
+        	}
+        	builder.append(piecewise.getClosing())
+        }
+        else if (symbol instanceof PieceSymbol) {
+        	PieceSymbol piece=symbol as PieceSymbol
+        	builder.append(piece.getOpening())
+        	builder.append(piece.getTermStarter())
+        	prefixToInfix(builder, stack)
+        	builder.append(piece.getTermEnder())
+        	if (piece.type==PieceSymbol.ConditionType.OTHERWISE) {
+        		builder.append(piece.getOtherwiseText())
+        	}
+        	else {
+        		builder.append(piece.getIfText())
+        		builder.append(piece.getTermStarter())
+        		prefixToInfix(builder, stack)
+        		builder.append(piece.getTermEnder())
+        	}
+        	builder.append(piece.getClosing())
+        }
         else {
             builder.append(symbol.getMapping())
-            return;
         }
-        prefixToInfix(builder, stack)
+       // prefixToInfix(builder, stack)
     }
 
     private String convertToMathML(def equation) {
         List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equation).reverse()
-        StringBuilder builder=new StringBuilder("")
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
         List<String> stack=new LinkedList<String>()
         symbols.each {
                stack.push(it)
         }
         prefixToInfix(builder, stack)
+        builder.append("</mstyle></math>")
         return builder.toString()
     }
 

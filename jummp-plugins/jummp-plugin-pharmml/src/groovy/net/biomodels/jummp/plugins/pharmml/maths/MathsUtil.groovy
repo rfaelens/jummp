@@ -5,58 +5,29 @@ import eu.ddmore.libpharmml.dom.maths.Equation
 import javax.xml.bind.JAXBElement
 import eu.ddmore.libpharmml.dom.maths.BinopType
 import eu.ddmore.libpharmml.dom.maths.UniopType
+import eu.ddmore.libpharmml.dom.maths.LogicUniOpType
+import eu.ddmore.libpharmml.dom.maths.LogicBinOpType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
 import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
+import eu.ddmore.libpharmml.dom.maths.PiecewiseType
+import eu.ddmore.libpharmml.dom.maths.PieceType
+import eu.ddmore.libpharmml.dom.maths.Condition
 
 class MathsUtil {
 	private static def pharmMap = [ "plus":"+",
 					"minus":"-",
-					"times":"x",
-					"divide":"/",
+					"times":" &InvisibleTimes;",
 					"power":"^",
-					"logx":"logx",
-					"root":"root",
+					"lt": "&lt;",
+					"leq": "&le;",
+					"gt":"&gt;",
+					"geq":"&ge;",
+					"eq":"=",
+					"neq":"&ne;",
+					"and":"&and;",
+					"or":"&or;",
 					]
-	
-	public static List<MathsSymbol> convertToSymbols(String xml) {
-		List<MathsSymbol> symbols = new LinkedList<MathsSymbol>();
-		String[] split=xml.split("<");
-		split.each {
-    	    	    if (it.contains("/") && !it.contains("/>")) {
-    	    	    }
-    	    	    else if (it.contains("Equation")) {
-    	    	    }
-    	    	    else {
-    	    	    	    if (it.contains("Uniop")) {
-    	    	    	    	    symbols.add(new OperatorSymbol(it.split("op=")[1], it.split("op=")[1], OperatorSymbol.OperatorType.UNARY));
-    	    	    	    }
-    	    	    	    else if (it.contains("Binop")) {
-    	    	    	    	 if (it.contains("plus")) {
-    	    	    	    	 	 symbols.add(new OperatorSymbol("+", "+", OperatorSymbol.OperatorType.BINARY));
-    	    	    	    	 }
-    	    	    	    	 else if (it.contains("minus")) {
-    	    	    	    	 	 symbols.add(new OperatorSymbol("-", "-", OperatorSymbol.OperatorType.BINARY));
-    	    	    	    	 }
-    	    	    	    	 else if (it.contains("divide")) {
-    	    	    	    	 	 symbols.add(new OperatorSymbol("/", "/", OperatorSymbol.OperatorType.BINARY));
-    	    	    	    	 }
-    	    	    	    	 else if (it.contains("times")) {
-    	    	    	    	 	 symbols.add(new OperatorSymbol("x", "x", OperatorSymbol.OperatorType.BINARY));
-    	    	    	    	 }
-    	    	    	    }
-    	    	    	    else if (it.contains("ct")) {
-    	    	    	    	    if (it.contains("SymbRef")) {
-    	    	    	    	    	    symbols.add(new MathsSymbol(it.split("symbIdRef=")[1], it.split("symbIdRef=")[1]));
-    	    	    	    	    }
-    	    	    	    	    else {
-    	    	    	    	    	    symbols.add(new MathsSymbol(it.split(">")[1], it.split(">")[1]));
-    	    	    	    	    }
-    	    	    	    }
-   	    	    }
-    	    	}
-    	    	return symbols;
-	}
 	
 	public static List<MathsSymbol> convertToSymbols(EquationType equation) {
 		List<MathsSymbol> symbols = new LinkedList<MathsSymbol>();
@@ -66,6 +37,10 @@ class MathsUtil {
 	}
 
 	private static void convertJAX(List<MathsSymbol> symbols, def jaxObject) {
+		if (jaxObject instanceof JAXBElement) { //shouldnt really happen, but sanity check.
+			convertJAX(symbols, jaxObject.getValue())
+			return;
+		}
 		MathsSymbol symbol=getSymbol(jaxObject)
 		if (symbol) {
 			symbols.add(symbol)
@@ -85,7 +60,7 @@ class MathsUtil {
 				subTree.add(it.getValue())
 			}
 		}
-		else if (jaxObject instanceof BinopType) {
+		else if (jaxObject instanceof BinopType || jaxObject instanceof LogicBinOpType) {
 			jaxObject.getContent().each {
 				subTree.add(it.getValue())
 			}
@@ -101,6 +76,25 @@ class MathsUtil {
 				addIfExists(it.constant, subTree)
 			}
 		}
+		else if (jaxObject instanceof PiecewiseType) {
+			List pieces=jaxObject.getPiece()
+			subTree.addAll(pieces)
+		}
+		else if (jaxObject instanceof PieceType) {
+			addIfExists(jaxObject.binop, subTree)
+			addIfExists(jaxObject.uniop, subTree)
+			addIfExists(jaxObject.symbRef, subTree)
+			addIfExists(jaxObject.functionCall, subTree)
+			addIfExists(jaxObject.scalar, subTree)
+			addIfExists(jaxObject.constant, subTree)
+			Condition condition=jaxObject.getCondition()
+			if (!condition.getOtherwise()) {
+				addIfExists(condition.getLogicBinop(),subTree)
+				addIfExists(condition.getLogicUniop(),subTree)
+				addIfExists(condition.getBoolean(),subTree)
+			}
+			
+		}
 		else if (jaxObject instanceof UniopType) {
 			addIfExists(jaxObject.binop, subTree)
 			addIfExists(jaxObject.uniop, subTree)
@@ -108,6 +102,16 @@ class MathsUtil {
 			addIfExists(jaxObject.functionCall, subTree)
 			addIfExists(jaxObject.scalar, subTree)
 			addIfExists(jaxObject.constant, subTree)
+		}
+		else if (jaxObject instanceof LogicUniOpType) {
+			addIfExists(jaxObject.binop, subTree)
+			addIfExists(jaxObject.uniop, subTree)
+			addIfExists(jaxObject.symbRef, subTree)
+			addIfExists(jaxObject.functionCall, subTree)
+			addIfExists(jaxObject.scalar, subTree)
+			addIfExists(jaxObject.constant, subTree)
+			addIfExists(jaxObject.logicBinop, subTree)
+			addIfExists(jaxObject.logicUniop, subTree)
 		}
 		return subTree
 	}
@@ -120,24 +124,31 @@ class MathsUtil {
 	
 	
 	private static MathsSymbol getSymbol(def jaxObject) {
-		if (jaxObject instanceof BinopType) {
+		if (jaxObject instanceof BinopType || jaxObject instanceof LogicBinOpType) {
+			if (jaxObject.getOp() == "divide") {
+				return OperatorSymbol.DivideSymbol()
+			}
 			return new OperatorSymbol(jaxObject.getOp(), 
 						  convertTextToSymbol(jaxObject.getOp()), 
 						  OperatorSymbol.OperatorType.BINARY)
 		}
-		if (jaxObject instanceof UniopType) {
-			return new OperatorSymbol(jaxObject.getOp(), 
+		if (jaxObject instanceof UniopType || jaxObject instanceof LogicUniOpType) {
+			OperatorSymbol op= new OperatorSymbol(jaxObject.getOp(), 
 						  convertTextToSymbol(jaxObject.getOp()), 
 						  OperatorSymbol.OperatorType.UNARY)
+			if (jaxObject.getOp()=="minus") {
+				op.omitBraces=true
+			}
+			return op
 		}
 		if (jaxObject instanceof eu.ddmore.libpharmml.dom.commontypes.Boolean) { //NEEDS TO BE LOOKED AT!
 			return new MathsSymbol(""+jaxObject.getId(), ""+jaxObject.getId())
 		}
 		if (jaxObject instanceof SymbolRefType) {
 			String varName="";
-			if (jaxObject.getBlkIdRef()) {
+			/*if (jaxObject.getBlkIdRef()) {
 				varName=jaxObject.getBlkIdRef()+":";
-			}
+			}*/
 			varName+=jaxObject.getSymbIdRef();
 			return new MathsSymbol(varName, varName)
 		}
@@ -145,10 +156,20 @@ class MathsUtil {
 			MathsSymbol tmp=getSymbol(jaxObject.symbRef)
 			return new FunctionSymbol(tmp.mapsTo, tmp.mapsTo, jaxObject.functionArgument.size())
 		}
+		if (jaxObject instanceof PiecewiseType) {
+			return new PiecewiseSymbol(jaxObject.getPiece().size())
+		}
+		if (jaxObject instanceof PieceType) {
+			Condition condition=jaxObject.getCondition()
+			if (condition.getOtherwise()) {
+				return new PieceSymbol(PieceSymbol.ConditionType.OTHERWISE)
+			}
+			return new PieceSymbol(PieceSymbol.ConditionType.EXTERNAL)
+			
+		}
 		if (jaxObject.getClass().getCanonicalName().contains("eu.ddmore.libpharmml.dom.commontypes")) {
 			return new MathsSymbol(""+jaxObject.getValue(), ""+jaxObject.getValue())
 		}
-		
 		return null
 	}
 	
