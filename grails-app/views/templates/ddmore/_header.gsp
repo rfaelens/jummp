@@ -35,7 +35,7 @@
       	</div>
       <div id="block-search-form" class="block block-search search even">
       	 <div class="content">
-      	 	<g:form controller="search" action="search">
+      	 	<g:form controller="search" action="searchRedir">
       	 	<%-- <form action="/" method="post" id="search-block-form" accept-charset="UTF-8"> --%><div><div class="container-inline">
       	 		<h2 class="element-invisible">Search form</h2>
       	 		<div class="form-item form-type-textfield form-item-search-block-form">

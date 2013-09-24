@@ -45,7 +45,7 @@ class ModelController {
     }
     
     
-    def mathsTest = {
+    //def mathsTest = { will disappear if all goes well.
     /*	    String maths='''<Equation xmlns="http://www.pharmml.org/2013/03/Maths"/>
 <Binop op="times">
 <Binop op="minus">
@@ -61,7 +61,7 @@ class ModelController {
     	    }
     	    
     	    [inputString: "Passed equation object: "+params.maths.inspect(), maths:convertToMathML(symbols)]*/
-    }
+    //}
     
     def show = {
     	    ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
