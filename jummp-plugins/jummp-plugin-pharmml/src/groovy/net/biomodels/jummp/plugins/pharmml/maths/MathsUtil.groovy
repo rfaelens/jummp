@@ -6,7 +6,8 @@ import javax.xml.bind.JAXBElement
 import eu.ddmore.libpharmml.dom.maths.BinopType
 import eu.ddmore.libpharmml.dom.maths.UniopType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
-
+import eu.ddmore.libpharmml.dom.maths.FunctionCallType
+import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
 
 class MathsUtil {
 	private static def pharmMap = [ "plus":"+",
@@ -69,7 +70,7 @@ class MathsUtil {
 		if (symbol) {
 			symbols.add(symbol)
 		}
-		List<JAXBElement> subtree=getSubTree(jaxObject)
+		List<JAXBElement> subtree=getSubTree(jaxObject, symbols)
 		if (!subtree.isEmpty()) {
 			subtree.each {
 				convertJAX(symbols, it);
@@ -77,7 +78,7 @@ class MathsUtil {
 		}
 	}
 	
-	private static List getSubTree(def jaxObject) {
+	private static List getSubTree(def jaxObject, List<MathsSymbol> symbols) {
 		List subTree=new LinkedList()
 		if (jaxObject instanceof EquationType || jaxObject instanceof Equation) {
 			jaxObject.getScalarOrSymbRefOrBinop().each {
@@ -87,6 +88,17 @@ class MathsUtil {
 		else if (jaxObject instanceof BinopType) {
 			jaxObject.getContent().each {
 				subTree.add(it.getValue())
+			}
+		}
+		else if (jaxObject instanceof FunctionCallType) {
+			List args=jaxObject.functionArgument
+			args.each {
+				if (it.equation) {
+					convertJAX(symbols, it.equation)
+				}
+				addIfExists(it.symbRef, subTree)
+				addIfExists(it.scalar, subTree)
+				addIfExists(it.constant, subTree)
 			}
 		}
 		else if (jaxObject instanceof UniopType) {
@@ -105,6 +117,7 @@ class MathsUtil {
 			list.add(object)
 		}
 	}
+	
 	
 	private static MathsSymbol getSymbol(def jaxObject) {
 		if (jaxObject instanceof BinopType) {
@@ -127,6 +140,10 @@ class MathsUtil {
 			}
 			varName+=jaxObject.getSymbIdRef();
 			return new MathsSymbol(varName, varName)
+		}
+		if (jaxObject instanceof FunctionCallType) {
+			MathsSymbol tmp=getSymbol(jaxObject.symbRef)
+			return new FunctionSymbol(tmp.mapsTo, tmp.mapsTo, jaxObject.functionArgument.size())
 		}
 		if (jaxObject.getClass().getCanonicalName().contains("eu.ddmore.libpharmml.dom.commontypes")) {
 			return new MathsSymbol(""+jaxObject.getValue(), ""+jaxObject.getValue())
