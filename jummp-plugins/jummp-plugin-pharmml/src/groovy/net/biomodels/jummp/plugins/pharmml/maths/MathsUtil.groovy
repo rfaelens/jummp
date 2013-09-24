@@ -18,11 +18,10 @@ class MathsUtil {
 	private static def pharmMap = [ "plus":"+",
 					"minus":"-",
 					"times":" &InvisibleTimes;",
-					"divide":"/",
 					"power":"^",
-					"lt": "<",
+					"lt": "&lt;",
 					"leq": "&le;",
-					"gt":">",
+					"gt":"&gt;",
 					"geq":"&ge;",
 					"eq":"=",
 					"neq":"&ne;",
@@ -126,6 +125,9 @@ class MathsUtil {
 	
 	private static MathsSymbol getSymbol(def jaxObject) {
 		if (jaxObject instanceof BinopType || jaxObject instanceof LogicBinOpType) {
+			if (jaxObject.getOp() == "divide") {
+				return OperatorSymbol.DivideSymbol()
+			}
 			return new OperatorSymbol(jaxObject.getOp(), 
 						  convertTextToSymbol(jaxObject.getOp()), 
 						  OperatorSymbol.OperatorType.BINARY)

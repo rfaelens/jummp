@@ -32,9 +32,21 @@ class PharmMlTagLib {
             OperatorSymbol operator=symbol as OperatorSymbol
             if (operator.type==OperatorSymbol.OperatorType.BINARY) {
                 builder.append(operator.getOpening())
+                if (operator.needsTermSeparation) {
+                	builder.append("<mrow>")
+                }
                 prefixToInfix(builder,stack)
+                if (operator.needsTermSeparation) {
+                	builder.append("</mrow>")
+                }
                 builder.append(operator.getMapping())
+                if (operator.needsTermSeparation) {
+                	builder.append("<mrow>")
+                }
                 prefixToInfix(builder,stack)
+                if (operator.needsTermSeparation) {
+                	builder.append("</mrow>")
+                }
                 builder.append(operator.getClosing())
             } else {
                 builder.append(operator.getMapping())
@@ -42,7 +54,6 @@ class PharmMlTagLib {
                 prefixToInfix(builder,stack)
                 builder.append(operator.getClosing())
             }
-            return;
         } 
         else if (symbol instanceof FunctionSymbol) {
         	FunctionSymbol function=symbol as FunctionSymbol
@@ -83,7 +94,6 @@ class PharmMlTagLib {
         }
         else {
             builder.append(symbol.getMapping())
-            return;
         }
        // prefixToInfix(builder, stack)
     }
