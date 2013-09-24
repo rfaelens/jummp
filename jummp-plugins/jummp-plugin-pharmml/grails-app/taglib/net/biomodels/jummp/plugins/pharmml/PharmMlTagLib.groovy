@@ -4,6 +4,8 @@ import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
 import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
+import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
+import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
@@ -108,7 +110,7 @@ class PharmMlTagLib {
         out << result.append("</tbody>\n</table>").toString()
     }
 
-    StringBuilder variabilityLevel(VariabilityLevelDefnType variabilityLevels) {
+    StringBuilder variabilityLevel(List variabilityLevels) {
         def result = new StringBuilder()
         if (!variabilityLevels) {
             return result.append("&nbsp;")
@@ -122,7 +124,7 @@ class PharmMlTagLib {
             }
             if (l.parentLevel) {
                 result.append(",&nbsp;")
-                result.append("parent level:").append(l.parentLevel.symbRef)
+                result.append("parent level:").append(l.parentLevel.symbRef.symbIdRef)
             }
             result.append("</p>")
         }
@@ -158,18 +160,32 @@ class PharmMlTagLib {
     }
 
     StringBuilder categCov = { c, symbId ->
-        def result = new StringBuilder("<p>")
-        result.append("<span class=\"bold\"Type: Categorical</span>").append("&nbsp;")
-        result.append(symbId).append("~")
-        result.append(distribution(c.probability))
-        return result.append("</p>")
+        def result = new StringBuilder("<p>\n")
+        result.append("<span class=\"bold\">Type: Categorical</span>").append("&nbsp;")
+        c.category.inject(result) { r, categ ->
+            if (categ.probability) {
+                r.append(symbId).append("~").append(categ.probability)
+                r.append(distribution(categ.probability))
+            }
+        }
+        result.append("</p>\n")
+        result.append("<p>Categories:")
+        c.category.inject(result) { r, cat ->
+            println "cat ${cat}: ${cat.properties}"
+            println(cat.catId)
+            if (cat.name) {
+                r.append("&nbsp;(").append(cat.name.value).append(")").append("&nbsp;")
+            }
+        }
+        result.append("</p>\n")
+        return result
     }
 
     StringBuilder contCov = { c, symbId ->
         def result = new StringBuilder("<p>")
         result.append("<span class=\"bold\">Type:</span>").append("&nbsp;Continuous</p>\n<p>")
-        result.append(symbId)
         if (c.abstractContinuousUnivariateDistribution) {
+            result.append(symbId)
             result.append(distribution(c.abstractContinuousUnivariateDistribution))
             result.append("</p><p>")
         }
@@ -180,20 +196,46 @@ class PharmMlTagLib {
 
     def observations = { attrs ->
         if (!attrs.observations || attrs.observations.size() == 0) {
-            out << "No observations defined in the model."
+            return
         }
 
         StringBuilder result = new StringBuilder()
-        // skip parameters to avoid rendering complex maths
-        if (attrs.observations.parameter) {
-            out << "<strong>Observation parameters have not been displayed. We apologise for the inconvenience.</strong>\n"
-        }
-        if (attrs.observations.continuous) {
-            attrs.observations.continuous.each { c ->
-                result.append(randomEffect(c.randomEffect))
+        result.append("<h3>Observations</h3>")
+        attrs.observations.each { om ->
+            result.append("<p><span class=\"bold\">Observation error:</span>")
+            // the API returns a JAXBElement, not ObservationErrorType
+            def obsErr = om.observationError.value
+            result.append(obsErr.symbId).append("&nbsp;")
+            if (obsErr.symbol?.value) {
+                result.append(obsErr.symbol.value)
+            }
+            result.append("</p><p>")
+            if (obsErr instanceof GaussianObsError) {
+                result.append(gaussianObsErr(obsErr)).append("</p>").append("&nbsp;")
+            } else { // can only be GeneralObsError
+                result.append(generalObsErr(obsErr)).append("</p>").append("&nbsp;")
             }
         }
         out << result.toString()
+    }
+
+    StringBuilder gaussianObsErr(GaussianObsError e) {
+        def result = new StringBuilder()
+        if (e.transformation) {
+            result.append("<span class=\"bold\">Transformation:</span>")
+            result.append(e.transformation.value())
+        }
+        result.append(";&nbsp;")
+        result.append(e.output.symbRef.symbIdRef).append("=")
+        result.append(rhs(e.errorModel.assign, result))
+        result.append("&nbsp;<span class=\"bold\">Residual error:</span>")
+        result.append(e.residualError.symbRef.symbIdRef)
+        return result
+    }
+
+    StringBuilder generalObsErr(GeneralObsError e) {
+        def result = new StringBuilder("todo")
+        return result
     }
 
     def randomEffect = { re ->
@@ -297,25 +339,19 @@ class PharmMlTagLib {
     }
 
     StringBuilder rhs = { r, text ->
-        if (r.getConstant()) {
-            text.append(constant(r))
-        } else if (r.getScalar()) {
+        if (r.getScalar()) {
             text.append(scalar(r))
-        } else if (r.getString()) {
-            text.append(string(r))
-        } else if (r.getVar()) {
-            text.append(variable(r))
         } else if (r.getSequence()) {
             text.append(sequence(r.sequence))
         } else if (r.getVector()) {
             text.append(vector(r))
-        }else { // equation, dataset, distribution or function call
-            text.append(" cannot be extracted, sorry. ${r.inspect()}")
+        } else if (r.getSymbRef()) {
+            text.append(symbRef(r))
+        } else { // equation
+            text.append(convertToMathML(r.equation))
         }
         return text
     }
-
-    def constant = { c -> c.op }
 
     def variable(VariableDefinitionType v) {
         v?.symbId
@@ -327,8 +363,6 @@ class PharmMlTagLib {
     }
 
     def scalar = { s -> s.value }
-
-    def string = { s -> s.value }
 
     def sequence = { s ->
         new StringBuilder("[").append(s.begin).append(":").append(s.stepSize).append(":").append(s.end).
