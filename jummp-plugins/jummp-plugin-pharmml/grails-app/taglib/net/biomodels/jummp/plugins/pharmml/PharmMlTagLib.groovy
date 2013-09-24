@@ -3,6 +3,7 @@ package net.biomodels.jummp.plugins.pharmml
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
 import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
@@ -161,7 +162,7 @@ class PharmMlTagLib {
 
     StringBuilder categCov = { c, symbId ->
         def result = new StringBuilder("<p>\n")
-        result.append("<span class=\"bold\">Type: Categorical</span>").append("&nbsp;")
+        result.append("<span class=\"bold\">Categorical covariate ${symbId}</span>\n")
         c.category.inject(result) { r, categ ->
             if (categ.probability) {
                 r.append(symbId).append("~").append(categ.probability)
@@ -170,12 +171,14 @@ class PharmMlTagLib {
         }
         result.append("</p>\n")
         result.append("<p>Categories:")
-        c.category.inject(result) { r, cat ->
-            println "cat ${cat}: ${cat.properties}"
-            println(cat.catId)
+        assert c.category instanceof List
+        c.category.inject(result) { StringBuilder sb, CategoryType cat ->
+            sb =  sb ? sb : new StringBuilder()
+            sb.append(cat.catId)
             if (cat.name) {
-                r.append("&nbsp;(").append(cat.name.value).append(")").append("&nbsp;")
+                sb.append("(").append(cat.name.value).append(")")
             }
+            sb.append("&nbsp;")
         }
         result.append("</p>\n")
         return result
@@ -183,7 +186,7 @@ class PharmMlTagLib {
 
     StringBuilder contCov = { c, symbId ->
         def result = new StringBuilder("<p>")
-        result.append("<span class=\"bold\">Type:</span>").append("&nbsp;Continuous</p>\n<p>")
+        result.append("<span class=\"bold\">Continuous covariate ${symbId}</span>\n</p>\n<p>")
         if (c.abstractContinuousUnivariateDistribution) {
             result.append(symbId)
             result.append(distribution(c.abstractContinuousUnivariateDistribution))
