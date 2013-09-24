@@ -13,6 +13,7 @@ import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
 import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
+import net.biomodels.jummp.plugins.pharmml.maths.FunctionSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
 import eu.ddmore.libpharmml.dom.maths.EquationType
 
@@ -40,7 +41,20 @@ class PharmMlTagLib {
                 builder.append(operator.getClosing())
             }
             return;
-        } else {
+        } 
+        if (symbol instanceof FunctionSymbol) {
+        	FunctionSymbol function=symbol as FunctionSymbol
+        	builder.append(function.getMapping())
+                builder.append(function.getOpening())
+                for (int i=0; i<function.getArgCount(); i++) {
+                	prefixToInfix(builder, stack)
+                	if (i!=function.getArgCount()-1) {
+                		builder.append(function.getArgSeparator())
+                	}
+                }
+                builder.append(function.getClosing())
+        }
+        else {
             builder.append(symbol.getMapping())
             return;
         }
