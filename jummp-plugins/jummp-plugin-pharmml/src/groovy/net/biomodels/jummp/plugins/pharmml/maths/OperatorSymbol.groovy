@@ -2,6 +2,7 @@ package net.biomodels.jummp.plugins.pharmml.maths
 
 class OperatorSymbol extends MathsSymbol {
 	public enum OperatorType {BINARY,UNARY};
+	boolean omitBraces=false;
 	OperatorType type;
 	
 	public OperatorSymbol(String text, String mapsTo, OperatorType t) {
@@ -10,6 +11,9 @@ class OperatorSymbol extends MathsSymbol {
 	}
 	
 	public String getOpening() {
+		if (omitBraces) {
+			return "";
+		}
 		if (format==MathsSymbol.OutputFormat.MATHML) {
 			return "<mo>(</mo>"
 		}
@@ -18,6 +22,9 @@ class OperatorSymbol extends MathsSymbol {
 	}
 	
 	public String getClosing() {
+		if (omitBraces) {
+			return "";
+		}
 		if (format==MathsSymbol.OutputFormat.MATHML) {
 			return "<mo>)</mo>"
 		}

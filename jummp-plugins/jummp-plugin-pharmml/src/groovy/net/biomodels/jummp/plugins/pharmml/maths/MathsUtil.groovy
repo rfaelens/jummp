@@ -131,9 +131,13 @@ class MathsUtil {
 						  OperatorSymbol.OperatorType.BINARY)
 		}
 		if (jaxObject instanceof UniopType || jaxObject instanceof LogicUniOpType) {
-			return new OperatorSymbol(jaxObject.getOp(), 
+			OperatorSymbol op= new OperatorSymbol(jaxObject.getOp(), 
 						  convertTextToSymbol(jaxObject.getOp()), 
 						  OperatorSymbol.OperatorType.UNARY)
+			if (jaxObject.getOp()=="minus") {
+				op.omitBraces=true
+			}
+			return op
 		}
 		if (jaxObject instanceof eu.ddmore.libpharmml.dom.commontypes.Boolean) { //NEEDS TO BE LOOKED AT!
 			return new MathsSymbol(""+jaxObject.getId(), ""+jaxObject.getId())
