@@ -209,7 +209,7 @@ class PharmMlTagLib {
             out << "No function definitions were found."
             return
         }
-        def result = new StringBuilder("<table>\n\t")
+        def result = new StringBuilder()
         attrs.functionDefs.each { d ->
             def rightHandSide=d.getDefinition().getEquation();
             if (d.getDefinition().getScalar()) {
@@ -218,9 +218,8 @@ class PharmMlTagLib {
             if (d.getDefinition().getSymbRef()) {
         	rightHandSide=d.getDefintion().getSymbRef()
             }
-            result.append("<tr>${convertToMathML(d.symbId, d.getFunctionArgument(), rightHandSide)}</tr>")
+            result.append("<p>${convertToMathML(d.symbId, d.getFunctionArgument(), rightHandSide)}</p>")
         }
-        result.append("</tbody>\n</table>")
         out << result.toString()
     }
 
