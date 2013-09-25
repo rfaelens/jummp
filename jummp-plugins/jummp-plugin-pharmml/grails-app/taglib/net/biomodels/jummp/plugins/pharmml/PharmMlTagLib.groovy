@@ -123,6 +123,24 @@ class PharmMlTagLib {
     	    builder.append("</mstyle></math>")
     	    return builder.toString()
     }
+    
+    private String convertToMathML(String lhs, List arguments, def equation) {
+    	    StringBuilder builder=new StringBuilder("<math display='inline'><mstyle><mi>")
+    	    builder.append(lhs)
+    	    builder.append("</mi><mo>(</mo>")
+    	    for (int i=0; i<arguments.size(); i++) {
+    	    	    builder.append("<mi>")
+    	    	    builder.append(arguments.get(i).symbId)
+    	    	    builder.append("</mi>")
+    	    	    if (i<arguments.size()-1) {
+    	    	    	    builder.append("<mo>,</mo>")
+    	    	    }
+    	    }
+    	    builder.append("<mo>)</mo><mo>=</mo>")
+    	    convertEquation(equation, builder)
+    	    builder.append("</mstyle></math>")
+    	    return builder.toString()
+    }
 
     StringBuilder simpleParams(List<SimpleParameterType> parameters) {
         def outcome = new StringBuilder()
@@ -156,15 +174,15 @@ class PharmMlTagLib {
             return
         }
         def result = new StringBuilder("<table>\n\t")
-        result.append("<thead>\n")
-        result.append("<tr>\n<th>Identifier</th><th>Type</th></tr>\n")
-        result.append("</thead>\n<tbody>\n")
         attrs.functionDefs.each { d ->
-            result.append("<tr><td class=\"value\">")
-            result.append(d.symbId)
-            result.append("</td><td class=\"value\">")
-            result.append(d.symbolType.value())
-            result.append("</td></tr>\n")
+            def rightHandSide=d.getDefinition().getEquation();
+            if (d.getDefinition().getScalar()) {
+        	rightHandSide=d.getDefinition().getScalar()
+            }
+            if (d.getDefinition().getSymbRef()) {
+        	rightHandSide=d.getDefintion().getSymbRef()
+            }
+            result.append("<tr>${convertToMathML(d.symbId, d.getFunctionArgument(), rightHandSide)}</tr>")
         }
         result.append("</tbody>\n</table>")
         out << result.toString()
