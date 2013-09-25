@@ -288,10 +288,6 @@ class PharmMlTagLib {
             result.append(distribution(c.abstractContinuousUnivariateDistribution))
             result.append("</p><p>")
         }
-        /* Used to be!
-        result.append("<span class=\"bold\">Transformation:</span>")
-        result.append(convertToMathML(c.transformation.equation))
-        */
         result.append(convertToMathML("Transformation", c.transformation.equation))
         return result.append("</p>")
     }
@@ -337,10 +333,6 @@ class PharmMlTagLib {
             result.append(e.transformation.value()).append("</p>")
         }
         result.append("<p>")
-        /* Used to be
-        result.append(e.output.symbRef.symbIdRef).append("=")
-        result.append(convertToMathML(e.errorModel.assign.equation)).append("</p>")
-        */
         result.append(convertToMathML(e.output.symbRef.symbIdRef, e.errorModel.assign.equation))
         result.append("</p><p><span class=\"bold\">Residual error:</span>")
         return result.append(e.residualError.symbRef.symbIdRef).append("</p>")
