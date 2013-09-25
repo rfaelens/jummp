@@ -195,8 +195,7 @@ class PharmMlTagLib {
         rv.inject(output) { o, i ->
             if (i.abstractContinuousUnivariateDistribution) {
                 o.append("[")
-                o.append(i.symbId)
-                o.append(distribution(i.abstractContinuousUnivariateDistribution))
+                o.append(distributionAssignment(i.symbId, i.abstractContinuousUnivariateDistribution))
                 o.append(" variability: ").append(i.variabilityReference.symbRef.symbIdRef)
                 o.append("]")
             }
@@ -293,11 +292,10 @@ class PharmMlTagLib {
 
     StringBuilder categCov = { c, symbId ->
         def result = new StringBuilder("<p>\n")
-        result.append("<span class=\"bold\">Categorical covariate ${symbId}</span>\n")
+        result.append("<span class=\"bold\">Categorical covariate ${symbId}</span><p>\n")
         c.category.inject(result) { r, categ ->
             if (categ.probability) {
-                r.append(symbId).append("~").append(categ.probability)
-                r.append(distribution(categ.probability))
+            	r.append(distributionAssignment(symbId,categ.probability))
             }
         }
         result.append("</p>\n")
@@ -319,8 +317,7 @@ class PharmMlTagLib {
         def result = new StringBuilder("<p>")
         result.append("<span class=\"bold\">Continuous covariate ${symbId}</span>\n</p>\n<p>")
         if (c.abstractContinuousUnivariateDistribution) {
-            result.append(symbId)
-            result.append(distribution(c.abstractContinuousUnivariateDistribution))
+            result.append(distributionAssignment(symId, c.abstractContinuousUnivariateDistribution))
             result.append("</p><p>")
         }
         result.append(convertToMathML("Transformation", c.transformation.equation))
@@ -391,31 +388,41 @@ class PharmMlTagLib {
         return distribution(re.distribution[0])
     }
 
+    def distributionAssignment = { l, d->
+    	    StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+    	    builder.append(oprand(l))
+    	    builder.append(op("&sim;"))
+    	    builder.append(distribution(d))
+    	    builder.append("</mstyle></math>")
+    }
+    
     def distribution = { d ->
         if (!d) {
             return
         }
-        def StringBuilder result = new StringBuilder("&nbsp;~&nbsp;N(")
+        def StringBuilder result = new StringBuilder(oprand("N"))
+        result.append(op("("))
         def distributionType = d.value
         if (distributionType instanceof NormalDistribution) {
-            return result.append(normalDistribution(d))
+            result.append(normalDistribution(d))
         }
+        result.append(op(")"))
+        return result
     }
 
     def normalDistribution = { dist ->
         StringBuilder result = new StringBuilder()
         NormalDistribution d= dist.value
         String mean = d.mean.var?.varId ? d.mean.var.varId : d.mean.rVal
-        result.append(mean)
+        result.append(oprand(mean))
         String stdDev = d.stddev?.var?.varId ? d.stddev.var.varId : d.stddev?.prVal
         if (stdDev) {
-            result.append(", ").append(stdDev)
+            result.append(op(",")).append(oprand(stdDev))
         }
         String variance = d.variance?.var?.varId ? d.variance.var.varId : d.variance?.prVal
         if (variance) {
-            result.append(", ").append(variance)
+            result.append(op(",")).append(oprand(variance))
         }
-        result.append(") ")
 
         return result.toString()
     }
