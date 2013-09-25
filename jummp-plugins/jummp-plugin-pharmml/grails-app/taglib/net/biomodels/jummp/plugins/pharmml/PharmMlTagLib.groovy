@@ -210,7 +210,7 @@ class PharmMlTagLib {
             	}
                 o.append("[")
                 o.append(distributionAssignment(i.symbId, i.abstractContinuousUnivariateDistribution))
-                o.append(" variability: ").append(i.variabilityReference.symbRef.symbIdRef)
+                o.append(", variability: ").append(i.variabilityReference.symbRef.symbIdRef)
                 o.append("]")
             }
         }
@@ -331,7 +331,7 @@ class PharmMlTagLib {
         def result = new StringBuilder("<p>")
         result.append("<span class=\"bold\">Continuous covariate ${symbId}</span>\n</p>\n<p>")
         if (c.abstractContinuousUnivariateDistribution) {
-            result.append(distributionAssignment(symId, c.abstractContinuousUnivariateDistribution))
+            result.append(distributionAssignment(symbId, c.abstractContinuousUnivariateDistribution))
             result.append("</p><p>")
         }
         result.append(convertToMathML("Transformation", c.transformation.equation))
