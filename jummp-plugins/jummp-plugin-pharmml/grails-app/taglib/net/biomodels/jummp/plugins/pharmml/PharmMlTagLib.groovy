@@ -179,7 +179,14 @@ class PharmMlTagLib {
         if (!parameters) {
             return outcome
         }
+        boolean first=true;
         parameters.inject(outcome) { sb, p ->
+            if (!first) {
+            	    sb.append(", ")
+            }
+            else {
+            	    first=false;
+            }
             if (p.assign) {
             	    sb.append(convertToMathML(p.symbId, p.assign))
             }
@@ -192,8 +199,15 @@ class PharmMlTagLib {
 
     StringBuilder randomVariables(List<ParameterRandomVariableType> rv) {
         def output = new StringBuilder()
+        boolean first=true;
         rv.inject(output) { o, i ->
             if (i.abstractContinuousUnivariateDistribution) {
+            	if (!first) {
+            	    	    o.append(", ")
+            	}
+            	else {
+            	    	    first=false;
+            	}
                 o.append("[")
                 o.append(distributionAssignment(i.symbId, i.abstractContinuousUnivariateDistribution))
                 o.append(" variability: ").append(i.variabilityReference.symbRef.symbIdRef)
@@ -274,7 +288,7 @@ class PharmMlTagLib {
         attrs.covariate.each { c ->
             result.append("<div>")
             if (c.simpleParameter) {
-                result.append("<p><span class=\"bold\">Parameters:</span> ")
+                result.append("<p><span class=\"bold\">Parameters:</span></p> <p>")
                 result.append(simpleParams(c.simpleParameter))
                 result.append("</p>")
             }
@@ -336,7 +350,7 @@ class PharmMlTagLib {
             // the API returns a JAXBElement, not ObservationErrorType
             def obsErr = om.observationError.value
             result.append(obsErr.symbId).append("</h4>\n<p>")
-            result.append("<span class=\"bold\">Parameters: ")
+            result.append("<span class=\"bold\">Parameters: </span>")
             def simpleParameters = om.commonParameterElement.value.findAll {
                 it instanceof SimpleParameterType
             }
@@ -344,8 +358,12 @@ class PharmMlTagLib {
                 it instanceof ParameterRandomVariableType
             }
             result.append(simpleParams(simpleParameters))
-            result.append(randomVariables(rv))
-            result.append("</span></p>\n<p>")
+            String randoms=randomVariables(rv)
+            if (randoms) {
+            	    result.append(", ")
+            	    result.append(randoms)
+            }
+            result.append("\n<p>")
             if (obsErr.symbol?.value) {
                 result.append(obsErr.symbol.value)
             }
