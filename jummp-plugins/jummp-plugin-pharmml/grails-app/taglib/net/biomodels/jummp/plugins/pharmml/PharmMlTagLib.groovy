@@ -99,16 +99,29 @@ class PharmMlTagLib {
        // prefixToInfix(builder, stack)
     }
 
-    private String convertToMathML(def equation) {
+    private void convertEquation(def equation, StringBuilder builder) {
         List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equation).reverse()
-        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
         List<String> stack=new LinkedList<String>()
         symbols.each {
                stack.push(it)
         }
         prefixToInfix(builder, stack)
-        builder.append("</mstyle></math>")
-        return builder.toString()
+    }
+    
+    private String convertToMathML(def equation) {
+    	    StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+    	    convertEquation(equation, builder)
+    	    builder.append("</mstyle></math>")
+    	    return builder.toString()            
+    }
+    
+    private String convertToMathML(String lhs, def equation) {
+    	    StringBuilder builder=new StringBuilder("<math display='inline'><mstyle><mi>")
+    	    builder.append(lhs)
+    	    builder.append("</mi><mo>=</mo>")
+    	    convertEquation(equation, builder)
+    	    builder.append("</mstyle></math>")
+    	    return builder.toString()
     }
 
     StringBuilder simpleParams(List<SimpleParameterType> parameters) {
@@ -257,8 +270,11 @@ class PharmMlTagLib {
             result.append(distribution(c.abstractContinuousUnivariateDistribution))
             result.append("</p><p>")
         }
+        /* Used to be!
         result.append("<span class=\"bold\">Transformation:</span>")
         result.append(convertToMathML(c.transformation.equation))
+        */
+        result.append(convertToMathML("Transformation", c.transformation.equation))
         return result.append("</p>")
     }
 
@@ -303,9 +319,12 @@ class PharmMlTagLib {
             result.append(e.transformation.value()).append("</p>")
         }
         result.append("<p>")
+        /* Used to be
         result.append(e.output.symbRef.symbIdRef).append("=")
         result.append(convertToMathML(e.errorModel.assign.equation)).append("</p>")
-        result.append("<p><span class=\"bold\">Residual error:</span>")
+        */
+        result.append(convertToMathML(e.output.symbRef.symbIdRef, e.errorModel.assign.equation))
+        result.append("</p><p><span class=\"bold\">Residual error:</span>")
         return result.append(e.residualError.symbRef.symbIdRef).append("</p>")
     }
 
