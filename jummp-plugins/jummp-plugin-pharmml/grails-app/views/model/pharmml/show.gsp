@@ -65,11 +65,6 @@
     </div>
 
     <div id="modellingSteps">
-<%--
-       <pharmml:checkModellingSteps steps="${modellingSteps}"/>
-       <pharmml:variableAssignments variables="${variableAssignments}"/>
-       <pharmml:estSimSteps steps="${estSimSteps}"/>
-       <pharmml:stepDeps deps="${stepDeps}"/>
---%>
+       <pharmml:modellingSteps steps="${estSimSteps}"/>
     </div>
 </content>

@@ -2,7 +2,7 @@ package net.biomodels.jummp.plugins.pharmml
 
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
-import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
+import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
@@ -10,6 +10,7 @@ import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariableType
 import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
 import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
+import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
@@ -435,7 +436,7 @@ class PharmMlTagLib {
         }
         return text
     }
-
+/*
     def variable(VariableDefinitionType v) {
         v?.symbId
     }
@@ -444,7 +445,7 @@ class PharmMlTagLib {
     StringBuilder variable(VariableDefinitionType v, StringBuilder text) {
         text.append(v?.symbId ? v.symbId : " undefined.")
     }
-
+*/
     def scalar = { s -> s.value }
 
     def sequence = { s ->
@@ -617,13 +618,6 @@ class PharmMlTagLib {
         result
     }
 
-    def checkModellingSteps = { attrs ->
-        if (!attrs.steps) {
-            out << "No modelling steps defined in the model."
-            return
-        }
-    }
-
     def variableDefs = { attrs ->
         if (!attrs.variables) {
             // there may not be any variables in the modelling steps
@@ -650,28 +644,32 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    def estSimSteps = { attrs ->
+    def modellingSteps = { attrs ->
         if (!attrs.steps) {
             return
         }
         /*
-        * Check which kind of step we are dealing with.
-        * Estimation and simulation steps cannot be mixed, hence only look at the first one to decide.
+        * Check which kind of step we are dealing with by looking at the value
+        * attribute of the JAXB element. Estimation and simulation steps cannot
+        * be mixed, hence only look at the first one to decide.
         */
-        boolean areSimulations = true
-        def step = attrs.steps.first()
+        def step = attrs.steps.first().value
         if (step instanceof EstimationStepType) {
-            areSimulations = false
+            return estimationSteps(attrs.steps)
         }
-        areSimulations ? simulationSteps(attrs.steps) : estimationSteps(attrs.steps)
+        out << simulationSteps(attrs.steps)
     }
 
-    def simulationSteps = { steps ->
+    void simulationSteps(List<SimulationStepType> steps) {
         if (!steps) {
             return
         }
         def result = new StringBuilder("<h3>Simulation Steps</h3>\n")
-        result.append("<table><thead><tr>").append("<th>Identifier</th>")
+        steps.each { s ->
+            result.append("<h4>Simulation step ${s.oid}")
+            result.append(variableAssignments(s.variableAssignment))
+        }
+        /*result.append("<table><thead><tr>").append("<th>Identifier</th>")
         result.append("<th>Replicates</th><th>Initial Values</th>")
         result.append("<th>Output variable</th><th>Observation times</th></tr>")
         result.append("</thead><tbody>")
@@ -682,6 +680,14 @@ class PharmMlTagLib {
             result.append(simulationObservations(s.observations)).append("</td></tr>")
         }
         out << result.append("</tbody></table>").toString()
+         */
+        out << result.toString()
+    }
+
+    StringBuilder variableAssignments(List<VariableAssignmentType> assignments) {
+        def result = new StringBuilder(assignments.size())
+
+        return result
     }
 
     StringBuilder initialValues = {
@@ -807,7 +813,7 @@ class PharmMlTagLib {
         while (iterator.hasNext()) {
             def s = iterator.next()
             // each step has a list of dependencies, need to fetch those as well.
-            result.append(s.idRef)
+            result.append(s.oidRef)
             if (s.dependantStep) {
                 StringBuilder dependenciesOfThisStep = transitiveStepDeps(s.dependantStep)
                 result.append(", ").append(dependenciesOfThisStep)

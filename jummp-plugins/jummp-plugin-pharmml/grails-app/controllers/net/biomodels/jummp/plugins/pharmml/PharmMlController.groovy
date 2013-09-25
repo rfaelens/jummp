@@ -38,11 +38,8 @@ class PharmMlController {
                 treatmentEpoch: pharmMlService.getTreatmentEpoch(design),
                 group: pharmMlService.getGroup(design),*/
                 modellingSteps: pharmMlService.getModellingSteps(revision),
-//                variableAssignments: pharmMlService.getVariableAssignments(steps),
-//                estSimSteps: pharmMlService.getEstimationOrSimulationSteps(steps),
                 stepDeps: pharmMlService.getStepDependencies(steps),
                 flashMessage: params.flashMessage
-
                ]
         )
     }

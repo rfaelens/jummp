@@ -89,7 +89,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
             }
         }
         if (IS_INFO_ENABLED) {
-            println "Validation report check took ${(System.nanoTime()-step2)/1000000.0}ms."
+            log.info "Validation report check took ${(System.nanoTime()-step2)/1000000.0}ms."
         }
         return report.isValid()
     }
