@@ -29,6 +29,7 @@ import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
 import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PieceSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
+import eu.ddmore.libpharmml.dom.commontypes.Rhs
 
 class PharmMlTagLib {
     static namespace = "pharmml"
@@ -108,16 +109,78 @@ class PharmMlTagLib {
        // prefixToInfix(builder, stack)
     }
 
-    private String convertToMathML(def equation) {
+    private void convertEquation(def equation, StringBuilder builder) {
         List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equation).reverse()
-        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
         List<String> stack=new LinkedList<String>()
         symbols.each {
                stack.push(it)
         }
         prefixToInfix(builder, stack)
+    }
+
+    private String convertToMathML(def equation) {
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        convertEquation(equation, builder)
         builder.append("</mstyle></math>")
         return builder.toString()
+    }
+
+    private String convertToMathML(String lhs, def equation) {
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(lhs))
+        builder.append(op("="))
+        convertEquation(equation, builder)
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    private String convertToMathML(String lhs, Rhs rhs) {
+        if (rhs.equation) {
+                return convertToMathML(lhs, rhs.equation)
+        }
+        if (rhs.getSymbRef()) {
+                return convertToMathML(lhs, rhs.getSymbRef())
+        }
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(lhs))
+        builder.append(op("="))
+        if (rhs.getScalar()) {
+                builder.append(oprand(rhs.getScalar()))
+        } 
+        else if (r.getSequence()) {
+                builder.append(sequenceAsMathML(r.sequence))
+        } 
+        else if (r.getVector()) {
+                builder.append(vectorAsMathML(r))
+        } 
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    
+    private String convertToMathML(String lhs, List arguments, def equation) {
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(lhs))
+        builder.append(op("("))
+        for (int i=0; i<arguments.size(); i++) {
+                builder.append(oprand(arguments.get(i).symbId))
+                if (i<arguments.size()-1) {
+                        builder.append(op(","))
+                }
+        }
+        builder.append(op(")"))
+        builder.append(op("="))
+        convertEquation(equation, builder)
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    private String op(String o) {
+        return "<mo>${o}</mo>"
+    }
+
+    private String oprand(String o) {
+        return "<mi>${o}</mi>"
     }
 
     StringBuilder simpleParams(List<SimpleParameterType> parameters) {
@@ -125,21 +188,37 @@ class PharmMlTagLib {
         if (!parameters) {
             return outcome
         }
+        boolean first=true;
         parameters.inject(outcome) { sb, p ->
-            sb.append(p.symbId)
-            return (p.assign ? rhs(p.assign, sb.append("=")) : sb).append(" ")
+            if (!first) {
+                sb.append(", ")
+            }
+            else {
+                first=false;
+            }
+            if (p.assign) {
+                sb.append(convertToMathML(p.symbId, p.assign))
+            }
+            else {
+                sb.append(p.symbId)
+            }
         }
         return outcome
     }
 
     StringBuilder randomVariables(List<ParameterRandomVariableType> rv) {
         def output = new StringBuilder()
+        boolean first=true;
         rv.inject(output) { o, i ->
             if (i.abstractContinuousUnivariateDistribution) {
+                if (!first) {
+                    o.append(", ")
+                } else {
+                    first=false;
+                }
                 o.append("[")
-                o.append(i.symbId)
-                o.append(distribution(i.abstractContinuousUnivariateDistribution))
-                o.append(" variability: ").append(i.variabilityReference.symbRef.symbIdRef)
+                o.append(distributionAssignment(i.symbId, i.abstractContinuousUnivariateDistribution))
+                o.append(", variability: ").append(i.variabilityReference.symbRef.symbIdRef)
                 o.append("]")
             }
         }
@@ -151,18 +230,17 @@ class PharmMlTagLib {
             out << "No function definitions were found."
             return
         }
-        def result = new StringBuilder("<table>\n\t")
-        result.append("<thead>\n")
-        result.append("<tr>\n<th>Identifier</th><th>Type</th></tr>\n")
-        result.append("</thead>\n<tbody>\n")
+        def result = new StringBuilder()
         attrs.functionDefs.each { d ->
-            result.append("<tr><td class=\"value\">")
-            result.append(d.symbId)
-            result.append("</td><td class=\"value\">")
-            result.append(d.symbolType.value())
-            result.append("</td></tr>\n")
+            def rightHandSide=d.getDefinition().getEquation();
+            if (d.getDefinition().getScalar()) {
+                rightHandSide=d.getDefinition().getScalar()
+            }
+            if (d.getDefinition().getSymbRef()) {
+                rightHandSide=d.getDefintion().getSymbRef()
+            }
+            result.append("<p>${convertToMathML(d.symbId, d.getFunctionArgument(), rightHandSide)}</p>")
         }
-        result.append("</tbody>\n</table>")
         out << result.toString()
     }
 
@@ -218,7 +296,7 @@ class PharmMlTagLib {
         attrs.covariate.each { c ->
             result.append("<div>")
             if (c.simpleParameter) {
-                result.append("<p><span class=\"bold\">Parameters:</span> ")
+                result.append("<p><span class=\"bold\">Parameters:</span></p> <p>")
                 result.append(simpleParams(c.simpleParameter))
                 result.append("</p>")
             }
@@ -236,11 +314,10 @@ class PharmMlTagLib {
 
     StringBuilder categCov = { c, symbId ->
         def result = new StringBuilder("<p>\n")
-        result.append("<span class=\"bold\">Categorical covariate ${symbId}</span>\n")
+        result.append("<span class=\"bold\">Categorical covariate ${symbId}</span><p>\n")
         c.category.inject(result) { r, categ ->
             if (categ.probability) {
-                r.append(symbId).append("~").append(categ.probability)
-                r.append(distribution(categ.probability))
+            	r.append(distributionAssignment(symbId,categ.probability))
             }
         }
         result.append("</p>\n")
@@ -262,8 +339,7 @@ class PharmMlTagLib {
         def result = new StringBuilder("<p>")
         result.append("<span class=\"bold\">Continuous covariate ${symbId}</span>\n</p>\n<p>")
         if (c.abstractContinuousUnivariateDistribution) {
-            result.append(symbId)
-            result.append(distribution(c.abstractContinuousUnivariateDistribution))
+            result.append(distributionAssignment(symbId, c.abstractContinuousUnivariateDistribution))
             result.append("</p><p>")
         }
         result.append("<span class=\"bold\">Transformation:</span>")
@@ -283,7 +359,7 @@ class PharmMlTagLib {
             // the API returns a JAXBElement, not ObservationErrorType
             def obsErr = om.observationError.value
             result.append(obsErr.symbId).append("</h4>\n<p>")
-            result.append("<span class=\"bold\">Parameters: ")
+            result.append("<span class=\"bold\">Parameters: </span>")
             def simpleParameters = om.commonParameterElement.value.findAll {
                 it instanceof SimpleParameterType
             }
@@ -291,8 +367,12 @@ class PharmMlTagLib {
                 it instanceof ParameterRandomVariableType
             }
             result.append(simpleParams(simpleParameters))
-            result.append(randomVariables(rv))
-            result.append("</span></p>\n<p>")
+            String randoms=randomVariables(rv)
+            if (randoms) {
+            	    result.append(", ")
+            	    result.append(randoms)
+            }
+            result.append("\n<p>")
             if (obsErr.symbol?.value) {
                 result.append(obsErr.symbol.value)
             }
@@ -324,8 +404,7 @@ class PharmMlTagLib {
             return result
         }
         if (e.assign) {
-            result.append(e.symbId)
-            rhs(e.assign, result.append("="))
+            result.append(convertToMathML(e.symbId, e.assign))
         }
         return result
     }
@@ -337,31 +416,41 @@ class PharmMlTagLib {
         return distribution(re.distribution[0])
     }
 
+    def distributionAssignment = { l, d->
+    	    StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+    	    builder.append(oprand(l))
+    	    builder.append(op("&sim;"))
+    	    builder.append(distribution(d))
+    	    builder.append("</mstyle></math>")
+    }
+    
     def distribution = { d ->
         if (!d) {
             return
         }
-        def StringBuilder result = new StringBuilder("&nbsp;~&nbsp;N(")
+        def StringBuilder result = new StringBuilder(oprand("N"))
+        result.append(op("("))
         def distributionType = d.value
         if (distributionType instanceof NormalDistribution) {
-            return result.append(normalDistribution(d))
+            result.append(normalDistribution(d))
         }
+        result.append(op(")"))
+        return result
     }
 
     def normalDistribution = { dist ->
         StringBuilder result = new StringBuilder()
         NormalDistribution d= dist.value
         String mean = d.mean.var?.varId ? d.mean.var.varId : d.mean.rVal
-        result.append(mean)
+        result.append(oprand(mean))
         String stdDev = d.stddev?.var?.varId ? d.stddev.var.varId : d.stddev?.prVal
         if (stdDev) {
-            result.append(", ").append(stdDev)
+            result.append(op(",")).append(oprand(stdDev))
         }
         String variance = d.variance?.var?.varId ? d.variance.var.varId : d.variance?.prVal
         if (variance) {
-            result.append(", ").append(variance)
+            result.append(op(",")).append(oprand(variance))
         }
-        result.append(") ")
 
         return result.toString()
     }
@@ -410,7 +499,7 @@ class PharmMlTagLib {
     }
 
     StringBuilder doseAmount = { a ->
-        def amt = rhs(a?.amount, new StringBuilder("<p>Dose amount:")).append("</p>")
+        def amt = new StringBuilder("<p>").append(convertToMathML("Dose Amount", a?.amount)).append("</p>")
         def d = variable(a?.doseVar, new StringBuilder("<p>Dose variable:")).append("</p>")
         def t
         if (a?.targetVar) {
@@ -468,6 +557,38 @@ class PharmMlTagLib {
         return [s.begin, s.stepSize, s.end].collect{rhs(it, new StringBuilder())}.join(":")
     }
 
+    def sequenceAsMathML = {
+        new StringBuilder(op("[")).append(oprand(s.begin)).append(op(":")).
+        			   append(oprand(s.stepSize)).append(op(":")).
+        			   append(oprand(s.end)).append(op("]"))
+    }
+
+    StringBuilder vectorAsMathML = { v ->
+        def result = new StringBuilder()
+        if (!v) {
+            return result.append(" ")
+        }
+        result.append(op("["))
+        def iterator = v.vector.sequenceOrScalar.iterator()
+        while (iterator.hasNext()) {
+            //can be a scalar or a sequence
+            def vectorElement = iterator.next()
+            def item
+            try {
+                item = vectorElement as ScalarRhs
+                result.append(oprand(item.value.toPlainString()))
+            } catch (ClassCastException ignored) {
+                item = vectorElement as SequenceType
+                result.append(sequence(item))
+            }
+            if (iterator.hasNext()) {
+                result.append(op(","))
+            }
+        }
+        result.append(op("]"))
+    }
+
+    
     StringBuilder vector = { v ->
         def result = new StringBuilder()
         if (!v) {
