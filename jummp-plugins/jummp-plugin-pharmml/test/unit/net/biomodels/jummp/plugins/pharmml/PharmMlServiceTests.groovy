@@ -77,14 +77,15 @@ class PharmMlServiceTests {
         def model = [new File("test/files/pdmodel_sbml.xml"), new File("test/files/iov1_data.txt")]
         assertEquals "", service.extractName(model)
         model = [new File("test/files/example2.xml")]
-        assertEquals("Warfarin example - basic PK with covariate W", service.extractName(model))
+        assertEquals("Example 2 - simulation continuous PK (Bonate 2012)", service.extractName(model))
         model = []
         def baseFolder = new File("test/files/")
         baseFolder.eachFileMatch FileType.FILES, ~/.*\.xml/, { File f -> model << f; }
-        def mergedNames = [ "Example 1 - continuous PK/PD",
-                "Warfarin example - basic PK with covariate W",
-                "IOV1 with covariates",
-                "Ribba et al. 2012 - growth tumor model"
+        def mergedNames = [ "Example 1 - simulation continuous PK/PD",
+                "Example 2 - simulation continuous PK (Bonate 2012)",
+                "Example 3 - basic Warfarin PK estimation with covariate W",
+                "Example 4 - estimation with IOV1 and with covariates",
+                "Example 5 - estimation for growth tumor model (Ribba et al. 2012)"
         ]
         // the order of the files may not be preserved.
         String result = service.extractName(model)
@@ -94,7 +95,10 @@ class PharmMlServiceTests {
     @Test
     void modelDescriptionGetsExtracted() {
         assertEquals "", service.extractDescription(null)
-        assertEquals "based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemotherapy or Radiotherapy\n        Benjamin Ribba, Gentian Kaloshi, Mathieu Peyre, et al. Clin Cancer Res Published OnlineFirst July 3, 2012.", service.extractDescription([new File("test/files/Ribba_CCR2012.xml")])
+        String expected = '''\
+based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemotherapy or Radiotherapy
+        Benjamin Ribba, Gentian Kaloshi, Mathieu Peyre, et al. Clin Cancer Res Published OnlineFirst July 3, 2012.'''
+        assertEquals expected, service.extractDescription([new File("test/files/example5.xml")])
     }
 
     @Test
