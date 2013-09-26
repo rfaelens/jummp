@@ -7,6 +7,11 @@
     <g:javascript>
     	$.appName = "${grailsApplication.metadata["app.name"]}";
     	$.serverUrl = "${grailsApplication.config.grails.serverURL}";
+    	$.i18n.properties({
+    		name: 'messages',
+    		path: "${grailsApplication.config.grails.serverURL}/js/i18n/",
+    		mode: "map"
+    	});
     </g:javascript>
     <g:javascript src="jummp.js"/>
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/head" />
