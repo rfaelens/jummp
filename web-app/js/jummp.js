@@ -3,7 +3,7 @@
 // TODO: create proper links
 $.i18n.properties({
     name: 'messages',
-    path: '/jummp/js/i18n/',
+    path: $.jummp.createURI('js/i18n/'),
     mode: "map"
 });
 
