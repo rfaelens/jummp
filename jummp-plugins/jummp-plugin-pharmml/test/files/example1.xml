@@ -10,7 +10,8 @@
     xmlns:mml="http://www.pharmml.org/2013/03/PharmML"
     writtenVersion="0.1">
     
-    <ct:Name>Example 1 - continuous PK/PD</ct:Name>
+    <ct:Name>Example 1 - simulation continuous PK/PD</ct:Name>
+    
     <IndependentVariable symbId="t"/>
     <FunctionDefinition xmlns="http://www.pharmml.org/2013/03/CommonTypes"
         symbId="constantErrorModel" symbolType="real">
@@ -183,7 +184,7 @@
                     <Transformation>log</Transformation>
                     <LinearCovariate>
                         <PopulationParameter>
-                            <ct:Assign><ct:SymbRef symbIdRef="pop_Cl"></ct:SymbRef></ct:Assign>
+                            <ct:Assign><ct:SymbRef symbIdRef="pop_Cl"/></ct:Assign>
                         </PopulationParameter>
                         <Covariate>
                             <ct:SymbRef blkIdRef="c1" symbIdRef="W"/>
@@ -555,7 +556,7 @@
             <Activity oid="d2">
                 <Bolus>
                     <DoseAmount inputType="target">
-                        <ct:SymbRef blkIdRef="main" symbIdRef="Ac"/>
+                        <ct:SymbRef blkIdRef="main" symbIdRef="Ad"/>
                         <ct:Assign>
                             <Equation xmlns="http://www.pharmml.org/2013/03/Maths">
                                 <Binop op="times">
@@ -643,22 +644,22 @@
             </IndividualTemplate>
             <ds:DataSet>
                 <ds:Definition>
-                    <ds:Column columnId="id" valueType="string" columnNum="1"/>
-                    <ds:Column columnId="arm" valueType="string" columnNum="2"/>
+                    <ds:Column columnId="id" valueType="id" columnNum="1"/>
+                    <ds:Column columnId="arm" valueType="id" columnNum="2"/>
                     <ds:Column columnId="reps" valueType="int" columnNum="3"/>
                 </ds:Definition>
                 <ds:Table>
                     <ds:Row>
-                        <ct:String>i1</ct:String><ct:String>a1</ct:String><ct:Int>20</ct:Int>
+                        <ct:Id>i1</ct:Id><ct:Id>a1</ct:Id><ct:Int>20</ct:Int>
                     </ds:Row>
                     <ds:Row>
-                        <ct:String>i2</ct:String><ct:String>a2</ct:String><ct:Int>20</ct:Int>
+                        <ct:Id>i2</ct:Id><ct:Id>a2</ct:Id><ct:Int>20</ct:Int>
                     </ds:Row>
                     <ds:Row>
-                        <ct:String>i3</ct:String><ct:String>a3</ct:String><ct:Int>40</ct:Int>
+                        <ct:Id>i3</ct:Id><ct:Id>a3</ct:Id><ct:Int>40</ct:Int>
                     </ds:Row>
                     <ds:Row>
-                        <ct:String>i4</ct:String><ct:String>a4</ct:String><ct:Int>40</ct:Int>
+                        <ct:Id>i4</ct:Id><ct:Id>a4</ct:Id><ct:Int>40</ct:Int>
                     </ds:Row>
                 </ds:Table>
             </ds:DataSet>

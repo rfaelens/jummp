@@ -4,7 +4,9 @@
     xsi:schemaLocation="http://www.pharmml.org/2013/03/PharmML http://www.pharmml.org/2013/03/PharmML"
     xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes"
     writtenVersion="0.1">
-    <ct:Name>Ribba et al. 2012 - growth tumor model</ct:Name>
+    
+    <ct:Name>Example 5 - estimation for growth tumor model (Ribba et al. 2012)</ct:Name>
+    
     <ct:Description>based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemotherapy or Radiotherapy
         Benjamin Ribba, Gentian Kaloshi, Mathieu Peyre, et al. Clin Cancer Res Published OnlineFirst July 3, 2012.</ct:Description>
     
@@ -502,9 +504,9 @@
                 <SegmentRef oidRef="TA"/>
             </Cell>
             <Segment oid="TA">
-                <ActivityRef oidRef="activity1"/>
+                <ActivityRef oidRef="bolusIV"/>
             </Segment>
-            <Activity oid="activity1">
+            <Activity oid="bolusIV">
                 <Bolus>
                     <DoseAmount inputType="target">
                         <ct:SymbRef blkIdRef="sm1" symbIdRef="C"/>
@@ -528,14 +530,14 @@
             </IndividualTemplate>
             <DataSet xmlns="http://www.pharmml.org/2013/08/Dataset">
                 <Definition>
-                    <Column columnId="ID" valueType="string" columnNum="1"/> 
-                    <Column columnId="ARM" valueType="string" columnNum="2"/> 
+                    <Column columnId="ID" valueType="id" columnNum="1"/> 
+                    <Column columnId="ARM" valueType="id" columnNum="2"/> 
                     <Column columnId="REP" valueType="int" columnNum="3"/> 
                 </Definition>
                 <Table>
                     <Row>
-                        <ct:String>i</ct:String>
-                        <ct:String>a1</ct:String>
+                        <ct:Id>i</ct:Id>
+                        <ct:Id>arm1</ct:Id>
                         <ct:Int>21</ct:Int>
                     </Row>
                 </Table>
@@ -544,33 +546,33 @@
 
         <!-- INDIVUIDUAL DOSING -->
         <IndividualDosing>
-            <ActivityRef oidRef="activity1"/>
+            <ActivityRef oidRef="bolusIV"/>
             <IndividualRef columnIdRef="ID"/>
             <DataSet xmlns="http://www.pharmml.org/2013/08/Dataset">
                 <Definition>
-                    <Column columnId="ID" valueType="string" columnNum="1"/>
+                    <Column columnId="ID" valueType="id" columnNum="1"/>
                     <Column columnId="TIME" valueType="real" columnNum="2"/>
                     <Column columnId="DOSE" valueType="real" columnNum="5"/>
                 </Definition>
                 <Table>
                     <!-- subject 1 -->
-                    <Row><ct:String>i1</ct:String><ct:Real>54.57</ct:Real><ct:Real>1</ct:Real></Row> 
-                    <Row><ct:String>i1</ct:String><ct:Real>59.77</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i1</ct:Id><ct:Real>54.57</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i1</ct:Id><ct:Real>59.77</ct:Real><ct:Real>1</ct:Real></Row> 
                     <!-- subject 2 -->
-                    <Row><ct:String>i2</ct:String><ct:Real>12</ct:Real><ct:Real>1</ct:Real></Row> 
-                    <Row><ct:String>i2</ct:String><ct:Real>14.09</ct:Real><ct:Real>1</ct:Real></Row> 
-                    <Row><ct:String>i2</ct:String><ct:Real>16.17</ct:Real><ct:Real>1</ct:Real></Row> 
-                    <Row><ct:String>i2</ct:String><ct:Real>18.26</ct:Real><ct:Real>1</ct:Real></Row> 
-                    <Row><ct:String>i2</ct:String><ct:Real>20.35</ct:Real><ct:Real>1</ct:Real></Row> 
-                    <Row><ct:String>i2</ct:String><ct:Real>22.43</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i2</ct:Id><ct:Real>12</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i2</ct:Id><ct:Real>14.09</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i2</ct:Id><ct:Real>16.17</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i2</ct:Id><ct:Real>18.26</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i2</ct:Id><ct:Real>20.35</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i2</ct:Id><ct:Real>22.43</ct:Real><ct:Real>1</ct:Real></Row> 
                     <!-- SNIP -->
                     <!-- subject 21 -->
-                    <Row><ct:String>i21</ct:String><ct:Real>1.5</ct:Real><ct:Real>1</ct:Real></Row> 
-                    <Row><ct:String>i21</ct:String><ct:Real>3.17</ct:Real><ct:Real>1</ct:Real></Row> 
-                    <Row><ct:String>i21</ct:String><ct:Real>4.85</ct:Real><ct:Real>1</ct:Real></Row> 
-                    <Row><ct:String>i21</ct:String><ct:Real>6.52</ct:Real><ct:Real>1</ct:Real></Row> 
-                    <Row><ct:String>i21</ct:String><ct:Real>8.19</ct:Real><ct:Real>1</ct:Real></Row> 
-                    <Row><ct:String>i21</ct:String><ct:Real>9.87</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i21</ct:Id><ct:Real>1.5</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i21</ct:Id><ct:Real>3.17</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i21</ct:Id><ct:Real>4.85</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i21</ct:Id><ct:Real>6.52</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i21</ct:Id><ct:Real>8.19</ct:Real><ct:Real>1</ct:Real></Row> 
+                    <Row><ct:Id>i21</ct:Id><ct:Real>9.87</ct:Real><ct:Real>1</ct:Real></Row> 
                 </Table>
             </DataSet>
         </IndividualDosing>
@@ -596,40 +598,40 @@
                 
                 <DataSet xmlns="http://www.pharmml.org/2013/08/Dataset">
                     <Definition>
-                        <Column columnId="ID" valueType="string" columnNum="1"/>
+                        <Column columnId="ID" valueType="id" columnNum="1"/>
                         <Column columnId="TIME" valueType="real" columnNum="2"/>
                         <Column columnId="DV" valueType="real" columnNum="3"/>
                     </Definition>
                     <Table>
                         <!-- SUBJECT 1 -->
-                        <Row><ct:String>i1</ct:String><ct:Real>3.43</ct:Real><ct:Real>45.7</ct:Real></Row>
-                        <Row><ct:String>i1</ct:String><ct:Real>5.3</ct:Real><ct:Real>48.03</ct:Real></Row> 
-                        <Row><ct:String>i1</ct:String><ct:Real>42.13</ct:Real><ct:Real>71.34</ct:Real></Row>
-                        <Row><ct:String>i1</ct:String><ct:Real>52.63</ct:Real><ct:Real>79.3</ct:Real></Row>
-                        <Row><ct:String>i1</ct:String><ct:Real>57.53</ct:Real><ct:Real>72.3</ct:Real></Row>
-                        <Row><ct:String>i1</ct:String><ct:Real>63.3</ct:Real><ct:Real>72.07</ct:Real></Row>
-                        <Row><ct:String>i1</ct:String><ct:Real>68.97</ct:Real><ct:Real>70.24</ct:Real></Row>
-                        <Row><ct:String>i1</ct:String><ct:Real>76.53</ct:Real><ct:Real>66.81</ct:Real></Row>
-                        <Row><ct:String>i1</ct:String><ct:Real>94.53</ct:Real><ct:Real>60.48</ct:Real></Row>
-                        <Row><ct:String>i1</ct:String><ct:Real>106.1</ct:Real><ct:Real>62</ct:Real></Row>
-                        <Row><ct:String>i1</ct:String><ct:Real>116.23</ct:Real><ct:Real>72.04</ct:Real></Row>
-                        <Row><ct:String>i1</ct:String><ct:Real>121.87</ct:Real><ct:Real>90.16</ct:Real></Row>
+                        <Row><ct:Id>i1</ct:Id><ct:Real>3.43</ct:Real><ct:Real>45.7</ct:Real></Row>
+                        <Row><ct:Id>i1</ct:Id><ct:Real>5.3</ct:Real><ct:Real>48.03</ct:Real></Row> 
+                        <Row><ct:Id>i1</ct:Id><ct:Real>42.13</ct:Real><ct:Real>71.34</ct:Real></Row>
+                        <Row><ct:Id>i1</ct:Id><ct:Real>52.63</ct:Real><ct:Real>79.3</ct:Real></Row>
+                        <Row><ct:Id>i1</ct:Id><ct:Real>57.53</ct:Real><ct:Real>72.3</ct:Real></Row>
+                        <Row><ct:Id>i1</ct:Id><ct:Real>63.3</ct:Real><ct:Real>72.07</ct:Real></Row>
+                        <Row><ct:Id>i1</ct:Id><ct:Real>68.97</ct:Real><ct:Real>70.24</ct:Real></Row>
+                        <Row><ct:Id>i1</ct:Id><ct:Real>76.53</ct:Real><ct:Real>66.81</ct:Real></Row>
+                        <Row><ct:Id>i1</ct:Id><ct:Real>94.53</ct:Real><ct:Real>60.48</ct:Real></Row>
+                        <Row><ct:Id>i1</ct:Id><ct:Real>106.1</ct:Real><ct:Real>62</ct:Real></Row>
+                        <Row><ct:Id>i1</ct:Id><ct:Real>116.23</ct:Real><ct:Real>72.04</ct:Real></Row>
+                        <Row><ct:Id>i1</ct:Id><ct:Real>121.87</ct:Real><ct:Real>90.16</ct:Real></Row>
                         <!-- SUBJECT 2 -->
-                        <Row><ct:String>i2</ct:String><ct:Real>0</ct:Real><ct:Real>50.17</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>11.07</ct:Real><ct:Real>61.68</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>14.17</ct:Real><ct:Real>52.82</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>16.6</ct:Real><ct:Real>53.36</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>19.33</ct:Real><ct:Real>53.28</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>25.13</ct:Real><ct:Real>48.3</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>29.27</ct:Real><ct:Real>40.66</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>33.4</ct:Real><ct:Real>42.4</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>37.43</ct:Real><ct:Real>38.2</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>42.67</ct:Real><ct:Real>42.99</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>48.83</ct:Real><ct:Real>42.76</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>56.4</ct:Real><ct:Real>48.6</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>62.23</ct:Real><ct:Real>55.85</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>65.9</ct:Real><ct:Real>54.71</ct:Real></Row>
-                        <Row><ct:String>i2</ct:String><ct:Real>71.37</ct:Real><ct:Real>60.77</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>0</ct:Real><ct:Real>50.17</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>11.07</ct:Real><ct:Real>61.68</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>14.17</ct:Real><ct:Real>52.82</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>16.6</ct:Real><ct:Real>53.36</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>19.33</ct:Real><ct:Real>53.28</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>25.13</ct:Real><ct:Real>48.3</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>29.27</ct:Real><ct:Real>40.66</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>33.4</ct:Real><ct:Real>42.4</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>37.43</ct:Real><ct:Real>38.2</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>42.67</ct:Real><ct:Real>42.99</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>48.83</ct:Real><ct:Real>42.76</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>56.4</ct:Real><ct:Real>48.6</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>62.23</ct:Real><ct:Real>55.85</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>65.9</ct:Real><ct:Real>54.71</ct:Real></Row>
+                        <Row><ct:Id>i2</ct:Id><ct:Real>71.37</ct:Real><ct:Real>60.77</ct:Real></Row>
                         <!-- SUBJECT 3 -->
                         <!-- SUBJECT 4 -->
                         <!-- SUBJECT 5 -->
@@ -640,10 +642,10 @@
                         <!-- SUBJECT 10 -->
                         <!-- SNIP -->
                         <!-- SUBJECT 21 -->
-                        <Row><ct:String>i21</ct:String><ct:Real>9.77</ct:Real><ct:Real>72.35</ct:Real></Row>
-                        <Row><ct:String>i21</ct:String><ct:Real>14.23</ct:Real><ct:Real>66.96</ct:Real></Row>
-                        <Row><ct:String>i21</ct:String><ct:Real>18.13</ct:Real><ct:Real>56.79</ct:Real></Row>
-                        <Row><ct:String>i21</ct:String><ct:Real>23.9</ct:Real><ct:Real>60.06</ct:Real></Row>
+                        <Row><ct:Id>i21</ct:Id><ct:Real>9.77</ct:Real><ct:Real>72.35</ct:Real></Row>
+                        <Row><ct:Id>i21</ct:Id><ct:Real>14.23</ct:Real><ct:Real>66.96</ct:Real></Row>
+                        <Row><ct:Id>i21</ct:Id><ct:Real>18.13</ct:Real><ct:Real>56.79</ct:Real></Row>
+                        <Row><ct:Id>i21</ct:Id><ct:Real>23.9</ct:Real><ct:Real>60.06</ct:Real></Row>
                     </Table>
 
                 </DataSet>
