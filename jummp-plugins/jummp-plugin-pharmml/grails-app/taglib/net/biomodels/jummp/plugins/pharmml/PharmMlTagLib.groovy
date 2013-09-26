@@ -1,6 +1,5 @@
 package net.biomodels.jummp.plugins.pharmml
 
-import eu.ddmore.libpharmml.dom.commontypes.Boolean
 import eu.ddmore.libpharmml.dom.commontypes.IntValueType
 import eu.ddmore.libpharmml.dom.commontypes.RealValueType
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
@@ -31,6 +30,9 @@ import net.biomodels.jummp.plugins.pharmml.maths.PieceSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 import eu.ddmore.libpharmml.dom.commontypes.Rhs
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
+import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
+import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
+
 
 class PharmMlTagLib {
     static namespace = "pharmml"
@@ -556,8 +558,10 @@ class PharmMlTagLib {
             case StringValueType:
                 return s.value
                 break
-            case eu.ddmore.libpharmml.dom.commontypes.Boolean:
-                return "bool"
+            case TrueBooleanType:
+                return "true"
+            case FalseBooleanType:
+            	return "false"
             default:
                 return s.toString()
         }
