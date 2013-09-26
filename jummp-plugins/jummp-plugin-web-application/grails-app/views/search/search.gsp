@@ -6,9 +6,9 @@
         <%-- 
          <link rel="stylesheet" href="${resource(contextPath: "/jummp", dir: '/css/jqueryui/south-street', file: 'jquery-ui-1.10.3.custom.css')}" />
         --%>
-         <link rel="stylesheet" href="${resource(contextPath: "/jummp", dir: '/css', file: 'datatablestyle.css')}" />
+         <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'datatablestyle.css')}" />
          
-         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
+         <g:javascript contextPath="" src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript>
         	$(document).ready(function() {
         		 $.jummp.showModels.searchModels('${query}');

@@ -103,9 +103,15 @@ class ModelService {
     	    results.each {
     	    	    try
     	    	    {
-    	    	    	    Model returned=getModel(Integer.parseInt(it.get("model_id")))
-    	    	    	    if (returned) {
-    	    	    	    	    returnVals.add(returned.toCommandObject())
+    	    	    	    def existingModel=returnVals.find { prevs -> 
+    	    	    	    	prevs.id == Integer.parseInt(it.get("model_id")) 
+    	    	    	    }
+    	    	    	    if (!existingModel)
+    	    	    	    {
+    	    	    	    	    Model returned=getModel(Integer.parseInt(it.get("model_id")))
+    	    	    	    	    if (returned) {
+    	    	    	    	    	    returnVals.add(returned.toCommandObject())
+    	    	    	    	    }
     	    	    	    }
     	    	    }
     	    	    catch(Exception ignore) {
