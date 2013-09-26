@@ -1,6 +1,5 @@
 package net.biomodels.jummp.plugins.pharmml
 
-import eu.ddmore.libpharmml.dom.commontypes.Boolean
 import eu.ddmore.libpharmml.dom.commontypes.IntValueType
 import eu.ddmore.libpharmml.dom.commontypes.RealValueType
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
@@ -31,6 +30,9 @@ import net.biomodels.jummp.plugins.pharmml.maths.PieceSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 import eu.ddmore.libpharmml.dom.commontypes.Rhs
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
+import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
+import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
+
 
 class PharmMlTagLib {
     static namespace = "pharmml"
@@ -352,8 +354,7 @@ class PharmMlTagLib {
             result.append(distributionAssignment(symbId, c.abstractContinuousUnivariateDistribution))
             result.append("</p><p>")
         }
-        result.append("<span class=\"bold\">Transformation:</span>")
-        result.append(convertToMathML(c.transformation.equation))
+        result.append(convertToMathML("Transformation",c.transformation.equation))
         return result.append("</p>")
     }
 
@@ -402,8 +403,7 @@ class PharmMlTagLib {
             result.append(e.transformation.value()).append("</p>")
         }
         result.append("<p>")
-        result.append(e.output.symbRef.symbIdRef).append("=")
-        result.append(convertToMathML(e.errorModel.assign.equation)).append("</p>")
+        result.append(convertToMathML(e.output.symbRef.symbIdRef, e.errorModel.assign.equation)).append("</p>")
         result.append("<p><span class=\"bold\">Residual error:</span>")
         return result.append(e.residualError.symbRef.symbIdRef).append("</p>")
     }
@@ -556,8 +556,10 @@ class PharmMlTagLib {
             case StringValueType:
                 return s.value
                 break
-            case eu.ddmore.libpharmml.dom.commontypes.Boolean:
-                return "bool"
+            case TrueBooleanType:
+                return "true"
+            case FalseBooleanType:
+            	return "false"
             default:
                 return s.toString()
         }

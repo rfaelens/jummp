@@ -13,6 +13,8 @@ import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
 import eu.ddmore.libpharmml.dom.maths.PiecewiseType
 import eu.ddmore.libpharmml.dom.maths.PieceType
 import eu.ddmore.libpharmml.dom.maths.Condition
+import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
+import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
 
 class MathsUtil {
 	private static def pharmMap = [ "plus":"+",
@@ -81,12 +83,7 @@ class MathsUtil {
 			subTree.addAll(pieces)
 		}
 		else if (jaxObject instanceof PieceType) {
-			addIfExists(jaxObject.binop, subTree)
-			addIfExists(jaxObject.uniop, subTree)
-			addIfExists(jaxObject.symbRef, subTree)
-			addIfExists(jaxObject.functionCall, subTree)
-			addIfExists(jaxObject.scalar, subTree)
-			addIfExists(jaxObject.constant, subTree)
+			addCommonSubElements(jaxObject, subTree)
 			Condition condition=jaxObject.getCondition()
 			if (!condition.getOtherwise()) {
 				addIfExists(condition.getLogicBinop(),subTree)
@@ -96,24 +93,23 @@ class MathsUtil {
 			
 		}
 		else if (jaxObject instanceof UniopType) {
-			addIfExists(jaxObject.binop, subTree)
-			addIfExists(jaxObject.uniop, subTree)
-			addIfExists(jaxObject.symbRef, subTree)
-			addIfExists(jaxObject.functionCall, subTree)
-			addIfExists(jaxObject.scalar, subTree)
-			addIfExists(jaxObject.constant, subTree)
+			addCommonSubElements(jaxObject, subTree)
 		}
 		else if (jaxObject instanceof LogicUniOpType) {
-			addIfExists(jaxObject.binop, subTree)
-			addIfExists(jaxObject.uniop, subTree)
-			addIfExists(jaxObject.symbRef, subTree)
-			addIfExists(jaxObject.functionCall, subTree)
-			addIfExists(jaxObject.scalar, subTree)
-			addIfExists(jaxObject.constant, subTree)
+			addCommonSubElements(jaxObject, subTree)
 			addIfExists(jaxObject.logicBinop, subTree)
 			addIfExists(jaxObject.logicUniop, subTree)
 		}
 		return subTree
+	}
+
+	private static void addCommonSubElements(def jaxObject, List subTree) {
+		addIfExists(jaxObject.binop, subTree)
+		addIfExists(jaxObject.uniop, subTree)
+		addIfExists(jaxObject.symbRef, subTree)
+		addIfExists(jaxObject.functionCall, subTree)
+		addIfExists(jaxObject.scalar, subTree)
+		addIfExists(jaxObject.constant, subTree)
 	}
 	
 	private static void addIfExists(Object object, List list) {
@@ -122,6 +118,40 @@ class MathsUtil {
 		}
 	}
 	
+	private static MathsSymbol getSymbol(SymbolRefType jaxObject) {
+		String varName="";
+		/*if (jaxObject.getBlkIdRef()) {
+			varName=jaxObject.getBlkIdRef()+":";
+		}*/
+		varName+=jaxObject.getSymbIdRef();
+		return new MathsSymbol(varName, varName)
+	}
+	
+	private static MathsSymbol getSymbol(FunctionCallType jaxObject) {
+		MathsSymbol tmp=getSymbol(jaxObject.symbRef)
+		return new FunctionSymbol(tmp.mapsTo, tmp.mapsTo, jaxObject.functionArgument.size())
+	}
+	
+	private static MathsSymbol getSymbol(PiecewiseType jaxObject) {
+		return new PiecewiseSymbol(jaxObject.getPiece().size())
+	}
+
+	private static MathsSymbol getSymbol(PieceType jaxObject) {
+		Condition condition=jaxObject.getCondition()
+		if (condition.getOtherwise()) {
+			return new PieceSymbol(PieceSymbol.ConditionType.OTHERWISE)
+		}
+		return new PieceSymbol(PieceSymbol.ConditionType.EXTERNAL)
+	}
+	
+	
+	private static MathsSymbol getSymbol(TrueBooleanType jaxObject) {
+		return new MathsSymbol("true", "true");
+	}
+	
+	private static MathsSymbol getSymbol(FalseBooleanType jaxObject) {
+		return new MathsSymbol("false", "false");
+	}
 	
 	private static MathsSymbol getSymbol(def jaxObject) {
 		if (jaxObject instanceof BinopType || jaxObject instanceof LogicBinOpType) {
@@ -140,32 +170,6 @@ class MathsUtil {
 				op.omitBraces=true
 			}
 			return op
-		}
-		if (jaxObject instanceof eu.ddmore.libpharmml.dom.commontypes.Boolean) { //NEEDS TO BE LOOKED AT!
-			return new MathsSymbol(""+jaxObject.getId(), ""+jaxObject.getId())
-		}
-		if (jaxObject instanceof SymbolRefType) {
-			String varName="";
-			/*if (jaxObject.getBlkIdRef()) {
-				varName=jaxObject.getBlkIdRef()+":";
-			}*/
-			varName+=jaxObject.getSymbIdRef();
-			return new MathsSymbol(varName, varName)
-		}
-		if (jaxObject instanceof FunctionCallType) {
-			MathsSymbol tmp=getSymbol(jaxObject.symbRef)
-			return new FunctionSymbol(tmp.mapsTo, tmp.mapsTo, jaxObject.functionArgument.size())
-		}
-		if (jaxObject instanceof PiecewiseType) {
-			return new PiecewiseSymbol(jaxObject.getPiece().size())
-		}
-		if (jaxObject instanceof PieceType) {
-			Condition condition=jaxObject.getCondition()
-			if (condition.getOtherwise()) {
-				return new PieceSymbol(PieceSymbol.ConditionType.OTHERWISE)
-			}
-			return new PieceSymbol(PieceSymbol.ConditionType.EXTERNAL)
-			
 		}
 		if (jaxObject.getClass().getCanonicalName().contains("eu.ddmore.libpharmml.dom.commontypes")) {
 			return new MathsSymbol(""+jaxObject.getValue(), ""+jaxObject.getValue())
