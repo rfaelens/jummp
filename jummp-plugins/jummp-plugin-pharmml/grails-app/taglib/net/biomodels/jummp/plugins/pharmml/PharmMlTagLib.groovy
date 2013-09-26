@@ -148,7 +148,7 @@ class PharmMlTagLib {
         builder.append(oprand(lhs))
         builder.append(op("="))
         if (rhs.getScalar()) {
-                builder.append(oprand(scalar(rhs.getScalar())))
+                builder.append(oprand(scalar(rhs.scalar.value)))
         }
         else if (r.getSequence()) {
                 builder.append(sequenceAsMathML(r.sequence))
@@ -552,17 +552,17 @@ class PharmMlTagLib {
         }
     }
 
-    def scalar = { s ->
+    String scalar = { s ->
         switch(s) {
             case RealValueType:
             case IntValueType:
             case StringValueType:
-                return s.value
+                return s.value as String
                 break
             case TrueBooleanType:
                 return "true"
             case FalseBooleanType:
-            	return "false"
+                return "false"
             default:
                 return s.toString()
         }
