@@ -74,7 +74,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         }
         long step2 = System.nanoTime()
         if (IS_INFO_ENABLED) {
-            log.infoi("libPharmML validation took ${(step2-step1)/1000000.0}ms.")
+            log.info("libPharmML validation took ${(step2-step1)/1000000.0}ms.")
         }
         IValidationReport report = resource.getCreationReport()
         if (IS_INFO_ENABLED) {
