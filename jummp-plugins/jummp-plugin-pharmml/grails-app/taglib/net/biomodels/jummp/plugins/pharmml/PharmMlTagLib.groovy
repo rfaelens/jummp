@@ -148,7 +148,7 @@ class PharmMlTagLib {
         builder.append(oprand(lhs))
         builder.append(op("="))
         if (rhs.getScalar()) {
-                builder.append(oprand(rhs.getScalar()))
+                builder.append(oprand(scalar(rhs.getScalar())))
         } 
         else if (r.getSequence()) {
                 builder.append(sequenceAsMathML(r.sequence))
@@ -244,13 +244,16 @@ class PharmMlTagLib {
         }
         def result = new StringBuilder()
         attrs.functionDefs.each { d ->
-            def rightHandSide=d.getDefinition().getEquation();
-            if (d.getDefinition().getScalar()) {
-                rightHandSide=d.getDefinition().getScalar()
+            def rightHandSide
+            if (d.definition.equation) {
+                rightHandSide = d.definition.equation
+            } else if (d.definition.scalar) {
+                rightHandSide = d.definition.scalar
+            } else if (d.definition.symbRef) {
+                rightHandSide = d.definition.symbRef
             }
-            if (d.getDefinition().getSymbRef()) {
-                rightHandSide=d.getDefintion().getSymbRef()
-            }
+            //should not be null by now
+            assert !!rightHandSide
             result.append("<p>${convertToMathML(d.symbId, d.getFunctionArgument(), rightHandSide)}</p>")
         }
         out << result.toString()
@@ -892,58 +895,15 @@ class PharmMlTagLib {
         }
         return result
     }
-    StringBuilder simulationObservations = {
-        if (!it) {
-            return new StringBuilder("None.&nbsp;")
-        }
-        def timepointList = []
-        def outputList = []
-        it.each {
-            outputList << it.output
-            timepointList << it.timepoints
-        }
-        def result = new StringBuilder()
-        def iterator = outputList.iterator()
-        while (iterator.hasNext()) {
-            def o = iterator.next()
-            //each observation has variables and timepoints
-            if (o.var) {
-                o.var.each { v ->
-                    if (v.block) {
-                        result.append(v.block).append(".")
-                    }
-                    result.append(v.symbId)
-                    if (iterator.hasNext()) {
-                        result.append("<br/>")
-                    }
-                }
-            } else {
-                return new StringBuilder("None.")
-            }
-        }
-
-        result.append("</td><td>")
-        if (!timepointList) {
-            return result.append("None.")
-        } else {
-            result.append("[")
-        }
-        iterator = timepointList.iterator()
-        while(iterator.hasNext()) {
-            def t = iterator.next()
-            result.append(rhs(t, new StringBuilder()))
-            if (iterator.hasNext()) {
-                result.append(",<br/>")
-            }
-        }
-        result.append("]")
-    }
 
     StringBuilder estimationSteps(List<EstimationStepType> steps) {
         if (!steps) {
             return
         }
         def result = new StringBuilder("<h3>Estimation Steps</h3>")
+        steps.each { s ->
+            result.append("<p>${s.properties}</p>\n")
+        }
         return result
     }
 
