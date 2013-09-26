@@ -42,7 +42,7 @@
                                     </label>
                                 </td>
                                 <td class="value">
-                                    <g:textField name="RevisionComments" maxlength="50"/>
+                                    <g:textArea name="RevisionComments" rows="5" cols="70"/>
                                 </td>
                           </tr>
                         </g:if>
