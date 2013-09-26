@@ -137,7 +137,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
             return ""
         }
         String theDescription = model.inject(new StringBuilder()) { desc, m ->
-            desc.append(JummpXmlUtils.findModelElement(m, "Description")).append(
+            desc.append(getDomFromPharmML(m).description?.value ?: "").append(
                     System.properties["line.separator"])
         }.toString().trim()
         if (IS_INFO_ENABLED) {

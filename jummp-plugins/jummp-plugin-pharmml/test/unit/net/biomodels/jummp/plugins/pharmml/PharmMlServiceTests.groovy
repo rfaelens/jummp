@@ -95,6 +95,8 @@ class PharmMlServiceTests {
     @Test
     void modelDescriptionGetsExtracted() {
         assertEquals "", service.extractDescription(null)
+        // only return a description when it relates to the root, not just any element
+        assertEquals "", service.extractDescription([new File("test/files/example1.xml")])
         String expected = '''\
 based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemotherapy or Radiotherapy
         Benjamin Ribba, Gentian Kaloshi, Mathieu Peyre, et al. Clin Cancer Res Published OnlineFirst July 3, 2012.'''
