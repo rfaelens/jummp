@@ -1,11 +1,15 @@
 package net.biomodels.jummp.plugins.pharmml
 
+import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
+import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
 import eu.ddmore.libpharmml.dom.commontypes.IntValueType
 import eu.ddmore.libpharmml.dom.commontypes.RealValueType
+import eu.ddmore.libpharmml.dom.commontypes.Rhs
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.commontypes.StringValueType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
+import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
 import eu.ddmore.libpharmml.dom.maths.Equation
@@ -16,8 +20,9 @@ import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariableType
 import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
 import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
-import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
+import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
+import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
@@ -28,11 +33,6 @@ import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
 import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PieceSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
-import eu.ddmore.libpharmml.dom.commontypes.Rhs
-import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
-import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
-import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
-
 
 class PharmMlTagLib {
     static namespace = "pharmml"
@@ -149,13 +149,13 @@ class PharmMlTagLib {
         builder.append(op("="))
         if (rhs.getScalar()) {
                 builder.append(oprand(scalar(rhs.getScalar())))
-        } 
+        }
         else if (r.getSequence()) {
                 builder.append(sequenceAsMathML(r.sequence))
-        } 
+        }
         else if (r.getVector()) {
                 builder.append(vectorAsMathML(r))
-        } 
+        }
         builder.append("</mstyle></math>")
         return builder.toString()
     }
@@ -900,11 +900,27 @@ class PharmMlTagLib {
         if (!steps) {
             return
         }
-        def result = new StringBuilder("<h3>Estimation Steps</h3>")
+        def result = new StringBuilder("<h3>Estimation Steps</h3>\n")
         steps.each { s ->
-            result.append("<p>${s.properties}</p>\n")
+            result.append("<h4>Estimation Step ${s.oid}</h4>\n")
+            if (s.variableAssignment) {
+                result.append(variableAssignments(s.variableAssignment))
+            }
+            if (s.objectiveDataSet) {
+                result.append(objectiveDataSet(s.objectiveDataSet))
+            }
+            if (s.operation) {
+                result.append("operation")
+            }
+            if (s.parametersToEstimate) {
+                result.append(" paramsToEst")
+            }
         }
         return result
+    }
+
+    StringBuilder objectiveDataSet(DatasetMappingType dataSet) {
+        return new StringBuilder("<h5>Dataset mapping</h5>\n")
     }
 
     StringBuilder estimationOps = { operations ->
