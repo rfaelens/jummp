@@ -13,8 +13,8 @@ import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
 import eu.ddmore.libpharmml.dom.maths.PiecewiseType
 import eu.ddmore.libpharmml.dom.maths.PieceType
 import eu.ddmore.libpharmml.dom.maths.Condition
-//import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
-//import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
+import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
+import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
 
 class MathsUtil {
 	private static def pharmMap = [ "plus":"+",
@@ -145,7 +145,6 @@ class MathsUtil {
 	}
 	
 	
-	/*
 	private static MathsSymbol getSymbol(TrueBooleanType jaxObject) {
 		return new MathsSymbol("true", "true");
 	}
@@ -153,8 +152,6 @@ class MathsUtil {
 	private static MathsSymbol getSymbol(FalseBooleanType jaxObject) {
 		return new MathsSymbol("false", "false");
 	}
-	*/
-	
 	
 	private static MathsSymbol getSymbol(def jaxObject) {
 		if (jaxObject instanceof BinopType || jaxObject instanceof LogicBinOpType) {
