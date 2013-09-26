@@ -4,7 +4,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import net.biomodels.jummp.core.RunnableModelFormatDetector
 import net.biomodels.jummp.core.util.JummpXmlUtils
-import net.biomodels.jummp.plugins.sbml.SbmlService
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.tika.detect.DefaultDetector
