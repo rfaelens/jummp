@@ -31,7 +31,7 @@ class MathsUtil {
 					"or":"&or;",
 					]
 	
-	public static List<MathsSymbol> convertToSymbols(EquationType equation) {
+	public static List<MathsSymbol> convertToSymbols(def equation) {
 		List<MathsSymbol> symbols = new LinkedList<MathsSymbol>();
 		convertJAX(symbols, equation)
 		System.out.println("CONVERTED TO ${symbols}")

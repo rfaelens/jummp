@@ -8,7 +8,7 @@
         --%>
          <link rel="stylesheet" href="${resource(contextPath: "/jummp", dir: '/css', file: 'datatablestyle.css')}" />
          
-         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
+         <g:javascript contextPath="" src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript>
         	$(document).ready(function() {
         		 $.jummp.showModels.loadModelList();
