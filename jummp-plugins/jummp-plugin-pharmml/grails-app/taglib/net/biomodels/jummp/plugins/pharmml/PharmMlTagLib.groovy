@@ -30,6 +30,7 @@ import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PieceSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 import eu.ddmore.libpharmml.dom.commontypes.Rhs
+import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
 
 class PharmMlTagLib {
     static namespace = "pharmml"
@@ -156,6 +157,11 @@ class PharmMlTagLib {
         builder.append("</mstyle></math>")
         return builder.toString()
     }
+    
+    private String convertToMathML(DerivativeVariableType derivative) {
+    	    String derivTerm="d${derivative.symbId}<DIVIDEDBY>d${derivative.independentVariable.symbRef.symbId}"
+    	    return convertToMathML(derivTerm, derivative.getAssign())
+    }
 
     
     private String convertToMathML(String lhs, List arguments, def equation) {
@@ -180,7 +186,11 @@ class PharmMlTagLib {
     }
 
     private String oprand(String o) {
-        return "<mi>${o}</mi>"
+    	    if (o.contains("<DIVIDEDBY>")) {
+    	    	    String[] parts=o.split("<DIVIDEDBY>")
+    	    	    return "<mfrac><mi>${parts[0]}</mi><mi>${parts[1]}</mi></mfrac>"
+    	    }
+    	    return "<mi>${o}</mi>"
     }
 
     StringBuilder simpleParams(List<SimpleParameterType> parameters) {
