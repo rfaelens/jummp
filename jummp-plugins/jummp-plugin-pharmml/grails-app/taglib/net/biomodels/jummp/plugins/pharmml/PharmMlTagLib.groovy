@@ -23,6 +23,7 @@ import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
 import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
+import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
@@ -890,8 +891,7 @@ class PharmMlTagLib {
     StringBuilder variableAssignments(List<VariableAssignmentType> assignments) {
         def result = new StringBuilder("\n<h5>Variable assignments</h5>\n")
         assignments.inject(result){r,v ->
-            rhs(v.assign, r.append("<p>").append(v.symbRef.symbIdRef).append("="))
-            result.append("</p>\n")
+            r.append("<p>").append(convertToMathML(v.symbRef.symbIdRef, v.assign)).append("</p>")
         }
         return result
     }
@@ -910,10 +910,10 @@ class PharmMlTagLib {
                 result.append(objectiveDataSet(s.objectiveDataSet))
             }
             if (s.operation) {
-                result.append("operation")
+                result.append(estimationOps(s.operation))
             }
             if (s.parametersToEstimate) {
-                result.append(" paramsToEst")
+                result.append(" ")
             }
         }
         return result
@@ -924,23 +924,54 @@ class PharmMlTagLib {
     }
 
     StringBuilder estimationOps = { operations ->
-        def result = new StringBuilder()
         if (!operations) {
-            return result
+            return new StringBuilder()
         }
-        if ( operations.size() == 1 ) {
-            return result.append(operations[0].opType)
-        } else {
-            result.append("[")
-            def iOperations = operations.iterator()
-            while (iOperations.hasNext()) {
-                result.append(iOperations.next().opType)
-                if (iOperations.hasNext()){
-                    result.append(", ")
+        def result = new StringBuilder("<h5>Estimation operations</h5>\n")
+        // It is nicer to display the long description than the enum value.
+        def operationMeaningMap = [
+                "estFIM"   : "Calculate the Fisher Information Matrix",
+                "estIndiv" : "Estimate the individual parameters",
+                "estPop"   : "Estimate the population parameters"
+        ]
+        operations.each { o ->
+            result.append("<div><span class=\"bold\">")
+            result.append(o.order).append(") ")
+            println o.opType.value()
+            result.append(o.name ? o.name.value : operationMeaningMap[o.opType.value()])
+            result.append("</span>\n")
+            if (o.description || o.algorithm || o.property) {
+                result.append("<p>")
+                if (o.description) {
+                    result.append(o.description.value)
+                }
+                if (o.property || o.algorithm) {
+                    result.append("\n<ul>")
+                    o.property.inject(result) { r, p ->
+                        r.append("<li>").append(operationProperty(p)).append("</li>")
+                    }
+                    result.append("</ul>\n</p>")
+                    if (o.algorithm) {
+                        result.append("\n<p>Algorithm ").append(o.algorithm.name ? o.algorithm.name.value :
+                                (o.algorithm.definition ? o.algorithm.definition : ""))
+                        if (o.algorithm.property) {
+                            result.append("<ul>")
+                            o.algorithm.property.inject(result) { r, p ->
+                                r.append("<li>").append(operationProperty(p)).append("</li>")
+                            }
+                        }
+                        result.append("</ul>")
+                    }
+                    result.append("</p>")
                 }
             }
-            return result.append("]")
+            result.append("</div>")
         }
+        return result
+    }
+
+    StringBuilder operationProperty(OperationPropertyType prop) {
+        return new StringBuilder().append(convertToMathML(prop.name, prop.assign))
     }
 
     def stepDeps = { attrs ->
