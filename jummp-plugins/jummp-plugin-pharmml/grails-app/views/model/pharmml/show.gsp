@@ -65,6 +65,6 @@
     </div>
 
     <div id="modellingSteps">
-       <pharmml:modellingSteps steps="${estSimSteps}"/>
+       <pharmml:modellingSteps steps="${modellingSteps}"/>
     </div>
 </content>

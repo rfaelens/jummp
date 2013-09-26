@@ -37,7 +37,7 @@ class PharmMlController {
                 /*treatment: pharmMlService.getTreatment(design),
                 treatmentEpoch: pharmMlService.getTreatmentEpoch(design),
                 group: pharmMlService.getGroup(design),*/
-                modellingSteps: pharmMlService.getModellingSteps(revision),
+                modellingSteps: pharmMlService.getCommonModellingSteps(steps),
                 stepDeps: pharmMlService.getStepDependencies(steps),
                 flashMessage: params.flashMessage
                ]

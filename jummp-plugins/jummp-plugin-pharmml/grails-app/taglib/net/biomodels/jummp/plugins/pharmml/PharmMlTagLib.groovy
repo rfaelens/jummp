@@ -1,8 +1,15 @@
 package net.biomodels.jummp.plugins.pharmml
 
+import eu.ddmore.libpharmml.dom.commontypes.Boolean
+import eu.ddmore.libpharmml.dom.commontypes.IntValueType
+import eu.ddmore.libpharmml.dom.commontypes.RealValueType
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
+import eu.ddmore.libpharmml.dom.commontypes.StringValueType
+import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
+import eu.ddmore.libpharmml.dom.commontypes.VectorType
+import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
@@ -15,6 +22,7 @@ import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
+import javax.xml.bind.JAXBElement
 import net.biomodels.jummp.plugins.pharmml.maths.FunctionSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
@@ -100,47 +108,16 @@ class PharmMlTagLib {
        // prefixToInfix(builder, stack)
     }
 
-    private void convertEquation(def equation, StringBuilder builder) {
+    private String convertToMathML(def equation) {
         List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equation).reverse()
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
         List<String> stack=new LinkedList<String>()
         symbols.each {
                stack.push(it)
         }
         prefixToInfix(builder, stack)
-    }
-    
-    private String convertToMathML(def equation) {
-    	    StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
-    	    convertEquation(equation, builder)
-    	    builder.append("</mstyle></math>")
-    	    return builder.toString()            
-    }
-    
-    private String convertToMathML(String lhs, def equation) {
-    	    StringBuilder builder=new StringBuilder("<math display='inline'><mstyle><mi>")
-    	    builder.append(lhs)
-    	    builder.append("</mi><mo>=</mo>")
-    	    convertEquation(equation, builder)
-    	    builder.append("</mstyle></math>")
-    	    return builder.toString()
-    }
-    
-    private String convertToMathML(String lhs, List arguments, def equation) {
-    	    StringBuilder builder=new StringBuilder("<math display='inline'><mstyle><mi>")
-    	    builder.append(lhs)
-    	    builder.append("</mi><mo>(</mo>")
-    	    for (int i=0; i<arguments.size(); i++) {
-    	    	    builder.append("<mi>")
-    	    	    builder.append(arguments.get(i).symbId)
-    	    	    builder.append("</mi>")
-    	    	    if (i<arguments.size()-1) {
-    	    	    	    builder.append("<mo>,</mo>")
-    	    	    }
-    	    }
-    	    builder.append("<mo>)</mo><mo>=</mo>")
-    	    convertEquation(equation, builder)
-    	    builder.append("</mstyle></math>")
-    	    return builder.toString()
+        builder.append("</mstyle></math>")
+        return builder.toString()
     }
 
     StringBuilder simpleParams(List<SimpleParameterType> parameters) {
@@ -175,15 +152,15 @@ class PharmMlTagLib {
             return
         }
         def result = new StringBuilder("<table>\n\t")
+        result.append("<thead>\n")
+        result.append("<tr>\n<th>Identifier</th><th>Type</th></tr>\n")
+        result.append("</thead>\n<tbody>\n")
         attrs.functionDefs.each { d ->
-            def rightHandSide=d.getDefinition().getEquation();
-            if (d.getDefinition().getScalar()) {
-        	rightHandSide=d.getDefinition().getScalar()
-            }
-            if (d.getDefinition().getSymbRef()) {
-        	rightHandSide=d.getDefintion().getSymbRef()
-            }
-            result.append("<tr>${convertToMathML(d.symbId, d.getFunctionArgument(), rightHandSide)}</tr>")
+            result.append("<tr><td class=\"value\">")
+            result.append(d.symbId)
+            result.append("</td><td class=\"value\">")
+            result.append(d.symbolType.value())
+            result.append("</td></tr>\n")
         }
         result.append("</tbody>\n</table>")
         out << result.toString()
@@ -236,7 +213,7 @@ class PharmMlTagLib {
         if (!attrs.covariate) {
             return
         }
-        out.println("<h3>Covariate Model</h3>")
+        out << "<h3>Covariate Model</h3>"
         def result = new StringBuilder()
         attrs.covariate.each { c ->
             result.append("<div>")
@@ -289,7 +266,8 @@ class PharmMlTagLib {
             result.append(distribution(c.abstractContinuousUnivariateDistribution))
             result.append("</p><p>")
         }
-        result.append(convertToMathML("Transformation", c.transformation.equation))
+        result.append("<span class=\"bold\">Transformation:</span>")
+        result.append(convertToMathML(c.transformation.equation))
         return result.append("</p>")
     }
 
@@ -334,8 +312,9 @@ class PharmMlTagLib {
             result.append(e.transformation.value()).append("</p>")
         }
         result.append("<p>")
-        result.append(convertToMathML(e.output.symbRef.symbIdRef, e.errorModel.assign.equation))
-        result.append("</p><p><span class=\"bold\">Residual error:</span>")
+        result.append(e.output.symbRef.symbIdRef).append("=")
+        result.append(convertToMathML(e.errorModel.assign.equation)).append("</p>")
+        result.append("<p><span class=\"bold\">Residual error:</span>")
         return result.append(e.residualError.symbRef.symbIdRef).append("</p>")
     }
 
@@ -452,34 +431,41 @@ class PharmMlTagLib {
     }
 
     StringBuilder rhs = { r, text ->
-        if (r.getScalar()) {
-            text.append(scalar(r))
-        } else if (r.getSequence()) {
-            text.append(sequence(r.sequence))
-        } else if (r.getVector()) {
-            text.append(vector(r))
-        } else if (r.getSymbRef()) {
-            text.append(symbRef(r))
-        } else { // equation
-            text.append(convertToMathML(r.equation))
+        if (r.equation) {
+            return text.append(convertToMathML(r.equation))
         }
-        return text
-    }
-/*
-    def variable(VariableDefinitionType v) {
-        v?.symbId
+        if (r.sequence) {
+            return text.append(sequence(r.sequence))
+        }
+        if (r.vector) {
+            return text.append(jaxbVector(r.vector))
+        }
+        if (r.symbRef) {
+            return text.append(r.symbRef.symbIdRef)
+        }
+        if (r.scalar) {
+            return text.append(scalar(r.scalar.value))
+        } else {
+            return text.append(r.toString())
+        }
     }
 
-    //TODO HANDLE VariableAssignmentType too
-    StringBuilder variable(VariableDefinitionType v, StringBuilder text) {
-        text.append(v?.symbId ? v.symbId : " undefined.")
+    def scalar = { s ->
+        switch(s) {
+            case RealValueType:
+            case IntValueType:
+            case StringValueType:
+                return s.value
+                break
+            case eu.ddmore.libpharmml.dom.commontypes.Boolean:
+                return "bool"
+            default:
+                return s.toString()
+        }
     }
-*/
-    def scalar = { s -> s.value }
 
-    def sequence = { s ->
-        new StringBuilder("[").append(s.begin).append(":").append(s.stepSize).append(":").append(s.end).
-                append("]")
+    String sequence(SequenceType s) {
+        return [s.begin, s.stepSize, s.end].collect{rhs(it, new StringBuilder())}.join(":")
     }
 
     StringBuilder vector = { v ->
@@ -488,7 +474,7 @@ class PharmMlTagLib {
             return result.append(" ")
         }
         result.append("[")
-        def iterator = v.vector.sequenceOrScalar.iterator()
+        def iterator = v.sequenceOrScalar.iterator()
         while (iterator.hasNext()) {
             //can be a scalar or a sequence
             def vectorElement = iterator.next()
@@ -678,72 +664,104 @@ class PharmMlTagLib {
             return
         }
         /*
-        * Check which kind of step we are dealing with by looking at the value
-        * attribute of the JAXB element. Estimation and simulation steps cannot
+        * Check which kind of step we are dealing with. Estimation and simulation steps cannot
         * be mixed, hence only look at the first one to decide.
         */
-        def step = attrs.steps.first().value
+        def step = attrs.steps.first()
+        def result = new StringBuilder()
         if (step instanceof EstimationStepType) {
-            return estimationSteps(attrs.steps)
+            result.append(estimationSteps(attrs.steps))
+        } else {
+            result.append(simulationSteps(attrs.steps))
         }
-        out << simulationSteps(attrs.steps)
+        out << result.toString()
     }
 
-    void simulationSteps(List<SimulationStepType> steps) {
+    StringBuilder simulationSteps = { List<SimulationStepType> steps ->
         if (!steps) {
             return
         }
         def result = new StringBuilder("<h3>Simulation Steps</h3>\n")
         steps.each { s ->
             result.append("<h4>Simulation step ${s.oid}")
-            result.append(variableAssignments(s.variableAssignment))
+            if (s.variableAssignment) {
+                result.append(variableAssignments(s.variableAssignment))
+            }
+            if (s.observations) {
+                s.observations.each { o ->
+                    result.append("\n<h5>Observation</h5>\n")
+                    if (o.continuous) {
+                        result.append("<p><span class=\"bold\">Type:</span>Continuous</p>\n")
+                        if (o.continuous.symbRef) {
+                            result.append("<p><span class=\"bold\">Variables:</span>")
+                            //check for symbIdRef clashes and display the blkIdRef accordingly
+                            List vars = o.continuous.symbRef
+                            List allVars = []
+                            List uniqueVars = []
+                            vars.each {
+                                uniqueVars << it.symbIdRef
+                                allVars << [it.blkIdRef, it.symbIdRef].join('.')
+                            }
+                            boolean needBlk = allVars.size() != uniqueVars.unique().size()
+                            vars.inject(result) { r, v ->
+                                r.append("${needBlk ? v.blkIdRef + '.': ''}${v.symbIdRef} ")
+                            }
+                            result.append("</p>\n")
+                        }
+                    }
+                    if (o.timepoints) {
+                        result.append("<p><span class=\"bold\">Timepoints:</span>\n")
+                        // put all timepoints here, output them separated by commas
+                        List<String> observationTimepoints = []
+                        o.timepoints.arrays.each { a ->
+                            //JAXBElement parameterised with SequenceType or VectorType
+                            if (a.value instanceof VectorType) {
+                                observationTimepoints << jaxbVector(a.value).toString()
+                            } else if (a.value instanceof SequenceType) {
+                                observationTimepoints << sequence(a.value).toString()
+                            }
+                        }
+                        result.append(
+                            observationTimepoints.size() == 1 ? observationTimepoints[0] :
+                                    "[${observationTimepoints.join(', ')}]")
+                        result.append("</p>\n")
+                    }
+                }
+            }
         }
-        /*result.append("<table><thead><tr>").append("<th>Identifier</th>")
-        result.append("<th>Replicates</th><th>Initial Values</th>")
-        result.append("<th>Output variable</th><th>Observation times</th></tr>")
-        result.append("</thead><tbody>")
-        steps.each { s ->
-            result.append("\n<tr><td>").append(s.id).append("</td><td>")
-            result.append(s.replicates.scalar.value).append("</td><td>")
-            result.append(initialValues(s.initialValue)).append("</td><td>")
-            result.append(simulationObservations(s.observations)).append("</td></tr>")
-        }
-        out << result.append("</tbody></table>").toString()
-         */
-        out << result.toString()
-    }
-
-    StringBuilder variableAssignments(List<VariableAssignmentType> assignments) {
-        def result = new StringBuilder(assignments.size())
-
         return result
     }
 
-    StringBuilder initialValues = {
-        def result  = new StringBuilder()
-        if (!it) {
-            return result.append("&nbsp;")
+    StringBuilder jaxbVector(VectorType vector) {
+        if (!vector) {
+            return new StringBuilder()
         }
-        def iValues = it.iterator()
-        while (iValues.hasNext()) {
-            def v = iValues.next()
-            if (v.block) {
-                result.append(v.block).append(".")
-            }
-            result.append(v.symbId).append("=")
-            if (v.scalar) {
-                result.append(v.scalar.value.toPlainString())
-            }
-            if (iValues.hasNext()) {
-                result.append(",<br/>")
+        def result = new StringBuilder("")
+        def values = []
+        vector.sequenceOrScalar.inject(result) { r, ss ->
+            switch(ss.value) {
+               case SequenceType:
+                    values << sequence(ss.value)
+                    break
+                default:
+                    values << scalar(ss.value)
             }
         }
-        result
+        result.append(values.size() > 1 ? "[${values.join(', ')}]" : values.first())
+        return result
     }
 
+    StringBuilder variableAssignments(List<VariableAssignmentType> assignments) {
+        def result = new StringBuilder("\n<h5>Variable assignments</h5>\n")
+        assignments.inject(result){r,v ->
+            rhs(v.assign, r.append("<p>").append(v.symbRef.symbIdRef).append("="))
+            result.append("</p>\n")
+        }
+        return result
+    }
     StringBuilder simulationObservations = {
         if (!it) {
-            return new StringBuilder("None.</td><td>&nbsp;")
+            return new StringBuilder("None.&nbsp;")
         }
         def timepointList = []
         def outputList = []
@@ -788,28 +806,12 @@ class PharmMlTagLib {
         result.append("]")
     }
 
-    def estimationSteps = { steps ->
+    StringBuilder estimationSteps(List<EstimationStepType> steps) {
         if (!steps) {
             return
         }
         def result = new StringBuilder("<h3>Estimation Steps</h3>")
-        result.append("\n<table><thead><tr><th>Identifier</th>")
-        result.append("<th>Initial Values</th><th>Estimation Operations</th></tr></thead><tbody>")
-        steps.each { s ->
-            result.append("<tr><td>").append(s.id).append("</td><td>")
-            if (s.initialValue) {
-                result.append(initialValues(s.initialValue)).append("</td><td>")
-            } else {
-                result.append("&nbsp;</td><td>")
-            }
-            if (s.estimationOperation) {
-                result.append(estimationOps(s.estimationOperation))
-            } else {
-                result.append("&nbsp;")
-            }
-            result.append("</td></tr>")
-        }
-        out << result.append("</tbody></table>").toString()
+        return result
     }
 
     StringBuilder estimationOps = { operations ->
