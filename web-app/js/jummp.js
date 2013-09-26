@@ -62,7 +62,7 @@ $.jummp.createLink = function (controller, action, id) {
  */
 $.jummp.createURI = function (path) {
     "use strict";
-    return "/" + $.appName + "/" + path;
+    return $.serverUrl + "/" + path;
 };
 
 $(function () {

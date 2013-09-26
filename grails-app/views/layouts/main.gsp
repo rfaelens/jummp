@@ -6,6 +6,7 @@
     <g:javascript src="jquery/jquery.i18n.properties-min-1.0.9.js"/>
     <g:javascript>
     	$.appName = "${grailsApplication.metadata["app.name"]}";
+    	$.serverUrl = "${grailsApplication.config.grails.serverURL}";
     </g:javascript>
     <g:javascript src="jummp.js"/>
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/head" />
