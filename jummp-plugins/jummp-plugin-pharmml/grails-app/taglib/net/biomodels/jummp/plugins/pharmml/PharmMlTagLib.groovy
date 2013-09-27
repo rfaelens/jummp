@@ -325,37 +325,41 @@ class PharmMlTagLib {
     }
 
     StringBuilder commonVariables(List<JAXBElement> vars, def indepVar) {
-        println "iv:${indepVar}"
         def result = new StringBuilder()
         if (!vars) {
             return result
         }
-        def initialConditions = []
+        def initialConditions = [:]
         vars.each { v ->
+            result.append("<div>")
             switch(v.value) {
                 case DerivativeVariableType:
                     if (v.value.initialCondition) {
-                        initialConditions << v.value.initialCondition
+                        initialConditions << [(v.value.symbId) : v.value.initialCondition]
                     }
-                    result.append("<div>").append(convertToMathML(v.value, indepVar)).append("</div>")
+                    result.append(convertToMathML(v.value, indepVar))
                     break
                 case VariableDefinitionType:
+                    result.append(convertToMathML(v.value.symbId, v.value.assign))
                     break
                 case FunctionDefinitionType:
                     def fd = v.value
-                    String funcDefn = ["<div>", "</div>\n"].join(
-                                convertToMathML(fd.symbId, fd.functionArgument, fd))
-                    result.append(funcDefn)
+                    result.append(convertToMathML(fd.symbId, fd.functionArgument, fd))
                     break
                 case FuncParameterDefinitionType:
+                    result.append(v.value.symbId)
                     break
                 default:
-                    result.append("<div>").append(v.value.symbId).append("</div>")
+                    result.append(v.value.symbId)
                     break
             }
+            result.append("</div>")
         }
         if (initialConditions) {
-            println "initial conditions"
+            result.append("\n<p class='bold'>Initial conditions</p>\n")
+            initialConditions.keySet().each { s ->
+                result.append("<div>").append(convertToMathML(s, initialConditions[s].assign)).append("</div>\n")
+            }
         }
         return result
     }
@@ -1175,7 +1179,6 @@ class PharmMlTagLib {
     def stepDeps = { attrs ->
         StringBuilder result = new StringBuilder()
         if (!attrs.deps || !attrs.deps.step) {
-            println "fail"
             return result
         }
         result.append("<h3>Step Dependencies</h3>")
