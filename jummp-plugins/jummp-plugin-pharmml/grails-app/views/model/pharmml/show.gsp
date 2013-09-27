@@ -30,14 +30,7 @@
    </div>
 
     <div id="modelDefinition">
-        <h3>Structural Model</h3>
-        <table>
-            <tr>
-                <td class="key"></td>
-                <td class="value">
-                </td>
-            </tr>
-        </table>
+        <pharmml:structuralModel sm="${structuralModel}" />
 
        <pharmml:variabilityModel variabilityModel="${variabilityModel}"/>
 

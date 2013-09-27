@@ -280,6 +280,35 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
+    def structuralModel = { attrs ->
+        if (!attrs.sm) {
+            println "wtf"
+            return
+        }
+        def result = new StringBuilder("<h3>Structural ")
+        boolean multipleStructuralModels = attrs.sm.size() > 1
+        if (!multipleStructuralModels) {
+            result.append("Model ").append(attrs.sm[0].name?.value ?: attrs.sm[0].blkId)
+        } else {
+            result.append("Models")
+        }
+        result.append("</h3>\n")
+        if (!multipleStructuralModels) {
+            def model = attrs.sm[0]
+            if (model.simpleParameter) {
+                result.append("<p><span class=\"bold\">Parameters: </span>")
+                result.append(simpleParams(model.simpleParameter))
+                result.append("</p>")
+            }
+        } else {
+            sm.each { s ->
+                result.append("<h4>").append(s.name?.value ?: s.blkId).append("</h4>\n")
+                //todo expand
+            }
+        }
+        out << result.toString()
+    }
+
     def variabilityModel = { attrs ->
         if (!attrs.variabilityModel) {
             return
