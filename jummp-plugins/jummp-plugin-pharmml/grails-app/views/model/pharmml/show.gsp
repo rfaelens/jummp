@@ -66,5 +66,6 @@
 
     <div id="modellingSteps">
        <pharmml:modellingSteps steps="${modellingSteps}"/>
+       <pharmml:stepDeps deps="${stepDeps}" />
     </div>
 </content>

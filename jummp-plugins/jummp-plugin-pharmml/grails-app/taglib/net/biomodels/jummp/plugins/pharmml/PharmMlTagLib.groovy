@@ -840,9 +840,9 @@ class PharmMlTagLib {
         }
         def result = new StringBuilder("<h3>Simulation Steps</h3>\n")
         steps.each { s ->
-            result.append("<h4>Simulation step ${s.oid}")
+            result.append("<h4>Simulation step ${s.oid}</h4>")
             if (s.variableAssignment) {
-                result.append(variableAssignments(s.variableAssignment))
+                result.append(variableAssignments(s.variableAssignment, "<h5>Variable assignments</h5>\n"))
             }
             if (s.observations) {
                 s.observations.each { o ->
@@ -963,7 +963,6 @@ class PharmMlTagLib {
 
         noTables.inject(result) { r, d ->
             def key = columnOrder[d.columnNum]
-            println "variableMap[${key}]=${variableMap[key]}"
             r.append(["<th>", "</th>"].join(variableMap[key] ?: d.columnId))
         }
         result.append("</tr></thead><tbody>")
@@ -1062,26 +1061,23 @@ class PharmMlTagLib {
     }
 
     def stepDeps = { attrs ->
-        StringBuilder result = new StringBuilder("<h3>Step Dependencies</h3>")
+        StringBuilder result = new StringBuilder()
         if (!attrs.deps || !attrs.deps.step) {
-            return result.append("<p>There are no step dependencies defined in the model.</p>")
+            println "fail"
+            return result
         }
-        result.append("[")
-        def iterator = attrs.deps.step.iterator()
-        while (iterator.hasNext()) {
-            def s = iterator.next()
-            // each step has a list of dependencies, need to fetch those as well.
-            result.append(s.oidRef)
-            if (s.dependantStep) {
-                StringBuilder dependenciesOfThisStep = transitiveStepDeps(s.dependantStep)
-                result.append(", ").append(dependenciesOfThisStep)
+        result.append("<h3>Step Dependencies</h3>")
+        result.append("\n<ul>")
+        attrs.deps.step.inject(result) { r, s ->
+            StringBuilder dep = new StringBuilder(s.oidRef.oidRef)
+            if (s.dependents) {
+                dep.append(": ").append(transitiveStepDeps(s.dependents))
             }
-
-            if (iterator.hasNext()) {
-                result.append(", ")
-            }
+            r.append(["<li>", "</li>\n"].join(dep.toString()))
+            
         }
-        out << result.append("]").toString()
+        result.append("</ul>")
+        out << result.toString()
     }
 
     StringBuilder transitiveStepDeps = { ds ->
@@ -1089,6 +1085,11 @@ class PharmMlTagLib {
         if (!ds) {
             return result
         }
-        result.append(ds.join(", "))
+        def deps = []
+        ds.each { deps << it.oidRef }
+
+        result.append(deps.join(", "))
+        return deps.size() == 1 ? result :
+                new StringBuilder("[").append(result).append("]")
     }
 }
