@@ -2,6 +2,7 @@ package net.biomodels.jummp.plugins.pharmml
 
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
 import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
+import eu.ddmore.libpharmml.dom.commontypes.IdValueType
 import eu.ddmore.libpharmml.dom.commontypes.IntValueType
 import eu.ddmore.libpharmml.dom.commontypes.RealValueType
 import eu.ddmore.libpharmml.dom.commontypes.Rhs
@@ -12,6 +13,8 @@ import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
 import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
+import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
+import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
@@ -26,6 +29,7 @@ import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
+import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
@@ -574,6 +578,7 @@ class PharmMlTagLib {
             case RealValueType:
             case IntValueType:
             case StringValueType:
+            case IdValueType:
                 return s.value as String
                 break
             case TrueBooleanType:
@@ -903,8 +908,8 @@ class PharmMlTagLib {
         return result
     }
 
-    StringBuilder variableAssignments(List<VariableAssignmentType> assignments) {
-        def result = new StringBuilder("\n<h5>Variable assignments</h5>\n")
+    StringBuilder variableAssignments(List<VariableAssignmentType> assignments, String heading) {
+        def result = new StringBuilder("\n${heading}\n")
         assignments.inject(result){r,v ->
             r.append("<p>").append(convertToMathML(v.symbRef.symbIdRef, v.assign)).append("</p>")
         }
@@ -919,7 +924,7 @@ class PharmMlTagLib {
         steps.each { s ->
             result.append("<h4>Estimation Step ${s.oid}</h4>\n")
             if (s.variableAssignment) {
-                result.append(variableAssignments(s.variableAssignment))
+                result.append(variableAssignments(s.variableAssignment, "<h5>Variable assignments</h5>"))
             }
             if (s.objectiveDataSet) {
                 result.append(objectiveDataSet(s.objectiveDataSet))
@@ -935,7 +940,43 @@ class PharmMlTagLib {
     }
 
     StringBuilder objectiveDataSet(DatasetMappingType dataSet) {
-        return new StringBuilder("<h5>Dataset mapping</h5>\n")
+        def result = new StringBuilder("<h5>Dataset mapping</h5>\n")
+        def variableMap = [:]
+        if (dataSet.variableAssignment) {
+            result.append(variableAssignments(dataSet.variableAssignment,
+                        "<span class=\"bold\">Variable assignments</span>"))
+        }
+        dataSet.mapping.each {
+            //keep track of variableMappings so that we know how to name the columns
+            //deal with JAXBElement
+            if (it.value instanceof VariableMappingType) {
+                //TODO handle nested  ColumnRefs recursively
+                variableMap << [ (it.value.columnRef.columnIdRef) : (it.value.symbRef.symbIdRef)]
+            }
+        }
+        def columnOrder = [:]
+        List noTables = dataSet.dataSet.definition.columnOrTable.findAll{it instanceof ColumnDefnType}
+        noTables.each {
+            columnOrder << [ (it.columnNum) : (it.columnId) ]
+        }
+        result.append("\n<table><thead><tr>")
+
+        noTables.inject(result) { r, d ->
+            def key = columnOrder[d.columnNum]
+            println "variableMap[${key}]=${variableMap[key]}"
+            r.append(["<th>", "</th>"].join(variableMap[key] ?: d.columnId))
+        }
+        result.append("</tr></thead><tbody>")
+        dataSet.dataSet.table.row.inject(result) { r, i ->
+            r.append("\n<tr>")
+            def columns = i.scalarOrTable.findAll{ !(it.value instanceof DataSetTableType) }
+            columns.inject(r) { o, td ->
+                o.append(["<td>", "</td>"].join(scalar(td.value)))
+            }
+            r.append("</tr>")
+        }
+        result.append("</tbody></table>\n")
+        return result
     }
 
     StringBuilder paramsToEstimate(ToEstimateType params) {
@@ -991,15 +1032,16 @@ class PharmMlTagLib {
                 if (o.description) {
                     result.append(o.description.value)
                 }
+                result.append("</p>")
                 if (o.property || o.algorithm) {
                     result.append("\n<ul>")
                     o.property.inject(result) { r, p ->
                         r.append("<li>").append(operationProperty(p)).append("</li>")
                     }
-                    result.append("</ul>\n</p>")
+                    result.append("</ul>\n")
                     if (o.algorithm) {
                         result.append("\n<p>Algorithm ").append(o.algorithm.name ? o.algorithm.name.value :
-                                (o.algorithm.definition ? o.algorithm.definition : ""))
+                                (o.algorithm.definition ? o.algorithm.definition : "")).append("</p>\n")
                         if (o.algorithm.property) {
                             result.append("<ul>")
                             o.algorithm.property.inject(result) { r, p ->
@@ -1008,7 +1050,6 @@ class PharmMlTagLib {
                         }
                         result.append("</ul>")
                     }
-                    result.append("</p>")
                 }
             }
             result.append("</div>")
