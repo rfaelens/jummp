@@ -245,33 +245,26 @@ class PharmMlTagLib {
 
     StringBuilder individualParams(List<IndividualParameterType> parameters) {
         def output = new StringBuilder("")
-        parameters.inject(output) { o, i ->
-        	/*if (i.transformation) {
-        		result.append(convertToMathML("Transformation",i.transformation.equation))
-        	}*/
-            if (i.assign) {
-                o.append("<p>")
-                o.append(convertToMathML(i.symbId, i.assign))	
-                o.append("</p>\n")
-            }
-            else if (i.gaussianModel.generalCovariate) {
-                o.append("<p>")
-                o.append(convertToMathML(i.symbId, i.gaussianModel.generalCovariate.assign))	
-                o.append("</p>\n")
-            }
-/*            if (i.randomEffects) {
-            	o.append(randomEffect(i.randomEffects))
-            }*/
-/*            else if (i.gaussianModel.linearCovariate) {
-            	equation=i.gaussianModel.generalCovariate.assign
-            }
-        	if (i.assign) {
-            }
-            else if (i.assign. {
-            	o.append("<p>")
-                o.append(convertToMathML(i.symbId, i.assign))	
-                o.append("</p>\n")
-            }*/
+        parameters.each {
+        	if (it.assign) {
+        		String converted=convertToMathML(it.symbId, it.assign)
+                output.append("<p>")
+        		output.append(converted)
+                output.append("</p>")
+        	}
+        	if (it.gaussianModel) {
+        		if (it.gaussianModel.generalCovariate) {
+        			try
+        			{
+        				String converted=convertToMathML(it.symbId, it.gaussianModel.generalCovariate.assign)
+        				output.append("<p>")
+        				output.append(converted)
+        				output.append("</p>")
+        			}
+        			catch(Exception ignore) {
+        			}
+        		}
+        	}
         }
         return output
     }
@@ -376,6 +369,7 @@ class PharmMlTagLib {
             return
         }
         out << "<h3>Parameter Model</h3>"
+       
         def result = new StringBuilder()
         result.append("<span class=\"bold\">Parameters </span>")
         attrs.parameterModel.each { pm ->
