@@ -221,38 +221,22 @@ class PharmMlTagLib {
         if (!parameters) {
             return outcome
         }
-        boolean first=true;
-        parameters.inject(outcome) { sb, p ->
-            if (!first) {
-                sb.append(", ")
-            }
-            else {
-                first=false;
-            }
-            if (p.assign) {
-                sb.append(convertToMathML(p.symbId, p.assign))
-            }
-            else {
-                sb.append(p.symbId)
-            }
+        outcome.append("<div>")
+        parameters.inject(outcome) { o, p ->
+            String thisParam = p.assign ? convertToMathML(p.symbId, p.assign) : p.symbId
+            o.append(["<span>", "</span>\n"].join(thisParam)).append("&nbsp;")
         }
-        return outcome
+        return outcome.append("</div>")
     }
 
     StringBuilder randomVariables(List<ParameterRandomVariableType> rv) {
         def output = new StringBuilder()
-        boolean first=true;
         rv.inject(output) { o, i ->
             if (i.abstractContinuousUnivariateDistribution) {
-                if (!first) {
-                    o.append(", ")
-                } else {
-                    first=false;
-                }
-                o.append("[")
+                o.append("<div>random variable with distribution ")
                 o.append(distributionAssignment(i.symbId, i.abstractContinuousUnivariateDistribution))
-                o.append(", variability: ").append(i.variabilityReference.symbRef.symbIdRef)
-                o.append("]")
+                o.append(" and variability ").append(i.variabilityReference.symbRef.symbIdRef)
+                o.append("</div>\n")
             }
         }
         return output
@@ -296,9 +280,8 @@ class PharmMlTagLib {
         if (!multipleStructuralModels) {
             def model = attrs.sm[0]
             if (model.simpleParameter) {
-                result.append("<p><span class=\"bold\">Parameters: </span>")
+                result.append("<p class=\"bold\">Parameters: </p>")
                 result.append(simpleParams(model.simpleParameter))
-                result.append("</p>")
             }
         } else {
             sm.each { s ->
@@ -361,9 +344,8 @@ class PharmMlTagLib {
         attrs.covariate.each { c ->
             result.append("<div>")
             if (c.simpleParameter) {
-                result.append("<p><span class=\"bold\">Parameters:</span></p> <p>")
+                result.append("<div><span class=\"bold\">Parameters:</span></div>")
                 result.append(simpleParams(c.simpleParameter))
-                result.append("</p>")
             }
             if (c.covariate) {
                 c.covariate.each {
@@ -422,8 +404,8 @@ class PharmMlTagLib {
             result.append("<h4>Observation error ")
             // the API returns a JAXBElement, not ObservationErrorType
             def obsErr = om.observationError.value
-            result.append(obsErr.symbId).append("</h4>\n<p>")
-            result.append("<span class=\"bold\">Parameters: </span>")
+            result.append(obsErr.symbId).append("</h4>\n")
+            result.append("<p class=\"bold\">Parameters: </p>")
             def simpleParameters = om.commonParameterElement.value.findAll {
                 it instanceof SimpleParameterType
             }
@@ -431,12 +413,11 @@ class PharmMlTagLib {
                 it instanceof ParameterRandomVariableType
             }
             result.append(simpleParams(simpleParameters))
-            String randoms=randomVariables(rv)
+            String randoms = randomVariables(rv)
             if (randoms) {
-                result.append(", ")
                 result.append(randoms)
             }
-            result.append("\n<p>")
+            //result.append("\n<p>")
             if (obsErr.symbol?.value) {
                 result.append(obsErr.symbol.value)
             }
