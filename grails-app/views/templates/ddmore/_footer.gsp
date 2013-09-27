@@ -1,5 +1,6 @@
           <div id="content-bottom">
           <div class="region region-content-bottom">
+          <span>DDMoRe Model Repository Demo September 2013</span>
     
 <div id="block-menu-menu-footer-menu" class="block block-menu footer-menu even">
 
