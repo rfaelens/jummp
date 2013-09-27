@@ -266,7 +266,6 @@ class PharmMlTagLib {
 
     def structuralModel = { attrs ->
         if (!attrs.sm) {
-            println "wtf"
             return
         }
         def result = new StringBuilder("<h3>Structural ")
@@ -280,7 +279,7 @@ class PharmMlTagLib {
         if (!multipleStructuralModels) {
             def model = attrs.sm[0]
             if (model.simpleParameter) {
-                result.append("<p class=\"bold\">Parameters: </p>")
+                result.append("<p class=\"bold\">Parameters </p>")
                 result.append(simpleParams(model.simpleParameter))
             }
         } else {
@@ -344,7 +343,7 @@ class PharmMlTagLib {
         attrs.covariate.each { c ->
             result.append("<div>")
             if (c.simpleParameter) {
-                result.append("<div><span class=\"bold\">Parameters:</span></div>")
+                result.append("<div><span class=\"bold\">Parameters</span></div>")
                 result.append(simpleParams(c.simpleParameter))
             }
             if (c.covariate) {
@@ -405,7 +404,7 @@ class PharmMlTagLib {
             // the API returns a JAXBElement, not ObservationErrorType
             def obsErr = om.observationError.value
             result.append(obsErr.symbId).append("</h4>\n")
-            result.append("<p class=\"bold\">Parameters: </p>")
+            result.append("<span class=\"bold\">Parameters </span>")
             def simpleParameters = om.commonParameterElement.value.findAll {
                 it instanceof SimpleParameterType
             }
@@ -448,7 +447,7 @@ class PharmMlTagLib {
             return result
         }
         if (e.assign) {
-            result.append(convertToMathML(e.symbId, e.assign))
+            result.append("<p>").append(convertToMathML(e.symbId, e.assign)).append("</p>")
         }
         return result
     }
