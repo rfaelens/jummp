@@ -30,7 +30,7 @@
    </div>
 
     <div id="modelDefinition">
-        <pharmml:structuralModel sm="${structuralModel}" />
+        <pharmml:structuralModel sm="${structuralModel}" iv="${independentVar}"/>
 
         <pharmml:variabilityModel variabilityModel="${variabilityModel}"/>
 

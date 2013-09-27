@@ -2,6 +2,8 @@ package net.biomodels.jummp.plugins.pharmml
 
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
 import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
+import eu.ddmore.libpharmml.dom.commontypes.FuncParameterDefinitionType
+import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.IdValueType
 import eu.ddmore.libpharmml.dom.commontypes.IntValueType
 import eu.ddmore.libpharmml.dom.commontypes.RealValueType
@@ -12,6 +14,7 @@ import eu.ddmore.libpharmml.dom.commontypes.StringValueType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
 import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
+import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
 import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
@@ -20,14 +23,15 @@ import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
+import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariableType
 import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
 import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
 import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
+import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
@@ -40,7 +44,6 @@ import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
 import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PieceSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
-import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
 
 class PharmMlTagLib {
     static namespace = "pharmml"
@@ -183,8 +186,9 @@ class PharmMlTagLib {
         return builder.toString()
     }
 
-    private String convertToMathML(DerivativeVariableType derivative) {
-        String derivTerm="d${derivative.symbId}<DIVIDEDBY>d${derivative.independentVariable.symbRef.symbId}"
+    private String convertToMathML(DerivativeVariableType derivative, def iv) {
+        String independentVariable = derivative.independentVariable?.symbRef?.symbIdRef ?: (iv ?: "t")
+        String derivTerm="d${derivative.symbId}<DIVIDEDBY>d${independentVariable}"
         return convertToMathML(derivTerm, derivative.getAssign())
     }
 
@@ -246,31 +250,26 @@ class PharmMlTagLib {
     StringBuilder individualParams(List<IndividualParameterType> parameters) {
         def output = new StringBuilder("")
         parameters.each {
-        	if (it.assign) {
-        		String converted=convertToMathML(it.symbId, it.assign)
+            if (it.assign) {
+                String converted=convertToMathML(it.symbId, it.assign)
                 output.append("<p>")
-        		output.append(converted)
+                output.append(converted)
                 output.append("</p>")
-        	}
-        	if (it.gaussianModel) {
-        		if (it.gaussianModel.generalCovariate) {
-        			try
-        			{
-        				String converted=convertToMathML(it.symbId, it.gaussianModel.generalCovariate.assign)
-        				output.append("<p>")
-        				output.append(converted)
-        				output.append("</p>")
-        			}
-        			catch(Exception ignore) {
-        			}
-        		}
-        	}
+            }
+            if (it.gaussianModel) {
+                if (it.gaussianModel.generalCovariate) {
+                    try {
+                        String converted=convertToMathML(it.symbId, it.gaussianModel.generalCovariate.assign)
+                        output.append("<p>")
+                        output.append(converted)
+                        output.append("</p>")
+                    } catch(Exception ignore) { }
+                }
+            }
         }
         return output
     }
 
-    
-    
     def functionDefinitions = { attrs ->
         if (!attrs.functionDefs) {
             out << "No function definitions were found."
@@ -288,7 +287,7 @@ class PharmMlTagLib {
             }
             //should not be null by now
             assert !!rightHandSide
-            result.append("<p>${convertToMathML(d.symbId, d.getFunctionArgument(), rightHandSide)}</p>")
+            result.append("<div>${convertToMathML(d.symbId, d.getFunctionArgument(), rightHandSide)}</div>")
         }
         out << result.toString()
     }
@@ -311,6 +310,11 @@ class PharmMlTagLib {
                 result.append("<p class=\"bold\">Parameters </p>")
                 result.append(simpleParams(model.simpleParameter))
             }
+            if (model.commonVariable) {
+                result.append("<p class=\"bold\">Variable definitions</p>")
+                result.append(["<div>", "</div>\n"].join(
+                    commonVariables(model.commonVariable, attrs.iv).toString()))
+            }
         } else {
             sm.each { s ->
                 result.append("<h4>").append(s.name?.value ?: s.blkId).append("</h4>\n")
@@ -318,6 +322,42 @@ class PharmMlTagLib {
             }
         }
         out << result.toString()
+    }
+
+    StringBuilder commonVariables(List<JAXBElement> vars, def indepVar) {
+        println "iv:${indepVar}"
+        def result = new StringBuilder()
+        if (!vars) {
+            return result
+        }
+        def initialConditions = []
+        vars.each { v ->
+            switch(v.value) {
+                case DerivativeVariableType:
+                    if (v.value.initialCondition) {
+                        initialConditions << v.value.initialCondition
+                    }
+                    result.append("<div>").append(convertToMathML(v.value, indepVar)).append("</div>")
+                    break
+                case VariableDefinitionType:
+                    break
+                case FunctionDefinitionType:
+                    def fd = v.value
+                    String funcDefn = ["<div>", "</div>\n"].join(
+                                convertToMathML(fd.symbId, fd.functionArgument, fd))
+                    result.append(funcDefn)
+                    break
+                case FuncParameterDefinitionType:
+                    break
+                default:
+                    result.append("<div>").append(v.value.symbId).append("</div>")
+                    break
+            }
+        }
+        if (initialConditions) {
+            println "initial conditions"
+        }
+        return result
     }
 
     def variabilityModel = { attrs ->
@@ -363,42 +403,40 @@ class PharmMlTagLib {
         return result
     }
 
-    
     def parameterModel = { attrs ->
         if (!attrs.parameterModel) {
             return
         }
         out << "<h3>Parameter Model</h3>"
-       
+
         def result = new StringBuilder()
         result.append("<span class=\"bold\">Parameters </span>")
         attrs.parameterModel.each { pm ->
-        	result.append("<p>")
-        	def simpleParameters = pm.commonParameterElement.value.findAll {
-        		it instanceof SimpleParameterType
-        	}
-        	def rv = pm.commonParameterElement.value.findAll {
-        		it instanceof ParameterRandomVariableType
-        	}
-        	def individualParameters = pm.commonParameterElement.value.findAll {
-        		it instanceof IndividualParameterType
-        	}
-        	result.append(simpleParams(simpleParameters))
-        	String randoms=randomVariables(rv)
-        	if (randoms) {
-        		result.append(randoms)
-        	}
-        	String individuals=individualParams(individualParameters)
-        	if (individuals) {
-        		result.append(individuals)
-        	}
-        	result.append("</p>")
+               result.append("<p>")
+               def simpleParameters = pm.commonParameterElement.value.findAll {
+                       it instanceof SimpleParameterType
+               }
+               def rv = pm.commonParameterElement.value.findAll {
+                       it instanceof ParameterRandomVariableType
+               }
+               def individualParameters = pm.commonParameterElement.value.findAll {
+                       it instanceof IndividualParameterType
+               }
+               result.append(simpleParams(simpleParameters))
+               String randoms=randomVariables(rv)
+               if (randoms) {
+                       result.append(randoms)
+               }
+               String individuals=individualParams(individualParameters)
+               if (individuals) {
+                       result.append(individuals)
+               }
+               result.append("</p>")
         }
-        
+
         out << result.toString()
     }
-    
-    
+
     def covariates = { attrs ->
         if (!attrs.covariate) {
             return
@@ -519,7 +557,7 @@ class PharmMlTagLib {
 
     def randomEffect = { re ->
         if (!re) {
-            return "No random effect defined.\n"
+            return ""
         }
         return distribution(re.distribution[0])
     }
