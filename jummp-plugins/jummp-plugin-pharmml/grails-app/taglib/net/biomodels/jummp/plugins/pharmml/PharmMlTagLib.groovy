@@ -40,6 +40,7 @@ import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
 import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PieceSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
+import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
 
 class PharmMlTagLib {
     static namespace = "pharmml"
@@ -242,6 +243,41 @@ class PharmMlTagLib {
         return output
     }
 
+    StringBuilder individualParams(List<IndividualParameterType> parameters) {
+        def output = new StringBuilder("")
+        parameters.inject(output) { o, i ->
+        	/*if (i.transformation) {
+        		result.append(convertToMathML("Transformation",i.transformation.equation))
+        	}*/
+            if (i.assign) {
+                o.append("<p>")
+                o.append(convertToMathML(i.symbId, i.assign))	
+                o.append("</p>\n")
+            }
+            else if (i.gaussianModel.generalCovariate) {
+                o.append("<p>")
+                o.append(convertToMathML(i.symbId, i.gaussianModel.generalCovariate.assign))	
+                o.append("</p>\n")
+            }
+/*            if (i.randomEffects) {
+            	o.append(randomEffect(i.randomEffects))
+            }*/
+/*            else if (i.gaussianModel.linearCovariate) {
+            	equation=i.gaussianModel.generalCovariate.assign
+            }
+        	if (i.assign) {
+            }
+            else if (i.assign. {
+            	o.append("<p>")
+                o.append(convertToMathML(i.symbId, i.assign))	
+                o.append("</p>\n")
+            }*/
+        }
+        return output
+    }
+
+    
+    
     def functionDefinitions = { attrs ->
         if (!attrs.functionDefs) {
             out << "No function definitions were found."
@@ -334,6 +370,41 @@ class PharmMlTagLib {
         return result
     }
 
+    
+    def parameterModel = { attrs ->
+        if (!attrs.parameterModel) {
+            return
+        }
+        out << "<h3>Parameter Model</h3>"
+        def result = new StringBuilder()
+        result.append("<span class=\"bold\">Parameters </span>")
+        attrs.parameterModel.each { pm ->
+        	result.append("<p>")
+        	def simpleParameters = pm.commonParameterElement.value.findAll {
+        		it instanceof SimpleParameterType
+        	}
+        	def rv = pm.commonParameterElement.value.findAll {
+        		it instanceof ParameterRandomVariableType
+        	}
+        	def individualParameters = pm.commonParameterElement.value.findAll {
+        		it instanceof IndividualParameterType
+        	}
+        	result.append(simpleParams(simpleParameters))
+        	String randoms=randomVariables(rv)
+        	if (randoms) {
+        		result.append(randoms)
+        	}
+        	String individuals=individualParams(individualParameters)
+        	if (individuals) {
+        		result.append(individuals)
+        	}
+        	result.append("</p>")
+        }
+        
+        out << result.toString()
+    }
+    
+    
     def covariates = { attrs ->
         if (!attrs.covariate) {
             return
@@ -454,7 +525,7 @@ class PharmMlTagLib {
 
     def randomEffect = { re ->
         if (!re) {
-            return "No random effect defined in the observation model.\n"
+            return "No random effect defined.\n"
         }
         return distribution(re.distribution[0])
     }

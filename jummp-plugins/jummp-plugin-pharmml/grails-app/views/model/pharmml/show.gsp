@@ -32,18 +32,11 @@
     <div id="modelDefinition">
         <pharmml:structuralModel sm="${structuralModel}" />
 
-       <pharmml:variabilityModel variabilityModel="${variabilityModel}"/>
+        <pharmml:variabilityModel variabilityModel="${variabilityModel}"/>
 
         <pharmml:covariates covariate="${covariateModel}" />
 
-        <h3>Parameter Model</h3>
-        <table>
-            <tr>
-                <td class="key"></td>
-                <td class="value">
-                </td>
-            </tr>
-        </table>
+        <pharmml:parameterModel parameterModel="${parameterModel}" />
 
         <pharmml:observations observations="${observationModel}"/>
  </div>
