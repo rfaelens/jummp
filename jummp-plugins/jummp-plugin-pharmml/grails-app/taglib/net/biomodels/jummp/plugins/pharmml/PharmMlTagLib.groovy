@@ -22,8 +22,10 @@ import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
 import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
 import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
+import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
+import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
@@ -117,7 +119,7 @@ class PharmMlTagLib {
         List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equation).reverse()
         List<String> stack=new LinkedList<String>()
         symbols.each {
-               stack.push(it)
+           stack.push(it)
         }
         prefixToInfix(builder, stack)
     }
@@ -138,44 +140,58 @@ class PharmMlTagLib {
         return builder.toString()
     }
 
+    private String convertToMathML(String lhs, ScalarRhs srhs) {
+         if (srhs.equation) {
+            return convertToMathML(lhs, srhs.equation)
+        }
+        if (srhs.symbRef) {
+            return convertToMathML(lhs, srhs.symbRef)
+        }
+        StringBuilder result = new StringBuilder("<math display='inline'><mstyle>")
+        result.append(oprand(lhs)).append(op("="))
+        if (srhs.scalar) {
+            result.append(oprand(scalar(srhs.scalar.value)))
+        }
+        return result.append("</mstyle></math>").toString()
+    }
+
     private String convertToMathML(String lhs, Rhs rhs) {
         if (rhs.equation) {
-                return convertToMathML(lhs, rhs.equation)
+            return convertToMathML(lhs, rhs.equation)
         }
         if (rhs.getSymbRef()) {
-                return convertToMathML(lhs, rhs.getSymbRef())
+            return convertToMathML(lhs, rhs.getSymbRef())
         }
         StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
         builder.append(oprand(lhs))
         builder.append(op("="))
         if (rhs.getScalar()) {
-                builder.append(oprand(scalar(rhs.scalar.value)))
+            builder.append(oprand(scalar(rhs.scalar.value)))
         }
         else if (r.getSequence()) {
-                builder.append(sequenceAsMathML(r.sequence))
+            builder.append(sequenceAsMathML(r.sequence))
         }
         else if (r.getVector()) {
-                builder.append(vectorAsMathML(r))
+            builder.append(vectorAsMathML(r))
         }
         builder.append("</mstyle></math>")
         return builder.toString()
     }
-    
+
     private String convertToMathML(DerivativeVariableType derivative) {
-    	    String derivTerm="d${derivative.symbId}<DIVIDEDBY>d${derivative.independentVariable.symbRef.symbId}"
-    	    return convertToMathML(derivTerm, derivative.getAssign())
+        String derivTerm="d${derivative.symbId}<DIVIDEDBY>d${derivative.independentVariable.symbRef.symbId}"
+        return convertToMathML(derivTerm, derivative.getAssign())
     }
 
-    
     private String convertToMathML(String lhs, List arguments, def equation) {
         StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
         builder.append(oprand(lhs))
         builder.append(op("("))
         for (int i=0; i<arguments.size(); i++) {
-                builder.append(oprand(arguments.get(i).symbId))
-                if (i<arguments.size()-1) {
-                        builder.append(op(","))
-                }
+            builder.append(oprand(arguments.get(i).symbId))
+            if (i<arguments.size()-1) {
+                builder.append(op(","))
+            }
         }
         builder.append(op(")"))
         builder.append(op("="))
@@ -189,11 +205,11 @@ class PharmMlTagLib {
     }
 
     private String oprand(String o) {
-    	    if (o.contains("<DIVIDEDBY>")) {
-    	    	    String[] parts=o.split("<DIVIDEDBY>")
-    	    	    return "<mfrac><mi>${parts[0]}</mi><mi>${parts[1]}</mi></mfrac>"
-    	    }
-    	    return "<mi>${o}</mi>"
+        if (o.contains("<DIVIDEDBY>")) {
+            String[] parts=o.split("<DIVIDEDBY>")
+            return "<mfrac><mi>${parts[0]}</mi><mi>${parts[1]}</mi></mfrac>"
+        }
+        return "<mi>${o}</mi>"
     }
 
     StringBuilder simpleParams(List<SimpleParameterType> parameters) {
@@ -333,7 +349,7 @@ class PharmMlTagLib {
         result.append("<span class=\"bold\">Categorical covariate ${symbId}</span><p>\n")
         c.category.inject(result) { r, categ ->
             if (categ.probability) {
-            	r.append(distributionAssignment(symbId,categ.probability))
+                r.append(distributionAssignment(symbId,categ.probability))
             }
         }
         result.append("</p>\n")
@@ -384,8 +400,8 @@ class PharmMlTagLib {
             result.append(simpleParams(simpleParameters))
             String randoms=randomVariables(rv)
             if (randoms) {
-            	    result.append(", ")
-            	    result.append(randoms)
+                result.append(", ")
+                result.append(randoms)
             }
             result.append("\n<p>")
             if (obsErr.symbol?.value) {
@@ -431,13 +447,13 @@ class PharmMlTagLib {
     }
 
     def distributionAssignment = { l, d->
-    	    StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
-    	    builder.append(oprand(l))
-    	    builder.append(op("&sim;"))
-    	    builder.append(distribution(d))
-    	    builder.append("</mstyle></math>")
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(l))
+        builder.append(op("&sim;"))
+        builder.append(distribution(d))
+        builder.append("</mstyle></math>")
     }
-    
+
     def distribution = { d ->
         if (!d) {
             return
@@ -523,12 +539,12 @@ class PharmMlTagLib {
     }
 
     StringBuilder scalarRhs = { r, text ->
-        if (r.getScalar()) {
-            text.append(scalar(r))
-        } else if (r.getString()) {
-            text.append(string(r))
-        } else if (r.getVar()) {
-            text.append(variable(r))
+        if (r.scalar) {
+            text.append(scalar(r.scalar.value))
+        } else if (r.equation) {
+            text.append(convertToMathML(r.equation))
+        } else if (r.symbRef) {
+            text.append(r.symbRef.symbIdRef)
         }
         return text
     }
@@ -604,7 +620,6 @@ class PharmMlTagLib {
         result.append(op("]"))
     }
 
-    
     StringBuilder vector = { v ->
         def result = new StringBuilder()
         if (!v) {
@@ -909,11 +924,11 @@ class PharmMlTagLib {
             if (s.objectiveDataSet) {
                 result.append(objectiveDataSet(s.objectiveDataSet))
             }
+            if (s.parametersToEstimate) {
+                result.append(paramsToEstimate(s.parametersToEstimate))
+            }
             if (s.operation) {
                 result.append(estimationOps(s.operation))
-            }
-            if (s.parametersToEstimate) {
-                result.append(" ")
             }
         }
         return result
@@ -921,6 +936,38 @@ class PharmMlTagLib {
 
     StringBuilder objectiveDataSet(DatasetMappingType dataSet) {
         return new StringBuilder("<h5>Dataset mapping</h5>\n")
+    }
+
+    StringBuilder paramsToEstimate(ToEstimateType params) {
+        def result  = new StringBuilder("<div><h5>Estimation parameters</h5>\n")
+        def fixedParams = params.parameterEstimation.findAll{ it.initialEstimate.fixed }
+        if (fixedParams) {
+            result.append(estimParamsWithInitialEstimate(fixedParams, "Fixed parameters"))
+        }
+        def estimatedParams = params.parameterEstimation - fixedParams
+        if (estimatedParams) {
+            result.append(estimParamsWithInitialEstimate(estimatedParams, "Initial estimates for non-fixed parameters"))
+        }
+        return result.append("</div>")
+    }
+
+    StringBuilder estimParamsWithInitialEstimate(List<ParameterEstimateType> params, String heading) {
+        def result = new StringBuilder("<p class=\"bold\">${heading}\n")
+        if (params.size() > 1) {
+            result.append("<ul>")
+            params.inject(result) { r, p ->
+                r.append("<li>")
+                //how do we display lowerBound and upperBound?
+                r.append(convertToMathML(p.symbRef.symbIdRef, p.initialEstimate))
+                r.append("</li>\n")
+            }
+            result.append("</ul></p>\n")
+        } else {
+            result.append("&nbsp;<span>")
+            result.append(convertToMathML(params[0].symbRef.symbIdRef, params[0].initialEstimate))
+            result.append("</span></p>\n")
+        }
+        return result
     }
 
     StringBuilder estimationOps = { operations ->
@@ -937,7 +984,6 @@ class PharmMlTagLib {
         operations.each { o ->
             result.append("<div><span class=\"bold\">")
             result.append(o.order).append(") ")
-            println o.opType.value()
             result.append(o.name ? o.name.value : operationMeaningMap[o.opType.value()])
             result.append("</span>\n")
             if (o.description || o.algorithm || o.property) {
