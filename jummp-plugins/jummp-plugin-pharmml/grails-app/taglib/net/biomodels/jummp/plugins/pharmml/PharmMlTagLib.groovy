@@ -142,7 +142,7 @@ class PharmMlTagLib {
     private String convertToMathML(String lhs, def equation) {
         StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
         builder.append(oprand(lhs))
-        builder.append(op("="))
+
         convertEquation(equation, builder)
         builder.append("</mstyle></math>")
         return builder.toString()
@@ -238,9 +238,9 @@ class PharmMlTagLib {
         def output = new StringBuilder()
         rv.inject(output) { o, i ->
             if (i.abstractContinuousUnivariateDistribution) {
-                o.append("<div>random variable with distribution ")
+                o.append("<div>")
                 o.append(distributionAssignment(i.symbId, i.abstractContinuousUnivariateDistribution))
-                o.append(" and variability ").append(i.variabilityReference.symbRef.symbIdRef)
+                o.append(" - ").append(i.variabilityReference.symbRef.symbIdRef)
                 o.append("</div>\n")
             }
         }
@@ -368,7 +368,7 @@ class PharmMlTagLib {
         if (!attrs.variabilityModel) {
             return
         }
-        def result = new StringBuilder("<h3>Variability Model</h3>\n<table>\n<thead><tr>")
+        def result = new StringBuilder("<h3>Variability Model</h3>\n<table class='views-table cols-4'>\n<thead><tr>")
         result.append("<th>Identifier</th><th>Name</th><th>Levels</th><th>Type</th></tr>")
         result.append("\n</thead>\n<tbody>\n")
         attrs.variabilityModel.each { m ->
