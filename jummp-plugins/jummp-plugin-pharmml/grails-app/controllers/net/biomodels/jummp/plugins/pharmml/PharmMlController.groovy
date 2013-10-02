@@ -40,7 +40,8 @@ class PharmMlController {
                 modellingSteps: pharmMlService.getCommonModellingSteps(steps),
                 stepDeps: pharmMlService.getStepDependencies(steps),
                 flashMessage: params.flashMessage,
-                showPublishOption:params.showPublishOption, 
+                canUpdate:params.canUpdate,
+		        showPublishOption:params.showPublishOption, 
     	        showUnpublishOption:params.showUnpublishOption
     		]
         )

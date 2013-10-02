@@ -17,7 +17,8 @@ class CombineController {
     		 authors: revs.last().model.creators,
     		 allRevs: revs,
     		 flashMessage: params.flashMessage,
-    		 showPublishOption:params.showPublishOption, 
+    		 canUpdate:params.canUpdate,
+		     showPublishOption:params.showPublishOption, 
     	     showUnpublishOption:params.showUnpublishOption
     		]
     		)

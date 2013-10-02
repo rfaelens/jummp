@@ -206,7 +206,9 @@
     	        <div style="float:right;margin-top:10px">
     	        <div id="modeltoolbar" <%--class="ui-widget-header ui-corner-all"--%>>
     	        		<button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.id)}')">Download</button>
-    	        		<button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}')">Update</button>
+    	        		<g:if test="${canUpdate=="true"}">
+    	        			<button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}')">Update</button>
+    	        		</g:if>
     	        		<g:if test="${showPublishOption=="true"}">
     	        			<button id="publish" onclick="return openPage('${g.createLink(controller: 'model', action: 'publish', id: revision.id)}')">${showPublishOption}</button>
     	        		</g:if>

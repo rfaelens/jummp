@@ -51,12 +51,14 @@ class ModelController {
     	    ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
     	    boolean showPublishOption=false
     	    boolean showUnpublishOption=false
+    	    boolean canUpdate=modelDelegateService.canAddRevision(model.id)
     	    if (model.state==ModelState.UNPUBLISHED) {
     	    	showPublishOption=true
     	    }
-    	    else if (modelDelegateService.canAddRevision(model.id)) {
+    	    else if (canUpdate) {
     	    	showUnpublishOption=true
     	    }
+    	    
     	    String flashMessage=""
     	    if (flash.now["giveMessage"]) {
     	    	    flashMessage=flash.now["giveMessage"]
@@ -64,7 +66,8 @@ class ModelController {
     	    forward controller:modelFileFormatService.getPluginForFormat(model.format), 
     	    		action:"show", 
     	    		id: params.id, 
-    	    		params:[flashMessage:flashMessage, 
+    	    		params:[flashMessage:flashMessage,
+    	    				canUpdate:canUpdate,
     	    				showPublishOption:showPublishOption, 
     	    				showUnpublishOption:showUnpublishOption]
     }
