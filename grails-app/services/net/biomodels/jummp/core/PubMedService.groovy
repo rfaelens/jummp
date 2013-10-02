@@ -37,7 +37,7 @@ class PubMedService {
     private Publication fetchPublicationData(String id) throws JummpException {
         URL url
         try {
-            url = new URL("http://www.ebi.ac.uk/citexplore/viewXML.do?externalId=${id}&dataSource=MED")
+            url = new URL("http://www.ebi.ac.uk/europepmc/webservices/rest/search/query=ext_id:${id}%20src:med")
         } catch (MalformedURLException e) {
             // TODO: throw a specific exception
             throw new JummpException("PubMed URL is malformed", e)

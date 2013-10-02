@@ -11,7 +11,7 @@ import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.model.RepositoryFile
 import org.perf4j.aop.Profiled
 import org.apache.commons.io.FilenameUtils
-
+import net.biomodels.jummp.core.model.
 /**
  * Service that provides model building functionality to a wizard-style model
  * import or update implemented in the web app. It is currently kept in core as
@@ -152,6 +152,20 @@ class SubmissionService {
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
         protected abstract void createTransportObjects(Map<String,Object> workingMemory);
+        
+        protected boolean updatePubs(MTC model, String publinkType, String publink) {
+        	boolean refreshPublication=false
+        	if (!model.publication) {
+        		model.publication=new PublicationTransportCommand()
+        		refreshPublication=true;
+        	}
+        	else if (model.publication.link!=publink || model.publication.linkProvider.toString()!=publinkType) {
+        		refreshPublication=true;
+        	}
+        	model.publication.link=publink
+        	model.publication.linkProvider=PublicationLinkProvider.valueOf(publinkType)
+        	return refreshPublication
+        }
 
         protected String getModelNameFromFiles(List<File> mainFiles) {
         	StringBuilder name=new StringBuilder()
@@ -247,7 +261,14 @@ class SubmissionService {
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          * @param modifications     a Map containing the user's modifications to the model information we extracted.
          */
-        abstract void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications);
+        void updateFromSummary(Map<String,Object> workingMemory, Map<String,String> modifications) {
+        	if (modifications.containsKey("PubLinkProvider")) {
+        		workingMemory.put("RetrievePubDetails", 
+        							updatePubs(workingMemory.get("ModelTC") as MTC, 
+        									   modifications.get("PubLinkProvider"), 
+        									   modifications.get("PubLink")))
+        	}
+        }
 
         /**
          * Purpose submit files, remove intermediate files from disk
@@ -416,17 +437,6 @@ class SubmissionService {
         }
 
         /**
-         * Implementation of @link{StateMachineStrategy#updateRevisionComments(Map workingMemory, Map modifications)}
-         * This method is final so that subclasses can not alter its behaviour.
-         *
-         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
-         * @param modifications     a Map containing the user's modifications to the model information we extracted.
-         */
-        final void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {
-            // does nothing
-        }
-
-        /**
          * Purpose Saves the model in the database and repository
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
@@ -560,8 +570,9 @@ class SubmissionService {
          * @param modifications     the revision comments (and any other info to be updated)
          */
         @Profiled(tag = "submissionService.NewRevisionStateMachine.updateRevisionComments")
-        void updateRevisionComments(Map<String,Object> workingMemory, Map<String,String> modifications) {
-            RTC revision=workingMemory.get("RevisionTC") as RTC
+        void updateFromSummary(Map<String,Object> workingMemory, Map<String,String> modifications) {
+            super.updateFromSummary(workingMemory, modifications)
+        	RTC revision=workingMemory.get("RevisionTC") as RTC
             revision.comment=modifications.get("RevisionComments")
         }
 

@@ -358,7 +358,11 @@ class ModelController {
                 else {
                     modifications.put("RevisionComments", "Model revised without commit message")
                 }
-                submissionService.updateRevisionComments(flow.workingMemory, modifications)
+                if (params.PubLinkProvider && params.PublicationLink) {
+                	modifications.put("PubLinkProvider",params.PubLinkProvider) 
+                	modifications.put("PubLink",params.PublicationLink) 
+                }
+                submissionService.updateFromSummary(flow.workingMemory, modifications)
             }.to "saveModel"
             on("Cancel").to "cleanUpAndTerminate"
             //on("Back"){}.to "displayModelInfo" //To be set back when model editing is enabled
