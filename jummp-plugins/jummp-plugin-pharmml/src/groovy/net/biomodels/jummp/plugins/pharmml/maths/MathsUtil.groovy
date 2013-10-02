@@ -19,7 +19,7 @@ import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
 class MathsUtil {
 	private static def pharmMap = [ "plus":"+",
 					"minus":"-",
-					"times":" &InvisibleTimes;",
+					"times":" &times;",
 					"power":"^",
 					"lt": "&lt;",
 					"leq": "&le;",
