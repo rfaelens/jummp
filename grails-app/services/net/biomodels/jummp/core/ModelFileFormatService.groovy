@@ -31,14 +31,13 @@ class ModelFileFormatService {
     def grailsApplication
 
     private Map<String,String> getServices() {
-    	    grailsApplication.mainContext.getBean("modelFileFormatConfig").getServices()
+        grailsApplication.mainContext.getBean("modelFileFormatConfig").getServices()
     }
 
     private Map<String,String> getControllers() {
-    	    grailsApplication.mainContext.getBean("modelFileFormatConfig").getControllers()
+        grailsApplication.mainContext.getBean("modelFileFormatConfig").getControllers()
     }
 
-    
     /**
      * Extracts the format of the supplied @p modelFiles.
      * Returns the default ModelFormat representation with an empty formatVersion, since this is expected to exist 
@@ -172,15 +171,15 @@ class ModelFileFormatService {
     }
 
     /**
-     * Retrieves the content of a @p revisiontransportcommand to be indexed by the search engine  
+     * Retrieves the content of a @p revisiontransportcommand to be indexed by the search engine
      * @param revision the revision from which content to be indexed is extracted
      * @return The content to be indexed in Lucene
      */
     String getSearchIndexingContent(RevisionTransportCommand revision) {
-    	FileFormatService service = serviceForFormat(revision?.format)
+        FileFormatService service = serviceForFormat(revision?.format)
         return service ? service.getSearchIndexingContent(revision) : ""
     }
-    
+
     /**
      * Retrieves all annotation URNs through the service responsible for the format used
      * by the @p revision.
@@ -212,16 +211,16 @@ class ModelFileFormatService {
     }
 
     /**
-     * Used to select the templates used to display the model of the @p format provided. 
+     * Used to select the templates used to display the model of the @p format provided.
      * The convention is to place the templates inside views/model/"uniquelabel". The uniquelabel
      * is specified by the format plugin during registration.
      * @param rev The Revision for which all pubmed annotations should be retrieved
      * @return The folder where template for the model display can be found
      */
     String getPluginForFormat(final ModelFormatTransportCommand format) {
-    	    return getControllers().get(format.identifier)
+        return getControllers().get(format.identifier)
     }
-    
+
     /**
      * Helper function to get the proper service for @p format.
      * @param format The ModelFormatTransportCommand/ModelFormat identifier for which the service should be returned.
@@ -229,7 +228,7 @@ class ModelFileFormatService {
      */
     private FileFormatService serviceForFormat(final def format) {
         if (format) {
-            Map<String,String> services=getServices() 
+            Map<String,String> services=getServices()
             if (services.containsKey(format.identifier)) {
                 return grailsApplication.mainContext.getBean((String)services.getAt(format.identifier))
             }

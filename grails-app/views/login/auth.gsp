@@ -18,7 +18,7 @@
                                 </label>
                         </td>
                         <td>
-                        	<input type='text' name='j_username' id='username'/>
+                        	<input type='text' name='j_username' id='username' autocomplete="on"/>
                         </td>
                     </tr>
                     <tr>
@@ -28,7 +28,7 @@
                                 </label>
                         </td>
                     	<td>
-                    		<input type='password' name='j_password' id='password'/>
+                    		<input type='password' name='j_password' id='password' autocomplete="on"/>
                     	</td>
                    </tr>
                     <tr>

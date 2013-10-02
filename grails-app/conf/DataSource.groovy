@@ -71,7 +71,7 @@ hibernate {
 environments {
     development {
         dataSource {
-            dbCreate = databaseConfig.jummp.database.update // one of 'create', 'create-drop','update'
+            dbCreate = databaseConfig.jummp.database.dbCreate // one of 'create', 'create-drop','update'
             url = databaseConfig.jummp.database.url
         }
     }
