@@ -160,8 +160,33 @@
 					$(".flash").fadeOut("slow", function () {
 							$(".flash").remove();
 					}); }, 4000);
+		
+			$( "#download" ).button({
+					text:false,
+					icons: {
+						primary:"ui-icon-arrowthickstop-1-s"
+					}
+			});
+			$( "#update" ).button({
+					text:false,
+					icons: {
+						primary:"ui-icon-wrench"
+					}
+			});
+			$( "#publish" ).button({
+					text:false,
+					icons: {
+						primary:"ui-icon-unlocked"
+					}
+			});
 		});
 	
+	</script>
+	<script>
+		function openPage(loc) 
+		{
+			window.location.href = loc;
+		}
 	</script>
 	<g:layoutHead/>
     </head>
@@ -171,11 +196,20 @@
 	    		<div class='flash'>${flashMessage}</div>
 	    	</g:if>
     	        <h2 style="float: left;">${revision.model.name}</h2>
-        	<a class="submit" title="Update Model" href="${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}">Update</a> 	
+    	        <div style="float:right;">
+    	        <div id="modeltoolbar" class="ui-widget-header ui-corner-all">
+    	        		<button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.id)}')">Download</button>
+    	        		<button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}')">Update</button>
+    	        		<button id="publish" onclick="return openPage('${g.createLink(controller: 'model', action: 'publish', id: revision.id)}')">Publish</button>
+    	         </div>
+    	         </div>
+   
+    	        <%--        <a class="submit" title="Update Model" href="${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}">Update</a> 	
         	<a class="submit" title="Download Model" href="${g.createLink(controller: 'model', action: 'download', id: revision.id)}">Download</a> 	
-	</div>
+	 --%></div>
     	<div id="tablewrapper">
-	<div id="tabs">
+	
+    	<div id="tabs">
 	  <ul>
 	    <li><a href="#Overview">Overview</a></li>
 	    <li><a href="#Files">Files</a></li>

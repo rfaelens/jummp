@@ -1625,6 +1625,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
         aclUtilService.addPermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
+        revision.model.state=ModelState.PUBLISHED
+        revision.model.save(flush:true)
     }
 
     /**

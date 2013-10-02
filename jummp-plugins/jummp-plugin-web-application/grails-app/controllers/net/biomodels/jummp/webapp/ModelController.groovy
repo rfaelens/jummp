@@ -45,24 +45,6 @@ class ModelController {
     }
     
     
-    //def mathsTest = { will disappear if all goes well.
-    /*	    String maths='''<Equation xmlns="http://www.pharmml.org/2013/03/Maths"/>
-<Binop op="times">
-<Binop op="minus">
-<ct:Real>9</ct:Real>
-<ct:Real>5</ct:Real>
-</Binop>
-<ct:Int>2</ct:Int>
-</Binop>
-</Equation>'''
-	    List<MathsSymbol> symbols;
-    	    if (params.maths) {
-    	    	    symbols=MathsUtil.convertToSymbols(params.maths as EquationType).reverse()
-    	    }
-    	    
-    	    [inputString: "Passed equation object: "+params.maths.inspect(), maths:convertToMathML(symbols)]*/
-    //}
-    
     def show = {
     	    ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
     	    String flashMessage=""
@@ -70,6 +52,13 @@ class ModelController {
     	    	    flashMessage=flash.now["giveMessage"]
     	    }
     	    forward controller:modelFileFormatService.getPluginForFormat(model.format), action:"show", id: params.id, params:[flashMessage:flashMessage]
+    }
+    
+    def publish = {
+    	   def rev=new RevisionTransportCommand(id: params.id as int)
+    	   modelDelegateService.publishModelRevision(rev)
+    	   redirect(action: "showWithMessage", id: modelDelegateService.getRevisionDetails(rev).model.id, 
+    	            params: [flashMessage:"Model has been published."])
     }
 
     @Secured(["isAuthenticated()"])

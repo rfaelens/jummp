@@ -88,3 +88,13 @@ background-color: #fff;
 font-size:20px;-moz-border-radius: 6px;-webkit-border-radius: 6px;
 color:brown;
 }
+.ui-menu { width: 150px; }
+#modeltoolbar {
+    padding: 4px;
+    display: inline-block;
+  }
+  /* support: IE7 */
+  *+html #modeltoolbar {
+    display: inline;
+  }
+  </style>
