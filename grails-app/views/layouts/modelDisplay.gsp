@@ -210,10 +210,10 @@
     	        			<button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}')">Update</button>
     	        		</g:if>
     	        		<g:if test="${showPublishOption=="true"}">
-    	        			<button id="publish" onclick="return openPage('${g.createLink(controller: 'model', action: 'publish', id: revision.id)}')">${showPublishOption}</button>
+    	        			<button id="publish" onclick="return openPage('${g.createLink(controller: 'model', action: 'publish', id: revision.id)}')">Publish</button>
     	        		</g:if>
     	        		<g:if test="${showUnpublishOption=="true"}">
-    	        			<button id="unpublish" onclick="return openPage('${g.createLink(controller: 'model', action: 'unpublish', id: revision.id)}')">${showUnpublishOption}</button>
+    	        			<button id="unpublish" onclick="return openPage('${g.createLink(controller: 'model', action: 'unpublish', id: revision.id)}')">Unpublish</button>
     	        		</g:if>
     	         </div>
     	         </div>
