@@ -142,7 +142,7 @@ class PharmMlTagLib {
     private String convertToMathML(String lhs, def equation) {
         StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
         builder.append(oprand(lhs))
-
+        builder.append(op("="))
         convertEquation(equation, builder)
         builder.append("</mstyle></math>")
         return builder.toString()
