@@ -16,7 +16,9 @@ class SbmlController {
 		render(view:"/model/sbml/show", model: [revision: revs.last(), 
     		 authors: revs.last().model.creators,
     		 allRevs: revs,
-    		 flashMessage: params.flashMessage
+    		 flashMessage: params.flashMessage,
+    		 showPublishOption:params.showPublishOption, 
+    	     showUnpublishOption:params.showUnpublishOption
     		]
     		)
 	}

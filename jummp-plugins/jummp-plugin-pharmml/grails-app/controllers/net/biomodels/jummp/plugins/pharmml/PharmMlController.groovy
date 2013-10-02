@@ -39,8 +39,10 @@ class PharmMlController {
                 group: pharmMlService.getGroup(design),*/
                 modellingSteps: pharmMlService.getCommonModellingSteps(steps),
                 stepDeps: pharmMlService.getStepDependencies(steps),
-                flashMessage: params.flashMessage
-               ]
+                flashMessage: params.flashMessage,
+                showPublishOption:params.showPublishOption, 
+    	        showUnpublishOption:params.showUnpublishOption
+    		]
         )
     }
 }

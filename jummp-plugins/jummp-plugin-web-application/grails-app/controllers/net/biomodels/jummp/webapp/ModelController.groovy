@@ -8,6 +8,7 @@ import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
 
@@ -38,6 +39,7 @@ class ModelController {
      * Dependency Injection of grailsApplication
      */
     def grailsApplication
+    
 
     def showWithMessage = {
     	    flash["giveMessage"]=params.flashMessage
@@ -47,11 +49,24 @@ class ModelController {
     
     def show = {
     	    ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
+    	    boolean showPublishOption=false
+    	    boolean showUnpublishOption=false
+    	    if (model.state==ModelState.UNPUBLISHED) {
+    	    	showPublishOption=true
+    	    }
+    	    else if (modelDelegateService.canAddRevision(model.id)) {
+    	    	showUnpublishOption=true
+    	    }
     	    String flashMessage=""
     	    if (flash.now["giveMessage"]) {
     	    	    flashMessage=flash.now["giveMessage"]
     	    }
-    	    forward controller:modelFileFormatService.getPluginForFormat(model.format), action:"show", id: params.id, params:[flashMessage:flashMessage]
+    	    forward controller:modelFileFormatService.getPluginForFormat(model.format), 
+    	    		action:"show", 
+    	    		id: params.id, 
+    	    		params:[flashMessage:flashMessage, 
+    	    				showPublishOption:showPublishOption, 
+    	    				showUnpublishOption:showUnpublishOption]
     }
     
     def publish = {
@@ -59,6 +74,13 @@ class ModelController {
     	   modelDelegateService.publishModelRevision(rev)
     	   redirect(action: "showWithMessage", id: modelDelegateService.getRevisionDetails(rev).model.id, 
     	            params: [flashMessage:"Model has been published."])
+    }
+    
+    def unpublish = {
+    	   def rev=new RevisionTransportCommand(id: params.id as int)
+    	   modelDelegateService.unpublishModelRevision(rev)
+    	   redirect(action: "showWithMessage", id: modelDelegateService.getRevisionDetails(rev).model.id, 
+    	            params: [flashMessage:"Model has been unpublished."])
     }
 
     @Secured(["isAuthenticated()"])

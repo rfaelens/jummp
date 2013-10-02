@@ -1628,6 +1628,36 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         revision.model.state=ModelState.PUBLISHED
         revision.model.save(flush:true)
     }
+    
+    
+    
+    /**
+     * Makes a Model Revision unpublished
+     * This means that ROLE_USER and ROLE_ANONYMOUS lose read access to the Revision and by that also to
+     * the Model, if they had it.
+     *
+     * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
+     * method.
+     * @param revision The Revision to be published
+     */
+    @PreAuthorize("(hasRole('ROLE_CURATOR') and hasPermission(#revision, write)) or hasRole('ROLE_ADMIN')")
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.publishModelRevision")
+    public void unpublishModelRevision(Revision revision) {
+        if (!revision) {
+            throw new IllegalArgumentException("Revision may not be null")
+        }
+        if (revision.deleted) {
+            throw new IllegalArgumentException("Revision may not be deleted")
+        }
+        aclUtilService.deletePermission(revision, "ROLE_USER", BasePermission.READ)
+        aclUtilService.deletePermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
+        revision.model.state=ModelState.UNPUBLISHED
+        revision.model.save(flush:true)
+    }
+
+    
+    
 
     /**
      * Retrieves the pub med annotations of the @p model.
