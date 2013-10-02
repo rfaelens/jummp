@@ -226,10 +226,17 @@ class PharmMlTagLib {
         if (!parameters) {
             return outcome
         }
-        outcome.append("<div>")
+        outcome.append("<div class='spaced'>")
         parameters.inject(outcome) { o, p ->
-            String thisParam = p.assign ? convertToMathML(p.symbId, p.assign) : p.symbId
-            o.append(["<span>", "</span>\n"].join(thisParam)).append("&nbsp;")
+            String thisParam
+            if (p.assign) {
+                thisParam = convertToMathML(p.symbId, p.assign)
+            } else {
+                thisParam = ["<math display='inline'><mstyle>", "</mstyle></math>"].join(op(p.symbId))
+            }
+            o.append("<span>")
+            o.append(thisParam).append(";&nbsp;")
+            o.append("</span>\n")
         }
         return outcome.append("</div>")
     }
@@ -240,7 +247,7 @@ class PharmMlTagLib {
             if (i.abstractContinuousUnivariateDistribution) {
                 o.append("<div>")
                 o.append(distributionAssignment(i.symbId, i.abstractContinuousUnivariateDistribution))
-                o.append(" - ").append(i.variabilityReference.symbRef.symbIdRef)
+                o.append("&nbsp;&mdash; ").append(i.variabilityReference.symbRef.symbIdRef)
                 o.append("</div>\n")
             }
         }
@@ -340,7 +347,12 @@ class PharmMlTagLib {
                     result.append(convertToMathML(v.value, indepVar))
                     break
                 case VariableDefinitionType:
-                    result.append(convertToMathML(v.value.symbId, v.value.assign))
+                    if (v.value.assign) {
+                        result.append(convertToMathML(v.value.symbId, v.value.assign))
+                    } else {
+                        result.append("<math display='inline'><mstyle>").append(op(v.value.symbId)).append(
+                                "</mstyle></math>")
+                    }
                     break
                 case FunctionDefinitionType:
                     def fd = v.value
@@ -369,7 +381,7 @@ class PharmMlTagLib {
             return
         }
         def result = new StringBuilder("<h3>Variability Model</h3>\n<table class='views-table cols-4'>\n<thead><tr>")
-        result.append("<th>Identifier</th><th>Name</th><th>Levels</th><th>Type</th></tr>")
+        result.append("<th>Identifier</th><th>Name</th><th>Level</th><th>Type</th></tr>")
         result.append("\n</thead>\n<tbody>\n")
         attrs.variabilityModel.each { m ->
             result.append("<tr><td class=\"value\">")
@@ -543,7 +555,12 @@ class PharmMlTagLib {
             result.append(e.transformation.value()).append("</p>")
         }
         result.append("<p>")
-        result.append(convertToMathML(e.output.symbRef.symbIdRef, e.errorModel.assign.equation)).append("</p>")
+        String renderedVar = [
+                "<math display='inline'><mstyle><mo>",
+                "</mo></mstyle></math>"
+        ].join(e.output.symbRef.symbIdRef)
+        result.append(renderedVar).append(" with ")
+        result.append(convertToMathML(e.errorModel.assign.equation)).append("</p>")
         result.append("<p><span class=\"bold\">Residual error:</span>")
         return result.append(e.residualError.symbRef.symbIdRef).append("</p>")
     }
@@ -956,7 +973,7 @@ class PharmMlTagLib {
         }
         def result = new StringBuilder("<h3>Simulation Steps</h3>\n")
         steps.each { s ->
-            result.append("<h4>Simulation step ${s.oid}</h4>")
+            result.append("<h4>Simulation step <span class='italic'>${s.oid}</span></h4>")
             if (s.variableAssignment) {
                 result.append(variableAssignments(s.variableAssignment, "<h5>Variable assignments</h5>\n"))
             }
