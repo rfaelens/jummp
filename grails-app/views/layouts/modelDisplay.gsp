@@ -171,7 +171,7 @@
 			$( "#update" ).button({
 					text:false,
 					icons: {
-						primary:"ui-icon-wrench"
+						primary:"ui-icon-refresh"
 					}
 			});
 			$( "#publish" ).button({
