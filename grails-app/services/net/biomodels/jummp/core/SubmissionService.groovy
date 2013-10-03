@@ -5,13 +5,14 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC //rude
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
+import net.biomodels.jummp.core.model.PublicationTransportCommand
+import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.model.RepositoryFile
 import org.perf4j.aop.Profiled
 import org.apache.commons.io.FilenameUtils
-import net.biomodels.jummp.core.model.
 /**
  * Service that provides model building functionality to a wizard-style model
  * import or update implemented in the web app. It is currently kept in core as
@@ -671,20 +672,20 @@ class SubmissionService {
     }
 
     /**
-     * update the working memory with revision specific comments
+     * update the working memory with revision specific comments and publication data
      * parameter left as a map<string,string> for forward-compatibility
      *
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      */
-    @Profiled(tag = "submissionService.updateRevisionComments")
-    void updateRevisionComments(Map<String, Object> workingMemory, Map<String, String> modifications) {
-        getStrategyFromContext(workingMemory).updateRevisionComments(workingMemory, modifications)
+    @Profiled(tag = "submissionService.updateFromSummary")
+    void updateFromSummary(Map<String, Object> workingMemory, Map<String, String> modifications) {
+        getStrategyFromContext(workingMemory).updateFromSummary(workingMemory, modifications)
     }
 
     /**
      * Purpose Create or update DOM objects as necessary
      *
-     * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+     * @param workingMemory     a Map containing all objects exchanged througho6ut the flow.
      */
     @Profiled(tag = "submissionService.handleSubmission")
     void handleSubmission(Map<String,Object> workingMemory) {

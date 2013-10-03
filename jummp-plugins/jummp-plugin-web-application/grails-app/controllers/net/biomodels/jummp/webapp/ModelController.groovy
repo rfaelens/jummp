@@ -11,6 +11,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
+import net.biomodels.jummp.core.model.PublicationLinkProvider
 
 
 class ModelController {
@@ -39,6 +40,10 @@ class ModelController {
      * Dependency Injection of grailsApplication
      */
     def grailsApplication
+    /**
+    * Dependency injenction of pubMedService 
+    */
+    def pubMedService
     
 
     def showWithMessage = {
@@ -362,11 +367,40 @@ class ModelController {
                 	modifications.put("PubLinkProvider",params.PubLinkProvider) 
                 	modifications.put("PubLink",params.PublicationLink) 
                 }
+                else {
+                	flow.workingMemory.put("RetrievePubDetails", false)
+                }
                 submissionService.updateFromSummary(flow.workingMemory, modifications)
-            }.to "saveModel"
+            }.to "getPublicationDataIfPossible"
             on("Cancel").to "cleanUpAndTerminate"
             //on("Back"){}.to "displayModelInfo" //To be set back when model editing is enabled
             on("Back"){}.to "uploadFiles"
+        }
+        getPublicationDataIfPossible {
+        	action {
+        		ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
+        		if (flow.workingMemory.get("RetrievePubDetails") as Boolean) {
+        			if (model.publication.linkProvider==PublicationLinkProvider.PUBMED) {
+        				model.publication = pubMedService.
+        							getPublication(model.publication.link).
+        							toCommandObject()
+        			}
+        		}
+        		if (model.publication?.link && model.publication?.linkProvider) {
+        			publicationInfoPage()
+        		}
+        		else {
+        			saveModel()
+        		}
+        	}
+        	on("publicationInfoPage").to "publicationInfoPage"
+        	on("saveModel").to "saveModel"
+        }
+        publicationInfoPage {
+            on("Continue"){
+            }.to "saveModel"
+            on("Cancel").to "cleanUpAndTerminate"
+            on("Back").to "displaySummaryOfChanges"
         }
         saveModel {
             action {
