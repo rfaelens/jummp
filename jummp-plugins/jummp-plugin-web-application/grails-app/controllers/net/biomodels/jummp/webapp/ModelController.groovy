@@ -379,14 +379,12 @@ class ModelController {
         getPublicationDataIfPossible {
         	action {
         		ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
-        		if (flow.workingMemory.get("RetrievePubDetails") as Boolean) {
+        		if (flow.workingMemory.remove("RetrievePubDetails") as Boolean) {
         			if (model.publication.linkProvider==PublicationLinkProvider.PUBMED) {
         				model.publication = pubMedService.
         							getPublication(model.publication.link).
         							toCommandObject()
         			}
-        		}
-        		if (model.publication?.link && model.publication?.linkProvider) {
         			publicationInfoPage()
         		}
         		else {
@@ -400,7 +398,10 @@ class ModelController {
             on("Continue"){
             }.to "saveModel"
             on("Cancel").to "cleanUpAndTerminate"
-            on("Back").to "displaySummaryOfChanges"
+            on("Back"){
+            	ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
+        		model.publication=null
+            }.to "displaySummaryOfChanges"
         }
         saveModel {
             action {
