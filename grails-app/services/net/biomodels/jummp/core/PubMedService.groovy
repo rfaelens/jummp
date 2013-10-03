@@ -63,18 +63,18 @@ class PubMedService {
             throw new JummpException("Could not parse PubMed information", e)
         }
         Publication publication = new Publication(linkProvider: PublicationLinkProvider.PUBMED, link: id)
-        setFieldIfItExists("year", publication, slurper.resultList.result.pubYear, true)
         setFieldIfItExists("pages", publication, slurper.resultList.result.pageInfo, false)
-        setFieldIfItExists("journal", publication, slurper.resultList.result.journalTitle, false)
         setFieldIfItExists("title", publication, slurper.resultList.result.title, false)
         setFieldIfItExists("affiliation", publication, slurper.resultList.result.affiliation, false)
         setFieldIfItExists("synopsis", publication, slurper.resultList.result.abstractText, false)
         
         if (slurper.resultList.result.journalInfo) {
         	setFieldIfItExists("month", publication, slurper.resultList.result.journalInfo.monthOfPublication, true)
+        	setFieldIfItExists("year", publication, slurper.resultList.result.journalInfo.yearOfPublication, true)
         	//setFieldIfItExists("day", publication, slurper.resultList.result.journalInfo.dateOfPublication, true) //we have integer, this returns a string
         	setFieldIfItExists("volume", publication, slurper.resultList.result.journalInfo.volume, true)
         	setFieldIfItExists("issue", publication, slurper.resultList.result.journalInfo.issue, true)
+        	setFieldIfItExists("journal", publication, slurper.resultList.result.journalInfo.journal.title, false)
         }
         System.out.println(slurper.resultList.result.authorString.text())
         parseAuthors(slurper, publication)
