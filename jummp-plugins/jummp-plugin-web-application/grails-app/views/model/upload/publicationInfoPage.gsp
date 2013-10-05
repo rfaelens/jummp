@@ -28,11 +28,18 @@
         	$(document).ready(function () {
         			$('#addButton').click(function() {
         				addText()
-        			
+        				setHiddenFieldValue()
         			});
-        			
-        			
+        			setHiddenFieldValue()
         	});
+        	
+        	function setHiddenFieldValue() {
+        		var text=""
+        		$('#authorList > option').each(function(i, option) {
+        				text=text+"!!author!!"+$(option).val();
+        		});
+        		$('#authorFieldTotal').val(text);
+        	}
 	</script>
      <style type="text/css">
 	.addButton {
@@ -145,7 +152,7 @@
                             </td>
                             <td class="value" style="vertical-align:top;">
                           	<g:select name="month" from="${1..12}" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.month?:Calendar.instance.get(Calendar.MONTH)}"/>
-                          	<g:select name="month" from="${1800..Calendar.instance.get(Calendar.YEAR)}" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.year?:Calendar.instance.get(Calendar.YEAR)}"/>
+                          	<g:select name="year" from="${1800..Calendar.instance.get(Calendar.YEAR)}" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.year?:Calendar.instance.get(Calendar.YEAR)}"/>
                             </td>
                         </tr>
                         <tr class="prop">
@@ -155,7 +162,7 @@
                                 </label>
                             </td>
                             <td class="value" style="vertical-align:top;">
-                          	<g:textField name="affiliation" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.volume}"/>
+                          	<g:textField name="volume" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.volume}"/>
                             </td>
                             <td class="title" style="vertical-align:top;">
                                 <label for="journal">
@@ -163,7 +170,7 @@
                                 </label>
                             </td>
                             <td class="value" style="vertical-align:top;">
-                          	<g:textField name="affiliation" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.issue}"/>
+                          	<g:textField name="issue" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.issue}"/>
                             </td>
                         </tr>
                         <tr class="prop">
@@ -173,7 +180,7 @@
                                 </label>
                             </td>
                             <td class="value" style="vertical-align:top;">
-                          	<g:textField name="affiliation" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.pages}"/>
+                          	<g:textField name="pages" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.pages}"/>
                             </td>
                         </tr>
                         
@@ -182,6 +189,7 @@
                     <g:submitButton name="Cancel" value="${g.message(code: 'submission.common.cancelButton')}" />
                     <g:submitButton name="Back" value="${g.message(code: 'submission.common.backButton')}" />
                     <g:submitButton name="Continue" value="${g.message(code: 'submission.publication.continueButton')}" />
+                    <g:hiddenField name="authorFieldTotal" value="" />
                 </div>
             </div>
         </g:form>

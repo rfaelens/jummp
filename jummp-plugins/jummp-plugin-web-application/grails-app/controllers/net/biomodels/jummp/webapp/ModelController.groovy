@@ -8,6 +8,7 @@ import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.AuthorTransportCommand
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
@@ -396,6 +397,38 @@ class ModelController {
         }
         publicationInfoPage {
             on("Continue"){
+            	    ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
+            	    model.publication.journal=params.journal
+            	    model.publication.title=params.title
+            	    model.publication.month=Integer.parseInt(params.month)
+            	    model.publication.year=Integer.parseInt(params.year)
+            	    model.publication.synopsis=params.synopsis
+            	    model.publication.affiliation=params.affiliation
+            	    model.publication.volume=Integer.parseInt(params.volume)
+            	    model.publication.issue=Integer.parseInt(params.issue)
+            	    model.publication.pages=params.pages
+            	    String[] authorList=params.authorFieldTotal.split("!!author!!")
+            	    authorList.each {
+            	    	    if (it) {
+            	    	    String[] authorParts=it.split("<init>")
+            	    	    String lastName=authorParts[0]
+            	    	    String initials=""
+            	    	    if (authorParts.length>1) {
+            	    	    	    initials=authorParts[1]
+            	    	    }
+            	    	    def authorListSrc=model.publication.authors
+            	    	    if (!authorListSrc) {
+            	    	    	    authorListSrc=new LinkedList<AuthorTransportCommand>();
+            	    	    }
+            	    	    def author=authorListSrc.find { auth ->
+            	    	    	    auth.lastName==lastName && auth.initials==initials 
+            	    	    }
+            	    	    if (!author) {
+            	    	    	author=new AuthorTransportCommand(lastName:lastName, initials:initials)
+            	    	        model.publication.authors.add(author)
+            	    	    }
+            	       }
+            	   }
             }.to "saveModel"
             on("Cancel").to "cleanUpAndTerminate"
             on("Back"){
