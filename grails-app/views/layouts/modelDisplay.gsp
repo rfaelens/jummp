@@ -9,6 +9,7 @@
 <%@ page import="java.nio.file.FileVisitResult"%>
 <%@ page import="org.apache.commons.io.FilenameUtils"%>
 <%@ page import="java.text.DateFormat"%>
+<%@ page import="net.biomodels.jummp.core.model.ModelState"%>
 <%
 	def loadedZips=new HashMap();
 	def zipSupported=[:]
@@ -170,13 +171,19 @@
 			$( "#update" ).button({
 					text:false,
 					icons: {
-						primary:"ui-icon-wrench"
+						primary:"ui-icon-refresh"
 					}
 			});
 			$( "#publish" ).button({
 					text:false,
 					icons: {
 						primary:"ui-icon-unlocked"
+					}
+			});
+			$( "#unpublish" ).button({
+					text:false,
+					icons: {
+						primary:"ui-icon-locked"
 					}
 			});
 		});
@@ -196,11 +203,18 @@
 	    		<div class='flash'>${flashMessage}</div>
 	    	</g:if>
     	        <h2 style="float: left;">${revision.model.name}</h2>
-    	        <div style="float:right;">
-    	        <div id="modeltoolbar" class="ui-widget-header ui-corner-all">
+    	        <div style="float:right;margin-top:10px">
+    	        <div id="modeltoolbar" <%--class="ui-widget-header ui-corner-all"--%>>
     	        		<button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.id)}')">Download</button>
-    	        		<button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}')">Update</button>
-    	        		<button id="publish" onclick="return openPage('${g.createLink(controller: 'model', action: 'publish', id: revision.id)}')">Publish</button>
+    	        		<g:if test="${canUpdate=="true"}">
+    	        			<button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}')">Update</button>
+    	        		</g:if>
+    	        		<g:if test="${showPublishOption=="true"}">
+    	        			<button id="publish" onclick="return openPage('${g.createLink(controller: 'model', action: 'publish', id: revision.id)}')">Publish</button>
+    	        		</g:if>
+    	        		<g:if test="${showUnpublishOption=="true"}">
+    	        			<button id="unpublish" onclick="return openPage('${g.createLink(controller: 'model', action: 'unpublish', id: revision.id)}')">Unpublish</button>
+    	        		</g:if>
     	         </div>
     	         </div>
    
@@ -208,7 +222,6 @@
         	<a class="submit" title="Download Model" href="${g.createLink(controller: 'model', action: 'download', id: revision.id)}">Download</a> 	
 	 --%></div>
     	<div id="tablewrapper">
-	
     	<div id="tabs">
 	  <ul>
 	    <li><a href="#Overview">Overview</a></li>
@@ -227,7 +240,7 @@
 		</tr>
 		<tr>
 		    <td class='key'><g:message code="model.model.status"/></td>
-		    <td class='value'>${revision.model.state}</td>
+		    <td class='value'>${revision.model.state.toString().toLowerCase().capitalize()}</td>
 		    <td class='key'><g:message code="model.model.formatversion"/></td>
 		    <td class='value'>${revision.format.formatVersion}</td>
 		<tr>

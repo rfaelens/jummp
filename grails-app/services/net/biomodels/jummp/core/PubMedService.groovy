@@ -27,6 +27,19 @@ class PubMedService {
         }
     }
 
+    private setFieldIfItExists(String fieldName, Publication publication, def xmlField, boolean castToInt) {
+    	if (xmlField && xmlField.size()==1) {
+    		String text=xmlField.text()
+    		def fields=Publication.getFields()
+    		if (castToInt) {
+    			publication."${fieldName}"=Integer.parseInt(text)
+    		}
+    		else {
+    			publication."${fieldName}"=text
+    		}
+    	}
+    }
+    
     /**
      * Downloads the XML describing the PubMed resource and parses the Publication information.
      * @param id The PubMed Identifier
@@ -37,7 +50,7 @@ class PubMedService {
     private Publication fetchPublicationData(String id) throws JummpException {
         URL url
         try {
-            url = new URL("http://www.ebi.ac.uk/citexplore/viewXML.do?externalId=${id}&dataSource=MED")
+            url = new URL("http://www.ebi.ac.uk/europepmc/webservices/rest/search/query=ext_id:${id}%20src:med&resulttype=core")
         } catch (MalformedURLException e) {
             // TODO: throw a specific exception
             throw new JummpException("PubMed URL is malformed", e)
@@ -50,64 +63,29 @@ class PubMedService {
             throw new JummpException("Could not parse PubMed information", e)
         }
         Publication publication = new Publication(linkProvider: PublicationLinkProvider.PUBMED, link: id)
-        // journal information
-        if (slurper.Article.Journal.JournalIssue.PubDate.size() == 1) {
-            if (slurper.Article.Journal.JournalIssue.PubDate.Year.size() == 1) {
-                publication.year = slurper.Article.Journal.JournalIssue.PubDate.Year[0].text() as Integer
-            }
-            if (slurper.Article.Journal.JournalIssue.PubDate.Month.size() == 1) {
-                publication.month = slurper.Article.Journal.JournalIssue.PubDate.Month[0].text()
-            }
-            if (slurper.Article.Journal.JournalIssue.PubDate.Day.size() == 1) {
-                publication.day = slurper.Article.Journal.JournalIssue.PubDate.Day[0]?.text() as Integer
-            }
+        setFieldIfItExists("pages", publication, slurper.resultList.result.pageInfo, false)
+        setFieldIfItExists("title", publication, slurper.resultList.result.title, false)
+        setFieldIfItExists("affiliation", publication, slurper.resultList.result.affiliation, false)
+        setFieldIfItExists("synopsis", publication, slurper.resultList.result.abstractText, false)
+        
+        if (slurper.resultList.result.journalInfo) {
+        	setFieldIfItExists("month", publication, slurper.resultList.result.journalInfo.monthOfPublication, true)
+        	setFieldIfItExists("year", publication, slurper.resultList.result.journalInfo.yearOfPublication, true)
+        	//setFieldIfItExists("day", publication, slurper.resultList.result.journalInfo.dateOfPublication, true) //we have integer, this returns a string
+        	setFieldIfItExists("volume", publication, slurper.resultList.result.journalInfo.volume, true)
+        	setFieldIfItExists("issue", publication, slurper.resultList.result.journalInfo.issue, true)
+        	setFieldIfItExists("journal", publication, slurper.resultList.result.journalInfo.journal.title, false)
         }
-        if (slurper.Article.Journal.JournalIssue.Volume.size() == 1) {
-            try {
-                publication.volume = slurper.Article.Journal.JournalIssue.Volume[0].text() as Integer
-            } catch (NumberFormatException e) {
-                // ignore
-            }
-        }
-        if (slurper.Article.Journal.JournalIssue.Issue.size() == 1) {
-            try {
-                publication.issue = slurper.Article.Journal.JournalIssue.Issue[0].text() as Integer
-            } catch (NumberFormatException e) {
-                // ignore
-            }
-        }
-        if (slurper.Article.Pagination.MedlinePgn.size() == 1) {
-            publication.pages = slurper.Article.Pagination.MedlinePgn[0].text()
-        }
-        if (slurper.MedlineJournalInfo.MedlineTA.size() == 1) {
-            publication.journal = slurper.MedlineJournalInfo.MedlineTA[0].text()
-        }
-
-        if (slurper.Article.ArticleTitle.size() == 1) {
-            publication.title = slurper.Article.ArticleTitle.text()
-        }
-        if (slurper.Article.Affiliation.size() == 1) {
-            publication.affiliation = slurper.Article.Affiliation.text()
-        }
-        if (slurper.Article.Abstract.AbstractText.size() > 0) {
-            publication.synopsis = ''
-            slurper.Article.Abstract.AbstractText.each {
-                if (it.@Label.size() == 1) {
-                    publication.synopsis += it.@Label.text() + "\n"
-                }
-                publication.synopsis += it.text()
-            }
-            if (publication.synopsis.length() > 1000) {
-                publication.synopsis = publication.synopsis.substring(0, 999) + "…"
-            }
-        }
-
+        System.out.println(slurper.resultList.result.authorString.text())
         parseAuthors(slurper, publication)
-
+        publication.save(flush:true)
+        System.out.println("Publication: "+publication.inspect())
+        
+        
         if (!publication.validate()) {
+        	System.out.println(publication.errors.inspect())
             throw new JummpException("Retrieved PubMed Publication ${id} does not create a valid Publication")
         }
-
         return publication
     }
 
@@ -117,11 +95,11 @@ class PubMedService {
      * @param publication The publication to add the authors to
      */
     private void parseAuthors(def slurper, Publication publication) {
-        for (def authorXml in slurper.Article.AuthorList.Author) {
+        for (def authorXml in slurper.resultList.result.authorList.author) {
             Author author = new Author()
-            author.lastName = authorXml.LastName[0].text()
-            author.firstName = authorXml.ForeName[0].text()
-            author.initials = authorXml.Initials[0].text()
+            author.lastName = authorXml.lastName[0].text()
+            //author.firstName = authorXml.ForeName[0].text()
+            author.initials = authorXml.initials[0].text()
             author.save()
             publication.addToAuthors(author)
         }

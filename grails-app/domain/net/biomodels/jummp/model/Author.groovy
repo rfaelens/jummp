@@ -14,7 +14,7 @@ class Author implements Serializable {
     static constraints = {
         lastName(nullable: false)
         firstName(nullable: true)
-        initials(nuallable: true)
+        initials(nullable: true)
     }
 
     AuthorTransportCommand toCommandObject() {

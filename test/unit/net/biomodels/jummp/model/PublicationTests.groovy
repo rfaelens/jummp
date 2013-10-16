@@ -30,7 +30,7 @@ class PublicationTests extends GrailsUnitTestCase {
         assertNull(publication.errors["synopsis"])
         // test for max size of synopsis
         String synopsis = ""
-        for (int i=0; i<=1000; i++) {
+        for (int i=0; i<=5000; i++) {
             synopsis += "1"
         }
         publication.synopsis = synopsis

@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="net.biomodels.jummp.core.model.RevisionTransportCommand" %>
+<%@ page import=" net.biomodels.jummp.core.model.PublicationLinkProvider" %>
 
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -33,6 +34,38 @@
                                 	<label name="description">${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}</label>
                                 </div>
                             </td>
+                        </tr>
+                        <tr class="prop">
+                            <td class="name" style="vertical-align:top;">
+                                <label for="pub">
+                                    <g:message code="submission.summary.publication"/>
+                                </label>
+                            </td>
+                            <td class="value" style="vertical-align:top;">
+                          		<g:if test="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).model.publication}">
+                          					<g:select name="PubLinkProvider" 
+                          					from="${PublicationLinkProvider.
+                          							values().collect(new LinkedList()) { it.toString() }}" 
+                          							value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).
+                          																		model.
+                          																		publication.
+                          																		linkProvider.
+                          																		toString()}" 
+                          							noSelection="['':'-Please select publication link type-']"/>
+                          					<g:textField name="PublicationLink"
+                          								 value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).
+                          								 												model.
+                          								 												publication.
+                          								 												link}"/>
+                          		</g:if>
+                          		<g:else>
+                          					<g:select name="PubLinkProvider" 
+                          					from="${PublicationLinkProvider.
+                          							values().collect(new LinkedList()) { it.toString() }}" 
+                          					noSelection="['':'-Please select publication link type-']"/>
+                          					<g:textField name="PublicationLink"/>
+                          		</g:else>
+                          	</td>
                         </tr>
                         <g:if test="${workingMemory.get("isUpdateOnExistingModel") as Boolean}">
                             <tr class="prop">

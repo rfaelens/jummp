@@ -190,5 +190,9 @@ class ModelDelegateService implements IModelService {
     
     void publishModelRevision(RevisionTransportCommand revision) {
         modelService.publishModelRevision(Revision.get(revision.id))
+    }               
+    
+    void unpublishModelRevision(RevisionTransportCommand revision) {
+        modelService.unpublishModelRevision(Revision.get(revision.id))
     }
 }

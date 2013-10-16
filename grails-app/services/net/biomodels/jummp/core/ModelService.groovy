@@ -12,6 +12,7 @@ import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.Author
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.model.RepositoryFile
@@ -857,6 +858,26 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             if (rev.model.publication && rev.model.publication.linkProvider == PublicationLinkProvider.PUBMED) {
                 try {
                     model.publication = pubMedService.getPublication(rev.model.publication.link)
+                    model.publication.journal=rev.model.publication.journal
+            	    model.publication.title=rev.model.publication.title
+            	    model.publication.month=rev.model.publication.month
+            	    model.publication.year=rev.model.publication.year
+            	    model.publication.synopsis=rev.model.publication.synopsis
+            	    model.publication.affiliation=rev.model.publication.affiliation
+            	    model.publication.volume=rev.model.publication.volume
+            	    model.publication.issue=rev.model.publication.issue
+            	    model.publication.pages=rev.model.publication.pages
+            	    rev.model.publication.authors.each { uploaded->
+            	    	    def author=model.publication.authors.find { saved->
+            	    	    	    saved.lastName==uploaded.lastName && saved.initials==uploaded.initials
+            	    	    }
+            	    	    if (!author) {
+            	    	    	    Author newAuthor=new Author(lastName:uploaded.lastName, initials:uploaded.initials)
+            	    	    	    newAuthor.save()
+            	    	    	    model.publication.authors.add(newAuthor)
+            	    	    }
+            	    }
+            	    model.publication.save()
                 } catch (JummpException e) {
                     revision.discard()
                     domainObjects.each { it.discard() }
@@ -1628,6 +1649,36 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         revision.model.state=ModelState.PUBLISHED
         revision.model.save(flush:true)
     }
+    
+    
+    
+    /**
+     * Makes a Model Revision unpublished
+     * This means that ROLE_USER and ROLE_ANONYMOUS lose read access to the Revision and by that also to
+     * the Model, if they had it.
+     *
+     * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
+     * method.
+     * @param revision The Revision to be published
+     */
+    @PreAuthorize("(hasRole('ROLE_CURATOR') and hasPermission(#revision, write)) or hasRole('ROLE_ADMIN')")
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.publishModelRevision")
+    public void unpublishModelRevision(Revision revision) {
+        if (!revision) {
+            throw new IllegalArgumentException("Revision may not be null")
+        }
+        if (revision.deleted) {
+            throw new IllegalArgumentException("Revision may not be deleted")
+        }
+        aclUtilService.deletePermission(revision, "ROLE_USER", BasePermission.READ)
+        aclUtilService.deletePermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
+        revision.model.state=ModelState.UNPUBLISHED
+        revision.model.save(flush:true)
+    }
+
+    
+    
 
     /**
      * Retrieves the pub med annotations of the @p model.

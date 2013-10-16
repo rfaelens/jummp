@@ -8,8 +8,11 @@ import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.AuthorTransportCommand
+import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
+import net.biomodels.jummp.core.model.PublicationLinkProvider
 
 
 class ModelController {
@@ -38,6 +41,11 @@ class ModelController {
      * Dependency Injection of grailsApplication
      */
     def grailsApplication
+    /**
+    * Dependency injenction of pubMedService 
+    */
+    def pubMedService
+    
 
     def showWithMessage = {
     	    flash["giveMessage"]=params.flashMessage
@@ -47,11 +55,27 @@ class ModelController {
     
     def show = {
     	    ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
+    	    boolean showPublishOption=false
+    	    boolean showUnpublishOption=false
+    	    boolean canUpdate=modelDelegateService.canAddRevision(model.id)
+    	    if (model.state==ModelState.UNPUBLISHED) {
+    	    	showPublishOption=true
+    	    }
+    	    else if (canUpdate) {
+    	    	showUnpublishOption=true
+    	    }
+    	    
     	    String flashMessage=""
     	    if (flash.now["giveMessage"]) {
     	    	    flashMessage=flash.now["giveMessage"]
     	    }
-    	    forward controller:modelFileFormatService.getPluginForFormat(model.format), action:"show", id: params.id, params:[flashMessage:flashMessage]
+    	    forward controller:modelFileFormatService.getPluginForFormat(model.format), 
+    	    		action:"show", 
+    	    		id: params.id, 
+    	    		params:[flashMessage:flashMessage,
+    	    				canUpdate:canUpdate,
+    	    				showPublishOption:showPublishOption, 
+    	    				showUnpublishOption:showUnpublishOption]
     }
     
     def publish = {
@@ -59,6 +83,13 @@ class ModelController {
     	   modelDelegateService.publishModelRevision(rev)
     	   redirect(action: "showWithMessage", id: modelDelegateService.getRevisionDetails(rev).model.id, 
     	            params: [flashMessage:"Model has been published."])
+    }
+    
+    def unpublish = {
+    	   def rev=new RevisionTransportCommand(id: params.id as int)
+    	   modelDelegateService.unpublishModelRevision(rev)
+    	   redirect(action: "showWithMessage", id: modelDelegateService.getRevisionDetails(rev).model.id, 
+    	            params: [flashMessage:"Model has been unpublished."])
     }
 
     @Secured(["isAuthenticated()"])
@@ -333,11 +364,77 @@ class ModelController {
                 else {
                     modifications.put("RevisionComments", "Model revised without commit message")
                 }
-                submissionService.updateRevisionComments(flow.workingMemory, modifications)
-            }.to "saveModel"
+                if (params.PubLinkProvider && params.PublicationLink) {
+                	modifications.put("PubLinkProvider",params.PubLinkProvider) 
+                	modifications.put("PubLink",params.PublicationLink) 
+                }
+                else {
+                	flow.workingMemory.put("RetrievePubDetails", false)
+                }
+                submissionService.updateFromSummary(flow.workingMemory, modifications)
+            }.to "getPublicationDataIfPossible"
             on("Cancel").to "cleanUpAndTerminate"
             //on("Back"){}.to "displayModelInfo" //To be set back when model editing is enabled
             on("Back"){}.to "uploadFiles"
+        }
+        getPublicationDataIfPossible {
+        	action {
+        		ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
+        		if (flow.workingMemory.remove("RetrievePubDetails") as Boolean) {
+        			if (model.publication.linkProvider==PublicationLinkProvider.PUBMED) {
+        				model.publication = pubMedService.
+        							getPublication(model.publication.link).
+        							toCommandObject()
+        			}
+        			publicationInfoPage()
+        		}
+        		else {
+        			saveModel()
+        		}
+        	}
+        	on("publicationInfoPage").to "publicationInfoPage"
+        	on("saveModel").to "saveModel"
+        }
+        publicationInfoPage {
+            on("Continue"){
+            	    ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
+            	    model.publication.journal=params.journal
+            	    model.publication.title=params.title
+            	    model.publication.month=Integer.parseInt(params.month)
+            	    model.publication.year=Integer.parseInt(params.year)
+            	    model.publication.synopsis=params.synopsis
+            	    model.publication.affiliation=params.affiliation
+            	    model.publication.volume=Integer.parseInt(params.volume)
+            	    model.publication.issue=Integer.parseInt(params.issue)
+            	    model.publication.pages=params.pages
+            	    String[] authorList=params.authorFieldTotal.split("!!author!!")
+            	    authorList.each {
+            	    	    if (it) {
+            	    	    String[] authorParts=it.split("<init>")
+            	    	    String lastName=authorParts[0]
+            	    	    String initials=""
+            	    	    if (authorParts.length>1) {
+            	    	    	    initials=authorParts[1]
+            	    	    }
+            	    	    def authorListSrc=model.publication.authors
+            	    	    if (!authorListSrc) {
+            	    	    	    authorListSrc=new LinkedList<AuthorTransportCommand>();
+            	    	    }
+            	    	    def author=authorListSrc.find { auth ->
+            	    	    	    auth.lastName==lastName && auth.initials==initials 
+            	    	    }
+            	    	    if (!author) {
+            	    	    	author=new AuthorTransportCommand(lastName:lastName, initials:initials)
+            	    	        model.publication.authors.add(author)
+            	    	    }
+            	       }
+            	   }
+            }.to "saveModel"
+            on("Cancel").to "cleanUpAndTerminate"
+            on("Back"){
+            	ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
+        		model.publication=null
+            }.to "displaySummaryOfChanges"
         }
         saveModel {
             action {
