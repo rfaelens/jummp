@@ -13,6 +13,8 @@ import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
 import net.biomodels.jummp.core.model.PublicationLinkProvider
+import net.biomodels.jummp.core.model.PublicationTransportCommand
+
 
 
 class ModelController {
@@ -398,16 +400,9 @@ class ModelController {
         publicationInfoPage {
             on("Continue"){
             	    ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
-            	    model.publication.journal=params.journal
-            	    model.publication.title=params.title
-            	    model.publication.month=Integer.parseInt(params.month)
-            	    model.publication.year=Integer.parseInt(params.year)
-            	    model.publication.synopsis=params.synopsis
-            	    model.publication.affiliation=params.affiliation
-            	    model.publication.volume=Integer.parseInt(params.volume)
-            	    model.publication.issue=Integer.parseInt(params.issue)
-            	    model.publication.pages=params.pages
+            	    bindData(model.publication, params, [exclude: ['authors']])
             	    String[] authorList=params.authorFieldTotal.split("!!author!!")
+            	    List<AuthorTransportCommand> validatedAuthors=new LinkedList<AuthorTransportCommand>()
             	    authorList.each {
             	    	    if (it) {
             	    	    String[] authorParts=it.split("<init>")
@@ -425,12 +420,26 @@ class ModelController {
             	    	    }
             	    	    if (!author) {
             	    	    	author=new AuthorTransportCommand(lastName:lastName, initials:initials)
-            	    	        if (!model.publication.authors) {
+            	    	    	if (!model.publication.authors) {
             	    	        	model.publication.authors=new LinkedList<AuthorTransportCommand>()
             	    	        }
-            	    	    	model.publication.authors.add(author)
+            	    	        model.publication.authors.add(author)
             	    	    }
-            	       }
+        	    	        if (author.validate()) {
+        	    	        	validatedAuthors.add(author)
+        	    	        }
+        	    	        else {
+        	    	        	log.error "Submission did not validate: ${author.properties}."
+        	    	        	log.error "Errors: ${author.errors.allErrors.inspect()}."
+        	    	        	return error()
+        	    	        }
+        	    	 }
+            	   }
+            	   model.publication.authors=validatedAuthors
+            	   if (!model.publication.validate()) {
+            	   	   log.error "Submission did not validate: ${model.publication.properties}."
+            	   	   log.error "Errors: ${model.publication.errors.allErrors.inspect()}."
+            	   	   return error()
             	   }
             }.to "saveModel"
             on("Cancel").to "cleanUpAndTerminate"

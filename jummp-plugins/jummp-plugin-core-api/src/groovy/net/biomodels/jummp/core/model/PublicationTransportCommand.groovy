@@ -1,10 +1,11 @@
 package net.biomodels.jummp.core.model
-
+import org.codehaus.groovy.grails.validation.Validateable
 /**
  * @short Wrapper for a Publciation to be transported through JMS.
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
+@grails.validation.Validateable	
 class PublicationTransportCommand implements Serializable {
     private static final long serialVersionUID = 1L
     /**
@@ -57,4 +58,21 @@ class PublicationTransportCommand implements Serializable {
      */
     String link
     List<AuthorTransportCommand> authors
+    static constraints = {
+    	// importFrom Publication ...would have been nice :(
+    	// TODO: do we need more than 250 characters?
+        journal(nullable: false, blank: false)
+        // TODO: do we need more than 250 characters?
+        title(nullable: false, blank: false)
+        // TODO: do we need more than 250 characters?
+        affiliation(nullable: false, blank: false)
+        // TODO: How long can an abstract be? Are 5000 characters sufficient?
+        synopsis(nullable: false, blank: true, maxSize: 5000)
+        year(nullable: true)
+        month(nullable: true)
+        day(nullable: true)
+        volume(nullable: true)
+        issue(nullable: true)
+        pages(nullable: true)
+    }
 }
