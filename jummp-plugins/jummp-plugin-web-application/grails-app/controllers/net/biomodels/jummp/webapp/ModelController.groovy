@@ -425,7 +425,10 @@ class ModelController {
             	    	    }
             	    	    if (!author) {
             	    	    	author=new AuthorTransportCommand(lastName:lastName, initials:initials)
-            	    	        model.publication.authors.add(author)
+            	    	        if (!model.publication.authors) {
+            	    	        	model.publication.authors=new LinkedList<AuthorTransportCommand>()
+            	    	        }
+            	    	    	model.publication.authors.add(author)
             	    	    }
             	       }
             	   }
