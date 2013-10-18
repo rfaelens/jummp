@@ -123,6 +123,9 @@
     	border-collapse:separate;
     	border-spacing:10px 5px;
     }
+    td {
+    	vertical-align:top;
+    }
 
     </style>
     </head>
@@ -138,30 +141,30 @@
                 <table class="formtable">
                     <tbody>
                         <tr class="prop">
-                            <td class="title" style="vertical-align:top;">
-                                <label for="title">
+                            <td>
+                                <label>
                                     <g:message code="submission.publication.title"/>
                                 </label>
                             </td>
-                            <td class="value" style="vertical-align:top;">
+                            <td>
                           	<g:textField name="title" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.title}"/>
                             </td>
-                            <td class="title" style="vertical-align:top;">
+                            <td>
                                 <label for="journal">
                                     <g:message code="submission.publication.journal"/>
                                 </label>
                             </td>
-                            <td class="value" style="vertical-align:top;">
+                            <td>
                           	<g:textField name="journal" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.journal}"/>
                             </td>
                         </tr>
-                        <tr class="prop">
-                            <td class="title" style="vertical-align:top;">
-                                <label for="journal">
+                        <tr>
+                            <td>
+                                <label>
                                     <g:message code="submission.publication.authors"/>
                                 </label>
                             </td>
-                            <td class="value" style="vertical-align:top;">
+                            <td>
                           	<select style="width:330px" id="authorList" name="authorList" size="2">
                           		<g:each in="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.authors}">
                           			<option value="${it.lastName}<init>${it.initials}">${it.initials}. ${it.lastName}</option>
@@ -186,59 +189,59 @@
                           		</div>
                           			
                             </td>
-                            <td class="title" style="vertical-align:top;">
-                                <label for="journal">
+                            <td>
+                                <label>
                                     <g:message code="submission.publication.synopsis"/>
                                 </label>
                             </td>
-                            <td class="value" style="vertical-align:top;">
+                            <td>
                           	<g:textArea name="synopsis" rows="13" cols="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.synopsis}"/>
                             </td>
                         </tr>
-                        <tr class="prop">
-                            <td class="title" style="vertical-align:top;">
-                                <label for="journal">
+                        <tr>
+                            <td>
+                                <label>
                                     <g:message code="submission.publication.affiliation"/>
                                 </label>
                             </td>
-                            <td class="value" style="vertical-align:top;">
+                            <td>
                           	<g:textField name="affiliation" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.affiliation}"/>
                             </td>
-                            <td class="title" style="vertical-align:top;">
-                                <label for="journal">
+                            <td>
+                                <label>
                                     <g:message code="submission.publication.date"/>
                                 </label>
                             </td>
-                            <td class="value" style="vertical-align:top;">
+                            <td>
                           	<g:select name="month" from="${1..12}" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.month?:Calendar.instance.get(Calendar.MONTH)}"/>
                           	<g:select name="year" from="${1800..Calendar.instance.get(Calendar.YEAR)}" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.year?:Calendar.instance.get(Calendar.YEAR)}"/>
                             </td>
                         </tr>
-                        <tr class="prop">
-                            <td class="title" style="vertical-align:top;">
-                                <label for="journal">
+                        <tr>
+                            <td>
+                                <label>
                                     <g:message code="submission.publication.volume"/>
                                 </label>
                             </td>
-                            <td class="value" style="vertical-align:top;">
+                            <td>
                           	<g:textField name="volume" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.volume}"/>
                             </td>
-                            <td class="title" style="vertical-align:top;">
-                                <label for="journal">
+                            <td>
+                                <label>
                                     <g:message code="submission.publication.issue"/>
                                 </label>
                             </td>
-                            <td class="value" style="vertical-align:top;">
+                            <td>
                           	<g:textField name="issue" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.issue}"/>
                             </td>
                         </tr>
-                        <tr class="prop">
-                            <td class="title" style="vertical-align:top;">
-                                <label for="journal">
+                        <tr>
+                            <td>
+                                <label>
                                     <g:message code="submission.publication.pages"/>
                                 </label>
                             </td>
-                            <td class="value" style="vertical-align:top;">
+                            <td>
                           	<g:textField name="pages" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.pages}"/>
                             </td>
                         </tr>
