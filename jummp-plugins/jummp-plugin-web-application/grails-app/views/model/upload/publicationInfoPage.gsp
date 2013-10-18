@@ -12,23 +12,38 @@
         </title>
         <script>
         	function addText() {
-        		if ($('#newAuthor').val().length > 1) {
-			    var fullName=$('#newAuthor').val()
-			    var parts=fullName.split(" ")
-			    var id=parts[0]+"<init>"
-			    if (parts.length>1) {
-			    	    id=id+parts[1]
+        		if ($('#newAuthorLastName').val()) {
+			    var lastName=$('#newAuthorLastName').val()
+			    var fullName=lastName
+			    var id=lastName+"<init>"
+			    if ($('#newAuthorInitials').val()) {
+			    	    var initials=$('#newAuthorInitials').val()
+			    		id=id+initials
+			    	    fullName=initials+". "+lastName
 			    }
-			    $('#authorList')
-			    .append($('<option>', { value : id })
-			    .text(fullName)); 
+			    var alreadyPresent=false
+			    $("#authorList > option").each(function() {
+			    	if (this.value === id) {
+			    		alreadyPresent=true
+			    	}
+			    });
+			    if (!alreadyPresent) {
+			    	$('#authorList')
+			    		.append($('<option>', { value : id })
+			    		.text(fullName));
+			    		setHiddenFieldValue();
+			    }
+			    else {
+			    	alert("An author by that name is already added to the publication.")
+			    }
+			    $('#newAuthorInitials').val("")
+			    $('#newAuthorLastName').val("")
 			}
         	}
         	
         	$(document).ready(function () {
         			$('#addButton').click(function() {
         				addText()
-        				setHiddenFieldValue()
         			});
         			setHiddenFieldValue()
         	});
@@ -66,7 +81,6 @@
 	border:1px solid #dcdcdc;
 	display:inline-block;
 	color:#777777;
-	margin-left:10px;
 	font-family:arial;
 	font-size:15px;
 	font-weight:bold;
@@ -84,9 +98,32 @@
 	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed');
 	background-color:#dfdfdf;
 	}.addButton:active {
-	position:relative;
 	top:1px;
 	}
+	label {
+		display:block;
+		margin-left:10px;
+	}
+	.authorLabel {
+		display:block;
+	}
+	#authorform {
+    	width:200px; 
+    	overflow:hidden;
+    	margin-left:-25px;
+    	margin-top:5px;
+    }
+ 
+    #authorform li {
+    	list-style:none; 
+    	padding-bottom:10px;
+    }
+    table
+    {
+    	border-collapse:separate;
+    	border-spacing:10px 5px;
+    }
+
     </style>
     </head>
     <body>
@@ -127,10 +164,27 @@
                             <td class="value" style="vertical-align:top;">
                           	<select style="width:330px" id="authorList" name="authorList" size="2">
                           		<g:each in="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.authors}">
-                          			<option value="${it.lastName}<init>${it.initials}">${it.lastName} ${it.initials}</option>
+                          			<option value="${it.lastName}<init>${it.initials}">${it.initials}. ${it.lastName}</option>
                           		</g:each>
                           	</select>
-                          	<input size="30" type="text" id="newAuthor"/><a href="#" id="addButton" class="addButton">Add</a>
+                          		<div>
+                          			<ul id="authorform">
+                          				<li>
+                          					<label style="display:block;margin-left:0px">Initials</label>
+                          					<span><input size="20" type="text" id="newAuthorInitials"/></span>
+                          				</li>
+                          				<li>
+                          					<label style="display:block;margin-left:0px">Last name</label>
+                          					<span>
+                          					<input size="20" type="text" id="newAuthorLastName"/>
+                          					</span>
+                          				</li>
+                          				<li>
+                          					<a href="#" id="addButton" class="addButton">Add</a>
+                          				</li>
+                          			</ul>
+                          		</div>
+                          			
                             </td>
                             <td class="title" style="vertical-align:top;">
                                 <label for="journal">
@@ -138,7 +192,7 @@
                                 </label>
                             </td>
                             <td class="value" style="vertical-align:top;">
-                          	<g:textArea name="synopsis" rows="5" cols="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.synopsis}"/>
+                          	<g:textArea name="synopsis" rows="13" cols="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.synopsis}"/>
                             </td>
                         </tr>
                         <tr class="prop">
