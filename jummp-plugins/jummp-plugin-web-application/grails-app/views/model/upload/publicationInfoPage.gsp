@@ -91,6 +91,11 @@
     </head>
     <body>
         <h2>Update Publication Information</h2>
+        <g:hasErrors bean="${validationErrorOn}">
+        <div class="errors">
+        	<g:renderErrors bean="${validationErrorOn}" as="list" />
+        </div>
+        </g:hasErrors>
         <g:form>
             <div class="dialog">
                 <table class="formtable">
@@ -120,7 +125,7 @@
                                 </label>
                             </td>
                             <td class="value" style="vertical-align:top;">
-                          	<select style="width:330px" id="authorList" name="authorList" size="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.authors?.size()?:2}">
+                          	<select style="width:330px" id="authorList" name="authorList" size="2">
                           		<g:each in="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.authors}">
                           			<option value="${it.lastName}<init>${it.initials}">${it.lastName} ${it.initials}</option>
                           		</g:each>

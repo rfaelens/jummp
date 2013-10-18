@@ -431,6 +431,7 @@ class ModelController {
         	    	        else {
         	    	        	log.error "Submission did not validate: ${author.properties}."
         	    	        	log.error "Errors: ${author.errors.allErrors.inspect()}."
+        	    	        	flash.validationErrorOn=author
         	    	        	return error()
         	    	        }
         	    	 }
@@ -439,6 +440,7 @@ class ModelController {
             	   if (!model.publication.validate()) {
             	   	   log.error "Submission did not validate: ${model.publication.properties}."
             	   	   log.error "Errors: ${model.publication.errors.allErrors.inspect()}."
+            	   	   flash.validationErrorOn=model.publication
             	   	   return error()
             	   }
             }.to "saveModel"
