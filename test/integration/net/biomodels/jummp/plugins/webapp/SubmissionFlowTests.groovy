@@ -265,6 +265,9 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             //add tests for when displayModelInfo does something interesting
             //signalEvent("Continue") display model info disabled
             
+            //Dont add publication info
+            signalEvent("Continue")
+            
             assertFlowState("displaySummaryOfChanges")
             Model model=modelService.getModel(modelid)
             Revision prev=modelService.getLatestRevision(model)
@@ -337,6 +340,14 @@ class SubmissionFlowTests extends JummpIntegrationTest {
            	assertFlowState("displayModelInfo") 
            	signalEvent("Continue")
             */
+           
+            //Dont add publication info
+            assertFlowState("enterPublicationLink")
+            //(mockRequest as MockHttpServletRequest).setParameter("PubLinkProvider","PUBMED") Doesnt seem to work :/
+            //(mockRequest as MockHttpServletRequest).setParameter("PublicationLink","9486845")
+            
+            signalEvent("Continue")
+            
             assert false == (Boolean) flowScope.
                                         workingMemory.
                                         get("isUpdateOnExistingModel")
