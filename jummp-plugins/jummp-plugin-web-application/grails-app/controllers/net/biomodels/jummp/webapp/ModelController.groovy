@@ -341,7 +341,7 @@ class ModelController {
             action {
                 submissionService.inferModelInfo(flow.workingMemory)
             }
-            on("success").to "displaySummaryOfChanges"
+            on("success").to "enterPublicationLink"
         }
         /** Temporarily disabled state while we arent able to modify the model
         displayModelInfo {
@@ -356,33 +356,25 @@ class ModelController {
             on("Back"){}.to "uploadFiles"
         }
         */
-        displaySummaryOfChanges {
-            on("Continue")
-            {
-                Map<String,String> modifications=new HashMap<String,String>()
-                if (params.RevisionComments) {
-                    modifications.put("RevisionComments", params.RevisionComments)
-                }
-                else {
-                    modifications.put("RevisionComments", "Model revised without commit message")
-                }
+        enterPublicationLink {
+        	on("Continue") {
+        		Map<String,String> modifications=new HashMap<String,String>()
                 if (params.PubLinkProvider && params.PublicationLink) {
                 	modifications.put("PubLinkProvider",params.PubLinkProvider) 
                 	modifications.put("PubLink",params.PublicationLink) 
+                	submissionService.updatePublicationLink(flow.workingMemory, modifications)
                 }
                 else {
                 	flow.workingMemory.put("RetrievePubDetails", false)
                 }
-                submissionService.updateFromSummary(flow.workingMemory, modifications)
-            }.to "getPublicationDataIfPossible"
-            on("Cancel").to "cleanUpAndTerminate"
-            //on("Back"){}.to "displayModelInfo" //To be set back when model editing is enabled
-            on("Back"){}.to "uploadFiles"
+        	}.to "getPublicationDataIfPossible"
+        	on("Cancel").to "cleanUpAndTerminate"
+            on("Back").to "uploadFiles"
         }
         getPublicationDataIfPossible {
         	action {
-        		ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
         		if (flow.workingMemory.remove("RetrievePubDetails") as Boolean) {
+        			ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
         			if (model.publication.linkProvider==PublicationLinkProvider.PUBMED) {
         				model.publication = pubMedService.
         							getPublication(model.publication.link).
@@ -391,11 +383,11 @@ class ModelController {
         			publicationInfoPage()
         		}
         		else {
-        			saveModel()
+        			displaySummaryOfChanges()
         		}
         	}
         	on("publicationInfoPage").to "publicationInfoPage"
-        	on("saveModel").to "saveModel"
+        	on("displaySummaryOfChanges").to "displaySummaryOfChanges"
         }
         publicationInfoPage {
             on("Continue"){
@@ -443,12 +435,28 @@ class ModelController {
             	   	   flash.validationErrorOn=model.publication
             	   	   return error()
             	   }
-            }.to "saveModel"
+            }.to "displaySummaryOfChanges"
             on("Cancel").to "cleanUpAndTerminate"
             on("Back"){
             	ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
         		model.publication=null
-            }.to "displaySummaryOfChanges"
+            }.to "enterPublicationLink"
+        }
+        displaySummaryOfChanges {
+            on("Continue")
+            {
+                Map<String,String> modifications=new HashMap<String,String>()
+                if (params.RevisionComments) {
+                    modifications.put("RevisionComments", params.RevisionComments)
+                }
+                else {
+                    modifications.put("RevisionComments", "Model revised without commit message")
+                }
+                submissionService.updateFromSummary(flow.workingMemory, modifications)
+            }.to "saveModel"
+            on("Cancel").to "cleanUpAndTerminate"
+            //on("Back"){}.to "displayModelInfo" //To be set back when model editing is enabled
+            on("Back"){}.to "enterPublicationLink"
         }
         saveModel {
             action {

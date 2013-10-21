@@ -256,6 +256,16 @@ class SubmissionService {
         protected abstract void handleModificationsToSubmissionInfo(Map<String, Object> workingMemory,
                 Map<String,Object> modifications);
 
+                
+        void updatePublicationLink(Map<String,Object> workingMemory, Map<String,String> modifications) {
+        	if (modifications.containsKey("PubLinkProvider")) {
+        		workingMemory.put("RetrievePubDetails", 
+        							updatePubs(workingMemory.get("ModelTC") as MTC, 
+        									   modifications.get("PubLinkProvider"), 
+        									   modifications.get("PubLink")))
+        	}
+        }
+                
         /**
          * Purpose
          *
@@ -263,12 +273,7 @@ class SubmissionService {
          * @param modifications     a Map containing the user's modifications to the model information we extracted.
          */
         void updateFromSummary(Map<String,Object> workingMemory, Map<String,String> modifications) {
-        	if (modifications.containsKey("PubLinkProvider")) {
-        		workingMemory.put("RetrievePubDetails", 
-        							updatePubs(workingMemory.get("ModelTC") as MTC, 
-        									   modifications.get("PubLinkProvider"), 
-        									   modifications.get("PubLink")))
-        	}
+        	//does nothing in the base class. 
         }
 
         /**
@@ -672,7 +677,7 @@ class SubmissionService {
     }
 
     /**
-     * update the working memory with revision specific comments and publication data
+     * update the working memory with revision specific comments
      * parameter left as a map<string,string> for forward-compatibility
      *
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
@@ -681,7 +686,20 @@ class SubmissionService {
     void updateFromSummary(Map<String, Object> workingMemory, Map<String, String> modifications) {
         getStrategyFromContext(workingMemory).updateFromSummary(workingMemory, modifications)
     }
-
+    
+    
+    /**
+     * update the working memory with publication data.
+     * parameter left as a map<string,string> for forward-compatibility
+     *
+     * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+     */
+    @Profiled(tag = "submissionService.updateFromSummary")
+    void updatePublicationLink(Map<String, Object> workingMemory, Map<String, String> modifications) {
+        getStrategyFromContext(workingMemory).updatePublicationLink(workingMemory, modifications)
+    }
+    
+    
     /**
      * Purpose Create or update DOM objects as necessary
      *
