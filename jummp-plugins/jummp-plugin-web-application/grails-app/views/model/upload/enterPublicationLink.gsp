@@ -10,16 +10,13 @@
     <body>
     	<h2><g:message code="submission.publicationLink.header"/></h2>
         <g:form>
+            <g:message code="submission.publink.publication"/>
+                            
             <div class="dialog">
                 <table class="formtable">
                     <tbody>
                      	<tr class="prop">
-                            <td class="name" style="vertical-align:top;">
-                                <label for="pub">
-                                    <g:message code="submission.publink.publication"/>
-                                </label>
-                            </td>
-                           <td class="value" style="vertical-align:top;">
+                            <td class="value" style="vertical-align:top;">
                           		<g:if test="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).model.publication}">
                           					<g:select name="PubLinkProvider" 
                           					from="${PublicationLinkProvider.LinkType.
