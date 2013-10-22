@@ -180,20 +180,19 @@
 						primary:"ui-icon-unlocked"
 					}
 			});
-			$( "#unpublish" ).button({
-					text:false,
-					icons: {
-						primary:"ui-icon-locked"
-					}
-			});
 		});
 	
 	</script>
 	<script>
-		function openPage(loc) 
-		{
-			window.location.href = loc;
-		}
+        function openPage(loc) {
+            window.location.href = loc;
+        }
+        function publishModel(url) {
+            var shouldPublish = window.confirm("Make this version of the model visible to anyone without logging in?\nThis step is not reversible.");
+            if (shouldPublish) {
+                openPage(url);
+            }
+        }
 	</script>
 	<g:layoutHead/>
     </head>
@@ -204,18 +203,18 @@
 	    	</g:if>
     	        <h2 style="float: left;">${revision.model.name}</h2>
     	        <div style="float:right;margin-top:10px">
-    	        <div id="modeltoolbar" <%--class="ui-widget-header ui-corner-all"--%>>
-    	        		<button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.id)}')">Download</button>
-    	        		<g:if test="${canUpdate=="true"}">
-    	        			<button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}')">Update</button>
-    	        		</g:if>
-    	        		<g:if test="${showPublishOption=="true"}">
-    	        			<button id="publish" onclick="return openPage('${g.createLink(controller: 'model', action: 'publish', id: revision.id)}')">Publish</button>
-    	        		</g:if>
-    	        		<g:if test="${showUnpublishOption=="true"}">
-    	        			<button id="unpublish" onclick="return openPage('${g.createLink(controller: 'model', action: 'unpublish', id: revision.id)}')">Unpublish</button>
-    	        		</g:if>
-    	         </div>
+                    <div id="modeltoolbar" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>
+                            <button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.id)}')">Download</button>
+                            <g:if test="${canUpdate=="true"}">
+                                <button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}')">Update</button>
+                            </g:if>
+                            <g:if test="${showPublishOption=="true"}">
+                                <button id="publish" onclick="return publishModel('${g.createLink(controller: 'model', action: 'publish', id: revision.id)}')">Publish</button>
+                            </g:if>
+                            <g:else>
+                                <img style="float:right;margin-top:0;" title="This version of the model is public" alt="public model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/unlock.png"/>
+                            </g:else>
+                     </div>
     	         </div>
    
     	        <%--        <a class="submit" title="Update Model" href="${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}">Update</a> 	
