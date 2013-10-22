@@ -12,7 +12,6 @@ import net.biomodels.jummp.core.model.AuthorTransportCommand
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
-import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 
 
@@ -375,10 +374,14 @@ class ModelController {
         	action {
         		if (flow.workingMemory.remove("RetrievePubDetails") as Boolean) {
         			ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
-        			if (model.publication.linkProvider==PublicationLinkProvider.PUBMED) {
-        				model.publication = pubMedService.
-        							getPublication(model.publication.link).
-        							toCommandObject()
+        			if (model.publication.link && model.publication.linkProvider) {
+        				System.out.println("About to query pubmedservice")
+        				def retrieved=pubMedService.
+        							getPublication(model.publication)
+        				System.out.println("Got: "+retrieved)
+        				if (retrieved) {
+        					model.publication = retrieved.toCommandObject() 
+        				}
         			}
         			publicationInfoPage()
         		}

@@ -1,11 +1,11 @@
 package net.biomodels.jummp.core
 
 import net.biomodels.jummp.model.Publication
-import net.biomodels.jummp.core.model.PublicationLinkProvider
+import net.biomodels.jummp.model.PublicationLinkProvider
 import net.biomodels.jummp.model.Author
 import org.xml.sax.SAXParseException
 import org.springframework.transaction.annotation.Transactional
-
+import net.biomodels.jummp.core.model.PublicationTransportCommand
 /**
  * @short Service for fetching Publication Information for PubMed resources.
  *
@@ -19,13 +19,26 @@ class PubMedService {
     static transactional = true
 
     Publication getPublication(String id) throws JummpException {
-        Publication publication = Publication.findByLinkProviderAndLink(PublicationLinkProvider.PUBMED, id)
-        if (publication) {
+    	Publication publication = Publication.createCriteria().get() {
+    		eq("link",id)
+    		linkProvider {
+    			eq("linkType",PublicationLinkProvider.LinkType.PUBMED)
+    		}
+    	}
+    	if (publication) {
             return publication
         } else {
-            return fetchPublicationData(id)
+        	return fetchPublicationData(id)
         }
     }
+    
+    Publication getPublication(PublicationTransportCommand cmd) throws JummpException {
+    	if (PublicationLinkProvider.LinkType.valueOf(cmd.linkProvider.linkType)==PublicationLinkProvider.LinkType.PUBMED) {
+    		return getPublication(cmd.link)
+    	}
+    	return null
+    }
+
 
     private setFieldIfItExists(String fieldName, Publication publication, def xmlField, boolean castToInt) {
     	if (xmlField && xmlField.size()==1) {
@@ -62,7 +75,10 @@ class PubMedService {
         } catch (SAXParseException e) {
             throw new JummpException("Could not parse PubMed information", e)
         }
-        Publication publication = new Publication(linkProvider: PublicationLinkProvider.PUBMED, link: id)
+        PublicationLinkProvider link=PublicationLinkProvider.createCriteria().get() {
+        	eq("linkType",PublicationLinkProvider.LinkType.PUBMED)
+        }
+        Publication publication = new Publication(linkProvider: link, link: id)
         setFieldIfItExists("pages", publication, slurper.resultList.result.pageInfo, false)
         setFieldIfItExists("title", publication, slurper.resultList.result.title, false)
         setFieldIfItExists("affiliation", publication, slurper.resultList.result.affiliation, false)

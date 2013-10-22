@@ -52,7 +52,7 @@ class PublicationTransportCommand implements Serializable {
     /**
      * The provider of the publication id (e.g. PubMed)
      */
-    PublicationLinkProvider linkProvider
+    PublicationLinkProviderTransportCommand linkProvider
     /**
      * The key to the publication at the linkProvider or a URL
      */

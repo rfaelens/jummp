@@ -4,12 +4,23 @@ import net.biomodels.jummp.plugins.security.User
 import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.UserRole
-
+import net.biomodels.jummp.model.PublicationLinkProvider
+import net.biomodels.jummp.core.model.PublicationLinkProviderTransportCommand as PubLinkProvTC
 
 class BootStrap {
     def springSecurityService
     def wcmSecurityService
 
+    void addPublicationLinkProvider(PubLinkProvTC cmd) {
+    	def publinkType=PublicationLinkProvider.LinkType.valueOf(cmd.linkType)
+    	if (!PublicationLinkProvider.findByLinkType(publinkType)) {
+    		def publinkprov=new PublicationLinkProvider(linkType:publinkType,
+    													pattern:cmd.pattern,
+    													identifiersPrefix:cmd.identifiersPrefix)
+    		publinkprov.save(flush:true)
+    	}
+    }
+    
     def init = { servletContext ->
         ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "")
         if (!format) {
@@ -20,7 +31,48 @@ class BootStrap {
         def service = ctx.getBean("modelFileFormatService")
         def modelFormat = service.registerModelFormat("UNKNOWN", "UNKNOWN")
         service.handleModelFormat(modelFormat, "unknownFormatService", "unknown")
-        /* ONLY NEEDED FOR USER ACCOUNT CREATION.
+        
+        addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.PUBMED,
+        											 pattern:"^\\d+",
+        											 identifiersPrefix:"http://identifiers.org/pubmed/"))
+        											 
+        addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.DOI,
+        											 pattern:"^(doi\\:)?\\d{2}\\.\\d{4}.*",
+        											 identifiersPrefix:"http://identifiers.org/doi/"))
+        
+        addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.ARXIV,
+        											 pattern:"^(\\w+(\\-\\w+)?(\\.\\w+)?/)?\\d{4,7}(\\.\\d{4}(v\\d+)?)?",
+        											 identifiersPrefix:"http://identifiers.org/arxiv/"))
+        
+        addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.ISBN,
+        											 pattern:"^(ISBN)?(-13|-10)?[:]?[ ]?(\\d{2,3}[ -]?)?\\d{1,5}[ -]?\\d{1,7}[ -]?\\d{1,6}[ -]?(\\d|X)",
+        											 identifiersPrefix:"http://identifiers.org/isbn/"))
+        
+         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.ISSN,
+        											 pattern:"^\\d{4}\\-\\d{4}",
+        											 identifiersPrefix:"http://identifiers.org/issn/"))
+
+         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.JSTOR,
+        											 pattern:"^\\d+",
+        											 identifiersPrefix:"http://identifiers.org/jstor/"))
+
+         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.NARCIS,
+        											 pattern:"^oai\\:cwi\\.nl\\:\\d+",
+        											 identifiersPrefix:"http://identifiers.org/narcis/"))
+
+        addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.NBN,
+        											 pattern:"^urn\\:nbn\\:[A-Za-z_0-9]+\\:([A-Za-z_0-9]+\\:)?[A-Za-z_0-9]+",
+        											 identifiersPrefix:"http://identifiers.org/nbn/"))
+        
+        addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.PMC,
+        											 pattern:"PMC\\d+",
+        											 identifiersPrefix:"http://identifiers.org/pmc/"))
+											 
+        addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.CUSTOM,
+        											 pattern:"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",
+        							))
+        // ONLY NEEDED FOR USER ACCOUNT CREATION.
+        /*
         if (!User.findByUsername("user")) {
            def user = new User(username: "user",
                     password: springSecurityService.encodePassword("secret"),
@@ -37,8 +89,13 @@ class BootStrap {
             }
             Role userRole = Role.findByAuthority("ROLE_USER")
             UserRole.create(user, userRole, true)
+            if (!Role.findByAuthority("ROLE_ADMIN")) {
+                new Role(authority: "ROLE_ADMIN").save(flush: true)
+            }
+            userRole = Role.findByAuthority("ROLE_ADMIN")
+            UserRole.create(user, userRole, true)
         } 
-        */
+        //*/
 
         // custom mapping for weceem as it fails to work with an LDAPUserDetailsImpl
         wcmSecurityService.securityDelegate = [

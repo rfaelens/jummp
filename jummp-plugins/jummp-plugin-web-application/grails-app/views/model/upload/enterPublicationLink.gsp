@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="net.biomodels.jummp.core.model.RevisionTransportCommand" %>
-<%@ page import=" net.biomodels.jummp.core.model.PublicationLinkProvider" %>
+<%@ page import=" net.biomodels.jummp.model.PublicationLinkProvider" %>
 
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -22,7 +22,7 @@
                            <td class="value" style="vertical-align:top;">
                           		<g:if test="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).model.publication}">
                           					<g:select name="PubLinkProvider" 
-                          					from="${PublicationLinkProvider.
+                          					from="${PublicationLinkProvider.LinkType.
                           							values().collect(new LinkedList()) { it.toString() }}" 
                           							value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).
                           																		model.
@@ -38,7 +38,7 @@
                           		</g:if>
                           		<g:else>
                           					<g:select name="PubLinkProvider" 
-                          					from="${PublicationLinkProvider.
+                          					from="${PublicationLinkProvider.LinkType.
                           							values().collect(new LinkedList()) { it.toString() }}" 
                           					noSelection="['':'-Please select publication link type-']"/>
                           					<g:textField name="PublicationLink"/>

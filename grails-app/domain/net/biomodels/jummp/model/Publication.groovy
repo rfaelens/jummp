@@ -1,6 +1,5 @@
 package net.biomodels.jummp.model
 
-import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.AuthorTransportCommand
 
@@ -101,18 +100,27 @@ class Publication implements Serializable {
                 volume: volume,
                 issue: issue,
                 pages: pages,
-                linkProvider: linkProvider,
+                linkProvider: linkProvider.toCommandObject(),
                 link: link,
                 authors: authorCmds)
     }
 
     static Publication fromCommandObject(PublicationTransportCommand cmd) {
-        List<Author> authors = []
+        Publication publication = Publication.createCriteria().get() {
+    		eq("link",cmd.link)
+    		linkProvider {
+    			eq("linkType",PublicationLinkProvider.LinkType.valueOf(cmd.linkProvider.linkType))
+    		}
+    	}
+    	if (publication) {
+        	return publication
+        }
+    	List<Author> authors = []
         cmd.authors.each {
             Author current = new Author(initials: it.initials, firstName: it.firstName, lastName: it.lastName)
             authors << current
         }
-        return new Publication(journal: cmd.journal,
+        Publication publ=new Publication(journal: cmd.journal,
                 title: cmd.title,
                 affiliation: cmd.affiliation,
                 synopsis: cmd.synopsis,
@@ -122,9 +130,11 @@ class Publication implements Serializable {
                 volume: cmd.volume,
                 issue: cmd.issue,
                 pages: cmd.pages,
-                linkProvider: cmd.linkProvider,
+                linkProvider: PublicationLinkProvider.fromCommandObject(cmd.linkProvider),
                 link: cmd.link,
                 authors: authors
                 )
+        publ.save(flush:true)
+        return publ
     }
 }

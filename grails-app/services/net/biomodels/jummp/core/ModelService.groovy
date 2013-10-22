@@ -8,13 +8,13 @@ import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.core.model.PublicationLinkProvider
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Author
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Publication
+import net.biomodels.jummp.model.PublicationLinkProvider
 import net.biomodels.jummp.model.RepositoryFile
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
@@ -855,43 +855,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         if (revision.validate()) {
             model.addToRevisions(revision)
-            if (rev.model.publication && rev.model.publication.linkProvider == PublicationLinkProvider.PUBMED) {
-                try {
-                    model.publication = pubMedService.getPublication(rev.model.publication.link)
-                    model.publication.journal=rev.model.publication.journal
-            	    model.publication.title=rev.model.publication.title
-            	    model.publication.month=rev.model.publication.month
-            	    model.publication.year=rev.model.publication.year
-            	    model.publication.synopsis=rev.model.publication.synopsis
-            	    model.publication.affiliation=rev.model.publication.affiliation
-            	    model.publication.volume=rev.model.publication.volume
-            	    model.publication.issue=rev.model.publication.issue
-            	    model.publication.pages=rev.model.publication.pages
-            	    rev.model.publication.authors.each { uploaded->
-            	    	    def author=model.publication.authors.find { saved->
-            	    	    	    saved.lastName==uploaded.lastName && saved.initials==uploaded.initials
-            	    	    }
-            	    	    if (!author) {
-            	    	    	    Author newAuthor=new Author(lastName:uploaded.lastName, initials:uploaded.initials)
-            	    	    	    newAuthor.save()
-            	    	    	    model.publication.authors.add(newAuthor)
-            	    	    }
-            	    }
-            	    model.publication.save()
-                } catch (JummpException e) {
-                    revision.discard()
-                    domainObjects.each { it.discard() }
-                    model.discard()
-                    def error = new StringBuffer("New Model ${model.name} does not validate:")
-                    error.append("${model.errors.allErrors.inspect()}\n")
-                    error.append("${revision.errors.allErrors.inspect()}\n")
-                    log.error(error)
-                    stopWatch.stop()
-                    throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data for ${model.name}", e)
-                }
-            } else if (rev.model.publication &&
-                    (rev.model.publication.linkProvider == PublicationLinkProvider.DOI || rev.model.publication.linkProvider == PublicationLinkProvider.URL)) {
-                model.publication = Publication.fromCommandObject(rev.model.publication)
+            if (rev.model.publication) {
+            	model.publication = Publication.fromCommandObject(rev.model.publication)
             }
             if (!model.validate()) {
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
@@ -1095,7 +1060,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         if (revision.validate()) {
             model.addToRevisions(revision)
-            if (meta.publication && meta.publication.linkProvider == PublicationLinkProvider.PUBMED) {
+            if (meta.publication && meta.publication.linkProvider.linkType == PublicationLinkProvider.LinkType.PUBMED) {
                 try {
                     model.publication = pubMedService.getPublication(meta.publication.link)
                 } catch (JummpException e) {
@@ -1109,8 +1074,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     stopWatch.stop()
                     throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data for ${model.name}", e)
                 }
-            } else if (meta.publication &&
-                    (meta.publication.linkProvider == PublicationLinkProvider.DOI || meta.publication.linkProvider == PublicationLinkProvider.URL)) {
+            } else if (meta.publication) {
                 model.publication = Publication.fromCommandObject(meta.publication)
             }
             if (!model.validate()) {

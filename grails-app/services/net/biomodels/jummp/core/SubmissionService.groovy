@@ -6,7 +6,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.core.model.PublicationTransportCommand
-import net.biomodels.jummp.core.model.PublicationLinkProvider
+import net.biomodels.jummp.model.PublicationLinkProvider
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
@@ -156,15 +156,19 @@ class SubmissionService {
         
         protected boolean updatePubs(MTC model, String publinkType, String publink) {
         	boolean refreshPublication=false
+        	def linkType=PublicationLinkProvider.LinkType.valueOf(publinkType)
         	if (!model.publication) {
         		model.publication=new PublicationTransportCommand()
         		refreshPublication=true;
         	}
-        	else if (model.publication.link!=publink || model.publication.linkProvider.toString()!=publinkType) {
+        	else if (model.publication.link!=publink || model.publication.linkProvider?.linkType!=linkType) {
         		refreshPublication=true;
         	}
         	model.publication.link=publink
-        	model.publication.linkProvider=PublicationLinkProvider.valueOf(publinkType)
+        	model.publication.linkProvider=PublicationLinkProvider.createCriteria().get() {
+        			eq("linkType",linkType)
+        	}.toCommandObject()
+        	System.out.println("Refresh Publications: "+refreshPublication+".."+model.publication.linkProvider.getProperties())
         	return refreshPublication
         }
 
