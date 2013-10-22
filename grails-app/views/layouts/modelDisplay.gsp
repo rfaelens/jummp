@@ -236,13 +236,18 @@
 		    <td class='key'><g:message code="model.model.version"/></td>
 		    <td class='value'>${revision.revisionNumber}</td>
 		    <td class='key'><g:message code="model.model.format"/></td>
-		    <td class='value'>${revision.format.name}</td>
+		    <td class='value'>${revision.format.name} (${revision.format.formatVersion})</td>
 		</tr>
 		<tr>
 		    <td class='key'><g:message code="model.model.status"/></td>
 		    <td class='value'>${revision.model.state.toString().toLowerCase().capitalize()}</td>
-		    <td class='key'><g:message code="model.model.formatversion"/></td>
-		    <td class='value'>${revision.format.formatVersion}</td>
+		    <td class='key'><g:message code="model.model.publication"/>:</td>
+		    <td>
+		    	<%
+		    		model=revision.model
+		    	%>
+		    	<g:render  model="[model:model]" template="/templates/showPublication" />
+		    </td>
 		<tr>
 		</tr>
 		</tr>

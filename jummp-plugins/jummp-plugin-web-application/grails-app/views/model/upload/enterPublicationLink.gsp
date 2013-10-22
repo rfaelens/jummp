@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="net.biomodels.jummp.core.model.RevisionTransportCommand" %>
+<%@ page import="net.biomodels.jummp.core.model.ModelTransportCommand" %>
 <%@ page import=" net.biomodels.jummp.model.PublicationLinkProvider" %>
 
     <head>
@@ -11,7 +12,14 @@
     	<h2><g:message code="submission.publicationLink.header"/></h2>
         <g:form>
             <g:message code="submission.publink.publication"/>
-                            
+            <% 
+            	model=(workingMemory.get('ModelTC') as ModelTransportCommand) 
+            %>
+            <g:if test="${model.publication}">
+				Currently, the model is associated with: 
+            	<g:render  model="[model:model]" template="/templates/showPublication" />
+			</g:if>
+                                    
             <div class="dialog">
                 <table class="formtable">
                     <tbody>
