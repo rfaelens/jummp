@@ -236,7 +236,7 @@
 		    <td class='key'><g:message code="model.model.version"/></td>
 		    <td class='value'>${revision.revisionNumber}</td>
 		    <td class='key'><g:message code="model.model.format"/></td>
-		    <td class='value'>${revision.format.name} (${revision.format.formatVersion})</td>
+		    <td class='value'>${revision.format.name} ${revision.format.formatVersion?"(${revision.format.formatVersion})":""}</td>
 		</tr>
 		<tr>
 		    <td class='key'><g:message code="model.model.status"/></td>

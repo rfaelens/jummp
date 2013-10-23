@@ -10,6 +10,9 @@
     </head>
     <body>
     	<h2><g:message code="submission.publicationLink.header"/></h2>
+    	<g:if test="${validationError}">
+    		<p><b>${validationError}</b><p>
+    	</g:if>
         <g:form>
             <g:message code="submission.publink.publication"/>
             <% 
@@ -19,8 +22,7 @@
 				Currently, the model is associated with: 
             	<g:render  model="[model:model]" template="/templates/showPublication" />
 			</g:if>
-                                    
-            <div class="dialog">
+			<div class="dialog">
                 <table class="formtable">
                     <tbody>
                      	<tr class="prop">
@@ -32,7 +34,7 @@
                           							value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).
                           																		model.
                           																		publication.
-                          																		linkProvider.
+                          																		linkProvider.linkType.
                           																		toString()}" 
                           							noSelection="['':'-Please select publication link type-']"/>
                           					<g:textField name="PublicationLink"

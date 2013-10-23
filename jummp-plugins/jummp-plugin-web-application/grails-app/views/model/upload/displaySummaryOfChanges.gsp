@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="net.biomodels.jummp.core.model.RevisionTransportCommand" %>
+<%@ page import="net.biomodels.jummp.core.model.ModelTransportCommand" %>
 
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -31,6 +32,21 @@
                             <td class="value" style="vertical-align:top;">
                             	<div class="displayDescription">
                                 	<label name="description">${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}</label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="prop">
+                            <td class="name" style="vertical-align:top;">
+                                <label for="description">
+                                    <g:message code="submission.summary.publication"/>
+                                </label>
+                            </td>
+                            <td class="value" style="vertical-align:top;">
+                            	<div class="displayDescription">
+                            		<%
+                            			model=(workingMemory.get("ModelTC") as ModelTransportCommand)
+                            		%>
+                            		<g:render  model="[model:model]" template="/templates/showPublication" />
                                 </div>
                             </td>
                         </tr>
