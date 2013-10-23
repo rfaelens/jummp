@@ -6,6 +6,8 @@ import net.biomodels.jummp.model.Author
 import org.xml.sax.SAXParseException
 import org.springframework.transaction.annotation.Transactional
 import net.biomodels.jummp.core.model.PublicationTransportCommand
+import java.util.regex.Pattern
+import java.util.regex.Matcher
 /**
  * @short Service for fetching Publication Information for PubMed resources.
  *
@@ -39,6 +41,19 @@ class PubMedService {
     	return null
     }
 
+    boolean verifyLink(String linkTypeAsString, String link) {
+    	PublicationLinkProvider linkType=PublicationLinkProvider.createCriteria().get() {
+        	eq("linkType",PublicationLinkProvider.LinkType.valueOf(linkTypeAsString))
+        }
+        if (!linkType) {
+        	return false
+        }
+        Pattern p = Pattern.compile(linkType.pattern);
+        Matcher m = p.matcher(link);
+        System.out.println(link+" ... "+linkType.pattern+" ... "+p.toString()+" ... "+m.matches())
+        return m.matches()
+    }
+    
 
     private setFieldIfItExists(String fieldName, Publication publication, def xmlField, boolean castToInt) {
     	if (xmlField && xmlField.size()==1) {
