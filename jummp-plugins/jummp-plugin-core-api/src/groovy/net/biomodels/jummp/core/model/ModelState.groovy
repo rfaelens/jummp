@@ -22,9 +22,5 @@ public enum ModelState {
     /**
      * The Model has been included in a release.
      */
-    RELEASED,
-    /**
-     * The Model is deleted. The previous state was UNPUBLISHED
-     */
-    DELETED
+    RELEASED
 }
