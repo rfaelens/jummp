@@ -157,11 +157,9 @@ class SubmissionService {
         protected boolean updatePubs(MTC model, String publinkType, String publink) {
         	boolean refreshPublication=false
         	def linkType=PublicationLinkProvider.LinkType.valueOf(publinkType)
-        	if (!model.publication) {
+        	if (!model.publication || model.publication.link!=publink 
+        		|| model.publication.linkProvider?.linkType!=publinkType) {
         		model.publication=new PublicationTransportCommand()
-        		refreshPublication=true;
-        	}
-        	else if (model.publication.link!=publink || model.publication.linkProvider?.linkType!=linkType) {
         		refreshPublication=true;
         	}
         	model.publication.link=publink
