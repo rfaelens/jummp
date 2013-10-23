@@ -336,17 +336,25 @@
   		</div>
   	  </div>
 	  <div id="History">
-	  	<h5>Model owned by ${revision.model.submitter}</h5>
 	  	<% DateFormat dateFormat = DateFormat.getDateTimeInstance(); %>
 	  	<ul>
+	  		<li>Model owner: ${revision.model.submitter}</li>
 	  		<li>Submitted: ${dateFormat.format(allRevs.first().uploadDate)}</li>
 	  		<li>Last Modified: ${dateFormat.format(allRevs.last().uploadDate)}</li>
 	  	</ul>
 	  	<h5>Revisions</h5>
 	  	<ul>
-	  	     <g:each in="${allRevs.sort{a,b -> a.revisionNumber > b.revisionNumber ? -1 : 1}}">
-	  	     	<li>${dateFormat.format(it.uploadDate)} - Version: ${it.revisionNumber}, submitted by ${it.owner} with comment: ${it.comment}
-	  	     		<div title="Download version ${it.revisionNumber}" class="arrow-down" onclick='window.location = "${g.createLink(controller: 'model', action: 'download', id: it.id)}"'></div>
+	  	     <g:each status="i" var="rv" in="${allRevs.sort{a,b -> a.revisionNumber > b.revisionNumber ? -1 : 1}}">
+	  	     	<li style="${i==0?"background-color:#FFFFCC;":""}margin-top:5px">
+	  	     		Version: ${rv.revisionNumber} 
+	  	     				<a title="download" href="${g.createLink(controller: 'model', action: 'download', id: rv.id)}">
+	  	     					<img style="width:15px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png"/>
+	  	     				</a>
+	  	     			<ul>
+	  	     				<li>Submitted on: ${dateFormat.format(rv.uploadDate)}</li>
+	  	     				<li>Submitted by: ${rv.owner}</li>
+	  	     				<li>With comment: ${rv.comment}</li>
+	  	     			</ul>
 	  	     	</li>
 	  	     </g:each>
   		</ul>
