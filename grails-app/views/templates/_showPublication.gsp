@@ -23,8 +23,7 @@
     				<a href="${model.publication.linkProvider.identifiersPrefix?model.publication.linkProvider.identifiersPrefix+model.publication.link:model.publication.link}">View Publication</a>
     			</li>
     	</div>
-
-    	<script src="http://sylvain-hamel.github.io/simple-expand/javascripts/simple-expand.js"></script>
+    	<g:javascript contextPath="" src="simple-expand.js"/>
     	<script>
 			$('.expander').simpleexpand({'defaultTarget':'div.hiddenContent'});
 		</script>
