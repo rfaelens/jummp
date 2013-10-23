@@ -357,8 +357,16 @@ class ModelController {
         */
         enterPublicationLink {
         	on("Continue") {
+        		if (!params.PubLinkProvider && params.PublicationLink) {
+        			flash.validationError="Please select a publication link type."
+        			return error()
+        		}
         		Map<String,String> modifications=new HashMap<String,String>()
                 if (params.PubLinkProvider && params.PublicationLink) {
+                	if (!pubMedService.verifyLink(params.PubLinkProvider,params.PublicationLink)) {
+                		flash.validationError="The link is not a valid ${params.PubLinkProvider}"
+                		return error()
+        			}
                 	modifications.put("PubLinkProvider",params.PubLinkProvider) 
                 	modifications.put("PubLink",params.PublicationLink) 
                 	submissionService.updatePublicationLink(flow.workingMemory, modifications)
@@ -378,7 +386,6 @@ class ModelController {
         				System.out.println("About to query pubmedservice")
         				def retrieved=pubMedService.
         							getPublication(model.publication)
-        				System.out.println("Got: "+retrieved)
         				if (retrieved) {
         					model.publication = retrieved.toCommandObject() 
         				}
@@ -440,10 +447,7 @@ class ModelController {
             	   }
             }.to "displaySummaryOfChanges"
             on("Cancel").to "cleanUpAndTerminate"
-            on("Back"){
-            	ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
-        		model.publication=null
-            }.to "enterPublicationLink"
+            on("Back").to "enterPublicationLink"
         }
         displaySummaryOfChanges {
             on("Continue")
