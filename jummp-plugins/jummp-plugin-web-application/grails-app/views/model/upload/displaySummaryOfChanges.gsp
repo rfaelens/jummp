@@ -20,7 +20,7 @@
                                 </label>
                             </td>
                             <td class="value" style="vertical-align:top;">
-                          	<label name="name">${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}</label>
+                          	${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}
                             </td>
                         </tr>
                         <tr class="prop">
@@ -31,7 +31,7 @@
                             </td>
                             <td class="value" style="vertical-align:top;">
                             	<div class="displayDescription">
-                                	<label name="description">${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}</label>
+                                	${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}
                                 </div>
                             </td>
                         </tr>
