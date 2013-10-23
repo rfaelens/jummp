@@ -1,6 +1,5 @@
 package net.biomodels.jummp.model
 
-import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.core.model.ModelTransportCommand
 
 /**
@@ -32,13 +31,13 @@ class Model implements Serializable {
      */
     String vcsIdentifier
     /**
-     * The state of the Model, by default UNPUBLISHED
-     */
-    ModelState state = ModelState.UNPUBLISHED
-    /**
      * The Publication the model has been described in
      */
     Publication publication
+    /*
+     * Whether the model has been deleted
+    */
+    boolean deleted=false
     // TODO: unique Identifier for the model? UML diagram lists an "accessionNumber"?
 
     static mapping = {
@@ -51,8 +50,8 @@ class Model implements Serializable {
         revisions(nullable: false, validator: { revs ->
             return !revs.isEmpty()
         })
-        state(nullable: false)
         publication(nullable: true)
+        deleted(nullable: false)
     }
 
     ModelTransportCommand toCommandObject() {
@@ -63,7 +62,7 @@ class Model implements Serializable {
                 creators.add(revision.owner.userRealName)
             }
         }
-        return new ModelTransportCommand(id: id, name: name, state: state,
+        return new ModelTransportCommand(id: id, name: name,
                 lastModifiedDate: revisions ? revisions.sort{ it.revisionNumber }.last().uploadDate : null,
                 format: revisions ? revisions.sort{ it.revisionNumber }.last().format.toCommandObject() : null,
                 publication: publication ? publication.toCommandObject() : null,

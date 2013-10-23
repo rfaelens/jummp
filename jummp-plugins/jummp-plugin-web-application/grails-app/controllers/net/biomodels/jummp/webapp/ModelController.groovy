@@ -54,7 +54,7 @@ class ModelController {
 
     def show = {
         ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
-        boolean showPublishOption = model.state == ModelState.UNPUBLISHED
+        boolean showPublishOption = modelDelegateService.getLatestRevision(model.id).state == ModelState.UNPUBLISHED
         boolean canUpdate = modelDelegateService.canAddRevision(model.id)
 
         String flashMessage=""

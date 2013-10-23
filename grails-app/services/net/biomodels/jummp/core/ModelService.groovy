@@ -174,7 +174,7 @@ class ModelService {
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
             def criteria = Model.createCriteria()
             return criteria.list {
-                ne("state", ModelState.DELETED)
+                ne("deleted", true)
                 if (filter && filter.length() >= 3) {
                     or {
                         ilike("name", "%${filter}%")
@@ -242,7 +242,7 @@ AND ac.className = :className
 AND sid.sid IN (:roles)
 AND ace.mask IN (:permissions)
 AND ace.granting = true
-AND m.state != :deleted
+AND m.deleted = false
 AND r.deleted = false
 '''
         if (filter && filter.length() >= 3) {
@@ -289,7 +289,6 @@ ORDER BY
         Map params = [
             className: Revision.class.getName(),
             permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
-            deleted: ModelState.DELETED,
             roles: roles, max: count, offset: offset]
         if (filter && filter.length() >= 3) {
             params.put("filter", "%${filter.toLowerCase()}%");
@@ -372,7 +371,7 @@ ORDER BY
             // special handling for Admin - is allowed to see all (not deleted) Models
             def criteria = Model.createCriteria()
             return criteria.get {
-                ne("state", ModelState.DELETED)
+                ne("deleted", true)
                 if (filter && filter.length() >= 3) {
                     or {
                         ilike("name", "%${filter}%")
@@ -409,7 +408,7 @@ AND ac.className = :className
 AND sid.sid IN (:roles)
 AND ace.mask IN (:permissions)
 AND ace.granting = true
-AND m.state != :deleted
+AND m.deleted = false
 AND r.deleted = false
 '''
         if (filter && filter.length() >= 3) {
@@ -425,7 +424,6 @@ OR lower(m.publication.affiliation) like :filter
         Map params = [
             className: Revision.class.getName(),
             permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
-            deleted: ModelState.DELETED,
             roles: roles]
         if (filter && filter.length() >= 3) {
             params.put("filter", "%${filter.toLowerCase()}%");
@@ -464,7 +462,7 @@ OR lower(m.publication.affiliation) like :filter
         if (!model) {
             return null
         }
-        if (model.state == ModelState.DELETED) {
+        if (model.deleted) {
             // exclude deleted models
             return null
         }
@@ -530,7 +528,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllRevisions")
     public List<Revision> getAllRevisions(Model model) {
-        if (model.state == ModelState.DELETED) {
+        if (model.deleted) {
             return []
         }
         // exclude deleted revisions
@@ -627,7 +625,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (!rev.model) {
             throw new ModelException(null, "Model may not be null")
         }
-        if (rev.model.state == ModelState.DELETED) {
+        if (rev.model.deleted) {
             throw new ModelException(rev.model, "A new Revision cannot be added to a deleted model")
         }
         if (rev.comment == null) {
@@ -1176,7 +1174,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (!model) {
             throw new ModelException(null, "Model may not be null")
         }
-        if (model.state == ModelState.DELETED) {
+        if (model.deleted) {
             throw new ModelException(model.toCommandObject(), "A new Revision cannot be added to a deleted model")
         }
         if (comment == null) {
@@ -1517,13 +1515,20 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (!model) {
             throw new IllegalArgumentException("Model may not be null")
         }
-        // TODO: the code does not check whether the model exists
-        if (model.state != ModelState.UNPUBLISHED) {
-            return false
+        if (model.deleted) {
+        	return false
         }
-        model.state = ModelState.DELETED
+        List<Revision> revs=getAllRevisions(model)
+        Revision publicRev=revs.find {
+        	it.state != ModelState.UNPUBLISHED
+        }
+        System.out.println("Revision with unpublished status: "+publicRev)
+        if (publicRev) {
+        	return false
+        }
+        model.deleted=true
         model.save(flush: true)
-        return model.state == ModelState.DELETED
+        return model.deleted==true
     }
 
     /**
@@ -1542,11 +1547,14 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (!model) {
             throw new IllegalArgumentException("Model may not be null")
         }
+        if (!model.deleted) {
+        	return false
+        }
         // TODO: the code does not check whether the model exists
-        if (model.state == ModelState.DELETED) {
-            model.state = ModelState.UNPUBLISHED
-            model.save(flush: true)
-            return model.state == ModelState.UNPUBLISHED
+        if (model.deleted) {
+            model.deleted=false
+        	model.save(flush: true)
+            return model.deleted==false
         } else {
             return false
         }
@@ -1613,8 +1621,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
         aclUtilService.addPermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
-        revision.model.state=ModelState.PUBLISHED
-        revision.model.save(flush:true)
+        revision.state=ModelState.PUBLISHED
+        revision.save(flush:true)
     }
     
     
@@ -1640,8 +1648,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         aclUtilService.deletePermission(revision, "ROLE_USER", BasePermission.READ)
         aclUtilService.deletePermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
-        revision.model.state=ModelState.UNPUBLISHED
-        revision.model.save(flush:true)
+        revision.state=ModelState.UNPUBLISHED
+        revision.save(flush:true)
     }
 
     

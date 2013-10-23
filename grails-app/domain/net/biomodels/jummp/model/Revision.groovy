@@ -3,6 +3,8 @@ package net.biomodels.jummp.model
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
+import net.biomodels.jummp.core.model.ModelState
+
 
 /**
  * @short A Revision represents one version of a Model.
@@ -82,6 +84,10 @@ class Revision implements Serializable {
      */
     ModelFormat format
     /**
+     * The state of the Model, by default UNPUBLISHED
+     */
+    ModelState state = ModelState.UNPUBLISHED
+    /**
      * Indicates whether this Revision is marked as deleted.
      */
     Boolean deleted = false
@@ -100,6 +106,7 @@ class Revision implements Serializable {
         comment(nullable: false, blank: true, maxSize: 1000)
         format(nullable: false)
         deleted(nullable: false)
+        state(nullable: false)
     }
     
     
@@ -124,6 +131,7 @@ class Revision implements Serializable {
     RevisionTransportCommand toCommandObject() {
         RevisionTransportCommand rev=new RevisionTransportCommand(
                 id: id,
+                state:state,
                 revisionNumber: revisionNumber,
                 owner: owner.userRealName,
                 minorRevision: minorRevision,

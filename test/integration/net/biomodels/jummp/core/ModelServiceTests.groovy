@@ -705,7 +705,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue(model.validate())
         model.save()
         // Model is not yet deleted
-        assertEquals(ModelState.UNPUBLISHED, model.state)
+        assertEquals(ModelState.UNPUBLISHED, rev1.state)
         // try to delete as anonymous
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -722,7 +722,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         // admin is allowed to delete
         authenticateAsAdmin()
         assertTrue(modelService.deleteModel(model))
-        assertEquals(ModelState.DELETED, model.state)
+        assertEquals(true, model.deleted)
         // no user is allowed to restore
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -739,10 +739,10 @@ class ModelServiceTests extends JummpIntegrationTest {
         // admin can restore the model
         authenticateAsAdmin()
         assertTrue(modelService.restoreModel(model))
-        assertEquals(ModelState.UNPUBLISHED, model.state)
+        assertEquals(false, model.deleted)
         // let's try to restore again
         assertFalse(modelService.restoreModel(model))
-        assertEquals(ModelState.UNPUBLISHED, model.state)
+        assertEquals(false, model.deleted)
         // let's grant some rights on the model
         aclUtilService.addPermission(model, "testuser", BasePermission.READ)
         aclUtilService.addPermission(model, "testuser", BasePermission.WRITE)
@@ -760,10 +760,10 @@ class ModelServiceTests extends JummpIntegrationTest {
         // testuser is allowed to delete
         authenticateAsTestUser()
         assertTrue(modelService.deleteModel(model))
-        assertEquals(ModelState.DELETED, model.state)
+        assertEquals(true, model.deleted)
         // further delete should not work
         assertFalse(modelService.deleteModel(model))
-        assertEquals(ModelState.DELETED, model.state)
+        assertEquals(true, model.deleted)
         // testuser is not allowed to restore
         shouldFail(AccessDeniedException) {
             modelService.restoreModel(model)
@@ -776,23 +776,27 @@ class ModelServiceTests extends JummpIntegrationTest {
         // admin is allowed to restore
         authenticateAsAdmin()
         assertTrue(modelService.restoreModel(model))
-        assertEquals(ModelState.UNPUBLISHED, model.state)
+        assertEquals(false, model.deleted)
         // let's change the model state
-        model.state = ModelState.UNDER_CURATION
+        Revision savedRev=modelService.getLatestRevision(model)
+        savedRev.state = ModelState.UNDER_CURATION
+        savedRev.save(flush:true)
         assertFalse(modelService.deleteModel(model))
-        assertEquals(ModelState.UNDER_CURATION, model.state)
+        assertEquals(false, model.deleted)
         assertFalse(modelService.restoreModel(model))
-        assertEquals(ModelState.UNDER_CURATION, model.state)
-        model.state = ModelState.PUBLISHED
+        assertEquals(false, model.deleted)
+        savedRev.state = ModelState.PUBLISHED
+        savedRev.save(flush:true)
         assertFalse(modelService.deleteModel(model))
-        assertEquals(ModelState.PUBLISHED, model.state)
+        assertEquals(false, model.deleted)
         assertFalse(modelService.restoreModel(model))
-        assertEquals(ModelState.PUBLISHED, model.state)
-        model.state = ModelState.RELEASED
+        assertEquals(false, model.deleted)
+        savedRev.state = ModelState.RELEASED
+        savedRev.save(flush:true)
         assertFalse(modelService.deleteModel(model))
-        assertEquals(ModelState.RELEASED, model.state)
+        assertEquals(false, model.deleted)
         assertFalse(modelService.restoreModel(model))
-        assertEquals(ModelState.RELEASED, model.state)
+        assertEquals(false, model.deleted)
     }
 
     @Test
@@ -1246,11 +1250,12 @@ class ModelServiceTests extends JummpIntegrationTest {
         aclUtilService.addPermission(model, username, BasePermission.DELETE)
         assertTrue(modelService.deleteModel(model))
         // set model state back to initial tate
-        model.state = ModelState.UNPUBLISHED
+        model.deleted = false
         // admin should get access to the method
         authenticateAsAdmin()
         assertTrue(modelService.deleteModel(model))
-        model.state = ModelState.PUBLISHED
+        revision.state=ModelState.PUBLISHED
+        revision.save(flush:true)
         assertFalse(modelService.deleteModel(model))
         model = null
         shouldFail(IllegalArgumentException) {
@@ -1279,9 +1284,10 @@ class ModelServiceTests extends JummpIntegrationTest {
         // admin should get access to the method
         authenticateAsAdmin()
         assertFalse(modelService.restoreModel(model))
-        model.state = ModelState.DELETED
+        model.deleted = true
         assertTrue(modelService.restoreModel(model))
-        model.state = ModelState.PUBLISHED
+        revision.state = ModelState.PUBLISHED
+        revision.save()
         assertFalse(modelService.deleteModel(model))
         model = null
         shouldFail(IllegalArgumentException) {

@@ -9,7 +9,6 @@
 <%@ page import="java.nio.file.FileVisitResult"%>
 <%@ page import="org.apache.commons.io.FilenameUtils"%>
 <%@ page import="java.text.DateFormat"%>
-<%@ page import="net.biomodels.jummp.core.model.ModelState"%>
 <%
 	def loadedZips=new HashMap();
 	def zipSupported=[:]
@@ -239,7 +238,7 @@
 		</tr>
 		<tr>
 		    <td class='key'><g:message code="model.model.status"/></td>
-		    <td class='value'>${revision.model.state.toString().toLowerCase().capitalize()}</td>
+		    <td class='value'>${revision.state.toString().toLowerCase().capitalize()}</td>
 		    <td class='key'><g:message code="model.model.publication"/>:</td>
 		    <td>
 		    	<%
