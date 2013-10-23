@@ -113,7 +113,26 @@ class Publication implements Serializable {
     		}
     	}
     	if (publication) {
-        	return publication
+    		publication.title=cmd.title;
+        	publication.affiliation=cmd.affiliation;
+            publication.synopsis=cmd.synopsis;
+            publication.year=cmd.year;
+            publication.month=cmd.month;
+            publication.day=cmd.day;
+            publication.volume=cmd.volume;
+            publication.issue=cmd.issue;
+            publication.pages=cmd.pages;
+            cmd.authors.each { newAuthor ->
+            	Author existing = publication.authors.find {
+            		it.initials == newAuthor.initials && it.lastName == newAuthor.lastName
+            	}
+            	if (!existing) {
+            		Author current = new Author(initials: it.initials, firstName: it.firstName, lastName: it.lastName)
+            		authors << current
+            	}
+            }
+            publication.save(flush:true)
+            return publication
         }
     	List<Author> authors = []
         cmd.authors.each {
