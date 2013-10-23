@@ -46,60 +46,44 @@ class ModelController {
     * Dependency injenction of pubMedService 
     */
     def pubMedService
-    
 
     def showWithMessage = {
-    	    flash["giveMessage"]=params.flashMessage
-    	    redirect(action: show, id:params.id)
+        flash["giveMessage"]=params.flashMessage
+        redirect(action: show, id:params.id)
     }
-    
-    
+
     def show = {
-    	    ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
-    	    boolean showPublishOption=false
-    	    boolean showUnpublishOption=false
-    	    boolean canUpdate=modelDelegateService.canAddRevision(model.id)
-    	    if (model.state==ModelState.UNPUBLISHED) {
-    	    	showPublishOption=true
-    	    }
-    	    else if (canUpdate) {
-    	    	showUnpublishOption=true
-    	    }
-    	    
-    	    String flashMessage=""
-    	    if (flash.now["giveMessage"]) {
-    	    	    flashMessage=flash.now["giveMessage"]
-    	    }
-    	    forward controller:modelFileFormatService.getPluginForFormat(model.format), 
-    	    		action:"show", 
-    	    		id: params.id, 
-    	    		params:[flashMessage:flashMessage,
-    	    				canUpdate:canUpdate,
-    	    				showPublishOption:showPublishOption, 
-    	    				showUnpublishOption:showUnpublishOption]
+        ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
+        boolean showPublishOption = model.state == ModelState.UNPUBLISHED
+        boolean canUpdate = modelDelegateService.canAddRevision(model.id)
+
+        String flashMessage=""
+        if (flash.now["giveMessage"]) {
+            flashMessage=flash.now["giveMessage"]
+        }
+        forward controller:modelFileFormatService.getPluginForFormat(model.format),
+                action:"show",
+                id: params.id,
+                params:[flashMessage:flashMessage,
+                    canUpdate:canUpdate,
+                    showPublishOption:showPublishOption
+                ]
     }
-    
+
     def publish = {
-    	   def rev=new RevisionTransportCommand(id: params.id as int)
-    	   modelDelegateService.publishModelRevision(rev)
-    	   redirect(action: "showWithMessage", id: modelDelegateService.getRevisionDetails(rev).model.id, 
-    	            params: [flashMessage:"Model has been published."])
-    }
-    
-    def unpublish = {
-    	   def rev=new RevisionTransportCommand(id: params.id as int)
-    	   modelDelegateService.unpublishModelRevision(rev)
-    	   redirect(action: "showWithMessage", id: modelDelegateService.getRevisionDetails(rev).model.id, 
-    	            params: [flashMessage:"Model has been unpublished."])
+       def rev=new RevisionTransportCommand(id: params.id as int)
+       modelDelegateService.publishModelRevision(rev)
+       redirect(action: "showWithMessage", id: modelDelegateService.getRevisionDetails(rev).model.id,
+                params: [flashMessage:"Model has been published."])
     }
 
     @Secured(["isAuthenticated()"])
     def updateFlow = {
         start {
             action {
-            	if (!params.id) {
-            		return error()
-            	}
+                if (!params.id) {
+                    return error()
+                }
                 conversation.model_id=params.id
             }
             on("success").to "uploadPipeline"
@@ -115,8 +99,7 @@ class ModelController {
         displayConfirmationPage()
         displayErrorPage()
     }
-    
-    
+
     @Secured(["isAuthenticated()"])
     def createFlow = {
         uploadPipeline {
@@ -129,8 +112,7 @@ class ModelController {
         displayConfirmationPage()
         displayErrorPage()
     }
-    
-    
+
     /*
      * The flow maintains the 'params' as flow.workingMemory (just to distinguish
      * between request.params and our params. Flow scope requires all objects
