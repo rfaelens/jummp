@@ -19,9 +19,9 @@
     			<li>
     				${model.publication.journal}${model.publication.month?", ${model.publication.month}/":""}${model.publication.year?"${model.publication.year}":""}${model.publication.volume?", Volume ${model.publication.volume}":""}${model.publication.issue?", Issue ${model.publication.issue}":""}${model.publication.pages?", pages: ${model.publication.pages}":""}
     			</li>
-    			<li>
+    			<%-- <li>
     				<a href="${model.publication.linkProvider.identifiersPrefix?model.publication.linkProvider.identifiersPrefix+model.publication.link:model.publication.link}">View Publication</a>
-    			</li>
+    			</li> --%>
     	</div>
     	<g:javascript contextPath="" src="simple-expand.js"/>
     	<script>
