@@ -66,6 +66,7 @@ class Model implements Serializable {
                 lastModifiedDate: revisions ? revisions.sort{ it.revisionNumber }.last().uploadDate : null,
                 format: revisions ? revisions.sort{ it.revisionNumber }.last().format.toCommandObject() : null,
                 publication: publication ? publication.toCommandObject() : null,
+                deleted:deleted,
                 submitter: revisions ? revisions.sort{ it.revisionNumber }.first().owner.userRealName : null,
                 submissionDate: revisions ? revisions.sort{ it.revisionNumber }.first().uploadDate : null,
                 creators: creators

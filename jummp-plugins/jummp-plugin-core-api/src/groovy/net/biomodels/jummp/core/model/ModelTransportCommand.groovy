@@ -16,6 +16,7 @@ class ModelTransportCommand implements Serializable {
     private static final long serialVersionUID = 1L
     Long id
     String name
+    boolean deleted
     /**
      * Only needed to upload new Models. When retrieving Models set to format of latest revision.
      */

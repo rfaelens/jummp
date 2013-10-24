@@ -1522,7 +1522,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         Revision publicRev=revs.find {
         	it.state != ModelState.UNPUBLISHED
         }
-        System.out.println("Revision with unpublished status: "+publicRev)
         if (publicRev) {
         	return false
         }
