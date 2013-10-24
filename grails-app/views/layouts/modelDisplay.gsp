@@ -194,6 +194,11 @@
         }
 	</script>
 	<g:layoutHead/>
+	<style>
+		.spaced {
+			margin:10px;
+		}
+	</style>
     </head>
     <body>
     	<div id="topBar">
@@ -228,35 +233,36 @@
 	    <g:pageProperty name="page.modelspecifictabs" />
 	  </ul>
 	  <div id="Overview">
-	    ${revision.description}
-	    <table>
+	  	<label>Model Description:</label>
+	  		<ul style="list-style-type: none;">
+	  			<li>${revision.description}</li>
+	  		</ul>
+	    <table style="margin-top:30px">
 		<tr>
-		    <td class='key'><g:message code="model.model.version"/></td>
-		    <td class='value'>${revision.revisionNumber}</td>
-		    <td class='key'><g:message code="model.model.format"/></td>
-		    <td class='value'>${revision.format.name} ${revision.format.formatVersion?"(${revision.format.formatVersion})":""}</td>
+		    <td><label><g:message code="model.model.format"/></label></td>
+		    <td><div class='spaced'>${revision.format.name} ${revision.format.formatVersion?"(${revision.format.formatVersion})":""}</div></td>
 		</tr>
 		<tr>
-		    <td class='key'><g:message code="model.model.status"/></td>
-		    <td class='value'>${revision.state.toString().toLowerCase().capitalize()}</td>
-		    <td class='key'><g:message code="model.model.publication"/>:</td>
+		    <td><label><g:message code="model.model.publication"/>:</label></td>
 		    <td>
 		    	<%
 		    		model=revision.model
 		    	%>
-		    	<g:render  model="[model:model]" template="/templates/showPublication" />
+		    	<div class='spaced'>
+		    		<g:render  model="[model:model]" template="/templates/showPublication" />
+		    	</div>
 		    </td>
 		<tr>
 		</tr>
 		</tr>
 		<tr>
-		    <td class='key left'><g:message code="model.model.authors"/></td>
-		    <td class='value'>
+		    <td><label><g:message code="model.model.authors"/></label></td>
+		    <td>
+		    	<div class='spaced'>
 		    		<g:each in="${authors}" status="i" var="author"><g:if test="${i>0}">, </g:if>${author}
 		    		</g:each>
+		    	</div>
 		    </td>
-		    <td class='key'><g:message code="model.model.creationDate"/></td>
-		    <td class='value'>${revision.model.submissionDate}</td>
 		</tr>
 	    </table>
 	
