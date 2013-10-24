@@ -545,7 +545,7 @@ class SubmissionService {
          */
         @Profiled(tag = "submissionService.NewRevisionStateMachine.createTransportObjects")
         protected void createTransportObjects(Map<String,Object> workingMemory) {
-            RTC revision=workingMemory.remove("LastRevision") as RTC
+            RTC revision=workingMemory.get("LastRevision") as RTC
             if (workingMemory.containsKey("reprocess_files")) {
                 String formatId = workingMemory["model_type"] as String
                 final String formatVersion = revision.format.formatVersion ? revision.format.formatVersion : ""
