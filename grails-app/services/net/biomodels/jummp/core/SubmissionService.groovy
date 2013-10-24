@@ -166,7 +166,6 @@ class SubmissionService {
         	model.publication.linkProvider=PublicationLinkProvider.createCriteria().get() {
         			eq("linkType",linkType)
         	}.toCommandObject()
-        	System.out.println("Refresh Publications: "+refreshPublication+".."+model.publication.linkProvider.getProperties())
         	return refreshPublication
         }
 
@@ -591,8 +590,9 @@ class SubmissionService {
         void completeSubmission(Map<String,Object> workingMemory) {
             RTC revision=workingMemory.get("RevisionTC") as RTC
             List<RFTC> repoFiles = getRepFiles(workingMemory)
-            workingMemory.put("model_id",
-            modelService.addValidatedRevision(repoFiles, revision).model.id)
+            
+            def newlyCreated= modelService.addValidatedRevision(repoFiles, revision)
+            workingMemory.put("model_id", newlyCreated.model.id)
         }
     }
 
