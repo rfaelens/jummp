@@ -275,7 +275,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
             signalEvent("Continue")
             //assert flowExecutionOutcome.id == "displayConfirmationPage"
             
-            System.out.println(revision.comment)
+            
             //test that the model is infact saved in the database
             Revision rev=modelService.getLatestRevision(model)
             //test that revision is saved correctly
