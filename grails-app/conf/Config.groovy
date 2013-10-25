@@ -419,3 +419,14 @@ weceem.create.default.space = true
 weceem.default.space.template = "classpath:/weceem-jummp-default-space.zip"
 weceem.security.policy.path = jummp.security.cms.policy
 grails.resources.adhoc.excludes=["/content/*"]
+
+grails.mail.host="smtp.gmail.com"
+grails.mail.port=465
+grails.mail.username="raza.ali@gmail.com"
+grails.mail.password="thisisnotmypassword"
+grails.mail.props = ["mail.smtp.auth":"true", 					   
+              "mail.smtp.socketFactory.port":"465",
+              "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
+              "mail.smtp.socketFactory.fallback":"false"]
+
+
