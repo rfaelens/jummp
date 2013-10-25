@@ -6,7 +6,7 @@ $.jummp.userAdministration.changeUser = function (userId, field, target) {
     $.ajax({
         url: target + "/" + userId,
         dataType: 'json',
-        data: {value: $("#" + field).attr("checked") === "checked" ? true : false},
+        data: {value: $("#" + field).prop("checked")},
         cache: 'false',
         success: function () {
             // redraw the dataTable to reset all changes
