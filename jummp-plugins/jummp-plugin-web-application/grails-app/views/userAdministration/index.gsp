@@ -4,10 +4,15 @@
         <title>User Administration</title>
         <meta name="layout" content="main" />
         <g:javascript contextPath="" src="useradministration.js"/>
-        <jqDT:resources/>
+        <g:javascript contextPath="" src="jquery/jquery.dataTables.js"/>
+        <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'datatablestyle.css')}" />
+         
     </head>
     <body>
-        <table id="userTable">
+    	<div class="content">
+    		  <div class="view view-dom-id-9c00a92f557689f996511ded36a88594">
+    		  <div class="view-content">
+        <table id="userTable" class="views-table cols-4">
             <thead>
             <tr>
                 <th><g:message code="user.administration.list.id"/></th>
@@ -34,6 +39,9 @@
             </tr>
             </tfoot>
         </table>
+        </div>
+        </div>
+        </div>
         <g:javascript>
 $(function() {
     $.jummp.userAdministration.loadUserList();

@@ -3,8 +3,8 @@
     <head>
         <title><g:message code="user.administration.ui.heading.user"/></title>
         <meta name="layout" content="main" />
-        <g:javascript src="js/userAdministration.js"/>
-    </head>
+        <g:javascript contextPath="" src="useradministration.js"/>
+     </head>
     <body>
         <h1><g:message code="user.administration.ui.heading.user"/></h1>
         <div>
