@@ -66,10 +66,10 @@
                 </table>
             </div>
         </div>
-        <r:script>
+        <g:javascript>
 $(function() {
     $.jummp.userAdministration.editUser();
 });
-        </r:script>
+        </g:javascript>
     </body>
 </html>

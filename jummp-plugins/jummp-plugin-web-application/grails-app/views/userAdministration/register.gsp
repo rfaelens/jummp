@@ -32,10 +32,10 @@
                 </div>
             </form>
         </div>
-        <r:script>
+        <g:javascript>
 $(function() {
     $.jummp.userAdministration.register();
 });
-        </r:script>
+        </g:javascript>
     </body>
 </html>
