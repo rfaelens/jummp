@@ -24,6 +24,14 @@
                         <td><label for="register-form-email"><g:message code="user.administration.ui.email"/>:</label></td>
                         <td><span><input type="text" id="register-form-email" name="email"/></span></td>
                     </tr>
+                    <tr>
+                        <td><label for="register-form-institution"><g:message code="user.administration.ui.institution"/>:</label></td>
+                        <td><span><input type="text" id="register-form-institution" name="institution"/></span></td>
+                    </tr>
+                    <tr>
+                        <td><label for="register-form-orcid"><g:message code="user.administration.ui.orcid"/>:</label></td>
+                        <td><span><input type="text" id="register-form-orcid" name="orcid"/></span></td>
+                    </tr>
                     </tbody>
                 </table>
                 <div class="buttons">

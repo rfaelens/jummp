@@ -25,6 +25,8 @@
                 <th><g:message code="user.administration.list.username"/></th>
                 <th><g:message code="user.administration.list.realname"/></th>
                 <th><g:message code="user.administration.list.email"/></th>
+                <th><g:message code="user.administration.list.institution"/></th>
+                <th><g:message code="user.administration.list.orcid"/></th>
                 <th><g:message code="user.administration.list.enabled"/></th>
                 <th><g:message code="user.administration.list.accountExpired"/></th>
                 <th><g:message code="user.administration.list.accountLocked"/></th>
@@ -38,6 +40,8 @@
                 <th><g:message code="user.administration.list.username"/></th>
                 <th><g:message code="user.administration.list.realname"/></th>
                 <th><g:message code="user.administration.list.email"/></th>
+                <th><g:message code="user.administration.list.institution"/></th>
+                <th><g:message code="user.administration.list.orcid"/></th>
                 <th><g:message code="user.administration.list.enabled"/></th>
                 <th><g:message code="user.administration.list.accountExpired"/></th>
                 <th><g:message code="user.administration.list.accountLocked"/></th>

@@ -54,7 +54,7 @@ class UserAdministrationController {
 
         List users = userService.getAllUsers(start, length)
         users.each { user ->
-            dataToRender.aaData << [user.id, user.username, user.userRealName, user.email, user.enabled, user.accountExpired, user.accountLocked, user.passwordExpired]
+            dataToRender.aaData << [user.id, user.username, user.userRealName, user.email, user.institution, user.orcid, user.enabled, user.accountExpired, user.accountLocked, user.passwordExpired]
         }
         render dataToRender as JSON
     }
@@ -266,15 +266,19 @@ class RegistrationCommand {
     String username
     String email
     String userRealName
+    String institution
+    String orcid
 
     static constraints = {
         username(nullable: false, blank: false)
         email(nullable: false, email: true, blank: false)
         userRealName(nullable: false, blank: false)
+        institution(nullable:true)
+        orcid(nullable:true)
     }
 
     User toUser() {
-        return new User(username: this.username, email: this.email, userRealName: this.userRealName)
+        return new User(username: this.username, email: this.email, userRealName: this.userRealName, institution:this.institution, orcid:this.orcid)
     }
 }
 
@@ -286,11 +290,15 @@ class EditUserCommand implements Serializable {
     String username
     String userRealName
     String email
+    String institution
+    String orcid
 
     static constraints = {
         username(nullable: false, blank: false)
         userRealName(nullable: false, blank: false)
         email(nullable: false, blank: false, email: true)
+        institution(nullable:true)
+        orcid(nullable:true)
     }
 
     /**
@@ -298,6 +306,6 @@ class EditUserCommand implements Serializable {
      * @return The command object as a User
      */
     User toUser() {
-        return new User(username: this.username, userRealName: this.userRealName, email: this.email)
+        return new User(username: this.username, userRealName: this.userRealName, email: this.email, institution:this.institution, orcid:this.orcid)
     }
 }

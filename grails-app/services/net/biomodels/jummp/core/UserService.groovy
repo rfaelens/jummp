@@ -70,6 +70,8 @@ class UserService implements IUserService {
         User origUser = User.findByUsername(user.username)
         origUser.userRealName = user.userRealName
         origUser.email = user.email
+        origUser.orcid = user.orcid
+        origUser.institution = user.institution
         if (!origUser.validate()) {
             throw new UserInvalidException(user.username)
         }

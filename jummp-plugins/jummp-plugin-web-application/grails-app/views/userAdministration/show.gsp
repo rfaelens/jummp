@@ -24,6 +24,14 @@
                     <td><label for="edit-user-email"><g:message code="user.administration.ui.email"/>:</label></td>
                     <td><span><input type="text" id="edit-user-email" name="email" value="${user.email}"/></span></td>
                 </tr>
+                <tr>
+                    <td><label for="edit-user-institution"><g:message code="user.administration.ui.institution"/>:</label></td>
+                    <td><span><input type="text" id="edit-user-institution" name="institution" value="${user.institution}"/></span></td>
+                </tr>
+                <tr>
+                    <td><label for="edit-user-orcid"><g:message code="user.administration.ui.orcid"/>:</label></td>
+                    <td><span><input type="text" id="edit-user-orcid" name="orcid" value="${user.orcid}"/></span></td>
+                </tr>
                 </tbody>
             </table>
             <div class="buttons">

@@ -11,6 +11,8 @@ class User implements Serializable {
     String password
     String userRealName
     String email
+    String institution
+    String orcid
     Boolean enabled
     Boolean accountExpired
     Boolean accountLocked
@@ -39,6 +41,8 @@ class User implements Serializable {
         password(blank: false)
         userRealName(blank: false)
         email(email: true)
+        institution(nullable:true)
+        orcid(nullable:true)
         registrationCode(nullable: true)
         registrationInvalidation(nullable: true)
         passwordForgottenCode(nullable: true)
@@ -59,6 +63,8 @@ class User implements Serializable {
      * @return User without any security relevant information.
      */
     User sanitizedUser() {
-        return new User(id: this.id, username: this.username, userRealName: this.userRealName, email: this.email)
+        return new User(id: this.id, username: this.username, 
+        				userRealName: this.userRealName, email: this.email, institution:this.institution,
+        				orcid:this.orcid)
     }
 }

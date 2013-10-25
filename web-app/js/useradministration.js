@@ -51,10 +51,10 @@ $.jummp.userAdministration.loadUserList = function () {
                         rowData = json.aaData[i];
                         id = rowData[0];
                         rowData[0] = "<a href=\"show/" + id + "\">" + id + "</a>";
-                        rowData[4] = createUserChangeMarkup(id, 'enable', rowData[4]);
-                        rowData[5] = createUserChangeMarkup(id, 'expireAccount', rowData[5]);
-                        rowData[6] = createUserChangeMarkup(id, 'lockAccount', rowData[6]);
-                        rowData[7] = createUserChangeMarkup(id, 'expirePassword', rowData[7]);
+                        rowData[6] = createUserChangeMarkup(id, 'enable', rowData[6]);
+                        rowData[7] = createUserChangeMarkup(id, 'expireAccount', rowData[7]);
+                        rowData[8] = createUserChangeMarkup(id, 'lockAccount', rowData[8]);
+                        rowData[9] = createUserChangeMarkup(id, 'expirePassword', rowData[9]);
                     }
                     fnCallback(json);
                 }
@@ -109,6 +109,8 @@ $.jummp.userAdministration.editUser = function () {
             data: {
                 username: $("#edit-user-username").val(),
                 userRealName: $("#edit-user-userrealname").val(),
+                institution: $("#edit-user-institution").val(),
+                orcid: $("#edit-user-orcid").val(),
                 email: $("#edit-user-email").val()
             },
             success: function (data) {
@@ -136,6 +138,8 @@ $.jummp.userAdministration.register = function () {
             data: {
                 username: $("#register-form-username").val(),
                 userRealName: $("#register-form-name").val(),
+                institution: $("#register-form-institution").val(),
+                orcid: $("#register-form-orcid").val(),
                 email: $("#register-form-email").val()
             },
             success: function (data) {
