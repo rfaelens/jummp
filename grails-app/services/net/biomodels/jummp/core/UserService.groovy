@@ -116,12 +116,13 @@ class UserService implements IUserService {
     @Profiled(tag="userService.enableUser")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     Boolean enableUser(Long userId, Boolean enable) throws UserNotFoundException {
-        User user = User.get(userId)
+    	User user = User.get(userId)
         if (!user) {
             throw new UserNotFoundException(userId)
         }
+        System.out.println(userId+"..."+user.enabled +"..."+ enable)
         if (user.enabled != enable) {
-            user.enabled = enable
+        	user.enabled = enable
             user.save(flush: true)
             return (User.get(userId).enabled == enable)
         } else {
@@ -179,6 +180,13 @@ class UserService implements IUserService {
             return false
         }
     }
+    
+    def generator = { String alphabet, int n ->
+    		new Random().with {
+    				(1..n).collect { alphabet[ nextInt( alphabet.length() ) ] }.join()
+    		}
+    }
+
 
     @PostLogging(LoggingEventType.CREATION)
     @Profiled(tag="userService.register")
@@ -193,11 +201,13 @@ class UserService implements IUserService {
         }
         User newUser = user.sanitizedUser()
         boolean adminRegistration = false
+        String p=generator( (('A'..'Z')+('0'..'9')).join(), 6 )
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-            // admin user cannot set the password and creates the account enabled, but with expired password
+            // admin creates with a random password that is emailed to the user.
             newUser.password = "*"
             newUser.enabled = true
-            newUser.passwordExpired = true
+            newUser.password =  springSecurityService.encodePassword(p, null)
+            newUser.passwordExpired=false
             adminRegistration = true
         } else {
             if (grailsApplication.config.jummp.security.ldap.enabled) {
@@ -239,6 +249,7 @@ class UserService implements IUserService {
                 emailSubject = grailsApplication.config.jummp.security.activation.email.subject
                 emailBody = grailsApplication.config.jummp.security.activation.email.body
                 emailBody = emailBody.replace("{{USERNAME}}", newUser.username)
+                emailBody = emailBody.replace("{{PASSWORD}}", p)
             }
             url = url.replace("{{CODE}}", newUser.registrationCode)
             emailBody = emailBody.replace("{{NAME}}", newUser.userRealName)
