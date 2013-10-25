@@ -221,10 +221,9 @@ class UserServiceTests extends JummpIntegrationTest {
         assertTrue(adminRegisteredUser.enabled)
         assertFalse(adminRegisteredUser.accountLocked)
         assertFalse(adminRegisteredUser.accountExpired)
-        assertTrue(adminRegisteredUser.passwordExpired)
+        assertFalse(adminRegisteredUser.passwordExpired)
         assertNotNull(adminRegisteredUser.registrationCode)
         assertNotNull(adminRegisteredUser.registrationInvalidation)
-        assertEquals(adminRegisteredUser.password, "*")
         assertFalse(registeredUser.registrationCode == adminRegisteredUser.registrationCode)
         grailsApplication.config.jummp.security.anonymousRegistration = anonymousRegistration
     }
