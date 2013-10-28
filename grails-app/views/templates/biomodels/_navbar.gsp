@@ -27,7 +27,7 @@
     </sec:ifLoggedIn>
     <sec:ifNotLoggedIn>
     	<li class="functional first">
-    	    <a href="${grailsApplication.config.grails.serverURL}/register" class="icon icon-functional" data-icon="7">
+    	    <a href="${grailsApplication.config.grails.serverURL}/registration" class="icon icon-functional" data-icon="7">
     			<g:message code="jummp.main.register"/>
     		</a>
     	</li>

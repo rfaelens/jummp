@@ -22,19 +22,19 @@
       			<ul class="menu">
       			<sec:ifLoggedIn>
       				<li class="first last leaf">
-      					<a href="${grailsApplication.config.grails.serverURL}/logout" class="icon icon-functional" data-icon="l">
+      					<a href="${grailsApplication.config.grails.serverURL}/logout">
       						<g:message code="jummp.main.logout"/>
       					</a>
       				</li>
       			</sec:ifLoggedIn>
       			<sec:ifNotLoggedIn>
       				<li class="first leaf">
-      					<a href="${grailsApplication.config.grails.serverURL}/register" class="icon icon-functional" data-icon="l">
+      					<a href="${grailsApplication.config.grails.serverURL}/registration">
       						<g:message code="jummp.main.register"/>
       					</a>
       				</li>
       				<li class="last leaf">
-      					<a href="${grailsApplication.config.grails.serverURL}/login" class="icon icon-functional" data-icon="l">
+      					<a href="${grailsApplication.config.grails.serverURL}/login">
       						<g:message code="jummp.main.login"/>
       					</a>
       				</li>

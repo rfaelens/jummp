@@ -134,6 +134,7 @@ grails.project.dependency.resolution = {
         compile ":jms:1.2"
         compile ":executor:0.3"
         compile ":mail:1.0.1"
+        compile ":simple-captcha:0.9.4"
         //compile ":quartz:0.4.2"
         compile(":quartz:1.0-RC6") { excludes 'hibernate-core' /* don't need 3.6.10.Final */ }
         // to see the status of quartz jobs
