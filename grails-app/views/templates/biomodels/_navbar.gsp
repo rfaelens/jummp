@@ -17,16 +17,25 @@
        add them here, and give them a class of "functional". Remember: you'll need a class of "last" for
        whichever one will show up last... 
        For example: -->
-  <li class="functional last">
     <sec:ifLoggedIn>
-    	<a href="/jummp/logout" class="icon icon-functional" data-icon="l">
-		<g:message code="jummp.main.logout"/>
+    	<li class="functional last">
+    		<a href="/jummp/logout" class="icon icon-functional" data-icon="l">
+    			<g:message code="jummp.main.logout"/>
+    		</a>
+    	</li>
 	</a>
     </sec:ifLoggedIn>
     <sec:ifNotLoggedIn>
-	<a href="/jummp/login" class="icon icon-functional" data-icon="l">
-		<g:message code="jummp.main.login"/>
-	</a>
-    </sec:ifNotLoggedIn></a></li>
+    	<li class="functional first">
+    	    <a href="${grailsApplication.config.grails.serverURL}/register" class="icon icon-functional" data-icon="7">
+    			<g:message code="jummp.main.register"/>
+    		</a>
+    	</li>
+    	<li class="functional last">
+    		<a href="${grailsApplication.config.grails.serverURL}/login" class="icon icon-functional" data-icon="l">
+    			<g:message code="jummp.main.login"/>
+    		</a>
+    	</li>
+    </sec:ifNotLoggedIn>
 </ul>
 </nav>    

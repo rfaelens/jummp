@@ -19,18 +19,27 @@
       <div class="region region-header">
       	<div id="block-system-user-menu" class="block block-system user-menu block-menu first odd">      
       		<div class="content">
-      			<ul class="menu"><li class="first last leaf">
+      			<ul class="menu">
       			<sec:ifLoggedIn>
-      				<a href="${grailsApplication.config.grails.serverURL}/logout" class="icon icon-functional" data-icon="l">
-      					<g:message code="jummp.main.logout"/>
-      				</a>
+      				<li class="first last leaf">
+      					<a href="${grailsApplication.config.grails.serverURL}/logout" class="icon icon-functional" data-icon="l">
+      						<g:message code="jummp.main.logout"/>
+      					</a>
+      				</li>
       			</sec:ifLoggedIn>
       			<sec:ifNotLoggedIn>
-      				<a href="${grailsApplication.config.grails.serverURL}/login" class="icon icon-functional" data-icon="l">
-      				<g:message code="jummp.main.login"/>
-      			</a>
+      				<li class="first leaf">
+      					<a href="${grailsApplication.config.grails.serverURL}/register" class="icon icon-functional" data-icon="l">
+      						<g:message code="jummp.main.register"/>
+      					</a>
+      				</li>
+      				<li class="last leaf">
+      					<a href="${grailsApplication.config.grails.serverURL}/login" class="icon icon-functional" data-icon="l">
+      						<g:message code="jummp.main.login"/>
+      					</a>
+      				</li>
       			</sec:ifNotLoggedIn>
-      			</li></ul>
+      			</ul>
       		</div><!-- /.block -->
       	</div>
       <div id="block-search-form" class="block block-search search even">
