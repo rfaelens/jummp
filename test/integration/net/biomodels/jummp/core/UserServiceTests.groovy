@@ -200,7 +200,7 @@ class UserServiceTests extends JummpIntegrationTest {
         }
         User registeredUser = User.findByUsername("register")
         assertEquals(registeredUser.id, id)
-        assertFalse(registeredUser.enabled)
+        assertTrue(registeredUser.enabled)
         assertFalse(registeredUser.accountLocked)
         assertFalse(registeredUser.accountExpired)
         assertFalse(registeredUser.passwordExpired)
@@ -228,6 +228,8 @@ class UserServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.security.anonymousRegistration = anonymousRegistration
     }
 
+    //Test no longer relevant until registration link mechanism is reinstated.
+    @Ignore
     @Test
     void testValidateRegistration() {
         authenticateAsUser()
