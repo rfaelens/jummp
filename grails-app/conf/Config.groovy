@@ -420,13 +420,30 @@ weceem.default.space.template = "classpath:/weceem-jummp-default-space.zip"
 weceem.security.policy.path = jummp.security.cms.policy
 grails.resources.adhoc.excludes=["/content/*"]
 
-grails.mail.host="smtp.gmail.com"
-grails.mail.port=465
-grails.mail.username="raza.ali@gmail.com"
-grails.mail.password="thisisnotmypassword"
-grails.mail.props = ["mail.smtp.auth":"true", 					   
-              "mail.smtp.socketFactory.port":"465",
-              "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
-              "mail.smtp.socketFactory.fallback":"false"]
-
+grails.mails.props=[:]
+if (!(jummpConfig.jummp.security.mailer.host instanceof ConfigObject)) {
+	grails.mail.host=jummpConfig.jummp.security.mailer.host
+}
+if (!(jummpConfig.jummp.security.mailer.username instanceof ConfigObject)) {
+	grails.mail.username=jummpConfig.jummp.security.mailer.username
+}
+if (!(jummpConfig.jummp.security.mailer.password instanceof ConfigObject)) {
+	grails.mail.password=jummpConfig.jummp.security.mailer.password
+}
+if (!(jummpConfig.jummp.security.mailer.port instanceof ConfigObject)) {
+	grails.mail.port=jummpConfig.jummp.security.mailer.port
+	grails.mails.props["mail.smtp.socketFactory.port"]=grails.mail.port
+}
+if (!(jummpConfig.jummp.security.mailer.auth instanceof ConfigObject)) {
+	grails.mail.props["mail.smtp.auth"]=jummpConfig.jummp.security.mailer.auth
+}
+if (!(jummpConfig.jummp.security.mailer.socketFactory instanceof ConfigObject)) {
+	grails.mail.props["mail.smtp.socketFactory.class"]=jummpConfig.jummp.security.mailer.socketFactory
+}
+if (!(jummpConfig.jummp.security.mailer.fallback instanceof ConfigObject)) {
+	grails.mail.props["mail.smtp.socketFactory.fallback"]=jummpConfig.jummp.security.mailer.fallback
+}
+if (!(jummpConfig.jummp.security.mailer.tlsrequired instanceof ConfigObject)) {
+	grails.mail.props["mail.smtp.starttls.required"]=jummpConfig.jummp.security.mailer.tlsrequired
+}
 
