@@ -217,10 +217,10 @@ class UserService implements IUserService {
                 newUser.password = "*"
             } else {
                 // TODO: validate the password length?
-                newUser.password = springSecurityService.encodePassword(user.password, null)
+                newUser.password = springSecurityService.encodePassword(p, null)
             }
-            // user disabled after registration
-            newUser.enabled = false
+            // user (no longer) disabled after registration
+            newUser.enabled = true
             newUser.passwordExpired = false
         }
 
@@ -243,19 +243,12 @@ class UserService implements IUserService {
             if (grailsApplication.config.jummp.security.registration.email.sendToAdmin) {
                 recipient = grailsApplication.config.jummp.security.registration.email.adminAddress
             }
-            String url = grailsApplication.config.jummp.security.registration.verificationURL
             String emailBody = grailsApplication.config.jummp.security.registration.email.body
-            String emailSubject = grailsApplication.config.jummp.security.registration.email.subject
-            if (adminRegistration) {
-                url = grailsApplication.config.jummp.security.activation.activationURL
-                emailSubject = grailsApplication.config.jummp.security.activation.email.subject
-                emailBody = grailsApplication.config.jummp.security.activation.email.body
-                emailBody = emailBody.replace("{{USERNAME}}", newUser.username)
-                emailBody = emailBody.replace("{{PASSWORD}}", p)
-            }
-            url = url.replace("{{CODE}}", newUser.registrationCode)
+            String emailSubject = grailsApplication.config.jummp.security.activation.email.subject
+            emailBody = grailsApplication.config.jummp.security.activation.email.body
+            emailBody = emailBody.replace("{{USERNAME}}", newUser.username)
+            emailBody = emailBody.replace("{{PASSWORD}}", p)
             emailBody = emailBody.replace("{{NAME}}", newUser.userRealName)
-            emailBody = emailBody.replace("{{URL}}", url)
             mailService.sendMail {
                 to recipient
                 from grailsApplication.config.jummp.security.registration.email.sender

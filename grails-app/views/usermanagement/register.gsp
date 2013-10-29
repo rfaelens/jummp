@@ -33,7 +33,7 @@
                     </tr>
                     <tr>
                         <td><label for="register-form-name"><g:message code="user.signup.ui.realname"/>:</label></td>
-                        <td><span><g:textField name="realname"/></span></td>
+                        <td><span><g:textField name="userRealName"/></span></td>
                     </tr>
                     <tr>
                         <td><label for="register-form-email"><g:message code="user.signup.ui.email"/>:</label></td>
