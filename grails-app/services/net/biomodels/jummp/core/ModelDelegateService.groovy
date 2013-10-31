@@ -23,6 +23,7 @@ import java.util.Map
  * service should not be used internally in the core. In the core the
  * ModelService should be used directly.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class ModelDelegateService implements IModelService {
 

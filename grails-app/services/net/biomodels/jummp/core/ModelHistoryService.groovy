@@ -19,6 +19,7 @@ import org.perf4j.aop.Profiled
  * users.
  *
  * @author Martin Graesslin <m.graesslin@dkfz.de>
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  * @see ModelHistoryItem
  */
 class ModelHistoryService {

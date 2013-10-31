@@ -1,5 +1,12 @@
 import net.biomodels.jummp.webapp.RegistrationCommand
 
+/*
+* @short Controller for managing user registrations
+* @author Raza Ali <raza.ali@ebi.ac.uk>
+*/
+
+
+
 class UsermanagementController {
 
 	/**
@@ -21,7 +28,7 @@ class UsermanagementController {
     }
     				   
      /**
-     * Default action; redirects to 'defaultTargetUrl' if logged in, /login/auth otherwise.
+     * Passes on any info messages needed to be displayed and renders the register gsp
      */
     def create = {
         /*if (springSecurityService.isLoggedIn()) {
@@ -36,6 +43,13 @@ class UsermanagementController {
      //   }
     }
     
+    				   
+     /**
+     * Performs validation on the captcha, ensures that the empty security parameter is not
+     * filled (as is commonly done by robots), validates the command object and then uses
+     * the user service to create a user. If an error occurs at any point, the method redirects
+     * to create action and sends the user a helpful message.
+     */
     def signUp = {
     	boolean captchaValid = simpleCaptchaService.validateCaptcha(params.captcha)
     	if (!captchaValid) {

@@ -42,6 +42,7 @@ import org.apache.lucene.document.Document
  * @see Revision
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  * @date 20130715
  */
 @SuppressWarnings("GroovyUnusedCatchParameter")

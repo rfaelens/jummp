@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize
  * @internal
  * @see VcsManager
  * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class VcsService {
     static transactional = true

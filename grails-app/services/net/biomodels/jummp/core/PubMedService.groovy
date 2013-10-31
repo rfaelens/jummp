@@ -15,6 +15,7 @@ import java.util.regex.Matcher
  * publication information for PubMed resources. It connects to citexplore and
  * parses the returned HTML page for the publication information.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class PubMedService {
 

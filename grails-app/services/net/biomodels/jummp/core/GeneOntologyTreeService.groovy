@@ -14,6 +14,7 @@ import org.perf4j.aop.Profiled
  * @short Service to retrieve Gene Ontology Tree information.
  *
  * @author Martin Gräßlin <m.graesslin@dkfz.de>
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class GeneOntologyTreeService {
     /**
