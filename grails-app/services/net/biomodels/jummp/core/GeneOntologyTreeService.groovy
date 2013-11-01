@@ -13,10 +13,10 @@
 *
 * Additional permission under GNU Affero GPL version 3 section 7
 *
-* If you modify Jummp, or any covered work, by linking or combining it with [name of library] (or a modified version of that
-* library), containing parts covered by the terms of [name of library's license], the licensors of this Program grant you additional
+* If you modify Jummp, or any covered work, by linking or combining it with Spring Security and Perf4j (or a modified version of that
+* library), containing parts covered by the terms of Apache 2.0, the licensors of this Program grant you additional
 * permission to convey the resulting work. {Corresponding Source for a non-source form of such a combination shall include the source
-* code for the parts of [name of library] used as well as that of the covered work.}
+* code for the parts of Spring Security and Perf4j used as well as that of the covered work.}
 **/
 
 
@@ -36,7 +36,6 @@ import org.perf4j.aop.Profiled
  * @short Service to retrieve Gene Ontology Tree information.
  *
  * @author Martin Gräßlin <m.graesslin@dkfz.de>
- * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class GeneOntologyTreeService {
     /**

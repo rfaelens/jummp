@@ -13,10 +13,10 @@
 *
 * Additional permission under GNU Affero GPL version 3 section 7
 *
-* If you modify Jummp, or any covered work, by linking or combining it with [name of library] (or a modified version of that
-* library), containing parts covered by the terms of [name of library's license], the licensors of this Program grant you additional
+* If you modify Jummp, or any covered work, by linking or combining it with Perf4j, Apache Commons (or a modified version of that
+* library), containing parts covered by the terms of Perf4j, the licensors of this Program grant you additional
 * permission to convey the resulting work. {Corresponding Source for a non-source form of such a combination shall include the source
-* code for the parts of [name of library] used as well as that of the covered work.}
+* code for the parts of Perf4j and Apache Commons used as well as that of the covered work.}
 **/
 
 
