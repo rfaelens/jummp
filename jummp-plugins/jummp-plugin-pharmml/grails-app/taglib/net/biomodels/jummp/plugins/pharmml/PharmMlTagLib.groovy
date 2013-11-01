@@ -1167,14 +1167,14 @@ class PharmMlTagLib {
             if (s.variableAssignment) {
                 result.append(variableAssignments(s.variableAssignment, "<h5>Variable assignments</h5>"))
             }
-            if (s.objectiveDataSet) {
-                result.append(objectiveDataSet(s.objectiveDataSet))
-            }
             if (s.parametersToEstimate) {
                 result.append(paramsToEstimate(s.parametersToEstimate))
             }
             if (s.operation) {
                 result.append(estimationOps(s.operation))
+            }
+            if (s.objectiveDataSet) {
+                result.append(objectiveDataSet(s.objectiveDataSet))
             }
         }
         return result
