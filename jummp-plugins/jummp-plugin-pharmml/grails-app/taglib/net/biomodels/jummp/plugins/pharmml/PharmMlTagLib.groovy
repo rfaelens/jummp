@@ -1,5 +1,6 @@
 package net.biomodels.jummp.plugins.pharmml
 
+import eu.ddmore.libpharmml.dom.IndependentVariableType
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
 import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
 import eu.ddmore.libpharmml.dom.commontypes.FuncParameterDefinitionType
@@ -18,12 +19,17 @@ import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
 import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
+import eu.ddmore.libpharmml.dom.maths.BinopType
+import eu.ddmore.libpharmml.dom.maths.ConstantType
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
+import eu.ddmore.libpharmml.dom.maths.UniopType
 import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
+import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
+import eu.ddmore.libpharmml.dom.modeldefn.LhsTransformationType
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariableType
 import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
 import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
@@ -38,6 +44,7 @@ import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
 import javax.xml.bind.JAXBElement
+import javax.xml.namespace.QName
 import net.biomodels.jummp.plugins.pharmml.maths.FunctionSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
@@ -148,6 +155,17 @@ class PharmMlTagLib {
         return builder.toString()
     }
 
+    //works with EquationType and Equation as well
+    private String convertToMathML(EquationType lhs, EquationType rhs) {
+        StringBuilder output = new StringBuilder("<div>")
+        output.append("<math display='inline'><mstyle>")
+        convertEquation(lhs, output)
+        output.append(op("="))
+        convertEquation(rhs, output)
+        output.append("</mstyle></math>")
+        return output.append("</div>").toString()
+    }
+
     private String convertToMathML(String lhs, ScalarRhs srhs) {
          if (srhs.equation) {
             return convertToMathML(lhs, srhs.equation)
@@ -247,34 +265,107 @@ class PharmMlTagLib {
             if (i.abstractContinuousUnivariateDistribution) {
                 o.append("<div>")
                 o.append(distributionAssignment(i.symbId, i.abstractContinuousUnivariateDistribution))
-                o.append("&nbsp;&mdash; ").append(i.variabilityReference.symbRef.symbIdRef)
+                o.append("&nbsp;&mdash;&nbsp;").append(i.variabilityReference.symbRef.symbIdRef)
                 o.append("</div>\n")
             }
         }
         return output
     }
 
-    StringBuilder individualParams(List<IndividualParameterType> parameters) {
-        def output = new StringBuilder("")
-        parameters.each {
-            if (it.assign) {
-                String converted=convertToMathML(it.symbId, it.assign)
-                output.append("<p>")
+    StringBuilder individualParams(List<IndividualParameterType> parameters, List<ParameterRandomVariableType> rv,
+                List<CovariateDefinitionType> covariates) {
+        def output = new StringBuilder("<div class='spaced'>")
+        parameters.each { p ->
+            if (p.assign) {
+                String converted = convertToMathML(p.symbId, p.assign)
+                output.append("<div>")
                 output.append(converted)
-                output.append("</p>")
+                output.append("</div>")
             }
-            if (it.gaussianModel) {
-                if (it.gaussianModel.generalCovariate) {
-                    try {
-                        String converted=convertToMathML(it.symbId, it.gaussianModel.generalCovariate.assign)
-                        output.append("<p>")
-                        output.append(converted)
-                        output.append("</p>")
-                    } catch(Exception ignore) { }
+            if (p.gaussianModel) {
+                output.append("\n")
+                def gaussianModel = p.gaussianModel
+                if (gaussianModel.linearCovariate) {
+                    def linearCovariate = gaussianModel.linearCovariate
+                    if (gaussianModel.transformation) {
+                        final String TRANSFORMATION = gaussianModel.transformation.value()
+                        //LHS
+                        UniopType indivParam = new UniopType()
+                        indivParam.op = TRANSFORMATION
+                        def paramSymbRef = new SymbolRefType()
+                        paramSymbRef.symbIdRef = p.symbId
+                        indivParam.symbRef = paramSymbRef
+                        def lhsEquation = new Equation()
+                        lhsEquation.scalarOrSymbRefOrBinop.add(wrapJaxb(indivParam))
+                        //POPULATION
+                        def popParam
+                        if (linearCovariate.populationParameter.assign.symbRef) {
+                            popParam = new UniopType()
+                            popParam.op = TRANSFORMATION
+                            popParam.symbRef = linearCovariate.populationParameter.assign.symbRef
+                        }
+                        def fixedEffectsCovMap = [:]
+                        linearCovariate.covariate.each { c ->
+                            //fixed effects
+                            if (!c.fixedEffect) {
+                                return
+                            }
+                            def fixedEffects = []
+                            SymbolRefType covEffectKey
+                            c.fixedEffect.each { fe ->
+                                if (fe.category) {
+                                    def catIdSymbRef = new SymbolRefType()
+                                    def trickReference = new StringBuilder("<msub><mi>")
+                                    trickReference.append(c.symbRef.symbIdRef).append("</mi><mi>")
+                                    trickReference.append(fe.category.catId).append("</mi></msub>")
+                                    catIdSymbRef.symbIdRef = trickReference.toString()
+                                    covEffectKey = catIdSymbRef
+                                } else {
+                                    covEffectKey = c.symbRef
+                                }
+                                fixedEffects << fe.symbRef
+                            }
+                            fixedEffectsCovMap[covEffectKey] = fixedEffects
+                        }
+                        def fixedEffectsTimesCovariateList = []
+                        if (fixedEffectsCovMap) {
+                            fixedEffectsCovMap.each{
+                                def thisCov = []
+                                thisCov.add(wrapJaxb(it.key))
+                                it.value.collect{ v -> thisCov.add(wrapJaxb(v)) }
+                                fixedEffectsTimesCovariateList.add(applyBinopToList(thisCov, "times"))
+                            }
+                        }
+                        //RANDOM EFFECTS
+                        def randomEffects = []
+                        if (gaussianModel.randomEffects) {
+                            gaussianModel.randomEffects.symbRef.each { re ->
+                                def randomEffectSymbol = new SymbolRefType()
+                                randomEffectSymbol.symbIdRef = re.symbIdRef
+                                randomEffects << wrapJaxb(randomEffectSymbol)
+                            }
+                        }
+                        def sumElements = []
+                        sumElements.add(wrapJaxb(popParam))
+                        if (fixedEffectsTimesCovariateList) {
+                            sumElements.addAll(fixedEffectsTimesCovariateList)
+                        }
+                        sumElements.addAll(randomEffects)
+
+                        Equation rhsEquation = new Equation()
+                        rhsEquation.scalarOrSymbRefOrBinop.add(applyBinopToList(sumElements, "plus"))
+                        output.append(convertToMathML(lhsEquation, rhsEquation))
+                        output.append("\n")
+                    }
+                } else if (gaussianModel.generalCovariate) {
+                    String converted=convertToMathML(p.symbId, gaussianModel.generalCovariate.assign)
+                    output.append("<div>")
+                    output.append(converted)
+                    output.append("</div>")
                 }
             }
         }
-        return output
+        return output.append("</div>")
     }
 
     def functionDefinitions = { attrs ->
@@ -419,6 +510,11 @@ class PharmMlTagLib {
         return result
     }
 
+    /**
+     * Expects as arguments the parameter model as well as the covariate model.
+     * The latter is necessary to display the transformations that are defined
+     * for each individual parameter.
+     */
     def parameterModel = { attrs ->
         if (!attrs.parameterModel) {
             return
@@ -428,7 +524,7 @@ class PharmMlTagLib {
         def result = new StringBuilder()
         result.append("<span class=\"bold\">Parameters </span>")
         attrs.parameterModel.each { pm ->
-               result.append("<p>")
+               result.append("<div class='spaced'>")
                def simpleParameters = pm.commonParameterElement.value.findAll {
                        it instanceof SimpleParameterType
                }
@@ -443,11 +539,11 @@ class PharmMlTagLib {
                if (randoms) {
                        result.append(randoms)
                }
-               String individuals=individualParams(individualParameters)
+               String individuals = individualParams(individualParameters, rv, attrs.covariates)
                if (individuals) {
                        result.append(individuals)
                }
-               result.append("</p>")
+               result.append("</div>")
         }
 
         out << result.toString()
@@ -519,10 +615,10 @@ class PharmMlTagLib {
         StringBuilder result = new StringBuilder()
         result.append("<h3>Observation Model</h3>")
         attrs.observations.each { om ->
-            result.append("<h4>Observation error ")
+            result.append("<h4>Observation error <span class='italic'>")
             // the API returns a JAXBElement, not ObservationErrorType
             def obsErr = om.observationError.value
-            result.append(obsErr.symbId).append("</h4>\n")
+            result.append(obsErr.symbId).append("</span></h4>\n")
             result.append("<span class=\"bold\">Parameters </span>")
             def simpleParameters = om.commonParameterElement.value.findAll {
                 it instanceof SimpleParameterType
@@ -716,8 +812,10 @@ class PharmMlTagLib {
                 break
             case TrueBooleanType:
                 return "true"
+                break
             case FalseBooleanType:
                 return "false"
+                break
             default:
                 return s.toString()
         }
@@ -729,8 +827,8 @@ class PharmMlTagLib {
 
     def sequenceAsMathML = {
         new StringBuilder(op("[")).append(oprand(s.begin)).append(op(":")).
-        			   append(oprand(s.stepSize)).append(op(":")).
-        			   append(oprand(s.end)).append(op("]"))
+                   append(oprand(s.stepSize)).append(op(":")).
+                   append(oprand(s.end)).append(op("]"))
     }
 
     StringBuilder vectorAsMathML = { v ->
@@ -953,6 +1051,12 @@ class PharmMlTagLib {
         if (!attrs.steps) {
             return
         }
+        if (!attrs.independentVariable) {
+            // the default independent variable is assumed to be time.
+            def iv = new IndependentVariableType()
+            iv.symbId = "time"
+            attrs.independentVariable = iv
+        }
         /*
         * Check which kind of step we are dealing with. Estimation and simulation steps cannot
         * be mixed, hence only look at the first one to decide.
@@ -962,12 +1066,12 @@ class PharmMlTagLib {
         if (step instanceof EstimationStepType) {
             result.append(estimationSteps(attrs.steps))
         } else {
-            result.append(simulationSteps(attrs.steps))
+            result.append(simulationSteps(attrs.steps, attrs.independentVariable))
         }
         out << result.toString()
     }
 
-    StringBuilder simulationSteps = { List<SimulationStepType> steps ->
+    StringBuilder simulationSteps = { List<SimulationStepType> steps, String iv ->
         if (!steps) {
             return
         }
@@ -1000,7 +1104,11 @@ class PharmMlTagLib {
                         }
                     }
                     if (o.timepoints) {
-                        result.append("<p><span class=\"bold\">Timepoints:</span>\n")
+                        result.append("<p><span class=\"bold\">Independent variable")
+                        if (iv) {
+                            result.append("(").append(iv).append(")")
+                        }
+                        result.append(":</span>\n")
                         // put all timepoints here, output them separated by commas
                         List<String> observationTimepoints = []
                         o.timepoints.arrays.each { a ->
@@ -1125,7 +1233,7 @@ class PharmMlTagLib {
     }
 
     StringBuilder estimParamsWithInitialEstimate(List<ParameterEstimateType> params, String heading) {
-        def result = new StringBuilder("<p class=\"bold\">${heading}\n")
+        def result = new StringBuilder("<p class=\"bold\">${heading}</p>\n")
         if (params.size() > 1) {
             result.append("<ul>")
             params.inject(result) { r, p ->
@@ -1134,11 +1242,11 @@ class PharmMlTagLib {
                 r.append(convertToMathML(p.symbRef.symbIdRef, p.initialEstimate))
                 r.append("</li>\n")
             }
-            result.append("</ul></p>\n")
+            result.append("</ul>\n")
         } else {
             result.append("&nbsp;<span>")
             result.append(convertToMathML(params[0].symbRef.symbIdRef, params[0].initialEstimate))
-            result.append("</span></p>\n")
+            result.append("</span>\n")
         }
         return result
     }
@@ -1160,11 +1268,11 @@ class PharmMlTagLib {
             result.append(o.name ? o.name.value : operationMeaningMap[o.opType.value()])
             result.append("</span>\n")
             if (o.description || o.algorithm || o.property) {
-                result.append("<p>")
+                result.append("<div>")
                 if (o.description) {
                     result.append(o.description.value)
                 }
-                result.append("</p>")
+                result.append("</div>")
                 if (o.property || o.algorithm) {
                     result.append("\n<ul>")
                     o.property.inject(result) { r, p ->
@@ -1172,15 +1280,15 @@ class PharmMlTagLib {
                     }
                     result.append("</ul>\n")
                     if (o.algorithm) {
-                        result.append("\n<p>Algorithm ").append(o.algorithm.name ? o.algorithm.name.value :
-                                (o.algorithm.definition ? o.algorithm.definition : "")).append("</p>\n")
+                        result.append("\n<span>Algorithm ").append(o.algorithm.name ? o.algorithm.name.value :
+                                (o.algorithm.definition ? o.algorithm.definition : "")).append("</span>\n")
                         if (o.algorithm.property) {
                             result.append("<ul>")
                             o.algorithm.property.inject(result) { r, p ->
                                 r.append("<li>").append(operationProperty(p)).append("</li>")
                             }
+                            result.append("</ul>")
                         }
-                        result.append("</ul>")
                     }
                 }
             }
@@ -1223,5 +1331,24 @@ class PharmMlTagLib {
         result.append(deps.join(", "))
         return deps.size() == 1 ? result :
                 new StringBuilder("[").append(result).append("]")
+    }
+
+    private JAXBElement wrapJaxb(def elem) {
+        return new JAXBElement(new QName(""), elem.getClass(), elem)
+    }
+
+    private JAXBElement applyBinopToList(List elements, String operator) {
+        if (elements.size() == 1) {
+            // just return the element
+            return wrapJaxb(elements.first())
+        } else {
+            def result = new BinopType()
+            result.op = operator
+            final int LAST = elements.size() - 1
+            result.content = []
+            result.content.add(wrapJaxb(elements.first()))
+            result.content.add(applyBinopToList(elements[1..LAST], operator))
+            return wrapJaxb(result)
+        }
     }
 }

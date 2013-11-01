@@ -23,26 +23,25 @@
     </style>
 </head>
 <content tag="modelspecifictabs">
-    <li><a href="#customDefinitions">Custom Definitions</a></li>
     <li><a href="#modelDefinition">Model Definition</a></li>
     <li><a href="#trialDesign">Trial Design</a></li>
     <li><a href="#modellingSteps">Modelling Steps</a></li>
 </content>
 <content tag="modelspecifictabscontent">
-    <div id="customDefinitions">
-        <p><strong>Independent variable</strong>&nbsp;${independentVar}</p>
-        <h3>Function Definitions</h3>
-            <pharmml:functionDefinitions functionDefs="${functionDefs}"/>
-   </div>
-
     <div id="modelDefinition">
+
+        <p><strong>Independent variable</strong>&nbsp;${independentVar}</p>
+
+        <h3>Function Definitions</h3>
+        <pharmml:functionDefinitions functionDefs="${functionDefs}"/>
+
         <pharmml:structuralModel sm="${structuralModel}" iv="${independentVar}"/>
 
         <pharmml:variabilityModel variabilityModel="${variabilityModel}"/>
 
         <pharmml:covariates covariate="${covariateModel}" />
 
-        <pharmml:parameterModel parameterModel="${parameterModel}" />
+        <pharmml:parameterModel parameterModel="${parameterModel}" covariates="${covariateModel}" />
 
         <pharmml:observations observations="${observationModel}"/>
  </div>
@@ -57,7 +56,7 @@
     </div>
 
     <div id="modellingSteps">
-       <pharmml:modellingSteps steps="${modellingSteps}"/>
+       <pharmml:modellingSteps steps="${modellingSteps}" independentVariable="${independentVar}" />
        <pharmml:stepDeps deps="${stepDeps}" />
     </div>
 </content>
