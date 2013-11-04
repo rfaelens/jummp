@@ -126,7 +126,7 @@ class ModelController {
             }
             on("success").to "uploadPipeline"
             on("error"){
-            	session.messageForError="Error starting update process. Possibly ID not valid?"
+            	session.updateMissingId="True"
             }.to "displayErrorPage"
         }
         uploadPipeline {
@@ -200,7 +200,8 @@ class ModelController {
                 List<MultipartFile> extraMultipartList = []
                 if (extraFileField instanceof MultipartFile) {
                     extraMultipartList = [extraFileField]
-                }else {
+                }
+                else {
                     extraMultipartList = extraFileField
                 }
                 def descriptionFields = params["description"]
@@ -323,7 +324,7 @@ class ModelController {
         
         performValidation {
             action {
-                if (!flow.workingMemory.containsKey("model_type")) {
+            	if (!flow.workingMemory.containsKey("model_type")) {
                     submissionService.inferModelFormatType(flow.workingMemory)
                 }
                 submissionService.performValidation(flow.workingMemory)
