@@ -35,8 +35,7 @@
         <title>Error Page</title>
     </head>
     <body>
-        <h2>Oh, snap</h2>
-        <p>Something bad happened. That is all we know. Sorry 'bout that.</p>
+        <g:render template="/templates/errorTemplate"/>
     </body>
     <content tag="submit">
     	selected

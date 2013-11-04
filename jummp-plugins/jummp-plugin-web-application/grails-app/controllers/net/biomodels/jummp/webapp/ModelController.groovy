@@ -47,7 +47,7 @@ import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
 import net.biomodels.jummp.core.model.PublicationTransportCommand
-
+import org.apache.commons.lang.exception.ExceptionUtils
 
 
 class ModelController {
@@ -80,6 +80,10 @@ class ModelController {
     * Dependency injenction of pubMedService 
     */
     def pubMedService
+    /*
+    * Dependency injection of mailService
+    */
+    def mailService
 
     def showWithMessage = {
         flash["giveMessage"]=params.flashMessage
@@ -121,7 +125,9 @@ class ModelController {
                 conversation.model_id=params.id
             }
             on("success").to "uploadPipeline"
-            on("error").to "displayErrorPage"
+            on("error"){
+            	session.messageForError="Error starting update process. Possibly ID not valid?"
+            }.to "displayErrorPage"
         }
         uploadPipeline {
             subflow(controller: "model", action: "upload", input: [isUpdate: true])
@@ -181,6 +187,7 @@ class ModelController {
             }
             on("skipDisclaimer").to "uploadFiles"
             on("goToDisclaimer").to "displayDisclaimer"
+            on(Exception).to "handleException"
         }
         displayDisclaimer {
             on("Continue").to "uploadFiles"
@@ -188,7 +195,6 @@ class ModelController {
         }
         uploadFiles {
             on("Upload") {
-
                 def mainMultipartList = request.getMultiFileMap().mainFile
                 def extraFileField = request.getMultiFileMap().extraFile
                 List<MultipartFile> extraMultipartList = []
@@ -219,37 +225,6 @@ class ModelController {
                     log.debug "Data binding done :${cmd.properties}"
                 }
                 flow.workingMemory.put("UploadCommand", cmd)
-                if (!cmd.validate()) {
-                    log.error "Submission did not validate: ${cmd.properties}."
-                    log.error "Errors: ${cmd.errors.allErrors.inspect()}."
-                    // No main file! This must be an error!
-                    flow.workingMemory.put("file_validation_error",true)
-                    // Unless there was one all along
-                    if (cmd.errors["mainFile"].codes.contains("mainFile.blank")) {
-                        if (flow.workingMemory.containsKey("repository_files")) {
-                            List mainFiles=getMainFiles(flow.workingMemory)
-                            if (mainFiles && !mainFiles.isEmpty())
-                            {
-                            	    if (!mainFileOverwritten(mainFiles, cmd.extraFiles)) {
-                            	    	    flow.workingMemory.put("file_validation_error",false)
-                            	    	    //if there are no main or additional files, remove upload command
-                            	    	    if (!cmd.extraFiles || cmd.extraFiles.isEmpty()) {
-                            	    	    	    flow.workingMemory.remove("UploadCommand")
-                            	    	    }
-                            	    }
-                            	    else {
-                            	    	    flow.workingMemory.put("overwriting_main_with_additional",true)
-                            	    }
-                            }
-                        }
-                    }
-                } else {
-                    flow.workingMemory.put("file_validation_error",false)
-                    if (IS_DEBUG_ENABLED) {
-                        log.debug("The files are valid.")
-                    }
-                }
-                //}
             }.to "transferFilesToService"
             on("ProceedWithoutValidation"){
             }.to "inferModelInfo"
@@ -258,19 +233,45 @@ class ModelController {
         }
         transferFilesToService {
             action {
-            	    if (flow.workingMemory.remove("file_validation_error") as Boolean) {
-                    	    if (flow.workingMemory.containsKey("overwriting_main_with_additional")) {
-                    	    	    flow.workingMemory.remove("overwriting_main_with_additional")
-                    	    	    flow.workingMemory.remove("UploadCommand")
-                    	    	    AdditionalReplacingMainError()
-                    	    }
-            	    	    else {
-            	    	    	    MainFileMissingError()
-            	    	    }
+            	UploadFilesCommand cmd = flow.workingMemory.remove("UploadCommand") as UploadFilesCommand
+            	boolean fileValidationError=false
+            	boolean furtherProcessingRequired=true
+            	if (!cmd.validate()) {
+                    // No main file! This must be an error!
+                    fileValidationError=true
+                    // Unless there was one all along
+                    if (cmd.errors["mainFile"].codes.contains("mainFile.blank")) {
+                    	if (flow.workingMemory.containsKey("repository_files")) {
+                            List mainFiles=getMainFiles(flow.workingMemory)
+                            if (mainFiles && !mainFiles.isEmpty())
+                            {
+                            	if (!mainFileOverwritten(mainFiles, cmd.extraFiles)) {
+                            	    fileValidationError=false
+                            	    furtherProcessingRequired=true
+                            	}
+                            	else {
+                            		return AdditionalReplacingMainError()
+                            	}
+                            }
+                            else {
+                            	return MainFileMissingError()
+                            }
+                        }
+                        else {
+                           	return MainFileMissingError()
+                        }
                     }
-                    else if (flow.workingMemory.containsKey("UploadCommand")) {
+                    else {
+                        throw new Exception("Error in uploading files. Cmd did not validate: ${cmd.getProperties()}")
+                    }
+                } 
+                else {
+                    if (IS_DEBUG_ENABLED) {
+                        log.debug("The files are valid.")
+                    }
+                }
+            	if (!fileValidationError && furtherProcessingRequired) {
                         //should this be in a separate action state?
-                        UploadFilesCommand cmd = flow.workingMemory.remove("UploadCommand") as UploadFilesCommand
                         def uuid = UUID.randomUUID().toString()
                         if (IS_DEBUG_ENABLED) {
                             log.debug "Generated submission UUID: ${uuid}"
@@ -308,7 +309,7 @@ class ModelController {
                         flow.workingMemory["submitted_additionals"] = additionalsMap
                         def inputs = new HashMap<String, Object>()
                         submissionService.handleFileUpload(flow.workingMemory,inputs)
-                    }
+                }
             }
             on("MainFileMissingError") {
             	    flash.error="submission.upload.error.fileerror"
@@ -317,6 +318,7 @@ class ModelController {
             	    flash.error="submission.upload.error.additional_replacing_main"
             }.to "uploadFiles"
             on("success").to "performValidation"
+            on(Exception).to "handleException"
         }
         
         performValidation {
@@ -351,12 +353,14 @@ class ModelController {
             on("FilesNotValid") {
                 flash.error="submission.upload.error.fileerror"
             }.to "uploadFiles"
+            on(Exception).to "handleException"
         }
         inferModelInfo {
             action {
                 submissionService.inferModelInfo(flow.workingMemory)
             }
             on("success").to "enterPublicationLink"
+            on(Exception).to "handleException"
         }
         /** Temporarily disabled state while we arent able to modify the model
         displayModelInfo {
@@ -414,6 +418,7 @@ class ModelController {
         	}
         	on("publicationInfoPage").to "publicationInfoPage"
         	on("displaySummaryOfChanges").to "displaySummaryOfChanges"
+        	on(Exception).to "handleException"
         }
         publicationInfoPage {
             on("Continue"){
@@ -483,19 +488,14 @@ class ModelController {
         }
         saveModel {
             action {
-                try {
-                    submissionService.handleSubmission(flow.workingMemory)
-                    session.result_submission=flow.workingMemory.get("model_id")
-                    if (flow.isUpdate) {
-                    	    redirect(controller:'model', action:'showWithMessage', id:conversation.model_id, params: [flashMessage: "Model ${session.result_submission} has been updated."])
-                    }
-                }
-                catch(Exception ignore) {
-                    error()
+                submissionService.handleSubmission(flow.workingMemory)
+                session.result_submission=flow.workingMemory.get("model_id")
+                if (flow.isUpdate) {
+                    redirect(controller:'model', action:'showWithMessage', id:conversation.model_id, params: [flashMessage: "Model ${session.result_submission} has been updated."])
                 }
             }
             on("success").to "displayConfirmationPage"
-            on("error").to "displayErrorPage"
+            on(Exception).to "handleException"
         }
         cleanUpAndTerminate {
             action {
@@ -505,6 +505,20 @@ class ModelController {
                 }
             }
             on("success").to "abort"
+        }
+        handleException {
+        	action {
+        		String stackTrace=ExceptionUtils.getStackTrace(flash.flowExecutionException)
+        		String ticket=UUID.randomUUID().toString()
+        		mailService.sendMail {
+        			to grailsApplication.config.jummp.security.registration.email.adminAddress
+        			from grailsApplication.config.jummp.security.registration.email.sender
+        			subject "Bug in submission: ${ticket}"
+        			body stackTrace
+                }
+        		session.messageForError=ticket   
+        	}
+        	on("success").to "displayErrorPage"
         }
         abort()
         displayConfirmationPage()
