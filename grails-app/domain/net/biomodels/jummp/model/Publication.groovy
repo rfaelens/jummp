@@ -140,6 +140,7 @@ class Publication implements Serializable {
     		publication.title=cmd.title;
         	publication.affiliation=cmd.affiliation;
             publication.synopsis=cmd.synopsis;
+            publication.journal=cmd.journal;
             publication.year=cmd.year;
             publication.month=cmd.month;
             publication.day=cmd.day;
