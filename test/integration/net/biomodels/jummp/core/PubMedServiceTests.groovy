@@ -78,13 +78,6 @@ class PubMedServiceTests extends JummpIntegrationTest {
         assertNull(publication.day)
         assertEquals("0",publication.month) 
         assertNull(publication.issue)
-        try
-        {
-        	pubMedService.fetchPublicationData("0")
-        }
-        catch(Exception e) {
-        	e.printStackTrace()
-        }
         // should cause a SAXParseException
         shouldFail(JummpException) {
         	pubMedService.fetchPublicationData("0")
