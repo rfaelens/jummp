@@ -91,15 +91,21 @@ class PubMedService {
     
 
     private setFieldIfItExists(String fieldName, Publication publication, def xmlField, boolean castToInt) {
-    	if (xmlField && xmlField.size()==1) {
-    		String text=xmlField.text()
-    		def fields=Publication.getFields()
-    		if (castToInt) {
-    			publication."${fieldName}"=Integer.parseInt(text)
+    	try
+    	{
+    		if (xmlField && xmlField.size()==1) {
+    			String text=xmlField.text()
+    			def fields=Publication.getFields()
+    			if (castToInt) {
+    				publication."${fieldName}"=Integer.parseInt(text)
+    			}
+    			else {
+    				publication."${fieldName}"=text
+    			}
     		}
-    		else {
-    			publication."${fieldName}"=text
-    		}
+    	}
+    	catch(Exception e) {
+    		e.printStackTrace()
     	}
     }
     
