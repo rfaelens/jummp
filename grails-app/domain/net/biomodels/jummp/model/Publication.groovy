@@ -108,7 +108,7 @@ class Publication implements Serializable {
         linkProvider(nullable: true)
         link(nullable: true)
         authors validator: { authorValue, pubObj ->
-        	return !authorValue.isEmpty()
+        	return authorValue && !authorValue.isEmpty()
         }
     }
 

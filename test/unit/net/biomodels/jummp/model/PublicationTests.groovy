@@ -28,7 +28,9 @@
 * that of the covered work.}
 **/
 
-
+/*
+* Author: raza.ali@ebi.ac.uk
+*/
 
 
 
@@ -76,6 +78,9 @@ class PublicationTests extends GrailsUnitTestCase {
         for (int i=1; i<1000; i++) {
             synopsis += "1"
         }
+        Author author =new Author(lastName: "Ali", initials:"R")
+        publication.authors = []
+        publication.authors << author
         publication.synopsis = synopsis
         assertTrue(publication.validate())
     }
