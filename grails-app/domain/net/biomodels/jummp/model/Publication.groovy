@@ -107,6 +107,9 @@ class Publication implements Serializable {
         pages(nullable: true)
         linkProvider(nullable: true)
         link(nullable: true)
+        authors validator: { authorValue, pubObj ->
+        	return !authorValue.isEmpty()
+        }
     }
 
     PublicationTransportCommand toCommandObject() {

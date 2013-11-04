@@ -108,5 +108,8 @@ class PublicationTransportCommand implements Serializable {
         volume(nullable: true)
         issue(nullable: true)
         pages(nullable: true)
+        authors validator: { authorValue, pubObj ->
+        	return !authorValue.isEmpty()
+        }
     }
 }
