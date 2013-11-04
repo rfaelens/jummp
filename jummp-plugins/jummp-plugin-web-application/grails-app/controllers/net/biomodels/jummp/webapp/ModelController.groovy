@@ -241,7 +241,8 @@ class ModelController {
                     // No main file! This must be an error!
                     fileValidationError=true
                     // Unless there was one all along
-                    if (cmd.errors["mainFile"].codes.contains("mainFile.blank")) {
+                    
+                    if (cmd.errors["mainFile"].codes.find{ it.contains("mainFile.blank") || it.contains("mainFile.nullable") }) {
                     	if (flow.workingMemory.containsKey("repository_files")) {
                             List mainFiles=getMainFiles(flow.workingMemory)
                             if (mainFiles && !mainFiles.isEmpty())
@@ -263,6 +264,8 @@ class ModelController {
                         }
                     }
                     else {
+                    	//System.out.println(cmd.errors["mainFile"])
+                        //System.out.println(cmd.errors["mainFile"].getProperties())
                         throw new Exception("Error in uploading files. Cmd did not validate: ${cmd.getProperties()}")
                     }
                 } 
@@ -492,20 +495,31 @@ class ModelController {
                 submissionService.handleSubmission(flow.workingMemory)
                 session.result_submission=flow.workingMemory.get("model_id")
                 if (flow.isUpdate) {
-                    redirect(controller:'model', action:'showWithMessage', id:conversation.model_id, params: [flashMessage: "Model ${session.result_submission} has been updated."])
+                	flash.sendMessage="Model ${session.result_submission} has been updated."
+                    return redirectWithMessage()
                 }
             }
             on("success").to "displayConfirmationPage"
+            on("redirectWithMessage").to "redirectWithMessage"
             on(Exception).to "handleException"
         }
         cleanUpAndTerminate {
             action {
                 submissionService.cleanup(flow.workingMemory)
                 if (flow.isUpdate) {
-                    	    redirect(controller:'model', action:'showWithMessage', id:conversation.model_id, params: [flashMessage: "Model update was cancelled."])
+                	flash.sendMessage="Model update was cancelled."
+                	return redirectWithMessage()
                 }
             }
             on("success").to "abort"
+            on("redirectWithMessage").to "redirectWithMessage"
+        }
+        redirectWithMessage {
+        	action {
+        		redirect(controller:'model', action:'showWithMessage', id:conversation.model_id, params: [flashMessage: flash.sendMessage])
+        	}
+        	on("success").to "displayConfirmationPage"
+        	on(Exception).to "displayConfirmationPage"
         }
         handleException {
         	action {
