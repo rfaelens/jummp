@@ -147,12 +147,13 @@ class Publication implements Serializable {
             publication.issue=cmd.issue;
             publication.pages=cmd.pages;
             cmd.authors.each { newAuthor ->
-            	Author existing = publication.authors.find {
-            		it.initials == newAuthor.initials && it.lastName == newAuthor.lastName
+            	Author existing = publication.authors.find { oldAuthor ->
+            		oldAuthor.initials == newAuthor.initials && oldAuthor.lastName == newAuthor.lastName
             	}
             	if (!existing) {
-            		Author current = new Author(initials: it.initials, firstName: it.firstName, lastName: it.lastName)
-            		authors << current
+            		Author current = new Author(initials: newAuthor.initials, firstName: newAuthor.firstName,
+            									lastName: newAuthor.lastName)
+            		publication.authors << current
             	}
             }
             publication.save(flush:true)
