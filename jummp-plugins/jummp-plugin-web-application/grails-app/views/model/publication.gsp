@@ -18,15 +18,6 @@
 --%>
 
 
-
-
-
-
-
-
-
-
-
 <%@ page import="net.biomodels.jummp.model.PublicationLinkProvider" %>
 <g:if test="${publication?.link && publication?.linkProvider}">
 <h2><g:message code="model.summary.reference-publication"/></h2>
