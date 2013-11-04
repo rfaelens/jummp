@@ -78,11 +78,11 @@ class UsermanagementController {
     	boolean captchaValid = simpleCaptchaService.validateCaptcha(params.captcha)
     	if (!captchaValid) {
     		flash.message="The text entered did not match the image. Please try again"
-    		redirect(action:"create")
+    		return redirect(action:"create")
     	}
     	if (params.verysecure) {
     		flash.message="I hope you are a robot. Otherwise something has gone wrong."
-    		redirect(action:"create")
+    		return redirect(action:"create")
     	}
     	RegistrationCommand cmd=new RegistrationCommand()
     	bindData(cmd, params)
@@ -92,7 +92,7 @@ class UsermanagementController {
     			errors.append(humanReadable(it.field)).append(" was ").append(humanReadable(it.code)).append(". ")
         	}
         	flash.message=errors.toString()
-        	redirect(action:"create")
+        	return redirect(action:"create")
     	}
     	try 
     	{
@@ -100,7 +100,7 @@ class UsermanagementController {
     	}
     	catch(Exception e) {
     		flash.message=humanReadable(e.toString())
-   			redirect(action:"create")
+   			return redirect(action:"create")
     	}
     	render view: "successfulregistration"
     }
