@@ -41,6 +41,7 @@ import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.core.user.RoleNotFoundException
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.webapp.RegistrationCommand
+import net.biomodels.jummp.webapp.EditUserCommand
 
 /**
  * @short Controller for user management.
@@ -294,31 +295,3 @@ class AddRemoveRoleCommand {
     }
 }
 
-
-/**
- * @short Command Object to validate the user before editing.
- */
-class EditUserCommand implements Serializable {
-    private static final long serialVersionUID = 1L
-    String username
-    String userRealName
-    String email
-    String institution
-    String orcid
-
-    static constraints = {
-        username(nullable: false, blank: false)
-        userRealName(nullable: false, blank: false)
-        email(nullable: false, blank: false, email: true)
-        institution(nullable:true)
-        orcid(nullable:true)
-    }
-
-    /**
-     *
-     * @return The command object as a User
-     */
-    User toUser() {
-        return new User(username: this.username, userRealName: this.userRealName, email: this.email, institution:this.institution, orcid:this.orcid)
-    }
-}

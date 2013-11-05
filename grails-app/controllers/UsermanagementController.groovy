@@ -23,6 +23,8 @@
 
 
 import net.biomodels.jummp.webapp.RegistrationCommand
+import net.biomodels.jummp.webapp.EditUserCommand
+import grails.plugins.springsecurity.Secured
 
 /*
 * @short Controller for managing user registrations
@@ -39,6 +41,7 @@ class UsermanagementController {
     //def springSecurityService
     def simpleCaptchaService
     def userService
+    def springSecurityService
     def human=["email":"Email", "username":"Username", 
     		   "userRealName":"Name", "institution":"Institution", 
     		   "orcid":"Orcid", "email.invalid":"invalid",
@@ -55,16 +58,56 @@ class UsermanagementController {
      * Passes on any info messages needed to be displayed and renders the register gsp
      */
     def create = {
-        /*if (springSecurityService.isLoggedIn()) {
-            redirect uri: SpringSecurityUtils.securityConfig.successHandler.defaultTargetUrl
+        String flashMessage=""
+        if (flash.message) {
+        	flashMessage=flash.message
         }
-        else {*/
-        	String flashMessage=""
-        	if (flash.message) {
-        		flashMessage=flash.message
+        render view: "register", model: [postUrl: "", flashMessage:flashMessage]
+    }
+    
+    @Secured(["isAuthenticated()"])
+    def edit = {
+        String flashMessage=""
+        if (flash.message) {
+        	flashMessage=flash.message
+        }
+        render view: "edit", model: [postUrl: "", flashMessage:flashMessage, user: userService.getUser(springSecurityService.principal.id)]
+    }
+    
+    boolean validateUserData(def cmd, def params) {
+    	bindData(cmd, params)
+    	if (!cmd.validate()) {
+    		StringBuilder errors=new StringBuilder("Your submission had the following errors: ")
+    		cmd.errors.allErrors.each {
+    			errors.append(humanReadable(it.field)).append(" was ").append(humanReadable(it.code)).append(". ")
         	}
-        	render view: "register", model: [postUrl: "", flashMessage:flashMessage]
-     //   }
+        	flash.message=errors.toString()
+        	return false
+    	}
+    	return true
+    }
+    
+    
+    /**
+     * Validates the command object and then uses the user service to 
+     * edit a user. If an error occurs at any point, the method redirects
+     * to edit action and sends the user a helpful message.
+     */
+    def editUser = {
+    	EditUserCommand cmd=new EditUserCommand()
+    	if (!validateUserData(cmd, params)) {
+    		return redirect(action:"edit")
+    	}
+    	try 
+    	{
+    		userService.editUser(cmd.toUser())
+    	}
+    	catch(Exception e) {
+    		flash.message=humanReadable(e.toString())
+   			return redirect(action:"create")
+    	}
+    	flash.message="Profile was updated successfully"
+    	redirect(action:"edit")
     }
     
     				   
@@ -85,14 +128,8 @@ class UsermanagementController {
     		return redirect(action:"create")
     	}
     	RegistrationCommand cmd=new RegistrationCommand()
-    	bindData(cmd, params)
-    	if (!cmd.validate()) {
-    		StringBuilder errors=new StringBuilder("Your submission had the following errors: ")
-    		cmd.errors.allErrors.each {
-    			errors.append(humanReadable(it.field)).append(" was ").append(humanReadable(it.code)).append(". ")
-        	}
-        	flash.message=errors.toString()
-        	return redirect(action:"create")
+    	if (!validateUserData(cmd, params)) {
+    		return redirect(action:"create")
     	}
     	try 
     	{
