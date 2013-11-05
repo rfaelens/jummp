@@ -923,9 +923,21 @@ class PharmMlTagLib {
                                 result.append("<td>bolus</td>")
                                 //fall through
                             case InfusionType:
-                                result.append("<td>infusion</td>")
+                                if (regimen instanceof InfusionType) {
+                                    result.append("<td>infusion</td>")
+                                }
+                                if (regimen.dosingTimes) {
+                                    rhs(regimen.dosingTimes.assign, result.append("<td>"))
+                                    result.append("</td>")
+                                } else {
+                                    result.append("<td>&nbsp;</td>")
+                                }
                                 def amt = regimen.doseAmount
-                                rhs(amt.assign, result.append("<td>")).append("</td>")
+                                if (amt.assign) {
+                                    rhs(amt.assign, result.append("<td>")).append("</td>")
+                                } else {
+                                    result.append("<td>&nbsp;</td>")
+                                }
                                 result.append("<td>").append(amt.symbRef.symbIdRef).append("</td>")
                                 break
                            default:
