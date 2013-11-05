@@ -77,190 +77,6 @@ import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 class PharmMlTagLib {
     static namespace = "pharmml"
 
-    private void prefixToInfix(StringBuilder builder, List<MathsSymbol> stack) {
-        if (stack.isEmpty()) {
-            return;
-        }
-        MathsSymbol symbol=stack.pop()
-        if (symbol instanceof OperatorSymbol) {
-            OperatorSymbol operator=symbol as OperatorSymbol
-            if (operator.type==OperatorSymbol.OperatorType.BINARY) {
-                builder.append(operator.getOpening())
-                if (operator.needsTermSeparation) {
-                	builder.append("<mrow>")
-                }
-                prefixToInfix(builder,stack)
-                if (operator.needsTermSeparation) {
-                	builder.append("</mrow>")
-                }
-                builder.append(operator.getMapping())
-                if (operator.needsTermSeparation) {
-                	builder.append("<mrow>")
-                }
-                prefixToInfix(builder,stack)
-                if (operator.needsTermSeparation) {
-                	builder.append("</mrow>")
-                }
-                builder.append(operator.getClosing())
-            } else {
-                builder.append(operator.getMapping())
-                builder.append(operator.getOpening())
-                prefixToInfix(builder,stack)
-                builder.append(operator.getClosing())
-            }
-        } 
-        else if (symbol instanceof FunctionSymbol) {
-        	FunctionSymbol function=symbol as FunctionSymbol
-        	builder.append(function.getMapping())
-                builder.append(function.getOpening())
-                for (int i=0; i<function.getArgCount(); i++) {
-                	prefixToInfix(builder, stack)
-                	if (i!=function.getArgCount()-1) {
-                		builder.append(function.getArgSeparator())
-                	}
-                }
-                builder.append(function.getClosing())
-        }
-        else if (symbol instanceof PiecewiseSymbol) {
-        	PiecewiseSymbol piecewise=symbol as PiecewiseSymbol
-        	builder.append(piecewise.getOpening())
-        	for (int i=0; i<piecewise.getPieceCount(); i++) {
-        		prefixToInfix(builder, stack)
-        	}
-        	builder.append(piecewise.getClosing())
-        }
-        else if (symbol instanceof PieceSymbol) {
-        	PieceSymbol piece=symbol as PieceSymbol
-        	builder.append(piece.getOpening())
-        	builder.append(piece.getTermStarter())
-        	prefixToInfix(builder, stack)
-        	builder.append(piece.getTermEnder())
-        	if (piece.type==PieceSymbol.ConditionType.OTHERWISE) {
-        		builder.append(piece.getOtherwiseText())
-        	}
-        	else {
-        		builder.append(piece.getIfText())
-        		builder.append(piece.getTermStarter())
-        		prefixToInfix(builder, stack)
-        		builder.append(piece.getTermEnder())
-        	}
-        	builder.append(piece.getClosing())
-        }
-        else {
-            builder.append(symbol.getMapping())
-        }
-       // prefixToInfix(builder, stack)
-    }
-
-    private void convertEquation(def equation, StringBuilder builder) {
-        List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equation).reverse()
-        List<String> stack=new LinkedList<String>()
-        symbols.each {
-           stack.push(it)
-        }
-        prefixToInfix(builder, stack)
-    }
-
-    private String convertToMathML(def equation) {
-        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
-        convertEquation(equation, builder)
-        builder.append("</mstyle></math>")
-        return builder.toString()
-    }
-
-    private String convertToMathML(String lhs, def equation) {
-        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
-        builder.append(oprand(lhs))
-        builder.append(op("="))
-        convertEquation(equation, builder)
-        builder.append("</mstyle></math>")
-        return builder.toString()
-    }
-
-    //works with EquationType and Equation as well
-    private String convertToMathML(EquationType lhs, EquationType rhs) {
-        StringBuilder output = new StringBuilder("<div>")
-        output.append("<math display='inline'><mstyle>")
-        convertEquation(lhs, output)
-        output.append(op("="))
-        convertEquation(rhs, output)
-        output.append("</mstyle></math>")
-        return output.append("</div>").toString()
-    }
-
-    private String convertToMathML(String lhs, ScalarRhs srhs) {
-         if (srhs.equation) {
-            return convertToMathML(lhs, srhs.equation)
-        }
-        if (srhs.symbRef) {
-            return convertToMathML(lhs, srhs.symbRef)
-        }
-        StringBuilder result = new StringBuilder("<math display='inline'><mstyle>")
-        result.append(oprand(lhs)).append(op("="))
-        if (srhs.scalar) {
-            result.append(oprand(scalar(srhs.scalar.value)))
-        }
-        return result.append("</mstyle></math>").toString()
-    }
-
-    private String convertToMathML(String lhs, Rhs rhs) {
-        if (rhs.equation) {
-            return convertToMathML(lhs, rhs.equation)
-        }
-        if (rhs.getSymbRef()) {
-            return convertToMathML(lhs, rhs.getSymbRef())
-        }
-        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
-        builder.append(oprand(lhs))
-        builder.append(op("="))
-        if (rhs.getScalar()) {
-            builder.append(oprand(scalar(rhs.scalar.value)))
-        }
-        else if (r.getSequence()) {
-            builder.append(sequenceAsMathML(r.sequence))
-        }
-        else if (r.getVector()) {
-            builder.append(vectorAsMathML(r))
-        }
-        builder.append("</mstyle></math>")
-        return builder.toString()
-    }
-
-    private String convertToMathML(DerivativeVariableType derivative, def iv) {
-        String independentVariable = derivative.independentVariable?.symbRef?.symbIdRef ?: (iv ?: "t")
-        String derivTerm="d${derivative.symbId}<DIVIDEDBY>d${independentVariable}"
-        return convertToMathML(derivTerm, derivative.getAssign())
-    }
-
-    private String convertToMathML(String lhs, List arguments, def equation) {
-        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
-        builder.append(oprand(lhs))
-        builder.append(op("("))
-        for (int i=0; i<arguments.size(); i++) {
-            builder.append(oprand(arguments.get(i).symbId))
-            if (i<arguments.size()-1) {
-                builder.append(op(","))
-            }
-        }
-        builder.append(op(")"))
-        builder.append(op("="))
-        convertEquation(equation, builder)
-        builder.append("</mstyle></math>")
-        return builder.toString()
-    }
-
-    private String op(String o) {
-        return "<mo>${o}</mo>"
-    }
-
-    private String oprand(String o) {
-        if (o.contains("<DIVIDEDBY>")) {
-            String[] parts=o.split("<DIVIDEDBY>")
-            return "<mfrac><mi>${parts[0]}</mi><mi>${parts[1]}</mi></mfrac>"
-        }
-        return "<mi>${o}</mi>"
-    }
-
     StringBuilder simpleParams(List<SimpleParameterType> parameters) {
         def outcome = new StringBuilder()
         if (!parameters) {
@@ -1336,7 +1152,6 @@ class PharmMlTagLib {
                 dep.append(": ").append(transitiveStepDeps(s.dependents))
             }
             r.append(["<li>", "</li>\n"].join(dep.toString()))
-            
         }
         result.append("</ul>")
         out << result.toString()
@@ -1353,6 +1168,190 @@ class PharmMlTagLib {
         result.append(deps.join(", "))
         return deps.size() == 1 ? result :
                 new StringBuilder("[").append(result).append("]")
+    }
+
+    private void prefixToInfix(StringBuilder builder, List<MathsSymbol> stack) {
+        if (stack.isEmpty()) {
+            return;
+        }
+        MathsSymbol symbol=stack.pop()
+        if (symbol instanceof OperatorSymbol) {
+            OperatorSymbol operator=symbol as OperatorSymbol
+            if (operator.type==OperatorSymbol.OperatorType.BINARY) {
+                builder.append(operator.getOpening())
+                if (operator.needsTermSeparation) {
+                    builder.append("<mrow>")
+                }
+                prefixToInfix(builder,stack)
+                if (operator.needsTermSeparation) {
+                    builder.append("</mrow>")
+                }
+                builder.append(operator.getMapping())
+                if (operator.needsTermSeparation) {
+                    builder.append("<mrow>")
+                }
+                prefixToInfix(builder,stack)
+                if (operator.needsTermSeparation) {
+                    builder.append("</mrow>")
+                }
+                builder.append(operator.getClosing())
+            } else {
+                builder.append(operator.getMapping())
+                builder.append(operator.getOpening())
+                prefixToInfix(builder,stack)
+                builder.append(operator.getClosing())
+            }
+        } 
+        else if (symbol instanceof FunctionSymbol) {
+            FunctionSymbol function=symbol as FunctionSymbol
+            builder.append(function.getMapping())
+                builder.append(function.getOpening())
+                for (int i=0; i<function.getArgCount(); i++) {
+                    prefixToInfix(builder, stack)
+                    if (i!=function.getArgCount()-1) {
+                        builder.append(function.getArgSeparator())
+                    }
+                }
+                builder.append(function.getClosing())
+        }
+        else if (symbol instanceof PiecewiseSymbol) {
+            PiecewiseSymbol piecewise=symbol as PiecewiseSymbol
+            builder.append(piecewise.getOpening())
+            for (int i=0; i<piecewise.getPieceCount(); i++) {
+                prefixToInfix(builder, stack)
+            }
+            builder.append(piecewise.getClosing())
+        }
+        else if (symbol instanceof PieceSymbol) {
+            PieceSymbol piece=symbol as PieceSymbol
+            builder.append(piece.getOpening())
+            builder.append(piece.getTermStarter())
+            prefixToInfix(builder, stack)
+            builder.append(piece.getTermEnder())
+            if (piece.type==PieceSymbol.ConditionType.OTHERWISE) {
+                builder.append(piece.getOtherwiseText())
+            }
+            else {
+                builder.append(piece.getIfText())
+                builder.append(piece.getTermStarter())
+                prefixToInfix(builder, stack)
+                builder.append(piece.getTermEnder())
+            }
+            builder.append(piece.getClosing())
+        }
+        else {
+            builder.append(symbol.getMapping())
+        }
+       // prefixToInfix(builder, stack)
+    }
+
+    private void convertEquation(def equation, StringBuilder builder) {
+        List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equation).reverse()
+        List<String> stack=new LinkedList<String>()
+        symbols.each {
+           stack.push(it)
+        }
+        prefixToInfix(builder, stack)
+    }
+
+    private String convertToMathML(def equation) {
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        convertEquation(equation, builder)
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    private String convertToMathML(String lhs, def equation) {
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(lhs))
+        builder.append(op("="))
+        convertEquation(equation, builder)
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    //works with EquationType and Equation as well
+    private String convertToMathML(EquationType lhs, EquationType rhs) {
+        StringBuilder output = new StringBuilder("<div>")
+        output.append("<math display='inline'><mstyle>")
+        convertEquation(lhs, output)
+        output.append(op("="))
+        convertEquation(rhs, output)
+        output.append("</mstyle></math>")
+        return output.append("</div>").toString()
+    }
+
+    private String convertToMathML(String lhs, ScalarRhs srhs) {
+         if (srhs.equation) {
+            return convertToMathML(lhs, srhs.equation)
+        }
+        if (srhs.symbRef) {
+            return convertToMathML(lhs, srhs.symbRef)
+        }
+        StringBuilder result = new StringBuilder("<math display='inline'><mstyle>")
+        result.append(oprand(lhs)).append(op("="))
+        if (srhs.scalar) {
+            result.append(oprand(scalar(srhs.scalar.value)))
+        }
+        return result.append("</mstyle></math>").toString()
+    }
+
+    private String convertToMathML(String lhs, Rhs rhs) {
+        if (rhs.equation) {
+            return convertToMathML(lhs, rhs.equation)
+        }
+        if (rhs.getSymbRef()) {
+            return convertToMathML(lhs, rhs.getSymbRef())
+        }
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(lhs))
+        builder.append(op("="))
+        if (rhs.getScalar()) {
+            builder.append(oprand(scalar(rhs.scalar.value)))
+        }
+        else if (r.getSequence()) {
+            builder.append(sequenceAsMathML(r.sequence))
+        }
+        else if (r.getVector()) {
+            builder.append(vectorAsMathML(r))
+        }
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    private String convertToMathML(DerivativeVariableType derivative, def iv) {
+        String independentVariable = derivative.independentVariable?.symbRef?.symbIdRef ?: (iv ?: "t")
+        String derivTerm="d${derivative.symbId}<DIVIDEDBY>d${independentVariable}"
+        return convertToMathML(derivTerm, derivative.getAssign())
+    }
+
+    private String convertToMathML(String lhs, List arguments, def equation) {
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(lhs))
+        builder.append(op("("))
+        for (int i=0; i<arguments.size(); i++) {
+            builder.append(oprand(arguments.get(i).symbId))
+            if (i<arguments.size()-1) {
+                builder.append(op(","))
+            }
+        }
+        builder.append(op(")"))
+        builder.append(op("="))
+        convertEquation(equation, builder)
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    private String op(String o) {
+        return "<mo>${o}</mo>"
+    }
+
+    private String oprand(String o) {
+        if (o.contains("<DIVIDEDBY>")) {
+            String[] parts=o.split("<DIVIDEDBY>")
+            return "<mfrac><mi>${parts[0]}</mi><mi>${parts[1]}</mi></mfrac>"
+        }
+        return "<mi>${o}</mi>"
     }
 
     private JAXBElement wrapJaxb(def elem) {
