@@ -50,14 +50,6 @@ public class TrialDesignStructure {
         allCellsDefined()
     }
 
-    private boolean allCellsDefined() {
-        if (trialDesignStructure.size() != epochs.size() * arms.size()) {
-            log.error("The trial design does not cover all arms and all epochs.")
-            return false
-        }
-        return true
-    }
-
     public List<SegmentDefnType> findByEpoch(String epoch) {
         if (!epoch) {
             log.error("Who is interested in the treatment over an undefined epoch?")
@@ -90,6 +82,14 @@ public class TrialDesignStructure {
         def result = new TreeSet(cmp)
         result.addAll(trialDesignStructure.keySet().collect{it.split("_")[0]})
         return result
+    }
+
+    private boolean allCellsDefined() {
+        if (trialDesignStructure.size() != epochs.size() * arms.size()) {
+            log.error("The trial design does not cover all arms and all epochs.")
+            return false
+        }
+        return true
     }
 
     private List<SegmentDefnType> linkRefsToSegments(List segRefs) {
