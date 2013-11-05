@@ -50,22 +50,38 @@ public class TrialDesignStructure {
         allCellsDefined()
     }
 
-    public List<SegmentDefnType> findByEpoch(String epoch) {
+    public List<SegmentDefnType> findSegmentsByEpoch(String epoch) {
         if (!epoch) {
-            log.error("Who is interested in the treatment over an undefined epoch?")
+            log.error("Who is interested in the treatments over an undefined epoch?")
             return []
         }
-        def refs = trialDesignStructure.findAll{it.key.contains(epoch)}.values().flatten()
+        def refs = findMatchingReferences(epoch)
         return linkRefsToSegments(refs)
     }
 
-    public List<SegmentDefnType> findByArm(String arm) {
+    public List<String> findSegmentRefsByEpoch(String epoch) {
+        if (!epoch) {
+            log.error("Who is interested in treatment references over an undefined epoch?")
+            return []
+        }
+        return findMatchingReferences(epoch)
+    }
+
+    public List<SegmentDefnType> findSegmentsByArm(String arm) {
         if (!arm) {
             log.error("Who is interested in the treatment over an undefined arm?")
             return []
         }
-        def refs = trialDesignStructure.findAll{it.key.contains(arm)}.values().flatten()
+        def refs = findMatchingReferences(arm)
         return linkRefsToSegments(refs)
+    }
+
+    public List<String> findSegmentRefsByArm(String arm) {
+        if (!arm) {
+            log.error("Who is interested in treatment references over an undefined arm?")
+            return []
+        }
+        return findMatchingReferences(arm)
     }
 
     public Iterator iterator() {
@@ -90,6 +106,10 @@ public class TrialDesignStructure {
             return false
         }
         return true
+    }
+
+    private List findMatchingReferences(String elem) {
+        return trialDesignStructure.findAll{it.key.contains(elem)}.values().flatten()
     }
 
     private List<SegmentDefnType> linkRefsToSegments(List segRefs) {

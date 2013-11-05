@@ -88,13 +88,16 @@ public class TrialDesignStructureTests {
             "ep2" : ["wash", "wash"],
             "ep3" : ["tb", "ta"]
         ]
-        def out = [:]
+        def out     = [:]
+        def refOut  = [:]
         expected.each { it ->
-            out[it.key] = structure.findByEpoch(it.key).collect{it.oid}
+            out[it.key]     = structure.findSegmentsByEpoch(it.key).collect{it.oid}
+            refOut[it.key]  = structure.findSegmentRefsByEpoch(it.key)
         }
         assertEquals(expected, out)
-        assertTrue(structure.findByEpoch("").size() == 0)
-        assertTrue(structure.findByEpoch(null).size() == 0)
+        assertEquals(expected, refOut)
+        assertTrue(structure.findSegmentsByEpoch("").size() == 0)
+        assertTrue(structure.findSegmentsByEpoch(null).size() == 0)
    }
 
    @Test
@@ -108,13 +111,16 @@ public class TrialDesignStructureTests {
             "a1" : ["ta", "wash", "tb"],
             "a2" : ["tb", "wash", "ta"]
         ]
-        def out = [:]
+        def out     = [:]
+        def refOut  = [:]
         expected.each { it ->
-            out[it.key] = structure.findByArm(it.key).collect{it.oid}
+            out[it.key]     = structure.findSegmentsByArm(it.key).collect{it.oid}
+            refOut[it.key]  = structure.findSegmentRefsByArm(it.key)
         }
         assertEquals(expected, out)
-        assertTrue(structure.findByArm("").size() == 0)
-        assertTrue(structure.findByArm(null).size() == 0)
+        assertEquals(expected, refOut)
+        assertTrue(structure.findSegmentsByArm("").size() == 0)
+        assertTrue(structure.findSegmentsByArm(null).size() == 0)
    }
 
    @Test
