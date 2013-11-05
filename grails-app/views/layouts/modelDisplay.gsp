@@ -13,15 +13,6 @@
 
 
 <g:applyLayout name="main">
-<%@ page import="java.nio.file.Files"%>
-<%@ page import="java.nio.file.attribute.BasicFileAttributes"%>
-<%@ page import="java.nio.file.FileSystem"%>
-<%@ page import="java.nio.file.FileSystems"%>
-<%@ page import="java.nio.file.Path"%>
-<%@ page import="java.nio.file.Paths"%>
-<%@ page import="java.nio.file.SimpleFileVisitor"%>
-<%@ page import="java.nio.file.FileVisitResult"%>
-<%@ page import="org.apache.commons.io.FilenameUtils"%>
 <%@ page import="java.text.DateFormat"%>
 <%
 	def loadedZips=new HashMap();
