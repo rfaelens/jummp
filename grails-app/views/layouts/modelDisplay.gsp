@@ -152,7 +152,7 @@
 	</script>
 	<g:layoutHead/>
 	<style>
-		.spaced {
+		.spacedMargin {
 			margin:10px;
 		}
 	</style>
@@ -197,7 +197,7 @@
 	    <table style="margin-top:30px">
 		<tr>
 		    <td><label><g:message code="model.model.format"/></label></td>
-		    <td><div class='spaced'>${revision.format.name} ${revision.format.formatVersion?"(${revision.format.formatVersion})":""}</div></td>
+		    <td><div class='spacedMargin'>${revision.format.name} ${revision.format.formatVersion?"(${revision.format.formatVersion})":""}</div></td>
 		</tr>
 		<tr>
 		    <td><label><g:message code="model.model.publication"/>:</label></td>
@@ -205,7 +205,7 @@
 		    	<%
 		    		model=revision.model
 		    	%>
-		    	<div class='spaced'>
+		    	<div class='spacedMargin'>
 		    		<g:render  model="[model:model]" template="/templates/showPublication" />
 		    	</div>
 		    </td>
@@ -215,7 +215,7 @@
 		<tr>
 		    <td><label><g:message code="model.model.authors"/></label></td>
 		    <td>
-		    	<div class='spaced'>
+		    	<div class='spacedMargin'>
 		    		<g:each in="${authors}" status="i" var="author"><g:if test="${i>0}">, </g:if>${author}
 		    		</g:each>
 		    	</div>
