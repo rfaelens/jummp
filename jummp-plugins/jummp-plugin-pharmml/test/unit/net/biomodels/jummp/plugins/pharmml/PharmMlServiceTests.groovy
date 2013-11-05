@@ -34,25 +34,10 @@
 
 package net.biomodels.jummp.plugins.pharmml
 
-import eu.ddmore.libpharmml.IErrorHandler;
-import eu.ddmore.libpharmml.IMarshaller;
-import eu.ddmore.libpharmml.dom.PharmML;
 import grails.test.mixin.*
 import groovy.io.FileType
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.ValidationEvent;
-import javax.xml.bind.ValidationEventHandler;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 import net.biomodels.jummp.plugins.pharmml.PharmMlDetector
-import org.apache.xerces.util.XMLCatalogResolver;
 import org.junit.*
-import org.xml.sax.SAXException;
 
 @TestFor(PharmMlService)
 class PharmMlServiceTests {
