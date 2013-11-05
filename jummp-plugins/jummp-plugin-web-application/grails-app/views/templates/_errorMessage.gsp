@@ -28,6 +28,6 @@
 
 
 <g:if test="${error}">
-	<div class="warning"><g:message code="${error}"/></div>
+	<div style="background-color: #E9E9E9;border: 1px solid #000;"><g:message code="${error}"/></div>
 </g:if>
 
