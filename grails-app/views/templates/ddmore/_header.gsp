@@ -50,8 +50,13 @@
       		<div class="content">
       			<ul class="menu">
       			<sec:ifLoggedIn>
-      				<li class="first last leaf">
-      					<a href="${grailsApplication.config.grails.serverURL}/logout">
+      				<li class="first leaf">
+      					<a title="View ${sec.username()}'s Profile" href="${grailsApplication.config.grails.serverURL}/user">
+      						${sec.username()}'s Profile
+      					</a>
+      				</li>
+      				<li class="last leaf">
+      					<a title="Logout" href="${grailsApplication.config.grails.serverURL}/logout">
       						<g:message code="jummp.main.logout"/>
       					</a>
       				</li>

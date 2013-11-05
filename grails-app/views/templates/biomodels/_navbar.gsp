@@ -47,6 +47,11 @@
        whichever one will show up last... 
        For example: -->
     <sec:ifLoggedIn>
+    	<li class="functional first">
+      		<a href="${grailsApplication.config.grails.serverURL}/user" class="icon icon-functional" data-icon="5">
+      			${sec.username()}'s Profile
+      		</a>
+      	</li>
     	<li class="functional last">
     		<a href="/jummp/logout" class="icon icon-functional" data-icon="l">
     			<g:message code="jummp.main.logout"/>

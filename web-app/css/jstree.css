@@ -89,6 +89,17 @@ background-color: #fff;
 font-size:20px;-moz-border-radius: 6px;-webkit-border-radius: 6px;
 color:brown;
 }
+#optionsList 
+{
+	list-style: none;
+	padding:0px;
+}
+#optionsList li
+{
+	display: inline;
+	list-style-type: none;
+	padding-right: 20px;
+}
 .ui-menu { width: 150px; }
 #modeltoolbar {
     padding: 4px;
@@ -98,4 +109,4 @@ color:brown;
   *+html #modeltoolbar {
     display: inline;
   }
-  </style>
+
