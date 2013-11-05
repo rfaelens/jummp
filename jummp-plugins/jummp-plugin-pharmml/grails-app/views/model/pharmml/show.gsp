@@ -61,12 +61,9 @@
  </div>
 
     <div id="trialDesign">
-       <h3>Treatments</h3>
-       <%--pharmml:treatment treatment="${treatment}"/--%>
-       <h3>Epoch</h3>
-       <%--pharmml:treatmentEpoch epoch="${treatmentEpoch}"/--%>
-       <h3>Group</h3>
-       <%--pharmml:group group="${group}"/--%>
+       <pharmml:trialStructure structure="${structure}"/>
+       <pharmml:trialDosing dosing="${dosing}"/>
+       <pharmml:trialPopulation pop="${population}"/>
     </div>
 
     <div id="modellingSteps">

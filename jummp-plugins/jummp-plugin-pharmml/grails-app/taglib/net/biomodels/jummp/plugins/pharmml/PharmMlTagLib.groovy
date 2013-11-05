@@ -67,6 +67,7 @@ import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
 import javax.xml.bind.JAXBElement
 import javax.xml.namespace.QName
+import net.biomodels.jummp.plugins.pharmml.TrialDesignStructure
 import net.biomodels.jummp.plugins.pharmml.maths.FunctionSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
@@ -719,6 +720,7 @@ class PharmMlTagLib {
         result.append("]")
     }
 
+    /* TRIAL DESIGN */
     def regimenDuration = { d ->
         if (d.equation || d.functionCall) {
             return "Regimen duration cannot be extracted, sorry."
@@ -859,6 +861,100 @@ class PharmMlTagLib {
         result
     }
 
+    def trialStructure = { attrs ->
+        if (!attrs.structure) {
+            return
+        }
+        def result = new StringBuilder()
+        result.append("<h3>Structure overview</h3>\n")
+        def tds = new TrialDesignStructure(attrs.structure.arm, attrs.structure.epoch,
+                    attrs.structure.cell, attrs.structure.segment)
+        def armRefs     = new ArrayList(tds.getArmRefs())
+        def epochRefs   = new ArrayList(tds.getEpochRefs())
+        /* arm-epoch matrix*/
+        result.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
+        for (String e: epochRefs) {
+            result.append("<th class='bold'>").append(e).append("</th>")
+        }
+        result.append("</tr></thead><tbody>\n")
+        for (String a: armRefs) {
+            result.append("<tr><th class='bold'>").append(a).append("</th>")
+            tds.findSegmentRefsByArm(a).each { s ->
+                result.append("<td>").append(s).append("</td>")
+            }
+            result.append("</tr>\n")
+        }
+        result.append("</tbody></table>\n")
+
+        /* segments and activities */
+        // avoid the need to increase the size of the map, because re-hashing is expensive
+        def segmentActivitiesMap = new HashMap(attrs.structure.activity.size(), 1.0)
+        attrs.structure.segment.each { s ->
+            segmentActivitiesMap[s.oid] = s.activityRef.collect{ a ->
+                attrs.structure.activity.find{ a.oidRef.equals(it.oid) }
+            }
+        }
+        result.append("<h4>Segment-Activity definition</h4>\n")
+        result.append("<table><thead><tr><th class='bold'>Segment</th><th class='bold'>Activity</th>")
+        result.append("<th class='bold'>Treatment</th><th class='bold'>Dose time</th>")
+        result.append("<th class='bold'>Dose size</th><th class='bold'>Target variable</th></tr></thead><tbody>")
+        if (segmentActivitiesMap) {
+            segmentActivitiesMap.entrySet().each {
+                def activityList = it.value
+                if (!activityList) {
+                    result.append("<tr><td colspan='6'></td></tr>")
+                } else {
+                    final int ACTIVITY_COUNT = activityList.size()
+                    result.append("<tr><td")
+                    if (ACTIVITY_COUNT > 1) {
+                        result.append(" rowspan='").append(ACTIVITY_COUNT).append("'")
+                    }
+                    result.append(">").append(it.key).append("</td><td>")
+                    def first = activityList[0]
+                    result.append(first.oid).append("</td>")
+                    result.append("</td>")
+                    if (first.washout) {
+                        result.append("<td>washout</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>")
+                    } else {
+                        /* dosingRegimen is a JAXBElement */
+                        def regimen = first.dosingRegimen.value
+                        switch(regimen) {
+                            case BolusType:
+                                result.append("<td>bolus</td>")
+                                //fall through
+                            case InfusionType:
+                                result.append("<td>infusion</td>")
+                                def amt = regimen.doseAmount
+                                rhs(amt.assign, result.append("<td>")).append("</td>")
+                                result.append("<td>").append(amt.symbRef.symbIdRef).append("</td>")
+                                break
+                           default:
+                                result.append("<td colspan='4'>Unknown</td>")
+                                break
+                        }
+                    }
+                    result.append("</tr>\n")
+                }
+            }
+            //result.append("</tbody></table>\n")
+        }
+        /* epochs and occasions */
+        out << result.append("</tbody></table>\n").toString()
+    }
+
+    def trialDosing = { attrs ->
+        if (!attrs.dosing) {
+            return
+        }
+    }
+
+    def trialPopulation = { attrs ->
+        if (!attrs.pop) {
+            return
+        }
+    }
+
+    /* MODELLING STEPS */
     def variableDefs = { attrs ->
         if (!attrs.variables) {
             // there may not be any variables in the modelling steps

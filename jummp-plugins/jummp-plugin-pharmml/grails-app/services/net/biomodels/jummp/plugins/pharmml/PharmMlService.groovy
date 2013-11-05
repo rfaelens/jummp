@@ -28,7 +28,9 @@ import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
+import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 import eu.ddmore.libpharmml.impl.*
 import java.nio.file.Files
 import java.nio.file.Path
@@ -284,24 +286,22 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         PharmML dom = getDomFromRevision(revision)
         return dom?.trialDesign
     }
-/*
-    //todo incomplete
-    @Profiled(tag="pharmMlService.getTreatment")
-    List getTreatment(TrialDesignType design) {
+
+    @Profiled(tag="pharmMlService.getTrialDesignStructure")
+    TrialStructureType getTrialDesignStructure(TrialDesignType design) {
+        return design?.structure
+    }
+
+    @Profiled(tag="pharmMlService.getIndividualDosing")
+    List getIndividualDosing(TrialDesignType design) {
         return design?.individualDosing
     }
 
-    //todo: incomplete
-    @Profiled(tag="pharmMlService.getTreatmentEpoch")
-    List getTreatmentEpoch(TrialDesignType design) {
-        return design?.structure.epoch
-    }
-
-    @Profiled(tag="pharmMlService.getGroup")
-    List getGroup(TrialDesignType design) {
+    @Profiled(tag="pharmMlService.getPopulation")
+    PopulationType getPopulation(TrialDesignType design) {
         return design?.population
     }
-*/
+
     @Profiled(tag="pharmMlService.getModellingSteps")
     ModellingStepsType getModellingSteps(RevisionTransportCommand revision) {
         PharmML dom = getDomFromRevision(revision)
