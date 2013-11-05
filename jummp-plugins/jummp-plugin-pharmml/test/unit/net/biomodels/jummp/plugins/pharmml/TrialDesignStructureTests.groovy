@@ -132,7 +132,18 @@ public class TrialDesignStructureTests {
             iteratorOutput.add(iStructure.next())
         }
         assertEquals(structure.trialDesignStructure.size(), iteratorOutput.size())
-        assertEquals(structure.trialDesignStructure.entrySet(), iteratorOutput)
+        assertEquals(structure.trialDesignStructure.entrySet().toList(), iteratorOutput)
+   }
+
+   @Test
+    void getArmsAndEpochsWork() {
+        def pharmMlService = new PharmMlService()
+        def testFile = new File("test/files/example4.xml")
+        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def tds = dom.trialDesign.structure
+        def struct = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
+        assertEquals(["a1", "a2"] as Set, struct.getArmRefs())
+        assertEquals(["ep1", "ep2", "ep3"] as Set, struct.getEpochRefs())
    }
 
    boolean nonEmptyList(List l) {

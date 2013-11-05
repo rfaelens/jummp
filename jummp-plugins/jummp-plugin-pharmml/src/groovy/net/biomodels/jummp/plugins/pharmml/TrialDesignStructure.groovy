@@ -18,6 +18,7 @@ public class TrialDesignStructure {
     private List<EpochDefnType>             epochs
     private List<CellDefnType>              cells
     private List<SegmentDefnType>           segments
+    private def cmp = [compare: { a,b -> a <=> b } ] as Comparator
     // [epochRef_armRef : segmentRef]
     private Map<String, List<String>>   trialDesignStructure
 
@@ -38,7 +39,6 @@ public class TrialDesignStructure {
         epochs      = Collections.unmodifiableList(EPOCHS)
         cells       = Collections.unmodifiableList(CELLS)
         segments    = Collections.unmodifiableList(SEGMENTS)
-        def cmp = [compare: { a,b -> a <=> b } ] as Comparator
         trialDesignStructure = new TreeMap<String, List<String>>(cmp)
 
         cells.each { c ->
@@ -78,6 +78,18 @@ public class TrialDesignStructure {
 
     public Iterator iterator() {
         return trialDesignStructure.entrySet().iterator()
+    }
+
+    public TreeSet<String> getArmRefs() {
+        def result = new TreeSet(cmp)
+        result.addAll(trialDesignStructure.keySet().collect{it.split("_")[1]})
+        return result
+    }
+
+    public TreeSet<String> getEpochRefs() {
+        def result = new TreeSet(cmp)
+        result.addAll(trialDesignStructure.keySet().collect{it.split("_")[0]})
+        return result
     }
 
     private List<SegmentDefnType> linkRefsToSegments(List segRefs) {
