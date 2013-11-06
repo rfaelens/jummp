@@ -316,10 +316,10 @@ class ModelController {
                 }
             }
             on("MainFileMissingError") {
-            	    flash.error="submission.upload.error.fileerror"
+            	    flash.flashMessage="submission.upload.error.fileerror"
             }.to "uploadFiles"
             on("AdditionalReplacingMainError") {
-            	    flash.error="submission.upload.error.additional_replacing_main"
+            	    flash.flashMessage="submission.upload.error.additional_replacing_main"
             }.to "uploadFiles"
             on("success").to "performValidation"
             on(Exception).to "handleException"
@@ -382,13 +382,13 @@ class ModelController {
         enterPublicationLink {
         	on("Continue") {
         		if (!params.PubLinkProvider && params.PublicationLink) {
-        			flash.validationError="Please select a publication link type."
+        			flash.flashMessage="Please select a publication link type."
         			return error()
         		}
         		Map<String,String> modifications=new HashMap<String,String>()
                 if (params.PubLinkProvider && params.PublicationLink) {
                 	if (!pubMedService.verifyLink(params.PubLinkProvider,params.PublicationLink)) {
-                		flash.validationError="The link is not a valid ${params.PubLinkProvider}"
+                		flash.flashMessage="The link is not a valid ${params.PubLinkProvider}"
                 		return error()
         			}
                 	modifications.put("PubLinkProvider",params.PubLinkProvider) 

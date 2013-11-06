@@ -39,10 +39,7 @@
     </head>
     <body>
     	<h2><g:message code="submission.publicationLink.header"/></h2>
-    	<g:if test="${validationError}">
-    		<p><b>${validationError}</b><p>
-    	</g:if>
-        <g:form>
+    	<g:form>
             <g:message code="submission.publink.publication"/>
             <% 
             	model=(workingMemory.get('ModelTC') as ModelTransportCommand) 

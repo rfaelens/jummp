@@ -138,11 +138,6 @@
 			tree.bind("loaded.jstree", function (event, data) {
 				tree.jstree("open_all");
 			});
-			setTimeout(function(){
-					$(".flash").fadeOut("slow", function () {
-							$(".flash").remove();
-					}); }, 4000);
-		
 			$( "#download" ).button({
 					text:false,
 					icons: {
@@ -184,10 +179,7 @@
     </head>
     <body>
     	<div id="topBar">
-    		<g:if test="${flashMessage && flashMessage.length()>0}">
-	    		<div class='flash'>${flashMessage}</div>
-	    	</g:if>
-    	        <h2 style="float: left;">${revision.model.name}</h2>
+    		    <h2 style="float: left;">${revision.model.name}</h2>
     	        <div style="float:right;margin-top:10px">
                     <div id="modeltoolbar" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>
                             <button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.id)}')">Download</button>

@@ -49,6 +49,7 @@
   <div class="content">
     
   	<div class="content">
+  		<g:render template="/templates/notification/showNotificationDiv"/>
   		<g:pageProperty name="page.main-content" />
   		<g:layoutBody/>
   	</div>

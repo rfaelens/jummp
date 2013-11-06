@@ -38,20 +38,9 @@
         	}
         </style>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
-        <script>
-        	$(document).ready(function() {
-        		setTimeout(function(){
-					$(".flash").fadeOut("slow", function () {
-							$(".flash").remove();
-					}); }, 4000);
-        	});
-        </script>
     </head>
      <body>
         <h2><g:message code="user.signup.ui.heading.register"/></h2>
-        <g:if test="${flashMessage && flashMessage.length()>0}">
-	    		<div class='flash'>${flashMessage}</div>
-	    </g:if>
         <div>
             <g:form name="registerForm" action="signUp">
                 <table>

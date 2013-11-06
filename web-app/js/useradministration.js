@@ -115,11 +115,9 @@ $.jummp.userAdministration.editUser = function () {
             },
             success: function (data) {
                 if (data.error) {
-                    $.jummp.warningMessage(data.username);
-                    $.jummp.warningMessage(data.userRealName);
-                    $.jummp.warningMessage(data.email);
+                	showNotification("User could not be updated. Please check the values provided and try again")
                 } else if (data.success) {
-                    $.jummp.infoMessage($.i18n.prop("user.administration.edit.success"));
+                	showNotification("User details updated")
                 }
             }
         });
@@ -144,11 +142,9 @@ $.jummp.userAdministration.register = function () {
             },
             success: function (data) {
                 if (data.error) {
-                    $.jummp.warningMessage(data.username);
-                    $.jummp.warningMessage(data.userRealName);
-                    $.jummp.warningMessage(data.email);
+                	showNotification("User could not be created. Please check values provided and try again")
                 } else if (data.success) {
-                    $.jummp.infoMessage($.i18n.prop("user.administration.register.success", data.user));
+                	showNotification("User created successfully")
                 }
             }
         });

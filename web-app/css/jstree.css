@@ -80,15 +80,6 @@
 	cursor: pointer;
 	border-top: 12px solid gray;
 }
-.flash{
-width:759px;
-text-align:left;
-padding-top:8px;
-padding-bottom:8px;
-background-color: #fff;
-font-size:20px;-moz-border-radius: 6px;-webkit-border-radius: 6px;
-color:brown;
-}
 #optionsList 
 {
 	list-style: none;

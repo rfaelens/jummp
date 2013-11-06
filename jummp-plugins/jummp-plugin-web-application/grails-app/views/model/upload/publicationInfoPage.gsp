@@ -44,11 +44,6 @@
     </head>
     <body>
         <h2>Update Publication Information</h2>
-        <g:hasErrors bean="${validationErrorOn}">
-        <div class="errors">
-        	<g:renderErrors bean="${validationErrorOn}" as="list" />
-        </div>
-        </g:hasErrors>
         <g:form>
             <div class="dialog">
                 <table class="formtable">

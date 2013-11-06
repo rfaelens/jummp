@@ -26,20 +26,9 @@
         <title><g:message code="user.administration.ui.heading.user"/></title>
         <meta name="layout" content="main" />
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
-        <script>
-        	$(document).ready(function() {
-        		setTimeout(function(){
-					$(".flash").fadeOut("slow", function () {
-							$(".flash").remove();
-					}); }, 4000);
-        	});
-        </script>
      </head>
     <body>
         <h2><g:message code="user.administration.updatePassword.heading"/></h2>
-        <g:if test="${flashMessage && flashMessage.length()>0}">
-	    	<div class='flash'>${flashMessage}</div>
-	    </g:if>
         <div>
 			<g:form action="updatePassword">
 				<table>

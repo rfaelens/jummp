@@ -21,12 +21,6 @@
 
 
 
-
-
-
-
-
-
 <!doctype html>
 <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/precursor" />
 <html>
@@ -43,6 +37,8 @@
     	});
     </g:javascript>
     <g:javascript src="jummp.js"/>
+    <link rel="stylesheet" href="${resource(dir: 'css', file: 'notification.css')}" /> 
+    <g:javascript src="notification.js"/>
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/head" />
     <g:layoutHead/>
 </head>

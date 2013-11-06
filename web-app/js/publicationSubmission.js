@@ -21,7 +21,7 @@ function addText() {
 			setHiddenFieldValue();
 	}
 	else {
-		alert("An author by that name is already added to the publication.")
+		showNotification("An author by that name is already added to the publication.")
 	}
 	$('#newAuthorInitials').val("")
 	$('#newAuthorLastName').val("")
