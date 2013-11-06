@@ -1,14 +1,29 @@
 <%--
- Copyright (C) 2010-2013 EMBL-European Bioinformatics Institute (EMBL-EBI), Deutsches Krebsforschungszentrum (DKFZ)
+ Copyright (C) 2010-2013 EMBL-European Bioinformatics Institute (EMBL-EBI),
+ Deutsches Krebsforschungszentrum (DKFZ)
 
  This file is part of Jummp.
 
- Jummp is free software; you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ Jummp is free software; you can redistribute it and/or modify it under the
+ terms of the GNU Affero General Public License as published by the Free
+ Software Foundation; either version 3 of the License, or (at your option) any
+ later version.
 
- Jummp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
-
- You should have received a copy of the GNU Affero General Public License along with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
+ Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
+ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+ 
+ You should have received a copy of the GNU Affero General Public License along 
+ with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
+
+
+
+
+
+
+
+
 
 
 
@@ -35,8 +50,13 @@
       		<div class="content">
       			<ul class="menu">
       			<sec:ifLoggedIn>
-      				<li class="first last leaf">
-      					<a href="${grailsApplication.config.grails.serverURL}/logout">
+      				<li class="first leaf">
+      					<a title="View ${sec.username()}'s Profile" href="${grailsApplication.config.grails.serverURL}/user">
+      						${sec.username()}'s Profile
+      					</a>
+      				</li>
+      				<li class="last leaf">
+      					<a title="Logout" href="${grailsApplication.config.grails.serverURL}/logout">
       						<g:message code="jummp.main.logout"/>
       					</a>
       				</li>

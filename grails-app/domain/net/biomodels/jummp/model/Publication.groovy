@@ -1,14 +1,25 @@
 /**
-* Copyright (C) 2010-2013 EMBL-European Bioinformatics Institute (EMBL-EBI), Deutsches Krebsforschungszentrum (DKFZ)
+* Copyright (C) 2010-2013 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Deutsches Krebsforschungszentrum (DKFZ)
 *
 * This file is part of Jummp.
 *
-* Jummp is free software; you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+* Jummp is free software; you can redistribute it and/or modify it under the
+* terms of the GNU Affero General Public License as published by the Free
+* Software Foundation; either version 3 of the License, or (at your option) any
+* later version.
 *
-* Jummp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+* Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
+* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+* A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+* details.
 *
-* You should have received a copy of the GNU Affero General Public License along with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
+* You should have received a copy of the GNU Affero General Public License along
+* with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 **/
+
+
+
 
 
 package net.biomodels.jummp.model
@@ -96,6 +107,9 @@ class Publication implements Serializable {
         pages(nullable: true)
         linkProvider(nullable: true)
         link(nullable: true)
+        authors validator: { authorValue, pubObj ->
+        	return authorValue && !authorValue.isEmpty()
+        }
     }
 
     PublicationTransportCommand toCommandObject() {
@@ -129,6 +143,7 @@ class Publication implements Serializable {
     		publication.title=cmd.title;
         	publication.affiliation=cmd.affiliation;
             publication.synopsis=cmd.synopsis;
+            publication.journal=cmd.journal;
             publication.year=cmd.year;
             publication.month=cmd.month;
             publication.day=cmd.day;
@@ -136,12 +151,13 @@ class Publication implements Serializable {
             publication.issue=cmd.issue;
             publication.pages=cmd.pages;
             cmd.authors.each { newAuthor ->
-            	Author existing = publication.authors.find {
-            		it.initials == newAuthor.initials && it.lastName == newAuthor.lastName
+            	Author existing = publication.authors.find { oldAuthor ->
+            		oldAuthor.initials == newAuthor.initials && oldAuthor.lastName == newAuthor.lastName
             	}
             	if (!existing) {
-            		Author current = new Author(initials: it.initials, firstName: it.firstName, lastName: it.lastName)
-            		authors << current
+            		Author current = new Author(initials: newAuthor.initials, firstName: newAuthor.firstName,
+            									lastName: newAuthor.lastName)
+            		publication.authors << current
             	}
             }
             publication.save(flush:true)
