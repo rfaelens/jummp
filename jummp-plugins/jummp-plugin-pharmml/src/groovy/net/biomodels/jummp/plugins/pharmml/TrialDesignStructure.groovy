@@ -1,6 +1,5 @@
 package net.biomodels.jummp.plugins.pharmml
 
-import eu.ddmore.libpharmml.dom.commontypes.OidRefType
 import eu.ddmore.libpharmml.dom.trialdesign.ArmDefnType
 import eu.ddmore.libpharmml.dom.trialdesign.CellDefnType
 import eu.ddmore.libpharmml.dom.trialdesign.EpochDefnType
@@ -14,13 +13,12 @@ import org.apache.commons.logging.LogFactory
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 public class TrialDesignStructure {
-    private List<ArmDefnType>               arms
-    private List<EpochDefnType>             epochs
-    private List<CellDefnType>              cells
-    private List<SegmentDefnType>           segments
+    private List<ArmDefnType>           arms
+    private List<EpochDefnType>         epochs
+    private List<CellDefnType>          cells
+    private List<SegmentDefnType>       segments
+    private Map<String, List<String>>   trialDesignStructure // [epochRef_armRef : segmentRef]
     private def cmp = [compare: { a,b -> a <=> b } ] as Comparator
-    // [epochRef_armRef : segmentRef]
-    private Map<String, List<String>>   trialDesignStructure
 
     private static final Log log = LogFactory.getLog(this)
 
