@@ -85,6 +85,7 @@
 			});
 			$("#tabs ul li a").click(function (e) {
 				var anchor=$(this).attr('href');
+				alert($(this).attr('class'))
 				if (typeof(anchor) != "undefined") {
 					e.preventDefault();
 					location.hash = anchor;
@@ -274,7 +275,7 @@
 	  	     <g:each status="i" var="rv" in="${allRevs.sort{a,b -> a.revisionNumber > b.revisionNumber ? -1 : 1}}">
 	  	     	<li style="${i==0 && allRevs.size()>1?"background-color:#FFFFCC;":""}margin-top:5px">
 	  	     		Version: ${rv.revisionNumber} 
-	  	     				<a title="download" href="${g.createLink(controller: 'model', action: 'download', id: rv.id)}">
+	  	     				<a class="versionDownload" title="download" href="${g.createLink(controller: 'model', action: 'download', id: rv.id)}">
 	  	     					<img style="width:15px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png"/>
 	  	     				</a>
 	  	     			<ul>
