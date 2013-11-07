@@ -74,6 +74,7 @@ import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
+import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
@@ -92,6 +93,8 @@ import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 
 class PharmMlTagLib {
     static namespace = "pharmml"
+
+    private Map<String, String> modellingTabsMap
 
     StringBuilder simpleParams(List<SimpleParameterType> parameters) {
         def outcome = new StringBuilder()
@@ -901,26 +904,47 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    def modellingSteps = { attrs ->
-        if (!attrs.steps) {
+    def decideModellingStepsTabs = { attrs ->
+        if (!attrs.estimation && !attrs.simulation) {
+            return
+        }
+        modellingTabsMap = new HashMap<String, String>(3, 1.0)
+        if (attrs.estimation) {
+            final String EST_TAB = "estimationSteps"
+            modellingTabsMap["est"] = EST_TAB
+            out << "<li><a href='#${EST_TAB}'>Estimation Steps</a></li>"
+        }
+        if (attrs.simulation) {
+            final String SIM_TAB = "simulationSteps"
+            modellingTabsMap["sim"] = SIM_TAB
+            out << "<li><a href='#${SIM_TAB}'>Simulation Steps</a></li>"
+        }
+    }
+
+    def handleModellingStepsTabs = { attrs ->
+        if (!attrs.estimation && !attrs.simulation && !modellingTabsMap) {
             return
         }
         if (!attrs.independentVariable) {
             // the default independent variable is assumed to be time.
-            def iv = new IndependentVariableType()
-            iv.symbId = "time"
-            attrs.independentVariable = iv
+            attrs.independentVariable = "time"
         }
-        /*
-        * Check which kind of step we are dealing with. Estimation and simulation steps cannot
-        * be mixed, hence only look at the first one to decide.
-        */
-        def step = attrs.steps.first()
+
         def result = new StringBuilder()
-        if (step instanceof EstimationStepType) {
-            result.append(estimationSteps(attrs.steps))
-        } else {
-            result.append(simulationSteps(attrs.steps, attrs.independentVariable))
+        if (attrs.estimation) {
+            result.append("<div id='${modellingTabsMap["est"]}'>")
+            result.append(estimationSteps(attrs.estimation))
+            //only consider step dependencies here when there are no simulation steps
+            if (modellingTabsMap.size() == 1) {
+                result.append(stepDeps(attrs.deps))
+            }
+            result.append("</div>")
+        }
+        if (attrs.simulation) {
+            result.append("<div id='${modellingTabsMap["sim"]}'>")
+            result.append(simulationSteps(attrs.simulation, attrs.independentVariable))
+            result.append(stepDeps(attrs.deps))
+            result.append("</div>")
         }
         out << result.toString()
     }
@@ -1189,22 +1213,21 @@ class PharmMlTagLib {
         return new StringBuilder().append(convertToMathML(prop.name, prop.assign))
     }
 
-    def stepDeps = { attrs ->
+    StringBuilder stepDeps(StepDependencyType deps) {
         StringBuilder result = new StringBuilder()
-        if (!attrs.deps || !attrs.deps.step) {
+        if (!deps || !deps.step) {
             return result
         }
         result.append("<h3>Step Dependencies</h3>")
         result.append("\n<ul>")
-        attrs.deps.step.inject(result) { r, s ->
+        deps.step.inject(result) { r, s ->
             StringBuilder dep = new StringBuilder(s.oidRef.oidRef)
             if (s.dependents) {
                 dep.append(": ").append(transitiveStepDeps(s.dependents))
             }
             r.append(["<li>", "</li>\n"].join(dep.toString()))
         }
-        result.append("</ul>")
-        out << result.toString()
+        return result.append("</ul>")
     }
 
     StringBuilder transitiveStepDeps = { ds ->

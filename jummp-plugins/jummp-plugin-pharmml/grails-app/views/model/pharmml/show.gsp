@@ -44,7 +44,8 @@
 <content tag="modelspecifictabs">
     <li><a href="#modelDefinition">Model Definition</a></li>
     <li><a href="#trialDesign">Trial Design</a></li>
-    <li><a href="#modellingSteps">Modelling Steps</a></li>
+    <pharmml:decideModellingStepsTabs estimation="${estSteps}" simulation="${simSteps}" />
+<%--    <li><a href="#modellingSteps">Modelling Steps</a></li> --%>
 </content>
 <content tag="modelspecifictabscontent">
     <div id="modelDefinition">
@@ -70,8 +71,6 @@
        <pharmml:trialPopulation pop="${population}"/>
     </div>
 
-    <div id="modellingSteps">
-       <pharmml:modellingSteps steps="${modellingSteps}" independentVariable="${independentVar}" />
-       <pharmml:stepDeps deps="${stepDeps}" />
-    </div>
+    <pharmml:handleModellingStepsTabs estimation="${estSteps}" simulation="${simSteps}"
+        independentVariable="${independentVar}" deps="${stepDeps}" />
 </content>

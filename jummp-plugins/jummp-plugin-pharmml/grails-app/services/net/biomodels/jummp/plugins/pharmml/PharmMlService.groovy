@@ -326,6 +326,18 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         return steps?.commonModellingStep.value
     }
 
+    @Profiled(tag="pharmMlService.getSimulationSteps")
+    List getSimulationSteps(ModellingStepsType steps) {
+        def allSteps = getCommonModellingSteps(steps)
+        return allSteps ? allSteps.findAll {it instanceof SimulationStepType} : []
+    }
+
+    @Profiled(tag="pharmMlService.getEstimationSteps")
+    List getEstimationSteps(ModellingStepsType steps) {
+        def allSteps = getCommonModellingSteps(steps)
+        return allSteps ? allSteps.findAll {it instanceof EstimationStepType} : []
+    }
+
     @Profiled(tag="pharmMlService.getStepDependencies")
     StepDependencyType getStepDependencies(ModellingStepsType steps) {
         return steps?.stepDependencies
