@@ -85,7 +85,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         File pharmMlFile = findPharmML(model)
         if (!pharmMlFile) {
             if (IS_INFO_ENABLED) {
-                log.info("No PharmML file found in ${model.inspect}, hence nothing to validate.")
+                log.info("No PharmML file found in ${model.inspect()}, hence nothing to validate.")
             }
             return false
         }
