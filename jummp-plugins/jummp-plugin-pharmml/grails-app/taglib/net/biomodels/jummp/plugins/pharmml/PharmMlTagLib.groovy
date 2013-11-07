@@ -52,6 +52,7 @@ import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
 import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
 import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
+import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
 import eu.ddmore.libpharmml.dom.dataset.DataSetType
 import eu.ddmore.libpharmml.dom.maths.BinopType
@@ -1056,28 +1057,52 @@ class PharmMlTagLib {
 
     StringBuilder dataSet(DataSetType dataSet, Map variableMap, StringBuilder sb) {
         def columnOrder = [:]
-        List noTables = dataSet.definition.columnOrTable.findAll{it instanceof ColumnDefnType}
-        noTables.each {
-            columnOrder << [ (it.columnNum) : (it.columnId) ]
+        List tables = dataSet.definition.columnOrTable
+        tables.each {
+            if (it instanceof ColumnDefnType) {
+                columnOrder << [ (it.columnNum) : (it.columnId) ]
+            } else if (it instanceof DataSetTableDefnType) {
+                columnOrder << [ (it.columnNum) : (it.tableId) ]
+            }
         }
         sb.append("\n<table><thead><tr>")
 
-        noTables.inject(sb) { txt, d ->
+        tables.inject(sb) { txt, d ->
             def key = columnOrder[d.columnNum]
             if (key && variableMap && variableMap[key]) {
                 txt.append(["<th>", "</th>"].join(variableMap[key]))
-            } else {
+            } else if (d instanceof ColumnDefnType) {
                 txt.append(["<th>", "</th>"].join(d.columnId))
+            } else if (d instanceof DataSetTableDefnType) {
+                txt.append(["<th>", "</th>"].join(d.tableId))
             }
         }
         sb.append("</tr></thead><tbody>")
-        dataSet.table.row.inject(sb) { txt, i ->
-            txt.append("\n<tr>")
-            def columns = i.scalarOrTable.findAll{ !(it.value instanceof DataSetTableType) }
-            columns.inject(txt) { o, td ->
-                o.append(["<td>", "</td>"].join(scalar(td.value)))
+        dataSet.table.row.each { i ->
+            sb.append("\n<tr>")
+            i.scalarOrTable.each { td ->
+                if (td.value instanceof DataSetTableType) {
+                    def content = new StringBuilder("<table class='default'>")
+                    td.value.row.inject(content) { cont, r ->
+                        cont.append("<tr class='default'>")
+                        r.scalarOrTable.inject(cont) { s, val ->
+                            s.append("<td class='default'>")
+                            if (val instanceof DataSetTableType) {
+                                s.append("*")
+                            } else {
+                                s.append(scalar(val.value))
+                            }
+                            s.append("</td>")
+                        }
+                        cont.append("</tr>")
+                    }
+                    String ready = content.append("</table>").toString()
+                    sb.append(["<td class='default'>", "</td>"].join(ready))
+                } else {
+                    sb.append(["<td class='default'>", "</td>"].join(scalar(td.value)))
+                }
             }
-            txt.append("</tr>")
+            sb.append("</tr>")
         }
         return sb.append("</tbody></table>\n")
     }
