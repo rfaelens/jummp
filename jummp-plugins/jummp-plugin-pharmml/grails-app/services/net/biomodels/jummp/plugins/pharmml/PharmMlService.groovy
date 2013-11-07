@@ -325,7 +325,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         return steps?.variable
     }
 */
-    @Profiled(tag="pharmMlService.getEstimationOrSimulationSteps")
+    @Profiled(tag="pharmMlService.getCommonModellingSteps")
     List getCommonModellingSteps(ModellingStepsType steps) {
         return steps?.commonModellingStep.value
     }
