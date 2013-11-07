@@ -73,8 +73,10 @@
 			});
 			$("#tabs ul li a").click(function (e) {
 				var anchor=$(this).attr('href');
-				alert($(this).attr('class'))
-				if (typeof(anchor) != "undefined") {
+				if ($(this).attr('class')=="versionDownload") {
+					openPage(anchor)
+				}
+				else if (typeof(anchor) != "undefined") {
 					e.preventDefault();
 					location.hash = anchor;
 					window.scrollTo(0, 0);
