@@ -17,16 +17,6 @@
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
 
-
-
-
-
-
-
-
-
-
-
 <head>
     <meta name="layout" content="modelDisplay"/>
     <style>
@@ -54,14 +44,14 @@
 <content tag="modelspecifictabs">
     <li><a href="#modelDefinition">Model Definition</a></li>
     <li><a href="#trialDesign">Trial Design</a></li>
-    <li><a href="#modellingSteps">Modelling Steps</a></li>
+    <pharmml:decideModellingStepsTabs estimation="${estSteps}" simulation="${simSteps}" />
+<%--    <li><a href="#modellingSteps">Modelling Steps</a></li> --%>
 </content>
 <content tag="modelspecifictabscontent">
     <div id="modelDefinition">
 
         <p><strong>Independent variable</strong>&nbsp;${independentVar}</p>
 
-        <h3>Function Definitions</h3>
         <pharmml:functionDefinitions functionDefs="${functionDefs}"/>
 
         <pharmml:structuralModel sm="${structuralModel}" iv="${independentVar}"/>
@@ -76,16 +66,11 @@
  </div>
 
     <div id="trialDesign">
-       <h3>Treatments</h3>
-       <%--pharmml:treatment treatment="${treatment}"/--%>
-       <h3>Epoch</h3>
-       <%--pharmml:treatmentEpoch epoch="${treatmentEpoch}"/--%>
-       <h3>Group</h3>
-       <%--pharmml:group group="${group}"/--%>
+       <pharmml:trialStructure structure="${structure}"/>
+       <pharmml:trialDosing dosing="${dosing}"/>
+       <pharmml:trialPopulation pop="${population}"/>
     </div>
 
-    <div id="modellingSteps">
-       <pharmml:modellingSteps steps="${modellingSteps}" independentVariable="${independentVar}" />
-       <pharmml:stepDeps deps="${stepDeps}" />
-    </div>
+    <pharmml:handleModellingStepsTabs estimation="${estSteps}" simulation="${simSteps}"
+        independentVariable="${independentVar}" deps="${stepDeps}" />
 </content>

@@ -1,6 +1,5 @@
 package net.biomodels.jummp.plugins.pharmml
 
-import eu.ddmore.libpharmml.dom.commontypes.OidRefType
 import eu.ddmore.libpharmml.dom.trialdesign.ArmDefnType
 import eu.ddmore.libpharmml.dom.trialdesign.CellDefnType
 import eu.ddmore.libpharmml.dom.trialdesign.EpochDefnType
@@ -14,12 +13,12 @@ import org.apache.commons.logging.LogFactory
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 public class TrialDesignStructure {
-    private List<ArmDefnType>               arms
-    private List<EpochDefnType>             epochs
-    private List<CellDefnType>              cells
-    private List<SegmentDefnType>           segments
-    // [epochRef_armRef : segmentRef]
-    private Map<String, List<String>>   trialDesignStructure
+    private List<ArmDefnType>           arms
+    private List<EpochDefnType>         epochs
+    private List<CellDefnType>          cells
+    private List<SegmentDefnType>       segments
+    private Map<String, List<String>>   trialDesignStructure // [epochRef_armRef : segmentRef]
+    private def cmp = [compare: { a,b -> a <=> b } ] as Comparator
 
     private static final Log log = LogFactory.getLog(this)
 
@@ -38,7 +37,6 @@ public class TrialDesignStructure {
         epochs      = Collections.unmodifiableList(EPOCHS)
         cells       = Collections.unmodifiableList(CELLS)
         segments    = Collections.unmodifiableList(SEGMENTS)
-        def cmp = [compare: { a,b -> a <=> b } ] as Comparator
         trialDesignStructure = new TreeMap<String, List<String>>(cmp)
 
         cells.each { c ->
@@ -50,6 +48,56 @@ public class TrialDesignStructure {
         allCellsDefined()
     }
 
+    public List<SegmentDefnType> findSegmentsByEpoch(String epoch) {
+        if (!epoch) {
+            log.error("Who is interested in the treatments over an undefined epoch?")
+            return []
+        }
+        def refs = findMatchingReferences(epoch)
+        return linkRefsToSegments(refs)
+    }
+
+    public List<String> findSegmentRefsByEpoch(String epoch) {
+        if (!epoch) {
+            log.error("Who is interested in treatment references over an undefined epoch?")
+            return []
+        }
+        return findMatchingReferences(epoch)
+    }
+
+    public List<SegmentDefnType> findSegmentsByArm(String arm) {
+        if (!arm) {
+            log.error("Who is interested in the treatment over an undefined arm?")
+            return []
+        }
+        def refs = findMatchingReferences(arm)
+        return linkRefsToSegments(refs)
+    }
+
+    public List<String> findSegmentRefsByArm(String arm) {
+        if (!arm) {
+            log.error("Who is interested in treatment references over an undefined arm?")
+            return []
+        }
+        return findMatchingReferences(arm)
+    }
+
+    public Iterator iterator() {
+        return trialDesignStructure.entrySet().iterator()
+    }
+
+    public TreeSet<String> getArmRefs() {
+        def result = new TreeSet(cmp)
+        result.addAll(trialDesignStructure.keySet().collect{it.split("_")[1]})
+        return result
+    }
+
+    public TreeSet<String> getEpochRefs() {
+        def result = new TreeSet(cmp)
+        result.addAll(trialDesignStructure.keySet().collect{it.split("_")[0]})
+        return result
+    }
+
     private boolean allCellsDefined() {
         if (trialDesignStructure.size() != epochs.size() * arms.size()) {
             log.error("The trial design does not cover all arms and all epochs.")
@@ -58,26 +106,8 @@ public class TrialDesignStructure {
         return true
     }
 
-    public List<SegmentDefnType> findByEpoch(String epoch) {
-        if (!epoch) {
-            log.error("Who is interested in the treatment over an undefined epoch?")
-            return []
-        }
-        def refs = trialDesignStructure.findAll{it.key.contains(epoch)}.values().flatten()
-        return linkRefsToSegments(refs)
-    }
-
-    public List<SegmentDefnType> findByArm(String arm) {
-        if (!arm) {
-            log.error("Who is interested in the treatment over an undefined arm?")
-            return []
-        }
-        def refs = trialDesignStructure.findAll{it.key.contains(arm)}.values().flatten()
-        return linkRefsToSegments(refs)
-    }
-
-    public Iterator iterator() {
-        return trialDesignStructure.entrySet().iterator()
+    private List findMatchingReferences(String elem) {
+        return trialDesignStructure.findAll{it.key.contains(elem)}.values().flatten()
     }
 
     private List<SegmentDefnType> linkRefsToSegments(List segRefs) {

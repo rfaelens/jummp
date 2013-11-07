@@ -68,16 +68,17 @@ class PharmMlController {
                 covariateModel: pharmMlService.getCovariateModel(dom),
                 parameterModel: pharmMlService.getParameterModel(dom),
                 observationModel: pharmMlService.getObservationModel(dom),
-                /*treatment: pharmMlService.getTreatment(design),
-                treatmentEpoch: pharmMlService.getTreatmentEpoch(design),
-                group: pharmMlService.getGroup(design),*/
-                modellingSteps: pharmMlService.getCommonModellingSteps(steps),
+                structure: pharmMlService.getTrialDesignStructure(design),
+                population: pharmMlService.getPopulation(design),
+                dosing: pharmMlService.getIndividualDosing(design),
+                estSteps: pharmMlService.getEstimationSteps(steps),
+                simSteps: pharmMlService.getSimulationSteps(steps),
                 stepDeps: pharmMlService.getStepDependencies(steps),
                 flashMessage: params.flashMessage,
                 canUpdate:params.canUpdate,
-		        showPublishOption:params.showPublishOption, 
-    	        showUnpublishOption:params.showUnpublishOption
-    		]
+                showPublishOption:params.showPublishOption,
+                showUnpublishOption:params.showUnpublishOption
+            ]
         )
     }
 }

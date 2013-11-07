@@ -88,13 +88,16 @@ public class TrialDesignStructureTests {
             "ep2" : ["wash", "wash"],
             "ep3" : ["tb", "ta"]
         ]
-        def out = [:]
+        def out     = [:]
+        def refOut  = [:]
         expected.each { it ->
-            out[it.key] = structure.findByEpoch(it.key).collect{it.oid}
+            out[it.key]     = structure.findSegmentsByEpoch(it.key).collect{it.oid}
+            refOut[it.key]  = structure.findSegmentRefsByEpoch(it.key)
         }
         assertEquals(expected, out)
-        assertTrue(structure.findByEpoch("").size() == 0)
-        assertTrue(structure.findByEpoch(null).size() == 0)
+        assertEquals(expected, refOut)
+        assertTrue(structure.findSegmentsByEpoch("").size() == 0)
+        assertTrue(structure.findSegmentsByEpoch(null).size() == 0)
    }
 
    @Test
@@ -108,13 +111,16 @@ public class TrialDesignStructureTests {
             "a1" : ["ta", "wash", "tb"],
             "a2" : ["tb", "wash", "ta"]
         ]
-        def out = [:]
+        def out     = [:]
+        def refOut  = [:]
         expected.each { it ->
-            out[it.key] = structure.findByArm(it.key).collect{it.oid}
+            out[it.key]     = structure.findSegmentsByArm(it.key).collect{it.oid}
+            refOut[it.key]  = structure.findSegmentRefsByArm(it.key)
         }
         assertEquals(expected, out)
-        assertTrue(structure.findByArm("").size() == 0)
-        assertTrue(structure.findByArm(null).size() == 0)
+        assertEquals(expected, refOut)
+        assertTrue(structure.findSegmentsByArm("").size() == 0)
+        assertTrue(structure.findSegmentsByArm(null).size() == 0)
    }
 
    @Test
@@ -132,7 +138,18 @@ public class TrialDesignStructureTests {
             iteratorOutput.add(iStructure.next())
         }
         assertEquals(structure.trialDesignStructure.size(), iteratorOutput.size())
-        assertEquals(structure.trialDesignStructure.entrySet(), iteratorOutput)
+        assertEquals(structure.trialDesignStructure.entrySet().toList(), iteratorOutput)
+   }
+
+   @Test
+    void getArmsAndEpochsWork() {
+        def pharmMlService = new PharmMlService()
+        def testFile = new File("test/files/example4.xml")
+        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def tds = dom.trialDesign.structure
+        def struct = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
+        assertEquals(["a1", "a2"] as Set, struct.getArmRefs())
+        assertEquals(["ep1", "ep2", "ep3"] as Set, struct.getEpochRefs())
    }
 
    boolean nonEmptyList(List l) {

@@ -38,39 +38,27 @@
 
 
 <g:applyLayout name="main">
-<%@ page import="java.nio.file.Files"%>
-<%@ page import="java.nio.file.attribute.BasicFileAttributes"%>
-<%@ page import="java.nio.file.FileSystem"%>
-<%@ page import="java.nio.file.FileSystems"%>
-<%@ page import="java.nio.file.Path"%>
-<%@ page import="java.nio.file.Paths"%>
-<%@ page import="java.nio.file.SimpleFileVisitor"%>
-<%@ page import="java.nio.file.FileVisitResult"%>
-<%@ page import="org.apache.commons.io.FilenameUtils"%>
 <%@ page import="java.text.DateFormat"%>
 <%
-	def loadedZips=new HashMap();
-	def zipSupported=[:]
+    def loadedZips=new HashMap();
+    def zipSupported=[:]
 %>
 <head>
         <title>${revision.model.name}</title>
         <link rel="stylesheet" href="<g:resource dir="css/jqueryui/smoothness" file="jquery-ui-1.10.3.custom.css"/>" />
- 
+
         <script type="text/x-mathjax-config">
-  		MathJax.Hub.Config({
-    		tex2jax: { inlineMath: [['$','$'],['\\(','\\)']] }
-    	});
-  	</script>
-	<script type='text/javascript' src='http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
-        
+        MathJax.Hub.Config({
+            tex2jax: { inlineMath: [['$','$'],['\\(','\\)']] }
+        });
+    </script>
+    <script type='text/javascript' src='http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+
         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript src="jstree/jquery.jstree.js"/>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
         <Ziphandler:outputFileInfoAsJS repFiles="${revision.files}" loadedZips="${loadedZips}" zipSupported="${zipSupported}"/>
         <script>
-		 
-		 
-		 
 		$(function() {
 			$( "#tabs" ).tabs({
 				fx: { opacity: 'toggle' },
@@ -170,13 +158,13 @@
                 openPage(url);
             }
         }
-	</script>
-	<g:layoutHead/>
-	<style>
-		.spaced {
-			margin:10px;
-		}
-	</style>
+    </script>
+    <g:layoutHead/>
+    <style>
+        .spacedMargin {
+            margin:10px;
+        }
+    </style>
     </head>
     <body>
     	<div id="topBar">
@@ -289,7 +277,7 @@
 	  </div>
 	  <g:pageProperty name="page.modelspecifictabscontent" />
 	</div>
-        </div>
+    </div>
 
 </body>
 </g:applyLayout>

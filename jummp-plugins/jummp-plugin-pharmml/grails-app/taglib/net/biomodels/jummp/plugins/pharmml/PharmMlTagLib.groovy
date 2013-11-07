@@ -52,7 +52,9 @@ import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
 import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
 import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
+import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
+import eu.ddmore.libpharmml.dom.dataset.DataSetType
 import eu.ddmore.libpharmml.dom.maths.BinopType
 import eu.ddmore.libpharmml.dom.maths.ConstantType
 import eu.ddmore.libpharmml.dom.maths.Equation
@@ -72,6 +74,7 @@ import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
+import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
@@ -79,6 +82,8 @@ import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
 import javax.xml.bind.JAXBElement
 import javax.xml.namespace.QName
+import net.biomodels.jummp.plugins.pharmml.ObservationEventsMap
+import net.biomodels.jummp.plugins.pharmml.TrialDesignStructure
 import net.biomodels.jummp.plugins.pharmml.maths.FunctionSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
@@ -89,189 +94,7 @@ import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 class PharmMlTagLib {
     static namespace = "pharmml"
 
-    private void prefixToInfix(StringBuilder builder, List<MathsSymbol> stack) {
-        if (stack.isEmpty()) {
-            return;
-        }
-        MathsSymbol symbol=stack.pop()
-        if (symbol instanceof OperatorSymbol) {
-            OperatorSymbol operator=symbol as OperatorSymbol
-            if (operator.type==OperatorSymbol.OperatorType.BINARY) {
-                builder.append(operator.getOpening())
-                if (operator.needsTermSeparation) {
-                	builder.append("<mrow>")
-                }
-                prefixToInfix(builder,stack)
-                if (operator.needsTermSeparation) {
-                	builder.append("</mrow>")
-                }
-                builder.append(operator.getMapping())
-                if (operator.needsTermSeparation) {
-                	builder.append("<mrow>")
-                }
-                prefixToInfix(builder,stack)
-                if (operator.needsTermSeparation) {
-                	builder.append("</mrow>")
-                }
-                builder.append(operator.getClosing())
-            } else {
-                builder.append(operator.getMapping())
-                builder.append(operator.getOpening())
-                prefixToInfix(builder,stack)
-                builder.append(operator.getClosing())
-            }
-        } 
-        else if (symbol instanceof FunctionSymbol) {
-        	FunctionSymbol function=symbol as FunctionSymbol
-        	builder.append(function.getMapping())
-                builder.append(function.getOpening())
-                for (int i=0; i<function.getArgCount(); i++) {
-                	prefixToInfix(builder, stack)
-                	if (i!=function.getArgCount()-1) {
-                		builder.append(function.getArgSeparator())
-                	}
-                }
-                builder.append(function.getClosing())
-        }
-        else if (symbol instanceof PiecewiseSymbol) {
-        	PiecewiseSymbol piecewise=symbol as PiecewiseSymbol
-        	builder.append(piecewise.getOpening())
-        	for (int i=0; i<piecewise.getPieceCount(); i++) {
-        		prefixToInfix(builder, stack)
-        	}
-        	builder.append(piecewise.getClosing())
-        }
-        else if (symbol instanceof PieceSymbol) {
-        	PieceSymbol piece=symbol as PieceSymbol
-        	builder.append(piece.getOpening())
-        	builder.append(piece.getTermStarter())
-        	prefixToInfix(builder, stack)
-        	builder.append(piece.getTermEnder())
-        	if (piece.type==PieceSymbol.ConditionType.OTHERWISE) {
-        		builder.append(piece.getOtherwiseText())
-        	}
-        	else {
-        		builder.append(piece.getIfText())
-        		builder.append(piece.getTermStarter())
-        		prefixToInfix(builder, stack)
-        		builder.append(piece.getTermEnder())
-        	}
-        	builder.append(piece.getClosing())
-        }
-        else {
-            builder.append(symbol.getMapping())
-        }
-       // prefixToInfix(builder, stack)
-    }
-
-    private void convertEquation(def equation, StringBuilder builder) {
-        List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equation).reverse()
-        List<String> stack=new LinkedList<String>()
-        symbols.each {
-           stack.push(it)
-        }
-        prefixToInfix(builder, stack)
-    }
-
-    private String convertToMathML(def equation) {
-        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
-        convertEquation(equation, builder)
-        builder.append("</mstyle></math>")
-        return builder.toString()
-    }
-
-    private String convertToMathML(String lhs, def equation) {
-        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
-        builder.append(oprand(lhs))
-        builder.append(op("="))
-        convertEquation(equation, builder)
-        builder.append("</mstyle></math>")
-        return builder.toString()
-    }
-
-    //works with EquationType and Equation as well
-    private String convertToMathML(EquationType lhs, EquationType rhs) {
-        StringBuilder output = new StringBuilder("<div>")
-        output.append("<math display='inline'><mstyle>")
-        convertEquation(lhs, output)
-        output.append(op("="))
-        convertEquation(rhs, output)
-        output.append("</mstyle></math>")
-        return output.append("</div>").toString()
-    }
-
-    private String convertToMathML(String lhs, ScalarRhs srhs) {
-         if (srhs.equation) {
-            return convertToMathML(lhs, srhs.equation)
-        }
-        if (srhs.symbRef) {
-            return convertToMathML(lhs, srhs.symbRef)
-        }
-        StringBuilder result = new StringBuilder("<math display='inline'><mstyle>")
-        result.append(oprand(lhs)).append(op("="))
-        if (srhs.scalar) {
-            result.append(oprand(scalar(srhs.scalar.value)))
-        }
-        return result.append("</mstyle></math>").toString()
-    }
-
-    private String convertToMathML(String lhs, Rhs rhs) {
-        if (rhs.equation) {
-            return convertToMathML(lhs, rhs.equation)
-        }
-        if (rhs.getSymbRef()) {
-            return convertToMathML(lhs, rhs.getSymbRef())
-        }
-        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
-        builder.append(oprand(lhs))
-        builder.append(op("="))
-        if (rhs.getScalar()) {
-            builder.append(oprand(scalar(rhs.scalar.value)))
-        }
-        else if (r.getSequence()) {
-            builder.append(sequenceAsMathML(r.sequence))
-        }
-        else if (r.getVector()) {
-            builder.append(vectorAsMathML(r))
-        }
-        builder.append("</mstyle></math>")
-        return builder.toString()
-    }
-
-    private String convertToMathML(DerivativeVariableType derivative, def iv) {
-        String independentVariable = derivative.independentVariable?.symbRef?.symbIdRef ?: (iv ?: "t")
-        String derivTerm="d${derivative.symbId}<DIVIDEDBY>d${independentVariable}"
-        return convertToMathML(derivTerm, derivative.getAssign())
-    }
-
-    private String convertToMathML(String lhs, List arguments, def equation) {
-        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
-        builder.append(oprand(lhs))
-        builder.append(op("("))
-        for (int i=0; i<arguments.size(); i++) {
-            builder.append(oprand(arguments.get(i).symbId))
-            if (i<arguments.size()-1) {
-                builder.append(op(","))
-            }
-        }
-        builder.append(op(")"))
-        builder.append(op("="))
-        convertEquation(equation, builder)
-        builder.append("</mstyle></math>")
-        return builder.toString()
-    }
-
-    private String op(String o) {
-        return "<mo>${o}</mo>"
-    }
-
-    private String oprand(String o) {
-        if (o.contains("<DIVIDEDBY>")) {
-            String[] parts=o.split("<DIVIDEDBY>")
-            return "<mfrac><mi>${parts[0]}</mi><mi>${parts[1]}</mi></mfrac>"
-        }
-        return "<mi>${o}</mi>"
-    }
+    private Map<String, String> modellingTabsMap
 
     StringBuilder simpleParams(List<SimpleParameterType> parameters) {
         def outcome = new StringBuilder()
@@ -404,10 +227,9 @@ class PharmMlTagLib {
 
     def functionDefinitions = { attrs ->
         if (!attrs.functionDefs) {
-            out << "No function definitions were found."
             return
         }
-        def result = new StringBuilder()
+        def result = new StringBuilder("<h3>Function Definitions</h3>")
         attrs.functionDefs.each { d ->
             def rightHandSide
             if (d.definition.equation) {
@@ -691,7 +513,7 @@ class PharmMlTagLib {
         ].join(e.output.symbRef.symbIdRef)
         result.append(renderedVar).append(" with ")
         result.append(convertToMathML(e.errorModel.assign.equation)).append("</p>")
-        result.append("<p><span class=\"bold\">Residual error:</span>")
+        result.append("<p><span class=\"bold\">Residual error: </span>")
         return result.append(e.residualError.symbRef.symbIdRef).append("</p>")
     }
 
@@ -765,44 +587,6 @@ class PharmMlTagLib {
         }
         result.append("</tbody></table>")
         out << result.toString()
-    }
-
-    StringBuilder dosingRegimen = { dr ->
-        def result = new StringBuilder("<table>\n<thead><tr><th>Type</th><th>Description</th></tr></thead>\n<tbody>\n<tr><td>")
-        // JAXB returns an Object, so we need to guess the type
-        def regimen
-        boolean isInfusion = false
-        // could be either Bolus or Infusion - no way of telling without casting
-        try {
-            regimen = dr[0].bolusOrInfusion[0] as InfusionType
-            isInfusion = true
-        } catch (ClassCastException e) {
-            regimen = dr[0].bolusOrInfusion[0] as BolusType
-        }
-
-        result.append(isInfusion ? "Infusion" : "Bolus").append("</td><td>")
-        result.append(doseAmount(regimen.doseAmount)).append("<p>")
-        if (regimen.dosingTimes) {
-            result.append(dosingTimes(regimen.dosingTimes))
-        } else if (regimen.steadyState) {
-            result.append(steadyState(regimen.steadyState))
-        }
-        result.append("</p>")
-        if (isInfusion) {
-            result.append("<p>Duration: ").append(regimenDuration(regimen.duration)).append("</p>")
-        }
-        result.append("</td></tr></tbody></table>")
-        return result
-    }
-
-    StringBuilder doseAmount = { a ->
-        def amt = new StringBuilder("<p>").append(convertToMathML("Dose Amount", a?.amount)).append("</p>")
-        def d = variable(a?.doseVar, new StringBuilder("<p>Dose variable:")).append("</p>")
-        def t
-        if (a?.targetVar) {
-            t = variable(a.targetVar, new StringBuilder("<p>Target variable:")).append("</p>")
-        }
-        return  t ? amt.append(d).append(t) : amt.append(d)
     }
 
     StringBuilder scalarRhs = { r, text ->
@@ -915,61 +699,19 @@ class PharmMlTagLib {
         result.append("]")
     }
 
-    def regimenDuration = { d ->
-        if (d.equation || d.functionCall) {
-            return "Regimen duration cannot be extracted, sorry."
-        }
-        if (d.scalar) {
-            return scalar(d.scalar)
-        }
-        if (d.string) {
-            return string(d.string)
-        }
-        if (d.var) {
-            return variable(d.var)
-        }
-    }
-
-    StringBuilder dosingTimes = { dt ->
-        def result = new StringBuilder("Dosing Times:")
-        dt.sequenceOrScalar.each { t ->
-            def time
-            try {
-                time = t as ScalarRhs
-                result.append(scalar(time))
-            } catch(ClassCastException ignored) {
-                time = t as SequenceType
-                result.append(sequence(time))
-            }
-        }
+    /* TRIAL DESIGN */
+    StringBuilder steadyState = { ss ->
+        def result = new StringBuilder("<strong>Steady state</strong>")
+        def i = ss.interval
+        def end = ss.endTime
+        result.append("<div>Interval: ").append(convertToMathML(i.symbRef.symbIdRef, i.assign))
+        result.append("</div><div>")
+        result.append("End time: ").append(convertToMathML(end.symbRef.symbIdRef, end.assign))
+        result.append("</div>")
         return result
     }
 
-    StringBuilder steadyState = { ss ->
-        def result = new StringBuilder("Steady state:")
-        def interval = scalarRhs(ss.interval, new StringBuilder("Interval:"))
-        def endTime = scalarRhs(ss.endTime, new StringBuilder("End time:"))
-        return result.append(interval).append(" ").append(endTime)
-    }
-
-    def treatmentEpoch = { attrs ->
-        if (!attrs.epoch) {
-            out << "No treatment timeframe defined in the model - epoch fail!"
-            return
-        }
-        def result = new StringBuilder("<table><thead>\n<tr><th>Identifier</th><th>Name</th>")
-        result.append("<th>Start</th><th>End</th><th>Occasions</th><th>Treatment</th></tr></thead>\n<tbody>\n")
-        def td = new StringBuilder("</td><td>")
-        attrs.epoch.each { e ->
-            result.append("<tr><td>").append(e.id).append(td).append(e.name ? e.name : " ")
-            result.append( e.start ? scalarRhs(e.start, new StringBuilder("</td><td>")) : "&nbsp;</td><td>")
-            result.append( e.end ? scalarRhs(e.end, new StringBuilder("</td><td>")) : "&nbsp;</td><td>")
-            result.append( e.occasion ? occasions(e.occasion, new StringBuilder("</td><td>")) : "&nbsp;</td><td>")
-            result.append(treatmentRef(e.treatmentRef, new StringBuilder("</td><td>"))).append("</td></tr>")
-        }
-        out << result.append("\n</tbody></table>").toString()
-    }
-
+    //todo - remove/reuse
     StringBuilder occasions = { occasions, text ->
         text.append("[")
         occasions.each { o ->
@@ -980,81 +722,162 @@ class PharmMlTagLib {
         text.append("]")
     }
 
-    StringBuilder treatmentRef = { t, text ->
-        t.each {
-            text.append(it.idRef)
-        }
-        text
-    }
-
-    def group = { attrs ->
-        if (!attrs.group) {
-            out << "No treatment groups defined in the model."
+    // NEW TRIAL DESIGN
+    def trialStructure = { attrs ->
+        if (!attrs.structure) {
             return
         }
-        new StringBuilder("</td><td>")
-        def result = new StringBuilder("<table><thead>\n<tr><th>Identifier</th><th>Name</th>")
-        result.append("<th>Treatment</th><th>Individuals</th><th>Variability</th></tr>")
-        result.append("</thead>\n<tbody>\n")
-
-        attrs.group.each { g ->
-            result.append("<tr><td>").append(g.id).append("</td><td>").append(g.name ? g.name : "&nbsp;")
-            result.append(
-                    g.treatmentEpochRefOrWashout ?
-                        treatmentEpochRefs(g.treatmentEpochRefOrWashout, new StringBuilder("</td><td>")) :
-                        "</td><td>&nbsp;")
-            result.append("</td><td>").append(g.individuals ? individuals(g.individuals) :
-                        "&nbsp;</td><td>&nbsp;")
-            result.append("</td></tr>")
-        }
-        out << result.append("\n</tbody></table>").toString()
-    }
-
-    StringBuilder treatmentEpochRefs = { refs, text ->
-        refs.each {
-            if (it.idRef) {
-                // code repetition is faster than another method call
-                text.append(it.idRef)
-            } else {
-                text.append("Washout")
-            }
-            text.append(" ")
-        }
-        text
-    }
-
-    StringBuilder individuals = { i ->
-        List<String> indivCounts = []
-        def indivVars = []
-        i.each {
-            indivVars << it.levelId
-            def individualCount = it.scalar ? it.scalar.value.toPlainString() : "undefined"
-            indivCounts << individualCount
-        }
-
         def result = new StringBuilder()
-        if (indivCounts.size() == 1) {
-            return result.append(indivCounts[0]).append("</td><td>").append(indivVars[0])
-        } else {
-            def indivCountsIterator = indivCounts.iterator()
-            while (indivCountsIterator.hasNext()) {
-                result.append(indivCountsIterator.next())
-                if (indivCountsIterator.hasNext()) {
-                    result.append("<br/>")
-                }
+        result.append("<h3>Structure overview</h3>\n")
+        def tds = new TrialDesignStructure(attrs.structure.arm, attrs.structure.epoch,
+                    attrs.structure.cell, attrs.structure.segment)
+        def armRefs     = new ArrayList(tds.getArmRefs())
+        def epochRefs   = new ArrayList(tds.getEpochRefs())
+        /* arm-epoch matrix*/
+        result.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
+        for (String e: epochRefs) {
+            result.append("<th class='bold'>").append(e).append("</th>")
+        }
+        result.append("</tr></thead><tbody>\n")
+        for (String a: armRefs) {
+            result.append("<tr><th class='bold'>").append(a).append("</th>")
+            tds.findSegmentRefsByArm(a).each { s ->
+                result.append("<td>").append(s).append("</td>")
             }
-            result.append("</td><td>")
-            def indivVarsIterator = indivVars.iterator()
-            while (indivVarsIterator.hasNext()) {
-                result.append(indivVarsIterator.next())
-                if (indivVarsIterator.hasNext()) {
-                    result.append("<br/>")
-                }
+            result.append("</tr>\n")
+        }
+        result.append("</tbody></table>\n")
+
+        /* segments and activities */
+        List activities = attrs.structure.activity
+        // avoid the need to increase the size of the map, because re-hashing is expensive
+        def segmentActivitiesMap = new HashMap(activities.size(), 1.0)
+        attrs.structure.segment.each { s ->
+            segmentActivitiesMap[s.oid] = s.activityRef.collect{ a ->
+                attrs.structure.activity.find{ a.oidRef.equals(it.oid) }
             }
         }
-        result
+        boolean showDosingFootnote = false
+        result.append("<h4>Segment-Activity definition</h4>\n")
+        result.append("<table style='margin-bottom:0px;'><thead><tr><th class='bold'>Segment</th><th class='bold'>Activity</th>")
+        result.append("<th class='bold'>Treatment</th><th class='bold'>Dose time</th>")
+        result.append("<th class='bold'>Dose size</th><th class='bold'>Target variable</th></tr></thead><tbody>")
+        if (segmentActivitiesMap) {
+            segmentActivitiesMap.entrySet().each {
+                def activityList = it.value
+                if (!activityList) {
+                    result.append("<tr><td colspan='6'></td></tr>")
+                } else {
+                    final int ACTIVITY_COUNT = activityList.size()
+                    result.append("<tr><td")
+                    if (ACTIVITY_COUNT > 1) {
+                        result.append(" rowspan='").append(ACTIVITY_COUNT).append("'")
+                    }
+                    result.append(">").append(it.key).append("</td><td>")
+                    def first = activityList[0]
+                    result.append(first.oid).append("</td>")
+                    if (first.washout) {
+                        result.append("<td>washout</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>")
+                    } else {
+                        /* dosingRegimen is a JAXBElement */
+                        def regimen = first.dosingRegimen.value
+                        switch(regimen) {
+                            case BolusType:
+                                result.append("<td>bolus</td>")
+                                //fall through
+                            case InfusionType:
+                                if (regimen instanceof InfusionType) {
+                                    result.append("<td>infusion</td>")
+                                }
+                                if (regimen.dosingTimes) {
+                                    rhs(regimen.dosingTimes.assign, result.append("<td>"))
+                                    result.append("</td>")
+                                } else if (regimen.steadyState) {
+                                    result.append("<td>")
+                                    result.append(steadyState(regimen.steadyState))
+                                    result.append("</td>")
+                                } else {
+                                    result.append("<td>*</td>")
+                                    showDosingFootnote = true
+                                }
+                                def amt = regimen.doseAmount
+                                if (amt.assign) {
+                                    rhs(amt.assign, result.append("<td>")).append("</td>")
+                                } else {
+                                    result.append("<td>*</td>")
+                                    showDosingFootnote = true
+                                }
+                                result.append("<td>").append(amt.symbRef.symbIdRef).append("</td>")
+                                break
+                           default:
+                                result.append("<td colspan='4'>Unknown</td>")
+                                break
+                        }
+                    }
+                    result.append("</tr>\n")
+                }
+            }
+            result.append("</tbody></table>\n")
+        }
+        if (showDosingFootnote) {
+            result.append("<span>* &ndash; Element defined in the Individual dosing section.</span>")
+        }
+        /* epochs and occasions */
+        if (attrs.structure.studyEvent) {
+            ObservationEventsMap oem = new ObservationEventsMap(attrs.structure.studyEvent)
+            def arms = oem.getArms()
+            def epochs = oem.getEpochs()
+            result.append("\n<h4>Epoch-Occasion definition</h4>\n")
+            result.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
+            for (String e: epochs) {
+                result.append("<th class='bold'>").append(e).append("</th>")
+            }
+            result.append("</tr></thead><tbody>\n")
+            arms.each { a ->
+                result.append("<tr><th class='bold'>").append(a).append("</th>")
+                def occ = oem.findOccasionsByArm(a)
+                occ.each {
+                    def o = it.firstEntry()
+                    result.append("<td>")
+                    result.append("<div>").append(o.key).append("</div><div><span class='bold'>")
+                    result.append(o.value).append("</span> variability</div></td>")
+                }
+                result.append("</tr>")
+            }
+            result.append("</tbody></table>\n")
+        }
+        out << result.toString()
     }
 
+    def trialDosing = { attrs ->
+        if (!attrs.dosing) {
+            return
+        }
+        def result = new StringBuilder("<h4>Individual dosing</h4>\n")
+        attrs.dosing.each { d ->
+            if (d.dataSet) {
+                dataSet(d.dataSet, null, result)
+            }
+        }
+        out << result.toString()
+    }
+
+    def trialPopulation = { attrs ->
+        if (!attrs.pop) {
+            return
+        }
+        def result = new StringBuilder("<h4>Population</h4>\n")
+        if (attrs.pop.variabilityReference) {
+            result.append("<span><strong>Variability level: </strong>")
+            result.append(attrs.pop.variabilityReference.symbRef.symbIdRef).append("</span>")
+        }
+        if (attrs.pop.dataSet) {
+            dataSet(attrs.pop.dataSet, null, result)
+        }
+        out << result.toString()
+    }
+
+    /* MODELLING STEPS */
     def variableDefs = { attrs ->
         if (!attrs.variables) {
             // there may not be any variables in the modelling steps
@@ -1081,26 +904,47 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    def modellingSteps = { attrs ->
-        if (!attrs.steps) {
+    def decideModellingStepsTabs = { attrs ->
+        if (!attrs.estimation && !attrs.simulation) {
+            return
+        }
+        modellingTabsMap = new HashMap<String, String>(3, 1.0)
+        if (attrs.estimation) {
+            final String EST_TAB = "estimationSteps"
+            modellingTabsMap["est"] = EST_TAB
+            out << "<li><a href='#${EST_TAB}'>Estimation Steps</a></li>"
+        }
+        if (attrs.simulation) {
+            final String SIM_TAB = "simulationSteps"
+            modellingTabsMap["sim"] = SIM_TAB
+            out << "<li><a href='#${SIM_TAB}'>Simulation Steps</a></li>"
+        }
+    }
+
+    def handleModellingStepsTabs = { attrs ->
+        if (!attrs.estimation && !attrs.simulation && !modellingTabsMap) {
             return
         }
         if (!attrs.independentVariable) {
             // the default independent variable is assumed to be time.
-            def iv = new IndependentVariableType()
-            iv.symbId = "time"
-            attrs.independentVariable = iv
+            attrs.independentVariable = "time"
         }
-        /*
-        * Check which kind of step we are dealing with. Estimation and simulation steps cannot
-        * be mixed, hence only look at the first one to decide.
-        */
-        def step = attrs.steps.first()
+
         def result = new StringBuilder()
-        if (step instanceof EstimationStepType) {
-            result.append(estimationSteps(attrs.steps))
-        } else {
-            result.append(simulationSteps(attrs.steps, attrs.independentVariable))
+        if (attrs.estimation) {
+            result.append("<div id='${modellingTabsMap["est"]}'>")
+            result.append(estimationSteps(attrs.estimation))
+            //only consider step dependencies here when there are no simulation steps
+            if (modellingTabsMap.size() == 1) {
+                result.append(stepDeps(attrs.deps))
+            }
+            result.append("</div>")
+        }
+        if (attrs.simulation) {
+            result.append("<div id='${modellingTabsMap["sim"]}'>")
+            result.append(simulationSteps(attrs.simulation, attrs.independentVariable))
+            result.append(stepDeps(attrs.deps))
+            result.append("</div>")
         }
         out << result.toString()
     }
@@ -1208,20 +1052,20 @@ class PharmMlTagLib {
                 result.append(estimationOps(s.operation))
             }
             if (s.objectiveDataSet) {
-                result.append(objectiveDataSet(s.objectiveDataSet))
+                result.append(objectiveDataSetMapping(s.objectiveDataSet))
             }
         }
         return result
     }
 
-    StringBuilder objectiveDataSet(DatasetMappingType dataSet) {
+    StringBuilder objectiveDataSetMapping(DatasetMappingType dsm) {
         def result = new StringBuilder("<h5>Dataset mapping</h5>\n")
         def variableMap = [:]
-        if (dataSet.variableAssignment) {
-            result.append(variableAssignments(dataSet.variableAssignment,
+        if (dsm.variableAssignment) {
+            result.append(variableAssignments(dsm.variableAssignment,
                         "<span class=\"bold\">Variable assignments</span>"))
         }
-        dataSet.mapping.each {
+        dsm.mapping.each {
             //keep track of variableMappings so that we know how to name the columns
             //deal with JAXBElement
             if (it.value instanceof VariableMappingType) {
@@ -1229,28 +1073,62 @@ class PharmMlTagLib {
                 variableMap << [ (it.value.columnRef.columnIdRef) : (it.value.symbRef.symbIdRef)]
             }
         }
-        def columnOrder = [:]
-        List noTables = dataSet.dataSet.definition.columnOrTable.findAll{it instanceof ColumnDefnType}
-        noTables.each {
-            columnOrder << [ (it.columnNum) : (it.columnId) ]
+        if (dsm.dataSet) {
+            dataSet(dsm.dataSet, variableMap, result)
         }
-        result.append("\n<table><thead><tr>")
-
-        noTables.inject(result) { r, d ->
-            def key = columnOrder[d.columnNum]
-            r.append(["<th>", "</th>"].join(variableMap[key] ?: d.columnId))
-        }
-        result.append("</tr></thead><tbody>")
-        dataSet.dataSet.table.row.inject(result) { r, i ->
-            r.append("\n<tr>")
-            def columns = i.scalarOrTable.findAll{ !(it.value instanceof DataSetTableType) }
-            columns.inject(r) { o, td ->
-                o.append(["<td>", "</td>"].join(scalar(td.value)))
-            }
-            r.append("</tr>")
-        }
-        result.append("</tbody></table>\n")
         return result
+    }
+
+    StringBuilder dataSet(DataSetType dataSet, Map variableMap, StringBuilder sb) {
+        def columnOrder = [:]
+        List tables = dataSet.definition.columnOrTable
+        tables.each {
+            if (it instanceof ColumnDefnType) {
+                columnOrder << [ (it.columnNum) : (it.columnId) ]
+            } else if (it instanceof DataSetTableDefnType) {
+                columnOrder << [ (it.columnNum) : (it.tableId) ]
+            }
+        }
+        sb.append("\n<table><thead><tr>")
+
+        tables.inject(sb) { txt, d ->
+            def key = columnOrder[d.columnNum]
+            if (key && variableMap && variableMap[key]) {
+                txt.append(["<th>", "</th>"].join(variableMap[key]))
+            } else if (d instanceof ColumnDefnType) {
+                txt.append(["<th>", "</th>"].join(d.columnId))
+            } else if (d instanceof DataSetTableDefnType) {
+                txt.append(["<th>", "</th>"].join(d.tableId))
+            }
+        }
+        sb.append("</tr></thead><tbody>")
+        dataSet.table.row.each { i ->
+            sb.append("\n<tr>")
+            i.scalarOrTable.each { td ->
+                if (td.value instanceof DataSetTableType) {
+                    def content = new StringBuilder("<table class='default'>")
+                    td.value.row.inject(content) { cont, r ->
+                        cont.append("<tr class='default'>")
+                        r.scalarOrTable.inject(cont) { s, val ->
+                            s.append("<td class='default'>")
+                            if (val instanceof DataSetTableType) {
+                                s.append("*")
+                            } else {
+                                s.append(scalar(val.value))
+                            }
+                            s.append("</td>")
+                        }
+                        cont.append("</tr>")
+                    }
+                    String ready = content.append("</table>").toString()
+                    sb.append(["<td class='default'>", "</td>"].join(ready))
+                } else {
+                    sb.append(["<td class='default'>", "</td>"].join(scalar(td.value)))
+                }
+            }
+            sb.append("</tr>")
+        }
+        return sb.append("</tbody></table>\n")
     }
 
     StringBuilder paramsToEstimate(ToEstimateType params) {
@@ -1335,23 +1213,21 @@ class PharmMlTagLib {
         return new StringBuilder().append(convertToMathML(prop.name, prop.assign))
     }
 
-    def stepDeps = { attrs ->
+    StringBuilder stepDeps(StepDependencyType deps) {
         StringBuilder result = new StringBuilder()
-        if (!attrs.deps || !attrs.deps.step) {
+        if (!deps || !deps.step) {
             return result
         }
         result.append("<h3>Step Dependencies</h3>")
         result.append("\n<ul>")
-        attrs.deps.step.inject(result) { r, s ->
+        deps.step.inject(result) { r, s ->
             StringBuilder dep = new StringBuilder(s.oidRef.oidRef)
             if (s.dependents) {
                 dep.append(": ").append(transitiveStepDeps(s.dependents))
             }
             r.append(["<li>", "</li>\n"].join(dep.toString()))
-            
         }
-        result.append("</ul>")
-        out << result.toString()
+        return result.append("</ul>")
     }
 
     StringBuilder transitiveStepDeps = { ds ->
@@ -1365,6 +1241,190 @@ class PharmMlTagLib {
         result.append(deps.join(", "))
         return deps.size() == 1 ? result :
                 new StringBuilder("[").append(result).append("]")
+    }
+
+    private void prefixToInfix(StringBuilder builder, List<MathsSymbol> stack) {
+        if (stack.isEmpty()) {
+            return;
+        }
+        MathsSymbol symbol=stack.pop()
+        if (symbol instanceof OperatorSymbol) {
+            OperatorSymbol operator=symbol as OperatorSymbol
+            if (operator.type==OperatorSymbol.OperatorType.BINARY) {
+                builder.append(operator.getOpening())
+                if (operator.needsTermSeparation) {
+                    builder.append("<mrow>")
+                }
+                prefixToInfix(builder,stack)
+                if (operator.needsTermSeparation) {
+                    builder.append("</mrow>")
+                }
+                builder.append(operator.getMapping())
+                if (operator.needsTermSeparation) {
+                    builder.append("<mrow>")
+                }
+                prefixToInfix(builder,stack)
+                if (operator.needsTermSeparation) {
+                    builder.append("</mrow>")
+                }
+                builder.append(operator.getClosing())
+            } else {
+                builder.append(operator.getMapping())
+                builder.append(operator.getOpening())
+                prefixToInfix(builder,stack)
+                builder.append(operator.getClosing())
+            }
+        } 
+        else if (symbol instanceof FunctionSymbol) {
+            FunctionSymbol function=symbol as FunctionSymbol
+            builder.append(function.getMapping())
+                builder.append(function.getOpening())
+                for (int i=0; i<function.getArgCount(); i++) {
+                    prefixToInfix(builder, stack)
+                    if (i!=function.getArgCount()-1) {
+                        builder.append(function.getArgSeparator())
+                    }
+                }
+                builder.append(function.getClosing())
+        }
+        else if (symbol instanceof PiecewiseSymbol) {
+            PiecewiseSymbol piecewise=symbol as PiecewiseSymbol
+            builder.append(piecewise.getOpening())
+            for (int i=0; i<piecewise.getPieceCount(); i++) {
+                prefixToInfix(builder, stack)
+            }
+            builder.append(piecewise.getClosing())
+        }
+        else if (symbol instanceof PieceSymbol) {
+            PieceSymbol piece=symbol as PieceSymbol
+            builder.append(piece.getOpening())
+            builder.append(piece.getTermStarter())
+            prefixToInfix(builder, stack)
+            builder.append(piece.getTermEnder())
+            if (piece.type==PieceSymbol.ConditionType.OTHERWISE) {
+                builder.append(piece.getOtherwiseText())
+            }
+            else {
+                builder.append(piece.getIfText())
+                builder.append(piece.getTermStarter())
+                prefixToInfix(builder, stack)
+                builder.append(piece.getTermEnder())
+            }
+            builder.append(piece.getClosing())
+        }
+        else {
+            builder.append(symbol.getMapping())
+        }
+       // prefixToInfix(builder, stack)
+    }
+
+    private void convertEquation(def equation, StringBuilder builder) {
+        List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equation).reverse()
+        List<String> stack=new LinkedList<String>()
+        symbols.each {
+           stack.push(it)
+        }
+        prefixToInfix(builder, stack)
+    }
+
+    private String convertToMathML(def equation) {
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        convertEquation(equation, builder)
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    private String convertToMathML(String lhs, def equation) {
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(lhs))
+        builder.append(op("="))
+        convertEquation(equation, builder)
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    //works with EquationType and Equation as well
+    private String convertToMathML(EquationType lhs, EquationType rhs) {
+        StringBuilder output = new StringBuilder("<div>")
+        output.append("<math display='inline'><mstyle>")
+        convertEquation(lhs, output)
+        output.append(op("="))
+        convertEquation(rhs, output)
+        output.append("</mstyle></math>")
+        return output.append("</div>").toString()
+    }
+
+    private String convertToMathML(String lhs, ScalarRhs srhs) {
+         if (srhs.equation) {
+            return convertToMathML(lhs, srhs.equation)
+        }
+        if (srhs.symbRef) {
+            return convertToMathML(lhs, srhs.symbRef)
+        }
+        StringBuilder result = new StringBuilder("<math display='inline'><mstyle>")
+        result.append(oprand(lhs)).append(op("="))
+        if (srhs.scalar) {
+            result.append(oprand(scalar(srhs.scalar.value)))
+        }
+        return result.append("</mstyle></math>").toString()
+    }
+
+    private String convertToMathML(String lhs, Rhs rhs) {
+        if (rhs.equation) {
+            return convertToMathML(lhs, rhs.equation)
+        }
+        if (rhs.getSymbRef()) {
+            return convertToMathML(lhs, rhs.getSymbRef())
+        }
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(lhs))
+        builder.append(op("="))
+        if (rhs.getScalar()) {
+            builder.append(oprand(scalar(rhs.scalar.value)))
+        }
+        else if (r.getSequence()) {
+            builder.append(sequenceAsMathML(r.sequence))
+        }
+        else if (r.getVector()) {
+            builder.append(vectorAsMathML(r))
+        }
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    private String convertToMathML(DerivativeVariableType derivative, def iv) {
+        String independentVariable = derivative.independentVariable?.symbRef?.symbIdRef ?: (iv ?: "t")
+        String derivTerm="d${derivative.symbId}<DIVIDEDBY>d${independentVariable}"
+        return convertToMathML(derivTerm, derivative.getAssign())
+    }
+
+    private String convertToMathML(String lhs, List arguments, def equation) {
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(lhs))
+        builder.append(op("("))
+        for (int i=0; i<arguments.size(); i++) {
+            builder.append(oprand(arguments.get(i).symbId))
+            if (i<arguments.size()-1) {
+                builder.append(op(","))
+            }
+        }
+        builder.append(op(")"))
+        builder.append(op("="))
+        convertEquation(equation, builder)
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    private String op(String o) {
+        return "<mo>${o}</mo>"
+    }
+
+    private String oprand(String o) {
+        if (o.contains("<DIVIDEDBY>")) {
+            String[] parts=o.split("<DIVIDEDBY>")
+            return "<mfrac><mi>${parts[0]}</mi><mi>${parts[1]}</mi></mfrac>"
+        }
+        return "<mi>${o}</mi>"
     }
 
     private JAXBElement wrapJaxb(def elem) {

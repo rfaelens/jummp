@@ -37,10 +37,13 @@ package net.biomodels.jummp.plugins.pharmml
 import eu.ddmore.libpharmml.*
 import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
+import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 import eu.ddmore.libpharmml.impl.*
 import java.nio.file.Files
 import java.nio.file.Path
@@ -83,7 +86,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         File pharmMlFile = findPharmML(model)
         if (!pharmMlFile) {
             if (IS_INFO_ENABLED) {
-                log.info("No PharmML file found in ${model.inspect}, hence nothing to validate.")
+                log.info("No PharmML file found in ${model.inspect()}, hence nothing to validate.")
             }
             return false
         }
@@ -296,38 +299,43 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         PharmML dom = getDomFromRevision(revision)
         return dom?.trialDesign
     }
-/*
-    //todo incomplete
-    @Profiled(tag="pharmMlService.getTreatment")
-    List getTreatment(TrialDesignType design) {
+
+    @Profiled(tag="pharmMlService.getTrialDesignStructure")
+    TrialStructureType getTrialDesignStructure(TrialDesignType design) {
+        return design?.structure
+    }
+
+    @Profiled(tag="pharmMlService.getIndividualDosing")
+    List getIndividualDosing(TrialDesignType design) {
         return design?.individualDosing
     }
 
-    //todo: incomplete
-    @Profiled(tag="pharmMlService.getTreatmentEpoch")
-    List getTreatmentEpoch(TrialDesignType design) {
-        return design?.structure.epoch
-    }
-
-    @Profiled(tag="pharmMlService.getGroup")
-    List getGroup(TrialDesignType design) {
+    @Profiled(tag="pharmMlService.getPopulation")
+    PopulationType getPopulation(TrialDesignType design) {
         return design?.population
     }
-*/
+
     @Profiled(tag="pharmMlService.getModellingSteps")
     ModellingStepsType getModellingSteps(RevisionTransportCommand revision) {
         PharmML dom = getDomFromRevision(revision)
         return dom?.modellingSteps
     }
-/*
-    @Profiled(tag="pharmMlService.getVariableDefinitions")
-    List getVariableAssignments(ModellingStepsType steps) {
-        return steps?.variable
-    }
-*/
-    @Profiled(tag="pharmMlService.getEstimationOrSimulationSteps")
+
+    @Profiled(tag="pharmMlService.getCommonModellingSteps")
     List getCommonModellingSteps(ModellingStepsType steps) {
         return steps?.commonModellingStep.value
+    }
+
+    @Profiled(tag="pharmMlService.getSimulationSteps")
+    List getSimulationSteps(ModellingStepsType steps) {
+        def allSteps = getCommonModellingSteps(steps)
+        return allSteps ? allSteps.findAll {it instanceof SimulationStepType} : []
+    }
+
+    @Profiled(tag="pharmMlService.getEstimationSteps")
+    List getEstimationSteps(ModellingStepsType steps) {
+        def allSteps = getCommonModellingSteps(steps)
+        return allSteps ? allSteps.findAll {it instanceof EstimationStepType} : []
     }
 
     @Profiled(tag="pharmMlService.getStepDependencies")
