@@ -25,6 +25,7 @@
 <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/precursor" />
 <html>
 <head>
+    <link rel="stylesheet" type="text/css" href="${resource(dir:'css',file:'notification.css')}" />
     <g:javascript library="jquery" plugin="jquery"/>
     <g:javascript src="jquery/jquery.i18n.properties-min-1.0.9.js"/>
     <g:javascript>
@@ -37,7 +38,6 @@
     	});
     </g:javascript>
     <g:javascript src="jummp.js"/>
-    <link rel="stylesheet" href="${resource(dir: 'css', file: 'notification.css')}" /> 
     <g:javascript src="notification.js"/>
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/head" />
     <g:layoutHead/>
