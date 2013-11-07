@@ -31,7 +31,8 @@
 	
 	<g:if test="${g.pageProperty(name:'page.sidebar')?.length()}">
 		<section class="grid_18 alpha"> 
-		        <g:pageProperty name="page.main-content" />
+				<g:render template="/templates/notification/showNotificationDiv"/>
+				<g:pageProperty name="page.main-content" />
 		        <g:layoutBody/>
 	        </section>  
     
@@ -41,7 +42,8 @@
 	</g:if>
 	<g:else>
 		<section> 
-		        <g:pageProperty name="page.main-content" />
+		        <g:render template="/templates/notification/showNotificationDiv"/>
+				<g:pageProperty name="page.main-content" />
 		        <g:layoutBody/>
 	        </section>  
 	</g:else>
