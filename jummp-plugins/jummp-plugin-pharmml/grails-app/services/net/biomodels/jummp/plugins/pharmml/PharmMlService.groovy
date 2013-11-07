@@ -37,6 +37,7 @@ package net.biomodels.jummp.plugins.pharmml
 import eu.ddmore.libpharmml.*
 import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
@@ -319,12 +320,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         PharmML dom = getDomFromRevision(revision)
         return dom?.modellingSteps
     }
-/*
-    @Profiled(tag="pharmMlService.getVariableDefinitions")
-    List getVariableAssignments(ModellingStepsType steps) {
-        return steps?.variable
-    }
-*/
+
     @Profiled(tag="pharmMlService.getCommonModellingSteps")
     List getCommonModellingSteps(ModellingStepsType steps) {
         return steps?.commonModellingStep.value
