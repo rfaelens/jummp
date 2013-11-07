@@ -53,6 +53,7 @@ import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
 import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
+import eu.ddmore.libpharmml.dom.dataset.DataSetType
 import eu.ddmore.libpharmml.dom.maths.BinopType
 import eu.ddmore.libpharmml.dom.maths.ConstantType
 import eu.ddmore.libpharmml.dom.maths.Equation
@@ -79,6 +80,7 @@ import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
 import javax.xml.bind.JAXBElement
 import javax.xml.namespace.QName
+import net.biomodels.jummp.plugins.pharmml.ObservationEventsMap
 import net.biomodels.jummp.plugins.pharmml.TrialDesignStructure
 import net.biomodels.jummp.plugins.pharmml.maths.FunctionSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
@@ -221,10 +223,9 @@ class PharmMlTagLib {
 
     def functionDefinitions = { attrs ->
         if (!attrs.functionDefs) {
-            out << "No function definitions were found."
             return
         }
-        def result = new StringBuilder()
+        def result = new StringBuilder("<h3>Function Definitions</h3>")
         attrs.functionDefs.each { d ->
             def rightHandSide
             if (d.definition.equation) {
@@ -584,44 +585,6 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    StringBuilder dosingRegimen = { dr ->
-        def result = new StringBuilder("<table>\n<thead><tr><th>Type</th><th>Description</th></tr></thead>\n<tbody>\n<tr><td>")
-        // JAXB returns an Object, so we need to guess the type
-        def regimen
-        boolean isInfusion = false
-        // could be either Bolus or Infusion - no way of telling without casting
-        try {
-            regimen = dr[0].bolusOrInfusion[0] as InfusionType
-            isInfusion = true
-        } catch (ClassCastException e) {
-            regimen = dr[0].bolusOrInfusion[0] as BolusType
-        }
-
-        result.append(isInfusion ? "Infusion" : "Bolus").append("</td><td>")
-        result.append(doseAmount(regimen.doseAmount)).append("<p>")
-        if (regimen.dosingTimes) {
-            result.append(dosingTimes(regimen.dosingTimes))
-        } else if (regimen.steadyState) {
-            result.append(steadyState(regimen.steadyState))
-        }
-        result.append("</p>")
-        if (isInfusion) {
-            result.append("<p>Duration: ").append(regimenDuration(regimen.duration)).append("</p>")
-        }
-        result.append("</td></tr></tbody></table>")
-        return result
-    }
-
-    StringBuilder doseAmount = { a ->
-        def amt = new StringBuilder("<p>").append(convertToMathML("Dose Amount", a?.amount)).append("</p>")
-        def d = variable(a?.doseVar, new StringBuilder("<p>Dose variable:")).append("</p>")
-        def t
-        if (a?.targetVar) {
-            t = variable(a.targetVar, new StringBuilder("<p>Target variable:")).append("</p>")
-        }
-        return  t ? amt.append(d).append(t) : amt.append(d)
-    }
-
     StringBuilder scalarRhs = { r, text ->
         if (r.scalar) {
             text.append(scalar(r.scalar.value))
@@ -733,61 +696,18 @@ class PharmMlTagLib {
     }
 
     /* TRIAL DESIGN */
-    def regimenDuration = { d ->
-        if (d.equation || d.functionCall) {
-            return "Regimen duration cannot be extracted, sorry."
-        }
-        if (d.scalar) {
-            return scalar(d.scalar)
-        }
-        if (d.string) {
-            return string(d.string)
-        }
-        if (d.var) {
-            return variable(d.var)
-        }
-    }
-
-    StringBuilder dosingTimes = { dt ->
-        def result = new StringBuilder("Dosing Times:")
-        dt.sequenceOrScalar.each { t ->
-            def time
-            try {
-                time = t as ScalarRhs
-                result.append(scalar(time))
-            } catch(ClassCastException ignored) {
-                time = t as SequenceType
-                result.append(sequence(time))
-            }
-        }
+    StringBuilder steadyState = { ss ->
+        def result = new StringBuilder("<strong>Steady state</strong>")
+        def i = ss.interval
+        def end = ss.endTime
+        result.append("<div>Interval: ").append(convertToMathML(i.symbRef.symbIdRef, i.assign))
+        result.append("</div><div>")
+        result.append("End time: ").append(convertToMathML(end.symbRef.symbIdRef, end.assign))
+        result.append("</div>")
         return result
     }
 
-    StringBuilder steadyState = { ss ->
-        def result = new StringBuilder("Steady state:")
-        def interval = scalarRhs(ss.interval, new StringBuilder("Interval:"))
-        def endTime = scalarRhs(ss.endTime, new StringBuilder("End time:"))
-        return result.append(interval).append(" ").append(endTime)
-    }
-
-    def treatmentEpoch = { attrs ->
-        if (!attrs.epoch) {
-            out << "No treatment timeframe defined in the model - epoch fail!"
-            return
-        }
-        def result = new StringBuilder("<table><thead>\n<tr><th>Identifier</th><th>Name</th>")
-        result.append("<th>Start</th><th>End</th><th>Occasions</th><th>Treatment</th></tr></thead>\n<tbody>\n")
-        def td = new StringBuilder("</td><td>")
-        attrs.epoch.each { e ->
-            result.append("<tr><td>").append(e.id).append(td).append(e.name ? e.name : " ")
-            result.append( e.start ? scalarRhs(e.start, new StringBuilder("</td><td>")) : "&nbsp;</td><td>")
-            result.append( e.end ? scalarRhs(e.end, new StringBuilder("</td><td>")) : "&nbsp;</td><td>")
-            result.append( e.occasion ? occasions(e.occasion, new StringBuilder("</td><td>")) : "&nbsp;</td><td>")
-            result.append(treatmentRef(e.treatmentRef, new StringBuilder("</td><td>"))).append("</td></tr>")
-        }
-        out << result.append("\n</tbody></table>").toString()
-    }
-
+    //todo - remove/reuse
     StringBuilder occasions = { occasions, text ->
         text.append("[")
         occasions.each { o ->
@@ -798,81 +718,7 @@ class PharmMlTagLib {
         text.append("]")
     }
 
-    StringBuilder treatmentRef = { t, text ->
-        t.each {
-            text.append(it.idRef)
-        }
-        text
-    }
-
-    def group = { attrs ->
-        if (!attrs.group) {
-            out << "No treatment groups defined in the model."
-            return
-        }
-        new StringBuilder("</td><td>")
-        def result = new StringBuilder("<table><thead>\n<tr><th>Identifier</th><th>Name</th>")
-        result.append("<th>Treatment</th><th>Individuals</th><th>Variability</th></tr>")
-        result.append("</thead>\n<tbody>\n")
-
-        attrs.group.each { g ->
-            result.append("<tr><td>").append(g.id).append("</td><td>").append(g.name ? g.name : "&nbsp;")
-            result.append(
-                    g.treatmentEpochRefOrWashout ?
-                        treatmentEpochRefs(g.treatmentEpochRefOrWashout, new StringBuilder("</td><td>")) :
-                        "</td><td>&nbsp;")
-            result.append("</td><td>").append(g.individuals ? individuals(g.individuals) :
-                        "&nbsp;</td><td>&nbsp;")
-            result.append("</td></tr>")
-        }
-        out << result.append("\n</tbody></table>").toString()
-    }
-
-    StringBuilder treatmentEpochRefs = { refs, text ->
-        refs.each {
-            if (it.idRef) {
-                // code repetition is faster than another method call
-                text.append(it.idRef)
-            } else {
-                text.append("Washout")
-            }
-            text.append(" ")
-        }
-        text
-    }
-
-    StringBuilder individuals = { i ->
-        List<String> indivCounts = []
-        def indivVars = []
-        i.each {
-            indivVars << it.levelId
-            def individualCount = it.scalar ? it.scalar.value.toPlainString() : "undefined"
-            indivCounts << individualCount
-        }
-
-        def result = new StringBuilder()
-        if (indivCounts.size() == 1) {
-            return result.append(indivCounts[0]).append("</td><td>").append(indivVars[0])
-        } else {
-            def indivCountsIterator = indivCounts.iterator()
-            while (indivCountsIterator.hasNext()) {
-                result.append(indivCountsIterator.next())
-                if (indivCountsIterator.hasNext()) {
-                    result.append("<br/>")
-                }
-            }
-            result.append("</td><td>")
-            def indivVarsIterator = indivVars.iterator()
-            while (indivVarsIterator.hasNext()) {
-                result.append(indivVarsIterator.next())
-                if (indivVarsIterator.hasNext()) {
-                    result.append("<br/>")
-                }
-            }
-        }
-        result
-    }
-
+    // NEW TRIAL DESIGN
     def trialStructure = { attrs ->
         if (!attrs.structure) {
             return
@@ -899,15 +745,17 @@ class PharmMlTagLib {
         result.append("</tbody></table>\n")
 
         /* segments and activities */
+        List activities = attrs.structure.activity
         // avoid the need to increase the size of the map, because re-hashing is expensive
-        def segmentActivitiesMap = new HashMap(attrs.structure.activity.size(), 1.0)
+        def segmentActivitiesMap = new HashMap(activities.size(), 1.0)
         attrs.structure.segment.each { s ->
             segmentActivitiesMap[s.oid] = s.activityRef.collect{ a ->
                 attrs.structure.activity.find{ a.oidRef.equals(it.oid) }
             }
         }
+        boolean showDosingFootnote = false
         result.append("<h4>Segment-Activity definition</h4>\n")
-        result.append("<table><thead><tr><th class='bold'>Segment</th><th class='bold'>Activity</th>")
+        result.append("<table style='margin-bottom:0px;'><thead><tr><th class='bold'>Segment</th><th class='bold'>Activity</th>")
         result.append("<th class='bold'>Treatment</th><th class='bold'>Dose time</th>")
         result.append("<th class='bold'>Dose size</th><th class='bold'>Target variable</th></tr></thead><tbody>")
         if (segmentActivitiesMap) {
@@ -924,7 +772,6 @@ class PharmMlTagLib {
                     result.append(">").append(it.key).append("</td><td>")
                     def first = activityList[0]
                     result.append(first.oid).append("</td>")
-                    result.append("</td>")
                     if (first.washout) {
                         result.append("<td>washout</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>")
                     } else {
@@ -941,14 +788,20 @@ class PharmMlTagLib {
                                 if (regimen.dosingTimes) {
                                     rhs(regimen.dosingTimes.assign, result.append("<td>"))
                                     result.append("</td>")
+                                } else if (regimen.steadyState) {
+                                    result.append("<td>")
+                                    result.append(steadyState(regimen.steadyState))
+                                    result.append("</td>")
                                 } else {
-                                    result.append("<td>&nbsp;</td>")
+                                    result.append("<td>*</td>")
+                                    showDosingFootnote = true
                                 }
                                 def amt = regimen.doseAmount
                                 if (amt.assign) {
                                     rhs(amt.assign, result.append("<td>")).append("</td>")
                                 } else {
-                                    result.append("<td>&nbsp;</td>")
+                                    result.append("<td>*</td>")
+                                    showDosingFootnote = true
                                 }
                                 result.append("<td>").append(amt.symbRef.symbIdRef).append("</td>")
                                 break
@@ -960,22 +813,64 @@ class PharmMlTagLib {
                     result.append("</tr>\n")
                 }
             }
-            //result.append("</tbody></table>\n")
+            result.append("</tbody></table>\n")
+        }
+        if (showDosingFootnote) {
+            result.append("<span>* &ndash; Element defined in the Individual dosing section.</span>")
         }
         /* epochs and occasions */
-        out << result.append("</tbody></table>\n").toString()
+        if (attrs.structure.studyEvent) {
+            ObservationEventsMap oem = new ObservationEventsMap(attrs.structure.studyEvent)
+            def arms = oem.getArms()
+            def epochs = oem.getEpochs()
+            result.append("\n<h4>Epoch-Occasion definition</h4>\n")
+            result.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
+            for (String e: epochs) {
+                result.append("<th class='bold'>").append(e).append("</th>")
+            }
+            result.append("</tr></thead><tbody>\n")
+            arms.each { a ->
+                result.append("<tr><th class='bold'>").append(a).append("</th>")
+                def occ = oem.findOccasionsByArm(a)
+                occ.each {
+                    def o = it.firstEntry()
+                    result.append("<td>")
+                    result.append("<div>").append(o.key).append("</div><div><span class='bold'>")
+                    result.append(o.value).append("</span> variability</div></td>")
+                }
+                result.append("</tr>")
+            }
+            result.append("</tbody></table>\n")
+        }
+        out << result.toString()
     }
 
     def trialDosing = { attrs ->
         if (!attrs.dosing) {
             return
         }
+        def result = new StringBuilder("<h4>Individual dosing</h4>\n")
+        attrs.dosing.each { d ->
+            if (d.dataSet) {
+                dataSet(d.dataSet, null, result)
+            }
+        }
+        out << result.toString()
     }
 
     def trialPopulation = { attrs ->
         if (!attrs.pop) {
             return
         }
+        def result = new StringBuilder("<h4>Population</h4>\n")
+        if (attrs.pop.variabilityReference) {
+            result.append("<span><strong>Variability level: </strong>")
+            result.append(attrs.pop.variabilityReference.symbRef.symbIdRef).append("</span>")
+        }
+        if (attrs.pop.dataSet) {
+            dataSet(attrs.pop.dataSet, null, result)
+        }
+        out << result.toString()
     }
 
     /* MODELLING STEPS */
@@ -1132,20 +1027,20 @@ class PharmMlTagLib {
                 result.append(estimationOps(s.operation))
             }
             if (s.objectiveDataSet) {
-                result.append(objectiveDataSet(s.objectiveDataSet))
+                result.append(objectiveDataSetMapping(s.objectiveDataSet))
             }
         }
         return result
     }
 
-    StringBuilder objectiveDataSet(DatasetMappingType dataSet) {
+    StringBuilder objectiveDataSetMapping(DatasetMappingType dsm) {
         def result = new StringBuilder("<h5>Dataset mapping</h5>\n")
         def variableMap = [:]
-        if (dataSet.variableAssignment) {
-            result.append(variableAssignments(dataSet.variableAssignment,
+        if (dsm.variableAssignment) {
+            result.append(variableAssignments(dsm.variableAssignment,
                         "<span class=\"bold\">Variable assignments</span>"))
         }
-        dataSet.mapping.each {
+        dsm.mapping.each {
             //keep track of variableMappings so that we know how to name the columns
             //deal with JAXBElement
             if (it.value instanceof VariableMappingType) {
@@ -1153,28 +1048,38 @@ class PharmMlTagLib {
                 variableMap << [ (it.value.columnRef.columnIdRef) : (it.value.symbRef.symbIdRef)]
             }
         }
+        if (dsm.dataSet) {
+            dataSet(dsm.dataSet, variableMap, result)
+        }
+        return result
+    }
+
+    StringBuilder dataSet(DataSetType dataSet, Map variableMap, StringBuilder sb) {
         def columnOrder = [:]
-        List noTables = dataSet.dataSet.definition.columnOrTable.findAll{it instanceof ColumnDefnType}
+        List noTables = dataSet.definition.columnOrTable.findAll{it instanceof ColumnDefnType}
         noTables.each {
             columnOrder << [ (it.columnNum) : (it.columnId) ]
         }
-        result.append("\n<table><thead><tr>")
+        sb.append("\n<table><thead><tr>")
 
-        noTables.inject(result) { r, d ->
+        noTables.inject(sb) { txt, d ->
             def key = columnOrder[d.columnNum]
-            r.append(["<th>", "</th>"].join(variableMap[key] ?: d.columnId))
+            if (key && variableMap && variableMap[key]) {
+                txt.append(["<th>", "</th>"].join(variableMap[key]))
+            } else {
+                txt.append(["<th>", "</th>"].join(d.columnId))
+            }
         }
-        result.append("</tr></thead><tbody>")
-        dataSet.dataSet.table.row.inject(result) { r, i ->
-            r.append("\n<tr>")
+        sb.append("</tr></thead><tbody>")
+        dataSet.table.row.inject(sb) { txt, i ->
+            txt.append("\n<tr>")
             def columns = i.scalarOrTable.findAll{ !(it.value instanceof DataSetTableType) }
-            columns.inject(r) { o, td ->
+            columns.inject(txt) { o, td ->
                 o.append(["<td>", "</td>"].join(scalar(td.value)))
             }
-            r.append("</tr>")
+            txt.append("</tr>")
         }
-        result.append("</tbody></table>\n")
-        return result
+        return sb.append("</tbody></table>\n")
     }
 
     StringBuilder paramsToEstimate(ToEstimateType params) {

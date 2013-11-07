@@ -17,16 +17,6 @@
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
 
-
-
-
-
-
-
-
-
-
-
 <head>
     <meta name="layout" content="modelDisplay"/>
     <style>
@@ -61,7 +51,6 @@
 
         <p><strong>Independent variable</strong>&nbsp;${independentVar}</p>
 
-        <h3>Function Definitions</h3>
         <pharmml:functionDefinitions functionDefs="${functionDefs}"/>
 
         <pharmml:structuralModel sm="${structuralModel}" iv="${independentVar}"/>
