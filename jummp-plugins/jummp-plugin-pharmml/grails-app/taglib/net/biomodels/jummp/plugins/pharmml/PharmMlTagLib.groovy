@@ -509,7 +509,7 @@ class PharmMlTagLib {
         ].join(e.output.symbRef.symbIdRef)
         result.append(renderedVar).append(" with ")
         result.append(convertToMathML(e.errorModel.assign.equation)).append("</p>")
-        result.append("<p><span class=\"bold\">Residual error:</span>")
+        result.append("<p><span class=\"bold\">Residual error: </span>")
         return result.append(e.residualError.symbRef.symbIdRef).append("</p>")
     }
 
