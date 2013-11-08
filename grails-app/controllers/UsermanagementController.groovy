@@ -43,22 +43,6 @@ class UsermanagementController {
     def simpleCaptchaService
     def userService
     def springSecurityService
-    def human=["email":"Email", "username":"Username", 
-    		   "userRealName":"Name", "institution":"Institution", 
-    		   "orcid":"Orcid", "email.invalid":"invalid",
-    		   "oldPassword":"Current password",
-    		   "newPassword":"New password",
-    		   "newPasswordRpt":"New password confirmation",
-    		   "validator.invalid":"Invalid",
-    		   "org.springframework.security.authentication.BadCredentialsException: Cannot change password, old password is incorrect": "Cannot change password, old password is incorrect",
-    		   "net.biomodels.jummp.core.user.RegistrationException: User with same name already exists":"A user with this name already exists. Please try another username"]
-    
-    private String humanReadable(String input) {
-    	if (human.containsKey(input)) {
-    		input=human.get(input)
-    	}
-    	return input
-    }
     			
     private String checkForMessage() {
         String flashMessage=""
@@ -68,37 +52,46 @@ class UsermanagementController {
         return flashMessage
     }
     
+    private Object checkForErrorBean() {
+    	if (flash.validationError) {
+    		return flash.validationError
+    	}
+    	return null
+    }
+    
      /**
      * Passes on any info messages needed to be displayed and renders the register gsp
      */
     def create = {
-    	render view: "register", model: [postUrl: "", flashMessage:checkForMessage()]
+    	render view: "register", model: [postUrl: "", flashMessage:checkForMessage(), 
+    									validationErrorOn: checkForErrorBean()]
     }
     
     @Secured(["isAuthenticated()"])
     def edit = {
-    	render view: "edit", model: [postUrl: "", flashMessage:checkForMessage(), user: userService.getUser(springSecurityService.principal.id)]
+    	render view: "edit", model: [postUrl: "", flashMessage:checkForMessage(), 
+    								validationErrorOn: checkForErrorBean(), 
+    								user: userService.getUser(springSecurityService.principal.username)]
     }
     
     @Secured(["isAuthenticated()"])
     def editPassword = {
-    	render view: "editPassword", model: [postUrl: "", flashMessage:checkForMessage(), user: userService.getUser(springSecurityService.principal.id)]
+    	render view: "editPassword", model: [postUrl: "", flashMessage:checkForMessage(), 
+    										validationErrorOn: checkForErrorBean(), 
+    										user: userService.getUser(springSecurityService.principal.username)]
     }
     
     @Secured(["isAuthenticated()"])
     def show = {
-    	render view: "show", model: [postUrl: "", flashMessage:checkForMessage(), user: userService.getUser(springSecurityService.principal.id)]
+    	render view: "show", model: [postUrl: "", flashMessage:checkForMessage(), 
+    								validationErrorOn: checkForErrorBean(), 
+    								user: userService.getUser(springSecurityService.principal.username)]
     }
     
     boolean validateUserData(def cmd, def params) {
     	bindData(cmd, params)
     	if (!cmd.validate()) {
-    		StringBuilder errors=new StringBuilder("Your submission had the following errors: ")
-    		cmd.errors.allErrors.each {
-    			errors.append(humanReadable(it.field)).append(" was ").append(humanReadable(it.code)).append(". ")
-        	}
-        	System.out.println("Setting errors to ${errors.toString()}")
-        	flash.message=errors.toString()
+    		flash.validationError=cmd
         	return false
     	}
     	return true
@@ -120,7 +113,7 @@ class UsermanagementController {
     		userService.editUser(cmd.toUser())
     	}
     	catch(Exception e) {
-    		flash.message=humanReadable(e.toString())
+    		flash.message=e.toString().split(":")[0]
    			return redirect(action:"edit")
     	}
     	flash.message="Profile was updated successfully"
@@ -143,7 +136,7 @@ class UsermanagementController {
     		userService.changePassword(cmd.oldPassword, cmd.newPassword)
     	}
     	catch(Exception e) {
-    		flash.message=humanReadable(e.toString())
+    		flash.message=e.toString().split(":")[0]
    			return redirect(action:"editPassword")
     	}
     	flash.message="Password was updated successfully"
@@ -175,7 +168,7 @@ class UsermanagementController {
     		userService.register(cmd.toUser())
     	}
     	catch(Exception e) {
-    		flash.message=humanReadable(e.toString())
+    		flash.message=e.toString().split(":")[0]
    			return redirect(action:"create")
     	}
     	render view: "successfulregistration"
