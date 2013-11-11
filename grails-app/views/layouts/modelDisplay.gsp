@@ -39,6 +39,7 @@
 
 <g:applyLayout name="main">
 <%@ page import="java.text.DateFormat"%>
+<%@ page import="net.biomodels.jummp.core.model.ModelState"%>
 <%
     def loadedZips=new HashMap();
     def zipSupported=[:]
@@ -73,7 +74,7 @@
 			});
 			$("#tabs ul li a").click(function (e) {
 				var anchor=$(this).attr('href');
-				if ($(this).attr('class')=="versionDownload") {
+				if ($(this).attr('class')=="versionDownload" || $(this).attr('class')=="publicationLink") {
 					openPage(anchor)
 				}
 				else if (typeof(anchor) != "undefined") {
@@ -181,7 +182,12 @@
                                 <button id="publish" onclick="return publishModel('${g.createLink(controller: 'model', action: 'publish', id: revision.id)}')">Publish</button>
                             </g:if>
                             <g:else>
-                                <img style="float:right;margin-top:0;" title="This version of the model is public" alt="public model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/unlock.png"/>
+                            	<g:if test="${revision.state==ModelState.PUBLISHED}">
+                                	<img style="float:right;margin-top:0;" title="This version of the model is public" alt="public model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/unlock.png"/>
+                                </g:if>
+								<g:else>
+									<img style="float:right;margin-top:0;" title="This version of the model is unpublished" alt="unpublished model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/lock.png"/>
+								</g:else>                                
                             </g:else>
                      </div>
     	         </div>

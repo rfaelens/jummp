@@ -64,7 +64,7 @@ class User implements Serializable {
         username(blank: false, unique: true)
         password(blank: false)
         userRealName(blank: false)
-        email(email: true)
+        email(email: true, unique:true)
         institution(nullable:true)
         orcid(nullable:true)
         registrationCode(nullable: true)

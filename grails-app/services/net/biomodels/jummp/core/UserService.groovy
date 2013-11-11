@@ -53,7 +53,8 @@ import net.biomodels.jummp.core.user.RegistrationException
 import net.biomodels.jummp.core.user.UserManagementException
 import net.biomodels.jummp.core.user.RoleNotFoundException
 import org.springframework.transaction.TransactionStatus
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 /**
  * @short Service for User administration.
  *
@@ -83,6 +84,13 @@ class UserService implements IUserService {
      */
     private final Random random = new Random(System.currentTimeMillis())
 
+    private void checkUserValid(String user) {
+    	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (user!=auth.getName()) {
+        	throw new Exception("User not valid. You do not have rights to modify this user")
+        }
+    }
+    
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="userService.changePassword")
     void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {
@@ -99,8 +107,9 @@ class UserService implements IUserService {
 
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="userService.editUser")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.name==#user.username")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
     void editUser(User user) throws UserInvalidException {
+        checkUserValid(user.username)
         User origUser = User.findByUsername(user.username)
         origUser.userRealName = user.userRealName
         origUser.email = user.email
@@ -121,8 +130,9 @@ class UserService implements IUserService {
 
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="userService.getUser")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.name==#username")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
     User getUser(String username) throws UserNotFoundException {
+        checkUserValid(username)
         User user = User.findByUsername(username)
         if (!user) {
             throw new UserNotFoundException(username)
@@ -271,18 +281,18 @@ class UserService implements IUserService {
         newUser.registrationInvalidation = registrationInvalidation.getTime()
         newUser.save(flush: true)
         UserRole.create(newUser, Role.findByAuthority("ROLE_USER"), true)
+        UserRole.create(newUser, Role.findByAuthority("ROLE_CURATOR"), true)
         // send out notification mail
         if (grailsApplication.config.jummp.security.registration.email.send) {
             String recipient = newUser.email
             if (grailsApplication.config.jummp.security.registration.email.sendToAdmin) {
                 recipient = grailsApplication.config.jummp.security.registration.email.adminAddress
             }
-            String emailBody = grailsApplication.config.jummp.security.registration.email.body
+            String emailBody = grailsApplication.config.jummp.security.activation.email.body
             String emailSubject = grailsApplication.config.jummp.security.activation.email.subject
-            emailBody = grailsApplication.config.jummp.security.activation.email.body
             emailBody = emailBody.replace("{{USERNAME}}", newUser.username)
             emailBody = emailBody.replace("{{PASSWORD}}", p)
-            emailBody = emailBody.replace("{{NAME}}", newUser.userRealName)
+            emailBody = emailBody.replace("{{REALNAME}}", newUser.userRealName)
             mailService.sendMail {
                 to recipient
                 from grailsApplication.config.jummp.security.registration.email.sender
