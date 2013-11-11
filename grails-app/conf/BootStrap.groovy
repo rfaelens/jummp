@@ -32,14 +32,15 @@
 
 
 
-import net.biomodels.jummp.model.ModelFormat
-import org.codehaus.groovy.grails.commons.ApplicationAttributes
-import net.biomodels.jummp.plugins.security.User
-import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
-import net.biomodels.jummp.plugins.security.Role
-import net.biomodels.jummp.plugins.security.UserRole
-import net.biomodels.jummp.model.PublicationLinkProvider
+import grails.util.Environment
 import net.biomodels.jummp.core.model.PublicationLinkProviderTransportCommand as PubLinkProvTC
+import net.biomodels.jummp.model.ModelFormat
+import net.biomodels.jummp.model.PublicationLinkProvider
+import net.biomodels.jummp.plugins.security.Role
+import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.UserRole
+import org.codehaus.groovy.grails.commons.ApplicationAttributes
+import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
 
 class BootStrap {
     def springSecurityService
@@ -105,31 +106,36 @@ class BootStrap {
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.CUSTOM,
         											 pattern:"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",
         							))
-        // ONLY NEEDED FOR USER ACCOUNT CREATION.
-        /*
-        if (!User.findByUsername("user")) {
-           def user = new User(username: "user",
-                    password: springSecurityService.encodePassword("secret"),
-                    userRealName: "user",
-                    email: "user@test.com",
-                    enabled: true,
-                    accountExpired: false,
-                    accountLocked: false,
-                    passwordExpired: false)
-            user.save(flush: true)
-            new AclSid(sid: user.username, principal: true).save(flush: true)
-            if (!Role.findByAuthority("ROLE_USER")) {
+        if (Environment.getCurrent() != Environment.TEST) {
+             if (!Role.findByAuthority("ROLE_USER")) {
                 new Role(authority: "ROLE_USER").save(flush: true)
             }
-            Role userRole = Role.findByAuthority("ROLE_USER")
-            UserRole.create(user, userRole, true)
+            if (!Role.findByAuthority("ROLE_CURATOR")) {
+                new Role(authority: "ROLE_CURATOR").save(flush: true)
+            }
             if (!Role.findByAuthority("ROLE_ADMIN")) {
                 new Role(authority: "ROLE_ADMIN").save(flush: true)
             }
-            userRole = Role.findByAuthority("ROLE_ADMIN")
-            UserRole.create(user, userRole, true)
-        } 
-        //*/
+            if (!User.findByUsername("administrator")) {
+               def user = new User(username: "administrator",
+                        password: springSecurityService.encodePassword("administrator"),
+                        userRealName: "administrator",
+                        email: "user@test.com",
+                        enabled: true,
+                        accountExpired: false,
+                        accountLocked: false,
+                        passwordExpired: false)
+                user.save(flush: true)
+                new AclSid(sid: user.username, principal: true).save(flush: true)
+                Role userRole = Role.findByAuthority("ROLE_USER")
+                UserRole.create(user, userRole, true)
+                if (!Role.findByAuthority("ROLE_ADMIN")) {
+                    new Role(authority: "ROLE_ADMIN").save(flush: true)
+                }
+                userRole = Role.findByAuthority("ROLE_ADMIN")
+                UserRole.create(user, userRole, true)
+            }
+        }
 
         // custom mapping for weceem as it fails to work with an LDAPUserDetailsImpl
         wcmSecurityService.securityDelegate = [
