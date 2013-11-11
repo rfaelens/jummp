@@ -58,6 +58,7 @@ import eu.ddmore.libpharmml.dom.dataset.DataSetType
 import eu.ddmore.libpharmml.dom.maths.BinopType
 import eu.ddmore.libpharmml.dom.maths.ConstantType
 import eu.ddmore.libpharmml.dom.maths.Equation
+import eu.ddmore.libpharmml.dom.maths.FunctionCallType
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.UniopType
 import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
@@ -471,7 +472,7 @@ class PharmMlTagLib {
         StringBuilder result = new StringBuilder()
         result.append("<h3>Observation Model</h3>")
         attrs.observations.each { om ->
-            result.append("<h4>Observation error <span class='italic'>")
+            result.append("<h4>Observation <span class='italic'>")
             // the API returns a JAXBElement, not ObservationErrorType
             def obsErr = om.observationError.value
             result.append(obsErr.symbId).append("</span></h4>\n")
@@ -501,20 +502,56 @@ class PharmMlTagLib {
     }
 
     StringBuilder gaussianObsErr(GaussianObsError e) {
-        def result = new StringBuilder()
+        def result = new StringBuilder("<div class='spaced'>")
+
+        // could be an Equation or just a String
+        def lhs
+        def lhsSymb = new SymbolRefType()
+        lhsSymb.symbIdRef = e.symbId
+        def prediction
+        def predictionSymb = e.output.symbRef
+        def residualErrorSymb = e.residualError.symbRef
+
         if (e.transformation) {
-            result.append("<p> <span class=\"bold\">Transformation:</span>")
-            result.append(e.transformation.value()).append("</p>")
+            final String tr = e.transformation.value()
+            def lhsUniop = new UniopType()
+            lhsUniop.op = tr
+            lhsUniop.symbRef = lhsSymb
+            lhs = new Equation()
+            lhs.scalarOrSymbRefOrBinop.add(wrapJaxb(lhsUniop))
+            def predUniop = new UniopType()
+            predUniop.op = tr
+            predUniop.symbRef = predictionSymb
+            prediction = wrapJaxb(predUniop)
+        } else {
+            lhs = lhsSymb.symbIdRef
+            prediction = wrapJaxb(predictionSymb)
         }
-        result.append("<p>")
-        String renderedVar = [
-                "<math display='inline'><mstyle><mo>",
-                "</mo></mstyle></math>"
-        ].join(e.output.symbRef.symbIdRef)
-        result.append(renderedVar).append(" with ")
-        result.append(convertToMathML(e.errorModel.assign.equation)).append("</p>")
-        result.append("<p><span class=\"bold\">Residual error: </span>")
-        return result.append(e.residualError.symbRef.symbIdRef).append("</p>")
+
+        def errModelAssign = e.errorModel.assign
+        assert errModelAssign != null
+        def errModel
+        def errModelTimesResidualErr
+        def rhsEquation
+        if (errModelAssign.equation) {
+            errModel = errModelAssign.equation.scalarOrSymbRefOrBinop.first()
+        } else if (errModelAssign.scalar) {
+            errModel = wrapJaxb(errModelAssign.scalar)
+        } else if (errModelAssign.symbRef) {
+            errModel = wrapJaxb(errModelAssign.symbRef)
+        }
+        def em_re = new BinopType()
+        em_re.op = "times"
+        em_re.content.add(errModel)
+        em_re.content.add(wrapJaxb(residualErrorSymb))
+        errModelTimesResidualErr = wrapJaxb(em_re)
+        def sum = new BinopType()
+        sum.op = "plus"
+        sum.content.add(prediction)
+        sum.content.add(errModelTimesResidualErr)
+        rhsEquation = new Equation()
+        rhsEquation.scalarOrSymbRefOrBinop.add(wrapJaxb(sum))
+        return result.append(convertToMathML(lhs, rhsEquation)).append("</div>")
     }
 
     StringBuilder generalObsErr(GeneralObsError e) {

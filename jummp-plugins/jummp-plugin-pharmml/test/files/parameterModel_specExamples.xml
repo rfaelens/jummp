@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PharmML xmlns="http://www.pharmml.org/2013/03/PharmML"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.pharmml.org/2013/03/PharmML http://www.pharmml.org/2013/03/PharmML"
+    xmlns:math="http://www.pharmml.org/2013/03/Maths"
+    xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes"
+    writtenVersion="0.1">
+    <ct:Name>Parameter models from the spec</ct:Name>
+    <ct:Description>just for testing</ct:Description>
+
+    <!-- intependent variable -->
+    <IndependentVariable symbId="time"/>
+
+    <!-- RESIDUAL ERROR DEFINITION -->
+    <!-- type 1 - ADDITIVE MODEL -->
+    <ct:FunctionDefinition symbId="additiveErrorModel" symbolType="real">
+        <ct:FunctionArgument symbId="a" symbolType="real"/>
+        <ct:Definition>
+            <ct:SymbRef symbIdRef="a"/>
+        </ct:Definition>
+    </ct:FunctionDefinition>
+    
+    <!-- MODEL DEFINITION -->
+    <ModelDefinition xmlns="http://www.pharmml.org/2013/03/ModelDefinition">
+        
+        <!-- VARIABILITY MODEL -->
+        <VariabilityModel blkId="model" type="model">
+            <Level symbId="indiv">
+                <ct:Name>Subject Level</ct:Name>
+            </Level>
+        </VariabilityModel>
+        
+        <VariabilityModel blkId="obsErr" type="model">
+            <Level symbId="residual">
+                <ct:Name>Residual Error</ct:Name>
+            </Level>
+        </VariabilityModel>
+        
+        <!-- COVARIATE MODEL -->
+        <CovariateModel blkId="cm1">
+            <Covariate symbId="covWT">
+                <Continuous>
+                    <Transformation>
+                        <math:Equation>
+                            <ct:SymbRef symbIdRef="WT"/>
+                        </math:Equation>
+                    </Transformation>
+                </Continuous>
+            </Covariate>
+        </CovariateModel>
+        
+        <!-- PARAMETER MODEL -->
+        <ParameterModel blkId="pm1">
+            <!-- additional parameter model for V of Type 2, page 23 in the specification -->
+            <RandomVariable symbId="eta_V">
+                <ct:VariabilityReference>
+                    <ct:SymbRef symbIdRef="indiv"/>
+                </ct:VariabilityReference>
+                <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="0.1">
+                    <mean>
+                        <rVal>0</rVal>
+                    </mean>
+                    <stddev>
+                        <var varId="omega_V"/>
+                    </stddev>
+                </NormalDistribution>
+            </RandomVariable>
+            <IndividualParameter symbId="V">
+                <GaussianModel>
+                    <Transformation>log</Transformation>
+                    <GeneralCovariate>
+                        <ct:Assign>
+                            <math:Equation>
+                                <math:Uniop op="log">
+                                    <math:Binop op="plus">
+                                        <ct:SymbRef symbIdRef="theta3"/>
+                                        <math:Binop op="divide">
+                                            <math:Binop op="times">
+                                                <ct:SymbRef symbIdRef="theta1"/>
+                                                <ct:SymbRef blkIdRef="cm1" symbIdRef="covWT"/>
+                                            </math:Binop>
+                                            <math:Binop op="plus">
+                                                <ct:SymbRef symbIdRef="theta2"/>
+                                                <ct:SymbRef blkIdRef="cm1" symbIdRef="covWT"/>
+                                            </math:Binop>
+                                        </math:Binop>
+                                    </math:Binop>
+                                </math:Uniop>
+                            </math:Equation>
+                        </ct:Assign>
+                    </GeneralCovariate>
+                    <RandomEffects>
+                        <ct:SymbRef symbIdRef="eta_V"/>
+                    </RandomEffects>
+                </GaussianModel>
+            </IndividualParameter>
+        </ParameterModel>
+        
+        <!-- STRUCTURAL MODEL -->
+        <StructuralModel blkId="sm1">
+            <ct:Variable symbolType="real" symbId="tD"/>
+            <ct:Variable symbolType="real" symbId="tD2"/>
+            <ct:Variable symbolType="real" symbId="D"/>
+            <!-- Cmodel variable -->
+            <ct:Variable symbolType="real" symbId="Cmodel">
+                <ct:Assign>
+                    <Equation xmlns="http://www.pharmml.org/2013/03/Maths">
+                        <Binop op="times">
+                            <Binop op="divide">
+                                <ct:SymbRef symbIdRef="D"/>
+                                <ct:SymbRef blkIdRef="pm1" symbIdRef="V"/>
+                            </Binop>
+                            <Uniop op="exp">
+                                <Binop op="times">
+                                    <Uniop op="minus">
+                                        <ct:SymbRef blkIdRef="pm1" symbIdRef="k"/>
+                                    </Uniop>
+                                    <Binop op="minus">
+                                        <ct:SymbRef symbIdRef="time"/>
+                                        <ct:SymbRef symbIdRef="tD"/>
+                                    </Binop>
+                                </Binop>
+                            </Uniop>
+                        </Binop>
+                    </Equation>
+                </ct:Assign>
+            </ct:Variable>
+        </StructuralModel>
+        
+        
+        <!-- OBSERVATION MODELS -->
+
+        <!-- type 1 - ADDITIVE MODEL   C = Cmodel + a * eps -->
+        <ObservationModel blkId="om1">
+            <!-- simple parameters -->
+            <SimpleParameter symbId="a"/>
+            <!-- with type 1 - ADDITIVE MODEL -->
+            <RandomVariable symbId="eps_C">
+                <ct:VariabilityReference>
+                    <ct:SymbRef blkIdRef="obsErr" symbIdRef="residual"/>
+                </ct:VariabilityReference>
+                <NormalDistribution xmlns="http://www.uncertml.org/3.0" 
+                    definition="http://www.uncertml.org/distributions/normal">
+                    <mean>
+                        <rVal>0</rVal>
+                    </mean>
+                    <stddev>
+                        <prVal>1</prVal>
+                    </stddev>
+                </NormalDistribution>
+            </RandomVariable>
+            <Standard symbId="C">
+                <Output>
+                    <ct:SymbRef blkIdRef="sm1" symbIdRef="Cmodel"/>
+                </Output>
+                <ErrorModel>
+                    <ct:Assign>
+                        <Equation xmlns="http://www.pharmml.org/2013/03/Maths">
+                            <FunctionCall>
+                                <ct:SymbRef symbIdRef="additiveErrorModel"/>
+                                <FunctionArgument symbId="a">
+                                    <ct:SymbRef symbIdRef="a"/>
+                                </FunctionArgument>
+                            </FunctionCall>
+                        </Equation>
+                    </ct:Assign>
+                </ErrorModel>
+                <ResidualError>
+                    <ct:SymbRef symbIdRef="eps"/>
+                </ResidualError>
+            </Standard>
+        </ObservationModel>
+
+    </ModelDefinition>
+    
+ 
+</PharmML>

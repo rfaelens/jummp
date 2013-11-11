@@ -28,10 +28,6 @@
 * that of the covered work.}
 **/
 
-
-
-
-
 package net.biomodels.jummp.plugins.pharmml
 
 import grails.test.mixin.*
@@ -138,5 +134,20 @@ based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemo
         model.each { pharmML ->
             println "${pharmML}: ${service.validate([new File(pharmML)])}"
         }
+    }
+
+    @Test
+    void modellingStepsAreNotCompulsory() {
+        def model = new File("test/files/parameterModel_specExamples.xml")
+        assertTrue(model.exists())
+        def dom = service.getDomFromPharmML(model)
+        assertNull(dom.modellingSteps)
+        assertEquals([], service.getCommonModellingSteps(dom.modellingSteps))
+        // now try one that does have modellingSteps
+        model = new File("test/files/example1.xml")
+        assertTrue(model.exists())
+        dom = service.getDomFromPharmML(model)
+        assertNotNull(dom.modellingSteps)
+        assertEquals(1, service.getCommonModellingSteps(dom.modellingSteps).size())
     }
 }
