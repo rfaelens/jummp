@@ -44,6 +44,7 @@ import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.plugins.security.User
 import java.util.List
 import java.util.Map
@@ -162,6 +163,19 @@ class ModelDelegateService implements IModelService {
 
     Boolean canAddRevision(long modelId) {
         return modelService.canAddRevision(Model.get(modelId))
+    }
+    
+    Boolean canPublish(long modelId) {
+    	def revision=getLatestRevision(modelId)
+    	if (revision.state == ModelState.UNPUBLISHED) {
+    		try {
+    			return modelService.canPublish(Revision.get(revision.id))
+    		}
+    		catch(Exception e) {
+    			return false
+    		}
+    	}
+    	return false
     }
 
     List<RepositoryFileTransportCommand> retrieveModelFiles(RevisionTransportCommand revision) throws ModelException {

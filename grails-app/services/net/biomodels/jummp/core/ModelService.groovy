@@ -1635,6 +1635,32 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
+     * Tests if the user can publish this revision
+     * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
+     * method.
+     * @param revision The Revision to be published
+     */
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.canPublish")
+    public boolean canPublish(Revision revision) {
+        if (!revision) {
+            return false
+        }
+        if (revision.deleted) {
+        	return false
+        }
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+        	return true
+        }
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_CURATOR")) {
+        	return canAddRevision(revision.model)
+        }
+        return false
+    }
+
+    
+    
+    /**
      * Makes a Model Revision publicly available.
      * This means that ROLE_USER and ROLE_ANONYMOUS gain read access to the Revision and by that also to
      * the Model.
