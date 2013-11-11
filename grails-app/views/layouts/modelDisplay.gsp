@@ -73,7 +73,7 @@
 			});
 			$("#tabs ul li a").click(function (e) {
 				var anchor=$(this).attr('href');
-				if ($(this).attr('class')=="versionDownload") {
+				if ($(this).attr('class')=="versionDownload" || $(this).attr('class')=="publicationLink") {
 					openPage(anchor)
 				}
 				else if (typeof(anchor) != "undefined") {

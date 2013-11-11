@@ -39,7 +39,7 @@
 				<img style="width:12px;margin:2px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/expand.png"/>
 			</span>
 		</a>
-		<a title="View publication" href="${model.publication.linkProvider.identifiersPrefix?model.publication.linkProvider.identifiersPrefix+model.publication.link:model.publication.link}">
+		<a title="View publication" class="publicationLink" href="${model.publication.linkProvider.identifiersPrefix?model.publication.linkProvider.identifiersPrefix+model.publication.link:model.publication.link}">
 			<img style="width:12px;margin:2px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Generic/Generic%20icons/external_link.png"/>
 		</a></b></li>		
 		<li>${model.publication.authors.collect{"${it.initials?:""} ${it.lastName}"}.join(", ")}</li>
