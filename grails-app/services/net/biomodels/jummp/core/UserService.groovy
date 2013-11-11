@@ -281,6 +281,7 @@ class UserService implements IUserService {
         newUser.registrationInvalidation = registrationInvalidation.getTime()
         newUser.save(flush: true)
         UserRole.create(newUser, Role.findByAuthority("ROLE_USER"), true)
+        UserRole.create(newUser, Role.findByAuthority("ROLE_CURATOR"), true)
         // send out notification mail
         if (grailsApplication.config.jummp.security.registration.email.send) {
             String recipient = newUser.email

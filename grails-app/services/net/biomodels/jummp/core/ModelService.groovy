@@ -1669,7 +1669,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * method.
      * @param revision The Revision to be published
      */
-    @PreAuthorize("(hasRole('ROLE_CURATOR') and hasPermission(#revision, write)) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("(hasRole('ROLE_CURATOR') and hasPermission(#revision, admin)) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.publishModelRevision")
     public void publishModelRevision(Revision revision) {
@@ -1696,7 +1696,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * method.
      * @param revision The Revision to be published
      */
-    @PreAuthorize("(hasRole('ROLE_CURATOR') and hasPermission(#revision, write)) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("(hasRole('ROLE_CURATOR') and hasPermission(#revision, admin)) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.publishModelRevision")
     public void unpublishModelRevision(Revision revision) {
