@@ -152,7 +152,7 @@ log4j = {
     }
 
     root {
-        error 'stdout', 'jummpAppender'
+        error 'stdout'
     }
 
     // configure the performanceStatsAppender to log at INFO level
