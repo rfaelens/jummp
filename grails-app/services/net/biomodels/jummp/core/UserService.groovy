@@ -287,12 +287,11 @@ class UserService implements IUserService {
             if (grailsApplication.config.jummp.security.registration.email.sendToAdmin) {
                 recipient = grailsApplication.config.jummp.security.registration.email.adminAddress
             }
-            String emailBody = grailsApplication.config.jummp.security.registration.email.body
+            String emailBody = grailsApplication.config.jummp.security.activation.email.body
             String emailSubject = grailsApplication.config.jummp.security.activation.email.subject
-            emailBody = grailsApplication.config.jummp.security.activation.email.body
             emailBody = emailBody.replace("{{USERNAME}}", newUser.username)
             emailBody = emailBody.replace("{{PASSWORD}}", p)
-            emailBody = emailBody.replace("{{NAME}}", newUser.userRealName)
+            emailBody = emailBody.replace("{{REALNAME}}", newUser.userRealName)
             mailService.sendMail {
                 to recipient
                 from grailsApplication.config.jummp.security.registration.email.sender
