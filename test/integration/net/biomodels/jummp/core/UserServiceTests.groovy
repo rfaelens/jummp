@@ -249,6 +249,7 @@ class UserServiceTests extends JummpIntegrationTest {
         authenticateAsAdmin()
         grailsApplication.config.jummp.security.anonymousRegistration = false
         user.username = "register2"
+        user.email = "test2@example.com"
         id = userService.register(user)
         User adminRegisteredUser = User.findByUsername("register2")
         assertEquals(adminRegisteredUser.id, id)
