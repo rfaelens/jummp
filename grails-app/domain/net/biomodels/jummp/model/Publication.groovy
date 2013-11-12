@@ -114,8 +114,10 @@ class Publication implements Serializable {
 
     PublicationTransportCommand toCommandObject() {
         List<AuthorTransportCommand> authorCmds = []
-        authors.toList().sort{it.id}.each { author ->
-            authorCmds << author.toCommandObject()
+        if (authors) {
+        		authors.toList().sort{it.id}.each { author ->
+        			authorCmds << author.toCommandObject()
+        		}
         }
         return new PublicationTransportCommand(journal: journal,
                 title: title,
