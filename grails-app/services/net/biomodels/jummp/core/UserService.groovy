@@ -55,6 +55,7 @@ import net.biomodels.jummp.core.user.RoleNotFoundException
 import org.springframework.transaction.TransactionStatus
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException
 /**
  * @short Service for User administration.
  *
@@ -86,8 +87,8 @@ class UserService implements IUserService {
 
     private void checkUserValid(String user) {
     	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (user!=auth.getName()) {
-        	throw new Exception("User not valid. You do not have rights to modify this user")
+        if (user!=auth.getName() && !SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+        	throw new AccessDeniedException("User not valid. You do not have rights to modify this user")
         }
     }
     

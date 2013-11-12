@@ -1404,7 +1404,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertNull(latest)
         // curator should get access to the method
         authenticateAsCurator()
-        aclUtilService.addPermission(Revision.class, revision.id, "ROLE_CURATOR", BasePermission.WRITE)
+        aclUtilService.addPermission(Revision.class, revision.id, "ROLE_CURATOR", BasePermission.ADMINISTRATION)
         modelService.publishModelRevision(revision)
         assertNotNull(modelService.getLatestRevision(model))
         // user should now see the revision
