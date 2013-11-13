@@ -84,7 +84,8 @@ class ModelController {
     * Dependency injection of mailService
     */
     def mailService
-
+    
+    
     def showWithMessage = {
         flash["giveMessage"]=params.flashMessage
         redirect(action: show, id:params.id)
@@ -153,6 +154,7 @@ class ModelController {
         displayErrorPage()
     }
 
+    
     /*
      * The flow maintains the 'params' as flow.workingMemory (just to distinguish
      * between request.params and our params. Flow scope requires all objects
@@ -176,6 +178,17 @@ class ModelController {
                     Long model_id=conversation.model_id as Long
                     flow.workingMemory.put("model_id", model_id)
                     flow.workingMemory.put("LastRevision", modelDelegateService.getLatestRevision(model_id))
+                    /* Maintain reference to the previous revision in session 
+                       memory to ensure it is not overwritten. Do it with a
+                       random variable name to allow updating of multiple
+                       models simultaneously by the same user
+                    */
+                    String alphabet=(('A'..'Z')+('a'..'z')).join()
+                    String variableName=new Random().with {
+                    	(1..10).collect { alphabet[ nextInt( alphabet.length() ) ] }.join()
+    				}
+                    flow.workingMemory.put("SafeReferenceVariable",variableName)
+                    session."${variableName}"=flow.workingMemory.get("LastRevision")
                 }
                 submissionService.initialise(flow.workingMemory)
                 if (flow.isUpdate) {
@@ -496,6 +509,7 @@ class ModelController {
                 session.result_submission=flow.workingMemory.get("model_id")
                 if (flow.isUpdate) {
                 	flash.sendMessage="Model ${session.result_submission} has been updated."
+                	session.removeAttribute(flow.workingMemory.get("SafeReferenceVariable") as String)
                     return redirectWithMessage()
                 }
             }
@@ -508,6 +522,7 @@ class ModelController {
                 submissionService.cleanup(flow.workingMemory)
                 if (flow.isUpdate) {
                 	flash.sendMessage="Model update was cancelled."
+                	session.removeAttribute(flow.workingMemory.get("SafeReferenceVariable") as String)
                 	return redirectWithMessage()
                 }
             }
@@ -525,6 +540,9 @@ class ModelController {
         	action {
         		String stackTrace=ExceptionUtils.getStackTrace(flash.flowExecutionException)
         		String ticket=UUID.randomUUID().toString()
+        		if (flow.isUpdate) {
+                	session.removeAttribute(flow.workingMemory.get("SafeReferenceVariable") as String)
+                }
         		mailService.sendMail {
         			to grailsApplication.config.jummp.security.registration.email.adminAddress
         			from grailsApplication.config.jummp.security.registration.email.sender
