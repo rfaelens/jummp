@@ -540,6 +540,9 @@ class ModelController {
         	action {
         		String stackTrace=ExceptionUtils.getStackTrace(flash.flowExecutionException)
         		String ticket=UUID.randomUUID().toString()
+        		if (flow.isUpdate) {
+                	session.removeAttribute(flow.workingMemory.get("SafeReferenceVariable") as String)
+                }
         		mailService.sendMail {
         			to grailsApplication.config.jummp.security.registration.email.adminAddress
         			from grailsApplication.config.jummp.security.registration.email.sender
