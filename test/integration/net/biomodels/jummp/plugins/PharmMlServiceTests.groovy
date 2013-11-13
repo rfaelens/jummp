@@ -106,7 +106,7 @@ class PharmMlServiceTests extends JummpIntegrationTest {
         def modelCommand = new ModelTransportCommand(format: defaultFormat, comment: "First commit", name: "Foo")
         Model model = modelService.uploadModelAsFile(rf, modelCommand)
         def revision = modelService.getLatestRevision(model).toCommandObject()
-        assertEquals "0.1", pharmMlService.getFormatVersion(revision)
+        assertEquals "0.2.1", pharmMlService.getFormatVersion(revision)
     }
 
     @Test

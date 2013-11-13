@@ -3,15 +3,16 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.pharmml.org/2013/03/PharmML http://www.pharmml.org/2013/03/PharmML"
     xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes"
-    writtenVersion="0.1">
+    writtenVersion="0.2.1">
     
-    <ct:Name>Example 5 - estimation for growth tumor model (Ribba et al. 2012)</ct:Name>
+    <ct:Name id="i1">Example 5 - estimation for growth tumor model (Ribba et al. 2012)</ct:Name>
     
-    <ct:Description>based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemotherapy or Radiotherapy
+    <ct:Description id="i2">This model is based on the publication: A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemotherapy or Radiotherapy
         Benjamin Ribba, Gentian Kaloshi, Mathieu Peyre, et al. Clin Cancer Res Published OnlineFirst July 3, 2012.</ct:Description>
     
+    
     <!-- intependent variable -->
-    <IndependentVariable symbId="time"/>
+    <IndependentVariable id="i3" symbId="t"/>
 
     <!-- SYMBOL DEFINITION - RESUIDUAL ERROR MODEL -->
     <ct:FunctionDefinition symbId="constantErrorModel" symbolType="real">
@@ -53,7 +54,7 @@
                     <stddev><var varId="omega_P0"/></stddev>
                 </NormalDistribution>
             </RandomVariable>
-            <IndividualParameter symbId="P0">
+            <IndividualParameter symbId="P0" id="i13">
                 <GaussianModel>
                     <Transformation>log</Transformation>
                     <LinearCovariate>
@@ -80,7 +81,7 @@
                     <stddev><var varId="omega_Q0"/></stddev>
                 </NormalDistribution>
             </RandomVariable>
-            <IndividualParameter symbId="Q0">
+            <IndividualParameter symbId="Q0" id="i14">
                 <GaussianModel>
                     <Transformation>log</Transformation>
                     <LinearCovariate>
@@ -143,7 +144,6 @@
             </RandomVariable>
             <IndividualParameter symbId="LAMBDAP">
                 <GaussianModel>
-                    <Transformation>log</Transformation>
                     <LinearCovariate>
                         <PopulationParameter>
                             <ct:Assign>
@@ -152,7 +152,7 @@
                         </PopulationParameter>
                     </LinearCovariate>
                     <RandomEffects>
-                        <ct:SymbRef symbIdRef="eta_LAMBDA"/>
+                        <ct:SymbRef symbIdRef="eta_LAMBDAP"/>
                     </RandomEffects>
                 </GaussianModel>
             </IndividualParameter>
@@ -280,10 +280,10 @@
         </ParameterModel>
 
         <!-- STRUCTURAL MODEL - ODEs -->
-        <StructuralModel blkId="sm1">
+        <StructuralModel blkId="sm1" id="i6">
             
             <!-- dC/dt -->
-            <ct:DerivativeVariable symbolType="real" symbId="C">
+            <ct:DerivativeVariable symbolType="real" symbId="C" id="i5">
                 <ct:Assign>
                     <Equation xmlns="http://www.pharmml.org/2013/03/Maths">
                         <Binop op="times">
@@ -295,7 +295,7 @@
                     </Equation>
                 </ct:Assign>
                 <ct:IndependentVariable>
-                    <ct:SymbRef symbIdRef="time"/>
+                    <ct:SymbRef symbIdRef="t"/>
                 </ct:IndependentVariable>
                 <ct:InitialCondition>
                     <ct:Assign>
@@ -305,7 +305,7 @@
             </ct:DerivativeVariable>
             
             <!-- dPT/dt -->
-            <ct:DerivativeVariable symbolType="real" symbId="PT">
+            <ct:DerivativeVariable symbolType="real" symbId="PT" id="i16">
                 <ct:Assign>
                     <Equation xmlns="http://www.pharmml.org/2013/03/Maths">
                         <Binop op="plus">
@@ -348,7 +348,7 @@
                     </Equation>
                 </ct:Assign>
                 <ct:IndependentVariable>
-                    <ct:SymbRef symbIdRef="time"/>
+                    <ct:SymbRef symbIdRef="t"/>
                 </ct:IndependentVariable>
                 <ct:InitialCondition>
                     <ct:Assign>
@@ -358,7 +358,7 @@
             </ct:DerivativeVariable>
             
             <!-- dQ/dt --> 
-            <ct:DerivativeVariable symbolType="real" symbId="Q">
+            <ct:DerivativeVariable symbolType="real" symbId="Q" id="i15">
                 <ct:Assign>
                     <Equation xmlns="http://www.pharmml.org/2013/03/Maths">
                         <Binop op="minus">
@@ -377,7 +377,7 @@
                     </Equation>
                 </ct:Assign>
                 <ct:IndependentVariable>
-                    <ct:SymbRef symbIdRef="time"/>
+                    <ct:SymbRef symbIdRef="t"/>
                 </ct:IndependentVariable>
                 <ct:InitialCondition>
                     <ct:Assign>
@@ -387,7 +387,7 @@
             </ct:DerivativeVariable>
             
             <!-- dQP/dt -->
-            <ct:DerivativeVariable symbolType="real" symbId="QP">
+            <ct:DerivativeVariable symbolType="real" symbId="QP" id="i17">
                 <ct:Assign>
                     <Equation xmlns="http://www.pharmml.org/2013/03/Maths">
                         <Binop op="minus">
@@ -415,7 +415,7 @@
                     </Equation>
                 </ct:Assign>
                 <ct:IndependentVariable>
-                    <ct:SymbRef symbIdRef="time"/>
+                    <ct:SymbRef symbIdRef="t"/>
                 </ct:IndependentVariable>
                 <ct:InitialCondition>
                     <ct:Assign>
@@ -425,7 +425,7 @@
             </ct:DerivativeVariable>
 
             <!-- PSTAR -->
-            <ct:Variable symbolType="real" symbId="PSTAR" >
+            <ct:Variable symbolType="real" symbId="PSTAR" id="i18">
                 <ct:Assign>
                     <Equation xmlns="http://www.pharmml.org/2013/03/Maths">
                         <Binop op="plus">
@@ -447,9 +447,6 @@
                 <ct:VariabilityReference>
                     <ct:SymbRef blkIdRef="obsErr" symbIdRef="residual"/>
                 </ct:VariabilityReference>
-                <!-- SLM: The definition is not the version, but the URL of the web definitions.
-                    It should be definition="http://www.uncertml.org/distributions/normal"
-                    -->
                 <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="http://www.uncertml.org/distributions/normal">
                     <mean>
                         <rVal>0</rVal>
@@ -459,7 +456,7 @@
                     </stddev>
                 </NormalDistribution>
             </RandomVariable>
-            <Standard symbId="PSTAR">
+            <Standard symbId="PSTAR_obs" id="i9">
                 <Output>
                     <ct:SymbRef blkIdRef="sm1" symbIdRef="PSTAR"/>
                 </Output>
@@ -480,14 +477,13 @@
                 </ResidualError>
             </Standard>
         </ObservationModel>
-
     </ModelDefinition>
     
     <!-- BLOCK II: TRIAL DEFINITION -->
     <TrialDesign xmlns="http://www.pharmml.org/2013/03/TrialDesign">
         
         <!-- STRUCTURE -->
-        <Structure>
+        <Structure id="i7">
             <Epoch oid="epoch1">
                 <Start>
                     <ct:Real>0</ct:Real>
@@ -552,7 +548,7 @@
                 <Definition>
                     <Column columnId="ID" valueType="id" columnNum="1"/>
                     <Column columnId="TIME" valueType="real" columnNum="2"/>
-                    <Column columnId="DOSE" valueType="real" columnNum="5"/>
+                    <Column columnId="DOSE" valueType="real" columnNum="5" id="i12"/>
                 </Definition>
                 <Table>
                     <!-- subject 1 -->
@@ -582,25 +578,25 @@
     <ModellingSteps xmlns="http://www.pharmml.org/2013/03/ModellingSteps">
         
         <!-- ESTIMATION STEP -->
-        <EstimationStep oid="estTask1">
-            <ObjectiveDataSet>
+        <EstimationStep oid="estTask1" id="i10">
+            <ObjectiveDataSet id="i8">
                 <IndividualMapping>
                     <ColumnRef xmlns="http://www.pharmml.org/2013/08/Dataset" columnIdRef="ID"/>
                 </IndividualMapping>
                 <VariableMapping>
                     <ColumnRef xmlns="http://www.pharmml.org/2013/08/Dataset" columnIdRef="TIME"/> 
-                    <ct:SymbRef symbIdRef="time"/>
+                    <ct:SymbRef symbIdRef="t"/>
                 </VariableMapping>
                 <VariableMapping>
                     <ColumnRef xmlns="http://www.pharmml.org/2013/08/Dataset" columnIdRef="DV"/> 
-                    <ct:SymbRef blkIdRef="om1" symbIdRef="PSTAR"/>
+                    <ct:SymbRef blkIdRef="om1" symbIdRef="PSTAR_obs"/>
                 </VariableMapping>
                 
                 <DataSet xmlns="http://www.pharmml.org/2013/08/Dataset">
                     <Definition>
                         <Column columnId="ID" valueType="id" columnNum="1"/>
                         <Column columnId="TIME" valueType="real" columnNum="2"/>
-                        <Column columnId="DV" valueType="real" columnNum="3"/>
+                        <Column columnId="DV" valueType="real" columnNum="3" id="i11"/>
                     </Definition>
                     <Table>
                         <!-- SUBJECT 1 -->
@@ -702,7 +698,7 @@
                         <ct:Real>1</ct:Real>
                     </InitialEstimate>
                 </ParameterEstimation>
-                
+                                
                 <!-- KDE -->
                 <!-- omega_KDE is fixed, see pm1 -->
                 <!-- only pop_KDE to be estimated -->
@@ -726,21 +722,7 @@
                         <ct:Real>1</ct:Real>
                     </InitialEstimate>
                 </ParameterEstimation>
-                
-                <!-- LAMBDAP -->
-                <ParameterEstimation>
-                    <ct:SymbRef blkIdRef="pm1" symbIdRef="pop_LAMBDAP"/>
-                    <InitialEstimate>
-                        <ct:Real>10</ct:Real>
-                    </InitialEstimate>
-                </ParameterEstimation>
-                <ParameterEstimation>
-                    <ct:SymbRef blkIdRef="pm1" symbIdRef="omega_LAMBDAP"/>
-                    <InitialEstimate>
-                        <ct:Real>1</ct:Real>
-                    </InitialEstimate>
-                </ParameterEstimation>
-                
+                                
                 <!-- KPQ -->
                 <ParameterEstimation>
                     <ct:SymbRef blkIdRef="pm1" symbIdRef="pop_KQP"/>

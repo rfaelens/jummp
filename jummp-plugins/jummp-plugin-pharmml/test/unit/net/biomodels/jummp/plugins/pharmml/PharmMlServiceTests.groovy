@@ -111,9 +111,13 @@ class PharmMlServiceTests {
     void modelDescriptionGetsExtracted() {
         assertEquals "", service.extractDescription(null)
         // only return a description when it relates to the root, not just any element
-        assertEquals "", service.extractDescription([new File("test/files/example1.xml")])
         String expected = '''\
-based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemotherapy or Radiotherapy
+The following example is based on the CTS1 use case [Lavielle and Grevel, 2011]. 
+        Both PK (the drug concentration) and PD (the drug effect) are simulated. 
+        A one compartment PK model is linked to an indirect response PD model.'''
+        assertEquals(expected, service.extractDescription([new File("test/files/example1.xml")]))
+        expected = '''\
+This model is based on the publication: A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemotherapy or Radiotherapy
         Benjamin Ribba, Gentian Kaloshi, Mathieu Peyre, et al. Clin Cancer Res Published OnlineFirst July 3, 2012.'''
         assertEquals expected, service.extractDescription([new File("test/files/example5.xml")])
     }
