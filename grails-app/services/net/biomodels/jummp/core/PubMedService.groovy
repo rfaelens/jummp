@@ -148,16 +148,16 @@ class PubMedService {
         	setFieldIfItExists("issue", publication, slurper.resultList.result.journalInfo.issue, true)
         	setFieldIfItExists("journal", publication, slurper.resultList.result.journalInfo.journal.title, false)
         }
-        System.out.println(slurper.resultList.result.authorString.text())
         parseAuthors(slurper, publication)
+        
+        /*
         publication.save(flush:true)
-        System.out.println("Publication: "+publication.inspect())
-        
-        
         if (!publication.validate()) {
         	System.out.println(publication.errors.inspect())
             throw new JummpException("Retrieved PubMed Publication ${id} does not create a valid Publication")
         }
+        */
+        
         return publication
     }
 
