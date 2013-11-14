@@ -49,43 +49,33 @@ try {
             throw new Exception("Test system")
         }
     }
-} catch (Exception e) {
-    // no database configured yet, use hsqldb
-    databaseProperties.setProperty("jummp.database.driver", "org.hsqldb.jdbcDriver")
-    databaseProperties.setProperty("jummp.database.username", "sa")
-    databaseProperties.setProperty("jummp.database.password", "")
-    databaseProperties.setProperty("jummp.database.url", "jdbc:hsqldb:mem:devDb")
-    databaseProperties.setProperty("jummp.database.pooled", "false")
-    databaseProperties.setProperty("jummp.database.dbCreate", "create")
-    databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.HSQLDialect")
-}
-def databaseConfig = new ConfigSlurper().parse(databaseProperties)
+    def databaseConfig = new ConfigSlurper().parse(databaseProperties)
 
-dataSource {
-    pooled = Boolean.parseBoolean(databaseConfig.jummp.database.pooled)
-    driverClassName = databaseConfig.jummp.database.driver
-    username = databaseConfig.jummp.database.username
-    password = databaseConfig.jummp.database.password
-    dialect  = databaseConfig.jummp.database.dialect
-    properties 
-            { 
-                maxActive = 50 
-                maxIdle = 25 
-                minIdle =1 
-                initialSize = 1 
-                minEvictableIdleTimeMillis = 60000 
-                timeBetweenEvictionRunsMillis = 60000 
-                numTestsPerEvictionRun = 3 
-                maxWait = 10000 
-
-                testOnBorrow = true 
-                testWhileIdle = true 
-                testOnReturn = false 
-
-                validationQuery = "SELECT 1" 
-    } 
-}
-hibernate {
+	dataSource {
+		pooled = Boolean.parseBoolean(databaseConfig.jummp.database.pooled)
+		driverClassName = databaseConfig.jummp.database.driver
+		username = databaseConfig.jummp.database.username
+		password = databaseConfig.jummp.database.password
+		dialect  = databaseConfig.jummp.database.dialect
+		properties 
+				{ 
+					maxActive = 50 
+					maxIdle = 25 
+					minIdle =1 
+					initialSize = 1 
+					minEvictableIdleTimeMillis = 60000 
+					timeBetweenEvictionRunsMillis = 60000 
+					numTestsPerEvictionRun = 3 
+					maxWait = 10000 
+	
+					testOnBorrow = true 
+					testWhileIdle = true 
+					testOnReturn = false 
+	
+					validationQuery = "SELECT 1" 
+		} 
+	}
+	hibernate {
     cache.use_second_level_cache = true
     cache.use_query_cache = true
     cache.region.factory_class = 'net.sf.ehcache.hibernate.EhCacheRegionFactory'
@@ -119,3 +109,19 @@ environments {
         }
     }
 }
+	
+} catch (Exception e) {
+    // no database configured yet, use hsqldb
+	hibernate {
+		cache.use_second_level_cache = false
+		cache.use_query_cache = false
+	}
+	dataSource {
+		dbCreate = "update"
+		url = "jdbc:hsqldb:mem:tempDb"
+		dialect = ""
+		driverClassName = "org.hsqldb.jdbcDriver"
+	}
+}
+
+
