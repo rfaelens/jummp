@@ -27,6 +27,10 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 grails.project.groupId = "net.biomodels.jummp.core"
+grails.project.source.level = 1.7
+grails.project.target.level = 1.7
+// maven can't handle flatDirs, would break sbml and bives
+grails.project.dependency.resolver = "ivy"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -53,6 +57,8 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
+        mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
+        mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
         flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
@@ -65,6 +71,9 @@ grails.project.dependency.resolution = {
         compile "xml-apis:xml-apis:1.4.01"
 
         // plugin dependencies
+        compile("eu.ddmore.pharmml:libPharmML:0.1-SNAPSHOT") {
+            excludes 'junit-dep'
+        }
     }
     plugins {
         compile ":spring-security-core:1.2.7.3"
