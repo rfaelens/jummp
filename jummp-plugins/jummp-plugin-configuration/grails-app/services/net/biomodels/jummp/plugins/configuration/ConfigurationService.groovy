@@ -89,20 +89,48 @@ class ConfigurationService implements InitializingBean {
                                    RemoteCommand remote, TriggerCommand trigger, SBMLCommand sbml, BivesCommand bives,
                                    CmsCommand cms, BrandingCommand branding) {
         Properties properties = new Properties()
-        updateDatabaseConfiguration(properties, database)
-        updateRemoteConfiguration(properties, remote)
-        updateLdapConfiguration(properties, ldap)
-        updateVcsConfiguration(properties, vcs)
-        updateSvnConfiguration(properties, svn)
-        updateFirstRunConfiguration(properties, firstRun)
-        updateServerConfiguration(properties, server)
-        updateUserRegistrationConfiguration(properties, userRegistration)
-        updateChangePasswordConfiguration(properties, changePassword)
-        updateSBMLConfiguration(properties, sbml)
-        updateTriggerConfiguration(properties, trigger)
-        updateBivesConfiguration(properties, bives)
-        updateCmsConfiguration(properties, cms)
-        updateBrandingConfiguration(properties, branding)
+        if (database) {
+        	updateDatabaseConfiguration(properties, database)
+        }
+        if (remote) {
+        	updateRemoteConfiguration(properties, remote)
+        }
+        if (ldap) {
+        	updateLdapConfiguration(properties, ldap)
+        }
+        if (vcs) {
+        	updateVcsConfiguration(properties, vcs)
+        }
+        if (svn) {
+        	updateSvnConfiguration(properties, svn)
+        }
+        if (firstRun) {
+        	updateFirstRunConfiguration(properties, firstRun)
+        }
+        if (server) {
+        	updateServerConfiguration(properties, server)
+        }
+        if (userRegistration) {
+        	updateUserRegistrationConfiguration(properties, userRegistration)
+        }
+        if (changePassword) {
+        	updateChangePasswordConfiguration(properties, changePassword)
+        }
+        if (sbml) {
+        	updateSBMLConfiguration(properties, sbml)
+        }
+        if (trigger) {
+        	updateTriggerConfiguration(properties, trigger)
+        }
+        if (bives) {
+        	updateBivesConfiguration(properties, bives)
+        }
+        if (cms) {
+        	updateCmsConfiguration(properties, cms)
+        }
+        if (branding) {
+        	updateBrandingConfiguration(properties, branding)
+        }
         if (ldap) {
             properties.setProperty("jummp.security.authenticationBackend", "ldap")
         } else {
@@ -512,6 +540,9 @@ class ConfigurationService implements InitializingBean {
     private void updateRemoteConfiguration(Properties properties, RemoteCommand remote) {
         if (!remote.validate()) {
             return
+        }
+        if (!remote.jummpRemote) {
+        	remote.jummpRemote=false
         }
         properties.setProperty("jummp.remote",   remote.jummpRemote)
         properties.setProperty("jummp.export.jms", remote.jummpExportJms.toString())

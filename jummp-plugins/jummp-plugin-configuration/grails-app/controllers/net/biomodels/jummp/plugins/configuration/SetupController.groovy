@@ -68,7 +68,26 @@ class SetupController {
             on("next").to("validateAuthenticationBackend")
             on("back").to("start")
         }
-
+        
+        validateAuthenticationBackend {
+            action {
+                if (params.authenticationBackend == "database") {
+                	System.out.println("IN VALIDATION AUTHENTICATION BACKEND WITH ${flow.getProperties()}")
+                    flow.authenticationBackend = "database"
+                    System.out.println("Returning to database!")
+                    return database()
+                } else if (params.authenticationBackend == "ldap") {
+                    flow.validationErrorOn="LDAP is currently not supported"
+                	error()
+                } else {
+                    error()
+                }
+            }
+            on("database").to("vcs")
+            on("ldap").to("ldap")
+            on("error").to("authenticationBackend")
+        }
+        
         ldap {
             on("next") { LdapCommand cmd ->
                 flow.ldap = cmd
@@ -80,11 +99,31 @@ class SetupController {
             }.to("vcs")
             on("back").to("authenticationBackend")
         }
+        
         vcs {
-            on("next").to("validateVcs")
+            on("next") { VcsCommand cmd ->
+                flow.vcs = cmd
+                if (flow.vcs.hasErrors()) {
+                    error()
+                } 
+            }.to("branchOnVcsType")
             on("back").to("decideBackFromVcs")
         }
-
+        
+        branchOnVcsType {
+            action { 
+            	if (flow.vcs.isGit()) {
+                    git()
+                } 
+                else if (flow.vcs.isSvn()) {
+                    svn()
+                }
+            }
+            on("svn").to("svn")
+            on("git").to("firstRun")
+            on(Exception).to("exception")
+        }
+        
         svn {
             on("next") { SvnCommand cmd ->
                 flow.svn = cmd
@@ -111,7 +150,7 @@ class SetupController {
                     return success()
                 }
             }.to("userRegistration")
-            on("back").to("decideBackFromFirstRun")
+            on("back").to("vcs")
         }
 
         userRegistration {
@@ -122,7 +161,7 @@ class SetupController {
                 } else {
                     return success()
                 }
-            }.to("changePassword")
+            }.to("remoteExport")
             on("back").to("firstRun")
         }
 
@@ -147,7 +186,7 @@ class SetupController {
                     return success()
                 }
             }.to("validateRemote")
-            on("back").to("changePassword")
+            on("back").to("userRegistration")
         }
 
         remoteRemote {
@@ -218,9 +257,10 @@ class SetupController {
                 if (flow.cms.hasErrors()) {
                     return error()
                 } else {
+                    configurationService.storeConfiguration(flow.database, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword?:null, flow.remote, flow.trigger, flow.sbml, flow.bives, flow.cms, flow.branding?:null)
                     return success()
                 }
-            }.to("branding")
+            }.to("finish")
             on("back").to("bives")
         }
 
@@ -236,24 +276,6 @@ class SetupController {
             }.to("finish")
             on("back").to("cms")
         }
-
-        validateAuthenticationBackend {
-            action {
-                if (params.authenticationBackend == "database") {
-                    flow.authenticationBackend = "database"
-                    database()
-                } else if (params.authenticationBackend == "ldap") {
-                    flow.authenticationBackend = "ldap"
-                    ldap()
-                } else {
-                    error()
-                }
-            }
-            on("database").to("vcs")
-            on("ldap").to("ldap")
-            on("error").to("authenticationBackend")
-        }
-
         validateRemote {
             action {
                 if (flow.remote.jummpExportJms) {
@@ -265,22 +287,6 @@ class SetupController {
             }
             on("remote").to("remoteRemote")
             on("server").to("server")
-        }
-
-        validateVcs {
-            action { VcsCommand cmd ->
-                flow.vcs = cmd
-                if (flow.vcs.hasErrors()) {
-                    error()
-                } else if (flow.vcs.isGit()) {
-                    git()
-                } else if (flow.vcs.isSvn()) {
-                    svn()
-                }
-            }
-            on("svn").to("svn")
-            on("git").to("git")
-            on("error").to("vcs")
         }
 
         decideBackFromVcs {

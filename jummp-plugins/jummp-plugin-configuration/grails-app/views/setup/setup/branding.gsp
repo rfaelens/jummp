@@ -27,21 +27,22 @@
 
 
 
-<div class="dialog">
-    <table class="formtable">
-        <tbody>
-        <tr class="prop">
-                <td class="name"><label for="validation">Enable SBML Validation</label></td>
-                <td class="value ${hasErrors(bean: sbml, field: 'validation', 'errors')}">
-                    <g:radio name="validation" value="true"/>
-                </td>
-            </tr>
-        <tr class="prop">
-                <td class="name"><label for="validation">Disable SBML Validation</label></td>
-                <td class="value ${hasErrors(bean: sbml, field: 'validation', 'errors')}">
-                    <g:radio name="validation" value="false"/>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="layout" content="main" />
+        <title>Setup</title>
+    </head>
+    <body>
+        <div id="remote" class="body">
+            <h1>Branding</h1>
+            <g:form name="bivesForm" action="setup">
+                <g:render template="/templates/configuration/branding"/>
+                <div class="buttons">
+                    <g:submitButton name="back" value="Back"/>
+                    <g:submitButton name="next" value="Next"/>
+                </div>
+            </g:form>
+        </div>
+    </body>
+</html>
