@@ -27,6 +27,10 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 grails.project.groupId = "net.biomodels.jummp.plugins.bives"
+grails.project.source.level = 1.7
+grails.project.target.level = 1.7
+// maven can't handle flatDirs, would break sbml and bives
+grails.project.dependency.resolver = "ivy"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -60,22 +64,24 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
         runtime('org.apache.commons:commons-compress:1.1') {excludes 'commons-io'}
-        runtime "commons-io:commons-io:2.4"
+        compile "commons-io:commons-io:2.1"
         compile ":jaxen:1.1.1"
         compile ":jdom:1.1.1"
         compile ":bives-fwk:0.9.0"
         compile ":bives.diff:0.1.0"
         test 'hsqldb:hsqldb:1.8.0.10'
+        // broken Grails 2.3.2 dependecy
+        compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core' }
     }
     plugins {
         compile ":perf4j:0.1.1"
-        compile ":spring-security-core:1.2.7.2"
+        compile ":spring-security-core:1.2.7.3"
         // default grails plugins
-        compile ":hibernate:$grailsVersion"
+        compile ":hibernate:3.6.10.3"
         compile ":jquery:1.10.0"
         //compile ":resources:1.0.2"
 
-        build ":tomcat:$grailsVersion"
+        build ":tomcat:7.0.42"
     }
 }
 grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"
