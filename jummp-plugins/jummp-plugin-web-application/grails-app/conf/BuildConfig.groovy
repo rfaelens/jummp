@@ -25,7 +25,9 @@
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
-grails.project.target.level = 1.6
+grails.project.source.level = 1.7
+grails.project.target.level = 1.7
+grails.project.dependency.resolver = "ivy"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 grails.project.groupId = "net.biomodels.jummp.webapp"
 
@@ -35,7 +37,7 @@ grails.project.dependency.resolution = {
         // uncomment to disable ehcache
         // excludes 'ehcache'
     }
-    log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    log "debug" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {
         if (System.getenv("JUMMP_ARTIFACTORY_URL")) {
             mavenRepo "${System.getenv('JUMMP_ARTIFACTORY_URL')}"
@@ -64,9 +66,8 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        compile ":svn:1.0.2"
-        build(":tomcat:$grailsVersion",
-              ":release:1.0.0") {
+        build(":tomcat:7.0.42",
+              ":release:3.0.1") {
             export = false
         }
         compile ":jquery:1.10.0"
