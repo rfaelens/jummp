@@ -25,6 +25,10 @@
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
+grails.project.source.level = 1.7
+grails.project.target.level = 1.7
+// maven can't handle flatDirs, would break sbml and bives
+grails.project.dependency.resolver = "ivy"
 
 grails.project.dependency.resolution = {
     inherits("global") {
@@ -50,12 +54,16 @@ grails.project.dependency.resolution = {
         }
         //test "org.junit:junit:4.10"
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
-        compile "commons-io:commons-io:2.4"
+        compile "commons-io:commons-io:2.1"
         compile 'xml-apis:xml-apis:1.4.01'
+        // mime-type detection
+        compile "org.apache.tika:tika-core:1.3"
+        // broken Grails 2.3.2 dependecy
+        compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core' }
     }
 
     plugins {
-        build(":tomcat:$grailsVersion",
+        build(":tomcat:7.0.42",
               ":release:2.2.1",
               ":rest-client-builder:1.0.3") {
             export = false
