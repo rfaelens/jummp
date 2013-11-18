@@ -69,73 +69,74 @@ interface IPharmMlService {
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      */
-    List getCovariateModel(def dom) {
+    List getCovariateModel(def dom)
 
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      */
-    List getVariabilityModel(def dom) {
+    List getVariabilityModel(def dom)
 
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      */
-    List getParameterModel(def dom) {
+    List getParameterModel(def dom)
 
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      */
-    List getStructuralModel(def dom) {
+    List getStructuralModel(def dom)
 
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      */
-    List getObservationModel(def dom) {
+    List getObservationModel(def dom)
 
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      * @return eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
      */
-    def getTrialDesign(RevisionTransportCommand revision) {
+    def getTrialDesign(RevisionTransportCommand revision)
 
     /**
      * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
      * @return eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
      */
-    def getTrialDesignStructure(def design) {
+    def getTrialDesignStructure(def design)
 
     /**
      * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
      */
-    List getIndividualDosing(TrialDesignType design) {
+    List getIndividualDosing(def design)
 
     /**
      * @param design an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
      * return an instance of eu.ddmore.libpharmml.dom.trialdesign.PopulationType
      */
-    PopulationType getPopulation(TrialDesignType design) {
+    def getPopulation(def design)
 
     /**
      * @return an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
      */
-    ModellingStepsType getModellingSteps(RevisionTransportCommand revision) {
+    def getModellingSteps(RevisionTransportCommand revision)
 
     /**
      * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
      */
-    List getCommonModellingSteps(ModellingStepsType steps) {
+    List getCommonModellingSteps(def steps)
 
     /**
      * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
      */
-    List getSimulationSteps(ModellingStepsType steps) {
+    List getSimulationSteps(def steps)
 
     /**
      * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
      */
-    List getEstimationSteps(ModellingStepsType steps) {
+    List getEstimationSteps(def steps)
 
     /**
      * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
+     * @return an instance of eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
      */
-    StepDependencyType getStepDependencies(ModellingStepsType steps) {
+    def getStepDependencies(def steps)
 }
