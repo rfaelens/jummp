@@ -264,7 +264,6 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         return dom?.independentVariable.symbId
     }
 
-    //todo change display format
     @Profiled(tag="pharmMlService.getFunctionDefinitions")
     List getFunctionDefinitions(PharmML dom) {
         return dom?.functionDefinition
