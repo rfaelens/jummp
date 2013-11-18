@@ -35,6 +35,11 @@
 package net.biomodels.jummp.core
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import eu.ddmore.libpharmml.dom.PharmML
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
+import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
+import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 
 /**
  * @short Interface describing the service to access a model encoded in PharmML.
@@ -57,86 +62,85 @@ interface IPharmMlService {
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      */
-    public String getIndependentVariable(def dom)
+    public String getIndependentVariable(PharmML dom)
 
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      */
-    public List getFunctionDefinitions(def dom)
+    public List getFunctionDefinitions(PharmML dom)
 
     public List getModelDefinition(RevisionTransportCommand rev)
 
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      */
-    List getCovariateModel(def dom)
+    List getCovariateModel(PharmML dom)
 
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      */
-    List getVariabilityModel(def dom)
+    List getVariabilityModel(PharmML dom)
 
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      */
-    List getParameterModel(def dom)
+    List getParameterModel(PharmML dom)
 
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      */
-    List getStructuralModel(def dom)
+    List getStructuralModel(PharmML dom)
 
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      */
-    List getObservationModel(def dom)
+    List getObservationModel(PharmML dom)
 
     /**
-     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      * @return eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
      */
-    def getTrialDesign(RevisionTransportCommand revision)
+    TrialDesignType getTrialDesign(RevisionTransportCommand revision)
 
     /**
      * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
      * @return eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
      */
-    def getTrialDesignStructure(def design)
+    def getTrialDesignStructure(TrialDesignType design)
 
     /**
      * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
      */
-    List getIndividualDosing(def design)
+    List getIndividualDosing(TrialDesignType design)
 
     /**
      * @param design an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
      * return an instance of eu.ddmore.libpharmml.dom.trialdesign.PopulationType
      */
-    def getPopulation(def design)
+    PopulationType getPopulation(TrialDesignType design)
 
     /**
      * @return an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
      */
-    def getModellingSteps(RevisionTransportCommand revision)
+    ModellingStepsType getModellingSteps(RevisionTransportCommand revision)
 
     /**
      * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
      */
-    List getCommonModellingSteps(def steps)
+    List getCommonModellingSteps(ModellingStepsType steps)
 
     /**
      * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
      */
-    List getSimulationSteps(def steps)
+    List getSimulationSteps(ModellingStepsType steps)
 
     /**
      * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
      */
-    List getEstimationSteps(def steps)
+    List getEstimationSteps(ModellingStepsType steps)
 
     /**
      * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
      * @return an instance of eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
      */
-    def getStepDependencies(def steps)
+    StepDependencyType getStepDependencies(ModellingStepsType steps)
 }
