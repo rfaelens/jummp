@@ -27,6 +27,10 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 grails.project.groupId = "net.biomodels.jummp.plugins.git"
+grails.project.source.level = 1.7
+grails.project.target.level = 1.7
+// maven can't handle flatDirs, would break sbml and bives
+grails.project.dependency.resolver = "ivy"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -67,11 +71,11 @@ grails.project.dependency.resolution = {
         test ":code-coverage:1.2.5"
 
         // default grails plugins
-        compile ":hibernate:$grailsVersion"
+        compile ":hibernate:3.6.10.3"
         compile ":jquery:1.10.0"
         //compile ":resources:1.0.2"
 
-        build ":tomcat:$grailsVersion"
+        build ":tomcat:7.0.42"
     }
 }
 grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"
