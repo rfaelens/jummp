@@ -27,6 +27,10 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 grails.project.groupId = "net.biomodels.jummp.plugins.security"
+grails.project.source.level = 1.7
+grails.project.target.level = 1.7
+// maven can't handle flatDirs, would break sbml and bives
+grails.project.dependency.resolver = "ivy"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
