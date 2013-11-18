@@ -25,6 +25,10 @@
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
+grails.project.source.level = 1.7
+grails.project.target.level = 1.7
+// maven can't handle flatDirs, would break sbml and bives
+grails.project.dependency.resolver = "ivy"
 
 grails.project.dependency.resolution = {
     inherits("global") {
@@ -55,7 +59,7 @@ grails.project.dependency.resolution = {
 
     plugins {
         build(":tomcat:7.0.42",
-              ":release:2.2.1",
+              ":release:3.0.1",
               ":rest-client-builder:1.0.3") {
             export = false
         }
