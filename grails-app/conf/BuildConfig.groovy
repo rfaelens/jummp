@@ -29,13 +29,16 @@ grails.project.war.file = "target/${appName}.war"
 grails.project.groupId = "net.biomodels.jummp"
 grails.project.source.level = 1.7
 grails.project.target.level = 1.7
+// maven can't handle flatDirs, would break sbml and bives
+grails.project.dependency.resolver = "ivy"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
         // uncomment to disable ehcache
         // excludes 'ehcache'
     }
-    log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    log "info" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    legacyResolve true
     repositories {
         if (System.getenv("JUMMP_ARTIFACTORY_URL")) {
             println "Artifactory URL: " + System.getenv("JUMMP_ARTIFACTORY_URL")
@@ -109,7 +112,7 @@ grails.project.dependency.resolution = {
         // bives
         runtime('org.apache.commons:commons-compress:1.1') { excludes 'commons-io' }
 
-        // jms
+        /* jms
         runtime('org.apache.activemq:activeio-core:3.1.2',
                 'org.apache.activemq:activemq-core:5.5.0',
                 'org.apache.activemq:activemq-spring:5.5.0',
@@ -127,7 +130,7 @@ grails.project.dependency.resolution = {
                     'slf4j-api',
                     'xalan',
                     'xml-apis'
-        }
+        }*/
         compile "xml-apis:xml-apis:1.4.01"
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
 
@@ -141,8 +144,6 @@ grails.project.dependency.resolution = {
         }
         //weceem, feeds
         runtime("rome:rome:1.0RC2") { excludes 'junit', 'jdom' }
-        //lesscss
-        compile "commons-io:commons-io:2.4"
 
         // cobertura
         compile "asm:asm:3.1"
@@ -150,14 +151,18 @@ grails.project.dependency.resolution = {
         compile "com.thoughtworks.xstream:xstream:1.4.3"
 
         compile "org.apache.tika:tika-core:1.3"
+
+        // broken Grails 2.3.2 dependecy
+        compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core' }
+        compile "org.compass-project:compass:2.2.0"
     }
 
     plugins {
         compile ":webxml:1.4.1"
         compile ":perf4j:0.1.1"
-        compile ":jms:1.2"
+        //compile ":jms:1.2"
         compile ":executor:0.3"
-        compile ":mail:1.0.1"
+        compile(":mail:1.0.1") { excludes 'spring-test' }
         compile ":simple-captcha:0.9.4"
         //compile ":quartz:0.4.2"
         compile(":quartz:1.0-RC6") { excludes 'hibernate-core' /* don't need 3.6.10.Final */ }
@@ -165,10 +170,9 @@ grails.project.dependency.resolution = {
         //compile(":quartz-monitor:0.2") { export = false } //requires quartz plugin version 0.4.2 
 
         compile ":spring-security-acl:1.1.1"
-        compile ":svn:1.0.2"
-        runtime ":spring-security-core:1.2.7.3"
-        runtime(":spring-security-ldap:1.0.6"){ export = false }
-        //compile(":lesscss-resources:1.3.3") { excludes 'commons-io' }
+        //compile ":svn:1.0.2"
+        compile ":spring-security-core:1.2.7.3"
+        compile ":spring-security-ldap:1.0.6"
         test ":code-coverage:1.2.6"
         test(":codenarc:0.18.1") { transitive = false }
         test ":gmetrics:0.3.1"
@@ -177,11 +181,13 @@ grails.project.dependency.resolution = {
                      'quartz',
                      'jquery',
                      'jquery-ui',
+                     'ant',     // 1.7 is too old
                      //also exclude java feeds API rome in order to avoid conflicting revisions
                      'feeds',
-                     'ckeditor'
-               //      'searchable'
+                     'ckeditor',
+                     'searchable' // 0.6.5+ needed for Grails 2.3
         }
+        compile(":searchable:0.6.6") { excludes 'compass' }
         runtime(":feeds:1.6") { excludes 'rome', 'jdom' }
         runtime(":ckeditor:3.6.3.0") { excludes 'svn' }
         compile ":jquery-datatables:1.7.5"
@@ -189,12 +195,12 @@ grails.project.dependency.resolution = {
         // Locale plugin
         compile ":locale-variant:0.1"
         // default grails plugins
-        compile ":hibernate:$grailsVersion"
+        compile ":hibernate:3.6.10.3"
         compile ":webflow:2.0.8.1"
         compile ":jquery:1.10.2"
         //compile ":resources:1.2"
 
-        build ":tomcat:$grailsVersion"
+        build ":tomcat:7.0.42"
 
     }
 }
