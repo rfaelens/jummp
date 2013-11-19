@@ -64,6 +64,8 @@ grails.project.dependency.resolution = {
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
         mavenRepo "http://download.eclipse.org/jgit/maven"
+        // compass 2.2.1
+        mavenRepo "http://repo.grails.org/grails/core"
         mavenRepo "http://www.biojava.org/download/maven/"
     }
     dependencies {
@@ -154,7 +156,6 @@ grails.project.dependency.resolution = {
 
         // broken Grails 2.3.2 dependecy
         compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core' }
-        compile "org.compass-project:compass:2.2.0"
     }
 
     plugins {
@@ -187,7 +188,7 @@ grails.project.dependency.resolution = {
                      'ckeditor',
                      'searchable' // 0.6.5+ needed for Grails 2.3
         }
-        compile(":searchable:0.6.6") { excludes 'compass' }
+        compile(":searchable:0.6.6")
         runtime(":feeds:1.6") { excludes 'rome', 'jdom' }
         runtime(":ckeditor:3.6.3.0") { excludes 'svn' }
         compile ":jquery-datatables:1.7.5"
