@@ -437,6 +437,8 @@ if (pluginsToExclude) {
     grails.plugin.excludes = pluginsToExclude
 }
 
+//platform-core 1.0RC5, used by weceem
+plugin.platformCore.events.catchFlushExceptions = true
 // weceem
 grails.mime.file.extensions = false
 weceem.content.prefix = 'content'
