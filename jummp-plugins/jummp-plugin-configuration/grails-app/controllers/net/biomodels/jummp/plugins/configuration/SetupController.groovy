@@ -120,7 +120,7 @@ class SetupController {
                 }
             }
             on("svn").to("svn")
-            on("git").to("firstRun")
+            on("git").to("userRegistration")
             on(Exception).to("exception")
         }
         
@@ -135,12 +135,12 @@ class SetupController {
             }.to("firstRun")
             on("back").to("vcs")
         }
-
+        /* Disabled as it adds nothing*/
         git {
             on("next").to("firstRun")
             on("back").to("vcs")
         }
-
+        /* Disabled as admins created by config.groovy*/
         firstRun {
             on("next") { FirstRunCommand cmd ->
                 flow.firstRun = cmd
@@ -162,9 +162,9 @@ class SetupController {
                     return success()
                 }
             }.to("remoteExport")
-            on("back").to("firstRun")
+            on("back").to("vcs")
         }
-
+        /* Disabled */
         changePassword {
             on("next") { ChangePasswordCommand cmd ->
                 flow.changePassword = cmd
@@ -223,8 +223,33 @@ class SetupController {
                 } else {
                     return success()
                 }
-            }.to("sbml")
+            }.to("mail")
             on("back").to("server")
+        }
+        
+        mail {
+            on("next") { MailCommand cmd ->
+                System.out.println(cmd.getProperties())
+                flow.mail = cmd
+                if (flow.mail.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("search")
+            on("back").to("trigger")
+        }
+        
+        search {
+            on("next") { SearchCommand cmd ->
+                flow.search = cmd
+                if (flow.search.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("sbml")
+            on("back").to("mail")
         }
 
         sbml {
@@ -235,10 +260,10 @@ class SetupController {
                 } else {
                     return success()
                 }
-            }.to("bives")
-            on("back").to("trigger")
+            }.to("cms")
+            on("back").to("search")
         }
-
+        /* Disabled */
         bives {
             on("next") { BivesCommand cmd ->
                 flow.bives = cmd
@@ -257,13 +282,19 @@ class SetupController {
                 if (flow.cms.hasErrors()) {
                     return error()
                 } else {
-                    configurationService.storeConfiguration(flow.database, (flow.authenticationBackend == "ldap") ? flow.ldap : null, flow.vcs, flow.svn, flow.firstRun, flow.server, flow.userRegistration, flow.changePassword?:null, flow.remote, flow.trigger, flow.sbml, flow.bives, flow.cms, flow.branding?:null)
+                    configurationService.storeConfiguration(flow.database, 
+                    										(flow.authenticationBackend == "ldap") ? flow.ldap : null, 
+                    										flow.vcs, flow.svn, flow.firstRun, 
+                    										flow.server, flow.userRegistration, flow.changePassword?:null, 
+                    										flow.remote, flow.trigger, flow.sbml, flow.bives, 
+                    										flow.cms, flow.branding?:null, 
+                    										flow.search, flow.mail)
                     return success()
                 }
             }.to("finish")
-            on("back").to("bives")
+            on("back").to("sbml")
         }
-
+        /* Disabled */
         branding {
             on("next") { BrandingCommand cmd ->
                 flow.branding = cmd
@@ -335,7 +366,9 @@ class SetupController {
 
         validateAdmin {
             action {
-                if (userService.createAdmin(flow.user)) {
+            	try
+            	{
+            		userService.createAdmin(flow.user)
                     Properties props = new Properties()
                     File file = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
                     props.load(new FileInputStream(file))
@@ -343,9 +376,12 @@ class SetupController {
                     FileOutputStream out = new FileOutputStream(file)
                     props.store(out, "Jummp Configuration")
                     next()
-                } else {
+            	}
+            	catch(Exception e)
+            	{
+            		e.printStackTrace()
                     error()
-                }
+            	}
             }
             on("error").to("start")
             on("next").to("finish")

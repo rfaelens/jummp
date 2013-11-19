@@ -59,18 +59,19 @@ class GarbageCollectionBasedCleanerJob {
   
     def execute() {
    	    if (forcedGC) {
+   	    		System.out.println("RUNNING GC")
    	    	    System.gc()
    	    }
    	    def refTracker=grailsApplication.mainContext.getBean("referenceTracker")
-    	    ReferenceQueue queue=refTracker.getRefQueue()
-    	    while (true) {
-    	    	   WrappedRevisionReference ref=(WrappedRevisionReference) queue.poll()
-    	    	   if (!ref) {
-    	    	   	   break
-    	    	   }
-    	    	   System.out.println("GC Cleaner deleting: "+ref.id()+" ..."+ref.deleteFolder())
-    	    	   refTracker.clearReference(ref.id())
-    	    }
+		ReferenceQueue queue=refTracker.getRefQueue()
+		while (true) {
+			   WrappedRevisionReference ref=(WrappedRevisionReference) queue.poll()
+			   if (!ref) {
+				   break
+			   }
+			   System.out.println("GC Cleaner deleting: "+ref.id()+" ..."+ref.deleteFolder())
+			   refTracker.clearReference(ref.id())
+		}
     }
 
 }

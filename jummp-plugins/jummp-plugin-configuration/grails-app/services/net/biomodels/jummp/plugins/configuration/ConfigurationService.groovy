@@ -67,6 +67,22 @@ class ConfigurationService implements InitializingBean {
             configurationFile = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
         }
     }
+    
+    /*
+    * Simple class to sort the properties map to make the resulting config file
+    * easier to read.
+    */
+    class SortedProperties extends Properties {
+    	public Enumeration keys() {
+    		Enumeration keysEnum = super.keys();
+    		Vector<String> keyList = new Vector<String>();
+    		while(keysEnum.hasMoreElements()){
+    			keyList.add((String)keysEnum.nextElement());
+    		}
+    		Collections.sort(keyList);
+    		return keyList.elements();
+    	}
+    }
 
     /**
      * Rewrites the complete configuration.
@@ -87,8 +103,8 @@ class ConfigurationService implements InitializingBean {
     public void storeConfiguration(DatabaseCommand database, LdapCommand ldap, VcsCommand vcs, SvnCommand svn, FirstRunCommand firstRun,
                                    ServerCommand server, UserRegistrationCommand userRegistration, ChangePasswordCommand changePassword,
                                    RemoteCommand remote, TriggerCommand trigger, SBMLCommand sbml, BivesCommand bives,
-                                   CmsCommand cms, BrandingCommand branding) {
-        Properties properties = new Properties()
+                                   CmsCommand cms, BrandingCommand branding, SearchCommand search, MailCommand mail) {
+        Properties properties = new SortedProperties()
         if (database) {
         	updateDatabaseConfiguration(properties, database)
         }
@@ -130,6 +146,12 @@ class ConfigurationService implements InitializingBean {
         }
         if (branding) {
         	updateBrandingConfiguration(properties, branding)
+        }
+        if (search) {
+        	updateSearchConfiguration(properties, search)
+        }
+        if (mail) {
+        	updateMailConfiguration(properties, mail)
         }
         if (ldap) {
             properties.setProperty("jummp.security.authenticationBackend", "ldap")
@@ -641,14 +663,14 @@ class ConfigurationService implements InitializingBean {
         if (!cmd.validate()) {
             return
         }
-        if (!cmd.url.endsWith("/")) {
+        /*if (!cmd.url.endsWith("/")) {
             cmd.url = cmd.url + "/"
         }
         cmd.url = cmd.url + "register/validate/{{CODE}}"
         if (!cmd.activationUrl.endsWith("/")) {
             cmd.activationUrl = cmd.activationUrl + "/"
         }
-        cmd.activationUrl = cmd.activationUrl + "register/confirmRegistration/{{CODE}}"
+        cmd.activationUrl = cmd.activationUrl + "register/confirmRegistration/{{CODE}}"*/
         properties.setProperty("jummp.security.anonymousRegistration", cmd.registration ? "true" : "false")
         properties.setProperty("jummp.security.registration.email.send", cmd.sendEmail ? "true" : "false")
         properties.setProperty("jummp.security.registration.email.sendToAdmin", cmd.sendToAdmin ? "true" : "false")
@@ -656,10 +678,10 @@ class ConfigurationService implements InitializingBean {
         properties.setProperty("jummp.security.registration.email.adminAddress", cmd.adminAddress)
         properties.setProperty("jummp.security.registration.email.subject", cmd.subject)
         properties.setProperty("jummp.security.registration.email.body", cmd.body)
-        properties.setProperty("jummp.security.registration.verificationURL", cmd.url)
+        /*properties.setProperty("jummp.security.registration.verificationURL", cmd.url)
         properties.setProperty("jummp.security.activation.email.body", cmd.activationBody)
         properties.setProperty("jummp.security.activation.email.subject", cmd.activationSubject)
-        properties.setProperty("jummp.security.activation.activationURL", cmd.activationUrl)
+        properties.setProperty("jummp.security.activation.activationURL", cmd.activationUrl)*/
     }
 
     /**
@@ -721,7 +743,47 @@ class ConfigurationService implements InitializingBean {
        properties.setProperty("jummp.branding.internalColor", branding.internalColor.toString())
        properties.setProperty("jummp.branding.externalColor", branding.externalColor.toString())
    }
+   
+    /**
+    * Updates the @p properties with the settings from @p search
+    * @param properties The existing properties
+    * @param search The search settings
+    */
+   private void updateSearchConfiguration(Properties properties, SearchCommand search) {
+       if(!search.validate()) {
+           return
+       }
+       properties.setProperty("jummp.search.index", search.indexDirectory.toString())
+   }
 
+   /**
+    * Updates the @p properties with the settings from @p mail
+    * @param properties The existing properties
+    * @param mail The mail settings
+    */
+   private void updateMailConfiguration(Properties properties, MailCommand mail) {
+       if(!mail.validate()) {
+           return
+       }
+       properties.setProperty("jummp.security.mailer.host", mail.host.toString())
+       properties.setProperty("jummp.security.mailer.port", mail.port.toString())
+       if (mail.auth) {
+       	   properties.setProperty("jummp.security.mailer.auth", "true")
+       	   if (mail.tlsRequired) {
+       	   	   properties.setProperty("jummp.security.mailer.tlsrequired", "true")
+       	   }
+       	   else {
+       	   	   properties.setProperty("jummp.security.mailer.tlsrequired", "false")
+       	   }
+       	   properties.setProperty("jummp.security.mailer.username", mail.username.toString())
+       	   properties.setProperty("jummp.security.mailer.password", mail.password.toString())
+       }
+       else {
+       	   properties.setProperty("jummp.security.mailer.auth", "false")
+       }
+   }
+
+   
     /**
      * Loads the properties from the configuration file
      * @return The Jummp Configuration Properties

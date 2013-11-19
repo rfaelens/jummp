@@ -31,12 +31,10 @@
     <table class="formtable">
         <tbody>
             <tr class="prop">
-                <td class="name"><label for="database">Database:</label></td>
-                <td class="value"><input type="radio" name="authenticationBackend" id="database" value="database" checked="checked"/></td>
-            </tr>
-            <tr class="prop">
-                <td class="name"><label for="ldap">LDAP:</label></td>
-                <td class="value"><input disabled="true" type="radio" name="authenticationBackend" id="ldap" value="ldap"/></td>
+                <td class="name"><label for="Search Index Location">Search Index Directory:</label></td>
+                <td class="value ${hasErrors(bean: search, field: 'indexDirectory', 'errors')}">
+                    <input type="text" name="indexDirectory" id="indexDirectory" value="${search?.indexDirectory}"/>
+                </td>
             </tr>
         </tbody>
     </table>

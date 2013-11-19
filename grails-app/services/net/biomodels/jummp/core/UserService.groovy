@@ -289,8 +289,8 @@ class UserService implements IUserService {
             if (grailsApplication.config.jummp.security.registration.email.sendToAdmin) {
                 recipient = grailsApplication.config.jummp.security.registration.email.adminAddress
             }
-            String emailBody = grailsApplication.config.jummp.security.activation.email.body
-            String emailSubject = grailsApplication.config.jummp.security.activation.email.subject
+            String emailBody = grailsApplication.config.jummp.security.registration.email.body
+            String emailSubject = grailsApplication.config.jummp.security.registration.email.subject
             emailBody = emailBody.replace("{{USERNAME}}", newUser.username)
             emailBody = emailBody.replace("{{PASSWORD}}", p)
             emailBody = emailBody.replace("{{REALNAME}}", newUser.userRealName)
@@ -490,7 +490,7 @@ class UserService implements IUserService {
             if (persistAdminWithRoles(person)) {
                 userCreated = true
             } else {
-                log.error("The initial user could not be created in the database. Is the database configured properly?")
+            	log.error("The initial user could not be created in the database. Is the database configured properly?")
                 userCreated = false
             }
         } else {
