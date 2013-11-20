@@ -62,12 +62,16 @@ class ConfigurationService implements InitializingBean {
     @SuppressWarnings('GrailsStatelessService')
     File configurationFile = null
 
+    private boolean testPath(String path) {
+    	File testFile=new File(path)
+    	return testFile.exists()
+    }
+    
     String getConfigFilePath() {
     	String path = System.getenv("JUMMP_CONFIG");
-    	if (!path) {
+    	if (!path || !testPath(path)) {
     		path=System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"
-    		File testFile=new File(path)
-    		if (!testFile.exists()) {
+    		if (!testPath(path)) {
     			path=null
     		}
     	}
@@ -692,6 +696,8 @@ class ConfigurationService implements InitializingBean {
         properties.setProperty("jummp.security.registration.email.adminAddress", cmd.adminAddress)
         properties.setProperty("jummp.security.registration.email.subject", cmd.subject)
         properties.setProperty("jummp.security.registration.email.body", cmd.body)
+        properties.setProperty("jummp.security.resetPassword.email.subject", cmd.resetSubject)
+        properties.setProperty("jummp.security.resetPassword.email.body", cmd.resetBody)
         /*properties.setProperty("jummp.security.registration.verificationURL", cmd.url)
         properties.setProperty("jummp.security.activation.email.body", cmd.activationBody)
         properties.setProperty("jummp.security.activation.email.subject", cmd.activationSubject)
@@ -817,8 +823,12 @@ class ConfigurationService implements InitializingBean {
         lock.lock()
         try {
         	if (!configurationFile) {
-        		// There is no location specified. Using the default location.
-        		configurationFile = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
+        		String path=getConfigFilePath()
+        		if (!path) {
+        			// There is no location specified. Using the default location.
+        			path=System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"
+        		}
+        		configurationFile = new File(path)
         	}
             FileOutputStream out = new FileOutputStream(configurationFile)
             properties.store(out, "Jummp Configuration")

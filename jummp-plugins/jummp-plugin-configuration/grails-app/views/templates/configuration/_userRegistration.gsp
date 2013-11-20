@@ -74,6 +74,20 @@
                     </textarea>
                 </td>
             </tr>
+           <tr class="prop">
+                <td class="name"><label for="resetSubject">Reset Password Subject:</label></td>
+                <td class="value ${hasErrors(bean: userRegistration, field: 'resetSubject', 'errors')}">
+                    <input type="text" name="resetSubject" id="resetSubject" value="${userRegistration?.resetSubject ?: 'Example Subject: Reset Password'}"/>
+                </td>
+            </tr>
+            <tr class="prop">
+                <td class="name"><label for="body">Reset Body:</label></td>
+                <td class="value ${hasErrors(bean: userRegistration, field: 'resetBody', 'errors')}">
+                    <textarea id="resetBody" rows="20" cols="40" name="resetBody">
+                        ${userRegistration?.resetBody ?: 'Example Text: Password reset body'}
+                    </textarea>
+                </td>
+            </tr>
           <%--   <tr class="prop">
                 <td class="name"><label for="url">URL for Account Verification:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'url', 'errors')}">

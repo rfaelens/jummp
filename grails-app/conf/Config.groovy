@@ -284,20 +284,12 @@ if (!(jummpConfig.jummp.security.registration.email.send instanceof ConfigObject
     jummp.security.activation.email.subject        = jummpConfig.jummp.security.activation.email.subject
     jummp.security.activation.email.body           = jummpConfig.jummp.security.activation.email.body
     jummp.security.activation.activationURL        = jummpConfig.jummp.security.activation.activationURL
+    jummp.security.resetPassword.email.body    = jummpConfig.jummp.security.resetPassword.email.body
+    jummp.security.resetPassword.email.subject = jummpConfig.jummp.security.resetPassword.email.subject
 } else {
     jummp.security.registration.email.send = false
 }
 
-// reset password settings
-if (!(jummpConfig.jummp.security.resetPassword.email.send instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.security.resetPassword.email.send)) {
-    jummp.security.resetPassword.email.send    = Boolean.parseBoolean(jummpConfig.jummp.security.resetPassword.email.send)
-    jummp.security.resetPassword.email.sender  = jummpConfig.jummp.security.resetPassword.email.sender
-    jummp.security.resetPassword.email.body    = jummpConfig.jummp.security.resetPassword.email.body
-    jummp.security.resetPassword.email.subject = jummpConfig.jummp.security.resetPassword.email.subject
-    jummp.security.resetPassword.url           = jummpConfig.jummp.security.resetPassword.url
-} else {
-    jummp.security.resetPassword.email.send = false
-}
 
 // whether a user is allowed to change the password depends on the setting an if LDAP is used
 // in case of LDAP changing the password is not (yet) possible in the application
