@@ -66,6 +66,14 @@
                     		<button>LOGIN</button>
                     	</td>
                    </tr>
+                   <tr>
+  	                <td/>
+                    	<td>
+                    		<a href="${grailsApplication.config.grails.serverURL}/forgotpassword">
+	  	     					Forgot password?
+	  	     				</a>
+                    	</td>
+                   </tr>
                 </tbody>
             </table>
         </form>

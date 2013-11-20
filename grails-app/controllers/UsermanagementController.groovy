@@ -25,6 +25,7 @@
 import net.biomodels.jummp.webapp.RegistrationCommand
 import net.biomodels.jummp.webapp.EditUserCommand
 import net.biomodels.jummp.webapp.UpdatePasswordCommand
+import net.biomodels.jummp.webapp.ResetPasswordCommand
 import grails.plugins.springsecurity.Secured
 
 /*
@@ -62,6 +63,7 @@ class UsermanagementController {
      /**
      * Passes on any info messages needed to be displayed and renders the register gsp
      */
+    @Secured(["isAnonymous()"])
     def create = {
     	render view: "register", model: [postUrl: "", flashMessage:checkForMessage(), 
     									validationErrorOn: checkForErrorBean()]
@@ -87,6 +89,29 @@ class UsermanagementController {
     								validationErrorOn: checkForErrorBean(), 
     								user: userService.getUser(springSecurityService.principal.username)]
     }
+    
+    @Secured(["isAnonymous()"])
+    def forgot = {
+    	render view: "forgot", model: [postUrl: "", flashMessage:checkForMessage(), 
+    								validationErrorOn: checkForErrorBean()]
+    }
+
+    @Secured(["isAnonymous()"])
+    def passwordreset = {
+    	flash.hashCode=params.id
+    	redirect action: reset
+    }
+    
+    /**
+    * Password reset based on the unique code sent to the user
+    **/
+    @Secured(["isAnonymous()"])
+    def reset = {
+    	render view: "reset", model: [postUrl: "", flashMessage:checkForMessage(), 
+    								validationErrorOn: checkForErrorBean(), 
+    								hashCode: flash.hashCode]
+    }
+    				   
     
     boolean validateUserData(def cmd, def params) {
     	bindData(cmd, params)
@@ -119,6 +144,30 @@ class UsermanagementController {
     	flash.message="Profile was updated successfully"
     	redirect(action:"show")
     }
+
+    /**
+     * Validates the command object and then uses the user service to 
+     * edit a user. If an error occurs at any point, the method redirects
+     * to edit action and sends the user a helpful message.
+     */
+    def newPassword = {
+    	ResetPasswordCommand cmd=new ResetPasswordCommand()
+    	if (!validateUserData(cmd, params)) {
+    		flash.hashCode=params.hashCode
+    		return redirect(action:"reset")
+    	}
+    	try 
+    	{
+    		userService.resetPassword(cmd.hashCode, cmd.username, cmd.newPassword)
+    	}
+    	catch(Exception e) {
+    		flash.message="password.reset.service.error"
+   			return redirect(action:"reset")
+    	}
+    	flash.flashMessage="Password for ${cmd.username} was updated successfully. Please try logging in now"
+    	redirect(controller: "login", action:"auth")
+    }
+
     
     
     /**
@@ -142,7 +191,24 @@ class UsermanagementController {
     	flash.message="Password was updated successfully"
     	redirect(action:"show")
     }
-    				   
+    
+    /**
+    * Requests a password link from the user service, hiding the exception thrown
+    * if the username provided does not exist.
+    **/
+    
+    def requestPassword = {
+    	try
+    	{
+    		userService.requestPassword(params.username)
+    	}
+    	catch(Exception e) {
+    		e.printStackTrace()
+    	}
+    	flash.message="Thank you. Please check the email associated with ${params.username}'s account"
+    	redirect(action:"forgot")
+    }
+    
      /**
      * Performs validation on the captcha, ensures that the empty security parameter is not
      * filled (as is commonly done by robots), validates the command object and then uses

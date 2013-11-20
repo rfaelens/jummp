@@ -56,6 +56,7 @@ import org.springframework.transaction.TransactionStatus
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 /**
  * @short Service for User administration.
  *
@@ -80,6 +81,8 @@ class UserService implements IUserService {
      */
     @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
+    
+    def grailsLinkGenerator
     /**
      * Random number generator for creating user validation ids.
      */
@@ -376,19 +379,16 @@ class UserService implements IUserService {
         user.passwordForgottenInvalidation = codeInvalidation.getTime()
         user.save(flush: true)
         // send out notification mail
-        if (grailsApplication.config.jummp.security.resetPassword.email.send) {
-            String recipient = user.email
-            String url = grailsApplication.config.jummp.security.resetPassword.url
-            url = url.replace("{{CODE}}", user.passwordForgottenCode)
-            String emailBody = grailsApplication.config.jummp.security.resetPassword.email.body
-            emailBody = emailBody.replace("{{NAME}}", user.userRealName)
-            emailBody = emailBody.replace("{{URL}}", url)
-            mailService.sendMail {
+        String recipient = user.email
+        String url = grailsLinkGenerator.link(controller: 'usermanagement', action: 'passwordreset', id: user.passwordForgottenCode, absolute: true)
+        String emailBody = grailsApplication.config.jummp.security.resetPassword.email.body
+        emailBody = emailBody.replace("{{REALNAME}}", user.userRealName)
+        emailBody = emailBody.replace("{{URL}}", url)
+        mailService.sendMail {
                 to recipient
-                from grailsApplication.config.jummp.security.resetPassword.email.sender
+                from grailsApplication.config.jummp.security.registration.email.sender
                 subject grailsApplication.config.jummp.security.resetPassword.email.subject
                 body emailBody
-            }
         }
     }
 

@@ -69,7 +69,6 @@ Brief description of the plugin.
         	}
         	props.load(new FileInputStream(pathToConfig))
         } catch (Exception ignored) {
-        	ignored.printStackTrace()
         }
         def jummpConfig = new ConfigSlurper().parse(props)
         if (jummpConfig.jummp.vcs.plugin == "git") {
