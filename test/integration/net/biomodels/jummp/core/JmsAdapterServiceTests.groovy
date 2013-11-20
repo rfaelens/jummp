@@ -63,6 +63,7 @@ import net.biomodels.jummp.core.user.JummpAuthentication
 import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
 import java.util.concurrent.Callable
 
+@TestMixin(IntegrationTestMixin)
 class JmsAdapterServiceTests extends JummpIntegrationTest {
     def aclUtilService
     def modelService

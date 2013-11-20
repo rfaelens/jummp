@@ -53,6 +53,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 
 import org.springframework.security.acls.domain.BasePermission
 
+@TestMixin(IntegrationTestMixin)
 class ModelHistoryServiceTests extends JummpIntegrationTest {
     /**
      * Dependency Injection of Grails Application

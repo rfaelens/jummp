@@ -53,6 +53,7 @@ import static org.junit.Assert.*
 /**
  * Test for SbmlService parts which require a running core to retrieve Models.
  */
+@TestMixin(IntegrationTestMixin)
 class SbmlServiceTests extends JummpIntegrationTest {
     /**
      * Dependency injection of SbmlService

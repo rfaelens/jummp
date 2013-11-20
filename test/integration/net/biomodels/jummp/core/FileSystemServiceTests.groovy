@@ -39,6 +39,7 @@ import java.util.UUID
 import org.junit.*
 import org.apache.commons.io.FileUtils
 
+@TestMixin(IntegrationTestMixin)
 class FileSystemServiceTests {
     def fileSystemService
     def grailsApplication

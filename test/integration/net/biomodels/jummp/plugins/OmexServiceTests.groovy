@@ -50,6 +50,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.junit.*
 import static org.junit.Assert.*
 
+@TestMixin(IntegrationTestMixin)
 class OmexServiceTests extends JummpIntegrationTest {
 
     def fileSystemService

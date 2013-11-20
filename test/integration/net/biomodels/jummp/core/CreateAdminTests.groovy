@@ -40,6 +40,7 @@ import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.plugins.security.UserRole
 import net.biomodels.jummp.plugins.security.Role
 
+@TestMixin(IntegrationTestMixin)
 class CreateAdminTests extends JummpIntegrationTest {
     def userService
     @Override

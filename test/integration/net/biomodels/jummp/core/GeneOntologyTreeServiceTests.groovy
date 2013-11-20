@@ -48,6 +48,7 @@ import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.core.miriam.MiriamResource
 
+@TestMixin(IntegrationTestMixin)
 class GeneOntologyTreeServiceTests extends JummpIntegrationTest {
     def geneOntologyTreeService
 

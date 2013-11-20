@@ -43,6 +43,7 @@ import net.biomodels.jummp.core.model.UnknownFormatService
 import org.apache.commons.io.FileUtils
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 
+@TestMixin(IntegrationTestMixin)
 class ModelFileFormatServiceTests {
     def modelFileFormatService
     def grailsApplication

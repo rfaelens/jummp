@@ -47,6 +47,7 @@ import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.core.miriam.GeneOntology
 import net.biomodels.jummp.core.miriam.GeneOntologyRelationship
 
+@TestMixin(IntegrationTestMixin)
 class MiriamServiceTests extends JummpIntegrationTest {
     def miriamService
 

@@ -45,6 +45,7 @@ import org.apache.commons.io.FileUtils
 import org.junit.*
 import static org.junit.Assert.*
 
+@TestMixin(IntegrationTestMixin)
 class SearchTests extends JummpIntegrationTest {
     def modelService
     def fileSystemService

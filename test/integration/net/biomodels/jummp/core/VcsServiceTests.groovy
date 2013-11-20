@@ -63,6 +63,7 @@ import org.springframework.core.io.FileSystemResourceLoader
 import java.util.List
 import java.util.LinkedList
 
+@TestMixin(IntegrationTestMixin)
 class VcsServiceTests extends JummpIntegrationTest implements ApplicationContextAware {
     /**
      * Dependency injection of the service we want to test

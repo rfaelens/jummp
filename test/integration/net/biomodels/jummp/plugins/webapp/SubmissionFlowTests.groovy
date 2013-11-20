@@ -53,6 +53,7 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import static org.junit.Assert.*
 
+@TestMixin(IntegrationTestMixin)
 class SubmissionFlowTests extends JummpIntegrationTest {
     
     def grailsApplication

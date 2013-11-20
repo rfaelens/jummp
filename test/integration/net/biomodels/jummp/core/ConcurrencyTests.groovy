@@ -66,7 +66,7 @@ when threads are accessing different models (which should occur concurrently)
 and when threads are accessing the same model (which should result in sequential access)
 */
 
-
+@TestMixin(IntegrationTestMixin)
 class ConcurrencyTests extends JummpIntegrationTest {
 
     def vcsService

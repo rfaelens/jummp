@@ -50,6 +50,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.junit.*
 import static org.junit.Assert.*
 
+@TestMixin(IntegrationTestMixin)
 class PharmMlServiceTests extends JummpIntegrationTest {
 
     def fileSystemService

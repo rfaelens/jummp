@@ -47,6 +47,7 @@ import net.biomodels.jummp.core.user.UserCodeExpiredException
 import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserNotFoundException
 
+@TestMixin(IntegrationTestMixin)
 class UserServiceTests extends JummpIntegrationTest {
     def userService
     def grailsApplication

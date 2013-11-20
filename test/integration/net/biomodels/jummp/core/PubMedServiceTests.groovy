@@ -38,6 +38,7 @@ import static org.junit.Assert.*
 import org.junit.*
 import net.biomodels.jummp.model.Publication
 
+@TestMixin(IntegrationTestMixin)
 class PubMedServiceTests extends JummpIntegrationTest {
     def pubMedService
     

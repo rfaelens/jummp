@@ -56,6 +56,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
 import static org.junit.Assert.*
 
+@TestMixin(IntegrationTestMixin)
 class ModelServiceTests extends JummpIntegrationTest {
     def aclUtilService
     def modelService
