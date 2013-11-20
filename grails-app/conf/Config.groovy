@@ -20,8 +20,6 @@
 
 
 
-
-
 // locations to search for config files that get merged into the main config
 // config files can either be Java properties files or ConfigSlurper scripts
 
@@ -36,7 +34,14 @@
 
 Properties jummpProperties = new Properties()
 try {
-    jummpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"))
+	def service = new net.biomodels.jummp.plugins.configuration.ConfigurationService()
+    String pathToConfig=service.getConfigFilePath()
+    if (pathToConfig) {
+    	jummpProperties.load(new FileInputStream(pathToConfig))
+    }
+    else {
+    	throw new Exception("No config file available, using defaults")
+    }
 } catch (Exception ignored) {
     jummpProperties.setProperty("jummp.security.ldap.enabled", "false")
     jummpProperties.setProperty("jummp.security.registration.email.send", "false")

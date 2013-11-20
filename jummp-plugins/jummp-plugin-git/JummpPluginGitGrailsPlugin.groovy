@@ -29,11 +29,9 @@
 **/
 
 
-
-
-
 import net.biomodels.jummp.plugins.git.GitManagerFactory
 import grails.util.Environment
+import net.biomodels.jummp.plugins.configuration.ConfigurationService
 
 class JummpPluginGitGrailsPlugin {
     // the plugin version
@@ -46,7 +44,6 @@ class JummpPluginGitGrailsPlugin {
     def pluginExcludes = [
             "grails-app/views/error.gsp"
     ]
-
     // TODO Fill in these fields
     def author = "Your name"
     def authorEmail = ""
@@ -65,9 +62,14 @@ Brief description of the plugin.
     def doWithSpring = {
         Properties props = new Properties()
         try {
-            props.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") +
-                    ".jummp.properties"))
+        	ConfigurationService service = new ConfigurationService()
+        	String pathToConfig=service.getConfigFilePath()
+        	if (!pathToConfig) {
+        		throw new Exception("No config file available, using defaults")
+        	}
+        	props.load(new FileInputStream(pathToConfig))
         } catch (Exception ignored) {
+        	ignored.printStackTrace()
         }
         def jummpConfig = new ConfigSlurper().parse(props)
         if (jummpConfig.jummp.vcs.plugin == "git") {

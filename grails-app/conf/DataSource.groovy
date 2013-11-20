@@ -24,7 +24,12 @@
 
 Properties databaseProperties = new Properties()
 try {
-    databaseProperties.load(new FileInputStream(System.getProperty("user.home") + "/.jummp.properties"))
+	def service = new net.biomodels.jummp.plugins.configuration.ConfigurationService()
+    String pathToConfig=service.getConfigFilePath()
+    if (!pathToConfig) {
+    	throw new Exception("No config file available, using defaults")
+    }
+    databaseProperties.load(new FileInputStream(pathToConfig))
     String server = databaseProperties.getProperty("jummp.database.server")
     String port = databaseProperties.getProperty("jummp.database.port")
     String database = databaseProperties.getProperty("jummp.database.database")

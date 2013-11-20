@@ -370,7 +370,7 @@ class SetupController {
             	{
             		userService.createAdmin(flow.user)
                     Properties props = new Properties()
-                    File file = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
+                    File file = new File(configurationService.getConfigFilePath())
                     props.load(new FileInputStream(file))
                     props.setProperty("jummp.firstRun", "false")
                     FileOutputStream out = new FileOutputStream(file)

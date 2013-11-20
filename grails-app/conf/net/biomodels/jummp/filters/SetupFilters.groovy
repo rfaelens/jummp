@@ -56,14 +56,16 @@ import org.springframework.beans.factory.InitializingBean
 class SetupFilters implements InitializingBean {
     private boolean configFileExists = false
     private boolean firstRun = false
+    def configurationService
 
     public void afterPropertiesSet() throws Exception {
-        File configurationProperties = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
-        configFileExists = configurationProperties.exists()
-        if (configFileExists) {
+        String configPath=configurationService.getConfigFilePath()
+        if (configPath) {
+        	configFileExists=true
             Properties props = new Properties()
-            props.load(new FileInputStream(configurationProperties))
-            firstRun = Boolean.parseBoolean(props.getProperty("jummp.firstRun"))
+            props.load(new FileInputStream(configPath))
+           // firstRun = Boolean.parseBoolean(props.getProperty("jummp.firstRun"))
+           firstRun = false //disabling the non-functioning admin creation mechanism
         } else {
             firstRun = false
         }

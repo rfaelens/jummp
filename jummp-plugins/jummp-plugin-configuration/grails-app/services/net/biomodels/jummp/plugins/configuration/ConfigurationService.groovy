@@ -62,8 +62,22 @@ class ConfigurationService implements InitializingBean {
     @SuppressWarnings('GrailsStatelessService')
     File configurationFile = null
 
+    String getConfigFilePath() {
+    	String path = System.getenv("JUMMP_CONFIG");
+    	if (!path) {
+    		path=System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"
+    		File testFile=new File(path)
+    		if (!testFile.exists()) {
+    			path=null
+    		}
+    	}
+    	return path
+    }
+    
+    
     void afterPropertiesSet() {
-        if (!configurationFile) {
+    	String configPath=getConfigFilePath()
+        if (!configurationFile && configPath) {
             configurationFile = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
         }
     }
@@ -802,6 +816,10 @@ class ConfigurationService implements InitializingBean {
     private void saveProperties(Properties properties) {
         lock.lock()
         try {
+        	if (!configurationFile) {
+        		// There is no location specified. Using the default location.
+        		configurationFile = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
+        	}
             FileOutputStream out = new FileOutputStream(configurationFile)
             properties.store(out, "Jummp Configuration")
         } finally {
