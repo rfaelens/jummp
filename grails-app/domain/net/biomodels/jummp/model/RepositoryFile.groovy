@@ -82,9 +82,8 @@ class RepositoryFile implements Serializable {
     String mimeType
 
     static constraints = {
-        path(blank: false,
+        path(blank: false, nullable: false,
             validator: { p, rf ->
-                String sep  = File.separator
                 if (!p || !new File(p).exists()) {
                     return false
                 }
@@ -95,11 +94,11 @@ class RepositoryFile implements Serializable {
                 p = f.name
                 if (!rf.mimeType.equals(properType)) {
                     rf.mimeType = properType
-                    return true
                 }
+                return true
             })
-        description(blank: true, maxSize:500)
+        description(nullable: true, maxSize:500)
         //content type detection is performed above, when we validate the path of the file
-        mimeType(nullable: true, blank: true)
+        mimeType(nullable: true)
     }
 }

@@ -34,18 +34,13 @@
 
 package net.biomodels.jummp.model
 
-import grails.test.*
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
 import net.biomodels.jummp.plugins.security.User
 
-class RevisionTests extends GrailsUnitTestCase {
-    protected void setUp() {
-        super.setUp()
-    }
-
-    protected void tearDown() {
-        super.tearDown()
-    }
-
+@TestFor(Revision)
+@Mock(Model)
+class RevisionTests {
     @SuppressWarnings('UnusedVariable')
     void testConstraints() {
         Model model = new Model(vcsIdentifier: "test", name: "test")
@@ -63,6 +58,11 @@ class RevisionTests extends GrailsUnitTestCase {
         assertEquals("nullable", revision.errors["comment"])
         assertEquals("nullable", revision.errors["owner"])
         assertEquals("nullable", revision.errors["format"])
+
+        // a comment cannot be blank
+        revision = new Revision(comment: '')
+        assertFalse(revision.validate())
+        assertEquals("nullable", revision.errors["comment"])
 
         // verify vcsId uniqueness constraint
         revision = new Revision(vcsId: "1")
@@ -82,10 +82,6 @@ class RevisionTests extends GrailsUnitTestCase {
         revision = new Revision(comment: comment)
         assertFalse(revision.validate())
         assertEquals("maxSize", revision.errors["comment"])
-        // a comment may be blank
-        revision = new Revision(comment: '')
-        assertFalse(revision.validate())
-        assertNull(revision.errors["comment"])
         // a comment may be smaller than 1000
         comment = ""
         for (int i=0; i<1000; i++) {
@@ -95,23 +91,20 @@ class RevisionTests extends GrailsUnitTestCase {
         assertFalse(revision.validate())
         assertNull(revision.errors["comment"])
 
-        
         // verify description constraints
-        // a description may be blank
+        // a description cannot be blank
         revision = new Revision(description: '')
         assertFalse(revision.validate())
-        assertNull(revision.errors["description"])
+        assertEquals("nullable", revision.errors["description"])
 
-        
         // verify name constraints
-        // a name may be blank
+        // a name cannot be blank
         revision = new Revision(name: '')
         assertFalse(revision.validate())
-        assertNull(revision.errors["name"])
+        assertEquals("nullable", revision.errors["name"])
 
-        
         // verify that a correct Revision is valid
-        revision = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: owner, minorRevision: true, uploadDate: new Date(), name:'',description:'', comment: '', format: new ModelFormat(identifier: "UNKNOWN", name: "unknown"))
+        revision = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: owner, minorRevision: true, uploadDate: new Date(), name:'test',description:'pointless', comment: 'fictional', format: new ModelFormat(identifier: "UNKNOWN", name: "unknown"))
         assertTrue(revision.validate())
     }
 }

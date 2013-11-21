@@ -36,6 +36,7 @@ package net.biomodels.jummp.model
 
 import grails.test.*
 import grails.test.mixin.TestFor
+import net.biomodels.jummp.plugins.security.User
 
 @TestFor(Model)
 class ModelTests {
@@ -48,13 +49,12 @@ class ModelTests {
         assertEquals("nullable", model.errors["vcsIdentifier"])
         assertEquals("nullable", model.errors["name"])
         assertEquals("nullable", model.errors["revisions"])
-        // test for blank
         model = new Model()
         model.name = ""
         model.vcsIdentifier = ""
         assertFalse(model.validate())
         assertEquals("blank", model.errors["vcsIdentifier"])
-        assertNull("blank", model.errors["name"])
+        assertNull(model.errors["name"])
         assertEquals("nullable", model.errors["revisions"])
         // test for uniqueness
         model = new Model()
@@ -73,11 +73,13 @@ class ModelTests {
         assertEquals("validator", model.errors["revisions"])
         // try a valid model
         model = new Model()
-        Revision revision = new Revision()
+        User owner = new User(username: "testUser", password: "secret", userRealName: "Test User", email: "test@user.org", enabled: true, accountExpired: false, accountLocked: false, passwordExpired: false)
+        Revision revision = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: owner, minorRevision: true, uploadDate: new Date(), name:'test',description:'pointless', comment: 'fictional', format: new ModelFormat(identifier: "UNKNOWN", name: "unknown"))
         mockDomain(Revision, [revision])
         model.revisions = [revision] as Set
         model.name = "Model"
         model.vcsIdentifier = "1234"
         assertTrue(model.validate())
+        assertFalse(model.hasErrors())
     }
 }

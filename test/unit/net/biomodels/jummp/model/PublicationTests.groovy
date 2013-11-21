@@ -28,8 +28,9 @@
 * that of the covered work.}
 **/
 
-/*
-* Author: raza.ali@ebi.ac.uk
+/**
+* @author Raza Ali <raza.ali@ebi.ac.uk>
+* @author Mihai Glonț <mihai.glont@ebi.ac.uk>
 */
 
 
@@ -38,15 +39,7 @@ package net.biomodels.jummp.model
 
 import grails.test.*
 
-class PublicationTests extends GrailsUnitTestCase {
-    protected void setUp() {
-        super.setUp()
-    }
-
-    protected void tearDown() {
-        super.tearDown()
-    }
-
+class PublicationTests {
     @SuppressWarnings('UnusedVariable')
     void testConstraints() {
         mockForConstraintsTests(Publication)
@@ -60,10 +53,10 @@ class PublicationTests extends GrailsUnitTestCase {
         // test for blank
         publication = new Publication(journal: "", title: "", affiliation: "", synopsis: "")
         assertFalse(publication.validate())
-        assertEquals("blank", publication.errors["journal"])
-        assertEquals("blank", publication.errors["title"])
-        assertEquals("blank", publication.errors["affiliation"])
-        assertNull(publication.errors["synopsis"])
+        assertEquals("nullable", publication.errors["journal"])
+        assertEquals("nullable", publication.errors["title"])
+        assertEquals("nullable", publication.errors["affiliation"])
+        assertEquals("nullable", publication.errors["synopsis"])
         // test for max size of synopsis
         String synopsis = ""
         for (int i=0; i<=5000; i++) {

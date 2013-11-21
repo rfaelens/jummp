@@ -39,6 +39,7 @@ import grails.validation.Validateable
 /**
  * Command Object for validating LDAP settings.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 @Validateable
 class LdapCommand implements Serializable {
@@ -54,8 +55,8 @@ class LdapCommand implements Serializable {
         ldapServer(nullable: false, blank: false)
         ldapManagerDn(nullable: false, blank: false)
         ldapManagerPassword(nullable: false, blank: false)
-        ldapSearchBase(nullable: false, blank: true)
-        ldapSearchFilter(nullable: false, blank: true)
+        ldapSearchBase(nullable: true)
+        ldapSearchFilter(nullable: true)
         ldapSearchSubtree(nullable: false)
     }
 }

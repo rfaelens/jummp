@@ -48,43 +48,41 @@ class VcsCommand implements Serializable {
     String exchangeDirectory
 
     static constraints = {
-        vcs(blank: false,
-            nullable: false,
+        vcs(nullable: false,
             validator: { vcs, cmd ->
                 return (vcs == "svn" || vcs == "git")
             })
-        workingDirectory(blank: true,
-                nullable: false,
+        workingDirectory(nullable: false,
                 validator: { workingDirectory, cmd ->
-                    if (!workingDirectory.isEmpty()) {
-                        // if it is not empty it has to be a directory
-                        File directory = new File((String)workingDirectory)
-                        if (!directory.exists() || !directory.isDirectory()) {
-                            return false
-                        }
-                        if (workingDirectory == cmd.exchangeDirectory) {
-                            return false
-                        }
+                    if (!workingDirectory) {
+                        return false
                     }
-                    if (cmd.vcs == "git") {
-                        // TODO: verify that workingDirectory is a git directory
-                        return !workingDirectory.isEmpty()
+                    //it has to be a directory
+                    File directory = new File((String)workingDirectory)
+                    if (!directory.exists() || !directory.isDirectory()) {
+                        return false
                     }
+                    if (workingDirectory == cmd.exchangeDirectory) {
+                        return false
+                    }
+                    // TODO: verify that workingDirectory is a git directory
+
                     return true
                 })
-        exchangeDirectory(blank: true,
-                nullable: false,
+        exchangeDirectory(nullable: false,
                 validator: { exchangeDirectory, cmd ->
-                    if (!exchangeDirectory.isEmpty()) {
-                        // if it is not empty it has to be a directory
-                        File directory = new File((String)exchangeDirectory)
-                        if (!directory.exists() || !directory.isDirectory()) {
-                            return false
-                        }
-                        if (exchangeDirectory == cmd.workingDirectory) {
-                            return false
-                        }
+                    if (!exchangeDirectory) {
+                        return false
                     }
+                    //it has to be a directory
+                    File directory = new File((String)exchangeDirectory)
+                    if (!directory.exists() || !directory.isDirectory()) {
+                        return false
+                    }
+                    if (exchangeDirectory == cmd.workingDirectory) {
+                        return false
+                    }
+
                     return true
                 })
     }
