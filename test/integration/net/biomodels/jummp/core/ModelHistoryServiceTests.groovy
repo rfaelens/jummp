@@ -34,24 +34,23 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
-import org.junit.*
-import net.biomodels.jummp.plugins.git.GitManagerFactory
-import net.biomodels.jummp.plugins.security.Role
-import net.biomodels.jummp.plugins.security.User
-
-import net.biomodels.jummp.core.model.ModelTransportCommand
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
-
+import net.biomodels.jummp.plugins.git.GitManagerFactory
+import net.biomodels.jummp.plugins.security.Role
+import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-
+import org.junit.*
 import org.springframework.security.acls.domain.BasePermission
+import static org.junit.Assert.*
 
 @TestMixin(IntegrationTestMixin)
 class ModelHistoryServiceTests extends JummpIntegrationTest {

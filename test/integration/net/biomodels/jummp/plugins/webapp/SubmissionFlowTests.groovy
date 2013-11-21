@@ -36,6 +36,8 @@
 package net.biomodels.jummp.plugins.webapp
 
 import grails.test.WebFlowTestCase
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.core.JummpIntegrationTest
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -47,9 +49,9 @@ import net.biomodels.jummp.webapp.ModelController
 import org.apache.commons.io.FileUtils
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.junit.*
+import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.mock.web.MockMultipartHttpServletRequest
-import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import static org.junit.Assert.*
 

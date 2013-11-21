@@ -48,6 +48,8 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.junit.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import static org.junit.Assert.*
 
 /**

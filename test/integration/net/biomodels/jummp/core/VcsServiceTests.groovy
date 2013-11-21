@@ -37,31 +37,31 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
-import org.junit.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
+import net.biomodels.jummp.core.vcs.FileNotVersionedException
+import net.biomodels.jummp.core.vcs.VcsException
+import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.ModelFormat
+import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.git.GitManagerFactory
+import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.lib.Repository
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import org.tmatesoft.svn.core.io.SVNRepositoryFactory
-import org.springframework.context.ApplicationContextAware
-import org.springframework.context.ApplicationContext
-import org.springframework.security.access.AccessDeniedException
-import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.model.Revision
-import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.core.vcs.VcsException
-import net.biomodels.jummp.core.vcs.FileNotVersionedException
-import org.eclipse.jgit.lib.ObjectId
-import org.eclipse.jgit.revwalk.RevWalk
-import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.lib.Constants
-import net.biomodels.jummp.model.ModelFormat
-import org.springframework.mock.web.MockServletContext
+import org.eclipse.jgit.lib.ObjectId
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.revwalk.RevCommit
+import org.eclipse.jgit.revwalk.RevWalk
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.junit.*
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
 import org.springframework.core.io.FileSystemResourceLoader
-import java.util.List
-import java.util.LinkedList
+import org.springframework.mock.web.MockServletContext
+import org.springframework.security.access.AccessDeniedException
+//import org.tmatesoft.svn.core.io.SVNRepositoryFactory
+import static org.junit.Assert.*
 
 @TestMixin(IntegrationTestMixin)
 class VcsServiceTests extends JummpIntegrationTest implements ApplicationContextAware {

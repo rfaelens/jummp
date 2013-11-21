@@ -36,27 +36,29 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
-import org.junit.*
-import org.springframework.context.ApplicationContextAware
-import org.springframework.context.ApplicationContext
 import edu.umd.cs.mtc.MultithreadedTestCase
 import edu.umd.cs.mtc.TestFramework
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import java.util.concurrent.atomic.AtomicInteger
-import org.springframework.mock.web.MockServletContext
-import org.springframework.core.io.FileSystemResourceLoader
-import org.apache.commons.io.FileUtils
-import net.biomodels.jummp.plugins.git.GitManagerFactory
 import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.model.Revision
-import net.biomodels.jummp.plugins.security.User
-import org.eclipse.jgit.lib.Repository
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import org.eclipse.jgit.lib.ObjectId
-import org.eclipse.jgit.revwalk.RevWalk
-import org.eclipse.jgit.revwalk.RevCommit
-import org.eclipse.jgit.lib.Constants
 import net.biomodels.jummp.model.ModelFormat
+import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.plugins.git.GitManagerFactory
+import net.biomodels.jummp.plugins.security.User
+import org.apache.commons.io.FileUtils
+import org.eclipse.jgit.lib.Constants
+import org.eclipse.jgit.lib.ObjectId
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.revwalk.RevCommit
+import org.eclipse.jgit.revwalk.RevWalk
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.junit.*
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
+import org.springframework.core.io.FileSystemResourceLoader
+import org.springframework.mock.web.MockServletContext
+import static org.junit.Assert.*
 
 /*These tests are written to test the concurrent use of VcsManager.
 They do not aim to test other concurrency aspects of Jummp, although

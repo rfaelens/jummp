@@ -34,18 +34,20 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
-import org.junit.*
-import org.springframework.security.authentication.BadCredentialsException
-import net.biomodels.jummp.plugins.security.Role
-import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.plugins.security.UserRole
-import org.springframework.security.access.AccessDeniedException
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.core.user.RegistrationException
 import net.biomodels.jummp.core.user.RoleNotFoundException
 import net.biomodels.jummp.core.user.UserCodeExpiredException
 import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserNotFoundException
+import net.biomodels.jummp.plugins.security.Role
+import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.UserRole
+import org.junit.*
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.authentication.BadCredentialsException
+import static org.junit.Assert.*
 
 @TestMixin(IntegrationTestMixin)
 class UserServiceTests extends JummpIntegrationTest {

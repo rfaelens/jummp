@@ -34,14 +34,16 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
-import org.junit.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
+import net.biomodels.jummp.core.model.FileFormatService
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.core.model.UnknownFormatService
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.plugins.sbml.SbmlService
-import net.biomodels.jummp.core.model.FileFormatService
-import net.biomodels.jummp.core.model.UnknownFormatService
 import org.apache.commons.io.FileUtils
-import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import org.junit.*
+import static org.junit.Assert.*
 
 @TestMixin(IntegrationTestMixin)
 class ModelFileFormatServiceTests {

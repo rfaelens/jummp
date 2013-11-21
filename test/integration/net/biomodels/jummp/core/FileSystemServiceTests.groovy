@@ -34,10 +34,12 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import java.util.UUID
-import org.junit.*
 import org.apache.commons.io.FileUtils
+import org.junit.*
+import static org.junit.Assert.*
 
 @TestMixin(IntegrationTestMixin)
 class FileSystemServiceTests {
