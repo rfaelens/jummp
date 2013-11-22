@@ -37,3 +37,6 @@
     <div class='errors'>Sorry, you're not authorized to view this page.</div>
 </div>
 </body>
+<content tag="title">
+	Denied
+</content>

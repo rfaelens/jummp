@@ -35,7 +35,6 @@
         <g:javascript contextPath="" src="useradministration.js"/>
      </head>
     <body>
-        <h1><g:message code="user.administration.ui.heading.user"/></h1>
         <div>
         <form id="edit-user-form" method="POST">
             <table>
@@ -110,3 +109,6 @@ $(function() {
         </g:javascript>
     </body>
 </html>
+<content tag="title">
+	<g:message code="user.administration.ui.heading.user"/>
+</content>

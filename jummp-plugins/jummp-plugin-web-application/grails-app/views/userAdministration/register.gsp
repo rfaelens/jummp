@@ -36,7 +36,6 @@
         
     </head>
     <body>
-        <h1><g:message code="user.administration.ui.heading.register"/></h1>
         <div>
             <form id="registerForm">
                 <table>
@@ -76,3 +75,6 @@ $(function() {
         </g:javascript>
     </body>
 </html>
+<content tag="title">
+	<g:message code="user.administration.ui.heading.register"/>
+</content>

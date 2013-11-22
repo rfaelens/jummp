@@ -88,3 +88,6 @@ $(function() {
         </g:javascript>
     </body>
 </html>
+<content tag="title">
+	User Administration
+</content>

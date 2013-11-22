@@ -170,6 +170,4 @@
             });
         </g:javascript>
     </body>
-    <content tag="submit">
-    	selected
-    </content>
+   <g:render template="/templates/decorateSubmission" />

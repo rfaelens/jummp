@@ -47,7 +47,6 @@
         <g:javascript contextPath="" src="showmodels.js"/>
     </head>
     <body activetab="search">
-    	<h2><g:message code="model.list.heading"/></h2>
     	  <div class="content">
     	  <div class="view view-dom-id-9c00a92f557689f996511ded36a88594">
     	<div class="view-content">
@@ -87,4 +86,7 @@
     </content>
     <content tag="browse">
     	selected
+    </content>
+    <content tag="title">
+    	<g:message code="model.list.heading"/>
     </content>

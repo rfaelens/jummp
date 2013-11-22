@@ -36,7 +36,6 @@
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
     </head>
      <body>
-        <h2><g:message code="user.forgot.ui.heading"/></h2>
         <p><g:message code="user.forgot.ui.explanation"/></p>
         <div>
             <g:form name="passwordForm" action="requestPassword">
@@ -54,4 +53,7 @@
             </g:form>
         </div>
         </body>
-</html
+</html>
+<content tag="title">
+	<g:message code="user.forgot.ui.heading"/>
+</content>

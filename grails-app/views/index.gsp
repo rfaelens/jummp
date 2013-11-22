@@ -39,3 +39,6 @@
         <wcm:render path="main-sidebar"/>
     </content>
 </html>
+<content tag="title">
+	DDMoRe Model Repository
+</content>

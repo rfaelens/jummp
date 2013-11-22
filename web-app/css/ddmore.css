@@ -75,7 +75,7 @@ a.tabledrag-handle .handle {
     height: 13px;
     margin: -0.4em 0.5em;
     padding: 0.42em 0.5em;
-    width: 13px;
+    width:  1.3%;
 }
 a.tabledrag-handle-hover .handle {
     background-position: 6px -11px;
@@ -85,7 +85,7 @@ div.indentation {
     height: 1.7em;
     margin: -0.4em 0.2em -0.4em -0.4em;
     padding: 0.42em 0 0.42em 0.6em;
-    width: 20px;
+    width:  2.0%;
 }
 div.tree-child {
     background: url(//ddmore.eu/misc/tree.png) no-repeat 11px center;
@@ -110,7 +110,7 @@ table.sticky-header {
 .progress .filled {
     background-color: #000;
     height: 1.5em;
-    width: 5px;
+    width:  0.5%;
 }
 .progress .percentage {
     float: right;
@@ -123,10 +123,10 @@ table.sticky-header {
     float: left;
     height: 15px;
     margin: 2px;
-    width: 15px;
+    width:  1.5%;
 }
 .ajax-progress .message {
-    padding-left: 20px;
+    padding-left:  2.0%;
 }
 tr .ajax-progress .throbber {
     margin: 0 2px;
@@ -224,7 +224,7 @@ ul.primary {
     height: auto;
     line-height: normal;
     list-style: none;
-    margin: 5px;
+    margin:  0.5%;
     padding: 0 0 0 1em;
     white-space: nowrap;
 }
@@ -254,7 +254,7 @@ ul.primary li a:hover {
 ul.secondary {
     border-bottom: 1px solid #bbb;
     padding: 0.5em 1em;
-    margin: 5px;
+    margin:  0.5%;
 }
 ul.secondary li {
     border-right: 1px solid #ccc;
@@ -434,7 +434,7 @@ input.form-checkbox, input.form-radio {
 }
 html.js fieldset.collapsible .fieldset-legend {
     background: url(//ddmore.eu/misc/menu-expanded.png) 5px 65% no-repeat;
-    padding-left: 15px;
+    padding-left:  1.5%;
 }
 html.js fieldset.collapsed .fieldset-legend {
     background-image: url(//ddmore.eu/misc/menu-collapsed.png);
@@ -482,7 +482,7 @@ td.checkbox, th.checkbox {
     margin-top: 15px;
 }
 .indented {
-    margin-left: 25px;
+    margin-left:  2.5%;
 }
 .comment-unpublished {
     background-color: #fff4f4;
@@ -515,7 +515,7 @@ td.checkbox, th.checkbox {
     clear: both;
 }
 .container-inline-date .form-item input, .container-inline-date .form-item select, .container-inline-date .form-item option {
-    margin-right: 5px;
+    margin-right:  0.5%;
 }
 .container-inline-date .date-spacer {
     margin-left: -5px;
@@ -530,7 +530,7 @@ td.checkbox, th.checkbox {
     width: auto;
 }
 .container-inline-date .date-padding {
-    padding: 10px;
+    padding:  1.0%;
     float: left;
 }
 .views-exposed-form .container-inline-date .date-padding {
@@ -588,7 +588,7 @@ span.date-display-end {
 }
 .date-container .date-format-type {
     float: left;
-    padding-left: 10px;
+    padding-left:  1.0%;
 }
 .date-container .select-container {
     clear: left;
@@ -605,7 +605,7 @@ div.date-calendar-day {
     line-height: 1;
     margin: 6px 10px 0 0;
     text-align: center;
-    width: 40px;
+    width:  4.0%;
 }
 div.date-calendar-day span {
     display: block;
@@ -649,7 +649,7 @@ form .field-multiple-table th.field-label {
     padding-left: 0;
 }
 form .field-multiple-table td.field-multiple-drag {
-    width: 30px;
+    width:  3.0%;
     padding-right: 0;
 }
 form .field-multiple-table td.field-multiple-drag a.tabledrag-handle {
@@ -840,7 +840,7 @@ a.ctools-ajaxing, input.ctools-ajaxing, button.ctools-ajaxing, select.ctools-aja
 }
 div.ctools-ajaxing {
     float: left;
-    width: 18px;
+    width:  1.8%;
     background: url(//ddmore.eu/sites/all/modules/contrib/ctools/images/status-active.gif) center center no-repeat;
 }
 
@@ -1715,8 +1715,8 @@ a:hover {
     display: inline-block;
     border-left: 1px solid #cacaca;
     line-height: 16px;
-    padding-left: 10px;
-    margin-left: 8px;
+    padding-left:  1.0%;
+    margin-left:  0.8%;
 }
 #header .user-menu ul li a {
     font-size: 11.5px;
@@ -1761,7 +1761,7 @@ a:hover {
     margin: 0 0 0 0;
     right: 3px;
     top: 4px;
-    width: 20px;
+    width:  2.0%;
     height: 19px;
     border-left: 1px solid #e6e6e6;
     background-image: url(//ddmore.eu/sites/ddmore/themes/ddmore/images/l_search.png);
@@ -1784,7 +1784,7 @@ a:hover {
 }
 .main-menu ul {
     padding-top: 16px;
-    padding-left: 15px;
+    padding-left:  1.5%;
 }
 .main-menu ul li {
     float: left;
@@ -1816,7 +1816,7 @@ a:hover {
 }
 .main-menu ul li.expanded ul {
     display: none;
-    padding: 10px;
+    padding:  1.0%;
     margin: 0;
     position: absolute;
     top: 47px;
@@ -1893,7 +1893,7 @@ a:hover {
     position: absolute;
 }
 .earlier-events h2.block-title {
-    margin-left: 20px;
+    margin-left:  2.0%;
 }
 .node .field-name-field-downloads {
     clear: both;
@@ -1910,7 +1910,7 @@ a:hover {
 }
 .node .submitted .user-picture {
     float: left;
-    margin-right: 15px;
+    margin-right:  1.5%;
 }
 .node .submitted .user-picture img {
     border-radius: 3px;
@@ -1939,7 +1939,7 @@ a:hover {
     background: #ffffff;
     color: #aaaaaa;
     padding: 3px 8px;
-    margin-right: 15px;
+    margin-right:  1.5%;
     font-weight: bold;
 }
 .node .field-type-taxonomy-term-reference .field-item a:hover {
@@ -1974,12 +1974,12 @@ a:hover {
 .node table th {
     background: #dddddd;
     border-bottom: 2px solid #cccccc;
-    padding: 5px;
+    padding:  0.5%;
     line-height: 15px;
 }
 .node table tr td {
     border-bottom: 1px solid #e6e6e6;
-    padding: 5px;
+    padding:  0.5%;
 }
 .node table tr.odd {
     background: none;
@@ -2015,7 +2015,7 @@ a:hover {
     padding: 0 40px 0 20px;
 }
 .overview .views-row {
-    padding: 20px;
+    padding:  2.0%;
     list-style: none;
     border-bottom: 1px solid #e1e1e1;
     color: #555555;
@@ -2081,7 +2081,7 @@ a:hover {
     padding: 25px 15px 0 25px;
 }
 .partner-titles ul {
-    padding-left: 15px;
+    padding-left:  1.5%;
 }
 .partner-titles .views-field {
     display: inline-block;
@@ -2136,7 +2136,7 @@ a:hover {
     color: #999999;
 }
 .contacts {
-    padding: 20px;
+    padding:  2.0%;
 }
 .contacts .view-filters {
     padding-bottom: 15px;
@@ -2163,7 +2163,7 @@ a:hover {
     width:  17.5%;
     padding: 10px 15px;
     background: #ffffff;
-    margin-right: 20px;
+    margin-right:  2.0%;
     margin-bottom: 20px;
     border-radius: 3px;
     box-shadow: 1px 1px 2px #dddddd;
@@ -2195,7 +2195,7 @@ a:hover {
     padding-bottom: 5px;
 }
 .contacts .views-row .views-field-field-work-phone, .contacts .views-row .views-field-field-mobile-phone, .contacts .views-row .views-field-mail {
-    padding-left: 20px;
+    padding-left:  2.0%;
     background: url(//ddmore.eu/sites/ddmore/themes/ddmore/images/l_icons.png) 0 3px no-repeat;
 }
 .contacts .views-row .views-label {
@@ -2218,7 +2218,7 @@ a:hover {
 }
 .region-sidebar-second .section {
     padding-top: 42px;
-    padding-right: 20px;
+    padding-right:  2.0%;
 }
 .region-sidebar-second .block {
     border-bottom: 1px solid #e6e6e6;
@@ -2263,7 +2263,7 @@ a:hover {
 }
 .region-sidebar-second .users .views-row .views-field-picture {
     float: left;
-    margin-right: 10px;
+    margin-right:  1.0%;
     margin-top: 4px;
 }
 .region-sidebar-second .users .views-row a {
@@ -2329,7 +2329,7 @@ a:hover {
     padding-bottom: 15px;
 }
 #content-bottom .region {
-    padding: 20px;
+    padding:  2.0%;
 }
 #content-bottom h2 {
     font-size: 16px;
@@ -2413,7 +2413,7 @@ a:hover {
     color: #179349;
     font-size: 14px;
     border-bottom: 1px solid #e6e6e6;
-    margin-right: 20px;
+    margin-right:  2.0%;
     padding-bottom: 5px;
     margin-bottom: 5px;
 }
@@ -2486,7 +2486,7 @@ a:hover {
 }
 .footer-block.quick-facts ul li {
     background: url(//ddmore.eu/sites/ddmore/themes/ddmore/images/l_arrows.png) 0 5px no-repeat;
-    padding-left: 18px;
+    padding-left:  1.8%;
     margin-bottom: 8px;
 }
 .region-bottom {
@@ -2501,7 +2501,7 @@ a:hover {
     margin: 0;
 }
 .view-taxonomy-term .views-field-description ul li {
-    margin-left: 18px;
+    margin-left:  1.8%;
 }
 input.form-text, input.form-select, textarea {
     font-family: inherit;
@@ -2551,7 +2551,7 @@ input.form-submit {
 }
 .comment {
     background: #ffffff;
-    padding: 15px;
+    padding:  1.5%;
     padding-left:  6.0%;
     border-radius: 2px;
     margin-bottom: 20px;
@@ -2662,7 +2662,7 @@ ul.links .comment-add a {
 }
 #timeline .views-row .open-close {
     position: absolute;
-    width: 23px;
+    width:  2.3%;
     height: 23px;
     top: 10px;
     right: 10px;
@@ -2671,7 +2671,7 @@ ul.links .comment-add a {
     cursor: pointer;
 }
 #timeline .views-row .timeline-body, #timeline .views-row .timeline-dates, #timeline .views-row .read-more {
-    margin-left: 8px;
+    margin-left:  0.8%;
 }
 #timeline .views-row.expanded .open-close {
     background: url(//ddmore.eu/sites/ddmore/themes/ddmore/images/timeline-open-close.png) 0 -34px no-repeat;
@@ -2756,7 +2756,7 @@ ul.links .comment-add a {
     display: none;
 }
 #timeline .views-row.milestone .views-field-title {
-    padding-left: 45px;
+    padding-left:  4.5%;
 }
 #timeline .views-field-collection {
     display: none;
@@ -2768,7 +2768,7 @@ ul.links .comment-add a {
 }
 #timeline .view-header .timeline-control {
     cursor: pointer;
-    margin-left: 10px;
+    margin-left:  1.0%;
     color: #aaaaaa;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 12px;
@@ -2776,7 +2776,7 @@ ul.links .comment-add a {
     float: left;
     background: #ffffff;
     border: 1px solid #e6e6e6;
-    padding-left: 8px;
+    padding-left:  0.8%;
     line-height: 28px;
     border-radius: 5px;
     box-shadow: 1px 1px 0 #e6e6e6;
@@ -2785,8 +2785,8 @@ ul.links .comment-add a {
 #timeline .view-header .timeline-control span {
     border-left: 1px solid #e6e6e6;
     display: inline-block;
-    margin-left: 10px;
-    width: 25px;
+    margin-left:  1.0%;
+    width:  2.5%;
     height: 100%;
     background: url(//ddmore.eu/sites/ddmore/themes/ddmore/images/timeline-arrow.png) 8px 11px no-repeat;
 }
@@ -2811,7 +2811,7 @@ ul.links .comment-add a {
     color: #aaaaaa;
     text-shadow: 1px 1px 0 #ffffff;
     padding-bottom: 3px;
-    padding-left: 5px;
+    padding-left:  0.5%;
 }
 #block-views-exp-timeline-page select, #block-views-exp-timeline-page option {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -2879,10 +2879,10 @@ ul.links .comment-add a {
     position: absolute;
     background: #f6f6f6;
     box-shadow: 0 0 3px #f0f0f0 inset;
-    width: 25px;
+    width:  2.5%;
     text-align: right;
-    padding: 5px;
-    margin-right: 20px;
+    padding:  0.5%;
+    margin-right:  2.0%;
     line-height: 13px;
     font-size: 11px;
     font-weight: bold;

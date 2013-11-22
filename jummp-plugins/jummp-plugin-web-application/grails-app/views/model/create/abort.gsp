@@ -38,6 +38,9 @@
         <h2><g:message code="submission.abort.create.header"/></h2>
         <p><g:message code="submission.abort.create.message" args="${[createLink(controller: 'model', action: 'create')]}"/></p>
     </body>
-    <content tag="submit">
+      <content tag="submit">
     	selected
     </content>
+    <content tag="title">
+		Submit a model
+	</content>

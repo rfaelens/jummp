@@ -40,7 +40,6 @@
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
     </head>
      <body>
-        <h2><g:message code="user.resetpassword.ui.heading"/></h2>
         <div>
             <g:form name="resetForm" action="newPassword">
                 <table>
@@ -68,4 +67,7 @@
             </g:form>
         </div>
         </body>
-</html
+</html>
+<content tag="title">
+	<g:message code="user.resetpassword.ui.heading"/>
+</content>

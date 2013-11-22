@@ -34,7 +34,7 @@
         <title>Login</title>
     </head>
     <body>
-        <h2>Login</h2>
+        
     <div id='login'>
         <form action='${postUrl}' method='POST' id='loginForm' class='cssform' autocomplete='off'>
             <table>
@@ -97,4 +97,7 @@
         });
     </script>
     </body>
-</html
+</html>
+<content tag="title">
+	Login
+</content>

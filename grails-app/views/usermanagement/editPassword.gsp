@@ -28,7 +28,6 @@
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
      </head>
     <body>
-        <h2><g:message code="user.administration.updatePassword.heading"/></h2>
         <div>
 			<g:form action="updatePassword">
 				<table>
@@ -55,3 +54,6 @@
         </div>
    </body>
 </html>
+<content tag="title">
+	<g:message code="user.administration.updatePassword.heading"/>
+</content>
