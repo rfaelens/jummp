@@ -1009,7 +1009,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         stopWatch.lap("Finished performing sanity checks.")
         stopWatch.setTag("modelService.uploadModelAsList.prepareVcsStorage")
         boolean valid = true
-        ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(meta.format.identifier, "")
+        ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(meta.format.identifier, "*")
         if (!modelFileFormatService.validate(modelFiles, format)) {
             def err = "The files ${modelFiles.inspect()} do no comprise valid ${meta.format.identifier}"
             log.error(err)
@@ -1163,6 +1163,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             revision.discard()
             domainObjects.each {it.discard()}
             model.discard()
+            println("New Model ${model.properties} with properties ${meta.properties} does not validate:${revision.errors.allErrors.inspect()}")
             log.error("New Model ${model.properties} with properties ${meta.properties} does not validate:${revision.errors.allErrors.inspect()}")
             throw new ModelException(model.toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
         }

@@ -55,12 +55,12 @@ class ModelFormat implements Serializable {
 
     // keep this closure transient to avoid flow scope errors
     transient beforeInsert() {
-        formatVersion = formatVersion == null ? "" : formatVersion
+        formatVersion = formatVersion == null ? "*" : formatVersion
     }
 
     // DRY is nice, but duplicating one line is more efficient than another method call
     transient beforeUpdate() {
-        formatVersion = formatVersion == null ? "" : formatVersion
+        formatVersion = formatVersion == null ? "*" : formatVersion
     }
 
     static constraints = {
