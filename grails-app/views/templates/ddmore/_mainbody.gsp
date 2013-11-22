@@ -31,6 +31,7 @@
 
   <div id="page-wrapper">
     <div id="center-background">&nbsp;</div>
+    <div id="center-backgroundright">&nbsp;</div>
     <div id="page">
 
   <div id="main-wrapper"><div id="main" class="clearfix">

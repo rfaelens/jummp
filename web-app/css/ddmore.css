@@ -543,7 +543,7 @@ td.checkbox, th.checkbox {
 #calendar_div, .calendar_control, .calendar_links, .calendar_header, .calendar {
     border-collapse: separate;
     margin: 0;
-    width: 185px;
+    width:  18.5%;
 }
 .calendar td {
     padding: 0;
@@ -1040,32 +1040,32 @@ body {
 #page-wrapper, .region-bottom {
     margin-left: auto;
     margin-right: auto;
-    width: 960px;
+    width:  96.0%;
 }
 #main-wrapper {
     position: relative;
 }
 #content, .no-sidebars #content {
     float: left;
-    width: 960px;
+    width:  96.0%;
     margin-left: 0;
-    margin-right: -960px;
+    margin-right: -96%;
     padding: 0;
 }
 .sidebar-first #content {
-    width: 760px;
-    margin-left: 200px;
-    margin-right: -960px;
+    width:  76.0%;
+    margin-left:  20.0%;
+    margin-right: -96%;
 }
 .sidebar-second #content {
-    width: 720px;
+    width:  72.0%;
     margin-left: 0;
-    margin-right: -720px;
+    margin-right: -72%;
 }
 .two-sidebars #content {
-    width: 560px;
-    margin-left: 200px;
-    margin-right: -760px;
+    width:  56.0%;
+    margin-left:  20.0%;
+    margin-right: -76%;
 }
 #content .section {
     margin: 0;
@@ -1086,9 +1086,9 @@ body {
 }
 .region-sidebar-first {
     float: left;
-    width: 200px;
+    width:  20.0%;
     margin-left: 0;
-    margin-right: -200px;
+    margin-right: -20%;
     padding: 0;
 }
 .region-sidebar-first .section {
@@ -1097,9 +1097,9 @@ body {
 }
 .region-sidebar-second {
     float: left;
-    width: 220px;
-    margin-left: 730px;
-    margin-right: -960px;
+    width:  22.0%;
+    margin-left:  75.0%;
+    margin-right: -96%;
     padding: 0;
 }
 .region-sidebar-second .section {
@@ -1660,7 +1660,7 @@ body {
     line-height: 20px;
 }
 #header, #footer {
-    width: 960px;
+    width:  96.0%;
     margin: 0 auto;
 }
 #center-full {
@@ -1691,7 +1691,7 @@ a:hover {
     position: absolute;
     background: #ffffff;
     top: 31px;
-    width: 250px;
+    width:  29.0%;
     height: 100px;
     border-radius: 5px 5px 0 0;
 }
@@ -1747,7 +1747,7 @@ a:hover {
 }
 #header .search form input.form-text {
     height: 24px;
-    width: 225px;
+    width:  22.5%;
     padding: 2px 10px;
     color: #999999;
     font-size: 11px;
@@ -1756,7 +1756,7 @@ a:hover {
     box-shadow: 0 0 8px #c9f0ff;
 }
 #header .search form input.form-submit {
-    text-indent: -9000px;
+    text-indent: -900%;
     position: absolute;
     margin: 0 0 0 0;
     right: 3px;
@@ -1766,13 +1766,13 @@ a:hover {
     border-left: 1px solid #e6e6e6;
     background-image: url(//ddmore.eu/sites/ddmore/themes/ddmore/images/l_search.png);
     background-position: 5px 50%;
-    text-indent: -900;
+    text-indent: -90%;
 }
 .main-menu {
     top: 53px;
     background: url(//ddmore.eu/sites/ddmore/themes/ddmore/images/b_menu.png) 100% 0 repeat-x;
     height: 100px;
-    width: 710px;
+    width:  71.0%;
     position: absolute;
     right: 0;
     border-radius: 0 5px 0 0;
@@ -1820,7 +1820,7 @@ a:hover {
     margin: 0;
     position: absolute;
     top: 47px;
-    width: 150px;
+    width:  15.0%;
     background: #ffffff;
     z-index: 50;
     box-shadow: 4px 4px 5px #cccccc;
@@ -1845,10 +1845,18 @@ a:hover {
 #center-background {
     position: absolute;
     margin-left: -11px;
-    background: url(//ddmore.eu/sites/ddmore/themes/ddmore/images/l_header.png) 0 -1px no-repeat;
-    width: 981px;
+    background: url(../images/ddmore/left.png) 0 -1px no-repeat;
+    width:  98.1%;
     height: 120px;
 }
+#center-backgroundright {
+    float:right;
+    background: url(../images/ddmore/right.png) no-repeat;
+    height: 120px;
+    width:50px;
+    margin-right: -3.0%
+}
+
 #content {
     background: #ffffff;
 }
@@ -1993,10 +2001,10 @@ a:hover {
     background: none;
 }
 .view-users table .views-field-field-work-package {
-    width: 120px;
+    width:  12.0%;
 }
 .view-users table .views-field-mail {
-    width: 150px;
+    width:  15.0%;
     word-break: break-all;
 }
 .overview ul {
@@ -2034,21 +2042,21 @@ a:hover {
     margin-top: 0;
 }
 .overview .views-row.with-image {
-    padding-left: 230px;
+    padding-left:  23.0%;
 }
 .overview .views-row.with-image .views-field-body {
     min-height: 115px;
 }
 .overview .views-row.with-image .views-field-field-image {
     position: absolute;
-    margin-left: -210px;
+    margin-left: -21%;
 }
 .overview .views-row.with-image .views-field-field-image img {
     border-radius: 3px;
 }
 .page-node-32 #content {
-    margin-right: -520px;
-    width: 520px;
+    margin-right: -52%;
+    width:  52.0%;
 }
 .page-node-32 #content h1#page-title {
     background: none;
@@ -2062,8 +2070,8 @@ a:hover {
     padding: 0;
 }
 .page-node-32 .region-sidebar-second {
-    margin-left: 520px;
-    width: 420px;
+    margin-left:  52.0%;
+    width:  42.0%;
     background: #f6f6f6;
     border-radius: 5px;
     margin-top: 20px;
@@ -2148,11 +2156,11 @@ a:hover {
     margin-bottom: 5px;
 }
 .contacts .view-filters #edit-field-work-package-tid {
-    width: 100px;
+    width:  10.0%;
 }
 .contacts .views-row {
     float: left;
-    width: 175px;
+    width:  17.5%;
     padding: 10px 15px;
     background: #ffffff;
     margin-right: 20px;
@@ -2238,7 +2246,7 @@ a:hover {
 }
 .region-sidebar-second .work-packages .content ul li {
     float: left;
-    width: 80px;
+    width:  8.0%;
 }
 .region-sidebar-second .block.last {
     border: none;
@@ -2291,7 +2299,7 @@ a:hover {
 }
 .profile {
     min-height: 300px;
-    max-width: 580px;
+    max-width:  58.0%;
 }
 .profile .field-name-field-surname, .profile .field-name-field-name {
     display: none;
@@ -2333,7 +2341,7 @@ a:hover {
     bottom: -25px;
     background: #4a4949 url(//ddmore.eu/sites/ddmore/themes/ddmore/images/b_menu.png) 0 0 repeat-x;
     margin-left: -20px;
-    width: 960px;
+    width:  96.0%;
     height: 45px;
     border-radius: 0 0 5px 5px;
 }
@@ -2377,9 +2385,9 @@ a:hover {
 }
 #content-bottom .block.social .content a {
     display: inline-block;
-    text-indent: -9000px;
+    text-indent: -900%;
     height: 15px;
-    width: 57px;
+    width:  5.7%;
     background: url(//ddmore.eu/sites/ddmore/themes/ddmore/images/l_twitter.png) 0 1px no-repeat;
 }
 .front.page-node #content h1#page-title {
@@ -2532,19 +2540,19 @@ input.form-submit {
 }
 #comments .form-item-subject label {
     display: inline-block;
-    width: 150px;
+    width:  15.0%;
 }
 #comments .form-item-subject input {
     font-size: 14px;
     padding: 5px 8px;
 }
 .no-sidebars #comments input {
-    width: 622px;
+    width:  62.2%;
 }
 .comment {
     background: #ffffff;
     padding: 15px;
-    padding-left: 60px;
+    padding-left:  6.0%;
     border-radius: 2px;
     margin-bottom: 20px;
 }
@@ -2591,7 +2599,7 @@ ul.links .comment-add a {
     line-height: 24px;
     color: #666666;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    width: 820px;
+    width:  82.0%;
     margin: 0 auto;
     text-align: center;
 }
@@ -2611,7 +2619,7 @@ ul.links .comment-add a {
     padding-bottom: 30px;
 }
 #timeline .view-content {
-    width: 820px;
+    width:  82.0%;
     margin: 0 auto;
     padding-top: 20px;
 }
@@ -2646,7 +2654,7 @@ ul.links .comment-add a {
     clear: both;
     background: #ffffff;
     border-radius: 5px;
-    width: 320px;
+    width:  32.0%;
     margin-top: 10px;
     position: relative;
     padding: 15px 15px 20px;
@@ -2659,7 +2667,7 @@ ul.links .comment-add a {
     top: 10px;
     right: 10px;
     background: url(//ddmore.eu/sites/ddmore/themes/ddmore/images/timeline-open-close.png) 0 0 no-repeat;
-    text-indent: -9000px;
+    text-indent: -900%;
     cursor: pointer;
 }
 #timeline .views-row .timeline-body, #timeline .views-row .timeline-dates, #timeline .views-row .read-more {
@@ -2700,7 +2708,7 @@ ul.links .comment-add a {
     margin-bottom: 15px;
 }
 #timeline .views-row .timeline-dates .date-field {
-    width: 150px;
+    width:  15.0%;
     display: inline-block;
 }
 #timeline .views-row .timeline-dates .field-label {
@@ -2722,7 +2730,7 @@ ul.links .comment-add a {
     position: absolute;
     right: -77px;
     background: url(//ddmore.eu/sites/ddmore/themes/ddmore/images/timeline-b-date.png) 0 0 no-repeat;
-    width: 77px;
+    width:  7.7%;
     top: 9px;
     height: 37px;
 }
@@ -2825,7 +2833,7 @@ ul.links .comment-add a {
     margin-top: -10px;
     margin-left: -20px;
     padding: 10px 20px;
-    width: 640px;
+    width:  64.0%;
     margin-bottom: 20px;
     line-height: 18px;
 }
@@ -2884,5 +2892,3 @@ ul.links .comment-add a {
     display: block;
     color: #666666;
 }
-
-
