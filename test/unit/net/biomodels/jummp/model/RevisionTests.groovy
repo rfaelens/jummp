@@ -53,16 +53,16 @@ class RevisionTests {
         assertEquals("nullable", revision.errors["revisionNumber"])
         assertEquals("nullable", revision.errors["minorRevision"])
         assertEquals("nullable", revision.errors["uploadDate"])
-        assertEquals("nullable", revision.errors["name"])
-        assertEquals("nullable", revision.errors["description"])
-        assertEquals("nullable", revision.errors["comment"])
         assertEquals("nullable", revision.errors["owner"])
         assertEquals("nullable", revision.errors["format"])
+        assertNull(revision.errors["name"])
+        assertNull(revision.errors["description"])
+        assertNull(revision.errors["comment"])
 
-        // a comment cannot be blank
+        // a comment can be blank
         revision = new Revision(comment: '')
         assertFalse(revision.validate())
-        assertEquals("nullable", revision.errors["comment"])
+        assertNull(revision.errors["comment"])
 
         // verify vcsId uniqueness constraint
         revision = new Revision(vcsId: "1")
@@ -92,16 +92,16 @@ class RevisionTests {
         assertNull(revision.errors["comment"])
 
         // verify description constraints
-        // a description cannot be blank
+        // a description can be blank
         revision = new Revision(description: '')
         assertFalse(revision.validate())
-        assertEquals("nullable", revision.errors["description"])
+        assertNull(revision.errors["description"])
 
         // verify name constraints
-        // a name cannot be blank
+        // a name can be blank
         revision = new Revision(name: '')
         assertFalse(revision.validate())
-        assertEquals("nullable", revision.errors["name"])
+        assertNull(revision.errors["name"])
 
         // verify that a correct Revision is valid
         revision = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: owner, minorRevision: true, uploadDate: new Date(), name:'test',description:'pointless', comment: 'fictional', format: new ModelFormat(identifier: "UNKNOWN", name: "unknown"))
