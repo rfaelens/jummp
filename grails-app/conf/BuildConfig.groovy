@@ -22,22 +22,36 @@
 
 
 
+grails.servlet.version = "3.0"
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
+grails.project.work.dir = "target/work"
 grails.project.war.file = "target/${appName}.war"
 grails.project.groupId = "net.biomodels.jummp"
 grails.project.source.level = 1.7
 grails.project.target.level = 1.7
 // maven can't handle flatDirs, would break sbml and bives
-grails.project.dependency.resolver = "ivy"
+grails.project.dependency.resolver = "maven"
+
+grails.project.fork = [
+    // configure settings for the test-app JVM, uses the daemon by default
+    test: false, //[maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, daemon:true],
+    // configure settings for the run-app JVM
+    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    // configure settings for the run-war JVM
+    war: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    // configure settings for the Console UI JVM
+    console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256]
+]
+
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
         // uncomment to disable ehcache
         // excludes 'ehcache'
     }
-    log "info" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     legacyResolve true
     repositories {
         if (System.getenv("JUMMP_ARTIFACTORY_URL")) {
@@ -51,11 +65,11 @@ grails.project.dependency.resolution = {
         grailsPlugins()
         grailsHome()
         grailsCentral()
-        ebr()
+        //ebr()
 
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
-        //mavenLocal()
+        mavenLocal()
         mavenCentral()
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
@@ -67,6 +81,7 @@ grails.project.dependency.resolution = {
         // compass 2.2.1
         mavenRepo "http://repo.grails.org/grails/core"
         mavenRepo "http://www.biojava.org/download/maven/"
+        //flatDir name: "jummpLibs", dirs: "lib/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -112,7 +127,7 @@ grails.project.dependency.resolution = {
         }
 
         // bives
-        runtime('org.apache.commons:commons-compress:1.1') { excludes 'commons-io' }
+        //runtime('org.apache.commons:commons-compress:1.1') { excludes 'commons-io' }
 
         /* jms
         runtime('org.apache.activemq:activeio-core:3.1.2',
@@ -154,8 +169,9 @@ grails.project.dependency.resolution = {
 
         compile "org.apache.tika:tika-core:1.3"
 
-        // broken Grails 2.3.2 dependecy
+        // broken Grails 2.3.2 dependecies
         compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core' }
+        compile "org.springframework:spring-test:3.2.4.RELEASE"
     }
 
     plugins {
@@ -215,7 +231,7 @@ grails.plugin.location.'jummp-plugin-git' = "jummp-plugins/jummp-plugin-git"
 grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
 grails.plugin.location.'jummp-plugin-combine-archive' = "jummp-plugins/jummp-plugin-combine-archive"
 grails.plugin.location.'jummp-plugin-pharmml' = "jummp-plugins/jummp-plugin-pharmml"
-grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
+//grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
 //grails.plugin.location.'jummp-plugin-search' = "jummp-plugins/jummp-plugin-search"
 grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plugin-simple-logging"
 grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"
@@ -250,7 +266,7 @@ codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
                              'jummp-plugins/*/grails-app/utils',
                              'jummp-plugins/*/test/unit',
                              'jummp-plugins/*/test/integration']
-
+/*
 grails.tomcat.jvmArgs = ["-Xmx2G",
                         "-Xss512M",
                         "-XX:MaxPermSize=256M",
@@ -259,6 +275,6 @@ grails.tomcat.jvmArgs = ["-Xmx2G",
                         "-XX:+UseConcMarkSweepGC",
                         "-XX:+UseParNewGC"
 ]
-
+*/
 //ensure that AST.jar is put in the right place. See scripts/AST.groovy
 System.setProperty("jummp.basePath", new File("./").getAbsolutePath())

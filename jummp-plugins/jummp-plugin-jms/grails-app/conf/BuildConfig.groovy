@@ -22,15 +22,29 @@
 
 
 
+grails.servlet.version = "3.0"
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
+grails.project.work.dir = "target/work"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 grails.project.groupId = "net.biomodels.jummp.jms"
 grails.project.source.level = 1.7
 grails.project.target.level = 1.7
 // maven can't handle flatDirs, would break sbml and bives
-grails.project.dependency.resolver = "ivy"
+grails.project.dependency.resolver = "maven"
+
+grails.project.fork = [
+    // configure settings for the test-app JVM, uses the daemon by default
+    test: false, //[maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, daemon:true],
+    // configure settings for the run-app JVM
+    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    // configure settings for the run-war JVM
+    war: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    // configure settings for the Console UI JVM
+    console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256]
+]
+
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -47,7 +61,7 @@ grails.project.dependency.resolution = {
             grailsRepo "${System.getenv('JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL')}"
         }
         //needed by spring-security-ldap
-        ebr()
+        //ebr()
         grailsPlugins()
         grailsHome()
         grailsCentral()
@@ -62,7 +76,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
-        flatDir name: "jummpLibs", dirs: "../../lib/"
+        //flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
