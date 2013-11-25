@@ -80,6 +80,9 @@
 	cursor: pointer;
 	border-top: 12px solid gray;
 }
+.spacedMargin {
+    margin:10px;
+}
 #optionsList 
 {
 	list-style: none;

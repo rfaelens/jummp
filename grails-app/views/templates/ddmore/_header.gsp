@@ -41,7 +41,7 @@
   
    <div id="header"><div class="section clearfix">
 
-          <a href="${createLink(uri: '/', absolute: true)}" title="Home" rel="home" id="logo"><g:img dir="images/ddmore" file="logo.png" width="60%" height="60%"/></a>
+          <a href="${createLink(uri: '/', absolute: true)}" title="Home" rel="home" id="logo"><g:img dir="images/ddmore" file="logo.png" alt="DDMoRe Logo"/></a>
     
     
     
@@ -82,9 +82,10 @@
       	 	<%-- <form action="/" method="post" id="search-block-form" accept-charset="UTF-8"> --%><div><div class="container-inline">
       	 			<input title="Enter the terms you wish to search for." type="text" id="edit-search-block-form--2" name="search_block_form" value="" maxlength="128" class="form-text" />
       	 			<input type="submit" id="edit-submit" value="" class="form-submit" />
-      	 	</g:form>
-			</div>
-</div>  </div>
+     		</div></div>
+    	 	</g:form>
+	
+  </div>
 
 </div>
       	 		

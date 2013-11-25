@@ -202,13 +202,13 @@ class ZiphandlerTagLib {
         		if (attrs.mainFile==it.mainFile) {
         			builder.append('''<li rel="file"><a><span class="pointerhere">''')
         			File f=new File(it.path);
-        			builder.append(f.name).append("</a>")
+        			builder.append(f.name).append("</span></a>")
         			if (it.mimeType.contains('zip')) {
         				builder.append("<ul>")
         				handleZip(builder, false, it.path)
         				builder.append("</ul>")
 	 			    }
-	 			    builder.append("</span></li>")
+	 			    builder.append("</li>")
         		}
         	}
 		}
