@@ -156,9 +156,9 @@ class UpdatedRepositoryListener implements ApplicationListener {
 		IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer)
 		indexWriter.setMaxFieldLength(25000)
 		
-		String name = revision.name
-		String description = revision.description
-		String content=modelDelegateService.getSearchIndexingContent(revision)
+		String name = revision.name ?: ""
+		String description = revision.description ?: ""
+		String content = modelDelegateService.getSearchIndexingContent(revision) ?: ""
 		Document doc = new Document()
 		
 		/*
