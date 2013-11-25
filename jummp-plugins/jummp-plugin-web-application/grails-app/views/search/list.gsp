@@ -73,7 +73,6 @@
     <content tag="sidebar">
         <div class="element" id="sidebar-element-last-accessed-models">
             <h2><g:message code="model.history.title"/></h2>
-            <h3><g:message code="model.history.empty"/></h3>
             <p></p>
         </div>
         <%--  GoTree code, disabled until it is useful again.	
