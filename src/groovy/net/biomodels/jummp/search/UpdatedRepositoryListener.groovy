@@ -48,7 +48,7 @@ import org.apache.lucene.document.Field
 import org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.analysis.Analyzer
-import org.codehaus.groovy.grails.commons.ApplicationHolder
+import grails.util.Holders
 import grails.util.Environment
 
 /* Lucene 4.4 imports
@@ -76,7 +76,7 @@ import org.apache.lucene.search.IndexSearcher
 class UpdatedRepositoryListener implements ApplicationListener {
 
 	def modelDelegateService
-	def grailsApplication = ApplicationHolder.application
+	def grailsApplication = Holders.grailsApplication
 	Directory fsDirectory
 	File location
 	/**
