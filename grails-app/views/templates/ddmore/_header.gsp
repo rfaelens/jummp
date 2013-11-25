@@ -41,7 +41,7 @@
   
    <div id="header"><div class="section clearfix">
 
-          <a href="${createLink(uri: '/', absolute: true)}" title="Home" rel="home" id="logo"><img src="http://www.ddmore.eu/sites/ddmore/themes/ddmore/logo.png" alt="Home" /></a>
+          <a href="${createLink(uri: '/', absolute: true)}" title="Home" rel="home" id="logo"><g:img dir="images/ddmore" file="logo.png" width="60%" height="60%"/></a>
     
     
     

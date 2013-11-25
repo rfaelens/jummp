@@ -1690,14 +1690,14 @@ a:hover {
 #header a#logo {
     position: absolute;
     background: #ffffff;
-    top: 31px;
+    top: 15%;
     width:  29.0%;
-    height: 100px;
+    height: 130px;
     border-radius: 5px 5px 0 0;
 }
 #header a#logo img {
     display: block;
-    margin: 15px 0 0 20px;
+    margin: 10px 0 0 60px;
 }
 #header .user-menu {
     position: absolute;
