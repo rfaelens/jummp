@@ -94,6 +94,8 @@ grails.project.dependency.resolution = {
         }
 
         test 'hsqldb:hsqldb:1.8.0.10'
+        compile "xml-apis:xml-apis:1.4.01"
+        compile 'org.jdom:jdom:1.1.3'
         compile 'org.springframework:spring-jms:3.2.4.RELEASE'
         // work around for 2.3.2's wonderful dependency resolution issues
         compile "org.springframework:spring-test:3.2.4.RELEASE"
@@ -115,7 +117,7 @@ grails.project.dependency.resolution = {
 }
 grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"
 grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"
-grails.plugin.location.'jummp-plugin-bives'="../jummp-plugin-bives"
+//grails.plugin.location.'jummp-plugin-bives'="../jummp-plugin-bives"
 grails.plugin.location.'jummp-plugin-sbml'="../jummp-plugin-sbml"
 grails.plugin.location.'jummp-plugin-remote'="../jummp-plugin-remote"
 

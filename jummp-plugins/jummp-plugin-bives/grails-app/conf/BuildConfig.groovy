@@ -76,7 +76,7 @@ grails.project.dependency.resolution = {
         runtime('org.apache.commons:commons-compress:1.1') {excludes 'commons-io'}
         compile "commons-io:commons-io:2.1"
         compile ":jaxen:1.1.1"
-        compile ":jdom:1.1.1"
+        compile "org.jdom:jdom:1.1.3"
         compile ":bives-fwk:0.9.0"
         compile ":bives.diff:0.1.0"
         test 'hsqldb:hsqldb:1.8.0.10'

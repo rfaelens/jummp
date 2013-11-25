@@ -95,7 +95,8 @@ grails.project.dependency.resolution = {
         runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"
         compile "org.sbfc:converter:1.1"
-        compile "org.jdom:jdom:2.0.2"
+        compile "org.jdom:jdom:1.1.3"
+        compile "xml-apis:xml-apis:1.4.01"
     }
 
     plugins {

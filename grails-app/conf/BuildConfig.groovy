@@ -145,6 +145,9 @@ grails.project.dependency.resolution = {
                     'xml-apis'
         }*/
         compile "xml-apis:xml-apis:1.4.01"
+
+        compile "org.jdom:jdom:1.1.3"
+
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
 
         //git
