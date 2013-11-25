@@ -2323,7 +2323,6 @@ a:hover {
     font-size: 12px;
     line-height: 18px;
     color: #ffffff;
-    background: #0076a3 url(//ddmore.eu/sites/ddmore/themes/ddmore/images/b_footer.png) 0 100% repeat-x;
     border-radius: 5px 5px 0 0;
     position: relative;
     padding-bottom: 15px;
@@ -2341,7 +2340,7 @@ a:hover {
     bottom: -25px;
     background: #4a4949 url(//ddmore.eu/sites/ddmore/themes/ddmore/images/b_menu.png) 0 0 repeat-x;
     margin-left: -20px;
-    width:  96.0%;
+    width:  99.0%;
     height: 45px;
     border-radius: 0 0 5px 5px;
 }
