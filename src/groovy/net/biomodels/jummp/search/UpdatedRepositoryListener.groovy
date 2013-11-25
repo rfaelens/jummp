@@ -92,9 +92,8 @@ class UpdatedRepositoryListener implements ApplicationListener {
 		}
 		location=new File(path)
 		location.mkdirs()
-		System.out.println("USING ${location} for index directory!")
 		//Create instance of Directory where index files will be stored
-		fsDirectory =  FSDirectory.getDirectory(location);
+		fsDirectory =  FSDirectory.getDirectory(location)
 		/* Create instance of analyzer, which will be used to tokenize
 		the input data */
 		
@@ -102,13 +101,13 @@ class UpdatedRepositoryListener implements ApplicationListener {
 		LUCENE 4.4 CODE.
 		
 		//Create the instance of deletion policy
-		Analyzer standardAnalyzer = new StandardAnalyzer(Version.LUCENE_44);
-		IndexDeletionPolicy deletionPolicy = new KeepOnlyLastCommitDeletionPolicy(); 
+		Analyzer standardAnalyzer = new StandardAnalyzer(Version.LUCENE_44)
+		IndexDeletionPolicy deletionPolicy = new KeepOnlyLastCommitDeletionPolicy() 
 		
 		IndexWriterConfig conf=new IndexWriterConfig(Version.LUCENE_44,standardAnalyzer)
 		conf.setIndexDeletionPolicy(deletionPolicy)
 		conf.setOpenMode(OpenMode.CREATE_OR_APPEND)
-		indexWriter =new IndexWriter(fsDirectory,conf);
+		indexWriter =new IndexWriter(fsDirectory,conf)
 		*/
 		
 	}
@@ -135,14 +134,14 @@ class UpdatedRepositoryListener implements ApplicationListener {
 		Clears the index. Handle with care.
 	*/
 	public void clearIndex() {
-		/*Analyzer standardAnalyzer = new StandardAnalyzer();
-		IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer);
+		/*Analyzer standardAnalyzer = new StandardAnalyzer()
+		IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer)
 		indexWriter.deleteAll()
 		indexWriter.optimize()
 		indexWriter.close()*/
-		location.deleteDir();
-		location.mkdirs();
-		fsDirectory =  FSDirectory.getDirectory(location);
+		location.deleteDir()
+		location.mkdirs()
+		fsDirectory =  FSDirectory.getDirectory(location)
 	}
 	
 	/**
@@ -153,33 +152,33 @@ class UpdatedRepositoryListener implements ApplicationListener {
 	**/
 	public void updateIndex(RevisionTransportCommand revision) {
 		
-		Analyzer standardAnalyzer = new StandardAnalyzer();
-		IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer);
-		indexWriter.setMaxFieldLength(25000);
+		Analyzer standardAnalyzer = new StandardAnalyzer()
+		IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer)
+		indexWriter.setMaxFieldLength(25000)
 		
 		String name = revision.name
 		String description = revision.description
 		String content=modelDelegateService.getSearchIndexingContent(revision)
-		Document doc = new Document();
+		Document doc = new Document()
 		
 		/*
 		*	Indexed fields
 		*/
 		Field nameField =
-			new Field("name",name,Field.Store.YES,Field.Index.ANALYZED);
+			new Field("name",name,Field.Store.YES,Field.Index.ANALYZED)
 		Field descriptionField = 
-			new Field("description",description,Field.Store.NO,Field.Index.ANALYZED); 
+			new Field("description",description,Field.Store.NO,Field.Index.ANALYZED) 
 		Field formatField = 
-			new Field("modelFormat",""+revision.format.name,Field.Store.YES,Field.Index.ANALYZED);
+			new Field("modelFormat",""+revision.format.name,Field.Store.YES,Field.Index.ANALYZED)
 		Field levelVersionField = 
-			new Field("levelVersion",""+revision.format.formatVersion,Field.Store.NO,Field.Index.ANALYZED);
+			new Field("levelVersion",""+revision.format.formatVersion,Field.Store.NO,Field.Index.ANALYZED)
 		Field submitterField = 
-			new Field("submitter",""+revision.owner,Field.Store.YES,Field.Index.ANALYZED);
+			new Field("submitter",""+revision.owner,Field.Store.YES,Field.Index.ANALYZED)
 		Field contentField = 
-			new Field("content",content,Field.Store.NO,Field.Index.ANALYZED); 
+			new Field("content",content,Field.Store.NO,Field.Index.ANALYZED) 
 		
-		doc.add(nameField);
-		doc.add(descriptionField);
+		doc.add(nameField)
+		doc.add(descriptionField)
 		doc.add(formatField)
 		doc.add(levelVersionField)
 		doc.add(submitterField)
@@ -191,17 +190,17 @@ class UpdatedRepositoryListener implements ApplicationListener {
 		*	look in the database to figure out if the user has access to a model. 
 		*/
 		Field idField = 
-			new Field("model_id",""+revision.model.id,Field.Store.YES,Field.Index.NO); 
+			new Field("model_id",""+revision.model.id,Field.Store.YES,Field.Index.NO) 
 		Field versionField = 
-			new Field("versionNumber",""+revision.revisionNumber,Field.Store.YES,Field.Index.NO);
+			new Field("versionNumber",""+revision.revisionNumber,Field.Store.YES,Field.Index.NO)
 		Field submittedField = 
-			new Field("submissionDate",""+revision.model.submissionDate,Field.Store.YES,Field.Index.NO);
-		doc.add(idField);
-		doc.add(versionField);
+			new Field("submissionDate",""+revision.model.submissionDate,Field.Store.YES,Field.Index.NO)
+		doc.add(idField)
+		doc.add(versionField)
 		doc.add(submittedField)
 		
-		indexWriter.addDocument(doc);
-		//indexWriter.commit(); // To do: investigate a more optimised commit mechanism (4.4)
+		indexWriter.addDocument(doc)
+		//indexWriter.commit() // To do: investigate a more optimised commit mechanism (4.4)
 		indexWriter.optimize()
 		indexWriter.close()
 	}
@@ -217,8 +216,8 @@ class UpdatedRepositoryListener implements ApplicationListener {
 	* @returns A searchermanager linked to the indexwriter, so that changes made in the writer will be
 	* reflected in the searcher.
 	public SearcherManager getSearcherManager() {
-		boolean applyAllDeletes = true;
-		SearcherManager mgr = new SearcherManager(indexWriter, true, new SearcherFactory());
+		boolean applyAllDeletes = true
+		SearcherManager mgr = new SearcherManager(indexWriter, true, new SearcherFactory())
                 return mgr
 	}
 	*/
