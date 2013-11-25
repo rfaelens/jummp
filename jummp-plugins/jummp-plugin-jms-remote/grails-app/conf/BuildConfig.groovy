@@ -57,8 +57,6 @@ grails.project.dependency.resolution = {
         if (System.getenv("JUMMP_ARTIFACTORY_URL")) {
             mavenRepo "${System.getenv('JUMMP_ARTIFACTORY_URL')}"
         }
-        grailsPlugins()
-        grailsHome()
         grailsCentral()
         // necessary because core-api depends on libPharmML
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
@@ -66,7 +64,7 @@ grails.project.dependency.resolution = {
 
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
-        //mavenLocal()
+        mavenLocal()
         mavenCentral()
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
