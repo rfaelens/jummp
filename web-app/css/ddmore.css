@@ -1701,8 +1701,9 @@ a:hover {
 }
 #header .user-menu {
     position: absolute;
-    right: 260px;
+    right: 17%;
     top: 14px;
+    width: 20%;
 }
 #header .user-menu ul, #header .user-menu ul li {
     margin: 0;
