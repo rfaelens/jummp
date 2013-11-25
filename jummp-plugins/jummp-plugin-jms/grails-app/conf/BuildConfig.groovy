@@ -57,11 +57,6 @@ grails.project.dependency.resolution = {
         if (System.getenv("JUMMP_ARTIFACTORY_URL")) {
             mavenRepo "${System.getenv('JUMMP_ARTIFACTORY_URL')}"
         }
-        if (System.getenv("JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL")) {
-            grailsRepo "${System.getenv('JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL')}"
-        }
-        //needed by spring-security-ldap
-        //ebr()
         grailsPlugins()
         grailsHome()
         grailsCentral()

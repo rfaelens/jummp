@@ -59,14 +59,9 @@ grails.project.dependency.resolution = {
             println "Artifactory URL: " + System.getenv("JUMMP_ARTIFACTORY_URL")
             mavenRepo "${System.getenv('JUMMP_ARTIFACTORY_URL')}"
         }
-        if (System.getenv("JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL")) {
-            println "Grails Repo URL: " + System.getenv("JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL")
-            grailsRepo "${System.getenv('JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL')}"
-        }
         grailsPlugins()
         grailsHome()
         grailsCentral()
-        //ebr()
 
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
