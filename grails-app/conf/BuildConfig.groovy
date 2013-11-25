@@ -34,15 +34,16 @@ grails.project.target.level = 1.7
 // maven can't handle flatDirs, would break sbml and bives
 grails.project.dependency.resolver = "maven"
 
+customJvmArgs = ["-server", "-noverify", "-XX:+UseConcMarkSweepGC", "-XX:+UseParNewGC" ]
 grails.project.fork = [
     // configure settings for the test-app JVM, uses the daemon by default
     test: false, //[maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, daemon:true],
     // configure settings for the run-app JVM
-    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false, jvmArgs: customJvmArgs],
     // configure settings for the run-war JVM
-    war: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    war: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false, jvmArgs: customJvmArgs],
     // configure settings for the Console UI JVM
-    console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256]
+    console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256, jvmArgs: customJvmArgs]
 ]
 
 grails.project.dependency.resolution = {
@@ -266,15 +267,7 @@ codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
                              'jummp-plugins/*/grails-app/utils',
                              'jummp-plugins/*/test/unit',
                              'jummp-plugins/*/test/integration']
-/*
-grails.tomcat.jvmArgs = ["-Xmx2G",
-                        "-Xss512M",
-                        "-XX:MaxPermSize=256M",
-                        "-server",
-                        "-noverify",
-                        "-XX:+UseConcMarkSweepGC",
-                        "-XX:+UseParNewGC"
-]
-*/
+
+
 //ensure that AST.jar is put in the right place. See scripts/AST.groovy
 System.setProperty("jummp.basePath", new File("./").getAbsolutePath())
