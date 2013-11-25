@@ -197,11 +197,11 @@ class ModelFileFormatService {
     /**
      * Retrieves the version of the format in which @p revisiontransportcommand is encoded.
      * @param revision the RevisionTransportCommand/Revision for which to extract the format version.
-     * @return The format version, or an empty String if this cannot be extracted.
+     * @return The format version, or '*' if this cannot be extracted.
      */
     String getFormatVersion(def revision) {
         FileFormatService service = serviceForFormat(revision?.format)
-        return service ? service.getFormatVersion(revision) : ""
+        return service ? service.getFormatVersion(revision) : "*"
     }
 
     /**

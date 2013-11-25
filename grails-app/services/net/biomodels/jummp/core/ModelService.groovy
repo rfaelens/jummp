@@ -1073,6 +1073,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         String formatVersion = modelFileFormatService.getFormatVersion(revision)
         revision.format = ModelFormat.findByIdentifierAndFormatVersion(meta.format.identifier, formatVersion)
+        assert formatVersion != null && revision.format != null
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
         } catch (VcsException e) {
