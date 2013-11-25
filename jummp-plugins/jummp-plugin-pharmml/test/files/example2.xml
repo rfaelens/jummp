@@ -4,9 +4,13 @@
     xsi:schemaLocation="http://www.pharmml.org/2013/03/PharmML http://www.pharmml.org/2013/03/PharmML"
     xmlns:math="http://www.pharmml.org/2013/03/Maths"
     xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes"
-    writtenVersion="0.1">
+    writtenVersion="0.2.1">
     
     <ct:Name>Example 2 - simulation continuous PK (Bonate 2012)</ct:Name>
+    
+    <ct:Description>The following example is taken from [Bonate, 2011], p.535, and represents another PK simulation case. 
+        Here a system under steady state is implemented following a twice daily dosing in 50 adult subjects who received a dose of 100 mg per administration. 
+        The drug concentration follows a 1-comp model with first order absorption with a proportional residual error model. </ct:Description>
     
     <IndependentVariable symbId="t"/>
     <!-- residual errors model definition  -->
@@ -45,7 +49,7 @@
             </SimpleParameter>
             <Covariate symbId="Weight">
                 <Continuous>
-                    <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="">
+                    <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="http://www.uncertml.org/distributions/normal">
                         <mean>
                             <var varId="pop_Weight"/>
                         </mean>
@@ -92,7 +96,7 @@
                 <ct:VariabilityReference>
                     <ct:SymbRef blkIdRef="modelVar" symbIdRef="indiv"/>
                 </ct:VariabilityReference>
-                <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="">
+                <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="http://www.uncertml.org/distributions/normal">
                     <mean>
                         <rVal>0</rVal>
                     </mean>
@@ -121,7 +125,7 @@
                 <ct:VariabilityReference>
                     <ct:SymbRef blkIdRef="modelVar" symbIdRef="indiv"/>
                 </ct:VariabilityReference>
-                <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="">
+                <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="http://www.uncertml.org/distributions/normal">
                     <mean>
                         <rVal>0</rVal>
                     </mean>
@@ -148,9 +152,10 @@
         </ParameterModel>
         <!-- structural model -->
         <StructuralModel blkId="sm1">
-            <ct:Variable symbolType="real" symbId="D"/>
-            <ct:Variable symbolType="real" symbId="tD"/>
-            <ct:Variable symbolType="real" symbId="k">
+            <SimpleParameter symbId="D"/>
+            <SimpleParameter symbId="tD"/>
+            <!-- k -->
+            <SimpleParameter symbId="k">
                 <ct:Assign>
                     <math:Equation>
                         <math:Binop op="divide">
@@ -159,7 +164,7 @@
                         </math:Binop>
                     </math:Equation>
                 </ct:Assign>
-            </ct:Variable>
+            </SimpleParameter>
             <!-- Css -->
             <ct:Variable symbolType="real" symbId="Css">
                 <ct:Assign>
@@ -233,6 +238,7 @@
                 </ct:Assign>
             </ct:Variable>
         </StructuralModel>
+        
         <!-- observation model -->
         <ObservationModel blkId="om1">
             <SimpleParameter symbId="b"/>
@@ -240,7 +246,7 @@
                 <ct:VariabilityReference>
                     <ct:SymbRef blkIdRef="obsVar" symbIdRef="resErr"/>
                 </ct:VariabilityReference>
-                <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="0.1">
+                <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="http://www.uncertml.org/distributions/normal">
                     <mean>
                         <rVal>0</rVal>
                     </mean>
@@ -249,7 +255,7 @@
                     </stddev>
                 </NormalDistribution>
             </RandomVariable>
-            <Standard symbId="Css">
+            <Standard symbId="Css_obs">
                 <Output>
                     <ct:SymbRef blkIdRef="sm1" symbIdRef="Css"/>
                 </Output>
@@ -411,7 +417,7 @@
                     </ct:Sequence>
                 </Timepoints>
                 <Continuous>
-                    <ct:SymbRef blkIdRef="om1" symbIdRef="Css"/>
+                    <ct:SymbRef blkIdRef="om1" symbIdRef="Css_obs"/>
                 </Continuous>
             </Observations>
         </SimulationStep>

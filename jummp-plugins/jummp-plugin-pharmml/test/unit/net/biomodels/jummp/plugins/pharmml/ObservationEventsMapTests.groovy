@@ -41,10 +41,10 @@ public class ObservationEventsMapTests {
         assertNotNull(structure)
         ObservationEventsMap oem = new ObservationEventsMap(structure.studyEvent)
         def expected = new TreeMap([
-            "ep1_a1" : new TreeMap([ "occ1" : "iov"]),
-            "ep1_a2" : new TreeMap([ "occ1" : "iov"]),
-            "ep3_a1" : new TreeMap([ "occ2" : "iov"]),
-            "ep3_a2" : new TreeMap([ "occ2" : "iov"])
+            "ep1_a1" : new TreeMap([ "occ1" : "iov1"]),
+            "ep1_a2" : new TreeMap([ "occ1" : "iov1"]),
+            "ep3_a1" : new TreeMap([ "occ2" : "iov1"]),
+            "ep3_a2" : new TreeMap([ "occ2" : "iov1"])
         ])
         assertEquals(expected, oem.getObservationMap())
    }

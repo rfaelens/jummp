@@ -236,13 +236,20 @@ class PharmMlService implements FileFormatService, IPharmMlService {
 
     @Profiled(tag="pharmMlService.getFormatVersion")
     public String getFormatVersion(RevisionTransportCommand revision) {
-        //return PharmML writtenVersion
-        return revision ? "0.1" : ""
+        if (!revision) {
+            log.error "Cannot get PharmML model format version from undefined revision."
+            return ""
+        }
+        assert revision.format.identifier == "PharmML"
+        List<File> revisionFiles = fetchMainFilesFromRevision(revision)
+        final File pharmML = findPharmML(revisionFiles)
+        PharmML dom =  getDomFromPharmML(pharmML)
+        return dom?.writtenVersion
     }
 
     @Profiled(tag="pharmMlService.getDomFromRevision")
     PharmML getDomFromRevision(RevisionTransportCommand revision) {
-    if (!revision) {
+        if (!revision) {
             log.error "Cannot get PharmML model definition from undefined revision."
             return ""
         }
