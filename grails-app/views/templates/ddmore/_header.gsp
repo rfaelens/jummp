@@ -80,7 +80,7 @@
       	 <div class="content">
       	 	<g:form controller="search" action="searchRedir">
       	 	<%-- <form action="/" method="post" id="search-block-form" accept-charset="UTF-8"> --%><div><div class="container-inline">
-      	 			<input title="Enter the terms you wish to search for." type="text" id="edit-search-block-form--2" name="search_block_form" value="" size="30" maxlength="128" class="form-text" />
+      	 			<input title="Enter the terms you wish to search for." type="text" id="edit-search-block-form--2" name="search_block_form" value="" maxlength="128" class="form-text" />
       	 			<input type="submit" id="edit-submit" value="" class="form-submit" />
       	 	</g:form>
 			</div>
