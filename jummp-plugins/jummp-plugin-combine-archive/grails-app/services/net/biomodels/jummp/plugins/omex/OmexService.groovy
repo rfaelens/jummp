@@ -47,6 +47,7 @@ import org.perf4j.aop.Profiled
 import org.apache.tika.detect.DefaultDetector
 import org.apache.tika.metadata.Metadata
 import org.apache.tika.mime.MediaType
+import java.net.URLEncoder
 
 /**
  * Provides methods to handle the COMBINE archive format.
@@ -147,11 +148,10 @@ class OmexService implements FileFormatService {
             }
             return false
         }
-        def pathURI = new URI(new StringBuilder("jar:").append(path.toUri()).toString())
         FileSystem fs
         boolean containsManifest
         try {
-            fs = FileSystems.newFileSystem(pathURI, [:])
+            fs = FileSystems.newFileSystem(path, null)
             final String MANIFEST_LOCATION =  "manifest.xml"
             Path manifestPath = fs.getPath(MANIFEST_LOCATION)
             containsManifest = Files.exists(manifestPath) &&
