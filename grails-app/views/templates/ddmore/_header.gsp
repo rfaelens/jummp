@@ -115,9 +115,6 @@
 	    	</g:if>
     		title="give feedback">Feedback</a>
     	</li>
-    	<li class="leaf">
-    		<a href="//ddmore.eu" title="about ddmore">About DDMoRe</a>
-    	</li>
     </ul>  
 </div>
 <p>${g.pageProperty(name:'page.selectedtab')}</p>
