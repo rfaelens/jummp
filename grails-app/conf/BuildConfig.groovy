@@ -94,8 +94,8 @@ grails.project.dependency.resolution = {
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
         // dependencies of jsbml
-        runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
-        runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
+        runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api', 'stax-api' }
+        runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api', 'stax-api' }
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"
         //compile ('org.apache.lucene:lucene-core:4.4.0')
         //compile ('org.apache.lucene:lucene-analyzers-common:4.4.0')
@@ -145,6 +145,7 @@ grails.project.dependency.resolution = {
                     'xml-apis'
         }*/
         compile "xml-apis:xml-apis:1.4.01"
+        compile "jaxen:jaxen:1.1.4"
 
         compile "org.jdom:jdom:1.1.3"
 
@@ -169,7 +170,7 @@ grails.project.dependency.resolution = {
         compile "org.apache.tika:tika-core:1.3"
 
         // broken Grails 2.3.2 dependecies
-        compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core' }
+        compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core', 'junit-dep' }
         compile "org.springframework:spring-test:3.2.4.RELEASE"
     }
 
@@ -213,10 +214,10 @@ grails.project.dependency.resolution = {
         // default grails plugins
         compile ":hibernate:3.6.10.3"
         compile ":webflow:2.0.8.1"
-        compile ":jquery:1.10.2"
+        compile ":jquery:1.10.2.2"
         //compile ":resources:1.2"
 
-        build ":tomcat:7.0.42"
+        build ":tomcat:7.0.47"
 
     }
 }

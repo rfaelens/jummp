@@ -97,6 +97,7 @@ grails.project.dependency.resolution = {
         compile "org.sbfc:converter:1.1"
         compile "org.jdom:jdom:1.1.3"
         compile "xml-apis:xml-apis:1.4.01"
+        compile "jaxen:jaxen:1.1.4"
     }
 
     plugins {
@@ -109,7 +110,7 @@ grails.project.dependency.resolution = {
         compile ":jquery:1.10.0"
         //compile ":resources:1.0.2"
 
-        build ":tomcat:7.0.42"
+        build ":tomcat:7.0.47"
     }
 }
 grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"
