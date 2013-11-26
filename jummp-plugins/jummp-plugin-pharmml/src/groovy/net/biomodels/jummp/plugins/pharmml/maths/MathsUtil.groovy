@@ -104,14 +104,12 @@ class MathsUtil {
 		else if (jaxObject instanceof FunctionCallType) {
 			List args=jaxObject.functionArgument
 			int index=0;
-			System.out.println(symbols)
 			args.each {
 				addIfExists(it.equation, subTree)
 				addIfExists(it.symbRef, subTree)
 				addIfExists(it.scalar, subTree)
 				addIfExists(it.constant, subTree)
 			}
-			System.out.println(symbols)
 		}
 		else if (jaxObject instanceof PiecewiseType) {
 			List pieces=jaxObject.getPiece()

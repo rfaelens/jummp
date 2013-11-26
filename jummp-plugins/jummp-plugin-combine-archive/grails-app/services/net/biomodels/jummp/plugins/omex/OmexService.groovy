@@ -47,7 +47,6 @@ import org.perf4j.aop.Profiled
 import org.apache.tika.detect.DefaultDetector
 import org.apache.tika.metadata.Metadata
 import org.apache.tika.mime.MediaType
-import java.net.URLEncoder
 
 /**
  * Provides methods to handle the COMBINE archive format.

@@ -85,7 +85,6 @@ class PubMedService {
         }
         Pattern p = Pattern.compile(linkType.pattern);
         Matcher m = p.matcher(link);
-        System.out.println(link+" ... "+linkType.pattern+" ... "+p.toString()+" ... "+m.matches())
         return m.matches()
     }
     
@@ -149,14 +148,6 @@ class PubMedService {
         	setFieldIfItExists("journal", publication, slurper.resultList.result.journalInfo.journal.title, false)
         }
         parseAuthors(slurper, publication)
-        
-        /*
-        publication.save(flush:true)
-        if (!publication.validate()) {
-        	System.out.println(publication.errors.inspect())
-            throw new JummpException("Retrieved PubMed Publication ${id} does not create a valid Publication")
-        }
-        */
         
         return publication
     }

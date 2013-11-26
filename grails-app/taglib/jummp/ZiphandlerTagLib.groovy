@@ -176,10 +176,7 @@ class ZiphandlerTagLib {
 			return (bytes / Math.pow(1024, e)).toFixed(2) + " " + s[e]; 
 		}var fileData=new Array();''')
 		if (!attrs.repFiles || attrs.loadedZips==null || attrs.zipSupported==null) {
-        	System.out.println("RepFiles"+ attrs.repFiles)	
-			System.out.println("loadedZips"+ attrs.loadedZips)	
-			System.out.println("zipSupported"+ attrs.zipSupported)	
-			return
+        	return
         }
         loadedZips=attrs.loadedZips;
         zipSupported=attrs.zipSupported;

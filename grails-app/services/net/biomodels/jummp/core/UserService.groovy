@@ -170,7 +170,6 @@ class UserService implements IUserService {
         if (!user) {
             throw new UserNotFoundException(userId)
         }
-        System.out.println(userId+"..."+user.enabled +"..."+ enable)
         if (user.enabled != enable) {
         	user.enabled = enable
             user.save(flush: true)
