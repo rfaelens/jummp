@@ -1305,7 +1305,52 @@ class PharmMlTagLib {
                     builder.append("</mrow>")
                 }
                 builder.append(operator.getClosing())
-            } else {
+            }
+            // Special case of root/square root, handled differently from other
+            // operators.
+            else if (operator.type==OperatorSymbol.OperatorType.ROOT) {
+            	StringBuilder operandBuilder=new StringBuilder()
+            	prefixToInfix(operandBuilder, stack)
+            	StringBuilder rootBuilder=new StringBuilder()
+            	prefixToInfix(rootBuilder, stack)
+            	boolean isSquareRoot=false
+            	try {
+            		String rootValue=rootBuilder.toString().replace("<mi>","").replace("</mi>","")
+            		double value = Double.parseDouble(rootValue)
+            		if (value==2.0) {
+            			isSquareRoot=true
+            		}
+            	}
+            	catch(Exception notANumber) {
+            	}
+            	if (!isSquareRoot) {
+            		builder.append("<mroot><mrow>")
+            		builder.append(operandBuilder)
+            		builder.append("</mrow><mrow>")
+            		builder.append(rootBuilder)
+            		builder.append("</mrow></mroot>")
+            	}
+            	else {
+            		builder.append("<msqrt>")
+            		builder.append(operandBuilder)
+            		builder.append("</msqrt>")
+            	}
+            }
+            // Special case of power, handled differently from other
+            // operators.
+            else if (operator.type==OperatorSymbol.OperatorType.POWER) {
+            	StringBuilder operandBuilder=new StringBuilder()
+            	prefixToInfix(operandBuilder, stack)
+            	StringBuilder powerBuilder=new StringBuilder()
+            	prefixToInfix(powerBuilder, stack)
+            	boolean isSquareRoot=false
+           		builder.append("<msup><mrow>")
+           		builder.append(operandBuilder)
+           		builder.append("</mrow><mrow>")
+           		builder.append(powerBuilder)
+           		builder.append("</mrow></msup>")
+            }
+            else {
                 builder.append(operator.getMapping())
                 builder.append(operator.getOpening())
                 prefixToInfix(builder,stack)

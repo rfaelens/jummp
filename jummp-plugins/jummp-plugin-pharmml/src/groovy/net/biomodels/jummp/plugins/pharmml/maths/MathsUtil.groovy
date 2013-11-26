@@ -192,6 +192,16 @@ class MathsUtil {
 			if (jaxObject.getOp() == "divide") {
 				return OperatorSymbol.DivideSymbol()
 			}
+			if (jaxObject.getOp() == "root") {
+				return new OperatorSymbol(jaxObject.getOp(), 
+					  convertTextToSymbol(jaxObject.getOp()), 
+					  OperatorSymbol.OperatorType.ROOT)
+			}
+			if (jaxObject.getOp() == "power") {
+				return new OperatorSymbol(jaxObject.getOp(), 
+					  convertTextToSymbol(jaxObject.getOp()), 
+					  OperatorSymbol.OperatorType.POWER)
+			}
 			return new OperatorSymbol(jaxObject.getOp(), 
 						  convertTextToSymbol(jaxObject.getOp()), 
 						  OperatorSymbol.OperatorType.BINARY)
