@@ -36,7 +36,7 @@
     <body>
         
     <div id='login'>
-        <form action='${postUrl}' method='POST' id='loginForm' class='cssform' autocomplete='off'>
+        <form action='${postUrl}' method='POST' id='loginForm' class='cssform' autocomplete='on'>
             <table>
                 <tr><p>${flash.message}</p></tr>
                 <tbody>
@@ -47,7 +47,7 @@
                                 </label>
                         </td>
                         <td>
-                        	<input type='text' name='j_username' id='username' autocomplete="on"/>
+                            <input type='text' name='j_username' id='username'/>
                         </td>
                     </tr>
                     <tr>
@@ -57,7 +57,7 @@
                                 </label>
                         </td>
                     	<td>
-                    		<input type='password' name='j_password' id='password' autocomplete="on"/>
+                            <input type='password' name='j_password' id='password'/>
                     	</td>
                    </tr>
                     <tr>
