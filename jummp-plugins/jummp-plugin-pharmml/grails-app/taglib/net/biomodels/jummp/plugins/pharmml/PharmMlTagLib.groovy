@@ -738,21 +738,6 @@ class PharmMlTagLib {
         return result.toString()
     }
 
-    def treatment = { attrs ->
-        if (!attrs.treatment) {
-            out << "No treatments defined in the model."
-            return
-        }
-        def result = new StringBuilder("<table>\n<thead>\n<tr><th>Identifier</th><th>Name</th><th>Dosing Regimen</th></tr></thead><tbody>\n")
-        attrs.treatment.each { t ->
-            result.append("<tr><td>")
-            result.append(t.id).append("</td><td>").append(t.name? t.name : " ").append("</td><td>").append(dosingRegimen(t.dosingRegimen))
-            result.append("</td>\n</tr>\n")
-        }
-        result.append("</tbody></table>")
-        out << result.toString()
-    }
-
     StringBuilder scalarRhs = { r, text ->
         if (r.scalar) {
             text.append(scalar(r.scalar.value))
@@ -864,29 +849,6 @@ class PharmMlTagLib {
     }
 
     /* TRIAL DESIGN */
-    StringBuilder steadyState = { ss ->
-        def result = new StringBuilder("<strong>Steady state</strong>")
-        def i = ss.interval
-        def end = ss.endTime
-        result.append("<div>Interval: ").append(convertToMathML(i.symbRef.symbIdRef, i.assign))
-        result.append("</div><div>")
-        result.append("End time: ").append(convertToMathML(end.symbRef.symbIdRef, end.assign))
-        result.append("</div>")
-        return result
-    }
-
-    //todo - remove/reuse
-    StringBuilder occasions = { occasions, text ->
-        text.append("[")
-        occasions.each { o ->
-            StringBuilder sb = new StringBuilder("(level:")
-            sb.append(o.levelId).append(", symbolIdentifier:").append(o.symbId).append(")")
-            text.append(sb)
-        }
-        text.append("]")
-    }
-
-    // NEW TRIAL DESIGN
     def trialStructure = { structure ->
         if (!structure) {
             return
@@ -1041,7 +1003,28 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    /* MODELLING STEPS */
+     StringBuilder steadyState = { ss ->
+        def result = new StringBuilder("<strong>Steady state</strong>")
+        def i = ss.interval
+        def end = ss.endTime
+        result.append("<div>Interval: ").append(convertToMathML(i.symbRef.symbIdRef, i.assign))
+        result.append("</div><div>")
+        result.append("End time: ").append(convertToMathML(end.symbRef.symbIdRef, end.assign))
+        result.append("</div>")
+        return result
+    }
+
+    StringBuilder occasions = { occasions, text ->
+        text.append("[")
+        occasions.each { o ->
+            StringBuilder sb = new StringBuilder("(level:")
+            sb.append(o.levelId).append(", symbolIdentifier:").append(o.symbId).append(")")
+            text.append(sb)
+        }
+        text.append("]")
+    }
+
+   /* MODELLING STEPS */
     def variableDefs = { attrs ->
         if (!attrs.variables) {
             // there may not be any variables in the modelling steps
