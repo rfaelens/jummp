@@ -95,7 +95,114 @@ import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 class PharmMlTagLib {
     static namespace = "pharmml"
 
-    private Map<String, String> modellingTabsMap
+    private Map<String, String> tabsMap
+
+    def decideTabs = { attrs ->
+        boolean haveTabsToDisplay = true
+        def topics = ["iv", "fd", "md", "td", "est", "sim"]
+        topics.inject(haveTabsToDisplay) { display, t ->
+            display && attrs."${t}"
+        }
+        if (!haveTabsToDisplay) {
+            return
+        }
+        tabsMap = new HashMap<String, String>(topics.size(), 1.0)
+        if (attrs.iv || attrs.fd || attrs.md) {
+            final String MDEF_TAB = "modelDefinition"
+            tabsMap["mdef"] = MDEF_TAB
+            out << "<li><a href='#${MDEF_TAB}'>Model Definition</a></li>\n"
+        }
+        if (attrs.td) {
+            final String TD_TAB = "trialDesign"
+            tabsMap["td"] = TD_TAB
+            out << "<li><a href='#${TD_TAB}'>Trial Design</a></li>\n"
+        }
+        if (attrs.est) {
+            final String EST_TAB = "estimationSteps"
+            tabsMap["est"] = EST_TAB
+            out << "<li><a href='#${EST_TAB}'>Estimation Steps</a></li>\n"
+        }
+        if (attrs.sim) {
+            final String SIM_TAB = "simulationSteps"
+            tabsMap["sim"] = SIM_TAB
+            out << "<li><a href='#${SIM_TAB}'>Simulation Steps</a></li>\n"
+        }
+    }
+
+    def handleModelDefinitionTab = { attrs ->
+        if (!tabsMap["mdef"]) {
+            return
+        }
+        out << "<div id='${tabsMap["mdef"]}'>"
+        if (attrs.iv) {
+            out << "\n<p><strong>Independent variable</strong>&nbsp;${attrs.iv}</p>\n"
+        }
+        if (attrs.fd) {
+            functionDefinitions(attrs.fd)
+        }
+        if (attrs.sm) {
+            structuralModel(attrs.sm, attrs.iv)
+        }
+        if (attrs.vm) {
+            variabilityModel(attrs.vm)
+        }
+        if (attrs.cm) {
+            covariates(attrs.cm)
+        }
+        if (attrs.pm) {
+            parameterModel(attrs.pm, attrs.cm)
+        }
+        if (attrs.om) {
+            observations(attrs.om)
+        }
+        out << "</div>\n"
+    }
+
+    def handleTrialDesignTab = { attrs ->
+        if (!tabsMap["td"]) {
+            return
+        }
+        out << "<div id='${tabsMap["td"]}'>"
+        if (attrs.ts) {
+            trialStructure(attrs.ts)
+        }
+        if (attrs.td) {
+            trialDosing(attrs.td)
+        }
+        if (attrs.tp) {
+            trialPopulation(attrs.tp)
+        }
+        out << "</div>\n"
+    }
+
+    def handleModellingStepsTabs = { attrs ->
+        if (!attrs.estimation && !attrs.simulation && !tabsMap) {
+            return
+        }
+        if (!attrs.independentVariable) {
+            // the default independent variable is assumed to be time.
+            attrs.independentVariable = "time"
+        }
+
+        def result = new StringBuilder()
+        if (attrs.estimation) {
+            result.append("<div id='${tabsMap["est"]}'>")
+            result.append(estimationSteps(attrs.estimation))
+            //only consider step dependencies here when there are no simulation steps
+            if (!tabsMap["sim"]) {
+                result.append(stepDeps(attrs.deps))
+            }
+            result.append("</div>")
+        }
+        if (attrs.simulation) {
+            result.append("<div id='${tabsMap["sim"]}'>")
+            result.append(simulationSteps(attrs.simulation, attrs.independentVariable))
+            result.append(stepDeps(attrs.deps))
+            result.append("</div>")
+        }
+        out << result.toString()
+    }
+
 
     StringBuilder simpleParams(List<SimpleParameterType> parameters) {
         def outcome = new StringBuilder()
@@ -246,12 +353,12 @@ class PharmMlTagLib {
         return output.append("</div>")
     }
 
-    def functionDefinitions = { attrs ->
-        if (!attrs.functionDefs) {
+    def functionDefinitions = { functionDefs ->
+        if (!functionDefs) {
             return
         }
         def result = new StringBuilder("<h3>Function Definitions</h3>")
-        attrs.functionDefs.each { d ->
+        functionDefs.each { d ->
             def rightHandSide
             if (d.definition.equation) {
                 rightHandSide = d.definition.equation
@@ -267,20 +374,20 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    def structuralModel = { attrs ->
-        if (!attrs.sm) {
+    def structuralModel = { sm, iv ->
+        if (!sm) {
             return
         }
         def result = new StringBuilder("<h3>Structural ")
-        boolean multipleStructuralModels = attrs.sm.size() > 1
+        boolean multipleStructuralModels = sm.size() > 1
         if (!multipleStructuralModels) {
-            result.append("Model ").append(attrs.sm[0].name?.value ?: attrs.sm[0].blkId)
+            result.append("Model ").append(sm[0].name?.value ?: sm[0].blkId)
         } else {
             result.append("Models")
         }
         result.append("</h3>\n")
         if (!multipleStructuralModels) {
-            def model = attrs.sm[0]
+            def model = sm[0]
             if (model.simpleParameter) {
                 result.append("<p class=\"bold\">Parameters </p>")
                 result.append(simpleParams(model.simpleParameter))
@@ -288,7 +395,7 @@ class PharmMlTagLib {
             if (model.commonVariable) {
                 result.append("<p class=\"bold\">Variable definitions</p>")
                 result.append(["<div>", "</div>\n"].join(
-                    commonVariables(model.commonVariable, attrs.iv).toString()))
+                    commonVariables(model.commonVariable, iv).toString()))
             }
         } else {
             sm.each { s ->
@@ -344,14 +451,14 @@ class PharmMlTagLib {
         return result
     }
 
-    def variabilityModel = { attrs ->
-        if (!attrs.variabilityModel) {
+    def variabilityModel = { variabilityModel ->
+        if (!variabilityModel) {
             return
         }
         def result = new StringBuilder("<h3>Variability Model</h3>\n<table class='views-table cols-4'>\n<thead><tr>")
         result.append("<th>Identifier</th><th>Name</th><th>Level</th><th>Type</th></tr>")
         result.append("\n</thead>\n<tbody>\n")
-        attrs.variabilityModel.each { m ->
+        variabilityModel.each { m ->
             result.append("<tr><td class=\"value\">")
             result.append(m.blkId)
             result.append("</td><td class=\"value\">")
@@ -392,15 +499,15 @@ class PharmMlTagLib {
      * The latter is necessary to display the transformations that are defined
      * for each individual parameter.
      */
-    def parameterModel = { attrs ->
-        if (!attrs.parameterModel) {
+    def parameterModel = { parameterModel, covariates ->
+        if (!parameterModel) {
             return
         }
         out << "<h3>Parameter Model</h3>"
 
         def result = new StringBuilder()
         result.append("<span class=\"bold\">Parameters </span>")
-        attrs.parameterModel.each { pm ->
+        parameterModel.each { pm ->
                result.append("<div class='spaced'>")
                def simpleParameters = pm.commonParameterElement.value.findAll {
                        it instanceof SimpleParameterType
@@ -416,7 +523,7 @@ class PharmMlTagLib {
                if (randoms) {
                        result.append(randoms)
                }
-               String individuals = individualParams(individualParameters, rv, attrs.covariates)
+               String individuals = individualParams(individualParameters, rv, covariates)
                if (individuals) {
                        result.append(individuals)
                }
@@ -426,13 +533,13 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    def covariates = { attrs ->
-        if (!attrs.covariate) {
+    def covariates = { covariate ->
+        if (!covariate) {
             return
         }
         out << "<h3>Covariate Model</h3>"
         def result = new StringBuilder()
-        attrs.covariate.each { c ->
+        covariate.each { c ->
             result.append("<div>")
             if (c.simpleParameter) {
                 result.append("<div><span class=\"bold\">Parameters</span></div>")
@@ -484,14 +591,14 @@ class PharmMlTagLib {
         return result.append("</p>")
     }
 
-    def observations = { attrs ->
-        if (!attrs.observations || attrs.observations.size() == 0) {
+    def observations = { observations ->
+        if (!observations || observations.size() == 0) {
             return
         }
 
         StringBuilder result = new StringBuilder()
         result.append("<h3>Observation Model</h3>")
-        attrs.observations.each { om ->
+        observations.each { om ->
             result.append("<h4>Observation <span class='italic'>")
             // the API returns a JAXBElement, not ObservationErrorType
             def obsErr = om.observationError.value
@@ -780,14 +887,14 @@ class PharmMlTagLib {
     }
 
     // NEW TRIAL DESIGN
-    def trialStructure = { attrs ->
-        if (!attrs.structure) {
+    def trialStructure = { structure ->
+        if (!structure) {
             return
         }
         def result = new StringBuilder()
         result.append("<h3>Structure overview</h3>\n")
-        def tds = new TrialDesignStructure(attrs.structure.arm, attrs.structure.epoch,
-                    attrs.structure.cell, attrs.structure.segment)
+        def tds = new TrialDesignStructure(structure.arm, structure.epoch,
+                    structure.cell, structure.segment)
         def armRefs     = new ArrayList(tds.getArmRefs())
         def epochRefs   = new ArrayList(tds.getEpochRefs())
         /* arm-epoch matrix*/
@@ -806,12 +913,12 @@ class PharmMlTagLib {
         result.append("</tbody></table>\n")
 
         /* segments and activities */
-        List activities = attrs.structure.activity
+        List activities = structure.activity
         // avoid the need to increase the size of the map, because re-hashing is expensive
         def segmentActivitiesMap = new HashMap(activities.size(), 1.0)
-        attrs.structure.segment.each { s ->
+        structure.segment.each { s ->
             segmentActivitiesMap[s.oid] = s.activityRef.collect{ a ->
-                attrs.structure.activity.find{ a.oidRef.equals(it.oid) }
+                structure.activity.find{ a.oidRef.equals(it.oid) }
             }
         }
         boolean showDosingFootnote = false
@@ -880,8 +987,8 @@ class PharmMlTagLib {
             result.append("<span>* &ndash; Element defined in the Individual dosing section.</span>")
         }
         /* epochs and occasions */
-        if (attrs.structure.studyEvent) {
-            ObservationEventsMap oem = new ObservationEventsMap(attrs.structure.studyEvent)
+        if (structure.studyEvent) {
+            ObservationEventsMap oem = new ObservationEventsMap(structure.studyEvent)
             def arms = oem.getArms()
             def epochs = oem.getEpochs()
             result.append("\n<h4>Epoch-Occasion definition</h4>\n")
@@ -906,12 +1013,12 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    def trialDosing = { attrs ->
-        if (!attrs.dosing) {
+    def trialDosing = { dosing ->
+        if (!dosing) {
             return
         }
         def result = new StringBuilder("<h4>Individual dosing</h4>\n")
-        attrs.dosing.each { d ->
+        dosing.each { d ->
             if (d.dataSet) {
                 dataSet(d.dataSet, null, result)
             }
@@ -919,17 +1026,17 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    def trialPopulation = { attrs ->
-        if (!attrs.pop) {
+    def trialPopulation = { pop ->
+        if (!pop) {
             return
         }
         def result = new StringBuilder("<h4>Population</h4>\n")
-        if (attrs.pop.variabilityReference) {
+        if (pop.variabilityReference) {
             result.append("<span><strong>Variability level: </strong>")
-            result.append(attrs.pop.variabilityReference.symbRef.symbIdRef).append("</span>")
+            result.append(pop.variabilityReference.symbRef.symbIdRef).append("</span>")
         }
-        if (attrs.pop.dataSet) {
-            dataSet(attrs.pop.dataSet, null, result)
+        if (pop.dataSet) {
+            dataSet(pop.dataSet, null, result)
         }
         out << result.toString()
     }
@@ -960,52 +1067,6 @@ class PharmMlTagLib {
         result.append("</tbody></table>")
         out << result.toString()
     }
-
-    def decideModellingStepsTabs = { attrs ->
-        if (!attrs.estimation && !attrs.simulation) {
-            return
-        }
-        modellingTabsMap = new HashMap<String, String>(3, 1.0)
-        if (attrs.estimation) {
-            final String EST_TAB = "estimationSteps"
-            modellingTabsMap["est"] = EST_TAB
-            out << "<li><a href='#${EST_TAB}'>Estimation Steps</a></li>"
-        }
-        if (attrs.simulation) {
-            final String SIM_TAB = "simulationSteps"
-            modellingTabsMap["sim"] = SIM_TAB
-            out << "<li><a href='#${SIM_TAB}'>Simulation Steps</a></li>"
-        }
-    }
-
-    def handleModellingStepsTabs = { attrs ->
-        if (!attrs.estimation && !attrs.simulation && !modellingTabsMap) {
-            return
-        }
-        if (!attrs.independentVariable) {
-            // the default independent variable is assumed to be time.
-            attrs.independentVariable = "time"
-        }
-
-        def result = new StringBuilder()
-        if (attrs.estimation) {
-            result.append("<div id='${modellingTabsMap["est"]}'>")
-            result.append(estimationSteps(attrs.estimation))
-            //only consider step dependencies here when there are no simulation steps
-            if (modellingTabsMap.size() == 1) {
-                result.append(stepDeps(attrs.deps))
-            }
-            result.append("</div>")
-        }
-        if (attrs.simulation) {
-            result.append("<div id='${modellingTabsMap["sim"]}'>")
-            result.append(simulationSteps(attrs.simulation, attrs.independentVariable))
-            result.append(stepDeps(attrs.deps))
-            result.append("</div>")
-        }
-        out << result.toString()
-    }
-
     StringBuilder simulationSteps = { List<SimulationStepType> steps, String iv ->
         if (!steps) {
             return

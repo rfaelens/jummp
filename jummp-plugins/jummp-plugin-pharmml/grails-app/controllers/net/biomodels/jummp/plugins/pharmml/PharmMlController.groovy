@@ -61,6 +61,8 @@ class PharmMlController {
                 revision: revision,
                 authors: revision.model.creators,
                 allRevs: revs,
+                modelDefinition: dom.modelDefinition,
+                trialDesign: design,
                 independentVar: pharmMlService.getIndependentVariable(dom),
                 functionDefs: pharmMlService.getFunctionDefinitions(dom),
                 structuralModel: pharmMlService.getStructuralModel(dom),
