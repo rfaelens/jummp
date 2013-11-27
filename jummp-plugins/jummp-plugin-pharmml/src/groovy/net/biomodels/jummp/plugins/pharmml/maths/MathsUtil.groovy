@@ -103,10 +103,9 @@ class MathsUtil {
 		}
 		else if (jaxObject instanceof FunctionCallType) {
 			List args=jaxObject.functionArgument
+			int index=0;
 			args.each {
-				if (it.equation) {
-					convertJAX(symbols, it.equation)
-				}
+				addIfExists(it.equation, subTree)
 				addIfExists(it.symbRef, subTree)
 				addIfExists(it.scalar, subTree)
 				addIfExists(it.constant, subTree)

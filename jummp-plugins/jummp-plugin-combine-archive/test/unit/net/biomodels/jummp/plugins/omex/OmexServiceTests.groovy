@@ -55,7 +55,7 @@ class OmexServiceTests {
         randomFile.setText("Hello")
         assertTrue randomFile.exists()
         assertFalse omexService.validate([randomFile])
-        def omexFile = new File("test/files/sample.omex")
+        def omexFile = new File("test/files/sample archive.omex")
         assertTrue omexService.validate([omexFile])
     }
 
@@ -64,7 +64,7 @@ class OmexServiceTests {
         def omexService = new OmexService()
         List<File> modelFiles = null
         assertEquals("", omexService.extractName(modelFiles))
-        modelFiles = [new File("test/files/sample.omex")]
+        modelFiles = [new File("test/files/sample archive.omex")]
         assertEquals("", omexService.extractName(modelFiles))
     }
 
@@ -73,7 +73,7 @@ class OmexServiceTests {
         def omexService = new OmexService()
         List<File> modelFiles = null
         assertEquals("", omexService.extractDescription(modelFiles))
-        modelFiles = [new File("test/files/sample.omex")]
+        modelFiles = [new File("test/files/sample archive.omex")]
         assertEquals("", omexService.extractDescription(modelFiles))
     }
 
@@ -83,7 +83,7 @@ class OmexServiceTests {
         assertEquals([], omexService.getAllAnnotationURNs(null))
         def omexFormat = new ModelFormatTransportCommand(identifier: "OMEX",
                 name: "Open Modelling Exchange Format")
-        def file = new RepositoryFileTransportCommand(path: "test/files/sample.omex",
+        def file = new RepositoryFileTransportCommand(path: "test/files/sample archive.omex",
                 mainFile: true, hidden: false, userSubmitted: true)
         def revision = new RevisionTransportCommand(format: omexFormat, files: [file])
 
@@ -96,7 +96,7 @@ class OmexServiceTests {
         assertEquals([], omexService.getPubMedAnnotation(null))
         def omexFormat = new ModelFormatTransportCommand(identifier: "OMEX",
                 name: "Open Modelling Exchange Format")
-        def file = new RepositoryFileTransportCommand(path: "test/files/sample.omex",
+        def file = new RepositoryFileTransportCommand(path: "test/files/sample archive.omex",
                 mainFile: true, hidden: false, userSubmitted: true)
         def revision = new RevisionTransportCommand(format: omexFormat, files: [file])
 

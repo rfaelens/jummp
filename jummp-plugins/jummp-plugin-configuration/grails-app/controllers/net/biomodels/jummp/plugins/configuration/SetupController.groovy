@@ -72,9 +72,7 @@ class SetupController {
         validateAuthenticationBackend {
             action {
                 if (params.authenticationBackend == "database") {
-                	System.out.println("IN VALIDATION AUTHENTICATION BACKEND WITH ${flow.getProperties()}")
-                    flow.authenticationBackend = "database"
-                    System.out.println("Returning to database!")
+                	flow.authenticationBackend = "database"
                     return database()
                 } else if (params.authenticationBackend == "ldap") {
                     flow.validationErrorOn="LDAP is currently not supported"
@@ -229,7 +227,6 @@ class SetupController {
         
         mail {
             on("next") { MailCommand cmd ->
-                System.out.println(cmd.getProperties())
                 flow.mail = cmd
                 if (flow.mail.hasErrors()) {
                     return error()

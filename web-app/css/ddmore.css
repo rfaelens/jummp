@@ -1850,11 +1850,11 @@ a:hover {
     height: 120px;
 }
 #center-backgroundright {
-    float:right;
+	position:absolute;
     background: url(../images/ddmore/right.png) no-repeat;
     height: 120px;
-    width:50px;
-    margin-right: -3.0%
+    width:30px;
+    margin-left:99%;
 }
 
 #content {
