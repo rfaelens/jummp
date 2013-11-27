@@ -1115,23 +1115,30 @@ class PharmMlTagLib {
         return result
     }
 
-    StringBuilder objectiveDataSetMapping(DatasetMappingType dsm) {
-        def result = new StringBuilder("<h5>Dataset mapping</h5>\n")
+    StringBuilder objectiveDataSetMapping(List<DatasetMappingType> mappings) {
+        def result = new StringBuilder("<h5>Dataset mapping")
+        if (mappings.size() > 1) {
+            result.append("s")
+        }
+        result.append("</h5>\n")
         def variableMap = [:]
-        if (dsm.variableAssignment) {
-            result.append(variableAssignments(dsm.variableAssignment,
-                        "<span class=\"bold\">Variable assignments</span>"))
-        }
-        dsm.mapping.each {
-            //keep track of variableMappings so that we know how to name the columns
-            //deal with JAXBElement
-            if (it.value instanceof VariableMappingType) {
-                //TODO handle nested  ColumnRefs recursively
-                variableMap << [ (it.value.columnRef.columnIdRef) : (it.value.symbRef.symbIdRef)]
+
+        mappings.each { dsm ->
+            if (dsm.variableAssignment) {
+                result.append(variableAssignments(dsm.variableAssignment,
+                            "<span class=\"bold\">Variable assignments</span>"))
             }
-        }
-        if (dsm.dataSet) {
-            dataSet(dsm.dataSet, variableMap, result)
+            dsm.mapping.each {
+                //keep track of variableMappings so that we know how to name the columns
+                //deal with JAXBElement
+                if (it.value instanceof VariableMappingType) {
+                    //TODO handle nested  ColumnRefs recursively
+                    variableMap << [ (it.value.columnRef.columnIdRef) : (it.value.symbRef.symbIdRef)]
+                }
+            }
+            if (dsm.dataSet) {
+                dataSet(dsm.dataSet, variableMap, result)
+            }
         }
         return result
     }
