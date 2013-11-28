@@ -44,14 +44,15 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.core.authority.GrantedAuthorityImpl
+import grails.util.Holders
 
 /**
  * Base class for Integration tests providing useful methods for creating users and authentication.
  * @author  Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class JummpIntegrationTest {
-    def authenticationManager
-    def springSecurityService
+    def authenticationManager=Holders.applicationContext.getBean("authenticationManager")
+    def springSecurityService=Holders.applicationContext.getBean("springSecurityService")
 
     def shouldFail = { exception, code ->
         try {
