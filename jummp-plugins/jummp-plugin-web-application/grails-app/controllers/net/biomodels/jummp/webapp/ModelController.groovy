@@ -232,9 +232,10 @@ class ModelController {
                 }
 
                 def cmd = new UploadFilesCommand()
-                bindData(cmd, mainMultipartList, [include: ['mainFile']])
-                bindData(cmd, extraMultipartList, [include: ['extraFiles']])
-                bindData(cmd, descriptionFields)
+                cmd.mainFile=mainMultipartList
+                cmd.extraFiles=extraMultipartList
+                bindData(cmd, descriptionFields, [include: ['description']])
+                System.out.println(cmd.getProperties())
                 if (IS_DEBUG_ENABLED) {
                     log.debug "Data binding done :${cmd.properties}"
                 }
