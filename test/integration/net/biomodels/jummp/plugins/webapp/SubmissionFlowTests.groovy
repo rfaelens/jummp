@@ -38,11 +38,13 @@ package net.biomodels.jummp.plugins.webapp
 import grails.test.WebFlowTestCase
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
+import grails.util.Holders
 import net.biomodels.jummp.core.JummpIntegrationTest
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
+import net.biomodels.jummp.core.plugins.webapp.*
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.webapp.ModelController
@@ -54,7 +56,6 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.mock.web.MockMultipartHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
 import static org.junit.Assert.*
-import grails.util.Holders
 
 class SubmissionFlowTests extends JummpIntegrationTest {
     

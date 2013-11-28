@@ -73,7 +73,11 @@ class UploadFilesCommand implements Serializable {
         }
         def result = [:]
         extraFiles?.eachWithIndex { f, i ->
-            result[f] = description[i]
+            if (description && description[i]) {
+                result[f] = description[i]
+            } else {
+                result[f] = ""
+            }
         }
         result
     }
@@ -113,7 +117,7 @@ class UploadFilesCommand implements Serializable {
                 }
                 mf = mf.findAll{ it && !it.isEmpty() }
                 if (mf.size() < 1) {
-                    log.error "\tPlease give me some files."
+                    log.warn "\tPlease give me some files."
                     return ['mainFile.blank']
                 }
                 //process mains in reverse so that the latest submitted one is kept.
@@ -190,5 +194,6 @@ class UploadFilesCommand implements Serializable {
                 return true
             }
         )
+        description(nullable: true)
     }
 }

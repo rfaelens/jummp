@@ -117,7 +117,7 @@ import net.biomodels.jummp.webapp.ModelController
         }
         
         
-            private File getFileForTest(String filename, String text)
+            public File getFileForTest(String filename, String text)
     {
         def tmp = System.getProperty("java.io.tmpdir")
         def testFile=new File(tmp + File.separator + filename)

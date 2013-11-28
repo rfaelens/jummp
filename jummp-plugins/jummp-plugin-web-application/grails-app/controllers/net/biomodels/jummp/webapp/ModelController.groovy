@@ -209,7 +209,7 @@ class ModelController {
         uploadFiles {
             on("Upload") {
                 def mainMultipartList = request.getMultiFileMap().mainFile
-                def extraFileField = request.getMultiFileMap().extraFile
+                def extraFileField = request.getMultiFileMap().extraFiles
                 List<MultipartFile> extraMultipartList = []
                 if (extraFileField instanceof MultipartFile) {
                     extraMultipartList = [extraFileField]
@@ -217,7 +217,7 @@ class ModelController {
                 else {
                     extraMultipartList = extraFileField
                 }
-                def descriptionFields = params["description"]
+                def descriptionFields = params?.description ?: [""]
                 if (descriptionFields instanceof String) {
                     descriptionFields = [descriptionFields]
                 }
@@ -232,9 +232,9 @@ class ModelController {
                 }
 
                 def cmd = new UploadFilesCommand()
-                cmd.mainFile=mainMultipartList
-                cmd.extraFiles=extraMultipartList
-                bindData(cmd, descriptionFields, [include: ['description']])
+                cmd.mainFile = mainMultipartList
+                cmd.extraFiles = extraMultipartList
+                cmd.description = descriptionFields
                 System.out.println(cmd.getProperties())
                 if (IS_DEBUG_ENABLED) {
                     log.debug "Data binding done :${cmd.properties}"
