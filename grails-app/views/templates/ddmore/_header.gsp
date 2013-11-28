@@ -41,7 +41,7 @@
   
    <div id="header"><div class="section clearfix">
 
-          <a href="${createLink(uri: '/', absolute: true)}" title="Home" rel="home" id="logo"><img src="http://www.ddmore.eu/sites/ddmore/themes/ddmore/logo.png" alt="Home" /></a>
+          <a href="${createLink(uri: '/', absolute: true)}" title="Home" rel="home" id="logo"><g:img dir="images/ddmore" file="logo.png" alt="DDMoRe Logo"/></a>
     
     
     
@@ -80,16 +80,12 @@
       	 <div class="content">
       	 	<g:form controller="search" action="searchRedir">
       	 	<%-- <form action="/" method="post" id="search-block-form" accept-charset="UTF-8"> --%><div><div class="container-inline">
-      	 		<h2 class="element-invisible">Search form</h2>
-      	 		<div class="form-item form-type-textfield form-item-search-block-form">
-      	 			<label class="element-invisible" for="edit-search-block-form--2">Search </label>
-      	 			<input title="Enter the terms you wish to search for." type="text" id="edit-search-block-form--2" name="search_block_form" value="" size="15" maxlength="128" class="form-text" />
-      	 		</div>
-      	 		<div class="form-actions form-wrapper" id="edit-actions">
-      	 			<input type="submit" id="edit-submit" name="op" value="Search" class="form-submit" />
-      	 		</div>
-			</div>
-</div></g:form>  </div>
+      	 			<input title="Enter the terms you wish to search for." type="text" id="edit-search-block-form--2" name="search_block_form" value="" maxlength="128" class="form-text" />
+      	 			<input type="submit" id="edit-submit" value="" class="form-submit" />
+     		</div></div>
+    	 	</g:form>
+	
+  </div>
 
 </div>
       	 		
@@ -118,9 +114,6 @@
 	    		class="active-trail active"
 	    	</g:if>
     		title="give feedback">Feedback</a>
-    	</li>
-    	<li class="leaf">
-    		<a href="//ddmore.eu" title="about ddmore">About DDMoRe</a>
     	</li>
     </ul>  
 </div>

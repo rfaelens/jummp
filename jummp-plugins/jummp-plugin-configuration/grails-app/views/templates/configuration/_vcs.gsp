@@ -33,7 +33,7 @@
             <tr class="prop">
                 <td class="name"><label for="subversion">Subversion:</label></td>
                 <td class="value ${hasErrors(bean: vcs, field: 'vcs', 'errors')}">
-                    <input type="radio" name="vcs" id="subversion" value="svn" ${!vcs || vcs.vcs == "svn" ? 'checked="checked"' : ''} title="Subversion"/>
+                    <input type="radio" disabled="true" name="vcs" id="subversion" value="svn" ${!vcs || vcs.vcs == "svn" ? 'checked="checked"' : ''} title="Subversion"/>
                 </td>
             </tr>
             <tr class="prop">

@@ -31,6 +31,7 @@
 
   <div id="page-wrapper">
     <div id="center-background">&nbsp;</div>
+    <div id="center-backgroundright">&nbsp;</div>
     <div id="page">
 
   <div id="main-wrapper"><div id="main" class="clearfix">
@@ -39,7 +40,7 @@
             
                   
             <a id="main-content"></a>
-                    <h1 class="title" id="page-title">Model Repository</h1>
+                    <h1 class="title" id="page-title"><g:pageProperty name="page.title" /></h1>
                     <div class="content">
                      </div>
                                 <div class="region region-content">

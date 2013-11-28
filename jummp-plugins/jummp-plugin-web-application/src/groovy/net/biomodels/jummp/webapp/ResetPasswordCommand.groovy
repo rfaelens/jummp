@@ -18,44 +18,24 @@
 * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 **/
 
+package net.biomodels.jummp.webapp
 
+/**
+ * @short Command object for User registration
+ */
+@grails.validation.Validateable
+class ResetPasswordCommand {
+    String username
+    String hashCode
+    String newPassword
+    String newPasswordRpt
 
-
-
-package net.biomodels.jummp.plugins.pharmml.maths
-
-class MathsSymbol {
-	public enum OutputFormat {MATHML, LATEX}
-	OutputFormat format=OutputFormat.MATHML;
-	String text;
-	String mapsTo;
-	
-	public MathsSymbol(String t, String m) {
-		text=t;
-		mapsTo=m;
-	}
-	
-	private String simplifyNumber() {
-		try
-		{
-			double number=Double.parseDouble(mapsTo)
-			if (number==Math.ceil(number)) {
-				return ""+(int)number
-			}
-		}
-		catch(Exception ignore) {
-		}
-		return mapsTo
-	}
-	
-	public String getMapping() {
-		if (format==OutputFormat.MATHML) {
-			return "<mi>${simplifyNumber()}</mi>"
-		}
-		return null
-	}
-	
-	public String toString() {
-		return mapsTo
-	}
+    static constraints = {
+        username(nullable: false, blank: false)
+        hashCode(nullable: false, blank: false)
+        newPassword(nullable: false, blank: false)
+        newPasswordRpt validator: { repeatValue, cmd ->
+        	return repeatValue && cmd.newPassword == repeatValue
+        }
+    }
 }

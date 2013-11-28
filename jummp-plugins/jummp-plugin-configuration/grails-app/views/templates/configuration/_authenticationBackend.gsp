@@ -36,7 +36,7 @@
             </tr>
             <tr class="prop">
                 <td class="name"><label for="ldap">LDAP:</label></td>
-                <td class="value"><input type="radio" name="authenticationBackend" id="ldap" value="ldap"/></td>
+                <td class="value"><input disabled="true" type="radio" name="authenticationBackend" id="ldap" value="ldap"/></td>
             </tr>
         </tbody>
     </table>

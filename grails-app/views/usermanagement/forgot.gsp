@@ -27,20 +27,33 @@
 
 
 
-<%@ page contentType="text/html;charset=UTF-8" %>
-
+<html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
-        <title><g:message code="submission.abort.common.title"/></title>
+        <title>Forgot Password</title>
+        </style>
+        <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
     </head>
-    <body>
-        <h2><g:message code="submission.abort.create.header"/></h2>
-        <p><g:message code="submission.abort.create.message" args="${[createLink(controller: 'model', action: 'create')]}"/></p>
-    </body>
-      <content tag="submit">
-    	selected
-    </content>
-    <content tag="title">
-		Submit a model
-	</content>
+     <body>
+        <p><g:message code="user.forgot.ui.explanation"/></p>
+        <div>
+            <g:form name="passwordForm" action="requestPassword">
+                <table>
+                    <tbody>
+                    <tr>
+                        <td><label><g:message code="user.forgot.ui.username"/>:</label></td>
+                        <td><span><g:textField name="username"/></span></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="buttons">
+                    <input type="submit" value="Submit"/>
+                </div>
+            </g:form>
+        </div>
+        </body>
+</html>
+<content tag="title">
+	<g:message code="user.forgot.ui.heading"/>
+</content>

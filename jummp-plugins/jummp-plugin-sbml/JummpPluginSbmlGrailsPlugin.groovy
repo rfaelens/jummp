@@ -33,6 +33,8 @@
 
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
+import net.biomodels.jummp.plugins.configuration.ConfigurationService
+
 
 class JummpPluginSbmlGrailsPlugin {
     // the plugin version
@@ -62,10 +64,14 @@ Brief description of the plugin.
     }
 
     def doWithSpring = {
-        Properties props = new Properties()
+    	Properties props = new Properties()
         try {
-            props.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") +
-                    ".jummp.properties"))
+        	ConfigurationService service = new ConfigurationService()
+        	String pathToConfig=service.getConfigFilePath()
+        	if (!pathToConfig) {
+        		throw new Exception("No config file available, using defaults")
+        	}
+        	props.load(new FileInputStream(pathToConfig))
         } catch (Exception ignored) {
         }
         def jummpConfig = new ConfigSlurper().parse(props)

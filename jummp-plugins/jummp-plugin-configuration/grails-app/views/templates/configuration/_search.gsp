@@ -27,20 +27,15 @@
 
 
 
-<%@ page contentType="text/html;charset=UTF-8" %>
-
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta name="layout" content="main"/>
-        <title><g:message code="submission.abort.common.title"/></title>
-    </head>
-    <body>
-        <h2><g:message code="submission.abort.create.header"/></h2>
-        <p><g:message code="submission.abort.create.message" args="${[createLink(controller: 'model', action: 'create')]}"/></p>
-    </body>
-      <content tag="submit">
-    	selected
-    </content>
-    <content tag="title">
-		Submit a model
-	</content>
+<div class="dialog">
+    <table class="formtable">
+        <tbody>
+            <tr class="prop">
+                <td class="name"><label for="Search Index Location">Search Index Directory:</label></td>
+                <td class="value ${hasErrors(bean: search, field: 'indexDirectory', 'errors')}">
+                    <input type="text" name="indexDirectory" id="indexDirectory" value="${search?.indexDirectory}"/>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

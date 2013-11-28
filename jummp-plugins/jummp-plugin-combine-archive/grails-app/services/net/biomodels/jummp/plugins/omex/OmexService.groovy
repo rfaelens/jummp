@@ -147,11 +147,10 @@ class OmexService implements FileFormatService {
             }
             return false
         }
-        def pathURI = new URI(new StringBuilder("jar:").append(path.toUri()).toString())
         FileSystem fs
         boolean containsManifest
         try {
-            fs = FileSystems.newFileSystem(pathURI, [:])
+            fs = FileSystems.newFileSystem(path, null)
             final String MANIFEST_LOCATION =  "manifest.xml"
             Path manifestPath = fs.getPath(MANIFEST_LOCATION)
             containsManifest = Files.exists(manifestPath) &&

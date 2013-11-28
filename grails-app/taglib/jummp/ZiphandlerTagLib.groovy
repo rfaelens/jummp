@@ -108,15 +108,13 @@ class ZiphandlerTagLib {
 	private void handleZip(StringBuilder builder, boolean JS, String filePath) {
 		 try {
   				Path zipfile = Paths.get(filePath);
-		 	 	final URI uri = URI.create("jar:file:" + zipfile.toUri().getPath());
-		 	 	final Map<String, String> env = new HashMap<>();
-	 			FileSystem fs = null;
-	 			if (!loadedZips.containsKey(uri)) {
-	 				fs=FileSystems.newFileSystem(uri, env);
-	 				loadedZips.put(uri, fs)
+		 	 	FileSystem fs = null;
+	 			if (!loadedZips.containsKey(zipfile.toString())) {
+	 				fs=FileSystems.newFileSystem(zipfile, null);
+	 				loadedZips.put(zipfile.toString(), fs)
 	 			}
 	 			else {
-	 				fs=loadedZips.get(uri)
+	 				fs=loadedZips.get(zipfile.toString())
 	 			}
   	 			final Path root = fs.getPath("/");
   	 			Files.walkFileTree(root, new SimpleFileVisitor<Path>(){
@@ -178,10 +176,7 @@ class ZiphandlerTagLib {
 			return (bytes / Math.pow(1024, e)).toFixed(2) + " " + s[e]; 
 		}var fileData=new Array();''')
 		if (!attrs.repFiles || attrs.loadedZips==null || attrs.zipSupported==null) {
-        	System.out.println("RepFiles"+ attrs.repFiles)	
-			System.out.println("loadedZips"+ attrs.loadedZips)	
-			System.out.println("zipSupported"+ attrs.zipSupported)	
-			return
+        	return
         }
         loadedZips=attrs.loadedZips;
         zipSupported=attrs.zipSupported;
@@ -202,13 +197,13 @@ class ZiphandlerTagLib {
         		if (attrs.mainFile==it.mainFile) {
         			builder.append('''<li rel="file"><a><span class="pointerhere">''')
         			File f=new File(it.path);
-        			builder.append(f.name).append("</a>")
+        			builder.append(f.name).append("</span></a>")
         			if (it.mimeType.contains('zip')) {
         				builder.append("<ul>")
         				handleZip(builder, false, it.path)
         				builder.append("</ul>")
 	 			    }
-	 			    builder.append("</span></li>")
+	 			    builder.append("</li>")
         		}
         	}
 		}

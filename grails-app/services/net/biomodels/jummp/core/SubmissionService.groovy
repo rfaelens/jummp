@@ -352,7 +352,9 @@ class SubmissionService {
                     }
                     deleteMe.delete()
                 }
-                parent.delete()
+                if (parent) {
+                	parent.delete()
+                }
             }
             catch(Exception e) {
                 e.printStackTrace()

@@ -73,4 +73,7 @@
     <content tag="searchQuery">
     		${query}
     </content>
+    <content tag="title">
+		Search Model Repository
+	</content>
     

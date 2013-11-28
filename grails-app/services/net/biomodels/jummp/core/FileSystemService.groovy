@@ -85,12 +85,17 @@ class FileSystemService implements IFileSystemService, InitializingBean {
      * Sets the location of the root and of the current model container.
      */
     void afterPropertiesSet() throws Exception {
-        root = findRoot()
-        StringBuffer currentModelContainerPath = new StringBuffer(root.absolutePath)
-        currentModelContainerPath.append(File.separator).append(CONTAINER_PATTERN_SEED)
-        currentModelContainer = currentModelContainerPath.toString()
-        ensureFolderExists(currentModelContainer)
-        log.debug("New model to be deposited in $currentModelContainer")
+        root = findRoot() 
+        if (root) {
+        	StringBuffer currentModelContainerPath = new StringBuffer(root.absolutePath)
+        	currentModelContainerPath.append(File.separator).append(CONTAINER_PATTERN_SEED)
+        	currentModelContainer = currentModelContainerPath.toString()
+        	ensureFolderExists(currentModelContainer)
+        	log.debug("New model to be deposited in $currentModelContainer")
+        }
+        else {
+        	log.debug("Root for FileSystemService was not configured!")
+        }
     }
 
     /**
@@ -153,7 +158,7 @@ class FileSystemService implements IFileSystemService, InitializingBean {
         } catch(SecurityException e) {
             log.error(e.message, e)
         }
-        if (!root.exists()) {
+        if (root && !root.exists()) {
             log.error("Root folder ${root.absolutePath} does not exist.")
         }
         return root

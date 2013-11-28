@@ -67,7 +67,7 @@ class ConfigurationServiceTests {
         assertNotNull(configurationService.configurationFile)
         configurationService.afterPropertiesSet()
         assertNotNull(configurationService.configurationFile)
-        assertEquals(new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"), configurationService.configurationFile)
+        assertEquals(new File(configurationService.getConfigFilePath()), configurationService.configurationFile)
         // test setting a file
         configurationService.configurationFile = null
         assertNull(configurationService.configurationFile)

@@ -27,20 +27,27 @@
 
 
 
-<%@ page contentType="text/html;charset=UTF-8" %>
-
+<html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta name="layout" content="main"/>
-        <title><g:message code="submission.abort.common.title"/></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="layout" content="main" />
+        <title>Setup</title>
     </head>
     <body>
-        <h2><g:message code="submission.abort.create.header"/></h2>
-        <p><g:message code="submission.abort.create.message" args="${[createLink(controller: 'model', action: 'create')]}"/></p>
+        <g:hasErrors bean="${mail}">
+            <div class="errors">
+                <g:renderErrors bean="${mail}"/>
+            </div>
+        </g:hasErrors>
+        <div id="sbml" class="body">
+            <h1>Mail Settings</h1>
+            <g:form name="firstRun" action="setup">
+                <g:render template="/templates/configuration/mail"/>
+                <div class="buttons">
+                    <g:submitButton name="back" value="Back"/>
+                    <g:submitButton name="next" value="Next"/>
+                </div>
+            </g:form>
+        </div>
     </body>
-      <content tag="submit">
-    	selected
-    </content>
-    <content tag="title">
-		Submit a model
-	</content>
+</html>

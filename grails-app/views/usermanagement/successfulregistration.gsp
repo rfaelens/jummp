@@ -35,9 +35,11 @@
         
     </head>
      <body>
-        <h2><g:message code="user.signup.ui.heading.register.success"/></h2>
         <div>
         	<g:message code="user.signup.ui.register.success.message"/>
         </div>
         </body>
 </html
+<content tag="title">
+	<g:message code="user.signup.ui.heading.register.success"/>
+</content>

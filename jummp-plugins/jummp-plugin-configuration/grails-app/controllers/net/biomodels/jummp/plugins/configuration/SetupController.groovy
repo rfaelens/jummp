@@ -68,7 +68,24 @@ class SetupController {
             on("next").to("validateAuthenticationBackend")
             on("back").to("start")
         }
-
+        
+        validateAuthenticationBackend {
+            action {
+                if (params.authenticationBackend == "database") {
+                	flow.authenticationBackend = "database"
+                    return database()
+                } else if (params.authenticationBackend == "ldap") {
+                    flow.validationErrorOn="LDAP is currently not supported"
+                	error()
+                } else {
+                    error()
+                }
+            }
+            on("database").to("vcs")
+            on("ldap").to("ldap")
+            on("error").to("authenticationBackend")
+        }
+        
         ldap {
             on("next") { LdapCommand cmd ->
                 flow.ldap = cmd
@@ -80,11 +97,31 @@ class SetupController {
             }.to("vcs")
             on("back").to("authenticationBackend")
         }
+        
         vcs {
-            on("next").to("validateVcs")
+            on("next") { VcsCommand cmd ->
+                flow.vcs = cmd
+                if (flow.vcs.hasErrors()) {
+                    error()
+                } 
+            }.to("branchOnVcsType")
             on("back").to("decideBackFromVcs")
         }
-
+        
+        branchOnVcsType {
+            action { 
+            	if (flow.vcs.isGit()) {
+                    git()
+                } 
+                else if (flow.vcs.isSvn()) {
+                    svn()
+                }
+            }
+            on("svn").to("svn")
+            on("git").to("userRegistration")
+            on(Exception).to("exception")
+        }
+        
         svn {
             on("next") { SvnCommand cmd ->
                 flow.svn = cmd
@@ -96,12 +133,12 @@ class SetupController {
             }.to("firstRun")
             on("back").to("vcs")
         }
-
+        /* Disabled as it adds nothing*/
         git {
             on("next").to("firstRun")
             on("back").to("vcs")
         }
-
+        /* Disabled as admins created by config.groovy*/
         firstRun {
             on("next") { FirstRunCommand cmd ->
                 flow.firstRun = cmd
@@ -111,7 +148,7 @@ class SetupController {
                     return success()
                 }
             }.to("userRegistration")
-            on("back").to("decideBackFromFirstRun")
+            on("back").to("vcs")
         }
 
         userRegistration {
@@ -122,10 +159,10 @@ class SetupController {
                 } else {
                     return success()
                 }
-            }.to("changePassword")
-            on("back").to("firstRun")
+            }.to("remoteExport")
+            on("back").to("vcs")
         }
-
+        /* Disabled */
         changePassword {
             on("next") { ChangePasswordCommand cmd ->
                 flow.changePassword = cmd
@@ -147,7 +184,7 @@ class SetupController {
                     return success()
                 }
             }.to("validateRemote")
-            on("back").to("changePassword")
+            on("back").to("userRegistration")
         }
 
         remoteRemote {
@@ -184,8 +221,32 @@ class SetupController {
                 } else {
                     return success()
                 }
-            }.to("sbml")
+            }.to("mail")
             on("back").to("server")
+        }
+        
+        mail {
+            on("next") { MailCommand cmd ->
+                flow.mail = cmd
+                if (flow.mail.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("search")
+            on("back").to("trigger")
+        }
+        
+        search {
+            on("next") { SearchCommand cmd ->
+                flow.search = cmd
+                if (flow.search.hasErrors()) {
+                    return error()
+                } else {
+                    return success()
+                }
+            }.to("sbml")
+            on("back").to("mail")
         }
 
         sbml {
@@ -196,10 +257,10 @@ class SetupController {
                 } else {
                     return success()
                 }
-            }.to("bives")
-            on("back").to("trigger")
+            }.to("cms")
+            on("back").to("search")
         }
-
+        /* Disabled */
         bives {
             on("next") { BivesCommand cmd ->
                 flow.bives = cmd
@@ -218,12 +279,19 @@ class SetupController {
                 if (flow.cms.hasErrors()) {
                     return error()
                 } else {
+                    configurationService.storeConfiguration(flow.database, 
+                    										(flow.authenticationBackend == "ldap") ? flow.ldap : null, 
+                    										flow.vcs, flow.svn, flow.firstRun, 
+                    										flow.server, flow.userRegistration, flow.changePassword?:null, 
+                    										flow.remote, flow.trigger, flow.sbml, flow.bives, 
+                    										flow.cms, flow.branding?:null, 
+                    										flow.search, flow.mail)
                     return success()
                 }
-            }.to("branding")
-            on("back").to("bives")
+            }.to("finish")
+            on("back").to("sbml")
         }
-
+        /* Disabled */
         branding {
             on("next") { BrandingCommand cmd ->
                 flow.branding = cmd
@@ -236,24 +304,6 @@ class SetupController {
             }.to("finish")
             on("back").to("cms")
         }
-
-        validateAuthenticationBackend {
-            action {
-                if (params.authenticationBackend == "database") {
-                    flow.authenticationBackend = "database"
-                    database()
-                } else if (params.authenticationBackend == "ldap") {
-                    flow.authenticationBackend = "ldap"
-                    ldap()
-                } else {
-                    error()
-                }
-            }
-            on("database").to("vcs")
-            on("ldap").to("ldap")
-            on("error").to("authenticationBackend")
-        }
-
         validateRemote {
             action {
                 if (flow.remote.jummpExportJms) {
@@ -265,22 +315,6 @@ class SetupController {
             }
             on("remote").to("remoteRemote")
             on("server").to("server")
-        }
-
-        validateVcs {
-            action { VcsCommand cmd ->
-                flow.vcs = cmd
-                if (flow.vcs.hasErrors()) {
-                    error()
-                } else if (flow.vcs.isGit()) {
-                    git()
-                } else if (flow.vcs.isSvn()) {
-                    svn()
-                }
-            }
-            on("svn").to("svn")
-            on("git").to("git")
-            on("error").to("vcs")
         }
 
         decideBackFromVcs {
@@ -329,17 +363,22 @@ class SetupController {
 
         validateAdmin {
             action {
-                if (userService.createAdmin(flow.user)) {
+            	try
+            	{
+            		userService.createAdmin(flow.user)
                     Properties props = new Properties()
-                    File file = new File(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties")
+                    File file = new File(configurationService.getConfigFilePath())
                     props.load(new FileInputStream(file))
                     props.setProperty("jummp.firstRun", "false")
                     FileOutputStream out = new FileOutputStream(file)
                     props.store(out, "Jummp Configuration")
                     next()
-                } else {
+            	}
+            	catch(Exception e)
+            	{
+            		e.printStackTrace()
                     error()
-                }
+            	}
             }
             on("error").to("start")
             on("next").to("finish")

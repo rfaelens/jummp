@@ -47,7 +47,6 @@
         <g:javascript contextPath="" src="showmodels.js"/>
     </head>
     <body activetab="search">
-    	<h2><g:message code="model.list.heading"/></h2>
     	  <div class="content">
     	  <div class="view view-dom-id-9c00a92f557689f996511ded36a88594">
     	<div class="view-content">
@@ -74,7 +73,6 @@
     <content tag="sidebar">
         <div class="element" id="sidebar-element-last-accessed-models">
             <h2><g:message code="model.history.title"/></h2>
-            <h3><g:message code="model.history.empty"/></h3>
             <p></p>
         </div>
         <%--  GoTree code, disabled until it is useful again.	
@@ -87,4 +85,7 @@
     </content>
     <content tag="browse">
     	selected
+    </content>
+    <content tag="title">
+    	<g:message code="model.list.heading"/>
     </content>

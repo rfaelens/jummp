@@ -38,7 +38,7 @@
             <h1>Setup Finished</h1>
             <div>
                 <p style="margin-left: 12px;">
-                    The setup process is finished. Redeploy you web archive to activate the changes.
+                    The setup process is finished, and a config file has been created. Please restart your application to apply the changes.
                 </p>
             </div>
         </div>

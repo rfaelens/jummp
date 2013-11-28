@@ -28,7 +28,6 @@
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
      </head>
     <body>
-        <h2><g:message code="user.administration.ui.heading.user"/></h2>
         <div>
 			<g:form action="editUser">
 				<table>
@@ -63,3 +62,6 @@
         </div>
    </body>
 </html>
+<content tag="title">
+	<g:message code="user.administration.ui.heading.user"/>
+</content>

@@ -20,8 +20,6 @@
 
 
 
-
-
 // locations to search for config files that get merged into the main config
 // config files can either be Java properties files or ConfigSlurper scripts
 
@@ -36,7 +34,14 @@
 
 Properties jummpProperties = new Properties()
 try {
-    jummpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".jummp.properties"))
+	def service = new net.biomodels.jummp.plugins.configuration.ConfigurationService()
+    String pathToConfig=service.getConfigFilePath()
+    if (pathToConfig) {
+    	jummpProperties.load(new FileInputStream(pathToConfig))
+    }
+    else {
+    	throw new Exception("No config file available, using defaults")
+    }
 } catch (Exception ignored) {
     jummpProperties.setProperty("jummp.security.ldap.enabled", "false")
     jummpProperties.setProperty("jummp.security.registration.email.send", "false")
@@ -291,20 +296,12 @@ if (!(jummpConfig.jummp.security.registration.email.send instanceof ConfigObject
     jummp.security.activation.email.subject        = jummpConfig.jummp.security.activation.email.subject
     jummp.security.activation.email.body           = jummpConfig.jummp.security.activation.email.body
     jummp.security.activation.activationURL        = jummpConfig.jummp.security.activation.activationURL
+    jummp.security.resetPassword.email.body    = jummpConfig.jummp.security.resetPassword.email.body
+    jummp.security.resetPassword.email.subject = jummpConfig.jummp.security.resetPassword.email.subject
 } else {
     jummp.security.registration.email.send = false
 }
 
-// reset password settings
-if (!(jummpConfig.jummp.security.resetPassword.email.send instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.security.resetPassword.email.send)) {
-    jummp.security.resetPassword.email.send    = Boolean.parseBoolean(jummpConfig.jummp.security.resetPassword.email.send)
-    jummp.security.resetPassword.email.sender  = jummpConfig.jummp.security.resetPassword.email.sender
-    jummp.security.resetPassword.email.body    = jummpConfig.jummp.security.resetPassword.email.body
-    jummp.security.resetPassword.email.subject = jummpConfig.jummp.security.resetPassword.email.subject
-    jummp.security.resetPassword.url           = jummpConfig.jummp.security.resetPassword.url
-} else {
-    jummp.security.resetPassword.email.send = false
-}
 
 // whether a user is allowed to change the password depends on the setting an if LDAP is used
 // in case of LDAP changing the password is not (yet) possible in the application

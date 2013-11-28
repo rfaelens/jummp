@@ -20,24 +20,35 @@
 
 
 
-<%@ page contentType="text/html;charset=UTF-8" %>
+
+
+
+
+
+
+
 <html>
     <head>
-        <title><g:message code="user.administration.ui.heading.user"/></title>
-        <meta name="layout" content="main" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="layout" content="main"/>
+        <title>Reset Password</title>
+        <style>
+        	.verysecure {
+        		visibility:hidden;
+        	}
+        </style>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
-     </head>
-    <body>
+    </head>
+     <body>
         <div>
-			<g:form action="updatePassword">
-				<table>
-					<thead></thead>
-					<tbody>
-					<tr>
-						<td><label><g:message code="user.administration.updatePassword.oldPassword"/>:</label></td>
-						<td><g:passwordField name="oldPassword"/></td>
-					</tr>
-					<tr>
+            <g:form name="resetForm" action="newPassword">
+                <table>
+                    <tbody>
+                    <tr>
+                        <td><label for="register-form-username"><g:message code="user.signup.ui.username"/>:</label></td>
+                        <td><span><g:textField name="username"/></span></td>
+                    </tr>
+                    <tr>
 						<td><label><g:message code="user.administration.updatePassword.newPassword"/>:</label></td>
 						<td><g:passwordField name="newPassword"/></td>
 					</tr>
@@ -45,15 +56,18 @@
 						<td><label><g:message code="user.administration.updatePassword.newPasswordRpt"/>:</label></td>
 						<td><g:passwordField name="newPasswordRpt"/></td>
 					</tr>
-					</tbody>
-				</table>
-				<div class="buttons">
-						<input type="submit" value="${g.message(code: 'user.administration.updatePassword.submit')}"/>
-				</div>
-			</g:form>
+                    </tbody>
+                </table>
+                <div class="buttons">
+                    <input type="submit" value="Reset Password"/>
+                </div>
+                <label class="verysecure">You shouldnt see me</label>
+                <input class="verysecure" name="hashCode" value="${hashCode}"/>
+                 
+            </g:form>
         </div>
-   </body>
+        </body>
 </html>
 <content tag="title">
-	<g:message code="user.administration.updatePassword.heading"/>
+	<g:message code="user.resetpassword.ui.heading"/>
 </content>

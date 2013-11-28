@@ -93,13 +93,13 @@ class OmexServiceTests extends JummpIntegrationTest {
         FileUtils.touch modelFile
         modelFile.setText("I am the main entry of this model submission.")
         assertFalse omexService.areFilesThisFormat([modelFile])
-        modelFile = new File("jummp-plugins/jummp-plugin-combine-archive/test/files/sample.omex")
+        modelFile = new File("jummp-plugins/jummp-plugin-combine-archive/test/files/sample archive.omex")
         assertTrue omexService.areFilesThisFormat([modelFile])
     }
 
     @Test
     void testGetVersionFormat() {
-        def modelFile = new File("jummp-plugins/jummp-plugin-combine-archive/test/files/sample.omex")
+        def modelFile = new File("jummp-plugins/jummp-plugin-combine-archive/test/files/sample archive.omex")
         authenticateAsTestUser()
         def rf = new RepositoryFileTransportCommand(path: modelFile.absolutePath,
                     description: "A very interesting model.", mainFile: true)

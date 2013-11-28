@@ -421,7 +421,6 @@ class ModelController {
         		if (flow.workingMemory.remove("RetrievePubDetails") as Boolean) {
         			ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
         			if (model.publication.link && model.publication.linkProvider) {
-        				System.out.println("About to query pubmedservice")
         				def retrieved=pubMedService.
         							getPublication(model.publication)
         				if (retrieved) {

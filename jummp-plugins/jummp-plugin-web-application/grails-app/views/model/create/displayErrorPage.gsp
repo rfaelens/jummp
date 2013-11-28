@@ -37,6 +37,6 @@
     <body>
         <g:render template="/templates/errorTemplate"/>
     </body>
-    <content tag="submit">
-    	selected
-    </content>
+   <content tag="title">
+		Submit a model
+	</content>

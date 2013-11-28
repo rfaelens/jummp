@@ -40,7 +40,6 @@
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
     </head>
      <body>
-        <h2><g:message code="user.signup.ui.heading.register"/></h2>
         <div>
             <g:form name="registerForm" action="signUp">
                 <table>
@@ -85,4 +84,7 @@
             </g:form>
         </div>
         </body>
-</html
+</html>
+<content tag="title">
+	<g:message code="user.signup.ui.heading.register"/>
+</content>

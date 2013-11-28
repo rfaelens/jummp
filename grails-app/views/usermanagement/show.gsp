@@ -28,7 +28,6 @@
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
      </head>
     <body>
-        <h2>${user.userRealName}'s Profile</h2>
         <div>
 			<table>
 				<thead></thead>
@@ -62,3 +61,6 @@
         </div>
    </body>
 </html>
+<content tag="title">
+	${user.userRealName}'s Profile
+</content>

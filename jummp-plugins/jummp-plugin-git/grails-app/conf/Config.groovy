@@ -25,13 +25,22 @@
 // configuration for plugin testing - will not be included in the plugin zip
 Properties jummpProps = new Properties()
 try {
-    jummpProps.load(new FileInputStream("${userHome}${System.getProperty('file.separator')}.jummp.properties"))
+	def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT) 
+    def service = ctx.getBean("configurationService")
+    String pathToConfig=service.getConfigFilePath()
+    if (!pathToConfig) {
+    	throw new Exception("No config file available, using defaults")
+    }
+    jummpProps.load(new FileInputStream(pathToConfig))
+    def cfg = new ConfigSlurper().parse(jummpProps)
+    jummp.vcs.workingDirectory = cfg.jummp.vcs.workingDirectory
+    jummp.vcs.exchangeDirectory = cfg.jummp.vcs.exchangeDirectory
 }
-catch (Exception ignored) {
+catch (Exception defaulted) {
+	jummp.vcs.workingDirectory=File.createTempDir().getCanonicalPath()
+	jummp.vcs.exchangeDirectory=File.createTempDir().getCanonicalPath()
 }
-def cfg = new ConfigSlurper().parse(jummpProps)
-jummp.vcs.workingDirectory = cfg.jummp.vcs.workingDirectory
-jummp.vcs.exchangeDirectory = cfg.jummp.vcs.exchangeDirectory
+
 log4j = {
     // Example of changing the log pattern for the default console
     // appender:

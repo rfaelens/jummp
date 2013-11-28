@@ -103,10 +103,9 @@ class MathsUtil {
 		}
 		else if (jaxObject instanceof FunctionCallType) {
 			List args=jaxObject.functionArgument
+			int index=0;
 			args.each {
-				if (it.equation) {
-					convertJAX(symbols, it.equation)
-				}
+				addIfExists(it.equation, subTree)
 				addIfExists(it.symbRef, subTree)
 				addIfExists(it.scalar, subTree)
 				addIfExists(it.constant, subTree)
@@ -191,6 +190,16 @@ class MathsUtil {
 		if (jaxObject instanceof BinopType || jaxObject instanceof LogicBinOpType) {
 			if (jaxObject.getOp() == "divide") {
 				return OperatorSymbol.DivideSymbol()
+			}
+			if (jaxObject.getOp() == "root") {
+				return new OperatorSymbol(jaxObject.getOp(), 
+					  convertTextToSymbol(jaxObject.getOp()), 
+					  OperatorSymbol.OperatorType.ROOT)
+			}
+			if (jaxObject.getOp() == "power") {
+				return new OperatorSymbol(jaxObject.getOp(), 
+					  convertTextToSymbol(jaxObject.getOp()), 
+					  OperatorSymbol.OperatorType.POWER)
 			}
 			return new OperatorSymbol(jaxObject.getOp(), 
 						  convertTextToSymbol(jaxObject.getOp()), 

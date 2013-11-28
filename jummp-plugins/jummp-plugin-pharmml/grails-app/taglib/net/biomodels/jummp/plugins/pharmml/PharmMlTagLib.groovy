@@ -143,6 +143,15 @@ class PharmMlTagLib {
             if (p.gaussianModel) {
                 output.append("\n")
                 def gaussianModel = p.gaussianModel
+                //RANDOM EFFECTS
+                def randomEffects = []
+                if (gaussianModel.randomEffects) {
+                    gaussianModel.randomEffects.symbRef.each { re ->
+                        def randomEffectSymbol = new SymbolRefType()
+                        randomEffectSymbol.symbIdRef = re.symbIdRef
+                        randomEffects << wrapJaxb(randomEffectSymbol)
+                    }
+                }
                 if (gaussianModel.linearCovariate) {
                     def linearCovariate = gaussianModel.linearCovariate
                     if (gaussianModel.transformation) {
@@ -194,15 +203,6 @@ class PharmMlTagLib {
                                 fixedEffectsTimesCovariateList.add(applyBinopToList(thisCov, "times"))
                             }
                         }
-                        //RANDOM EFFECTS
-                        def randomEffects = []
-                        if (gaussianModel.randomEffects) {
-                            gaussianModel.randomEffects.symbRef.each { re ->
-                                def randomEffectSymbol = new SymbolRefType()
-                                randomEffectSymbol.symbIdRef = re.symbIdRef
-                                randomEffects << wrapJaxb(randomEffectSymbol)
-                            }
-                        }
                         def sumElements = []
                         sumElements.add(wrapJaxb(popParam))
                         if (fixedEffectsTimesCovariateList) {
@@ -216,7 +216,27 @@ class PharmMlTagLib {
                         output.append("\n")
                     }
                 } else if (gaussianModel.generalCovariate) {
-                    String converted=convertToMathML(p.symbId, gaussianModel.generalCovariate.assign)
+                    def rhsEquation
+                    def covModel
+                    def covariateModelAssign = gaussianModel.generalCovariate.assign
+                    assert covariateModelAssign != null
+                    if (!randomEffects) {
+                        rhsEquation = covariateModelAssign
+                    } else {
+                        if (covariateModelAssign.equation) {
+                            covModel = covariateModelAssign.equation.scalarOrSymbRefOrBinop.first()
+                        } else if (covariateModelAssign.scalar) {
+                            covModel = wrapJaxb(covariateModelAssign.scalar)
+                        } else if (covariateModelAssign.symbRef) {
+                            covModel = wrapJaxb(covariateModelAssign.symbRef)
+                        }
+                    }
+                    def cm_re = []
+                    cm_re.add(covModel)
+                    cm_re.addAll(randomEffects)
+                    rhsEquation = new Equation()
+                    rhsEquation.scalarOrSymbRefOrBinop.add(applyBinopToList(cm_re, "plus"))
+                    String converted = convertToMathML(p.symbId, rhsEquation)
                     output.append("<div>")
                     output.append(converted)
                     output.append("</div>")
@@ -1095,23 +1115,30 @@ class PharmMlTagLib {
         return result
     }
 
-    StringBuilder objectiveDataSetMapping(DatasetMappingType dsm) {
-        def result = new StringBuilder("<h5>Dataset mapping</h5>\n")
+    StringBuilder objectiveDataSetMapping(List<DatasetMappingType> mappings) {
+        def result = new StringBuilder("<h5>Dataset mapping")
+        if (mappings.size() > 1) {
+            result.append("s")
+        }
+        result.append("</h5>\n")
         def variableMap = [:]
-        if (dsm.variableAssignment) {
-            result.append(variableAssignments(dsm.variableAssignment,
-                        "<span class=\"bold\">Variable assignments</span>"))
-        }
-        dsm.mapping.each {
-            //keep track of variableMappings so that we know how to name the columns
-            //deal with JAXBElement
-            if (it.value instanceof VariableMappingType) {
-                //TODO handle nested  ColumnRefs recursively
-                variableMap << [ (it.value.columnRef.columnIdRef) : (it.value.symbRef.symbIdRef)]
+
+        mappings.each { dsm ->
+            if (dsm.variableAssignment) {
+                result.append(variableAssignments(dsm.variableAssignment,
+                            "<span class=\"bold\">Variable assignments</span>"))
             }
-        }
-        if (dsm.dataSet) {
-            dataSet(dsm.dataSet, variableMap, result)
+            dsm.mapping.each {
+                //keep track of variableMappings so that we know how to name the columns
+                //deal with JAXBElement
+                if (it.value instanceof VariableMappingType) {
+                    //TODO handle nested  ColumnRefs recursively
+                    variableMap << [ (it.value.columnRef.columnIdRef) : (it.value.symbRef.symbIdRef)]
+                }
+            }
+            if (dsm.dataSet) {
+                dataSet(dsm.dataSet, variableMap, result)
+            }
         }
         return result
     }
@@ -1305,7 +1332,52 @@ class PharmMlTagLib {
                     builder.append("</mrow>")
                 }
                 builder.append(operator.getClosing())
-            } else {
+            }
+            // Special case of root/square root, handled differently from other
+            // operators.
+            else if (operator.type==OperatorSymbol.OperatorType.ROOT) {
+            	StringBuilder operandBuilder=new StringBuilder()
+            	prefixToInfix(operandBuilder, stack)
+            	StringBuilder rootBuilder=new StringBuilder()
+            	prefixToInfix(rootBuilder, stack)
+            	boolean isSquareRoot=false
+            	try {
+            		String rootValue=rootBuilder.toString().replace("<mi>","").replace("</mi>","")
+            		double value = Double.parseDouble(rootValue)
+            		if (value==2.0) {
+            			isSquareRoot=true
+            		}
+            	}
+            	catch(Exception notANumber) {
+            	}
+            	if (!isSquareRoot) {
+            		builder.append("<mroot><mrow>")
+            		builder.append(operandBuilder)
+            		builder.append("</mrow><mrow>")
+            		builder.append(rootBuilder)
+            		builder.append("</mrow></mroot>")
+            	}
+            	else {
+            		builder.append("<msqrt>")
+            		builder.append(operandBuilder)
+            		builder.append("</msqrt>")
+            	}
+            }
+            // Special case of power, handled differently from other
+            // operators.
+            else if (operator.type==OperatorSymbol.OperatorType.POWER) {
+            	StringBuilder operandBuilder=new StringBuilder()
+            	prefixToInfix(operandBuilder, stack)
+            	StringBuilder powerBuilder=new StringBuilder()
+            	prefixToInfix(powerBuilder, stack)
+            	boolean isSquareRoot=false
+           		builder.append("<msup><mrow>")
+           		builder.append(operandBuilder)
+           		builder.append("</mrow><mrow>")
+           		builder.append(powerBuilder)
+           		builder.append("</mrow></msup>")
+            }
+            else {
                 builder.append(operator.getMapping())
                 builder.append(operator.getOpening())
                 prefixToInfix(builder,stack)

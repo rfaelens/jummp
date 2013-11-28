@@ -217,19 +217,19 @@ $.jummp.showModels.lastAccessedModels = function (container) {
         cache: false, // makes IE happy
         success: function (data) {
             if (data.length === 0) {
-                $("h3", container).text($.i18n.prop("model.history.empty"));
-                $("h3", container).show();
-                $("p", container).text("");
+            	$("h2", container).hide();
+                $("p", container).hide();
                 return;
             }
             var ul, i;
-            $("h3", container).hide();
+            $("h2", container).show();
             $("p", container).text("");
             ul = $("<ul/>");
             for (i = 0; i < data.length; i += 1) {
                 ul.append("<li><a href=\"" + $.jummp.createLink("model", "show", data[i].id) + "\">" + data[i].name.replace(/_/g, " ") + "</a><br/>" + $.i18n.prop("model.history.submitter") + " " + data[i].submitter+"</li>");
             }
             $("p", container).append(ul);
+            $("p", container).show();
             $("p ul li a", container).click(function () {
                 $.jummp.showModels.showOverlay($.jummp.createLink("model", "show", $(this).prop("rel")));
             });
