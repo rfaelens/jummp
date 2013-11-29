@@ -238,7 +238,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
     public String getFormatVersion(RevisionTransportCommand revision) {
         if (!revision) {
             log.error "Cannot get PharmML model format version from undefined revision."
-            return ""
+            return "*"
         }
         assert revision.format.identifier == "PharmML"
         List<File> revisionFiles = fetchMainFilesFromRevision(revision)
