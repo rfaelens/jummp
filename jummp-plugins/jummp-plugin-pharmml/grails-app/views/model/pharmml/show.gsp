@@ -42,34 +42,13 @@
     </style>
 </head>
 <content tag="modelspecifictabs">
-    <li><a href="#modelDefinition">Model Definition</a></li>
-    <li><a href="#trialDesign">Trial Design</a></li>
-    <pharmml:decideModellingStepsTabs estimation="${estSteps}" simulation="${simSteps}" />
-<%--    <li><a href="#modellingSteps">Modelling Steps</a></li> --%>
+    <pharmml:decideTabs iv="${independentVar}" fd="${functionDefs}" md="${modelDefinition}" td="${trialDesign}" est="${estSteps}" sim="${simSteps}" />
 </content>
 <content tag="modelspecifictabscontent">
-    <div id="modelDefinition">
 
-        <p><strong>Independent variable</strong>&nbsp;${independentVar}</p>
+    <pharmml:handleModelDefinitionTab iv="${independentVar}" fd="${functionDefs}" sm="${structuralModel}" vm="${variabilityModel}" cm="${covariateModel}" pm="${parameterModel}" om="${observationModel}" />
 
-        <pharmml:functionDefinitions functionDefs="${functionDefs}"/>
-
-        <pharmml:structuralModel sm="${structuralModel}" iv="${independentVar}"/>
-
-        <pharmml:variabilityModel variabilityModel="${variabilityModel}"/>
-
-        <pharmml:covariates covariate="${covariateModel}" />
-
-        <pharmml:parameterModel parameterModel="${parameterModel}" covariates="${covariateModel}" />
-
-        <pharmml:observations observations="${observationModel}"/>
- </div>
-
-    <div id="trialDesign">
-       <pharmml:trialStructure structure="${structure}"/>
-       <pharmml:trialDosing dosing="${dosing}"/>
-       <pharmml:trialPopulation pop="${population}"/>
-    </div>
+    <pharmml:handleTrialDesignTab ts="${structure}" td="${dosing}" tp="${population}" />
 
     <pharmml:handleModellingStepsTabs estimation="${estSteps}" simulation="${simSteps}"
         independentVariable="${independentVar}" deps="${stepDeps}" />
