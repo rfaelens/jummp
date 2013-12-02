@@ -570,6 +570,39 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         modelHistoryService.addModelToHistory(model)
         return model.revisions.toList().findAll { !it.deleted }.sort {it.revisionNumber}
     }
+    
+    /**
+     * Parses the @p identifier to query for a model and optionally
+     * a revision number, separated by the . character. If no revision
+     * is specified the latest revision is returned.
+     * @param identifier The identifier in the format Model.Revision
+     * @return The revision or @c null if there is no such revision
+     */
+    @PostAuthorize("hasPermission(returnObject, read) or hasRole('ROLE_ADMIN')")
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getRevisionByIdentifier")
+    public Revision getRevision(String identifier) {
+        String[] parts=identifier.split("\\.");
+		parts.each {
+			try
+			{
+				Long.parseLong(it)
+			}
+			catch(Exception e) {
+				throw new IllegalArgumentException("Identifier ${identifier} could not be parsed")
+			}
+		}
+        Model model = Model.get(parts[0]) 
+        if (parts.length==1) {
+        	Revision revision = getLatestRevision(model)
+        	if (!revision) {
+        		throw new AccessDeniedException("Sorry you are not allowed to access this Model.")
+        	}
+        	return revision
+        }
+        return getRevision(model, Integer.parseInt(parts[1]))
+    }
+
 
     /**
      * Queries the @p model for the revision with @p revisionNumber.
@@ -584,8 +617,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.getRevision")
     public Revision getRevision(Model model, int revisionNumber) {
         Revision revision = Revision.findByRevisionNumberAndModel(revisionNumber, model)
-        if (revision.deleted) {
-            return null
+        if (revision.deleted || model.deleted) {
+            throw new AccessDeniedException("Sorry you are not allowed to access this Model.")
         } else {
             modelHistoryService.addModelToHistory(model)
             revision.refresh()

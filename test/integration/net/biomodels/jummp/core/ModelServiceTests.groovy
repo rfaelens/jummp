@@ -301,6 +301,103 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertNull(modelService.getLatestRevision(model))
     }
 
+    
+    @Test
+    void testGetByRevisionIdentifier() {
+        // create Model with one revision, without ACL
+        Model model = new Model(name: "test", vcsIdentifier: "${fileSystemService.findCurrentModelContainer()}/test/")
+        FileUtils.touch(new File("${model.vcsIdentifier}test.xml".toString()))
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
+        assertTrue(revision.validate())
+        model.addToRevisions(revision)
+        assertTrue(model.validate())
+        model.save()
+        // only admin should see the revision
+        authenticateAsTestUser()
+        shouldFail(AccessDeniedException) {
+        	modelService.getRevision("${model.id}")
+        }
+        authenticateAsUser()
+        shouldFail(AccessDeniedException) {
+        	modelService.getRevision("${model.id}")
+        }
+        authenticateAsAdmin()
+        assertSame(revision, modelService.getRevision("${model.id}"))
+        // adding permission for the users
+        aclUtilService.addPermission(revision, "username", BasePermission.READ)
+        aclUtilService.addPermission(revision, "testuser", BasePermission.READ)
+        // now our users should see the revision
+        authenticateAsTestUser()
+        assertSame(revision, modelService.getRevision("${model.id}"))
+        authenticateAsUser()
+        assertSame(revision, modelService.getRevision("${model.id}"))
+        authenticateAsAdmin()
+        assertSame(revision, modelService.getRevision("${model.id}"))
+        // add some more revisions
+        Revision rev2 = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
+        Revision rev3 = new Revision(model: model, vcsId: "3", revisionNumber: 3, owner: User.findByUsername("username"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
+        Revision rev4 = new Revision(model: model, vcsId: "4", revisionNumber: 4, owner: User.findByUsername("username"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
+        Revision rev5 = new Revision(model: model, vcsId: "5", revisionNumber: 5, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
+        Revision rev6 = new Revision(model: model, vcsId: "6", revisionNumber: 6, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
+        assertTrue(rev2.validate())
+        assertTrue(rev3.validate())
+        assertTrue(rev4.validate())
+        assertTrue(rev5.validate())
+        assertTrue(rev6.validate())
+        model.addToRevisions(rev2)
+        model.addToRevisions(rev3)
+        model.addToRevisions(rev4)
+        model.addToRevisions(rev5)
+        model.addToRevisions(rev6)
+        assertTrue(model.validate())
+        model.save()
+        // no acl set for these new revisions, user should still see previous revision, admin should see rev6
+        authenticateAsTestUser()
+        assertSame(revision, modelService.getRevision("${model.id}"))
+        authenticateAsUser()
+        assertSame(revision, modelService.getRevision("${model.id}"))
+        authenticateAsAdmin()
+        assertSame(rev6, modelService.getRevision("${model.id}"))
+        // let's add some ACL
+        aclUtilService.addPermission(rev3, "testuser", BasePermission.READ)
+        aclUtilService.addPermission(rev6, "username", BasePermission.READ)
+        authenticateAsTestUser()
+        assertSame(rev3, modelService.getRevision("${model.id}.${rev3.revisionNumber}"))
+        authenticateAsUser()
+        assertSame(rev6, modelService.getRevision("${model.id}.${rev6.revisionNumber}"))
+        // admin should see everything
+        authenticateAsAdmin()
+        assertSame(rev2, modelService.getRevision("${model.id}.${rev2.revisionNumber}"))
+        assertSame(rev3, modelService.getRevision("${model.id}.${rev3.revisionNumber}"))
+        assertSame(rev4, modelService.getRevision("${model.id}.${rev4.revisionNumber}"))
+        assertSame(rev5, modelService.getRevision("${model.id}.${rev5.revisionNumber}"))
+        assertSame(rev6, modelService.getRevision("${model.id}.${rev6.revisionNumber}"))
+        // let's delete the model
+        authenticateAsAdmin()
+        assertTrue(modelService.deleteModel(model))
+        shouldFail(AccessDeniedException) {
+        	modelService.getRevision("${model.id}")
+        }
+        shouldFail(AccessDeniedException) {
+        	modelService.getRevision("${model.id}.${rev2.revisionNumber}")
+        }
+        shouldFail(AccessDeniedException) {
+        	modelService.getRevision("${model.id}.${rev3.revisionNumber}")
+        }
+        shouldFail(AccessDeniedException) {
+        	modelService.getRevision("${model.id}.${rev4.revisionNumber}")
+        }
+        shouldFail(AccessDeniedException) {
+        	modelService.getRevision("${model.id}.${rev5.revisionNumber}")
+        }
+        shouldFail(AccessDeniedException) {
+        	modelService.getRevision("${model.id}.${rev6.revisionNumber}")
+        }
+        
+    }
+
+    
+    
     @Test
     @SuppressWarnings('UnusedVariable')
     void testGetAllModels() {
