@@ -95,7 +95,7 @@
 					if (prop!="isInternal" && fileProps[prop]) {
 						content.push("<tr><td><b>",prop.replace("_"," "),"</b></td><td>",fileProps[prop])
 						if (prop=="Name" && fileProps.isInternal==false) {
-								content.push("<a title='Download ",fileProps[prop], "'","href='","${g.createLink(controller: 'model', action: 'downloadFile', id: revision.id)}");
+								content.push("<a title='Download ",fileProps[prop], "'","href='","${g.createLink(controller: 'model', action: 'downloadFile', id: revision.model.id)}");
 								content.push("?filename=",encodeURIComponent(fileProps.Name),"'><img style='width:15px;margin-left:10px;float:none' alt='Download' src='http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png'/></a></div>");
 						}
 						content.push("</td></tr>");
@@ -169,7 +169,7 @@
     		    <h2 style="float: left;">${revision.model.name}</h2>
     	        <div style="float:right;margin-top:10px">
                     <div id="modeltoolbar" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>
-                            <button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.id)}')">Download</button>
+                            <button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.model.id)}')">Download</button>
                             <g:if test="${canUpdate=="true"}">
                                 <button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}')">Update</button>
                             </g:if>
@@ -266,7 +266,7 @@
 	  	     <g:each status="i" var="rv" in="${allRevs.sort{a,b -> a.revisionNumber > b.revisionNumber ? -1 : 1}}">
 	  	     	<li style="${i==0 && allRevs.size()>1?"background-color:#FFFFCC;":""}margin-top:5px">
 	  	     		Version: ${rv.revisionNumber} 
-	  	     				<a class="versionDownload" title="download" href="${g.createLink(controller: 'model', action: 'download', id: rv.id)}">
+	  	     				<a class="versionDownload" title="download" href="${g.createLink(controller: 'model', action: 'download', id: rv.identifier()).replace("%3A",".")}">
 	  	     					<img alt="Download this version" style="width:15px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png"/>
 	  	     				</a>
 	  	     			<ul>

@@ -590,7 +590,7 @@ class ModelController {
     def downloadFile = {
         try
         {
-            List<RFTC> files = modelDelegateService.retrieveModelFiles(new RevisionTransportCommand(id: params.id as int))
+            List<RFTC> files = modelDelegateService.retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
             RFTC requested=files.find {
             	    File file=new File(it.path)
             	    file.getName()==params.filename
@@ -612,7 +612,8 @@ class ModelController {
     def download = {
         try
         {
-            List<RFTC> files = modelDelegateService.retrieveModelFiles(new RevisionTransportCommand(id: params.id as int))
+        	
+            List<RFTC> files = modelDelegateService.retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
             List<RFTC> mainFiles = files.findAll { it.mainFile }
             if (files.size() == 1) {
             	    serveModelAsFile(files.first(), response)
