@@ -127,8 +127,12 @@ class PubMedService {
         def slurper
         try {
             slurper = new XmlSlurper().parse(url.openStream())
-        } catch (SAXParseException e) {
+        } 
+        catch (SAXParseException e) {
             throw new JummpException("Could not parse PubMed information", e)
+        }
+        catch (Exception e) {
+            throw new JummpException("Error retrieving publication info", e)
         }
         PublicationLinkProvider link=PublicationLinkProvider.createCriteria().get() {
         	eq("linkType",PublicationLinkProvider.LinkType.PUBMED)
