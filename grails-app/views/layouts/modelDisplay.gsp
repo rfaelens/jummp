@@ -206,7 +206,7 @@
 	    <table style="margin-top:30px">
 		<tr>
 		    <td><label><g:message code="model.model.format"/></label></td>
-		    <td><div class='spaced'>${revision.format.name} ${revision.format.formatVersion?"(${revision.format.formatVersion})":""}</div></td>
+		    <td><div class='spaced'>${revision.format.name} ${revision.format.formatVersion!="*"?"(${revision.format.formatVersion})":""}</div></td>
 		</tr>
 		<tr>
 		    <td><label><g:message code="model.model.publication"/>:</label></td>
