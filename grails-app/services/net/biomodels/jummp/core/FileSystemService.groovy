@@ -150,10 +150,10 @@ class FileSystemService implements IFileSystemService, InitializingBean {
         }
         log.debug("Root folder for model repositories set to ${rootLocation}")
         try {
-            root = new File(rootLocation).getCanonicalFile()
-        } catch(NullPointerException e) {
-            log.error("Cannot find the location of the root folder", e)
-        } catch(IOException ex) {
+            if (rootLocation) {
+                root = new File(rootLocation).getCanonicalFile()
+            }
+       } catch(IOException ex) {
             log.error(ex.message, ex)
         } catch(SecurityException e) {
             log.error(e.message, e)
