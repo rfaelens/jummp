@@ -39,7 +39,8 @@ class JummpPluginBivesGrailsPlugin {
     def authorEmail = ""
     def developers = [
         [ name: "Robert Haelke", email: "robert.haelke@googlemail.com"],
-        [ name: "Mihai Glonț", email: "mihai.glont@ebi.ac.uk" ]
+        [ name: "Mihai Glonț", email: "mihai.glont@ebi.ac.uk" ],
+        [ name: "Raza Ali", email: "raza.ali@ebi.ac.uk>"]
     ]
     def title = "Plugin summary/headline"
     def description = '''\\
