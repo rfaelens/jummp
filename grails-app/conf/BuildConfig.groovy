@@ -55,6 +55,7 @@ grails.project.dependency.resolution = {
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     legacyResolve true
     repositories {
+        inherits true //inherit repo definitions from plugins
         if (System.getenv("JUMMP_ARTIFACTORY_URL")) {
             println "Artifactory URL: " + System.getenv("JUMMP_ARTIFACTORY_URL")
             mavenRepo "${System.getenv('JUMMP_ARTIFACTORY_URL')}"
@@ -77,7 +78,6 @@ grails.project.dependency.resolution = {
         // compass 2.2.1
         mavenRepo "http://repo.grails.org/grails/core"
         mavenRepo "http://www.biojava.org/download/maven/"
-        //flatDir name: "jummpLibs", dirs: "lib/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -231,7 +231,7 @@ grails.plugin.location.'jummp-plugin-git' = "jummp-plugins/jummp-plugin-git"
 grails.plugin.location.'jummp-plugin-sbml' = "jummp-plugins/jummp-plugin-sbml"
 grails.plugin.location.'jummp-plugin-combine-archive' = "jummp-plugins/jummp-plugin-combine-archive"
 grails.plugin.location.'jummp-plugin-pharmml' = "jummp-plugins/jummp-plugin-pharmml"
-//grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
+grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
 //grails.plugin.location.'jummp-plugin-search' = "jummp-plugins/jummp-plugin-search"
 grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plugin-simple-logging"
 grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"

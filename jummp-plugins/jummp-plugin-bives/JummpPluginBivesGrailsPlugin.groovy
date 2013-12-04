@@ -17,11 +17,6 @@
 * You should have received a copy of the GNU Affero General Public License along
 * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 **/
-import net.biomodels.jummp.plugins.configuration.ConfigurationService
-
-
-
-
 
 class JummpPluginBivesGrailsPlugin {
     // the plugin version
@@ -55,40 +50,10 @@ Brief description of the plugin.
     }
 
     def doWithSpring = {
-        Properties props = new Properties()
-        try {
-        	ConfigurationService service = new ConfigurationService()
-        	String pathToConfig=service.getConfigFilePath()
-        	if (!pathToConfig) {
-        		throw new Exception("No config file available, using defaults")
-        	}
-        	props.load(new FileInputStream(pathToConfig))
-        } catch (Exception ignored) {
-        }
-        def jummpConfig = new ConfigSlurper().parse(props)
-        if (jummpConfig.jummp.plugins.bives.diffdir) {
-            application.config.jummp.plugins.bives.diffdir = jummpConfig.jummp.plugins.bives.diffdir
-            println("BiVeS: Diff directory set to " + jummpConfig.jummp.plugins.bives.diffdir)
-        }
-        else {
-        	StringBuffer tmp = new StringBuffer(System.getProperty("java.io.tmpdir"))
-        	File bvs = new File(tmp.append(File.separator).append("bives").toString())
-        	bvs.mkdirs()
-            application.config.jummp.plugins.bives.diffdir = bvs.canonicalPath
-        }
-		bivesEventListener(net.biomodels.jummp.plugins.bives.RevisionCreatedListener) {
-			modelDelegateService = ref("modelDelegateService")
+        bivesEventListener(net.biomodels.jummp.plugins.bives.RevisionCreatedListener) {
+            modelDelegateService = ref("modelDelegateService")
             diffDataService = ref("diffDataService")
-		}
-		diffDataProvider(net.biomodels.jummp.plugins.bives.DiffDataProvider) { bean ->
-			bean.autowire = "byName"
-			bean.scope = "prototype"
-		}
-		createDiff(net.biomodels.jummp.plugins.bives.CreateDiffThread) { bean ->
-			bean.autowire = "byName"
-			bean.factoryMethod = "getInstance"
-			bean.scope = "prototype"
-		}
+        }
     }
 
     def doWithDynamicMethods = { ctx ->
