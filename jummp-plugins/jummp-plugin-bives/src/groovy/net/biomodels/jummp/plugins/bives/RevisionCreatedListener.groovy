@@ -56,7 +56,7 @@ class RevisionCreatedListener implements ApplicationListener {
 
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof RevisionCreatedEvent) {
-            RevisionTransportCommand revision = ((RevisionCreatedEvent) event).revision
+            /*RevisionTransportCommand revision = ((RevisionCreatedEvent) event).revision
             RepositoryFileTransportCommand files = revision.files.find{it.mainFile}
             //ensure there is a previous revision
             RevisionTransportCommand previous = modelDelegateService.getRevision(revision.model.id, revision.revisionNumber - 1)
@@ -70,7 +70,7 @@ class RevisionCreatedListener implements ApplicationListener {
             } else {
                 println "no diff to create"
             }
-        
+            */
         }
     }
 }
