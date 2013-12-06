@@ -95,7 +95,7 @@
 					if (prop!="isInternal" && fileProps[prop]) {
 						content.push("<tr><td><b>",prop.replace("_"," "),"</b></td><td>",fileProps[prop])
 						if (prop=="Name" && fileProps.isInternal==false) {
-								content.push("<a title='Download ",fileProps[prop], "'","href='","${g.createLink(controller: 'model', action: 'downloadFile', id: revision.model.id)}");
+								content.push("<a title='Download ",fileProps[prop], "'","href='","${g.createLink(controller: 'model', action: 'download', id: revision.model.id)}");
 								content.push("?filename=",encodeURIComponent(fileProps.Name),"'><img style='width:15px;margin-left:10px;float:none' alt='Download' src='http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png'/></a></div>");
 						}
 						content.push("</td></tr>");

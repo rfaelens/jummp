@@ -600,42 +600,32 @@ class ModelController {
     /**
      * File download of the model file for a model by id
      */
-    def downloadFile = {
-        try
-        {
-            List<RFTC> files = modelDelegateService.retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
-            RFTC requested=files.find {
-            	    File file=new File(it.path)
-            	    file.getName()==params.filename
-            }
-            if (requested) {
-            	    serveModelAsFile(requested, response)
-            }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace()
-        }
-    }
-    
-
-    /**
-     * File download of the model file for a model by id
-     */
     def download = {
         try
         {
-        	
-            List<RFTC> files = modelDelegateService.retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
-            List<RFTC> mainFiles = files.findAll { it.mainFile }
-            if (files.size() == 1) {
-            	    serveModelAsFile(files.first(), response)
-            }
-            else if (mainFiles.size() == 1) {
-            	    serveModelAsFile(mainFiles.first(), response)
+        	if (!params.filename) {	
+        		List<RFTC> files = modelDelegateService.retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
+        		List<RFTC> mainFiles = files.findAll { it.mainFile }
+        		if (files.size() == 1) {
+            		   serveModelAsFile(files.first(), response)
+            	}
+            	else if (mainFiles.size() == 1) {
+            		   serveModelAsFile(mainFiles.first(), response)
+            	}
+            	else {
+            	       serveModelAsZip(files, response)
+            	}
             }
             else {
-            	    serveModelAsZip(files, response)
+            	List<RFTC> files = modelDelegateService.
+            						retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
+            	RFTC requested=files.find {
+            	    File file=new File(it.path)
+            	    file.getName()==params.filename
+            	}
+            	if (requested) {
+            	    serveModelAsFile(requested, response)
+            	}            	
             }
         }
         catch(Exception e)
