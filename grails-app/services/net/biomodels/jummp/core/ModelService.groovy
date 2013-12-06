@@ -679,7 +679,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         def stopWatch = new Log4JStopWatch("modelService.addValidatedRevision.rftcCreation")
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
-            final String fileName = rf.path.split(File.separator).last()
+            String sep = File.separator.equals("/") ? "/" : "\\\\"
+            final String fileName = rf.path.split(sep).last()
             final def domain = new RepositoryFile(path: rf.path, description: rf.description, 
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
@@ -845,7 +846,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
              * only store the name of the file in the database, as the location can change and
              * we generate the correct path when the RepositoryFileTransportCommand wrapper is created
              */
-            String fileName = rf.path.split(File.separator).last()
+            String sep = File.separator.equals("/") ? "/" : "\\\\"
+            String fileName = rf.path.split(sep).last()
             final def domain = new RepositoryFile(path: rf.path, description: rf.description,
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
@@ -1045,11 +1047,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         // keep a list of RFs closeby, as we may need to discard all of them
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
+            String sep = File.separator.equals("/") ? "/" : "\\\\"
             /*
              * only store the name of the file in the database, as the location can change and
              * we generate the correct path when the RepositoryFileTransportCommand wrapper is created
              */
-            String fileName = rf.path.split(File.separator).last()
+            String fileName = rf.path.split(sep).last()
             final def domain = new RepositoryFile(path: rf.path, description: rf.description,
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
@@ -1261,7 +1264,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 minorRevision: false, validated:valid)
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
-            final String fileName = rf.path.split(File.separator).last()
+            String sep = File.separator.equals("/") ? "/" : "\\\\"
+            final String fileName = rf.path.split(sep).last()
             final def domain = new RepositoryFile(path: rf.path, description: rf.description, 
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
