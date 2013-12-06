@@ -48,7 +48,9 @@ import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import org.apache.commons.lang.exception.ExceptionUtils
-
+import grails.transaction.*
+import static org.springframework.http.HttpStatus.*
+import static org.springframework.http.HttpMethod.*
 
 class ModelController {
     /**
@@ -92,21 +94,29 @@ class ModelController {
     }
 
     def show = {
-        ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
-        boolean showPublishOption = modelDelegateService.canPublish(model.id)
-        boolean canUpdate = modelDelegateService.canAddRevision(model.id)
+    	System.out.println(params.inspect())
+    	System.out.println("FORMAT IS: "+params.format)
+        if (!params.format || params.format=="html") {
+        		ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
+        		boolean showPublishOption = modelDelegateService.canPublish(model.id)
+        		boolean canUpdate = modelDelegateService.canAddRevision(model.id)
 
-        String flashMessage=""
-        if (flash.now["giveMessage"]) {
-            flashMessage=flash.now["giveMessage"]
+        		String flashMessage=""
+        		if (flash.now["giveMessage"]) {
+        			flashMessage=flash.now["giveMessage"]
+        		}
+        		forward controller:modelFileFormatService.getPluginForFormat(model.format),
+                	action:"show",
+                	id: params.id,
+                	params:[flashMessage:flashMessage,
+                    	canUpdate:canUpdate,
+                    	showPublishOption:showPublishOption
+                    ]
         }
-        forward controller:modelFileFormatService.getPluginForFormat(model.format),
-                action:"show",
-                id: params.id,
-                params:[flashMessage:flashMessage,
-                    canUpdate:canUpdate,
-                    showPublishOption:showPublishOption
-                ]
+        else {
+        	RevisionTransportCommand rev=modelDelegateService.getRevision(params.id)
+           	respond new net.biomodels.jummp.webapp.rest.model.show.Model(rev)
+        }
     }
 
     def publish = {
