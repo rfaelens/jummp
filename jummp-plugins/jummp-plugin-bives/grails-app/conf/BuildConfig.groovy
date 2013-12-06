@@ -31,7 +31,6 @@ grails.project.work.dir = "target/work"
 grails.project.groupId = "net.biomodels.jummp.plugins.bives"
 grails.project.source.level = 1.7
 grails.project.target.level = 1.7
-// maven can't handle flatDirs, would break sbml and bives
 grails.project.dependency.resolver = "maven"
 
 grails.project.fork = [
@@ -63,22 +62,18 @@ grails.project.dependency.resolution = {
         // from public Maven repositories
         mavenLocal()
         mavenCentral()
+        mavenRepo "http://mvn.sems.uni-rostock.de/snapshots/"
+        mavenRepo "http://mvn.sems.uni-rostock.de/releases/"
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
-        //flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
-        runtime('org.apache.commons:commons-compress:1.1') {excludes 'commons-io'}
-        compile "commons-io:commons-io:2.1"
-        compile ":jaxen:1.1.1"
-        compile "org.jdom:jdom:1.1.3"
-        compile ":bives-fwk:0.9.0"
-        compile ":bives.diff:0.1.0"
+        compile "de.unirostock.sems:BiVeS:1.1-SNAPSHOT"
         test 'hsqldb:hsqldb:1.8.0.10'
         // broken Grails 2.3.2 dependecy
         compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core' }

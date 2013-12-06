@@ -245,7 +245,6 @@ class ModelController {
                 cmd.mainFile = mainMultipartList
                 cmd.extraFiles = extraMultipartList
                 cmd.description = descriptionFields
-                System.out.println(cmd.getProperties())
                 if (IS_DEBUG_ENABLED) {
                     log.debug "Data binding done :${cmd.properties}"
                 }
@@ -288,8 +287,6 @@ class ModelController {
                         }
                     }
                     else {
-                    	//System.out.println(cmd.errors["mainFile"])
-                        //System.out.println(cmd.errors["mainFile"].getProperties())
                         throw new Exception("Error in uploading files. Cmd did not validate: ${cmd.getProperties()}")
                     }
                 } 
