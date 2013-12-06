@@ -25,11 +25,16 @@
 class UrlMappings {
 
 	static mappings = {
-		"/$controller/$action?/$id?"{
-			constraints {
-				// apply constraints here
-			}
-		}
+		/*"/$controller/$action?/$id?(.${format})?"{
+            constraints {
+                // apply constraints here
+            }*/
+            "/$controller/$action?/$id?"{
+            	constraints {
+            		// apply constraints here
+            	}
+            }
+
 	"/"(view:"/index")
 	"403"(controller: "errors", action: "error403")
         "404"(controller: "errors", action: "error404")
@@ -46,7 +51,9 @@ class UrlMappings {
 	"/user"(controller:"usermanagement", action:"show")
 	"/"(view:"/index")
 	"500"(view:'/error')
-	
+	"/model/$id"(controller:"model") {
+       action = [GET:"show", PUT:"update", DELETE:"delete", POST:"save"]
+    }
 	
         }
 }
