@@ -51,9 +51,9 @@ class UrlMappings {
 	"/user"(controller:"usermanagement", action:"show")
 	"/"(view:"/index")
 	"500"(view:'/error')
-	"/model/$id"(controller:"model") {
+	/*"/model/$id"(controller:"model") {
        action = [GET:"show", PUT:"update", DELETE:"delete", POST:"save"]
-    }
+    }*/
 	
         }
 }
