@@ -156,27 +156,7 @@ class SearchController {
         if (params.iDisplayLength) {
             length = Math.min(100, params.iDisplayLength as int)
         }
-        String sortBy="name"
-        switch (params.iSortCol_0 as int) {
-        case 0:
-            sortBy="name"
-            break
-        case 1:
-            sortBy="format"
-            break
-        case 2:
-			sortBy="submitter"            
-        	break
-        case 3:
-            sortBy="submitted"
-        	break
-        case 4:
-        	sortBy="modified"
-        	break
-        default:
-            sortBy="name"
-        	break
-        }
+        String sortBy=getSortColumn(params.iSortCol_0 as int)
         //List<MTC> models=new LinkedList<MTC>()
         def results=searchCore(params.id, sortBy, params.sSortDir_0, start, length)
         def dataToRender = [:]
