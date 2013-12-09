@@ -39,6 +39,7 @@ import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
 import grails.plugins.springsecurity.Secured
 import net.biomodels.jummp.webapp.rest.search.SearchResults
+import net.biomodels.jummp.webapp.rest.search.BrowseResults
 
 class SearchController {
     
@@ -63,6 +64,12 @@ class SearchController {
      * Default action showing a list view
      */
     def list = {
+    	if (!params.format || params.format=="html") {
+     	 	 return []
+     	 }
+		 respond new BrowseResults(browseCore(params.sortBy, 
+		 									  params.sortDir, 
+		 									  params.offset ? Integer.parseInt(params.offset):0, 10))     
     }
     
     def searchRedir = {
@@ -195,7 +202,63 @@ class SearchController {
     }
 
     
+    private def browseCore(String sortBy, String sortDirection, int offset, int length) {
+    	ModelListSorting sort
+        switch (sortBy) {
+        case "name":
+            sort = ModelListSorting.NAME
+            break
+        case "format":
+            sort = ModelListSorting.FORMAT
+            break
+        case "submitter":
+            sort = ModelListSorting.SUBMITTER
+            break
+        case "submitted":
+            sort = ModelListSorting.SUBMISSION_DATE
+            break
+        case "modified":
+            sort = ModelListSorting.LAST_MODIFIED
+            break
+        default:
+            sort = ModelListSorting.ID
+            break
+        }
+        List modelsDomain = modelService.getAllModels(offset, length, sortDirection == "asc", sort)
+        List models = []
+        modelsDomain.each {
+        	models.add(it.toCommandObject())
+        }
+        return [models: models, 
+        		modelsAvailable: modelService.getModelCount(),
+        		sortBy: sortBy,
+        		sortDirection: sortDirection,
+        		offset: offset,
+        		length: length]
+    }
     
+    
+    private String getSortColumn(int sc) {
+    	String sortBy="name"
+    	switch (sc) {
+    		case 0:
+            	sortBy="name"
+            	break
+            case 1:
+            	sortBy="format"
+            	break
+            case 2:
+				sortBy="submitter"            
+				break
+			case 3:
+            	sortBy="submitted"
+            	break
+            case 4:
+        		sortBy="modified"
+        		break
+        }
+        return sortBy
+    }
     
     /**
      * Action returning the DataTable content as JSON
@@ -209,45 +272,25 @@ class SearchController {
         if (params.iDisplayLength) {
             length = Math.min(100, params.iDisplayLength as int)
         }
+        String sortBy=getSortColumn(params.iSortCol_0 as int)
+        
+        def results = browseCore(sortBy, params.sSortDir_0, start, length)
         def dataToRender = [:]
         dataToRender.sEcho = params.sEcho
         dataToRender.aaData = []
         dataToRender.modelIDs= []
 
-        dataToRender.iTotalRecords = modelService.getModelCount(params.sSearch)
+        dataToRender.iTotalRecords = results.modelsAvailable
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.offset = start
         dataToRender.iSortCol_0 = params.iSortCol_0
         dataToRender.sSortDir_0 = params.sSortDir_0
         
         
-        ModelListSorting sort
-        switch (params.iSortCol_0 as int) {
-        case 0:
-            sort = ModelListSorting.NAME
-            break
-        case 1:
-            sort = ModelListSorting.FORMAT
-            break
-        case 2:
-            sort = ModelListSorting.SUBMITTER
-            break
-        case 3:
-            sort = ModelListSorting.SUBMISSION_DATE
-            break
-        case 4:
-            sort = ModelListSorting.LAST_MODIFIED
-            break
-        default:
-            sort = ModelListSorting.ID
-            break
-        }
-        List models = modelService.getAllModels(start, length, params.sSortDir_0 == "asc", sort, params.sSearch)
-        models.each { model ->
-            MTC modelTC=model.toCommandObject()
-            dataToRender.modelIDs << [ model.id ]
+        results.models.each { modelTC ->
+            dataToRender.modelIDs << [ modelTC.id ]
             dataToRender.aaData << [
-                model.name,
+                modelTC.name,
                 modelTC.format.name,
                 modelTC.submitter,
                 modelTC.submissionDate.getTime(),
