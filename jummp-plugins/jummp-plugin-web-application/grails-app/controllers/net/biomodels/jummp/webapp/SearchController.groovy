@@ -38,6 +38,7 @@ import grails.converters.JSON
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
 import grails.plugins.springsecurity.Secured
+import net.biomodels.jummp.webapp.rest.search.SearchResults
 
 class SearchController {
     
@@ -72,7 +73,14 @@ class SearchController {
      * Default action showing a list view
      */
      def search = {
-    	   [query:params.query]
+    	 
+     	 if (!params.format || params.format=="html") {
+     	 	 return [query:params.query]
+     	 }
+		 respond new SearchResults(searchCore(params.query, 
+		 									  params.sortBy, 
+		 									  params.sortDir, 
+		 									  params.offset ? Integer.parseInt(params.offset):0, 10))     	 
     }
     
     @Secured(['ROLE_ADMIN'])
@@ -82,11 +90,58 @@ class SearchController {
     	[regenTime:System.currentTimeMillis() - start]
     }
 
-        /**
+    
+    private def searchCore(String query, String sortBy, String sortDirection, int offset, int length) {
+    	List<MTC> models=[]
+    	models.addAll(modelService.searchModels(query))
+        if (sortBy) {
+        	int sortDir=1
+        	if (sortDirection=="asc") {
+        		sortDir=-1;
+        	}
+        	switch (sortBy) {
+        		case "name":
+        			models = models.sort{ m1, m2 -> sortDir * m2.name.compareTo(m1.name)  }
+        			break
+        		case "format":
+        			models = models.sort{ m1, m2 -> sortDir * m2.format.name.compareTo(m1.format.name)  }
+        			break
+        		case "submitter":
+        			models = models.sort{ m1, m2 -> sortDir * m2.submitter.compareTo(m1.submitter)  }
+        			break
+        		case "submitted":
+        			models = models.sort{ m1, m2 -> sortDir * m2.submissionDate.getTime() - m1.submissionDate.getTime()  }
+        			break
+        		case "modified":
+        			models = models.sort{ m1, m2 -> sortDir * m2.lastModifiedDate.getTime() - m1.lastModifiedDate.getTime()  }
+        			break
+        		default:
+        			models = models.sort{ m1, m2 -> sortDir * m2.name.compareTo(m1.name)  }
+        			break
+        	}
+        }
+        int retval=models.size()
+        if (offset>0 && offset<models.size()) {
+        	models = models[offset..-1]
+        }
+        if (models.size() > length) {
+        	models = models[0..length-1]
+        }
+        return [models: models, 
+        		matches: retval,
+        		sortBy: sortBy,
+        		sortDirection: sortDirection,
+        		offset: offset,
+        		length: length]
+        
+    }
+    
+    
+    /**
      * Action returning the DataTable content as JSON
      */
     def executeSearch = {
-        int start = 0
+    	int start = 0
         int length = 10
         if (params.iDisplayStart) {
             start = params.iDisplayStart as int
@@ -94,52 +149,39 @@ class SearchController {
         if (params.iDisplayLength) {
             length = Math.min(100, params.iDisplayLength as int)
         }
+        String sortBy="name"
+        switch (params.iSortCol_0 as int) {
+        case 0:
+            sortBy="name"
+            break
+        case 1:
+            sortBy="format"
+            break
+        case 2:
+			sortBy="submitter"            
+        	break
+        case 3:
+            sortBy="submitted"
+        	break
+        case 4:
+        	sortBy="modified"
+        	break
+        default:
+            sortBy="name"
+        	break
+        }
+        //List<MTC> models=new LinkedList<MTC>()
+        def results=searchCore(params.id, sortBy, params.sSortDir_0, start, length)
         def dataToRender = [:]
         dataToRender.sEcho = params.sEcho
         dataToRender.aaData = []
         dataToRender.modelIDs= []
-
-        List models = new LinkedList()
-        models.addAll(modelService.searchModels(params.id))
-        
-        int sortDir=1;
-        if (params.sSortDir_0=="asc") {
-        	sortDir=-1;
-        }
-        
-        switch (params.iSortCol_0 as int) {
-        case 0:
-            models = models.sort{ m1, m2 -> sortDir * m1.name.compareTo(m2.name)  }
-            break
-        case 1:
-            models = models.sort{ m1, m2 -> sortDir * m1.format.name.compareTo(m2.format.name)  }
-            break
-        case 2:
-            models = models.sort{ m1, m2 -> sortDir * m1.submitter.compareTo(m2.submitter)  }
-            break
-        case 3:
-            models = models.sort{ m1, m2 -> sortDir * m1.submissionDate.getTime() - m2.submissionDate.getTime()  }
-            break
-        case 4:
-            models = models.sort{ m1, m2 -> sortDir * m1.lastModifiedDate.getTime() - m2.lastModifiedDate.getTime()  }
-            break
-        default:
-            models = models.sort{ m1, m2 -> sortDir * m1.name.compareTo(m2.name)  }
-            break
-        }
-        dataToRender.iTotalRecords = models.size()
+        dataToRender.iTotalRecords = results.matches
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.offset = start
         dataToRender.iSortCol_0 = params.iSortCol_0
         dataToRender.sSortDir_0 = params.sSortDir_0
-        if (start>0 && start<models.size()) {
-        	models = models[start..-1]
-        }
-        if (models.size() > length) {
-        	models = models[0..length-1]
-        }
-        
-        models.each { modelTC ->
+        results.models.each { modelTC ->
             dataToRender.modelIDs << [ modelTC.id ]
             dataToRender.aaData << [
                 modelTC.name,
