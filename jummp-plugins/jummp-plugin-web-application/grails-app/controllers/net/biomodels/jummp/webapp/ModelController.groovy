@@ -51,6 +51,7 @@ import org.apache.commons.lang.exception.ExceptionUtils
 import grails.transaction.*
 import static org.springframework.http.HttpStatus.*
 import static org.springframework.http.HttpMethod.*
+import org.apache.commons.io.FileUtils
 
 class ModelController {
     /**
@@ -561,6 +562,17 @@ class ModelController {
         		if (flow.isUpdate) {
                 	session.removeAttribute(flow.workingMemory.get("SafeReferenceVariable") as String)
                 }
+                if (flow.workingMemory.containsKey("repository_files")) {
+                	def repFile=flow.workingMemory.get("repository_files").first()
+                	if (repFile) {
+                		File aSingleFile=new File(repFile.path)
+                		File buggyFiles=new File(new File(grailsApplication.config.jummp.vcs.exchangeDirectory),"buggy")
+                		File temporaryStorage=new File(buggyFiles, ticket)
+                		temporaryStorage.mkdirs()
+                		FileUtils.copyDirectory(new File(aSingleFile.getParent()), temporaryStorage)
+                	}
+                }
+                submissionService.cleanup(flow.workingMemory)
         		mailService.sendMail {
         			to grailsApplication.config.jummp.security.registration.email.adminAddress
         			from grailsApplication.config.jummp.security.registration.email.sender

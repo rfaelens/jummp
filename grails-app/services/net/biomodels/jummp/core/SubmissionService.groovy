@@ -319,14 +319,12 @@ class SubmissionService {
         @Profiled(tag = "submissionService.handleSubmission")
         void handleSubmission(Map<String,Object> workingMemory) {
             try {
-                completeSubmission(workingMemory)
+            	completeSubmission(workingMemory)
+            	cleanup(workingMemory)
             }
             catch(Exception e) {
                 e.printStackTrace()
                 throw e
-            }
-            finally {
-                cleanup(workingMemory)
             }
         }
         /*
