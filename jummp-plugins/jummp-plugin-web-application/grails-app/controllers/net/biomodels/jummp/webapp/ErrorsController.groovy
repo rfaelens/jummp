@@ -32,9 +32,9 @@ class ErrorsController {
 	def springSecurityService
 	def messageSource
 	
-	private Error getError(String code) {
-		return new Error(messageSource.getMessage("error.${code}.title",null, Locale.getDefault()),
-						 messageSource.getMessage("error.${code}.explanation",null, Locale.getDefault()))
+	private Error getError(String code, Object[] args = null) {
+		return new Error(messageSource.getMessage("error.${code}.title",args, Locale.getDefault()),
+						 messageSource.getMessage("error.${code}.explanation",args, Locale.getDefault()))
 	}
 
     def error403 = {
@@ -48,7 +48,7 @@ class ErrorsController {
 
     def error404 = {
         if (params.format && params.format!="html") {
-            respond getError("404")
+            respond getError("404", [request.forwardURI])
         } else {
             [resource: request.forwardURI]
         }
