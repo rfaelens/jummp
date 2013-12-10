@@ -42,7 +42,6 @@ class UrlMappings {
         "500"(controller: "errors", action: "error403", exception: org.springframework.security.access.AccessDeniedException)
         "/models"(controller: "search", action: "list")
 	"/search"(controller: "search", action: "search")
-	"/models/model"(controller:"model", action:"model")
 	"/feedback"(controller:"jummp", action:"feedback")
 	"/registration"(controller:"usermanagement", action:"create")
 	"/forgotpassword"(controller:"usermanagement", action:"forgot")
@@ -50,7 +49,10 @@ class UrlMappings {
 	"/user/editPassword"(controller:"usermanagement", action:"editPassword")
 	"/user"(controller:"usermanagement", action:"show")
 	"/"(view:"/index")
-	"500"(view:'/error')
+	"/model/create"(controller: "model", action: "create")
+	"/model/$id"(controller:"model", action:"show")
+	"/model/update"(controller: "model", action: "update")
+	"/model/publish"(controller: "model", action: "publish")
 	/*"/model/$id"(controller:"model") {
        action = [GET:"show", PUT:"update", DELETE:"delete", POST:"save"]
     }*/
