@@ -80,14 +80,14 @@ class SearchController {
      * Default action showing a list view
      */
      def search = {
-    	 
-     	 if (!params.format || params.format=="html") {
-     	 	 return [query:params.query]
-     	 }
-		 respond new SearchResults(searchCore(params.query, 
-		 									  params.sortBy, 
-		 									  params.sortDir, 
-		 									  params.offset ? Integer.parseInt(params.offset):0, 10))     	 
+    	 def results=searchCore(params.query, 
+		 				     	params.sortBy, 
+		 						params.sortDir, 
+		 						params.offset ? Integer.parseInt(params.offset):0, 10)
+		 if (!params.format || params.format=="html") {
+		 	 return results
+		 }
+     	 respond new SearchResults(results)
     }
     
     @Secured(['ROLE_ADMIN'])
@@ -101,33 +101,37 @@ class SearchController {
     private def searchCore(String query, String sortBy, String sortDirection, int offset, int length) {
     	List<MTC> models=[]
     	models.addAll(modelService.searchModels(query))
-        if (sortBy) {
-        	int sortDir=1
-        	if (sortDirection=="asc") {
-        		sortDir=-1;
-        	}
-        	switch (sortBy) {
-        		case "name":
-        			models = models.sort{ m1, m2 -> sortDir * m2.name.compareTo(m1.name)  }
-        			break
-        		case "format":
-        			models = models.sort{ m1, m2 -> sortDir * m2.format.name.compareTo(m1.format.name)  }
-        			break
-        		case "submitter":
-        			models = models.sort{ m1, m2 -> sortDir * m2.submitter.compareTo(m1.submitter)  }
-        			break
-        		case "submitted":
-        			models = models.sort{ m1, m2 -> sortDir * m2.submissionDate.getTime() - m1.submissionDate.getTime()  }
-        			break
-        		case "modified":
-        			models = models.sort{ m1, m2 -> sortDir * m2.lastModifiedDate.getTime() - m1.lastModifiedDate.getTime()  }
-        			break
-        		default:
-        			models = models.sort{ m1, m2 -> sortDir * m2.name.compareTo(m1.name)  }
-        			break
-        	}
-        }
-        int retval=models.size()
+    	if (!sortBy) {
+    		sortBy="name"
+    	}
+    	if (!sortDirection) {
+    		sortDirection="asc"
+    	}
+		int sortDir=1
+		if (sortDirection=="asc") {
+			sortDir=-1;
+		}
+		switch (sortBy) {
+			case "name":
+				models = models.sort{ m1, m2 -> sortDir * m2.name.compareTo(m1.name)  }
+				break
+			case "format":
+				models = models.sort{ m1, m2 -> sortDir * m2.format.name.compareTo(m1.format.name)  }
+				break
+			case "submitter":
+				models = models.sort{ m1, m2 -> sortDir * m2.submitter.compareTo(m1.submitter)  }
+				break
+			case "submitted":
+				models = models.sort{ m1, m2 -> sortDir * m2.submissionDate.getTime() - m1.submissionDate.getTime()  }
+				break
+			case "modified":
+				models = models.sort{ m1, m2 -> sortDir * m2.lastModifiedDate.getTime() - m1.lastModifiedDate.getTime()  }
+				break
+			default:
+				models = models.sort{ m1, m2 -> sortDir * m2.name.compareTo(m1.name)  }
+				break
+		}
+		int retval=models.size()
         if (offset>0 && offset<models.size()) {
         	models = models[offset..-1]
         }
@@ -139,7 +143,8 @@ class SearchController {
         		sortBy: sortBy,
         		sortDirection: sortDirection,
         		offset: offset,
-        		length: length]
+        		length: length,
+        		query: query]
         
     }
     
