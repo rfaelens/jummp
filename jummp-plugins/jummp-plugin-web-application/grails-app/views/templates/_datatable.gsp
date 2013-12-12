@@ -1,7 +1,9 @@
 <%
 	def totalCount
+	String action="list"
 	if (matches) {
 		totalCount=matches
+		action="search"
 	}
 	else {
 		totalCount=modelsAvailable
@@ -13,18 +15,22 @@
     		<g:if test="${models}">
     	    	<table id="modelTable" class="views-table cols-4">
         	    <thead>
-        	    <tr>
-                	<th><b><g:message code="model.list.name"/></b></th>
-                	<th><b><g:message code="model.list.format"/></b></th>
-                	<th><b><g:message code="model.list.submitter"/></b></th>
-                	<th><b><g:message code="model.list.submissionDate"/></b></th>
-                	<th><b><g:message code="model.list.modifiedDate"/></b></th>
+                <tr>
+                	<g:render template="/templates/tableheader" model="[action: action, 'sortColumn': 'name','msgCode':'model.list.name']"/>
+                	<g:render template="/templates/tableheader" model="[action: action, 'sortColumn': 'format','msgCode':'model.list.format']"/>
+                	<g:render template="/templates/tableheader" model="[action: action, 'sortColumn': 'submitter','msgCode':'model.list.submitter']"/>
+                	<g:render template="/templates/tableheader" model="[action: action, 'sortColumn': 'submitted','msgCode':'model.list.submissionDate']"/>
+                	<g:render template="/templates/tableheader" model="[action: action, 'sortColumn': 'modified','msgCode':'model.list.modifiedDate']"/>
                 </tr>
                 </thead>
                 <tbody>
                 	<g:each status="i" in="${models}" var="model">
                 		<tr class="${ (i % 2) == 0 ? 'even' : 'odd'}">
-                			<td>${model.name}</td>
+                			<td>
+                				<a href="${createLink(controller: 'model', id: model.id, action: 'show')}">
+                					${model.name}
+                				</a>
+                			</td>
                 			<td>${model.format.name}</td>
                 			<td>${model.submitter}</td>
                 			<td>${model.submissionDate.format('yyyy/MM/dd')}</td>
@@ -37,11 +43,48 @@
                 	</tr>
                 </tfoot>
                 </table>
+                	<%
+						int currentPage=1
+						if (offset!=0) {
+							currentPage = Math.ceil((double) (offset+1) / (double) length)
+						}
+						int modelStart=1 + (currentPage - 1)*length
+						int modelEnd= length < models.size() ? length : models.size()
+						modelEnd+=modelStart -1
+						int numPages= Math.ceil((double) totalCount / (double) length)
+                	%>
                 <div class="dataTables_info">
-                	Showing 1 of ${models.size()} of ${totalCount} models.
+                	Showing ${modelStart} to ${modelEnd} of ${totalCount} models
                 </div>
                 <div class="dataTables_paginate">
-                	Pagination Controls go here
+                	<g:if test="${currentPage==1}">
+                		<g:img dir="${grailsApplication.config.jummp.app.name}/images/pagination" contextPath="" file="arrow-previous-disable.gif" alt="Previous"/>
+                	</g:if>
+                	<g:else>
+                		<a href="${createLink(controller: 'search', action: action, params: [query: query, sortDir: sortDirection, sortBy: sortBy, offset: modelStart-length-1])}">
+                			<g:img dir="${grailsApplication.config.jummp.app.name}/images/pagination" contextPath="" file="arrow-previous.gif" alt="Previous"/>
+                		</a>
+                	</g:else>
+                	<g:each var="i" in="${ (1..<numPages+1) }">
+                		<span class="pageNumbers">
+                			<g:if test="${currentPage==i}">
+                				${i}
+                			</g:if>
+                			<g:else>
+                				<a href="${createLink(controller: 'search', action: action, params: [query: query,  sortDir: sortDirection, sortBy: sortBy, offset: (i - 1)*length ])}">
+                					${i}
+                				</a>
+                			</g:else>
+                		</span>
+                	</g:each>
+                	<g:if test="${modelEnd==totalCount}">
+                		<g:img dir="${grailsApplication.config.jummp.app.name}/images/pagination" contextPath="" file="arrow-next-disable.gif" alt="Next"/>
+                	</g:if>
+                	<g:else>
+                		<a href="${createLink(controller: 'search', action: action, params: [query: query,  sortDir: sortDirection, sortBy: sortBy, offset: modelStart+length-1])}">
+                			<g:img dir="${grailsApplication.config.jummp.app.name}/images/pagination" contextPath="" file="arrow-next.gif" alt="Next"/>
+                		</a>
+                	</g:else>
                 </div>
             </g:if>
             <g:else>

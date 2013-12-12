@@ -104,6 +104,7 @@ environments {
     }
 
 }
+jummp.app.name=appName
 //branding
 jummp.branding.deployment="biomodels" //used to select messages,and style if jummp.branding.style is not specified 
 jummp.branding.style="ddmore" //used to specify any other name for the css file

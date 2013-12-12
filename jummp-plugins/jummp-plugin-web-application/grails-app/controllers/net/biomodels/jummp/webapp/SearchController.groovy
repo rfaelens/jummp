@@ -64,12 +64,14 @@ class SearchController {
      * Default action showing a list view
      */
     def list = {
+    	def results=browseCore(params.sortBy, 
+		 					   params.sortDir, 
+		 					   params.offset ? Integer.parseInt(params.offset):0, 10)
+		 									  
     	if (!params.format || params.format=="html") {
-     	 	 return []
+     	 	 return results
      	 }
-		 respond new BrowseResults(browseCore(params.sortBy, 
-		 									  params.sortDir, 
-		 									  params.offset ? Integer.parseInt(params.offset):0, 10))     
+		 respond new BrowseResults(results)    
     }
     
     def searchRedir = {
@@ -149,45 +151,18 @@ class SearchController {
     }
     
     
-    /**
-     * Action returning the DataTable content as JSON
-     */
-    def executeSearch = {
-    	int start = 0
-        int length = 10
-        if (params.iDisplayStart) {
-            start = params.iDisplayStart as int
-        }
-        if (params.iDisplayLength) {
-            length = Math.min(100, params.iDisplayLength as int)
-        }
-        String sortBy=getSortColumn(params.iSortCol_0 as int)
-        //List<MTC> models=new LinkedList<MTC>()
-        def results=searchCore(params.id, sortBy, params.sSortDir_0, start, length)
-        def dataToRender = [:]
-        dataToRender.sEcho = params.sEcho
-        dataToRender.aaData = []
-        dataToRender.modelIDs= []
-        dataToRender.iTotalRecords = results.matches
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.offset = start
-        dataToRender.iSortCol_0 = params.iSortCol_0
-        dataToRender.sSortDir_0 = params.sSortDir_0
-        results.models.each { modelTC ->
-            dataToRender.modelIDs << [ modelTC.id ]
-            dataToRender.aaData << [
-                modelTC.name,
-                modelTC.format.name,
-                modelTC.submitter,
-                modelTC.submissionDate.getTime(),
-                modelTC.lastModifiedDate.getTime()
-            ]
-        }
-        render dataToRender as JSON
-    }
-
     
     private def browseCore(String sortBy, String sortDirection, int offset, int length) {
+    	if (!sortBy) {
+    		sortBy="name"
+    	}
+    	if (!sortDirection) {
+    		sortDirection="asc"
+    	}
+		int sortDir=1
+		if (sortDirection=="asc") {
+			sortDir=-1;
+		}
     	ModelListSorting sort
         switch (sortBy) {
         case "name":
@@ -245,46 +220,6 @@ class SearchController {
         return sortBy
     }
     
-    /**
-     * Action returning the DataTable content as JSON
-     */
-    def dataTableSource = {
-        int start = 0
-        int length = 10
-        if (params.iDisplayStart) {
-            start = params.iDisplayStart as int
-        }
-        if (params.iDisplayLength) {
-            length = Math.min(100, params.iDisplayLength as int)
-        }
-        String sortBy=getSortColumn(params.iSortCol_0 as int)
-        
-        def results = browseCore(sortBy, params.sSortDir_0, start, length)
-        def dataToRender = [:]
-        dataToRender.sEcho = params.sEcho
-        dataToRender.aaData = []
-        dataToRender.modelIDs= []
-
-        dataToRender.iTotalRecords = results.modelsAvailable
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.offset = start
-        dataToRender.iSortCol_0 = params.iSortCol_0
-        dataToRender.sSortDir_0 = params.sSortDir_0
-        
-        
-        results.models.each { modelTC ->
-            dataToRender.modelIDs << [ modelTC.id ]
-            dataToRender.aaData << [
-                modelTC.name,
-                modelTC.format.name,
-                modelTC.submitter,
-                modelTC.submissionDate.getTime(),
-                modelTC.lastModifiedDate.getTime()
-            ]
-        }
-        render dataToRender as JSON
-    }
-
     def lastAccessedModels = {
         List data = modelHistoryService.history()
         def dataToRender = []

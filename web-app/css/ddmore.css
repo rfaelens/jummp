@@ -2398,8 +2398,7 @@ a:hover {
     padding: 0 0 0 20px;
 }
 .front.page-node #content .section .region-content img {
-    float: right;
-    margin-top: -60px;
+    
 }
 #content .users.associated h2 {
     color: #555555;
@@ -2890,4 +2889,7 @@ ul.links .comment-add a {
 .region-sidebar-second .whats-next-list ul li .next-date span {
     display: block;
     color: #666666;
+}
+.mini-search {
+	padding-bottom:15px;
 }

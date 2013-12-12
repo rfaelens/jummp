@@ -16,6 +16,10 @@
 	margin-top:-10px;
 }
 
+table {
+	width: 100%;	
+}
+
 table thead th {
 	padding: 3px 18px 3px 10px;
 	border-bottom: 1px solid black;
@@ -69,7 +73,9 @@ tbody tr.odd td {
 	float: right;
 	text-align: right;
 }
-
+.pageNumbers {
+	padding: 2px;
+}
 tr.even {
 	background-color: ##EEEEEE;
 }
