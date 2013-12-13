@@ -36,9 +36,6 @@ class BuildFormatTagLib {
 	def formatter = { attrs ->
 		String buildString=attrs.build
 		def parts=buildString.tokenize('|')
-		parts.eachWithIndex { part, i ->
-			System.out.println(part+"\t"+i)
-		}
 		StringBuilder builder=new StringBuilder("<a href='https://bitbucket.org/jummp/jummp/commits/all?search=")
 		builder.append(parts.get(0))
 		builder.append("'>")
