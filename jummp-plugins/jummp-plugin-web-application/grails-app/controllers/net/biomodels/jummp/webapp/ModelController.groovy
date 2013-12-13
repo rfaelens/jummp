@@ -636,6 +636,9 @@ class ModelController {
             	List<RFTC> files = modelDelegateService.
             						retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
             	RFTC requested=files.find {
+                    if (it.hidden) {
+                        return false
+                    }
             	    File file=new File(it.path)
             	    file.getName()==params.filename
             	}
