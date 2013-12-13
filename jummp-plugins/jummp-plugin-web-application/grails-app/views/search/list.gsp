@@ -32,23 +32,22 @@
         <title>Model Listing</title>
         <meta name="layout" content="main" />
         <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'datatablestyle.css')}" />
-         <g:javascript>
-        	$(document).ready(function() {
-        		 $.jummp.showModels.lastAccessedModels($("#sidebar-element-last-accessed-models"));
-        	} );
-         </g:javascript>
-         
         <g:javascript contextPath="" src="jquery/jquery-ui-v1.10.3.js"/>
-        <g:javascript contextPath="" src="showmodels.js"/>
     </head>
     <body activetab="search">
     	 <g:render template="/templates/datatable"/>
     </body>
     <content tag="sidebar">
-        <div class="element" id="sidebar-element-last-accessed-models">
-            <h2><g:message code="model.history.title"/></h2>
-            <p></p>
-        </div>
+    	<g:if test="${history}">
+    		<div class="element" id="sidebar-element-last-accessed-models">
+    	        <h2><g:message code="model.history.title"/></h2>
+    	        	<ul>
+    	        		<g:each in="${history}">
+ 							<li><a href="${createLink(controller: "model", action: "show", id: it.id)}">${it.name}</a><br/><g:message code="model.history.submitter"/>${it.submitter}</li>   	        			
+    	        		</g:each>
+    	        	</ul>
+    	    </div>
+    	</g:if>
         <%--  GoTree code, disabled until it is useful again.	
              <div class="element">  
             <h2>Gene Ontology Tree</h2>

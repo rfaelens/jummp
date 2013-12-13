@@ -69,7 +69,8 @@ class SearchController {
 		 					   params.offset ? Integer.parseInt(params.offset):0, 10)
 		 									  
     	if (!params.format || params.format=="html") {
-     	 	 return results
+     	 	 	results["history"]=modelHistoryService.history()
+    			return results
      	 }
 		 respond new BrowseResults(results)    
     }

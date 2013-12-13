@@ -33,7 +33,6 @@
         <meta name="layout" content="main" />
          <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'datatablestyle.css')}" />
          <g:javascript contextPath="" src="jquery/jquery-ui-v1.10.3.js"/>
-         <g:javascript contextPath="" src="showmodels.js"/>
     </head>
     <body activetab="search">
     	<g:render template="/templates/${grailsApplication.config.jummp.branding.style}/searchBox"/>
