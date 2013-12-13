@@ -8,6 +8,7 @@
 	color:brown;
 	border:2px solid gray;
     padding:10px;
+    position: relative;
 }
 .close {
   font-size: 20px;
@@ -18,7 +19,9 @@
   opacity: 0.2;
   filter: alpha(opacity=20);
   text-decoration: none;
-  float: right;
+  position: absolute;
+  top: 5px;
+  right: 5px;
 }
 .close:hover {
   color: #000000;
