@@ -21,12 +21,6 @@
 
 
 
-
-
-
-
-
-
  <div id="content-bottom">
     <div class="region region-content-bottom">
     <div id="block-menu-menu-footer-menu" class="block block-menu footer-menu even">

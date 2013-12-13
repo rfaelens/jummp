@@ -31,7 +31,7 @@ eventCompileStart = { msg ->
     def proc = "git log -1 --pretty=format:\"%h|%aD\"".execute()
     proc.waitFor()
     ant.mkdir(dir: "grails-app/views/templates/")
-    new FileOutputStream("grails-app/views/templates/_version.gsp", false) << proc.in.text
+    new FileOutputStream("grails-app/views/templates/_version.gsp", false) << "<BuildFormat:formatter build="+proc.in.text+"/>"
 
     // copy the messages.properties
     ant.mkdir(dir: "web-app/js/i18n/")
