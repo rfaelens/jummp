@@ -74,6 +74,13 @@
 	  	     				</a>
                     	</td>
                    </tr>
+                   <td/>
+                    	<td>
+                    		<a href="${grailsApplication.config.grails.serverURL}/registration">
+	  	     					Register
+	  	     				</a>
+                    	</td>
+                   </tr>
                 </tbody>
             </table>
         </form>
