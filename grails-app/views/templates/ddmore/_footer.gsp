@@ -26,13 +26,16 @@
     <div id="block-menu-menu-footer-menu" class="block block-menu footer-menu even">
     	<div class="content">
     		<ul class="menu">
-    						<li class="first leaf">© 2012 - 2013</li>
+    						<li class="first leaf" style="margin-top:-100px">© 2012 - 2013</li>
     						<li class="leaf"><a href="//ddmore.eu">DDMoRe</a>, all rights reserved.</li>  
+    		</ul>
+    			<ul style="margin-top:1.3%;padding-left: 0.5em;">
     						<li class="leaf"><a href="http://efpia.eu" rel="nofollow"><g:img dir="images/ddmore" file="EFPIA.jpg"/></a></li>
     						<li class="leaf"><a href="http://ec.europa.eu/research/index.cfm" rel="nofollow"><g:img dir="images/ddmore" file="EU.jpg"/></a></li>
-    						<li class="leaf"><a href="http://www.imi.europa.eu/#&amp;panel1-9" rel="nofollow"><g:img dir="images/ddmore" file="IMI.jpg"/></a></li>
-    						<li class="last leaf" style="float:right;">Build info: <g:render template="/templates/version"/></li>
+    						<li class="last leaf"><a href="http://www.imi.europa.eu/#&amp;panel1-9" rel="nofollow"><g:img dir="images/ddmore" file="IMI.jpg"/></a></li>
     		</ul>
+    		<div class="build">Build info: <g:render template="/templates/version"/></div>
+   
     	</div>
     </div><!-- /.block -->
  </div><!-- /.region -->

@@ -2351,13 +2351,25 @@ a:hover {
     border-radius: 0 0 5px 5px;
 }
 #content-bottom .block.block-menu ul {
-    margin: 0;
-    padding: 16px 0 0 20px;
+   position: relative;
+   float:left;
+}
+.build {
+    position: relative;
+	float: right;
+    margin-top: 1.5%;
+    padding-right: 5px;
+}
+.build a {
+    color: #ffffff;
+    text-shadow: 1px 1px 1px #000000;
+}
+.build a:hover {
+    color: #cccccc;
 }
 #content-bottom .block.block-menu ul li {
     list-style: none;
     padding: 0 8px 0 0;
-    margin: 0 8px 0 0;
     display: inline-block;
     border-right: 1px solid #666666;
 }
