@@ -1987,6 +1987,9 @@ a:hover {
 .node table.text-smaller {
     font-size: 90%;
 }
+.view table {
+	width: 100%;
+}
 .view table th, .view table td {
     padding: 5px 10px;
 }

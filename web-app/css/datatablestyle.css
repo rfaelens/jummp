@@ -1,82 +1,12 @@
-.paging_full_numbers .ui-button {
-	padding: 2px 6px;
-	margin: 0;
-	cursor: pointer;
-	* cursor: hand;
-}
-
-.paging_full_numbers .ui-button {
-	padding: 2px 6px;
-	margin: 0;
-	cursor: pointer;
-	* cursor: hand;
-}
-
-#modelTable {
-	margin-top:-10px;
-}
-
-table {
-	width: 100%;	
-}
-
-table thead th {
-	padding: 3px 18px 3px 10px;
-	border-bottom: 1px solid black;
-	font-weight: bold;
-	cursor: pointer;
-	* cursor: hand;
-}
-
-
-table td,
-table th {
-	padding:5px;
-	border:1px solid #fff;
-	border-width:0 1px 1px 0;
-	}
-	
-thead th {
-	font-weight:bold;
-	}
-		
-	thead th[colspan],
-	thead th[rowspan] {
-	}
-	
-tbody th,
-tbody td,
-tfoot td {
-	text-align:left;
-	}
-	
-tfoot th {
-	}
-	
-tfoot td {
-	font-weight:bold;
-	}
-		
-tbody tr.odd td { 
-	}
-
-.dataTables thead th {
-    text-align: center;
-}
-
 .dataTables_info {
 	width: 40%;
 	float: left;
 }
-
 .dataTables_paginate {
 	float: right;
 	text-align: right;
 }
 .pageNumbers {
 	padding: 2px;
-}
-tr.even {
-	background-color: ##EEEEEE;
 }
 

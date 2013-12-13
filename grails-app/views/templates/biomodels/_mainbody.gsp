@@ -27,9 +27,15 @@
 
 
 
+<%
+  	def sidebarContent=g.pageProperty(name:'page.sidebar')
+  	if (sidebarContent) {
+  		sidebarContent=sidebarContent.trim()
+  	}
+%>
 <div id="content" role="main" class="grid_24 clearfix">
 	
-	<g:if test="${g.pageProperty(name:'page.sidebar')?.length()}">
+	<g:if test="${sidebarContent}">
 		<section class="grid_18 alpha"> 
 				<g:render template="/templates/notification/showNotificationDiv"/>
 				<g:pageProperty name="page.main-content" />
@@ -37,8 +43,8 @@
 	        </section>  
     
 	        <section class="grid_6 omega">
-			<g:pageProperty name="page.sidebar"/>
-		</section>
+				${sidebarContent}
+			</section>
 	</g:if>
 	<g:else>
 		<section> 

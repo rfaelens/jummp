@@ -40,7 +40,6 @@
  
  <link rel="stylesheet" href="<g:resource dir="css" file="ddmore.css"/>" />
  
- 
   <!--[if lte IE 7]>
 <link type="text/css" rel="stylesheet" href="http://www.ddmore.eu/sites/ddmore/files/css/css_sIsRwCKuAMZS6YJIMFqPXNCtZHxV56wN2ePifCvkLYc.css" media="all" />
 <![endif]-->
