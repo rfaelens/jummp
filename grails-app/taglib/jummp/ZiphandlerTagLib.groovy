@@ -144,7 +144,7 @@ class ZiphandlerTagLib {
 	private void processFilesJS(def repFiles, StringBuilder builder) {
 		try
         {
-        	repFiles.each {
+            repFiles.each {
 				File file=new File(it.path)
 				BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class)
 				builder.append("fileData[\"").append(file.name).append("\"]=new Object();");

@@ -117,10 +117,11 @@ class ModelController {
            	respond new net.biomodels.jummp.webapp.rest.model.show.Model(rev)
         }
     }
-    
+
     def files = {
-    	def repFiles=modelDelegateService.getRevision(params.id).files
-    	respond new net.biomodels.jummp.webapp.rest.model.show.ModelFiles(repFiles)
+        def revisionFiles = modelDelegateService.getRevision(params.id).files
+        def responseFiles = revisionFiles.findAll { !it.hidden }
+        respond new net.biomodels.jummp.webapp.rest.model.show.ModelFiles(responseFiles)
     }
 
     def publish = {

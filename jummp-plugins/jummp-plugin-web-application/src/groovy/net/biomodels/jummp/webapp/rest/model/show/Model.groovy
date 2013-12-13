@@ -45,7 +45,7 @@ class Model
                           model.publication.linkProvider.identifiersPrefix + model.publication.link :
                           model.publication.link
         }
-        files = new ModelFiles(revision.files)
+        files = new ModelFiles(revision.files.findAll{ !it.hidden })
         history = new History(model.id)
     }
 }
