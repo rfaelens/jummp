@@ -844,8 +844,11 @@ div.ctools-ajaxing {
     background: url(//ddmore.eu/sites/all/modules/contrib/ctools/images/status-active.gif) center center no-repeat;
 }
 
+
+
 body {
     font-size: 100%;
+    min-width: 1100px;
 }
 #skip-to-nav, #page {
     font-size: 0.75em;
