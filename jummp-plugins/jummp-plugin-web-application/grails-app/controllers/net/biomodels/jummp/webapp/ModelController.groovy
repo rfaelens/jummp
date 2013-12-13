@@ -95,8 +95,6 @@ class ModelController {
     }
 
     def show = {
-    	System.out.println(params.inspect())
-    	System.out.println("FORMAT IS: "+params.format)
         if (!params.format || params.format=="html") {
         		ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
         		boolean showPublishOption = modelDelegateService.canPublish(model.id)

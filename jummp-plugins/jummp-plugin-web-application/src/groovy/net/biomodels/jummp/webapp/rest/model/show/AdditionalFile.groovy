@@ -18,16 +18,17 @@
 * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 **/
 
-package net.biomodels.jummp.webapp.rest.search
+package net.biomodels.jummp.webapp.rest.model.show
 
-import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 
-class BrowseResults extends Results
+class AdditionalFile extends ModelFile
 {
-    int modelsAvailable
-    public BrowseResults(def browseResults)
+    String description
+
+    public AdditionalFile(RepositoryFileTransportCommand file)
     {
-        super(browseResults)
-        modelsAvailable = browseResults.modelsAvailable
+        super(file)
+        description = file.description
     }
 }
