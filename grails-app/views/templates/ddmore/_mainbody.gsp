@@ -62,13 +62,19 @@
     </div><!-- /.section, /#content -->
 
     
-    
+ 
+<%
+  	def sidebarContent=g.pageProperty(name:'page.sidebar')
+  	if (sidebarContent) {
+  		sidebarContent=sidebarContent.trim()
+  	}
+%>   
     
   </div>
-  <g:if test="${g.pageProperty(name:'page.sidebar')?.length()}">
- <div class="region region-sidebar-second column sidebar">
- 	<g:pageProperty name="page.sidebar" />
- </div>
+  <g:if test="${sidebarContent}">
+  	<div class="region region-sidebar-second column sidebar">
+ 		${sidebarContent}
+ 	</div>
  </g:if> 
  
   

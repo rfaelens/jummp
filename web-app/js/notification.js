@@ -16,7 +16,6 @@ function hideNow() {
 function showNotification(message) {
 	$(".flashNotificationDiv").show()
 	$(".flashNotificationDiv").text(message)
-	scheduleHide()
 }
 
 

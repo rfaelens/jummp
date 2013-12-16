@@ -225,8 +225,16 @@
 		    <td><label><g:message code="model.model.authors"/></label></td>
 		    <td>
 		    	<div class='spaced'>
-		    		<g:each in="${authors}" status="i" var="author"><g:if test="${i>0}">, </g:if>${author}
-		    		</g:each>
+			    	<%
+			    		StringBuilder authorString=new StringBuilder()
+			    		authors.eachWithIndex() { author, i -> 
+			    			if (i!=0) {
+			    				authorString.append(", ")
+			    			}
+			    			authorString.append(author)
+			    		};
+			    	%>
+		    		${authorString.toString()}
 		    	</div>
 		    </td>
 		</tr>

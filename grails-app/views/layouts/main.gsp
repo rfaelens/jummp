@@ -25,8 +25,7 @@
 <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/precursor" />
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="${resource(dir:'css',file:'notification.css')}" />
-    <g:javascript library="jquery" plugin="jquery"/>
+	<g:javascript library="jquery" plugin="jquery"/>
     <g:javascript src="jquery/jquery.i18n.properties-min-1.0.9.js"/>
     <g:javascript>
     	$.appName = "${grailsApplication.metadata["app.name"]}";
@@ -39,6 +38,7 @@
     </g:javascript>
     <g:javascript src="jummp.js"/>
     <g:javascript src="notification.js"/>
+    <link rel="stylesheet" href="<g:resource dir="css" file="notification.css"/>" />
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/head" />
     <g:layoutHead/>
 </head>
