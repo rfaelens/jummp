@@ -93,7 +93,7 @@ class ModelController {
     
     def showWithMessage = {
         flash["giveMessage"]=params.flashMessage
-        redirect(action: show, id:params.id)
+        redirect(action: "show", id:params.id)
     }
 
     @ApiOperation(value = "Show a model.", httpMethod = "GET",
