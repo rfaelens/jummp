@@ -95,8 +95,6 @@ class ModelController {
     }
 
     def show = {
-    	System.out.println(params.inspect())
-    	System.out.println("FORMAT IS: "+params.format)
         if (!params.format || params.format=="html") {
         		ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
         		boolean showPublishOption = modelDelegateService.canPublish(model.id)
@@ -119,10 +117,11 @@ class ModelController {
            	respond new net.biomodels.jummp.webapp.rest.model.show.Model(rev)
         }
     }
-    
+
     def files = {
-    	def repFiles=modelDelegateService.getRevision(params.id).files
-    	respond new net.biomodels.jummp.webapp.rest.model.show.ModelFiles(repFiles)
+        def revisionFiles = modelDelegateService.getRevision(params.id).files
+        def responseFiles = revisionFiles.findAll { !it.hidden }
+        respond new net.biomodels.jummp.webapp.rest.model.show.ModelFiles(responseFiles)
     }
 
     def publish = {
@@ -637,6 +636,9 @@ class ModelController {
             	List<RFTC> files = modelDelegateService.
             						retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
             	RFTC requested=files.find {
+                    if (it.hidden) {
+                        return false
+                    }
             	    File file=new File(it.path)
             	    file.getName()==params.filename
             	}

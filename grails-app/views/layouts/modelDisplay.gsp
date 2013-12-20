@@ -58,7 +58,7 @@
         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript src="jstree/jquery.jstree.js"/>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
-        <Ziphandler:outputFileInfoAsJS repFiles="${revision.files}" loadedZips="${loadedZips}" zipSupported="${zipSupported}"/>
+        <Ziphandler:outputFileInfoAsJS repFiles="${revision.files.findAll{!it.hidden}}" loadedZips="${loadedZips}" zipSupported="${zipSupported}"/>
         <script>
 		$(function() {
 			$( "#tabs" ).tabs({
@@ -253,7 +253,7 @@
 	  		<ul>
 	  		   <li><a>Additional Files</a>
    	  		   	<ul>
-	  		   	   <Ziphandler:outputFileInfoAsHtml repFiles="${revision.files}" loadedZips="${loadedZips}" zipSupported="${zipSupported}" mainFile="${false}"/>
+	  		   	   <Ziphandler:outputFileInfoAsHtml repFiles="${revision.files.findAll{!it.hidden}}" loadedZips="${loadedZips}" zipSupported="${zipSupported}" mainFile="${false}"/>
 	  		   	</ul>
 	  		   </li>
 	  		</ul>
