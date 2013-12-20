@@ -34,6 +34,7 @@
 
 package net.biomodels.jummp.webapp
 
+import com.wordnik.swagger.annotations.*
 import grails.plugins.springsecurity.Secured
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -53,6 +54,7 @@ import static org.springframework.http.HttpStatus.*
 import static org.springframework.http.HttpMethod.*
 import org.apache.commons.io.FileUtils
 
+@Api(value = "/model", description = "Operations related to models")
 class ModelController {
     /**
      * Flag that checks whether the dynamically-inserted logger is set to DEBUG or higher.
@@ -94,7 +96,11 @@ class ModelController {
         redirect(action: show, id:params.id)
     }
 
-    def show = {
+    @ApiOperation(value = "Show a model.", httpMethod = "GET",
+                response = net.biomodels.jummp.webapp.rest.model.show.Model.class,
+                notes = "Pass the expected media type of the request as a parameter e.g. /model/id?format=json")
+    @ApiImplicitParam(name = "modelId", value = "The model identifier", required = true, allowMultiple = false)
+    def show() {
         if (!params.format || params.format=="html") {
         		ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
         		boolean showPublishOption = modelDelegateService.canPublish(model.id)

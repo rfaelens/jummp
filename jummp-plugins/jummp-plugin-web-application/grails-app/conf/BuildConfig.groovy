@@ -69,10 +69,8 @@ grails.project.dependency.resolution = {
         //flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-
-        // runtime 'mysql:mysql-connector-java:5.1.5'
-        
+        // swagger
+        compile 'com.wordnik:swagger-servlet_2.10:1.3.1'
     }
 
     plugins {
