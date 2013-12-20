@@ -22,7 +22,7 @@ jummp-plugins/*/grails-app/i18n
 jummp-plugins/*/plugin.xml
 jummp-plugins/*/target-eclipse/*
 jummp-plugins/*/target/*
-jummp-plugins/*/web-app
+jummp-plugins/*/web-app/WEB-INF/classes/
 jummp-plugins/jummp-plugin-git/out/*
 jummp-web-application/ast-build/*
 jummp-web-application/grails-app/views/templates/_version.gsp
