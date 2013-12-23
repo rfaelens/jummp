@@ -127,6 +127,7 @@ class ModelController {
                 }
                 else { //showing an old version, with the default page. Dont allow updates.
                 	model["canUpdate"]=false
+                	model["showPublishOption"]=false
                 	model["oldVersion"]=true
                 	return model
                 }
