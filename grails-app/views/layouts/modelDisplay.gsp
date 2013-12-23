@@ -281,6 +281,11 @@
 	  	     <g:each status="i" var="rv" in="${allRevs.sort{a,b -> a.revisionNumber > b.revisionNumber ? -1 : 1}}">
 	  	     	<li style="${revision.id == rv.id ?"background-color:#FFFFCC;":""}margin-top:5px">
 	  	     		Version: ${rv.revisionNumber} 
+	  	     		<g:if test="${revision.id!=rv.id}">
+	  	     			<a class="versionDownload" title="go to version ${rv.revisionNumber}" href="${g.createLink(controller: 'model', action: 'show', id: rv.identifier()).replace("%3A",".")}">
+	  	     				<img style="width:12px;margin:2px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Generic/Generic%20icons/external_link.png"/> 
+	  	     			</a>
+	  	     		</g:if>
 	  	     				<a class="versionDownload" title="download" href="${g.createLink(controller: 'model', action: 'download', id: rv.identifier()).replace("%3A",".")}">
 	  	     					<img alt="Download this version" style="width:15px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png"/>
 	  	     				</a>
