@@ -165,15 +165,22 @@
     <g:layoutHead/>
     </head>
     <body>
+    	<g:if test="${oldVersion}">
+    		<div class='flashNotificationDiv'>
+    			You are viewing a version of a model that has been updated. 
+    			To access the latest version, and a more detailed display please 
+    			go <a href="${createLink(controller: "model", action: "show", id: revision.model.id)}">here</a>.
+    		</div>
+    	</g:if>
     	<div id="topBar">
     		    <h2 style="float: left;">${revision.model.name}</h2>
     	        <div style="float:right;margin-top:10px">
                     <div id="modeltoolbar" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>
                             <button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.model.id)}')">Download</button>
-                            <g:if test="${canUpdate=="true"}">
+                            <g:if test="${canUpdate}">
                                 <button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}')">Update</button>
                             </g:if>
-                            <g:if test="${showPublishOption=="true"}">
+                            <g:if test="${showPublishOption}">
                                 <button id="publish" onclick="return publishModel('${g.createLink(controller: 'model', action: 'publish', id: revision.id)}')">Publish</button>
                             </g:if>
                             <g:else>
@@ -272,7 +279,7 @@
 	  	<h5>Revisions</h5>
 	  	<ul>
 	  	     <g:each status="i" var="rv" in="${allRevs.sort{a,b -> a.revisionNumber > b.revisionNumber ? -1 : 1}}">
-	  	     	<li style="${i==0 && allRevs.size()>1?"background-color:#FFFFCC;":""}margin-top:5px">
+	  	     	<li style="${revision.id == rv.id ?"background-color:#FFFFCC;":""}margin-top:5px">
 	  	     		Version: ${rv.revisionNumber} 
 	  	     				<a class="versionDownload" title="download" href="${g.createLink(controller: 'model', action: 'download', id: rv.identifier()).replace("%3A",".")}">
 	  	     					<img alt="Download this version" style="width:15px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png"/>

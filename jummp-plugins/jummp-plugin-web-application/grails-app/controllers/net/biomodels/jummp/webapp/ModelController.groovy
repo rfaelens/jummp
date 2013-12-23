@@ -102,21 +102,34 @@ class ModelController {
     @ApiImplicitParam(name = "modelId", value = "The model identifier", required = true, allowMultiple = false)
     def show() {
         if (!params.format || params.format=="html") {
-        		ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
-        		boolean showPublishOption = modelDelegateService.canPublish(model.id)
-        		boolean canUpdate = modelDelegateService.canAddRevision(model.id)
+        		RevisionTransportCommand rev=modelDelegateService.getRevision(params.id)
+        		boolean showPublishOption = modelDelegateService.canPublish(rev.model.id)
+        		boolean canUpdate = modelDelegateService.canAddRevision(rev.model.id)
 
         		String flashMessage=""
         		if (flash.now["giveMessage"]) {
         			flashMessage=flash.now["giveMessage"]
         		}
-        		forward controller:modelFileFormatService.getPluginForFormat(model.format),
-                	action:"show",
-                	id: params.id,
-                	params:[flashMessage:flashMessage,
-                    	canUpdate:canUpdate,
-                    	showPublishOption:showPublishOption
-                    ]
+        		List<RevisionTransportCommand> revs=modelDelegateService.getAllRevisions(rev.model.id)
+        		def model=[revision: rev, 
+        				   authors: rev.model.creators,
+        				   allRevs: revs,
+        				   flashMessage: flashMessage,
+        				   canUpdate: canUpdate,
+        				   showPublishOption: showPublishOption,
+        		]
+        		if (rev.id == modelDelegateService.getLatestRevision(rev.model.id).id)
+        		{
+        			flash.genericModel=model
+        			forward controller:modelFileFormatService.getPluginForFormat(rev.model.format),
+                			action:"show",
+                			id: params.id
+                }
+                else { //showing an old version, with the default page. Dont allow updates.
+                	model["canUpdate"]=false
+                	model["oldVersion"]=true
+                	return model
+                }
         }
         else {
         	RevisionTransportCommand rev=modelDelegateService.getRevision(params.id)
