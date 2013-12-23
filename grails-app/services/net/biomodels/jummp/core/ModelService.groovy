@@ -617,7 +617,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.getRevision")
     public Revision getRevision(Model model, int revisionNumber) {
         Revision revision = Revision.findByRevisionNumberAndModel(revisionNumber, model)
-        if (revision.deleted || model.deleted) {
+        if (!revision || revision.deleted || model.deleted) {
             throw new AccessDeniedException("Sorry you are not allowed to access this Model.")
         } else {
             modelHistoryService.addModelToHistory(model)
@@ -1386,10 +1386,14 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * @return Byte Array of the content of the Model files for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
+    //@PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')") Not working. Seems related to: https://bitbucket.org/jummp/jummp/issue/23/spring-security-doesnt-work-as-expected-in
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.retrieveModelFiles")
     List<File> retrieveModelRepFiles(final Revision revision) throws ModelException {
+  	    if (!aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ) 
+  	    			&& !SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+    			throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
+   	    }
         List<File> files
         try {
             files = vcsService.retrieveFiles(revision)
@@ -1406,11 +1410,14 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * @return Byte Array of the content of the Model files for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
+    //@PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")  Not working. Seems related to: https://bitbucket.org/jummp/jummp/issue/23/spring-security-doesnt-work-as-expected-in
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.retrieveModelFiles")
     List<RepositoryFileTransportCommand> retrieveModelFiles(final Revision revision) throws ModelException {
-    	    return revision.getRepositoryFilesForRevision()
+    	if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)
+    		|| SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+        			return revision.getRepositoryFilesForRevision()
+    	}
     }
 
     /**
