@@ -92,7 +92,7 @@
 				var content=[];
 				content.push("<table cellpadding='2' cellspacing='5'>")
 				for (var prop in fileProps) {
-					if (prop!="isInternal" && fileProps[prop]) {
+					if (prop!="isInternal" && fileProps[prop] && fileProps[prop]!="null") {
 						content.push("<tr><td><b>",prop.replace("_"," "),"</b></td><td>",fileProps[prop])
 						if (prop=="Name" && fileProps.isInternal==false) {
 								content.push("<a title='Download ",fileProps[prop], "'","href='","${g.createLink(controller: 'model', action: 'download', id: revision.model.id)}");
