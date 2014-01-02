@@ -303,6 +303,14 @@ if (!(jummpConfig.jummp.security.registration.email.send instanceof ConfigObject
     jummp.security.registration.email.send = false
 }
 
+// whether a user has curator rights by default, allowing them to publish models
+// they have access to.
+if (!(jummpConfig.jummp.security.curatorByDefault instanceof ConfigObject)) {
+    jummp.security.curatorByDefault = Boolean.parseBoolean(jummpConfig.jummp.security.curatorByDefault)
+} else {
+    // default to true
+    jummp.security.curatorByDefault = true
+}
 
 // whether a user is allowed to change the password depends on the setting an if LDAP is used
 // in case of LDAP changing the password is not (yet) possible in the application

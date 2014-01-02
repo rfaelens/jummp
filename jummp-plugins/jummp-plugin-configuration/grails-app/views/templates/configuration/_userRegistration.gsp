@@ -37,6 +37,12 @@
                 </td>
             </tr>
             <tr class="prop">
+                <td class="name"><label for="registration">Users curators by default:</label></td>
+                <td class="value ${hasErrors(bean: userRegistration, field: 'curator', 'errors')}">
+                    <input type="checkbox" name="curator" id="curator" ${!userRegistration || userRegistration.curator ? 'checked="checked"' : ''} title="Users curators by default?"/>
+                </td>
+            </tr>
+            <tr class="prop">
                 <td class="name"><label for="sendEmail">Send Email on User Registration:</label></td>
                 <td class="value ${hasErrors(bean: userRegistration, field: 'sendEmail', 'errors')}">
                     <input type="checkbox" name="sendEmail" id="sendEmail" ${!userRegistration || userRegistration.sendEmail ? 'checked="checked"' : ''} title="Send Email on User Registration"/>
