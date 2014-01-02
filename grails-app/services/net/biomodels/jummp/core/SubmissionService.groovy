@@ -582,7 +582,13 @@ class SubmissionService {
             RTC revision=workingMemory.get("LastRevision") as RTC
             if (workingMemory.containsKey("reprocess_files")) {
                 String formatId = workingMemory["model_type"] as String
-                final String formatVersion = revision.format.formatVersion ? revision.format.formatVersion : ""
+                final String formatVersion
+                if (formatId != revision.format.identifier) {
+                	formatVersion="*"
+                }
+                else {
+                	formatVersion = revision.format.formatVersion ? revision.format.formatVersion : "*"
+                }
                 revision.format =
                         ModelFormat.findByIdentifierAndFormatVersion(formatId, formatVersion).toCommandObject()
             }
