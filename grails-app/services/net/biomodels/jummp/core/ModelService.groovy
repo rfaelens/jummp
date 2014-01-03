@@ -263,7 +263,6 @@ ORDER BY
             break
         }
         query += " " + sorting
-        System.out.println(query)
         Map params = [
             max: count, offset: offset]
         if (filter && filter.length() >= 3) {
@@ -346,7 +345,6 @@ ORDER BY
             break
         }
         query += " " + sorting
-        System.out.println(query)
         Map params = [
             className: Revision.class.getName(),
             permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
