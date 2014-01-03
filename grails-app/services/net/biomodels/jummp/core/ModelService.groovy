@@ -272,7 +272,14 @@ JOIN ace.aclObjectIdentity AS aoi
 JOIN aoi.aclClass AS ac
 JOIN ace.sid AS sid
 WHERE
-aoi.objectId = r.id
+'''
+if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT) {
+	query+='''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+}
+else if (sortColumn==ModelListSorting.SUBMITTER) {
+	query+='''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+}
+query+='''aoi.objectId = r.id
 AND ac.className = :className
 AND sid.sid IN (:roles)
 AND ace.mask IN (:permissions)
@@ -321,6 +328,7 @@ ORDER BY
             break
         }
         query += " " + sorting
+        System.out.println(query)
         Map params = [
             className: Revision.class.getName(),
             permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
