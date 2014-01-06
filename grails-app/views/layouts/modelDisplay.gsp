@@ -95,7 +95,7 @@
 					if (prop!="isInternal" && fileProps[prop] && fileProps[prop]!="null") {
 						content.push("<tr><td><b>",prop.replace("_"," "),"</b></td><td>",fileProps[prop])
 						if (prop=="Name" && fileProps.isInternal==false) {
-								content.push("<a title='Download ",fileProps[prop], "'","href='","${g.createLink(controller: 'model', action: 'download', id: revision.model.id)}");
+								content.push("<a title='Download ",fileProps[prop], "'","href='","${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}");
 								content.push("?filename=",encodeURIComponent(fileProps.Name),"'><img style='width:15px;margin-left:10px;float:none' alt='Download' src='http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png'/></a></div>");
 						}
 						content.push("</td></tr>");
@@ -176,7 +176,7 @@
     		    <h2 style="float: left;">${revision.model.name}</h2>
     	        <div style="float:right;margin-top:10px">
                     <div id="modeltoolbar" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>
-                            <button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.model.id)}')">Download</button>
+                            <button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}')">Download</button>
                             <g:if test="${canUpdate}">
                                 <button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}')">Update</button>
                             </g:if>
