@@ -1442,6 +1442,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     		|| SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
         			return revision.getRepositoryFilesForRevision()
     	}
+    	else {
+    		throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
+    	}
     }
 
     /**
