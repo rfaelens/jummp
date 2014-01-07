@@ -212,7 +212,7 @@ grails.project.dependency.resolution = {
         // Locale plugin
         compile ":locale-variant:0.1"
         // default grails plugins
-        compile ":hibernate:3.6.10.3"
+        compile ":hibernate:3.6.10.6"
         compile ":webflow:2.0.8.1"
         compile ":jquery:1.10.2.2"
         //compile ":resources:1.2"
