@@ -173,10 +173,10 @@
     		</div>
     	</g:if>
     	<div id="topBar">
-    		    <div style="float:left;width:88%;">
+    		    <div style="float:left;width:85%;">
     				<h2>${revision.model.name}</h2>
     			</div>
-    	        <div style="float:right;margin-top:10px;width:12%;">
+    	        <div style="float:right;margin-top:10px;width:15%;">
                     <div id="modeltoolbar" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>
                             <button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}')">Download</button>
                             <g:if test="${canUpdate}">
