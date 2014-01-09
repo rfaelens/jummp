@@ -45,7 +45,7 @@
     def zipSupported=[:]
 %>
 <head>
-        <title>${revision.model.name}</title>
+        <title>${revision.name}</title>
         <link rel="stylesheet" href="<g:resource dir="css/jqueryui/smoothness" file="jquery-ui-1.10.3.custom.css"/>" />
 
         <script type="text/x-mathjax-config">
@@ -174,7 +174,7 @@
     	</g:if>
     	<div id="topBar">
     		    <div style="float:left;width:85%;">
-    				<h2>${revision.model.name}</h2>
+    				<h2>${revision.name}</h2>
     			</div>
     	        <div style="float:right;margin-top:10px;width:15%;">
                     <div id="modeltoolbar" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>

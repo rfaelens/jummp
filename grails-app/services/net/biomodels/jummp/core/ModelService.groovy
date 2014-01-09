@@ -65,6 +65,7 @@ import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
 import org.apache.lucene.document.Document
+import static java.util.UUID.randomUUID
 /**
  * @short Service class for managing Models
  *
@@ -1025,7 +1026,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throws ModelException {
         def stopWatch = new Log4JStopWatch("modelService.uploadModelAsList.sanityChecks")
         // TODO: to support anonymous submissions this method has to be changed
-        String name=modelFileFormatService.extractName(modelFiles, format)
         if (!repoFiles || repoFiles.size() == 0) {
             log.error("No files were provided as part of the submission of model ${meta.properties}")
             throw new ModelException(meta, "A model must contain at least one file.")
@@ -1062,15 +1062,19 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (!modelFileFormatService.validate(modelFiles, format)) {
             def err = "The files ${modelFiles.inspect()} do no comprise valid ${meta.format.identifier}"
             log.error(err)
-       //     throw new ModelException(meta, "Invalid ${meta.format.identifier} submission.")
+       //     throw new ModelException(meta, "Invalid ${meta.format.identifier} submission.")v
             valid=false
         }
         // model is valid, create a new repository and store it as revision1
         // vcs identifier is upload date + name - this should by all means be unique
+        String name=modelFileFormatService.extractName(modelFiles, format)
+        if (!name) {
+        	name=meta.name
+        }
         String pathPrefix =
                 fileSystemService.findCurrentModelContainer() + File.separator
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(name).
+        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(name.length() > 0 ? name:(randomUUID() as String)+"_blankname").
                 append(File.separator).toString()
         boolean success = new File(modelPath).mkdirs()
         if (!success) {
@@ -1078,6 +1082,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             log.error(err)
             throw new ModelException(meta, err)
         }
+        System.out.println(modelPath)
         model.vcsIdentifier = modelPath
         //model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
 
@@ -1126,7 +1131,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         assert formatVersion != null && revision.format != null
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
+            System.out.println("VCSID: ${revision.vcsId}")
         } catch (VcsException e) {
+        	e.printStackTrace()
+        	System.out.println(e)
             revision.discard()
             domainObjects.each { it.discard() }
             model.discard()
@@ -1135,6 +1143,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             errMsg.append("${model.toCommandObject().properties} to VCS: ${e.getMessage()}.\n")
             errMsg.append("${model.errors.allErrors.inspect()}\n")
             errMsg.append("${revision.errors.allErrors.inspect()}\n")
+            System.out.println(errMsg)
             log.error(errMsg)
             stopWatch.stop()
             throw new ModelException(model.toCommandObject(),

@@ -51,7 +51,7 @@ import org.junit.*
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
 import static org.junit.Assert.*
-
+import net.biomodels.jummp.plugins.git.GitManagerFactory
 /**
  * Test for SbmlService parts which require a running core to retrieve Models.
  */
@@ -73,6 +73,13 @@ class SbmlServiceTests extends JummpIntegrationTest {
         fileSystemService.currentModelContainer = fileSystemService.root.absolutePath + "/ttt/"
         // disable validation as it is broken
         grailsApplication.config.jummp.plugins.sbml.validation = false
+        GitManagerFactory gitService = new GitManagerFactory()
+        gitService.grailsApplication = grailsApplication
+        grailsApplication.config.jummp.plugins.git.enabled = true
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.plugins.sbml.validation = true
+        modelService.vcsService.vcsManager = gitService.getInstance()
     }
 
     @After

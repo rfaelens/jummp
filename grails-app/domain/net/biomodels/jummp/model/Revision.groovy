@@ -119,7 +119,7 @@ class Revision implements Serializable {
 
     static constraints = {
         model(nullable: false)
-        vcsId(nullable: false, unique: true)
+        vcsId(nullable: false,  unique: 'model')
         revisionNumber(nullable: false, unique: 'model')
         owner(nullable: false)
         minorRevision(nullable: false)
