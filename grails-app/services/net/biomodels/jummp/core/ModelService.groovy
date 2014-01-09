@@ -225,8 +225,7 @@ AND r.deleted = false
         if (filter && filter.length() >= 3) {
             query += '''
 AND (
-lower(m.name) like :filter
-OR lower(m.publication.journal) like :filter
+lower(m.publication.journal) like :filter
 OR lower(m.publication.title) like :filter
 OR lower(m.publication.affiliation) like :filter
 )
@@ -237,7 +236,7 @@ ORDER BY
 '''
         switch (sortColumn) {
         case ModelListSorting.NAME:
-            query += "m.name"
+            query += "r.name"
             break
         case ModelListSorting.LAST_MODIFIED:
             query += "r.uploadDate"
@@ -307,8 +306,7 @@ AND r.deleted = false
         if (filter && filter.length() >= 3) {
             query += '''
 AND (
-lower(m.name) like :filter
-OR lower(m.publication.journal) like :filter
+lower(m.publication.journal) like :filter
 OR lower(m.publication.title) like :filter
 OR lower(m.publication.affiliation) like :filter
 )
@@ -319,7 +317,7 @@ ORDER BY
 '''
         switch (sortColumn) {
         case ModelListSorting.NAME:
-            query += "m.name"
+            query += "r.name"
             break
         case ModelListSorting.LAST_MODIFIED:
             query += "r.uploadDate"
@@ -473,8 +471,7 @@ AND r.deleted = false
         if (filter && filter.length() >= 3) {
             query += '''
 AND (
-lower(m.name) like :filter
-OR lower(m.publication.journal) like :filter
+lower(m.publication.journal) like :filter
 OR lower(m.publication.title) like :filter
 OR lower(m.publication.affiliation) like :filter
 )
@@ -849,16 +846,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throws ModelException {
         def stopWatch = new Log4JStopWatch("modelService.uploadValidatedModel.catchDuplicate")
         // TODO: to support anonymous submissions this method has to be changed
-        if (Model.findByName(rev.model.name)) {
-            final ModelTransportCommand MODEL = Model.findByName(rev.model.name).toCommandObject()
-            final String msg = "There is already a Model with name ${rev.model.name}".toString()
+        if (Revision.findByName(rev.name)) {
+            final String msg = "There is already a Model with name ${rev.name}".toString()
             log.warn(msg)
             /*log.error(msg)
             throw new ModelException(rev.model, msg)*/
         }
         stopWatch.lap("Finished checking for model duplicates.")
         stopWatch.setTag("modelService.uploadValidatedModel.addFiles")
-        Model model = new Model(name: rev.model.name)
+        Model model = new Model()
         List<File> modelFiles = []
         for (rf in repoFiles) {
             final String path = rf.path
@@ -874,11 +870,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         String pathPrefix =
                 fileSystemService.findCurrentModelContainer() + File.separator
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(model.name).
+        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(rev.name).
                 append(File.separator).toString()
         boolean success = new File(modelPath).mkdirs()
         if (!success) {
-            def err = "Cannot create the directory where the ${model.name} should be stored"
+            def err = "Cannot create the directory where the ${rev.name} should be stored"
             log.error(err)
             throw new ModelException(rev.model, err)
         }
@@ -957,7 +953,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
                 revision.discard()
                 model.discard()
-                def msg  = new StringBuffer("New Model ${model.name} does not validate:\n")
+                def msg  = new StringBuffer("New Model ${rev.name} does not validate:\n")
                 msg.append("${model.errors.allErrors.inspect()}\n")
                 msg.append("${revision.errors.allErrors.inspect()}\n")
                 log.error(msg)
@@ -1029,18 +1025,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throws ModelException {
         def stopWatch = new Log4JStopWatch("modelService.uploadModelAsList.sanityChecks")
         // TODO: to support anonymous submissions this method has to be changed
-        if (Model.findByName(meta.name)) {
-            final ModelTransportCommand MODEL = Model.findByName(meta.name).toCommandObject()
-            final String msg = "There is already a Model with name ${meta.name}".toString()
-            log.warn(msg)
-            /*log.error(msg)
-            throw new ModelException(meta, msg)*/
-        }
+        String name=modelFileFormatService.extractName(modelFiles, format)
         if (!repoFiles || repoFiles.size() == 0) {
             log.error("No files were provided as part of the submission of model ${meta.properties}")
             throw new ModelException(meta, "A model must contain at least one file.")
         }
-        Model model = new Model(name: meta.name)
+        Model model = new Model()
         List<File> modelFiles = []
         for (rf in repoFiles) {
             if (!rf || !rf.path) {
@@ -1080,11 +1070,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         String pathPrefix =
                 fileSystemService.findCurrentModelContainer() + File.separator
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(model.name).
+        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(name).
                 append(File.separator).toString()
         boolean success = new File(modelPath).mkdirs()
         if (!success) {
-            def err = "Cannot create the directory where the ${model.name} should be stored"
+            def err = "Cannot create the directory where the ${name} should be stored"
             log.error(err)
             throw new ModelException(meta, err)
         }
@@ -1096,7 +1086,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 owner: User.findByUsername(springSecurityService.authentication.name),
                 minorRevision: false,
                 validated: valid,
-                name: modelFileFormatService.extractName(modelFiles, format),
+                name: name,
                 description: modelFileFormatService.extractDescription(modelFiles, format),
                 comment: meta.comment,
                 uploadDate: new Date())
@@ -1164,12 +1154,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     revision.discard()
                     domainObjects.each { it.discard() }
                     model.discard()
-                    def error = new StringBuffer("New Model ${model.name} does not validate:")
+                    def error = new StringBuffer("New Model ${name} does not validate:")
                     error.append("${model.errors.allErrors.inspect()}\n")
                     error.append("${revision.errors.allErrors.inspect()}\n")
                     log.error(error)
                     stopWatch.stop()
-                    throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data for ${model.name}", e)
+                    throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data for ${name}", e)
                 }
             } else if (meta.publication) {
                 model.publication = Publication.fromCommandObject(meta.publication)
@@ -1178,7 +1168,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
                 revision.discard()
                 model.discard()
-                def msg  = new StringBuffer("New Model ${model.name} does not validate:\n")
+                def msg  = new StringBuffer("New Model ${name} does not validate:\n")
                 msg.append("${model.errors.allErrors.inspect()}\n")
                 msg.append("${revision.errors.allErrors.inspect()}\n")
                 log.error(msg)
@@ -1422,7 +1412,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         try {
             files = vcsService.retrieveFiles(revision)
         } catch (VcsException e) {
-            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.model.name} from VCS failed.")
+            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.name} from VCS failed.")
             throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.")
         }
         return files

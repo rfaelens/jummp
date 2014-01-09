@@ -487,7 +487,6 @@ class SubmissionService {
             List<RFTC> repoFiles = getRepFiles(workingMemory)
             RTC revision=workingMemory.get("RevisionTC") as RTC
             MTC model=revision.model
-            model.name=revision.name
             model.format=revision.format
             revision.comment="Import of ${revision.name}".toString()
             workingMemory.put("model_id",
