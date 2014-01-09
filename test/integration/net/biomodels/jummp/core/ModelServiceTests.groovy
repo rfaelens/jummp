@@ -982,7 +982,6 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertEquals(ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"), model.revisions.toList().first().format)
         // complete name cannot be tested, as it uses a generated date and we do not know the date
         
-        System.out.println(model.vcsIdentifier)
         assertTrue(model.vcsIdentifier.endsWith("blankname/"))
 
         File gitFile = new File(model.vcsIdentifier + System.getProperty("file.separator") + importFile.getName())
