@@ -49,12 +49,13 @@
         <link rel="stylesheet" href="<g:resource dir="css/jqueryui/smoothness" file="jquery-ui-1.10.3.custom.css"/>" />
 
         <script type="text/x-mathjax-config">
-        MathJax.Hub.Config({
-            tex2jax: { inlineMath: [['$','$'],['\\(','\\)']] }
-        });
-    </script>
-    <script type='text/javascript' src='http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
-
+        	MathJax.Hub.Config({
+            	tex2jax: { inlineMath: [['$','$'],['\\(','\\)']] }
+            });
+        </script>
+        <script type='text/javascript' 
+        		src='http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'>
+        </script>
         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript src="jstree/jquery.jstree.js"/>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
@@ -176,7 +177,7 @@
     		    <div style="float:left;width:85%;">
     				<h2>${revision.name}</h2>
     			</div>
-    	        <div style="float:right;margin-top:10px;width:15%;">
+    	        <div style="float:right;margin-top:10px;">
                     <div id="modeltoolbar" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>
                             <button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}')">Download</button>
                             <g:if test="${canUpdate}">
