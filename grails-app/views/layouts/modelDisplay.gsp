@@ -58,7 +58,12 @@
         </script>
         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript src="jstree/jquery.jstree.js"/>
+        <g:javascript src="equalize.js"/>
+        <script type="text/javascript" src="http://malsup.github.com/chili-1.7.pack.js"></script>
+        <script type="text/javascript" src="http://malsup.github.com/jquery.media.js"></script>
+        <script type="text/javascript" src="http://malsup.com/jquery/jquery.metadata.js"></script>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
+        <link rel="stylesheet" href="${resource(dir: 'css', file: 'filegrid.css')}" /> 
         <Ziphandler:outputFileInfoAsJS repFiles="${revision.files.findAll{!it.hidden}}" loadedZips="${loadedZips}" zipSupported="${zipSupported}"/>
         <script>
 		$(function() {
@@ -90,33 +95,95 @@
 				
 		function updateFileDetailsPanel(fileProps) {
 			if (typeof(fileProps) != "undefined") {
+				var formats=["text","txt","pdf", "jpg","jpeg", "gif", "png", "bmp"];
+				var mimeType=fileProps["mime"];
 				var content=[];
+				var makeAjaxCall=false;
+				var imageType=false;
+				var pdfType=false;
+				content.push("<div class='filepanel'><h3>")
+				content.push(fileProps["Name"])
+				var fileLink="${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}"
+										+"?filename="+encodeURIComponent(fileProps.Name)
+				content.push("<a title='Download ",fileProps[prop], "'","href='",fileLink);
+				content.push("'><img style='width:15px;margin-left:10px;float:none' alt='Download' src='http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png'/></a></h3>");
+				if (mimeType!=null) {
+					for (var format in formats) {
+						var matching=formats[format];
+						if (mimeType.indexOf(matching) !=-1) {
+							content.push("<div id='filegoeshere' class='previewpanel'>")
+							makeAjaxCall=true
+							if (matching=="jpg" || matching=="jpeg" || matching=="gif" || matching=="png" || matching=="bmp") {
+								imageType=true;
+							}
+							if (matching=="pdf") {
+							/*	content.push("<a class='media' href='")
+								content.push(fileLink)
+								content.push("'>PDF File</a>") 
+								pdfType=true*/
+								content.push("<iframe width='100%' src='")
+								content.push(fileLink)
+								content.push("'/>")
+							}
+							content.push("</div>")
+						}
+					}
+				}
+				content.push("<div class='metapanel'>")
 				content.push("<table cellpadding='2' cellspacing='5'>")
 				for (var prop in fileProps) {
-					if (prop!="isInternal" && fileProps[prop] && fileProps[prop]!="null") {
+					if (prop!="isInternal" && prop!="Name" && fileProps[prop] && fileProps[prop]!="null" && prop!="mime") {
 						content.push("<tr><td><b>",prop.replace("_"," "),"</b></td><td>",fileProps[prop])
-						if (prop=="Name" && fileProps.isInternal==false) {
-								content.push("<a title='Download ",fileProps[prop], "'","href='","${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}");
-								content.push("?filename=",encodeURIComponent(fileProps.Name),"'><img style='width:15px;margin-left:10px;float:none' alt='Download' src='http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png'/></a></div>");
-						}
 						content.push("</td></tr>");
 						}
 				}
-				content.push("</table>");
-				$("#Files #resizable #detailsBox").html(content.join(""));
+				content.push("</table></div></div>");
+				$("#Files #detailsBox").html(content.join(""));
+				if (makeAjaxCall) {
+					if (mimeType.indexOf("txt") != -1 || mimeType.indexOf("text") != -1) {
+						$.ajax({
+							url : fileLink,
+							dataType: "text",
+							success : function (data) {
+								$("#filegoeshere").text(data);
+								$("#Files").equalize({reset: true});
+							}
+						});
+					}
+					else if (imageType) {
+						var img = $("<img style='width:100%;' />").attr('src', fileLink)
+									.load(function() {
+										if (!this.complete || typeof this.naturalWidth == "undefined" || this.naturalWidth == 0) {
+											$("#filegoeshere").text("Image could not be loaded")
+										} else {
+											$("#filegoeshere").append(img);
+											$("#Files").equalize({reset: true});
+										}
+						});
+					}
+					else if (pdfType) {
+						//$('a.media').media({width:500, height:400, autoplay: false});
+					}
+				}
 			}
 			else {
-				$("#Files #resizable #detailsBox").html("");
+				$("#Files #detailsBox").html("");
 			}
+			$("#Files").equalize({reset: true});
 		}
 		
 		$(document).ready(function() {
 			// Handler for .ready() called.
 			$("#Files #treeView").bind("select_node.jstree", function(event, data) {
-					var clickedOn=$(data.args[0]).text()
-					clickedOn = clickedOn.replace(/^\s+|\s+$/g,'')
-					var fileProps=fileData[clickedOn]
-					updateFileDetailsPanel(fileProps)
+					var clickedOn=$(data.args[0]).attr('title')
+					if (clickedOn!=null) {
+						clickedOn = clickedOn.replace(/^\s+|\s+$/g,'')
+						var fileProps=fileData[clickedOn]
+						updateFileDetailsPanel(fileProps)
+					}
+					else {
+						$("#Files #detailsBox").html("");						
+					}
 				}).jstree({
 				"ui" : {
 					"select_limit" : 1
@@ -251,24 +318,26 @@
 	    </table>
 	
 	  </div>
-	  <div id="Files">
-	  	<div id="treeView">
-	  		<ul>
-	  		   <li rel="folder"><a>Main Files</a>
-	  		   	<ul>
-	  		   	   <Ziphandler:outputFileInfoAsHtml repFiles="${revision.files}" loadedZips="${loadedZips}" zipSupported="${zipSupported}" mainFile="${true}"/>
-        	   	</ul>
-	  		   </li>
-	  		</ul>
-	  		<ul>
-	  		   <li><a>Additional Files</a>
-   	  		   	<ul>
-	  		   	   <Ziphandler:outputFileInfoAsHtml repFiles="${revision.files.findAll{!it.hidden}}" loadedZips="${loadedZips}" zipSupported="${zipSupported}" mainFile="${false}"/>
-	  		   	</ul>
+	  <div id="Files" class="filegrid">
+	  	<div class="filecol-1-3">
+	  		<div id="treeView">
+	  			<ul>
+	  				<li rel="folder"><a>Main Files</a>
+	  				<ul>
+	  					<Ziphandler:outputFileInfoAsHtml repFiles="${revision.files}" loadedZips="${loadedZips}" zipSupported="${zipSupported}" mainFile="${true}"/>
+	  				</ul>
+	  				</li>
+	  			</ul>
+	  			<ul>
+	  				<li><a>Additional Files</a>
+	  				<ul>
+	  				   <Ziphandler:outputFileInfoAsHtml repFiles="${revision.files.findAll{!it.hidden}}" loadedZips="${loadedZips}" zipSupported="${zipSupported}" mainFile="${false}"/>
+	  			   </ul>
 	  		   </li>
 	  		</ul>
   		</div>
-  		<div id="resizable">
+  		</div>
+  		<div class="filecol-2-3">
   			<div id="detailsBox" class="detailsBox"></div>
   		</div>
   	  </div>

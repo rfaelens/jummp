@@ -1,0 +1,29 @@
+.filegrid {
+  background: white;
+  margin: 0 0 20px 0;
+}
+.filegrid:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+[class*='filecol-'] {
+  float: left;
+}
+.filecol-2-3 {
+  width: 70%;
+  margin-left: 3%;
+}
+.filecol-1-3 {
+  width: 25%;
+}
+.filepanel {
+  border-style: ridge;
+}
+/* Opt-in outside padding */
+.filegrid-pad {
+  padding: 20px 0 20px 20px;
+  [class*='filecol-']:last-of-type {
+    padding-right: 20px;
+  }
+}
