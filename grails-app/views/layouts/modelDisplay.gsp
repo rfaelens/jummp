@@ -115,7 +115,6 @@
 					for (var format in formats) {
 						var matching=formats[format];
 						if (mimeType.indexOf(matching) !=-1) {
-							content.push("<div id='filegoeshere' class='padleft padright padbottom'>")
 							makeAjaxCall=true
 							if (matching=="jpg" || matching=="jpeg" || matching=="gif" || matching=="png" || matching=="bmp") {
 								imageType=true;
@@ -128,6 +127,11 @@
 									xmlType=true;
 								}
 							}
+							content.push("<div id='filegoeshere' class='padright padbottom")
+							if (!mdlType && !xmlType) {
+								content.push(" padleft") 
+							}
+							content.push("'>")
 							if (matching=="pdf") {
 								content.push("<iframe width='100%' height='500' src='")
 								content.push(fileLink)
