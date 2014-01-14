@@ -59,9 +59,6 @@
         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript src="jstree/jquery.jstree.js"/>
         <g:javascript src="equalize.js"/>
-        <script type="text/javascript" src="http://malsup.github.com/chili-1.7.pack.js"></script>
-        <script type="text/javascript" src="http://malsup.github.com/jquery.media.js"></script>
-        <script type="text/javascript" src="http://malsup.com/jquery/jquery.metadata.js"></script>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'filegrid.css')}" /> 
         <Ziphandler:outputFileInfoAsJS repFiles="${revision.files.findAll{!it.hidden}}" loadedZips="${loadedZips}" zipSupported="${zipSupported}"/>
@@ -100,28 +97,24 @@
 				var content=[];
 				var makeAjaxCall=false;
 				var imageType=false;
-				var pdfType=false;
-				content.push("<div class='filepanel'><h3>")
+				content.push("<div class='ui-widget-content ui-corner-all'><div class='padleft padright padtop'><h3>")
 				content.push(fileProps["Name"])
 				var fileLink="${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}"
 										+"?filename="+encodeURIComponent(fileProps.Name)
 				content.push("<a title='Download ",fileProps[prop], "'","href='",fileLink);
-				content.push("'><img style='width:15px;margin-left:10px;float:none' alt='Download' src='http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png'/></a></h3>");
+				fileLink=fileLink+"&inline=true";
+				content.push("'><img style='width:20px;margin-left:10px;float:none' alt='Download' src='http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png'/></a></h3></div>");
 				if (mimeType!=null) {
 					for (var format in formats) {
 						var matching=formats[format];
 						if (mimeType.indexOf(matching) !=-1) {
-							content.push("<div id='filegoeshere' class='previewpanel'>")
+							content.push("<div id='filegoeshere' class='padleft padright padbottom'>")
 							makeAjaxCall=true
 							if (matching=="jpg" || matching=="jpeg" || matching=="gif" || matching=="png" || matching=="bmp") {
 								imageType=true;
 							}
 							if (matching=="pdf") {
-							/*	content.push("<a class='media' href='")
-								content.push(fileLink)
-								content.push("'>PDF File</a>") 
-								pdfType=true*/
-								content.push("<iframe width='100%' src='")
+								content.push("<iframe width='100%' height='500' src='")
 								content.push(fileLink)
 								content.push("'/>")
 							}
@@ -129,7 +122,7 @@
 						}
 					}
 				}
-				content.push("<div class='metapanel'>")
+				content.push("<div class='metapanel'><div class='padleft padright padbottom'>")
 				content.push("<table cellpadding='2' cellspacing='5'>")
 				for (var prop in fileProps) {
 					if (prop!="isInternal" && prop!="Name" && fileProps[prop] && fileProps[prop]!="null" && prop!="mime") {
@@ -137,7 +130,7 @@
 						content.push("</td></tr>");
 						}
 				}
-				content.push("</table></div></div>");
+				content.push("</table></div></div></div>");
 				$("#Files #detailsBox").html(content.join(""));
 				if (makeAjaxCall) {
 					if (mimeType.indexOf("txt") != -1 || mimeType.indexOf("text") != -1) {
@@ -160,9 +153,6 @@
 											$("#Files").equalize({reset: true});
 										}
 						});
-					}
-					else if (pdfType) {
-						//$('a.media').media({width:500, height:400, autoplay: false});
 					}
 				}
 			}
