@@ -21,22 +21,20 @@
 
 	function Brush()
 	{
-		var keywords =	'abstract assert boolean break byte case catch char class const ' +
-						'continue default do double else enum extends ' +
-						'false final finally float for goto if implements import ' +
-						'instanceof int interface long native new null ' +
-						'package private protected public return ' +
-						'short static strictfp super switch synchronized this throw throws true ' +
-						'transient try void volatile while';
+		var keywords =	'mdlobj parobj dataobj taskobj telobj INDIVIDUAL_VARIABLES MODEL_PREDICTION RANDOM_VARIABLE_DEFINITION INPUT_VARIABLES STRUCTURAL_PARAMETERS ' +
+						'VARIABILITY_PARAMETERS OUTPUT_VARIABLES GROUP_VARIABLES OBSERVATION ESTIMATION SIMULATION STRUCTURAL ' +
+						'false VARIABILITY PRIOR_PARAMETERS HEADER FILE PARAMETER DATA IGNORE ACCEPT ' +
+						'DROP ADD REMOVE MODEL list LIBRARY null continuous covariate  Normal Binomial Poisson Student_T MVNormal' +
+						'ODE MIXTURE matrix diag same INLINE DESIGN RSCRIPT ESTIMATE SIMULATE EXECUTE LIKELIHOOD NMTRAN_CODE ' +
+						'MLXTRAN_CODE PML_CODE BUGS_CODE R_CODE MATLAB_CODE MISSING mdv id dv idv dvid amt categorical ' +
+						'~ true';
 
 		this.regexList = [
 			{ regex: SyntaxHighlighter.regexLib.singleLinePerlComments,	css: 'comments' },		// one line comments
 			{ regex: SyntaxHighlighter.regexLib.doubleQuotedString,		css: 'string' },		// strings
 			{ regex: SyntaxHighlighter.regexLib.singleQuotedString,		css: 'string' },		// strings
 			{ regex: /\b([\d]+(\.[\d]+)?|0x[a-f0-9]+)\b/gi,				css: 'value' },			// numbers
-			{ regex: /(?!\@interface\b)\@[\$\w]+\b/g,					css: 'color1' },		// annotation @anno
-			{ regex: /\@interface\b/g,									css: 'color2' },		// @interface keyword
-			{ regex: new RegExp(this.getKeywords(keywords), 'gm'),		css: 'keyword' }		// java keyword
+			{ regex: new RegExp(this.getKeywords(keywords), 'gm'),		css: 'keyword' }		// MDL keywords
 			];
 
 		this.forHtmlScript({

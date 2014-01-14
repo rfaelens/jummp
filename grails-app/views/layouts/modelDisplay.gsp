@@ -61,7 +61,7 @@
         <g:javascript src="equalize.js"/>
         <g:javascript src="syntax/shCore.js"/>
         <g:javascript src="syntax/shBrushMdl.js"/>
-        <g:javascript src="syntax/shBrushGroovy.js"/>
+        <g:javascript src="syntax/shBrushXml.js"/>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'filegrid.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shCore.css')}" /> 
@@ -97,12 +97,13 @@
 				
 		function updateFileDetailsPanel(fileProps) {
 			if (typeof(fileProps) != "undefined") {
-				var formats=["text","txt","pdf", "jpg","jpeg", "gif", "png", "bmp"];
+				var formats=["text","txt","xml","pdf", "jpg","jpeg", "gif", "png", "bmp"];
 				var mimeType=fileProps["mime"];
 				var content=[];
 				var makeAjaxCall=false;
 				var imageType=false;
 				var mdlType=false;
+				var xmlType=false;
 				content.push("<div class='ui-widget-content ui-corner-all'><div class='padleft padright padtop'><h3>")
 				content.push(fileProps["Name"])
 				var fileLink="${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}"
@@ -119,9 +120,12 @@
 							if (matching=="jpg" || matching=="jpeg" || matching=="gif" || matching=="png" || matching=="bmp") {
 								imageType=true;
 							}
-							if (matching=="txt" || matching=="text") {
+							if (matching=="txt" || matching=="text" || matching=="xml") {
 								if (fileProps.Name.indexOf('.mdl') !=-1) {
 									mdlType=true;
+								}
+								if (fileProps.Name.indexOf('.xml')!=-1) {
+									xmlType=true;
 								}
 							}
 							if (matching=="pdf") {
@@ -150,6 +154,19 @@
 							dataType: "text",
 							success : function (data) {
 								var brush=new SyntaxHighlighter.brushes.mdl()
+								brush.init({ toolbar: false });
+								var html=brush.getHtml(data)
+								$("#filegoeshere").html(html);
+								$("#Files").equalize({reset: true});
+							}
+						});
+					}
+					else if (xmlType) {
+						$.ajax({
+							url : fileLink,
+							dataType: "text",
+							success : function (data) {
+								var brush=new SyntaxHighlighter.brushes.Xml()
 								brush.init({ toolbar: false });
 								var html=brush.getHtml(data)
 								$("#filegoeshere").html(html);
