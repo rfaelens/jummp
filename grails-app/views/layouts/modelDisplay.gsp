@@ -61,6 +61,7 @@
         <g:javascript src="equalize.js"/>
         <g:javascript src="syntax/shCore.js"/>
         <g:javascript src="syntax/shBrushMdl.js"/>
+        <g:javascript src="syntax/shBrushGroovy.js"/>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'filegrid.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shCore.css')}" /> 
@@ -148,17 +149,15 @@
 							url : fileLink,
 							dataType: "text",
 							success : function (data) {
-								var divcontent=[]
-								divcontent.push('<pre class="brush: mdl">')
-								divcontent.push(data)
-								divcontent.push('</pre>')
-								$("#filegoeshere").text(divcontent.join(""));
-								SyntaxHighlighter.all();								
+								var brush=new SyntaxHighlighter.brushes.mdl()
+								brush.init({ toolbar: false });
+								var html=brush.getHtml(data)
+								$("#filegoeshere").html(html);
 								$("#Files").equalize({reset: true});
 							}
 						});
 					}
-					if (mimeType.indexOf("txt") != -1 || mimeType.indexOf("text") != -1) {
+					else if (mimeType.indexOf("txt") != -1 || mimeType.indexOf("text") != -1) {
 						$.ajax({
 							url : fileLink,
 							dataType: "text",

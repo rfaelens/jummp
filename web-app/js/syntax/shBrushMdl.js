@@ -47,9 +47,8 @@
 
 	Brush.prototype	= new SyntaxHighlighter.Highlighter();
 	Brush.aliases	= ['mdl'];
-	alert("mdl added")
-
-	SyntaxHighlighter.brushes.Java = Brush;
+	
+	SyntaxHighlighter.brushes.mdl = Brush;
 
 	// CommonJS
 	typeof(exports) != 'undefined' ? exports.Brush = Brush : null;
