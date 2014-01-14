@@ -1082,7 +1082,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             log.error(err)
             throw new ModelException(meta, err)
         }
-        System.out.println(modelPath)
         model.vcsIdentifier = modelPath
         //model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
 
@@ -1131,11 +1130,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         assert formatVersion != null && revision.format != null
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
-            System.out.println("VCSID: ${revision.vcsId}")
         } catch (VcsException e) {
         	e.printStackTrace()
-        	System.out.println(e)
-            revision.discard()
+        	revision.discard()
             domainObjects.each { it.discard() }
             model.discard()
             //TODO undo the addition of the files to the VCS.
@@ -1143,7 +1140,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             errMsg.append("${model.toCommandObject().properties} to VCS: ${e.getMessage()}.\n")
             errMsg.append("${model.errors.allErrors.inspect()}\n")
             errMsg.append("${revision.errors.allErrors.inspect()}\n")
-            System.out.println(errMsg)
             log.error(errMsg)
             stopWatch.stop()
             throw new ModelException(model.toCommandObject(),

@@ -498,7 +498,7 @@ class GitManager implements VcsManager {
     private String handleAddition(File modelDirectory, List<File> files, String commitMessage) {
         String revision
         try {
-            //updateWorkingCopy(modelDirectory)
+        	//updateWorkingCopy(modelDirectory)
             Git git = initedRepositories.get(modelDirectory);
             AddCommand add = git.add()
             files.each
