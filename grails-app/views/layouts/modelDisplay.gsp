@@ -59,8 +59,12 @@
         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript src="jstree/jquery.jstree.js"/>
         <g:javascript src="equalize.js"/>
+        <g:javascript src="syntax/shCore.js"/>
+        <g:javascript src="syntax/shBrushMdl.js"/>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'filegrid.css')}" /> 
+        <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shCore.css')}" /> 
+        <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shThemeDefault.css')}" /> 
         <Ziphandler:outputFileInfoAsJS repFiles="${revision.files.findAll{!it.hidden}}" loadedZips="${loadedZips}" zipSupported="${zipSupported}"/>
         <script>
 		$(function() {
@@ -97,6 +101,7 @@
 				var content=[];
 				var makeAjaxCall=false;
 				var imageType=false;
+				var mdlType=false;
 				content.push("<div class='ui-widget-content ui-corner-all'><div class='padleft padright padtop'><h3>")
 				content.push(fileProps["Name"])
 				var fileLink="${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}"
@@ -112,6 +117,11 @@
 							makeAjaxCall=true
 							if (matching=="jpg" || matching=="jpeg" || matching=="gif" || matching=="png" || matching=="bmp") {
 								imageType=true;
+							}
+							if (matching=="txt" || matching=="text") {
+								if (fileProps.Name.indexOf('.mdl') !=-1) {
+									mdlType=true;
+								}
 							}
 							if (matching=="pdf") {
 								content.push("<iframe width='100%' height='500' src='")
@@ -133,6 +143,21 @@
 				content.push("</table></div></div></div>");
 				$("#Files #detailsBox").html(content.join(""));
 				if (makeAjaxCall) {
+					if (mdlType) {
+						$.ajax({
+							url : fileLink,
+							dataType: "text",
+							success : function (data) {
+								var divcontent=[]
+								divcontent.push('<pre class="brush: mdl">')
+								divcontent.push(data)
+								divcontent.push('</pre>')
+								$("#filegoeshere").text(divcontent.join(""));
+								SyntaxHighlighter.all();								
+								$("#Files").equalize({reset: true});
+							}
+						});
+					}
 					if (mimeType.indexOf("txt") != -1 || mimeType.indexOf("text") != -1) {
 						$.ajax({
 							url : fileLink,
