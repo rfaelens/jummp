@@ -8,6 +8,7 @@
 	else {
 		totalCount=modelsAvailable
 	}
+	def imagePath="/images"
 %>
 <div class="content">
    	<div class="view view-dom-id-9c00a92f557689f996511ded36a88594">
@@ -58,11 +59,11 @@
                 </div>
                 <div class="dataTables_paginate">
                 	<g:if test="${currentPage==1}">
-                		<g:img dir="${grailsApplication.config.grails.serverURL}/images/pagination" contextPath="" file="arrow-previous-disable.gif" alt="Previous"/>
+                		<g:img dir="${imagePath}/pagination" absolute="true" contextPath="" file="arrow-previous-disable.gif" alt="Previous"/>
                 	</g:if>
                 	<g:else>
                 		<a href="${createLink(controller: 'search', action: action, params: [query: query, sortDir: sortDirection, sortBy: sortBy, offset: modelStart-length-1])}">
-                			<g:img dir="${grailsApplication.config.grails.serverURL}/images/pagination" contextPath="" file="arrow-previous.gif" alt="Previous"/>
+                			<g:img dir="${imagePath}/pagination" absolute="true"  contextPath="" file="arrow-previous.gif" alt="Previous"/>
                 		</a>
                 	</g:else>
                 	<g:each var="i" in="${ (1..<numPages+1) }">
@@ -78,11 +79,11 @@
                 		</span>
                 	</g:each>
                 	<g:if test="${modelEnd==totalCount}">
-                		<g:img dir="${grailsApplication.config.grails.serverURL}/images/pagination" contextPath="" file="arrow-next-disable.gif" alt="Next"/>
+                		<g:img dir="${imagePath}/pagination" absolute="true"  contextPath="" file="arrow-next-disable.gif" alt="Next"/>
                 	</g:if>
                 	<g:else>
                 		<a href="${createLink(controller: 'search', action: action, params: [query: query,  sortDir: sortDirection, sortBy: sortBy, offset: modelStart+length-1])}">
-                			<g:img dir="${grailsApplication.config.grails.serverURL}/images/pagination" contextPath="" file="arrow-next.gif" alt="Next"/>
+                			<g:img dir="${imagePath}/pagination" absolute="true"  contextPath="" file="arrow-next.gif" alt="Next"/>
                 		</a>
                 	</g:else>
                 </div>
