@@ -944,7 +944,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         }
         // try importing with null file - should fail
         def auth = authenticateAsTestUser()
-        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "test", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"))
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"))
         
         shouldFail(ModelException) {
             modelService.uploadModelAsFile(null, meta)
@@ -981,7 +981,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue(model.validate())
         assertEquals(ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"), model.revisions.toList().first().format)
         // complete name cannot be tested, as it uses a generated date and we do not know the date
-        
+        println model.vcsIdentifier
         assertTrue(model.vcsIdentifier.endsWith("blankname/"))
 
         File gitFile = new File(model.vcsIdentifier + System.getProperty("file.separator") + importFile.getName())

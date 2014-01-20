@@ -1068,13 +1068,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         // model is valid, create a new repository and store it as revision1
         // vcs identifier is upload date + name - this should by all means be unique
         String name=modelFileFormatService.extractName(modelFiles, format)
-        if (!name) {
-        	name=meta.name
+        if (!name && meta.name ) {
+        	name = meta.name
         }
         String pathPrefix =
                 fileSystemService.findCurrentModelContainer() + File.separator
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(name.length() > 0 ? name:(randomUUID() as String)+"_blankname").
+        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(name?.length() > 0 ? name:(randomUUID() as String)+"_blankname").
                 append(File.separator).toString()
         boolean success = new File(modelPath).mkdirs()
         if (!success) {
