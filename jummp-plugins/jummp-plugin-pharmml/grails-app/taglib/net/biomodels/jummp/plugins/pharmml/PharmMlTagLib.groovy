@@ -63,6 +63,7 @@ import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.UniopType
 import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.ContinuousCovariateType
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
@@ -96,6 +97,8 @@ class PharmMlTagLib {
     static namespace = "pharmml"
 
     private Map<String, String> modellingTabsMap
+    // map to help resolve references to covariates from the parameter model
+    private Map<String, Equation> continuousCovariateTransformations = [:]
 
     StringBuilder simpleParams(List<SimpleParameterType> parameters) {
         def outcome = new StringBuilder()
@@ -178,7 +181,7 @@ class PharmMlTagLib {
                                 return
                             }
                             def fixedEffects = []
-                            SymbolRefType covEffectKey
+                            def covEffectKey
                             c.fixedEffect.each { fe ->
                                 if (fe.category) {
                                     def catIdSymbRef = new SymbolRefType()
@@ -188,7 +191,13 @@ class PharmMlTagLib {
                                     catIdSymbRef.symbIdRef = trickReference.toString()
                                     covEffectKey = catIdSymbRef
                                 } else {
-                                    covEffectKey = c.symbRef
+                                    //RESOLVE REFERENCE TO CONT COV TRANSF
+                                    final EquationType transfEq = resolveSymbolReference(c.symbRef)
+                                    if (transfEq) {
+                                        covEffectKey = transfEq
+                                    } else {
+                                        covEffectKey = c.symbRef
+                                    }
                                 }
                                 fixedEffects << fe.symbRef
                             }
@@ -198,7 +207,12 @@ class PharmMlTagLib {
                         if (fixedEffectsCovMap) {
                             fixedEffectsCovMap.each{
                                 def thisCov = []
-                                thisCov.add(wrapJaxb(it.key))
+                                def key = it.key
+                                if ( key instanceof Equation) {
+                                    thisCov.addAll(key.scalarOrSymbRefOrBinop)
+                                } else {
+                                    thisCov.add(wrapJaxb(key))
+                                }
                                 it.value.collect{ v -> thisCov.add(wrapJaxb(v)) }
                                 fixedEffectsTimesCovariateList.add(applyBinopToList(thisCov, "times"))
                             }
@@ -442,7 +456,7 @@ class PharmMlTagLib {
                 c.covariate.each {
                     result.append(
                         it.getCategorical() ? categCov(it.getCategorical(), it.symbId) :
-                                contCov(it.getContinuous(), it.symbId))
+                                contCov(it.symbId, c.blkId, it.getContinuous()))
                 }
             }
             result.append("</div>")
@@ -473,14 +487,16 @@ class PharmMlTagLib {
         return result
     }
 
-    StringBuilder contCov = { c, symbId ->
+    StringBuilder contCov(String symbId, String blkId, ContinuousCovariateType c) {
+        // may need to populate this map on-demand, before continuous covariates are displayed
+        continuousCovariateTransformations["${blkId}_${symbId}"] = c.transformation.equation
         def result = new StringBuilder("<p>")
         result.append("<span class=\"bold\">Continuous covariate ${symbId}</span>\n</p>\n<p>")
         if (c.abstractContinuousUnivariateDistribution) {
             result.append(distributionAssignment(symbId, c.abstractContinuousUnivariateDistribution))
             result.append("</p><p>")
         }
-        result.append(convertToMathML("Transformation",c.transformation.equation))
+        result.append(convertToMathML("Transformation", c.transformation.equation))
         return result.append("</p>")
     }
 
@@ -1427,7 +1443,76 @@ class PharmMlTagLib {
        // prefixToInfix(builder, stack)
     }
 
+    private JAXBElement<BinopType> replaceReferencesInBinop(JAXBElement<BinopType> elem) {
+        List<JAXBElement> content = elem.value.content
+        //TODO walk through content and replace any references you find.
+        def resolvedContent = content.collect {
+            switch (it.value) {
+                case SymbolRefType:
+                    return replaceReferencesInSymbRef(it.value)
+                    break
+                case UniopType:
+                    break
+                case BinopType:
+                    break
+                default:
+                    return it
+            }
+        }
+        elem.value.content = resolvedContent
+        return elem
+    }
+
+    /*FIXME*/ private JAXBElement<UniopType> replaceReferencesInUniop(JAXBElement<UniopType> elem) {
+        //handle uniop, symbref and binop
+        if (elem.value.uniop) {
+            elem.value.uniop = replaceReferencesInUniop(wrapJaxb(elem.value.uniop))
+        } else if (elem.value.binop) {
+            elem.value.binop = replaceReferencesInBinop(wrapJaxb(elem.value.binop))
+        } else if (elem.value.symbRef) {
+            // there is no guarantee that this will result in a symbRef!!
+            elem.value.symbRef = replaceReferencesInSymbRef(wrapJaxb(elem.value.symbRef))
+        }
+        return elem
+    }
+
+    /*
+     * Return type is anything that can be in EquationType.scalarOrSymbRefOrBinop.
+     */
+    private JAXBElement replaceReferencesInSymbRef(JAXBElement<SymbolRefType> elem, List<JAXBElement> equationTerms) {
+        //if reference found, add all elements of transfEq.scalarOrSymbRefOrBinop
+        final EquationType transfEq = resolveSymbolReference(elem)
+        if (transfEq) {
+            equationTerms.addAll(transfEq.scalarOrSymbRefOrBinop)
+        } else {
+            equationTerms.add(it)
+        }
+    }
+
+    private EquationType expandEquation(EquationType equation) {
+        List<JAXBElement> eqTerms = []
+        equation.scalarOrSymbRefOrBinop.each {
+            switch(it.value) {
+                case BinopType:
+                    //fall through
+                case UniopType:
+                    eqTerms.add(replaceReferences(it))
+                    break
+                case SymbolRefType:
+                    //replaceReferences can return a list here
+                    eqTerms.addAll(replaceReferences(it))
+                    break
+                default:
+                    eqTerms.add(it)
+            }
+        }
+        def newEquation = new EquationType()
+        newEquation.scalarOrSymbRefOrBinop = eqTerms
+        return newEquation
+    }
+
     private void convertEquation(def equation, StringBuilder builder) {
+        //EquationType expandedEquation = expandEquation(equation)
         List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equation).reverse()
         List<String> stack=new LinkedList<String>()
         symbols.each {
@@ -1482,8 +1567,8 @@ class PharmMlTagLib {
         if (rhs.equation) {
             return convertToMathML(lhs, rhs.equation)
         }
-        if (rhs.getSymbRef()) {
-            return convertToMathML(lhs, rhs.getSymbRef())
+        if (rhs.symbRef) {
+            return convertToMathML(lhs, rhs.symbRef)
         }
         StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
         builder.append(oprand(lhs))
@@ -1537,7 +1622,7 @@ class PharmMlTagLib {
     }
 
     private JAXBElement wrapJaxb(def elem) {
-        return new JAXBElement(new QName(""), elem.getClass(), elem)
+        return elem instanceof JAXBElement ? elem : new JAXBElement(new QName(""), elem.getClass(), elem)
     }
 
     private JAXBElement applyBinopToList(List elements, String operator) {
@@ -1553,5 +1638,26 @@ class PharmMlTagLib {
             result.content.add(applyBinopToList(elements[1..LAST], operator))
             return wrapJaxb(result)
         }
+    }
+
+    /*
+     * Looks up a symbol reference in continuousCovariateTransformations map.
+     * If the given @p ref contains both a blkIdRef and a symbIdRef, then it returns
+     * the equation corresponding to that continuous covariate, or null if there is no
+     * covariate with that @ref defined in the map.
+     *
+     * If @ref only has a symbIdRef, then it will return the first element from the map
+     * that matches, or null if there were no matches. 
+     */
+    private EquationType resolveSymbolReference(SymbolRefType ref) {
+        EquationType transfEq
+        if (ref.blkIdRef) {
+            String transfRef = "${ref.blkIdRef}_${ref.symbIdRef}"
+            transfEq = continuousCovariateTransformations[transfRef]
+        } else {
+            String transfRef = ref.symbIdRef
+            transfEq = continuousCovariateTransformations.find{ it.key.contains("_${transfRef}")}
+        }
+        return transfEq
     }
 }
