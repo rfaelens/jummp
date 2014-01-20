@@ -124,8 +124,11 @@ class UpdatedRepositoryListener implements ApplicationListener {
 			updateIndex((event as RevisionCreatedEvent).revision)
 		}
 		if (event instanceof ModelCreatedEvent) {
+			ModelCreatedEvent modEvent=event as ModelCreatedEvent
+			System.out.println("EVENT: "+modEvent.model.getProperties())
+			System.out.println("EVENT: "+modEvent.model.inspect())
 			updateIndex(modelDelegateService.
-						getLatestRevision((event as ModelCreatedEvent).model.id))
+						getLatestRevision(modEvent.model.id))
 													
 		}
 	}

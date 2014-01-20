@@ -625,10 +625,10 @@ class ModelController {
             resp.outputStream << new ByteArrayInputStream(byteBuffer.toByteArray())
     }
     
-    private void serveModelAsFile(RFTC rf, def resp) {
+    private void serveModelAsFile(RFTC rf, def resp, boolean inline) {
             File file=new File(rf.path)
             resp.setContentType(rf.mimeType)
-            resp.setHeader("Content-disposition", "attachment;filename=\"${file.getName()}\"")
+            resp.setHeader("Content-disposition", "${inline? "inline" : "attachment"};filename=\"${file.getName()}\"")
             resp.outputStream<< new ByteArrayInputStream(file.getBytes())
     }
     
@@ -643,10 +643,10 @@ class ModelController {
         		List<RFTC> files = modelDelegateService.retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
         		List<RFTC> mainFiles = files.findAll { it.mainFile }
         		if (files.size() == 1) {
-            		   serveModelAsFile(files.first(), response)
+            		   serveModelAsFile(files.first(), response, false)
             	}
             	else if (mainFiles.size() == 1) {
-            		   serveModelAsFile(mainFiles.first(), response)
+            		   serveModelAsFile(mainFiles.first(), response, false)
             	}
             	else {
             	       serveModelAsZip(files, response)
@@ -662,8 +662,12 @@ class ModelController {
             	    File file=new File(it.path)
             	    file.getName()==params.filename
             	}
+            	boolean inline=true
+            	if (!params.inline) {
+            		inline=false
+            	}
             	if (requested) {
-            	    serveModelAsFile(requested, response)
+            	    serveModelAsFile(requested, response, inline)
             	}            	
             }
         }
