@@ -45,6 +45,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
 class BootStrap {
     def springSecurityService
     def wcmSecurityService
+    def searchableService
 
     void addPublicationLinkProvider(PubLinkProvTC cmd) {
     	def publinkType=PublicationLinkProvider.LinkType.valueOf(cmd.linkType)
@@ -196,7 +197,12 @@ class BootStrap {
                 }
             }
         ]
-        
+
+      // Manually start Searchable's mirroring process to ensure that it comes after the automated migrations.
+      println "Performing bulk index"
+      searchableService.reindex()
+      println "Starting mirror service"
+      searchableService.startMirroring()
     }
     def destroy = {
     }

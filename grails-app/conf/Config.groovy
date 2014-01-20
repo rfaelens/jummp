@@ -439,6 +439,13 @@ grails.plugins.springsecurity.controllerAnnotations.staticRules = jummp.controll
 if (!"jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
     jms.disabled = true
 }
+
+// tweak searchable configuration so that it plays nicely with database-migration
+searchable {
+    mirrorChanges = false
+    bulkIndexOnStartup = false
+}
+
 environments {
     test {
         // need to disable the plugins or tests may fail

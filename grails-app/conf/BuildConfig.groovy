@@ -211,6 +211,7 @@ grails.project.dependency.resolution = {
         compile ":jquery-ui:1.8.24"
         // Locale plugin
         compile ":locale-variant:0.1"
+        runtime ":database-migration:1.3.8"
         // default grails plugins
         compile ":hibernate:3.6.10.6"
         compile ":webflow:2.0.8.1"
