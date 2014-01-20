@@ -106,29 +106,39 @@ class PharmMlTagLib {
             return outcome
         }
         outcome.append("<div class='spaced'>")
-        parameters.inject(outcome) { o, p ->
-            String thisParam
-            if (p.assign) {
-                thisParam = convertToMathML(p.symbId, p.assign)
-            } else {
-                thisParam = ["<math display='inline'><mstyle>", "</mstyle></math>"].join(op(p.symbId))
+        try {
+            parameters.inject(outcome) { o, p ->
+                String thisParam
+                if (p.assign) {
+                    thisParam = convertToMathML(p.symbId, p.assign)
+                } else {
+                    thisParam = ["<math display='inline'><mstyle>", "</mstyle></math>"].join(op(p.symbId))
+                }
+                o.append("<span>")
+                o.append(thisParam).append(";&nbsp;")
+                o.append("</span>\n")
             }
-            o.append("<span>")
-            o.append(thisParam).append(";&nbsp;")
-            o.append("</span>\n")
+        } catch(Exception e) {
+            outcome.append("Cannot display simple parameters.")
+            log.error("Error encountered while rendering simple params ${parameters.inspect()}: ${e.message}")
         }
         return outcome.append("</div>")
     }
 
     StringBuilder randomVariables(List<ParameterRandomVariableType> rv) {
         def output = new StringBuilder()
-        rv.inject(output) { o, i ->
-            if (i.abstractContinuousUnivariateDistribution) {
-                o.append("<div>")
-                o.append(distributionAssignment(i.symbId, i.abstractContinuousUnivariateDistribution))
-                o.append("&nbsp;&mdash;&nbsp;").append(i.variabilityReference.symbRef.symbIdRef)
-                o.append("</div>\n")
+        try {
+            rv.inject(output) { o, i ->
+                if (i.abstractContinuousUnivariateDistribution) {
+                    o.append("<div>")
+                    o.append(distributionAssignment(i.symbId, i.abstractContinuousUnivariateDistribution))
+                    o.append("&nbsp;&mdash;&nbsp;").append(i.variabilityReference.symbRef.symbIdRef)
+                    o.append("</div>\n")
+                }
             }
+        } catch(Exception e) {
+            output.append("Cannot display random variables.")
+            log.error("Error encountered while rendering random variables ${rv.inspect()}: ${e.message}")
         }
         return output
     }
@@ -136,126 +146,131 @@ class PharmMlTagLib {
     StringBuilder individualParams(List<IndividualParameterType> parameters, List<ParameterRandomVariableType> rv,
                 List<CovariateDefinitionType> covariates) {
         def output = new StringBuilder("<div class='spaced'>")
-        parameters.each { p ->
-            if (p.assign) {
-                String converted = convertToMathML(p.symbId, p.assign)
-                output.append("<div>")
-                output.append(converted)
-                output.append("</div>")
-            }
-            if (p.gaussianModel) {
-                output.append("\n")
-                def gaussianModel = p.gaussianModel
-                //RANDOM EFFECTS
-                def randomEffects = []
-                if (gaussianModel.randomEffects) {
-                    gaussianModel.randomEffects.symbRef.each { re ->
-                        def randomEffectSymbol = new SymbolRefType()
-                        randomEffectSymbol.symbIdRef = re.symbIdRef
-                        randomEffects << wrapJaxb(randomEffectSymbol)
-                    }
-                }
-                if (gaussianModel.linearCovariate) {
-                    def linearCovariate = gaussianModel.linearCovariate
-                    if (gaussianModel.transformation) {
-                        final String TRANSFORMATION = gaussianModel.transformation.value()
-                        //LHS
-                        UniopType indivParam = new UniopType()
-                        indivParam.op = TRANSFORMATION
-                        def paramSymbRef = new SymbolRefType()
-                        paramSymbRef.symbIdRef = p.symbId
-                        indivParam.symbRef = paramSymbRef
-                        def lhsEquation = new Equation()
-                        lhsEquation.scalarOrSymbRefOrBinop.add(wrapJaxb(indivParam))
-                        //POPULATION
-                        def popParam
-                        if (linearCovariate.populationParameter.assign.symbRef) {
-                            popParam = new UniopType()
-                            popParam.op = TRANSFORMATION
-                            popParam.symbRef = linearCovariate.populationParameter.assign.symbRef
-                        }
-                        def fixedEffectsCovMap = [:]
-                        linearCovariate.covariate.each { c ->
-                            //fixed effects
-                            if (!c.fixedEffect) {
-                                return
-                            }
-                            def fixedEffects = []
-                            def covEffectKey
-                            c.fixedEffect.each { fe ->
-                                if (fe.category) {
-                                    def catIdSymbRef = new SymbolRefType()
-                                    def trickReference = new StringBuilder("<msub><mi>")
-                                    trickReference.append(c.symbRef.symbIdRef).append("</mi><mi>")
-                                    trickReference.append(fe.category.catId).append("</mi></msub>")
-                                    catIdSymbRef.symbIdRef = trickReference.toString()
-                                    covEffectKey = catIdSymbRef
-                                } else {
-                                    //RESOLVE REFERENCE TO CONT COV TRANSF
-                                    final EquationType transfEq = resolveSymbolReference(c.symbRef)
-                                    if (transfEq) {
-                                        covEffectKey = transfEq
-                                    } else {
-                                        covEffectKey = c.symbRef
-                                    }
-                                }
-                                fixedEffects << fe.symbRef
-                            }
-                            fixedEffectsCovMap[covEffectKey] = fixedEffects
-                        }
-                        def fixedEffectsTimesCovariateList = []
-                        if (fixedEffectsCovMap) {
-                            fixedEffectsCovMap.each{
-                                def thisCov = []
-                                def key = it.key
-                                if ( key instanceof Equation) {
-                                    thisCov.addAll(key.scalarOrSymbRefOrBinop)
-                                } else {
-                                    thisCov.add(wrapJaxb(key))
-                                }
-                                it.value.collect{ v -> thisCov.add(wrapJaxb(v)) }
-                                fixedEffectsTimesCovariateList.add(applyBinopToList(thisCov, "times"))
-                            }
-                        }
-                        def sumElements = []
-                        sumElements.add(wrapJaxb(popParam))
-                        if (fixedEffectsTimesCovariateList) {
-                            sumElements.addAll(fixedEffectsTimesCovariateList)
-                        }
-                        sumElements.addAll(randomEffects)
-
-                        Equation rhsEquation = new Equation()
-                        rhsEquation.scalarOrSymbRefOrBinop.add(applyBinopToList(sumElements, "plus"))
-                        output.append(convertToMathML(lhsEquation, rhsEquation))
-                        output.append("\n")
-                    }
-                } else if (gaussianModel.generalCovariate) {
-                    def rhsEquation
-                    def covModel
-                    def covariateModelAssign = gaussianModel.generalCovariate.assign
-                    assert covariateModelAssign != null
-                    if (!randomEffects) {
-                        rhsEquation = covariateModelAssign
-                    } else {
-                        if (covariateModelAssign.equation) {
-                            covModel = covariateModelAssign.equation.scalarOrSymbRefOrBinop.first()
-                        } else if (covariateModelAssign.scalar) {
-                            covModel = wrapJaxb(covariateModelAssign.scalar)
-                        } else if (covariateModelAssign.symbRef) {
-                            covModel = wrapJaxb(covariateModelAssign.symbRef)
-                        }
-                    }
-                    def cm_re = []
-                    cm_re.add(covModel)
-                    cm_re.addAll(randomEffects)
-                    rhsEquation = new Equation()
-                    rhsEquation.scalarOrSymbRefOrBinop.add(applyBinopToList(cm_re, "plus"))
-                    String converted = convertToMathML(p.symbId, rhsEquation)
+        try {
+            parameters.each { p ->
+                if (p.assign) {
+                    String converted = convertToMathML(p.symbId, p.assign)
                     output.append("<div>")
                     output.append(converted)
                     output.append("</div>")
                 }
+                if (p.gaussianModel) {
+                    output.append("\n")
+                    def gaussianModel = p.gaussianModel
+                    //RANDOM EFFECTS
+                    def randomEffects = []
+                    if (gaussianModel.randomEffects) {
+                        gaussianModel.randomEffects.symbRef.each { re ->
+                            def randomEffectSymbol = new SymbolRefType()
+                            randomEffectSymbol.symbIdRef = re.symbIdRef
+                            randomEffects << wrapJaxb(randomEffectSymbol)
+                        }
+                    }
+                    if (gaussianModel.linearCovariate) {
+                        def linearCovariate = gaussianModel.linearCovariate
+                        if (gaussianModel.transformation) {
+                            final String TRANSFORMATION = gaussianModel.transformation.value()
+                            //LHS
+                            UniopType indivParam = new UniopType()
+                            indivParam.op = TRANSFORMATION
+                            def paramSymbRef = new SymbolRefType()
+                            paramSymbRef.symbIdRef = p.symbId
+                            indivParam.symbRef = paramSymbRef
+                            def lhsEquation = new Equation()
+                            lhsEquation.scalarOrSymbRefOrBinop.add(wrapJaxb(indivParam))
+                            //POPULATION
+                            def popParam
+                            if (linearCovariate.populationParameter.assign.symbRef) {
+                                popParam = new UniopType()
+                                popParam.op = TRANSFORMATION
+                                popParam.symbRef = linearCovariate.populationParameter.assign.symbRef
+                            }
+                            def fixedEffectsCovMap = [:]
+                            linearCovariate.covariate.each { c ->
+                                //fixed effects
+                                if (!c.fixedEffect) {
+                                    return
+                                }
+                                def fixedEffects = []
+                                def covEffectKey
+                                c.fixedEffect.each { fe ->
+                                    if (fe.category) {
+                                        def catIdSymbRef = new SymbolRefType()
+                                        def trickReference = new StringBuilder("<msub><mi>")
+                                        trickReference.append(c.symbRef.symbIdRef).append("</mi><mi>")
+                                        trickReference.append(fe.category.catId).append("</mi></msub>")
+                                        catIdSymbRef.symbIdRef = trickReference.toString()
+                                        covEffectKey = catIdSymbRef
+                                    } else {
+                                        //RESOLVE REFERENCE TO CONT COV TRANSF
+                                        final EquationType transfEq = resolveSymbolReference(c.symbRef)
+                                        if (transfEq) {
+                                            covEffectKey = transfEq
+                                        } else {
+                                            covEffectKey = c.symbRef
+                                        }
+                                    }
+                                    fixedEffects << fe.symbRef
+                                }
+                                fixedEffectsCovMap[covEffectKey] = fixedEffects
+                            }
+                            def fixedEffectsTimesCovariateList = []
+                            if (fixedEffectsCovMap) {
+                                fixedEffectsCovMap.each{
+                                    def thisCov = []
+                                    def key = it.key
+                                    if ( key instanceof Equation) {
+                                        thisCov.addAll(key.scalarOrSymbRefOrBinop)
+                                    } else {
+                                        thisCov.add(wrapJaxb(key))
+                                    }
+                                    it.value.collect{ v -> thisCov.add(wrapJaxb(v)) }
+                                    fixedEffectsTimesCovariateList.add(applyBinopToList(thisCov, "times"))
+                                }
+                            }
+                            def sumElements = []
+                            sumElements.add(wrapJaxb(popParam))
+                            if (fixedEffectsTimesCovariateList) {
+                                sumElements.addAll(fixedEffectsTimesCovariateList)
+                            }
+                            sumElements.addAll(randomEffects)
+
+                            Equation rhsEquation = new Equation()
+                            rhsEquation.scalarOrSymbRefOrBinop.add(applyBinopToList(sumElements, "plus"))
+                            output.append(convertToMathML(lhsEquation, rhsEquation))
+                            output.append("\n")
+                        }
+                    } else if (gaussianModel.generalCovariate) {
+                        def rhsEquation
+                        def covModel
+                        def covariateModelAssign = gaussianModel.generalCovariate.assign
+                        assert covariateModelAssign != null
+                        if (!randomEffects) {
+                            rhsEquation = covariateModelAssign
+                        } else {
+                            if (covariateModelAssign.equation) {
+                                covModel = covariateModelAssign.equation.scalarOrSymbRefOrBinop.first()
+                            } else if (covariateModelAssign.scalar) {
+                                covModel = wrapJaxb(covariateModelAssign.scalar)
+                            } else if (covariateModelAssign.symbRef) {
+                                covModel = wrapJaxb(covariateModelAssign.symbRef)
+                            }
+                        }
+                        def cm_re = []
+                        cm_re.add(covModel)
+                        cm_re.addAll(randomEffects)
+                        rhsEquation = new Equation()
+                        rhsEquation.scalarOrSymbRefOrBinop.add(applyBinopToList(cm_re, "plus"))
+                        String converted = convertToMathML(p.symbId, rhsEquation)
+                        output.append("<div>")
+                        output.append(converted)
+                        output.append("</div>")
+                    }
+                }
             }
+        } catch(Exception e) {
+            output.append("Cannot display individual parameters.")
+            log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}")
         }
         return output.append("</div>")
     }
@@ -265,18 +280,23 @@ class PharmMlTagLib {
             return
         }
         def result = new StringBuilder("<h3>Function Definitions</h3>")
-        attrs.functionDefs.each { d ->
-            def rightHandSide
-            if (d.definition.equation) {
-                rightHandSide = d.definition.equation
-            } else if (d.definition.scalar) {
-                rightHandSide = d.definition.scalar
-            } else if (d.definition.symbRef) {
-                rightHandSide = d.definition.symbRef
+        try {
+            attrs.functionDefs.each { d ->
+                def rightHandSide
+                if (d.definition.equation) {
+                    rightHandSide = d.definition.equation
+                } else if (d.definition.scalar) {
+                    rightHandSide = d.definition.scalar
+                } else if (d.definition.symbRef) {
+                    rightHandSide = d.definition.symbRef
+                }
+                //should not be null by now
+                assert !!rightHandSide
+                result.append("<div>${convertToMathML(d.symbId, d.getFunctionArgument(), rightHandSide)}</div>")
             }
-            //should not be null by now
-            assert !!rightHandSide
-            result.append("<div>${convertToMathML(d.symbId, d.getFunctionArgument(), rightHandSide)}</div>")
+        } catch(Exception e) {
+            log.error("Error while rendering function definitions ${attrs.functionDefs.inspect()} from attr map ${attrs.inspect()}: ${e.message}")
+            result.append("Sorry, cannot render the function definitions.")
         }
         out << result.toString()
     }
@@ -285,30 +305,38 @@ class PharmMlTagLib {
         if (!attrs.sm) {
             return
         }
-        def result = new StringBuilder("<h3>Structural ")
-        boolean multipleStructuralModels = attrs.sm.size() > 1
-        if (!multipleStructuralModels) {
-            result.append("Model ").append(attrs.sm[0].name?.value ?: attrs.sm[0].blkId)
-        } else {
-            result.append("Models")
-        }
-        result.append("</h3>\n")
-        if (!multipleStructuralModels) {
-            def model = attrs.sm[0]
-            if (model.simpleParameter) {
-                result.append("<p class=\"bold\">Parameters </p>")
-                result.append(simpleParams(model.simpleParameter))
+
+        def result
+        try {
+            result = new StringBuilder("<h3>Structural ")
+            boolean multipleStructuralModels = attrs.sm.size() > 1
+            if (!multipleStructuralModels) {
+                result.append("Model ").append(attrs.sm[0].name?.value ?: attrs.sm[0].blkId)
+            } else {
+                result.append("Models")
             }
-            if (model.commonVariable) {
-                result.append("<p class=\"bold\">Variable definitions</p>")
-                result.append(["<div>", "</div>\n"].join(
-                    commonVariables(model.commonVariable, attrs.iv).toString()))
+            result.append("</h3>\n")
+            if (!multipleStructuralModels) {
+                def model = attrs.sm[0]
+                if (model.simpleParameter) {
+                    result.append("<p class=\"bold\">Parameters </p>")
+                    result.append(simpleParams(model.simpleParameter))
+                }
+                if (model.commonVariable) {
+                    result.append("<p class=\"bold\">Variable definitions</p>")
+                    result.append(["<div>", "</div>\n"].join(
+                        commonVariables(model.commonVariable, attrs.iv).toString()))
+                }
+            } else { //TODO: refactor above-code into a separate method and call it for each of the structural models.
+                sm.each { s ->
+                    result.append("<h4>").append(s.name?.value ?: s.blkId).append("</h4>\n")
+                    //todo expand
+                }
             }
-        } else {
-            sm.each { s ->
-                result.append("<h4>").append(s.name?.value ?: s.blkId).append("</h4>\n")
-                //todo expand
-            }
+        } catch(Exception e) {
+            log.error("Error while rendering structural model ${attrs.sm.inspect()} ${attrs.sm.properties}:${e.message}")
+            out << "Sorry, something went wrong while displaying the structural model."
+            return
         }
         out << result.toString()
     }
@@ -319,41 +347,46 @@ class PharmMlTagLib {
             return result
         }
         def initialConditions = [:]
-        vars.each { v ->
-            result.append("<div>")
-            switch(v.value) {
-                case DerivativeVariableType:
-                    if (v.value.initialCondition) {
-                        initialConditions << [(v.value.symbId) : v.value.initialCondition]
-                    }
-                    result.append(convertToMathML(v.value, indepVar))
-                    break
-                case VariableDefinitionType:
-                    if (v.value.assign) {
-                        result.append(convertToMathML(v.value.symbId, v.value.assign))
-                    } else {
-                        result.append("<math display='inline'><mstyle>").append(op(v.value.symbId)).append(
-                                "</mstyle></math>")
-                    }
-                    break
-                case FunctionDefinitionType:
-                    def fd = v.value
-                    result.append(convertToMathML(fd.symbId, fd.functionArgument, fd))
-                    break
-                case FuncParameterDefinitionType:
-                    result.append(v.value.symbId)
-                    break
-                default:
-                    result.append(v.value.symbId)
-                    break
+        try {
+            vars.each { v ->
+                result.append("<div>")
+                switch(v.value) {
+                    case DerivativeVariableType:
+                        if (v.value.initialCondition) {
+                            initialConditions << [(v.value.symbId) : v.value.initialCondition]
+                        }
+                        result.append(convertToMathML(v.value, indepVar))
+                        break
+                    case VariableDefinitionType:
+                        if (v.value.assign) {
+                            result.append(convertToMathML(v.value.symbId, v.value.assign))
+                        } else {
+                            result.append("<math display='inline'><mstyle>").append(op(v.value.symbId)).append(
+                                    "</mstyle></math>")
+                        }
+                        break
+                    case FunctionDefinitionType:
+                        def fd = v.value
+                        result.append(convertToMathML(fd.symbId, fd.functionArgument, fd))
+                        break
+                    case FuncParameterDefinitionType:
+                        result.append(v.value.symbId)
+                        break
+                    default:
+                        result.append(v.value.symbId)
+                        break
+                }
+                result.append("</div>")
             }
-            result.append("</div>")
-        }
-        if (initialConditions) {
-            result.append("\n<p class='bold'>Initial conditions</p>\n")
-            initialConditions.keySet().each { s ->
-                result.append("<div>").append(convertToMathML(s, initialConditions[s].assign)).append("</div>\n")
+            if (initialConditions) {
+                result.append("\n<p class='bold'>Initial conditions</p>\n")
+                initialConditions.keySet().each { s ->
+                    result.append("<div>").append(convertToMathML(s, initialConditions[s].assign)).append("</div>\n")
+                }
             }
+        } catch(Exception e) {
+            log.error("Error while displaying common variables - arguments ${vars.properties} ${indepVar.inspect()}: ${e.message} ")
+            return new StringBuilder("Sorry, ran into issues while trying to display variable definitions.")
         }
         return result
     }
@@ -414,29 +447,33 @@ class PharmMlTagLib {
 
         def result = new StringBuilder()
         result.append("<span class=\"bold\">Parameters </span>")
-        attrs.parameterModel.each { pm ->
-               result.append("<div class='spaced'>")
-               def simpleParameters = pm.commonParameterElement.value.findAll {
-                       it instanceof SimpleParameterType
-               }
-               def rv = pm.commonParameterElement.value.findAll {
-                       it instanceof ParameterRandomVariableType
-               }
-               def individualParameters = pm.commonParameterElement.value.findAll {
-                       it instanceof IndividualParameterType
-               }
-               result.append(simpleParams(simpleParameters))
-               String randoms=randomVariables(rv)
-               if (randoms) {
-                       result.append(randoms)
-               }
-               String individuals = individualParams(individualParameters, rv, attrs.covariates)
-               if (individuals) {
-                       result.append(individuals)
-               }
-               result.append("</div>")
+        try {
+            attrs.parameterModel.each { pm ->
+                   result.append("<div class='spaced'>")
+                   def simpleParameters = pm.commonParameterElement.value.findAll {
+                           it instanceof SimpleParameterType
+                   }
+                   def rv = pm.commonParameterElement.value.findAll {
+                           it instanceof ParameterRandomVariableType
+                   }
+                   def individualParameters = pm.commonParameterElement.value.findAll {
+                           it instanceof IndividualParameterType
+                   }
+                   result.append(simpleParams(simpleParameters))
+                   String randoms=randomVariables(rv)
+                   if (randoms) {
+                           result.append(randoms)
+                   }
+                   String individuals = individualParams(individualParameters, rv, attrs.covariates)
+                   if (individuals) {
+                           result.append(individuals)
+                   }
+                   result.append("</div>")
+            }
+        } catch(Exception e) {
+            log.error("Error rendering the parameter model for ${attrs.inspect()} ${attrs.parameterModel.properties}: ${e.message}")
+            out << "Sorry, something went wrong while rendering the parameter model."
         }
-
         out << result.toString()
     }
 
@@ -446,20 +483,25 @@ class PharmMlTagLib {
         }
         out << "<h3>Covariate Model</h3>"
         def result = new StringBuilder()
-        attrs.covariate.each { c ->
-            result.append("<div>")
-            if (c.simpleParameter) {
-                result.append("<div><span class=\"bold\">Parameters</span></div>")
-                result.append(simpleParams(c.simpleParameter))
-            }
-            if (c.covariate) {
-                c.covariate.each {
-                    result.append(
-                        it.getCategorical() ? categCov(it.getCategorical(), it.symbId) :
-                                contCov(it.symbId, c.blkId, it.getContinuous()))
+        try {
+            attrs.covariate.each { c ->
+                result.append("<div>")
+                if (c.simpleParameter) {
+                    result.append("<div><span class=\"bold\">Parameters</span></div>")
+                    result.append(simpleParams(c.simpleParameter))
                 }
+                if (c.covariate) {
+                    c.covariate.each {
+                        result.append(
+                            it.getCategorical() ? categCov(it.getCategorical(), it.symbId) :
+                                    contCov(it.symbId, c.blkId, it.getContinuous()))
+                    }
+                }
+                result.append("</div>")
             }
-            result.append("</div>")
+        } catch(Exception e) {
+            log.error("Error rendering the covariates for ${attrs.inspect()} ${attrs.covariate.properties}: ${e.message}")
+            out << "Sorry, something went wrong while rendering the covariates."
         }
         out << result.toString()
     }
@@ -507,32 +549,37 @@ class PharmMlTagLib {
 
         StringBuilder result = new StringBuilder()
         result.append("<h3>Observation Model</h3>")
-        attrs.observations.each { om ->
-            result.append("<h4>Observation <span class='italic'>")
-            // the API returns a JAXBElement, not ObservationErrorType
-            def obsErr = om.observationError.value
-            result.append(obsErr.symbId).append("</span></h4>\n")
-            result.append("<span class=\"bold\">Parameters </span>")
-            def simpleParameters = om.commonParameterElement.value.findAll {
-                it instanceof SimpleParameterType
+        try {
+            attrs.observations.each { om ->
+                result.append("<h4>Observation <span class='italic'>")
+                // the API returns a JAXBElement, not ObservationErrorType
+                def obsErr = om.observationError.value
+                result.append(obsErr.symbId).append("</span></h4>\n")
+                result.append("<span class=\"bold\">Parameters </span>")
+                def simpleParameters = om.commonParameterElement.value.findAll {
+                    it instanceof SimpleParameterType
+                }
+                def rv = om.commonParameterElement.value.findAll {
+                    it instanceof ParameterRandomVariableType
+                }
+                result.append(simpleParams(simpleParameters))
+                String randoms = randomVariables(rv)
+                if (randoms) {
+                    result.append(randoms)
+                }
+                //result.append("\n<p>")
+                if (obsErr.symbol?.value) {
+                    result.append(obsErr.symbol.value)
+                }
+                if (obsErr instanceof GaussianObsError) {
+                    result.append(gaussianObsErr(obsErr)).append(" ")
+                } else { // can only be GeneralObsError
+                    result.append(generalObsErr(obsErr)).append(" ")
+                }
             }
-            def rv = om.commonParameterElement.value.findAll {
-                it instanceof ParameterRandomVariableType
-            }
-            result.append(simpleParams(simpleParameters))
-            String randoms = randomVariables(rv)
-            if (randoms) {
-                result.append(randoms)
-            }
-            //result.append("\n<p>")
-            if (obsErr.symbol?.value) {
-                result.append(obsErr.symbol.value)
-            }
-            if (obsErr instanceof GaussianObsError) {
-                result.append(gaussianObsErr(obsErr)).append(" ")
-            } else { // can only be GeneralObsError
-                result.append(generalObsErr(obsErr)).append(" ")
-            }
+        } catch(Exception e) {
+            log.error("Error rendering the observations for ${attrs.inspect()} ${attrs.observations.inspect()}: ${e.message}")
+            out << "Sorry, something went wrong while rendering the observations."
         }
         out << result.toString()
     }
