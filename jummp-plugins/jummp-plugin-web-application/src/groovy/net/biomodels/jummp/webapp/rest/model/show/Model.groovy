@@ -43,7 +43,7 @@ class Model
     public Model(RevisionTransportCommand revision)
     {
         ModelTransportCommand model = revision.model
-        name = model.name
+        name = revision.name
         description = revision.description
         format = new Format(revision.format)
         if (!model.publication) {
