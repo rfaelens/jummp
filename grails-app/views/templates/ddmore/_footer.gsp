@@ -26,8 +26,8 @@
     <div id="block-menu-menu-footer-menu" class="block block-menu footer-menu even">
     	<div class="content">
     		<ul class="menu">
-    						<li class="first leaf" style="margin-top:-100px">© 2012 - 2013</li>
-    						<li class="leaf"><a href="//ddmore.eu">DDMoRe</a>, all rights reserved.</li>  
+    						<li class="first leaf" style="margin-top:-100px">© 2012 - <%=new Date().format('yyyy')%></li>
+    						<li class="leaf"><a href="//ddmore.eu">DDMoRe</a>, all rights reserved.</li>
     		</ul>
     			<ul style="margin-top:1.3%;padding-left: 0.5em;">
     						<li class="leaf"><a href="http://efpia.eu" rel="nofollow"><g:img dir="images/ddmore" file="EFPIA.jpg"/></a></li>
