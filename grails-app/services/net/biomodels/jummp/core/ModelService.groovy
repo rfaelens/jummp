@@ -211,7 +211,7 @@ class ModelService {
             
         	        String query = '''
 SELECT DISTINCT m FROM Revision AS r
-JOIN r.model AS m
+JOIN r.model AS m JOIN r.owner as u 
 WHERE
 '''
 if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT) {
@@ -237,7 +237,7 @@ ORDER BY
 '''
         switch (sortColumn) {
         case ModelListSorting.NAME:
-            query += "r.name"
+            query += "u.userRealName"
             break
         case ModelListSorting.LAST_MODIFIED:
             query += "r.uploadDate"
@@ -268,7 +268,6 @@ ORDER BY
         if (filter && filter.length() >= 3) {
             params.put("filter", "%${filter.toLowerCase()}%");
         }
-
         return Model.executeQuery(query, [:], params)
         	
         	
@@ -284,7 +283,7 @@ ORDER BY
         }
         String query = '''
 SELECT DISTINCT m FROM Revision AS r, AclEntry AS ace
-JOIN r.model AS m
+JOIN r.model AS m JOIN r.owner as u 
 JOIN ace.aclObjectIdentity AS aoi
 JOIN aoi.aclClass AS ac
 JOIN ace.sid AS sid
@@ -318,7 +317,7 @@ ORDER BY
 '''
         switch (sortColumn) {
         case ModelListSorting.NAME:
-            query += "r.name"
+            query += "u.userRealName"
             break
         case ModelListSorting.LAST_MODIFIED:
             query += "r.uploadDate"
@@ -351,7 +350,7 @@ ORDER BY
         if (filter && filter.length() >= 3) {
             params.put("filter", "%${filter.toLowerCase()}%");
         }
-
+        
         return Model.executeQuery(query, params)
     }
 
