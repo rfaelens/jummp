@@ -237,7 +237,7 @@ ORDER BY
 '''
         switch (sortColumn) {
         case ModelListSorting.NAME:
-            query += "u.userRealName"
+            query += "r.name"
             break
         case ModelListSorting.LAST_MODIFIED:
             query += "r.uploadDate"
@@ -246,7 +246,7 @@ ORDER BY
             query += "r.format"
             break
         case ModelListSorting.SUBMITTER:
-            query += "r.owner"
+            query += "u.userRealName"
             break
        case ModelListSorting.SUBMISSION_DATE:
        	    /*
@@ -317,7 +317,7 @@ ORDER BY
 '''
         switch (sortColumn) {
         case ModelListSorting.NAME:
-            query += "u.userRealName"
+            query += "r.name"
             break
         case ModelListSorting.LAST_MODIFIED:
             query += "r.uploadDate"
@@ -326,7 +326,7 @@ ORDER BY
             query += "r.format"
             break
         case ModelListSorting.SUBMITTER:
-            query += "r.owner"
+            query += "u.userRealName"
             break
        case ModelListSorting.SUBMISSION_DATE:
        	    /*
