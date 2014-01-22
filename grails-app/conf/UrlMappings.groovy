@@ -43,6 +43,7 @@ class UrlMappings {
         "/models"(controller: "search", action: "list")
 	"/search"(controller: "search", action: "search")
 	"/feedback"(controller:"jummp", action:"feedback")
+	"/help"(controller:"jummp", action:"help")
 	"/registration"(controller:"usermanagement", action:"create")
 	"/forgotpassword"(controller:"usermanagement", action:"forgot")
 	"/user/editUser"(controller:"usermanagement", action:"edit")
