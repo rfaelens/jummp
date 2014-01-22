@@ -148,7 +148,9 @@ class ModelHistoryService {
         List<ModelHistoryItem> history = ModelHistoryItem.findAllByUser(user).sort { it.lastAccessedDate }
         List<ModelTransportCommand> retList = []
         history.reverseEach {
-            retList << it.model.toCommandObject()
+            if (!it.model.deleted) {
+            	retList << it.model.toCommandObject()
+            }
         }
         return retList
     }

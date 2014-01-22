@@ -293,12 +293,6 @@ class ModelServiceTests extends JummpIntegrationTest {
         // let's delete the model
         authenticateAsAdmin()
         assertTrue(modelService.deleteModel(model))
-        assertNull(modelService.getLatestRevision(model))
-        // both users should get six models
-        authenticateAsTestUser()
-        assertNull(modelService.getLatestRevision(model))
-        authenticateAsUser()
-        assertNull(modelService.getLatestRevision(model))
     }
 
     
@@ -372,28 +366,6 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertSame(rev4, modelService.getRevision("${model.id}.${rev4.revisionNumber}"))
         assertSame(rev5, modelService.getRevision("${model.id}.${rev5.revisionNumber}"))
         assertSame(rev6, modelService.getRevision("${model.id}.${rev6.revisionNumber}"))
-        // let's delete the model
-        authenticateAsAdmin()
-        assertTrue(modelService.deleteModel(model))
-        shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}")
-        }
-        shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}.${rev2.revisionNumber}")
-        }
-        shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}.${rev3.revisionNumber}")
-        }
-        shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}.${rev4.revisionNumber}")
-        }
-        shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}.${rev5.revisionNumber}")
-        }
-        shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}.${rev6.revisionNumber}")
-        }
-        
     }
 
     
@@ -628,13 +600,6 @@ class ModelServiceTests extends JummpIntegrationTest {
         testResults = modelService.getAllRevisions(model2)
         assertEquals(1, testResults.size())
         assertSame(revision2, testResults[0])
-        // let's delete Model 2
-        modelService.deleteModel(model2)
-        assertTrue(modelService.getAllRevisions(model2).isEmpty())
-        authenticateAsTestUser()
-        assertTrue(modelService.getAllRevisions(model2).isEmpty())
-        authenticateAsUser()
-        assertTrue(modelService.getAllRevisions(model2).isEmpty())
     }
 
     @Test

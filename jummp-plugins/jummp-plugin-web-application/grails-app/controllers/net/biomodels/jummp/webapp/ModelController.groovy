@@ -105,6 +105,7 @@ class ModelController {
         		RevisionTransportCommand rev=modelDelegateService.getRevision(params.id)
         		boolean showPublishOption = modelDelegateService.canPublish(rev.model.id)
         		boolean canUpdate = modelDelegateService.canAddRevision(rev.model.id)
+        		boolean canDelete = modelDelegateService.canDelete(rev.model.id)
 
         		String flashMessage=""
         		if (flash.now["giveMessage"]) {
@@ -116,6 +117,7 @@ class ModelController {
         				   allRevs: revs,
         				   flashMessage: flashMessage,
         				   canUpdate: canUpdate,
+        				   canDelete: canDelete,
         				   showPublishOption: showPublishOption,
         		]
         		if (rev.id == modelDelegateService.getLatestRevision(rev.model.id).id)
@@ -129,6 +131,7 @@ class ModelController {
                 	model["canUpdate"]=false
                 	model["showPublishOption"]=false
                 	model["oldVersion"]=true
+                	model["canDelete"]=false
                 	return model
                 }
         }
@@ -151,6 +154,13 @@ class ModelController {
                 params: [flashMessage:"Model has been published."])
     }
 
+    def delete = {
+       boolean deleted=modelDelegateService.deleteModel(params.id as int)
+       redirect(action: "showWithMessage", id: params.id,
+                params: [flashMessage: deleted?"Model has been deleted, and moved into archives.":"Model could not be deleted"])
+ 
+    }
+    
     @Secured(["isAuthenticated()"])
     def updateFlow = {
         start {

@@ -65,7 +65,9 @@
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'filegrid.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shCore.css')}" /> 
-        <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shThemeDefault.css')}" /> 
+        <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shThemeDefault.css')}" />
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+        
         <Ziphandler:outputFileInfoAsJS repFiles="${revision.files.findAll{!it.hidden}}" loadedZips="${loadedZips}" zipSupported="${zipSupported}"/>
         <script>
 		$(function() {
@@ -91,10 +93,24 @@
 					window.scrollTo(0, 0);
 				}
 			});
+			$( "#dialog-confirm" ).dialog({
+                        resizable: false,
+                        autoOpen: false,
+                        height:250,
+                        modal: true,
+                        buttons: {
+                            "Confirm Delete": function() {
+                                openPage('${g.createLink(controller: 'model', action: 'delete', id: revision.model.id)}');
+                            	$( this ).dialog( "close" );
+                            },
+                            Cancel: function() {
+                                $( this ).dialog( "close" );
+                       }
+                    }
+            });
 			
 		});
 		
-				
 		function updateFileDetailsPanel(fileProps) {
 			if (typeof(fileProps) != "undefined") {
 				var formats=["text","txt","xml","pdf", "jpg","jpeg", "gif", "png", "bmp"];
@@ -245,6 +261,12 @@
 						primary:"ui-icon-refresh"
 					}
 			});
+			$( "#delete" ).button({
+					text:false,
+					icons: {
+						primary:"ui-icon-trash"
+					}
+			});
 			$( "#publish" ).button({
 					text:false,
 					icons: {
@@ -268,15 +290,20 @@
     <g:layoutHead/>
     </head>
     <body>
+    	<g:if test="${revision.model.deleted}">
+    		<div class='PermanentMessage'>
+    			This is an archived model.
+    		</div>
+    	</g:if>
     	<g:if test="${oldVersion}">
-    		<div class='flashNotificationDiv'>
+    		<div class='PermanentMessage'>
     			You are viewing a version of a model that has been updated. 
     			To access the latest version, and a more detailed display please 
     			go <a href="${createLink(controller: "model", action: "show", id: revision.model.id)}">here</a>.
     		</div>
     	</g:if>
     	<div id="topBar">
-    		    <div style="float:left;width:85%;">
+    		    <div style="float:left;width:80%;">
     				<h2>${revision.name}</h2>
     			</div>
     	        <div style="float:right;margin-top:10px;">
@@ -284,6 +311,12 @@
                             <button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}')">Download</button>
                             <g:if test="${canUpdate}">
                                 <button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}')">Update</button>
+                            </g:if>
+                            <g:if test="${canDelete}">
+                            	<div id="dialog-confirm" title="Confirm Delete">
+                            		<p>Are you sure you want to delete the model?</p>
+                            	</div>
+                                <button id="delete" onclick='return $( "#dialog-confirm" ).dialog( "open" );'>Delete</button>
                             </g:if>
                             <g:if test="${showPublishOption}">
                                 <button id="publish" onclick="return publishModel('${g.createLink(controller: 'model', action: 'publish', id: revision.id)}')">Publish</button>
