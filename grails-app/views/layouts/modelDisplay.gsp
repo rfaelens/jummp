@@ -364,11 +364,13 @@
 	  				</li>
 	  			</ul>
 	  			<ul>
+	  				<g:if test="${revision.files.find{!it.hidden && !it.mainFile}}">
 	  				<li><a>Additional Files</a>
-	  				<ul>
-	  				   <Ziphandler:outputFileInfoAsHtml repFiles="${revision.files.findAll{!it.hidden}}" loadedZips="${loadedZips}" zipSupported="${zipSupported}" mainFile="${false}"/>
-	  			   </ul>
-	  		   </li>
+	  					<ul>
+	  						<Ziphandler:outputFileInfoAsHtml repFiles="${revision.files.findAll{!it.hidden}}" loadedZips="${loadedZips}" zipSupported="${zipSupported}" mainFile="${false}"/>
+	  				   </ul>
+	  			    </li>
+	  			    </g:if>
 	  		</ul>
   		</div>
   		</div>
@@ -387,7 +389,13 @@
 	  	<ul>
 	  	     <g:each status="i" var="rv" in="${allRevs.sort{a,b -> a.revisionNumber > b.revisionNumber ? -1 : 1}}">
 	  	     	<li style="${revision.id == rv.id ?"background-color:#FFFFCC;":""}margin-top:5px">
-	  	     		Version: ${rv.revisionNumber} 
+	  	     		Version: ${rv.revisionNumber}
+	  	     		<g:if test="${rv.state==ModelState.PUBLISHED}">
+                           	<img style="width:12px;margin:2px;float:none;" title="This version of the model is public" alt="public model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/unlock.png"/>
+                    </g:if>
+					<g:else>
+							<img style="width:12px;margin:2px;float:none;" title="This version of the model is unpublished" alt="unpublished model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/lock.png"/>
+					</g:else>
 	  	     		<g:if test="${revision.id!=rv.id}">
 	  	     			<a class="versionDownload" title="go to version ${rv.revisionNumber}" href="${g.createLink(controller: 'model', action: 'show', id: rv.identifier()).replace("%3A",".")}">
 	  	     				<img style="width:12px;margin:2px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Generic/Generic%20icons/external_link.png"/> 
