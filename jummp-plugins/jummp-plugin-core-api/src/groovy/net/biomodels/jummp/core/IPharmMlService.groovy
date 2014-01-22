@@ -35,18 +35,112 @@
 package net.biomodels.jummp.core
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
+import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
+import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 
 /**
  * @short Interface describing the service to access a model encoded in PharmML.
  *
  * An implementation of this interface is provided by the PharmML plugin, however
  * this interface can be used to provide an alternative one.
+ *
+ * When argument types or return types are supplied by libPharmML, the interface uses def
+ * to avoid adding libPharmML as a dependency of this plugin.
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 interface IPharmMlService {
+
+    /**
+     * @return an instance of eu.ddmore.libpharmml.dom.PharmML corresponding to the
+     * PharmML file in @p rev.
+     */
+    public def getDomFromRevision(RevisionTransportCommand rev)
+
+    /**
+     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
+     */
+    public String getIndependentVariable(PharmML dom)
+
+    /**
+     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
+     */
+    public List getFunctionDefinitions(PharmML dom)
+
     public List getModelDefinition(RevisionTransportCommand rev)
-    public TrialDesignType getTrialDesign(RevisionTransportCommand rev)
-    public ModellingStepsType getModellingSteps(RevisionTransportCommand rev)
+
+    /**
+     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
+     */
+    List getCovariateModel(PharmML dom)
+
+    /**
+     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
+     */
+    List getVariabilityModel(PharmML dom)
+
+    /**
+     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
+     */
+    List getParameterModel(PharmML dom)
+
+    /**
+     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
+     */
+    List getStructuralModel(PharmML dom)
+
+    /**
+     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
+     */
+    List getObservationModel(PharmML dom)
+
+    /**
+     * @return eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+     */
+    TrialDesignType getTrialDesign(RevisionTransportCommand revision)
+
+    /**
+     * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+     * @return eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
+     */
+    def getTrialDesignStructure(TrialDesignType design)
+
+    /**
+     * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+     */
+    List getIndividualDosing(TrialDesignType design)
+
+    /**
+     * @param design an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+     * return an instance of eu.ddmore.libpharmml.dom.trialdesign.PopulationType
+     */
+    PopulationType getPopulation(TrialDesignType design)
+
+    /**
+     * @return an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
+     */
+    ModellingStepsType getModellingSteps(RevisionTransportCommand revision)
+
+    /**
+     * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
+     */
+    List getCommonModellingSteps(ModellingStepsType steps)
+
+    /**
+     * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
+     */
+    List getSimulationSteps(ModellingStepsType steps)
+
+    /**
+     * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
+     */
+    List getEstimationSteps(ModellingStepsType steps)
+
+    /**
+     * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
+     * @return an instance of eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
+     */
+    StepDependencyType getStepDependencies(ModellingStepsType steps)
 }

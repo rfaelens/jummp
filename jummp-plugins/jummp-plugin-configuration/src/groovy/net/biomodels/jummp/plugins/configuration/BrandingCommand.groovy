@@ -49,6 +49,6 @@ class BrandingCommand implements Serializable {
 
     static constraints = {
         internalColor(nullable: false, blank: false)
-        externalColor(nullable: true, blank: true)
+        externalColor(nullable: true)
     }
 }

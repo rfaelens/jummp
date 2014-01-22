@@ -144,7 +144,7 @@ class ZiphandlerTagLib {
 	private void processFilesJS(def repFiles, StringBuilder builder) {
 		try
         {
-        	repFiles.each {
+            repFiles.each {
 				File file=new File(it.path)
 				BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class)
 				builder.append("fileData[\"").append(file.name).append("\"]=new Object();");
@@ -153,6 +153,7 @@ class ZiphandlerTagLib {
 				if (!it.mainFile) {
 					addFileAttributesJS(builder, file.name, "Description", it.description, true)
 				}
+				addFileAttributesJS(builder, file.name, "mime", it.mimeType, true); 
 				addFileAttributesJS(builder,file.name,"Created","${new Date(attr.creationTime().toMillis())}".toString(), true) 
 				addFileAttributesJS(builder,file.name,"Last_Modified","${new Date(attr.lastModifiedTime().toMillis())}".toString(), true) 
 				addFileAttributesJS(builder,file.name,"isInternal","false", false) 
@@ -195,9 +196,15 @@ class ZiphandlerTagLib {
         	zipSupported=attrs.zipSupported;
         	attrs.repFiles.each {
         		if (attrs.mainFile==it.mainFile) {
-        			builder.append('''<li rel="file"><a><span class="pointerhere">''')
         			File f=new File(it.path);
-        			builder.append(f.name).append("</span></a>")
+        			builder.append('''<li rel="file"><a title="''')
+        			builder.append(f.name)
+        			builder.append('''"><span class="pointerhere">''')
+        			String filename=f.name
+        			if (filename.length()>20) {
+        				filename=filename.substring(0,20)+"..."
+        			}
+        			builder.append(filename).append("</span></a>")
         			if (it.mimeType.contains('zip')) {
         				builder.append("<ul>")
         				handleZip(builder, false, it.path)

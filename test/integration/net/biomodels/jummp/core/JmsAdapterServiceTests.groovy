@@ -36,11 +36,17 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
-import org.junit.*
-import net.biomodels.jummp.model.ModelFormat
-import net.biomodels.jummp.model.Model
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
+import java.util.concurrent.Callable
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelState
+import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
+import net.biomodels.jummp.core.user.JummpAuthentication
+import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.git.GitManagerFactory
 import net.biomodels.jummp.plugins.security.User
@@ -48,21 +54,15 @@ import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
-
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-
 import org.springframework.security.core.AuthenticationException
+import static org.junit.Assert.*
 
-import net.biomodels.jummp.core.model.ModelTransportCommand
-import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.core.model.ModelFormatTransportCommand
-import net.biomodels.jummp.core.user.JummpAuthentication
-import net.biomodels.jummp.core.user.AuthenticationHashNotFoundException
-import java.util.concurrent.Callable
-
+@TestMixin(IntegrationTestMixin)
 class JmsAdapterServiceTests extends JummpIntegrationTest {
     def aclUtilService
     def modelService

@@ -278,6 +278,38 @@ public class SvnManager implements VcsManager {
         }
     }
 
+    void init(File d) {
+        throw new UnsupportedOperationException("This is a stub.")
+    }
+
+    String updateModel(File d, List files, String msg) {
+        throw new UnsupportedOperationException("This is a stub.")
+    }
+
+    List getRevisions(File d) {
+        throw new UnsupportedOperationException("This is a stub.")
+    }
+
+    List retrieveModel(File d) {
+        throw new UnsupportedOperationException("This is a stub.")
+    }
+
+    String createModel(File d, List f, String msg) {
+        throw new UnsupportedOperationException("This is a stub.")
+    }
+
+    String updateModel(File d, List f) {
+        throw new UnsupportedOperationException("This is a stub.")
+    }
+
+    List retrieveModel(File d, String revisionId) {
+        throw new UnsupportedOperationException("This is a stub.")
+    }
+
+    void updateWorkingCopy(File d){
+        throw new UnsupportedOperationException("This is a stub.")
+    }
+
     /*
      * Initializes the library to work with a repository via
      * different protocols.

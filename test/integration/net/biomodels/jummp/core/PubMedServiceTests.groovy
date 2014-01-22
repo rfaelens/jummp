@@ -34,10 +34,13 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
-import org.junit.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.model.Publication
+import org.junit.*
+import static org.junit.Assert.*
 
+@TestMixin(IntegrationTestMixin)
 class PubMedServiceTests extends JummpIntegrationTest {
     def pubMedService
     

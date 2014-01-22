@@ -45,6 +45,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
 class BootStrap {
     def springSecurityService
     def wcmSecurityService
+    def searchableService
 
     void addPublicationLinkProvider(PubLinkProvTC cmd) {
     	def publinkType=PublicationLinkProvider.LinkType.valueOf(cmd.linkType)
@@ -57,9 +58,9 @@ class BootStrap {
     }
     
     def init = { servletContext ->
-        ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "")
+        ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*")
         if (!format) {
-            format = new ModelFormat(identifier: "UNKNOWN", name: "Unknown format", formatVersion: "")
+            format = new ModelFormat(identifier: "UNKNOWN", name: "Unknown format", formatVersion: "*")
             format.save(flush: true)
         }
         def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT) 
@@ -196,7 +197,12 @@ class BootStrap {
                 }
             }
         ]
-        
+
+      // Manually start Searchable's mirroring process to ensure that it comes after the automated migrations.
+      println "Performing bulk index"
+      searchableService.reindex()
+      println "Starting mirror service"
+      searchableService.startMirroring()
     }
     def destroy = {
     }

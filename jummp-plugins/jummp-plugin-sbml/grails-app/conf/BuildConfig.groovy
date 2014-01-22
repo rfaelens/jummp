@@ -22,11 +22,29 @@
 
 
 
+grails.servlet.version = "2.5"
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
+grails.project.work.dir = "target/work"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 grails.project.groupId = "net.biomodels.jummp.plugins.sbml"
+grails.project.source.level = 1.7
+grails.project.target.level = 1.7
+// maven can't handle flatDirs, would break sbml and bives
+grails.project.dependency.resolver = "maven"
+
+grails.project.fork = [
+    // configure settings for the test-app JVM, uses the daemon by default
+    test: false, //[maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, daemon:true],
+    // configure settings for the run-app JVM
+    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    // configure settings for the run-war JVM
+    war: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    // configure settings for the Console UI JVM
+    console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256]
+]
+
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -34,20 +52,16 @@ grails.project.dependency.resolution = {
         // excludes 'ehcache'
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    legacyResolve true
     repositories {
         if (System.getenv("JUMMP_ARTIFACTORY_URL")) {
             mavenRepo "${System.getenv('JUMMP_ARTIFACTORY_URL')}"
         }
-        if (System.getenv("JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL")) {
-            grailsRepo "${System.getenv('JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL')}"
-        }
-        grailsPlugins()
-        grailsHome()
         grailsCentral()
 
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
-        //mavenLocal()
+        mavenLocal()
         mavenCentral()
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
@@ -57,7 +71,7 @@ grails.project.dependency.resolution = {
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
         mavenRepo "http://www.biojava.org/download/maven/"
-        flatDir name: "jummpLibs", dirs: "../../lib/"
+        //flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -80,8 +94,10 @@ grails.project.dependency.resolution = {
         runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
         runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"
-        compile ":sbfc:1.1-20110624-109"
-        compile ":jdom:1.1.1"
+        compile "org.sbfc:converter:1.1"
+        compile "org.jdom:jdom:1.1.3"
+        compile "xml-apis:xml-apis:1.4.01"
+        compile "jaxen:jaxen:1.1.4"
     }
 
     plugins {
@@ -90,11 +106,11 @@ grails.project.dependency.resolution = {
         test ":code-coverage:1.2.5"
 
         // default grails plugins
-        compile ":hibernate:$grailsVersion"
+        compile ":hibernate:3.6.10.3"
         compile ":jquery:1.10.0"
         //compile ":resources:1.0.2"
 
-        build ":tomcat:$grailsVersion"
+        build ":tomcat:7.0.47"
     }
 }
 grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"

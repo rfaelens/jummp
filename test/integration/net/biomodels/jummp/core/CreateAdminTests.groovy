@@ -34,12 +34,15 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
-import org.junit.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
+import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.plugins.security.UserRole
-import net.biomodels.jummp.plugins.security.Role
+import org.junit.*
+import static org.junit.Assert.*
 
+@TestMixin(IntegrationTestMixin)
 class CreateAdminTests extends JummpIntegrationTest {
     def userService
     @Override

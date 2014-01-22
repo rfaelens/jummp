@@ -46,10 +46,6 @@ class Model implements Serializable {
      */
     static hasMany = [revisions: Revision]
     /**
-     * The name of the Model
-     */
-    String name
-    /**
      * The path, relative to the folder containing all models,
      * of the folder dedicated to this model
      */
@@ -69,7 +65,6 @@ class Model implements Serializable {
     }
 
     static constraints = {
-        name(nullable: false)
         vcsIdentifier(nullable: false, blank: false, unique: true)
         revisions(nullable: false, validator: { revs ->
             return !revs.isEmpty()
@@ -86,7 +81,9 @@ class Model implements Serializable {
                 creators.add(revision.owner.userRealName)
             }
         }
-        return new ModelTransportCommand(id: id, name: name,
+        return new ModelTransportCommand(
+        		id: id,
+        		name: revisions ? revisions.sort{ it.revisionNumber }.last().name : null,
                 lastModifiedDate: revisions ? revisions.sort{ it.revisionNumber }.last().uploadDate : null,
                 format: revisions ? revisions.sort{ it.revisionNumber }.last().format.toCommandObject() : null,
                 publication: publication ? publication.toCommandObject() : null,

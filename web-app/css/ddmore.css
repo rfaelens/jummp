@@ -844,8 +844,11 @@ div.ctools-ajaxing {
     background: url(//ddmore.eu/sites/all/modules/contrib/ctools/images/status-active.gif) center center no-repeat;
 }
 
+
+
 body {
     font-size: 100%;
+    min-width: 1100px;
 }
 #skip-to-nav, #page {
     font-size: 0.75em;
@@ -1987,6 +1990,9 @@ a:hover {
 .node table.text-smaller {
     font-size: 90%;
 }
+.view table {
+	width: 100%;
+}
 .view table th, .view table td {
     padding: 5px 10px;
 }
@@ -2345,13 +2351,25 @@ a:hover {
     border-radius: 0 0 5px 5px;
 }
 #content-bottom .block.block-menu ul {
-    margin: 0;
-    padding: 16px 0 0 20px;
+   position: relative;
+   float:left;
+}
+.build {
+    position: relative;
+	float: right;
+    margin-top: 1.5%;
+    padding-right: 5px;
+}
+.build a {
+    color: #ffffff;
+    text-shadow: 1px 1px 1px #000000;
+}
+.build a:hover {
+    color: #cccccc;
 }
 #content-bottom .block.block-menu ul li {
     list-style: none;
     padding: 0 8px 0 0;
-    margin: 0 8px 0 0;
     display: inline-block;
     border-right: 1px solid #666666;
 }
@@ -2398,8 +2416,7 @@ a:hover {
     padding: 0 0 0 20px;
 }
 .front.page-node #content .section .region-content img {
-    float: right;
-    margin-top: -60px;
+    
 }
 #content .users.associated h2 {
     color: #555555;
@@ -2890,4 +2907,7 @@ ul.links .comment-add a {
 .region-sidebar-second .whats-next-list ul li .next-date span {
     display: block;
     color: #666666;
+}
+.mini-search {
+	padding-bottom:15px;
 }

@@ -65,6 +65,7 @@ import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
 import org.apache.lucene.document.Document
+import static java.util.UUID.randomUUID
 /**
  * @short Service class for managing Models
  *
@@ -207,84 +208,25 @@ class ModelService {
         String sorting = sortOrder ? 'asc' : 'desc'
         // for Admin - sees all (not deleted) models
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-            def criteria = Model.createCriteria()
-            return criteria.list {
-                ne("deleted", true)
-                if (filter && filter.length() >= 3) {
-                    or {
-                        ilike("name", "%${filter}%")
-                        publication {
-                            or {
-                                ilike("journal", "%${filter}%")
-                                ilike("title", "%${filter}%")
-                                ilike("affiliation", "%${filter}%")
-                            }
-                        }
-                    }
-                }
-                maxResults(count)
-                firstResult(offset)
-                switch (sortColumn) {
-                case ModelListSorting.NAME:
-                    order("name", sorting)
-                    break
-                case ModelListSorting.LAST_MODIFIED:
-                    revisions {
-                        order("uploadDate", sorting)
-                    }
-                    break
-                case ModelListSorting.FORMAT:
-                    revisions {
-                        order("format", sorting)
-                    }
-                    break
-                case ModelListSorting.SUBMITTER:
-                    revisions {
-                        order("owner", sorting)
-                    }
-                    break
-                case ModelListSorting.SUBMISSION_DATE:
-                    /*
-                    * Hard to get to model submission date directly. However as model ids
-                    * are sequentially generated, they are used as a surrogate.
-                    */
-                    order("id", sorting)
-                    break
-                case ModelListSorting.PUBLICATION:
-                    // TODO: implement, fall through to default
-                case ModelListSorting.ID: // Id is the default
-                default:
-                    order("id", sorting)
-                    break
-                }
-            }
-        }
-
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
-        }
-        String query = '''
-SELECT DISTINCT m FROM Revision AS r, AclEntry AS ace
-JOIN r.model AS m
-JOIN ace.aclObjectIdentity AS aoi
-JOIN aoi.aclClass AS ac
-JOIN ace.sid AS sid
+            
+        	        String query = '''
+SELECT DISTINCT m FROM Revision AS r
+JOIN r.model AS m JOIN r.owner as u 
 WHERE
-aoi.objectId = r.id
-AND ac.className = :className
-AND sid.sid IN (:roles)
-AND ace.mask IN (:permissions)
-AND ace.granting = true
-AND m.deleted = false
+'''
+if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT) {
+	query+='''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+}
+else if (sortColumn==ModelListSorting.SUBMITTER) {
+	query+='''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+}
+query+='''m.deleted = false
 AND r.deleted = false
 '''
         if (filter && filter.length() >= 3) {
             query += '''
 AND (
-lower(m.name) like :filter
-OR lower(m.publication.journal) like :filter
+lower(m.publication.journal) like :filter
 OR lower(m.publication.title) like :filter
 OR lower(m.publication.affiliation) like :filter
 )
@@ -295,7 +237,7 @@ ORDER BY
 '''
         switch (sortColumn) {
         case ModelListSorting.NAME:
-            query += "m.name"
+            query += "r.name"
             break
         case ModelListSorting.LAST_MODIFIED:
             query += "r.uploadDate"
@@ -304,7 +246,87 @@ ORDER BY
             query += "r.format"
             break
         case ModelListSorting.SUBMITTER:
-            query += "r.owner"
+            query += "u.userRealName"
+            break
+       case ModelListSorting.SUBMISSION_DATE:
+       	    /*
+       	    * Hard to get to model submission date directly. However as model ids
+       	    * are sequentially generated, they are used as a surrogate.
+       	    */
+            query += "m.id"  
+            break
+        case ModelListSorting.PUBLICATION:
+            // TODO: implement, fall through to default
+        case ModelListSorting.ID: // Id is the default
+        default:
+            query += "m.id"
+            break
+        }
+        query += " " + sorting
+        Map params = [
+            max: count, offset: offset]
+        if (filter && filter.length() >= 3) {
+            params.put("filter", "%${filter.toLowerCase()}%");
+        }
+        return Model.executeQuery(query, [:], params)
+        	
+        	
+        	
+        	
+        	
+        }
+
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+        }
+        String query = '''
+SELECT DISTINCT m FROM Revision AS r, AclEntry AS ace
+JOIN r.model AS m JOIN r.owner as u 
+JOIN ace.aclObjectIdentity AS aoi
+JOIN aoi.aclClass AS ac
+JOIN ace.sid AS sid
+WHERE
+'''
+if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT) {
+	query+='''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+}
+else if (sortColumn==ModelListSorting.SUBMITTER) {
+	query+='''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+}
+query+='''aoi.objectId = r.id
+AND ac.className = :className
+AND sid.sid IN (:roles)
+AND ace.mask IN (:permissions)
+AND ace.granting = true
+AND m.deleted = false
+AND r.deleted = false
+'''
+        if (filter && filter.length() >= 3) {
+            query += '''
+AND (
+lower(m.publication.journal) like :filter
+OR lower(m.publication.title) like :filter
+OR lower(m.publication.affiliation) like :filter
+)
+'''
+        }
+        query += '''
+ORDER BY
+'''
+        switch (sortColumn) {
+        case ModelListSorting.NAME:
+            query += "r.name"
+            break
+        case ModelListSorting.LAST_MODIFIED:
+            query += "r.uploadDate"
+            break
+        case ModelListSorting.FORMAT:
+            query += "r.format"
+            break
+        case ModelListSorting.SUBMITTER:
+            query += "u.userRealName"
             break
        case ModelListSorting.SUBMISSION_DATE:
        	    /*
@@ -328,7 +350,7 @@ ORDER BY
         if (filter && filter.length() >= 3) {
             params.put("filter", "%${filter.toLowerCase()}%");
         }
-
+        
         return Model.executeQuery(query, params)
     }
 
@@ -449,8 +471,7 @@ AND r.deleted = false
         if (filter && filter.length() >= 3) {
             query += '''
 AND (
-lower(m.name) like :filter
-OR lower(m.publication.journal) like :filter
+lower(m.publication.journal) like :filter
 OR lower(m.publication.title) like :filter
 OR lower(m.publication.affiliation) like :filter
 )
@@ -570,6 +591,39 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         modelHistoryService.addModelToHistory(model)
         return model.revisions.toList().findAll { !it.deleted }.sort {it.revisionNumber}
     }
+    
+    /**
+     * Parses the @p identifier to query for a model and optionally
+     * a revision number, separated by the . character. If no revision
+     * is specified the latest revision is returned.
+     * @param identifier The identifier in the format Model.Revision
+     * @return The revision or @c null if there is no such revision
+     */
+    @PostAuthorize("hasPermission(returnObject, read) or hasRole('ROLE_ADMIN')")
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getRevisionByIdentifier")
+    public Revision getRevision(String identifier) {
+        String[] parts=identifier.split("\\.");
+		parts.each {
+			try
+			{
+				Long.parseLong(it)
+			}
+			catch(Exception e) {
+				throw new IllegalArgumentException("Identifier ${identifier} could not be parsed")
+			}
+		}
+        Model model = Model.get(parts[0]) 
+        if (parts.length==1) {
+        	Revision revision = getLatestRevision(model)
+        	if (!revision) {
+        		throw new AccessDeniedException("Sorry you are not allowed to access this Model.")
+        	}
+        	return revision
+        }
+        return getRevision(model, Integer.parseInt(parts[1]))
+    }
+
 
     /**
      * Queries the @p model for the revision with @p revisionNumber.
@@ -584,8 +638,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.getRevision")
     public Revision getRevision(Model model, int revisionNumber) {
         Revision revision = Revision.findByRevisionNumberAndModel(revisionNumber, model)
-        if (revision.deleted) {
-            return null
+        if (!revision || revision.deleted || model.deleted) {
+            throw new AccessDeniedException("Sorry you are not allowed to access this Model.")
         } else {
             modelHistoryService.addModelToHistory(model)
             revision.refresh()
@@ -679,7 +733,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         def stopWatch = new Log4JStopWatch("modelService.addValidatedRevision.rftcCreation")
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
-            final String fileName = rf.path.split(File.separator).last()
+            String sep = File.separator.equals("/") ? "/" : "\\\\"
+            final String fileName = rf.path.split(sep).last()
             final def domain = new RepositoryFile(path: rf.path, description: rf.description, 
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
@@ -791,16 +846,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throws ModelException {
         def stopWatch = new Log4JStopWatch("modelService.uploadValidatedModel.catchDuplicate")
         // TODO: to support anonymous submissions this method has to be changed
-        if (Model.findByName(rev.model.name)) {
-            final ModelTransportCommand MODEL = Model.findByName(rev.model.name).toCommandObject()
-            final String msg = "There is already a Model with name ${rev.model.name}".toString()
+        if (Revision.findByName(rev.name)) {
+            final String msg = "There is already a Model with name ${rev.name}".toString()
             log.warn(msg)
             /*log.error(msg)
             throw new ModelException(rev.model, msg)*/
         }
         stopWatch.lap("Finished checking for model duplicates.")
         stopWatch.setTag("modelService.uploadValidatedModel.addFiles")
-        Model model = new Model(name: rev.model.name)
+        Model model = new Model()
         List<File> modelFiles = []
         for (rf in repoFiles) {
             final String path = rf.path
@@ -816,11 +870,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         String pathPrefix =
                 fileSystemService.findCurrentModelContainer() + File.separator
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(model.name).
+        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(rev.name).
                 append(File.separator).toString()
         boolean success = new File(modelPath).mkdirs()
         if (!success) {
-            def err = "Cannot create the directory where the ${model.name} should be stored"
+            def err = "Cannot create the directory where the ${rev.name} should be stored"
             log.error(err)
             throw new ModelException(rev.model, err)
         }
@@ -845,7 +899,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
              * only store the name of the file in the database, as the location can change and
              * we generate the correct path when the RepositoryFileTransportCommand wrapper is created
              */
-            String fileName = rf.path.split(File.separator).last()
+            String sep = File.separator.equals("/") ? "/" : "\\\\"
+            String fileName = rf.path.split(sep).last()
             final def domain = new RepositoryFile(path: rf.path, description: rf.description,
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
@@ -898,7 +953,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
                 revision.discard()
                 model.discard()
-                def msg  = new StringBuffer("New Model ${model.name} does not validate:\n")
+                def msg  = new StringBuffer("New Model ${rev.name} does not validate:\n")
                 msg.append("${model.errors.allErrors.inspect()}\n")
                 msg.append("${revision.errors.allErrors.inspect()}\n")
                 log.error(msg)
@@ -970,18 +1025,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throws ModelException {
         def stopWatch = new Log4JStopWatch("modelService.uploadModelAsList.sanityChecks")
         // TODO: to support anonymous submissions this method has to be changed
-        if (Model.findByName(meta.name)) {
-            final ModelTransportCommand MODEL = Model.findByName(meta.name).toCommandObject()
-            final String msg = "There is already a Model with name ${meta.name}".toString()
-            log.warn(msg)
-            /*log.error(msg)
-            throw new ModelException(meta, msg)*/
-        }
         if (!repoFiles || repoFiles.size() == 0) {
             log.error("No files were provided as part of the submission of model ${meta.properties}")
             throw new ModelException(meta, "A model must contain at least one file.")
         }
-        Model model = new Model(name: meta.name)
+        Model model = new Model()
         List<File> modelFiles = []
         for (rf in repoFiles) {
             if (!rf || !rf.path) {
@@ -1009,23 +1057,27 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         stopWatch.lap("Finished performing sanity checks.")
         stopWatch.setTag("modelService.uploadModelAsList.prepareVcsStorage")
         boolean valid = true
-        ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(meta.format.identifier, "")
+        ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(meta.format.identifier, "*")
         if (!modelFileFormatService.validate(modelFiles, format)) {
             def err = "The files ${modelFiles.inspect()} do no comprise valid ${meta.format.identifier}"
             log.error(err)
-       //     throw new ModelException(meta, "Invalid ${meta.format.identifier} submission.")
+       //     throw new ModelException(meta, "Invalid ${meta.format.identifier} submission.")v
             valid=false
         }
         // model is valid, create a new repository and store it as revision1
         // vcs identifier is upload date + name - this should by all means be unique
+        String name=modelFileFormatService.extractName(modelFiles, format)
+        if (!name && meta.name ) {
+        	name = meta.name
+        }
         String pathPrefix =
                 fileSystemService.findCurrentModelContainer() + File.separator
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(model.name).
+        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(name?.length() > 0 ? name:(randomUUID() as String)+"_blankname").
                 append(File.separator).toString()
         boolean success = new File(modelPath).mkdirs()
         if (!success) {
-            def err = "Cannot create the directory where the ${model.name} should be stored"
+            def err = "Cannot create the directory where the ${name} should be stored"
             log.error(err)
             throw new ModelException(meta, err)
         }
@@ -1037,7 +1089,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 owner: User.findByUsername(springSecurityService.authentication.name),
                 minorRevision: false,
                 validated: valid,
-                name: modelFileFormatService.extractName(modelFiles, format),
+                name: name,
                 description: modelFileFormatService.extractDescription(modelFiles, format),
                 comment: meta.comment,
                 uploadDate: new Date())
@@ -1045,11 +1097,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         // keep a list of RFs closeby, as we may need to discard all of them
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
+            String sep = File.separator.equals("/") ? "/" : "\\\\"
             /*
              * only store the name of the file in the database, as the location can change and
              * we generate the correct path when the RepositoryFileTransportCommand wrapper is created
              */
-            String fileName = rf.path.split(File.separator).last()
+            String fileName = rf.path.split(sep).last()
             final def domain = new RepositoryFile(path: rf.path, description: rf.description,
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
@@ -1073,10 +1126,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         String formatVersion = modelFileFormatService.getFormatVersion(revision)
         revision.format = ModelFormat.findByIdentifierAndFormatVersion(meta.format.identifier, formatVersion)
+        assert formatVersion != null && revision.format != null
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
         } catch (VcsException e) {
-            revision.discard()
+        	e.printStackTrace()
+        	revision.discard()
             domainObjects.each { it.discard() }
             model.discard()
             //TODO undo the addition of the files to the VCS.
@@ -1103,12 +1158,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     revision.discard()
                     domainObjects.each { it.discard() }
                     model.discard()
-                    def error = new StringBuffer("New Model ${model.name} does not validate:")
+                    def error = new StringBuffer("New Model ${name} does not validate:")
                     error.append("${model.errors.allErrors.inspect()}\n")
                     error.append("${revision.errors.allErrors.inspect()}\n")
                     log.error(error)
                     stopWatch.stop()
-                    throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data for ${model.name}", e)
+                    throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data for ${name}", e)
                 }
             } else if (meta.publication) {
                 model.publication = Publication.fromCommandObject(meta.publication)
@@ -1117,7 +1172,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
                 revision.discard()
                 model.discard()
-                def msg  = new StringBuffer("New Model ${model.name} does not validate:\n")
+                def msg  = new StringBuffer("New Model ${name} does not validate:\n")
                 msg.append("${model.errors.allErrors.inspect()}\n")
                 msg.append("${revision.errors.allErrors.inspect()}\n")
                 log.error(msg)
@@ -1163,6 +1218,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             revision.discard()
             domainObjects.each {it.discard()}
             model.discard()
+            println("New Model ${model.properties} with properties ${meta.properties} does not validate:${revision.errors.allErrors.inspect()}")
             log.error("New Model ${model.properties} with properties ${meta.properties} does not validate:${revision.errors.allErrors.inspect()}")
             throw new ModelException(model.toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
         }
@@ -1259,7 +1315,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 minorRevision: false, validated:valid)
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
-            final String fileName = rf.path.split(File.separator).last()
+            String sep = File.separator.equals("/") ? "/" : "\\\\"
+            final String fileName = rf.path.split(sep).last()
             final def domain = new RepositoryFile(path: rf.path, description: rf.description, 
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
@@ -1347,15 +1404,19 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * @return Byte Array of the content of the Model files for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
+    //@PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')") Not working. Seems related to: https://bitbucket.org/jummp/jummp/issue/23/spring-security-doesnt-work-as-expected-in
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.retrieveModelFiles")
     List<File> retrieveModelRepFiles(final Revision revision) throws ModelException {
+  	    if (!aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ) 
+  	    			&& !SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+    			throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
+   	    }
         List<File> files
         try {
             files = vcsService.retrieveFiles(revision)
         } catch (VcsException e) {
-            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.model.name} from VCS failed.")
+            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.name} from VCS failed.")
             throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.")
         }
         return files
@@ -1367,11 +1428,17 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * @return Byte Array of the content of the Model files for the revision.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    @PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")
+    //@PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')")  Not working. Seems related to: https://bitbucket.org/jummp/jummp/issue/23/spring-security-doesnt-work-as-expected-in
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.retrieveModelFiles")
     List<RepositoryFileTransportCommand> retrieveModelFiles(final Revision revision) throws ModelException {
-    	    return revision.getRepositoryFilesForRevision()
+    	if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)
+    		|| SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+        			return revision.getRepositoryFilesForRevision()
+    	}
+    	else {
+    		throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
+    	}
     }
 
     /**

@@ -107,7 +107,7 @@ class OmexService implements FileFormatService {
 
     @Profiled(tag="omexService.getFormatVersion")
     public String getFormatVersion(RevisionTransportCommand revision) {
-        return revision ? "0.1" : ""
+        return revision ? "0.1" : "*"
     }
     
     @Profiled(tag="omexService.getSearchIndexingContent")

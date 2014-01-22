@@ -50,9 +50,8 @@ try {
 def jummpConfig = new ConfigSlurper().parse(jummpProperties)
 List pluginsToExclude = []
 
-grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
-grails.mime.use.accept.header = false
+grails.mime.use.accept.header = true
 grails.mime.types = [ html: ['text/html','application/xhtml+xml'],
                       xml: ['text/xml', 'application/xml'],
                       text: 'text/plain',
@@ -66,6 +65,8 @@ grails.mime.types = [ html: ['text/html','application/xhtml+xml'],
                       form: 'application/x-www-form-urlencoded',
                       multipartForm: 'multipart/form-data'
                     ]
+//needed?
+grails.web.disable.multipart = false
 
 // URL Mapping Cache Max Size, defaults to 5000
 //grails.urlmapping.cache.maxsize = 1000
@@ -103,6 +104,7 @@ environments {
     }
 
 }
+jummp.app.name=appName
 //branding
 jummp.branding.deployment="biomodels" //used to select messages,and style if jummp.branding.style is not specified 
 jummp.branding.style="ddmore" //used to specify any other name for the css file
@@ -156,16 +158,27 @@ log4j = {
         console name: "stdout", threshold: org.apache.log4j.Level.WARN
     }
 
-    root {
-        error 'stdout'
-    }
-
     // configure the performanceStatsAppender to log at INFO level
     info   performanceStatsAppender: 'org.perf4j.TimingLogger'
-    info  jummpAppender: [
+    debug  jummpAppender: [
             'grails.app', //everything provided by grails-app, e.g. services
             'net.biomodels.jummp' // everything from jummp
     ]
+    error  jummpAppender: [
+        'org.codehaus.groovy.grails.web.servlet',  //  controllers
+        'org.codehaus.groovy.grails.web.pages', //  GSP
+        'org.codehaus.groovy.grails.web.sitemesh', //  layouts
+        'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
+        'org.codehaus.groovy.grails.web.mapping', // URL mapping
+        'org.codehaus.groovy.grails.commons', // core / classloading
+        'org.codehaus.groovy.grails.plugins', // plugins
+        'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
+        'org.springframework',
+        'org.hibernate',
+        'net.sf.ehcache.hibernate'
+    ]
+
+    warn   jummpAppender: 'org.mortbay.log'
     // Simple Logging goes to its own file
     info   eventsAppender: 'net.biomodels.jummp.plugins.simplelogging'
 
@@ -290,6 +303,14 @@ if (!(jummpConfig.jummp.security.registration.email.send instanceof ConfigObject
     jummp.security.registration.email.send = false
 }
 
+// whether a user has curator rights by default, allowing them to publish models
+// they have access to.
+if (!(jummpConfig.jummp.security.curatorByDefault instanceof ConfigObject)) {
+    jummp.security.curatorByDefault = Boolean.parseBoolean(jummpConfig.jummp.security.curatorByDefault)
+} else {
+    // default to true
+    jummp.security.curatorByDefault = true
+}
 
 // whether a user is allowed to change the password depends on the setting an if LDAP is used
 // in case of LDAP changing the password is not (yet) possible in the application
@@ -418,6 +439,13 @@ grails.plugins.springsecurity.controllerAnnotations.staticRules = jummp.controll
 if (!"jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
     jms.disabled = true
 }
+
+// tweak searchable configuration so that it plays nicely with database-migration
+searchable {
+    mirrorChanges = false
+    bulkIndexOnStartup = false
+}
+
 environments {
     test {
         // need to disable the plugins or tests may fail
@@ -434,6 +462,8 @@ if (pluginsToExclude) {
     grails.plugin.excludes = pluginsToExclude
 }
 
+//platform-core 1.0RC5, used by weceem
+plugin.platformCore.events.catchFlushExceptions = true
 // weceem
 grails.mime.file.extensions = false
 weceem.content.prefix = 'content'
@@ -471,3 +501,27 @@ if (!(jummpConfig.jummp.security.mailer.tlsrequired instanceof ConfigObject)) {
 	grails.mail.props["mail.smtp.starttls.required"]=jummpConfig.jummp.security.mailer.tlsrequired
 }
 
+
+// Uncomment and edit the following lines to start using Grails encoding & escaping improvements
+
+/* remove this line 
+// GSP settings
+grails {
+    views {
+        gsp {
+            encoding = 'UTF-8'
+            htmlcodec = 'xml' // use xml escaping instead of HTML4 escaping
+            codecs {
+                expression = 'html' // escapes values inside null
+                scriptlet = 'none' // escapes output from scriptlets in GSPs
+                taglib = 'none' // escapes output from taglibs
+                staticparts = 'none' // escapes output from static template parts
+            }
+        }
+        // escapes all not-encoded output at final stage of outputting
+        filteringCodecForContentType {
+            //'text/html' = 'html'
+        }
+    }
+}
+remove this line */

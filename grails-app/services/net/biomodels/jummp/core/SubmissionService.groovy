@@ -319,14 +319,12 @@ class SubmissionService {
         @Profiled(tag = "submissionService.handleSubmission")
         void handleSubmission(Map<String,Object> workingMemory) {
             try {
-                completeSubmission(workingMemory)
+            	completeSubmission(workingMemory)
+            	cleanup(workingMemory)
             }
             catch(Exception e) {
                 e.printStackTrace()
                 throw e
-            }
-            finally {
-                cleanup(workingMemory)
             }
         }
         /*
@@ -489,7 +487,6 @@ class SubmissionService {
             List<RFTC> repoFiles = getRepFiles(workingMemory)
             RTC revision=workingMemory.get("RevisionTC") as RTC
             MTC model=revision.model
-            model.name=revision.name
             model.format=revision.format
             revision.comment="Import of ${revision.name}".toString()
             workingMemory.put("model_id",
@@ -584,7 +581,13 @@ class SubmissionService {
             RTC revision=workingMemory.get("LastRevision") as RTC
             if (workingMemory.containsKey("reprocess_files")) {
                 String formatId = workingMemory["model_type"] as String
-                final String formatVersion = revision.format.formatVersion ? revision.format.formatVersion : ""
+                final String formatVersion
+                if (formatId != revision.format.identifier) {
+                	formatVersion="*"
+                }
+                else {
+                	formatVersion = revision.format.formatVersion ? revision.format.formatVersion : "*"
+                }
                 revision.format =
                         ModelFormat.findByIdentifierAndFormatVersion(formatId, formatVersion).toCommandObject()
             }

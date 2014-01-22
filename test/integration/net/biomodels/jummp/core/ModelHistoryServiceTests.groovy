@@ -34,25 +34,25 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
-import org.junit.*
-import net.biomodels.jummp.plugins.git.GitManagerFactory
-import net.biomodels.jummp.plugins.security.Role
-import net.biomodels.jummp.plugins.security.User
-
-import net.biomodels.jummp.core.model.ModelTransportCommand
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
-
+import net.biomodels.jummp.plugins.git.GitManagerFactory
+import net.biomodels.jummp.plugins.security.Role
+import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-
+import org.junit.*
 import org.springframework.security.acls.domain.BasePermission
+import static org.junit.Assert.*
 
+@TestMixin(IntegrationTestMixin)
 class ModelHistoryServiceTests extends JummpIntegrationTest {
     /**
      * Dependency Injection of Grails Application
@@ -98,31 +98,30 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
         assertTrue(modelHistoryService.history().isEmpty())
         assertNull(modelHistoryService.lastAccessedModel().id)
         // add a Model to the history by accessing its revision
-        assertNotNull(modelService.getRevision(Model.findByName("model1"), 1))
+        assertNotNull(modelService.getRevision(Revision.findByName("model1").model, 1))
         // everything should still be empty
         assertTrue(modelHistoryService.history().isEmpty())
         assertNull(modelHistoryService.lastAccessedModel().id)
         // just ensure that this does not change when adding the history directly
-        modelHistoryService.addModelToHistory(Model.findByName("model1"))
+        modelHistoryService.addModelToHistory(Revision.findByName("model1").model)
         assertTrue(modelHistoryService.history().isEmpty())
         assertNull(modelHistoryService.lastAccessedModel().id)
 
         // now the same with history enabled
         grailsApplication.config.jummp.model.history.maxElements = 10
         // add a Model to the history by accessing its revision
-        assertNotNull(modelService.getRevision(Model.findByName("model1"), 1))
+        assertNotNull(modelService.getRevision(Revision.findByName("model1").model, 1))
         // everything should still be empty
         assertTrue(modelHistoryService.history().isEmpty())
         assertNull(modelHistoryService.lastAccessedModel().id)
         // just ensure that this does not change when adding the history directly
-        modelHistoryService.addModelToHistory(Model.findByName("model1"))
+        modelHistoryService.addModelToHistory(Revision.findByName("model1").model)
         assertTrue(modelHistoryService.history().isEmpty())
         assertNull(modelHistoryService.lastAccessedModel().id)
 
         // and just for the joy of it - trying all Models
         (1..11).each { it ->
-            assertNotNull(modelService.getRevision(Model.findByName("model${it}"), 1))
-            modelHistoryService.addModelToHistory(Model.findByName("model${it}"))
+            assertNotNull(modelService.getRevision(Revision.findByName("model${it}").model, 1))
             assertTrue(modelHistoryService.history().isEmpty())
             assertNull(modelHistoryService.lastAccessedModel().id)
         }
@@ -137,12 +136,12 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
         assertTrue(modelHistoryService.history().isEmpty())
         assertNull(modelHistoryService.lastAccessedModel().id)
         // add a Model to the history by accessing its revision
-        assertNotNull(modelService.getRevision(Model.findByName("model1"), 1))
+        assertNotNull(modelService.getRevision(Revision.findByName("model1").model, 1))
         // everything should still be empty
         assertTrue(modelHistoryService.history().isEmpty())
         assertNull(modelHistoryService.lastAccessedModel().id)
         // just ensure that this does not change when adding the history directly
-        modelHistoryService.addModelToHistory(Model.findByName("model1"))
+        modelHistoryService.addModelToHistory(Revision.findByName("model1").model)
         assertTrue(modelHistoryService.history().isEmpty())
         assertNull(modelHistoryService.lastAccessedModel().id)
 
@@ -150,7 +149,7 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.model.history.maxElements = 10
         assertTrue(modelHistoryService.history().isEmpty())
         // add a Model to the history by accessing its revision
-        Model model = Model.findByName("model1")
+        Model model = Revision.findByName("model1").model
         assertNotNull(modelService.getRevision(model, 1))
         // the model should now be visible in the history
         List<ModelTransportCommand> history = modelHistoryService.history()
@@ -168,7 +167,7 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
 
         // access all other available Models - history size should not surpass 10
         (2..10).each {
-            Model currentModel = Model.findByName("model${it}")
+            Model currentModel = Revision.findByName("model${it}").model
             assertNotNull(modelService.getRevision(currentModel, 1))
             history = modelHistoryService.history()
             assertEquals(it, history.size())
@@ -181,7 +180,7 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
         // now the size is 10
         assertEquals(10, modelHistoryService.history().size())
         // access one item to get it to the front
-        Model currentModel = Model.findByName("model5")
+        Model currentModel = Revision.findByName("model5").model
         assertNotNull(modelService.getRevision(currentModel, 1))
         history = modelHistoryService.history()
         assertEquals(10, history.size())
@@ -190,16 +189,16 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
         // last Model of list is still unchanged
         assertEquals(model.id, history.last().id)
         // second item of list is our previous first one
-        assertEquals(Model.findByName("model10").id, history[1].id)
+        assertEquals(Revision.findByName("model10").model.id, history[1].id)
 
         // accessing a Model not yet in the list should throw out the oldest
-        currentModel = Model.findByName("model11")
+        currentModel = Revision.findByName("model11").model
         assertNotNull(modelService.getRevision(currentModel, 1))
         history = modelHistoryService.history()
         assertEquals(10, history.size())
         assertEquals(currentModel.id, history.first().id)
         assertEquals(currentModel.id, modelHistoryService.lastAccessedModel().id)
-        assertEquals(Model.findByName("model2").id, history.last().id)
+        assertEquals(Revision.findByName("model2").model.id, history.last().id)
         history.each {
 			assert(model.id != it.id)
         }

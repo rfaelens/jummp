@@ -31,7 +31,7 @@ eventCompileStart = { msg ->
     def proc = "git log -1 --pretty=format:\"%h|%aD\"".execute()
     proc.waitFor()
     ant.mkdir(dir: "grails-app/views/templates/")
-    new FileOutputStream("grails-app/views/templates/_version.gsp", false) << proc.in.text
+    new FileOutputStream("grails-app/views/templates/_version.gsp", false) << "<BuildFormat:formatter build="+proc.in.text+"/>"
 
     // copy the messages.properties
     ant.mkdir(dir: "web-app/js/i18n/")
@@ -40,4 +40,27 @@ eventCompileStart = { msg ->
 
 eventCompileEnd = {
     weceem()
+}
+
+/**
+ * Since version 2.3.2, Grails needs a little help to produce the WAR file.
+ * The error message that is produced can be safely ignored.
+ */
+final String warName
+
+eventCreateWarStart = { name, d ->
+    println "Intercepted CreateWarStart event."
+    warName = name
+    ant.jar(destfile:name, basedir:d, manifest:"${d}/META-INF/MANIFEST.MF")
+}
+
+eventStatusError = { msg ->
+    File war = new File(warName)
+    if (war.exists()) {
+        String relativeWarPath = war.absolutePath - (grailsSettings.baseDir.absolutePath + File.separator)
+        if (msg) {
+            println "\n\nThe above error message can be ignored."
+        }
+        println "Successfully created $relativeWarPath."
+    }
 }

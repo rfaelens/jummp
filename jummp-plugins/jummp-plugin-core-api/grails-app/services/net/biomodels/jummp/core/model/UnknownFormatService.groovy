@@ -54,7 +54,7 @@ class UnknownFormatService implements FileFormatService {
      * @return an empty String.
      */
     public final String getFormatVersion(RevisionTransportCommand revision) {
-        return ""
+        return "*"
     }
     /**
      * Extracts the descrition from the @p model.

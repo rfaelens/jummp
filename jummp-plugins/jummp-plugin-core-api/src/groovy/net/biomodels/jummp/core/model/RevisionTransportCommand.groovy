@@ -104,6 +104,10 @@ class RevisionTransportCommand implements Serializable {
          }
          return files
      }
+     
+     String identifier() {
+     	 return model.id+":"+revisionNumber
+     }
 
      void setFiles(List<RepositoryFileTransportCommand> f) {
          files=f;

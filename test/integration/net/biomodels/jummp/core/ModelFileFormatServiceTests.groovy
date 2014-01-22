@@ -34,15 +34,18 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
-import org.junit.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
+import net.biomodels.jummp.core.model.FileFormatService
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.core.model.UnknownFormatService
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.plugins.sbml.SbmlService
-import net.biomodels.jummp.core.model.FileFormatService
-import net.biomodels.jummp.core.model.UnknownFormatService
 import org.apache.commons.io.FileUtils
-import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import org.junit.*
+import static org.junit.Assert.*
 
+@TestMixin(IntegrationTestMixin)
 class ModelFileFormatServiceTests {
     def modelFileFormatService
     def grailsApplication
@@ -68,7 +71,7 @@ class ModelFileFormatServiceTests {
         assertNotNull(dontKnowThisFormatService)
         // for sbml it needs to be a SbmlService
         def formatService = modelFileFormatService.serviceForFormat(
-                ModelFormat.findByIdentifierAndFormatVersion("SBML", ""))
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "*"))
         assertNotNull(formatService)
         assertTrue(formatService instanceof FileFormatService)
         assertTrue(formatService instanceof SbmlService)
@@ -131,7 +134,7 @@ class ModelFileFormatServiceTests {
   <model/>
 </sbml>''')
         assertFalse(modelFileFormatService.validate([invalidSbml],
-                ModelFormat.findByIdentifierAndFormatVersion("SBML", "")))
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "*")))
         // and for a valid SBML file it should be true
         File validSbml = new File("target/sbml/validSbml")
         FileUtils.deleteQuietly(validSbml)
@@ -165,9 +168,9 @@ class ModelFileFormatServiceTests {
         assertEquals("", modelFileFormatService.extractName(null, ModelFormat.findByIdentifier("UNKNOWN")))
         File sbmlModel = new File("test/files/BIOMD0000000272.xml")
         assertEquals("Becker2010_EpoR_AuxiliaryModel", modelFileFormatService.extractName([sbmlModel],
-                ModelFormat.findByIdentifierAndFormatVersion("SBML", "")))
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "*")))
         File omexModel = new File("jummp-plugins/jummp-plugin-combine-archive/test/files/sample.omex")
         assertEquals("", modelFileFormatService.extractName([omexModel],
-                ModelFormat.findByIdentifierAndFormatVersion("OMEX", "")))
+                ModelFormat.findByIdentifierAndFormatVersion("OMEX", "*")))
     }
 }

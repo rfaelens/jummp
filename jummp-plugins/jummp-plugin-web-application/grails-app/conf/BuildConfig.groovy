@@ -22,10 +22,26 @@
 
 
 
+grails.servlet.version = "2.5"
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
-grails.project.target.level = 1.6
+grails.project.work.dir = "target/work"
+grails.project.source.level = 1.7
+grails.project.target.level = 1.7
+grails.project.dependency.resolver = "maven"
+
+grails.project.fork = [
+    // configure settings for the test-app JVM, uses the daemon by default
+    test: false, //[maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, daemon:true],
+    // configure settings for the run-app JVM
+    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    // configure settings for the run-war JVM
+    war: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    // configure settings for the Console UI JVM
+    console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256]
+]
+
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 grails.project.groupId = "net.biomodels.jummp.webapp"
 
@@ -36,37 +52,30 @@ grails.project.dependency.resolution = {
         // excludes 'ehcache'
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    legacyResolve true
     repositories {
         if (System.getenv("JUMMP_ARTIFACTORY_URL")) {
             mavenRepo "${System.getenv('JUMMP_ARTIFACTORY_URL')}"
         }
-        if (System.getenv("JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL")) {
-            grailsRepo "${System.getenv('JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL')}"
-        }
-        grailsPlugins()
-        grailsHome()
         grailsCentral()
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
-        //mavenCentral()
-        //mavenLocal()
+        mavenCentral()
+        mavenLocal()
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
-        flatDir name: "jummpLibs", dirs: "../../lib/"
+        //flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-
-        // runtime 'mysql:mysql-connector-java:5.1.5'
-        
+        // swagger
+        compile 'com.wordnik:swagger-servlet_2.10:1.3.1'
     }
 
     plugins {
-        compile ":svn:1.0.2"
-        build(":tomcat:$grailsVersion",
-              ":release:1.0.0") {
+        build(":tomcat:7.0.47",
+              ":release:3.0.1") {
             export = false
         }
         compile ":jquery:1.10.0"

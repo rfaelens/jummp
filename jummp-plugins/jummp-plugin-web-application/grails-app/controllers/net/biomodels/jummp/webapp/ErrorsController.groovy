@@ -23,26 +23,32 @@
 
 
 package net.biomodels.jummp.webapp
+import net.biomodels.jummp.webapp.rest.error.Error
 
 import javax.servlet.http.HttpServletResponse
 
 class ErrorsController {
-    def springSecurityService
+    
+	def springSecurityService
+	def messageSource
+	
+	private Error getError(String code, Object[] args = null) {
+		return new Error(messageSource.getMessage("error.${code}.title",args, Locale.getDefault()),
+						 messageSource.getMessage("error.${code}.explanation",args, Locale.getDefault()))
+	}
 
     def error403 = {
         response.setStatus HttpServletResponse.SC_FORBIDDEN
-        if (springSecurityService.isAjax(request)) {
-            render springSecurityService.isLoggedIn().toString()
-            return
+        if (params.format && params.format!="html") {
+            respond getError("403")
         } else {
             [authenticated: springSecurityService.isLoggedIn()]
         }
     }
 
     def error404 = {
-        if (springSecurityService.isAjax(request)) {
-            render request.forwardURI
-            return
+        if (params.format && params.format!="html") {
+            respond getError("404", [request.forwardURI])
         } else {
             [resource: request.forwardURI]
         }
@@ -60,9 +66,8 @@ class ErrorsController {
             }
         }
         digest = digest.encodeAsMD5()
-        if (springSecurityService.isAjax(request)) {
-            render digest
-            return
+        if (params.format && params.format!="html") {
+        	respond new Error("Internal Server Error", digest)    
         } else {
             [code: digest]
         }

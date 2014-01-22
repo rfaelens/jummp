@@ -34,6 +34,7 @@
 
 package net.biomodels.jummp.webapp
 
+import com.wordnik.swagger.annotations.*
 import grails.plugins.springsecurity.Secured
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -48,8 +49,12 @@ import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import org.apache.commons.lang.exception.ExceptionUtils
+import grails.transaction.*
+import static org.springframework.http.HttpStatus.*
+import static org.springframework.http.HttpMethod.*
+import org.apache.commons.io.FileUtils
 
-
+@Api(value = "/model", description = "Operations related to models")
 class ModelController {
     /**
      * Flag that checks whether the dynamically-inserted logger is set to DEBUG or higher.
@@ -88,25 +93,55 @@ class ModelController {
     
     def showWithMessage = {
         flash["giveMessage"]=params.flashMessage
-        redirect(action: show, id:params.id)
+        redirect(action: "show", id:params.id)
     }
 
-    def show = {
-        ModelTransportCommand model=modelDelegateService.getModel(params.id as Long)
-        boolean showPublishOption = modelDelegateService.canPublish(model.id)
-        boolean canUpdate = modelDelegateService.canAddRevision(model.id)
+    @ApiOperation(value = "Show a model.", httpMethod = "GET",
+                response = net.biomodels.jummp.webapp.rest.model.show.Model.class,
+                notes = "Pass the expected media type of the request as a parameter e.g. /model/id?format=json")
+    @ApiImplicitParam(name = "modelId", value = "The model identifier", required = true, allowMultiple = false)
+    def show() {
+        if (!params.format || params.format=="html") {
+        		RevisionTransportCommand rev=modelDelegateService.getRevision(params.id)
+        		boolean showPublishOption = modelDelegateService.canPublish(rev.model.id)
+        		boolean canUpdate = modelDelegateService.canAddRevision(rev.model.id)
 
-        String flashMessage=""
-        if (flash.now["giveMessage"]) {
-            flashMessage=flash.now["giveMessage"]
+        		String flashMessage=""
+        		if (flash.now["giveMessage"]) {
+        			flashMessage=flash.now["giveMessage"]
+        		}
+        		List<RevisionTransportCommand> revs=modelDelegateService.getAllRevisions(rev.model.id)
+        		def model=[revision: rev, 
+        				   authors: rev.model.creators,
+        				   allRevs: revs,
+        				   flashMessage: flashMessage,
+        				   canUpdate: canUpdate,
+        				   showPublishOption: showPublishOption,
+        		]
+        		if (rev.id == modelDelegateService.getLatestRevision(rev.model.id).id)
+        		{
+        			flash.genericModel=model
+        			forward controller:modelFileFormatService.getPluginForFormat(rev.model.format),
+                			action:"show",
+                			id: params.id
+                }
+                else { //showing an old version, with the default page. Dont allow updates.
+                	model["canUpdate"]=false
+                	model["showPublishOption"]=false
+                	model["oldVersion"]=true
+                	return model
+                }
         }
-        forward controller:modelFileFormatService.getPluginForFormat(model.format),
-                action:"show",
-                id: params.id,
-                params:[flashMessage:flashMessage,
-                    canUpdate:canUpdate,
-                    showPublishOption:showPublishOption
-                ]
+        else {
+        	RevisionTransportCommand rev=modelDelegateService.getRevision(params.id)
+           	respond new net.biomodels.jummp.webapp.rest.model.show.Model(rev)
+        }
+    }
+
+    def files = {
+        def revisionFiles = modelDelegateService.getRevision(params.id).files
+        def responseFiles = revisionFiles.findAll { !it.hidden }
+        respond new net.biomodels.jummp.webapp.rest.model.show.ModelFiles(responseFiles)
     }
 
     def publish = {
@@ -209,7 +244,7 @@ class ModelController {
         uploadFiles {
             on("Upload") {
                 def mainMultipartList = request.getMultiFileMap().mainFile
-                def extraFileField = request.getMultiFileMap().extraFile
+                def extraFileField = request.getMultiFileMap().extraFiles
                 List<MultipartFile> extraMultipartList = []
                 if (extraFileField instanceof MultipartFile) {
                     extraMultipartList = [extraFileField]
@@ -217,7 +252,7 @@ class ModelController {
                 else {
                     extraMultipartList = extraFileField
                 }
-                def descriptionFields = params["description"]
+                def descriptionFields = params?.description ?: [""]
                 if (descriptionFields instanceof String) {
                     descriptionFields = [descriptionFields]
                 }
@@ -232,9 +267,9 @@ class ModelController {
                 }
 
                 def cmd = new UploadFilesCommand()
-                bindData(cmd, mainMultipartList, [include: ['mainFile']])
-                bindData(cmd, extraMultipartList, [include: ['extraFiles']])
-                bindData(cmd, descriptionFields)
+                cmd.mainFile = mainMultipartList
+                cmd.extraFiles = extraMultipartList
+                cmd.description = descriptionFields
                 if (IS_DEBUG_ENABLED) {
                     log.debug "Data binding done :${cmd.properties}"
                 }
@@ -277,8 +312,6 @@ class ModelController {
                         }
                     }
                     else {
-                    	//System.out.println(cmd.errors["mainFile"])
-                        //System.out.println(cmd.errors["mainFile"].getProperties())
                         throw new Exception("Error in uploading files. Cmd did not validate: ${cmd.getProperties()}")
                     }
                 } 
@@ -420,8 +453,14 @@ class ModelController {
         		if (flow.workingMemory.remove("RetrievePubDetails") as Boolean) {
         			ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
         			if (model.publication.link && model.publication.linkProvider) {
-        				def retrieved=pubMedService.
+        				def retrieved
+        				try {
+        					retrieved=pubMedService.
         							getPublication(model.publication)
+        				}
+        				catch(Exception e) {
+        					e.printStackTrace()
+        				}
         				if (retrieved) {
         					model.publication = retrieved.toCommandObject() 
         				}
@@ -542,6 +581,17 @@ class ModelController {
         		if (flow.isUpdate) {
                 	session.removeAttribute(flow.workingMemory.get("SafeReferenceVariable") as String)
                 }
+                if (flow.workingMemory.containsKey("repository_files")) {
+                	def repFile=flow.workingMemory.get("repository_files").first()
+                	if (repFile) {
+                		File aSingleFile=new File(repFile.path)
+                		File buggyFiles=new File(new File(grailsApplication.config.jummp.vcs.exchangeDirectory),"buggy")
+                		File temporaryStorage=new File(buggyFiles, ticket)
+                		temporaryStorage.mkdirs()
+                		FileUtils.copyDirectory(new File(aSingleFile.getParent()), temporaryStorage)
+                	}
+                }
+                submissionService.cleanup(flow.workingMemory)
         		mailService.sendMail {
         			to grailsApplication.config.jummp.security.registration.email.adminAddress
         			from grailsApplication.config.jummp.security.registration.email.sender
@@ -575,10 +625,10 @@ class ModelController {
             resp.outputStream << new ByteArrayInputStream(byteBuffer.toByteArray())
     }
     
-    private void serveModelAsFile(RFTC rf, def resp) {
+    private void serveModelAsFile(RFTC rf, def resp, boolean inline) {
             File file=new File(rf.path)
             resp.setContentType(rf.mimeType)
-            resp.setHeader("Content-disposition", "attachment;filename=\"${file.getName()}\"")
+            resp.setHeader("Content-disposition", "${inline? "inline" : "attachment"};filename=\"${file.getName()}\"")
             resp.outputStream<< new ByteArrayInputStream(file.getBytes())
     }
     
@@ -586,41 +636,39 @@ class ModelController {
     /**
      * File download of the model file for a model by id
      */
-    def downloadFile = {
-        try
-        {
-            List<RFTC> files = modelDelegateService.retrieveModelFiles(new RevisionTransportCommand(id: params.id as int))
-            RFTC requested=files.find {
-            	    File file=new File(it.path)
-            	    file.getName()==params.filename
-            }
-            if (requested) {
-            	    serveModelAsFile(requested, response)
-            }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace()
-        }
-    }
-    
-
-    /**
-     * File download of the model file for a model by id
-     */
     def download = {
         try
         {
-            List<RFTC> files = modelDelegateService.retrieveModelFiles(new RevisionTransportCommand(id: params.id as int))
-            List<RFTC> mainFiles = files.findAll { it.mainFile }
-            if (files.size() == 1) {
-            	    serveModelAsFile(files.first(), response)
-            }
-            else if (mainFiles.size() == 1) {
-            	    serveModelAsFile(mainFiles.first(), response)
+        	if (!params.filename) {	
+        		List<RFTC> files = modelDelegateService.retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
+        		List<RFTC> mainFiles = files.findAll { it.mainFile }
+        		if (files.size() == 1) {
+            		   serveModelAsFile(files.first(), response, false)
+            	}
+            	else if (mainFiles.size() == 1) {
+            		   serveModelAsFile(mainFiles.first(), response, false)
+            	}
+            	else {
+            	       serveModelAsZip(files, response)
+            	}
             }
             else {
-            	    serveModelAsZip(files, response)
+            	List<RFTC> files = modelDelegateService.
+            						retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
+            	RFTC requested=files.find {
+                    if (it.hidden) {
+                        return false
+                    }
+            	    File file=new File(it.path)
+            	    file.getName()==params.filename
+            	}
+            	boolean inline=true
+            	if (!params.inline) {
+            		inline=false
+            	}
+            	if (requested) {
+            	    serveModelAsFile(requested, response, inline)
+            	}            	
             }
         }
         catch(Exception e)

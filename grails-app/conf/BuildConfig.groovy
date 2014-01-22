@@ -22,13 +22,30 @@
 
 
 
+grails.servlet.version = "2.5"
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
+grails.project.work.dir = "target/work"
 grails.project.war.file = "target/${appName}.war"
 grails.project.groupId = "net.biomodels.jummp"
 grails.project.source.level = 1.7
 grails.project.target.level = 1.7
+// maven can't handle flatDirs, would break sbml and bives
+grails.project.dependency.resolver = "maven"
+
+customJvmArgs = ["-server", "-noverify", "-XX:+UseConcMarkSweepGC", "-XX:+UseParNewGC" ]
+grails.project.fork = [
+    // configure settings for the test-app JVM, uses the daemon by default
+    test: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, daemon:true],
+    // configure settings for the run-app JVM
+    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false, jvmArgs: customJvmArgs],
+    // configure settings for the run-war JVM
+    war: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false, jvmArgs: customJvmArgs],
+    // configure settings for the Console UI JVM
+    console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256, jvmArgs: customJvmArgs]
+]
+
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -36,23 +53,20 @@ grails.project.dependency.resolution = {
         // excludes 'ehcache'
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    legacyResolve true
     repositories {
+        inherits true //inherit repo definitions from plugins
         if (System.getenv("JUMMP_ARTIFACTORY_URL")) {
             println "Artifactory URL: " + System.getenv("JUMMP_ARTIFACTORY_URL")
             mavenRepo "${System.getenv('JUMMP_ARTIFACTORY_URL')}"
         }
-        if (System.getenv("JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL")) {
-            println "Grails Repo URL: " + System.getenv("JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL")
-            grailsRepo "${System.getenv('JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL')}"
-        }
         grailsPlugins()
         grailsHome()
         grailsCentral()
-        ebr()
 
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
-        //mavenLocal()
+        mavenLocal()
         mavenCentral()
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
@@ -61,6 +75,8 @@ grails.project.dependency.resolution = {
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
         mavenRepo "http://download.eclipse.org/jgit/maven"
+        // compass 2.2.1
+        mavenRepo "http://repo.grails.org/grails/core"
         mavenRepo "http://www.biojava.org/download/maven/"
     }
     dependencies {
@@ -78,8 +94,8 @@ grails.project.dependency.resolution = {
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
         // dependencies of jsbml
-        runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
-        runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
+        runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api', 'stax-api' }
+        runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api', 'stax-api' }
         runtime "org.codehaus.woodstox:stax2-api:3.1.0"
         //compile ('org.apache.lucene:lucene-core:4.4.0')
         //compile ('org.apache.lucene:lucene-analyzers-common:4.4.0')
@@ -107,9 +123,9 @@ grails.project.dependency.resolution = {
         }
 
         // bives
-        runtime('org.apache.commons:commons-compress:1.1') { excludes 'commons-io' }
+        //runtime('org.apache.commons:commons-compress:1.1') { excludes 'commons-io' }
 
-        // jms
+        /* jms
         runtime('org.apache.activemq:activeio-core:3.1.2',
                 'org.apache.activemq:activemq-core:5.5.0',
                 'org.apache.activemq:activemq-spring:5.5.0',
@@ -127,8 +143,12 @@ grails.project.dependency.resolution = {
                     'slf4j-api',
                     'xalan',
                     'xml-apis'
-        }
+        }*/
         compile "xml-apis:xml-apis:1.4.01"
+        compile "jaxen:jaxen:1.1.4"
+
+        compile "org.jdom:jdom:1.1.3"
+
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
 
         //git
@@ -141,8 +161,6 @@ grails.project.dependency.resolution = {
         }
         //weceem, feeds
         runtime("rome:rome:1.0RC2") { excludes 'junit', 'jdom' }
-        //lesscss
-        compile "commons-io:commons-io:2.4"
 
         // cobertura
         compile "asm:asm:3.1"
@@ -150,14 +168,18 @@ grails.project.dependency.resolution = {
         compile "com.thoughtworks.xstream:xstream:1.4.3"
 
         compile "org.apache.tika:tika-core:1.3"
+
+        // broken Grails 2.3.2 dependecies
+        compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core', 'junit-dep' }
+        compile "org.springframework:spring-test:3.2.4.RELEASE"
     }
 
     plugins {
         compile ":webxml:1.4.1"
         compile ":perf4j:0.1.1"
-        compile ":jms:1.2"
+        //compile ":jms:1.2"
         compile ":executor:0.3"
-        compile ":mail:1.0.1"
+        compile(":mail:1.0.1") { excludes 'spring-test' }
         compile ":simple-captcha:0.9.4"
         //compile ":quartz:0.4.2"
         compile(":quartz:1.0-RC6") { excludes 'hibernate-core' /* don't need 3.6.10.Final */ }
@@ -165,10 +187,9 @@ grails.project.dependency.resolution = {
         //compile(":quartz-monitor:0.2") { export = false } //requires quartz plugin version 0.4.2 
 
         compile ":spring-security-acl:1.1.1"
-        compile ":svn:1.0.2"
-        runtime ":spring-security-core:1.2.7.3"
-        runtime(":spring-security-ldap:1.0.6"){ export = false }
-        //compile(":lesscss-resources:1.3.3") { excludes 'commons-io' }
+        //compile ":svn:1.0.2"
+        compile ":spring-security-core:1.2.7.3"
+        compile ":spring-security-ldap:1.0.6"
         test ":code-coverage:1.2.6"
         test(":codenarc:0.18.1") { transitive = false }
         test ":gmetrics:0.3.1"
@@ -177,24 +198,27 @@ grails.project.dependency.resolution = {
                      'quartz',
                      'jquery',
                      'jquery-ui',
+                     'ant',     // 1.7 is too old
                      //also exclude java feeds API rome in order to avoid conflicting revisions
                      'feeds',
-                     'ckeditor'
-               //      'searchable'
+                     'ckeditor',
+                     'searchable' // 0.6.5+ needed for Grails 2.3
         }
+        compile(":searchable:0.6.6")
         runtime(":feeds:1.6") { excludes 'rome', 'jdom' }
         runtime(":ckeditor:3.6.3.0") { excludes 'svn' }
         compile ":jquery-datatables:1.7.5"
         compile ":jquery-ui:1.8.24"
         // Locale plugin
         compile ":locale-variant:0.1"
+        runtime ":database-migration:1.3.8"
         // default grails plugins
-        compile ":hibernate:$grailsVersion"
+        compile ":hibernate:3.6.10.6"
         compile ":webflow:2.0.8.1"
-        compile ":jquery:1.10.2"
+        compile ":jquery:1.10.2.2"
         //compile ":resources:1.2"
 
-        build ":tomcat:$grailsVersion"
+        build ":tomcat:7.0.47"
 
     }
 }
@@ -244,14 +268,6 @@ codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
                              'jummp-plugins/*/test/unit',
                              'jummp-plugins/*/test/integration']
 
-grails.tomcat.jvmArgs = ["-Xmx2G",
-                        "-Xss512M",
-                        "-XX:MaxPermSize=256M",
-                        "-server",
-                        "-noverify",
-                        "-XX:+UseConcMarkSweepGC",
-                        "-XX:+UseParNewGC"
-]
 
 //ensure that AST.jar is put in the right place. See scripts/AST.groovy
 System.setProperty("jummp.basePath", new File("./").getAbsolutePath())

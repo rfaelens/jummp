@@ -50,37 +50,27 @@ class PharmMlController {
     def pharmMlService
 
     def show = {
-        Long modelID = params.id as Long;
-        List<RevisionTransportCommand> revs = modelDelegateService.getAllRevisions(modelID)
-        final RevisionTransportCommand revision = revs.last()
-        PharmML dom = pharmMlService.getDomFromRevision(revision)
+        def model=flash.genericModel
+        PharmML dom = pharmMlService.getDomFromRevision(model.revision)
         TrialDesignType design = dom?.trialDesign
-        ModellingStepsType steps = pharmMlService.getModellingSteps(revision)
+        ModellingStepsType steps = pharmMlService.getModellingSteps(model.revision)
 
-        render(view:"/model/pharmml/show", model: [
-                revision: revision,
-                authors: revision.model.creators,
-                allRevs: revs,
-                modelDefinition: dom.modelDefinition,
-                trialDesign: design,
-                independentVar: pharmMlService.getIndependentVariable(dom),
-                functionDefs: pharmMlService.getFunctionDefinitions(dom),
-                structuralModel: pharmMlService.getStructuralModel(dom),
-                variabilityModel: pharmMlService.getVariabilityModel(dom),
-                covariateModel: pharmMlService.getCovariateModel(dom),
-                parameterModel: pharmMlService.getParameterModel(dom),
-                observationModel: pharmMlService.getObservationModel(dom),
-                structure: pharmMlService.getTrialDesignStructure(design),
-                population: pharmMlService.getPopulation(design),
-                dosing: pharmMlService.getIndividualDosing(design),
-                estSteps: pharmMlService.getEstimationSteps(steps),
-                simSteps: pharmMlService.getSimulationSteps(steps),
-                stepDeps: pharmMlService.getStepDependencies(steps),
-                flashMessage: params.flashMessage,
-                canUpdate:params.canUpdate,
-                showPublishOption:params.showPublishOption,
-                showUnpublishOption:params.showUnpublishOption
-            ]
-        )
+        model["modelDefinition"] = dom.modelDefinition
+        model["trialDesign"] = design
+        model["independentVar"] = pharmMlService.getIndependentVariable(dom)
+        model["functionDefs"] = pharmMlService.getFunctionDefinitions(dom)
+        model["structuralModel"] = pharmMlService.getStructuralModel(dom)
+        model["variabilityModel"] = pharmMlService.getVariabilityModel(dom)
+        model["covariateModel"] = pharmMlService.getCovariateModel(dom)
+        model["parameterModel"] = pharmMlService.getParameterModel(dom)
+        model["observationModel"] = pharmMlService.getObservationModel(dom)
+        model["structure"] = pharmMlService.getTrialDesignStructure(design)
+        model["population"] = pharmMlService.getPopulation(design)
+        model["dosing"] = pharmMlService.getIndividualDosing(design)
+        model["estSteps"] = pharmMlService.getEstimationSteps(steps)
+        model["simSteps"] = pharmMlService.getSimulationSteps(steps)
+        model["stepDeps"] = pharmMlService.getStepDependencies(steps)
+
+        render(view:"/model/pharmml/show", model: model)
     }
 }

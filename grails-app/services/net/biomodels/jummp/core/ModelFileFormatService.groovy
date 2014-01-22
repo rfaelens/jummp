@@ -93,9 +93,9 @@ class ModelFileFormatService {
             return ffs.areFilesThisFormat(modelFiles)
         }
         if (!match) {
-            return ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "").toCommandObject()
+            return ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*").toCommandObject()
         } else {
-            return ModelFormat.findByIdentifierAndFormatVersion(match, "").toCommandObject()
+            return ModelFormat.findByIdentifierAndFormatVersion(match, "*").toCommandObject()
         }
     }
 
@@ -122,7 +122,7 @@ class ModelFileFormatService {
     }
 
     ModelFormatTransportCommand registerModelFormat(final String identifier, final String name) {
-        return registerModelFormat(identifier, name, "")
+        return registerModelFormat(identifier, name, "*")
     }
 
     /**
@@ -137,7 +137,7 @@ class ModelFileFormatService {
      */
     @Profiled(tag = "modelFileFormatService.handleModelFormat")
     void handleModelFormat(ModelFormatTransportCommand format, String service, String controller) {
-        ModelFormat modelFormat = ModelFormat.findByIdentifierAndFormatVersion(format.identifier, "")
+        ModelFormat modelFormat = ModelFormat.findByIdentifierAndFormatVersion(format.identifier, "*")
         if (!modelFormat) {
             throw new IllegalArgumentException("ModelFormat ${format.properties} not registered in database")
         }
@@ -197,11 +197,11 @@ class ModelFileFormatService {
     /**
      * Retrieves the version of the format in which @p revisiontransportcommand is encoded.
      * @param revision the RevisionTransportCommand/Revision for which to extract the format version.
-     * @return The format version, or an empty String if this cannot be extracted.
+     * @return The format version, or '*' if this cannot be extracted.
      */
     String getFormatVersion(def revision) {
         FileFormatService service = serviceForFormat(revision?.format)
-        return service ? service.getFormatVersion(revision) : ""
+        return service ? service.getFormatVersion(revision) : "*"
     }
 
     /**

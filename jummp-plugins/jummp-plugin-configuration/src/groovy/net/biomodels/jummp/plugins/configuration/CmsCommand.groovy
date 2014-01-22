@@ -50,6 +50,6 @@ class CmsCommand implements Serializable {
     String policyFile
 
     static constraints = {
-        policyFile(nullable: false, blank: true)
+        policyFile(nullable: false)
     }
 }

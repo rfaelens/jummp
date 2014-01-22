@@ -98,7 +98,7 @@ class Publication implements Serializable {
         // TODO: do we need more than 250 characters?
         affiliation(nullable: false, blank: false)
         // TODO: How long can an abstract be? Are 5000 characters sufficient?
-        synopsis(nullable: false, blank: true, maxSize: 5000)
+        synopsis(nullable: false, maxSize: 5000)
         year(nullable: true)
         month(nullable: true)
         day(nullable: true)

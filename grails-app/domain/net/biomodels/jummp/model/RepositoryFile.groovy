@@ -78,15 +78,13 @@ class RepositoryFile implements Serializable {
     boolean userSubmitted = false
     /**
      * The content type of this file as defined in http://www.iana.org/assignments/media-types/
-     * 
      */
     String mimeType
 
     static constraints = {
-        path(blank: false,
+        path(blank: false, nullable: false,
             validator: { p, rf ->
-                String sep  = File.separator
-                if (p == null || !new File(p).exists()) {
+                if (!p || !new File(p).exists()) {
                     return false
                 }
                 def f = new File(p).getCanonicalFile()
@@ -96,43 +94,11 @@ class RepositoryFile implements Serializable {
                 p = f.name
                 if (!rf.mimeType.equals(properType)) {
                     rf.mimeType = properType
-                    return true
                 }
+                return true
             })
-        description(blank: true, maxSize:500)
+        description(nullable: true, maxSize:500)
         //content type detection is performed above, when we validate the path of the file
-        mimeType(nullable: true, blank: true)
-/*        mainFile(validator: { main, rf ->
-            if (main) {
-                return !rf.hidden
-            }
-            return true
-        })
-*/
+        mimeType(nullable: true)
     }
-
-    /**
-     * Comply with the need to provide the absolute file paths in RepositoryFileTransportCommand objects
-     * while also being flexible about the location of the root folder where all models are stored.
-     *
-     * Edit: Disabled to prevent RepositoryFile belonging to previous revision referring
-     * to a file in the current model directory.
-     */
-
-/*
-    RepositoryFileTransportCommand toCommandObject() {
-        final String sep = File.separator
-        def realPath = new StringBuffer(fileSystemService.root.absolutePath)
-        realPath.append(sep).append(revision.model.vcsIdentifier).append(sep)
-        realPath.append(path)
-        return new RepositoryFileTransportCommand(
-                path: realPath.toString(),
-                description: description,
-                hidden: hidden,
-                mainFile: mainFile,
-                userSubmitted: userSubmitted,
-                mimeType: mimeType,
-                revision: revision ? revision.toCommandObject() : null
-        )
-    }*/
 }

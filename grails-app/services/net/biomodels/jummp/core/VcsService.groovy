@@ -86,7 +86,7 @@ class VcsService {
         }
 
         if (commitMessage == null || commitMessage.isEmpty()) {
-            return vcsManager.updateModel(new File(model.vcsIdentifier), files, "Update of $model.name")
+            return vcsManager.updateModel(new File(model.vcsIdentifier), files, "Updated at ${new Date().toGMTString()}")
         } else {
             return vcsManager.updateModel(new File(model.vcsIdentifier), files, commitMessage)
         }
@@ -113,7 +113,7 @@ class VcsService {
             throw new VcsException("Version Control System is not valid")
         }
 
-        return vcsManager.updateModel(new File(model.vcsIdentifier), files, "Import of ${model.name}")
+        return vcsManager.updateModel(new File(model.vcsIdentifier), files, "Imported model at ${new Date().toGMTString()}")
     }
 
     /**

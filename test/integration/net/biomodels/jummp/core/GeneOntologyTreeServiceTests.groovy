@@ -34,20 +34,23 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
-import org.junit.*
-import net.biomodels.jummp.core.miriam.MiriamDatatype
-import net.biomodels.jummp.core.miriam.GeneOntologyTreeLevel
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.core.miriam.GeneOntology
-import net.biomodels.jummp.core.miriam.MiriamIdentifier
 import net.biomodels.jummp.core.miriam.GeneOntologyRelationship
 import net.biomodels.jummp.core.miriam.GeneOntologyRelationshipType
-import net.biomodels.jummp.model.ModelFormat
-import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.model.Revision
-import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.core.miriam.GeneOntologyTreeLevel
+import net.biomodels.jummp.core.miriam.MiriamDatatype
+import net.biomodels.jummp.core.miriam.MiriamIdentifier
 import net.biomodels.jummp.core.miriam.MiriamResource
+import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.ModelFormat
+import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.plugins.security.User
+import org.junit.*
+import static org.junit.Assert.*
 
+@TestMixin(IntegrationTestMixin)
 class GeneOntologyTreeServiceTests extends JummpIntegrationTest {
     def geneOntologyTreeService
 

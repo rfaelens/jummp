@@ -22,9 +22,27 @@
 
 
 
+grails.servlet.version = "2.5"
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
+grails.project.work.dir = "target/work"
+grails.project.source.level = 1.7
+grails.project.target.level = 1.7
+// maven can't handle flatDirs, would break sbml and bives
+grails.project.dependency.resolver = "maven"
+
+grails.project.fork = [
+    // configure settings for the test-app JVM, uses the daemon by default
+    test: false, //[maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, daemon:true],
+    // configure settings for the run-app JVM
+    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    // configure settings for the run-war JVM
+    war: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    // configure settings for the Console UI JVM
+    console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256]
+]
+
 
 grails.project.dependency.resolution = {
     inherits("global") {
@@ -35,9 +53,6 @@ grails.project.dependency.resolution = {
     repositories {
         if (System.getenv("JUMMP_ARTIFACTORY_URL")) {
             mavenRepo "${System.getenv('JUMMP_ARTIFACTORY_URL')}"
-        }
-        if (System.getenv("JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL")) {
-            grailsRepo "${System.getenv('JUMMP_ARTIFACTORY_GRAILS_PLUGINS_URL')}"
         }
         grailsCentral()
         mavenCentral()
@@ -50,12 +65,16 @@ grails.project.dependency.resolution = {
         }
         //test "org.junit:junit:4.10"
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
-        compile "commons-io:commons-io:2.4"
+        compile "commons-io:commons-io:2.1"
         compile 'xml-apis:xml-apis:1.4.01'
+        // mime-type detection
+        compile "org.apache.tika:tika-core:1.3"
+        // broken Grails 2.3.2 dependecy
+        compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core' }
     }
 
     plugins {
-        build(":tomcat:$grailsVersion",
+        build(":tomcat:7.0.47",
               ":release:2.2.1",
               ":rest-client-builder:1.0.3") {
             export = false

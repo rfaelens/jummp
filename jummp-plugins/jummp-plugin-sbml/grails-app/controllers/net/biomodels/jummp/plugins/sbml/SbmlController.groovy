@@ -34,17 +34,6 @@ class SbmlController {
 	def modelDelegateService
 	
 	def show={
-		 Long modelID=params.id as Long;
-		 List<RevisionTransportCommand> revs=modelDelegateService.getAllRevisions(modelID)
-		 
-		render(view:"/model/sbml/show", model: [revision: revs.last(), 
-    		 authors: revs.last().model.creators,
-    		 allRevs: revs,
-    		 flashMessage: params.flashMessage,
-    		 canUpdate:params.canUpdate,
-		     showPublishOption:params.showPublishOption, 
-    	     showUnpublishOption:params.showUnpublishOption
-    		]
-    		)
+		render(view:"/model/sbml/show", model: flash.genericModel)
 	}
 }

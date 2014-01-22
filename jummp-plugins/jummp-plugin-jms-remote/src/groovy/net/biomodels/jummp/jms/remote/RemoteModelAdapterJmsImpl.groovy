@@ -37,6 +37,8 @@ package net.biomodels.jummp.jms.remote
 import org.perf4j.aop.Profiled
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.remote.RemoteModelAdapter
 import net.biomodels.jummp.webapp.ast.RemoteJmsAdapter
 
@@ -52,6 +54,7 @@ import net.biomodels.jummp.webapp.ast.RemoteJmsAdapter
  *
  * Important: The methods of this adapter are auto-generated through an AST transformation.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 @RemoteJmsAdapter("RemoteModelAdapter")
 class RemoteModelAdapterJmsImpl extends AbstractJmsRemoteAdapter implements RemoteModelAdapter {
@@ -79,5 +82,12 @@ class RemoteModelAdapterJmsImpl extends AbstractJmsRemoteAdapter implements Remo
         def retVal = send("getAllModels", [sort])
         validateReturnValue(retVal, List)
         return (List)retVal
+    }
+
+    @Profiled(tag="RemoteModelAdapterJmsImpl.addRevision")
+    RevisionTransportCommand addRevision(long modelId, byte[] file, ModelFormatTransportCommand format, String comment) {
+        def returnValue = send("addRevision", [modelId, file, format, comment])
+        validateReturnValue(returnValue, RevisionTransportCommand)
+        return (RevisionTransportCommand) returnValue
     }
 }

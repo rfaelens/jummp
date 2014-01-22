@@ -34,6 +34,8 @@
 
 package net.biomodels.jummp.core
 
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -45,6 +47,7 @@ import org.apache.commons.io.FileUtils
 import org.junit.*
 import static org.junit.Assert.*
 
+@TestMixin(IntegrationTestMixin)
 class SearchTests extends JummpIntegrationTest {
     def modelService
     def fileSystemService

@@ -690,6 +690,7 @@ class ConfigurationService implements InitializingBean {
         }
         cmd.activationUrl = cmd.activationUrl + "register/confirmRegistration/{{CODE}}"*/
         properties.setProperty("jummp.security.anonymousRegistration", cmd.registration ? "true" : "false")
+        properties.setProperty("jummp.security.curatorByDefault", cmd.curator ? "true" : "false")
         properties.setProperty("jummp.security.registration.email.send", cmd.sendEmail ? "true" : "false")
         properties.setProperty("jummp.security.registration.email.sendToAdmin", cmd.sendToAdmin ? "true" : "false")
         properties.setProperty("jummp.security.registration.email.sender", cmd.senderAddress)

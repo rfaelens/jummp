@@ -90,7 +90,7 @@ Adds support for the COMBINE archive into JUMMP.
     def doWithApplicationContext = { applicationContext ->
          try {
             def service = applicationContext.getBean("modelFileFormatService")
-            ["", "0.1"].each {
+            ["*", "0.1"].each {
                 def modelFormat = service.registerModelFormat("OMEX", "COMBINE archive", it)
                 service.handleModelFormat(modelFormat, "omexService","combine")
             }

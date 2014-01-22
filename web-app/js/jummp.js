@@ -33,6 +33,21 @@ $.jummp.warningMessage = function (message) {
 };
 
 /**
+ * Same as g.createLinkNoAction.
+ * @param controller The name of the grails controller
+ * @param id The optional id
+ */
+$.jummp.createLinkNoAction = function (controller, id) {
+    "use strict";
+    var path = controller;
+    if (id !== undefined) {
+         path += "/" + id;
+    }
+    return $.jummp.createURI(path);
+};
+
+
+/**
  * Same as g.createLink.
  * @param controller The name of the grails controller
  * @param action The optional action

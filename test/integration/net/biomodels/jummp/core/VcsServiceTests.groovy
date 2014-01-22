@@ -37,32 +37,33 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
-import org.junit.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
+import net.biomodels.jummp.core.vcs.FileNotVersionedException
+import net.biomodels.jummp.core.vcs.VcsException
+import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.ModelFormat
+import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.git.GitManagerFactory
+import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.lib.Repository
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import org.tmatesoft.svn.core.io.SVNRepositoryFactory
-import org.springframework.context.ApplicationContextAware
-import org.springframework.context.ApplicationContext
-import org.springframework.security.access.AccessDeniedException
-import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.model.Revision
-import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.core.vcs.VcsException
-import net.biomodels.jummp.core.vcs.FileNotVersionedException
-import org.eclipse.jgit.lib.ObjectId
-import org.eclipse.jgit.revwalk.RevWalk
-import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.lib.Constants
-import net.biomodels.jummp.model.ModelFormat
-import org.springframework.mock.web.MockServletContext
+import org.eclipse.jgit.lib.ObjectId
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.revwalk.RevCommit
+import org.eclipse.jgit.revwalk.RevWalk
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.junit.*
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
 import org.springframework.core.io.FileSystemResourceLoader
-import java.util.List
-import java.util.LinkedList
+import org.springframework.mock.web.MockServletContext
+import org.springframework.security.access.AccessDeniedException
+//import org.tmatesoft.svn.core.io.SVNRepositoryFactory
+import static org.junit.Assert.*
 
+@TestMixin(IntegrationTestMixin)
 class VcsServiceTests extends JummpIntegrationTest implements ApplicationContextAware {
     /**
      * Dependency injection of the service we want to test
@@ -141,8 +142,8 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         String modelIdentifier="target/vcs/git"
         assertFalse(vcsService.isValid())
         // first create a model
-        Model model = new Model(name: "test", vcsIdentifier: modelIdentifier)
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"",description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
+        Model model = new Model(vcsIdentifier: modelIdentifier)
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name: "test", description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())
@@ -203,8 +204,8 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         RevCommit revCommit = revWalk.parseCommit(commit)
         assertEquals(commit.getName(), rev)
         // we did not specify a commit message, so default should be used
-        assertEquals("Import of ${model.name}".toString(), revCommit.getShortMessage())
-        assertEquals("Import of ${model.name}".toString(), revCommit.getFullMessage())
+        assertTrue(revCommit.getShortMessage().contains("Imported model at"))
+        assertTrue(revCommit.getFullMessage().contains("Imported model at"))
         // importing again should fail
 /*        shouldFail(VcsException) {
             vcsService.importFile(model, importFile)
@@ -218,8 +219,8 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         String modelIdentifier="target/vcs/git"
         assertFalse(vcsService.isValid())
         // first create a model
-        Model model = new Model(name: "test", vcsIdentifier: modelIdentifier)
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"",description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
+        Model model = new Model(vcsIdentifier: modelIdentifier)
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"test",description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())
@@ -270,16 +271,8 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
 
-       /* // file is not yet imported, so uploading should fail with a VcsException
-        shouldFail(FileNotVersionedException) {
-            vcsService.updateFile(model, importFile, null)
-        }
-        // import a file to the git repository, to make future updates possible
-        gitService.getInstance().importFile(importFile, "test.xml")*/
-        
         
         String rev = vcsService.updateModel(model, imports, null)
-
         for (i in 0..9)
         {
             File gitFile = new File("target/vcs/git/test${i}.xml")
@@ -294,8 +287,8 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         RevCommit revCommit = revWalk.parseCommit(commit)
         assertEquals(commit.getName(), rev)
         // we passed null as commit message, so default should be used
-        assertEquals("Update of $model.name".toString(), revCommit.getShortMessage())
-        assertEquals("Update of $model.name".toString(), revCommit.getFullMessage())
+        assertTrue(revCommit.getShortMessage().contains("Updated at"))
+        assertTrue(revCommit.getFullMessage().contains("Updated at"))
         // try again with an empty commit message - should also be default message
         imports.each
         {
@@ -321,8 +314,8 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         revWalk = new RevWalk(repository)
         revCommit = revWalk.parseCommit(commit)
         assertEquals(commit.getName(), rev)
-        assertEquals("Update of $model.name".toString(), revCommit.getShortMessage())
-        assertEquals("Update of $model.name".toString(), revCommit.getFullMessage())
+        assertTrue(revCommit.getShortMessage().contains("Updated at"))
+        assertTrue(revCommit.getFullMessage().contains("Updated at"))
         // try with a custom commit message
         
         imports.each
@@ -398,8 +391,8 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         String modelIdentifier="target/vcs/git"
         assertFalse(vcsService.isValid())
         // first create a model
-        Model model = new Model(name: "test", vcsIdentifier: modelIdentifier)
-        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"",description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
+        Model model = new Model(vcsIdentifier: modelIdentifier)
+        Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"test",description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
         assertTrue(model.validate())

@@ -45,8 +45,12 @@
 		<li>${model.publication.authors.collect{"${it.initials?:""} ${it.lastName}"}.join(", ")}</li>
     	<li><i>${model.publication.journal}</i>${model.publication.month?", ${model.publication.month}/":""}${model.publication.year?"${model.publication.year}":""}${model.publication.volume?", Volume ${model.publication.volume}":""}${model.publication.issue?", Issue ${model.publication.issue}":""}${model.publication.pages?", pages: ${model.publication.pages}":""}</li>
  		<div class="hiddenContent">
- 			<li><label>Affiliation: </label> ${model.publication.affiliation}</li>
-    		<li><label>Abstract: </label>${model.publication.synopsis}</li>
+ 			<g:if test="${model.publication.affiliation}">
+ 				<li><label>Affiliation: </label> ${model.publication.affiliation}</li>
+ 			</g:if>
+ 			<g:if test="${model.publication.synopsis}">
+    			<li><label>Abstract: </label>${model.publication.synopsis}</li>
+    		</g:if>
     	</div>
     	</ul>
     	<g:javascript contextPath="" src="simple-expand.js"/>

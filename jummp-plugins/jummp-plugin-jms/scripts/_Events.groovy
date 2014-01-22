@@ -38,7 +38,7 @@ basePath = System.getProperty("jummp.basePath")
 if (!basePath) {
     basePath = "../../"
 }
-astScriptLocation = Metadata.current.'app.name'.matches("jummp-plugin-jms") ?
+astScriptLocation = Metadata.current.'app.name'.contains("jummp-plugin-jms") ?
         "../../scripts/AST.groovy" : "scripts/AST.groovy"
 
 includeTargets << new File(astScriptLocation)

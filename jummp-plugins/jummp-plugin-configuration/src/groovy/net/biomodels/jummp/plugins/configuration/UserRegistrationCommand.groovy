@@ -44,6 +44,7 @@ import grails.validation.Validateable
 class UserRegistrationCommand implements Serializable {
     private static final long serialVersionUID = 1L
     Boolean registration
+    Boolean curator
     Boolean sendEmail
     Boolean sendToAdmin
     String senderAddress

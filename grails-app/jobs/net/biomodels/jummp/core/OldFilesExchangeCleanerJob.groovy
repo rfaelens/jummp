@@ -57,7 +57,7 @@ class OldFilesExchangeCleanerJob {
     def execute() {
     	    new File(grailsApplication.config.jummp.vcs.exchangeDirectory).eachFile({f ->
     	    	    System.out.println("EXCHANGE CLEANER: Processing "+f.getName()+" last modified at "+f.lastModified())
-    	    	    if (f.lastModified() <= veryOld) {
+    	    	    if (f.lastModified() <= veryOld && !f.getName().contains("buggy")) {
     	    	    	    if (f.isFile()) {
     	    	    	    	    f.delete()
     	    	    	    }
