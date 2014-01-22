@@ -105,10 +105,10 @@ class SearchController {
     	List<MTC> models=[]
     	models.addAll(modelService.searchModels(query))
     	if (!sortBy) {
-    		sortBy="name"
+    		sortBy="modified"
     	}
     	if (!sortDirection) {
-    		sortDirection="asc"
+    		sortDirection="desc"
     	}
 		int sortDir=1
 		if (sortDirection=="asc") {
@@ -155,10 +155,10 @@ class SearchController {
     
     private def browseCore(String sortBy, String sortDirection, int offset, int length) {
     	if (!sortBy) {
-    		sortBy="name"
+    		sortBy="modified"
     	}
     	if (!sortDirection) {
-    		sortDirection="asc"
+    		sortDirection="desc"
     	}
 		int sortDir=1
 		if (sortDirection=="asc") {
