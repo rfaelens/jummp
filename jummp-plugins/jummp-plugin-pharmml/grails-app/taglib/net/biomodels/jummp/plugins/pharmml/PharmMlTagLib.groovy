@@ -70,6 +70,7 @@ import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
 import eu.ddmore.libpharmml.dom.modeldefn.LhsTransformationType
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariableType
 import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
+import eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType
 import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
 import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
@@ -416,29 +417,13 @@ class PharmMlTagLib {
 
         def result
         try {
-            result = new StringBuilder("<h3>Structural ")
+            result = new StringBuilder()
             boolean multipleStructuralModels = sm.size() > 1
             if (!multipleStructuralModels) {
-                result.append("Model ").append(sm[0].name?.value ?: sm[0].blkId)
+                displayStructuralModel(sm[0], iv, result)
             } else {
-                result.append("Models")
-            }
-            result.append("</h3>\n")
-            if (!multipleStructuralModels) {
-                def model = sm[0]
-                if (model.simpleParameter) {
-                    result.append("<p class=\"bold\">Parameters </p>")
-                    result.append(simpleParams(model.simpleParameter))
-                }
-                if (model.commonVariable) {
-                    result.append("<p class=\"bold\">Variable definitions</p>")
-                    result.append(["<div>", "</div>\n"].join(
-                        commonVariables(model.commonVariable, iv).toString()))
-                }
-            } else { //TODO: refactor above-code into a separate method and call it for each of the structural models.
                 sm.each { s ->
-                    result.append("<h4>").append(s.name?.value ?: s.blkId).append("</h4>\n")
-                    //todo expand
+                    displayStructuralModel(s, iv, result)
                 }
             }
         } catch(Exception e) {
@@ -447,6 +432,20 @@ class PharmMlTagLib {
             return
         }
         out << result.toString()
+    }
+
+    void displayStructuralModel(StructuralModelType model, String iv, StringBuilder result) {
+        result.append("<h3>Structural Model ").append(model.name?.value ?: model.blkId)
+        result.append("</h3>\n")
+        if (model.simpleParameter) {
+            result.append("<p class=\"bold\">Parameters </p>")
+            result.append(simpleParams(model.simpleParameter))
+        }
+        if (model.commonVariable) {
+            result.append("<p class=\"bold\">Variable definitions</p>")
+            result.append(["<div>", "</div>\n"].join(
+                commonVariables(model.commonVariable, iv).toString()))
+        }
     }
 
     StringBuilder commonVariables(List<JAXBElement> vars, def indepVar) {
