@@ -158,7 +158,6 @@ class ModelController {
        boolean deleted=modelDelegateService.deleteModel(params.id as int)
        redirect(action: "showWithMessage", id: params.id,
                 params: [flashMessage: deleted?"Model has been deleted, and moved into archives.":"Model could not be deleted"])
- 
     }
     
     @Secured(["isAuthenticated()"])
@@ -168,12 +167,16 @@ class ModelController {
                 if (!params.id) {
                     return error()
                 }
+                if (!modelDelegateService.canAddRevision(params.id as Long)) {
+                	return accessDenied()
+                }
                 conversation.model_id=params.id
             }
             on("success").to "uploadPipeline"
             on("error"){
             	session.updateMissingId="True"
             }.to "displayErrorPage"
+            on("accessDenied").to "displayAccessDenied"
         }
         uploadPipeline {
             subflow(controller: "model", action: "upload", input: [isUpdate: true])
@@ -184,6 +187,7 @@ class ModelController {
         abort()
         displayConfirmationPage()
         displayErrorPage()
+        displayAccessDenied()
     }
 
     @Secured(["isAuthenticated()"])
