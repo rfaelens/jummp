@@ -75,6 +75,17 @@ class SearchController {
 		 respond new BrowseResults(results)    
     }
     
+    /**
+     * Default action showing a list view
+     */
+    def archive = {
+    	def results=archiveCore(params.sortBy, 
+		 					   params.sortDir, 
+		 					   params.offset ? Integer.parseInt(params.offset):0, 10)
+		 									  
+		return results
+    }
+    
     def searchRedir = {
     	    redirect action: 'search', params: [query:params.search_block_form]
     }
@@ -151,6 +162,50 @@ class SearchController {
         
     }
     
+    private def archiveCore(String sortBy, String sortDirection, int offset, int length) {
+    	if (!sortBy) {
+    		sortBy="modified"
+    	}
+    	if (!sortDirection) {
+    		sortDirection="desc"
+    	}
+		int sortDir=1
+		if (sortDirection=="asc") {
+			sortDir=-1;
+		}
+    	ModelListSorting sort
+        switch (sortBy) {
+        case "name":
+            sort = ModelListSorting.NAME
+            break
+        case "format":
+            sort = ModelListSorting.FORMAT
+            break
+        case "submitter":
+            sort = ModelListSorting.SUBMITTER
+            break
+        case "submitted":
+            sort = ModelListSorting.SUBMISSION_DATE
+            break
+        case "modified":
+            sort = ModelListSorting.LAST_MODIFIED
+            break
+        default:
+            sort = ModelListSorting.ID
+            break
+        }
+        List modelsDomain = modelService.getAllModels(offset, length, sortDirection == "asc", sort, null, true)
+        List models = []
+        modelsDomain.each {
+        	models.add(it.toCommandObject())
+        }
+        return [models: models, 
+        		modelsAvailable: modelService.getModelCount(null, false),
+        		sortBy: sortBy,
+        		sortDirection: sortDirection,
+        		offset: offset,
+        		length: length]
+    }
     
     
     private def browseCore(String sortBy, String sortDirection, int offset, int length) {

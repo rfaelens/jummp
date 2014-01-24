@@ -200,7 +200,7 @@ class ModelService {
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllModels")
     public List<Model> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn,
-    			String filter = null) {
+    			String filter = null, boolean deletedOnly=false) {
         if (offset < 0 || count <= 0) {
             // safety check
             return []
@@ -220,9 +220,7 @@ if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.F
 else if (sortColumn==ModelListSorting.SUBMITTER) {
 	query+='''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
 }
-query+='''m.deleted = false
-AND r.deleted = false
-'''
+query+="m.deleted = ${deletedOnly} AND r.deleted = false"
         if (filter && filter.length() >= 3) {
             query += '''
 AND (
@@ -423,12 +421,12 @@ ORDER BY
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getModelCount")
-    public Integer getModelCount(String filter = null) {
+    public Integer getModelCount(String filter = null, boolean deletedOnly = false) {
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
             // special handling for Admin - is allowed to see all (not deleted) Models
             def criteria = Model.createCriteria()
             return criteria.get {
-                ne("deleted", true)
+                ne("deleted", !deletedOnly)
                 if (filter && filter.length() >= 3) {
                     or {
                         ilike("name", "%${filter}%")
@@ -465,9 +463,9 @@ AND ac.className = :className
 AND sid.sid IN (:roles)
 AND ace.mask IN (:permissions)
 AND ace.granting = true
-AND m.deleted = false
 AND r.deleted = false
 '''
+query+=" AND m.deleted=${deletedOnly} "
         if (filter && filter.length() >= 3) {
             query += '''
 AND (
