@@ -200,7 +200,7 @@ class SearchController {
         	models.add(it.toCommandObject())
         }
         return [models: models, 
-        		modelsAvailable: modelService.getModelCount(null, false),
+        		modelsAvailable: modelService.getModelCount(null, true),
         		sortBy: sortBy,
         		sortDirection: sortDirection,
         		offset: offset,

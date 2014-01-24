@@ -200,7 +200,7 @@ class ModelService {
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllModels")
     public List<Model> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn,
-    			String filter = null, boolean deletedOnly=false) {
+    	String filter = null, boolean deletedOnly=false) {
         if (offset < 0 || count <= 0) {
             // safety check
             return []
@@ -298,9 +298,9 @@ AND ac.className = :className
 AND sid.sid IN (:roles)
 AND ace.mask IN (:permissions)
 AND ace.granting = true
-AND m.deleted = false
 AND r.deleted = false
 '''
+query+=" AND m.deleted = ${deletedOnly} "
         if (filter && filter.length() >= 3) {
             query += '''
 AND (
@@ -1637,12 +1637,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * @return @c true in case the Model has been deleted, @c false otherwise.
     * @see ModelService#restoreModel(Model model)
     **/
-    @PreAuthorize("hasPermission(#model, delete) or hasRole('ROLE_ADMIN')")
+    /*@PreAuthorize("hasPermission(#model, delete) or hasRole('ROLE_ADMIN')")*/ //Doesnt work
     @PostLogging(LoggingEventType.DELETION)
     @Profiled(tag="modelService.deleteModel")
     public boolean deleteModel(Model model) {
         if (!model) {
             throw new IllegalArgumentException("Model may not be null")
+        }
+        if (!canDelete(model)) {
+        	throw new AccessDeniedException("You do not have permission to delete this model")
         }
         if (model.deleted) {
         	return false

@@ -29,19 +29,14 @@
 
 <%@ page contentType="text/html;charset=UTF-8" %>
     <head>
-        <title>Model Search</title>
         <meta name="layout" content="main" />
          <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'datatablestyle.css')}" />
          <g:javascript contextPath="" src="jquery/jquery-ui-v1.10.3.js"/>
     </head>
-    <body activetab="search">
-    	<g:render template="/templates/${grailsApplication.config.jummp.branding.style}/searchBox"/>
-    	<g:render template="/templates/datatable" model="['action': 'search']"/>
+    <body>
+    	<g:render template="/templates/datatable" model="['action': 'archive']"/>
     </body>
-    <content tag="searchQuery">
-    		${query}
-    </content>
     <content tag="title">
-		Search Model Repository
+		Archived Models
 	</content>
     
