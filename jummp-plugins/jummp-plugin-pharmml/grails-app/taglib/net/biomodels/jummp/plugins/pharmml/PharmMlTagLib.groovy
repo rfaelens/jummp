@@ -58,12 +58,14 @@ import eu.ddmore.libpharmml.dom.dataset.DataSetType
 import eu.ddmore.libpharmml.dom.maths.BinopType
 import eu.ddmore.libpharmml.dom.maths.ConstantType
 import eu.ddmore.libpharmml.dom.maths.Equation
-import eu.ddmore.libpharmml.dom.maths.FunctionCallType
 import eu.ddmore.libpharmml.dom.maths.EquationType
+import eu.ddmore.libpharmml.dom.maths.FunctionCallType
 import eu.ddmore.libpharmml.dom.maths.UniopType
 import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
 import eu.ddmore.libpharmml.dom.modeldefn.ContinuousCovariateType
+import eu.ddmore.libpharmml.dom.modeldefn.CorrelatedRandomVarType
+import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
+import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
@@ -575,13 +577,36 @@ class PharmMlTagLib {
                    if (individuals) {
                        result.append(individuals)
                    }
+                   if (pm.correlation) {
+                       pm.correlation.each { cor ->
+                           correlation(cor, result)
+                       }
+                   }
                    result.append("</div>")
             }
         } catch(Exception e) {
-            log.error("Error rendering the parameter model for ${parameterModel.inspect()} ${parameterModel.properties}: ${e.message}")
+            log.error("Error rendering the parameter model for ${parameterModel.inspect()} ${parameterModel.properties}: ${e.message}\nStacktrace:\n${e.printStackTrace()}")
             out << "Sorry, something went wrong while rendering the parameter model."
         }
         out << result.toString()
+    }
+
+    void correlation(CorrelationType c, StringBuilder output) {
+        final String CORRELATION_TYPE
+        final ScalarRhs VALUE
+        if (c.correlationCoefficient) {
+            CORRELATION_TYPE = "correlation"
+            VALUE = c.correlationCoefficient
+        } else if (c.covariance) {
+            CORRELATION_TYPE = "covariance"
+            VALUE = c.covariance
+        }
+        output.append("<div><span>")
+        convertToMathML(CORRELATION_TYPE, [c.randomVariable1, c.randomVariable2], VALUE, output)
+        output.append("; </span><span class='bold'>Variability Level &mdash; </span><span>")
+        String var = c.variabilityReference.symbRef?.symbIdRef ?:
+                        c.variabilityReference.symbRef?.blkIdRef ?: "undefined"
+        output.append(var).append("</span></div>")
     }
 
     def covariates = { covariate ->
@@ -801,7 +826,9 @@ class PharmMlTagLib {
         return result.toString()
     }
 
-    StringBuilder scalarRhs = { r, text ->
+    StringBuilder scalarRhs = { r ->
+        StringBuilder text = new StringBuilder()
+        //TODO make this use its own sb, rather than the argument text
         if (r.scalar) {
             text.append(scalar(r.scalar.value))
         } else if (r.equation) {
@@ -1698,6 +1725,17 @@ class PharmMlTagLib {
         convertEquation(equation, builder)
         builder.append("</mstyle></math>")
         return builder.toString()
+    }
+
+    private void convertToMathML(String lhs, List<CorrelatedRandomVarType> rv,
+                                ScalarRhs rho, StringBuilder output) {
+        output.append("<math display='inline'><mstyle>")
+        output.append(oprand(lhs)).append(op("("))
+        final String RV = rv.collect {
+            it.symbRef?.symbIdRef ?: it.symbRef?.blkIdRef ?: "not_found"
+        }.join(", ")
+        output.append(oprand(RV)).append(op(")")).append(op("=")).append(oprand(scalarRhs(rho).toString()))
+        output.append("</mstyle></math>")
     }
 
     private String op(String o) {
