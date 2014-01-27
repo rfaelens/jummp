@@ -286,8 +286,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         assertTrue(revCommit.getShortMessage().contains("Updated at"))
         assertTrue(revCommit.getFullMessage().contains("Updated at"))
         // try again with an empty commit message - should also be default message
-        imports.each
-        {
+        imports.each {
             it.append("Second Test\n")
         }
         rev = vcsService.updateModel(model, imports, null, null)
@@ -366,6 +365,62 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         assertEquals(commit.getName(), rev)
         assertEquals("Admin Commit Message", revCommit.getShortMessage())
         assertEquals("Admin Commit Message", revCommit.getFullMessage())
+
+        imports.each {
+            it.append("Inexistent delete test\n")
+        }
+        def deletes = [new File("/tmp/inexistent")]
+        rev = vcsService.updateModel(model, imports, deletes, "Deleted inexistent file.")
+        for (i in 0..9) {
+            File gitFile = new File("target/vcs/git/test${i}.xml")
+            List<String> lines = gitFile.readLines()
+            assertEquals(5, lines.size())
+            assertEquals("Test - ${i}".toString(), lines[0])
+            assertEquals("Second Test", lines[1])
+            assertEquals("Third Test", lines[2])
+            assertEquals("Admin Test", lines[3])
+            assertEquals("Inexistent delete test", lines[4])
+        }
+        repository = builder.setWorkTree(clone)
+                .readEnvironment() // scan environment GIT_* variables
+                .findGitDir(clone) // scan up the file system tree
+                .build()
+        commit = repository.resolve(Constants.HEAD)
+        revWalk = new RevWalk(repository)
+        revCommit = revWalk.parseCommit(commit)
+        assertEquals(commit.getName(), rev)
+        assertEquals("Deleted inexistent file.", revCommit.getShortMessage())
+        assertEquals("Deleted inexistent file.", revCommit.getFullMessage())
+
+        // don't make deletes and imports disjoint - MWUHAHAHAHAAA!
+        deletes = [*3..9].collect{ new File("target/vcs/git/test${it}.xml") }
+        deletes.each { assertTrue it.exists() }
+        imports.each {
+            it.append("Testing the deletion of actual files.\n")
+        }
+        rev = vcsService.updateModel(model, imports, deletes, "Deleted actual files.")
+        deletes.each { assertFalse it.exists() }
+        def delta = imports - deletes
+        delta.each {
+            assertTrue it.exists()
+            String i = it.name - "test" - ".xml"
+            println "i for ${it.name} is $i"
+            List<String> lines = it.readLines()
+            assertEquals(6, lines.size())
+            assertEquals("Test - ${i}".toString(), lines[0])
+            assertEquals("Second Test", lines[1])
+            assertEquals("Third Test", lines[2])
+            assertEquals("Admin Test", lines[3])
+            assertEquals("Inexistent delete test", lines[4])
+            assertEquals("Testing the deletion of actual files.", lines[5])
+        }
+        commit = repository.resolve(Constants.HEAD)
+        revWalk = new RevWalk(repository)
+        revCommit = revWalk.parseCommit(commit)
+        assertEquals(commit.getName(), rev)
+        assertEquals("Deleted actual files.", revCommit.getShortMessage())
+        assertEquals("Deleted actual files.", revCommit.getFullMessage())
+
         // and last but not least user should still get an AccessDeniedException
         authenticateAsUser()
         shouldFail(AccessDeniedException) {
