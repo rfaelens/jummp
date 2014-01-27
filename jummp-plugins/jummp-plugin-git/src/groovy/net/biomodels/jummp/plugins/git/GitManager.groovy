@@ -488,6 +488,7 @@ class GitManager implements VcsManager {
      * copies the files, does git add, git commit and finally a push
      * @param modelDirectory The model directory
      * @param files The files to copy into the directory
+     * @param deleted The files that will be deleted
      * @param commitMessage The commit message 
      */
     @Profiled(tag = "gitManager.handleModification")
