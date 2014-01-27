@@ -99,8 +99,22 @@ import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 class PharmMlTagLib {
     static namespace = "pharmml"
 
-    // map to help resolve references to covariates from the parameter model
+    // resolve references to covariates from the parameter model
     private Map<String, Equation> continuousCovariateTransformations = [:]
+    // helps us decide the size of each correlation matrix in the parameter model
+    private Map<String, List<String>> paramRandomVariableMap = [:]
+    // pairs("${level}|${randomVar1}|${randomVar2}", covarianceOrCorrelationCoefficient)
+    private Map<String, String> paramCorrelations = [:]
+    private List<String> individualParametersInParameterModel = []
+    // pairs (variabilityLevel, correlationMatrix), must not entangle with observation model params
+    private Map<String, String[][]> paramCorrelationMatrixMap = [:]
+    // helps us decide the size of each correlation matrix in the parameter model
+    private Map<String, List<String>> obsRandomVariableMap = [:]
+    // pairs("${level}|${randomVar1}|${randomVar2}", covarianceOrCorrelationCoefficient)
+    private Map<String, String> obsCorrelations = [:]
+    private List<String> individualParametersInObservationModel = []
+    // pairs (variabilityLevel, correlationMatrix)
+    private Map<String, String[][]> obsCorrelationMatrixMap = [:]
     // holds information about which PharmML-specific tabs should be shown
     private Map<String, String> tabsMap
 
@@ -160,7 +174,7 @@ class PharmMlTagLib {
             parameterModel(attrs.pm, attrs.cm)
         }
         if (attrs.om) {
-            observations(attrs.om)
+            observations(attrs.om, attrs.cm)
         }
         out << "</div>\n"
     }
@@ -235,10 +249,11 @@ class PharmMlTagLib {
         return outcome.append("</div>")
     }
 
-    StringBuilder randomVariables(List<ParameterRandomVariableType> rv) {
+    StringBuilder randomVariables(List<ParameterRandomVariableType> rv, Map rvMap) {
         def output = new StringBuilder()
         try {
             rv.inject(output) { o, i ->
+                populateRandomVariableMap(i.symbId, i.variabilityReference.symbRef.symbIdRef, rvMap)
                 if (i.abstractContinuousUnivariateDistribution) {
                     o.append("<div>")
                     o.append(distributionAssignment(i.symbId, i.abstractContinuousUnivariateDistribution))
@@ -253,11 +268,15 @@ class PharmMlTagLib {
         return output
     }
 
-    StringBuilder individualParams(List<IndividualParameterType> parameters, List<ParameterRandomVariableType> rv,
-                List<CovariateDefinitionType> covariates) {
+    StringBuilder individualParams(List<IndividualParameterType> parameters,
+                List<ParameterRandomVariableType> rv, List<CovariateDefinitionType> covariates,
+                List<String> indivParamNameList) {
         def output = new StringBuilder("<div class='spaced'>")
         try {
             parameters.each { p ->
+                if (!indivParamNameList.contains(p.symbId)) {
+                    indivParamNameList.add(p.symbId)
+                }
                 if (p.assign) {
                     String converted = convertToMathML(p.symbId, p.assign)
                     output.append("<div>")
@@ -380,6 +399,7 @@ class PharmMlTagLib {
             }
         } catch(Exception e) {
             output.append("Cannot display individual parameters.")
+            e.printStackTrace()
             log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}")
         }
         return output.append("</div>")
@@ -558,31 +578,32 @@ class PharmMlTagLib {
         result.append("<span class=\"bold\">Parameters </span>")
         try {
             parameterModel.each { pm ->
-                   result.append("<div class='spaced'>")
-                   def simpleParameters = pm.commonParameterElement.value.findAll {
-                           it instanceof SimpleParameterType
-                   }
-                   def rv = pm.commonParameterElement.value.findAll {
-                           it instanceof ParameterRandomVariableType
-                   }
-                   def individualParameters = pm.commonParameterElement.value.findAll {
-                           it instanceof IndividualParameterType
-                   }
-                   result.append(simpleParams(simpleParameters))
-                   String randoms=randomVariables(rv)
-                   if (randoms) {
-                       result.append(randoms)
-                   }
-                   String individuals = individualParams(individualParameters, rv, covariates)
-                   if (individuals) {
-                       result.append(individuals)
-                   }
-                   if (pm.correlation) {
-                       pm.correlation.each { cor ->
-                           correlation(cor, result)
-                       }
-                   }
-                   result.append("</div>")
+                result.append("<div class='spaced'>")
+                def simpleParameters = pm.commonParameterElement.value.findAll {
+                       it instanceof SimpleParameterType
+                }
+                def rv = pm.commonParameterElement.value.findAll {
+                       it instanceof ParameterRandomVariableType
+                }
+                def individualParameters = pm.commonParameterElement.value.findAll {
+                       it instanceof IndividualParameterType
+                }
+                result.append(simpleParams(simpleParameters))
+                String randoms = randomVariables(rv, paramRandomVariableMap)
+                if (randoms) {
+                   result.append(randoms)
+                }
+                StringBuilder individuals = individualParams(individualParameters, rv, covariates,
+                            individualParametersInParameterModel)
+                if (individuals) {
+                   result.append(individuals)
+                }
+                if (pm.correlation) {
+                    handleCorrelations(pm.correlation, paramCorrelations,
+                                paramRandomVariableMap, paramCorrelationMatrixMap,
+                                individualParametersInParameterModel, result)
+                }
+                result.append("</div>")
             }
         } catch(Exception e) {
             log.error("Error rendering the parameter model for ${parameterModel.inspect()} ${parameterModel.properties}: ${e.message}\nStacktrace:\n${e.printStackTrace()}")
@@ -591,22 +612,78 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    void correlation(CorrelationType c, StringBuilder output) {
-        final String CORRELATION_TYPE
-        final ScalarRhs VALUE
-        if (c.correlationCoefficient) {
-            CORRELATION_TYPE = "correlation"
-            VALUE = c.correlationCoefficient
-        } else if (c.covariance) {
-            CORRELATION_TYPE = "covariance"
-            VALUE = c.covariance
+    /*
+     * Processes and displays correlations between covariates.
+     * @param corList:     correlations to be displayed.
+     * @param corMap:      covariate pair mapped to correlation coefficient or covariance
+     * @param rvMap:       random variables grouped by variability level
+     * @param matrix:      correlation matrices grouped by variability level
+     * @param indivParams: the names of the individual parameters.
+     * @param result:      StringBuilder where the output is accumulated.
+     */
+    private void handleCorrelations(List<CorrelationType> corList, Map corMap, Map rvMap,
+                Map matrix, List indivParams, StringBuilder result) {
+        corList.each { cor ->
+           buildCorrelationMap(cor, corMap)
         }
-        output.append("<div><span>")
-        convertToMathML(CORRELATION_TYPE, [c.randomVariable1, c.randomVariable2], VALUE, output)
-        output.append("; </span><span class='bold'>Variability Level &mdash; </span><span>")
+        processCorrelations(corMap, rvMap,
+                    matrix)
+        if (matrix) {
+            displayCorrelationMatrices(matrix,
+                        indivParams, result)
+        }
+    }
+
+    private void buildCorrelationMap(CorrelationType c, Map correlationsMap) {
+        final ScalarRhs VALUE = c.covariance ?: c.correlationCoefficient
+
         String var = c.variabilityReference.symbRef?.symbIdRef ?:
                         c.variabilityReference.symbRef?.blkIdRef ?: "undefined"
-        output.append(var).append("</span></div>")
+        String r1 = c.randomVariable1.symbRef?.symbIdRef
+        String r2 = c.randomVariable2.symbRef?.symbIdRef
+        final String KEY = "$var|$r1|$r2"
+        correlationsMap[KEY] = VALUE.symbRef.symbIdRef
+        final String KEY_REV = "$var|$r2|$r1"
+        correlationsMap[KEY_REV] = VALUE.symbRef.symbIdRef
+    }
+
+
+    private void processCorrelations(Map<String, String> c, Map<String, List<String>> rv,
+                Map<String, String[][]> corrMatrixMap) {
+        rv.entrySet().each {
+            final String LVL = it.key
+            if (!corrMatrixMap[LVL]) {
+                final int MATRIX_SIZE = it.value.size()
+                String[][] corrMatrix = new String[MATRIX_SIZE][MATRIX_SIZE]
+                for (int i = 0; i < MATRIX_SIZE; i++) {
+                    for (int j = 0; j < MATRIX_SIZE; j++) {
+                        final String R1 = it.value[i]
+                        final String R2 = it.value[j]
+                        final String KEY = "$LVL|$R1|$R2"
+                        final String KEY_REV = "$LVL|$R2|$R1"
+                        final String RHO = c[KEY]
+                        final String RHO_REV = c[KEY_REV]
+                        if (i == j) {
+                            corrMatrix[i][j] = "1"
+                        } else if (RHO) {
+                            corrMatrix[i][j] = RHO
+                        } else if (RHO_REV) {
+                            corrMatrix[i][j] = RHO_REV
+                        }else {
+                            corrMatrix[i][j] = "0"
+                        }
+                    }
+                }
+                corrMatrixMap[LVL] = corrMatrix
+            }
+        }
+    }
+
+    private void displayCorrelationMatrices(Map<String, String[][]> matrices,
+                List<String> paramNames, StringBuilder output) {
+        matrices.entrySet().each {
+            convertToMathML(it.key, it.value, paramNames, output)
+        }
     }
 
     def covariates = { covariate ->
@@ -674,7 +751,7 @@ class PharmMlTagLib {
         return result.append("</p>")
     }
 
-    def observations = { observations ->
+    def observations = { observations, covariates ->
         if (!observations || observations.size() == 0) {
             return
         }
@@ -694,12 +771,24 @@ class PharmMlTagLib {
                 def rv = om.commonParameterElement.value.findAll {
                     it instanceof ParameterRandomVariableType
                 }
+                def individualParameters = om.commonParameterElement.value.findAll {
+                       it instanceof IndividualParameterType
+                }
                 result.append(simpleParams(simpleParameters))
-                String randoms = randomVariables(rv)
+                String randoms = randomVariables(rv, obsRandomVariableMap)
                 if (randoms) {
                     result.append(randoms)
                 }
-                //result.append("\n<p>")
+                StringBuilder individuals = individualParams(individualParameters, rv, covariates,
+                            individualParametersInObservationModel)
+                if (individuals) {
+                   result.append(individuals)
+                }
+                if (om.correlation) {
+                    handleCorrelations(om.correlation, obsCorrelations,
+                                obsRandomVariableMap, obsCorrelationMatrixMap,
+                                individualParametersInObservationModel, result)
+                }
                 if (obsErr.symbol?.value) {
                     result.append(obsErr.symbol.value)
                 }
@@ -828,7 +917,6 @@ class PharmMlTagLib {
 
     StringBuilder scalarRhs = { r ->
         StringBuilder text = new StringBuilder()
-        //TODO make this use its own sb, rather than the argument text
         if (r.scalar) {
             text.append(scalar(r.scalar.value))
         } else if (r.equation) {
@@ -1727,14 +1815,24 @@ class PharmMlTagLib {
         return builder.toString()
     }
 
-    private void convertToMathML(String lhs, List<CorrelatedRandomVarType> rv,
-                                ScalarRhs rho, StringBuilder output) {
-        output.append("<math display='inline'><mstyle>")
-        output.append(oprand(lhs)).append(op("("))
-        final String RV = rv.collect {
-            it.symbRef?.symbIdRef ?: it.symbRef?.blkIdRef ?: "not_found"
-        }.join(", ")
-        output.append(oprand(RV)).append(op(")")).append(op("=")).append(oprand(scalarRhs(rho).toString()))
+    private void convertToMathML(String name, def matrix, List ipNames, StringBuilder output) {
+        output.append("<div class='spaced'>")
+        output.append("<span class='bold'>Correlation matrix for level <span class='italic'>")
+        output.append(name).append("</span> and parameters: ")
+        output.append(ipNames.join(", ")).append("</span></div>\n")
+        output.append("<math display='inline'><mstyle>\n")
+        output.append("<mrow>").append(op("(")).append("<mtable>\n")
+        final int N = matrix.size()
+        for (int i = 0; i < N; i++) {
+            output.append("<mtr>")
+            for (int j = 0; j < N; j++) {
+                output.append("<mtd><mi>")
+                output.append(matrix[i][j])
+                output.append("</mi></mtd>\n")
+            }
+            output.append("</mtr>\n")
+        }
+        output.append("</mtable>\n").append(op(")")).append("</mrow>")
         output.append("</mstyle></math>")
     }
 
@@ -1788,5 +1886,14 @@ class PharmMlTagLib {
             transfEq = continuousCovariateTransformations.find{ it.key.contains("_${transfRef}")}
         }
         return transfEq
+    }
+
+    private void populateRandomVariableMap(final String id, final String level, Map rv) {
+        def currentRVs = rv[level]
+        if (!currentRVs) {
+            currentRVs = []
+        }
+        currentRVs.add(id)
+        rv[level] = currentRVs
     }
 }
