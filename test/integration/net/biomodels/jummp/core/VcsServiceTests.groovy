@@ -404,7 +404,6 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         delta.each {
             assertTrue it.exists()
             String i = it.name - "test" - ".xml"
-            println "i for ${it.name} is $i"
             List<String> lines = it.readLines()
             assertEquals(6, lines.size())
             assertEquals("Test - ${i}".toString(), lines[0])
