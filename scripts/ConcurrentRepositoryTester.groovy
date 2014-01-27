@@ -96,7 +96,7 @@ Add a comment to this line
   </model>
 </sbml>''')
 
-    String rev=appCtx.getBean("vcsService").vcsManager.updateModel(modelFolder, [sbmlModel])
+    String rev=appCtx.getBean("vcsService").vcsManager.updateModel(modelFolder, [sbmlModel], null)
     
     
     sync.sendMessage("DoneStartup")

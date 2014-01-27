@@ -86,7 +86,7 @@ class MultiProcessRepositoryTests  {
         sync.waitForMessage("DoneStartup")
         
         //update the model
-        manager.updateModel(modelFolder, [bigModel()])
+        manager.updateModel(modelFolder, [bigModel()], null)
         
         //launch three update and test class threads
         UpdateAndTest test1=new UpdateAndTest(manager, modelFolder, exchange, 1)
