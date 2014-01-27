@@ -228,23 +228,23 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
-            vcsService.updateModel(model, null, null)
+            vcsService.updateModel(model, null, null, null)
         }
         // as user we should get an access denied exception
         authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
-            vcsService.updateModel(model, null, null)
+            vcsService.updateModel(model, null, null, null)
         }
         // as admin we should get an VcsException as the vcsService is not valid
         authenticateAsAdmin()
         shouldFail(VcsException) {
-            vcsService.updateModel(model, null, null)
+            vcsService.updateModel(model, null, null, null)
         }
         // now also the user should get a VcsException
         modelService.grantWriteAccess(model, User.findByUsername("testuser"))
         authenticateAsTestUser()
         shouldFail(VcsException) {
-            vcsService.updateModel(model, null, null)
+            vcsService.updateModel(model, null, null, null)
         }
         
         List<File> imports=new LinkedList<File>();
@@ -272,7 +272,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         assertTrue(vcsService.isValid())
 
         
-        String rev = vcsService.updateModel(model, imports, null)
+        String rev = vcsService.updateModel(model, imports, null, null)
         for (i in 0..9)
         {
             File gitFile = new File("target/vcs/git/test${i}.xml")
@@ -294,7 +294,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         {
             it.append("Second Test\n")
         }
-        rev = vcsService.updateModel(model, imports, null)
+        rev = vcsService.updateModel(model, imports, null, null)
         
         for (i in 0..9)
         {
@@ -322,7 +322,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         {
             it.append("Third Test\n")
         }
-        rev = vcsService.updateModel(model, imports, "Commit Message")
+        rev = vcsService.updateModel(model, imports, null, "Commit Message")
 
         for (i in 0..9)
         {
@@ -352,7 +352,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
             it.append("Admin Test\n")
         }
 
-        rev = vcsService.updateModel(model, imports, "Admin Commit Message")
+        rev = vcsService.updateModel(model, imports, null, "Admin Commit Message")
 
 
         for (i in 0..9)
@@ -380,7 +380,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         // and last but not least user should still get an AccessDeniedException
         authenticateAsUser()
         shouldFail(AccessDeniedException) {
-            vcsService.updateModel(model, imports, "Commit Message")
+            vcsService.updateModel(model, imports, null, "Commit Message")
         }
     }
 
@@ -434,9 +434,9 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
-        .build()
+                    .readEnvironment() // scan environment GIT_* variables
+                    .findGitDir() // scan up the file system tree
+                    .build()
 
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
@@ -453,10 +453,8 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         revision.vcsId = vcsService.importModel(model, imports)
         revision.save(flush: true)
         List<File> exchangeFiles = vcsService.retrieveFiles(revision)
-        exchangeFiles.each
-        { exchange ->
-            imports.each
-            { imported ->
+        exchangeFiles.each { exchange ->
+            imports.each { imported ->
                  assertNotSame(exchange, imported)
             }
             List<String> lines = exchange.readLines()
