@@ -290,6 +290,7 @@ class GitManager implements VcsManager {
      * the supplied files to the repository with the supplied message
      * @param modelDirectory The model directory
      * @param files A list of files to be put into the repository
+     * @param removeFiles The list of files to be removed from the repository.
      * @param commitMessage The commit message for this revision
      **/
     @Profiled(tag = "gitManager.updateModel")
