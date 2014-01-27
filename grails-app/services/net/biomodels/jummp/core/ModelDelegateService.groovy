@@ -170,6 +170,10 @@ class ModelDelegateService implements IModelService {
         return modelService.canAddRevision(Model.get(modelId))
     }
     
+    Boolean canDelete(long modelId) {
+    	return modelService.canDelete(Model.get(modelId))
+    }
+    
     Boolean canPublish(long modelId) {
     	def revision=getLatestRevision(modelId)
     	if (revision.state == ModelState.UNPUBLISHED) {

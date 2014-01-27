@@ -293,12 +293,9 @@ class ModelServiceTests extends JummpIntegrationTest {
         // let's delete the model
         authenticateAsAdmin()
         assertTrue(modelService.deleteModel(model))
-        assertNull(modelService.getLatestRevision(model))
-        // both users should get six models
-        authenticateAsTestUser()
-        assertNull(modelService.getLatestRevision(model))
-        authenticateAsUser()
-        assertNull(modelService.getLatestRevision(model))
+        assertSame(rev6, modelService.getLatestRevision(model))
+        assertFalse(modelService.canPublish(rev6))
+        assertFalse(modelService.canAddRevision(model))
     }
 
     
@@ -372,28 +369,6 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertSame(rev4, modelService.getRevision("${model.id}.${rev4.revisionNumber}"))
         assertSame(rev5, modelService.getRevision("${model.id}.${rev5.revisionNumber}"))
         assertSame(rev6, modelService.getRevision("${model.id}.${rev6.revisionNumber}"))
-        // let's delete the model
-        authenticateAsAdmin()
-        assertTrue(modelService.deleteModel(model))
-        shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}")
-        }
-        shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}.${rev2.revisionNumber}")
-        }
-        shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}.${rev3.revisionNumber}")
-        }
-        shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}.${rev4.revisionNumber}")
-        }
-        shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}.${rev5.revisionNumber}")
-        }
-        shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}.${rev6.revisionNumber}")
-        }
-        
     }
 
     
@@ -628,13 +603,6 @@ class ModelServiceTests extends JummpIntegrationTest {
         testResults = modelService.getAllRevisions(model2)
         assertEquals(1, testResults.size())
         assertSame(revision2, testResults[0])
-        // let's delete Model 2
-        modelService.deleteModel(model2)
-        assertTrue(modelService.getAllRevisions(model2).isEmpty())
-        authenticateAsTestUser()
-        assertTrue(modelService.getAllRevisions(model2).isEmpty())
-        authenticateAsUser()
-        assertTrue(modelService.getAllRevisions(model2).isEmpty())
     }
 
     @Test
@@ -896,7 +864,9 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue(modelService.deleteModel(model))
         assertEquals(true, model.deleted)
         // further delete should not work
-        assertFalse(modelService.deleteModel(model))
+        shouldFail(AccessDeniedException) {
+        	modelService.deleteModel(model)
+        }
         assertEquals(true, model.deleted)
         // testuser is not allowed to restore
         shouldFail(AccessDeniedException) {
@@ -915,19 +885,25 @@ class ModelServiceTests extends JummpIntegrationTest {
         Revision savedRev=modelService.getLatestRevision(model)
         savedRev.state = ModelState.UNDER_CURATION
         savedRev.save(flush:true)
-        assertFalse(modelService.deleteModel(model))
+        shouldFail(AccessDeniedException) {
+        	modelService.deleteModel(model)
+        }
         assertEquals(false, model.deleted)
         assertFalse(modelService.restoreModel(model))
         assertEquals(false, model.deleted)
         savedRev.state = ModelState.PUBLISHED
         savedRev.save(flush:true)
-        assertFalse(modelService.deleteModel(model))
+        shouldFail(AccessDeniedException) {
+        	modelService.deleteModel(model)
+        }
         assertEquals(false, model.deleted)
         assertFalse(modelService.restoreModel(model))
         assertEquals(false, model.deleted)
         savedRev.state = ModelState.RELEASED
         savedRev.save(flush:true)
-        assertFalse(modelService.deleteModel(model))
+        shouldFail(AccessDeniedException) {
+        	modelService.deleteModel(model)
+        }
         assertEquals(false, model.deleted)
         assertFalse(modelService.restoreModel(model))
         assertEquals(false, model.deleted)
@@ -1391,7 +1367,9 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue(modelService.deleteModel(model))
         revision.state=ModelState.PUBLISHED
         revision.save(flush:true)
-        assertFalse(modelService.deleteModel(model))
+        shouldFail(AccessDeniedException) {
+        	modelService.deleteModel(model)
+        }
         model = null
         shouldFail(IllegalArgumentException) {
             modelService.deleteModel(model)
@@ -1423,7 +1401,9 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue(modelService.restoreModel(model))
         revision.state = ModelState.PUBLISHED
         revision.save()
-        assertFalse(modelService.deleteModel(model))
+        shouldFail(AccessDeniedException) {
+        	modelService.deleteModel(model)
+        }
         model = null
         shouldFail(IllegalArgumentException) {
             modelService.deleteModel(model)
@@ -1460,8 +1440,10 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertFalse(revision.deleted)
         // admin should get access to the method
         authenticateAsAdmin()
-        modelService.deleteRevision(revision)
-        assertTrue(revision.deleted)
+        shouldFail(AccessDeniedException) {
+        	modelService.deleteRevision(revision)
+        }
+        assertFalse(revision.deleted)
         // add another revision to test if only current revision is set to deleted
         Revision revision2 = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: User.findByUsername("username"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
         assertTrue(revision2.validate())

@@ -29,7 +29,7 @@
 
 <nav>
 <ul class="grid_24" id="local-nav">
-  <li 
+  <li
   	<g:if test="${g.pageProperty(name:'page.browse')?.length()}">
 	    	class="active"
 	</g:if>><a href="${g.createLink(controller: 'search', action: 'list')}">Browse</a></li>
@@ -38,6 +38,10 @@
 	    	class="active"
 	</g:if>><a href="${g.createLink(controller: 'model', action: 'create')}">Submit</a></li>
   <li>
+  <li
+  	<g:if test="${g.pageProperty(name:'page.help')?.length()}">
+	    	class="active"
+	</g:if>><a href="${g.createLink(controller: 'jummp', action: 'help')}">Help</a></li>
   <li
   	<g:if test="${g.pageProperty(name:'page.feedback')?.length()}">
 	    	class="active"

@@ -27,15 +27,17 @@
 
 
 
-<head>
+<%@ page contentType="text/html;charset=UTF-8" %>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
-</head>
-<body>
-	<p><g:message code="jummp.feedback.message" /><p>
-</body>	
-<content tag="feedback">
+        <title>Access Denied</title>
+    </head>
+    <body>
+        <h2>Access Denied</h2>
+        <p><g:message code="update.accessdenied.message"/></p>
+    </body>
+    <content tag="submit">
     	selected
-</content>
-<content tag="title">
-	Feedback
-</content>
+    </content>

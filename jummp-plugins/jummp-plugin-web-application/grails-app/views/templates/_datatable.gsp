@@ -1,9 +1,7 @@
 <%
 	def totalCount
-	String action="list"
 	if (matches) {
 		totalCount=matches
-		action="search"
 	}
 	else {
 		totalCount=modelsAvailable

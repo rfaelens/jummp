@@ -36,7 +36,7 @@
     </head>
     <body activetab="search">
     	<g:render template="/templates/${grailsApplication.config.jummp.branding.style}/searchBox"/>
-    	<g:render template="/templates/datatable"/>
+    	<g:render template="/templates/datatable" model="['action': 'search']"/>
     </body>
     <content tag="searchQuery">
     		${query}

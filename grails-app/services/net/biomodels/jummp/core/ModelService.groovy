@@ -146,7 +146,7 @@ class ModelService {
     	    	    	    if (!existingModel)
     	    	    	    {
     	    	    	    	    Model returned=getModel(Integer.parseInt(it.get("model_id")))
-    	    	    	    	    if (returned) {
+    	    	    	    	    if (returned && !returned.deleted) {
     	    	    	    	    	    returnVals.add(returned.toCommandObject())
     	    	    	    	    }
     	    	    	    }
@@ -200,7 +200,7 @@ class ModelService {
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllModels")
     public List<Model> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn,
-    			String filter = null) {
+    	String filter = null, boolean deletedOnly=false) {
         if (offset < 0 || count <= 0) {
             // safety check
             return []
@@ -220,9 +220,7 @@ if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.F
 else if (sortColumn==ModelListSorting.SUBMITTER) {
 	query+='''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
 }
-query+='''m.deleted = false
-AND r.deleted = false
-'''
+query+="m.deleted = ${deletedOnly} AND r.deleted = false"
         if (filter && filter.length() >= 3) {
             query += '''
 AND (
@@ -300,9 +298,9 @@ AND ac.className = :className
 AND sid.sid IN (:roles)
 AND ace.mask IN (:permissions)
 AND ace.granting = true
-AND m.deleted = false
 AND r.deleted = false
 '''
+query+=" AND m.deleted = ${deletedOnly} "
         if (filter && filter.length() >= 3) {
             query += '''
 AND (
@@ -423,12 +421,12 @@ ORDER BY
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getModelCount")
-    public Integer getModelCount(String filter = null) {
+    public Integer getModelCount(String filter = null, boolean deletedOnly = false) {
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
             // special handling for Admin - is allowed to see all (not deleted) Models
             def criteria = Model.createCriteria()
             return criteria.get {
-                ne("deleted", true)
+                ne("deleted", !deletedOnly)
                 if (filter && filter.length() >= 3) {
                     or {
                         ilike("name", "%${filter}%")
@@ -465,9 +463,9 @@ AND ac.className = :className
 AND sid.sid IN (:roles)
 AND ace.mask IN (:permissions)
 AND ace.granting = true
-AND m.deleted = false
 AND r.deleted = false
 '''
+query+=" AND m.deleted=${deletedOnly} "
         if (filter && filter.length() >= 3) {
             query += '''
 AND (
@@ -518,10 +516,10 @@ OR lower(m.publication.affiliation) like :filter
         if (!model) {
             return null
         }
-        if (model.deleted) {
+        /*if (model.deleted) {
             // exclude deleted models
             return null
-        }
+        }*/
         // admin gets max (non deleted) revision
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
             List<Long> result = Revision.executeQuery('''
@@ -584,9 +582,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllRevisions")
     public List<Revision> getAllRevisions(Model model) {
-        if (model.deleted) {
+        /*if (model.deleted) {
             return []
-        }
+        }*/
         // exclude deleted revisions
         modelHistoryService.addModelToHistory(model)
         return model.revisions.toList().findAll { !it.deleted }.sort {it.revisionNumber}
@@ -638,7 +636,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.getRevision")
     public Revision getRevision(Model model, int revisionNumber) {
         Revision revision = Revision.findByRevisionNumberAndModel(revisionNumber, model)
-        if (!revision || revision.deleted || model.deleted) {
+        if (!revision || revision.deleted /*|| model.deleted */) {
             throw new AccessDeniedException("Sorry you are not allowed to access this Model.")
         } else {
             modelHistoryService.addModelToHistory(model)
@@ -1395,6 +1393,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.canAddRevision")
     public Boolean canAddRevision(final Model model) {
+    	if (model.deleted) {
+    		return false
+    	}
         return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.WRITE))
     }
 
@@ -1597,7 +1598,33 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     public void transferOwnerShip(Model model, User collaborator) {
         // TODO: implement me
     }
+    
+    /**
+    * Checks if the model can be deleted 
+    *
+    * @param model The Model to be deleted
+    * @return @c true in case the Model can be deleted, @c false otherwise.
+    **/
+    @PostLogging(LoggingEventType.DELETION)
+    @Profiled(tag="modelService.canDelete")
+    public boolean canDelete(Model model) {
+        if (!model) {
+            throw new IllegalArgumentException("Model may not be null")
+        }
+        if (model.deleted) {
+        	return false
+        }
+        List<Revision> revs=getAllRevisions(model)
+        Revision publicRev=revs.find {
+        	it.state != ModelState.UNPUBLISHED
+        }
+        if (publicRev) {
+        	return false
+        }
+        return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.DELETE))
+    }
 
+    
     /**
     * Deletes the @p model including all Revisions.
     *
@@ -1610,12 +1637,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * @return @c true in case the Model has been deleted, @c false otherwise.
     * @see ModelService#restoreModel(Model model)
     **/
-    @PreAuthorize("hasPermission(#model, delete) or hasRole('ROLE_ADMIN')")
+    /*@PreAuthorize("hasPermission(#model, delete) or hasRole('ROLE_ADMIN')")*/ //Doesnt work
     @PostLogging(LoggingEventType.DELETION)
     @Profiled(tag="modelService.deleteModel")
     public boolean deleteModel(Model model) {
         if (!model) {
             throw new IllegalArgumentException("Model may not be null")
+        }
+        if (!canDelete(model)) {
+        	throw new AccessDeniedException("You do not have permission to delete this model")
         }
         if (model.deleted) {
         	return false
@@ -1714,6 +1744,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             return false
         }
         if (revision.deleted) {
+        	return false
+        }
+        if (revision.model.deleted) {
         	return false
         }
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {

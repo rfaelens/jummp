@@ -31,11 +31,11 @@
         <meta name="layout" content="main"/>
 </head>
 <body>
-	<p><g:message code="jummp.feedback.message" /><p>
+	<p><g:message code="jummp.help.message" /><p>
 </body>	
-<content tag="feedback">
+<content tag="help">
     	selected
 </content>
 <content tag="title">
-	Feedback
+	Help
 </content>

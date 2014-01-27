@@ -27,15 +27,16 @@
 
 
 
-<head>
-        <meta name="layout" content="main"/>
-</head>
-<body>
-	<p><g:message code="jummp.feedback.message" /><p>
-</body>	
-<content tag="feedback">
-    	selected
-</content>
-<content tag="title">
-	Feedback
-</content>
+<%@ page contentType="text/html;charset=UTF-8" %>
+    <head>
+        <meta name="layout" content="main" />
+         <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'datatablestyle.css')}" />
+         <g:javascript contextPath="" src="jquery/jquery-ui-v1.10.3.js"/>
+    </head>
+    <body>
+    	<g:render template="/templates/datatable" model="['action': 'archive']"/>
+    </body>
+    <content tag="title">
+		Archived Models
+	</content>
+    

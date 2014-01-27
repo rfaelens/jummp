@@ -84,22 +84,24 @@ public interface VcsManager {
     * Copies @p files into the model directory of the VCS, with a single commit
     * @param modelDirectory the model directory
     * @param files the files to import
+    * @param deleted the files to delete (can be null)
     * @param commitMessage The commit message to be used for the import.
     * @return Revision corresponding to the commit
     * @throws VcsException
     **/
-    public String updateModel(File modelDirectory, List<File> files, String commitMessage) throws VcsException;
+    public String updateModel(File modelDirectory, List<File> files, List<File> deleted, String commitMessage) throws VcsException;
 
     /**
     * Overloaded method for convenience using a default commit message.
     * Copies @p files into the model directory of the VCS, with a single commit
     * @param modelDirectory the model directory
     * @param files the files to import
+    * @param deleted the files to delete (can be null) 
     * @return Revision corresponding to the commit
     * @see updateModel
     * @throws VcsException
      */
-    public String updateModel(File modelDirectory, List<File> files) throws VcsException;
+    public String updateModel(File modelDirectory, List<File> files, List<File> deleted) throws VcsException;
 
     /**
     * Retrieves files at the @p modelDirectory  of given @p revision.
