@@ -43,6 +43,7 @@ import java.util.concurrent.locks.ReentrantLock
 import net.biomodels.jummp.core.vcs.*
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.AddCommand
+import org.eclipse.jgit.api.RmCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.InitCommand
 import org.eclipse.jgit.lib.Config
@@ -300,17 +301,12 @@ class GitManager implements VcsManager {
      * @param commitMessage The commit message for this revision
      **/
     @Profiled(tag = "gitManager.updateModel")
-    public String updateModel(File modelDirectory, List<File> files, String commitMessage) {
+    public String updateModel(File modelDirectory, List<File> addfiles, List<File> removeFiles, String commitMessage) {
         ensureRepInited(modelDirectory)
-        files.each {
-            if (it.getName()== "small_file_test") {
-                List<String> lines = it.readLines()
-            }
-        }
         String revision = null
         lockModelRepository(modelDirectory)
         try {
-            revision = handleAddition(modelDirectory, files, commitMessage)
+            revision = handleModification(modelDirectory, addfiles, removeFiles, commitMessage)
         } finally {
             unlockModelRepository(modelDirectory)
         }
@@ -325,8 +321,8 @@ class GitManager implements VcsManager {
      * @param files A list of files to be put into the repository
      **/
     @Profiled(tag = "gitManager.updateModel")
-    public String updateModel(File modelDirectory, List<File> files) {
-        return updateModel(modelDirectory, files, "Update of ${modelDirectory.name}")
+    public String updateModel(File modelDirectory, List<File> addfiles, List<File> removeFiles) {
+        return updateModel(modelDirectory, addfiles, removeFiles, "Update of ${modelDirectory.name}")
     }
 
     /*
@@ -494,19 +490,29 @@ class GitManager implements VcsManager {
      * @param files The files to copy into the directory
      * @param commitMessage The commit message 
      */
-    @Profiled(tag = "gitManager.handleAddition")
-    private String handleAddition(File modelDirectory, List<File> files, String commitMessage) {
+    @Profiled(tag = "gitManager.handleModification")
+    private String handleModification(File modelDirectory, List<File> files, List<File> deleted, String commitMessage) {
         String revision
         try {
         	//updateWorkingCopy(modelDirectory)
             Git git = initedRepositories.get(modelDirectory);
-            AddCommand add = git.add()
-            files.each
-            {
-                FileUtils.copyFile(it, new File(modelDirectory.absolutePath + File.separator + it.getName()))
-                add = add.addFilepattern(it.getName())
+            if (files) {
+            	AddCommand add = git.add()
+            	files.each
+            	{
+            		FileUtils.copyFile(it, new File(modelDirectory.absolutePath + File.separator + it.getName()))
+            		add = add.addFilepattern(it.getName())
+            	}
+            	add.call()
             }
-            add.call()
+            if (deleted) {
+            	RmCommand rm = git.rm()
+            	deleted.each
+            	{
+            		rm = rm.addFilepattern(it.getName())
+            	}
+            	rm.call()
+            }
             RevCommit commit = git.commit().setMessage(commitMessage).call()
             revision = commit.getId().getName()
             /*if (hasRemote) {

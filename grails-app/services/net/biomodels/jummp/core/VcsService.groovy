@@ -80,15 +80,15 @@ class VcsService {
     **/
     @PreAuthorize("hasPermission(#model, write) or hasRole('ROLE_ADMIN')")
     @Profiled(tag = "vcsService.updateModel")
-    String updateModel(final Model model, final List<File> files, final String commitMessage) throws VcsException {
+    String updateModel(final Model model, final List<File> files, final List<File> deleted, final String commitMessage) throws VcsException {
         if (!isValid()) {
             throw new VcsException("Version Control System is not valid")
         }
 
         if (commitMessage == null || commitMessage.isEmpty()) {
-            return vcsManager.updateModel(new File(model.vcsIdentifier), files, "Updated at ${new Date().toGMTString()}")
+            return vcsManager.updateModel(new File(model.vcsIdentifier), files, deleted, "Updated at ${new Date().toGMTString()}")
         } else {
-            return vcsManager.updateModel(new File(model.vcsIdentifier), files, commitMessage)
+            return vcsManager.updateModel(new File(model.vcsIdentifier), files, deleted, commitMessage)
         }
     }
 
