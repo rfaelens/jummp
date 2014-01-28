@@ -371,8 +371,7 @@ class ModelController {
                         }
                         flow.workingMemory["submitted_mains"] = mainFileList
                         flow.workingMemory["submitted_additionals"] = additionalsMap
-                        def inputs = new HashMap<String, Object>()
-                        submissionService.handleFileUpload(flow.workingMemory,inputs)
+                        submissionService.handleFileUpload(flow.workingMemory)
                 }
             }
             on("MainFileMissingError") {

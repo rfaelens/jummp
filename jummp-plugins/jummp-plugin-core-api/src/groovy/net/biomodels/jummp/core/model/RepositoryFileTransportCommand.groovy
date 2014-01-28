@@ -47,4 +47,11 @@ class RepositoryFileTransportCommand implements Serializable {
     boolean userSubmitted
     String mimeType
     RevisionTransportCommand revision
+    
+    public boolean equals(Object obj) {
+    	String fileName=(new File(path)).getName()
+    	String testName=(new File(obj.path)).getName()
+    	return fileName == testName
+    }
+    
 }
