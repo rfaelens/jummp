@@ -75,7 +75,7 @@ class UpdateAndTest implements Runnable {
             for (int i=0; i<200; i++) {
                 String testText=""+(Math.random()*System.currentTimeMillis())
                 importFile.setText(testText)
-                String rev=manager.updateModel(modelFolder, [importFile], "Update by ${myDir.getName()} iteration ${i}")
+                String rev=manager.updateModel(modelFolder, [importFile], null, "Update by ${myDir.getName()} iteration ${i}")
                 List<File> files=manager.retrieveModel(modelFolder, rev);
                 testResult = testResult & testFileCorrectness(files, "importTest.txt", testText)
                 Thread.sleep(80)

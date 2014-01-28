@@ -67,7 +67,6 @@ class RevisionTests {
         // verify vcsId uniqueness constraint
         revision = new Revision(vcsId: "1", model: model)
         assertFalse(revision.validate())
-        println revision.errors.inspect()
         assertEquals("unique", revision.errors["vcsId"])
 
         // verify revisionNumber uniqueness for a single model

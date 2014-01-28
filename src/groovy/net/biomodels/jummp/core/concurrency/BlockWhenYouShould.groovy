@@ -104,7 +104,7 @@ class BlockWhenYouShould extends ConcurrentTestBase
 	    // Write a small text file
             String rev=vcsService.importModel(model, importMe)
 	    // update it
-	    vcsService.vcsManager.updateModel(new File(model.vcsIdentifier),[smallModel(testName,"some other text")])
+	    vcsService.vcsManager.updateModel(new File(model.vcsIdentifier),[smallModel(testName,"some other text")], null, "Test update")
 	    // retrieve the previous revision to establish baseline
 	    long base=System.currentTimeMillis();
 	    vcsService.vcsManager.retrieveModel(new File(modelIdentifier), rev);
@@ -136,7 +136,7 @@ class BlockWhenYouShould extends ConcurrentTestBase
             waitForTick(1)
             long base=System.currentTimeMillis();
             List<File> importMe=[smallModel(testName, finalText), bigFile]
-            String rev=vcsService.vcsManager.updateModel(new File(model.vcsIdentifier), importMe)
+            String rev=vcsService.vcsManager.updateModel(new File(model.vcsIdentifier), importMe, null)
             timeWriteFinished=System.currentTimeMillis() - base
 	    // test repository integrity
             testRepositoryCommit(repository, rev)

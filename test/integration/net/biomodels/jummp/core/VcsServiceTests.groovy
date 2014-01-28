@@ -114,9 +114,9 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         File gitDirectory = new File("target/vcs/git/")
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(gitDirectory)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
-        .build()
+                .readEnvironment() // scan environment GIT_* variables
+                .findGitDir() // scan up the file system tree
+                .build()
         Git git = new Git(repository)
         git.init().setDirectory(gitDirectory).call()
         assertFalse(vcsService.isValid())
@@ -165,8 +165,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         }
         // create a git repository
         List<File> imports=new LinkedList<File>();
-        for (i in 0..9)
-        {
+        for (i in 0..9) {
             imports.add(new File("target/vcs/exchange/test${i}.xml"));
             FileUtils.touch(imports.get(i));
             imports.get(i).append("Test - ${i}\n");
@@ -176,9 +175,9 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         clone.mkdirs()
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir(clone) // scan up the file system tree
-        .build() 
+                .readEnvironment() // scan environment GIT_* variables
+                .findGitDir(clone) // scan up the file system tree
+                .build() 
      
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
@@ -191,8 +190,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         authenticateAsTestUser()
         String rev= vcsService.importModel(model, imports)
         
-        for (i in 0..9)
-        {
+        for (i in 0..9) {
             File gitFile = new File("target/vcs/git/test${i}.xml")
             List<String> lines = gitFile.readLines()
             assertEquals(1, lines.size())
@@ -228,28 +226,27 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
-            vcsService.updateModel(model, null, null)
+            vcsService.updateModel(model, null, null, null)
         }
         // as user we should get an access denied exception
         authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
-            vcsService.updateModel(model, null, null)
+            vcsService.updateModel(model, null, null, null)
         }
         // as admin we should get an VcsException as the vcsService is not valid
         authenticateAsAdmin()
         shouldFail(VcsException) {
-            vcsService.updateModel(model, null, null)
+            vcsService.updateModel(model, null, null, null)
         }
         // now also the user should get a VcsException
         modelService.grantWriteAccess(model, User.findByUsername("testuser"))
         authenticateAsTestUser()
         shouldFail(VcsException) {
-            vcsService.updateModel(model, null, null)
+            vcsService.updateModel(model, null, null, null)
         }
         
         List<File> imports=new LinkedList<File>();
-        for (i in 0..9)
-        {
+        for (i in 0..9) {
             imports.add(new File("target/vcs/exchange/test${i}.xml"));
             FileUtils.touch(imports.get(i));
             imports.get(i).append("Test - ${i}\n");
@@ -259,9 +256,9 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         clone.mkdirs()
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir(clone) // scan up the file system tree
-        .build()
+                .readEnvironment() // scan environment GIT_* variables
+                .findGitDir(clone) // scan up the file system tree
+                .build()
 
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
@@ -272,9 +269,8 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         assertTrue(vcsService.isValid())
 
         
-        String rev = vcsService.updateModel(model, imports, null)
-        for (i in 0..9)
-        {
+        String rev = vcsService.updateModel(model, imports, null, null)
+        for (i in 0..9) {
             File gitFile = new File("target/vcs/git/test${i}.xml")
             List<String> lines = gitFile.readLines()
             assertEquals(1, lines.size())
@@ -290,14 +286,12 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         assertTrue(revCommit.getShortMessage().contains("Updated at"))
         assertTrue(revCommit.getFullMessage().contains("Updated at"))
         // try again with an empty commit message - should also be default message
-        imports.each
-        {
+        imports.each {
             it.append("Second Test\n")
         }
-        rev = vcsService.updateModel(model, imports, null)
+        rev = vcsService.updateModel(model, imports, null, null)
         
-        for (i in 0..9)
-        {
+        for (i in 0..9) {
             File gitFile = new File("target/vcs/git/test${i}.xml")
             List<String> lines = gitFile.readLines()
             assertEquals(2, lines.size())
@@ -307,9 +301,9 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
 
         
         repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir(clone) // scan up the file system tree
-        .build()
+                .readEnvironment() // scan environment GIT_* variables
+                .findGitDir(clone) // scan up the file system tree
+                .build()
         commit = repository.resolve(Constants.HEAD)
         revWalk = new RevWalk(repository)
         revCommit = revWalk.parseCommit(commit)
@@ -318,14 +312,12 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         assertTrue(revCommit.getFullMessage().contains("Updated at"))
         // try with a custom commit message
         
-        imports.each
-        {
+        imports.each {
             it.append("Third Test\n")
         }
-        rev = vcsService.updateModel(model, imports, "Commit Message")
+        rev = vcsService.updateModel(model, imports, null, "Commit Message")
 
-        for (i in 0..9)
-        {
+        for (i in 0..9) {
             File gitFile = new File("target/vcs/git/test${i}.xml")
             List<String> lines = gitFile.readLines()
             assertEquals(3, lines.size())
@@ -335,9 +327,9 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         }
 
         repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir(clone) // scan up the file system tree
-        .build()
+                .readEnvironment() // scan environment GIT_* variables
+                .findGitDir(clone) // scan up the file system tree
+                .build()
         commit = repository.resolve(Constants.HEAD)
         revWalk = new RevWalk(repository)
         revCommit = revWalk.parseCommit(commit)
@@ -347,16 +339,13 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         // and finally verify as admin
         authenticateAsAdmin()
 
-        imports.each
-        {
+        imports.each {
             it.append("Admin Test\n")
         }
 
-        rev = vcsService.updateModel(model, imports, "Admin Commit Message")
+        rev = vcsService.updateModel(model, imports, null, "Admin Commit Message")
 
-
-        for (i in 0..9)
-        {
+        for (i in 0..9) {
             File gitFile = new File("target/vcs/git/test${i}.xml")
             List<String> lines = gitFile.readLines()
             assertEquals(4, lines.size())
@@ -366,21 +355,75 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
             assertEquals("Admin Test", lines[3])
         }
 
-        
         repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir(clone) // scan up the file system tree
-        .build()
+                .readEnvironment() // scan environment GIT_* variables
+                .findGitDir(clone) // scan up the file system tree
+                .build()
         commit = repository.resolve(Constants.HEAD)
         revWalk = new RevWalk(repository)
         revCommit = revWalk.parseCommit(commit)
         assertEquals(commit.getName(), rev)
         assertEquals("Admin Commit Message", revCommit.getShortMessage())
         assertEquals("Admin Commit Message", revCommit.getFullMessage())
+
+        imports.each {
+            it.append("Inexistent delete test\n")
+        }
+        def deletes = [new File("/tmp/inexistent")]
+        rev = vcsService.updateModel(model, imports, deletes, "Deleted inexistent file.")
+        for (i in 0..9) {
+            File gitFile = new File("target/vcs/git/test${i}.xml")
+            List<String> lines = gitFile.readLines()
+            assertEquals(5, lines.size())
+            assertEquals("Test - ${i}".toString(), lines[0])
+            assertEquals("Second Test", lines[1])
+            assertEquals("Third Test", lines[2])
+            assertEquals("Admin Test", lines[3])
+            assertEquals("Inexistent delete test", lines[4])
+        }
+        repository = builder.setWorkTree(clone)
+                .readEnvironment() // scan environment GIT_* variables
+                .findGitDir(clone) // scan up the file system tree
+                .build()
+        commit = repository.resolve(Constants.HEAD)
+        revWalk = new RevWalk(repository)
+        revCommit = revWalk.parseCommit(commit)
+        assertEquals(commit.getName(), rev)
+        assertEquals("Deleted inexistent file.", revCommit.getShortMessage())
+        assertEquals("Deleted inexistent file.", revCommit.getFullMessage())
+
+        // don't make deletes and imports disjoint - MWUHAHAHAHAAA!
+        deletes = [*3..9].collect{ new File("target/vcs/git/test${it}.xml") }
+        deletes.each { assertTrue it.exists() }
+        imports.each {
+            it.append("Testing the deletion of actual files.\n")
+        }
+        rev = vcsService.updateModel(model, imports, deletes, "Deleted actual files.")
+        deletes.each { assertFalse it.exists() }
+        def delta = imports - deletes
+        delta.each {
+            assertTrue it.exists()
+            String i = it.name - "test" - ".xml"
+            List<String> lines = it.readLines()
+            assertEquals(6, lines.size())
+            assertEquals("Test - ${i}".toString(), lines[0])
+            assertEquals("Second Test", lines[1])
+            assertEquals("Third Test", lines[2])
+            assertEquals("Admin Test", lines[3])
+            assertEquals("Inexistent delete test", lines[4])
+            assertEquals("Testing the deletion of actual files.", lines[5])
+        }
+        commit = repository.resolve(Constants.HEAD)
+        revWalk = new RevWalk(repository)
+        revCommit = revWalk.parseCommit(commit)
+        assertEquals(commit.getName(), rev)
+        assertEquals("Deleted actual files.", revCommit.getShortMessage())
+        assertEquals("Deleted actual files.", revCommit.getFullMessage())
+
         // and last but not least user should still get an AccessDeniedException
         authenticateAsUser()
         shouldFail(AccessDeniedException) {
-            vcsService.updateModel(model, imports, "Commit Message")
+            vcsService.updateModel(model, imports, null, "Commit Message")
         }
     }
 
@@ -421,8 +464,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         // create a git repository
         List<File> imports=new LinkedList<File>();
         List<Integer> numbers=new LinkedList<Integer>();
-        for (i in 0..9)
-        {
+        for (i in 0..9) {
             imports.add(new File("target/vcs/exchange/test${i}.xml"));
             FileUtils.touch(imports.get(i));
             imports.get(i).append("${i}\n");
@@ -434,9 +476,9 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
         Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
-        .build()
+                    .readEnvironment() // scan environment GIT_* variables
+                    .findGitDir() // scan up the file system tree
+                    .build()
 
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
@@ -453,10 +495,8 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         revision.vcsId = vcsService.importModel(model, imports)
         revision.save(flush: true)
         List<File> exchangeFiles = vcsService.retrieveFiles(revision)
-        exchangeFiles.each
-        { exchange ->
-            imports.each
-            { imported ->
+        exchangeFiles.each { exchange ->
+            imports.each { imported ->
                  assertNotSame(exchange, imported)
             }
             List<String> lines = exchange.readLines()

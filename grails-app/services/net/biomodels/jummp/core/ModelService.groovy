@@ -759,7 +759,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         // save the new model in the database
 		stopWatch.setTag("modelService.addValidatedRevision.persistModel")
         try {
-            String vcsId = vcsService.updateModel(model, modelFiles, revision.comment)
+            String vcsId = vcsService.updateModel(model, modelFiles, null, revision.comment)
             revision.vcsId = vcsId
         } catch (VcsException e) {
             revision.discard()
@@ -1342,7 +1342,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
 
         // save the new model in the database
         try {
-            String vcsId = vcsService.updateModel(model, modelFiles, comment)
+            String vcsId = vcsService.updateModel(model, modelFiles, null, comment)
             revision.vcsId = vcsId
         } catch (VcsException e) {
             revision.discard()

@@ -113,7 +113,7 @@ class VcsService {
             throw new VcsException("Version Control System is not valid")
         }
 
-        return vcsManager.updateModel(new File(model.vcsIdentifier), files, "Imported model at ${new Date().toGMTString()}")
+        return vcsManager.updateModel(new File(model.vcsIdentifier), files, null, "Imported model at ${new Date().toGMTString()}")
     }
 
     /**
