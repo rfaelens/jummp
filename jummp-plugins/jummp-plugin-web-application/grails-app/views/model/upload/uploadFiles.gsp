@@ -99,11 +99,11 @@
                         </tr>
                     </tbody>
                 </table>
-                <a href="#" id="addFile" class="normalAnchor"><g:message code="submission.upload.additionalFiles.addButton" /></a>
                 <fieldset>
                     <legend>
                         <g:message code="submission.upload.additionalFiles.legend"/>
                     </legend>
+                    <a href="#" id="addFile" class="normalAnchor"><g:message code="submission.upload.additionalFiles.addButton" /></a>
                     <table class='formtable' id="additionalFiles">
                         <tbody>
                         </tbody>
