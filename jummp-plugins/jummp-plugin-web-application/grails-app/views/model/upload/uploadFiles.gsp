@@ -36,9 +36,6 @@
         <link rel="stylesheet" href="<g:resource dir="css/jqueryui/smoothness" file="jquery-ui-1.10.3.custom.css"/>" />
         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <style>
-            .normalAnchor {
-                color: #CCCC00;
-            }
         </style>
         <g:if test ="${showProceedWithoutValidationDialog}">
           <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
@@ -103,7 +100,7 @@
                     <legend>
                         <g:message code="submission.upload.additionalFiles.legend"/>
                     </legend>
-                    <a href="#" id="addFile" class="normalAnchor"><g:message code="submission.upload.additionalFiles.addButton" /></a>
+                    <a href="#" id="addFile"><g:message code="submission.upload.additionalFiles.addButton" /></a>
                     <table class='formtable' id="additionalFiles">
                         <tbody>
                         </tbody>
@@ -152,7 +149,7 @@
                         $('<td>').append(
                             $('<a>', {
                                 href: "#",
-                                class: 'killer normalAnchor',
+                                class: 'killer',
                                 text: 'Discard'
                             })
                         )
