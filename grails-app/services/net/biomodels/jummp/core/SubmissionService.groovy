@@ -109,6 +109,10 @@ class SubmissionService {
                     additionals=new HashMap<File,String>()
                 }
                 tobeAdded=createRFTCList(mainFiles, additionals)
+                if (workingMemory.containsKey("removeFromVCS")) {
+                	def removeFromVcs=workingMemory.get("removeFromVCS")
+                	removeFromVcs.deleteAll(tobeAdded) // update after delete -> update
+                }
             }
             if (workingMemory.containsKey("deleted_filenames"))
             {
@@ -124,19 +128,10 @@ class SubmissionService {
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
         @Profiled(tag = "submissionService.NewModelStateMachine.performValidation")
-        protected void handleDeletes(Map<String,Object> workingMemory, List<String> filesToDelete) {
+        protected void handleDeletes(Map<String,Object> workingMemory, List<RFTC> filesToDelete) {
         	if (workingMemory.containsKey("repository_files")) {
                 List<RFTC> existing=(workingMemory.get("repository_files") as List<RFTC>)
-                def toDelete=[]
-                existing.each {
-                	File file=new File(it.path)
-                	filesToDelete.each { deleteMe ->
-                		if (file.getName() == deleteMe) {
-                			toDelete.add(it)
-                		}
-                	}
-                }
-                existing.deleteAll(toDelete)
+                existing.deleteAll(filesToDelete)
             }
          }
         
@@ -154,6 +149,7 @@ class SubmissionService {
         						 List<String> filesToDelete) {
             if (workingMemory.containsKey("repository_files")) {
                 List<RFTC> existing=(workingMemory.get("repository_files") as List<RFTC>)
+                List<RFTC> toDelete=new LinkedList<RFTC>()
                 existing.each { oldfile ->
                 	String oldname=(new File(oldfile.path)).getName()
                 	tobeAdded.each { newfile ->
@@ -172,7 +168,7 @@ class SubmissionService {
                 	}
                 }
                 if (filesToDelete) {
-                	handleDeletes(workingMemory, filesToDelete)
+                	handleDeletes(workingMemory, toDelete)
                 }
                 existing.addAll(tobeAdded)
             }
@@ -544,21 +540,14 @@ class SubmissionService {
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
         @Profiled(tag = "submissionService.NewModelStateMachine.performValidation")
-        void handleDeletes(Map<String,Object> workingMemory, List<String> filesToDelete) {
+        void handleDeletes(Map<String,Object> workingMemory, List<RFTC> filesToDelete) {
         	super.handleDeletes(workingMemory, filesToDelete)
         	if (!workingMemory.containsKey("removeFromVCS")) {
         		workingMemory.put("removeFromVCS", new LinkedList<String>())
         	}
         	def removeFromVcs=workingMemory.get("removeFromVCS")
         	
-        	(workingMemory.get("existing_files") as List<RFTC>).each {
-        		File file=new File(it.path)
-        		filesToDelete.each { deleteMe ->
-        			if (file.getName() == deleteMe) {
-        				removeFromVcs.add(deleteMe)
-        			}
-        		}
-        	}
+        	removeFromVcs.addAll(filesToDelete.intersect(workingMemory.get("existing_files") as List<RFTC>))
          }
 
         
