@@ -100,7 +100,6 @@
                     </tbody>
                 </table>
                 <a href="#" id="addFile" class="normalAnchor"><g:message code="submission.upload.additionalFiles.addButton" /></a>
-                <a href="#" id="removeFiles" class="normalAnchor"><g:message code="submission.upload.additionalFiles.removeAllButton" /></a>
                 <fieldset>
                     <legend>
                         <g:message code="submission.upload.additionalFiles.legend"/>
