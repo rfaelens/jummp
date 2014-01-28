@@ -689,8 +689,18 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     
+    private List<File> getFilesFromRF(List<RepositoryFileTransportCommand> files) {
+    	List<File> modelFiles = []
+    	if (files) {
+    		for (rf in files) {
+    			final def f = new File(rf.path)
+    			modelFiles.add(f)
+    		}
+    	}
+        return modelFiles
+    }
     
-        /**
+    /**
     * Adds a new Revision to the model, to be used by SubmissionService
     * The provided @p modelFiles will be stored in the VCS as an update to the existing files of the same @p model.
     * A new Revision will be created and appended to the list of Revisions of the @p model. 
@@ -707,7 +717,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.addValidatedRevision")
-    public Revision addValidatedRevision(final List<RepositoryFileTransportCommand> repoFiles, RevisionTransportCommand rev) throws ModelException {
+    public Revision addValidatedRevision(final List<RepositoryFileTransportCommand> repoFiles, 
+    									final List<RepositoryFileTransportCommand> deleteFiles,
+    									RevisionTransportCommand rev) throws ModelException {
         // TODO: the method should be thread safe, add a lock
         if (!rev.model) {
             throw new ModelException(null, "Model may not be null")
@@ -718,11 +730,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (rev.comment == null) {
             throw new ModelException(rev.model, "Comment may not be null, empty comment is allowed")
         }
-        List<File> modelFiles = []
-        for (rf in repoFiles) {
-            final def f = new File(rf.path)
-            modelFiles.add(f)
-        }
+        List<File> modelFiles = getFilesFromRF(repoFiles)
+        List<File> filesToDelete = getFilesFromRF(deleteFiles)
+        
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
         Model model = getModel(rev.model.id)
         final String formatVersion = modelFileFormatService.getFormatVersion(rev)
@@ -759,7 +769,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         // save the new model in the database
 		stopWatch.setTag("modelService.addValidatedRevision.persistModel")
         try {
-            String vcsId = vcsService.updateModel(model, modelFiles, null, revision.comment)
+            String vcsId = vcsService.updateModel(model, modelFiles, filesToDelete, revision.comment)
             revision.vcsId = vcsId
         } catch (VcsException e) {
             revision.discard()
@@ -853,12 +863,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         stopWatch.lap("Finished checking for model duplicates.")
         stopWatch.setTag("modelService.uploadValidatedModel.addFiles")
         Model model = new Model()
-        List<File> modelFiles = []
-        for (rf in repoFiles) {
-            final String path = rf.path
-            final def f = new File(path)
-            modelFiles.add(f)
-        }
+        List<File> modelFiles = getFilesFromRF(repoFiles)
         stopWatch.lap("Finished adding RepositoryFiles to the Model")
         stopWatch.setTag("modelService.uploadValidatedModel.prepareVcsStorage")
         final String formatVersion = modelFileFormatService.getFormatVersion(rev)

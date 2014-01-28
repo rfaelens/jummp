@@ -543,7 +543,7 @@ class SubmissionService {
         void handleDeletes(Map<String,Object> workingMemory, List<RFTC> filesToDelete) {
         	super.handleDeletes(workingMemory, filesToDelete)
         	if (!workingMemory.containsKey("removeFromVCS")) {
-        		workingMemory.put("removeFromVCS", new LinkedList<String>())
+        		workingMemory.put("removeFromVCS", new LinkedList<RFTC>())
         	}
         	def removeFromVcs=workingMemory.get("removeFromVCS")
         	
@@ -650,8 +650,8 @@ class SubmissionService {
         void completeSubmission(Map<String,Object> workingMemory) {
             RTC revision=workingMemory.get("RevisionTC") as RTC
             List<RFTC> repoFiles = getRepFiles(workingMemory)
-            
-            def newlyCreated= modelService.addValidatedRevision(repoFiles, revision)
+            List<RFTC> deleteFiles= getRepFiles(workingMemory, "removeFromVCS")
+            def newlyCreated= modelService.addValidatedRevision(repoFiles, deleteFiles, revision)
             workingMemory.put("model_id", newlyCreated.model.id)
         }
     }
@@ -826,7 +826,7 @@ class SubmissionService {
      *
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      */
-    private List<RFTC> getRepFiles(Map<String, Object> workingMemory) {
-        return (List<RFTC>)workingMemory.get("repository_files")
+    private List<RFTC> getRepFiles(Map<String, Object> workingMemory, String mapName="repository_files") {
+        return (List<RFTC>)workingMemory.get(mapName)
     }
 }
