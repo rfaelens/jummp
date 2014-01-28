@@ -118,8 +118,29 @@ class SubmissionService {
   
         }
         
+        /**
+         * Removes deleted files from memory
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
+        @Profiled(tag = "submissionService.NewModelStateMachine.performValidation")
+        protected void handleDeletes(Map<String,Object> workingMemory, List<String> filesToDelete) {
+        	if (workingMemory.containsKey("repository_files")) {
+                List<RFTC> existing=(workingMemory.get("repository_files") as List<RFTC>)
+                def toDelete=[]
+                existing.each {
+                	File file=new File(it.path)
+                	filesToDelete.each { deleteMe ->
+                		if (file.getName() == deleteMe) {
+                			toDelete.add(it)
+                		}
+                	}
+                }
+                existing.deleteAll(toDelete)
+            }
+         }
         
-        protected abstract void handleDeletes(Map<String, Object> workingMemory, Set<RFTC> toDelete);
+
         
         /**
          * Purpose Append supplied RFTC list to those in workingMemory (if any, otherwise create)
@@ -133,7 +154,6 @@ class SubmissionService {
         						 List<String> filesToDelete) {
             if (workingMemory.containsKey("repository_files")) {
                 List<RFTC> existing=(workingMemory.get("repository_files") as List<RFTC>)
-                Set<RFTC> toDelete=new HashSet<RFTC>()
                 existing.each { oldfile ->
                 	String oldname=(new File(oldfile.path)).getName()
                 	tobeAdded.each { newfile ->
@@ -142,14 +162,18 @@ class SubmissionService {
                 			toDelete.add(oldfile)
                 		}
                 	}
-                	toDelete.each { deleteFile ->
-                		String testname=(new File(deleteFile.path)).getName()
-                		if (oldname == testname) {
-                			toDelete.add(oldfile)
+                	if (filesToDelete) {
+                		filesToDelete.each { deleteFile ->
+                			String testname=(new File(deleteFile.path)).getName()
+                			if (oldname == testname) {
+                				toDelete.add(oldfile)
+                			}
                 		}
                 	}
                 }
-                handleDeletes(toDelete)
+                if (filesToDelete) {
+                	handleDeletes(workingMemory, filesToDelete)
+                }
                 existing.addAll(tobeAdded)
             }
             else {
@@ -157,15 +181,6 @@ class SubmissionService {
             }
         }
         
-        /**
-         * Purpose Method called from handleFileUpload that is responsible for
-         * handling modifications (e.g. deletion, when supported)
-         *
-         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
-         * @param modifications     a Map containing the existing files in the model, to be modified
-         */
-        protected abstract void handleModifications(Map<String, Object> workingMemory, Map<String, Object> modifications);
-
         /**
          * Detects the format of the model and stores this information in the working memory
          * using the key <tt>model_type</tt>
@@ -421,13 +436,6 @@ class SubmissionService {
         }
         
         
-        void handleDeletes(Map<String,Object> workingMemory, Set<RFTC> toDelete) {
-        	if (workingMemory.containsKey("repository_files")) {
-                List<RFTC> existing=(workingMemory.get("repository_files") as List<RFTC>)
-                existing.deleteAll(toDelete)
-            }
-         }
-        
         /**
          * Purpose Perform file and model validation, and throw the appropriate exception
          * when necessary
@@ -523,23 +531,47 @@ class SubmissionService {
             //fetch files from repository, make RFTCs out of them
             RTC rev=workingMemory.get("LastRevision") as RTC
             List<RFTC> repFiles=rev.getFiles()
-            storeRFTC(workingMemory, repFiles)
+            storeRFTC(workingMemory, repFiles, null)
             workingMemory.put("existing_files", repFiles)
             sessionFactory.currentSession.clear()
         }
 
         
- 
+        /**
+         * Removes deleted files from memory, checking against previous revision
+         * files, marking any existing files to be removed from Vcs
+         *
+         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
+         */
+        @Profiled(tag = "submissionService.NewModelStateMachine.performValidation")
+        void handleDeletes(Map<String,Object> workingMemory, List<String> filesToDelete) {
+        	super.handleDeletes(workingMemory, filesToDelete)
+        	if (!workingMemory.containsKey("removeFromVCS")) {
+        		workingMemory.put("removeFromVCS", new LinkedList<String>())
+        	}
+        	def removeFromVcs=workingMemory.get("removeFromVCS")
+        	
+        	(workingMemory.get("existing_files") as List<RFTC>).each {
+        		File file=new File(it.path)
+        		filesToDelete.each { deleteMe ->
+        			if (file.getName() == deleteMe) {
+        				removeFromVcs.add(deleteMe)
+        			}
+        		}
+        	}
+         }
+
+        
         /* 
          * If the files include additional files, set parameter in the working memory
          * to ensure that they are reprocessed (validation etc)
          * */
         @Profiled(tag = "submissionService.NewRevisionStateMachine.handleFileUpload")
-        void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
+        void handleFileUpload(Map<String, Object> workingMemory) {
             if (workingMemory.containsKey("submitted_mains")) {
                 workingMemory.put("reprocess_files", true)
             }
-            super.handleFileUpload(workingMemory, modifications)
+            super.handleFileUpload(workingMemory)
         }
 
         /**
@@ -655,15 +687,8 @@ class SubmissionService {
      * @param modifications
      */
     @Profiled(tag = "submissionService.handleFileUpload")
-    void handleFileUpload(Map<String, Object> workingMemory, Map<String, Object> modifications) {
-        /*
-         * The second parameter needs to contain the following:
-         *   a - The files to be *modified* - imported or removed
-         *   b - Possibly a map from filename to properties including:
-         *   whether this file is being added or removed, whether it is
-         *   the main file, and an optional description parameter
-         */
-        getStrategyFromContext(workingMemory).handleFileUpload(workingMemory, modifications)
+    void handleFileUpload(Map<String, Object> workingMemory) {
+        getStrategyFromContext(workingMemory).handleFileUpload(workingMemory)
     }
 
     /**
