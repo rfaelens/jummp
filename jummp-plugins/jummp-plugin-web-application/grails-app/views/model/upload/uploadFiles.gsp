@@ -28,7 +28,6 @@
 
 
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="net.biomodels.jummp.core.model.RepositoryFileTransportCommand" %>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
@@ -72,28 +71,7 @@
             <div class="dialog">
                 <table class="formtable">
                     <tbody>
-                        <g:if test="${workingMemory.containsKey("repository_files")}">
-                          <g:each in="${workingMemory.get("repository_files")}">
-                                <tr class="prop">
-                                    <td class="name">
-                                      <p>${(new File((it as RepositoryFileTransportCommand).path)).getName()}</p>
-                                    </td>
-                                    <td class="classification">
-                                      <p>${(it as RepositoryFileTransportCommand).mainFile ? "(main file)" : "(additional file)"}</p>
-                                    </td>
-                                </tr>
-                          </g:each>
-                        </g:if>
-                        <tr class="prop">
-                            <td class="name">
-                                <label for="mainFile">
-                                    <g:message code="submission.upload.mainFile.label"/>
-                                </label>
-                            </td>
-                            <td class="value">
-                                <input type="file" id="mainFile" name="mainFile"/>
-                            </td>
-                        </tr>
+                        <jummp:displayExistingMainFile main = "${workingMemory['main_file']}"/>
                     </tbody>
                 </table>
                 <fieldset>
@@ -103,6 +81,7 @@
                     <a href="#" id="addFile"><g:message code="submission.upload.additionalFiles.addButton" /></a>
                     <table class='formtable' id="additionalFiles">
                         <tbody>
+                            <jummp:displayExistingAdditionalFiles additionals = "${workingMemory['additional_files']}"/>
                         </tbody>
                     </table>
                 </fieldset>
@@ -118,6 +97,17 @@
         </g:uploadForm>
         <g:javascript>
             $(document).ready(function () {
+                $('#removeMain').click(function(e) {
+                    e.preventDefault();
+                    $(this).parent().get(0).innerHTML = "<input type='file' id='mainFile' name='mainFile'/>\n\t</td>\n</tr>";
+                    alert($(this).parent().get(0).innerHTML);
+                });
+                $('#replaceMain').click(function() {
+                    $('#mainFile').click();
+                });
+                $('#mainFile').change(function(click) {
+                    $('#mainName').text(this.value);
+                });
                 $('#removeFiles').click(function(e) {
                     e.preventDefault();
                     $('tr.fileEntry').empty();

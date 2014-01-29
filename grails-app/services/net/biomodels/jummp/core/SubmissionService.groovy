@@ -147,6 +147,8 @@ class SubmissionService {
         protected void storeRFTC(Map<String,Object> workingMemory, 
         						 List<RFTC> tobeAdded,
         						 List<String> filesToDelete) {
+            RFTC main
+            List<RFTC> additionals
             if (workingMemory.containsKey("repository_files")) {
                 List<RFTC> existing=(workingMemory.get("repository_files") as List<RFTC>)
                 List<RFTC> toDelete=new LinkedList<RFTC>()
@@ -171,10 +173,16 @@ class SubmissionService {
                 	handleDeletes(workingMemory, toDelete)
                 }
                 existing.addAll(tobeAdded)
+                main = existing.find { it.mainFile }
+                additionals = existing - main
             }
             else {
                 workingMemory.put("repository_files", tobeAdded)
+                main = tobeAdded.find { it.mainFile }
+                additionals = tobeAdded - main
             }
+            workingMemory.put("main_file", main)
+            workingMemory.put("additional_files", additionals)
         }
         
         /**

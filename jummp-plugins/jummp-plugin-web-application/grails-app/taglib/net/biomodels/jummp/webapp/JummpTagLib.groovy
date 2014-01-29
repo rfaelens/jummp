@@ -26,9 +26,46 @@ package net.biomodels.jummp.webapp
 
 import javax.xml.transform.stream.StreamSource
 import javax.xml.transform.stream.StreamResult
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 
 class JummpTagLib {
     static namespace = "jummp"
+
+    def displayExistingMainFile = { attrs ->
+        def result = new StringBuilder()
+        result.append("<tr class='prop'>\n\t<td class='name'>\n\t\t<label for='mainFile>\n\t\t\t'")
+        result.append(message(code: "submission.upload.mainFile.label"))
+        result.append("\n\t\t</label>\n\t</td>\n\t<td class='value'>\n\t\t")
+        if (!attrs.main) {
+            result.append("<input type='file' id='mainFile' name='mainFile'/>\n\t</td>\n</tr>")
+            out << result.toString()
+            return
+        }
+
+        RepositoryFileTransportCommand command = attrs.main as RepositoryFileTransportCommand
+        String name = new File(command.path).name
+        result.append("<span id='mainName'>").append(name).append("</span>\n\t\t")
+        result.append("<input style='display:none;' type='file' id='mainFile' name='mainFile'/>\n\t")
+        result.append("<a href='#' id='replaceMain'>Replace</a> | <a href='#' id='removeMain'>Remove</a></td>\n</tr>\n")
+        out << result.toString()
+    }
+
+    def displayExistingAdditionalFiles = { attrs ->
+        if (!attrs.additionals) {
+            return
+        }
+        attrs.additionals.each { f ->
+            RepositoryFileTransportCommand command = f as RepositoryFileTransportCommand
+            String name = new File(command.path).name
+            out << "<tr class='prop'>\n\t<td class='name'>"
+            out << name
+            out << "</td>\n\t<td class='value'><input type='text' name='description'"
+            if (command.description) {
+              out << "value='${command.description}'"
+            }
+            out << "/> <a href='#' class='killer' title='Discard file'>Discard</a></td>\n</tr>\n"
+        }
+    }
 
     /**
      * Renders the HTML code for a JUMMP styled button.
