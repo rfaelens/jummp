@@ -97,21 +97,22 @@ class SubmissionService {
         void handleFileUpload(Map<String, Object> workingMemory) {
             List<RFTC> tobeAdded;
             List<String> filesToDelete;
+            List<File> mainFiles
+            Map<File,String> additionals=null;
         	if (workingMemory.containsKey("submitted_mains"))
             {
-                List<File> mainFiles=workingMemory.remove("submitted_mains") as List<File>
-                Map<File,String> additionals=null;
-                if (workingMemory.containsKey("submitted_additionals")) {
+                mainFiles=workingMemory.remove("submitted_mains") as List<File>
+            }
+            if (workingMemory.containsKey("submitted_additionals")) {
                     additionals=workingMemory.remove("submitted_additionals") as Map<File, String>
-                }
-                else {
-                    additionals=new HashMap<File,String>()
-                }
-                tobeAdded=createRFTCList(mainFiles, additionals)
-                if (workingMemory.containsKey("removeFromVCS")) {
-                	def removeFromVcs=workingMemory.get("removeFromVCS")
-                	removeFromVcs.deleteAll(tobeAdded) // update after delete -> update
-                }
+            }
+            else {
+            	    additionals=new HashMap<File,String>()
+            }
+            tobeAdded=createRFTCList(mainFiles, additionals)
+            if (workingMemory.containsKey("removeFromVCS")) {
+            	   	def removeFromVcs=workingMemory.get("removeFromVCS")
+            	   	removeFromVcs.deleteAll(tobeAdded) // update after delete -> update
             }
             if (workingMemory.containsKey("deleted_filenames"))
             {
@@ -149,12 +150,13 @@ class SubmissionService {
             if (workingMemory.containsKey("repository_files")) {
                 List<RFTC> existing=(workingMemory.get("repository_files") as List<RFTC>)
                 List<RFTC> toDelete=new LinkedList<RFTC>()
+                Set<RFTC> willBeReplaced=new HashSet<RFTC>()
                 existing.each { oldfile ->
                 	String oldname=(new File(oldfile.path)).getName()
                 	tobeAdded.each { newfile ->
                 		String newname=(new File(newfile.path)).getName()
                 		if (newname==oldname) {
-                			toDelete.add(oldfile)
+                			willBeReplaced.add(oldfile)
                 		}
                 	}
                 	if (filesToDelete) {
@@ -164,6 +166,9 @@ class SubmissionService {
                 			}
                 		}
                 	}
+                }
+                if (willBeReplaced) {
+                	existing.removeAll(willBeReplaced)
                 }
                 if (filesToDelete) {
                 	handleDeletes(workingMemory, toDelete)
