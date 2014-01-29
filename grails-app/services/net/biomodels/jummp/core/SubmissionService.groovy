@@ -11,8 +11,7 @@
 *
 * Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
 * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-* A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
-* details.
+* A PARTICULAR PURPOSE. See the GNU Affero General Publicc
 *
 * You should have received a copy of the GNU Affero General Public License along
 * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
@@ -131,7 +130,7 @@ class SubmissionService {
         protected void handleDeletes(Map<String,Object> workingMemory, List<RFTC> filesToDelete) {
         	if (workingMemory.containsKey("repository_files")) {
                 List<RFTC> existing=(workingMemory.get("repository_files") as List<RFTC>)
-                existing.deleteAll(filesToDelete)
+                existing.removeAll(filesToDelete)
             }
          }
         
@@ -160,8 +159,7 @@ class SubmissionService {
                 	}
                 	if (filesToDelete) {
                 		filesToDelete.each { deleteFile ->
-                			String testname=(new File(deleteFile.path)).getName()
-                			if (oldname == testname) {
+                			if (oldname == deleteFile) {
                 				toDelete.add(oldfile)
                 			}
                 		}
@@ -170,7 +168,9 @@ class SubmissionService {
                 if (filesToDelete) {
                 	handleDeletes(workingMemory, toDelete)
                 }
-                existing.addAll(tobeAdded)
+                if (tobeAdded) {
+                	existing.addAll(tobeAdded)
+                }
             }
             else {
                 workingMemory.put("repository_files", tobeAdded)
@@ -473,7 +473,7 @@ class SubmissionService {
          */
         @Profiled(tag = "submissionService.NewModelStateMachine.createTransportObjects")
         protected void createTransportObjects(Map<String,Object> workingMemory) {
-            MTC model=new MTC() //no need for it currently, later on, store publication details
+            MTC model=new MTC()
             RTC revision=new RTC(files: getRepFiles(workingMemory), 
                                 model: model,
                                 format: ModelFormat.
@@ -664,7 +664,7 @@ class SubmissionService {
      */
     @Profiled(tag = "submissionService.initialise")
     void initialise(Map<String, Object> workingMemory) {
-        getStrategyFromContext(workingMemory).initialise(workingMemory)
+    	getStrategyFromContext(workingMemory).initialise(workingMemory)
     }
 
     
@@ -677,7 +677,7 @@ class SubmissionService {
      */
     @Profiled(tag = "submissionService.handleFileUpload")
     void handleFileUpload(Map<String, Object> workingMemory) {
-        getStrategyFromContext(workingMemory).handleFileUpload(workingMemory)
+    	getStrategyFromContext(workingMemory).handleFileUpload(workingMemory)
     }
 
     /**
@@ -702,7 +702,7 @@ class SubmissionService {
         /*
          * Throws an exception if files are not valid, or do not comprise a valid model
          */
-         getStrategyFromContext(workingMemory).performValidation(workingMemory)
+        getStrategyFromContext(workingMemory).performValidation(workingMemory)
     }
 
     /**
@@ -714,7 +714,7 @@ class SubmissionService {
     @Profiled(tag = "submissionService.inferModelInfo")
     void inferModelInfo(Map<String, Object> workingMemory) {
         /* create RevisionTC, ModelTC, populate fields */
-          getStrategyFromContext(workingMemory).inferModelInfo(workingMemory)
+        getStrategyFromContext(workingMemory).inferModelInfo(workingMemory)
     }
 
     /**
