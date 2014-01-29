@@ -11,8 +11,7 @@
 *
 * Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
 * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-* A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
-* details.
+* A PARTICULAR PURPOSE. See the GNU Affero General Publicc
 *
 * You should have received a copy of the GNU Affero General Public License along
 * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
@@ -98,21 +97,22 @@ class SubmissionService {
         void handleFileUpload(Map<String, Object> workingMemory) {
             List<RFTC> tobeAdded;
             List<String> filesToDelete;
+            List<File> mainFiles
+            Map<File,String> additionals=null;
         	if (workingMemory.containsKey("submitted_mains"))
             {
-                List<File> mainFiles=workingMemory.remove("submitted_mains") as List<File>
-                Map<File,String> additionals=null;
-                if (workingMemory.containsKey("submitted_additionals")) {
+                mainFiles=workingMemory.remove("submitted_mains") as List<File>
+            }
+            if (workingMemory.containsKey("submitted_additionals")) {
                     additionals=workingMemory.remove("submitted_additionals") as Map<File, String>
-                }
-                else {
-                    additionals=new HashMap<File,String>()
-                }
-                tobeAdded=createRFTCList(mainFiles, additionals)
-                if (workingMemory.containsKey("removeFromVCS")) {
-                	def removeFromVcs=workingMemory.get("removeFromVCS")
-                	removeFromVcs.deleteAll(tobeAdded) // update after delete -> update
-                }
+            }
+            else {
+            	    additionals=new HashMap<File,String>()
+            }
+            tobeAdded=createRFTCList(mainFiles, additionals)
+            if (workingMemory.containsKey("removeFromVCS")) {
+            	   	def removeFromVcs=workingMemory.get("removeFromVCS")
+            	   	removeFromVcs.deleteAll(tobeAdded) // update after delete -> update
             }
             if (workingMemory.containsKey("deleted_filenames"))
             {
@@ -131,7 +131,7 @@ class SubmissionService {
         protected void handleDeletes(Map<String,Object> workingMemory, List<RFTC> filesToDelete) {
         	if (workingMemory.containsKey("repository_files")) {
                 List<RFTC> existing=(workingMemory.get("repository_files") as List<RFTC>)
-                existing.deleteAll(filesToDelete)
+                existing.removeAll(filesToDelete)
             }
          }
         
@@ -152,27 +152,32 @@ class SubmissionService {
             if (workingMemory.containsKey("repository_files")) {
                 List<RFTC> existing=(workingMemory.get("repository_files") as List<RFTC>)
                 List<RFTC> toDelete=new LinkedList<RFTC>()
+                Set<RFTC> willBeReplaced=new HashSet<RFTC>()
                 existing.each { oldfile ->
                 	String oldname=(new File(oldfile.path)).getName()
                 	tobeAdded.each { newfile ->
                 		String newname=(new File(newfile.path)).getName()
                 		if (newname==oldname) {
-                			toDelete.add(oldfile)
+                			willBeReplaced.add(oldfile)
                 		}
                 	}
                 	if (filesToDelete) {
                 		filesToDelete.each { deleteFile ->
-                			String testname=(new File(deleteFile.path)).getName()
-                			if (oldname == testname) {
+                			if (oldname == deleteFile) {
                 				toDelete.add(oldfile)
                 			}
                 		}
                 	}
                 }
+                if (willBeReplaced) {
+                	existing.removeAll(willBeReplaced)
+                }
                 if (filesToDelete) {
                 	handleDeletes(workingMemory, toDelete)
                 }
-                existing.addAll(tobeAdded)
+                if (tobeAdded) {
+                	existing.addAll(tobeAdded)
+                }
                 main = existing.find { it.mainFile }
                 additionals = existing - main
             }
@@ -481,7 +486,7 @@ class SubmissionService {
          */
         @Profiled(tag = "submissionService.NewModelStateMachine.createTransportObjects")
         protected void createTransportObjects(Map<String,Object> workingMemory) {
-            MTC model=new MTC() //no need for it currently, later on, store publication details
+            MTC model=new MTC()
             RTC revision=new RTC(files: getRepFiles(workingMemory), 
                                 model: model,
                                 format: ModelFormat.
@@ -672,7 +677,7 @@ class SubmissionService {
      */
     @Profiled(tag = "submissionService.initialise")
     void initialise(Map<String, Object> workingMemory) {
-        getStrategyFromContext(workingMemory).initialise(workingMemory)
+    	getStrategyFromContext(workingMemory).initialise(workingMemory)
     }
 
     
@@ -685,7 +690,7 @@ class SubmissionService {
      */
     @Profiled(tag = "submissionService.handleFileUpload")
     void handleFileUpload(Map<String, Object> workingMemory) {
-        getStrategyFromContext(workingMemory).handleFileUpload(workingMemory)
+    	getStrategyFromContext(workingMemory).handleFileUpload(workingMemory)
     }
 
     /**
@@ -710,7 +715,7 @@ class SubmissionService {
         /*
          * Throws an exception if files are not valid, or do not comprise a valid model
          */
-         getStrategyFromContext(workingMemory).performValidation(workingMemory)
+        getStrategyFromContext(workingMemory).performValidation(workingMemory)
     }
 
     /**
@@ -722,7 +727,7 @@ class SubmissionService {
     @Profiled(tag = "submissionService.inferModelInfo")
     void inferModelInfo(Map<String, Object> workingMemory) {
         /* create RevisionTC, ModelTC, populate fields */
-          getStrategyFromContext(workingMemory).inferModelInfo(workingMemory)
+        getStrategyFromContext(workingMemory).inferModelInfo(workingMemory)
     }
 
     /**
