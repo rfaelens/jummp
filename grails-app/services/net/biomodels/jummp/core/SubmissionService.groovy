@@ -112,7 +112,7 @@ class SubmissionService {
             tobeAdded=createRFTCList(mainFiles, additionals)
             if (workingMemory.containsKey("removeFromVCS")) {
             	   	def removeFromVcs=workingMemory.get("removeFromVCS")
-            	   	removeFromVcs.deleteAll(tobeAdded) // update after delete -> update
+            	   	removeFromVcs.removeAll(tobeAdded) // update after delete -> update
             }
             if (workingMemory.containsKey("deleted_filenames"))
             {
@@ -541,7 +541,7 @@ class SubmissionService {
             RTC rev=workingMemory.get("LastRevision") as RTC
             List<RFTC> repFiles=rev.getFiles()
             storeRFTC(workingMemory, repFiles, null)
-            workingMemory.put("existing_files", repFiles)
+            workingMemory.put("existing_files", new ArrayList<RFTC>(repFiles))
             sessionFactory.currentSession.clear()
         }
 
@@ -559,8 +559,12 @@ class SubmissionService {
         		workingMemory.put("removeFromVCS", new LinkedList<RFTC>())
         	}
         	def removeFromVcs=workingMemory.get("removeFromVCS")
-        	
-        	removeFromVcs.addAll(filesToDelete.intersect(workingMemory.get("existing_files") as List<RFTC>))
+        	def existing=workingMemory.get("existing_files") as List<RFTC>
+        	filesToDelete.each { candidate ->
+        		if (existing.find { new File(it.path).getName() == new File(candidate.path).getName() }) {
+        			removeFromVcs.add(candidate)
+        		}
+        	}
          }
 
         
@@ -570,7 +574,7 @@ class SubmissionService {
          * */
         @Profiled(tag = "submissionService.NewRevisionStateMachine.handleFileUpload")
         void handleFileUpload(Map<String, Object> workingMemory) {
-            if (workingMemory.containsKey("submitted_mains")) {
+            if (workingMemory.containsKey("submitted_mains") || workingMemory.containsKey("deleted_filenames")) {
                 workingMemory.put("reprocess_files", true)
             }
             super.handleFileUpload(workingMemory)
