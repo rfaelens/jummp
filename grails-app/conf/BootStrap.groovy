@@ -136,6 +136,11 @@ class BootStrap {
                 userRole = Role.findByAuthority("ROLE_ADMIN")
                 UserRole.create(user, userRole, true)
             }
+            // Manually start Searchable's mirroring process to ensure that it comes after the automated migrations.
+            println "Performing bulk index"
+            searchableService.reindex()
+            println "Starting mirror service"
+            searchableService.startMirroring()
         }
 
         // custom mapping for weceem as it fails to work with an LDAPUserDetailsImpl
@@ -198,11 +203,6 @@ class BootStrap {
             }
         ]
 
-      // Manually start Searchable's mirroring process to ensure that it comes after the automated migrations.
-      println "Performing bulk index"
-      searchableService.reindex()
-      println "Starting mirror service"
-      searchableService.startMirroring()
     }
     def destroy = {
     }
