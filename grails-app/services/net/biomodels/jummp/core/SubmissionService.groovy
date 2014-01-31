@@ -117,6 +117,15 @@ class SubmissionService {
             if (workingMemory.containsKey("deleted_filenames"))
             {
                 filesToDelete=workingMemory.remove("deleted_filenames") as List<String>
+                // check for replacement
+                def overlapping=filesToDelete.findAll {
+                	tobeAdded.find { testFile ->
+                		new File(testFile.path).getName() == it
+                	}
+                }
+                if (overlapping) {
+                	filesToDelete=filesToDelete - overlapping
+                }
             }
             storeRFTC(workingMemory, tobeAdded, filesToDelete) 
   
