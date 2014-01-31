@@ -270,7 +270,15 @@ class ModelController {
                 if (descriptionFields instanceof String) {
                     descriptionFields = [descriptionFields]
                 }
-
+                def noMains = params.deletedMain
+                List<String> toBeDeleted = []
+                if (noMains) {
+                    if (!(noMains instanceof CharSequence)) {
+                        toBeDeleted.addAll(noMains)
+                    } else {
+                        toBeDeleted.add(noMains)
+                    }
+                }
                 if (IS_DEBUG_ENABLED) {
                     if (mainMultipartList?.size() == 1) {
                         log.debug("New submission started.The main file supplied is ${mainMultipartList.properties}.")
@@ -283,6 +291,7 @@ class ModelController {
                 def cmd = new UploadFilesCommand()
                 cmd.mainFile = mainMultipartList
                 cmd.extraFiles = extraMultipartList
+                cmd.mainDeletes = toBeDeleted
                 cmd.description = descriptionFields
                 if (IS_DEBUG_ENABLED) {
                     log.debug "Data binding done :${cmd.properties}"
@@ -299,6 +308,14 @@ class ModelController {
             	UploadFilesCommand cmd = flow.workingMemory.remove("UploadCommand") as UploadFilesCommand
             	boolean fileValidationError=false
             	boolean furtherProcessingRequired=true
+                def deletedMains = cmd.mainDeletes
+                List mainFiles=getMainFiles(flow.workingMemory)
+                boolean isOK = !mainFileDeleted(mainFiles, cmd.mainFile, deletedMains)
+                def multipartDebug = cmd.mainFile.collect { it.getOriginalFilename() }
+                def mainFilesDebug = mainFiles.collect { new File(it.path).name }
+                if (!isOK) {
+                    return MainFileMissingError()
+                }
             	if (!cmd.validate()) {
                     // No main file! This must be an error!
                     fileValidationError=true
@@ -306,9 +323,7 @@ class ModelController {
                     
                     if (cmd.errors["mainFile"].codes.find{ it.contains("mainFile.blank") || it.contains("mainFile.nullable") }) {
                     	if (flow.workingMemory.containsKey("repository_files")) {
-                            List mainFiles=getMainFiles(flow.workingMemory)
-                            if (mainFiles && !mainFiles.isEmpty())
-                            {
+                            if (mainFiles && !mainFiles.isEmpty()) {
                             	if (!mainFileOverwritten(mainFiles, cmd.extraFiles)) {
                             	    fileValidationError=false
                             	    furtherProcessingRequired=true
@@ -316,7 +331,7 @@ class ModelController {
                             	else {
                             		return AdditionalReplacingMainError()
                             	}
-                            }
+                            } 
                             else {
                             	return MainFileMissingError()
                             }
@@ -371,6 +386,7 @@ class ModelController {
                         }
                         flow.workingMemory["submitted_mains"] = mainFileList
                         flow.workingMemory["submitted_additionals"] = additionalsMap
+                        flow.workingMemory["deleted_filenames"] = deletedMains
                         submissionService.handleFileUpload(flow.workingMemory)
                 }
             }
@@ -775,5 +791,15 @@ class ModelController {
     		}
 	}
     	return returnVal
+    }
+
+    private boolean mainFileDeleted(List mainFiles, List cmdMains, List<String> toBeDeleted) {
+        def nonEmptyCmdMains = cmdMains?.find{!it.isEmpty()}
+        if (nonEmptyCmdMains) {
+            return false
+        }
+        def mainFileNames = mainFiles.collect { new File(it.path).name }
+        def wtf =  (mainFileNames - toBeDeleted)
+        return wtf.isEmpty()
     }
 }

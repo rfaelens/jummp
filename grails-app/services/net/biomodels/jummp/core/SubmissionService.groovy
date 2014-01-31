@@ -147,7 +147,7 @@ class SubmissionService {
         protected void storeRFTC(Map<String,Object> workingMemory, 
         						 List<RFTC> tobeAdded,
         						 List<String> filesToDelete) {
-            RFTC main
+            List<RFTC> main
             List<RFTC> additionals
             if (workingMemory.containsKey("repository_files")) {
                 List<RFTC> existing=(workingMemory.get("repository_files") as List<RFTC>)
@@ -178,14 +178,16 @@ class SubmissionService {
                 if (tobeAdded) {
                 	existing.addAll(tobeAdded)
                 }
-                main = existing.find { it.mainFile }
+                main = existing.findAll { it.mainFile }
                 additionals = existing - main
             }
             else {
                 workingMemory.put("repository_files", tobeAdded)
-                main = tobeAdded.find { it.mainFile }
+                main = tobeAdded.findAll { it.mainFile }
                 additionals = tobeAdded - main
             }
+            println "\tmain:${main.inspect()}"
+            println "\textra:${additionals.inspect()}"
             workingMemory.put("main_file", main)
             workingMemory.put("additional_files", additionals)
         }
