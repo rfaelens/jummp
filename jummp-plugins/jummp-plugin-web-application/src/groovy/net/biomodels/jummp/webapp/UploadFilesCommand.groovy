@@ -61,6 +61,7 @@ class UploadFilesCommand implements Serializable {
       * The descriptions associated with each additional file
       */
      List<String> description
+     List<String> mainDeletes
 
     /**
      * Provides the additional files along with their descriptions in a map.
@@ -195,5 +196,6 @@ class UploadFilesCommand implements Serializable {
             }
         )
         description(nullable: true)
+        mainDeletes(nullable: true)
     }
 }

@@ -67,13 +67,14 @@
         <g:render template="/templates/errorMessage"/>
         <h2><g:message code="submission.upload.header"/></h2>
         <p style="padding-bottom:1em"><g:message code="submission.upload.explanation"/></p>
-        <g:uploadForm id="fileUpload" novalidate="false" autocomplete="false">
+        <g:uploadForm id="fileUpload" novalidate="false" autocomplete="false" name="fileUploadForm">
             <div class="dialog">
                 <table class="formtable">
                     <tbody>
                         <jummp:displayExistingMainFile main = "${workingMemory['main_file']}"/>
                     </tbody>
                 </table>
+                <div id="noMains"></div>
                 <fieldset>
                     <legend>
                         <g:message code="submission.upload.additionalFiles.legend"/>
@@ -97,16 +98,28 @@
         </g:uploadForm>
         <g:javascript>
             $(document).ready(function () {
-                $('#removeMain').click(function(e) {
+                $('.removeMain').click(function(e) {
                     e.preventDefault();
-                    $(this).parent().get(0).innerHTML = "<input type='file' id='mainFile' name='mainFile'/>\n\t</td>\n</tr>";
-                    alert($(this).parent().get(0).innerHTML);
+                    var parent = $(this).parent().get(0).innerHTML;
+                    var trimmedParent = parent.replace(/^\s+/g,"");
+                    var start = "<span id='mainName_".length;
+                    var end = trimmedParent.indexOf("\">", start);
+                    var name = trimmedParent.substring(start, end);
+                    var hi = "<input type='hidden' value='" + name + "' name='deletedMain'/>";
+                    document.getElementById("noMains").innerHTML += hi;
+                    $(this).parent().get(0).innerHTML = "<input type='file' id='mainFile' name='mainFile' class='mainFile' ></input>\n\t</td>\n</tr>";
+
                 });
-                $('#replaceMain').click(function() {
-                    $('#mainFile').click();
+                $('.replaceMain').click(function(e) {
+                    e.preventDefault();
+                    $(this).parent().get(0).getElementsByTagName("input")[0].click();
                 });
-                $('#mainFile').change(function(click) {
-                    $('#mainName').text(this.value);
+                $('.mainFile').change(function(click) {
+                    var oldName = $(this).data("labelname");
+                    var hi = "<input type='hidden' value='" + oldName + "' name='deletedMain'/>";
+                    document.getElementById("noMains").innerHTML += hi;
+                    var id = "mainName_" + oldName;
+                    document.getElementById(id).innerHTML = this.value;
                 });
                 $('#removeFiles').click(function(e) {
                     e.preventDefault();
