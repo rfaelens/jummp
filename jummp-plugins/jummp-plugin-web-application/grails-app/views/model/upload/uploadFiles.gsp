@@ -84,6 +84,7 @@
                         <tbody>
                             <jummp:displayExistingAdditionalFiles additionals = "${workingMemory['additional_files']}"/>
                         </tbody>
+                        <div id="noAdditionals"></div>
                     </table>
                 </fieldset>
                 <div class="buttons">
@@ -121,11 +122,6 @@
                     var id = "mainName_" + oldName;
                     document.getElementById(id).innerHTML = this.value;
                 });
-                $('#removeFiles').click(function(e) {
-                    e.preventDefault();
-                    $('tr.fileEntry').empty();
-                });
-
                 $(document).on("click", 'a.killer', function (e) {
                     e.preventDefault();
                     $(this).parent().parent().empty();
