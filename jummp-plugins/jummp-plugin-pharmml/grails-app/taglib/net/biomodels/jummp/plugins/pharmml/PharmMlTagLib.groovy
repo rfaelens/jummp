@@ -1032,124 +1032,151 @@ class PharmMlTagLib {
             return
         }
         def result = new StringBuilder()
+        TrialDesignStructure tds
+        def segmentActivitiesMap
         result.append("<h3>Structure overview</h3>\n")
-        def tds = new TrialDesignStructure(structure.arm, structure.epoch,
-                    structure.cell, structure.segment)
-        def armRefs     = new ArrayList(tds.getArmRefs())
-        def epochRefs   = new ArrayList(tds.getEpochRefs())
-        /* arm-epoch matrix*/
-        result.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
-        for (String e: epochRefs) {
-            result.append("<th class='bold'>").append(e).append("</th>")
-        }
-        result.append("</tr></thead><tbody>\n")
-        for (String a: armRefs) {
-            result.append("<tr><th class='bold'>").append(a).append("</th>")
-            tds.findSegmentRefsByArm(a).each { s ->
-                result.append("<td>").append(s).append("</td>")
-            }
-            result.append("</tr>\n")
-        }
-        result.append("</tbody></table>\n")
-
-        /* segments and activities */
-        List activities = structure.activity
-        // avoid the need to increase the size of the map, because re-hashing is expensive
-        def segmentActivitiesMap = new HashMap(activities.size() + 1, 1.0)
-        structure.segment.each { s ->
-            segmentActivitiesMap[s.oid] = s.activityRef.collect{ a ->
-                structure.activity.find{ a.oidRef.equals(it.oid) }
-            }
-        }
-        boolean showDosingFootnote = false
-        result.append("<h4>Segment-Activity definition</h4>\n")
-        result.append("<table style='margin-bottom:0px;'><thead><tr><th class='bold'>Segment</th><th class='bold'>Activity</th>")
-        result.append("<th class='bold'>Treatment</th><th class='bold'>Dose time</th>")
-        result.append("<th class='bold'>Dose size</th><th class='bold'>Target variable</th></tr></thead><tbody>")
-        if (segmentActivitiesMap) {
-            segmentActivitiesMap.entrySet().each {
-                def activityList = it.value
-                if (!activityList) {
-                    result.append("<tr><td colspan='6'></td></tr>")
-                } else {
-                    final int ACTIVITY_COUNT = activityList.size()
-                    result.append("<tr><td")
-                    if (ACTIVITY_COUNT > 1) {
-                        result.append(" rowspan='").append(ACTIVITY_COUNT).append("'")
-                    }
-                    result.append(">").append(it.key).append("</td><td>")
-                    def first = activityList[0]
-                    result.append(first.oid).append("</td>")
-                    if (first.washout) {
-                        result.append("<td>washout</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>")
-                    } else {
-                        /* dosingRegimen is a JAXBElement */
-                        def regimen = first.dosingRegimen.value
-                        switch(regimen) {
-                            case BolusType:
-                                result.append("<td>bolus</td>")
-                                //fall through
-                            case InfusionType:
-                                if (regimen instanceof InfusionType) {
-                                    result.append("<td>infusion</td>")
-                                }
-                                if (regimen.dosingTimes) {
-                                    rhs(regimen.dosingTimes.assign, result.append("<td>"))
-                                    result.append("</td>")
-                                } else if (regimen.steadyState) {
-                                    result.append("<td>")
-                                    result.append(steadyState(regimen.steadyState))
-                                    result.append("</td>")
-                                } else {
-                                    result.append("<td>*</td>")
-                                    showDosingFootnote = true
-                                }
-                                def amt = regimen.doseAmount
-                                if (amt.assign) {
-                                    rhs(amt.assign, result.append("<td>")).append("</td>")
-                                } else {
-                                    result.append("<td>*</td>")
-                                    showDosingFootnote = true
-                                }
-                                result.append("<td>").append(amt.symbRef.symbIdRef).append("</td>")
-                                break
-                           default:
-                                result.append("<td colspan='4'>Unknown</td>")
-                                break
-                        }
-                    }
-                    result.append("</tr>\n")
-                }
-            }
-            result.append("</tbody></table>\n")
-        }
-        if (showDosingFootnote) {
-            result.append("<span>* &ndash; Element defined in the Individual dosing section.</span>")
-        }
-        /* epochs and occasions */
-        if (structure.studyEvent) {
-            ObservationEventsMap oem = new ObservationEventsMap(structure.studyEvent)
-            def arms = oem.getArms()
-            def epochs = oem.getEpochs()
-            result.append("\n<h4>Epoch-Occasion definition</h4>\n")
+        try {
+            tds = new TrialDesignStructure(structure.arm, structure.epoch,
+                        structure.cell, structure.segment)
+            def armRefs     = new ArrayList(tds.getArmRefs())
+            def epochRefs   = new ArrayList(tds.getEpochRefs())
+            /* arm-epoch matrix*/
             result.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
-            for (String e: epochs) {
+            for (String e: epochRefs) {
                 result.append("<th class='bold'>").append(e).append("</th>")
             }
             result.append("</tr></thead><tbody>\n")
-            arms.each { a ->
+            for (String a: armRefs) {
                 result.append("<tr><th class='bold'>").append(a).append("</th>")
-                def occ = oem.findOccasionsByArm(a)
-                occ.each {
-                    def o = it.firstEntry()
-                    result.append("<td>")
-                    result.append("<div>").append(o.key).append("</div><div><span class='bold'>")
-                    result.append(o.value).append("</span> variability</div></td>")
+                tds.findSegmentRefsByArm(a).each { s ->
+                    result.append("<td>").append(s).append("</td>")
                 }
-                result.append("</tr>")
+                result.append("</tr>\n")
             }
             result.append("</tbody></table>\n")
+        } catch(Exception e) {
+            result.append("Cannot display the arm-epoch matrix.")
+            def errMsg = new StringBuilder("Error encountered while rendering the arm-epoch matrix of")
+            errMsg.append("trial design structure ${structure.properties} ")
+            errMsg.append("using helper ${tds.trialDesignStructure.inspect()}: ")
+            log.error(errMsg, e)
         }
+        try {
+            /* segments and activities */
+            List activities = structure.activity
+            // avoid the need to increase the size of the map, because re-hashing is expensive
+            segmentActivitiesMap = new HashMap(activities.size() + 1, 1.0)
+            structure.segment.each { s ->
+                segmentActivitiesMap[s.oid] = s.activityRef.collect{ a ->
+                    structure.activity.find{ a.oidRef.equals(it.oid) }
+                }
+            }
+            boolean showDosingFootnote = false
+            result.append("<h4>Segment-Activity definition</h4>\n")
+            result.append("<table style='margin-bottom:0px;'><thead><tr><th class='bold'>Segment</th><th class='bold'>Activity</th>")
+            result.append("<th class='bold'>Treatment</th><th class='bold'>Dose time</th>")
+            result.append("<th class='bold'>Dose size</th><th class='bold'>Target variable</th></tr></thead><tbody>")
+            if (segmentActivitiesMap) {
+                segmentActivitiesMap.entrySet().each {
+                    def activityList = it.value
+                    if (!activityList) {
+                        result.append("<tr><td colspan='6'></td></tr>")
+                    } else {
+                        final int ACTIVITY_COUNT = activityList.size()
+                        result.append("<tr><td")
+                        if (ACTIVITY_COUNT > 1) {
+                            result.append(" rowspan='").append(ACTIVITY_COUNT).append("'")
+                        }
+                        result.append(">").append(it.key).append("</td><td>")
+                        def first = activityList[0]
+                        result.append(first.oid).append("</td>")
+                        if (first.washout) {
+                            result.append("<td>washout</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>")
+                        } else {
+                            /* dosingRegimen is a JAXBElement */
+                            def regimen = first.dosingRegimen.value
+                            switch(regimen) {
+                                case BolusType:
+                                    result.append("<td>bolus</td>")
+                                    //fall through
+                                case InfusionType:
+                                    if (regimen instanceof InfusionType) {
+                                        result.append("<td>infusion</td>")
+                                    }
+                                    if (regimen.dosingTimes) {
+                                        rhs(regimen.dosingTimes.assign, result.append("<td>"))
+                                        result.append("</td>")
+                                    } else if (regimen.steadyState) {
+                                        result.append("<td>")
+                                        result.append(steadyState(regimen.steadyState))
+                                        result.append("</td>")
+                                    } else {
+                                        result.append("<td>*</td>")
+                                        showDosingFootnote = true
+                                    }
+                                    def amt = regimen.doseAmount
+                                    if (amt.assign) {
+                                        rhs(amt.assign, result.append("<td>")).append("</td>")
+                                    } else {
+                                        result.append("<td>*</td>")
+                                        showDosingFootnote = true
+                                    }
+                                    result.append("<td>").append(amt.symbRef.symbIdRef).append("</td>")
+                                    break
+                               default:
+                                    result.append("<td colspan='4'>Unknown</td>")
+                                    break
+                            }
+                        }
+                        result.append("</tr>\n")
+                    }
+                }
+                result.append("</tbody></table>\n")
+            }
+            if (showDosingFootnote) {
+                result.append("<span>* &ndash; Element defined in the Individual dosing section.</span>")
+            }
+        } catch(Exception e) {
+            result.append("Cannot display the segment-activity overview.")
+            def errMsg = new StringBuilder("Cannot display the segment-activity overview for structure ")
+            errMsg.append(structure.properties).append(" using helper map ")
+            errMsg.append(segmentActivitiesMap.inspect())
+            log.error(errMsg, e)
+        }
+        ObservationEventsMap oem
+        /* epochs and occasions */
+        try {
+            if (structure.studyEvent) {
+                oem = new ObservationEventsMap(structure.studyEvent)
+                def arms = oem.getArms()
+                def epochs = oem.getEpochs()
+                result.append("\n<h4>Epoch-Occasion definition</h4>\n")
+                result.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
+                for (String e: epochs) {
+                    result.append("<th class='bold'>").append(e).append("</th>")
+                }
+                result.append("</tr></thead><tbody>\n")
+                arms.each { a ->
+                    result.append("<tr><th class='bold'>").append(a).append("</th>")
+                    def occ = oem.findOccasionsByArm(a)
+                    occ.each {
+                        def o = it.firstEntry()
+                        result.append("<td>")
+                        result.append("<div>").append(o.key).append("</div><div><span class='bold'>")
+                        result.append(o.value).append("</span> variability</div></td>")
+                    }
+                    result.append("</tr>")
+                }
+                result.append("</tbody></table>\n")
+            }
+        } catch(Exception e) {
+            result.append("<p>Cannot display the epoch-occasion overview.</p>")
+            def errMsg = new StringBuilder("Cannot display the epoch-occasion overview for structure ")
+            errMsg.append(structure.properties).append(" using helper map ")
+            errMsg.append(oem.inspect())
+            log.error(errMsg, e)
+        }
+
         out << result.toString()
     }
 
@@ -1157,12 +1184,21 @@ class PharmMlTagLib {
         if (!dosing) {
             return
         }
-        def result = new StringBuilder("<h4>Individual dosing</h4>\n")
-        dosing.each { d ->
-            if (d.dataSet) {
-                dataSet(d.dataSet, null, result)
+        def result = new StringBuilder()
+        try {
+            result.append("<h4>Individual dosing</h4>\n")
+            dosing.each { d ->
+                if (d.dataSet) {
+                    dataSet(d.dataSet, null, result)
+                }
             }
+        } catch(Exception e) {
+            result.append("Cannot display the trial dosing.")
+            def errMsg = new StringBuilder("Cannot display the trial dosing ")
+            errMsg.append(d.properties)
+            log.error(errMsg, e)
         }
+
         out << result.toString()
     }
 
@@ -1175,20 +1211,36 @@ class PharmMlTagLib {
             result.append("<span><strong>Variability level: </strong>")
             result.append(pop.variabilityReference.symbRef.symbIdRef).append("</span>")
         }
-        if (pop.dataSet) {
-            dataSet(pop.dataSet, null, result)
+        try {
+            if (pop.dataSet) {
+                dataSet(pop.dataSet, null, result)
+            }
+        } catch (Exception e) {
+            result.append("Cannot display population data set.")
+            def errMsg = new StringBuilder()
+            errMsg.append("Cannot display population data set ")
+            errMsg.append(pop.dataSet.properties).append( "for population ")
+            errMsg.append(pop.properties)
+            log.error(errMsg, e)
+        } finally {
+            out << result.toString()
         }
-        out << result.toString()
     }
 
      StringBuilder steadyState = { ss ->
-        def result = new StringBuilder("<strong>Steady state</strong>")
-        def i = ss.interval
-        def end = ss.endTime
-        result.append("<div>Interval: ").append(convertToMathML(i.symbRef.symbIdRef, i.assign))
-        result.append("</div><div>")
-        result.append("End time: ").append(convertToMathML(end.symbRef.symbIdRef, end.assign))
-        result.append("</div>")
+        def result = new StringBuilder()
+        try {
+            result.append("<strong>Steady state</strong>")
+            def i = ss.interval
+            def end = ss.endTime
+            result.append("<div>Interval: ").append(convertToMathML(i.symbRef.symbIdRef, i.assign))
+            result.append("</div><div>")
+            result.append("End time: ").append(convertToMathML(end.symbRef.symbIdRef, end.assign))
+            result.append("</div>")
+        } catch(Exception e) {
+            result.append("Cannot display steady state.")
+            log.error("Cannot display steady state ${ss.properties}", e)
+        }
         return result
     }
 
