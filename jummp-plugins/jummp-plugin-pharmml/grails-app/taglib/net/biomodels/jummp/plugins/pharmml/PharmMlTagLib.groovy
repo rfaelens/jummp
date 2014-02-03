@@ -1055,7 +1055,7 @@ class PharmMlTagLib {
         /* segments and activities */
         List activities = structure.activity
         // avoid the need to increase the size of the map, because re-hashing is expensive
-        def segmentActivitiesMap = new HashMap(activities.size(), 1.0)
+        def segmentActivitiesMap = new HashMap(activities.size() + 1, 1.0)
         structure.segment.each { s ->
             segmentActivitiesMap[s.oid] = s.activityRef.collect{ a ->
                 structure.activity.find{ a.oidRef.equals(it.oid) }
