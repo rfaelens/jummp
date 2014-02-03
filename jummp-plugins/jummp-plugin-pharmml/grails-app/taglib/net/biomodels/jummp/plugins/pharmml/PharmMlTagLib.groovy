@@ -457,8 +457,8 @@ class PharmMlTagLib {
     }
 
     void displayStructuralModel(StructuralModelType model, String iv, StringBuilder result) {
-        result.append("<h3>Structural Model ").append(model.name?.value ?: model.blkId)
-        result.append("</h3>\n")
+        result.append("<h3>Structural Model <span class='italic'>")
+        result.append(model.name?.value ?: model.blkId).append("</span></h3>\n")
         if (model.simpleParameter) {
             result.append("<p class=\"bold\">Parameters </p>")
             result.append(simpleParams(model.simpleParameter))
