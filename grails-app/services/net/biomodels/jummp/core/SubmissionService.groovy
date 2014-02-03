@@ -186,8 +186,6 @@ class SubmissionService {
                 main = tobeAdded.findAll { it.mainFile }
                 additionals = tobeAdded - main
             }
-            println "\tmain:${main.inspect()}"
-            println "\textra:${additionals.inspect()}"
             workingMemory.put("main_file", main)
             workingMemory.put("additional_files", additionals)
         }

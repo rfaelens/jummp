@@ -62,13 +62,10 @@ class JummpTagLib {
         attrs.additionals.each { f ->
             RepositoryFileTransportCommand command = f as RepositoryFileTransportCommand
             String name = new File(command.path).name
-            out << "<tr class='prop'>\n\t<td class='name'>"
+            out << "<tr class='fileEntry'>\n\t<td class='name'>"
             out << name
-            out << "</td>\n\t<td class='value'><input type='text' name='description'"
-            if (command.description) {
-              out << " value='${command.description}'"
-            }
-            out << "/> <a href='#' class='killer' title='Discard file'>Discard</a></td>\n</tr>\n"
+            out << "</td>\n\t<td></td>\n\t<td>"
+            out << "<a href='#' class='killer' title='Discard file'>Discard</a></td>\n</tr>\n"
         }
     }
 

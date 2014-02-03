@@ -84,8 +84,8 @@
                         <tbody>
                             <jummp:displayExistingAdditionalFiles additionals = "${workingMemory['additional_files']}"/>
                         </tbody>
-                        <div id="noAdditionals"></div>
                     </table>
+                    <div id="noAdditionals"></div>
                 </fieldset>
                 <div class="buttons">
                     <g:submitButton name="Cancel" value="${g.message(code: 'submission.common.cancelButton')}" />
@@ -124,7 +124,13 @@
                 });
                 $(document).on("click", 'a.killer', function (e) {
                     e.preventDefault();
-                    $(this).parent().parent().empty();
+                    var tr = $(this).parent().parent().get(0);
+                    var td = tr.getElementsByClassName("name")[0];
+                    if (td) {
+                        var hi = "<input type='hidden' value='" + td.innerHTML + "' name='deletedAdditional'/>";
+                        document.getElementById("noAdditionals").innerHTML += hi;
+                    }
+                    $(tr).empty();
                 });
 
                 $("#addFile").click(function (evt) {

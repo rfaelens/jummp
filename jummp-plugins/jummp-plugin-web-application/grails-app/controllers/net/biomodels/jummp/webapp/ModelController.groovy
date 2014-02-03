@@ -271,12 +271,23 @@ class ModelController {
                     descriptionFields = [descriptionFields]
                 }
                 def noMains = params.deletedMain
-                List<String> toBeDeleted = []
+                List<String> mainsToBeDeleted = []
                 if (noMains) {
                     if (!(noMains instanceof CharSequence)) {
-                        toBeDeleted.addAll(noMains)
+                        mainsToBeDeleted.addAll(Arrays.asList(noMains))
                     } else {
-                        toBeDeleted.add(noMains)
+                        mainsToBeDeleted.add(noMains)
+                    }
+                }
+                def noAdditionals = params.deletedAdditional
+                List<String> additionalsToBeDeleted = []
+                if (noAdditionals) {
+                    if (noAdditionals.getClass().isArray()) {
+                        println "noAdditionals is an array: ${noAdditionals.inspect()} ${noAdditionals.properties}"
+                        additionalsToBeDeleted.addAll(Arrays.asList(noAdditionals))
+                    } else {
+                        println "noAdditionals is not an array: ${noAdditionals.inspect()} ${noAdditionals.properties}"
+                        additionalsToBeDeleted.add(noAdditionals)
                     }
                 }
                 if (IS_DEBUG_ENABLED) {
@@ -291,7 +302,8 @@ class ModelController {
                 def cmd = new UploadFilesCommand()
                 cmd.mainFile = mainMultipartList
                 cmd.extraFiles = extraMultipartList
-                cmd.mainDeletes = toBeDeleted
+                cmd.mainDeletes = mainsToBeDeleted
+                cmd.extraDeletes = additionalsToBeDeleted
                 cmd.description = descriptionFields
                 if (IS_DEBUG_ENABLED) {
                     log.debug "Data binding done :${cmd.properties}"
@@ -349,57 +361,62 @@ class ModelController {
                         log.debug("The files are valid.")
                     }
                 }
-            	if (!fileValidationError && furtherProcessingRequired) {
-                        //should this be in a separate action state?
-                        def uuid = UUID.randomUUID().toString()
-                        if (IS_DEBUG_ENABLED) {
-                            log.debug "Generated submission UUID: ${uuid}"
-                        }
-                        //pray that exchangeDirectory has been defined
-                        File submission_folder=null
-                        def sep = File.separator
-                        if (!flow.workingMemory.containsKey("repository_files")) {
-                          def exchangeDir = grailsApplication.config.jummp.vcs.exchangeDirectory
-                          submission_folder = new File(exchangeDir, uuid)
-                          submission_folder.mkdirs()
-                        }
-                        else {
-                            RFTC existing=flow.workingMemory.get("repository_files").get(0) as RFTC
-                            submission_folder=(new File(existing.path)).getParentFile()
-                        }
-                        def parent = submission_folder.canonicalPath + sep
-                        List<File> mainFileList;
-                        if (cmd.mainFile) {
-                            mainFileList=transferFiles(parent, cmd.mainFile)
-                        }
-                        else {
-                            mainFileList=new LinkedList<File>()
-                        }
-                        List<File> extraFileList = transferFiles(parent, cmd.extraFiles)
-                        List<String> descriptionList  = cmd.description
-                        def additionalsMap = [:]
-                        extraFileList.eachWithIndex{ file, i ->
+                if (!fileValidationError && furtherProcessingRequired) {
+                    //should this be in a separate action state?
+                    def uuid = UUID.randomUUID().toString()
+                    if (IS_DEBUG_ENABLED) {
+                        log.debug "Generated submission UUID: ${uuid}"
+                    }
+                    //pray that exchangeDirectory has been defined
+                    File submission_folder=null
+                    def sep = File.separator
+                    if (!flow.workingMemory.containsKey("repository_files")) {
+                        def exchangeDir = grailsApplication.config.jummp.vcs.exchangeDirectory
+                        submission_folder = new File(exchangeDir, uuid)
+                        submission_folder.mkdirs()
+                    }
+                    else {
+                        RFTC existing = flow.workingMemory.get("repository_files").get(0) as RFTC
+                        submission_folder = (new File(existing.path)).getParentFile()
+                    }
+                    def parent = submission_folder.canonicalPath + sep
+                    List<File> mainFileList;
+                    if (cmd.mainFile) {
+                        mainFileList = transferFiles(parent, cmd.mainFile)
+                    }
+                    else {
+                        mainFileList = new LinkedList<File>()
+                    }
+                    List<File> extraFileList = transferFiles(parent, cmd.extraFiles)
+                    List<String> descriptionList = cmd.description
+                    def additionalsMap = [:]
+                    extraFileList.eachWithIndex{ file, i ->
                         additionalsMap[file] = descriptionList[i]
-                        }
-                        if (IS_DEBUG_ENABLED) {
-                            log.debug "About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."
-                        }
-                        flow.workingMemory["submitted_mains"] = mainFileList
-                        flow.workingMemory["submitted_additionals"] = additionalsMap
-                        flow.workingMemory["deleted_filenames"] = deletedMains
-                        submissionService.handleFileUpload(flow.workingMemory)
+                    }
+                    if (IS_DEBUG_ENABLED) {
+                        log.debug "About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."
+                    }
+                    flow.workingMemory["submitted_mains"] = mainFileList
+                    flow.workingMemory["submitted_additionals"] = additionalsMap
+                    List<String> deletedFileNames = []
+                    deletedFileNames.addAll(deletedMains)
+                    deletedFileNames.addAll(cmd.extraDeletes)
+                    println "1 + 1 = " + deletedFileNames.inspect() + deletedFileNames.properties
+                    // ensure there are no lists within this list
+                    flow.workingMemory["deleted_filenames"] = deletedFileNames.flatten()
+                    submissionService.handleFileUpload(flow.workingMemory)
                 }
             }
             on("MainFileMissingError") {
-            	    flash.flashMessage="submission.upload.error.fileerror"
+                flash.flashMessage="submission.upload.error.fileerror"
             }.to "uploadFiles"
             on("AdditionalReplacingMainError") {
-            	    flash.flashMessage="submission.upload.error.additional_replacing_main"
+                flash.flashMessage="submission.upload.error.additional_replacing_main"
             }.to "uploadFiles"
             on("success").to "performValidation"
             on(Exception).to "handleException"
         }
-        
+
         performValidation {
             action {
             	if (!flow.workingMemory.containsKey("model_type")) {
@@ -793,13 +810,13 @@ class ModelController {
     	return returnVal
     }
 
-    private boolean mainFileDeleted(List mainFiles, List cmdMains, List<String> toBeDeleted) {
+    private boolean mainFileDeleted(List mainFiles, List cmdMains, List<String> mainsToBeDeleted) {
         def nonEmptyCmdMains = cmdMains?.find{!it.isEmpty()}
         if (nonEmptyCmdMains) {
             return false
         }
         def mainFileNames = mainFiles.collect { new File(it.path).name }
-        def wtf =  (mainFileNames - toBeDeleted)
+        def wtf =  (mainFileNames - mainsToBeDeleted)
         return wtf.isEmpty()
     }
 }
