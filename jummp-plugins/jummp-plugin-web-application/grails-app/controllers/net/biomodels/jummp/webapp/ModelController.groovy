@@ -283,10 +283,8 @@ class ModelController {
                 List<String> additionalsToBeDeleted = []
                 if (noAdditionals) {
                     if (noAdditionals.getClass().isArray()) {
-                        println "noAdditionals is an array: ${noAdditionals.inspect()} ${noAdditionals.properties}"
                         additionalsToBeDeleted.addAll(Arrays.asList(noAdditionals))
                     } else {
-                        println "noAdditionals is not an array: ${noAdditionals.inspect()} ${noAdditionals.properties}"
                         additionalsToBeDeleted.add(noAdditionals)
                     }
                 }
@@ -401,7 +399,6 @@ class ModelController {
                     List<String> deletedFileNames = []
                     deletedFileNames.addAll(deletedMains)
                     deletedFileNames.addAll(cmd.extraDeletes)
-                    println "1 + 1 = " + deletedFileNames.inspect() + deletedFileNames.properties
                     // ensure there are no lists within this list
                     flow.workingMemory["deleted_filenames"] = deletedFileNames.flatten()
                     submissionService.handleFileUpload(flow.workingMemory)
