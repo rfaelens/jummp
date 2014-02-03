@@ -9,11 +9,16 @@
 	def imagePath="/images"
 %>
 <div class="content">
-   	<div class="view view-dom-id-9c00a92f557689f996511ded36a88594">
-    	<div class="view-content">
+	<div class="view view-dom-id-9c00a92f557689f996511ded36a88594">
+		<div class="view-content">
     		<g:if test="${models}">
-    	    	<table id="modelTable" class="views-table cols-4">
-        	    <thead>
+    			<g:if test="${action=="list"}">
+    				<div style="padding:10px;">
+    					<a href="${createLink(controller: "search", action: "archive")}" style="float:right;">Browse Archived Models</a>
+    				</div>
+    			</g:if>
+				<table id="modelTable">
+    	    	<thead>
                 <tr>
                 	<g:render template="/templates/tableheader" model="[action: action, 'sortColumn': 'name','msgCode':'model.list.name']"/>
                 	<g:render template="/templates/tableheader" model="[action: action, 'sortColumn': 'format','msgCode':'model.list.format']"/>

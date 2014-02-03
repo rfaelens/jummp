@@ -35,8 +35,7 @@
         <g:javascript contextPath="" src="jquery/jquery-ui-v1.10.3.js"/>
     </head>
     <body activetab="search">
-    	<a href="${createLink(controller: "search", action: "archive")}" style="float:right;margin-bottom:5px;">Browse Archived Models</a>
-    	<g:render template="/templates/datatable" model="['action': 'list']"/>
+    		<g:render template="/templates/datatable" model="['action': 'list']"/>
     </body>
     <content tag="sidebar">
     	<g:if test="${history}">
