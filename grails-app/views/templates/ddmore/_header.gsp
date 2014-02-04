@@ -118,7 +118,7 @@
     		<g:if test="${g.pageProperty(name:'page.help')?.length()}">
 	    		class="active-trail active"
 	    	</g:if>
-    		title="give feedback">Help</a>
+    		title="access help">Help</a>
     	</li>
     	<li class="expanded">
     		<a href="${g.createLink(controller: 'jummp', action: 'feedback')}" 
