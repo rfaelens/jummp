@@ -280,7 +280,7 @@ ORDER BY
             roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
         }
         String query = '''
-SELECT DISTINCT m FROM Revision AS r, AclEntry AS ace
+SELECT DISTINCT m FROM Revision AS r, AclEntry AS ace, Revision AS allRevs
 JOIN r.model AS m JOIN r.owner as u 
 JOIN ace.aclObjectIdentity AS aoi
 JOIN aoi.aclClass AS ac
@@ -293,7 +293,7 @@ if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.F
 else if (sortColumn==ModelListSorting.SUBMITTER) {
 	query+='''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
 }
-query+='''aoi.objectId = r.id
+query+='''r.model = allRevs.model AND aoi.objectId = allRevs.id
 AND ac.className = :className
 AND sid.sid IN (:roles)
 AND ace.mask IN (:permissions)
