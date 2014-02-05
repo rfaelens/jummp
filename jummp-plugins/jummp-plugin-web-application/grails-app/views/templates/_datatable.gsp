@@ -1,4 +1,4 @@
-<%
+<%l
 	def totalCount
 	if (matches) {
 		totalCount=matches
@@ -7,17 +7,39 @@
 		totalCount=modelsAvailable
 	}
 	def imagePath="/images"
+	def resultOptions=net.biomodels.jummp.webapp.Preferences.getOptions("numResults")
+	resultOptions=resultOptions.reverse()
 %>
 <div class="content">
 	<div class="view view-dom-id-9c00a92f557689f996511ded36a88594">
 		<div class="view-content">
     		<g:if test="${models}">
-    			<g:if test="${action=="list"}">
-    				<div style="padding:10px;">
-    					<a href="${createLink(controller: "search", action: "archive")}" style="float:right;">Browse Archived Models</a>
-    				</div>
-    			</g:if>
-				<table id="modelTable">
+    			  	<div id="inline-list">
+    					<g:if test="${action=="list"}">
+    						<sec:ifLoggedIn>
+    							<a href="${createLink(controller: "search", action: "archive")}">Browse Archived Models</a>
+    						</sec:ifLoggedIn>
+    					</g:if>
+    					<ul>
+    						<g:each in="${resultOptions}">
+    							<li>
+    								<g:if test="${it==length}">
+    									${it}
+    								</g:if>
+    								<g:else>
+    									<a href="${createLink(controller: 'search', 
+    														  action: action, 
+    														  params: [query: query,  sortDir: sortDirection, 
+    														  		   sortBy: sortBy, offset: 0, 
+    														  		   numResults:it])}">
+    														  		   ${it}
+    									</a>
+    								</g:else>
+    							</li>
+    						</g:each>
+						</ul>
+					</div>
+	 			<table id="modelTable">
     	    	<thead>
                 <tr>
                 	<g:render template="/templates/tableheader" model="[action: action, 'sortColumn': 'name','msgCode':'model.list.name']"/>
