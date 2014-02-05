@@ -399,7 +399,6 @@ class PharmMlTagLib {
             }
         } catch(Exception e) {
             output.append("Cannot display individual parameters.")
-            e.printStackTrace()
             log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}")
         }
         return output.append("</div>")
@@ -606,7 +605,7 @@ class PharmMlTagLib {
                 result.append("</div>")
             }
         } catch(Exception e) {
-            log.error("Error rendering the parameter model for ${parameterModel.inspect()} ${parameterModel.properties}: ${e.message}\nStacktrace:\n${e.printStackTrace()}")
+            log.error("Error rendering the parameter model for ${parameterModel.inspect()} ${parameterModel.properties}: ${e.message}\nStacktrace:\n")
             out << "Sorry, something went wrong while rendering the parameter model."
         }
         out << result.toString()
@@ -710,9 +709,10 @@ class PharmMlTagLib {
             }
         } catch(Exception e) {
             log.error("Error rendering the covariates ${covariate.inspect()} ${covariate.properties}: ${e.message}")
-            out << "Sorry, something went wrong while rendering the covariates."
+            result.append("Sorry, something went wrong while rendering the covariates.")
+        } finally {
+            out << result.toString()
         }
-        out << result.toString()
     }
 
     StringBuilder categCov = { c, symbId ->
@@ -739,8 +739,6 @@ class PharmMlTagLib {
     }
 
     StringBuilder contCov(String symbId, String blkId, ContinuousCovariateType c) {
-        // may need to populate this map on-demand, before continuous covariates are displayed
-        continuousCovariateTransformations["${blkId}_${symbId}"] = c.transformation.equation
         def result = new StringBuilder("<p>")
         result.append("<span class=\"bold\">Continuous covariate ${symbId}</span>\n</p>\n<p>")
         if (c.abstractContinuousUnivariateDistribution) {
@@ -748,6 +746,7 @@ class PharmMlTagLib {
             result.append("</p><p>")
         }
         result.append(convertToMathML("Transformation", c.transformation.equation))
+        continuousCovariateTransformations["${blkId}_${symbId}"] = c.transformation.equation
         return result.append("</p>")
     }
 
@@ -1470,7 +1469,7 @@ class PharmMlTagLib {
     }
 
     StringBuilder paramsToEstimate(ToEstimateType params) {
-        def result  = new StringBuilder("<div><h5>Estimation parameters</h5>\n")
+        def result = new StringBuilder("<div><h5>Estimation parameters</h5>\n")
         def fixedParams = params.parameterEstimation.findAll{ it.initialEstimate.fixed }
         if (fixedParams) {
             result.append(estimParamsWithInitialEstimate(fixedParams, "Fixed parameters"))
@@ -1701,77 +1700,157 @@ class PharmMlTagLib {
        // prefixToInfix(builder, stack)
     }
 
-    private JAXBElement<BinopType> replaceReferencesInBinop(JAXBElement<BinopType> elem) {
-        List<JAXBElement> content = elem.value.content
-        //TODO walk through content and replace any references you find.
-        def resolvedContent = content.collect {
-            switch (it.value) {
-                case SymbolRefType:
-                    return replaceReferencesInSymbRef(it.value)
+    private JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRefType> symbRef) {
+        final EquationType TRANSF_EQ = resolveSymbolReference(symbRef.value)
+        if (TRANSF_EQ) {
+            final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first()
+            final Class ELEM_CLASS = FIRST_ELEM.value.getClass()
+            switch(ELEM_CLASS) {
+                case BinopType:
                     break
                 case UniopType:
                     break
-                case BinopType:
+                case SymbolRefType:
+                    break
+                case ConstantType:
+                    break
+                case FunctionCallType:
+                    break
+                case IdValueType:
+                    break
+                case StringValueType:
+                    break
+                case IntValueType:
+                    break
+                case RealValueType:
                     break
                 default:
-                    return it
+                    assert false, "Cannot have ${ELEM_CLASS.name} inside a transformation."
+                    break
+            }
+            return FIRST_ELEM
+        } else {
+            return symbRef
+        }
+    }
+
+    private JAXBElement<UniopType> expandNestedUniop(JAXBElement<UniopType> jaxbUniop) {
+        UniopType uniop = jaxbUniop.value
+        UniopType replacement
+        if (uniop.symbRef) {
+            final EquationType TRANSF_EQ = resolveSymbolReference(uniop.symbRef)
+            if (TRANSF_EQ) {
+                final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first().value
+                final Class ELEM_CLASS = FIRST_ELEM.getClass()
+                replacement = new UniopType()
+                replacement.op = uniop.op
+                switch(ELEM_CLASS) {
+                    case BinopType:
+                        replacement.binop = FIRST_ELEM
+                        break
+                    case UniopType:
+                        replacement.uniop = FIRST_ELEM
+                        break
+                    case SymbolRefType:
+                        replacement.symbRef = FIRST_ELEM
+                        break
+                    case ConstantType:
+                        replacement.constant = FIRST_ELEM
+                        break
+                    case FunctionCallType:
+                        replacement.functionCall = FIRST_ELEM
+                        break
+                    case IdValueType:
+                        replacement.scalar = FIRST_ELEM
+                        break
+                    case StringValueType:
+                        break
+                    case IntValueType:
+                        replacement.scalar = FIRST_ELEM
+                        break
+                    case RealValueType:
+                        replacement.scalar = FIRST_ELEM
+                        break
+                    default:
+                        assert false, "Cannot have ${ELEM_CLASS.name} inside a unary operator."
+                        replacement = null
+                        break
+                }
+            }
+        } else if (uniop.uniop) {
+            def expanded = expandNestedUniop(wrapJaxb(uniop.uniop))?.value
+            if (expanded && !(expanded.equals(uniop.uniop))) {
+                uniop.uniop = expanded
+            }
+        } else if (uniop.binop) {
+            def expanded = expandNestedBinop(wrapJaxb(uniop.binop))?.value
+            if (expanded && !(expanded.equals(uniop.binop))) {
+                uniop.binop = expanded
             }
         }
-        elem.value.content = resolvedContent
-        return elem
+        if (replacement) {
+            return wrapJaxb(replacement)
+        }
+        return jaxbUniop
     }
 
-    /*FIXME*/ private JAXBElement<UniopType> replaceReferencesInUniop(JAXBElement<UniopType> elem) {
-        //handle uniop, symbref and binop
-        if (elem.value.uniop) {
-            elem.value.uniop = replaceReferencesInUniop(wrapJaxb(elem.value.uniop))
-        } else if (elem.value.binop) {
-            elem.value.binop = replaceReferencesInBinop(wrapJaxb(elem.value.binop))
-        } else if (elem.value.symbRef) {
-            // there is no guarantee that this will result in a symbRef!!
-            elem.value.symbRef = replaceReferencesInSymbRef(wrapJaxb(elem.value.symbRef))
+    private JAXBElement<BinopType> expandNestedBinop(JAXBElement<BinopType> jaxbBinop) {
+        BinopType binop = jaxbBinop.value
+        List<JAXBElement> terms = binop.content
+        def expandedTerms = terms.collect { c ->
+            switch (c.value) {
+                case SymbolRefType:
+                    return expandNestedSymbRefs(c)
+                    break
+                case BinopType:
+                    return expandNestedBinop(c)
+                    break
+                case UniopType:
+                    return expandNestedUniop(c)
+                    break
+                default:
+                    return c
+                    break
+            }
         }
-        return elem
-    }
-
-    /*
-     * Return type is anything that can be in EquationType.scalarOrSymbRefOrBinop.
-     */
-    private JAXBElement replaceReferencesInSymbRef(JAXBElement<SymbolRefType> elem, List<JAXBElement> equationTerms) {
-        //if reference found, add all elements of transfEq.scalarOrSymbRefOrBinop
-        final EquationType transfEq = resolveSymbolReference(elem)
-        if (transfEq) {
-            equationTerms.addAll(transfEq.scalarOrSymbRefOrBinop)
-        } else {
-            equationTerms.add(it)
+        if (expandedTerms.equals(terms)) {
+            return jaxbBinop
         }
+        BinopType expanded = new BinopType()
+        expanded.op = binop.op
+        expanded.content = expandedTerms
+        return wrapJaxb(expanded)
     }
 
     private EquationType expandEquation(EquationType equation) {
-        List<JAXBElement> eqTerms = []
-        equation.scalarOrSymbRefOrBinop.each {
+        List<JAXBElement> eqTerms = equation.scalarOrSymbRefOrBinop
+        List<JAXBElement> expandedTerms = eqTerms.collect {
             switch(it.value) {
                 case BinopType:
-                    //fall through
+                    return expandNestedBinop(it)
+                    break
                 case UniopType:
-                    eqTerms.add(replaceReferences(it))
+                    return expandNestedUniop(it)
                     break
                 case SymbolRefType:
-                    //replaceReferences can return a list here
-                    eqTerms.addAll(replaceReferences(it))
+                    return expandNestedSymbRefs(it)
                     break
                 default:
-                    eqTerms.add(it)
+                    return it
+                    break
             }
         }
-        def newEquation = new EquationType()
-        newEquation.scalarOrSymbRefOrBinop = eqTerms
-        return newEquation
+        if (!eqTerms.equals(expandedTerms)) {
+            def newEquation = new EquationType()
+            newEquation.scalarOrSymbRefOrBinop = expandedTerms
+            return newEquation
+        }
+        return equation
     }
 
     private void convertEquation(def equation, StringBuilder builder) {
-        //EquationType expandedEquation = expandEquation(equation)
-        List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equation).reverse()
+        EquationType expandedEquation = expandEquation(equation)
+        List<MathsSymbol> symbols = MathsUtil.convertToSymbols(expandedEquation).reverse()
         List<String> stack=new LinkedList<String>()
         symbols.each {
            stack.push(it)
@@ -1935,7 +2014,7 @@ class PharmMlTagLib {
             transfEq = continuousCovariateTransformations[transfRef]
         } else {
             String transfRef = ref.symbIdRef
-            transfEq = continuousCovariateTransformations.find{ it.key.contains("_${transfRef}")}
+            transfEq = continuousCovariateTransformations.find{ it.key.contains("_${transfRef}")}?.value
         }
         return transfEq
     }
