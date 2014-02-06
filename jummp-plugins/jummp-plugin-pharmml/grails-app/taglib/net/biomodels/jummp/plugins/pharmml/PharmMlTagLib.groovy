@@ -1855,9 +1855,14 @@ class PharmMlTagLib {
         return equation
     }
 
-    private void convertEquation(def equation, StringBuilder builder) {
-        EquationType expandedEquation = expandEquation(equation)
-        List<MathsSymbol> symbols = MathsUtil.convertToSymbols(expandedEquation).reverse()
+    private void convertEquation(final def equation, StringBuilder builder) {
+        def equationToProcess
+        if ((equation instanceof EquationType) || (equation instanceof Equation)) {
+            equationToProcess = expandEquation(equation)
+        } else {
+            equationToProcess = equation
+        }
+        List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equationToProcess).reverse()
         List<String> stack=new LinkedList<String>()
         symbols.each {
            stack.push(it)
