@@ -991,14 +991,23 @@ class PharmMlTagLib {
         def iterator = v.vector.sequenceOrScalar.iterator()
         while (iterator.hasNext()) {
             //can be a scalar or a sequence
-            def vectorElement = iterator.next()
-            def item
-            try {
-                item = vectorElement as ScalarRhs
-                result.append(oprand(item.value.toPlainString()))
-            } catch (ClassCastException ignored) {
-                item = vectorElement as SequenceType
-                result.append(sequence(item))
+            def vectorElement = iterator.next().value
+            switch (vectorElement) {
+                case SequenceType:
+                    result.append(sequence(vectorElement))
+                    break
+                case IdValueType:
+                case StringValueType:
+                case IntValueType:
+                case RealValueType:
+                case TrueBooleanType:
+                case FalseBooleanType:
+                    result.append(oprand(vectorElement.value.toString()))
+                    break
+                default:
+                    assert false, "Vectors can only contain scalars or sequences."
+                    log.error("Vectors cant contain ${vectorElement.inspect()} ${vectorElement.properties}")
+                    break
             }
             if (iterator.hasNext()) {
                 result.append(op(","))
@@ -1925,11 +1934,11 @@ class PharmMlTagLib {
         if (rhs.getScalar()) {
             builder.append(oprand(scalar(rhs.scalar.value)))
         }
-        else if (r.getSequence()) {
-            builder.append(sequenceAsMathML(r.sequence))
+        else if (rhs.getSequence()) {
+            builder.append(sequenceAsMathML(rhs.sequence))
         }
-        else if (r.getVector()) {
-            builder.append(vectorAsMathML(r))
+        else if (rhs.getVector()) {
+            builder.append(vectorAsMathML(rhs))
         }
         builder.append("</mstyle></math>")
         return builder.toString()
