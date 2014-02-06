@@ -745,8 +745,15 @@ class PharmMlTagLib {
             result.append(distributionAssignment(symbId, c.abstractContinuousUnivariateDistribution))
             result.append("</p><p>")
         }
-        result.append(convertToMathML("Transformation", c.transformation.equation))
-        continuousCovariateTransformations["${blkId}_${symbId}"] = c.transformation.equation
+
+        final String COV_KEY = "${blkId}_${symbId}"
+        // there is no need to expand the symbRef here, so temporarily pop it from the map
+        final EquationType TRANSF_REF = continuousCovariateTransformations.remove(COV_KEY)
+        final EquationType TRANSF_EQ =  TRANSF_REF ?: c.transformation.equation
+        result.append(convertToMathML("Transformation", TRANSF_EQ))
+        assert !(continuousCovariateTransformations[COV_KEY])
+        continuousCovariateTransformations[COV_KEY] = TRANSF_EQ
+
         return result.append("</p>")
     }
 
@@ -1700,7 +1707,7 @@ class PharmMlTagLib {
        // prefixToInfix(builder, stack)
     }
 
-    private JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRefType> symbRef) {
+    private def expandNestedSymbRefs = { JAXBElement<SymbolRefType> symbRef ->
         final EquationType TRANSF_EQ = resolveSymbolReference(symbRef.value)
         if (TRANSF_EQ) {
             final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first()
@@ -1732,9 +1739,9 @@ class PharmMlTagLib {
         } else {
             return symbRef
         }
-    }
+    }.memoizeAtMost(10)
 
-    private JAXBElement<UniopType> expandNestedUniop(JAXBElement<UniopType> jaxbUniop) {
+    private def expandNestedUniop = { JAXBElement<UniopType> jaxbUniop ->
         UniopType uniop = jaxbUniop.value
         UniopType replacement
         if (uniop.symbRef) {
@@ -1778,12 +1785,12 @@ class PharmMlTagLib {
                 }
             }
         } else if (uniop.uniop) {
-            def expanded = expandNestedUniop(wrapJaxb(uniop.uniop))?.value
+            def expanded = expandNestedUniop.call(wrapJaxb(uniop.uniop))?.value
             if (expanded && !(expanded.equals(uniop.uniop))) {
                 uniop.uniop = expanded
             }
         } else if (uniop.binop) {
-            def expanded = expandNestedBinop(wrapJaxb(uniop.binop))?.value
+            def expanded = expandNestedBinop.call(wrapJaxb(uniop.binop))?.value
             if (expanded && !(expanded.equals(uniop.binop))) {
                 uniop.binop = expanded
             }
@@ -1792,21 +1799,21 @@ class PharmMlTagLib {
             return wrapJaxb(replacement)
         }
         return jaxbUniop
-    }
+    }.memoizeAtMost(10)
 
-    private JAXBElement<BinopType> expandNestedBinop(JAXBElement<BinopType> jaxbBinop) {
+    private def expandNestedBinop = { JAXBElement<BinopType> jaxbBinop ->
         BinopType binop = jaxbBinop.value
         List<JAXBElement> terms = binop.content
         def expandedTerms = terms.collect { c ->
             switch (c.value) {
                 case SymbolRefType:
-                    return expandNestedSymbRefs(c)
+                    return expandNestedSymbRefs.call(c)
                     break
                 case BinopType:
-                    return expandNestedBinop(c)
+                    return expandNestedBinop.call(c)
                     break
                 case UniopType:
-                    return expandNestedUniop(c)
+                    return expandNestedUniop.call(c)
                     break
                 default:
                     return c
@@ -1820,20 +1827,20 @@ class PharmMlTagLib {
         expanded.op = binop.op
         expanded.content = expandedTerms
         return wrapJaxb(expanded)
-    }
+    }.memoizeAtMost(10)
 
     private EquationType expandEquation(EquationType equation) {
         List<JAXBElement> eqTerms = equation.scalarOrSymbRefOrBinop
         List<JAXBElement> expandedTerms = eqTerms.collect {
             switch(it.value) {
                 case BinopType:
-                    return expandNestedBinop(it)
+                    return expandNestedBinop.call(it)
                     break
                 case UniopType:
-                    return expandNestedUniop(it)
+                    return expandNestedUniop.call(it)
                     break
                 case SymbolRefType:
-                    return expandNestedSymbRefs(it)
+                    return expandNestedSymbRefs.call(it)
                     break
                 default:
                     return it
