@@ -40,6 +40,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
 import grails.plugins.springsecurity.Secured
 import net.biomodels.jummp.webapp.rest.search.SearchResults
 import net.biomodels.jummp.webapp.rest.search.BrowseResults
+import net.biomodels.jummp.plugins.security.User
 
 class SearchController {
     
@@ -59,14 +60,39 @@ class SearchController {
     def index = {
         redirect action: 'list'
     }
+    
+    private int numResults(def params) {
+    	User user;
+    	if (!(springSecurityService.principal instanceof String)) {
+    		user=User.findById(springSecurityService.principal.id)
+    	}
+    	Preferences prefs
+    	if (user) {
+    		prefs=Preferences.findByUser(user)
+    	}
+    	if (!prefs) {
+    		prefs=Preferences.getDefaults()
+    	}
+    	if (params.numResults) {
+    		prefs.numResults=params.numResults as Integer
+    		if (user) {
+    			prefs.setUser(user)
+    			prefs.save(flush:true)
+    		}
+    	}
+    	return prefs.numResults
+    }
+    
 
     /**
      * Default action showing a list view
      */
     def list = {
+    	int nResults=numResults(params)
+
     	def results=browseCore(params.sortBy, 
 		 					   params.sortDir, 
-		 					   params.offset ? Integer.parseInt(params.offset):0, 10)
+		 					   params.offset ? Integer.parseInt(params.offset):0, nResults)
 		 									  
     	if (!params.format || params.format=="html") {
      	 	 	results["history"]=modelHistoryService.history()
@@ -79,9 +105,10 @@ class SearchController {
      * Default action showing a list view
      */
     def archive = {
+    	int nResults=numResults(params)
     	def results=archiveCore(params.sortBy, 
 		 					   params.sortDir, 
-		 					   params.offset ? Integer.parseInt(params.offset):0, 10)
+		 					   params.offset ? Integer.parseInt(params.offset):0, nResults)
 		 									  
 		return results
     }
@@ -94,10 +121,11 @@ class SearchController {
      * Default action showing a list view
      */
      def search = {
+    	 int nResults=numResults(params)
     	 def results=searchCore(params.query, 
 		 				     	params.sortBy, 
 		 						params.sortDir, 
-		 						params.offset ? Integer.parseInt(params.offset):0, 10)
+		 						params.offset ? Integer.parseInt(params.offset):0, nResults)
 		 if (!params.format || params.format=="html") {
 		 	 return results
 		 }

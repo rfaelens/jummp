@@ -111,6 +111,40 @@
 			
 		});
 		
+		function getCSVData(data) {
+			var lines=data.match(/[^\r\n]+/g);
+			var content=[];
+			content.push("<table>");
+			for (var line in lines) {
+				if (line==0) {
+					content.push("<thead>");
+				}
+				content.push("<tr>");
+				var fields=lines[line].split(",");
+				for (var field in fields) {
+					if (line==0) {
+						content.push("<th>");
+					}
+					else {
+						content.push("<td>");
+					}
+					content.push(fields[field]);
+					if (line==0) {
+						content.push("</th>");
+					}
+					else {
+						content.push("</td>");
+					}
+				}
+				content.push("</tr>");
+				if (line==0) {
+					content.push("</thead>");
+				}
+			}
+			content.push("</table>");
+			return content.join("");
+		}
+		
 		function updateFileDetailsPanel(fileProps) {
 			if (typeof(fileProps) != "undefined") {
 				var formats=["text","txt","xml","pdf", "jpg","jpeg", "gif", "png", "bmp"];
@@ -120,6 +154,7 @@
 				var imageType=false;
 				var mdlType=false;
 				var xmlType=false;
+				var csvType=false;
 				content.push("<div class='ui-widget-content ui-corner-all'><div class='padleft padright padtop'><h3>")
 				content.push(fileProps["Name"])
 				var fileLink="${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}"
@@ -141,6 +176,9 @@
 								}
 								if (fileProps.Name.indexOf('.xml')!=-1) {
 									xmlType=true;
+								}
+								if (fileProps.Name.indexOf('.csv')!=-1) {
+									csvType=true;
 								}
 							}
 							content.push("<div id='filegoeshere' class='padright padbottom")
@@ -190,6 +228,17 @@
 								brush.init({ toolbar: false });
 								var html=brush.getHtml(data)
 								$("#filegoeshere").html(html);
+								$("#Files").equalize({reset: true});
+							}
+						});
+					}
+					else if (csvType) {
+						$.ajax({
+							url : fileLink,
+							dataType: "text",
+							success : function (data) {
+								var plottingData=getCSVData(data)
+								$("#filegoeshere").html(plottingData);
 								$("#Files").equalize({reset: true});
 							}
 						});
