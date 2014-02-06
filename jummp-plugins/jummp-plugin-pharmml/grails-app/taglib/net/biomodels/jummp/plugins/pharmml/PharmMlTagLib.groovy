@@ -766,10 +766,13 @@ class PharmMlTagLib {
         result.append("<h3>Observation Model</h3>")
         try {
             observations.each { om ->
-                result.append("<h4>Observation <span class='italic'>")
+                result.append("<h4>Observation")
                 // the API returns a JAXBElement, not ObservationErrorType
-                def obsErr = om.observationError.value
-                result.append(obsErr.symbId).append("</span></h4>\n")
+                def obsErr = om.observationError?.value
+                if (obsErr) {
+                    result.append(" <span class='italic'>")append(obsErr.symbId).append("</span>")
+                }
+                result.append("</h4>\n")
                 result.append("<span class=\"bold\">Parameters </span>")
                 def simpleParameters = om.commonParameterElement.value.findAll {
                     it instanceof SimpleParameterType
@@ -795,13 +798,15 @@ class PharmMlTagLib {
                                 obsRandomVariableMap, obsCorrelationMatrixMap,
                                 individualParametersInObservationModel, result)
                 }
-                if (obsErr.symbol?.value) {
-                    result.append(obsErr.symbol.value)
-                }
-                if (obsErr instanceof GaussianObsError) {
-                    result.append(gaussianObsErr(obsErr)).append(" ")
-                } else { // can only be GeneralObsError
-                    result.append(generalObsErr(obsErr)).append(" ")
+                if (obsErr) {
+                    if (obsErr.symbol?.value) {
+                        result.append(obsErr.symbol.value)
+                    }
+                    if (obsErr instanceof GaussianObsError) {
+                        result.append(gaussianObsErr(obsErr)).append(" ")
+                    } else { // can only be GeneralObsError
+                        result.append(generalObsErr(obsErr)).append(" ")
+                    }
                 }
             }
         } catch(Exception e) {
