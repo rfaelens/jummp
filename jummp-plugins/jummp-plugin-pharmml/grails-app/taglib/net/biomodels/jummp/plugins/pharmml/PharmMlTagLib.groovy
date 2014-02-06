@@ -1486,7 +1486,7 @@ class PharmMlTagLib {
 
     StringBuilder paramsToEstimate(ToEstimateType params) {
         def result = new StringBuilder("<div><h5>Estimation parameters</h5>\n")
-        def fixedParams = params.parameterEstimation.findAll{ it.initialEstimate.fixed }
+        def fixedParams = params.parameterEstimation.findAll{ it.initialEstimate?.fixed }
         if (fixedParams) {
             result.append(estimParamsWithInitialEstimate(fixedParams, "Fixed parameters"))
         }
