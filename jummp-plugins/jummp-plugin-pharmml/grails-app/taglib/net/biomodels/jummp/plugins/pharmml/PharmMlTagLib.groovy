@@ -82,6 +82,7 @@ import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
+import eu.ddmore.libpharmml.dom.trialdesign.ActivityType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
@@ -1107,48 +1108,13 @@ class PharmMlTagLib {
                         if (ACTIVITY_COUNT > 1) {
                             result.append(" rowspan='").append(ACTIVITY_COUNT).append("'")
                         }
-                        result.append(">").append(it.key).append("</td><td>")
-                        def first = activityList[0]
-                        result.append(first.oid).append("</td>")
-                        if (first.washout) {
-                            result.append("<td>washout</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>")
-                        } else {
-                            /* dosingRegimen is a JAXBElement */
-                            def regimen = first.dosingRegimen.value
-                            switch(regimen) {
-                                case BolusType:
-                                    result.append("<td>bolus</td>")
-                                    //fall through
-                                case InfusionType:
-                                    if (regimen instanceof InfusionType) {
-                                        result.append("<td>infusion</td>")
-                                    }
-                                    if (regimen.dosingTimes) {
-                                        rhs(regimen.dosingTimes.assign, result.append("<td>"))
-                                        result.append("</td>")
-                                    } else if (regimen.steadyState) {
-                                        result.append("<td>")
-                                        result.append(steadyState(regimen.steadyState))
-                                        result.append("</td>")
-                                    } else {
-                                        result.append("<td>*</td>")
-                                        showDosingFootnote = true
-                                    }
-                                    def amt = regimen.doseAmount
-                                    if (amt.assign) {
-                                        rhs(amt.assign, result.append("<td>")).append("</td>")
-                                    } else {
-                                        result.append("<td>*</td>")
-                                        showDosingFootnote = true
-                                    }
-                                    result.append("<td>").append(amt.symbRef.symbIdRef).append("</td>")
-                                    break
-                               default:
-                                    result.append("<td colspan='4'>Unknown</td>")
-                                    break
+                        result.append(">").append(it.key).append("</td>")
+                        activity(activityList[0], true, result)
+                        if (ACTIVITY_COUNT > 1) {
+                            for (int i = 1; i < ACTIVITY_COUNT; i++) {
+                                activity(activityList[i], false, result)
                             }
                         }
-                        result.append("</tr>\n")
                     }
                 }
                 result.append("</tbody></table>\n")
@@ -1180,6 +1146,7 @@ class PharmMlTagLib {
                     result.append("<tr><th class='bold'>").append(a).append("</th>")
                     def occ = oem.findOccasionsByArm(a)
                     occ.each {
+                        //TODO OCCASIONS CAN HAVE MANY ENTRIES
                         def o = it.firstEntry()
                         result.append("<td>")
                         result.append("<div>").append(o.key).append("</div><div><span class='bold'>")
@@ -1198,6 +1165,54 @@ class PharmMlTagLib {
         }
 
         out << result.toString()
+    }
+
+    private void activity(ActivityType activity, boolean isFirst, StringBuilder result) {
+        if (!isFirst) {
+            result.append("<tr>")
+        }
+        result.append("<td>")
+        result.append(activity.oid).append("</td>")
+        if (activity.washout) {
+            result.append("<td>washout</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>")
+        } else {
+            /* dosingRegimen is a JAXBElement */
+            def regimen = activity.dosingRegimen.value
+            switch(regimen) {
+                case BolusType:
+                    result.append("<td>bolus</td>")
+                    //fall through
+                case InfusionType:
+                    if (regimen instanceof InfusionType) {
+                        result.append("<td>infusion</td>")
+                    }
+                    if (regimen.dosingTimes) {
+                        rhs(regimen.dosingTimes.assign, result.append("<td>"))
+                        result.append("</td>")
+                    } else if (regimen.steadyState) {
+                        result.append("<td>")
+                        result.append(steadyState(regimen.steadyState))
+                        result.append("</td>")
+                    } else {
+                        result.append("<td>*</td>")
+                        showDosingFootnote = true
+                    }
+                    def amt = regimen.doseAmount
+                    if (amt.assign) {
+                        rhs(amt.assign, result.append("<td>")).append("</td>")
+                    } else {
+                        result.append("<td>*</td>")
+                        showDosingFootnote = true
+                    }
+                    result.append("<td>").append(amt.symbRef.symbIdRef).append("</td>")
+                    break
+               default:
+                    result.append("<td colspan='4'>Unknown</td>")
+                    break
+            }
+        }
+        result.append("</tr>\n")
+
     }
 
     def trialDosing = { dosing ->
