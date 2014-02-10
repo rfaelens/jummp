@@ -255,6 +255,31 @@ class UserService implements IUserService {
             throw new RegistrationException("User with same name already exists", user.username)
         }
         User newUser = user.sanitizedUser()
+        try
+        {
+        	if (newUser.person.orcid) {
+        		def existing=Person.findByOrcid(newUser.person.orcid)
+        		if (existing) {
+        			if (User.findByPerson(existing)) {
+						throw new RegistrationException("Someone with this ORCID is already registered in the repository", newUser.person.orcid)        				
+        			}
+        			else {
+        				if (newUser.person.userRealName == existing.userRealName) {
+        					newUser.person=existing
+        				}
+        				else {
+        					throw new RegistrationException("This ORCID is registered in the repository with the name ${existing.userRealName}. Please contact an administrator", newUser.person.orcid)        				
+        				}
+        			}
+        		}
+        	}
+        	else {
+        		newUser.person.save(flush:true, failOnError:true)
+        	}
+        }
+        catch(Exception e) {
+        	e.printStackTrace()
+        }
         boolean adminRegistration = false
         String p=generator( (('A'..'Z')+('0'..'9')).join(), 6 )
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
@@ -288,13 +313,6 @@ class UserService implements IUserService {
         GregorianCalendar registrationInvalidation = new GregorianCalendar()
         registrationInvalidation.add(GregorianCalendar.DAY_OF_MONTH, 1)
         newUser.registrationInvalidation = registrationInvalidation.getTime()
-        try
-        {
-        	newUser.person.save(flush:true, failOnError:true)
-        }
-        catch(Exception e) {
-        	e.printStackTrace()
-        }
         newUser.save(flush: true)
         UserRole.create(newUser, Role.findByAuthority("ROLE_USER"), true)
         if (grailsApplication.config.jummp.security.curatorByDefault) {
