@@ -46,7 +46,7 @@
                 </tr>
                 <tr>
                     <td><label for="edit-user-userrealname"><g:message code="user.administration.ui.realname"/>:</label></td>
-                    <td><span><input type="text" id="edit-user-userrealname" name="userRealName" value="${user.userRealName}"/></span></td>
+                    <td><span><input type="text" id="edit-user-userrealname" name="userRealName" value="${user.person.userRealName}"/></span></td>
                 </tr>
                 <tr>
                     <td><label for="edit-user-email"><g:message code="user.administration.ui.email"/>:</label></td>
@@ -54,11 +54,11 @@
                 </tr>
                 <tr>
                     <td><label for="edit-user-institution"><g:message code="user.administration.ui.institution"/>:</label></td>
-                    <td><span><input type="text" id="edit-user-institution" name="institution" value="${user.institution}"/></span></td>
+                    <td><span><input type="text" id="edit-user-institution" name="institution" value="${user.person.institution}"/></span></td>
                 </tr>
                 <tr>
                     <td><label for="edit-user-orcid"><g:message code="user.administration.ui.orcid"/>:</label></td>
-                    <td><span><input type="text" id="edit-user-orcid" name="orcid" value="${user.orcid}"/></span></td>
+                    <td><span><input type="text" id="edit-user-orcid" name="orcid" value="${user.person.orcid}"/></span></td>
                 </tr>
                 </tbody>
             </table>

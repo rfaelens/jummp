@@ -78,7 +78,7 @@ class Model implements Serializable {
         Set<String> creators = []
         if (revisions) {
             revisions.each { revision ->
-                creators.add(revision.owner.userRealName)
+                creators.add(revision.owner.person.userRealName)
             }
         }
         return new ModelTransportCommand(
@@ -88,7 +88,7 @@ class Model implements Serializable {
                 format: revisions ? revisions.sort{ it.revisionNumber }.last().format.toCommandObject() : null,
                 publication: publication ? publication.toCommandObject() : null,
                 deleted:deleted,
-                submitter: revisions ? revisions.sort{ it.revisionNumber }.first().owner.userRealName : null,
+                submitter: revisions ? revisions.sort{ it.revisionNumber }.first().owner.person.userRealName : null,
                 submissionDate: revisions ? revisions.sort{ it.revisionNumber }.first().uploadDate : null,
                 creators: creators
         )

@@ -40,6 +40,7 @@ import net.biomodels.jummp.model.Author
 import org.xml.sax.SAXParseException
 import org.springframework.transaction.annotation.Transactional
 import net.biomodels.jummp.core.model.PublicationTransportCommand
+import net.biomodels.jummp.plugins.security.Person
 import java.util.regex.Pattern
 import java.util.regex.Matcher
 /**
@@ -163,10 +164,11 @@ class PubMedService {
      */
     private void parseAuthors(def slurper, Publication publication) {
         for (def authorXml in slurper.resultList.result.authorList.author) {
-            Author author = new Author()
-            author.lastName = authorXml.lastName[0].text()
-            //author.firstName = authorXml.ForeName[0].text()
-            author.initials = authorXml.initials[0].text()
+            Person author = new Person()
+            author.userRealName = authorXml.fullName[0].text()
+            if (authorXml.authorId[0]?.@type=="ORCID") {
+            	author.orcid = authorXml.authorId[0].text()
+            }
             author.save()
             publication.addToAuthors(author)
         }

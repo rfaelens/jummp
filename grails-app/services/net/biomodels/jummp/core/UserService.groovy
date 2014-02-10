@@ -36,6 +36,7 @@ package net.biomodels.jummp.core
 
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.Person
 import net.biomodels.jummp.plugins.security.UserRole
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
@@ -64,6 +65,7 @@ import org.codehaus.groovy.grails.web.mapping.LinkGenerator
  * and administrative tasks like enabling/disabling users, etc.
  * 
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class UserService implements IUserService {
 
@@ -115,13 +117,17 @@ class UserService implements IUserService {
     void editUser(User user) throws UserInvalidException {
         checkUserValid(user.username)
         User origUser = User.findByUsername(user.username)
-        origUser.userRealName = user.userRealName
+        origUser.person.userRealName = user.person.userRealName
         origUser.email = user.email
-        origUser.orcid = user.orcid
-        origUser.institution = user.institution
+        origUser.person.orcid = user.person.orcid
+        origUser.person.institution = user.person.institution
+        if (!origUser.person.validate()) {
+    	    throw new UserInvalidException(user.username)
+        }
         if (!origUser.validate()) {
             throw new UserInvalidException(user.username)
         }
+        origUser.person.save(flush: true, failOnError: true)
         origUser.save(flush: true)
     }
 
@@ -282,6 +288,13 @@ class UserService implements IUserService {
         GregorianCalendar registrationInvalidation = new GregorianCalendar()
         registrationInvalidation.add(GregorianCalendar.DAY_OF_MONTH, 1)
         newUser.registrationInvalidation = registrationInvalidation.getTime()
+        try
+        {
+        	newUser.person.save(flush:true, failOnError:true)
+        }
+        catch(Exception e) {
+        	e.printStackTrace()
+        }
         newUser.save(flush: true)
         UserRole.create(newUser, Role.findByAuthority("ROLE_USER"), true)
         if (grailsApplication.config.jummp.security.curatorByDefault) {
@@ -297,7 +310,7 @@ class UserService implements IUserService {
             String emailSubject = grailsApplication.config.jummp.security.registration.email.subject
             emailBody = emailBody.replace("{{USERNAME}}", newUser.username)
             emailBody = emailBody.replace("{{PASSWORD}}", p)
-            emailBody = emailBody.replace("{{REALNAME}}", newUser.userRealName)
+            emailBody = emailBody.replace("{{REALNAME}}", newUser.person.userRealName)
             mailService.sendMail {
                 to recipient
                 from grailsApplication.config.jummp.security.registration.email.sender
@@ -383,7 +396,7 @@ class UserService implements IUserService {
         String recipient = user.email
         String url = grailsLinkGenerator.link(controller: 'usermanagement', action: 'passwordreset', id: user.passwordForgottenCode, absolute: true)
         String emailBody = grailsApplication.config.jummp.security.resetPassword.email.body
-        emailBody = emailBody.replace("{{REALNAME}}", user.userRealName)
+        emailBody = emailBody.replace("{{REALNAME}}", user.person.userRealName)
         emailBody = emailBody.replace("{{URL}}", url)
         mailService.sendMail {
                 to recipient

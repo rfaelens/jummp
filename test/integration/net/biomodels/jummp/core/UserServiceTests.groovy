@@ -43,6 +43,7 @@ import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserNotFoundException
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.Person
 import net.biomodels.jummp.plugins.security.UserRole
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
@@ -82,7 +83,7 @@ class UserServiceTests extends JummpIntegrationTest {
     void testEditUser() {
         authenticateAsTestUser()
         User user = User.findByUsername("username")
-        user.userRealName = "Changed Name"
+        user.person.userRealName = "Changed Name"
         shouldFail(AccessDeniedException) {
             userService.editUser(user)
         }
@@ -219,7 +220,9 @@ class UserServiceTests extends JummpIntegrationTest {
 
     @Test
     void testRegister() {
-        User user = new User(username: "register", password: "test", userRealName: "Test Name", email: "test@example.com")
+    	Person person = new Person(userRealName: "Test Name")
+        User user = new User(username: "register", password: "test", person: person, email: "test@example.com")
+        person.save()
         authenticateAsUser()
         shouldFail(AccessDeniedException) {
             userService.register(user)
@@ -279,7 +282,9 @@ class UserServiceTests extends JummpIntegrationTest {
             userService.validateRegistration("notExistingUser", "1234")
         }
         // first register a user
-        User user = new User(username: "register", password: "test", userRealName: "Test Name", email: "test@example.com")
+        Person person = new Person(userRealName: "Test Name")
+        User user = new User(username: "register", password: "test", person: person, email: "test@example.com")
+        person.save()
         userService.register(user)
         User registeredUser = User.findByUsername("register")
         // exception with wrong registration code

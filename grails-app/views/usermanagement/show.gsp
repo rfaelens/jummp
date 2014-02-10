@@ -38,7 +38,7 @@
 				</tr>
 				<tr>
 					<td><label><g:message code="user.administration.ui.realname"/>:</label></td>
-					<td>${user.userRealName}</td>
+					<td>${user.person.userRealName}</td>
 				</tr>
 				<tr>
 					<td><label><g:message code="user.administration.ui.email"/>:</label></td>
@@ -46,11 +46,11 @@
 				</tr>
 				<tr>
 					<td><label><g:message code="user.administration.ui.institution"/>:</label></td>
-					<td>${user.institution}</td>
+					<td>${user.person.institution}</td>
 				</tr>
 				<tr>
 					<td><label><g:message code="user.administration.ui.orcid"/>:</label></td>
-					<td>${user.orcid}</td>
+					<td>${user.person.orcid}</td>
 				</tr>
 				</tbody>
 			</table>
@@ -62,5 +62,5 @@
    </body>
 </html>
 <content tag="title">
-	${user.userRealName}'s Profile
+	${user.person.userRealName}'s Profile
 </content>

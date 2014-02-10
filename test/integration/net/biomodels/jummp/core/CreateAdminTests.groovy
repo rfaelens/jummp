@@ -38,6 +38,7 @@ import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.Person
 import net.biomodels.jummp.plugins.security.UserRole
 import org.junit.*
 import static org.junit.Assert.*
@@ -57,7 +58,9 @@ class CreateAdminTests extends JummpIntegrationTest {
 
     @Test
     void testCreateAdmin() {
-        User user = new User(username: "admin", password: "1234", userRealName: "Administrator", email: "admin@test.com")
+    	def person = new Person(userRealName: "Administrator")
+        User user = new User(username: "admin", password: "1234", person: person, email: "admin@test.com")
+        person.save()
         authenticateAnonymous()
         user.enabled = false
         assertFalse(user.validate())
@@ -76,12 +79,14 @@ class CreateAdminTests extends JummpIntegrationTest {
 
     @Test
     void testCreateRolesForAdmin() {
-        User user = new User(username: "admin", password: "1234", userRealName: "Administrator", email: "admin@test.com")
+        def person = new Person(userRealName: "Administrator")
+        User user = new User(username: "admin", password: "1234", person: person, email: "admin@test.com")
         authenticateAnonymous()
         user.enabled = true
         user.accountExpired = false
         user.accountLocked = false
         user.passwordExpired = false
+        person.save()
         assertNotNull(user.save())
         boolean ok = userService.createRolesForAdmin(user)
         assertTrue(ok)

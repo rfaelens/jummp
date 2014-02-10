@@ -25,23 +25,16 @@
 package net.biomodels.jummp.model
 
 import net.biomodels.jummp.core.model.AuthorTransportCommand
-
+import net.biomodels.jummp.plugins.security.Person
 /**
  * @short Representation of an author of a publication.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
-class Author implements Serializable {
-    String lastName
-    String firstName
-    String initials
-
-    static constraints = {
-        lastName(nullable: false)
-        firstName(nullable: true)
-        initials(nullable: true)
-    }
-
+class Author extends Person {
+	
     AuthorTransportCommand toCommandObject() {
-        return new AuthorTransportCommand(lastName: lastName, firstName: firstName, initials: initials)
+        return new AuthorTransportCommand(userRealName: this.userRealName,
+        								  institution: this.institution,
+        								  orcid: this.orcid)
     }
 }

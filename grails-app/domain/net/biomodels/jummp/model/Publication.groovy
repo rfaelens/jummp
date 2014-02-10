@@ -25,7 +25,7 @@
 package net.biomodels.jummp.model
 
 import net.biomodels.jummp.core.model.PublicationTransportCommand
-import net.biomodels.jummp.core.model.AuthorTransportCommand
+import net.biomodels.jummp.plugins.security.Person
 
 /**
  * @short Representation for a Publication.
@@ -39,7 +39,7 @@ class Publication implements Serializable {
      * A Publication is part of a Model.
      */
     static belongsTo = [Model]
-    static hasMany = [authors: Author, models: Model]
+    static hasMany = [authors: Person, models: Model]
     /**
      * Name of the journal where the publication has been published
      */
@@ -113,10 +113,10 @@ class Publication implements Serializable {
     }
 
     PublicationTransportCommand toCommandObject() {
-        List<AuthorTransportCommand> authorCmds = []
+        List<Person> authors = []
         if (authors) {
         		authors.toList().sort{it.id}.each { author ->
-        			authorCmds << author.toCommandObject()
+        			authors << author
         		}
         }
         return new PublicationTransportCommand(journal: journal,
@@ -131,7 +131,7 @@ class Publication implements Serializable {
                 pages: pages,
                 linkProvider: linkProvider.toCommandObject(),
                 link: link,
-                authors: authorCmds)
+                authors: authors)
     }
 
     static Publication fromCommandObject(PublicationTransportCommand cmd) {
@@ -153,21 +153,25 @@ class Publication implements Serializable {
             publication.issue=cmd.issue;
             publication.pages=cmd.pages;
             cmd.authors.each { newAuthor ->
-            	Author existing = publication.authors.find { oldAuthor ->
-            		oldAuthor.initials == newAuthor.initials && oldAuthor.lastName == newAuthor.lastName
+            	Person existing = publication.authors.find { oldAuthor ->
+            		if (newAuthor.orcid) {
+            			return newAuthor.orcid == oldAuthor.orcid
+            		}
+            		return false
             	}
             	if (!existing) {
-            		Author current = new Author(initials: newAuthor.initials, firstName: newAuthor.firstName,
-            									lastName: newAuthor.lastName)
+            		Person current = new Person(userRealName: newAuthor.userRealName, orcid: newAuthor.orcid)
             		publication.authors << current
             	}
             }
             publication.save(flush:true)
             return publication
         }
-    	List<Author> authors = []
+    	List<Person> authors = []
         cmd.authors.each {
-            Author current = new Author(initials: it.initials, firstName: it.firstName, lastName: it.lastName)
+            Person current = new Person(userRealName: it.userRealName,
+            							institution: it.institution,
+            							orcid: it.orcid)
             authors << current
         }
         Publication publ=new Publication(journal: cmd.journal,

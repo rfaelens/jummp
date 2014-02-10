@@ -45,6 +45,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.AuthorTransportCommand
 import net.biomodels.jummp.core.model.ModelState
+import net.biomodels.jummp.plugins.security.Person
 import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
 import net.biomodels.jummp.core.model.PublicationTransportCommand
@@ -526,21 +527,19 @@ class ModelController {
             	    ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
             	    bindData(model.publication, params, [exclude: ['authors']])
             	    String[] authorList=params.authorFieldTotal.split("!!author!!")
-            	    List<AuthorTransportCommand> validatedAuthors=new LinkedList<AuthorTransportCommand>()
+            	    List<Person> validatedAuthors=new LinkedList<Person>()
             	    authorList.each {
             	    	    if (it) {
-            	    	    String[] authorParts=it.split("<init>")
-            	    	    String lastName=authorParts[0]
-            	    	    String initials=""
-            	    	    if (authorParts.length>1) {
-            	    	    	    initials=authorParts[1]
-            	    	    }
+            	    	    String[] parts=it.split("<authPart>")
             	    	    def authorListSrc=model.publication.authors
             	    	    if (!authorListSrc) {
-            	    	    	    authorListSrc=new LinkedList<AuthorTransportCommand>();
+            	    	    	    authorListSrc=new LinkedList<Person>();
             	    	    }
             	    	    def author=authorListSrc.find { auth ->
-            	    	    	    auth.lastName==lastName && auth.initials==initials 
+            	    	    	if (it.orcid) {
+            	    	    		return it.orcid == auth.orcid
+            	    	    	}
+            	    	    	return false
             	    	    }
             	    	    if (!author) {
             	    	    	author=new AuthorTransportCommand(lastName:lastName, initials:initials)

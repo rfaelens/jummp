@@ -16,38 +16,37 @@
 *
 * You should have received a copy of the GNU Affero General Public License along
 * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
-*
-* Additional permission under GNU Affero GPL version 3 section 7
-*
-* If you modify Jummp, or any covered work, by linking or combining it with
-* groovy (or a modified version of that library), containing parts
-* covered by the terms of Apache License v2.0, the licensors of this
-* Program grant you additional permission to convey the resulting work.
-* {Corresponding Source for a non-source form of such a combination shall
-* include the source code for the parts of groovy used as well as
-* that of the covered work.}
 **/
 
 
 
 
 
-package net.biomodels.jummp.core.model
-import org.codehaus.groovy.grails.validation.Validateable
-import net.biomodels.jummp.plugins.security.Person
+package net.biomodels.jummp.plugins.security
+import java.util.regex.Pattern
+import java.util.regex.Matcher
 /**
- * @short Wrapper for an Author to be transported through JMS.
- *
- * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @short Representation of a Person. Should be subclassed to help understand what type of person
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
-@grails.validation.Validateable	
-class AuthorTransportCommand implements Serializable {
+class Person implements Serializable {
     private static final long serialVersionUID = 1L
+
     String userRealName
     String institution
     String orcid
     
     static constraints = {
-		importFrom Person
-	}	
+        userRealName(blank: false)
+        institution(nullable:true)
+        orcid nullable: true, unique:true, validator: {
+        	if (it) {
+        		Pattern p = Pattern.compile("^\\d{4}-\\d{4}-\\d{4}-\\d{3}(\\d|X)\$");
+        		Matcher m = p.matcher(it);
+        		return m.matches()
+        	}
+        	return true
+        }
+    }
+    
 }

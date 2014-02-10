@@ -36,6 +36,7 @@ package net.biomodels.jummp.core
 
 import static org.junit.Assert.*
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.Person
 import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.UserRole
@@ -73,52 +74,61 @@ class JummpIntegrationTest {
      */
     protected void createUserAndRoles() {
         User user, user2, admin, curator
+        Person person
         if (!User.findByUsername("testuser")) {
-            user = new User(username: "testuser",
+        	person=new Person(userRealName: "Test")
+        	user = new User(username: "testuser",
                     password: springSecurityService.encodePassword("secret"),
-                    userRealName: "Test",
+                    person: person,
                     email: "test@test.com",
                     enabled: true,
                     accountExpired: false,
                     accountLocked: false,
                     passwordExpired: false)
+            assertNotNull(person.save(flush:true, failOnError:true)) 
             assertNotNull(user.save())
             assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
         } else {
             user = User.findByUsername("testuser")
         }
         if (!User.findByUsername("username")) {
-            user2 = new User(username: "username",
+            person=new Person(userRealName: "Test2")
+        	user2 = new User(username: "username",
                     password: springSecurityService.encodePassword("verysecret"),
-                    userRealName: "Test2",
+                    person: person,
                     email: "test2@test.com",
                     enabled: true,
                     accountExpired: false,
                     accountLocked: false,
                     passwordExpired: false)
+            assertNotNull(person.save(flush:true, failOnError:true)) 
             assertNotNull(user2.save())
             assertNotNull(new AclSid(sid: user2.username, principal: true).save(flush: true))
         } else {
             user2 = User.findByUsername("username")
         }
         if (!User.findByUsername("admin")) {
-            admin = new User(username: "admin",
+            person=new Person(userRealName: "administrator")
+        	admin = new User(username: "admin",
                     password: springSecurityService.encodePassword("1234"),
-                    userRealName: "Administrator",
+                    person: person,
                     email: "admin@test.com",
                     enabled: true,
                     accountExpired: false,
                     accountLocked: false,
                     passwordExpired: false)
+            assertNotNull(person.save(flush:true, failOnError:true)) 
             assertNotNull(admin.save())
             assertNotNull(new AclSid(sid: admin.username, principal: true).save(flush: true))
         } else {
             admin = User.findByUsername("admin")
         }
         if (!User.findByUsername("curator")) {
+            person = new Person(userRealName: "Curator")
+        	assertNotNull(person.save(flush:true, failOnError:true)) 
             curator = new User(username: "curator",
                     password: springSecurityService.encodePassword("extremelysecret"),
-                    userRealName: "Curator",
+                    person: person,
                     email: "curator@test.com",
                     enabled: true,
                     accountExpired: false,

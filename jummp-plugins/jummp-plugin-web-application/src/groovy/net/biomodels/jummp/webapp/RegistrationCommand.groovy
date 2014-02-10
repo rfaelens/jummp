@@ -24,6 +24,10 @@
 
 package net.biomodels.jummp.webapp
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.Person
+import java.util.regex.Pattern
+import java.util.regex.Matcher
+
 /**
  * @short Command object for User registration
  */
@@ -40,10 +44,17 @@ class RegistrationCommand {
         email(nullable: false, email: true, blank: false)
         userRealName(nullable: false, blank: false)
         institution(nullable:true)
-        orcid(nullable:true)
+        orcid nullable: true, validator: {
+        	if (it) {
+        		Pattern p = Pattern.compile("^\\d{4}-\\d{4}-\\d{4}-\\d{3}(\\d|X)\$");
+        		Matcher m = p.matcher(it);
+        		return m.matches()
+        	}
+        	return true
+        }
     }
 
     User toUser() {
-        return new User(username: this.username, email: this.email, userRealName: this.userRealName, institution:this.institution, orcid:this.orcid)
+        return new User(username: this.username, email: this.email, person: new Person(userRealName: this.userRealName, institution:this.institution, orcid:this.orcid))
     }
 }
