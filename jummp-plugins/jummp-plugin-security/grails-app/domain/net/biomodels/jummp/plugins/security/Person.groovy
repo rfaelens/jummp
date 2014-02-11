@@ -49,4 +49,8 @@ class Person implements Serializable {
         }
     }
     
+    public String toString() {
+    	return userRealName
+    }
+    
 }

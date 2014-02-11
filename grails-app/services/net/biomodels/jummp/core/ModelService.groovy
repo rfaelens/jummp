@@ -45,7 +45,6 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.model.Author
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.model.PublicationLinkProvider

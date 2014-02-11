@@ -74,8 +74,8 @@
                             </td>
                             <td>
                           	<select class="input50" id="authorList" name="authorList" size="2">
-                          		<g:each in="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.authors}">
-                          			<option value="${it.lastName}<init>${it.initials}">${it.initials}. ${it.lastName}</option>
+                          		<g:each in="${workingMemory.get("Authors")}">
+                          			<option value="${it.userRealName}<init>${it.orcid ?: "no_orcid"}<init>${it.institution ?: "no_institution_provided"}">${it.userRealName}</option>
                           		</g:each>
                           	</select>
                           		<div>

@@ -92,7 +92,7 @@ class PublicationTransportCommand implements Serializable {
      * The key to the publication at the linkProvider or a URL
      */
     String link
-    List<Person> authors
+    HashSet<Person> authors
     static constraints = {
     	// importFrom Publication ...would have been nice :(
     	// TODO: do we need more than 250 characters?

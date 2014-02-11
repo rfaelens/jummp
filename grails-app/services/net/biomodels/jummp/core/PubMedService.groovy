@@ -36,7 +36,6 @@ package net.biomodels.jummp.core
 
 import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.model.PublicationLinkProvider
-import net.biomodels.jummp.model.Author
 import org.xml.sax.SAXParseException
 import org.springframework.transaction.annotation.Transactional
 import net.biomodels.jummp.core.model.PublicationTransportCommand
@@ -169,8 +168,20 @@ class PubMedService {
             if (authorXml.authorId[0]?.@type=="ORCID") {
             	author.orcid = authorXml.authorId[0].text()
             }
+			if (author.orcid && Person.findByOrcid(author.orcid)) {
+				Person existing=Person.findByOrcid(author.orcid)
+				if (author.userRealName == existing.userRealName) {
+					author=existing
+				}
+				else {
+					log.error("Conflicting info available for ORCID ${author.orcid}, with user with id: ${existing.id}.. name from service: ${author.userRealName}, name in repository: ${existing.userRealName}")
+					author.orcid=null
+        		}
+			}
             author.save()
             publication.addToAuthors(author)
         }
+        System.out.println("AUTHORS: "+publication.authors.inspect())
+        System.out.println("AUTHORS: "+publication.authors.getProperties())
     }
 }

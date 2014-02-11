@@ -43,7 +43,6 @@ import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
-import net.biomodels.jummp.core.model.AuthorTransportCommand
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.plugins.security.Person
 import net.biomodels.jummp.webapp.UploadFilesCommand
@@ -507,6 +506,7 @@ class ModelController {
         				}
         				if (retrieved) {
         					model.publication = retrieved.toCommandObject() 
+        					flow.workingMemory.put("Authors", model.publication.authors)
         				}
         			}
         			publicationInfoPage()
@@ -521,32 +521,44 @@ class ModelController {
         }
         publicationInfoPage {
             on("Continue"){
-            	    ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
+            		ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
             	    bindData(model.publication, params, [exclude: ['authors']])
             	    String[] authorList=params.authorFieldTotal.split("!!author!!")
             	    List<Person> validatedAuthors=new LinkedList<Person>()
             	    authorList.each {
             	    	    if (it) {
-            	    	    String[] parts=it.split("<authPart>")
+            	    	    System.out.println("NOW PROCESSING: "+it)
+            	    	    String[] parts=it.split("<init>")
+            	    	    String name=parts[0];
+            	    	    String orcid=parts[1];
+            	    	    String institution=parts[2];
             	    	    def authorListSrc=model.publication.authors
             	    	    if (!authorListSrc) {
             	    	    	    authorListSrc=new LinkedList<Person>();
             	    	    }
             	    	    def author=authorListSrc.find { auth ->
-            	    	    	if (it.orcid) {
-            	    	    		return it.orcid == auth.orcid
+            	    	    	if (orcid != "no_orcid") {
+            	    	    		return orcid == auth.orcid
+            	    	    	}
+            	    	    	else {
+            	    	    		return name == auth.userRealName
             	    	    	}
             	    	    	return false
             	    	    }
             	    	    if (!author) {
-            	    	    	author=new AuthorTransportCommand(lastName:lastName, initials:initials)
+            	    	    	System.out.println("COULDNT FIND AUTHOR "+name+" in ${authorListSrc}")
+            	    	    	author=new Person(userRealName:parts[0], 
+            	    	    					  orcid: parts[1]!="no_orcid" ?: null, 
+            	    	    					  institution: parts[2]!="no_institution_provided" ?:null)
             	    	    	if (!model.publication.authors) {
-            	    	        	model.publication.authors=new LinkedList<AuthorTransportCommand>()
+            	    	        	model.publication.authors=new LinkedList<Person>()
             	    	        }
             	    	        model.publication.authors.add(author)
             	    	    }
+            	    	    System.out.println("AUTHORS IN PUBINFO "+model.publication.authors.inspect())
         	    	        if (author.validate()) {
         	    	        	validatedAuthors.add(author)
+        	    	        	System.out.println("AUTHORS IN VALIDATED "+validatedAuthors.inspect())
         	    	        }
         	    	        else {
         	    	        	log.error "Submission did not validate: ${author.properties}."
@@ -557,6 +569,7 @@ class ModelController {
         	    	 }
             	   }
             	   model.publication.authors=validatedAuthors
+            	   System.out.println("AUTHOR SIZE" +model.publication.authors.size())
             	   if (!model.publication.validate()) {
             	   	   log.error "Submission did not validate: ${model.publication.properties}."
             	   	   log.error "Errors: ${model.publication.errors.allErrors.inspect()}."

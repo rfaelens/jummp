@@ -113,13 +113,7 @@ class Publication implements Serializable {
     }
 
     PublicationTransportCommand toCommandObject() {
-        List<Person> authors = []
-        if (authors) {
-        		authors.toList().sort{it.id}.each { author ->
-        			authors << author
-        		}
-        }
-        return new PublicationTransportCommand(journal: journal,
+       PublicationTransportCommand pubTC=new PublicationTransportCommand(journal: journal,
                 title: title,
                 affiliation: affiliation,
                 synopsis: synopsis,
@@ -131,7 +125,11 @@ class Publication implements Serializable {
                 pages: pages,
                 linkProvider: linkProvider.toCommandObject(),
                 link: link,
-                authors: authors)
+                authors: new HashSet<Person>())
+        authors.each {
+        	pubTC.authors.add(it)
+        }
+        return pubTC;
     }
 
     static Publication fromCommandObject(PublicationTransportCommand cmd) {
