@@ -1109,10 +1109,16 @@ class PharmMlTagLib {
                             result.append(" rowspan='").append(ACTIVITY_COUNT).append("'")
                         }
                         result.append(">").append(it.key).append("</td>")
-                        activity(activityList[0], true, result)
+                        boolean toShowFootnote = activity(activityList[0], true, result)
+                        if ((!showDosingFootnote) && toShowFootnote) {
+                            showDosingFootnote = toShowFootnote
+                        }
                         if (ACTIVITY_COUNT > 1) {
                             for (int i = 1; i < ACTIVITY_COUNT; i++) {
-                                activity(activityList[i], false, result)
+                                toShowFootnote = activity(activityList[i], false, result)
+                                if (!showDosingFootnote && toShowFootnote) {
+                                    showDosingFootnote = toShowFootnote
+                                }
                             }
                         }
                     }
@@ -1167,7 +1173,12 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    private void activity(ActivityType activity, boolean isFirst, StringBuilder result) {
+    /*
+     * Parses an activity and writes it to a StringBuilder.
+     * Returns whether to display a dosing footnote or not.
+     */
+    private boolean activity(ActivityType activity, boolean isFirst, StringBuilder result) {
+        boolean showDosingFootnote = false
         if (!isFirst) {
             result.append("<tr>")
         }
@@ -1212,7 +1223,7 @@ class PharmMlTagLib {
             }
         }
         result.append("</tr>\n")
-
+        return showDosingFootnote
     }
 
     def trialDosing = { dosing ->
