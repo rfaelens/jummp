@@ -92,7 +92,7 @@
             <SimpleParameter symbId="omega_V"/>
             <RandomVariable symbId="eta_V">
                 <ct:VariabilityReference>
-                   <ct:SymbRef blkIdRef="model" symbIdRef="level"/>
+                   <ct:SymbRef blkIdRef="model" symbIdRef="indiv"/>
                 </ct:VariabilityReference>
                 <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="http://www.uncertml.org/distributions/normal">
                     <mean><rVal>0</rVal></mean>

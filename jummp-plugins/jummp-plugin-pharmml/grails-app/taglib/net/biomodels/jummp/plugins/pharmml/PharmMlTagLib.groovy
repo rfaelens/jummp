@@ -82,6 +82,7 @@ import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
+import eu.ddmore.libpharmml.dom.trialdesign.ActivityType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
@@ -399,7 +400,6 @@ class PharmMlTagLib {
             }
         } catch(Exception e) {
             output.append("Cannot display individual parameters.")
-            e.printStackTrace()
             log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}")
         }
         return output.append("</div>")
@@ -457,8 +457,8 @@ class PharmMlTagLib {
     }
 
     void displayStructuralModel(StructuralModelType model, String iv, StringBuilder result) {
-        result.append("<h3>Structural Model ").append(model.name?.value ?: model.blkId)
-        result.append("</h3>\n")
+        result.append("<h3>Structural Model <span class='italic'>")
+        result.append(model.name?.value ?: model.blkId).append("</span></h3>\n")
         if (model.simpleParameter) {
             result.append("<p class=\"bold\">Parameters </p>")
             result.append(simpleParams(model.simpleParameter))
@@ -606,7 +606,7 @@ class PharmMlTagLib {
                 result.append("</div>")
             }
         } catch(Exception e) {
-            log.error("Error rendering the parameter model for ${parameterModel.inspect()} ${parameterModel.properties}: ${e.message}\nStacktrace:\n${e.printStackTrace()}")
+            log.error("Error rendering the parameter model for ${parameterModel.inspect()} ${parameterModel.properties}: ${e.message}\nStacktrace:\n")
             out << "Sorry, something went wrong while rendering the parameter model."
         }
         out << result.toString()
@@ -710,9 +710,10 @@ class PharmMlTagLib {
             }
         } catch(Exception e) {
             log.error("Error rendering the covariates ${covariate.inspect()} ${covariate.properties}: ${e.message}")
-            out << "Sorry, something went wrong while rendering the covariates."
+            result.append("Sorry, something went wrong while rendering the covariates.")
+        } finally {
+            out << result.toString()
         }
-        out << result.toString()
     }
 
     StringBuilder categCov = { c, symbId ->
@@ -739,15 +740,21 @@ class PharmMlTagLib {
     }
 
     StringBuilder contCov(String symbId, String blkId, ContinuousCovariateType c) {
-        // may need to populate this map on-demand, before continuous covariates are displayed
-        continuousCovariateTransformations["${blkId}_${symbId}"] = c.transformation.equation
         def result = new StringBuilder("<p>")
         result.append("<span class=\"bold\">Continuous covariate ${symbId}</span>\n</p>\n<p>")
         if (c.abstractContinuousUnivariateDistribution) {
             result.append(distributionAssignment(symbId, c.abstractContinuousUnivariateDistribution))
             result.append("</p><p>")
         }
-        result.append(convertToMathML("Transformation", c.transformation.equation))
+
+        final String COV_KEY = "${blkId}_${symbId}"
+        // there is no need to expand the symbRef here, so temporarily pop it from the map
+        final EquationType TRANSF_REF = continuousCovariateTransformations.remove(COV_KEY)
+        final EquationType TRANSF_EQ =  TRANSF_REF ?: c.transformation.equation
+        result.append(convertToMathML("Transformation", TRANSF_EQ))
+        assert !(continuousCovariateTransformations[COV_KEY])
+        continuousCovariateTransformations[COV_KEY] = TRANSF_EQ
+
         return result.append("</p>")
     }
 
@@ -760,10 +767,13 @@ class PharmMlTagLib {
         result.append("<h3>Observation Model</h3>")
         try {
             observations.each { om ->
-                result.append("<h4>Observation <span class='italic'>")
+                result.append("<h4>Observation")
                 // the API returns a JAXBElement, not ObservationErrorType
-                def obsErr = om.observationError.value
-                result.append(obsErr.symbId).append("</span></h4>\n")
+                def obsErr = om.observationError?.value
+                if (obsErr) {
+                    result.append(" <span class='italic'>")append(obsErr.symbId).append("</span>")
+                }
+                result.append("</h4>\n")
                 result.append("<span class=\"bold\">Parameters </span>")
                 def simpleParameters = om.commonParameterElement.value.findAll {
                     it instanceof SimpleParameterType
@@ -789,13 +799,15 @@ class PharmMlTagLib {
                                 obsRandomVariableMap, obsCorrelationMatrixMap,
                                 individualParametersInObservationModel, result)
                 }
-                if (obsErr.symbol?.value) {
-                    result.append(obsErr.symbol.value)
-                }
-                if (obsErr instanceof GaussianObsError) {
-                    result.append(gaussianObsErr(obsErr)).append(" ")
-                } else { // can only be GeneralObsError
-                    result.append(generalObsErr(obsErr)).append(" ")
+                if (obsErr) {
+                    if (obsErr.symbol?.value) {
+                        result.append(obsErr.symbol.value)
+                    }
+                    if (obsErr instanceof GaussianObsError) {
+                        result.append(gaussianObsErr(obsErr)).append(" ")
+                    } else { // can only be GeneralObsError
+                        result.append(generalObsErr(obsErr)).append(" ")
+                    }
                 }
             }
         } catch(Exception e) {
@@ -985,14 +997,23 @@ class PharmMlTagLib {
         def iterator = v.vector.sequenceOrScalar.iterator()
         while (iterator.hasNext()) {
             //can be a scalar or a sequence
-            def vectorElement = iterator.next()
-            def item
-            try {
-                item = vectorElement as ScalarRhs
-                result.append(oprand(item.value.toPlainString()))
-            } catch (ClassCastException ignored) {
-                item = vectorElement as SequenceType
-                result.append(sequence(item))
+            def vectorElement = iterator.next().value
+            switch (vectorElement) {
+                case SequenceType:
+                    result.append(sequence(vectorElement))
+                    break
+                case IdValueType:
+                case StringValueType:
+                case IntValueType:
+                case RealValueType:
+                case TrueBooleanType:
+                case FalseBooleanType:
+                    result.append(oprand(vectorElement.value.toString()))
+                    break
+                default:
+                    assert false, "Vectors can only contain scalars or sequences."
+                    log.error("Vectors cant contain ${vectorElement.inspect()} ${vectorElement.properties}")
+                    break
             }
             if (iterator.hasNext()) {
                 result.append(op(","))
@@ -1032,137 +1053,187 @@ class PharmMlTagLib {
             return
         }
         def result = new StringBuilder()
+        TrialDesignStructure tds
+        def segmentActivitiesMap
         result.append("<h3>Structure overview</h3>\n")
-        def tds = new TrialDesignStructure(structure.arm, structure.epoch,
-                    structure.cell, structure.segment)
-        def armRefs     = new ArrayList(tds.getArmRefs())
-        def epochRefs   = new ArrayList(tds.getEpochRefs())
-        /* arm-epoch matrix*/
-        result.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
-        for (String e: epochRefs) {
-            result.append("<th class='bold'>").append(e).append("</th>")
-        }
-        result.append("</tr></thead><tbody>\n")
-        for (String a: armRefs) {
-            result.append("<tr><th class='bold'>").append(a).append("</th>")
-            tds.findSegmentRefsByArm(a).each { s ->
-                result.append("<td>").append(s).append("</td>")
-            }
-            result.append("</tr>\n")
-        }
-        result.append("</tbody></table>\n")
-
-        /* segments and activities */
-        List activities = structure.activity
-        // avoid the need to increase the size of the map, because re-hashing is expensive
-        def segmentActivitiesMap = new HashMap(activities.size(), 1.0)
-        structure.segment.each { s ->
-            segmentActivitiesMap[s.oid] = s.activityRef.collect{ a ->
-                structure.activity.find{ a.oidRef.equals(it.oid) }
-            }
-        }
-        boolean showDosingFootnote = false
-        result.append("<h4>Segment-Activity definition</h4>\n")
-        result.append("<table style='margin-bottom:0px;'><thead><tr><th class='bold'>Segment</th><th class='bold'>Activity</th>")
-        result.append("<th class='bold'>Treatment</th><th class='bold'>Dose time</th>")
-        result.append("<th class='bold'>Dose size</th><th class='bold'>Target variable</th></tr></thead><tbody>")
-        if (segmentActivitiesMap) {
-            segmentActivitiesMap.entrySet().each {
-                def activityList = it.value
-                if (!activityList) {
-                    result.append("<tr><td colspan='6'></td></tr>")
-                } else {
-                    final int ACTIVITY_COUNT = activityList.size()
-                    result.append("<tr><td")
-                    if (ACTIVITY_COUNT > 1) {
-                        result.append(" rowspan='").append(ACTIVITY_COUNT).append("'")
-                    }
-                    result.append(">").append(it.key).append("</td><td>")
-                    def first = activityList[0]
-                    result.append(first.oid).append("</td>")
-                    if (first.washout) {
-                        result.append("<td>washout</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>")
-                    } else {
-                        /* dosingRegimen is a JAXBElement */
-                        def regimen = first.dosingRegimen.value
-                        switch(regimen) {
-                            case BolusType:
-                                result.append("<td>bolus</td>")
-                                //fall through
-                            case InfusionType:
-                                if (regimen instanceof InfusionType) {
-                                    result.append("<td>infusion</td>")
-                                }
-                                if (regimen.dosingTimes) {
-                                    rhs(regimen.dosingTimes.assign, result.append("<td>"))
-                                    result.append("</td>")
-                                } else if (regimen.steadyState) {
-                                    result.append("<td>")
-                                    result.append(steadyState(regimen.steadyState))
-                                    result.append("</td>")
-                                } else {
-                                    result.append("<td>*</td>")
-                                    showDosingFootnote = true
-                                }
-                                def amt = regimen.doseAmount
-                                if (amt.assign) {
-                                    rhs(amt.assign, result.append("<td>")).append("</td>")
-                                } else {
-                                    result.append("<td>*</td>")
-                                    showDosingFootnote = true
-                                }
-                                result.append("<td>").append(amt.symbRef.symbIdRef).append("</td>")
-                                break
-                           default:
-                                result.append("<td colspan='4'>Unknown</td>")
-                                break
-                        }
-                    }
-                    result.append("</tr>\n")
-                }
-            }
-            result.append("</tbody></table>\n")
-        }
-        if (showDosingFootnote) {
-            result.append("<span>* &ndash; Element defined in the Individual dosing section.</span>")
-        }
-        /* epochs and occasions */
-        if (structure.studyEvent) {
-            ObservationEventsMap oem = new ObservationEventsMap(structure.studyEvent)
-            def arms = oem.getArms()
-            def epochs = oem.getEpochs()
-            result.append("\n<h4>Epoch-Occasion definition</h4>\n")
+        try {
+            tds = new TrialDesignStructure(structure.arm, structure.epoch,
+                        structure.cell, structure.segment)
+            def armRefs     = new ArrayList(tds.getArmRefs())
+            def epochRefs   = new ArrayList(tds.getEpochRefs())
+            /* arm-epoch matrix*/
             result.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
-            for (String e: epochs) {
+            for (String e: epochRefs) {
                 result.append("<th class='bold'>").append(e).append("</th>")
             }
             result.append("</tr></thead><tbody>\n")
-            arms.each { a ->
+            for (String a: armRefs) {
                 result.append("<tr><th class='bold'>").append(a).append("</th>")
-                def occ = oem.findOccasionsByArm(a)
-                occ.each {
-                    def o = it.firstEntry()
-                    result.append("<td>")
-                    result.append("<div>").append(o.key).append("</div><div><span class='bold'>")
-                    result.append(o.value).append("</span> variability</div></td>")
+                tds.findSegmentRefsByArm(a).each { s ->
+                    result.append("<td>").append(s).append("</td>")
                 }
-                result.append("</tr>")
+                result.append("</tr>\n")
             }
             result.append("</tbody></table>\n")
+        } catch(Exception e) {
+            result.append("Cannot display the arm-epoch matrix.")
+            def errMsg = new StringBuilder("Error encountered while rendering the arm-epoch matrix of")
+            errMsg.append("trial design structure ${structure.properties} ")
+            errMsg.append("using helper ${tds.trialDesignStructure.inspect()}: ")
+            log.error(errMsg, e)
         }
+        try {
+            /* segments and activities */
+            List activities = structure.activity
+            // avoid the need to increase the size of the map, because re-hashing is expensive
+            segmentActivitiesMap = new HashMap(activities.size() + 1, 1.0)
+            structure.segment.each { s ->
+                segmentActivitiesMap[s.oid] = s.activityRef.collect{ a ->
+                    structure.activity.find{ a.oidRef.equals(it.oid) }
+                }
+            }
+            boolean showDosingFootnote = false
+            result.append("<h4>Segment-Activity definition</h4>\n")
+            result.append("<table style='margin-bottom:0px;'><thead><tr><th class='bold'>Segment</th><th class='bold'>Activity</th>")
+            result.append("<th class='bold'>Treatment</th><th class='bold'>Dose time</th>")
+            result.append("<th class='bold'>Dose size</th><th class='bold'>Target variable</th></tr></thead><tbody>")
+            if (segmentActivitiesMap) {
+                segmentActivitiesMap.entrySet().each {
+                    def activityList = it.value
+                    if (!activityList) {
+                        result.append("<tr><td colspan='6'></td></tr>")
+                    } else {
+                        final int ACTIVITY_COUNT = activityList.size()
+                        result.append("<tr><td")
+                        if (ACTIVITY_COUNT > 1) {
+                            result.append(" rowspan='").append(ACTIVITY_COUNT).append("'")
+                        }
+                        result.append(">").append(it.key).append("</td>")
+                        activity(activityList[0], true, result)
+                        if (ACTIVITY_COUNT > 1) {
+                            for (int i = 1; i < ACTIVITY_COUNT; i++) {
+                                activity(activityList[i], false, result)
+                            }
+                        }
+                    }
+                }
+                result.append("</tbody></table>\n")
+            }
+            if (showDosingFootnote) {
+                result.append("<span>* &ndash; Element defined in the Individual dosing section.</span>")
+            }
+        } catch(Exception e) {
+            result.append("Cannot display the segment-activity overview.")
+            def errMsg = new StringBuilder("Cannot display the segment-activity overview for structure ")
+            errMsg.append(structure.properties).append(" using helper map ")
+            errMsg.append(segmentActivitiesMap.inspect())
+            log.error(errMsg, e)
+        }
+        ObservationEventsMap oem
+        /* epochs and occasions */
+        try {
+            if (structure.studyEvent) {
+                oem = new ObservationEventsMap(structure.studyEvent)
+                def arms = oem.getArms()
+                def epochs = oem.getEpochs()
+                result.append("\n<h4>Epoch-Occasion definition</h4>\n")
+                result.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
+                for (String e: epochs) {
+                    result.append("<th class='bold'>").append(e).append("</th>")
+                }
+                result.append("</tr></thead><tbody>\n")
+                arms.each { a ->
+                    result.append("<tr><th class='bold'>").append(a).append("</th>")
+                    def occ = oem.findOccasionsByArm(a)
+                    occ.each {
+                        //TODO OCCASIONS CAN HAVE MANY ENTRIES
+                        def o = it.firstEntry()
+                        result.append("<td>")
+                        result.append("<div>").append(o.key).append("</div><div><span class='bold'>")
+                        result.append(o.value).append("</span> variability</div></td>")
+                    }
+                    result.append("</tr>")
+                }
+                result.append("</tbody></table>\n")
+            }
+        } catch(Exception e) {
+            result.append("<p>Cannot display the epoch-occasion overview.</p>")
+            def errMsg = new StringBuilder("Cannot display the epoch-occasion overview for structure ")
+            errMsg.append(structure.properties).append(" using helper map ")
+            errMsg.append(oem.inspect())
+            log.error(errMsg, e)
+        }
+
         out << result.toString()
+    }
+
+    private void activity(ActivityType activity, boolean isFirst, StringBuilder result) {
+        if (!isFirst) {
+            result.append("<tr>")
+        }
+        result.append("<td>")
+        result.append(activity.oid).append("</td>")
+        if (activity.washout) {
+            result.append("<td>washout</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>")
+        } else {
+            /* dosingRegimen is a JAXBElement */
+            def regimen = activity.dosingRegimen.value
+            switch(regimen) {
+                case BolusType:
+                    result.append("<td>bolus</td>")
+                    //fall through
+                case InfusionType:
+                    if (regimen instanceof InfusionType) {
+                        result.append("<td>infusion</td>")
+                    }
+                    if (regimen.dosingTimes) {
+                        rhs(regimen.dosingTimes.assign, result.append("<td>"))
+                        result.append("</td>")
+                    } else if (regimen.steadyState) {
+                        result.append("<td>")
+                        result.append(steadyState(regimen.steadyState))
+                        result.append("</td>")
+                    } else {
+                        result.append("<td>*</td>")
+                        showDosingFootnote = true
+                    }
+                    def amt = regimen.doseAmount
+                    if (amt.assign) {
+                        rhs(amt.assign, result.append("<td>")).append("</td>")
+                    } else {
+                        result.append("<td>*</td>")
+                        showDosingFootnote = true
+                    }
+                    result.append("<td>").append(amt.symbRef.symbIdRef).append("</td>")
+                    break
+               default:
+                    result.append("<td colspan='4'>Unknown</td>")
+                    break
+            }
+        }
+        result.append("</tr>\n")
+
     }
 
     def trialDosing = { dosing ->
         if (!dosing) {
             return
         }
-        def result = new StringBuilder("<h4>Individual dosing</h4>\n")
-        dosing.each { d ->
-            if (d.dataSet) {
-                dataSet(d.dataSet, null, result)
+        def result = new StringBuilder()
+        try {
+            result.append("<h4>Individual dosing</h4>\n")
+            dosing.each { d ->
+                if (d.dataSet) {
+                    dataSet(d.dataSet, null, result)
+                }
             }
+        } catch(Exception e) {
+            result.append("Cannot display the trial dosing.")
+            def errMsg = new StringBuilder("Cannot display the trial dosing ")
+            errMsg.append(d.properties)
+            log.error(errMsg, e)
         }
+
         out << result.toString()
     }
 
@@ -1175,20 +1246,36 @@ class PharmMlTagLib {
             result.append("<span><strong>Variability level: </strong>")
             result.append(pop.variabilityReference.symbRef.symbIdRef).append("</span>")
         }
-        if (pop.dataSet) {
-            dataSet(pop.dataSet, null, result)
+        try {
+            if (pop.dataSet) {
+                dataSet(pop.dataSet, null, result)
+            }
+        } catch (Exception e) {
+            result.append("Cannot display population data set.")
+            def errMsg = new StringBuilder()
+            errMsg.append("Cannot display population data set ")
+            errMsg.append(pop.dataSet.properties).append( "for population ")
+            errMsg.append(pop.properties)
+            log.error(errMsg, e)
+        } finally {
+            out << result.toString()
         }
-        out << result.toString()
     }
 
      StringBuilder steadyState = { ss ->
-        def result = new StringBuilder("<strong>Steady state</strong>")
-        def i = ss.interval
-        def end = ss.endTime
-        result.append("<div>Interval: ").append(convertToMathML(i.symbRef.symbIdRef, i.assign))
-        result.append("</div><div>")
-        result.append("End time: ").append(convertToMathML(end.symbRef.symbIdRef, end.assign))
-        result.append("</div>")
+        def result = new StringBuilder()
+        try {
+            result.append("<strong>Steady state</strong>")
+            def i = ss.interval
+            def end = ss.endTime
+            result.append("<div>Interval: ").append(convertToMathML(i.symbRef.symbIdRef, i.assign))
+            result.append("</div><div>")
+            result.append("End time: ").append(convertToMathML(end.symbRef.symbIdRef, end.assign))
+            result.append("</div>")
+        } catch(Exception e) {
+            result.append("Cannot display steady state.")
+            log.error("Cannot display steady state ${ss.properties}", e)
+        }
         return result
     }
 
@@ -1418,8 +1505,8 @@ class PharmMlTagLib {
     }
 
     StringBuilder paramsToEstimate(ToEstimateType params) {
-        def result  = new StringBuilder("<div><h5>Estimation parameters</h5>\n")
-        def fixedParams = params.parameterEstimation.findAll{ it.initialEstimate.fixed }
+        def result = new StringBuilder("<div><h5>Estimation parameters</h5>\n")
+        def fixedParams = params.parameterEstimation.findAll{ it.initialEstimate?.fixed }
         if (fixedParams) {
             result.append(estimParamsWithInitialEstimate(fixedParams, "Fixed parameters"))
         }
@@ -1649,77 +1736,162 @@ class PharmMlTagLib {
        // prefixToInfix(builder, stack)
     }
 
-    private JAXBElement<BinopType> replaceReferencesInBinop(JAXBElement<BinopType> elem) {
-        List<JAXBElement> content = elem.value.content
-        //TODO walk through content and replace any references you find.
-        def resolvedContent = content.collect {
-            switch (it.value) {
-                case SymbolRefType:
-                    return replaceReferencesInSymbRef(it.value)
+    private def expandNestedSymbRefs = { JAXBElement<SymbolRefType> symbRef ->
+        final EquationType TRANSF_EQ = resolveSymbolReference(symbRef.value)
+        if (TRANSF_EQ) {
+            final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first()
+            final Class ELEM_CLASS = FIRST_ELEM.value.getClass()
+            switch(ELEM_CLASS) {
+                case BinopType:
                     break
                 case UniopType:
                     break
+                case SymbolRefType:
+                    break
+                case ConstantType:
+                    break
+                case FunctionCallType:
+                    break
+                case IdValueType:
+                    break
+                case StringValueType:
+                    break
+                case IntValueType:
+                    break
+                case RealValueType:
+                    break
+                default:
+                    assert false, "Cannot have ${ELEM_CLASS.name} inside a transformation."
+                    break
+            }
+            return FIRST_ELEM
+        } else {
+            return symbRef
+        }
+    }.memoizeAtMost(10)
+
+    private def expandNestedUniop = { JAXBElement<UniopType> jaxbUniop ->
+        UniopType uniop = jaxbUniop.value
+        UniopType replacement
+        if (uniop.symbRef) {
+            final EquationType TRANSF_EQ = resolveSymbolReference(uniop.symbRef)
+            if (TRANSF_EQ) {
+                final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first().value
+                final Class ELEM_CLASS = FIRST_ELEM.getClass()
+                replacement = new UniopType()
+                replacement.op = uniop.op
+                switch(ELEM_CLASS) {
+                    case BinopType:
+                        replacement.binop = FIRST_ELEM
+                        break
+                    case UniopType:
+                        replacement.uniop = FIRST_ELEM
+                        break
+                    case SymbolRefType:
+                        replacement.symbRef = FIRST_ELEM
+                        break
+                    case ConstantType:
+                        replacement.constant = FIRST_ELEM
+                        break
+                    case FunctionCallType:
+                        replacement.functionCall = FIRST_ELEM
+                        break
+                    case IdValueType:
+                        replacement.scalar = FIRST_ELEM
+                        break
+                    case StringValueType:
+                        break
+                    case IntValueType:
+                        replacement.scalar = FIRST_ELEM
+                        break
+                    case RealValueType:
+                        replacement.scalar = FIRST_ELEM
+                        break
+                    default:
+                        assert false, "Cannot have ${ELEM_CLASS.name} inside a unary operator."
+                        replacement = null
+                        break
+                }
+            }
+        } else if (uniop.uniop) {
+            def expanded = expandNestedUniop.call(wrapJaxb(uniop.uniop))?.value
+            if (expanded && !(expanded.equals(uniop.uniop))) {
+                uniop.uniop = expanded
+            }
+        } else if (uniop.binop) {
+            def expanded = expandNestedBinop.call(wrapJaxb(uniop.binop))?.value
+            if (expanded && !(expanded.equals(uniop.binop))) {
+                uniop.binop = expanded
+            }
+        }
+        if (replacement) {
+            return wrapJaxb(replacement)
+        }
+        return jaxbUniop
+    }.memoizeAtMost(10)
+
+    private def expandNestedBinop = { JAXBElement<BinopType> jaxbBinop ->
+        BinopType binop = jaxbBinop.value
+        List<JAXBElement> terms = binop.content
+        def expandedTerms = terms.collect { c ->
+            switch (c.value) {
+                case SymbolRefType:
+                    return expandNestedSymbRefs.call(c)
+                    break
                 case BinopType:
+                    return expandNestedBinop.call(c)
+                    break
+                case UniopType:
+                    return expandNestedUniop.call(c)
+                    break
+                default:
+                    return c
+                    break
+            }
+        }
+        if (expandedTerms.equals(terms)) {
+            return jaxbBinop
+        }
+        BinopType expanded = new BinopType()
+        expanded.op = binop.op
+        expanded.content = expandedTerms
+        return wrapJaxb(expanded)
+    }.memoizeAtMost(10)
+
+    private EquationType expandEquation(EquationType equation) {
+        List<JAXBElement> eqTerms = equation.scalarOrSymbRefOrBinop
+        List<JAXBElement> expandedTerms = eqTerms.collect {
+            switch(it.value) {
+                case BinopType:
+                    return expandNestedBinop.call(it)
+                    break
+                case UniopType:
+                    return expandNestedUniop.call(it)
+                    break
+                case SymbolRefType:
+                    return expandNestedSymbRefs.call(it)
                     break
                 default:
                     return it
+                    break
             }
         }
-        elem.value.content = resolvedContent
-        return elem
-    }
-
-    /*FIXME*/ private JAXBElement<UniopType> replaceReferencesInUniop(JAXBElement<UniopType> elem) {
-        //handle uniop, symbref and binop
-        if (elem.value.uniop) {
-            elem.value.uniop = replaceReferencesInUniop(wrapJaxb(elem.value.uniop))
-        } else if (elem.value.binop) {
-            elem.value.binop = replaceReferencesInBinop(wrapJaxb(elem.value.binop))
-        } else if (elem.value.symbRef) {
-            // there is no guarantee that this will result in a symbRef!!
-            elem.value.symbRef = replaceReferencesInSymbRef(wrapJaxb(elem.value.symbRef))
+        if (!eqTerms.equals(expandedTerms)) {
+            def newEquation = new EquationType()
+            newEquation.scalarOrSymbRefOrBinop = expandedTerms
+            return newEquation
         }
-        return elem
+        return equation
     }
 
-    /*
-     * Return type is anything that can be in EquationType.scalarOrSymbRefOrBinop.
-     */
-    private JAXBElement replaceReferencesInSymbRef(JAXBElement<SymbolRefType> elem, List<JAXBElement> equationTerms) {
-        //if reference found, add all elements of transfEq.scalarOrSymbRefOrBinop
-        final EquationType transfEq = resolveSymbolReference(elem)
-        if (transfEq) {
-            equationTerms.addAll(transfEq.scalarOrSymbRefOrBinop)
+    private void convertEquation(final def equation, StringBuilder builder) {
+        def equationToProcess
+        if ((equation instanceof EquationType) || (equation instanceof Equation)) {
+            equationToProcess = expandEquation(equation)
         } else {
-            equationTerms.add(it)
+            equationToProcess = equation
         }
-    }
-
-    private EquationType expandEquation(EquationType equation) {
-        List<JAXBElement> eqTerms = []
-        equation.scalarOrSymbRefOrBinop.each {
-            switch(it.value) {
-                case BinopType:
-                    //fall through
-                case UniopType:
-                    eqTerms.add(replaceReferences(it))
-                    break
-                case SymbolRefType:
-                    //replaceReferences can return a list here
-                    eqTerms.addAll(replaceReferences(it))
-                    break
-                default:
-                    eqTerms.add(it)
-            }
-        }
-        def newEquation = new EquationType()
-        newEquation.scalarOrSymbRefOrBinop = eqTerms
-        return newEquation
-    }
-
-    private void convertEquation(def equation, StringBuilder builder) {
-        //EquationType expandedEquation = expandEquation(equation)
-        List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equation).reverse()
+        List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equationToProcess).reverse()
         List<String> stack=new LinkedList<String>()
         symbols.each {
            stack.push(it)
@@ -1782,11 +1954,11 @@ class PharmMlTagLib {
         if (rhs.getScalar()) {
             builder.append(oprand(scalar(rhs.scalar.value)))
         }
-        else if (r.getSequence()) {
-            builder.append(sequenceAsMathML(r.sequence))
+        else if (rhs.getSequence()) {
+            builder.append(sequenceAsMathML(rhs.sequence))
         }
-        else if (r.getVector()) {
-            builder.append(vectorAsMathML(r))
+        else if (rhs.getVector()) {
+            builder.append(vectorAsMathML(rhs))
         }
         builder.append("</mstyle></math>")
         return builder.toString()
@@ -1883,7 +2055,7 @@ class PharmMlTagLib {
             transfEq = continuousCovariateTransformations[transfRef]
         } else {
             String transfRef = ref.symbIdRef
-            transfEq = continuousCovariateTransformations.find{ it.key.contains("_${transfRef}")}
+            transfEq = continuousCovariateTransformations.find{ it.key.contains("_${transfRef}")}?.value
         }
         return transfEq
     }
