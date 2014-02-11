@@ -34,8 +34,9 @@
 */
 
 
-
 package net.biomodels.jummp.model
+
+import net.biomodels.jummp.plugins.security.Person
 
 import grails.test.*
 
@@ -71,7 +72,7 @@ class PublicationTests {
         for (int i=1; i<1000; i++) {
             synopsis += "1"
         }
-        Author author =new Author(lastName: "Ali", initials:"R")
+        Person author =new Person(userRealName:"Ali")
         publication.authors = []
         publication.authors << author
         publication.synopsis = synopsis

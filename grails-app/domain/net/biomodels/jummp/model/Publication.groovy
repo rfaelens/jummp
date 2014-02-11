@@ -25,6 +25,7 @@
 package net.biomodels.jummp.model
 
 import net.biomodels.jummp.core.model.PublicationTransportCommand
+import net.biomodels.jummp.plugins.security.PersonTransportCommand
 import net.biomodels.jummp.plugins.security.Person
 
 /**
@@ -125,13 +126,40 @@ class Publication implements Serializable {
                 pages: pages,
                 linkProvider: linkProvider.toCommandObject(),
                 link: link,
-                authors: new HashSet<Person>())
+                authors: new LinkedList<PersonTransportCommand>())
         authors.each {
-        	pubTC.authors.add(it)
+        	pubTC.authors.add(it.toCommandObject())
         }
         return pubTC;
     }
 
+    private static void reconcile(List authors, List tobeAdded) {
+    	tobeAdded.each { newAuthor ->
+            	Person existing = authors.find { oldAuthor ->
+            		if (newAuthor.orcid) {
+            			return newAuthor.orcid == oldAuthor.orcid
+            		}
+            		return false
+            	}
+            	if (!existing) {
+            		if (newAuthor.orcid) {
+            			existing=Person.findByOrcid(newAuthor.orcid)
+            			if (existing && existing.userRealName==newAuthor.userRealName) {
+            				authors<<existing
+            			}
+            			if (existing) {
+            				log.error "Received duplicate ORCID for ${existing.userRealName} (in the repository) and ${newAuthor.userRealName}. Please reconcile."
+            			}
+            		}
+            		else {
+            			Person current = new Person(userRealName: newAuthor.userRealName, orcid: newAuthor.orcid)
+            			authors << current
+            			current.save()
+            		}
+            	}
+         }
+    }
+    
     static Publication fromCommandObject(PublicationTransportCommand cmd) {
         Publication publication = Publication.createCriteria().get() {
     		eq("link",cmd.link)
@@ -150,29 +178,13 @@ class Publication implements Serializable {
             publication.volume=cmd.volume;
             publication.issue=cmd.issue;
             publication.pages=cmd.pages;
-            cmd.authors.each { newAuthor ->
-            	Person existing = publication.authors.find { oldAuthor ->
-            		if (newAuthor.orcid) {
-            			return newAuthor.orcid == oldAuthor.orcid
-            		}
-            		return false
-            	}
-            	if (!existing) {
-            		Person current = new Person(userRealName: newAuthor.userRealName, orcid: newAuthor.orcid)
-            		publication.authors << current
-            	}
-            }
+            reconcile(publication.authors, cmd.authors)
             publication.save(flush:true)
             return publication
         }
     	List<Person> authors = []
-        cmd.authors.each {
-            Person current = new Person(userRealName: it.userRealName,
-            							institution: it.institution,
-            							orcid: it.orcid)
-            authors << current
-        }
-        Publication publ=new Publication(journal: cmd.journal,
+        reconcile(authors, cmd.authors)
+    	Publication publ=new Publication(journal: cmd.journal,
                 title: cmd.title,
                 affiliation: cmd.affiliation,
                 synopsis: cmd.synopsis,

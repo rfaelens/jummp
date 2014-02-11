@@ -25,11 +25,13 @@
 package net.biomodels.jummp.plugins.security
 import java.util.regex.Pattern
 import java.util.regex.Matcher
+import org.codehaus.groovy.grails.validation.Validateable
 /**
  * @short Representation of a Person. Should be subclassed to help understand what type of person
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
-class Person implements Serializable {
+ @grails.validation.Validateable	
+class PersonTransportCommand implements Serializable {
     private static final long serialVersionUID = 1L
 
     String userRealName
@@ -37,22 +39,7 @@ class Person implements Serializable {
     String orcid
     
     static constraints = {
-        userRealName(blank: false)
-        institution(nullable:true)
-        orcid nullable: true, unique:true, validator: {
-        	if (it) {
-        		Pattern p = Pattern.compile("^\\d{4}-\\d{4}-\\d{4}-\\d{3}(\\d|X)\$");
-        		Matcher m = p.matcher(it);
-        		return m.matches()
-        	}
-        	return true
-        }
-    }
-    
-    public PersonTransportCommand toCommandObject() {
-    	return new PersonTransportCommand(userRealName: this.userRealName,
-    									  institution: this.institution,
-    									  orcid: this.orcid)
+    	importFrom Person
     }
     
     public String toString() {

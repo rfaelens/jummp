@@ -44,7 +44,7 @@ import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.ModelState
-import net.biomodels.jummp.plugins.security.Person
+import net.biomodels.jummp.plugins.security.PersonTransportCommand
 import net.biomodels.jummp.webapp.UploadFilesCommand
 import org.springframework.web.multipart.MultipartFile
 import net.biomodels.jummp.core.model.PublicationTransportCommand
@@ -523,18 +523,19 @@ class ModelController {
             on("Continue"){
             		ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
             	    bindData(model.publication, params, [exclude: ['authors']])
+            	    System.out.println("AUTHORS LIST: "+params.authorFieldTotal)
             	    String[] authorList=params.authorFieldTotal.split("!!author!!")
-            	    List<Person> validatedAuthors=new LinkedList<Person>()
+            	    List<PersonTransportCommand> validatedAuthors=new LinkedList<PersonTransportCommand>()
             	    authorList.each {
             	    	    if (it) {
-            	    	    System.out.println("NOW PROCESSING: "+it)
             	    	    String[] parts=it.split("<init>")
             	    	    String name=parts[0];
             	    	    String orcid=parts[1];
             	    	    String institution=parts[2];
+            	    	    System.out.println("NOW PROCESSING: "+it+"..."+name+"..."+orcid+".."+institution)
             	    	    def authorListSrc=model.publication.authors
             	    	    if (!authorListSrc) {
-            	    	    	    authorListSrc=new LinkedList<Person>();
+            	    	    	    authorListSrc=new LinkedList<PersonTransportCommand>();
             	    	    }
             	    	    def author=authorListSrc.find { auth ->
             	    	    	if (orcid != "no_orcid") {
@@ -547,11 +548,11 @@ class ModelController {
             	    	    }
             	    	    if (!author) {
             	    	    	System.out.println("COULDNT FIND AUTHOR "+name+" in ${authorListSrc}")
-            	    	    	author=new Person(userRealName:parts[0], 
-            	    	    					  orcid: parts[1]!="no_orcid" ?: null, 
-            	    	    					  institution: parts[2]!="no_institution_provided" ?:null)
+            	    	    	author=new PersonTransportCommand(userRealName:parts[0], 
+            	    	    					  orcid: orcid!="no_orcid" ? orcid: null, 
+            	    	    					  institution: institution!="no_institution_provided" ? institution:null)
             	    	    	if (!model.publication.authors) {
-            	    	        	model.publication.authors=new LinkedList<Person>()
+            	    	        	model.publication.authors=new LinkedList<PersonTransportCommand>()
             	    	        }
             	    	        model.publication.authors.add(author)
             	    	    }

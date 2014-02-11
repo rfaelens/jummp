@@ -81,15 +81,19 @@
                           		<div>
                           			<ul class="subListForm">
                           				<li>
-                          					<label style="display:block;margin-left:0px">Initials</label>
-                          					<span><input class="input20" size="20" type="text" id="newAuthorInitials"/></span>
+                          					<label style="display:block;margin-left:0px">Name</label>
+                          					<span><input class="input20" size="20" type="text" id="newAuthorName"/></span>
                           				</li>
                           				<li>
-                          					<label style="display:block;margin-left:0px">Last name</label>
+                          					<label style="display:block;margin-left:0px">Orcid</label>
                           					<span>
-                          					<input class="input20" size="20" type="text" id="newAuthorLastName"/>
+                          					<input class="input20" size="20" type="text" id="newAuthorOrcid"/>
                           					</span>
                           				</li>
+                          				<li>
+                          					<label style="display:block;margin-left:0px">Institution</label>
+                          					<span><input class="input20" size="20" type="text" id="newAuthorInstitution"/></span>
+                          				</li>	
                           				<li>
                           					<a href="#" id="addButton" class="addButton">Add</a>
                           				</li>
