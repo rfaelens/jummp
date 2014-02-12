@@ -578,7 +578,7 @@ class SubmissionService {
         	}
          }
          
-         //Always process files in create mode. Possibly needs optimisation.
+         //Reprocess files if a new main file has been added or files have been deleted
         boolean processingRequired(Map<String, Object> workingMemory) {
         	return workingMemory.containsKey("reprocess_files")
         }
