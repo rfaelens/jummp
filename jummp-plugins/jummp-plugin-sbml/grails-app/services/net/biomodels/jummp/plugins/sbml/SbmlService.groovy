@@ -164,7 +164,12 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         }
         // TODO: WARNING: checkConsistency uses an online validator. This might render timeouts during model upload
         try {
-            if (doc.checkConsistency() > 0) {
+            final int CONSISTENCY_ERRORS = doc.checkConsistency()
+            if (CONSISTENCY_ERRORS == -1) {
+                log.debug("Internal error in online SBML Validator while validating ${doc.inspect()}\t${doc.properties}")
+                return null
+            }
+            if (CONSISTENCY_ERRORS > 0) {
                 boolean valid = true
                 // search for an error
                 for (SBMLError error in doc.getListOfErrors().validationErrors) {
@@ -251,7 +256,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     @Profiled(tag="SbmlService.validate")
     public boolean validate(final List<File> model) {
         if (!grailsApplication.config.jummp.plugins.sbml.validation) {
-            log.info("Validation for ${model.name} skipped due to configuration option")
+            log.info("Validation for ${model.inspect()} skipped due to configuration option")
             return true
         }
         if (getDocumentFromFiles(model)) {
