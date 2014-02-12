@@ -64,14 +64,14 @@ Brief description of the plugin.
     }
 
     def doWithSpring = {
-    	Properties props = new Properties()
+        Properties props = new Properties()
         try {
-        	ConfigurationService service = new ConfigurationService()
-        	String pathToConfig=service.getConfigFilePath()
-        	if (!pathToConfig) {
-        		throw new Exception("No config file available, using defaults")
-        	}
-        	props.load(new FileInputStream(pathToConfig))
+            ConfigurationService service = new ConfigurationService()
+            String pathToConfig=service.getConfigFilePath()
+            if (!pathToConfig) {
+                throw new Exception("No config file available, using defaults")
+            }
+            props.load(new FileInputStream(pathToConfig))
         } catch (Exception ignored) {
         }
         def jummpConfig = new ConfigSlurper().parse(props)
