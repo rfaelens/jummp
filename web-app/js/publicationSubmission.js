@@ -11,7 +11,6 @@ function addText() {
 	}
 	var id=fullName+"<init>"+orcid+"<init>"+institution
 	var alreadyPresent=false
-	alert(orcid+".."+institution)
 	$("#authorList > option").each(function() {
 		if (this.value === id) {
 			alreadyPresent=true
