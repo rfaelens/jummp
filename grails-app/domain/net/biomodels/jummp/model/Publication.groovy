@@ -133,7 +133,7 @@ class Publication implements Serializable {
         return pubTC;
     }
 
-    private static void reconcile(List authors, List tobeAdded) {
+    private static void reconcile(def authors, def tobeAdded) {
     	tobeAdded.each { newAuthor ->
             	Person existing = authors.find { oldAuthor ->
             		if (newAuthor.orcid) {
