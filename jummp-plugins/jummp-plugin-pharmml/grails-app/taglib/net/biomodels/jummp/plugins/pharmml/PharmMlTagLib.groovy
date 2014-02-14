@@ -1898,7 +1898,7 @@ class PharmMlTagLib {
     private void convertEquation(final def equation, StringBuilder builder) {
         def equationToProcess
         if ((equation instanceof EquationType) || (equation instanceof Equation)) {
-            equationToProcess = expandEquation(equation)
+            equationToProcess = equation //expandEquation(equation)
         } else {
             equationToProcess = equation
         }
