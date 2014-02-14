@@ -56,7 +56,6 @@
         <script type='text/javascript' 
         		src='http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'>
         </script>
-        <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
         <g:javascript src="jstree/jquery.jstree.js"/>
         <g:javascript src="equalize.js"/>
         <g:javascript src="syntax/shCore.js"/>
@@ -66,7 +65,6 @@
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'filegrid.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shCore.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shThemeDefault.css')}" />
-        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
         
         <Ziphandler:outputFileInfoAsJS repFiles="${revision.files.findAll{!it.hidden}}" loadedZips="${loadedZips}" zipSupported="${zipSupported}"/>
         <script>
@@ -500,4 +498,7 @@
     </div>
 
 </body>
+<content tag="contexthelp">
+		main
+</content>
 </g:applyLayout>

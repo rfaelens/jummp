@@ -24,10 +24,6 @@
 
 
 
-
-
-
-<body>
 <div id="skip-to">
 <ul>
 <li><a href="#content">Skip to main content</a></li>

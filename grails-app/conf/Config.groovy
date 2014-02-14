@@ -525,3 +525,11 @@ grails {
     }
 }
 remove this line */
+if (!(jummpConfig.jummp.context.help.root instanceof ConfigObject)) {
+    def pages=["root", "main", "browse", "search"]
+    pages.each {
+    	if (!(jummpConfig.jummp.context.help."${it}" instanceof ConfigObject)) {
+    		jummp.context.help."${it}" = jummpConfig.jummp.context.help."${it}"
+    	}
+    }
+}

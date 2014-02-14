@@ -62,3 +62,6 @@
     <content tag="title">
     	<g:message code="model.list.heading"/>
     </content>
+    <content tag="contexthelp">
+		browse
+	</content>

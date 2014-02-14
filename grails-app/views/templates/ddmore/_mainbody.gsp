@@ -40,8 +40,11 @@
             
                   
             <a id="main-content"></a>
-                    <h1 class="title" id="page-title"><g:pageProperty name="page.title" /></h1>
-                    <div class="content">
+                    <h1 class="title" id="page-title">
+                    	<g:pageProperty name="page.title" />
+                    </h1>
+                    <g:render template="/templates/notification/showNotificationDiv"/>
+  		            <div class="content">
                      </div>
                                 <div class="region region-content">
     <div id="block-system-main" class="block block-system first last odd">
@@ -50,7 +53,6 @@
   <div class="content">
     
   	<div class="content">
-  		<g:render template="/templates/notification/showNotificationDiv"/>
   		<g:pageProperty name="page.main-content" />
   		<g:layoutBody/>
   	</div>
