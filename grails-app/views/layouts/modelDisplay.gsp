@@ -88,7 +88,9 @@
 				else if (typeof(anchor) != "undefined") {
 					e.preventDefault();
 					location.hash = anchor;
+					hideHelp();
 					window.scrollTo(0, 0);
+					showHelp();
 				}
 			});
 			$( "#dialog-confirm" ).dialog({

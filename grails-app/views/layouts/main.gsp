@@ -40,11 +40,13 @@
     	var helpWidth=-1;
     	var helpHidden=1;
     	var maxWidth=-1;
-    	var maxHelpWidth=600;
-    	var draggable=0;
+    	var maxHelpWidth=800;
+    	var minHelpWidth=50;
+    	var stepWidth=30;
+    	var syncResize=0;
     	
     	function adjustWidth(newWidth) {
-    		if (draggable==0) {
+    		if (syncResize==1) {
     			var delta= helpWidth - newWidth;
     			var mainWidth=$("#mainframe" ).width();
     			if (maxWidth==-1) {
@@ -72,12 +74,12 @@
     	
     	function showHelp() {
 	    	helpWidth=-1;
-    		$( "#helpPanel" ).width(250);
+    		$( "#helpPanel" ).width(350);
 			$( "#helpPanel" ).show();
-    		adjustWidth(250);
+    		adjustWidth(350);
     		$( "#helpPanel" ).position({
     			my: "left top",
-    			at: "right top+8%",
+    			at: "right-35% top+8%",
     			of: "#mainframe"
     		});
     		helpHidden=0;
@@ -87,7 +89,7 @@
     	
     	$(function() {
     		$( "#helpPanel" ).resizable({
-    					handles: 'w',
+    					handles: 'n,e,s,w',
     					maxWidth: maxHelpWidth,
     					resize: function( event, ui ) {
     						if (helpWidth==-1) {
@@ -96,33 +98,55 @@
     						adjustWidth(ui.size.width);
     					}
     		});
-    		$( "#helpPanel" ).draggable({ cursor: "move", revert: true});
+    		$( "#helpPanel" ).draggable({ cursor: "move", revert: false});
     		$( "#helpPanel" ).hide();
 		    $( "#expand" ).button({
 		     	text: false,
 		     	icons: {
-		     		primary: "ui-icon-arrow-4"
+		     		primary: "ui-icon-circle-plus"
 		     	}
 		    }).click(function() {
-		    	if (draggable!=1) {
-		    		$( "#helpPanel" ).draggable( "option", "revert", false );
-		    		draggable=1;
-		    	}
-		    	else {
-		    		$( "#helpPanel" ).draggable( "option", "revert", true );
-		    		draggable=0;
-		    	}
+		    	 helpWidth=$("#helpPanel" ).width();
+    			if (maxHelpWidth<helpWidth+stepWidth) {
+    				helpWidth=maxHelpWidth;
+    			}
+    			else {
+    				helpWidth+=stepWidth;
+    			}
+    			$( "#helpPanel" ).width(helpWidth);
 		    });
-		    
+		    $( "#contract" ).button({
+		     	text: false,
+		     	icons: {
+		     		primary: "ui-icon-circle-minus"
+		     	}
+		    }).click(function() {
+		    	 helpWidth=$("#helpPanel" ).width();
+    			if (minHelpWidth>helpWidth-stepWidth) {
+    				helpWidth=minHelpWidth
+    			}
+    			else {
+    				helpWidth-=stepWidth;
+    			}
+    			$( "#helpPanel" ).width(helpWidth);
+		    });
+   		    $( "#close" ).button({
+		     	text: false,
+		     	icons: {
+		     		primary: "ui-icon-circle-close"
+		     	}
+		    }).click(function() {
+		    	hideHelp();
+		    });
+
 		    $( "#snap" ).button({
 		    	text: false,
 		    	icons: {
-		     		primary: "ui-icon-pin-s"
+		     		primary: "ui-icon-arrowrefresh-1-e"
 		    	}
 		    }).click(function() {
 		    	hideHelp();
 		    	showHelp();
-		    	draggable=0;
 		    });
 		    
 		    $('#toggleHelp').click(function(event) {
@@ -165,8 +189,10 @@
     	</div>
 	    <div id="helpPanel">
 	    	<div id="toolbar" class="ui-widget-header ui-corner-all">
-	    		<input type="checkbox" value="false" id="expand"><label for="expand">Drag</label>
-	    		<button id="snap">Snap to page</button>
+	    		<button id="expand">Increase size</button>
+	    		<button id="contract">Decrease size</button>
+	    		<button id="snap">Reset</button>
+	    		<button id="close">Close</button>
 	    	</div>
   			
   			<ContextHelp:getLink location="${contextHelpLocation}"/>
