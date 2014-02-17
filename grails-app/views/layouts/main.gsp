@@ -29,54 +29,6 @@
     <g:javascript src="jquery/jquery.i18n.properties-min-1.0.9.js"/>
     <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-    <style>
-    	#mainframe {
-    		position: relative;
-    		min-width:1000px;
-    	}
-    	#helpbutton { 
-    			 height: 104px; 
-    			 width: 104px; 
-    			 position: fixed; 
-    			 top: 40%; 
-    			 z-index: 999;
-    			 transform: rotate(-90deg);
-    			 -webkit-transform: rotate(-90deg); 
-    			 -moz-transform: rotate(-90deg); 
-    			 -o-transform: rotate(-90deg); 
-    			 filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
-    	}
-    	#resizable {
-    		height:100%;
-    	}
-    	#helpbutton a { 
-    		display: block; 
-    		background: gray; 
-    		height: 15px; 
-    		width: 70px; 
-    		padding: 8px 16px;
-    		text-align: center;
-    		color: #fff; 
-    		font-family: Arial, sans-serif; 
-    		font-size: 17px; 
-    		font-weight: bold; 
-    		text-decoration: none; 
-    		border-bottom: solid 1px #333;
-    		border-left: solid 1px #333;
-    		border-right: solid 1px #fff;
-    	}
-
-    	#helpbutton a:hover { 
-    		background: #06c; 
-    	}
-    	
-    	#helpFrame {
-           width: 100%; 
-           height: 100%; 
-           overflow: scroll;
-        }
-    	
-    </style>
     <g:javascript>
     	$.appName = "${grailsApplication.metadata["app.name"]}";
     	$.serverUrl = "${grailsApplication.config.grails.serverURL}";
@@ -87,17 +39,56 @@
     	});
     	var helpWidth=-1;
     	var helpHidden=1;
+    	var maxWidth=-1;
+    	var maxHelpWidth=600;
+    	var draggable=0;
     	
     	function adjustWidth(newWidth) {
-    		var delta= helpWidth - newWidth;
-    		$( "#mainframe" ).width($( "#mainframe" ).width() + delta);
-    		helpWidth=newWidth;
+    		if (draggable==0) {
+    			var delta= helpWidth - newWidth;
+    			var mainWidth=$("#mainframe" ).width();
+    			if (maxWidth==-1) {
+    				maxWidth=mainWidth;
+    			}
+    			if (maxWidth<mainWidth+delta) {
+    				mainWidth=maxWidth;
+    			}
+    			else {
+    				mainWidth+=delta;
+    			}
+    			$( "#mainframe" ).width(mainWidth);
+    			helpWidth=newWidth;
+    		}
+    	}
+    	
+    	function hideHelp() {
+	    	adjustWidth(0);
+    		$( "#helpPanel" ).hide();
+    		helpHidden=1;
+    		helpWidth=-1;
+    		$('#toggleHelp').text("Help");
+    		$('#toggleHelp').attr("title", "Access help for this page");
+    	}
+    	
+    	function showHelp() {
+	    	helpWidth=-1;
+    		$( "#helpPanel" ).width(250);
+			$( "#helpPanel" ).show();
+    		adjustWidth(250);
+    		$( "#helpPanel" ).position({
+    			my: "left top",
+    			at: "right top+8%",
+    			of: "#mainframe"
+    		});
+    		helpHidden=0;
+    		$('#toggleHelp').text("Hide");
+    		$('#toggleHelp').attr("title", "Hide help");
     	}
     	
     	$(function() {
-    		$( "#resizable" ).resizable({
+    		$( "#helpPanel" ).resizable({
     					handles: 'w',
-    					maxWidth: 400,
+    					maxWidth: maxHelpWidth,
     					resize: function( event, ui ) {
     						if (helpWidth==-1) {
     							helpWidth=ui.originalSize.width;
@@ -105,40 +96,53 @@
     						adjustWidth(ui.size.width);
     					}
     		});
-		    $( "#resizable" ).hide();
-
+    		$( "#helpPanel" ).draggable({ cursor: "move", revert: true});
+    		$( "#helpPanel" ).hide();
+		    $( "#expand" ).button({
+		     	text: false,
+		     	icons: {
+		     		primary: "ui-icon-arrow-4"
+		     	}
+		    }).click(function() {
+		    	if (draggable!=1) {
+		    		$( "#helpPanel" ).draggable( "option", "revert", false );
+		    		draggable=1;
+		    	}
+		    	else {
+		    		$( "#helpPanel" ).draggable( "option", "revert", true );
+		    		draggable=0;
+		    	}
+		    });
+		    
+		    $( "#snap" ).button({
+		    	text: false,
+		    	icons: {
+		     		primary: "ui-icon-pin-s"
+		    	}
+		    }).click(function() {
+		    	hideHelp();
+		    	showHelp();
+		    	draggable=0;
+		    });
+		    
 		    $('#toggleHelp').click(function(event) {
     			event.preventDefault();
     			if (helpHidden==1) {
-    				helpWidth=-1;
-    				$( "#resizable" ).width(280);
-					$( "#resizable" ).show();
-    				adjustWidth(300);
-    				$( "#resizable" ).position({
-    					my: "left top",
-    					at: "right top+10%",
-    					of: "#mainframe"
-    				});
-    				helpHidden=0;
-    				$('#toggleHelp').text("Hide");
-    				$('#toggleHelp').attr("title", "Hide help");
+    				showHelp();
     			}
     			else {
-    				adjustWidth(0);
-    				$( "#resizable" ).hide();
-    				helpHidden=1;
-    				$('#toggleHelp').text("Help");
-    				$('#toggleHelp').attr("title", "Access help for this page");
+    				hideHelp();
     			}
     		});
     	
 		    
     	});
-    	
     </g:javascript>
     <g:javascript src="jummp.js"/>
     <g:javascript src="notification.js"/>
     <link rel="stylesheet" href="<g:resource dir="css" file="notification.css"/>" />
+    <link rel="stylesheet" href="<g:resource dir="css" file="layout.css"/>" />
+    
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/head" />
     <g:layoutHead/>
 </head>
@@ -159,7 +163,12 @@
     	<div id="helpbutton">
     		<a id="toggleHelp" title="Access help for this page" href="#">Help</a>
     	</div>
-	    <div id="resizable">
+	    <div id="helpPanel">
+	    	<div id="toolbar" class="ui-widget-header ui-corner-all">
+	    		<input type="checkbox" value="false" id="expand"><label for="expand">Drag</label>
+	    		<button id="snap">Snap to page</button>
+	    	</div>
+  			
   			<ContextHelp:getLink location="${contextHelpLocation}"/>
   		</div>
     </g:if>
