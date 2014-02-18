@@ -39,20 +39,40 @@ class ContextHelpTagLib {
 	static namespace="ContextHelp"
 	def grailsApplication
 	
+	private String computeLocation(String location) {
+		String helpRoot=grailsApplication.config.jummp.context.help.root
+		String defined=grailsApplication.config.jummp.context.help."${location}"
+		if (defined) {
+			return helpRoot+defined;
+		}
+		return null;
+	}
+	
+	def getURL = { attrs ->
+		System.out.println("IN GETURL WITH "+attrs.location)
+		if (attrs.location!=null) {
+			String url=computeLocation(attrs.location)
+			if (url) {
+				out<<url
+			}
+		}
+	}
+	
 	def getLink = { attrs ->
 		if (attrs.location!=null) {
 			StringBuilder builder=new StringBuilder("<iframe id='helpFrame' src='");
-			String helpRoot=grailsApplication.config.jummp.context.help.root
-			String location=grailsApplication.config.jummp.context.help."${attrs.location}"
-			String url=helpRoot+location;
-			url="http://www.ebi.ac.uk"
-			builder.append(url);
-			builder.append("'/>");
-			out<<builder.toString();
+			String url=computeLocation(attrs.location);
+			if (url) {
+				url="http://www.ebi.ac.uk"
+				builder.append(url);
+				builder.append("'/>");
+				out<<builder.toString();
+			}
 		}
 		else {
 			out<<"NO LOCATION PROVIDED!"
 		}
 	}
+	
 	
 }

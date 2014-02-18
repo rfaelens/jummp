@@ -17,9 +17,12 @@
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
 
-
-
-
+<%
+  		def contextHelpLocation=g.pageProperty(name:'page.contexthelp')
+  		if (contextHelpLocation) {
+  			contextHelpLocation=contextHelpLocation.trim()
+  		}
+%> 
 
 <!doctype html>
 <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/precursor" />
@@ -37,6 +40,7 @@
     		path: "${grailsApplication.config.grails.serverURL}/js/i18n/",
     		mode: "map"
     	});
+    	<g:if test="${contextHelpLocation}">
     	var helpWidth=-1;
     	var helpHidden=1;
     	var maxWidth=-1;
@@ -44,7 +48,6 @@
     	var minHelpWidth=50;
     	var stepWidth=30;
     	var syncResize=0;
-    	
     	function adjustWidth(newWidth) {
     		if (syncResize==1) {
     			var delta= helpWidth - newWidth;
@@ -148,7 +151,15 @@
 		    	hideHelp();
 		    	showHelp();
 		    });
-		    
+		    $( "#outlink" ).button({
+		    	text: false,
+		    	icons: {
+		     		primary: "ui-icon-extlink"
+		    	}
+		    }).click(function() {
+		    	hideHelp();
+			    window.open('<ContextHelp:getURL location="${contextHelpLocation}"/>','_blank');
+		    });
 		    $('#toggleHelp').click(function(event) {
     			event.preventDefault();
     			if (helpHidden==1) {
@@ -158,9 +169,8 @@
     				hideHelp();
     			}
     		});
-    	
-		    
     	});
+    	</g:if>
     </g:javascript>
     <g:javascript src="jummp.js"/>
     <g:javascript src="notification.js"/>
@@ -170,13 +180,7 @@
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/head" />
     <g:layoutHead/>
 </head>
-    <%
-  		def contextHelpLocation=g.pageProperty(name:'page.contexthelp')
-  		if (contextHelpLocation) {
-  			contextHelpLocation=contextHelpLocation.trim()
-  		}
-  	%> 
-  	<g:render template="/templates/${grailsApplication.config.jummp.branding.style}/bodyTag"/>
+    <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/bodyTag"/>
 	<div id="totality">
   	<div id="mainframe">
     	<g:render template="/templates/${grailsApplication.config.jummp.branding.style}/header"/>
@@ -192,6 +196,7 @@
 	    		<button id="expand">Increase size</button>
 	    		<button id="contract">Decrease size</button>
 	    		<button id="snap">Reset</button>
+	    		<button id="outlink">Open in a new tab</button>
 	    		<button id="close">Close</button>
 	    	</div>
   			
