@@ -40,9 +40,9 @@
     		path: "${grailsApplication.config.grails.serverURL}/js/i18n/",
     		mode: "map"
     	});
+    	var helpHidden=1;
     	<g:if test="${contextHelpLocation}">
     	var helpWidth=-1;
-    	var helpHidden=1;
     	var maxWidth=-1;
     	var maxHelpWidth=800;
     	var minHelpWidth=50;

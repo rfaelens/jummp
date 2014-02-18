@@ -88,9 +88,17 @@
 				else if (typeof(anchor) != "undefined") {
 					e.preventDefault();
 					location.hash = anchor;
-					hideHelp();
+					var toggleHelp=0;
+					if (helpHidden!=1) {
+						toggleHelp=1;
+					}
+					if (toggleHelp==1) {
+						hideHelp();
+					}
 					window.scrollTo(0, 0);
-					showHelp();
+					if (toggleHelp==1) {
+						showHelp();
+					}
 				}
 			});
 			$( "#dialog-confirm" ).dialog({
