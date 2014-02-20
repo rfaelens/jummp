@@ -474,6 +474,10 @@ weceem.default.space.template = "classpath:/weceem-jummp-default-space.zip"
 weceem.security.policy.path = jummp.security.cms.policy
 grails.resources.adhoc.excludes=["/content/*"]
 
+// database migrations
+grails.plugin.databasemigration.updateOnStart = true
+grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
+
 grails.mails.props=[:]
 if (!(jummpConfig.jummp.security.mailer.host instanceof ConfigObject)) {
 	grails.mail.host=jummpConfig.jummp.security.mailer.host

@@ -1,6 +1,6 @@
 databaseChangeLog = {
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-1") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-1") {
 		createTable(tableName: "acl_class") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -12,7 +12,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-2") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-2") {
 		createTable(tableName: "acl_entry") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -48,7 +48,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-3") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-3") {
 		createTable(tableName: "acl_object_identity") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -72,7 +72,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-4") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-4") {
 		createTable(tableName: "acl_sid") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -88,7 +88,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-5") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-5") {
 		createTable(tableName: "author") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -108,7 +108,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-6") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-6") {
 		createTable(tableName: "gene_ontology") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -124,7 +124,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-7") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-7") {
 		createTable(tableName: "gene_ontology_relationship") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -148,7 +148,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-8") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-8") {
 		createTable(tableName: "gene_ontology_revision") {
 			column(name: "gene_ontology_revisions_id", type: "BIGINT")
 
@@ -156,7 +156,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-9") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-9") {
 		createTable(tableName: "miriam_datatype") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -182,7 +182,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-10") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-10") {
 		createTable(tableName: "miriam_identifier") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -206,7 +206,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-11") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-11") {
 		createTable(tableName: "miriam_resource") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -234,7 +234,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-12") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-12") {
 		createTable(tableName: "model") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -248,10 +248,6 @@ databaseChangeLog = {
 				constraints(nullable: "false")
 			}
 
-			column(name: "name", type: "VARCHAR(255)") {
-				constraints(nullable: "false")
-			}
-
 			column(name: "publication_id", type: "BIGINT")
 
 			column(name: "vcs_identifier", type: "VARCHAR(255)") {
@@ -260,7 +256,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-13") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-13") {
 		createTable(tableName: "model_format") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -284,7 +280,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-14") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-14") {
 		createTable(tableName: "model_history_item") {
 			column(name: "model_id", type: "BIGINT") {
 				constraints(nullable: "false")
@@ -300,7 +296,27 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-15") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-15") {
+		createTable(tableName: "preferences") {
+			column(autoIncrement: "true", name: "id", type: "BIGINT") {
+				constraints(nullable: "false", primaryKey: "true")
+			}
+
+			column(name: "version", type: "BIGINT") {
+				constraints(nullable: "false")
+			}
+
+			column(name: "num_results", type: "INT") {
+				constraints(nullable: "false")
+			}
+
+			column(name: "user_id", type: "BIGINT") {
+				constraints(nullable: "false")
+			}
+		}
+	}
+
+	changeSet(author: "mglont (generated)", id: "1392901757860-16") {
 		createTable(tableName: "publication") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -344,7 +360,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-16") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-17") {
 		createTable(tableName: "publication_author") {
 			column(name: "publication_authors_id", type: "BIGINT")
 
@@ -352,7 +368,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-17") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-18") {
 		createTable(tableName: "publication_link_provider") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -374,7 +390,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-18") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-19") {
 		createTable(tableName: "repository_file") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -410,7 +426,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-19") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-20") {
 		createTable(tableName: "revision") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -468,7 +484,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-20") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-21") {
 		createTable(tableName: "role") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -484,7 +500,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-21") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-22") {
 		createTable(tableName: "tag_links") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -508,7 +524,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-22") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-23") {
 		createTable(tableName: "tags") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -524,7 +540,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-23") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-24") {
 		createTable(tableName: "user") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -580,7 +596,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-24") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-25") {
 		createTable(tableName: "user_role") {
 			column(name: "role_id", type: "BIGINT") {
 				constraints(nullable: "false")
@@ -592,7 +608,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-25") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-26") {
 		createTable(tableName: "wcm_content") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -708,7 +724,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-26") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-27") {
 		createTable(tableName: "wcm_content_version") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -746,7 +762,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-27") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-28") {
 		createTable(tableName: "wcm_related_content") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -782,7 +798,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-28") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-29") {
 		createTable(tableName: "wcm_space") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -800,7 +816,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-29") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-30") {
 		createTable(tableName: "wcm_status") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
@@ -824,21 +840,21 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-30") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-31") {
 		addPrimaryKey(columnNames: "model_id, user_id", tableName: "model_history_item")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-31") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-32") {
 		addPrimaryKey(columnNames: "role_id, user_id", tableName: "user_role")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-66") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-68") {
 		createIndex(indexName: "class", tableName: "acl_class", unique: "true") {
 			column(name: "class")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-67") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-69") {
 		createIndex(indexName: "acl_object_identity", tableName: "acl_entry", unique: "true") {
 			column(name: "acl_object_identity")
 
@@ -846,7 +862,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-68") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-70") {
 		createIndex(indexName: "object_id_class", tableName: "acl_object_identity", unique: "true") {
 			column(name: "object_id_class")
 
@@ -854,7 +870,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-69") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-71") {
 		createIndex(indexName: "sid", tableName: "acl_sid", unique: "true") {
 			column(name: "sid")
 
@@ -862,31 +878,31 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-70") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-72") {
 		createIndex(indexName: "identifier", tableName: "miriam_datatype", unique: "true") {
 			column(name: "identifier")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-71") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-73") {
 		createIndex(indexName: "identifier", tableName: "miriam_identifier", unique: "true") {
 			column(name: "identifier")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-72") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-74") {
 		createIndex(indexName: "identifier", tableName: "miriam_resource", unique: "true") {
 			column(name: "identifier")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-73") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-75") {
 		createIndex(indexName: "vcs_identifier", tableName: "model", unique: "true") {
 			column(name: "vcs_identifier")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-74") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-76") {
 		createIndex(indexName: "identifier", tableName: "model_format", unique: "true") {
 			column(name: "identifier")
 
@@ -894,7 +910,7 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-75") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-77") {
 		createIndex(indexName: "model_id", tableName: "revision", unique: "true") {
 			column(name: "model_id")
 
@@ -902,61 +918,61 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-76") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-78") {
 		createIndex(indexName: "vcs_id", tableName: "revision", unique: "true") {
 			column(name: "vcs_id")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-77") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-79") {
 		createIndex(indexName: "authority", tableName: "role", unique: "true") {
 			column(name: "authority")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-78") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-80") {
 		createIndex(indexName: "name", tableName: "tags", unique: "true") {
 			column(name: "name")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-79") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-81") {
 		createIndex(indexName: "email", tableName: "user", unique: "true") {
 			column(name: "email")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-80") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-82") {
 		createIndex(indexName: "username", tableName: "user", unique: "true") {
 			column(name: "username")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-81") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-83") {
 		createIndex(indexName: "content_aliasURI_Idx", tableName: "wcm_content", unique: "false") {
 			column(name: "aliasuri")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-82") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-84") {
 		createIndex(indexName: "content_changedOn_Idx", tableName: "wcm_content", unique: "false") {
 			column(name: "changed_on")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-83") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-85") {
 		createIndex(indexName: "content_contentName_Idx", tableName: "wcm_content", unique: "false") {
 			column(name: "title")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-84") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-86") {
 		createIndex(indexName: "content_createdOn_Idx", tableName: "wcm_content", unique: "false") {
 			column(name: "created_on")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-85") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-87") {
 		createIndex(indexName: "parent_id", tableName: "wcm_content", unique: "true") {
 			column(name: "parent_id")
 
@@ -966,163 +982,167 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-86") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-88") {
 		createIndex(indexName: "aliasuri", tableName: "wcm_space", unique: "true") {
 			column(name: "aliasuri")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-87") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-89") {
 		createIndex(indexName: "name", tableName: "wcm_space", unique: "true") {
 			column(name: "name")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-88") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-90") {
 		createIndex(indexName: "space_aliasURI_Idx", tableName: "wcm_space", unique: "false") {
 			column(name: "aliasuri")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-89") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-91") {
 		createIndex(indexName: "space_name_Idx", tableName: "wcm_space", unique: "false") {
 			column(name: "name")
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-32") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-33") {
 		addForeignKeyConstraint(baseColumnNames: "acl_object_identity", baseTableName: "acl_entry", baseTableSchemaName: "jummp", constraintName: "FK5302D47D8B9F71F2", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_object_identity", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-33") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-34") {
 		addForeignKeyConstraint(baseColumnNames: "sid", baseTableName: "acl_entry", baseTableSchemaName: "jummp", constraintName: "FK5302D47D5B1B0850", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_sid", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-34") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-35") {
 		addForeignKeyConstraint(baseColumnNames: "object_id_class", baseTableName: "acl_object_identity", baseTableSchemaName: "jummp", constraintName: "FK2A2BB009699FB980", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_class", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-35") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-36") {
 		addForeignKeyConstraint(baseColumnNames: "owner_sid", baseTableName: "acl_object_identity", baseTableSchemaName: "jummp", constraintName: "FK2A2BB0095C2B98C4", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_sid", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-36") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-37") {
 		addForeignKeyConstraint(baseColumnNames: "parent_object", baseTableName: "acl_object_identity", baseTableSchemaName: "jummp", constraintName: "FK2A2BB0097FC8265D", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_object_identity", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-37") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-38") {
 		addForeignKeyConstraint(baseColumnNames: "description_id", baseTableName: "gene_ontology", baseTableSchemaName: "jummp", constraintName: "FKF242873932FC8D7C", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "miriam_identifier", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-38") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-39") {
 		addForeignKeyConstraint(baseColumnNames: "from_id", baseTableName: "gene_ontology_relationship", baseTableSchemaName: "jummp", constraintName: "FKFBB69D7E2DF0334A", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "gene_ontology", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-39") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-40") {
 		addForeignKeyConstraint(baseColumnNames: "to_id", baseTableName: "gene_ontology_relationship", baseTableSchemaName: "jummp", constraintName: "FKFBB69D7E57F37ED9", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "gene_ontology", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-40") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-41") {
 		addForeignKeyConstraint(baseColumnNames: "gene_ontology_revisions_id", baseTableName: "gene_ontology_revision", baseTableSchemaName: "jummp", constraintName: "FK8CD9722112342382", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "gene_ontology", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-41") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-42") {
 		addForeignKeyConstraint(baseColumnNames: "revision_id", baseTableName: "gene_ontology_revision", baseTableSchemaName: "jummp", constraintName: "FK8CD97221265115F5", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "revision", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-42") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-43") {
 		addForeignKeyConstraint(baseColumnNames: "preferred_id", baseTableName: "miriam_datatype", baseTableSchemaName: "jummp", constraintName: "FK229D59E41FE7B37C", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "miriam_resource", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-43") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-44") {
 		addForeignKeyConstraint(baseColumnNames: "datatype_id", baseTableName: "miriam_identifier", baseTableSchemaName: "jummp", constraintName: "FKB846CA93E20DD0F", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "miriam_datatype", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-44") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-45") {
 		addForeignKeyConstraint(baseColumnNames: "datatype_id", baseTableName: "miriam_resource", baseTableSchemaName: "jummp", constraintName: "FKA397840E3E20DD0F", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "miriam_datatype", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-45") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-46") {
 		addForeignKeyConstraint(baseColumnNames: "publication_id", baseTableName: "model", baseTableSchemaName: "jummp", constraintName: "FK633FB297C6F423F", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "publication", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-46") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-47") {
 		addForeignKeyConstraint(baseColumnNames: "model_id", baseTableName: "model_history_item", baseTableSchemaName: "jummp", constraintName: "FK9388A534ADCECDF", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "model", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-47") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-48") {
 		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "model_history_item", baseTableSchemaName: "jummp", constraintName: "FK9388A5342C00D884", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "user", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-48") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-49") {
+		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "preferences", baseTableSchemaName: "jummp", constraintName: "FK769ADEF82C00D884", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "user", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+	}
+
+	changeSet(author: "mglont (generated)", id: "1392901757860-50") {
 		addForeignKeyConstraint(baseColumnNames: "link_provider_id", baseTableName: "publication", baseTableSchemaName: "jummp", constraintName: "FKBFBBA22C46318640", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "publication_link_provider", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-49") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-51") {
 		addForeignKeyConstraint(baseColumnNames: "author_id", baseTableName: "publication_author", baseTableSchemaName: "jummp", constraintName: "FKCE9AF2FEC6942B5", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "author", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-50") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-52") {
 		addForeignKeyConstraint(baseColumnNames: "publication_authors_id", baseTableName: "publication_author", baseTableSchemaName: "jummp", constraintName: "FKCE9AF2FEA253AE96", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "publication", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-51") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-53") {
 		addForeignKeyConstraint(baseColumnNames: "revision_id", baseTableName: "repository_file", baseTableSchemaName: "jummp", constraintName: "FK807B5151265115F5", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "revision", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-52") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-54") {
 		addForeignKeyConstraint(baseColumnNames: "format_id", baseTableName: "revision", baseTableSchemaName: "jummp", constraintName: "FKF074B7DB33F8EE8", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "model_format", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-53") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-55") {
 		addForeignKeyConstraint(baseColumnNames: "model_id", baseTableName: "revision", baseTableSchemaName: "jummp", constraintName: "FKF074B7DBADCECDF", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "model", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-54") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-56") {
 		addForeignKeyConstraint(baseColumnNames: "owner_id", baseTableName: "revision", baseTableSchemaName: "jummp", constraintName: "FKF074B7DB97E7889C", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "user", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-55") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-57") {
 		addForeignKeyConstraint(baseColumnNames: "tag_id", baseTableName: "tag_links", baseTableSchemaName: "jummp", constraintName: "FK7C35D6D45A3B441D", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "tags", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-56") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-58") {
 		addForeignKeyConstraint(baseColumnNames: "role_id", baseTableName: "user_role", baseTableSchemaName: "jummp", constraintName: "FK143BF46A86D614A4", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "role", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-57") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-59") {
 		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "user_role", baseTableSchemaName: "jummp", constraintName: "FK143BF46A2C00D884", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "user", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-58") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-60") {
 		addForeignKeyConstraint(baseColumnNames: "parent_id", baseTableName: "wcm_content", baseTableSchemaName: "jummp", constraintName: "FK951FF55BE1775669", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-59") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-61") {
 		addForeignKeyConstraint(baseColumnNames: "script_id", baseTableName: "wcm_content", baseTableSchemaName: "jummp", constraintName: "FK951FF55B3A4CE4A4", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-60") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-62") {
 		addForeignKeyConstraint(baseColumnNames: "space_id", baseTableName: "wcm_content", baseTableSchemaName: "jummp", constraintName: "FK951FF55BF1D5C51A", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_space", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-61") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-63") {
 		addForeignKeyConstraint(baseColumnNames: "status_id", baseTableName: "wcm_content", baseTableSchemaName: "jummp", constraintName: "FK951FF55B68CFF5A", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_status", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-62") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-64") {
 		addForeignKeyConstraint(baseColumnNames: "target_id", baseTableName: "wcm_content", baseTableSchemaName: "jummp", constraintName: "FK951FF55B3573F022", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-63") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-65") {
 		addForeignKeyConstraint(baseColumnNames: "template_id", baseTableName: "wcm_content", baseTableSchemaName: "jummp", constraintName: "FK951FF55B988A1A5A", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-64") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-66") {
 		addForeignKeyConstraint(baseColumnNames: "source_content_id", baseTableName: "wcm_related_content", baseTableSchemaName: "jummp", constraintName: "FKDE7BDB47AD0EC2DE", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "mglont (generated)", id: "1390183642476-65") {
+	changeSet(author: "mglont (generated)", id: "1392901757860-67") {
 		addForeignKeyConstraint(baseColumnNames: "target_content_id", baseTableName: "wcm_related_content", baseTableSchemaName: "jummp", constraintName: "FKDE7BDB47361353A8", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
 }
