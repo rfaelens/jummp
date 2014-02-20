@@ -48,7 +48,6 @@ try {
     }
     databaseProperties.setProperty("jummp.database.url", "jdbc:${protocol}://${server}:${port}/${database}")
     databaseProperties.setProperty("jummp.database.pooled", "true")
-    databaseProperties.setProperty("jummp.database.dbCreate", "update")
     environments {
         test {
             throw new Exception("Test system")
@@ -90,7 +89,6 @@ try {
 environments {
     development {
         dataSource {
-            dbCreate = databaseConfig.jummp.database.dbCreate // one of 'create', 'create-drop','update'
             url = databaseConfig.jummp.database.url
         }
     }
@@ -100,7 +98,6 @@ environments {
             cache.use_query_cache = false
         }
         dataSource {
-            dbCreate = "update"
             url = "jdbc:hsqldb:mem:testDb"
             dialect = ""
             driverClassName = "org.hsqldb.jdbcDriver"
@@ -108,7 +105,6 @@ environments {
     }
     production {
         dataSource {
-            dbCreate = databaseConfig.jummp.database.dbCreate
             url = databaseConfig.jummp.database.url
             
         }
@@ -122,7 +118,6 @@ environments {
 		cache.use_query_cache = false
 	}
 	dataSource {
-		dbCreate = "update"
 		url = "jdbc:hsqldb:mem:tempDb"
 		dialect = ""
 		driverClassName = "org.hsqldb.jdbcDriver"
