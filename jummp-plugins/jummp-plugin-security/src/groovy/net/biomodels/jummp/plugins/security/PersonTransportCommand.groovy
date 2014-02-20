@@ -22,26 +22,28 @@
 
 
 
-package net.biomodels.jummp.model
-
-import net.biomodels.jummp.core.model.AuthorTransportCommand
-
+package net.biomodels.jummp.plugins.security
+import java.util.regex.Pattern
+import java.util.regex.Matcher
+import org.codehaus.groovy.grails.validation.Validateable
 /**
- * @short Representation of an author of a publication.
- * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @short Representation of a Person. Should be subclassed to help understand what type of person
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
-class Author implements Serializable {
-    String lastName
-    String firstName
-    String initials
+ @grails.validation.Validateable	
+class PersonTransportCommand implements Serializable {
+    private static final long serialVersionUID = 1L
 
+    String userRealName
+    String institution
+    String orcid
+    
     static constraints = {
-        lastName(nullable: false)
-        firstName(nullable: true)
-        initials(nullable: true)
+    	importFrom Person
     }
-
-    AuthorTransportCommand toCommandObject() {
-        return new AuthorTransportCommand(lastName: lastName, firstName: firstName, initials: initials)
+    
+    public String toString() {
+    	return userRealName
     }
+    
 }

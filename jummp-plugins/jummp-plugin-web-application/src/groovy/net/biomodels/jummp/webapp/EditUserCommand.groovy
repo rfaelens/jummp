@@ -21,6 +21,9 @@
 
 package net.biomodels.jummp.webapp
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.Person
+import java.util.regex.Pattern
+import java.util.regex.Matcher
 
 /**
  * @short Command Object to validate the user before editing.
@@ -40,7 +43,14 @@ class EditUserCommand implements Serializable {
         userRealName(nullable: false, blank: false)
         email(nullable: false, blank: false, email: true)
         institution(nullable:true)
-        orcid(nullable:true)
+        orcid nullable: true, validator: {
+        	if (it) {
+        		Pattern p = Pattern.compile("^\\d{4}-\\d{4}-\\d{4}-\\d{3}(\\d|X)\$");
+        		Matcher m = p.matcher(it);
+        		return m.matches()
+        	}
+        	return true
+        }
     }
 
     /**
@@ -48,6 +58,6 @@ class EditUserCommand implements Serializable {
      * @return The command object as a User
      */
     User toUser() {
-        return new User(username: this.username, userRealName: this.userRealName, email: this.email, institution:this.institution, orcid:this.orcid)
+        return new User(username: this.username, person: new Person(userRealName: this.userRealName, institution:this.institution, orcid:this.orcid), email: this.email)
     }
 }

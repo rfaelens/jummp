@@ -46,10 +46,7 @@ import java.text.DateFormat
 
 class ZiphandlerTagLib {
 	static namespace="Ziphandler"
-	
-	 def loadedZips;
-     def zipSupported;
-	
+	 
 	class ZipVisitor extends SimpleFileVisitor<Path> {
 		boolean jsOutput=true;
 		StringBuilder builder;
@@ -105,7 +102,7 @@ class ZiphandlerTagLib {
 		builder.append(";")
 	}
 	
-	private void handleZip(StringBuilder builder, boolean JS, String filePath) {
+	private void handleZip(StringBuilder builder, boolean JS, String filePath, def loadedZips, def zipSupported) {
 		 try {
   				Path zipfile = Paths.get(filePath);
 		 	 	FileSystem fs = null;
@@ -141,7 +138,7 @@ class ZiphandlerTagLib {
   	 	 }
 	}
 	
-	private void processFilesJS(def repFiles, StringBuilder builder) {
+	private void processFilesJS(def repFiles, StringBuilder builder, def loadedZips, def zipSupported) {
 		try
         {
             repFiles.each {
@@ -159,7 +156,7 @@ class ZiphandlerTagLib {
 				addFileAttributesJS(builder,file.name,"isInternal","false", false) 
 				
 				if (it.mimeType.contains('zip')) {
-						 handleZip(builder, true, it.path)
+						 handleZip(builder, true, it.path, loadedZips, zipSupported)
 				}
      		}
      		builder.append("</script>")
@@ -179,9 +176,9 @@ class ZiphandlerTagLib {
 		if (!attrs.repFiles || attrs.loadedZips==null || attrs.zipSupported==null) {
         	return
         }
-        loadedZips=attrs.loadedZips;
-        zipSupported=attrs.zipSupported;
-        processFilesJS(attrs.repFiles, builder)	
+        def loadedZips=attrs.loadedZips;
+        def zipSupported=attrs.zipSupported;
+        processFilesJS(attrs.repFiles, builder, loadedZips, zipSupported)	
 		out<<builder.toString()
 	}
 	
@@ -192,8 +189,8 @@ class ZiphandlerTagLib {
 			if (!attrs.repFiles || attrs.loadedZips==null || attrs.zipSupported==null || attrs.mainFile==null) {
         		return
         	}
-        	loadedZips=attrs.loadedZips;
-        	zipSupported=attrs.zipSupported;
+        	def loadedZips=attrs.loadedZips;
+        	def zipSupported=attrs.zipSupported;
         	attrs.repFiles.each {
         		if (attrs.mainFile==it.mainFile) {
         			File f=new File(it.path);
@@ -207,7 +204,7 @@ class ZiphandlerTagLib {
         			builder.append(filename).append("</span></a>")
         			if (it.mimeType.contains('zip')) {
         				builder.append("<ul>")
-        				handleZip(builder, false, it.path)
+        				handleZip(builder, false, it.path, loadedZips, zipSupported)
         				builder.append("</ul>")
 	 			    }
 	 			    builder.append("</li>")

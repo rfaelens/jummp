@@ -20,11 +20,11 @@
 * Additional permission under GNU Affero GPL version 3 section 7
 *
 * If you modify Jummp, or any covered work, by linking or combining it with
-* groovy (or a modified version of that library), containing parts
+* Apache Commons (or a modified version of that library), containing parts
 * covered by the terms of Apache License v2.0, the licensors of this
 * Program grant you additional permission to convey the resulting work.
 * {Corresponding Source for a non-source form of such a combination shall
-* include the source code for the parts of groovy used as well as
+* include the source code for the parts of Apache Commons used as well as
 * that of the covered work.}
 **/
 
@@ -32,23 +32,47 @@
 
 
 
-package net.biomodels.jummp.core.model
-import org.codehaus.groovy.grails.validation.Validateable
-/**
- * @short Wrapper for an Author to be transported through JMS.
- *
- * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
- */
-@grails.validation.Validateable	
-class AuthorTransportCommand implements Serializable {
-    private static final long serialVersionUID = 1L
-    String lastName
-    String firstName
-    String initials
-    static constraints = {
-		//importFrom Author ...would have been nice :(
-		lastName(nullable: false)
-        firstName(nullable: true)
-        initials(nullable: true)
-	}	
+package jummp
+
+
+class ContextHelpTagLib {
+	static namespace="ContextHelp"
+	def grailsApplication
+	
+	private String computeLocation(String location) {
+		String helpRoot=grailsApplication.config.jummp.context.help.root
+		String defined=grailsApplication.config.jummp.context.help."${location}"
+		if (defined) {
+			return helpRoot+defined;
+		}
+		return null;
+	}
+	
+	def getURL = { attrs ->
+		System.out.println("IN GETURL WITH "+attrs.location)
+		if (attrs.location!=null) {
+			String url=computeLocation(attrs.location)
+			if (url) {
+				out<<url
+			}
+		}
+	}
+	
+	def getLink = { attrs ->
+		if (attrs.location!=null) {
+			StringBuilder builder=new StringBuilder("<iframe id='helpFrame' src='");
+			String url=computeLocation(attrs.location);
+			if (url) {
+				url="http://www.ebi.ac.uk"
+				builder.append(url);
+				builder.append("'/>");
+				out<<builder.toString();
+			}
+		}
+		else {
+			out<<"NO LOCATION PROVIDED!"
+		}
+	}
+	
+	
 }

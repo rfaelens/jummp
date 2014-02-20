@@ -25,7 +25,8 @@
 package net.biomodels.jummp.model
 
 import net.biomodels.jummp.core.model.PublicationTransportCommand
-import net.biomodels.jummp.core.model.AuthorTransportCommand
+import net.biomodels.jummp.plugins.security.PersonTransportCommand
+import net.biomodels.jummp.plugins.security.Person
 
 /**
  * @short Representation for a Publication.
@@ -39,7 +40,7 @@ class Publication implements Serializable {
      * A Publication is part of a Model.
      */
     static belongsTo = [Model]
-    static hasMany = [authors: Author, models: Model]
+    static hasMany = [authors: Person, models: Model]
     /**
      * Name of the journal where the publication has been published
      */
@@ -113,13 +114,7 @@ class Publication implements Serializable {
     }
 
     PublicationTransportCommand toCommandObject() {
-        List<AuthorTransportCommand> authorCmds = []
-        if (authors) {
-        		authors.toList().sort{it.id}.each { author ->
-        			authorCmds << author.toCommandObject()
-        		}
-        }
-        return new PublicationTransportCommand(journal: journal,
+       PublicationTransportCommand pubTC=new PublicationTransportCommand(journal: journal,
                 title: title,
                 affiliation: affiliation,
                 synopsis: synopsis,
@@ -131,9 +126,40 @@ class Publication implements Serializable {
                 pages: pages,
                 linkProvider: linkProvider.toCommandObject(),
                 link: link,
-                authors: authorCmds)
+                authors: new LinkedList<PersonTransportCommand>())
+        authors.each {
+        	pubTC.authors.add(it.toCommandObject())
+        }
+        return pubTC;
     }
 
+    private static void reconcile(def authors, def tobeAdded) {
+    	tobeAdded.each { newAuthor ->
+            	Person existing = authors.find { oldAuthor ->
+            		if (newAuthor.orcid) {
+            			return newAuthor.orcid == oldAuthor.orcid
+            		}
+            		return false
+            	}
+            	if (!existing) {
+            		if (newAuthor.orcid) {
+            			existing=Person.findByOrcid(newAuthor.orcid)
+            			if (existing && existing.userRealName==newAuthor.userRealName) {
+            				authors<<existing
+            			}
+            			if (existing) {
+            				log.error "Received duplicate ORCID for ${existing.userRealName} (in the repository) and ${newAuthor.userRealName}. Please reconcile."
+            			}
+            		}
+            		else {
+            			Person current = new Person(userRealName: newAuthor.userRealName, orcid: newAuthor.orcid)
+            			authors << current
+            			current.save()
+            		}
+            	}
+         }
+    }
+    
     static Publication fromCommandObject(PublicationTransportCommand cmd) {
         Publication publication = Publication.createCriteria().get() {
     		eq("link",cmd.link)
@@ -152,25 +178,13 @@ class Publication implements Serializable {
             publication.volume=cmd.volume;
             publication.issue=cmd.issue;
             publication.pages=cmd.pages;
-            cmd.authors.each { newAuthor ->
-            	Author existing = publication.authors.find { oldAuthor ->
-            		oldAuthor.initials == newAuthor.initials && oldAuthor.lastName == newAuthor.lastName
-            	}
-            	if (!existing) {
-            		Author current = new Author(initials: newAuthor.initials, firstName: newAuthor.firstName,
-            									lastName: newAuthor.lastName)
-            		publication.authors << current
-            	}
-            }
+            reconcile(publication.authors, cmd.authors)
             publication.save(flush:true)
             return publication
         }
-    	List<Author> authors = []
-        cmd.authors.each {
-            Author current = new Author(initials: it.initials, firstName: it.firstName, lastName: it.lastName)
-            authors << current
-        }
-        Publication publ=new Publication(journal: cmd.journal,
+    	List<Person> authors = []
+        reconcile(authors, cmd.authors)
+    	Publication publ=new Publication(journal: cmd.journal,
                 title: cmd.title,
                 affiliation: cmd.affiliation,
                 synopsis: cmd.synopsis,

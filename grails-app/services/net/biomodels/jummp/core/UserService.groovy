@@ -36,6 +36,7 @@ package net.biomodels.jummp.core
 
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.Person
 import net.biomodels.jummp.plugins.security.UserRole
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
@@ -64,6 +65,7 @@ import org.codehaus.groovy.grails.web.mapping.LinkGenerator
  * and administrative tasks like enabling/disabling users, etc.
  * 
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class UserService implements IUserService {
 
@@ -115,13 +117,17 @@ class UserService implements IUserService {
     void editUser(User user) throws UserInvalidException {
         checkUserValid(user.username)
         User origUser = User.findByUsername(user.username)
-        origUser.userRealName = user.userRealName
+        origUser.person.userRealName = user.person.userRealName
         origUser.email = user.email
-        origUser.orcid = user.orcid
-        origUser.institution = user.institution
+        origUser.person.orcid = user.person.orcid
+        origUser.person.institution = user.person.institution
+        if (!origUser.person.validate()) {
+    	    throw new UserInvalidException(user.username)
+        }
         if (!origUser.validate()) {
             throw new UserInvalidException(user.username)
         }
+        origUser.person.save(flush: true, failOnError: true)
         origUser.save(flush: true)
     }
 
@@ -249,6 +255,31 @@ class UserService implements IUserService {
             throw new RegistrationException("User with same name already exists", user.username)
         }
         User newUser = user.sanitizedUser()
+        try
+        {
+        	if (newUser.person.orcid) {
+        		def existing=Person.findByOrcid(newUser.person.orcid)
+        		if (existing) {
+        			if (User.findByPerson(existing)) {
+						throw new RegistrationException("Someone with this ORCID is already registered in the repository", newUser.person.orcid)        				
+        			}
+        			else {
+        				if (newUser.person.userRealName == existing.userRealName) {
+        					newUser.person=existing
+        				}
+        				else {
+        					throw new RegistrationException("This ORCID is registered in the repository with the name ${existing.userRealName}. Please contact an administrator", newUser.person.orcid)        				
+        				}
+        			}
+        		}
+        	}
+        	else {
+        		newUser.person.save(flush:true, failOnError:true)
+        	}
+        }
+        catch(Exception e) {
+        	e.printStackTrace()
+        }
         boolean adminRegistration = false
         String p=generator( (('A'..'Z')+('0'..'9')).join(), 6 )
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
@@ -297,7 +328,7 @@ class UserService implements IUserService {
             String emailSubject = grailsApplication.config.jummp.security.registration.email.subject
             emailBody = emailBody.replace("{{USERNAME}}", newUser.username)
             emailBody = emailBody.replace("{{PASSWORD}}", p)
-            emailBody = emailBody.replace("{{REALNAME}}", newUser.userRealName)
+            emailBody = emailBody.replace("{{REALNAME}}", newUser.person.userRealName)
             mailService.sendMail {
                 to recipient
                 from grailsApplication.config.jummp.security.registration.email.sender
@@ -383,7 +414,7 @@ class UserService implements IUserService {
         String recipient = user.email
         String url = grailsLinkGenerator.link(controller: 'usermanagement', action: 'passwordreset', id: user.passwordForgottenCode, absolute: true)
         String emailBody = grailsApplication.config.jummp.security.resetPassword.email.body
-        emailBody = emailBody.replace("{{REALNAME}}", user.userRealName)
+        emailBody = emailBody.replace("{{REALNAME}}", user.person.userRealName)
         emailBody = emailBody.replace("{{URL}}", url)
         mailService.sendMail {
                 to recipient

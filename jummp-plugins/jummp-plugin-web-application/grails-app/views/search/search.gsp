@@ -44,4 +44,6 @@
     <content tag="title">
 		Search Model Repository
 	</content>
-    
+    <content tag="contexthelp">
+		search
+	</content>

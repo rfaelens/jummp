@@ -102,6 +102,7 @@ class SubmissionService {
         	if (workingMemory.containsKey("submitted_mains"))
             {
                 mainFiles=workingMemory.remove("submitted_mains") as List<File>
+                workingMemory.put("reprocess_files", true)
             }
             if (workingMemory.containsKey("submitted_additionals")) {
                     additionals=workingMemory.remove("submitted_additionals") as Map<File, String>
@@ -117,6 +118,7 @@ class SubmissionService {
             if (workingMemory.containsKey("deleted_filenames"))
             {
                 filesToDelete=workingMemory.remove("deleted_filenames") as List<String>
+                workingMemory.put("reprocess_files", true)
                 // check for replacement
                 def overlapping=filesToDelete.findAll {
                 	tobeAdded.find { testFile ->
@@ -128,7 +130,6 @@ class SubmissionService {
                 }
             }
             storeRFTC(workingMemory, tobeAdded, filesToDelete) 
-  
         }
         
         /**
@@ -142,8 +143,10 @@ class SubmissionService {
                 List<RFTC> existing=(workingMemory.get("repository_files") as List<RFTC>)
                 existing.removeAll(filesToDelete)
             }
+            removeFromVCS(workingMemory, filesToDelete)
          }
         
+         abstract void removeFromVCS(Map<String,Object> workingMemory, List<RFTC> filesToDelete);
 
         
         /**
@@ -199,6 +202,8 @@ class SubmissionService {
             workingMemory.put("additional_files", additionals)
         }
         
+        abstract boolean processingRequired(Map<String, Object> workingMemory);
+        
         /**
          * Detects the format of the model and stores this information in the working memory
          * using the key <tt>model_type</tt>
@@ -207,9 +212,11 @@ class SubmissionService {
          */
         @Profiled(tag = "submissionService.inferModelFormatType")
         void inferModelFormatType(Map<String, Object> workingMemory) {
-            MFTC format=modelFileFormatService.inferModelFormat(getFilesFromMemory(workingMemory, true))
-            if (format) {
-                workingMemory.put("model_type",format.identifier)
+            if (processingRequired(workingMemory)) {
+            	MFTC format=modelFileFormatService.inferModelFormat(getFilesFromMemory(workingMemory, true))
+            	if (format) {
+            		workingMemory.put("model_type",format.identifier)
+            	}
             }
          }
 
@@ -218,7 +225,35 @@ class SubmissionService {
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
-        abstract void performValidation(Map<String,Object> workingMemory);
+        void performValidation(Map<String,Object> workingMemory) {
+        	if (processingRequired(workingMemory)) {
+        		List<File> modelFiles=getFilesFromMemory(workingMemory, false)
+        			modelFiles.each {
+        			if (!it) {
+                    	workingMemory.put("validation_error", "Null file passed!")
+                	}
+                	if (!it.exists()) {
+                    	workingMemory.put("validation_error", "File does not exist")
+                	}
+                	if (it.isDirectory()) {
+                    	workingMemory.put("validation_error", "Directory passed as input")
+                	}
+                }
+                boolean modelsAreValid = modelFileFormatService.validate(
+                        						getFilesFromMemory(workingMemory, true),
+                        						workingMemory.get("model_type") as String)
+                        						workingMemory.put("model_validation_result", 
+                        						modelsAreValid)
+                if (!workingMemory.containsKey("model_type")) {
+                	workingMemory.put("validation_error",
+                					  "Missing Format Error: Validation could not be performed, format unknown")
+                }
+                else if (!modelsAreValid) {
+                	//TODO be more specific to the user about what went wrong.
+                	workingMemory.put("validation_error", "ModelValidationError")
+                }
+            }
+        }
 
         /**
          * Convenience function to store the supplied DOMs in working memory
@@ -454,40 +489,15 @@ class SubmissionService {
         }
         
         
-        /**
-         * Purpose Perform file and model validation, and throw the appropriate exception
-         * when necessary
-         *
-         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
-         */
-        @Profiled(tag = "submissionService.NewModelStateMachine.performValidation")
-        void performValidation(Map<String,Object> workingMemory) {
-            List<File> modelFiles=getFilesFromMemory(workingMemory, false)
-            modelFiles.each {
-                if (!it) {
-                    workingMemory.put("validation_error", "Null file passed!")
-                }
-                if (!it.exists()) {
-                    workingMemory.put("validation_error", "File does not exist")
-                }
-                if (it.isDirectory()) {
-                    workingMemory.put("validation_error", "Directory passed as input")
-                }
-            }
-            boolean modelsAreValid = modelFileFormatService.validate(
-                        getFilesFromMemory(workingMemory, true),
-                        workingMemory.get("model_type") as String)
-            workingMemory.put("model_validation_result", modelsAreValid)
-            if (!workingMemory.containsKey("model_type")) {
-                workingMemory.put("validation_error",
-                    "Missing Format Error: Validation could not be performed, format unknown")
-            }
-            else if (!modelsAreValid) {
-                //TODO be more specific to the user about what went wrong.
-                workingMemory.put("validation_error", "ModelValidationError")
-            }
+        void removeFromVCS(Map<String,Object> workingMemory, List<RFTC> filesToDelete) {
+        	//nothing in VCS, need to do nothing
         }
-
+        
+        //Always process files in create mode. Possibly needs optimisation.
+        boolean processingRequired(Map<String, Object> workingMemory) {
+        	return true;
+        }
+        
         /**
          * Purpose Create new model and revision transport objects, store in working memory
          *
@@ -555,15 +565,7 @@ class SubmissionService {
         }
 
         
-        /**
-         * Removes deleted files from memory, checking against previous revision
-         * files, marking any existing files to be removed from Vcs
-         *
-         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
-         */
-        @Profiled(tag = "submissionService.NewModelStateMachine.performValidation")
-        void handleDeletes(Map<String,Object> workingMemory, List<RFTC> filesToDelete) {
-        	super.handleDeletes(workingMemory, filesToDelete)
+        void removeFromVCS(Map<String,Object> workingMemory, List<RFTC> filesToDelete) {
         	if (!workingMemory.containsKey("removeFromVCS")) {
         		workingMemory.put("removeFromVCS", new LinkedList<RFTC>())
         	}
@@ -575,48 +577,12 @@ class SubmissionService {
         		}
         	}
          }
-
-        
-        /* 
-         * If the files include additional files, set parameter in the working memory
-         * to ensure that they are reprocessed (validation etc)
-         * */
-        @Profiled(tag = "submissionService.NewRevisionStateMachine.handleFileUpload")
-        void handleFileUpload(Map<String, Object> workingMemory) {
-            if (workingMemory.containsKey("submitted_mains") || workingMemory.containsKey("deleted_filenames")) {
-                workingMemory.put("reprocess_files", true)
-            }
-            super.handleFileUpload(workingMemory)
-        }
-
-        /**
-         * Detects the format of the model and stores this information in the working memory
-         * using the key <tt>model_type</tt>. Only does it if the flag is set to reprocess 
-         * the files
-         *
-         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
-         */
-        @Profiled(tag = "submissionService.NewRevisionStateMachine.inferModelFormatType")
-        void inferModelFormatType(Map<String, Object> workingMemory) {
-            if (workingMemory.containsKey("reprocess_files")) {
-                super.inferModelFormatType(workingMemory)
-            }
+         
+         //Reprocess files if a new main file has been added or files have been deleted
+        boolean processingRequired(Map<String, Object> workingMemory) {
+        	return workingMemory.containsKey("reprocess_files")
         }
         
-        /**
-         * Performs validation using the key <tt>model_type</tt> to select the
-         * file format service. Only does it if the flag is set to reprocess 
-         * the files
-         *
-         * @param workingMemory     a Map containing all objects exchanged throughout the flow.
-         */
-        @Profiled(tag = "submissionService.NewRevisionStateMachine.performValidation")
-        void performValidation(Map<String,Object> workingMemory) {
-            if (workingMemory.containsKey("reprocess_files")) {
-                newModel.performValidation(workingMemory)
-            }
-        }
-
         /**
          * Initialises the Revision object based on the object stored
          * for the last revision and the <tt>model_type</tt> from working memory
@@ -664,8 +630,7 @@ class SubmissionService {
          */
         @Profiled(tag = "submissionService.NewRevisionStateMachine.updateRevisionComments")
         void updateFromSummary(Map<String,Object> workingMemory, Map<String,String> modifications) {
-            super.updateFromSummary(workingMemory, modifications)
-        	RTC revision=workingMemory.get("RevisionTC") as RTC
+            RTC revision=workingMemory.get("RevisionTC") as RTC
             revision.comment=modifications.get("RevisionComments")
         }
 

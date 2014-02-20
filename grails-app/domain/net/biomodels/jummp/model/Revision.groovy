@@ -157,7 +157,7 @@ class Revision implements Serializable {
                 id: id,
                 state:state,
                 revisionNumber: revisionNumber,
-                owner: owner.userRealName,
+                owner: owner.person.userRealName,
                 minorRevision: minorRevision,
                 validated: validated,
                 name: name,

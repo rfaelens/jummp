@@ -38,6 +38,7 @@ import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.PublicationLinkProvider
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.Person
 import net.biomodels.jummp.plugins.security.UserRole
 import org.codehaus.groovy.grails.commons.ApplicationAttributes
 import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
@@ -118,10 +119,12 @@ class BootStrap {
                 new Role(authority: "ROLE_ADMIN").save(flush: true)
             }
             if (!User.findByUsername("administrator")) {
-               def user = new User(username: "administrator",
+                def person = new Person(userRealName: "administrator")
+                person.save(flush: true)
+            	def user = new User(username: "administrator",
                         password: springSecurityService.encodePassword("administrator"),
-                        userRealName: "administrator",
                         email: "user@test.com",
+                        person: person,
                         enabled: true,
                         accountExpired: false,
                         accountLocked: false,

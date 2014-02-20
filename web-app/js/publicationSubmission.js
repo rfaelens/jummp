@@ -1,13 +1,15 @@
 function addText() {
-	if ($('#newAuthorLastName').val()) {
-	var lastName=$('#newAuthorLastName').val()
-	var fullName=lastName
-	var id=lastName+"<init>"
-	if ($('#newAuthorInitials').val()) {
-			var initials=$('#newAuthorInitials').val()
-			id=id+initials
-			fullName=initials+". "+lastName
+	if ($('#newAuthorName').val()) {
+	var fullName=$('#newAuthorName').val();
+	var orcid = $('#newAuthorOrcid').val();
+	if (orcid.length==0) {
+		orcid="no_orcid";
 	}
+	var institution = $('#newAuthorInstitution').val()
+	if (institution.length==0) {
+		institution="no_institution_provided";
+	}
+	var id=fullName+"<init>"+orcid+"<init>"+institution
 	var alreadyPresent=false
 	$("#authorList > option").each(function() {
 		if (this.value === id) {
@@ -23,8 +25,9 @@ function addText() {
 	else {
 		showNotification("An author by that name is already added to the publication.")
 	}
-	$('#newAuthorInitials').val("")
-	$('#newAuthorLastName').val("")
+	$('#newAuthorName').val("")
+	$('#newAuthorOrcid').val("")
+	$('#newAuthorInstitution').val("")
 }
 }
 

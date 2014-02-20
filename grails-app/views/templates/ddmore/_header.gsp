@@ -25,19 +25,7 @@
 
 
 
-<%
-  	def sidebarContent=g.pageProperty(name:'page.sidebar')
-  	if (sidebarContent) {
-  		sidebarContent=sidebarContent.trim()
-  	}
-%>
 
-<g:if test="${sidebarContent}">
-    <body class="html not-front not-logged-in one-sidebar sidebar-second page-node page-node- page-node-37 node-type-webform section-content">
-</g:if>
-<g:else>
-    <body class="html front not-logged-in no-sidebars page-node page-node- page-node-1 node-type-page" >
-</g:else>
   <div id="skip-link">
     <a href="#main-menu" class="element-invisible element-focusable">Jump to Navigation</a>
   </div>

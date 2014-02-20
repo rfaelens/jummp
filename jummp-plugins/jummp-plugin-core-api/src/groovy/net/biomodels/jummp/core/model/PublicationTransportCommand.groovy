@@ -33,6 +33,8 @@
 
 
 package net.biomodels.jummp.core.model
+import net.biomodels.jummp.plugins.security.Person
+import net.biomodels.jummp.plugins.security.PersonTransportCommand
 import org.codehaus.groovy.grails.validation.Validateable
 /**
  * @short Wrapper for a Publciation to be transported through JMS.
@@ -91,7 +93,7 @@ class PublicationTransportCommand implements Serializable {
      * The key to the publication at the linkProvider or a URL
      */
     String link
-    List<AuthorTransportCommand> authors
+    List<PersonTransportCommand> authors
     static constraints = {
     	// importFrom Publication ...would have been nice :(
     	// TODO: do we need more than 250 characters?
@@ -108,7 +110,7 @@ class PublicationTransportCommand implements Serializable {
         volume(nullable: true)
         issue(nullable: true)
         pages(nullable: true)
-        authors validator: { authorValue, pubObj ->
+        authors nullable: false, validator: { authorValue, pubObj ->
         	return !authorValue.isEmpty()
         }
     }

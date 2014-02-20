@@ -90,7 +90,7 @@ class UserAdministrationController {
 
         List users = userService.getAllUsers(start, length)
         users.each { user ->
-            dataToRender.aaData << [user.id, user.username, user.userRealName, user.email, user.institution, user.orcid, user.enabled, user.accountExpired, user.accountLocked, user.passwordExpired]
+            dataToRender.aaData << [user.id, user.username, user.person.userRealName, user.email, user.person.institution, user.person.orcid, user.enabled, user.accountExpired, user.accountLocked, user.passwordExpired]
         }
         render dataToRender as JSON
     }

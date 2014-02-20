@@ -33,10 +33,8 @@ class User implements Serializable {
 
     String username
     String password
-    String userRealName
+    Person person
     String email
-    String institution
-    String orcid
     Boolean enabled
     Boolean accountExpired
     Boolean accountLocked
@@ -63,14 +61,12 @@ class User implements Serializable {
     static constraints = {
         username(blank: false, unique: true)
         password(blank: false)
-        userRealName(blank: false)
-        email(email: true, unique:true)
-        institution(nullable:true)
-        orcid(nullable:true)
+        email(email: true, unique: true)
         registrationCode(nullable: true)
         registrationInvalidation(nullable: true)
         passwordForgottenCode(nullable: true)
         passwordForgottenInvalidation(nullable: true)
+        person(nullable: false, unique: true)
     }
 
     static mapping = {
@@ -87,8 +83,9 @@ class User implements Serializable {
      * @return User without any security relevant information.
      */
     User sanitizedUser() {
-        return new User(id: this.id, username: this.username, 
-        				userRealName: this.userRealName, email: this.email, institution:this.institution,
-        				orcid:this.orcid)
+        return new User(id: this.id, username: this.username, email: this.email, 
+        				person: new Person(userRealName: this.person.userRealName, 
+        								   institution: this.person.institution,
+        								   orcid:this.person.orcid))
     }
 }

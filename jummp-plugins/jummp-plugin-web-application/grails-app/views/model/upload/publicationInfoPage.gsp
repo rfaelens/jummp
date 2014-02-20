@@ -74,22 +74,26 @@
                             </td>
                             <td>
                           	<select class="input50" id="authorList" name="authorList" size="2">
-                          		<g:each in="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.authors}">
-                          			<option value="${it.lastName}<init>${it.initials}">${it.initials}. ${it.lastName}</option>
+                          		<g:each in="${workingMemory.get("Authors")}">
+                          			<option value="${it.userRealName}<init>${it.orcid ?: "no_orcid"}<init>${it.institution ?: "no_institution_provided"}">${it.userRealName}</option>
                           		</g:each>
                           	</select>
                           		<div>
                           			<ul class="subListForm">
                           				<li>
-                          					<label style="display:block;margin-left:0px">Initials</label>
-                          					<span><input class="input20" size="20" type="text" id="newAuthorInitials"/></span>
+                          					<label style="display:block;margin-left:0px">Name</label>
+                          					<span><input class="input20" size="20" type="text" id="newAuthorName"/></span>
                           				</li>
                           				<li>
-                          					<label style="display:block;margin-left:0px">Last name</label>
+                          					<label style="display:block;margin-left:0px">Orcid</label>
                           					<span>
-                          					<input class="input20" size="20" type="text" id="newAuthorLastName"/>
+                          					<input class="input20" size="20" type="text" id="newAuthorOrcid"/>
                           					</span>
                           				</li>
+                          				<li>
+                          					<label style="display:block;margin-left:0px">Institution</label>
+                          					<span><input class="input20" size="20" type="text" id="newAuthorInstitution"/></span>
+                          				</li>	
                           				<li>
                           					<a href="#" id="addButton" class="addButton">Add</a>
                           				</li>

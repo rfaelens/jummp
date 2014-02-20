@@ -22,29 +22,24 @@
 
 
 
-package net.biomodels.jummp.webapp
-import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.plugins.security.Person
+package net.biomodels.jummp.plugins.security
 import java.util.regex.Pattern
 import java.util.regex.Matcher
-
 /**
- * @short Command object for User registration
+ * @short Representation of a Person. Should be subclassed to help understand what type of person
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
-@grails.validation.Validateable
-class RegistrationCommand {
-    String username
-    String email
+class Person implements Serializable {
+    private static final long serialVersionUID = 1L
+
     String userRealName
     String institution
     String orcid
-
+    
     static constraints = {
-        username(nullable: false, blank: false)
-        email(nullable: false, email: true, blank: false)
-        userRealName(nullable: false, blank: false)
+        userRealName(blank: false)
         institution(nullable:true)
-        orcid nullable: true, validator: {
+        orcid nullable: true, unique:true, validator: {
         	if (it) {
         		Pattern p = Pattern.compile("^\\d{4}-\\d{4}-\\d{4}-\\d{3}(\\d|X)\$");
         		Matcher m = p.matcher(it);
@@ -53,8 +48,15 @@ class RegistrationCommand {
         	return true
         }
     }
-
-    User toUser() {
-        return new User(username: this.username, email: this.email, person: new Person(userRealName: this.userRealName, institution:this.institution, orcid:this.orcid))
+    
+    public PersonTransportCommand toCommandObject() {
+    	return new PersonTransportCommand(userRealName: this.userRealName,
+    									  institution: this.institution,
+    									  orcid: this.orcid)
     }
+    
+    public String toString() {
+    	return userRealName
+    }
+    
 }
