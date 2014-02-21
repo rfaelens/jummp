@@ -60,6 +60,8 @@ class ModelController {
      * Flag that checks whether the dynamically-inserted logger is set to DEBUG or higher.
      */
     private final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
+    
+    def springSecurityService;
     /**
      * Dependency injection of modelDelegateService.
      **/
@@ -90,6 +92,42 @@ class ModelController {
     */
     def mailService
     
+    def beforeInterceptor = [action: this.&auditBefore, except: ['updateFlow', 'createFlow', 'uploadFlow', 'showWithMessage']]
+    
+    def afterInterceptor = [ action: this.&auditAfter, except: ['updateFlow', 'createFlow', 'uploadFlow', 'showWithMessage']] 
+    
+    
+    private String getUsername() {
+    	String username="anonymous"
+		def principal = springSecurityService.principal
+		if (principal) {
+			username = principal.username
+		}
+		return username		
+    }
+    
+    private auditBefore() {
+    	String model=params.id.split("\\.")[0]
+    	long modelId=Long.parseLong(model)
+    	String username=getUsername();
+		String accessType=actionUri
+		String formatType=params.format?:"html"
+		String changesMade=null;
+		int historyItem=updateHistory(modelId, username, accessType, formatType, changesMade)
+		session.lastHistory=historyItem;
+    }
+    
+    private auditAfter(def model) {
+    	System.out.println("WILL UPDATE: ${session.lastHistory}")
+    	session.removeAttribute("lastHistory")
+    }
+    
+    private int updateHistory(long model, String user, String accessType, 
+    						  String formatType, String changesMade, boolean success=false) {
+    	accessType=accessType.replace("/model/","");
+    	System.out.println("WILL WRITE: "+model+".."+user+".."+accessType+".."+formatType+".."+changesMade+".."+success)
+    	return new Random().nextInt()
+    }
     
     def showWithMessage = {
         flash["giveMessage"]=params.flashMessage
@@ -176,12 +214,37 @@ class ModelController {
             on("error"){
             	session.updateMissingId="True"
             }.to "displayErrorPage"
-            on("accessDenied").to "displayAccessDenied"
+            on("accessDenied"){
+            	Long id=-1;
+            	try {
+            		id=Long.parseLong(params.id)
+            	}
+            	catch(Exception e) {
+            	}
+            	if (params.id) {
+            		updateHistory(id,
+            				  "something wrong", 
+            				  "update", 
+            				  "html", 
+            				   null,
+            				   false)
+            	}
+            }.to "displayAccessDenied"
         }
         uploadPipeline {
             subflow(controller: "model", action: "upload", input: [isUpdate: true])
             on("abort").to "abort"
-            on("displayConfirmationPage").to "displayConfirmationPage"
+            on("displayConfirmationPage"){
+            	String update=conversation.changesMade.join(". ")
+            	String model=conversation.model_id
+            	String user=getUsername()
+            	updateHistory(session.result_submission,
+            				  user, 
+            				  "update", 
+            				  "html", 
+            				  update,
+            				  true)
+            }.to "displayConfirmationPage"
             on("displayErrorPage").to "displayErrorPage"
         }
         abort()
@@ -195,7 +258,14 @@ class ModelController {
         uploadPipeline {
             subflow(controller: "model", action: "upload", input: [isUpdate:false])
             on("abort").to "abort"
-            on("displayConfirmationPage").to "displayConfirmationPage"
+            on("displayConfirmationPage") {
+            	updateHistory(session.result_submission,
+            				  getUsername(), 
+            				  "create", 
+            				  "html", 
+            				   null,
+            				   true)
+            }.to "displayConfirmationPage"
             on("displayErrorPage").to "displayErrorPage"
         }
         abort()
@@ -223,6 +293,7 @@ class ModelController {
                 Map<String, Object> workingMemory=new HashMap<String,Object>()
                 flow.workingMemory=workingMemory
                 flow.workingMemory.put("isUpdateOnExistingModel",flow.isUpdate)
+                conversation.changesMade=new TreeSet<String>();
                 if (flow.isUpdate) {
                     Long model_id=conversation.model_id as Long
                     flow.workingMemory.put("model_id", model_id)
@@ -509,7 +580,8 @@ class ModelController {
         					flow.workingMemory.put("Authors", model.publication.authors)
         				}
         			}
-        			publicationInfoPage()
+    				conversation.changesMade.add("Amended publication details");
+    				publicationInfoPage()
         		}
         		else {
         			displaySummaryOfChanges()
@@ -599,7 +671,7 @@ class ModelController {
         }
         saveModel {
             action {
-                submissionService.handleSubmission(flow.workingMemory)
+                conversation.changesMade.addAll(submissionService.handleSubmission(flow.workingMemory))
                 session.result_submission=flow.workingMemory.get("model_id")
                 if (flow.isUpdate) {
                 	flash.sendMessage="Model ${session.result_submission} has been updated."
