@@ -57,6 +57,7 @@ import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
 import static org.junit.Assert.*
+import net.biomodels.jummp.webapp.ModelController
 
 @TestMixin(IntegrationTestMixin)
 class ModelServiceTests extends JummpIntegrationTest {
@@ -290,6 +291,11 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertSame(rev6, modelService.getLatestRevision(model))
         authenticateAsAdmin()
         assertSame(rev6, modelService.getLatestRevision(model))
+        
+        def modelController = new ModelController()
+        modelController.params.id = ""+model.id
+        modelController.show()
+        
         // let's delete the model
         authenticateAsAdmin()
         assertTrue(modelService.deleteModel(model))

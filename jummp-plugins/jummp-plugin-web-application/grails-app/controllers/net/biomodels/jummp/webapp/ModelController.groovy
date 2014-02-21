@@ -616,7 +616,6 @@ class ModelController {
             on("Continue"){
             		ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
             	    bindData(model.publication, params, [exclude: ['authors']])
-            	    System.out.println("AUTHORS LIST: "+params.authorFieldTotal)
             	    String[] authorList=params.authorFieldTotal.split("!!author!!")
             	    List<PersonTransportCommand> validatedAuthors=new LinkedList<PersonTransportCommand>()
             	    authorList.each {
