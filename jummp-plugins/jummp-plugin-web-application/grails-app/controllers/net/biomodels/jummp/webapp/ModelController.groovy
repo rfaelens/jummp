@@ -53,6 +53,8 @@ import grails.transaction.*
 import static org.springframework.http.HttpStatus.*
 import static org.springframework.http.HttpMethod.*
 import org.apache.commons.io.FileUtils
+import net.biomodels.jummp.core.model.ModelAuditTransportCommand
+import net.biomodels.jummp.core.model.audit.*
 
 @Api(value = "/model", description = "Operations related to models")
 class ModelController {
@@ -100,7 +102,10 @@ class ModelController {
     private String getUsername() {
     	String username="anonymous"
 		def principal = springSecurityService.principal
-		if (principal) {
+		if (principal instanceof String) {
+			username=principal;
+		}
+		else if (principal) {
 			username = principal.username
 		}
 		return username		
@@ -111,6 +116,10 @@ class ModelController {
     	long modelId=Long.parseLong(model)
     	String username=getUsername();
 		String accessType=actionUri
+		// publish uses revision ids, annoyingly enough.
+		if (accessType.contains("publish")) {
+			modelId=modelDelegateService.getRevisionDetails(new RevisionTransportCommand(id: modelId)).model.id
+		}
 		String formatType=params.format?:"html"
 		String changesMade=null;
 		int historyItem=updateHistory(modelId, username, accessType, formatType, changesMade)
@@ -118,15 +127,21 @@ class ModelController {
     }
     
     private auditAfter(def model) {
-    	System.out.println("WILL UPDATE: ${session.lastHistory}")
+    	modelDelegateService.updateAuditSuccess(session.lastHistory, true)
     	session.removeAttribute("lastHistory")
     }
     
     private int updateHistory(long model, String user, String accessType, 
-    						  String formatType, String changesMade, boolean success=false) {
+    	String formatType, String changesMade, boolean success=false) {
     	accessType=accessType.replace("/model/","");
-    	System.out.println("WILL WRITE: "+model+".."+user+".."+accessType+".."+formatType+".."+changesMade+".."+success)
-    	return new Random().nextInt()
+    	ModelAuditTransportCommand audit=new ModelAuditTransportCommand(model: new ModelTransportCommand(id: model),
+    									username: user,
+    									format: AccessFormat.valueOf(formatType.toUpperCase()),
+    									type: AccessType.fromAction(accessType),
+    									changesMade: changesMade,
+    									success: success)
+    	long returned=modelDelegateService.createAuditItem(audit)
+    	return returned
     }
     
     def showWithMessage = {

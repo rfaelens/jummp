@@ -648,7 +648,7 @@ class SubmissionService {
             List<RFTC> deleteFiles= getRepFiles(workingMemory, "removeFromVCS")
             deleteFiles.each {
             	File file=new File(it.path)
-            	changes.add("Deleted file: ${file.getName()}.")
+            	changes.add("Deleted file: ${file.getName()}")
             }
             def existing=workingMemory.get("existing_files") as List<RFTC>
         	repoFiles.each { it ->
@@ -657,7 +657,7 @@ class SubmissionService {
             			fileAdded == new File(fileExisting.path).getName()
             	}
             	if (!exists) {
-            		changes.add("Added file: ${fileAdded}.")
+            		changes.add("Added file: ${fileAdded}")
             	}
             }
             def newlyCreated= modelService.addValidatedRevision(repoFiles, deleteFiles, revision)
