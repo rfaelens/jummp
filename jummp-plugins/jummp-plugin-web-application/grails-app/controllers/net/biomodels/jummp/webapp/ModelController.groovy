@@ -134,9 +134,15 @@ class ModelController {
     private int updateHistory(long model, String user, String accessType, 
     	String formatType, String changesMade, boolean success=false) {
     	accessType=accessType.replace("/model/","");
+    	AccessFormat format=AccessFormat.HTML
+    	try {
+    		format=AccessFormat.valueOf(formatType.toUpperCase())
+    	}
+    	catch(Exception ignore) {
+    	}
     	ModelAuditTransportCommand audit=new ModelAuditTransportCommand(model: new ModelTransportCommand(id: model),
     									username: user,
-    									format: AccessFormat.valueOf(formatType.toUpperCase()),
+    									format: format,
     									type: AccessType.fromAction(accessType),
     									changesMade: changesMade,
     									success: success)
