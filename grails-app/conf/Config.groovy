@@ -435,7 +435,6 @@ if (jummp.security.cms.policy != null) {
 }
 
 grails.plugins.springsecurity.controllerAnnotations.staticRules = jummp.controllerAnnotations
-
 if (!"jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
     jms.disabled = true
 }
@@ -533,3 +532,4 @@ if (!(jummpConfig.jummp.context.help.root instanceof ConfigObject)) {
     	}
     }
 }
+jummp.config.maintenance = false

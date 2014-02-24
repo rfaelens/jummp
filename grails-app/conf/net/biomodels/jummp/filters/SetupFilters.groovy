@@ -35,6 +35,7 @@
 package net.biomodels.jummp.filters
 
 import org.springframework.beans.factory.InitializingBean
+import org.codehaus.groovy.grails.commons.ConfigurationHolder as CH
 
 /**
  * @short Filter to redirect to SetupController
@@ -57,6 +58,7 @@ class SetupFilters implements InitializingBean {
     private boolean configFileExists = false
     private boolean firstRun = false
     def configurationService
+    def grailsApplication
 
     public void afterPropertiesSet() throws Exception {
         String configPath=configurationService.getConfigFilePath()
@@ -72,7 +74,24 @@ class SetupFilters implements InitializingBean {
     }
 
     def filters = {
-        if (configFileExists) {
+    		// special workaround for the root view: http://jira.grails.org/browse/GRAILS-10184
+    		maintenanceRoot(uri: '/') {
+    			before = {
+    				if (grailsApplication.mainContext.getBean("maintenanceMode").getMode()) {
+    					redirect(controller: 'maintenance', action:"index" )
+    					return true; 
+    				}
+    			}
+    		}
+    		maintenanceMode(controllerExclude: 'maintenance') {
+    			before = {
+    				if (grailsApplication.mainContext.getBean("maintenanceMode").getMode() && controllerName) {
+    					redirect(controller: 'maintenance', action:"index" )
+    					return false;
+    				}
+    			}
+    		}
+    		if (configFileExists) {
             if (firstRun) {
                 setupFilter1(controllerExclude: 'setup') {
                     before = {
