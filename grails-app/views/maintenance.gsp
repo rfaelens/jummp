@@ -43,7 +43,7 @@
     <body>
     	<wcm:render path="index"/>
     	<div id="dialog" title="Maintenance Mode">
-    		The system is currently in maintenance mode, and the repository is currently inaccessible. Please check back soon.
+    		The system is currently in maintenance mode, and the repository is inaccessible. Please check back soon.
     	</div>
     </body>
 </html>
