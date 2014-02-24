@@ -172,3 +172,5 @@
         </g:javascript>
     </body>
    <g:render template="/templates/decorateSubmission" />
+   <g:render template="/templates/subFlowContextHelp" />
+

@@ -39,4 +39,6 @@
     <content tag="title">
 		Archived Models
 	</content>
-    
+    <content tag="contexthelp">
+		archives
+	</content>
