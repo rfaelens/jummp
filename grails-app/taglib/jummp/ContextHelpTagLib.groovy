@@ -49,7 +49,6 @@ class ContextHelpTagLib {
 	}
 	
 	def getURL = { attrs ->
-		System.out.println("IN GETURL WITH "+attrs.location)
 		if (attrs.location!=null) {
 			String url=computeLocation(attrs.location)
 			if (url) {
