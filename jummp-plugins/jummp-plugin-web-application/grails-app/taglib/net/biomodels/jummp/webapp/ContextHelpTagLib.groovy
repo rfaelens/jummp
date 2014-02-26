@@ -32,7 +32,7 @@
 
 
 
-package jummp
+package net.biomodels.jummp.webapp
 
 
 class ContextHelpTagLib {

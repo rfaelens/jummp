@@ -28,7 +28,7 @@
 * that of the covered work.}
 **/
 
-package jummp
+package net.biomodels.jummp.webapp
 
 class BuildFormatTagLib {
 	static namespace="BuildFormat"
