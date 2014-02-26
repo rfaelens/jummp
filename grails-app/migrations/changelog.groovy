@@ -1145,4 +1145,6 @@ databaseChangeLog = {
 	changeSet(author: "mglont (generated)", id: "1392901757860-67") {
 		addForeignKeyConstraint(baseColumnNames: "target_content_id", baseTableName: "wcm_related_content", baseTableSchemaName: "jummp", constraintName: "FKDE7BDB47361353A8", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
 	}
+
+	include file: 'author2person.groovy'
 }

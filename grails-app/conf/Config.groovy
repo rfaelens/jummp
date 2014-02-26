@@ -477,6 +477,7 @@ grails.resources.adhoc.excludes=["/content/*"]
 // database migrations
 grails.plugin.databasemigration.updateOnStart = true
 grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
+grails.plugin.databasemigration.changelogFileName = 'changelog.groovy'
 
 grails.mails.props=[:]
 if (!(jummpConfig.jummp.security.mailer.host instanceof ConfigObject)) {
