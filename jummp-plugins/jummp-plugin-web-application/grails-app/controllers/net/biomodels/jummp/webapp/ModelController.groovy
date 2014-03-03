@@ -177,6 +177,7 @@ class ModelController {
         				   flashMessage: flashMessage,
         				   canUpdate: canUpdate,
         				   canDelete: canDelete,
+        				   canShare: true,
         				   showPublishOption: showPublishOption,
         		]
         		if (rev.id == modelDelegateService.getLatestRevision(rev.model.id).id)
@@ -191,6 +192,7 @@ class ModelController {
                 	model["showPublishOption"]=false
                 	model["oldVersion"]=true
                 	model["canDelete"]=false
+                	model["canShare"]=false
                 	return model
                 }
         }
@@ -217,6 +219,13 @@ class ModelController {
        boolean deleted=modelDelegateService.deleteModel(params.id as int)
        redirect(action: "showWithMessage", id: params.id,
                 params: [flashMessage: deleted?"Model has been deleted, and moved into archives.":"Model could not be deleted"])
+    }
+    
+    def share = {
+    	if (params.id) {
+    		return [revision: modelDelegateService.getRevision(new RevisionTransportCommand(id: params.id))]
+    	}
+    	else throw new Exception("Model version must be specified to share");
     }
     
     @Secured(["isAuthenticated()"])

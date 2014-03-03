@@ -330,6 +330,12 @@
 						primary:"ui-icon-unlocked"
 					}
 			});
+			$( "#share" ).button({
+					text:false,
+					icons: {
+						primary:"ui-icon-person"
+					}
+			});
 		});
 	
 	</script>
@@ -360,7 +366,7 @@
     		</div>
     	</g:if>
     	<div id="topBar">
-    		    <div style="float:left;width:80%;">
+    		    <div style="float:left;width:75%;">
     				<h2>${revision.name}</h2>
     			</div>
     	        <div style="float:right;margin-top:10px;">
@@ -386,6 +392,9 @@
 									<img style="float:right;margin-top:0;" title="This version of the model is unpublished" alt="unpublished model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/lock.png"/>
 								</g:else>                                
                             </g:else>
+                            <g:if test="${canShare}">
+                                <button id="share" onclick="return openPage('${g.createLink(controller: 'model', action: 'share', id: revision.id)}')">Share</button>
+                            </g:if>
                      </div>
     	         </div>
    
