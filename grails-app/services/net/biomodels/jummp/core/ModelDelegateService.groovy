@@ -38,6 +38,7 @@ import org.springframework.security.access.AccessDeniedException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.ModelAuditTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
@@ -122,6 +123,16 @@ class ModelDelegateService implements IModelService {
     Integer getModelCount() {
         return modelService.getModelCount()
     }
+    
+    long createAuditItem(ModelAuditTransportCommand cmd) {
+    	System.out.println(modelService.toString()+"..."+cmd)
+    	return modelService.createAuditItem(cmd)
+    }
+    
+    void updateAuditSuccess(Long itemId, boolean success) {
+    	modelService.updateAuditSuccess(itemId, success)
+    }
+    
 
     ModelTransportCommand getModel(long modelId) {
         return modelService.getModel(modelId).toCommandObject()

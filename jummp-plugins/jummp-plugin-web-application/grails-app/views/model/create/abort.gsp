@@ -44,3 +44,6 @@
     <content tag="title">
 		Submit a model
 	</content>
+	<content tag="contexthelp">
+		submission
+	</content>

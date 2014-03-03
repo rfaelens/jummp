@@ -108,3 +108,6 @@
 <content tag="title">
 	Login
 </content>
+<content tag="contexthelp">
+		login
+	</content>

@@ -42,9 +42,11 @@ import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ModelAuditTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.ModelAudit
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.model.PublicationLinkProvider
@@ -1816,8 +1818,48 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         revision.save(flush:true)
     }
 
-    
-    
+    /**
+     * Create a model audit item
+     
+     * @param cmd The ModelAuditTransportCommand to be saved in the database
+     */
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.createAuditItem")
+    long createAuditItem(ModelAuditTransportCommand cmd) {
+    	User user=null
+    	if (cmd.username!="anonymousUser") {
+    		user=User.findByUsername(cmd.username)
+    	}
+    	def model=Model.get(cmd.model.id)
+    	if (model) {
+    		ModelAudit audit=new ModelAudit(model: Model.get(cmd.model.id),
+    									user: user,
+    									format: cmd.format,
+    									type: cmd.type,
+    									changesMade: cmd.changesMade,
+    									success: cmd.success);
+    		audit.save(flush:true, failOnError:true);
+    		return audit.id;
+    	}
+    	return -1;
+    }
+
+	/**
+     * Update the success field in a model audit item
+     * The model audit item is initialised with false success from the 
+     * before interceptor. This function is called to update the success
+     * from the after interceptor if no exception was thrown.
+     * @param cmd The ModelAuditTransportCommand to be saved in the database
+     */
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.updateAuditSuccess")
+    void updateAuditSuccess(Long itemId, boolean success) {
+    	if (itemId!=-1) {
+    		ModelAudit audit=ModelAudit.get(itemId)
+    		audit.success=success;
+    		audit.save(flush:true, failOnError:true)
+    	}
+	}
 
     /**
      * Retrieves the pub med annotations of the @p model.

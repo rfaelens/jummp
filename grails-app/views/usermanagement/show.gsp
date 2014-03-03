@@ -64,3 +64,6 @@
 <content tag="title">
 	${user.person.userRealName}'s Profile
 </content>
+<content tag="contexthelp">
+	profile
+</content>

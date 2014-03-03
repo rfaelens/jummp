@@ -27,19 +27,26 @@
 
 
 
-<%@ page contentType="text/html;charset=UTF-8" %>
-
+<!doctype html>
+<html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="layout" content="main"/>
-        <title>Error Page</title>
+        <script>
+        	$(function() {
+        		$( "#dialog" ).dialog({
+        			resizable: false,
+        			modal: true
+        			});
+        	});
+        </script>
     </head>
     <body>
-        <g:render template="/templates/errorTemplate"/>
+    	<wcm:render path="index"/>
+    	<div id="dialog" title="Maintenance Mode">
+    		The system is currently in maintenance mode, and the repository is inaccessible. Please check back soon.
+    	</div>
     </body>
-   <content tag="title">
-		Submit a model
-	</content>
-	<content tag="contexthelp">
-		submission
-	</content>
+</html>
+<content tag="title">
+	DDMoRe Model Repository
+</content>

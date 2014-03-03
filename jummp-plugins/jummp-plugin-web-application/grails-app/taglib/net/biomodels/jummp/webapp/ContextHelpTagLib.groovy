@@ -49,7 +49,7 @@ class ContextHelpTagLib {
 	}
 	
 	def getURL = { attrs ->
-		if (attrs.location!=null) {
+		if (attrs.location!=null && attrs.location) {
 			String url=computeLocation(attrs.location)
 			if (url) {
 				out<<url
@@ -62,7 +62,6 @@ class ContextHelpTagLib {
 			StringBuilder builder=new StringBuilder("<iframe id='helpFrame' src='");
 			String url=computeLocation(attrs.location);
 			if (url) {
-				url="http://www.ebi.ac.uk"
 				builder.append(url);
 				builder.append("'/>");
 				out<<builder.toString();

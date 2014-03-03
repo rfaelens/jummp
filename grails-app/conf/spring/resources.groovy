@@ -92,6 +92,10 @@ beans = {
 			bean.autowire = "byName"
 			bean.singleton = true
     }
+    maintenanceMode(net.biomodels.jummp.core.MaintenanceBean) { bean ->
+			bean.autowire = "byName"
+			bean.singleton = true
+    }
     modelFileFormatConfig(net.biomodels.jummp.core.ModelFileFormatConfig) { bean ->
 			bean.autowire = "byName"
 			bean.singleton = true

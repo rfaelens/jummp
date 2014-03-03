@@ -509,6 +509,6 @@
 
 </body>
 <content tag="contexthelp">
-		main
+		display
 </content>
 </g:applyLayout>

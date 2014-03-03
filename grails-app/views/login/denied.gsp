@@ -40,3 +40,6 @@
 <content tag="title">
 	Denied
 </content>
+<content tag="contexthelp">
+		login
+</content>

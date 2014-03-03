@@ -69,3 +69,5 @@
         </g:form>
     </body>
     <g:render template="/templates/decorateSubmission" />
+    <g:render template="/templates/subFlowContextHelp" />
+
