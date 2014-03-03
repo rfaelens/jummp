@@ -82,6 +82,10 @@ try {
     environments {
         development {
             dataSource {
+                driverClassName = databaseConfig.jummp.database.driver
+                username = databaseConfig.jummp.database.username
+                password = databaseConfig.jummp.database.password
+                dialect  = databaseConfig.jummp.database.dialect
                 url = databaseConfig.jummp.database.url
             }
         }
@@ -91,28 +95,38 @@ try {
                 cache.use_query_cache = false
             }
             dataSource {
-                url = "jdbc:hsqldb:mem:testDb"
+                url = "jdbc:h2:mem:testDb;MVCC=true"
+                username = "sa"
+                password = ""
                 dialect = ""
-                driverClassName = "org.hsqldb.jdbcDriver"
+                driverClassName = "org.h2.Driver"
+                // can't use databaseMigrations
+                dbCreate = "create-drop"
             }
         }
         production {
             dataSource {
+                driverClassName = databaseConfig.jummp.database.driver
+                username = databaseConfig.jummp.database.username
+                password = databaseConfig.jummp.database.password
+                dialect  = databaseConfig.jummp.database.dialect
                 url = databaseConfig.jummp.database.url
             }
         }
     }
 
 } catch (Exception e) {
-    // no database configured yet, use hsqldb
+    // no database configured yet, use h2
     hibernate {
         cache.use_second_level_cache = false
         cache.use_query_cache = false
     }
     dataSource {
-        url = "jdbc:hsqldb:mem:tempDb"
+        url = "jdbc:h2:mem:tempDb;MVCC=true"
+        username = "sa"
+        password = ""
         dialect = ""
-        driverClassName = "org.hsqldb.jdbcDriver"
+        driverClassName = "org.h2.Driver"
     }
 }
 
