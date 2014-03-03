@@ -93,7 +93,6 @@ grails.project.dependency.resolution = {
                     //'xml-apis'
         }
 
-        test 'hsqldb:hsqldb:1.8.0.10'
         compile "xml-apis:xml-apis:1.4.01"
         compile 'org.jdom:jdom:1.1.3'
         compile 'org.springframework:spring-jms:3.2.4.RELEASE'

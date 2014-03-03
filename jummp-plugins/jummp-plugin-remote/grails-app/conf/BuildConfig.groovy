@@ -75,7 +75,6 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
 
-        test 'hsqldb:hsqldb:1.8.0.10'
     }
     plugins {
         compile ":spring-security-core:1.2.7.3"

@@ -74,7 +74,6 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
         compile "de.unirostock.sems:BiVeS:1.1-SNAPSHOT"
-        test 'hsqldb:hsqldb:1.8.0.10'
         // broken Grails 2.3.2 dependecy
         compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core' }
     }
