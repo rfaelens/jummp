@@ -52,26 +52,26 @@ try {
 
     dataSource {
         pooled = Boolean.parseBoolean(databaseConfig.jummp.database.pooled)
-            driverClassName = databaseConfig.jummp.database.driver
-            username = databaseConfig.jummp.database.username
-            password = databaseConfig.jummp.database.password
-            dialect  = databaseConfig.jummp.database.dialect
-            properties {
-                maxActive = 50
-                maxIdle = 25
-                minIdle =1
-                initialSize = 1
-                minEvictableIdleTimeMillis = 60000
-                timeBetweenEvictionRunsMillis = 60000
-                numTestsPerEvictionRun = 3
-                maxWait = 10000
+        driverClassName = databaseConfig.jummp.database.driver
+        username = databaseConfig.jummp.database.username
+        password = databaseConfig.jummp.database.password
+        dialect  = databaseConfig.jummp.database.dialect
+        properties {
+            maxActive = 50
+            maxIdle = 25
+            minIdle =1
+            initialSize = 1
+            minEvictableIdleTimeMillis = 60000
+            timeBetweenEvictionRunsMillis = 60000
+            numTestsPerEvictionRun = 3
+            maxWait = 10000
 
-                testOnBorrow = true
-                testWhileIdle = true
-                testOnReturn = false
+            testOnBorrow = true
+            testWhileIdle = true
+            testOnReturn = false
 
-                validationQuery = "SELECT 1"
-            }
+            validationQuery = "SELECT 1"
+        }
     }
     hibernate {
         cache.use_second_level_cache = true
