@@ -884,17 +884,17 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "mglont (generated)", id: "1392901757860-73") {
-		createIndex(indexName: "identifier", tableName: "miriam_identifier", unique: "true") {
-			column(name: "identifier")
-		}
-	}
+        changeSet(author: "mglont (generated)", id: "1392901757860-73") {
+                createIndex(indexName: "mi_identifier_unique", tableName: "miriam_identifier", unique: "true") {
+                        column(name: "identifier")
+                }
+        }
 
-	changeSet(author: "mglont (generated)", id: "1392901757860-74") {
-		createIndex(indexName: "identifier", tableName: "miriam_resource", unique: "true") {
-			column(name: "identifier")
-		}
-	}
+        changeSet(author: "mglont (generated)", id: "1392901757860-74") {
+                createIndex(indexName: "mr_identifier_unique", tableName: "miriam_resource", unique: "true") {
+                        column(name: "identifier")
+                }
+        }
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-75") {
 		createIndex(indexName: "vcs_identifier", tableName: "model", unique: "true") {
@@ -903,7 +903,7 @@ databaseChangeLog = {
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-76") {
-		createIndex(indexName: "identifier", tableName: "model_format", unique: "true") {
+		createIndex(indexName: "format_version_identifier", tableName: "model_format", unique: "true") {
 			column(name: "identifier")
 
 			column(name: "format_version")
@@ -989,7 +989,7 @@ databaseChangeLog = {
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-89") {
-		createIndex(indexName: "name", tableName: "wcm_space", unique: "true") {
+		createIndex(indexName: "name_unique", tableName: "wcm_space", unique: "true") {
 			column(name: "name")
 		}
 	}
@@ -1007,143 +1007,143 @@ databaseChangeLog = {
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-33") {
-		addForeignKeyConstraint(baseColumnNames: "acl_object_identity", baseTableName: "acl_entry", baseTableSchemaName: "jummp", constraintName: "FK5302D47D8B9F71F2", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_object_identity", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "acl_object_identity", baseTableName: "acl_entry", constraintName: "FK5302D47D8B9F71F2", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_object_identity", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-34") {
-		addForeignKeyConstraint(baseColumnNames: "sid", baseTableName: "acl_entry", baseTableSchemaName: "jummp", constraintName: "FK5302D47D5B1B0850", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_sid", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "sid", baseTableName: "acl_entry", constraintName: "FK5302D47D5B1B0850", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_sid", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-35") {
-		addForeignKeyConstraint(baseColumnNames: "object_id_class", baseTableName: "acl_object_identity", baseTableSchemaName: "jummp", constraintName: "FK2A2BB009699FB980", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_class", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "object_id_class", baseTableName: "acl_object_identity", constraintName: "FK2A2BB009699FB980", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_class", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-36") {
-		addForeignKeyConstraint(baseColumnNames: "owner_sid", baseTableName: "acl_object_identity", baseTableSchemaName: "jummp", constraintName: "FK2A2BB0095C2B98C4", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_sid", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "owner_sid", baseTableName: "acl_object_identity", constraintName: "FK2A2BB0095C2B98C4", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_sid", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-37") {
-		addForeignKeyConstraint(baseColumnNames: "parent_object", baseTableName: "acl_object_identity", baseTableSchemaName: "jummp", constraintName: "FK2A2BB0097FC8265D", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_object_identity", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "parent_object", baseTableName: "acl_object_identity", constraintName: "FK2A2BB0097FC8265D", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "acl_object_identity", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-38") {
-		addForeignKeyConstraint(baseColumnNames: "description_id", baseTableName: "gene_ontology", baseTableSchemaName: "jummp", constraintName: "FKF242873932FC8D7C", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "miriam_identifier", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "description_id", baseTableName: "gene_ontology", constraintName: "FKF242873932FC8D7C", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "miriam_identifier", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-39") {
-		addForeignKeyConstraint(baseColumnNames: "from_id", baseTableName: "gene_ontology_relationship", baseTableSchemaName: "jummp", constraintName: "FKFBB69D7E2DF0334A", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "gene_ontology", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "from_id", baseTableName: "gene_ontology_relationship", constraintName: "FKFBB69D7E2DF0334A", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "gene_ontology", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-40") {
-		addForeignKeyConstraint(baseColumnNames: "to_id", baseTableName: "gene_ontology_relationship", baseTableSchemaName: "jummp", constraintName: "FKFBB69D7E57F37ED9", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "gene_ontology", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "to_id", baseTableName: "gene_ontology_relationship", constraintName: "FKFBB69D7E57F37ED9", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "gene_ontology", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-41") {
-		addForeignKeyConstraint(baseColumnNames: "gene_ontology_revisions_id", baseTableName: "gene_ontology_revision", baseTableSchemaName: "jummp", constraintName: "FK8CD9722112342382", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "gene_ontology", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "gene_ontology_revisions_id", baseTableName: "gene_ontology_revision", constraintName: "FK8CD9722112342382", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "gene_ontology", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-42") {
-		addForeignKeyConstraint(baseColumnNames: "revision_id", baseTableName: "gene_ontology_revision", baseTableSchemaName: "jummp", constraintName: "FK8CD97221265115F5", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "revision", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "revision_id", baseTableName: "gene_ontology_revision", constraintName: "FK8CD97221265115F5", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "revision", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-43") {
-		addForeignKeyConstraint(baseColumnNames: "preferred_id", baseTableName: "miriam_datatype", baseTableSchemaName: "jummp", constraintName: "FK229D59E41FE7B37C", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "miriam_resource", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "preferred_id", baseTableName: "miriam_datatype", constraintName: "FK229D59E41FE7B37C", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "miriam_resource", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-44") {
-		addForeignKeyConstraint(baseColumnNames: "datatype_id", baseTableName: "miriam_identifier", baseTableSchemaName: "jummp", constraintName: "FKB846CA93E20DD0F", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "miriam_datatype", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "datatype_id", baseTableName: "miriam_identifier", constraintName: "FKB846CA93E20DD0F", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "miriam_datatype", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-45") {
-		addForeignKeyConstraint(baseColumnNames: "datatype_id", baseTableName: "miriam_resource", baseTableSchemaName: "jummp", constraintName: "FKA397840E3E20DD0F", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "miriam_datatype", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "datatype_id", baseTableName: "miriam_resource", constraintName: "FKA397840E3E20DD0F", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "miriam_datatype", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-46") {
-		addForeignKeyConstraint(baseColumnNames: "publication_id", baseTableName: "model", baseTableSchemaName: "jummp", constraintName: "FK633FB297C6F423F", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "publication", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "publication_id", baseTableName: "model", constraintName: "FK633FB297C6F423F", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "publication", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-47") {
-		addForeignKeyConstraint(baseColumnNames: "model_id", baseTableName: "model_history_item", baseTableSchemaName: "jummp", constraintName: "FK9388A534ADCECDF", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "model", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "model_id", baseTableName: "model_history_item", constraintName: "FK9388A534ADCECDF", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "model", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-48") {
-		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "model_history_item", baseTableSchemaName: "jummp", constraintName: "FK9388A5342C00D884", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "user", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "model_history_item", constraintName: "FK9388A5342C00D884", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "user", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-49") {
-		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "preferences", baseTableSchemaName: "jummp", constraintName: "FK769ADEF82C00D884", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "user", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "preferences", constraintName: "FK769ADEF82C00D884", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "user", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-50") {
-		addForeignKeyConstraint(baseColumnNames: "link_provider_id", baseTableName: "publication", baseTableSchemaName: "jummp", constraintName: "FKBFBBA22C46318640", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "publication_link_provider", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "link_provider_id", baseTableName: "publication", constraintName: "FKBFBBA22C46318640", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "publication_link_provider", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-51") {
-		addForeignKeyConstraint(baseColumnNames: "author_id", baseTableName: "publication_author", baseTableSchemaName: "jummp", constraintName: "FKCE9AF2FEC6942B5", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "author", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "author_id", baseTableName: "publication_author", constraintName: "FKCE9AF2FEC6942B5", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "author", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-52") {
-		addForeignKeyConstraint(baseColumnNames: "publication_authors_id", baseTableName: "publication_author", baseTableSchemaName: "jummp", constraintName: "FKCE9AF2FEA253AE96", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "publication", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "publication_authors_id", baseTableName: "publication_author", constraintName: "FKCE9AF2FEA253AE96", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "publication", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-53") {
-		addForeignKeyConstraint(baseColumnNames: "revision_id", baseTableName: "repository_file", baseTableSchemaName: "jummp", constraintName: "FK807B5151265115F5", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "revision", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "revision_id", baseTableName: "repository_file", constraintName: "FK807B5151265115F5", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "revision", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-54") {
-		addForeignKeyConstraint(baseColumnNames: "format_id", baseTableName: "revision", baseTableSchemaName: "jummp", constraintName: "FKF074B7DB33F8EE8", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "model_format", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "format_id", baseTableName: "revision", constraintName: "FKF074B7DB33F8EE8", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "model_format", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-55") {
-		addForeignKeyConstraint(baseColumnNames: "model_id", baseTableName: "revision", baseTableSchemaName: "jummp", constraintName: "FKF074B7DBADCECDF", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "model", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "model_id", baseTableName: "revision", constraintName: "FKF074B7DBADCECDF", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "model", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-56") {
-		addForeignKeyConstraint(baseColumnNames: "owner_id", baseTableName: "revision", baseTableSchemaName: "jummp", constraintName: "FKF074B7DB97E7889C", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "user", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "owner_id", baseTableName: "revision", constraintName: "FKF074B7DB97E7889C", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "user", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-57") {
-		addForeignKeyConstraint(baseColumnNames: "tag_id", baseTableName: "tag_links", baseTableSchemaName: "jummp", constraintName: "FK7C35D6D45A3B441D", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "tags", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "tag_id", baseTableName: "tag_links", constraintName: "FK7C35D6D45A3B441D", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "tags", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-58") {
-		addForeignKeyConstraint(baseColumnNames: "role_id", baseTableName: "user_role", baseTableSchemaName: "jummp", constraintName: "FK143BF46A86D614A4", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "role", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "role_id", baseTableName: "user_role", constraintName: "FK143BF46A86D614A4", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "role", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-59") {
-		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "user_role", baseTableSchemaName: "jummp", constraintName: "FK143BF46A2C00D884", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "user", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "user_role", constraintName: "FK143BF46A2C00D884", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "user", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-60") {
-		addForeignKeyConstraint(baseColumnNames: "parent_id", baseTableName: "wcm_content", baseTableSchemaName: "jummp", constraintName: "FK951FF55BE1775669", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "parent_id", baseTableName: "wcm_content", constraintName: "FK951FF55BE1775669", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-61") {
-		addForeignKeyConstraint(baseColumnNames: "script_id", baseTableName: "wcm_content", baseTableSchemaName: "jummp", constraintName: "FK951FF55B3A4CE4A4", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "script_id", baseTableName: "wcm_content", constraintName: "FK951FF55B3A4CE4A4", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-62") {
-		addForeignKeyConstraint(baseColumnNames: "space_id", baseTableName: "wcm_content", baseTableSchemaName: "jummp", constraintName: "FK951FF55BF1D5C51A", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_space", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "space_id", baseTableName: "wcm_content", constraintName: "FK951FF55BF1D5C51A", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_space", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-63") {
-		addForeignKeyConstraint(baseColumnNames: "status_id", baseTableName: "wcm_content", baseTableSchemaName: "jummp", constraintName: "FK951FF55B68CFF5A", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_status", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "status_id", baseTableName: "wcm_content", constraintName: "FK951FF55B68CFF5A", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_status", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-64") {
-		addForeignKeyConstraint(baseColumnNames: "target_id", baseTableName: "wcm_content", baseTableSchemaName: "jummp", constraintName: "FK951FF55B3573F022", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "target_id", baseTableName: "wcm_content", constraintName: "FK951FF55B3573F022", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-65") {
-		addForeignKeyConstraint(baseColumnNames: "template_id", baseTableName: "wcm_content", baseTableSchemaName: "jummp", constraintName: "FK951FF55B988A1A5A", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "template_id", baseTableName: "wcm_content", constraintName: "FK951FF55B988A1A5A", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-66") {
-		addForeignKeyConstraint(baseColumnNames: "source_content_id", baseTableName: "wcm_related_content", baseTableSchemaName: "jummp", constraintName: "FKDE7BDB47AD0EC2DE", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "source_content_id", baseTableName: "wcm_related_content", constraintName: "FKDE7BDB47AD0EC2DE", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1392901757860-67") {
-		addForeignKeyConstraint(baseColumnNames: "target_content_id", baseTableName: "wcm_related_content", baseTableSchemaName: "jummp", constraintName: "FKDE7BDB47361353A8", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "target_content_id", baseTableName: "wcm_related_content", constraintName: "FKDE7BDB47361353A8", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencesUniqueColumn: "false")
 	}
 
 	include file: 'author2person.groovy'

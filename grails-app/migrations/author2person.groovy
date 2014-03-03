@@ -122,11 +122,11 @@ databaseChangeLog = {
 	}
 
 	changeSet(author: "mglont (generated)", id: "1393423756842-5") {
-		dropForeignKeyConstraint(baseTableName: "publication_author", baseTableSchemaName: "jummp", constraintName: "FKCE9AF2FEC6942B5")
+		dropForeignKeyConstraint(baseTableName: "publication_author", constraintName: "FKCE9AF2FEC6942B5")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1393423756842-6") {
-		dropForeignKeyConstraint(baseTableName: "publication_author", baseTableSchemaName: "jummp", constraintName: "FKCE9AF2FEA253AE96")
+		dropForeignKeyConstraint(baseTableName: "publication_author", constraintName: "FKCE9AF2FEA253AE96")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1393423756842-11") {
@@ -156,14 +156,14 @@ databaseChangeLog = {
 	}
 
 	changeSet(author: "mglont (generated)", id: "1393423756842-7") {
-		addForeignKeyConstraint(baseColumnNames: "person_id", baseTableName: "publication_person", baseTableSchemaName: "jummp", constraintName: "FKE7516CC8448831C4", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "person", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "person_id", baseTableName: "publication_person", constraintName: "FKE7516CC8448831C4", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "person", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1393423756842-8") {
-		addForeignKeyConstraint(baseColumnNames: "publication_authors_id", baseTableName: "publication_person", baseTableSchemaName: "jummp", constraintName: "FKE7516CC8A253AE96", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "publication", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "publication_authors_id", baseTableName: "publication_person", constraintName: "FKE7516CC8A253AE96", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "publication", referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "mglont (generated)", id: "1393423756842-9") {
-		addForeignKeyConstraint(baseColumnNames: "person_id", baseTableName: "user", baseTableSchemaName: "jummp", constraintName: "FK36EBCB448831C4", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "person", referencedTableSchemaName: "jummp", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "person_id", baseTableName: "user", constraintName: "FK36EBCB448831C4", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "person", referencesUniqueColumn: "false")
 	}
 }
