@@ -149,7 +149,8 @@ class ZiphandlerTagLib {
 				addFileAttributesJS(builder, file.name, "Name", FilenameUtils.getName(it.path), true); 
 				addFileAttributesJS(builder, file.name, "Size", "window.readablizeBytes(${attr.size()})", false); 
 				if (!it.mainFile) {
-					addFileAttributesJS(builder, file.name, "Description", it.description, true)
+					addFileAttributesJS(builder, file.name, "Description",
+                            it.description.encodeAsJavaScript(), true)
 				}
 				addFileAttributesJS(builder, file.name, "mime", it.mimeType, true); 
 				addFileAttributesJS(builder,file.name,"Created","${new Date(attr.creationTime().toMillis())}".toString(), true) 
