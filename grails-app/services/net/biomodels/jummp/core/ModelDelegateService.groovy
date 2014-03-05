@@ -252,6 +252,10 @@ class ModelDelegateService implements IModelService {
         return modelService.deleteRevision(Revision.get(revision.id))
     }
     
+    Map<String, List<String>> getPermissionsMap(ModelTransportCommand model) {
+    	return modelService.getPermissionsMap(Model.get(model.id));
+    }
+    
     RevisionTransportCommand getRevisionDetails(RevisionTransportCommand skeleton) {
     	return Revision.get(skeleton.id).toCommandObject()
     }

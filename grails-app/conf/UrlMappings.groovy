@@ -44,6 +44,7 @@ class UrlMappings {
         "500"(controller: "errors", action: "error403", exception: org.springframework.security.access.AccessDeniedException)
         "/models"(controller: "search", action: "list")
 	"/search"(controller: "search", action: "search")
+	"/share"(controller: "model", action: "share")
 	"/archive"(controller: "search", action: "archive")
 	"/feedback"(controller:"jummp", action:"feedback")
 	"/help"(controller:"jummp", action:"help")

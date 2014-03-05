@@ -97,6 +97,11 @@ class UserService implements IUserService {
         }
     }
     
+    String getRealName(String userName) {
+    	User user=User.findByUsername(userName);
+    	return user.person.userRealName;
+    }
+    
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="userService.changePassword")
     void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {

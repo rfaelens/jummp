@@ -120,6 +120,10 @@ class ModelService {
      * Dependency Injection of FileSystemService
      */
     def fileSystemService
+    /**
+     * Dependency Injection of userService
+     */
+    def userService
 
     static transactional = true
 
@@ -413,7 +417,8 @@ ORDER BY
     public List<Model> getAllModels() {
         return getAllModels(ModelListSorting.ID)
     }
-
+    
+    
     /**
     * Returns the number of Models the user has access to.
     *
@@ -1490,7 +1495,51 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
         }
     }
+    
+    private String getPermissionString(int p) {
+    	switch(p) {
+    		case BasePermission.READ.getMask(): return "r";
+    		case BasePermission.WRITE.getMask(): return "w";
+    	}
+    	return null;
+    }
+    
+    /**
+    * Returns permissions of a @p model.
+    *
+    * returns the users with access to the model
+    *
+    * @param model The Model 
+    **/
+   // @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getPermissionsMap")
+    public Map<String, List<String>> getPermissionsMap(Model model) {
+    	Map<String, List<String>> map=new HashMap<String, List<String>>();
+    	if (aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.ADMINISTRATION )
+    		|| SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN'))
+    	{
+    		def permissions=aclUtilService.readAcl(model).getEntries();
+    		permissions.each {
+    			String permission=getPermissionString(it.getPermission().getMask())
+    			String user=it.getSid().principal;
+    			if (permission && user!=springSecurityService.principal.username) {
+    				user=userService.getRealName(user);
+    				if (!map.containsKey(user)) {
+    					map.put(user, new LinkedList<String>());
+    				}
+    				map.get(user).add(permission);
+    			}
+    		}
+    	}
+    	else {
+    		throw new AccessDeniedException("You cant access permissions if you dont have them.");
+    	}
+    	return map
+    }
 
+
+    
     /**
     * Grants write access for @p model to @p collaborator.
     *

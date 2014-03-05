@@ -55,6 +55,8 @@ import static org.springframework.http.HttpMethod.*
 import org.apache.commons.io.FileUtils
 import net.biomodels.jummp.core.model.ModelAuditTransportCommand
 import net.biomodels.jummp.core.model.audit.*
+import grails.converters.JSON
+import net.biomodels.jummp.core.model.PermissionTransportCommand
 
 @Api(value = "/model", description = "Operations related to models")
 class ModelController {
@@ -223,7 +225,23 @@ class ModelController {
     
     def share = {
     	if (params.id) {
-    		return [revision: modelDelegateService.getRevision(new RevisionTransportCommand(id: params.id))]
+    		def rev=modelDelegateService.getRevisionDetails(new RevisionTransportCommand
+    													(id: Long.parseLong(params.id)));
+    		def perms=modelDelegateService.getPermissionsMap(rev.model);
+    		PermissionTransportCommand[] permissions=new PermissionTransportCommand[perms.size()];
+    		perms.eachWithIndex() { entry, index ->
+    			permissions[index]=new PermissionTransportCommand();
+    			permissions[index].name=entry.getKey();
+    			entry.getValue().each {
+    				if (it == "r") {
+    					permissions[index].read=true;
+    				}
+    				else {
+    					permissions[index].write=true;
+    				}
+    			}
+    		}
+    		return [revision: rev, permissions: permissions as JSON]
     	}
     	else throw new Exception("Model version must be specified to share");
     }
