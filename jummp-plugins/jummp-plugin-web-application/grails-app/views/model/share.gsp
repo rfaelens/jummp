@@ -38,7 +38,7 @@
 				<form id="collaboratorAddForm">
 					<div>
 						<label for="name">Name</label>
-						<input name="name" type="text"/>
+						<input id="nameSearch" name="name" type="text"/>
 						<label for="read">Read</label>
 						<input type="checkbox" name="read"></input>
 						<label for="write">Write</label>
@@ -47,7 +47,7 @@
 					<button>Add</button>
 				</form>
 				{{#if [].length}}
-    			<h2>Existing Collaborators</h2>
+    			<h2>Collaborators</h2>
     			<table class='table'> 
     			<thead>
     				<tr>
@@ -65,10 +65,13 @@
     		 		{{/each}}
     		 	</tbody>
     		 	</table>
-    			<button class='Save'>Save</button>
-			 	{{else}}
+    			{{else}}
     		 		This model is not shared with anyone.
-    		 	{{/if}}	
+    		 	{{/if}}
+    		 	<div>
+    		 		<button class='SaveCollabs'>Save</button>
+    		 		<button id='Done'>Done</button>
+    		 	</div>
     		 </script>
     </head>
     <body>
@@ -77,7 +80,11 @@
     		<g:javascript contextPath="" src="share.js"/>
     		<g:javascript>
     			$( document ).ready(function() {
-    					main(JSON.parse('${permissions}'));
+    					main(JSON.parse('${permissions}'),
+    						'<g:createLink controller="jummp" action="lookupUser"/>',
+    						'<g:createLink controller="model" action="shareUpdate" id="${revision.model.id}"/>',
+    						'<g:createLink controller="jummp" action="autoCompleteUser"/>',
+    						'<g:createLink controller="model" action="show" id="${revision.model.id}"/>');
     			});
     		</g:javascript>
     </body>

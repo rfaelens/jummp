@@ -47,6 +47,7 @@ class UrlMappings {
 	"/share"(controller: "model", action: "share")
 	"/archive"(controller: "search", action: "archive")
 	"/feedback"(controller:"jummp", action:"feedback")
+	"/lookupUser"(controller:"jummp", action:"lookupUser")
 	"/help"(controller:"jummp", action:"help")
 	"/registration"(controller:"usermanagement", action:"create")
 	"/forgotpassword"(controller:"usermanagement", action:"forgot")

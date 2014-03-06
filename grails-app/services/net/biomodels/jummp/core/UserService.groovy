@@ -102,6 +102,23 @@ class UserService implements IUserService {
     	return user.person.userRealName;
     }
     
+    String getUsername(String realName) {
+    	def person=Person.findByUserRealName(realName);
+    	if (person) {
+    		User user=User.findByPerson(person);
+    		if (user) {
+    			return user.username;
+    		}
+    		else {
+    			System.out.println("NO USER FOUND FOR "+person.getProperties());
+    		}
+    	}
+    	else {
+    		System.out.println("NO PERSON FOUND FOR "+realName);
+    	}
+    	return null;
+    }
+    
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="userService.changePassword")
     void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {
@@ -147,7 +164,7 @@ class UserService implements IUserService {
     @Profiled(tag="userService.getUser")
     @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
     User getUser(String username) throws UserNotFoundException {
-        checkUserValid(username)
+        //checkUserValid(username)  -> dont need to be admin to get a user by their username anymore, legitimate use case -> model sharing
         User user = User.findByUsername(username)
         if (!user) {
             throw new UserNotFoundException(username)
@@ -164,6 +181,22 @@ class UserService implements IUserService {
             throw new UserNotFoundException(id)
         }
         return user
+    }
+    
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="userService.searchUsers")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
+    List<String> searchUsers(String term) {
+    	return User.withCriteria {
+    		projections {
+    			person {
+    				property('userRealName')
+    			}
+    		}
+    		person {
+    			 ilike 'userRealName', term + '%'
+    		}
+    	}
     }
 
     @PostLogging(LoggingEventType.RETRIEVAL)

@@ -34,6 +34,7 @@ package net.biomodels.jummp.core.model
  */
 class PermissionTransportCommand {
 	String name;
+	String id;
 	boolean read=false;
 	boolean write=false;
 }

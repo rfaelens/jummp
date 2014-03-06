@@ -23,12 +23,32 @@
 
 
 package net.biomodels.jummp.webapp
+import grails.converters.JSON
+
 
 class JummpController {
+	def userService;
+	
 	def feedback={
 		
 	} 
 	def help={
 		
 	}
+	def lookupUser = {
+    	if (params.name) {
+    		String user=userService.getUsername(params.name);
+    		if (user) {
+ 			    render (['found': true, 'username':user] as JSON)
+    		}
+    	}
+    	render (['found': false] as JSON)
+    }
+    
+    def autoCompleteUser = {
+    	def usersFound=userService.searchUsers(params.term);
+        render (usersFound as JSON)
+    } 
+
+   
 }

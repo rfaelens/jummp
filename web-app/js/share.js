@@ -1,4 +1,3 @@
-var userNameList=[];
 var toJSON = function(form) {
     return form.serializeArray().reduce(function(json,kv) {
       json[kv.name] = kv.value;
@@ -8,14 +7,6 @@ var toJSON = function(form) {
 var source = $('#collaborator-list-template').html();
 var template = Handlebars.compile(source);
 var Collaborator = Backbone.Model.extend({
-	validate: function(attrs) {
-		console.log(JSON.stringify(userNameList)+"..."+attrs.name);
-		var findMe=_.where(userNameList, {"name": attrs.name}); 
-		if (findMe.length==0) {
-			alert("There is no user by that name");
-			return "User not found";
-		}
-    }
 });
 var Collaborators = Backbone.Collection.extend({
 		model: Collaborator
@@ -27,13 +18,17 @@ function makeBoolean(value) {
 	}
 	return value;
 }
-
+var lookupURL="";
+var submitURL="";
+var autoURL="";
+var showURL="";
 collaborators = new Collaborators;
 CollaboratorTable = Backbone.View.extend({
     events: {
       "click .remove": "remove",
       "click .updateCollab": "updateCollab",
-      "submit #collaboratorAddForm": "create"
+      "submit #collaboratorAddForm": "create",
+      "click .SaveCollabs": "submitData"
     },
     initialize: function() {
       _.bindAll(this,"render","error");
@@ -48,20 +43,43 @@ CollaboratorTable = Backbone.View.extend({
     form: function() {
       return this.$("#collaboratorAddForm");
     },
+    submitData: function() {
+    	var collabString=JSON.stringify(this.collection);
+    	$.post(submitURL, { collabMap: collabString }, 
+      	  	function(returnedData){
+      	  			if (returnedData.success) {
+      	  				showNotification("Model sharing permissions updated");
+      	  			}
+     	  			else {
+     	  				showNotification(returnedData.message);
+     	  				scheduleHide();
+     	  			}
+      	  	}
+      );
+    },
     create: function(evt) {
       evt.preventDefault();
-      objectCreated=toJSON(this.form());
-      objectCreated.id=s4();
+      var objectCreated=toJSON(this.form());
       objectCreated.read=makeBoolean(objectCreated.read);
       objectCreated.write=makeBoolean(objectCreated.write);
+      if (objectCreated.write) {
+				objectCreated.read=true;
+	  }
       console.log(JSON.stringify(collaborators));
       console.log(JSON.stringify(objectCreated));
-      this.collection.add(objectCreated,{
-        validate: true,
-        error: this.error
-      });
-      console.log(this.collection);
-      userNameList=_.reject(userNameList, function(checkMe){ return checkMe.name === objectCreated.name; });
+      var that = this;
+      $.post(lookupURL, { name: objectCreated.name }, 
+      	  	function(returnedData){
+      	  			if (returnedData.found) {
+      	  				objectCreated.id=returnedData.username;
+      	  				collaborators.add(objectCreated);
+      	  			}
+     	  			else {
+     	  				showNotification("Could not find a user by that name");
+     	  				scheduleHide();
+     	  			}
+      	  	}
+      );
     },
     updateCollab: function(evt) {
       evt.preventDefault();
@@ -71,6 +89,16 @@ CollaboratorTable = Backbone.View.extend({
       var field=buttonElement.data("field");
       var collab=this.collection.get(id);
       collab.set(field, buttonElement.is(':checked'));
+      if (field==="write") {
+      	  if (collab.get("write")) {
+      	  	  collab.set("read", true);
+      	  }
+      }
+      else {
+      	  if (!collab.get("read")) {
+      	  	  collab.set("write", false)
+      	  }
+      }
       this.render();
     },
     update: function(evt) {
@@ -89,7 +117,6 @@ CollaboratorTable = Backbone.View.extend({
       var nameRemoved=buttonElement.data("name");
       var collaborator=buttonElement.parent().parent();
       var removed=this.collection.remove(id);
-      userNameList.push({name: nameRemoved});
       this.render();
     },
     render: function() {
@@ -99,11 +126,24 @@ CollaboratorTable = Backbone.View.extend({
       _.each(this.collection, function(num) { 
       		  console.log(JSON.stringify(num))
       });
+      addButtonEvents();
+
     }
 });
 collaboratorList = new CollaboratorTable({
     collection: collaborators
 });
+
+function addButtonEvents() {
+     $( "#nameSearch" ).autocomplete({
+    						source: autoURL,
+    						minLength: 2
+    					});
+      $( "#Done" ).click(function(){
+    		window.location=showURL;
+      });
+}
+
 
 function s4() {
   return Math.floor((1 + Math.random()) * 0x10000)
@@ -112,15 +152,21 @@ function s4() {
 };
 
 
-function main(existing) {
-	names=[{name:'mike'}, {name:'jim'},{name:'raza'}];
-	userNameList=names;
+function main(existing, contURL, submit, autoComp, show) {
+	lookupURL=contURL
+	submitURL=submit
+	autoURL=autoComp
+	showURL=show
+	console.log(submitURL);
 	console.log(collaboratorList.el);
 	$('#ui').html(collaboratorList.$el);
 	_.each(existing, function(collab) {
 			console.log(JSON.stringify(collab))
-			collab.id=s4();
+			if (collab.write) {
+				collab.read=true;
+			}
 			collaborators.add(collab);
 	});
+	addButtonEvents();
 }
 
