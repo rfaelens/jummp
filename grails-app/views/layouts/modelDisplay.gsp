@@ -82,9 +82,13 @@
 			});
 			$("#tabs ul li a").click(function (e) {
 				var anchor=$(this).attr('href');
-				if ($(this).attr('class')=="versionDownload" || $(this).attr('class')=="publicationLink") {
-					openPage(anchor)
-				}
+                var anchorClass = $(this).attr('class');
+                var anchorId = $(this).attr('id');
+                if (anchorClass=="versionDownload" || anchorClass=="publicationLink") {
+                    openPage(anchor);
+				} else if (anchor.startsWith("#mdl") && anchor.length == 14) {
+                    hideQuestionMark();
+                }
 				else if (typeof(anchor) != "undefined") {
 					e.preventDefault();
 					location.hash = anchor;
