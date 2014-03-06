@@ -33,6 +33,9 @@ class MdlController {
      */
     def mdlService
 
+    /**
+     * Render the MDL-specific tabs.
+     */
     def show() {
         def model = flash.genericModel
         model["mdlFiles"] = mdlService.getMdlFilesFromRevision(model.revision)

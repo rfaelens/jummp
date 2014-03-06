@@ -20,11 +20,28 @@
 
 package net.biomodels.jummp.plugins.mdl
 
+/**
+ * Tag library providing helpers for generating the MDL-specific tabs.
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ */
 class MdlTagLib {
+    /**
+     * Default encoding for the tags in this library.
+     */
     static defaultEncodeAs = 'html'
+    /**
+     * Map of custom encodings.
+     */
     static encodeAsForTags = [addMenuItem: 'raw', renderMdlFile: 'raw', renderDataFile: 'raw']
+    /**
+     * The namespace of this tag library
+     */
     static namespace = "mdl"
 
+    /**
+     * Generates the anchors for MDL-specific tabs.
+     * @attr file REQUIRED the file which will be displayed in this tab.
+     */
     def addMenuItem = { attrs, body ->
         if (!attrs.file) {
             return
@@ -37,6 +54,10 @@ class MdlTagLib {
         out << body("fileHref": fileHref, "fileName": fileName)
     }
 
+    /**
+     * Renders a file which contains MDL.
+     * @attr file REQUIRED the file which should be displayed.
+     */
     def renderMdlFile = { attrs, body ->
         if (!(attrs.file)) {
             return
@@ -47,6 +68,10 @@ class MdlTagLib {
         out << render(template: "/templates/renderMdl", model: [id: id, text: htmlText])
     }
 
+    /**
+     * Renders a CSV file.
+     * @attr file REQUIRED the file which should be displayed.
+     */
     def renderDataFile = { attrs ->
         if (!(attrs.file)) {
             return

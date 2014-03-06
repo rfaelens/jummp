@@ -35,33 +35,84 @@ import org.perf4j.aop.Profiled
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class MdlService implements FileFormatService {
+    /**
+     * Disable the default transactional behaviour of Grails Services.
+     */
     static transactional = false
+    /**
+     * The logger for this class.
+     */
     private static final Log log = LogFactory.getLog(this)
+    /**
+     * Indicates whether the granularity of the log level is high or low.
+     */
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
 
+    /**
+     *
+     */
+    @Override
     public boolean areFilesThisFormat(List<File> modelFiles) {
         return !!(modelFiles?.find { f -> f.exists() && isMdlFile(f) })
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String getFormatVersion(RevisionTransportCommand revision) { return "5.0.8" }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean validate(List<File> modelFiles) { return true }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String extractName(List<File> modelFiles) { return "" }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String extractDescription(List<File> modelFiles) { return "" }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String getSearchIndexingContent(RevisionTransportCommand revision) { return "" }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<String> getAllAnnotationURNs(RevisionTransportCommand revision) { return [] }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<String> getPubMedAnnotation(RevisionTransportCommand revision) { return [] }
 
-    public List getMdlFilesFromRevision(final RevisionTransportCommand REVISION) {
+    /**
+     * Filters the MDL files from a given revision.
+     * @param REVISION the revision from which to extract the MDL files.
+     * @return The matching list of files, or an empty list if there were no matches.
+     */
+    public List<File> getMdlFilesFromRevision(final RevisionTransportCommand REVISION) {
         return filterMdlFiles(extractFilesFromRevision(REVISION))
     }
 
-    public List filterMdlFiles(final List<File> FILES) {
+    /**
+     * Filters the MDL files from a given list of @p FILES.
+     * @param FILES the list from which to extract the MDL files.
+     * @return The matching list of files, or an empty list if there were no matches.
+     */
+    public List<File> filterMdlFiles(final List<File> FILES) {
         def mdlFiles = []
         if (!FILES) {
             return mdlFiles
@@ -75,11 +126,21 @@ class MdlService implements FileFormatService {
         return mdlFiles
     }
 
-    public List getDataFilesFromRevision(final RevisionTransportCommand REVISION) {
+    /**
+     * Filters the CSV files from a given @p REVISION.
+     * @param REVISION the revision from which to extract the CSV files.
+     * @return The matching list of files, or an empty list if there were no matches.
+     */
+    public List<File> getDataFilesFromRevision(final RevisionTransportCommand REVISION) {
         return filterDataFiles(extractFilesFromRevision(REVISION))
     }
 
-    public List filterDataFiles(final List<File> FILES) {
+    /**
+     * Filters the CSV files from the supplied @p FILES.
+     * @param FILES the list of files which should be filtered.
+     * @return The matching list of files, or an empty list if there were no matches.
+     */
+    public List<File> filterDataFiles(final List<File> FILES) {
         def csvFiles = []
         if (!FILES) {
             return csvFiles
@@ -93,10 +154,17 @@ class MdlService implements FileFormatService {
         return csvFiles
     }
 
+    /*
+     * Simple filter to detect whether @p FILE is an MDL file or not.
+     * The criteria include an ".mdl" extension for the @p FILE, and the mime type
+     */
     private boolean isMdlFile(final File FILE) {
         return FILE.name.endsWith(".mdl") && "text/plain" == detectMimeType(FILE)
     }
 
+    /*
+     * Detects the mime type for a given @p FILE
+     */
     private String detectMimeType(final File FILE) {
         def detector = new DefaultDetector()
         final String CONTENT_TYPE = detector.detect(new BufferedInputStream(
@@ -104,6 +172,9 @@ class MdlService implements FileFormatService {
         return CONTENT_TYPE
     }
 
+    /*
+     * Convenience method for retrieving the files from a supplied @p REVISION.
+     */
     private List<File> extractFilesFromRevision(final RevisionTransportCommand REVISION) {
         List<File> files = REVISION?.files?.collect { rf ->
             final File FILE = new File(rf.path)
@@ -114,12 +185,11 @@ class MdlService implements FileFormatService {
         return files
     }
 
+    /*
+     * Checks whether the supplied @p FILE adheres to the CSV "standard".
+     */
     private boolean isDataFile(final File FILE) {
         final String FORMAT = detectMimeType(FILE)
         return ("text/csv" == FORMAT || "text/plain" == FORMAT) && FILE.name.endsWith(".csv")
     }
-
-    public void setName(String name, RevisionTransportCommand revision) {}
-
-    public void setDescription(String description, RevisionTransportCommand revision) {}
 }
