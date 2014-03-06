@@ -54,7 +54,14 @@ class MdlService implements FileFormatService {
     @Override
     @Profiled(tag="mdlService.areFilesThisFormat")
     public boolean areFilesThisFormat(List<File> modelFiles) {
-        return !!(modelFiles?.find { f -> f.exists() && isMdlFile(f) })
+        return !!(modelFiles?.find { f ->
+            if (f.exists() && isMdlFile(f)) {
+                if (IS_INFO_ENABLED) {
+                    log.info "Treating ${modelFiles.inspect()} as MDL because of ${f.name}"
+                }
+                return true
+            }
+        })
     }
 
     /**
@@ -133,6 +140,9 @@ class MdlService implements FileFormatService {
             }
             return list
         }
+        if (IS_INFO_ENABLED) {
+            log.info "Filtered ${FILES.inspect()} and found MDL files ${mdlFiles.inspect()}."
+        }
         return mdlFiles
     }
 
@@ -162,6 +172,9 @@ class MdlService implements FileFormatService {
                 result.add(f)
             }
             return result
+        }
+        if (IS_INFO_ENABLED) {
+            log.info "Filtered ${FILES.inspect()} and found CSV files ${csvFiles.inspect()}."
         }
         return csvFiles
     }
@@ -196,6 +209,9 @@ class MdlService implements FileFormatService {
             if (FILE && FILE.exists() && FILE.canRead()) {
                 return FILE
             }
+        }
+        if (IS_INFO_ENABLED) {
+            log.info "${REVISION.properties} contains the following files ${files.inspect()}."
         }
         return files
     }
