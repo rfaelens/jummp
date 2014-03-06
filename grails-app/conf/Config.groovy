@@ -549,7 +549,6 @@ grails {
     }
 }
 remove this line */
-/* If you'd like to externalise context specific help, uncomment this 
 if (!(jummpConfig.jummp.context.help.root instanceof ConfigObject)) {
     def pages=["root", "browse", "search", "login", "display", "archives", "submission", "update", "profile"]
     pages.each {
@@ -558,14 +557,4 @@ if (!(jummpConfig.jummp.context.help.root instanceof ConfigObject)) {
     	}
     }
 }
-*/
-jummp.context.help.root='http://wwwdev.ebi.ac.uk/compneur-srv/ddmorehelp/ddmore/'
-jummp.context.help.browse='model_browsing.html'
-jummp.context.help.search='model_search.html'
-jummp.context.help.login='login.html'
-jummp.context.help.display='model_display.html'
-jummp.context.help.archives='model_archives.html'
-jummp.context.help.submission='model_submission.html'
-jummp.context.help.update='model_update.html'
-jummp.context.help.profile='user_profiles.html'
 jummp.config.maintenance = false
