@@ -52,6 +52,7 @@ class MdlService implements FileFormatService {
      *
      */
     @Override
+    @Profiled(tag="mdlService.areFilesThisFormat")
     public boolean areFilesThisFormat(List<File> modelFiles) {
         return !!(modelFiles?.find { f -> f.exists() && isMdlFile(f) })
     }
@@ -60,42 +61,49 @@ class MdlService implements FileFormatService {
      * {@inheritDoc}
      */
     @Override
+    @Profiled(tag="mdlService.getFormatVersion")
     public String getFormatVersion(RevisionTransportCommand revision) { return "5.0.8" }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @Profiled(tag="mdlService.validate")
     public boolean validate(List<File> modelFiles) { return true }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @Profiled(tag="mdlService.extractName")
     public String extractName(List<File> modelFiles) { return "" }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @Profiled(tag="mdlService.extractDescription")
     public String extractDescription(List<File> modelFiles) { return "" }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @Profiled(tag="mdlService.getSearchIndexingContent")
     public String getSearchIndexingContent(RevisionTransportCommand revision) { return "" }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @Profiled(tag="mdlService.getAllAnnotationURNs")
     public List<String> getAllAnnotationURNs(RevisionTransportCommand revision) { return [] }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @Profiled(tag="mdlService.getPubMedAnnotation")
     public List<String> getPubMedAnnotation(RevisionTransportCommand revision) { return [] }
 
     /**
@@ -103,6 +111,7 @@ class MdlService implements FileFormatService {
      * @param REVISION the revision from which to extract the MDL files.
      * @return The matching list of files, or an empty list if there were no matches.
      */
+    @Profiled(tag="mdlService.getMdlFilesFromRevision")
     public List<File> getMdlFilesFromRevision(final RevisionTransportCommand REVISION) {
         return filterMdlFiles(extractFilesFromRevision(REVISION))
     }
@@ -112,6 +121,7 @@ class MdlService implements FileFormatService {
      * @param FILES the list from which to extract the MDL files.
      * @return The matching list of files, or an empty list if there were no matches.
      */
+    @Profiled(tag="mdlService.filterMdlFiles")
     public List<File> filterMdlFiles(final List<File> FILES) {
         def mdlFiles = []
         if (!FILES) {
@@ -131,6 +141,7 @@ class MdlService implements FileFormatService {
      * @param REVISION the revision from which to extract the CSV files.
      * @return The matching list of files, or an empty list if there were no matches.
      */
+    @Profiled(tag="mdlService.getDataFilesFromRevision")
     public List<File> getDataFilesFromRevision(final RevisionTransportCommand REVISION) {
         return filterDataFiles(extractFilesFromRevision(REVISION))
     }
@@ -140,6 +151,7 @@ class MdlService implements FileFormatService {
      * @param FILES the list of files which should be filtered.
      * @return The matching list of files, or an empty list if there were no matches.
      */
+    @Profiled(tag="mdlService.filterDataFiles")
     public List<File> filterDataFiles(final List<File> FILES) {
         def csvFiles = []
         if (!FILES) {
@@ -158,6 +170,7 @@ class MdlService implements FileFormatService {
      * Simple filter to detect whether @p FILE is an MDL file or not.
      * The criteria include an ".mdl" extension for the @p FILE, and the mime type
      */
+    @Profiled(tag="mdlService.isMdlFile")
     private boolean isMdlFile(final File FILE) {
         return FILE.name.endsWith(".mdl") && "text/plain" == detectMimeType(FILE)
     }
@@ -165,6 +178,7 @@ class MdlService implements FileFormatService {
     /*
      * Detects the mime type for a given @p FILE
      */
+    @Profiled(tag="mdlService.detectMimeType")
     private String detectMimeType(final File FILE) {
         def detector = new DefaultDetector()
         final String CONTENT_TYPE = detector.detect(new BufferedInputStream(
@@ -175,6 +189,7 @@ class MdlService implements FileFormatService {
     /*
      * Convenience method for retrieving the files from a supplied @p REVISION.
      */
+    @Profiled(tag="mdlService.extractFilesFromRevision")
     private List<File> extractFilesFromRevision(final RevisionTransportCommand REVISION) {
         List<File> files = REVISION?.files?.collect { rf ->
             final File FILE = new File(rf.path)
@@ -188,6 +203,7 @@ class MdlService implements FileFormatService {
     /*
      * Checks whether the supplied @p FILE adheres to the CSV "standard".
      */
+    @Profiled(tag="mdlService.isDataFile")
     private boolean isDataFile(final File FILE) {
         final String FORMAT = detectMimeType(FILE)
         return ("text/csv" == FORMAT || "text/plain" == FORMAT) && FILE.name.endsWith(".csv")
