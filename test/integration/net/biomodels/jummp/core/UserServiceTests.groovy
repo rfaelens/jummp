@@ -112,9 +112,11 @@ class UserServiceTests extends JummpIntegrationTest {
             userService.getUser("username")
         }
         authenticateAsTestUser()
+        /* //logged in users can get users by usernames (use case-> sharing)  
         shouldFail(AccessDeniedException) {
             userService.getUser("username")
         }
+        */
         authenticateAsUser()
         User user = userService.getUser("username")
         assertEquals("username", user.username)
