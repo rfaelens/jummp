@@ -104,8 +104,8 @@ class RevisionTransportCommand implements Serializable {
          }
          return files
      }
-     
+
      String identifier() {
-     	 return model.id+":"+revisionNumber
+         return model.id+":"+revisionNumber
      }
 }
