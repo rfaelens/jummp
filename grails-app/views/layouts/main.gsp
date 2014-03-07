@@ -22,6 +22,7 @@
   		if (contextHelpLocation) {
   			contextHelpLocation=contextHelpLocation.trim()
   		}
+  		int helpWidth=400;
 %> 
 
 <!doctype html>
@@ -77,9 +78,9 @@
     	
     	function showHelp() {
 	    	helpWidth=-1;
-    		$( "#helpPanel" ).width(350);
+    		$( "#helpPanel" ).width(${helpWidth});
 			$( "#helpPanel" ).show();
-    		adjustWidth(350);
+    		adjustWidth(${helpWidth});
     		$( "#helpPanel" ).position({
     			my: "left top",
     			at: "right-35% top+8%",
@@ -200,7 +201,7 @@
 	    		<button id="close">Close</button>
 	    	</div>
   			
-  			<ContextHelp:getLink location="${contextHelpLocation}"/>
+  			<ContextHelp:getLink location="${contextHelpLocation}" width="${helpWidth}"/>
   		</div>
     </g:if>
     </div>
