@@ -1,0 +1,30 @@
+.formElement {
+	float: left;
+	padding: 10px;
+}
+#formElements {
+	width: 400px;
+	float: left;
+}
+.containUI {
+	margin-left: 13%;
+	position:static;
+	width:100%
+}
+#AddButton {
+	margin-left: 12px;
+}
+#collabCreate {
+	float: left;
+	width: 40%;
+}
+.tableEL {
+	padding: 10px;
+}
+.bold {
+	font-weight: bold;
+}
+.globalButtons {
+	width:20%;
+	margin-left:20%
+}

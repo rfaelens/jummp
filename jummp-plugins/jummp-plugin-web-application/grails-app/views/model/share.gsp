@@ -34,33 +34,44 @@
         <script src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js" type="text/javascript" charset="utf-8"></script>
         <script id="collaborator-list-template" type="text/x-handlebars-template">
-    			<h2>Add New Collaborator</h2>
+    			<div>
+        		<div class="containUI">
+        		<div id="collabCreate">
+        		<h2>Add New Collaborator</h2>
 				<form id="collaboratorAddForm">
-					<div>
-						<label for="name">Name</label>
-						<input id="nameSearch" name="name" type="text"/>
-						<label for="read">Read</label>
-						<input type="checkbox" name="read"></input>
-						<label for="write">Write</label>
-						<input type="checkbox" name="write"></input>
+					<div id="formElements">
+						<div class="formElement">
+							<label for="name">Name</label>
+							<input id="nameSearch" name="name" type="text"/>
+						</div>
+						<div class="formElement">
+							<label for="read">Read</label>
+							<input type="checkbox" name="read"></input>
+						</div>
+						<div class="formElement">
+							<label for="write">Write</label>
+							<input type="checkbox" name="write"></input>
+						</div>
 					</div>
-					<button>Add</button>
+					<button id="AddButton">Add</button>
 				</form>
-				{{#if [].length}}
-    			<h2>Collaborators</h2>
+				</div>
+				<div style="float: left">
+    			{{#if [].length}}
+				<h2>Collaborators</h2>
     			<table class='table'> 
     			<thead>
     				<tr>
-    					<td>Name</td>
-    					<td>Read</td>
-    					<td>Write</td>
+    					<td class="tableEL bold">Name</td>
+    					<td class="tableEL  bold">Read</td>
+    					<td class="tableEL bold">Write</td>
     			<tbody>
     		 		{{#each []}}
     		 			<tr class='collaborator'>
-    		 				<td>{{this.name}}</td>
-    		 				<td><input id=checkRead-{{this.id}} data-field="read" data-person={{this.id}} class="updateCollab" type="checkbox" name="read" {{#if this.read}}checked=true{{/if}}></input></td>
-    		 				<td><input id=checkWrite-{{this.id}} data-field="write" data-person={{this.id}} class="updateCollab" type="checkbox" name="write" {{#if this.write}}checked=true{{/if}}></input></td>
-    		 				<td><button id=removebutton-{{this.id}} data-name={{this.name}} data-person={{this.id}} class="remove">Remove</button></td>
+    		 				<td class="tableEL">{{this.name}}</td>
+    		 				<td class="tableEL"><input id=checkRead-{{this.id}} data-field="read" data-person={{this.id}} class="updateCollab" type="checkbox" name="read" {{#if this.read}}checked=true{{/if}}></input></td>
+    		 				<td class="tableEL"><input id=checkWrite-{{this.id}} data-field="write" data-person={{this.id}} class="updateCollab" type="checkbox" name="write" {{#if this.write}}checked=true{{/if}}></input></td>
+    		 				<td class="tableEL"><button id=removebutton-{{this.id}} data-name={{this.name}} data-person={{this.id}} class="remove">Remove</button></td>
     		 			</tr>
     		 		{{/each}}
     		 	</tbody>
@@ -68,11 +79,16 @@
     			{{else}}
     		 		This model is not shared with anyone.
     		 	{{/if}}
-    		 	<div>
-    		 		<button class='SaveCollabs'>Save</button>
-    		 		<button id='Done'>Done</button>
+    		 	</div>
+    		 	<div class="globalButtons">
+ 		 	    		<button class='SaveCollabs'>Save</button>
+ 		 	    		<button id='Done'>Done</button>
+ 		 	    	</div>
+ 		 	    </div>
     		 	</div>
     		 </script>
+    		 <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'share.css')}" />
+            		 
     </head>
     <body>
     		<div id="ui"></div>

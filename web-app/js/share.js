@@ -127,7 +127,6 @@ CollaboratorTable = Backbone.View.extend({
       		  console.log(JSON.stringify(num))
       });
       addButtonEvents();
-
     }
 });
 collaboratorList = new CollaboratorTable({
@@ -135,14 +134,14 @@ collaboratorList = new CollaboratorTable({
 });
 
 function addButtonEvents() {
-     $( "#nameSearch" ).autocomplete({
+	$( "#nameSearch" ).autocomplete({
     						source: autoURL,
     						minLength: 2
     					});
       $( "#Done" ).click(function(){
     		window.location=showURL;
       });
-}
+ }
 
 
 function s4() {
