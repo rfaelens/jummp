@@ -35,46 +35,26 @@
 package net.biomodels.jummp.webapp
 
 
-class ContextHelpTagLib {
-	static namespace="ContextHelp"
-	def grailsApplication
+class ShareTagLib {
+	static namespace="share"
+	 
 	
-	private String computeLocation(String location) {
-		
-		String helpRoot=grailsApplication.config.jummp.context.help.root
-		if (location=="manual") {
-			return helpRoot+"manual.html";
-		}
-		String defined=grailsApplication.config.jummp.context.help."${location}"
-		if (defined) {
-			return helpRoot+defined;
-		}
-		return null;
+	def outputTemplates = { attrs ->
+        String output=''' <script id="collaborators_tpl" type="text/underscore" charset="utf-8">
+
+    </script>
+    <script id="collaborator_tpl" type="text/underscore" charset="utf-8">
+      <form data-id="<%= collaborator.id %>" class="collaborator-form large-9 columns">
+        <div class="large-5 columns">
+          <label for="collaborator">Collaborator</label>
+          <input type="text" name="name">
+          </input>
+        </div>
+        <div class="large-1 columns without-label">
+          <button class="small button">Save</button>
+        </div>
+      </form>
+    </script>''';
+		out<<output
 	}
-	
-	def getURL = { attrs ->
-		if (attrs.location!=null && attrs.location) {
-			String url=computeLocation(attrs.location)
-			if (url) {
-				out<<url
-			}
-		}
-	}
-	
-	def getLink = { attrs ->
-		if (attrs.location!=null) {
-			StringBuilder builder=new StringBuilder("<iframe id='helpFrame' src='");
-			String url=computeLocation(attrs.location);
-			if (url) {
-				builder.append(url+"#contextSpecific/"+attrs.width);
-				builder.append("'/>");
-				out<<builder.toString();
-			}
-		}
-		else {
-			out<<"NO LOCATION PROVIDED!"
-		}
-	}
-	
-	
 }

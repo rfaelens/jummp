@@ -44,6 +44,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelAuditTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
+import net.biomodels.jummp.core.model.PermissionTransportCommand
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelAudit
@@ -120,6 +121,10 @@ class ModelService {
      * Dependency Injection of FileSystemService
      */
     def fileSystemService
+    /**
+     * Dependency Injection of userService
+     */
+    def userService
 
     static transactional = true
 
@@ -413,7 +418,8 @@ ORDER BY
     public List<Model> getAllModels() {
         return getAllModels(ModelListSorting.ID)
     }
-
+    
+    
     /**
     * Returns the number of Models the user has access to.
     *
@@ -1490,7 +1496,123 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
         }
     }
+    
+    private String getPermissionString(int p) {
+    	switch(p) {
+    		case BasePermission.READ.getMask(): return "r";
+    		case BasePermission.WRITE.getMask(): return "w";
+    	}
+    	return null;
+    }
+    
+    /**
+    * Returns permissions of a @p model.
+    *
+    * returns the users with access to the model
+    *
+    * @param model The Model 
+    **/
+   // @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getPermissionsMap")
+    public Collection<PermissionTransportCommand> getPermissionsMap(Model model) {
+    	HashMap<String, PermissionTransportCommand> map=new HashMap<String, PermissionTransportCommand>();
+    	if (aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.ADMINISTRATION )
+    		|| SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN'))
+    	{
+    		def permissions=aclUtilService.readAcl(model).getEntries();
+    		permissions.each {
+    			String permission=getPermissionString(it.getPermission().getMask())
+    			String user=it.getSid().principal;
+    			if (permission && user!=springSecurityService.principal.username) {
+    				String userRealName=userService.getRealName(user);
+    				if (!map.containsKey(user)) {
+    					PermissionTransportCommand ptc=new PermissionTransportCommand(
+    																		name: userRealName,
+    																		id: user);
+    					map.put(user, ptc);
+    				}
+    				if (permission=="r") {
+    					map.get(user).read=true;
+    				}
+    				else {
+    					map.get(user).write=true;
+    				}
+    			}
+    		}
+    	}
+    	else {
+    		throw new AccessDeniedException("You cant access permissions if you dont have them.");
+    	}
+    	return map.values();
+    }
+    
+    /**
+    * Grants permissions to a @model given a list of @permissions
+    *
+    *
+    * @param model The Model 
+    * @param permissions A list of permissions 
+    **/
+   // @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getPermissionsMap")
+    public void setPermissions(Model model, List<PermissionTransportCommand> permissions) {
+    	if (aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.ADMINISTRATION )
+    		|| SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN'))
+    	{
+    		Collection<PermissionTransportCommand> existing=getPermissionsMap(model);
+    		permissions.each { newPerm ->
+				PermissionTransportCommand current=existing.find { 
+					it.id == newPerm.id
+				}
+				User user=userService.getUser(newPerm.id);
+				if (current) {
+					if (current.read && !(newPerm.read)) {  //revoke previously held read access
+						System.out.println("REVOKING READ ACCESS TO "+newPerm.id);
+						revokeReadAccess(model, user);
+					}
+					if (current.write && !(newPerm.write)) { //revoke previously held write access
+						revokeWriteAccess(model, user);
+					}
+					if (!(current.read) && newPerm.read) {
+						grantReadAccess(model, user);
+					}
+					if (!(current.write) && newPerm.write) {
+						grantWriteAccess(model, user);
+					}
+				}
+				else {
+					if (newPerm.read) {
+						grantReadAccess(model, user);
+					}
+					if (newPerm.write) {
+						grantWriteAccess(model, user);
+					}
+				}
+    		}
+    		existing.each { oldPerm ->
+    			def retained=permissions.find {
+    				it.id == oldPerm.id
+    			}
+    			if (!retained) {
+    				User user=userService.getUser(oldPerm.id);
+    				if (oldPerm.read) {
+    					revokeReadAccess(model, user);
+					}
+					if (oldPerm.write) {
+						revokeWriteAccess(model, user);
+					}
+    			}
+    		}
+    	}
+    	else {
+    		throw new AccessDeniedException("You cant access permissions if you dont have them.");
+    	}
+    }
 
+
+    
     /**
     * Grants write access for @p model to @p collaborator.
     *
@@ -1544,6 +1666,18 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         aclUtilService.deletePermission(model, collaborator.username, BasePermission.READ)
         aclUtilService.deletePermission(model, collaborator.username, BasePermission.WRITE)
+        Set<Revision> revisions = model.revisions
+        for (Revision revision in revisions) {
+            if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+                try
+                {
+                	aclUtilService.deletePermission(revision, collaborator.username, BasePermission.READ)
+                }
+                catch(Exception e) {
+                	e.printStackTrace();
+                }
+            }
+        }
         return true
     }
 
@@ -1629,6 +1763,26 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.DELETE))
     }
+    
+    /**
+    * Checks if the model can be shared 
+    *
+    * @param model The Model to be shared
+    * @return @c true in case the Model can be shared, @c false otherwise.
+    **/
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.canShare")
+    public boolean canShare(Model model) {
+        if (!model) {
+            throw new IllegalArgumentException("Model may not be null")
+        }
+        if (model.deleted) {
+        	return false
+        }
+        System.out.println("I HAVE SHARING PERMISSION: "+aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.ADMINISTRATION));
+        return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.ADMINISTRATION))
+    }
+
 
     
     /**

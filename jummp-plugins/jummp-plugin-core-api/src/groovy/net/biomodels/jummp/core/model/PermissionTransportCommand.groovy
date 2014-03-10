@@ -22,30 +22,19 @@
 
 
 
-package net.biomodels.jummp.webapp
-import grails.converters.JSON
+package net.biomodels.jummp.core.model
 
-
-class JummpController {
-	def userService;
-	
-	def feedback={
-		
-	} 
-	def lookupUser = {
-    	if (params.name) {
-    		String user=userService.getUsername(params.name);
-    		if (user) {
- 			    render (['found': true, 'username':user] as JSON)
-    		}
-    	}
-    	render (['found': false] as JSON)
-    }
-    
-    def autoCompleteUser = {
-    	def usersFound=userService.searchUsers(params.term);
-        render (usersFound as JSON)
-    } 
-
-   
+/**
+ * @short Wrapper for a Permission
+ *
+ *
+ * The object can also be used as a command object for the web interface.
+ *
+ * @author raza ali <raza.ali@ebi.ac.uk>
+ */
+class PermissionTransportCommand {
+	String name;
+	String id;
+	boolean read=false;
+	boolean write=false;
 }

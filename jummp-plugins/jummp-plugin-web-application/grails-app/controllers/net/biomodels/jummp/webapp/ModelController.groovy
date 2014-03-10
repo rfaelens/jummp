@@ -55,6 +55,10 @@ import static org.springframework.http.HttpMethod.*
 import org.apache.commons.io.FileUtils
 import net.biomodels.jummp.core.model.ModelAuditTransportCommand
 import net.biomodels.jummp.core.model.audit.*
+import grails.converters.JSON
+import org.codehaus.groovy.grails.web.json.JSONObject
+import org.codehaus.groovy.grails.web.json.JSONArray
+import net.biomodels.jummp.core.model.PermissionTransportCommand
 
 @Api(value = "/model", description = "Operations related to models")
 class ModelController {
@@ -94,9 +98,9 @@ class ModelController {
     */
     def mailService
     
-    def beforeInterceptor = [action: this.&auditBefore, except: ['updateFlow', 'createFlow', 'uploadFlow', 'showWithMessage']]
+    def beforeInterceptor = [action: this.&auditBefore, except: ['updateFlow', 'createFlow', 'uploadFlow', 'showWithMessage', 'share']]
     
-    def afterInterceptor = [ action: this.&auditAfter, except: ['updateFlow', 'createFlow', 'uploadFlow', 'showWithMessage']] 
+    def afterInterceptor = [ action: this.&auditAfter, except: ['updateFlow', 'createFlow', 'uploadFlow', 'showWithMessage', 'share']] 
     
     
     private String getUsername() {
@@ -165,7 +169,7 @@ class ModelController {
         		boolean showPublishOption = modelDelegateService.canPublish(rev.model.id)
         		boolean canUpdate = modelDelegateService.canAddRevision(rev.model.id)
         		boolean canDelete = modelDelegateService.canDelete(rev.model.id)
-
+        		boolean canShare = modelDelegateService.canShare(rev.model.id)
         		String flashMessage=""
         		if (flash.now["giveMessage"]) {
         			flashMessage=flash.now["giveMessage"]
@@ -177,6 +181,7 @@ class ModelController {
         				   flashMessage: flashMessage,
         				   canUpdate: canUpdate,
         				   canDelete: canDelete,
+        				   canShare: canShare,
         				   showPublishOption: showPublishOption,
         		]
         		if (rev.id == modelDelegateService.getLatestRevision(rev.model.id).id)
@@ -191,6 +196,7 @@ class ModelController {
                 	model["showPublishOption"]=false
                 	model["oldVersion"]=true
                 	model["canDelete"]=false
+                	model["canShare"]=false
                 	return model
                 }
         }
@@ -219,7 +225,39 @@ class ModelController {
                 params: [flashMessage: deleted?"Model has been deleted, and moved into archives.":"Model could not be deleted"])
     }
     
-    @Secured(["isAuthenticated()"])
+    def share = {
+    	if (params.id) {
+    		def rev=modelDelegateService.getRevisionDetails(new RevisionTransportCommand
+    													(id: Long.parseLong(params.id)));
+    		def perms=modelDelegateService.getPermissionsMap(rev.model.id);
+    		return [revision: rev, permissions: perms as JSON]
+    	}
+    	else throw new Exception("Model version must be specified to share");
+    }
+    
+    def shareUpdate = {
+    	if (params.id && params.collabMap) {
+    		def map=JSON.parse(params.collabMap);
+    		List<PermissionTransportCommand> collabsNew=new LinkedList<PermissionTransportCommand>();
+    		for (int i=0; i<map.length(); i++) {
+    			JSONObject perm=map.getJSONObject(i);
+    			PermissionTransportCommand ptc=new PermissionTransportCommand(
+    														id: perm.getString("id"),
+    														name: perm.getString("name"),
+    														read: perm.getBoolean("read"),
+    														write: perm.getBoolean("write"));
+    			System.out.println("GOT :"+ptc.getProperties());
+    			collabsNew.add(ptc);
+    		}
+    		modelDelegateService.setPermissions(params.id as Long, collabsNew);
+    		render (['success': true, 'permissions': modelDelegateService.getPermissionsMap(params.id as Long)] as JSON)
+    	}
+    	else {
+    		render (['success': false, 'message': "Couldnt update stuff"] as JSON)
+    	}
+    }
+    
+   @Secured(["isAuthenticated()"])
     def updateFlow = {
         start {
             action {

@@ -3,11 +3,10 @@
 	min-width:1000px;
 }
 #helpbutton { 
-		 height: 104px; 
-		 width: 104px; 
-		 position: fixed; 
+		 height: 40px; 
+		 position: fixed;
+		 margin-left: -40px;
 		 top: 40%; 
-		 z-index: 999;
 		 transform: rotate(-90deg);
 		 -webkit-transform: rotate(-90deg); 
 		 -moz-transform: rotate(-90deg); 
@@ -20,9 +19,9 @@
 #helpbutton a { 
 	display: block; 
 	background: gray; 
-	height: 15px; 
-	width: 70px; 
-	padding: 8px 16px;
+	height: 20px; 
+	width: 90px; 
+	padding: 10px;
 	text-align: center;
 	color: #fff; 
 	font-family: Arial, sans-serif; 

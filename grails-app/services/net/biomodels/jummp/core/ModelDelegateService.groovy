@@ -47,6 +47,7 @@ import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.core.model.PermissionTransportCommand
 import java.util.List
 import java.util.Map
 
@@ -185,6 +186,10 @@ class ModelDelegateService implements IModelService {
     	return modelService.canDelete(Model.get(modelId))
     }
     
+    Boolean canShare(long modelId) {
+    	return modelService.canShare(Model.get(modelId))
+    }
+    
     Boolean canPublish(long modelId) {
     	def revision=getLatestRevision(modelId)
     	if (revision.state == ModelState.UNPUBLISHED) {
@@ -250,6 +255,14 @@ class ModelDelegateService implements IModelService {
 
     boolean deleteRevision(RevisionTransportCommand revision) {
         return modelService.deleteRevision(Revision.get(revision.id))
+    }
+    
+    Collection<PermissionTransportCommand> getPermissionsMap(long modelId) {
+    	return modelService.getPermissionsMap(Model.get(modelId));
+    }
+    
+    void setPermissions(long modelId, List<PermissionTransportCommand> permissions) {
+    	modelService.setPermissions(Model.get(modelId), permissions);
     }
     
     RevisionTransportCommand getRevisionDetails(RevisionTransportCommand skeleton) {

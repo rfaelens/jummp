@@ -22,6 +22,10 @@
   		if (contextHelpLocation) {
   			contextHelpLocation=contextHelpLocation.trim()
   		}
+  		else {
+  			contextHelpLocation="manual"
+  		}
+  		int helpWidth=400;
 %> 
 
 <!doctype html>
@@ -77,16 +81,17 @@
     	
     	function showHelp() {
 	    	helpWidth=-1;
-    		$( "#helpPanel" ).width(350);
+	    	$("html, body").animate({ scrollTop: 0 }, "medium");
+    		$( "#helpPanel" ).width(${helpWidth});
 			$( "#helpPanel" ).show();
-    		adjustWidth(350);
+    		adjustWidth(${helpWidth});
     		$( "#helpPanel" ).position({
-    			my: "left top",
-    			at: "right-35% top+8%",
-    			of: "#mainframe"
+    			my: "right bottom",
+    			at: "right bottom",
+    			of: ".main-menu"
     		});
     		helpHidden=0;
-    		$('#toggleHelp').text("Hide");
+    		$('#toggleHelp').text("Hide help");
     		$('#toggleHelp').attr("title", "Hide help");
     	}
     	
@@ -193,14 +198,14 @@
     	</div>
 	    <div id="helpPanel">
 	    	<div id="toolbar" class="ui-widget-header ui-corner-all">
-	    		<button id="expand">Increase size</button>
-	    		<button id="contract">Decrease size</button>
-	    		<button id="snap">Reset</button>
+	    		<button id="expand">Increase help size</button>
+	    		<button id="contract">Decrease help size</button>
+	    		<button id="snap">Reset help</button>
 	    		<button id="outlink">Open in a new tab</button>
 	    		<button id="close">Close</button>
 	    	</div>
   			
-  			<ContextHelp:getLink location="${contextHelpLocation}"/>
+  			<ContextHelp:getLink location="${contextHelpLocation}" width="${helpWidth}"/>
   		</div>
     </g:if>
     </div>
