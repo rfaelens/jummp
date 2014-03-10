@@ -40,7 +40,11 @@ class ContextHelpTagLib {
 	def grailsApplication
 	
 	private String computeLocation(String location) {
+		
 		String helpRoot=grailsApplication.config.jummp.context.help.root
+		if (location=="manual") {
+			return helpRoot+"manual.html";
+		}
 		String defined=grailsApplication.config.jummp.context.help."${location}"
 		if (defined) {
 			return helpRoot+defined;
