@@ -102,13 +102,6 @@
     		title="submit a model">Submit</a>
     	</li>
     	<li class="expanded">
-    		<a href="${g.createLink(controller: 'jummp', action: 'help')}" 
-    		<g:if test="${g.pageProperty(name:'page.help')?.length()}">
-	    		class="active-trail active"
-	    	</g:if>
-    		title="access help">Help</a>
-    	</li>
-    	<li class="expanded">
     		<a href="${g.createLink(controller: 'jummp', action: 'feedback')}" 
     		<g:if test="${g.pageProperty(name:'page.feedback')?.length()}">
 	    		class="active-trail active"

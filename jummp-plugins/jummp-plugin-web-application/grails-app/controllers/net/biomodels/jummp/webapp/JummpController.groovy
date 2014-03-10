@@ -32,9 +32,6 @@ class JummpController {
 	def feedback={
 		
 	} 
-	def help={
-		
-	}
 	def lookupUser = {
     	if (params.name) {
     		String user=userService.getUsername(params.name);
