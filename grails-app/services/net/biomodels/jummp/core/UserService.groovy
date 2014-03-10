@@ -103,15 +103,17 @@ class UserService implements IUserService {
     }
     
     String getUsername(String realName) {
-    	def person=Person.findByUserRealName(realName);
-    	if (person) {
-    		User user=User.findByPerson(person);
-    		if (user) {
-    			return user.username;
+    	System.out.println("SEARCHING FOR "+realName);
+    	def usernames=User.withCriteria {
+    		projections {
+   				property('username')
     		}
-    		else {
-    			System.out.println("NO USER FOUND FOR "+person.getProperties());
+    		person {
+    			 ilike 'userRealName', realName
     		}
+    	}
+    	if (usernames) {
+    		return usernames.get(0);
     	}
     	else {
     		System.out.println("NO PERSON FOUND FOR "+realName);
@@ -169,6 +171,7 @@ class UserService implements IUserService {
         if (!user) {
             throw new UserNotFoundException(username)
         }
+        System.out.println("RETURNING USER: "+user.person.userRealName+"..."+user.username);
         return user.sanitizedUser()
     }
 
