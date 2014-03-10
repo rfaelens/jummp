@@ -86,10 +86,7 @@
                 var anchorId = $(this).attr('id');
                 if (anchorClass=="versionDownload" || anchorClass=="publicationLink") {
                     openPage(anchor);
-				} else if (anchor.startsWith("#mdl") && anchor.length == 14) {
-                    hideQuestionMark();
-                }
-				else if (typeof(anchor) != "undefined") {
+				} else if (typeof(anchor) != "undefined") {
 					e.preventDefault();
 					location.hash = anchor;
 					var toggleHelp=0;
@@ -103,6 +100,9 @@
 					if (toggleHelp==1) {
 						showHelp();
 					}
+                    if (anchor.startsWith("#mdl") && anchor.length == 14) {
+                        hideQuestionMark();
+                    }
 				}
 			});
 			$( "#dialog-confirm" ).dialog({
