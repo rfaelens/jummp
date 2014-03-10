@@ -2009,9 +2009,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.updateAuditSuccess")
     void updateAuditSuccess(Long itemId, boolean success) {
     	if (itemId!=-1) {
-    		ModelAudit audit=ModelAudit.get(itemId)
+    		ModelAudit audit=ModelAudit.lock(itemId)
     		audit.success=success;
-    		audit.save(flush:true, failOnError:true)
+    		audit.save()
     	}
 	}
 
