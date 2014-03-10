@@ -48,6 +48,18 @@ class UnknownFormatService implements FileFormatService {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean updateName(RevisionTransportCommand revision, final String name) {
+        if (name.trim() && revision) {
+            revision.name = name
+            return true
+        }
+        return false
+    }
+
+    /**
      * Implementation of {@link net.biomodels.jummp.core.model.FileFormatService}
      * Does not make any attempt extract the version of an unknown model as it is undefined.
      * @param revision a revision of a model in a format that has not been recognised.

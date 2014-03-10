@@ -283,6 +283,20 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Profiled(tag="sbmlService.updateName")
+    public boolean updateName(RevisionTransportCommand revision, final String name) {
+        //TODO
+        if (revision && name.trim()) {
+            revision.name = name.trim()
+            return true
+        }
+        return false
+    }
+
+    /**
      * Extracts the SBML model notes.
      *
      * Note that all files with the exception of the first one are ignored.

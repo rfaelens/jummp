@@ -68,6 +68,19 @@ class OmexService implements FileFormatService {
         return ""
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Profiled(tag="omexService.updateName")
+    public boolean updateName(RevisionTransportCommand revision, final String name) {
+        if (revision && name.trim()) {
+            revision.name = name.trim()
+            return true
+        }
+        return false
+    }
+
     @Profiled(tag="omexService.extractDescription")
     public String extractDescription(final List<File> model) {
         return ""

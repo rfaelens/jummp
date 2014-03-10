@@ -544,22 +544,20 @@ class ModelController {
             action {
                 submissionService.inferModelInfo(flow.workingMemory)
             }
-            on("success").to "enterPublicationLink"
+            on("success").to "displayModelInfo"
             on(Exception).to "handleException"
         }
-        /** Temporarily disabled state while we arent able to modify the model
         displayModelInfo {
             on("Continue") {
                 //populate modifications object with form data
                 Map<String,Object> modifications = new HashMap<String,Object>()
-                modifications.put("new_name", params.name)
-                modifications.put("new_description", params.description)
+                modifications.put("new_name", params.name.encodeAsHTML())
+                modifications.put("new_description", params.description.encodeAsHTML())
                 submissionService.refineModelInfo(flow.workingMemory, modifications)
-            }.to "displaySummaryOfChanges"
+            }.to "enterPublicationLink"
             on("Cancel").to "cleanUpAndTerminate"
             on("Back"){}.to "uploadFiles"
         }
-        */
         enterPublicationLink {
         	on("Continue") {
         		if (!params.PubLinkProvider && params.PublicationLink) {
@@ -581,7 +579,7 @@ class ModelController {
                 }
         	}.to "getPublicationDataIfPossible"
         	on("Cancel").to "cleanUpAndTerminate"
-            on("Back").to "uploadFiles"
+            on("Back").to "displayModelInfo"
         }
         getPublicationDataIfPossible {
         	action {
@@ -686,7 +684,6 @@ class ModelController {
                 submissionService.updateFromSummary(flow.workingMemory, modifications)
             }.to "saveModel"
             on("Cancel").to "cleanUpAndTerminate"
-            //on("Back"){}.to "displayModelInfo" //To be set back when model editing is enabled
             on("Back"){}.to "enterPublicationLink"
         }
         saveModel {

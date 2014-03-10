@@ -61,6 +61,24 @@ public interface FileFormatService {
     public String extractDescription(final List<File> model);
 
     /**
+     * Attempts to set the model name of @p revision to @p name.
+     *
+     * @param revision The revision that should be updated.
+     * @param name The new name that the model should have.
+     * @return true if the operation was successful, false otherwise.
+     */
+    public boolean updateName(RevisionTransportCommand revision, final String name);
+
+    /**
+     * Attempts to set the model description of @p revision to @p description.
+     *
+     * @param revision The revision that should be updated.
+     * @param name The new description that the model should have.
+     * @return true if the operation was successful, false otherwise.
+     */
+    //public boolean updateDescription(RevisionTransportCommand revision, final String description);
+
+    /**
      * Retrieves all annotation URNs in the model file referenced by @p revision.
      * @param revision The Revision identifying a model file
      * @return List of all URNs in the model file.

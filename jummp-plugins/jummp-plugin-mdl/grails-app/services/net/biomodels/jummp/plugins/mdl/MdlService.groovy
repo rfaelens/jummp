@@ -89,6 +89,19 @@ class MdlService implements FileFormatService {
      * {@inheritDoc}
      */
     @Override
+    @Profiled(tag="mdlService.updateName")
+    public boolean updateName(RevisionTransportCommand revision, final String name) {
+        if (revision && name.trim()) {
+            revision.name = name.trim()
+            return true
+        }
+        return false
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @Profiled(tag="mdlService.extractDescription")
     public String extractDescription(List<File> modelFiles) { return "" }
 

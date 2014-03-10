@@ -33,6 +33,7 @@
 
 package net.biomodels.jummp.core
 
+import com.sun.org.apache.bcel.internal.generic.NEW
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC //rude?
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
@@ -368,13 +369,16 @@ class SubmissionService {
         }
 
         /**
-         * Purpose Handle changes made at the submission summary. Basically the commit message
+         * Purpose Handle changes made at the submission summary.
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          * @param modifications     a Map containing the user's modifications to the model information we extracted.
          */
-        protected abstract void handleModificationsToSubmissionInfo(Map<String, Object> workingMemory,
-                Map<String,Object> modifications);
+        protected void handleModificationsToSubmissionInfo(Map<String, Object> workingMemory,
+                Map<String,Object> modifications) {
+            workingMemory["new_name"] = modifications.get("new_name")
+            workingMemory["new_description"] = modifications.get("new_description")
+        }
 
                 
         void updatePublicationLink(Map<String,Object> workingMemory, Map<String,String> modifications) {
@@ -517,14 +521,13 @@ class SubmissionService {
         }
 
         /**
-         * Purpose Handles changes made on the summary screen. Dont need to do anything
-         * as currently implemented as there is no option for users to do anything.
+         * Purpose Handles changes made on the summary screen.
          *
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          * @param modifications     a Map containing the user's modifications to the model information we extracted.
          */
         void handleModificationsToSubmissionInfo(Map<String, Object> workingMemory, Map<String,Object> modifications) {
-            // todo
+            super.handleModificationsToSubmissionInfo(workingMemory, modifications)
         }
 
         /**
@@ -623,7 +626,7 @@ class SubmissionService {
          * @param modifications     the files to be modified/removed
          */
         void handleModificationsToSubmissionInfo(Map<String, Object> workingMemory, Map<String,Object> modifications) {
-            // todo
+            super.handleModificationsToSubmissionInfo(workingMemory, modifications)
         }
 
         /* Updates the revision's comments. New comment is passed through the 
@@ -661,7 +664,24 @@ class SubmissionService {
             	}
             }
             def newlyCreated= modelService.addValidatedRevision(repoFiles, deleteFiles, revision)
-            workingMemory.put("model_id", newlyCreated.model.id)
+            final String NEW_NAME = workingMemory["new_name"]
+            final String NEW_DESCRIPTION = workingMemory["new_description"]
+            final boolean SHOULD_UPDATE = NEW_NAME || NEW_DESCRIPTION
+            if (NEW_NAME) {
+                modelFileFormatService.updateName(revision, NEW_NAME)
+                changes.add("Edited model name")
+            }
+            if (NEW_DESCRIPTION) {
+                modelFileFormatService.updateDescription(revision, NEW_DESCRIPTION)
+                changes.add("Edited model description")
+            }
+            if (SHOULD_UPDATE) {
+                def updated = modelService.addValidatedRevision(repoFiles, [],
+                        (workingMemory["RevisionTC"] as RTC))
+                workingMemory.put("model_id", updated.model.id)
+            } else {
+                workingMemory.put("model_id", newlyCreated.model.id)
+            }
             return changes
         }
     }

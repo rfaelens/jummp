@@ -180,6 +180,19 @@ class ModelFileFormatService {
     }
 
     /**
+     * Attempts to set the model name of @p revision to @p name.
+     *
+     * @param revision The revision that should be updated.
+     * @param name The new name that the model should have.
+     * @return true if the operation was successful, false otherwise.
+     */
+    boolean updateName(RevisionTransportCommand revision, final String name) {
+        FileFormatService service = serviceForFormat(revision.format)
+        assert service
+        service.updateName(revision, name)
+    }
+
+    /**
      * Extracts the description of the Model from the @p model in specified @p format.
      * @param model The Model file to use as a source
      * @param format The format of the Model file
@@ -192,6 +205,19 @@ class ModelFileFormatService {
         } else {
             return ""
         }
+    }
+
+    /**
+     * Attempts to set the model description of @p revision to @p description.
+     *
+     * @param revision The revision that should be updated.
+     * @param name The new description that the model should have.
+     * @return true if the operation was successful, false otherwise.
+     */
+    boolean updateDescription(RevisionTransportCommand revision, final String description) {
+        FileFormatService service = serviceForFormat(revision.format)
+        assert service
+        service.updateDescription(revision, description)
     }
 
     /**

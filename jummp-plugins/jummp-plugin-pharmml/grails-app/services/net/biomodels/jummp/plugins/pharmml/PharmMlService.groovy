@@ -45,6 +45,11 @@ import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 import eu.ddmore.libpharmml.impl.*
+import groovy.xml.StreamingMarkupBuilder
+import groovy.xml.XmlUtil
+import org.xml.sax.SAXException
+
+import javax.xml.parsers.ParserConfigurationException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -60,6 +65,8 @@ import org.apache.commons.logging.LogFactory
 import org.apache.tika.detect.DefaultDetector
 import org.apache.tika.metadata.Metadata
 import org.perf4j.aop.Profiled
+
+import static groovy.xml.XmlUtil.*
 
 /**
  * Service class containing the logic to handle models encoded in PharmML.
@@ -157,6 +164,16 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         return theName
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Profiled(tag="pharmMlService.updateName")
+    public boolean updateName(RevisionTransportCommand revision, final String name) {
+        return updatePharmMlElement(revision, "Name",
+                "http://www.pharmml.org/2013/03/CommonTypes", name)
+    }
+
     @Profiled(tag="pharmMlService.getSearchIndexingContent")
     public String getSearchIndexingContent(RevisionTransportCommand revision) {
         return ""
@@ -181,6 +198,16 @@ class PharmMlService implements FileFormatService, IPharmMlService {
             log.info("PharmML model ${model.inspect()} has description ${theDescription}.")
         }
         return theDescription
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Profiled(tag = "pharmMlService.updateDescription")
+    public boolean updateDescription(RevisionTransportCommand revision, String description) {
+        return updatePharmMlElement(revision, "Description",
+                "http://www.pharmml.org/2013/03/CommonTypes", description)
     }
 
     @Profiled(tag="pharmMlService.getAllAnnotationURNs")
@@ -243,20 +270,26 @@ class PharmMlService implements FileFormatService, IPharmMlService {
         assert revision.format.identifier == "PharmML"
         List<File> revisionFiles = fetchMainFilesFromRevision(revision)
         final File pharmML = findPharmML(revisionFiles)
-        PharmML dom =  getDomFromPharmML(pharmML)
+        PharmML dom = getDomFromPharmML(pharmML)
         return dom?.writtenVersion
     }
 
     @Profiled(tag="pharmMlService.getDomFromRevision")
     PharmML getDomFromRevision(RevisionTransportCommand revision) {
+        IPharmMLResource resource = getResourceFromRevision(revision)
+        return resource?.dom
+    }
+
+    @Profiled(tag="pharmMlService.getResourceFromRevision")
+    IPharmMLResource getResourceFromRevision(RevisionTransportCommand revision) {
         if (!revision) {
-            log.error "Cannot get PharmML model definition from undefined revision."
+            log.error "Cannot get PharmML DOM from an undefined revision."
             return ""
         }
         assert revision.format.identifier == "PharmML"
         List<File> revisionFiles = fetchMainFilesFromRevision(revision)
         final File pharmML = findPharmML(revisionFiles)
-        return getDomFromPharmML(pharmML)
+        return getResourceFromPharmML(pharmML)
     }
 
     @Profiled(tag="pharmMlService.getIndependentVariable")
@@ -403,6 +436,12 @@ class PharmMlService implements FileFormatService, IPharmMlService {
 
     @Profiled(tag="pharmMlService.getDomFromPharmML")
     private PharmML getDomFromPharmML(File f) {
+        IPharmMLResource resource = getResourceFromPharmML(f)
+        return resource?.getDom()
+    }
+
+    @Profiled(tag="pharmMlService.getResourceFromPharmML")
+    private IPharmMLResource getResourceFromPharmML(final File f) {
         LibPharmMLImpl api = PharmMlFactory.getInstance().createLibPharmML()
         def stream = null
         IPharmMLResource resource = null
@@ -413,7 +452,59 @@ class PharmMlService implements FileFormatService, IPharmMlService {
             log.error(x.message, x)
         } finally {
             stream?.close()
+            return resource
         }
-        return resource.getDom()
+    }
+
+    /*
+     * Helper function that updates a given element of model encoded in PharmML.
+     *
+     * Specifically, it updates the XML element, as well as the corresponding attribute in
+     * the {@link net.biomodels.jummp.core.model.RevisionTransportCommand}.
+     *
+     * @param rev The revision which is being updated. A PharmML file must be present.
+     * @param elem The element which is being updated.
+     * @param elemNs The namespace of the element being updated.
+     * @param value The new value of the element in question
+     * @return true if the update was successful, false if gibberish was provided.
+     */
+    private boolean updatePharmMlElement(RevisionTransportCommand rev, String elem,
+                                         String elemNs, String value) {
+        if (rev && value?.trim()) {
+            if (!(rev.files)) {
+                log.error "Cannot update name for ${rev.properties} - it has no files."
+                return false
+            }
+            final String VALUE = value.trim()
+            List<File> revisionFiles = fetchMainFilesFromRevision(rev)
+            final File pharmML = findPharmML(revisionFiles)
+            XmlSlurper slurper = new XmlSlurper(false, true)
+            def root
+            try {
+                root = slurper.parse(pharmML)
+                boolean itemExists = !(root."$elem".isEmpty())
+                if (itemExists) {
+                    root."$elem" = VALUE
+                } else {
+                    root.appendNode({
+                        "$elem"("xmlns:ct": elemNs, VALUE)
+                    })
+                }
+                StreamingMarkupBuilder outputBuilder = new StreamingMarkupBuilder()
+                outputBuilder.encoding = "UTF-8"
+                def output = outputBuilder.bind { mkp.yield root }
+                XmlUtil.serialize(output, new BufferedWriter(new FileWriter(pharmML)))
+                rev."${elem.toLowerCase()}" = VALUE
+                return true
+            } catch (SAXException | ParserConfigurationException e) {
+                log.error ("""\
+Cannot slurp $pharmML from ${rev.properties} while setting $elem to $value:
+""", e)
+                return false
+            }
+        } else {
+            log.warn("Revision ${rev.properties} is null, or $elem '$value' is empty.")
+        }
+        return false
     }
 }
