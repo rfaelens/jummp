@@ -39,6 +39,9 @@ import net.biomodels.jummp.core.model.audit.AccessType
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class ModelAudit implements Serializable {
+    static mapping = {
+        changesMade type: "text"
+    }
     /**
      * Which model was accessed
      */

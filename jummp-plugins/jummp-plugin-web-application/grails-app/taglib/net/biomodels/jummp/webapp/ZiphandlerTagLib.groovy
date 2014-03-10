@@ -32,7 +32,8 @@
 
 
 
-package jummp
+package net.biomodels.jummp.webapp
+
 import java.nio.file.Files
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.FileSystem

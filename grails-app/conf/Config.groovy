@@ -473,6 +473,31 @@ weceem.default.space.template = "classpath:/weceem-jummp-default-space.zip"
 weceem.security.policy.path = jummp.security.cms.policy
 grails.resources.adhoc.excludes=["/content/*"]
 
+// database migrations
+environments {
+    development {
+        grails.plugin.databasemigration.updateOnStart = true
+        grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
+        grails.plugin.databasemigration.changelogFileName = 'changelog.groovy'
+    }
+    production {
+        grails.plugin.databasemigration.updateOnStart = true
+        grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
+        grails.plugin.databasemigration.changelogFileName = 'changelog.groovy'
+    }
+    test {
+        /*
+         * Due to GPDATABASEMIGRATION-160, migrations cannot be applied before
+         * integration tests. The suggested workaround was to use
+         *      grails.plugin.databasemigration.forceAutoMigrate = true
+         * but that does not work in Grails 2.3.4. Hence, we set dbCreate to
+         * create-drop in the test environment.
+         */
+        grails.plugin.databasemigration.updateOnStart = false
+        grails.plugin.databasemigration.autoMigrateScripts = []
+    }
+}
+
 grails.mails.props=[:]
 if (!(jummpConfig.jummp.security.mailer.host instanceof ConfigObject)) {
 	grails.mail.host=jummpConfig.jummp.security.mailer.host

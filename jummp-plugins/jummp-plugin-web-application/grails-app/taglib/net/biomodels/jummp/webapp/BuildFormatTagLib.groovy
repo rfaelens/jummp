@@ -28,53 +28,20 @@
 * that of the covered work.}
 **/
 
+package net.biomodels.jummp.webapp
 
-
-
-
-package jummp
-
-
-class ContextHelpTagLib {
-	static namespace="ContextHelp"
-	def grailsApplication
+class BuildFormatTagLib {
+	static namespace="BuildFormat"
 	
-	private String computeLocation(String location) {
-		
-		String helpRoot=grailsApplication.config.jummp.context.help.root
-		if (location=="manual") {
-			return helpRoot+"manual.html";
-		}
-		String defined=grailsApplication.config.jummp.context.help."${location}"
-		if (defined) {
-			return helpRoot+defined;
-		}
-		return null;
+	def formatter = { attrs ->
+		String buildString=attrs.build
+		def parts=buildString.tokenize('|')
+		StringBuilder builder=new StringBuilder("<a href='https://bitbucket.org/jummp/jummp/commits/all?search=")
+		builder.append(parts.get(0))
+		builder.append("'>")
+		builder.append(parts.get(0))
+		builder.append("</a> | ")
+		builder.append(parts.get(1).split("\\+")[0])
+		out<<builder.toString()
 	}
-	
-	def getURL = { attrs ->
-		if (attrs.location!=null && attrs.location) {
-			String url=computeLocation(attrs.location)
-			if (url) {
-				out<<url
-			}
-		}
-	}
-	
-	def getLink = { attrs ->
-		if (attrs.location!=null) {
-			StringBuilder builder=new StringBuilder("<iframe id='helpFrame' src='");
-			String url=computeLocation(attrs.location);
-			if (url) {
-				builder.append(url+"#contextSpecific/"+attrs.width);
-				builder.append("'/>");
-				out<<builder.toString();
-			}
-		}
-		else {
-			out<<"NO LOCATION PROVIDED!"
-		}
-	}
-	
-	
 }

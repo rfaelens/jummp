@@ -598,11 +598,11 @@ class PharmMlTagLib {
                 if (individuals) {
                    result.append(individuals)
                 }
-                if (pm.correlation) {
+                /*if (pm.correlation) {
                     handleCorrelations(pm.correlation, paramCorrelations,
                                 paramRandomVariableMap, paramCorrelationMatrixMap,
                                 individualParametersInParameterModel, result)
-                }
+                }*/
                 result.append("</div>")
             }
         } catch(Exception e) {
@@ -794,11 +794,11 @@ class PharmMlTagLib {
                 if (individuals) {
                    result.append(individuals)
                 }
-                if (om.correlation) {
+                /*if (om.correlation) {
                     handleCorrelations(om.correlation, obsCorrelations,
                                 obsRandomVariableMap, obsCorrelationMatrixMap,
                                 individualParametersInObservationModel, result)
-                }
+                }*/
                 if (obsErr) {
                     if (obsErr.symbol?.value) {
                         result.append(obsErr.symbol.value)
@@ -1109,10 +1109,16 @@ class PharmMlTagLib {
                             result.append(" rowspan='").append(ACTIVITY_COUNT).append("'")
                         }
                         result.append(">").append(it.key).append("</td>")
-                        activity(activityList[0], true, result)
+                        boolean toShowFootnote = activity(activityList[0], true, result)
+                        if ((!showDosingFootnote) && toShowFootnote) {
+                            showDosingFootnote = toShowFootnote
+                        }
                         if (ACTIVITY_COUNT > 1) {
                             for (int i = 1; i < ACTIVITY_COUNT; i++) {
-                                activity(activityList[i], false, result)
+                                toShowFootnote = activity(activityList[i], false, result)
+                                if (!showDosingFootnote && toShowFootnote) {
+                                    showDosingFootnote = toShowFootnote
+                                }
                             }
                         }
                     }
@@ -1167,7 +1173,12 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    private void activity(ActivityType activity, boolean isFirst, StringBuilder result) {
+    /*
+     * Parses an activity and writes it to a StringBuilder.
+     * Returns whether to display a dosing footnote or not.
+     */
+    private boolean activity(ActivityType activity, boolean isFirst, StringBuilder result) {
+        boolean showDosingFootnote = false
         if (!isFirst) {
             result.append("<tr>")
         }
@@ -1212,7 +1223,7 @@ class PharmMlTagLib {
             }
         }
         result.append("</tr>\n")
-
+        return showDosingFootnote
     }
 
     def trialDosing = { dosing ->
@@ -1736,7 +1747,7 @@ class PharmMlTagLib {
        // prefixToInfix(builder, stack)
     }
 
-    private def expandNestedSymbRefs = { JAXBElement<SymbolRefType> symbRef ->
+    private JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRefType> symbRef) {
         final EquationType TRANSF_EQ = resolveSymbolReference(symbRef.value)
         if (TRANSF_EQ) {
             final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first()
@@ -1768,9 +1779,9 @@ class PharmMlTagLib {
         } else {
             return symbRef
         }
-    }.memoizeAtMost(10)
+    }
 
-    private def expandNestedUniop = { JAXBElement<UniopType> jaxbUniop ->
+    private JAXBElement expandNestedUniop(JAXBElement<UniopType> jaxbUniop) {
         UniopType uniop = jaxbUniop.value
         UniopType replacement
         if (uniop.symbRef) {
@@ -1814,12 +1825,12 @@ class PharmMlTagLib {
                 }
             }
         } else if (uniop.uniop) {
-            def expanded = expandNestedUniop.call(wrapJaxb(uniop.uniop))?.value
+            def expanded = expandNestedUniop(wrapJaxb(uniop.uniop))?.value
             if (expanded && !(expanded.equals(uniop.uniop))) {
                 uniop.uniop = expanded
             }
         } else if (uniop.binop) {
-            def expanded = expandNestedBinop.call(wrapJaxb(uniop.binop))?.value
+            def expanded = expandNestedBinop(wrapJaxb(uniop.binop))?.value
             if (expanded && !(expanded.equals(uniop.binop))) {
                 uniop.binop = expanded
             }
@@ -1828,21 +1839,21 @@ class PharmMlTagLib {
             return wrapJaxb(replacement)
         }
         return jaxbUniop
-    }.memoizeAtMost(10)
+    }
 
-    private def expandNestedBinop = { JAXBElement<BinopType> jaxbBinop ->
+    private JAXBElement expandNestedBinop(JAXBElement<BinopType> jaxbBinop) {
         BinopType binop = jaxbBinop.value
         List<JAXBElement> terms = binop.content
         def expandedTerms = terms.collect { c ->
             switch (c.value) {
                 case SymbolRefType:
-                    return expandNestedSymbRefs.call(c)
+                    return expandNestedSymbRefs(c)
                     break
                 case BinopType:
-                    return expandNestedBinop.call(c)
+                    return expandNestedBinop(c)
                     break
                 case UniopType:
-                    return expandNestedUniop.call(c)
+                    return expandNestedUniop(c)
                     break
                 default:
                     return c
@@ -1856,20 +1867,20 @@ class PharmMlTagLib {
         expanded.op = binop.op
         expanded.content = expandedTerms
         return wrapJaxb(expanded)
-    }.memoizeAtMost(10)
+    }
 
     private EquationType expandEquation(EquationType equation) {
         List<JAXBElement> eqTerms = equation.scalarOrSymbRefOrBinop
         List<JAXBElement> expandedTerms = eqTerms.collect {
             switch(it.value) {
                 case BinopType:
-                    return expandNestedBinop.call(it)
+                    return expandNestedBinop(it)
                     break
                 case UniopType:
-                    return expandNestedUniop.call(it)
+                    return expandNestedUniop(it)
                     break
                 case SymbolRefType:
-                    return expandNestedSymbRefs.call(it)
+                    return expandNestedSymbRefs(it)
                     break
                 default:
                     return it
@@ -1887,7 +1898,7 @@ class PharmMlTagLib {
     private void convertEquation(final def equation, StringBuilder builder) {
         def equationToProcess
         if ((equation instanceof EquationType) || (equation instanceof Equation)) {
-            equationToProcess = expandEquation(equation)
+            equationToProcess = equation //expandEquation(equation)
         } else {
             equationToProcess = equation
         }

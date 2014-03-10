@@ -96,7 +96,6 @@ grails.project.dependency.resolution = {
         compile 'commons-io:commons-io:2.1'
         compile 'org.springframework:spring-jms:3.2.4.RELEASE'
 
-        test 'hsqldb:hsqldb:1.8.0.10'
     }
     plugins {
         compile ":spring-security-core:1.2.7.3"

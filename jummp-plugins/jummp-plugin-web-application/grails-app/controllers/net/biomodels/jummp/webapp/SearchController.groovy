@@ -142,7 +142,9 @@ class SearchController {
     
     private def searchCore(String query, String sortBy, String sortDirection, int offset, int length) {
     	List<MTC> models=[]
-    	models.addAll(modelService.searchModels(query))
+        if (query?.trim()) {
+            models.addAll(modelService.searchModels(query))
+        }
     	if (!sortBy) {
     		sortBy="modified"
     	}
