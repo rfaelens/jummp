@@ -481,7 +481,7 @@ environments {
         grails.plugin.databasemigration.changelogFileName = 'changelog.groovy'
     }
     production {
-        grails.plugin.databasemigration.updateOnStart = true
+        grails.plugin.databasemigration.updateOnStart = false
         grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
         grails.plugin.databasemigration.changelogFileName = 'changelog.groovy'
     }
