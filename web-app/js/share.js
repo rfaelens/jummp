@@ -123,9 +123,6 @@ CollaboratorTable = Backbone.View.extend({
       console.log('inside render with '+JSON.stringify(this.collection));
       var html = template(this.collection.toJSON());
       this.$el.html(html);
-      _.each(this.collection, function(num) { 
-      		  console.log(JSON.stringify(num))
-      });
       addButtonEvents();
     }
 });
@@ -141,6 +138,15 @@ function addButtonEvents() {
       $( "#Done" ).click(function(){
     		window.location=showURL;
       });
+      if (collaborators.length < 2) {
+      	  $("#collabCreate").removeClass('hideRightBorder');
+      	  $("#currentCollabs").addClass('hideLeftBorder');
+      }
+      else {
+      	  $("#collabCreate").addClass('hideRightBorder');
+      	  $("#currentCollabs").removeClass('hideLeftBorder');
+      }
+     
  }
 
 

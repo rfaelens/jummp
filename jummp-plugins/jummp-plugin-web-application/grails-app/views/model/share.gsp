@@ -56,10 +56,10 @@
 					<button id="AddButton">Add</button>
 				</form>
 				</div>
-				<div style="float: left">
-    			{{#if [].length}}
+				<div id="currentCollabs">
 				<h2>Collaborators</h2>
-    			<table class='table'> 
+    			{{#if [].length}}
+				<table class='table'> 
     			<thead>
     				<tr>
     					<td class="tableEL bold">Name</td>
