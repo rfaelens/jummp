@@ -50,7 +50,8 @@ import grails.util.Holders
             addSubmissionFiles([newFile], additionalFiles)
             signalEvent("Upload")
             
-            //assertFlowState("displayModelInfo") currently disabled
+            assertFlowState("displayModelInfo")
+            signalEvent("Continue")
             assert true == (Boolean) flowScope.
                                         workingMemory.
                                         get("isUpdateOnExistingModel")

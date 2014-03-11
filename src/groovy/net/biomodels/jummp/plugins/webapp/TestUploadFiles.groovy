@@ -38,11 +38,9 @@ import grails.util.Holders
             Map<File,String> additionalFiles=getRandomAdditionalFiles(10)
             addSubmissionFiles([file], additionalFiles)
             signalEvent("Upload")
-           /* 	Temporarily disabled states as editing model info is not implemented
-           	assertFlowState("displayModelInfo") 
-           	signalEvent("Continue")
-            */
-           
+            assertFlowState("displayModelInfo")
+            signalEvent("Continue")
+
             //Dont add publication info
             assertFlowState("enterPublicationLink")
             //(mockRequest as MockHttpServletRequest).setParameter("PubLinkProvider","PUBMED") Doesnt seem to work :/
