@@ -646,7 +646,7 @@ class SubmissionService {
         @Profiled(tag = "submissionService.NewRevisionStateMachine.completeSubmission")
         HashSet<String> completeSubmission(Map<String,Object> workingMemory) {
             HashSet<String> changes=new TreeSet<String>();
-        	RTC revision=workingMemory.get("RevisionTC") as RTC
+            RTC revision=workingMemory.get("RevisionTC") as RTC
             List<RFTC> repoFiles = getRepFiles(workingMemory)
             List<RFTC> deleteFiles= getRepFiles(workingMemory, "removeFromVCS")
             deleteFiles.each {
@@ -676,8 +676,9 @@ class SubmissionService {
                 changes.add("Edited model description")
             }
             if (SHOULD_UPDATE) {
-                def updated = modelService.addValidatedRevision(repoFiles, [],
-                        (workingMemory["RevisionTC"] as RTC))
+                RTC latest = workingMemory["RevisionTC"] as RTC
+                latest.comment = "Edited model metadata online."
+                def updated = modelService.addValidatedRevision(repoFiles, [], latest)
                 workingMemory.put("model_id", updated.model.id)
             } else {
                 workingMemory.put("model_id", newlyCreated.model.id)
