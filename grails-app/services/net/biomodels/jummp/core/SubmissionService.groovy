@@ -38,6 +38,7 @@ import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC //rude?
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.model.PublicationLinkProvider
@@ -542,8 +543,23 @@ class SubmissionService {
             MTC model=revision.model
             model.format=revision.format
             revision.comment="Import of ${revision.name}".toString()
-            workingMemory.put("model_id",
-                    modelService.uploadValidatedModel(repoFiles, revision).id)
+            Model newModel = modelService.uploadValidatedModel(repoFiles, revision)
+            RTC latest = modelService.getLatestRevision(newModel).toCommandObject()
+
+            final String NEW_NAME = workingMemory["new_name"]
+            final String NEW_DESCRIPTION = workingMemory["new_description"]
+            final boolean SHOULD_UPDATE = NEW_NAME || NEW_DESCRIPTION
+            if (NEW_NAME) {
+                modelFileFormatService.updateName(latest, NEW_NAME)
+            }
+            if (NEW_DESCRIPTION) {
+                modelFileFormatService.updateDescription(latest, NEW_DESCRIPTION)
+            }
+            if (SHOULD_UPDATE) {
+                latest.comment = "Edited model metadata online."
+                modelService.addValidatedRevision(repoFiles, [], latest)
+            }
+            workingMemory.put("model_id", newModel.id)
             return new TreeSet<String>(); //no need to track changes made during submission
         }
     }
