@@ -86,6 +86,19 @@ class OmexService implements FileFormatService {
         return ""
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Profiled(tag="omexService.updateDescription")
+    public boolean updateDescription(RevisionTransportCommand revision, final String DESC) {
+        if (revision && DESC.trim()) {
+            revision.description = DESC.trim()
+            return true
+        }
+        return false
+    }
+
     @Profiled(tag="omexService.getAllAnnotationURNs")
     public List<String> getAllAnnotationURNs(RevisionTransportCommand revision) {
         return []

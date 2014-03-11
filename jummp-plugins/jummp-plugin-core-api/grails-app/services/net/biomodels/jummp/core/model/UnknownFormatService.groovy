@@ -68,12 +68,26 @@ class UnknownFormatService implements FileFormatService {
     public final String getFormatVersion(RevisionTransportCommand revision) {
         return "*"
     }
+
     /**
      * Extracts the descrition from the @p model.
      */
     public final String extractDescription(final List<File> model) {
         return ""
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean updateDescription(RevisionTransportCommand revision, final String DESC) {
+        if (revision && DESC.trim()) {
+            revision.description = DESC.trim()
+            return true
+        }
+        return false
+    }
+
     /**
      * Retrieves all annotation URNs in the model file referenced by @p revision.
      * @param revision The Revision identifying a model file

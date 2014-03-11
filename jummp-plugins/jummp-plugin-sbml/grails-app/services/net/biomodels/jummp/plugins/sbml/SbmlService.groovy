@@ -288,7 +288,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     @Override
     @Profiled(tag="sbmlService.updateName")
     public boolean updateName(RevisionTransportCommand revision, final String name) {
-        //TODO
+        //TODO update file contents
         if (revision && name.trim()) {
             revision.name = name.trim()
             return true
@@ -350,6 +350,20 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             return ""
         }
         return description.toString()
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Profiled(tag="sbmlService.updateDescription")
+    public boolean updateDescription(RevisionTransportCommand revision, final String DESC) {
+        //TODO update file contents
+        if (revision && DESC.trim()) {
+            revision.description = DESC.trim()
+            return true
+        }
+        return false
     }
 
     @Profiled(tag="SbmlService.getMetaId")

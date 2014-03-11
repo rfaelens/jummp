@@ -73,10 +73,10 @@ public interface FileFormatService {
      * Attempts to set the model description of @p revision to @p description.
      *
      * @param revision The revision that should be updated.
-     * @param name The new description that the model should have.
+     * @param description The new description that the model should have.
      * @return true if the operation was successful, false otherwise.
      */
-    //public boolean updateDescription(RevisionTransportCommand revision, final String description);
+    public boolean updateDescription(RevisionTransportCommand revision, final String description);
 
     /**
      * Retrieves all annotation URNs in the model file referenced by @p revision.
