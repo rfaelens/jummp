@@ -169,9 +169,9 @@ class PharmMlService implements FileFormatService, IPharmMlService {
      */
     @Override
     @Profiled(tag="pharmMlService.updateName")
-    public boolean updateName(RevisionTransportCommand revision, final String name) {
+    public boolean updateName(RevisionTransportCommand revision, final String NAME) {
         return updatePharmMlElement(revision, "Name",
-                "http://www.pharmml.org/2013/03/CommonTypes", name)
+                "http://www.pharmml.org/2013/03/CommonTypes", NAME)
     }
 
     @Profiled(tag="pharmMlService.getSearchIndexingContent")
@@ -205,9 +205,9 @@ class PharmMlService implements FileFormatService, IPharmMlService {
      */
     @Override
     @Profiled(tag = "pharmMlService.updateDescription")
-    public boolean updateDescription(RevisionTransportCommand revision, String description) {
+    public boolean updateDescription(RevisionTransportCommand revision, final String DESCRIPTION) {
         return updatePharmMlElement(revision, "Description",
-                "http://www.pharmml.org/2013/03/CommonTypes", description)
+                "http://www.pharmml.org/2013/03/CommonTypes", DESCRIPTION)
     }
 
     @Profiled(tag="pharmMlService.getAllAnnotationURNs")
@@ -478,27 +478,24 @@ class PharmMlService implements FileFormatService, IPharmMlService {
             final String VALUE = value.trim()
             List<File> revisionFiles = fetchMainFilesFromRevision(rev)
             final File pharmML = findPharmML(revisionFiles)
-            XmlSlurper slurper = new XmlSlurper(false, true)
+            XmlParser parser = new XmlParser(false, true)
             def root
             try {
-                root = slurper.parse(pharmML)
-                boolean itemExists = !(root."$elem".isEmpty())
-                if (itemExists) {
-                    root."$elem" = VALUE
+                root = parser.parse(pharmML)
+                Node item = root.children().find { it.name().getLocalPart() == elem }
+                if (item) {
+                    item.setValue(VALUE)
                 } else {
-                    root.appendNode({
-                        "$elem"("xmlns:ct": elemNs, VALUE)
-                    })
+                    def elemXml = "<ct:$elem xmlns:ct=\"$elemNs\">$VALUE</ct:$elem>"
+                    def parsedElem = new XmlParser(false, true).parseText(elemXml)
+                    root.children().add(0, parsedElem)
                 }
-                StreamingMarkupBuilder outputBuilder = new StreamingMarkupBuilder()
-                outputBuilder.encoding = "UTF-8"
-                def output = outputBuilder.bind { mkp.yield root }
-                XmlUtil.serialize(output, new BufferedWriter(new FileWriter(pharmML)))
+                XmlUtil.serialize(root, new BufferedWriter(new FileWriter(pharmML)))
                 rev."${elem.toLowerCase()}" = VALUE
                 return true
             } catch (SAXException | ParserConfigurationException e) {
                 log.error ("""\
-Cannot slurp $pharmML from ${rev.properties} while setting $elem to $value:
+Cannot parse $pharmML from ${rev.properties} while setting $elem to $value:
 """, e)
                 return false
             }
