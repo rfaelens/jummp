@@ -49,7 +49,12 @@
                                 </label>
                             </td>
                             <td class="value" style="vertical-align:top;">
-                          	${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}
+                                <g:if test="${workingMemory["new_name"]}">
+                                    ${workingMemory["new_name"]}
+                                </g:if>
+                                <g:else>
+                                    ${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}
+                                </g:else>
                             </td>
                         </tr>
                         <tr class="prop">
@@ -60,7 +65,12 @@
                             </td>
                             <td class="value" style="vertical-align:top;">
                             	<div class="displayDescription">
-                                	${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}
+                                    <g:if test="${workingMemory["new_description"]}">
+                                        ${workingMemory["new_description"]}
+                                    </g:if>
+                                    <g:else>
+                                        ${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}
+                                    </g:else>
                                 </div>
                             </td>
                         </tr>
