@@ -34,29 +34,8 @@
         <script src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js" type="text/javascript" charset="utf-8"></script>
         <script id="collaborator-list-template" type="text/x-handlebars-template">
-    			<div>
-        		<div class="containUI">
-        		<div id="collabCreate">
-        		<h2>Add New Collaborator</h2>
-				<form id="collaboratorAddForm">
-					<div id="formElements">
-						<div class="formElement">
-							<label for="name">Name</label>
-							<input id="nameSearch" name="name" type="text"/>
-						</div>
-						<div class="formElement">
-							<label for="read">Read</label>
-							<input type="checkbox" name="read"></input>
-						</div>
-						<div class="formElement">
-							<label for="write">Write</label>
-							<input type="checkbox" name="write"></input>
-						</div>
-					</div>
-					<button id="AddButton">Add</button>
-				</form>
-				</div>
-				<div id="currentCollabs">
+    			
+        		<div id="currentCollabs">
 				<h2>Collaborators</h2>
     			{{#if [].length}}
 				<table class='table'> 
@@ -80,19 +59,38 @@
     		 		This model is not shared with anyone.
     		 	{{/if}}
     		 	</div>
-    		 	<div class="globalButtons">
- 		 	    		<button class='SaveCollabs'>Save</button>
- 		 	    		<button id='Done'>Done</button>
- 		 	    	</div>
- 		 	    </div>
-    		 	</div>
     		 </script>
     		 <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'share.css')}" />
             		 
     </head>
     <body>
-    		<div id="ui"></div>
-    		
+    		<div id="ui">
+    			<div id="collabUI">
+    				<div id="collabCreate">
+    					<h2>Add New Collaborator</h2>
+    					<form id="collaboratorAddForm">
+    						<div id="formElements">
+    							<div class="formElement">
+    								<label for="name">Name</label>
+    								<input id="nameSearch" name="name" type="text"/>
+    							</div>
+    							<div class="formElement">
+									<label for="read">Read</label>
+									<input type="checkbox" name="read"></input>
+								</div>
+								<div class="formElement">
+									<label for="write">Write</label>
+									<input type="checkbox" name="write"></input>
+								</div>
+							</div>
+						<button id="AddButton">Add</button>
+						<button id='SaveCollabs'>Save</button>
+ 		 	    	   </form>
+					</div>
+					<div class="containUI">
+					</div>
+					</div>
+			    </div>
     		<g:javascript contextPath="" src="share.js"/>
     		<g:javascript>
     			$( document ).ready(function() {
