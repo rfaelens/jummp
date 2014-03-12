@@ -358,13 +358,24 @@ class SubmissionService {
          */
         @Profiled(tag = "submissionService.refineModelInfo")
         void refineModelInfo(Map<String,Object> workingMemory, Map<String,Object> modifications) {
-            RTC revision=workingMemory.get("RevisionTC") as RTC
-            if (revision.name == modifications.get("new_name") as String) {
-                if (revision.description == modifications.get("new_description") as String) {
-                    return
-                }
+            RTC revision = workingMemory.get("RevisionTC") as RTC
+            final String NAME = revision.name
+            final String DESC = revision.description
+            String NEW_NAME = modifications["new_name"]?.trim()
+            String NEW_DESC = modifications["new_description"]?.trim()
+
+            if (!NEW_NAME && !NEW_DESC) {
+                return
             }
-            handleModificationsToSubmissionInfo(workingMemory, modifications)
+            if ((NAME == NEW_NAME) && (DESC == NEW_DESC)) {
+                return
+            }
+            if ((!NAME && NEW_NAME) || (!DESC && NEW_DESC)) {
+                handleModificationsToSubmissionInfo(workingMemory, modifications)
+            }
+            if ((NEW_NAME != NAME) || (NEW_DESC != DESC)) {
+                handleModificationsToSubmissionInfo(workingMemory, modifications)
+            }
         }
 
         /**
@@ -375,8 +386,17 @@ class SubmissionService {
          */
         protected void handleModificationsToSubmissionInfo(Map<String, Object> workingMemory,
                 Map<String,Object> modifications) {
-            workingMemory["new_name"] = modifications.get("new_name")
-            workingMemory["new_description"] = modifications.get("new_description")
+            final RTC REVISION = workingMemory["RevisionTC"] as RTC
+            final String R_NAME = REVISION.name
+            final String R_DESCRIPTION = REVISION.description
+            final String NEW_NAME = modifications["new_name"]
+            final String NEW_DESC = modifications["new_description"]
+            if (R_NAME != NEW_NAME) {
+                workingMemory["new_name"] = NEW_NAME
+            }
+            if (R_DESCRIPTION != NEW_DESC) {
+                workingMemory["new_description"] = NEW_DESC
+            }
         }
 
                 

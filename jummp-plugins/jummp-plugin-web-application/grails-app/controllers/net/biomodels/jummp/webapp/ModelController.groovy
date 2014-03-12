@@ -589,8 +589,14 @@ class ModelController {
             on("Continue") {
                 //populate modifications object with form data
                 Map<String,Object> modifications = new HashMap<String,Object>()
-                modifications.put("new_name", params.name.encodeAsHTML())
-                modifications.put("new_description", params.description.encodeAsHTML())
+                final String NAME = params.name
+                final String DESC = params.description
+                if (NAME && NAME.trim()) {
+                    modifications.put("new_name", NAME.trim())
+                }
+                if (DESC && DESC.trim()) {
+                    modifications.put("new_description", DESC.trim())
+                }
                 submissionService.refineModelInfo(flow.workingMemory, modifications)
             }.to "enterPublicationLink"
             on("Cancel").to "cleanUpAndTerminate"
