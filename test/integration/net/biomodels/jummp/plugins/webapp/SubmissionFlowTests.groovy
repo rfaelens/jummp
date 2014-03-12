@@ -140,5 +140,15 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         new TestSubmitOmex().testrun()
     }
 
-   
+   @Test
+   void testSubmitPharmML() {
+        authenticateAsTestUser()
+        new TestSubmitPharmMl().testrun()
+   }
+
+   @Test
+   void testSubmitMDL() {
+        authenticateAsTestUser()
+        new TestSubmitMdl().testrun()
+   }
 }
