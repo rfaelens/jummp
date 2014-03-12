@@ -33,12 +33,10 @@
 
 package net.biomodels.jummp.core
 
-import com.sun.org.apache.bcel.internal.generic.NEW
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC //rude?
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
-import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.model.PublicationLinkProvider
