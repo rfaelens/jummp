@@ -135,10 +135,10 @@
 				var fields=lines[line].split(",");
 				for (var field in fields) {
 					if (line==0) {
-						content.push("<th>");
+						content.push("<th class='padleft padright'>");
 					}
 					else {
-						content.push("<td>");
+						content.push("<td class='padleft padright'>");
 					}
 					content.push(fields[field]);
 					if (line==0) {
