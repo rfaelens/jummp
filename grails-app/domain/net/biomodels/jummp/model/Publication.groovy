@@ -136,8 +136,8 @@ class Publication implements Serializable {
     private static void reconcile(def authors, def tobeAdded) {
     	tobeAdded.each { newAuthor ->
             	Person existing = authors.find { oldAuthor ->
-            		if (newAuthor.orcid) {
-            			return newAuthor.orcid == oldAuthor.orcid
+            		if (newAuthor.id) {
+            			return newAuthor.id == oldAuthor.id
             		}
             		return false
             	}

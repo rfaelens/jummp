@@ -162,6 +162,7 @@ class PubMedService {
      * @param publication The publication to add the authors to
      */
     private void parseAuthors(def slurper, Publication publication) {
+    	System.out.println("INSIDE PARSE AUTHORS");
         for (def authorXml in slurper.resultList.result.authorList.author) {
             Person author = new Person()
             author.userRealName = authorXml.fullName[0].text()
