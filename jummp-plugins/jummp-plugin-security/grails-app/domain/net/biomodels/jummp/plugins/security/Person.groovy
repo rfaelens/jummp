@@ -50,7 +50,8 @@ class Person implements Serializable {
     }
     
     public PersonTransportCommand toCommandObject() {
-    	return new PersonTransportCommand(userRealName: this.userRealName,
+    	return new PersonTransportCommand(id: this.id,
+    									  userRealName: this.userRealName,
     									  institution: this.institution,
     									  orcid: this.orcid)
     }

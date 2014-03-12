@@ -33,7 +33,7 @@ import org.codehaus.groovy.grails.validation.Validateable
  @grails.validation.Validateable	
 class PersonTransportCommand implements Serializable {
     private static final long serialVersionUID = 1L
-
+    long id
     String userRealName
     String institution
     String orcid

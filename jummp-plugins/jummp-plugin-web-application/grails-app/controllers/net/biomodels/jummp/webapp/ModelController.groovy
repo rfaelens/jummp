@@ -614,9 +614,16 @@ class ModelController {
                 		flash.flashMessage="The link is not a valid ${params.PubLinkProvider}"
                 		return error()
         			}
-                	modifications.put("PubLinkProvider",params.PubLinkProvider) 
-                	modifications.put("PubLink",params.PublicationLink) 
-                	submissionService.updatePublicationLink(flow.workingMemory, modifications)
+                	ModelTransportCommand model=flow.workingMemory.get("ModelTC") as ModelTransportCommand
+        			if (params.PubLinkProvider !=model.publication?.linkProvider 
+        				|| params.PublicationLink !=model.publication?.link) {
+        					modifications.put("PubLinkProvider",params.PubLinkProvider) 
+        					modifications.put("PubLink",params.PublicationLink)
+        					submissionService.updatePublicationLink(flow.workingMemory, modifications)
+        			}
+        			else {
+        				flow.workingMemory.put("RetrievePubDetails", false)
+        			}
                 }
                 else {
                 	flow.workingMemory.put("RetrievePubDetails", false)
@@ -732,7 +739,10 @@ class ModelController {
         }
         saveModel {
             action {
-                conversation.changesMade.addAll(submissionService.handleSubmission(flow.workingMemory))
+            	def changes=submissionService.handleSubmission(flow.workingMemory);
+            	changes.each {
+            		conversation.changesMade.add(it.toString());
+            	}
                 session.result_submission=flow.workingMemory.get("model_id")
                 if (flow.isUpdate) {
                 	flash.sendMessage="Model ${session.result_submission} has been updated."

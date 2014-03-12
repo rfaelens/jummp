@@ -44,7 +44,10 @@
 .bold {
 	font-weight: bold;
 }
-.globalButtons {
-	width:20%;
-	margin-left:20%
+#collabUI {
+	width: 100%;
+}
+#ui {
+	margin-left:12%;
+	left:-12%;
 }

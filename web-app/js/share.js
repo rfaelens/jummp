@@ -27,8 +27,6 @@ CollaboratorTable = Backbone.View.extend({
     events: {
       "click .remove": "remove",
       "click .updateCollab": "updateCollab",
-      "submit #collaboratorAddForm": "create",
-      "click .SaveCollabs": "submitData"
     },
     initialize: function() {
       _.bindAll(this,"render","error");
@@ -40,16 +38,15 @@ CollaboratorTable = Backbone.View.extend({
     error: function(model,msg){
       alert(msg);
     },
-    form: function() {
-      return this.$("#collaboratorAddForm");
-    },
-    submitData: function() {
+    submitData: function(evt) {
+    	evt.preventDefault();
     	var collabString=JSON.stringify(this.collection);
     	$.post(submitURL, { collabMap: collabString }, 
       	  	function(returnedData){
       	  			if (returnedData.success) {
       	  				showNotification("Model sharing permissions updated");
-      	  			}
+    	  				window.location=showURL;
+    	  			}
      	  			else {
      	  				showNotification(returnedData.message);
      	  				scheduleHide();
@@ -59,7 +56,7 @@ CollaboratorTable = Backbone.View.extend({
     },
     create: function(evt) {
       evt.preventDefault();
-      var objectCreated=toJSON(this.form());
+      var objectCreated=toJSON($("#collaboratorAddForm"));
       objectCreated.read=makeBoolean(objectCreated.read);
       objectCreated.write=makeBoolean(objectCreated.write);
       if (objectCreated.write) {
@@ -131,22 +128,16 @@ collaboratorList = new CollaboratorTable({
 });
 
 function addButtonEvents() {
-	$( "#nameSearch" ).autocomplete({
-    						source: autoURL,
-    						minLength: 2
-    					});
-      $( "#Done" ).click(function(){
-    		window.location=showURL;
-      });
-      if (collaborators.length < 2) {
+	  if (collaborators.length < 2) {
       	  $("#collabCreate").removeClass('hideRightBorder');
       	  $("#currentCollabs").addClass('hideLeftBorder');
+      	  $("#collabUI").height($("#collabCreate").height());
       }
       else {
       	  $("#collabCreate").addClass('hideRightBorder');
       	  $("#currentCollabs").removeClass('hideLeftBorder');
+      	  $("#collabUI").height($("#currentCollabs").height());
       }
-     
  }
 
 
@@ -164,7 +155,7 @@ function main(existing, contURL, submit, autoComp, show) {
 	showURL=show
 	console.log(submitURL);
 	console.log(collaboratorList.el);
-	$('#ui').html(collaboratorList.$el);
+	$('.containUI').html(collaboratorList.$el);
 	_.each(existing, function(collab) {
 			console.log(JSON.stringify(collab))
 			if (collab.write) {
@@ -173,5 +164,16 @@ function main(existing, contURL, submit, autoComp, show) {
 			collaborators.add(collab);
 	});
 	addButtonEvents();
+	$( "#nameSearch" ).autocomplete({
+    						source: autoURL,
+    						minLength: 2
+      });
+      $( "#SaveCollabs" ).click(function(event){
+    		collaboratorList.submitData(event);
+      });
+      $( "#AddButton" ).click(function(event){
+    		collaboratorList.create(event);
+      });
+      
 }
 
