@@ -54,8 +54,8 @@ import org.apache.commons.io.FilenameUtils
  *
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @author 20130625
-*/
+ * @date 20140312
+ */
 class SubmissionService {
     // concrete strategies for the submission state machine
     private final NewModelStateMachine newModel = new NewModelStateMachine()
