@@ -804,6 +804,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.READ)
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.DELETE)
+            
+            //grant admin rights to the owner of the model
+        	Revision earliest=getRevision(model, 1);
+        	aclUtilService.addPermission(revision, earliest.owner.username, BasePermission.ADMINISTRATION)
+            aclUtilService.addPermission(revision, earliest.owner.username, BasePermission.DELETE)
+            
             // grant read access to all users having read access to the model
             Acl acl = aclUtilService.readAcl(model)
             for (ace in acl.entries) {
@@ -1494,6 +1500,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
                 aclUtilService.addPermission(revision, collaborator.username, BasePermission.READ)
             }
+            else {
+            	System.out.println("I COULD NOT GRANT PERMISSION TO "+revision.id+" and user: "+collaborator);
+            }
         }
     }
     
@@ -1607,6 +1616,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     		}
     	}
     	else {
+			System.out.println("I APPARENTLY DONT HAVE ACCESS TO THE MODEL");    		
     		throw new AccessDeniedException("You cant access permissions if you dont have them.");
     	}
     }
