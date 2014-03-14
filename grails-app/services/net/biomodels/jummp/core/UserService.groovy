@@ -313,9 +313,14 @@ class UserService implements IUserService {
         				}
         			}
         		}
+        		else {
+        			System.out.println("NO PERSON BY THE ORCID: "+newUser.person.orcid+" found!");
+        			newUser.person.save(flush:true, failOnError:true)
+        		}
         	}
         	else {
         		newUser.person.save(flush:true, failOnError:true)
+        		System.out.println("PERSON SAVED WITH PROPERTIES: "+newUser.person.inspect());
         	}
         }
         catch(Exception e) {
