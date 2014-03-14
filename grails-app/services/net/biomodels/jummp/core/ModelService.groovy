@@ -250,7 +250,7 @@ ORDER BY
             query += "r.format"
             break
         case ModelListSorting.SUBMITTER:
-            query += "u.userRealName"
+            query += "u.person.userRealName"
             break
        case ModelListSorting.SUBMISSION_DATE:
        	    /*
@@ -330,7 +330,7 @@ ORDER BY
             query += "r.format"
             break
         case ModelListSorting.SUBMITTER:
-            query += "u.userRealName"
+            query += "u.person.userRealName"
             break
        case ModelListSorting.SUBMISSION_DATE:
        	    /*
