@@ -174,6 +174,21 @@ class UserService implements IUserService {
         System.out.println("RETURNING USER: "+user.person.userRealName+"..."+user.username);
         return user.sanitizedUser()
     }
+    
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="userService.hasRole")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
+    boolean hasRole(String username, String role) throws UserNotFoundException {
+    	User potentialCurator = User.findByUsername(username)
+        if (!potentialCurator) {
+            throw new UserNotFoundException(username)
+        }
+        Set<Role> roles=potentialCurator.getAuthorities();
+        def isCurator=roles.find {
+        	it.authority==role;
+        }
+        return isCurator
+    }
 
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="userService.getUser")
