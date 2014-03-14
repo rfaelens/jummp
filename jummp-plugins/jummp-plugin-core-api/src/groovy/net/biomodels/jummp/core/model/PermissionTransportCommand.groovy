@@ -37,4 +37,5 @@ class PermissionTransportCommand {
 	String id;
 	boolean read=false;
 	boolean write=false;
+	boolean disabledEdit=false;
 }
