@@ -190,7 +190,7 @@ grails.project.dependency.resolution = {
         compile ":spring-security-core:1.2.7.3"
         compile ":spring-security-ldap:1.0.6"
         test ":code-coverage:1.2.6"
-        test(":codenarc:0.18.1") { transitive = false }
+        compile(":codenarc:0.20")
         test ":gmetrics:0.3.1"
         runtime(":weceem:1.1.3-SNAPSHOT") {
             excludes 'xstream',
