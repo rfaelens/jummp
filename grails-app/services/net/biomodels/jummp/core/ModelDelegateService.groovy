@@ -266,7 +266,13 @@ class ModelDelegateService implements IModelService {
     }
     
     RevisionTransportCommand getRevisionDetails(RevisionTransportCommand skeleton) {
-    	return Revision.get(skeleton.id).toCommandObject()
+        assert skeleton.id
+        final String REV_ID = skeleton.id
+        final Revision REV = Revision.get(REV_ID)
+        if (!REV) {
+            throw IllegalArgumentException("Revision with id $REV_ID does not exist")
+        }
+        return REV.toCommandObject()
     }
     
     
