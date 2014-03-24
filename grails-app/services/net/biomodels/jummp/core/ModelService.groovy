@@ -799,6 +799,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             if (rev.model.publication) {
             	model.publication = Publication.fromCommandObject(rev.model.publication)
             }
+            revision.save(failOnError:true)
             model.save(flush: true)
             stopWatch.lap("Model persisted to the database.")
             stopWatch.setTag("modelService.addValidatedRevision.grantPermissions")

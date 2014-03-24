@@ -712,10 +712,9 @@ class SubmissionService {
                 changes.add("Edited model description")
             }
             if (SHOULD_UPDATE) {
-                RTC latest = workingMemory["RevisionTC"] as RTC
-                latest.comment = "Edited model metadata online."
+                newlyCreatedRTC.comment = "Edited model metadata online."
                 def updated = modelService.addValidatedRevision(
-                        newlyCreatedRTC.files, [], latest)
+                        newlyCreatedRTC.files, [], newlyCreatedRTC)
                 workingMemory.put("model_id", updated.model.id)
             } else {
                 workingMemory.put("model_id", newlyCreated.model.id)
