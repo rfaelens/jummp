@@ -54,6 +54,7 @@ import net.biomodels.jummp.model.PublicationLinkProvider
 import net.biomodels.jummp.model.RepositoryFile
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.Role
 import org.apache.commons.io.FileUtils
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
@@ -810,11 +811,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         	aclUtilService.addPermission(revision, earliest.owner.username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, earliest.owner.username, BasePermission.DELETE)
             
+            
             // grant read access to all users having read access to the model
             Acl acl = aclUtilService.readAcl(model)
             for (ace in acl.entries) {
                 if (ace.sid instanceof PrincipalSid && ace.permission == BasePermission.READ) {
                     aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.READ)
+                }
+                if (ace.sid instanceof PrincipalSid && ace.permission == BasePermission.ADMINISTRATION) {
+                    aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.ADMINISTRATION)
                 }
             }
             stopWatch.stop()
@@ -1500,9 +1505,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
                 aclUtilService.addPermission(revision, collaborator.username, BasePermission.READ)
             }
-            else {
-            	System.out.println("I COULD NOT GRANT PERMISSION TO "+revision.id+" and user: "+collaborator);
-            }
         }
     }
     
@@ -1546,6 +1548,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     				}
     				else {
     					map.get(user).write=true;
+    					//disable editing for curators and for users who have contributed revisions
+    					if (userService.hasRole(user, "ROLE_CURATOR")) {
+    						map.get(user).disabledEdit=true;
+    					}
+    					getAllRevisions(model).each {
+    						if (it.owner.username == user) {
+    							map.get(user).disabledEdit=true;
+    						}
+    					}
     				}
     			}
     		}
@@ -1578,7 +1589,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
 				User user=userService.getUser(newPerm.id);
 				if (current) {
 					if (current.read && !(newPerm.read)) {  //revoke previously held read access
-						System.out.println("REVOKING READ ACCESS TO "+newPerm.id);
 						revokeReadAccess(model, user);
 					}
 					if (current.write && !(newPerm.write)) { //revoke previously held write access
@@ -1616,8 +1626,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     		}
     	}
     	else {
-			System.out.println("I APPARENTLY DONT HAVE ACCESS TO THE MODEL");    		
-    		throw new AccessDeniedException("You cant access permissions if you dont have them.");
+			throw new AccessDeniedException("You cant access permissions if you dont have them.");
     	}
     }
 
@@ -1639,6 +1648,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.grantWriteAccess")
     public void grantWriteAccess(Model model, User collaborator) {
         aclUtilService.addPermission(model, collaborator.username, BasePermission.WRITE)
+        boolean isCurator=userService.hasRole(collaborator.username, "ROLE_CURATOR")
+        if (isCurator) {
+        	aclUtilService.addPermission(model, collaborator.username, BasePermission.ADMINISTRATION);
+        	getAllRevisions(model).each {
+        		aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION);
+        	}
+        }
     }
 
     /**
@@ -1789,7 +1805,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (model.deleted) {
         	return false
         }
-        System.out.println("I HAVE SHARING PERMISSION: "+aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.ADMINISTRATION));
         return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.ADMINISTRATION))
     }
 
@@ -1939,10 +1954,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * method.
      * @param revision The Revision to be published
      */
-    @PreAuthorize("(hasRole('ROLE_CURATOR') and hasPermission(#revision, admin)) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_CURATOR') or hasRole('ROLE_ADMIN')") //used to be: (hasRole('ROLE_CURATOR') and hasPermission(#revision, admin))
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.publishModelRevision")
     public void publishModelRevision(Revision revision) {
+    	if (!SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+    		if (!aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.ADMINISTRATION)) {
+    			throw new AccessDeniedException("You cannot publish this model.");
+    		}
+    	}
         if (!revision) {
             throw new IllegalArgumentException("Revision may not be null")
         }

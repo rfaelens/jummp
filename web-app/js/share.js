@@ -62,6 +62,7 @@ CollaboratorTable = Backbone.View.extend({
       if (objectCreated.write) {
 				objectCreated.read=true;
 	  }
+  	  objectCreated.disabledEdit=false;
       console.log(JSON.stringify(collaborators));
       console.log(JSON.stringify(objectCreated));
       var that = this;
