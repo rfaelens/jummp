@@ -562,20 +562,21 @@ class SubmissionService {
             model.format=revision.format
             revision.comment="Import of ${revision.name}".toString()
             Model newModel = modelService.uploadValidatedModel(repoFiles, revision)
-            RTC latest = modelService.getLatestRevision(newModel).toCommandObject()
+            Revision latest = modelService.getLatestRevision(newModel)
+            RTC latestRTC = latest.toCommandObject()
 
             final String NEW_NAME = workingMemory["new_name"]
             final String NEW_DESCRIPTION = workingMemory["new_description"]
             final boolean SHOULD_UPDATE = NEW_NAME || NEW_DESCRIPTION
             if (NEW_NAME) {
-                modelFileFormatService.updateName(latest, NEW_NAME)
+                modelFileFormatService.updateName(latestRTC, NEW_NAME)
             }
             if (NEW_DESCRIPTION) {
-                modelFileFormatService.updateDescription(latest, NEW_DESCRIPTION)
+                modelFileFormatService.updateDescription(latestRTC, NEW_DESCRIPTION)
             }
             if (SHOULD_UPDATE) {
-                latest.comment = "Edited model metadata online."
-                modelService.addValidatedRevision(repoFiles, [], latest)
+                latestRTC.comment = "Edited model metadata online."
+                modelService.addValidatedRevision(latestRTC.files, [], latestRTC)
             }
             workingMemory.put("model_id", newModel.id)
             return new TreeSet<String>(); //no need to track changes made during submission
@@ -697,22 +698,24 @@ class SubmissionService {
             		changes.add("Added file: ${fileAdded}")
             	}
             }
-            def newlyCreated= modelService.addValidatedRevision(repoFiles, deleteFiles, revision)
+            Revision newlyCreated = modelService.addValidatedRevision(repoFiles, deleteFiles, revision)
+            RTC newlyCreatedRTC = newlyCreated.toCommandObject()
             final String NEW_NAME = workingMemory["new_name"]
             final String NEW_DESCRIPTION = workingMemory["new_description"]
             final boolean SHOULD_UPDATE = NEW_NAME || NEW_DESCRIPTION
             if (NEW_NAME) {
-                modelFileFormatService.updateName(revision, NEW_NAME)
+                modelFileFormatService.updateName(newlyCreatedRTC, NEW_NAME)
                 changes.add("Edited model name")
             }
             if (NEW_DESCRIPTION) {
-                modelFileFormatService.updateDescription(revision, NEW_DESCRIPTION)
+                modelFileFormatService.updateDescription(newlyCreatedRTC, NEW_DESCRIPTION)
                 changes.add("Edited model description")
             }
             if (SHOULD_UPDATE) {
                 RTC latest = workingMemory["RevisionTC"] as RTC
                 latest.comment = "Edited model metadata online."
-                def updated = modelService.addValidatedRevision(repoFiles, [], latest)
+                def updated = modelService.addValidatedRevision(
+                        newlyCreatedRTC.files, [], latest)
                 workingMemory.put("model_id", updated.model.id)
             } else {
                 workingMemory.put("model_id", newlyCreated.model.id)
