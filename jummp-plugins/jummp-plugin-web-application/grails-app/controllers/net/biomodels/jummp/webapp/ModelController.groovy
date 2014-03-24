@@ -115,7 +115,7 @@ class ModelController {
 		return username		
     }
     
-    private auditBefore() {
+    private void auditBefore() {
     	String model=params.id.split("\\.")[0]
     	long modelId=Long.parseLong(model)
     	String username=getUsername();
@@ -130,7 +130,7 @@ class ModelController {
 		session.lastHistory=historyItem;
     }
     
-    private auditAfter(def model) {
+    private void auditAfter(def model) {
     	modelDelegateService.updateAuditSuccess(session.lastHistory, true)
     	session.removeAttribute("lastHistory")
     }
