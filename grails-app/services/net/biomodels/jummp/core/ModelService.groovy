@@ -2022,7 +2022,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     									type: cmd.type,
     									changesMade: cmd.changesMade,
     									success: cmd.success);
-    		audit.save(flush:true, failOnError:true);
+    		audit.save();
     		return audit.id;
     	}
     	return -1;
