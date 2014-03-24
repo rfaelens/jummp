@@ -2039,9 +2039,16 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.updateAuditSuccess")
     void updateAuditSuccess(Long itemId, boolean success) {
     	if (itemId!=-1) {
-    		ModelAudit audit=ModelAudit.lock(itemId)
-    		audit.success=success;
-    		audit.save()
+    		try
+    		{
+    			ModelAudit audit=ModelAudit.lock(itemId)
+    			audit.success=success;
+    			audit.save()
+    		}
+    		catch(Exception e) {
+				log.error("Failed to update audit for "+itemId+" with success: "+success)    			
+    			e.printStackTrace();
+    		}
     	}
 	}
 
