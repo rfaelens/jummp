@@ -28,7 +28,8 @@ enum AccessType {
    PUBLISH (4, "Publish"), 
    ARCHIVE (5, "Archive"), 
    DOWNLOAD (6, "Download"),
-   SHARE (7, "Share") 
+   SHARE (7, "Share"),
+   FILES (8, "Files");
 
 
    final int id 
@@ -49,6 +50,7 @@ enum AccessType {
    	   	   case "delete": return ARCHIVE;
    	   	   case "download": return DOWNLOAD; 
    	   	   case "shareupdate": return SHARE;
+   	   	   case "files": return FILES;
    	   }
    	   return null;
    }
