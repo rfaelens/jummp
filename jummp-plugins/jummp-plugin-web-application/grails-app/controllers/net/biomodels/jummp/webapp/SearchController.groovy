@@ -44,7 +44,7 @@ import net.biomodels.jummp.plugins.security.User
 
 class SearchController {
     
-     /**
+	 /**
      * Dependency Injection of Spring Security Service
      */
      def springSecurityService
@@ -61,7 +61,56 @@ class SearchController {
         redirect action: 'list'
     }
     
-    private int numResults(def params) {
+    private boolean integerCheck(def input, boolean minValueCheck=false, int minValue=-1) {
+    	try {
+    		if (!input) {
+    			return false;
+    		}
+    		int value=Integer.parseInt(input);
+    		if (minValueCheck) {
+    			return value >= minValue;
+    		}
+    		return true;
+    	}
+    	catch(Exception e) {
+    		return false;
+    	}
+    }
+    
+    private void sanitiseParams() {
+    	if (!params.sortBy) {
+    		params.sortBy="modified"
+    	}
+		if (!params.sortDir || params.sortDir!="asc") {
+			params.sortDir="desc";
+		}
+		if (params.sortBy) {
+			switch (params.sortBy) {
+					case "name":
+					case "format":
+					case "submitter":
+					case "submitted":
+					case "modified":
+					break
+					default:
+						params.sortBy = "modified";
+			}	
+		}
+		else {
+			params.sortBy = "modified";
+		}
+		params.numResults=numResults();
+		if (integerCheck(params.offset, true, -1)) {
+			params.offset = params.offset ? Integer.parseInt(params.offset):0;
+		}
+		else {
+			params.offset=0;
+		}
+    }
+    
+    private int numResults() {
+    	final int MAXRESULTS=50;
+	    final int MINRESULTS=10;
     	User user;
     	if (!(springSecurityService.principal instanceof String)) {
     		user=User.findById(springSecurityService.principal.id)
@@ -73,8 +122,14 @@ class SearchController {
     	if (!prefs) {
     		prefs=Preferences.getDefaults()
     	}
-    	if (params.numResults) {
+    	if (integerCheck(params.numResults, true, -1)) {
     		prefs.numResults=params.numResults as Integer
+    		if (prefs.numResults > MAXRESULTS ) {
+    			prefs.numResults=MAXRESULTS;
+    		}
+    		else if (prefs.numResults < MINRESULTS ) {
+    			prefs.numResults=MINRESULTS;
+    		}
     		if (user) {
     			prefs.setUser(user)
     			prefs.save(flush:true)
@@ -88,11 +143,11 @@ class SearchController {
      * Default action showing a list view
      */
     def list = {
-    	int nResults=numResults(params)
-
+    	sanitiseParams();
     	def results=browseCore(params.sortBy, 
 		 					   params.sortDir, 
-		 					   params.offset ? Integer.parseInt(params.offset):0, nResults)
+		 					   params.offset,
+		 					   params.numResults)
 		 									  
     	if (!params.format || params.format=="html") {
      	 	 	results["history"]=modelHistoryService.history()
@@ -105,10 +160,11 @@ class SearchController {
      * Default action showing a list view
      */
     def archive = {
-    	int nResults=numResults(params)
+    	sanitiseParams();
     	def results=archiveCore(params.sortBy, 
 		 					   params.sortDir, 
-		 					   params.offset ? Integer.parseInt(params.offset):0, nResults)
+		 					   params.offset,
+		 					   params.numResults)
 		 									  
 		return results
     }
@@ -121,11 +177,15 @@ class SearchController {
      * Default action showing a list view
      */
      def search = {
-    	 int nResults=numResults(params)
+    	 sanitiseParams();
+    	 if (!params.query) {
+    	 	 params.query="";
+    	 }
     	 def results=searchCore(params.query, 
 		 				     	params.sortBy, 
 		 						params.sortDir, 
-		 						params.offset ? Integer.parseInt(params.offset):0, nResults)
+		 						params.offset,
+		 						params.numResults)
 		 if (!params.format || params.format=="html") {
 		 	 return results
 		 }
@@ -145,14 +205,8 @@ class SearchController {
         if (query?.trim()) {
             models.addAll(modelService.searchModels(query))
         }
-    	if (!sortBy) {
-    		sortBy="modified"
-    	}
-    	if (!sortDirection) {
-    		sortDirection="desc"
-    	}
-		int sortDir=1
-		if (sortDirection=="asc") {
+    	int sortDir=1
+		if (sortDirection && sortDirection=="asc") {
 			sortDir=-1;
 		}
 		switch (sortBy) {
@@ -179,6 +233,9 @@ class SearchController {
         if (offset>0 && offset<models.size()) {
         	models = models[offset..-1]
         }
+        else {
+        	offset=0;
+        }
         if (models.size() > length) {
         	models = models[0..length-1]
         }
@@ -193,13 +250,7 @@ class SearchController {
     }
     
     private def archiveCore(String sortBy, String sortDirection, int offset, int length) {
-    	if (!sortBy) {
-    		sortBy="modified"
-    	}
-    	if (!sortDirection) {
-    		sortDirection="desc"
-    	}
-		int sortDir=1
+    	int sortDir=1
 		if (sortDirection=="asc") {
 			sortDir=-1;
 		}
@@ -239,13 +290,7 @@ class SearchController {
     
     
     private def browseCore(String sortBy, String sortDirection, int offset, int length) {
-    	if (!sortBy) {
-    		sortBy="modified"
-    	}
-    	if (!sortDirection) {
-    		sortDirection="desc"
-    	}
-		int sortDir=1
+    	int sortDir=1
 		if (sortDirection=="asc") {
 			sortDir=-1;
 		}
