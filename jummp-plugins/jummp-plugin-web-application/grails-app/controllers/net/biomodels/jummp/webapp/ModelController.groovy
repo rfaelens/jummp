@@ -116,23 +116,42 @@ class ModelController {
     }
     
     private void auditBefore() {
-    	String model=params.id.split("\\.")[0]
-    	long modelId=Long.parseLong(model)
-    	String username=getUsername();
-		String accessType=actionUri
-		// publish uses revision ids, annoyingly enough.
-		if (accessType.contains("publish")) {
-			modelId=modelDelegateService.getRevisionDetails(new RevisionTransportCommand(id: modelId)).model.id
-		}
-		String formatType=params.format?:"html"
-		String changesMade=null;
-		int historyItem=updateHistory(modelId, username, accessType, formatType, changesMade)
-		session.lastHistory=historyItem;
+    	try {
+    		if (isValidId()) {
+    			String model=params.id.split("\\.")[0]
+    			long modelId=Long.parseLong(model)
+    			String username=getUsername();
+    			String accessType=actionUri
+    			if (accessType) {
+    				// publish uses revision ids, annoyingly enough.
+    				if (accessType.contains("publish")) {
+    					def rev=modelDelegateService.getRevisionDetails(new RevisionTransportCommand(id: modelId));
+    					if (rev) {
+    						modelId=rev.model.id
+    					}
+    				}
+    				String formatType=params.format?:"html"
+    				String changesMade=null;
+    				int historyItem=updateHistory(modelId, username, accessType, formatType, changesMade)
+    				session.lastHistory=historyItem;
+    			}
+    		}
+    	}
+    	catch(Exception e) {
+    		e.printStackTrace()
+    	}
     }
     
     private void auditAfter(def model) {
-    	modelDelegateService.updateAuditSuccess(session.lastHistory, true)
-    	session.removeAttribute("lastHistory")
+    	try {
+    		if (session.lastHistory) {
+    			modelDelegateService.updateAuditSuccess(session.lastHistory, true)
+    			session.removeAttribute("lastHistory")
+    		}
+    	}
+    	catch(Exception e) {
+    		e.printStackTrace();
+    	}
     }
     
     private int updateHistory(long model, String user, String accessType, 
@@ -159,6 +178,27 @@ class ModelController {
         redirect(action: "show", id:params.id)
     }
 
+    private boolean isValidId() {
+    	try {
+    		System.out.println("CHECKING ID: "+params.id);
+    		if (params.id) {
+    			String[] parts=params.id.split("\\.");
+    			parts.each {
+    				System.out.println("CHECKING PART: "+it);
+    				long part=Long.parseLong(it);
+    				if (part<1) {
+    					return false;
+    				}
+    			}
+    			return true;
+    		}
+    	}
+    	catch(Exception e) {
+	    		
+    	}
+    	return false;
+    }
+    
     @ApiOperation(value = "Show a model.", httpMethod = "GET",
                 response = net.biomodels.jummp.webapp.rest.model.show.Model.class,
                 notes = "Pass the expected media type of the request as a parameter e.g. /model/id?format=json")
@@ -207,36 +247,56 @@ class ModelController {
     }
 
     def files = {
-        def revisionFiles = modelDelegateService.getRevision(params.id).files
-        def responseFiles = revisionFiles.findAll { !it.hidden }
-        respond new net.biomodels.jummp.webapp.rest.model.show.ModelFiles(responseFiles)
+    	if (isValidId()) 
+         {
+         	 def revisionFiles = modelDelegateService.getRevision(params.id).files
+         	 def responseFiles = revisionFiles.findAll { !it.hidden }
+         	 respond new net.biomodels.jummp.webapp.rest.model.show.ModelFiles(responseFiles)
+         }
+       else {
+       	   respond net.biomodels.jummp.webapp.rest.error.Error("Invalid Id", "An invalid model id was specified");
+       }
     }
 
     def publish = {
-       def rev=new RevisionTransportCommand(id: params.id as int)
-       modelDelegateService.publishModelRevision(rev)
-       redirect(action: "showWithMessage", id: modelDelegateService.getRevisionDetails(rev).model.id,
-                params: [flashMessage:"Model has been published."])
+    	if (isValidId()) 
+        {
+        	def rev=new RevisionTransportCommand(id: params.id as int)
+        	modelDelegateService.publishModelRevision(rev)
+        	redirect(action: "showWithMessage", id: modelDelegateService.getRevisionDetails(rev).model.id,
+                	params: [flashMessage:"Model has been published."])
+        }
+        else {
+        	forward(controller: "errors", action: "error403")
+        }
     }
 
     def delete = {
-       boolean deleted=modelDelegateService.deleteModel(params.id as int)
-       redirect(action: "showWithMessage", id: params.id,
-                params: [flashMessage: deleted?"Model has been deleted, and moved into archives.":"Model could not be deleted"])
+    	if (isValidId()) 
+        {
+        	boolean deleted=modelDelegateService.deleteModel(params.id as int)
+        	redirect(action: "showWithMessage", id: params.id,
+            	     params: [flashMessage: deleted?"Model has been deleted, and moved into archives.":"Model could not be deleted"])
+        }
+        else {
+        	forward(controller: "errors", action: "error403")
+        }
     }
     
     def share = {
-    	if (params.id) {
+    	if (isValidId()) {
     		def rev=modelDelegateService.getRevisionDetails(new RevisionTransportCommand
     													(id: Long.parseLong(params.id)));
     		def perms=modelDelegateService.getPermissionsMap(rev.model.id);
     		return [revision: rev, permissions: perms as JSON]
     	}
-    	else throw new Exception("Model version must be specified to share");
+    	else {
+    		forward(controller: "errors", action: "error403")
+        }
     }
     
     def shareUpdate = {
-    	if (params.id && params.collabMap) {
+    	if (isValidId() && params.collabMap) {
     		def map=JSON.parse(params.collabMap);
     		List<PermissionTransportCommand> collabsNew=new LinkedList<PermissionTransportCommand>();
     		for (int i=0; i<map.length(); i++) {
@@ -253,7 +313,7 @@ class ModelController {
     		render (['success': true, 'permissions': modelDelegateService.getPermissionsMap(params.id as Long)] as JSON)
     	}
     	else {
-    		render (['success': false, 'message': "Couldnt update stuff"] as JSON)
+    		render (['success': false, 'message': "Couldnt update permissions"] as JSON)
     	}
     }
     
@@ -261,10 +321,10 @@ class ModelController {
     def updateFlow = {
         start {
             action {
-                if (!params.id) {
+            	if (!isValidId()) {
                     return error()
                 }
-                if (!modelDelegateService.canAddRevision(params.id as Long)) {
+                if ((params.id as Long) < 1 || !modelDelegateService.canAddRevision(params.id as Long)) {
                 	return accessDenied()
                 }
                 conversation.model_id=params.id
@@ -838,37 +898,39 @@ class ModelController {
     def download = {
         try
         {
-        	if (!params.filename) {	
-        		List<RFTC> files = modelDelegateService.retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
-        		List<RFTC> mainFiles = files.findAll { it.mainFile }
-        		if (files.size() == 1) {
-            		   serveModelAsFile(files.first(), response, false)
-            	}
-            	else if (mainFiles.size() == 1) {
-            		   serveModelAsFile(mainFiles.first(), response, false)
-            	}
-            	else {
-            	       serveModelAsZip(files, response)
-            	}
-            }
-            else {
-            	List<RFTC> files = modelDelegateService.
-            						retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
-            	RFTC requested=files.find {
-                    if (it.hidden) {
-                        return false
-                    }
-            	    File file=new File(it.path)
-            	    file.getName()==params.filename
-            	}
-            	boolean inline=true
-            	if (!params.inline) {
-            		inline=false
-            	}
-            	if (requested) {
-            	    serveModelAsFile(requested, response, inline)
-            	}            	
-            }
+        	if (isValidId()) {
+				if (!params.filename) {	
+					List<RFTC> files = modelDelegateService.retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
+					List<RFTC> mainFiles = files.findAll { it.mainFile }
+					if (files.size() == 1) {
+						   serveModelAsFile(files.first(), response, false)
+					}
+					else if (mainFiles.size() == 1) {
+						   serveModelAsFile(mainFiles.first(), response, false)
+					}
+					else {
+						   serveModelAsZip(files, response)
+					}
+				}
+				else {
+					List<RFTC> files = modelDelegateService.
+										retrieveModelFiles(modelDelegateService.getRevision(params.id as String))
+					RFTC requested=files.find {
+						if (it.hidden) {
+							return false
+						}
+						File file=new File(it.path)
+						file.getName()==params.filename
+					}
+					boolean inline=true
+					if (!params.inline) {
+						inline=false
+					}
+					if (requested) {
+						serveModelAsFile(requested, response, inline)
+					}            	
+				}
+			}
         }
         catch(Exception e)
         {
@@ -919,12 +981,14 @@ class ModelController {
      * File download of the model file for a model by id
      */
     def downloadModelRevision = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
-        byte[] bytes = modelDelegateService.retrieveModelFiles(rev)
-        response.setContentType("application/xml")
-        // TODO: set a proper name for the model
-        response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")
-        response.outputStream << new ByteArrayInputStream(bytes)
+    	if (isValidId()) {
+			RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+			byte[] bytes = modelDelegateService.retrieveModelFiles(rev)
+			response.setContentType("application/xml")
+			// TODO: set a proper name for the model
+			response.setHeader("Content-disposition", "attachment;filename=\"model.xml\"")
+			response.outputStream << new ByteArrayInputStream(bytes)
+		}
     }
 
     private List<File> transferFiles(String parent, List multipartFiles) {
