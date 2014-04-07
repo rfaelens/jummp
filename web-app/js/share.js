@@ -22,6 +22,7 @@ var lookupURL="";
 var submitURL="";
 var autoURL="";
 var showURL="";
+var selectedItem;
 collaborators = new Collaborators;
 CollaboratorTable = Backbone.View.extend({
     events: {
@@ -40,12 +41,14 @@ CollaboratorTable = Backbone.View.extend({
     },
     submitData: function(evt) {
     	evt.preventDefault();
+    	
+    },
+    performSubmission:function() {
     	var collabString=JSON.stringify(this.collection);
     	$.post(submitURL, { collabMap: collabString }, 
       	  	function(returnedData){
       	  			if (returnedData.success) {
-      	  				showNotification("Model sharing permissions updated");
-    	  				window.location=showURL;
+      	  				//window.location=showURL;
     	  			}
      	  			else {
      	  				showNotification(returnedData.message);
@@ -63,21 +66,31 @@ CollaboratorTable = Backbone.View.extend({
 				objectCreated.read=true;
 	  }
   	  objectCreated.disabledEdit=false;
+  	  objectCreated.show=true;
       console.log(JSON.stringify(collaborators));
       console.log(JSON.stringify(objectCreated));
       var that = this;
-      $.post(lookupURL, { name: objectCreated.name }, 
+      if (selectedItem && selectedItem.name==objectCreated.name) {
+      	  objectCreated.id = selectedItem[1];
+      	  collaborators.add(objectCreated);
+      	  this.performSubmission();
+      }
+      else {
+      	  var that=this;
+      	  $.post(lookupURL, { name: objectCreated.name }, 
       	  	function(returnedData){
       	  			if (returnedData.found) {
       	  				objectCreated.id=returnedData.username;
       	  				collaborators.add(objectCreated);
+      	  				that.performSubmission();
       	  			}
      	  			else {
      	  				showNotification("Could not find a user by that name");
      	  				scheduleHide();
      	  			}
       	  	}
-      );
+      	  );
+      }
     },
     updateCollab: function(evt) {
       evt.preventDefault();
@@ -98,6 +111,7 @@ CollaboratorTable = Backbone.View.extend({
       	  }
       }
       this.render();
+      this.performSubmission();
     },
     update: function(evt) {
       evt.preventDefault();
@@ -116,10 +130,19 @@ CollaboratorTable = Backbone.View.extend({
       var collaborator=buttonElement.parent().parent();
       var removed=this.collection.remove(id);
       this.render();
+      this.performSubmission();
     },
     render: function() {
-      console.log('inside render with '+JSON.stringify(this.collection));
-      var html = template(this.collection.toJSON());
+      willBeRendered=this.collection.length;
+      this.collection.each(function(collab) {
+      		  	console.log(collab);
+      	  		if (!collab.get("show")) {
+      	  			willBeRendered--;
+      	  		}
+      	  });
+      var renderThis = {collabsList: this.collection.toJSON(), hasCollabs: willBeRendered>0};
+      console.log(renderThis);
+      var html = template(renderThis);
       this.$el.html(html);
       addButtonEvents();
     }
@@ -149,6 +172,10 @@ function s4() {
 };
 
 
+function mangleEmail(mail) {
+	parts=mail.split("@");
+}
+
 function main(existing, contURL, submit, autoComp, show) {
 	lookupURL=contURL
 	submitURL=submit
@@ -166,10 +193,33 @@ function main(existing, contURL, submit, autoComp, show) {
 	});
 	addButtonEvents();
 	$( "#nameSearch" ).autocomplete({
-    						source: autoURL,
-    						minLength: 2
-      });
-      $( "#SaveCollabs" ).click(function(event){
+					minLength: 2,
+					source: function( request, response ) {
+							var term = request.term;
+							$.getJSON( autoURL, request, function( data, status, xhr ) {
+									var filtered=[];
+									$.each(data, function(result) {
+											if (collaborators.findWhere({name: data[result][2], id: data[result][1]})) {
+												console.log("EXCLUDED "+data[result][2]);
+											}
+											else {
+												filtered.push(data[result]);
+											}
+									});
+									response( filtered );
+							});
+					},
+					select: function( event, ui ) {
+							$( "#nameSearch" ).val( ui.item[2] );
+							selectedItem=ui.item[2];
+							return false;
+					}
+	}).data( "ui-autocomplete" )._renderItem = function( ul, item ) {
+      		return $( "<li>" )
+        	.append( "<a>" + item[2] + " ("+ item[1]+")<br/>" + item[0] + "<hr style='margin: 0.5em 0 !important;'/></a>" )
+        	.appendTo( ul );
+      };
+  	  $( "#SaveCollabs" ).click(function(event){
     		collaboratorList.submitData(event);
       });
       $( "#AddButton" ).click(function(event){

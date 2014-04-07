@@ -207,7 +207,9 @@ class UserService implements IUserService {
     List<String> searchUsers(String term) {
     	return User.withCriteria {
     		projections {
-    			person {
+    			property('email')
+ 			    property('username')
+ 			    person {
     				property('userRealName')
     			}
     		}

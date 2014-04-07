@@ -204,7 +204,7 @@ class ModelController {
                 notes = "Pass the expected media type of the request as a parameter e.g. /model/id?format=json")
     @ApiImplicitParam(name = "modelId", value = "The model identifier", required = true, allowMultiple = false)
     def show() {
-        if (!params.format || params.format=="html") {
+    	if (!params.format || (params.format!="json" && params.format!="xml") ) {
         		RevisionTransportCommand rev=modelDelegateService.getRevision(params.id)
         		boolean showPublishOption = modelDelegateService.canPublish(rev.model.id)
         		boolean canUpdate = modelDelegateService.canAddRevision(rev.model.id)

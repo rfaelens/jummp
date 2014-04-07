@@ -37,7 +37,7 @@
     			
         		<div id="currentCollabs">
 				<h2>Collaborators</h2>
-    			{{#if [].length}}
+    			{{#if hasCollabs}}
 				<table class='table'> 
     			<thead>
     				<tr>
@@ -45,13 +45,15 @@
     					<td class="tableEL  bold">Read</td>
     					<td class="tableEL bold">Write</td>
     			<tbody>
-    		 		{{#each []}}
-    		 			<tr class='collaborator'>
-    		 				<td class="tableEL">{{this.name}}</td>
-    		 				<td class="tableEL"><input id=checkRead-{{this.id}} data-field="read" data-person={{this.id}} class="updateCollab" type="checkbox" name="read" {{#if this.read}}checked=true{{/if}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}}></input></td>
-    		 				<td class="tableEL"><input id=checkWrite-{{this.id}} data-field="write" data-person={{this.id}} class="updateCollab" type="checkbox" name="write" {{#if this.write}}checked=true{{/if}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}}></input></td>
-    		 				<td class="tableEL"><button id=removebutton-{{this.id}} data-name={{this.name}} data-person={{this.id}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}} class="remove">Remove</button></td>
-    		 			</tr>
+    		 		{{#each collabsList}}
+    		 			{{#if this.show}}
+							<tr class='collaborator'>
+								<td class="tableEL">{{this.name}}</td>
+								<td class="tableEL"><input id=checkRead-{{this.id}} data-field="read" data-person={{this.id}} class="updateCollab" type="checkbox" name="read" {{#if this.read}}checked=true{{/if}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}}></input></td>
+								<td class="tableEL"><input id=checkWrite-{{this.id}} data-field="write" data-person={{this.id}} class="updateCollab" type="checkbox" name="write" {{#if this.write}}checked=true{{/if}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}}></input></td>
+								<td class="tableEL"><button id=removebutton-{{this.id}} data-name={{this.name}} data-person={{this.id}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}} class="remove">Remove</button></td>
+							</tr>
+						{{/if}}
     		 		{{/each}}
     		 	</tbody>
     		 	</table>
@@ -72,7 +74,7 @@
     						<div id="formElements">
     							<div class="formElement">
     								<label for="name">Name</label>
-    								<input id="nameSearch" name="name" type="text"/>
+    								<input placeholder="Name, username or email" id="nameSearch" name="name" type="text"/>
     							</div>
     							<div class="formElement">
 									<label for="read">Read</label>
@@ -84,8 +86,7 @@
 								</div>
 							</div>
 						<button id="AddButton">Add</button>
-						<button id='SaveCollabs'>Save</button>
- 		 	    	   </form>
+					   </form>
 					</div>
 					<div class="containUI">
 					</div>

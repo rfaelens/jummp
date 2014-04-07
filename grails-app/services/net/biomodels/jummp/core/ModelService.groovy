@@ -1536,13 +1536,16 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     		permissions.each {
     			String permission=getPermissionString(it.getPermission().getMask())
     			String user=it.getSid().principal;
-    			if (permission && user!=springSecurityService.principal.username) {
+    			if (permission) {
     				String userRealName=userService.getRealName(user);
     				if (!map.containsKey(user)) {
     					PermissionTransportCommand ptc=new PermissionTransportCommand(
     																		name: userRealName,
     																		id: user);
     					map.put(user, ptc);
+    				}
+    				if (user==springSecurityService.principal.username) {
+    					map.get(user).show=false;
     				}
     				if (permission=="r") {
     					map.get(user).read=true;

@@ -38,4 +38,5 @@ class PermissionTransportCommand {
 	boolean read=false;
 	boolean write=false;
 	boolean disabledEdit=false;
+	boolean show=true;
 }

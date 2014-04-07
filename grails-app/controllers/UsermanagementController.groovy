@@ -99,8 +99,13 @@ class UsermanagementController {
 
     @Secured(["isAnonymous()"])
     def passwordreset = {
-    	flash.hashCode=params.id
-    	redirect action: reset
+    	if (params.id) {
+    		flash.hashCode=params.id
+    		redirect action: reset
+    	}
+    	else {
+    		redirect action: forgot;
+    	}
     }
     
     /**
@@ -199,14 +204,19 @@ class UsermanagementController {
     **/
     
     def requestPassword = {
-    	try
-    	{
-    		userService.requestPassword(params.username)
+    	if (params.username) {
+    		try
+    		{
+    			userService.requestPassword(params.username)
+    		}
+    		catch(Exception e) {
+    			e.printStackTrace()
+    		}
+   			flash.message="Thank you. Please check the email associated with ${params.username}'s account"
     	}
-    	catch(Exception e) {
-    		e.printStackTrace()
+    	else {
+    		flash.message="Please provide a username.";
     	}
-    	flash.message="Thank you. Please check the email associated with ${params.username}'s account"
     	redirect(action:"forgot")
     }
     
