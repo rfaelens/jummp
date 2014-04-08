@@ -114,9 +114,17 @@
                 </div>
             </g:if>
             <g:else>
-            	<g:if test="${matches!=null}">
+            	<g:if test="${action=="list"}">
+    						<sec:ifLoggedIn>
+    							<p><a href="${createLink(controller: "search", action: "archive")}">Browse Archived Models</a></p>
+    						</sec:ifLoggedIn>
+    			</g:if>
+    			<g:if test="${matches!=null}">
             		No available models matched your query. Please try logging in to access more models, or another search query.
             	</g:if>
+            	<g:else>
+            		<p>No available models matched your query. Please try logging in to access more models, or another search query.</p>
+            	</g:else>
             </g:else>
         </div>
     </div>
