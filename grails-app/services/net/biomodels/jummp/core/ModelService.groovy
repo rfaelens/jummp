@@ -221,10 +221,10 @@ SELECT DISTINCT m FROM Revision AS r
 JOIN r.model AS m JOIN r.owner as u 
 WHERE
 '''
-if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT) {
+if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) {
 	query+='''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
 }
-else if (sortColumn==ModelListSorting.SUBMITTER) {
+else if (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE) {
 	query+='''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
 }
 query+="m.deleted = ${deletedOnly} AND r.deleted = false"
@@ -248,7 +248,7 @@ ORDER BY
             query += "r.uploadDate"
             break
         case ModelListSorting.FORMAT:
-            query += "r.format"
+            query += "r.format.name"
             break
         case ModelListSorting.SUBMITTER:
             query += "u.person.userRealName"
@@ -294,10 +294,10 @@ JOIN aoi.aclClass AS ac
 JOIN ace.sid AS sid
 WHERE
 '''
-if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT) {
+if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) {
 	query+='''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
 }
-else if (sortColumn==ModelListSorting.SUBMITTER) {
+else if (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE) {
 	query+='''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
 }
 query+='''r.model = allRevs.model AND aoi.objectId = allRevs.id
@@ -328,7 +328,7 @@ ORDER BY
             query += "r.uploadDate"
             break
         case ModelListSorting.FORMAT:
-            query += "r.format"
+            query += "r.format.name"
             break
         case ModelListSorting.SUBMITTER:
             query += "u.person.userRealName"
