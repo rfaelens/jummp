@@ -91,8 +91,9 @@
 					<div class="containUI">
 					</div>
 					</div>
-			    </div>
-    		<g:javascript contextPath="" src="share.js"/>
+					<a href="${createLink(action:"show", id:revision.model.id)}">Back to Model</a>
+    		   </div>
+			 <g:javascript contextPath="" src="share.js"/>
     		<g:javascript>
     			$( document ).ready(function() {
     					main(JSON.parse('${permissions}'),
@@ -104,7 +105,7 @@
     		</g:javascript>
     </body>
     <content tag="title">
-		Share model
+		Sharing: ${revision.model.name}
 	</content>
 	<content tag="contexthelp">
 		sharing
