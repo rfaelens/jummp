@@ -48,10 +48,10 @@
                             </td>
                             <td class="value">
                                 <g:if test="${workingMemory['new_name']}">
-                                    <g:textField name="name" maxlength="100" value="${workingMemory['new_name']}"/>
+                                    <g:textField id="name" name="name" maxlength="100" value="${workingMemory['new_name']}"/>
                                 </g:if>
                                 <g:else>
-                                    <g:textField name="name" maxlength="100" value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}"/>
+                                    <g:textField id="name" name="name" maxlength="100" value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}"/>
                                 </g:else>
                             </td>
                         </tr>
@@ -61,7 +61,7 @@
                             </td>
                             <td class="value">
                                 <g:if test="${workingMemory['new_description']}">
-                                    <g:textField name="name" maxlength="100" value="${workingMemory['new_description']}"/>
+                                    <g:textField id="description" name="name" maxlength="100" value="${workingMemory['new_description']}"/>
                                 </g:if>
                                 <g:else>
                                     <g:textArea id="description" cols="70" rows="10" name="description" maxlength="5000" value='${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}'/>
@@ -70,6 +70,7 @@
                         </tr>
                     </tbody>
                 </table>
+                <input type='hidden' value='false' name='changed' id="changeStatus"/>
                 <div class="buttons">
                     <g:submitButton name="Cancel" value="Abort" />
                     <g:submitButton name="Back" value="Back" />
@@ -77,7 +78,33 @@
                 </div>
             </div>
         </g:form>
-    </body>
+        <script>
+        
+        function associateEventHandlers(id) {
+        	var descBox = document.getElementById(id);
+        	
+        	
+        	if ("onpropertychange" in descBox)
+        	{
+        		descBox.attachEvent("onpropertychange", $.proxy(function () {
+        			if (event.propertyName == "value")
+        				$("#changeStatus").val(true);
+        			}, descBox));
+        	}
+        	else
+        	{
+        		descBox.addEventListener("input", function () { 
+        			$("#changeStatus").val(true);
+        		});
+        	}
+    	}
+    	$( document ).ready(function() {
+    		associateEventHandlers("description");
+    		associateEventHandlers("name");
+    	});
+    	</script>
+    
+     </body>
     <g:render template="/templates/decorateSubmission" />
     <g:render template="/templates/subFlowContextHelp" />
 

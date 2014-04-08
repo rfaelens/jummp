@@ -363,18 +363,19 @@ class SubmissionService {
             final String DESC = revision.description
             String NEW_NAME = modifications["new_name"]?.trim()
             String NEW_DESC = modifications["new_description"]?.trim()
-
-            if (!NEW_NAME && !NEW_DESC) {
-                return
-            }
-            if ((NAME == NEW_NAME) && (DESC == NEW_DESC)) {
-                return
-            }
-            if ((!NAME && NEW_NAME) || (!DESC && NEW_DESC)) {
-                handleModificationsToSubmissionInfo(workingMemory, modifications)
-            }
-            if ((NEW_NAME != NAME) || (NEW_DESC != DESC)) {
-                handleModificationsToSubmissionInfo(workingMemory, modifications)
+            if (modifications["changeStatus"]=="true") {
+            	if (!NEW_NAME && !NEW_DESC) {
+            		return
+            	}
+            	if ((NAME == NEW_NAME) && (DESC == NEW_DESC)) {
+            		return
+            	}
+            	if ((!NAME && NEW_NAME) || (!DESC && NEW_DESC)) {
+            		handleModificationsToSubmissionInfo(workingMemory, modifications)
+            	}
+            	if ((NEW_NAME != NAME) || (NEW_DESC != DESC)) {
+            		handleModificationsToSubmissionInfo(workingMemory, modifications)
+            	}
             }
         }
 

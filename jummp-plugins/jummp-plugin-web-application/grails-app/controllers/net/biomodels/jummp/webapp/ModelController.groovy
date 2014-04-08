@@ -656,12 +656,14 @@ class ModelController {
                 Map<String,Object> modifications = new HashMap<String,Object>()
                 final String NAME = params.name
                 final String DESC = params.description
+                final String changeStatus = params.changed
                 if (NAME && NAME.trim()) {
                     modifications.put("new_name", NAME.trim())
                 }
                 if (DESC && DESC.trim()) {
                     modifications.put("new_description", DESC.trim())
                 }
+                modifications.put("changeStatus", changeStatus);
                 submissionService.refineModelInfo(flow.workingMemory, modifications)
             }.to "enterPublicationLink"
             on("Cancel").to "cleanUpAndTerminate"
