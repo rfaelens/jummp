@@ -78,7 +78,7 @@
     							</div>
     							<div class="formElement">
 									<label for="read">Read</label>
-									<input id="radioReader" type="radio" name="read"></input>
+									<input id="radioReader" type="radio" name="read" checked></input>
 								</div>
 								<div class="formElement">
 									<label for="write">Write</label>
