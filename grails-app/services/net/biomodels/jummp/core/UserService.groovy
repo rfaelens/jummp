@@ -213,8 +213,12 @@ class UserService implements IUserService {
     				property('userRealName')
     			}
     		}
-    		person {
-    			 ilike 'userRealName', term + '%'
+    		or {
+    			ilike 'email', "%"+term + '%'
+    			ilike 'username', "%"+term + '%'
+    			person {
+    				ilike 'userRealName', "%"+term + '%'
+    			}
     		}
     	}
     }

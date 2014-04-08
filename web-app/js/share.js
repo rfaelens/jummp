@@ -45,15 +45,18 @@ CollaboratorTable = Backbone.View.extend({
     },
     performSubmission:function() {
     	var collabString=JSON.stringify(this.collection);
+    	$(":input").prop('disabled', true);
     	$.post(submitURL, { collabMap: collabString }, 
       	  	function(returnedData){
       	  			if (returnedData.success) {
       	  				//window.location=showURL;
+      	  				$(":input").prop('disabled', false);
     	  			}
      	  			else {
      	  				showNotification(returnedData.message);
      	  				scheduleHide();
-     	  			}
+     	  				$(":input").prop('disabled', false);
+    	  			}
       	  	}
       );
     },
@@ -93,12 +96,13 @@ CollaboratorTable = Backbone.View.extend({
       }
     },
     updateCollab: function(evt) {
-      evt.preventDefault();
-      evt.stopPropagation();
+      //evt.preventDefault();
+      //evt.stopPropagation();
       var buttonElement=$("#"+evt.currentTarget.id);
       var id=buttonElement.data("person");
       var field=buttonElement.data("field");
       var collab=this.collection.get(id);
+      console.log("Collab before: "+JSON.stringify(collab))
       collab.set(field, buttonElement.is(':checked'));
       if (field==="write") {
       	  if (collab.get("write")) {
@@ -106,11 +110,11 @@ CollaboratorTable = Backbone.View.extend({
       	  }
       }
       else {
-      	  if (!collab.get("read")) {
+      	  if (collab.get("read")) {
       	  	  collab.set("write", false)
       	  }
       }
-      this.render();
+      //this.render();
       this.performSubmission();
     },
     update: function(evt) {
@@ -176,6 +180,31 @@ function mangleEmail(mail) {
 	parts=mail.split("@");
 }
 
+function switchRadio(me, opposite) {
+	if ($(me).is(':checked')) {
+		$(opposite).prop("checked", false);
+	}
+}
+
+Handlebars.registerHelper('setChecked', function(mode) {
+	if (mode=="read") {
+		if (this.read && !this.write) {
+			return "checked";
+		}
+	}
+	else {
+		if (this.write) {
+			return "checked";
+		}
+	}
+});
+
+var searchTerm="";
+
+function getHighlighted(text) {
+	return text.replace(searchTerm, "<b>"+searchTerm+"</b>");
+}
+
 function main(existing, contURL, submit, autoComp, show) {
 	lookupURL=contURL
 	submitURL=submit
@@ -191,11 +220,19 @@ function main(existing, contURL, submit, autoComp, show) {
 			}
 			collaborators.add(collab);
 	});
+	$("#radioWriter").click(function() {
+			switchRadio("#radioWriter", "#radioReader");
+	});
+	$("#radioReader").click(function() {
+			switchRadio("#radioReader", "#radioWriter");
+	});
+      
 	addButtonEvents();
 	$( "#nameSearch" ).autocomplete({
 					minLength: 2,
 					source: function( request, response ) {
 							var term = request.term;
+							searchTerm=request.term;
 							$.getJSON( autoURL, request, function( data, status, xhr ) {
 									var filtered=[];
 									$.each(data, function(result) {
@@ -216,7 +253,7 @@ function main(existing, contURL, submit, autoComp, show) {
 					}
 	}).data( "ui-autocomplete" )._renderItem = function( ul, item ) {
       		return $( "<li>" )
-        	.append( "<a>" + item[2] + " ("+ item[1]+")<br/>" + item[0] + "<hr style='margin: 0.5em 0 !important;'/></a>" )
+        	.append( "<a>" + getHighlighted(item[2]) + " ("+ getHighlighted(item[1])+")<br/>" + getHighlighted(item[0]) + "<hr style='margin: 0.5em 0 !important;'/></a>" )
         	.appendTo( ul );
       };
   	  $( "#SaveCollabs" ).click(function(event){

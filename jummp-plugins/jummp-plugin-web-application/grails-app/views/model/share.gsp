@@ -49,8 +49,8 @@
     		 			{{#if this.show}}
 							<tr class='collaborator'>
 								<td class="tableEL">{{this.name}}</td>
-								<td class="tableEL"><input id=checkRead-{{this.id}} data-field="read" data-person={{this.id}} class="updateCollab" type="checkbox" name="read" {{#if this.read}}checked=true{{/if}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}}></input></td>
-								<td class="tableEL"><input id=checkWrite-{{this.id}} data-field="write" data-person={{this.id}} class="updateCollab" type="checkbox" name="write" {{#if this.write}}checked=true{{/if}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}}></input></td>
+								<td class="tableEL"><input id=checkRead-{{this.id}} data-field="read" data-person={{this.id}} class="updateCollab" type="radio" name="accesstype-{{this.id}}" {{setChecked "read"}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}}></input></td>
+								<td class="tableEL"><input id=checkWrite-{{this.id}} data-field="write" data-person={{this.id}} class="updateCollab" type="radio" name="accesstype-{{this.id}}" {{setChecked "write"}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}}></input></td>
 								<td class="tableEL"><button id=removebutton-{{this.id}} data-name={{this.name}} data-person={{this.id}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}} class="remove">Remove</button></td>
 							</tr>
 						{{/if}}
@@ -78,11 +78,11 @@
     							</div>
     							<div class="formElement">
 									<label for="read">Read</label>
-									<input type="checkbox" name="read"></input>
+									<input id="radioReader" type="radio" name="read"></input>
 								</div>
 								<div class="formElement">
 									<label for="write">Write</label>
-									<input type="checkbox" name="write"></input>
+									<input id="radioWriter" type="radio" name="write"></input>
 								</div>
 							</div>
 						<button id="AddButton">Add</button>

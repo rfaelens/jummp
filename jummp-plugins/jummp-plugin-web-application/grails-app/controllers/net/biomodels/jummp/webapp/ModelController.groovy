@@ -296,24 +296,29 @@ class ModelController {
     }
     
     def shareUpdate = {
-    	if (isValidId() && params.collabMap) {
-    		def map=JSON.parse(params.collabMap);
-    		List<PermissionTransportCommand> collabsNew=new LinkedList<PermissionTransportCommand>();
-    		for (int i=0; i<map.length(); i++) {
-    			JSONObject perm=map.getJSONObject(i);
-    			PermissionTransportCommand ptc=new PermissionTransportCommand(
+    	try { 
+	    		if (isValidId() && params.collabMap) {
+	    			def map=JSON.parse(params.collabMap);
+	    			List<PermissionTransportCommand> collabsNew=new LinkedList<PermissionTransportCommand>();
+	    			for (int i=0; i<map.length(); i++) {
+	    				JSONObject perm=map.getJSONObject(i);
+	    				PermissionTransportCommand ptc=new PermissionTransportCommand(
     														id: perm.getString("id"),
     														name: perm.getString("name"),
     														read: perm.getBoolean("read"),
     														write: perm.getBoolean("write"));
-    			System.out.println("GOT :"+ptc.getProperties());
-    			collabsNew.add(ptc);
-    		}
-    		modelDelegateService.setPermissions(params.id as Long, collabsNew);
-    		render (['success': true, 'permissions': modelDelegateService.getPermissionsMap(params.id as Long)] as JSON)
+    					System.out.println("GOT :"+ptc.getProperties());
+    					collabsNew.add(ptc);
+    				}
+    				modelDelegateService.setPermissions(params.id as Long, collabsNew);
+    				render (['success': true, 'permissions': modelDelegateService.getPermissionsMap(params.id as Long)] as JSON)
+    			}
+    			else {
+    				render (['success': false, 'message': "Couldnt update permissions"] as JSON)
+    			}
     	}
-    	else {
-    		render (['success': false, 'message': "Couldnt update permissions"] as JSON)
+    	catch(Exception e) {
+    		render (['success': false, 'message': "Couldnt update permissions: "+e.toString()] as JSON)
     	}
     }
     

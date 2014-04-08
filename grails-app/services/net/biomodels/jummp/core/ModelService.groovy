@@ -1704,6 +1704,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 	aclUtilService.deletePermission(revision, collaborator.username, BasePermission.READ)
                 }
                 catch(Exception e) {
+                	System.out.println("ERROR WHILE REMOVING READ ACCESS FOR "+collaborator.username);
                 	e.printStackTrace();
                 }
             }
