@@ -28,10 +28,6 @@
 * that of the covered work.}
 **/
 
-
-
-
-
 package net.biomodels.jummp.core
 
 import net.biomodels.jummp.core.events.LoggingEventType
@@ -69,6 +65,7 @@ import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
 import org.apache.lucene.document.Document
 import static java.util.UUID.randomUUID
+
 /**
  * @short Service class for managing Models
  *
@@ -129,41 +126,39 @@ class ModelService {
 
     static transactional = true
 
-    
     /**
     * Returns search results for query restricted Models the user has access to.
     *
-    * Executes the @p query, restricting results to Models the current user has access to, 
+    * Executes the @p query, restricting results to Models the current user has access to,
     * @param query freetext search on models
     * @return List of Models
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.searchModels")
     public Set<ModelTransportCommand> searchModels(String query) {
-    	    def searchEngine=grailsApplication.mainContext.getBean("searchEngine")
-    	    Set<Document> results=searchEngine.performSearch(["name","description","content","modelFormat", "levelVersion", "submitter"] as String[], query)
-    	    
-    	    Set<ModelTransportCommand> returnVals=new HashSet<ModelTransportCommand>()
-    	    results.each {
-    	    	    try
-    	    	    {
-    	    	    	    def existingModel=returnVals.find { prevs -> 
-    	    	    	    	prevs.id == Integer.parseInt(it.get("model_id")) 
-    	    	    	    }
-    	    	    	    if (!existingModel)
-    	    	    	    {
-    	    	    	    	    Model returned=getModel(Integer.parseInt(it.get("model_id")))
-    	    	    	    	    if (returned && !returned.deleted) {
-    	    	    	    	    	    returnVals.add(returned.toCommandObject())
-    	    	    	    	    }
-    	    	    	    }
-    	    	    }
-    	    	    catch(Exception ignore) {
-    	    	    }
-    	    }
-    	    return returnVals
+        def searchEngine = grailsApplication.mainContext.getBean("searchEngine")
+        String[] fields = ["name","description","content","modelFormat", "levelVersion", "submitter"]
+        Set<Document> results = searchEngine.performSearch(fields, query)
+
+        Set<ModelTransportCommand> returnVals = new HashSet<ModelTransportCommand>()
+        results.each {
+            try {
+                def existingModel = returnVals.find { prevs ->
+                    prevs.id == Integer.parseInt(it.get("model_id"))
+                }
+                if (!existingModel) {
+                    Model returned = getModel(Integer.parseInt(it.get("model_id")))
+                    if (returned && !returned.deleted) {
+                        returnVals.add(returned.toCommandObject())
+                    }
+                }
+            }
+            catch(Exception ignore) {
+            }
+        }
+        return returnVals
     }
-    
+
      /**
     * Returns search results for query restricted Models the user has access to.
     *
@@ -174,23 +169,22 @@ class ModelService {
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.regenerateIndices")
     public void regenerateIndices() {
-    	    def searchEngine=grailsApplication.mainContext.getBean("indexingEventListener")
-    	    searchEngine.clearIndex()
-    	    int offset=0
-    	    int count=10
-    	    while (true) {
-    	    	    List<Model> models=getAllModels(offset, count)
-    	    	    models.each {
-    	    	    	    searchEngine.updateIndex(getLatestRevision(it).toCommandObject())
-    	    	    }
-    	    	    if (models.size() < count) {
-    	    	    	    break;
-    	    	    }
-    	    	    offset+=count
-    	    }
+        def searchEngine=grailsApplication.mainContext.getBean("indexingEventListener")
+        searchEngine.clearIndex()
+        int offset = 0
+        int count = 10
+        while (true) {
+            List<Model> models = getAllModels(offset, count)
+            models.each {
+                searchEngine.updateIndex(getLatestRevision(it).toCommandObject())
+            }
+            if (models.size() < count) {
+                break
+            }
+            offset += count
+        }
     }
-    
-    
+
     /**
     * Returns list of Models the user has access to.
     *
@@ -207,7 +201,7 @@ class ModelService {
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getAllModels")
     public List<Model> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn,
-    	String filter = null, boolean deletedOnly=false) {
+                String filter = null, boolean deletedOnly=false) {
         if (offset < 0 || count <= 0) {
             // safety check
             return []
@@ -215,80 +209,78 @@ class ModelService {
         String sorting = sortOrder ? 'asc' : 'desc'
         // for Admin - sees all (not deleted) models
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-            
-        	        String query = '''
-
+            StringBuffer query = new StringBuffer()
+            query.append('''
 SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
 FROM Revision AS r
 JOIN r.model AS m JOIN r.owner as u 
 WHERE
-'''
-if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) {
-	query+='''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
-}
-else if (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE) {
-	query+='''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
-}
-query+="m.deleted = ${deletedOnly} AND r.deleted = false"
-        if (filter && filter.length() >= 3) {
-            query += '''
+''')
+            if ( sortColumn == ModelListSorting.LAST_MODIFIED || sortColumn == ModelListSorting.FORMAT ||
+                        sortColumn == ModelListSorting.NAME) {
+                query.append('''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND ''')
+            }
+            else if ( sortColumn == ModelListSorting.SUBMITTER || sortColumn == ModelListSorting.SUBMISSION_DATE) {
+                query.append('''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND ''')
+            }
+            query.append("m.deleted = ${deletedOnly} AND r.deleted = false")
+            if (filter && filter.length() >= 3) {
+                query.append('''
 AND (
 lower(m.publication.journal) like :filter
 OR lower(m.publication.title) like :filter
 OR lower(m.publication.affiliation) like :filter
 )
-'''
-        }
-        query += '''
+''')
+            }
+            query.append('''
 ORDER BY
-'''
-        switch (sortColumn) {
-        case ModelListSorting.NAME:
-            query += "r.name"
-            break
-        case ModelListSorting.LAST_MODIFIED:
-            query += "r.uploadDate"
-            break
-        case ModelListSorting.FORMAT:
-            query += "r.format.name"
-            break
-        case ModelListSorting.SUBMITTER:
-            query += "u.person.userRealName"
-            break
-       case ModelListSorting.SUBMISSION_DATE:
-       	    /*
-       	    * Hard to get to model submission date directly. However as model ids
-       	    * are sequentially generated, they are used as a surrogate.
-       	    */
-            query += "m.id"  
-            break
-        case ModelListSorting.PUBLICATION:
-            // TODO: implement, fall through to default
-        case ModelListSorting.ID: // Id is the default
-        default:
-            query += "m.id"
-            break
-        }
-        query += " " + sorting
-        Map params = [
-            max: count, offset: offset]
-        if (filter && filter.length() >= 3) {
-            params.put("filter", "%${filter.toLowerCase()}%");
-        }
-        List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, [:], params)
-        return resultSet.collect{it.first()}
-        	
-        	
-        	
-        	
+''')
+            switch (sortColumn) {
+            case ModelListSorting.NAME:
+                query.append("r.name")
+                break
+            case ModelListSorting.LAST_MODIFIED:
+                query.append("r.uploadDate")
+                break
+            case ModelListSorting.FORMAT:
+                query.append("r.format.name")
+                break
+            case ModelListSorting.SUBMITTER:
+                query.append("u.person.userRealName")
+                break
+            case ModelListSorting.SUBMISSION_DATE:
+                /*
+                * Hard to get to model submission date directly. However as model ids
+                * are sequentially generated, they are used as a surrogate.
+                */
+                query.append("m.id")
+                break
+            case ModelListSorting.PUBLICATION:
+                // TODO: implement, fall through to default
+            case ModelListSorting.ID: // Id is the default
+            default:
+                query.append("m.id")
+                break
+            }
+            query.append(" $sorting")
+            Map params = [ max: count, offset: offset]
+            if (filter && filter.length() >= 3) {
+                params.put("filter", "%${filter.toLowerCase()}%");
+            }
+            List<List<Model, String, Date, String, Long, String>> resultSet =
+                        Model.executeQuery(query.toString(), [:], params)
+            return resultSet.collect{it.first()}
         }
 
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(
+                    SpringSecurityUtils.getPrincipalAuthorities())
         if (springSecurityService.isLoggedIn()) {
             // anonymous users do not have a principal
             roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
         }
-        String query = '''
+        StringBuffer query = new StringBuffer()
+        query.append('''
 SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
 FROM Revision AS r, AclEntry AS ace, Revision AS allRevs
 JOIN r.model AS m JOIN r.owner as u 
@@ -296,21 +288,21 @@ JOIN ace.aclObjectIdentity AS aoi
 JOIN aoi.aclClass AS ac
 JOIN ace.sid AS sid
 WHERE
-'''
-if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) {
-	query+='''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
-}
-else if (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE) {
-	query+='''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
-}
-query+='''r.model = allRevs.model AND aoi.objectId = allRevs.id
+''')
+        if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) {
+            query+='''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+        }
+        else if (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE) {
+            query+='''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+        }
+        query+='''r.model = allRevs.model AND aoi.objectId = allRevs.id
 AND ac.className = :className
 AND sid.sid IN (:roles)
 AND ace.mask IN (:permissions)
 AND ace.granting = true
 AND r.deleted = false
 '''
-query+=" AND m.deleted = ${deletedOnly} "
+        query+=" AND m.deleted = ${deletedOnly} "
         if (filter && filter.length() >= 3) {
             query += '''
 AND (
@@ -337,11 +329,11 @@ ORDER BY
             query += "u.person.userRealName"
             break
        case ModelListSorting.SUBMISSION_DATE:
-       	    /*
-       	    * Hard to get to model submission date directly. However as model ids
-       	    * are sequentially generated, they are used as a surrogate.
-       	    */
-            query += "m.id"  
+           /*
+            * Hard to get to model submission date directly. However as model ids
+            * are sequentially generated, they are used as a surrogate.
+            */
+            query += "m.id"
             break
         case ModelListSorting.PUBLICATION:
             // TODO: implement, fall through to default
@@ -359,7 +351,7 @@ ORDER BY
             params.put("filter", "%${filter.toLowerCase()}%");
         }
 
-        List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, params)
+        List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query.toString(), params)
         return resultSet.collect {it.first()}
     }
 
@@ -423,8 +415,7 @@ ORDER BY
     public List<Model> getAllModels() {
         return getAllModels(ModelListSorting.ID)
     }
-    
-    
+
     /**
     * Returns the number of Models the user has access to.
     *
@@ -587,7 +578,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * Queries the @p model for all revisions the user has read access to.
     * The returned list is ordered by revision number of the model.
     * @param model The Model for which all revisions should be retrieved
-    * @return List of Revisions ordered by revision numbers of underlying VCS. If the user has no access to any revision an empty list is returned
+    * @return List of Revisions ordered by revision numbers of underlying VCS.
+    * If the user has no access to any revision an empty list is returned
     * @todo: add paginated version with offset and count. Problem: filter
     **/
     @PostFilter("hasPermission(filterObject, read) or hasRole('ROLE_ADMIN')")
@@ -601,7 +593,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         modelHistoryService.addModelToHistory(model)
         return model.revisions.toList().findAll { !it.deleted }.sort {it.revisionNumber}
     }
-    
+
     /**
      * Parses the @p identifier to query for a model and optionally
      * a revision number, separated by the . character. If no revision
@@ -614,26 +606,23 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.getRevisionByIdentifier")
     public Revision getRevision(String identifier) {
         String[] parts=identifier.split("\\.");
-		parts.each {
-			try
-			{
-				Long.parseLong(it)
-			}
-			catch(Exception e) {
-				throw new IllegalArgumentException("Identifier ${identifier} could not be parsed")
-			}
-		}
-        Model model = Model.get(parts[0]) 
-        if (parts.length==1) {
-        	Revision revision = getLatestRevision(model)
-        	if (!revision) {
-        		throw new AccessDeniedException("Sorry you are not allowed to access this Model.")
-        	}
-        	return revision
+        parts.each {
+            try {
+                Long.parseLong(it)
+            } catch(Exception e) {
+                throw new IllegalArgumentException("Identifier ${identifier} could not be parsed")
+            }
+        }
+        Model model = Model.get(parts[0])
+        if (parts.length == 1) {
+            Revision revision = getLatestRevision(model)
+            if (!revision) {
+                throw new AccessDeniedException("Sorry you are not allowed to access this Model.")
+            }
+            return revision
         }
         return getRevision(model, Integer.parseInt(parts[1]))
     }
-
 
     /**
      * Queries the @p model for the revision with @p revisionNumber.
@@ -700,18 +689,17 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         throw new ModelException(meta, "The new version of the model does not have any files.")
     }
 
-    
     private List<File> getFilesFromRF(List<RepositoryFileTransportCommand> files) {
-    	List<File> modelFiles = []
-    	if (files) {
-    		for (rf in files) {
-    			final def f = new File(rf.path)
-    			modelFiles.add(f)
-    		}
-    	}
+        List<File> modelFiles = []
+        if (files) {
+            for (rf in files) {
+                final def f = new File(rf.path)
+                modelFiles.add(f)
+            }
+        }
         return modelFiles
     }
-    
+
     /**
     * Adds a new Revision to the model, to be used by SubmissionService
     * The provided @p modelFiles will be stored in the VCS as an update to the existing files of the same @p model.
@@ -729,9 +717,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.addValidatedRevision")
-    public Revision addValidatedRevision(final List<RepositoryFileTransportCommand> repoFiles, 
-    									final List<RepositoryFileTransportCommand> deleteFiles,
-    									RevisionTransportCommand rev) throws ModelException {
+    public Revision addValidatedRevision(final List<RepositoryFileTransportCommand> repoFiles,
+                final List<RepositoryFileTransportCommand> deleteFiles, RevisionTransportCommand rev) throws
+                ModelException {
         // TODO: the method should be thread safe, add a lock
         if (!rev.model) {
             throw new ModelException(null, "Model may not be null")
@@ -744,18 +732,20 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         List<File> modelFiles = getFilesFromRF(repoFiles)
         List<File> filesToDelete = getFilesFromRF(deleteFiles)
-        
+
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
         Model model = getModel(rev.model.id)
         final String formatVersion = modelFileFormatService.getFormatVersion(rev)
-        Revision revision = new Revision(model: model, name: rev.name, description: rev.description, comment: rev.comment, uploadDate: new Date(), owner: currentUser,
-                minorRevision: false, validated:rev.validated, format: ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion))
+        Revision revision = new Revision(model: model, name: rev.name, description: rev.description,
+                    comment: rev.comment, uploadDate: new Date(), owner: currentUser, minorRevision: false,
+                    validated:rev.validated,
+                    format: ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion))
         def stopWatch = new Log4JStopWatch("modelService.addValidatedRevision.rftcCreation")
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
             String sep = File.separator.equals("/") ? "/" : "\\\\"
             final String fileName = rf.path.split(sep).last()
-            final def domain = new RepositoryFile(path: rf.path, description: rf.description, 
+            final def domain = new RepositoryFile(path: rf.path, description: rf.description,
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
                 domain.mainFile = rf.mainFile
@@ -777,9 +767,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 domainObjects.add(domain)
             }
         }
-		stopWatch.lap("RepositoryFileTransportCommands created.")
+        stopWatch.lap("RepositoryFileTransportCommands created.")
         // save the new model in the database
-		stopWatch.setTag("modelService.addValidatedRevision.persistModel")
+        stopWatch.setTag("modelService.addValidatedRevision.persistModel")
         try {
             String vcsId = vcsService.updateModel(model, modelFiles, filesToDelete, revision.comment)
             revision.vcsId = vcsId
@@ -801,7 +791,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             model.addToRevisions(revision)
             //save repoFiles, revision and model in one go
             if (rev.model.publication) {
-            	model.publication = Publication.fromCommandObject(rev.model.publication)
+                model.publication = Publication.fromCommandObject(rev.model.publication)
             }
             revision.save(failOnError:true)
             model.save(flush: true)
@@ -810,13 +800,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.READ)
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.DELETE)
-            
+
             //grant admin rights to the owner of the model
-        	Revision earliest=getRevision(model, 1);
-        	aclUtilService.addPermission(revision, earliest.owner.username, BasePermission.ADMINISTRATION)
+            Revision earliest=getRevision(model, 1);
+            aclUtilService.addPermission(revision, earliest.owner.username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, earliest.owner.username, BasePermission.DELETE)
-            
-            
+
             // grant read access to all users having read access to the model
             Acl acl = aclUtilService.readAcl(model)
             for (ace in acl.entries) {
@@ -830,7 +819,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             stopWatch.stop()
             revision.refresh()
             executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
-            grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), vcsService.retrieveFiles(revision)))
+            grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
+                    revision.toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.errors.allErrors.each {
@@ -853,10 +843,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * @return The model content
     **/
     public String getSearchIndexingContent(RevisionTransportCommand revision) {
-    	    return modelFileFormatService.getSearchIndexingContent(revision)
+        return modelFileFormatService.getSearchIndexingContent(revision)
     }
-    
-    
+
     /**
     * Creates a new Model and stores it in the VCS. Stripped down version suitable
     * for calling from SubmissionService, where model has already been validated
@@ -873,8 +862,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostLogging(LoggingEventType.CREATION)
     @Profiled(tag="modelService.uploadValidatedModel")
-    public Model uploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles, RevisionTransportCommand rev)
-            throws ModelException {
+    public Model uploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles,
+            RevisionTransportCommand rev) throws ModelException {
         def stopWatch = new Log4JStopWatch("modelService.uploadValidatedModel.catchDuplicate")
         // TODO: to support anonymous submissions this method has to be changed
         if (Revision.findByName(rev.name)) {
@@ -973,13 +962,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (revision.validate()) {
             model.addToRevisions(revision)
             if (rev.model.publication) {
-            	model.publication = Publication.fromCommandObject(rev.model.publication)
+                model.publication = Publication.fromCommandObject(rev.model.publication)
             }
             if (!model.validate()) {
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
                 revision.discard()
                 model.discard()
-                def msg  = new StringBuffer("New Model ${rev.name} does not validate:\n")
+                def msg = new StringBuffer("New Model ${rev.name} does not validate:\n")
                 msg.append("${model.errors.allErrors.inspect()}\n")
                 msg.append("${revision.errors.allErrors.inspect()}\n")
                 log.error(msg)
@@ -1088,11 +1077,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             def err = "The files ${modelFiles.inspect()} do no comprise valid ${meta.format.identifier}"
             log.error(err)
        //     throw new ModelException(meta, "Invalid ${meta.format.identifier} submission.")v
-            valid=false
+            valid = false
         }
         // model is valid, create a new repository and store it as revision1
         // vcs identifier is upload date + name - this should by all means be unique
-        String name=modelFileFormatService.extractName(modelFiles, format)
+        String name = modelFileFormatService.extractName(modelFiles, format)
         if (!name && meta.name ) {
         	name = meta.name
         }
@@ -1156,8 +1145,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
         } catch (VcsException e) {
-        	e.printStackTrace()
-        	revision.discard()
+            e.printStackTrace()
+            revision.discard()
             domainObjects.each { it.discard() }
             model.discard()
             //TODO undo the addition of the files to the VCS.
@@ -1326,12 +1315,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
             modelFiles.add(f)
         }
-        boolean valid=true
+        boolean valid = true
         if (!modelFileFormatService.validate(modelFiles, format)) {
             final def m = model.toCommandObject()
             log.warn("New revision of model ${m.properties} containing ${modelFiles.inspect()} does not comprise valid ${format.identifier}")
             //throw new ModelException(m, "The file list does not comprise valid ${format.identifier}")
-            valid=false;
+            valid = false
         }
 
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
@@ -1343,7 +1332,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         for (rf in repoFiles) {
             String sep = File.separator.equals("/") ? "/" : "\\\\"
             final String fileName = rf.path.split(sep).last()
-            final def domain = new RepositoryFile(path: rf.path, description: rf.description, 
+            final def domain = new RepositoryFile(path: rf.path, description: rf.description,
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
                 domain.mainFile = rf.mainFile
@@ -1401,8 +1390,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 }
             }
             revision.refresh()
-            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
-            grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this, revision.toCommandObject(), vcsService.retrieveFiles(revision)))
+            executorService.submit(
+                    grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
+            grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
+                    revision.toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
@@ -1421,10 +1412,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.canAddRevision")
     public Boolean canAddRevision(final Model model) {
-    	if (model.deleted) {
-    		return false
-    	}
-        return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.WRITE))
+        if (model.deleted) {
+            return false
+        }
+        return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") ||
+                aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.WRITE))
     }
 
     /**
@@ -1437,10 +1429,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.retrieveModelFiles")
     List<File> retrieveModelRepFiles(final Revision revision) throws ModelException {
-  	    if (!aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ) 
-  	    			&& !SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
-    			throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
-   	    }
+        if (!aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)
+                && !SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+            throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
+        }
         List<File> files
         try {
             files = vcsService.retrieveFiles(revision)
@@ -1461,13 +1453,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.retrieveModelFiles")
     List<RepositoryFileTransportCommand> retrieveModelFiles(final Revision revision) throws ModelException {
-    	if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)
-    		|| SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
-        			return revision.getRepositoryFilesForRevision()
-    	}
-    	else {
-    		throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
-    	}
+        if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)
+                || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+            return revision.getRepositoryFilesForRevision()
+        }
+        else {
+            throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
+        }
     }
 
     /**
@@ -1507,20 +1499,21 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         aclUtilService.addPermission(model, collaborator.username, BasePermission.READ)
         Set<Revision> revisions = model.revisions
         for (Revision revision in revisions) {
-            if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+            if (aclUtilService.hasPermission(springSecurityService.authentication, revision,
+                        BasePermission.READ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
                 aclUtilService.addPermission(revision, collaborator.username, BasePermission.READ)
             }
         }
     }
-    
+
     private String getPermissionString(int p) {
-    	switch(p) {
-    		case BasePermission.READ.getMask(): return "r";
-    		case BasePermission.WRITE.getMask(): return "w";
-    	}
-    	return null;
+        switch(p) {
+            case BasePermission.READ.getMask(): return "r"
+            case BasePermission.WRITE.getMask(): return "w"
+        }
+        return null
     }
-    
+
     /**
     * Returns permissions of a @p model.
     *
@@ -1532,49 +1525,47 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getPermissionsMap")
     public Collection<PermissionTransportCommand> getPermissionsMap(Model model) {
-    	HashMap<String, PermissionTransportCommand> map=new HashMap<String, PermissionTransportCommand>();
-    	if (aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.ADMINISTRATION )
-    		|| SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN'))
-    	{
-    		def permissions=aclUtilService.readAcl(model).getEntries();
-    		permissions.each {
-    			String permission=getPermissionString(it.getPermission().getMask())
-    			String user=it.getSid().principal;
-    			if (permission) {
-    				String userRealName=userService.getRealName(user);
-    				if (!map.containsKey(user)) {
-    					PermissionTransportCommand ptc=new PermissionTransportCommand(
-    																		name: userRealName,
-    																		id: user);
-    					map.put(user, ptc);
-    				}
-    				if (user==springSecurityService.principal.username) {
-    					map.get(user).show=false;
-    				}
-    				if (permission=="r") {
-    					map.get(user).read=true;
-    				}
-    				else {
-    					map.get(user).write=true;
-    					//disable editing for curators and for users who have contributed revisions
-    					if (userService.hasRole(user, "ROLE_CURATOR")) {
-    						map.get(user).disabledEdit=true;
-    					}
-    					getAllRevisions(model).each {
-    						if (it.owner.username == user) {
-    							map.get(user).disabledEdit=true;
-    						}
-    					}
-    				}
-    			}
-    		}
-    	}
-    	else {
-    		throw new AccessDeniedException("You cant access permissions if you dont have them.");
-    	}
-    	return map.values();
+        HashMap<String, PermissionTransportCommand> map = new HashMap<String, PermissionTransportCommand>()
+        if (aclUtilService.hasPermission(springSecurityService.authentication, model,
+                    BasePermission.ADMINISTRATION ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+            def permissions = aclUtilService.readAcl(model).getEntries()
+            permissions.each {
+                String permission = getPermissionString(it.getPermission().getMask())
+                String user = it.getSid().principal
+                if (permission) {
+                    String userRealName = userService.getRealName(user)
+                    if (!map.containsKey(user)) {
+                        PermissionTransportCommand ptc = new PermissionTransportCommand(
+                            name: userRealName, id: user)
+                        map.put(user, ptc)
+                    }
+                    if (user == springSecurityService.principal.username) {
+                        map.get(user).show = false
+                    }
+                    if (permission == "r") {
+                        map.get(user).read = true
+                    }
+                    else {
+                        map.get(user).write = true
+                        //disable editing for curators and for users who have contributed revisions
+                        if (userService.hasRole(user, "ROLE_CURATOR")) {
+                            map.get(user).disabledEdit = true
+                        }
+                        getAllRevisions(model).each {
+                            if (it.owner.username == user) {
+                                map.get(user).disabledEdit = true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            throw new AccessDeniedException("You cant access permissions if you dont have them.")
+        }
+        return map.values();
     }
-    
+
     /**
     * Grants permissions to a @model given a list of @permissions
     *
@@ -1586,60 +1577,57 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getPermissionsMap")
     public void setPermissions(Model model, List<PermissionTransportCommand> permissions) {
-    	if (aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.ADMINISTRATION )
-    		|| SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN'))
-    	{
-    		Collection<PermissionTransportCommand> existing=getPermissionsMap(model);
-    		permissions.each { newPerm ->
-				PermissionTransportCommand current=existing.find { 
-					it.id == newPerm.id
-				}
-				User user=userService.getUser(newPerm.id);
-				if (current) {
-					if (current.read && !(newPerm.read)) {  //revoke previously held read access
-						revokeReadAccess(model, user);
-					}
-					if (current.write && !(newPerm.write)) { //revoke previously held write access
-						revokeWriteAccess(model, user);
-					}
-					if (!(current.read) && newPerm.read) {
-						grantReadAccess(model, user);
-					}
-					if (!(current.write) && newPerm.write) {
-						grantWriteAccess(model, user);
-					}
-				}
-				else {
-					if (newPerm.read) {
-						grantReadAccess(model, user);
-					}
-					if (newPerm.write) {
-						grantWriteAccess(model, user);
-					}
-				}
-    		}
-    		existing.each { oldPerm ->
-    			def retained=permissions.find {
-    				it.id == oldPerm.id
-    			}
-    			if (!retained) {
-    				User user=userService.getUser(oldPerm.id);
-    				if (oldPerm.read) {
-    					revokeReadAccess(model, user);
-					}
-					if (oldPerm.write) {
-						revokeWriteAccess(model, user);
-					}
-    			}
-    		}
-    	}
-    	else {
-			throw new AccessDeniedException("You cant access permissions if you dont have them.");
-    	}
+        if (aclUtilService.hasPermission(springSecurityService.authentication, model,
+                    BasePermission.ADMINISTRATION ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+            Collection<PermissionTransportCommand> existing = getPermissionsMap(model)
+            permissions.each { newPerm ->
+                PermissionTransportCommand current=existing.find {
+                    it.id == newPerm.id
+                }
+                User user = userService.getUser(newPerm.id)
+                if (current) {
+                    if (current.read && !(newPerm.read)) {  //revoke previously held read access
+                        revokeReadAccess(model, user)
+                    }
+                    if (current.write && !(newPerm.write)) { //revoke previously held write access
+                        revokeWriteAccess(model, user)
+                    }
+                    if (!(current.read) && newPerm.read) {
+                        grantReadAccess(model, user)
+                    }
+                    if (!(current.write) && newPerm.write) {
+                        grantWriteAccess(model, user)
+                    }
+                }
+                else {
+                    if (newPerm.read) {
+                        grantReadAccess(model, user)
+                    }
+                    if (newPerm.write) {
+                        grantWriteAccess(model, user)
+                    }
+                }
+            }
+            existing.each { oldPerm ->
+                def retained = permissions.find {
+                    it.id == oldPerm.id
+                }
+                if (!retained) {
+                    User user = userService.getUser(oldPerm.id)
+                    if (oldPerm.read) {
+                        revokeReadAccess(model, user)
+                    }
+                    if (oldPerm.write) {
+                        revokeWriteAccess(model, user)
+                    }
+                }
+            }
+        }
+        else {
+            throw new AccessDeniedException("You cant access permissions if you dont have them.")
+        }
     }
 
-
-    
     /**
     * Grants write access for @p model to @p collaborator.
     *
@@ -1658,10 +1646,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         aclUtilService.addPermission(model, collaborator.username, BasePermission.WRITE)
         boolean isCurator=userService.hasRole(collaborator.username, "ROLE_CURATOR")
         if (isCurator) {
-        	aclUtilService.addPermission(model, collaborator.username, BasePermission.ADMINISTRATION);
-        	getAllRevisions(model).each {
-        		aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION);
-        	}
+            aclUtilService.addPermission(model, collaborator.username, BasePermission.ADMINISTRATION)
+            getAllRevisions(model).each {
+                aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION)
+            }
         }
     }
 
@@ -1702,14 +1690,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         aclUtilService.deletePermission(model, collaborator.username, BasePermission.WRITE)
         Set<Revision> revisions = model.revisions
         for (Revision revision in revisions) {
-            if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
-                try
-                {
-                	aclUtilService.deletePermission(revision, collaborator.username, BasePermission.READ)
-                }
-                catch(Exception e) {
-                	System.out.println("ERROR WHILE REMOVING READ ACCESS FOR "+collaborator.username);
-                	e.printStackTrace();
+            if (aclUtilService.hasPermission(springSecurityService.authentication, revision,
+                        BasePermission.READ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+                try {
+                    aclUtilService.deletePermission(revision, collaborator.username, BasePermission.READ)
+                } catch(Exception e) {
+                    System.out.println("ERROR WHILE REMOVING READ ACCESS FOR "+collaborator.username)
+                    e.printStackTrace()
                 }
             }
         }
@@ -1773,7 +1760,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     public void transferOwnerShip(Model model, User collaborator) {
         // TODO: implement me
     }
-    
+
     /**
     * Checks if the model can be deleted 
     *
@@ -1787,18 +1774,17 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new IllegalArgumentException("Model may not be null")
         }
         if (model.deleted) {
-        	return false
+            return false
         }
         List<Revision> revs=getAllRevisions(model)
-        Revision publicRev=revs.find {
-        	it.state != ModelState.UNPUBLISHED
-        }
+        Revision publicRev=revs.find { it.state != ModelState.UNPUBLISHED }
         if (publicRev) {
-        	return false
+            return false
         }
-        return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.DELETE))
+        return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(
+                springSecurityService.authentication, model, BasePermission.DELETE))
     }
-    
+
     /**
     * Checks if the model can be shared 
     *
@@ -1812,13 +1798,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new IllegalArgumentException("Model may not be null")
         }
         if (model.deleted) {
-        	return false
+            return false
         }
-        return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(springSecurityService.authentication, model, BasePermission.ADMINISTRATION))
+        return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(
+                springSecurityService.authentication, model, BasePermission.ADMINISTRATION))
     }
 
-
-    
     /**
     * Deletes the @p model including all Revisions.
     *
@@ -1839,21 +1824,21 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new IllegalArgumentException("Model may not be null")
         }
         if (!canDelete(model)) {
-        	throw new AccessDeniedException("You do not have permission to delete this model")
+            throw new AccessDeniedException("You do not have permission to delete this model")
         }
         if (model.deleted) {
-        	return false
+            return false
         }
-        List<Revision> revs=getAllRevisions(model)
-        Revision publicRev=revs.find {
-        	it.state != ModelState.UNPUBLISHED
+        List<Revision> revs = getAllRevisions(model)
+        Revision publicRev = revs.find {
+            it.state != ModelState.UNPUBLISHED
         }
         if (publicRev) {
-        	return false
+            return false
         }
-        model.deleted=true
+        model.deleted = true
         model.save(flush: true)
-        return model.deleted==true
+        return model.deleted
     }
 
     /**
@@ -1873,13 +1858,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new IllegalArgumentException("Model may not be null")
         }
         if (!model.deleted) {
-        	return false
+            return false
         }
         // TODO: the code does not check whether the model exists
         if (model.deleted) {
-            model.deleted=false
-        	model.save(flush: true)
-            return model.deleted==false
+            model.deleted = false
+            model.save(flush: true)
+            return model.deleted == false
         } else {
             return false
         }
@@ -1913,7 +1898,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (revision.model.revisions.findAll { !it.deleted }.size() == 1) {
             // only one revision, delete the Model
             // first check the ACL, has to be manual as Spring would not intercept the direct method call
-            if (aclUtilService.hasPermission(springSecurityService.authentication, revision.model, BasePermission.DELETE) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
+            if (aclUtilService.hasPermission(springSecurityService.authentication, revision.model,
+                        BasePermission.DELETE) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
                 deleteModel(revision.model)
             } else {
                 throw new AccessDeniedException("No permission to delete Model ${revision.model.id}")
@@ -1938,22 +1924,20 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             return false
         }
         if (revision.deleted) {
-        	return false
+            return false
         }
         if (revision.model.deleted) {
-        	return false
+            return false
         }
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-        	return true
+            return true
         }
         if (SpringSecurityUtils.ifAnyGranted("ROLE_CURATOR")) {
-        	return canAddRevision(revision.model)
+            return canAddRevision(revision.model)
         }
         return false
     }
 
-    
-    
     /**
      * Makes a Model Revision publicly available.
      * This means that ROLE_USER and ROLE_ANONYMOUS gain read access to the Revision and by that also to
@@ -1967,11 +1951,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.publishModelRevision")
     public void publishModelRevision(Revision revision) {
-    	if (!SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-    		if (!aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.ADMINISTRATION)) {
-    			throw new AccessDeniedException("You cannot publish this model.");
-    		}
-    	}
+        if (!SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            if (!aclUtilService.hasPermission(springSecurityService.authentication, revision,
+                        BasePermission.ADMINISTRATION)) {
+                throw new AccessDeniedException("You cannot publish this model.");
+            }
+        }
         if (!revision) {
             throw new IllegalArgumentException("Revision may not be null")
         }
@@ -1983,9 +1968,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         revision.state=ModelState.PUBLISHED
         revision.save(flush:true)
     }
-    
-    
-    
+
     /**
      * Makes a Model Revision unpublished
      * This means that ROLE_USER and ROLE_ANONYMOUS lose read access to the Revision and by that also to
@@ -2013,33 +1996,32 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
 
     /**
      * Create a model audit item
-     
      * @param cmd The ModelAuditTransportCommand to be saved in the database
      */
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.createAuditItem")
     long createAuditItem(ModelAuditTransportCommand cmd) {
-    	User user=null
-    	if (cmd.username!="anonymousUser") {
-    		user=User.findByUsername(cmd.username)
-    	}
-    	def model=Model.get(cmd.model.id)
-    	if (model) {
-    		ModelAudit audit=new ModelAudit(model: Model.get(cmd.model.id),
-    									user: user,
-    									format: cmd.format,
-    									type: cmd.type,
-    									changesMade: cmd.changesMade,
-    									success: cmd.success);
-    		audit.save();
-    		return audit.id;
-    	}
-    	return -1;
+        User user = null
+        if (cmd.username != "anonymousUser") {
+            user = User.findByUsername(cmd.username)
+        }
+        def model = Model.get(cmd.model.id)
+        if (model) {
+            ModelAudit audit = new ModelAudit(model: Model.get(cmd.model.id),
+                    user: user,
+                    format: cmd.format,
+                    type: cmd.type,
+                    changesMade: cmd.changesMade,
+                    success: cmd.success)
+            audit.save()
+            return audit.id
+        }
+        return -1
     }
 
-	/**
+    /**
      * Update the success field in a model audit item
-     * The model audit item is initialised with false success from the 
+     * The model audit item is initialised with false success from the
      * before interceptor. This function is called to update the success
      * from the after interceptor if no exception was thrown.
      * @param cmd The ModelAuditTransportCommand to be saved in the database
@@ -2047,19 +2029,18 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.updateAuditSuccess")
     void updateAuditSuccess(Long itemId, boolean success) {
-    	if (itemId!=-1) {
-    		try
-    		{
-    			ModelAudit audit=ModelAudit.lock(itemId)
-    			audit.success=success;
-    			audit.save()
-    		}
-    		catch(Exception e) {
-				log.error("Failed to update audit for "+itemId+" with success: "+success)    			
-    			e.printStackTrace();
-    		}
-    	}
-	}
+        if (itemId != -1) {
+            try {
+                ModelAudit audit = ModelAudit.lock(itemId)
+                audit.success = success
+                audit.save()
+            }
+            catch(Exception e) {
+                log.error("Failed to update audit for "+itemId+" with success: "+success)
+                e.printStackTrace();
+            }
+        }
+    }
 
     /**
      * Retrieves the pub med annotations of the @p model.
