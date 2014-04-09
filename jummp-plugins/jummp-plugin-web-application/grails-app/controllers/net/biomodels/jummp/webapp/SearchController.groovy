@@ -318,7 +318,7 @@ class SearchController {
         List modelsDomain = modelService.getAllModels(offset, length, sortDirection == "asc", sort)
         List models = []
         modelsDomain.each {
-        	models.add(it.toCommandObject())
+            models.add(it.toCommandObject())
         }
         return [models: models, 
         		modelsAvailable: modelService.getModelCount(),

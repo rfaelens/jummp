@@ -217,7 +217,9 @@ class ModelService {
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
             
         	        String query = '''
-SELECT DISTINCT m FROM Revision AS r
+
+SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
+FROM Revision AS r
 JOIN r.model AS m JOIN r.owner as u 
 WHERE
 '''
@@ -273,8 +275,8 @@ ORDER BY
         if (filter && filter.length() >= 3) {
             params.put("filter", "%${filter.toLowerCase()}%");
         }
-        return Model.executeQuery(query, [:], params)
-        	
+        List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, [:], params)
+        return resultSet.collect{it.first()}
         	
         	
         	
@@ -287,7 +289,8 @@ ORDER BY
             roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
         }
         String query = '''
-SELECT DISTINCT m FROM Revision AS r, AclEntry AS ace, Revision AS allRevs
+SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
+FROM Revision AS r, AclEntry AS ace, Revision AS allRevs
 JOIN r.model AS m JOIN r.owner as u 
 JOIN ace.aclObjectIdentity AS aoi
 JOIN aoi.aclClass AS ac
@@ -355,8 +358,9 @@ ORDER BY
         if (filter && filter.length() >= 3) {
             params.put("filter", "%${filter.toLowerCase()}%");
         }
-        
-        return Model.executeQuery(query, params)
+
+        List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, params)
+        return resultSet.collect {it.first()}
     }
 
     /**
