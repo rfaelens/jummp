@@ -127,7 +127,7 @@ class SearchControllerSpec extends Specification {
             model != null
     }
 
-    void "list ignores incorrect sort criteria and respects valid criteria"() {
+    void "list ignores incorrect sort criteria"() {
         when:
             def crt = "popularity"
             def comparator = { a, b -> a.id > b.id }
@@ -135,7 +135,8 @@ class SearchControllerSpec extends Specification {
             def model = controller.list()
         then:
             // bogus criteria result in sorting by model id
-            testSortingBy(model, crt, comparator)
+            doPairwiseComparisons(model.models, comparator)
+            assert model.sortBy == "modified"
     }
 
     void "list can sort models by name in desc order"() {
