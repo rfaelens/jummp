@@ -263,7 +263,8 @@ class PharmMlTagLib {
                 }
             }
         } catch(Exception e) {
-            output.append("Cannot display random variables.")
+            output=new StringBuilder();
+        	output.append("Cannot display random variables.")
             log.error("Error encountered while rendering random variables ${rv.inspect()}: ${e.message}")
         }
         return output
@@ -399,6 +400,7 @@ class PharmMlTagLib {
                 }
             }
         } catch(Exception e) {
+        	output=new StringBuilder("<div class='spaced'>")
             output.append("Cannot display individual parameters.")
             log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}")
         }
@@ -426,7 +428,8 @@ class PharmMlTagLib {
                 result.append("<div>${convertToMathML(d.symbId, d.getFunctionArgument(), rightHandSide)}</div>")
             }
         } catch(Exception e) {
-            log.error("Error while rendering function definitions ${functionDefs.inspect()}: ${e.message}")
+            result = new StringBuilder("<h3>Function Definitions</h3>")
+        	log.error("Error while rendering function definitions ${functionDefs.inspect()}: ${e.message}")
             result.append("Sorry, cannot render the function definitions.")
         }
         out << result.toString()
@@ -706,13 +709,14 @@ class PharmMlTagLib {
                                     contCov(it.symbId, c.blkId, it.getContinuous()))
                     }
                 }
-                result.append("</div>")
+               result.append("</div>")
             }
         } catch(Exception e) {
-            log.error("Error rendering the covariates ${covariate.inspect()} ${covariate.properties}: ${e.message}")
+            result = new StringBuilder();
+        	log.error("Error rendering the covariates ${covariate.inspect()} ${covariate.properties}: ${e.message}")
             result.append("Sorry, something went wrong while rendering the covariates.")
         } finally {
-            out << result.toString()
+        	out << result.toString()
         }
     }
 
@@ -1056,25 +1060,27 @@ class PharmMlTagLib {
         TrialDesignStructure tds
         def segmentActivitiesMap
         result.append("<h3>Structure overview</h3>\n")
+        StringBuilder structureBuilder=new StringBuilder();
         try {
             tds = new TrialDesignStructure(structure.arm, structure.epoch,
                         structure.cell, structure.segment)
             def armRefs     = new ArrayList(tds.getArmRefs())
             def epochRefs   = new ArrayList(tds.getEpochRefs())
             /* arm-epoch matrix*/
-            result.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
+            structureBuilder.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
             for (String e: epochRefs) {
-                result.append("<th class='bold'>").append(e).append("</th>")
+                structureBuilder.append("<th class='bold'>").append(e).append("</th>")
             }
-            result.append("</tr></thead><tbody>\n")
+            structureBuilder.append("</tr></thead><tbody>\n")
             for (String a: armRefs) {
-                result.append("<tr><th class='bold'>").append(a).append("</th>")
+                structureBuilder.append("<tr><th class='bold'>").append(a).append("</th>")
                 tds.findSegmentRefsByArm(a).each { s ->
-                    result.append("<td>").append(s).append("</td>")
+                    structureBuilder.append("<td>").append(s).append("</td>")
                 }
-                result.append("</tr>\n")
+                structureBuilder.append("</tr>\n")
             }
-            result.append("</tbody></table>\n")
+            structureBuilder.append("</tbody></table>\n")
+            result.append(structureBuilder.toString());
         } catch(Exception e) {
             result.append("Cannot display the arm-epoch matrix.")
             def errMsg = new StringBuilder("Error encountered while rendering the arm-epoch matrix of")
@@ -1082,6 +1088,7 @@ class PharmMlTagLib {
             errMsg.append("using helper ${tds.trialDesignStructure.inspect()}: ")
             log.error(errMsg, e)
         }
+        StringBuilder segActBuilder=new StringBuilder();
         try {
             /* segments and activities */
             List activities = structure.activity
@@ -1093,29 +1100,29 @@ class PharmMlTagLib {
                 }
             }
             boolean showDosingFootnote = false
-            result.append("<h4>Segment-Activity definition</h4>\n")
-            result.append("<table style='margin-bottom:0px;'><thead><tr><th class='bold'>Segment</th><th class='bold'>Activity</th>")
-            result.append("<th class='bold'>Treatment</th><th class='bold'>Dose time</th>")
-            result.append("<th class='bold'>Dose size</th><th class='bold'>Target variable</th></tr></thead><tbody>")
+            segActBuilder.append("<h4>Segment-Activity definition</h4>\n")
+            segActBuilder.append("<table style='margin-bottom:0px;'><thead><tr><th class='bold'>Segment</th><th class='bold'>Activity</th>")
+            segActBuilder.append("<th class='bold'>Treatment</th><th class='bold'>Dose time</th>")
+            segActBuilder.append("<th class='bold'>Dose size</th><th class='bold'>Target variable</th></tr></thead><tbody>")
             if (segmentActivitiesMap) {
                 segmentActivitiesMap.entrySet().each {
                     def activityList = it.value
                     if (!activityList) {
-                        result.append("<tr><td colspan='6'></td></tr>")
+                        segActBuilder.append("<tr><td colspan='6'></td></tr>")
                     } else {
                         final int ACTIVITY_COUNT = activityList.size()
-                        result.append("<tr><td")
+                        segActBuilder.append("<tr><td")
                         if (ACTIVITY_COUNT > 1) {
-                            result.append(" rowspan='").append(ACTIVITY_COUNT).append("'")
+                            segActBuilder.append(" rowspan='").append(ACTIVITY_COUNT).append("'")
                         }
-                        result.append(">").append(it.key).append("</td>")
-                        boolean toShowFootnote = activity(activityList[0], true, result)
+                        segActBuilder.append(">").append(it.key).append("</td>")
+                        boolean toShowFootnote = activity(activityList[0], true, segActBuilder)
                         if ((!showDosingFootnote) && toShowFootnote) {
                             showDosingFootnote = toShowFootnote
                         }
                         if (ACTIVITY_COUNT > 1) {
                             for (int i = 1; i < ACTIVITY_COUNT; i++) {
-                                toShowFootnote = activity(activityList[i], false, result)
+                                toShowFootnote = activity(activityList[i], false, segActBuilder)
                                 if (!showDosingFootnote && toShowFootnote) {
                                     showDosingFootnote = toShowFootnote
                                 }
@@ -1123,11 +1130,12 @@ class PharmMlTagLib {
                         }
                     }
                 }
-                result.append("</tbody></table>\n")
+                segActBuilder.append("</tbody></table>\n")
             }
             if (showDosingFootnote) {
-                result.append("<span>* &ndash; Element defined in the Individual dosing section.</span>")
+                segActBuilder.append("<span>* &ndash; Element defined in the Individual dosing section.</span>")
             }
+            result.append(segActBuilder.toString());
         } catch(Exception e) {
             result.append("Cannot display the segment-activity overview.")
             def errMsg = new StringBuilder("Cannot display the segment-activity overview for structure ")
@@ -1136,32 +1144,34 @@ class PharmMlTagLib {
             log.error(errMsg, e)
         }
         ObservationEventsMap oem
+        StringBuilder epOccBuilder=new StringBuilder();
         /* epochs and occasions */
         try {
             if (structure.studyEvent) {
                 oem = new ObservationEventsMap(structure.studyEvent)
                 def arms = oem.getArms()
                 def epochs = oem.getEpochs()
-                result.append("\n<h4>Epoch-Occasion definition</h4>\n")
-                result.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
+                epOccBuilder.append("\n<h4>Epoch-Occasion definition</h4>\n")
+                epOccBuilder.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
                 for (String e: epochs) {
-                    result.append("<th class='bold'>").append(e).append("</th>")
+                    epOccBuilder.append("<th class='bold'>").append(e).append("</th>")
                 }
-                result.append("</tr></thead><tbody>\n")
+                epOccBuilder.append("</tr></thead><tbody>\n")
                 arms.each { a ->
-                    result.append("<tr><th class='bold'>").append(a).append("</th>")
+                    epOccBuilder.append("<tr><th class='bold'>").append(a).append("</th>")
                     def occ = oem.findOccasionsByArm(a)
                     occ.each {
                         //TODO OCCASIONS CAN HAVE MANY ENTRIES
                         def o = it.firstEntry()
-                        result.append("<td>")
-                        result.append("<div>").append(o.key).append("</div><div><span class='bold'>")
-                        result.append(o.value).append("</span> variability</div></td>")
+                        epOccBuilder.append("<td>")
+                        epOccBuilder.append("<div>").append(o.key).append("</div><div><span class='bold'>")
+                        epOccBuilder.append(o.value).append("</span> variability</div></td>")
                     }
-                    result.append("</tr>")
+                    epOccBuilder.append("</tr>")
                 }
-                result.append("</tbody></table>\n")
+                epOccBuilder.append("</tbody></table>\n")
             }
+            result.append(epOccBuilder.toString());
         } catch(Exception e) {
             result.append("<p>Cannot display the epoch-occasion overview.</p>")
             def errMsg = new StringBuilder("Cannot display the epoch-occasion overview for structure ")
@@ -1284,6 +1294,7 @@ class PharmMlTagLib {
             result.append("End time: ").append(convertToMathML(end.symbRef.symbIdRef, end.assign))
             result.append("</div>")
         } catch(Exception e) {
+        	result = new StringBuilder()
             result.append("Cannot display steady state.")
             log.error("Cannot display steady state ${ss.properties}", e)
         }
