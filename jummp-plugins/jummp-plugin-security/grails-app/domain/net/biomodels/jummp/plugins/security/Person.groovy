@@ -35,10 +35,12 @@ class Person implements Serializable {
     String userRealName
     String institution
     String orcid
+    static hasMany = [aliases: Alias]
     
     static constraints = {
         userRealName(blank: false)
         institution(nullable:true)
+        aliases(nullable: true)
         orcid nullable: true, unique:true, validator: {
         	if (it) {
         		Pattern p = Pattern.compile("^\\d{4}-\\d{4}-\\d{4}-\\d{3}(\\d|X)\$");
