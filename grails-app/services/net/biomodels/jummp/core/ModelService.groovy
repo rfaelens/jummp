@@ -209,67 +209,66 @@ class ModelService {
         String sorting = sortOrder ? 'asc' : 'desc'
         // for Admin - sees all (not deleted) models
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-            StringBuffer query = new StringBuffer()
-            query.append('''
+            String query = '''
 SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
 FROM Revision AS r
 JOIN r.model AS m JOIN r.owner as u 
 WHERE
-''')
+'''
             if ( sortColumn == ModelListSorting.LAST_MODIFIED || sortColumn == ModelListSorting.FORMAT ||
                         sortColumn == ModelListSorting.NAME) {
-                query.append('''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND ''')
+                query += '''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
             }
             else if ( sortColumn == ModelListSorting.SUBMITTER || sortColumn == ModelListSorting.SUBMISSION_DATE) {
-                query.append('''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND ''')
+                query += '''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
             }
-            query.append("m.deleted = ${deletedOnly} AND r.deleted = false")
+            query += "m.deleted = ${deletedOnly} AND r.deleted = false"
             if (filter && filter.length() >= 3) {
-                query.append('''
+                query += '''
 AND (
 lower(m.publication.journal) like :filter
 OR lower(m.publication.title) like :filter
 OR lower(m.publication.affiliation) like :filter
 )
-''')
+'''
             }
-            query.append('''
+            query += '''
 ORDER BY
-''')
+'''
             switch (sortColumn) {
             case ModelListSorting.NAME:
-                query.append("r.name")
+                query += "r.name"
                 break
             case ModelListSorting.LAST_MODIFIED:
-                query.append("r.uploadDate")
+                query += "r.uploadDate"
                 break
             case ModelListSorting.FORMAT:
-                query.append("r.format.name")
+                query += "r.format.name"
                 break
             case ModelListSorting.SUBMITTER:
-                query.append("u.person.userRealName")
+                query += "u.person.userRealName"
                 break
             case ModelListSorting.SUBMISSION_DATE:
                 /*
                 * Hard to get to model submission date directly. However as model ids
                 * are sequentially generated, they are used as a surrogate.
                 */
-                query.append("m.id")
+                query += "m.id"
                 break
             case ModelListSorting.PUBLICATION:
                 // TODO: implement, fall through to default
             case ModelListSorting.ID: // Id is the default
             default:
-                query.append("m.id")
+                query += "m.id"
                 break
             }
-            query.append(" $sorting")
+            query += " $sorting"
             Map params = [ max: count, offset: offset]
             if (filter && filter.length() >= 3) {
                 params.put("filter", "%${filter.toLowerCase()}%");
             }
             List<List<Model, String, Date, String, Long, String>> resultSet =
-                        Model.executeQuery(query.toString(), [:], params)
+                        Model.executeQuery(query, [:], params)
             return resultSet.collect{it.first()}
         }
 
@@ -279,8 +278,7 @@ ORDER BY
             // anonymous users do not have a principal
             roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
         }
-        StringBuffer query = new StringBuffer()
-        query.append('''
+        String query = '''
 SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
 FROM Revision AS r, AclEntry AS ace, Revision AS allRevs
 JOIN r.model AS m JOIN r.owner as u 
@@ -288,21 +286,21 @@ JOIN ace.aclObjectIdentity AS aoi
 JOIN aoi.aclClass AS ac
 JOIN ace.sid AS sid
 WHERE
-''')
+'''
         if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) {
-            query+='''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+            query += '''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
         }
         else if (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE) {
-            query+='''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+            query += '''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
         }
-        query+='''r.model = allRevs.model AND aoi.objectId = allRevs.id
+        query += '''r.model = allRevs.model AND aoi.objectId = allRevs.id
 AND ac.className = :className
 AND sid.sid IN (:roles)
 AND ace.mask IN (:permissions)
 AND ace.granting = true
 AND r.deleted = false
 '''
-        query+=" AND m.deleted = ${deletedOnly} "
+        query += " AND m.deleted = ${deletedOnly} "
         if (filter && filter.length() >= 3) {
             query += '''
 AND (
@@ -351,7 +349,7 @@ ORDER BY
             params.put("filter", "%${filter.toLowerCase()}%");
         }
 
-        List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query.toString(), params)
+        List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, params)
         return resultSet.collect {it.first()}
     }
 
