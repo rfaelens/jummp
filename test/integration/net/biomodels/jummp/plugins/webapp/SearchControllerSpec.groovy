@@ -118,13 +118,13 @@ class SearchControllerSpec extends Specification {
             model.models.size() == 5
     }
 
-    @FailsWith(NumberFormatException) //FIXME
     void "list should sanitize input"() {
         when:
             controller.request.parameters = [offset: "abc"]
             def model = controller.list()
         then:
             model != null
+            model.models.size() == 10
     }
 
     void "list ignores incorrect sort criteria"() {
