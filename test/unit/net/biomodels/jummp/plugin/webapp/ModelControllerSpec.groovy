@@ -22,7 +22,7 @@ class ModelControllerSpec extends Specification {
         when:
             controller.share()
         then:
-            thrown(Exception)
+        	controller.actionUri == '/errors/error403'
     }
 
     void "share can handle rubbish input"() {
@@ -40,7 +40,7 @@ class ModelControllerSpec extends Specification {
             controller.request.parameters = [id: "one"]
             controller.share()
         then:
-            thrown(IllegalArgumentException)
+        	controller.actionUri == '/errors/error403'
     }
 
     void "share returns a model if there exists a Revision with the supplied id "() {
@@ -71,7 +71,7 @@ class ModelControllerSpec extends Specification {
             grails.converters.JSON perms = model.permissions
             String jsonPerms = perms.toString(false)
             String expected = """\
-[{"id":"0","name":"Me","read":true,"write":true},{"id":"1","name":"Myself","read":true,"write":false},{"id":"2","name":"I","read":true,"write":false}]"""
+[{"disabledEdit":false,"id":"0","name":"Me","read":true,"show":true,"write":true},{"disabledEdit":false,"id":"1","name":"Myself","read":true,"show":true,"write":false},{"disabledEdit":false,"id":"2","name":"I","read":true,"show":true,"write":false}]"""
             jsonPerms == expected
     }
 }
