@@ -95,7 +95,7 @@ try {
                 cache.use_query_cache = false
             }
             dataSource {
-                url = "jdbc:h2:mem:testDb;MVCC=true"
+                url = "jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE"
                 username = "sa"
                 password = ""
                 dialect = ""
@@ -122,7 +122,7 @@ try {
         cache.use_query_cache = false
     }
     dataSource {
-        url = "jdbc:h2:mem:tempDb;MVCC=true"
+        url = "jdbc:h2:mem:tempDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE"
         username = "sa"
         password = ""
         dialect = ""
