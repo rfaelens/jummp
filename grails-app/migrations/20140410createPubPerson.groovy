@@ -101,5 +101,75 @@ databaseChangeLog = {
 			}
 		}
 	}	
+	changeSet(author: "raza and mihai", id: "import non pubmed authors manually") {
+		grailsChange {
+			change{
+				def customImport = { publicationID, alias, position ->
+					Publication publication=Publication.get(publicationID)
+					def person = new Person(userRealName: alias)
+					person.save();
+					PubPerson pubPerson=new PubPerson( person: person,
+							 	 					   pubAlias: alias, 
+							 	 		     		   position: position, 
+							 	 					   publication: publication );
+					pubPerson.save();
+				}
+			   customImport(5, "Peter L. Bonate", 0);
+			   counter=0;
+			   customImport(18, "Ribba B", counter++);
+			   customImport(18, "Kaloshi G", counter++);
+			   customImport(18, "Peyre M", counter++);
+			   customImport(18, "Ricard D", counter++);
+			   customImport(18, "Calvez V", counter++);
+			   customImport(18, "Tod M", counter++);
+			   customImport(18, "Cajavec-Bernard B", counter++);
+			   customImport(18, "Idbaih A", counter++);
+			   customImport(18, "Psimaras D", counter++);
+			   customImport(18, "Dainese L", counter++);
+			   customImport(18, "Pallud J", counter++);
+			   customImport(18, "Cartalat-Carel S", counter++);
+			   customImport(18, "Delattre JY", counter++);
+			   customImport(18, "Honnorat J", counter++);
+			   customImport(18, "Grenier E", counter++);
+			   customImport(18, "Ducray F", counter++);
+			   counter=0; //same paper imported with different dois?
+			   customImport(21, "Ribba B", counter++);
+			   customImport(21, "Kaloshi G", counter++);
+			   customImport(21, "Peyre M", counter++);
+			   customImport(21, "Ricard D", counter++);
+			   customImport(21, "Calvez V", counter++);
+			   customImport(21, "Tod M", counter++);
+			   customImport(21, "Cajavec-Bernard B", counter++);
+			   customImport(21, "Idbaih A", counter++);
+			   customImport(21, "Psimaras D", counter++);
+			   customImport(21, "Dainese L", counter++);
+			   customImport(21, "Pallud J", counter++);
+			   customImport(21, "Cartalat-Carel S", counter++);
+			   customImport(21, "Delattre JY", counter++);
+			   customImport(21, "Honnorat J", counter++);
+			   customImport(21, "Grenier E", counter++);
+			   customImport(21, "Ducray F", counter++);
+			   counter=0;
+			   customImport(22, "Jupp S", counter++);
+			   customImport(22, "Malone J", counter++);
+			   customImport(22, "Bolleman J", counter++);
+			   customImport(22, "Brandizi M", counter++);
+			   customImport(22, "Davies M", counter++);
+			   customImport(22, "Garcia L", counter++);
+			   customImport(22, "Gaulton A", counter++);
+			   customImport(22, "Gehant S", counter++);
+			   customImport(22, "Laibe C", counter++);
+			   customImport(22, "Redaschi N", counter++);
+			   customImport(22, "Wimalaratne SM", counter++);
+			   customImport(22, "Martin M", counter++);
+			   customImport(22, "Le Novère N", counter++);
+			   customImport(22, "Parkinson H", counter++);
+			   customImport(22, "Birney E", counter++);
+			   customImport(22, "Jenkinson AM", counter++);
+			   counter=0;
+			   
+			}
+		}
+	}	
 	
 }
