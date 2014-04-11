@@ -122,11 +122,18 @@ class Publication implements Serializable {
                 issue: issue,
                 pages: pages,
                 linkProvider: linkProvider.toCommandObject(),
-                link: link)
-                /*authors: new LinkedList<PersonTransportCommand>())
-        authors.each {
-        	pubTC.authors.add(it.toCommandObject())
-        }*/
+                link: link,
+                authors: new LinkedList<PersonTransportCommand>())
+        List<Person> authors=PublicationPerson.withCriteria {
+    		projections {
+    			property('person')
+    		}
+    		eq("publication", this);
+    		order("position", "asc");
+    	}
+    	authors.each {
+    		pubTC.authors.add(it.toCommandObject());
+    	}
         return pubTC;
     }
     /*
