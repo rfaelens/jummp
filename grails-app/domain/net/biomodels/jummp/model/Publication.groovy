@@ -40,7 +40,7 @@ class Publication implements Serializable {
      * A Publication is part of a Model.
      */
     static belongsTo = [Model]
-    static hasMany = [models: Model]
+    static hasMany = [authors: Person, models: Model]
     /**
      * Name of the journal where the publication has been published
      */
@@ -108,9 +108,9 @@ class Publication implements Serializable {
         pages(nullable: true)
         linkProvider(nullable: true)
         link(nullable: true)
-    /*    authors validator: { authorValue, pubObj ->
+        authors validator: { authorValue, pubObj ->
         	return authorValue && !authorValue.isEmpty()
-        } */
+        }
     }
 
     PublicationTransportCommand toCommandObject() {
@@ -125,15 +125,14 @@ class Publication implements Serializable {
                 issue: issue,
                 pages: pages,
                 linkProvider: linkProvider.toCommandObject(),
-                link: link)
-                //authors: new LinkedList<PersonTransportCommand>())
-        /*authors.each {
+                link: link,
+                authors: new LinkedList<PersonTransportCommand>())
+        authors.each {
         	pubTC.authors.add(it.toCommandObject())
-        }*/
+        }
         return pubTC;
     }
 
-    /*
     private static void reconcile(def authors, def tobeAdded) {
     	tobeAdded.each { newAuthor ->
             	Person existing = authors.find { oldAuthor ->
@@ -159,7 +158,7 @@ class Publication implements Serializable {
             		}
             	}
          }
-    }*/
+    }
     
     static Publication fromCommandObject(PublicationTransportCommand cmd) {
         Publication publication = Publication.createCriteria().get() {
@@ -179,12 +178,12 @@ class Publication implements Serializable {
             publication.volume=cmd.volume;
             publication.issue=cmd.issue;
             publication.pages=cmd.pages;
-            //reconcile(publication.authors, cmd.authors)
+            reconcile(publication.authors, cmd.authors)
             publication.save(flush:true)
             return publication
         }
-    	//List<Person> authors = []
-        //reconcile(authors, cmd.authors)
+    	List<Person> authors = []
+        reconcile(authors, cmd.authors)
     	Publication publ=new Publication(journal: cmd.journal,
                 title: cmd.title,
                 affiliation: cmd.affiliation,
@@ -197,7 +196,7 @@ class Publication implements Serializable {
                 pages: cmd.pages,
                 linkProvider: PublicationLinkProvider.fromCommandObject(cmd.linkProvider),
                 link: cmd.link,
-                //authors: authors
+                authors: authors
                 )
         publ.save(flush:true)
         return publ
