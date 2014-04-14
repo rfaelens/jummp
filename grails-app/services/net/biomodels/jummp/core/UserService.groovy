@@ -326,22 +326,17 @@ class UserService implements IUserService {
 						throw new RegistrationException("Someone with this ORCID is already registered in the repository", newUser.person.orcid)        				
         			}
         			else {
-        				if (newUser.person.userRealName == existing.userRealName) {
-        					newUser.person=existing
-        				}
-        				else {
-        					throw new RegistrationException("This ORCID is registered in the repository with the name ${existing.userRealName}. Please contact an administrator", newUser.person.orcid)        				
-        				}
+        				existing.userRealName = newUser.person.userRealName
+        				existing.institution = newUser.person.institution
+        				newUser.person=existing
         			}
         		}
         		else {
-        			System.out.println("NO PERSON BY THE ORCID: "+newUser.person.orcid+" found!");
         			newUser.person.save(flush:true, failOnError:true)
         		}
         	}
         	else {
         		newUser.person.save(flush:true, failOnError:true)
-        		System.out.println("PERSON SAVED WITH PROPERTIES: "+newUser.person.inspect());
         	}
         }
         catch(Exception e) {
