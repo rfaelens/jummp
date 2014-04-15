@@ -100,22 +100,6 @@ import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 class PharmMlTagLib {
     static namespace = "pharmml"
 
-    // resolve references to covariates from the parameter model
-    private Map<String, Equation> continuousCovariateTransformations = [:]
-    // helps us decide the size of each correlation matrix in the parameter model
-    private Map<String, List<String>> paramRandomVariableMap = [:]
-    // pairs("${level}|${randomVar1}|${randomVar2}", covarianceOrCorrelationCoefficient)
-    private Map<String, String> paramCorrelations = [:]
-    private List<String> individualParametersInParameterModel = []
-    // pairs (variabilityLevel, correlationMatrix), must not entangle with observation model params
-    private Map<String, String[][]> paramCorrelationMatrixMap = [:]
-    // helps us decide the size of each correlation matrix in the parameter model
-    private Map<String, List<String>> obsRandomVariableMap = [:]
-    // pairs("${level}|${randomVar1}|${randomVar2}", covarianceOrCorrelationCoefficient)
-    private Map<String, String> obsCorrelations = [:]
-    private List<String> individualParametersInObservationModel = []
-    // pairs (variabilityLevel, correlationMatrix)
-    private Map<String, String[][]> obsCorrelationMatrixMap = [:]
     // holds information about which PharmML-specific tabs should be shown
     private Map<String, String> tabsMap
 
@@ -168,11 +152,13 @@ class PharmMlTagLib {
         if (attrs.vm) {
             variabilityModel(attrs.vm)
         }
+        // resolve references to covariates from the parameter model
+        Map<String, Equation> continuousCovariateTransformations = [:]
         if (attrs.cm) {
-            covariates(attrs.cm)
+            covariates(attrs.cm, continuousCovariateTransformations)
         }
         if (attrs.pm) {
-            parameterModel(attrs.pm, attrs.cm)
+            parameterModel(attrs.pm, attrs.cm, continuousCovariateTransformations)
         }
         if (attrs.om) {
             observations(attrs.om, attrs.cm)
@@ -272,7 +258,7 @@ class PharmMlTagLib {
 
     StringBuilder individualParams(List<IndividualParameterType> parameters,
                 List<ParameterRandomVariableType> rv, List<CovariateDefinitionType> covariates,
-                List<String> indivParamNameList) {
+                List<String> indivParamNameList, Map<String, Equation> transfMap) {
         def output = new StringBuilder("<div class='spaced'>")
         try {
             parameters.each { p ->
@@ -334,7 +320,7 @@ class PharmMlTagLib {
                                         covEffectKey = catIdSymbRef
                                     } else {
                                         //RESOLVE REFERENCE TO CONT COV TRANSF
-                                        final EquationType transfEq = resolveSymbolReference(c.symbRef)
+                                        final EquationType transfEq = resolveSymbolReference(c.symbRef, transfMap)
                                         if (transfEq) {
                                             covEffectKey = transfEq
                                         } else {
@@ -571,7 +557,7 @@ class PharmMlTagLib {
      * The latter is necessary to display the transformations that are defined
      * for each individual parameter.
      */
-    def parameterModel = { parameterModel, covariates ->
+    def parameterModel = { parameterModel, covariates, transfMap ->
         if (!parameterModel) {
             return
         }
@@ -592,12 +578,21 @@ class PharmMlTagLib {
                        it instanceof IndividualParameterType
                 }
                 result.append(simpleParams(simpleParameters))
+
+                // helps us decide the size of each correlation matrix in the parameter model
+                Map<String, List<String>> paramRandomVariableMap = [:]
+                // pairs("${level}|${randomVar1}|${randomVar2}", covarianceOrCorrelationCoefficient)
+                Map<String, String> paramCorrelations = [:]
+                List<String> individualParametersInParameterModel = []
+                // pairs (variabilityLevel, correlationMatrix), must not entangle with observation model params
+                Map<String, String[][]> paramCorrelationMatrixMap = [:]
+
                 String randoms = randomVariables(rv, paramRandomVariableMap)
                 if (randoms) {
                    result.append(randoms)
                 }
                 StringBuilder individuals = individualParams(individualParameters, rv, covariates,
-                            individualParametersInParameterModel)
+                            individualParametersInParameterModel, transfMap)
                 if (individuals) {
                    result.append(individuals)
                 }
@@ -689,7 +684,7 @@ class PharmMlTagLib {
         }
     }
 
-    def covariates = { covariate ->
+    def covariates = { covariate, transfMap ->
         if (!covariate) {
             return
         }
@@ -706,7 +701,7 @@ class PharmMlTagLib {
                     c.covariate.each {
                         result.append(
                             it.getCategorical() ? categCov(it.getCategorical(), it.symbId) :
-                                    contCov(it.symbId, c.blkId, it.getContinuous()))
+                                    contCov(it.symbId, c.blkId, it.getContinuous(), transfMap))
                     }
                 }
                result.append("</div>")
@@ -743,7 +738,7 @@ class PharmMlTagLib {
         return result
     }
 
-    StringBuilder contCov(String symbId, String blkId, ContinuousCovariateType c) {
+    StringBuilder contCov(String symbId, String blkId, ContinuousCovariateType c, Map<String, Equation> transfMap ) {
         def result = new StringBuilder("<p>")
         result.append("<span class=\"bold\">Continuous covariate ${symbId}</span>\n</p>\n<p>")
         if (c.abstractContinuousUnivariateDistribution) {
@@ -753,11 +748,11 @@ class PharmMlTagLib {
 
         final String COV_KEY = "${blkId}_${symbId}"
         // there is no need to expand the symbRef here, so temporarily pop it from the map
-        final EquationType TRANSF_REF = continuousCovariateTransformations.remove(COV_KEY)
+        final EquationType TRANSF_REF = transfMap.remove(COV_KEY)
         final EquationType TRANSF_EQ =  TRANSF_REF ?: c.transformation.equation
         result.append(convertToMathML("Transformation", TRANSF_EQ))
-        assert !(continuousCovariateTransformations[COV_KEY])
-        continuousCovariateTransformations[COV_KEY] = TRANSF_EQ
+        assert !(transfMap[COV_KEY])
+        transfMap[COV_KEY] = TRANSF_EQ
 
         return result.append("</p>")
     }
@@ -789,12 +784,21 @@ class PharmMlTagLib {
                        it instanceof IndividualParameterType
                 }
                 result.append(simpleParams(simpleParameters))
+
+                // helps us decide the size of each correlation matrix in the observation model
+                Map<String, List<String>> obsRandomVariableMap = [:]
+                // pairs("${level}|${randomVar1}|${randomVar2}", covarianceOrCorrelationCoefficient)
+                Map<String, String> obsCorrelations = [:]
+                List<String> individualParametersInObservationModel = []
+                // pairs (variabilityLevel, correlationMatrix)
+                Map<String, String[][]> obsCorrelationMatrixMap = [:]
+
                 String randoms = randomVariables(rv, obsRandomVariableMap)
                 if (randoms) {
                     result.append(randoms)
                 }
                 StringBuilder individuals = individualParams(individualParameters, rv, covariates,
-                            individualParametersInObservationModel)
+                            individualParametersInObservationModel, [:])
                 if (individuals) {
                    result.append(individuals)
                 }
@@ -1758,8 +1762,9 @@ class PharmMlTagLib {
        // prefixToInfix(builder, stack)
     }
 
-    private JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRefType> symbRef) {
-        final EquationType TRANSF_EQ = resolveSymbolReference(symbRef.value)
+    private JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRefType> symbRef,
+            Map<String, Equation> transformations) {
+        final EquationType TRANSF_EQ = resolveSymbolReference(symbRef.value, transformations)
         if (TRANSF_EQ) {
             final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first()
             final Class ELEM_CLASS = FIRST_ELEM.value.getClass()
@@ -1792,11 +1797,12 @@ class PharmMlTagLib {
         }
     }
 
-    private JAXBElement expandNestedUniop(JAXBElement<UniopType> jaxbUniop) {
+    private JAXBElement expandNestedUniop(JAXBElement<UniopType> jaxbUniop,
+            Map<String, Equation> transfMap) {
         UniopType uniop = jaxbUniop.value
         UniopType replacement
         if (uniop.symbRef) {
-            final EquationType TRANSF_EQ = resolveSymbolReference(uniop.symbRef)
+            final EquationType TRANSF_EQ = resolveSymbolReference(uniop.symbRef, transfMap)
             if (TRANSF_EQ) {
                 final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first().value
                 final Class ELEM_CLASS = FIRST_ELEM.getClass()
@@ -1836,12 +1842,12 @@ class PharmMlTagLib {
                 }
             }
         } else if (uniop.uniop) {
-            def expanded = expandNestedUniop(wrapJaxb(uniop.uniop))?.value
+            def expanded = expandNestedUniop(wrapJaxb(uniop.uniop), transfMap)?.value
             if (expanded && !(expanded.equals(uniop.uniop))) {
                 uniop.uniop = expanded
             }
         } else if (uniop.binop) {
-            def expanded = expandNestedBinop(wrapJaxb(uniop.binop))?.value
+            def expanded = expandNestedBinop(wrapJaxb(uniop.binop), transfMap)?.value
             if (expanded && !(expanded.equals(uniop.binop))) {
                 uniop.binop = expanded
             }
@@ -1852,19 +1858,20 @@ class PharmMlTagLib {
         return jaxbUniop
     }
 
-    private JAXBElement expandNestedBinop(JAXBElement<BinopType> jaxbBinop) {
+    private JAXBElement expandNestedBinop(JAXBElement<BinopType> jaxbBinop,
+            Map<String, Equation> transfMap) {
         BinopType binop = jaxbBinop.value
         List<JAXBElement> terms = binop.content
         def expandedTerms = terms.collect { c ->
             switch (c.value) {
                 case SymbolRefType:
-                    return expandNestedSymbRefs(c)
+                    return expandNestedSymbRefs(c, transfMap)
                     break
                 case BinopType:
-                    return expandNestedBinop(c)
+                    return expandNestedBinop(c, transfMap)
                     break
                 case UniopType:
-                    return expandNestedUniop(c)
+                    return expandNestedUniop(c, transfMap)
                     break
                 default:
                     return c
@@ -1880,18 +1887,18 @@ class PharmMlTagLib {
         return wrapJaxb(expanded)
     }
 
-    private EquationType expandEquation(EquationType equation) {
+    private EquationType expandEquation(EquationType equation, Map<String, Equation> transfMap) {
         List<JAXBElement> eqTerms = equation.scalarOrSymbRefOrBinop
         List<JAXBElement> expandedTerms = eqTerms.collect {
             switch(it.value) {
                 case BinopType:
-                    return expandNestedBinop(it)
+                    return expandNestedBinop(it, transfMap)
                     break
                 case UniopType:
-                    return expandNestedUniop(it)
+                    return expandNestedUniop(it, transfMap)
                     break
                 case SymbolRefType:
-                    return expandNestedSymbRefs(it)
+                    return expandNestedSymbRefs(it, transfMap)
                     break
                 default:
                     return it
@@ -1909,7 +1916,7 @@ class PharmMlTagLib {
     private void convertEquation(final def equation, StringBuilder builder) {
         def equationToProcess
         if ((equation instanceof EquationType) || (equation instanceof Equation)) {
-            equationToProcess = equation //expandEquation(equation)
+            equationToProcess = expandEquation(equation, [:])
         } else {
             equationToProcess = equation
         }
@@ -2070,14 +2077,14 @@ class PharmMlTagLib {
      * If @ref only has a symbIdRef, then it will return the first element from the map
      * that matches, or null if there were no matches. 
      */
-    private EquationType resolveSymbolReference(SymbolRefType ref) {
+    private EquationType resolveSymbolReference(SymbolRefType ref, Map<String, Equation> transfMap) {
         EquationType transfEq
         if (ref.blkIdRef) {
             String transfRef = "${ref.blkIdRef}_${ref.symbIdRef}"
-            transfEq = continuousCovariateTransformations[transfRef]
+            transfEq = transfMap[transfRef]
         } else {
             String transfRef = ref.symbIdRef
-            transfEq = continuousCovariateTransformations.find{ it.key.contains("_${transfRef}")}?.value
+            transfEq = transfMap.find{ it.key.contains("_${transfRef}")}?.value
         }
         return transfEq
     }
