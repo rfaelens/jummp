@@ -713,7 +713,7 @@ class ModelController {
         					e.printStackTrace()
         				}
         				if (retrieved) {
-        					model.publication = retrieved.toCommandObject() 
+        					model.publication = retrieved
         					flow.workingMemory.put("Authors", model.publication.authors)
         				}
         			}

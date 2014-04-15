@@ -40,7 +40,7 @@ class Publication implements Serializable {
      * A Publication is part of a Model.
      */
     static belongsTo = [Model]
-    static hasMany = [authors: Person, models: Model]
+    static hasMany = [models: Model]
     /**
      * Name of the journal where the publication has been published
      */
@@ -108,9 +108,6 @@ class Publication implements Serializable {
         pages(nullable: true)
         linkProvider(nullable: true)
         link(nullable: true)
-        authors validator: { authorValue, pubObj ->
-        	return authorValue && !authorValue.isEmpty()
-        }
     }
 
     PublicationTransportCommand toCommandObject() {
@@ -127,34 +124,58 @@ class Publication implements Serializable {
                 linkProvider: linkProvider.toCommandObject(),
                 link: link,
                 authors: new LinkedList<PersonTransportCommand>())
-        authors.each {
-        	pubTC.authors.add(it.toCommandObject())
-        }
+        def authors=PublicationPerson.findAllByPublication(this, [sort: "position", order: "asc"])
+    	authors.each {
+    		PersonTransportCommand personAlias= it.person.toCommandObject();
+    		personAlias.userRealName = it.pubAlias;
+    		pubTC.authors.add(personAlias);
+    	}
         return pubTC;
     }
-
-    private static void reconcile(def authors, def tobeAdded) {
-    	tobeAdded.each { newAuthor ->
-            	Person existing = authors.find { oldAuthor ->
+    
+    public static void reconcile(Publication publication, def tobeAdded) {
+    	System.out.println("INSIDE RECONCILE WITH "+publication+" and "+tobeAdded);
+    	def existing = PublicationPerson.findAllByPublication(publication, [sort: "position", order: "asc"]);
+    	tobeAdded.eachWithIndex { newAuthor, index ->
+            	def existingAuthor = existing.find { oldAuthor ->
             		if (newAuthor.id) {
-            			return newAuthor.id == oldAuthor.id
+            			return newAuthor.id == oldAuthor.person.id
+            		}
+            		else if (newAuthor.orcid) {
+            			return newAuthor.orcid == oldAuthor.person.orcid
             		}
             		return false
             	}
-            	if (!existing) {
+            	if (!existingAuthor) {
+            		System.out.println("Creating "+newAuthor);
+    	    		Person newlyCreatedPubAuthor;
             		if (newAuthor.orcid) {
-            			existing=Person.findByOrcid(newAuthor.orcid)
-            			if (existing && existing.userRealName==newAuthor.userRealName) {
-            				authors<<existing
-            			}
-            			if (existing) {
-            				log.error "Received duplicate ORCID for ${existing.userRealName} (in the repository) and ${newAuthor.userRealName}. Please reconcile."
+            			def personWithSameOrcid=Person.findByOrcid(newAuthor.orcid)
+            			if (personWithSameOrcid) {
+            				newlyCreatedPubAuthor=personWithSameOrcid
             			}
             		}
-            		else {
-            			Person current = new Person(userRealName: newAuthor.userRealName, orcid: newAuthor.orcid)
-            			authors << current
-            			current.save()
+            		if (!newlyCreatedPubAuthor) {
+            			newlyCreatedPubAuthor = new Person(userRealName: newAuthor.userRealName, orcid: newAuthor.orcid)
+            			newlyCreatedPubAuthor.save(failOnError: true);
+            			System.out.println("NEW PERSON CREATED: "+newlyCreatedPubAuthor.getProperties()	);
+            		}
+            		def tmp=new PublicationPerson(publication: publication, 
+            							  person: newlyCreatedPubAuthor,
+            							  pubAlias: newAuthor.userRealName,
+            							  position: index)
+            		try {
+            			tmp.save(failOnError:true, flush: true);
+            			System.out.println("NEW ASSOCIATION: "+tmp);
+            		}
+            		catch(Exception e) {
+            			e.printStackTrace();
+            		}
+            	}
+            	else {
+            		if (existingAuthor.position !=index) {
+            			existingAuthor.position = index;
+            			existingAuthor.save();
             		}
             	}
          }
@@ -178,12 +199,10 @@ class Publication implements Serializable {
             publication.volume=cmd.volume;
             publication.issue=cmd.issue;
             publication.pages=cmd.pages;
-            reconcile(publication.authors, cmd.authors)
             publication.save(flush:true)
+            reconcile(publication, cmd.authors)
             return publication
         }
-    	List<Person> authors = []
-        reconcile(authors, cmd.authors)
     	Publication publ=new Publication(journal: cmd.journal,
                 title: cmd.title,
                 affiliation: cmd.affiliation,
@@ -195,10 +214,10 @@ class Publication implements Serializable {
                 issue: cmd.issue,
                 pages: cmd.pages,
                 linkProvider: PublicationLinkProvider.fromCommandObject(cmd.linkProvider),
-                link: cmd.link,
-                authors: authors
+                link: cmd.link
                 )
         publ.save(flush:true)
-        return publ
+        reconcile(publ, cmd.authors)
+    	return publ
     }
 }

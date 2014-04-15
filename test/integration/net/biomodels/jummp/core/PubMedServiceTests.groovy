@@ -37,12 +37,16 @@ package net.biomodels.jummp.core
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.model.Publication
+import net.biomodels.jummp.model.PublicationPerson
 import org.junit.*
 import static org.junit.Assert.*
+import net.biomodels.jummp.plugins.security.Person
+import net.biomodels.jummp.plugins.security.User
 
 @TestMixin(IntegrationTestMixin)
 class PubMedServiceTests extends JummpIntegrationTest {
     def pubMedService
+    def userService
     
     @Before
     void setUp() {
@@ -54,9 +58,17 @@ class PubMedServiceTests extends JummpIntegrationTest {
 
     @Test
     void testFetchPublicationData() {
-        // publication: Science   (ISSN: 0036-8075)   (ESSN: 1095-9203)
+        authenticateAnonymous()
+        Person fakeAuthor = new Person(userRealName: "Not Schilling",
+        							   orcid: "0000-0002-9517-5166");
+        User user = new User(username: "fakeUser",
+        					 password: "nopassword",
+        					 person: fakeAuthor,
+        					 email: "noemail@hotmail.com");
+        userService.register(user)
+    	// publication: Science   (ISSN: 0036-8075)   (ESSN: 1095-9203)
         String id = "20488988"
-        Publication publication = pubMedService.fetchPublicationData(id)
+        Publication publication = Publication.fromCommandObject(pubMedService.fetchPublicationData(id));
         assertNotNull(publication)
         publication.validate()
         assertTrue(publication.validate())
@@ -71,13 +83,17 @@ class PubMedServiceTests extends JummpIntegrationTest {
         assertEquals("Division Systems Biology of Signal Transduction, DKFZ-ZMBH Alliance, German Cancer Research Center, 69120 Heidelberg, Germany.", publication.affiliation)
         assertEquals("Cell surface receptors convert extracellular cues into receptor activation, thereby triggering intracellular signaling networks and controlling cellular decisions. A major unresolved issue is the identification of receptor properties that critically determine processing of ligand-encoded information. We show by mathematical modeling of quantitative data and experimental validation that rapid ligand depletion and replenishment of the cell surface receptor are characteristic features of the erythropoietin (Epo) receptor (EpoR). The amount of Epo-EpoR complexes and EpoR activation integrated over time corresponds linearly to ligand input; this process is carried out over a broad range of ligand concentrations. This relation depends solely on EpoR turnover independent of ligand binding, which suggests an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system.", publication.synopsis)
         // TODO: add tests for author
-
+        def authors=PublicationPerson.findByPublication(publication)
+        authors.each {
+        	System.out.println("Author: "+it.person.inspect())
+        }
+        System.out.println("AUTHORS: "+authors);
         // test for 12974500 - no day specified
-        publication = pubMedService.fetchPublicationData("12974500")
+        publication = Publication.fromCommandObject(pubMedService.fetchPublicationData("12974500"));
         assertNull(publication.day)
 
         // test for 20955552 - no month and no issue
-        publication = pubMedService.fetchPublicationData("20955552")
+        publication = Publication.fromCommandObject(pubMedService.fetchPublicationData("20955552"));
         assertNull(publication.day)
         assertEquals("0",publication.month) 
         assertNull(publication.issue)

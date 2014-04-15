@@ -789,7 +789,19 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             model.addToRevisions(revision)
             //save repoFiles, revision and model in one go
             if (rev.model.publication) {
-                model.publication = Publication.fromCommandObject(rev.model.publication)
+                try {
+                	model.publication = Publication.fromCommandObject(rev.model.publication)
+                	int a=0;
+                	int b=1;
+                	int c=b/a;
+                }
+                catch(Exception e) {
+                	e.printStackTrace();
+                	System.out.println("PUBLICATION DATA STRUCTURE IS AS FOLLOWS: "+rev.model.publication.getProperties()+"..."+rev.model.publication.inspect());
+            	}
+            }
+            else {
+                System.out.println("THERE IS NO PUBLICATION?!");
             }
             revision.save(failOnError:true)
             model.save(flush: true)
@@ -960,7 +972,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (revision.validate()) {
             model.addToRevisions(revision)
             if (rev.model.publication) {
-                model.publication = Publication.fromCommandObject(rev.model.publication)
+            	model.publication = Publication.fromCommandObject(rev.model.publication)
             }
             if (!model.validate()) {
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
@@ -1164,22 +1176,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         if (revision.validate()) {
             model.addToRevisions(revision)
-            if (meta.publication && meta.publication.linkProvider.linkType == PublicationLinkProvider.LinkType.PUBMED) {
-                try {
-                    model.publication = pubMedService.getPublication(meta.publication.link)
-                } catch (JummpException e) {
-                    revision.discard()
-                    domainObjects.each { it.discard() }
-                    model.discard()
-                    def error = new StringBuffer("New Model ${name} does not validate:")
-                    error.append("${model.errors.allErrors.inspect()}\n")
-                    error.append("${revision.errors.allErrors.inspect()}\n")
-                    log.error(error)
-                    stopWatch.stop()
-                    throw new ModelException(model.toCommandObject(), "Error while parsing PubMed data for ${name}", e)
-                }
-            } else if (meta.publication) {
-                model.publication = Publication.fromCommandObject(meta.publication)
+            if (meta.publication) {
+            	System.out.println(meta.publication.getProperties()+"..."+meta.publication.inspect());
+            	model.publication = Publication.fromCommandObject(meta.publication)
             }
             if (!model.validate()) {
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad

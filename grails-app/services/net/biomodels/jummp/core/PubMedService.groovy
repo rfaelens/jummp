@@ -55,7 +55,7 @@ class PubMedService {
 
     static transactional = true
 
-    Publication getPublication(String id) throws JummpException {
+    PublicationTransportCommand getPublication(String id) throws JummpException {
     	Publication publication = Publication.createCriteria().get() {
     		eq("link",id)
     		linkProvider {
@@ -63,13 +63,13 @@ class PubMedService {
     		}
     	}
     	if (publication) {
-            return publication
+            return publication.toCommandObject();
         } else {
         	return fetchPublicationData(id)
         }
     }
     
-    Publication getPublication(PublicationTransportCommand cmd) throws JummpException {
+    PublicationTransportCommand getPublication(PublicationTransportCommand cmd) throws JummpException {
     	if (PublicationLinkProvider.LinkType.valueOf(cmd.linkProvider.linkType)==PublicationLinkProvider.LinkType.PUBMED) {
     		return getPublication(cmd.link)
     	}
@@ -89,7 +89,7 @@ class PubMedService {
     }
     
 
-    private setFieldIfItExists(String fieldName, Publication publication, def xmlField, boolean castToInt) {
+    private setFieldIfItExists(String fieldName, PublicationTransportCommand publication, def xmlField, boolean castToInt) {
     	try
     	{
     		if (xmlField && xmlField.size()==1) {
@@ -115,7 +115,7 @@ class PubMedService {
      */
     @SuppressWarnings("EmptyCatchBlock")
     @Transactional
-    private Publication fetchPublicationData(String id) throws JummpException {
+    private PublicationTransportCommand fetchPublicationData(String id) throws JummpException {
         URL url
         try {
             url = new URL("http://www.ebi.ac.uk/europepmc/webservices/rest/search/query=ext_id:${id}%20src:med&resulttype=core")
@@ -137,7 +137,7 @@ class PubMedService {
         PublicationLinkProvider link=PublicationLinkProvider.createCriteria().get() {
         	eq("linkType",PublicationLinkProvider.LinkType.PUBMED)
         }
-        Publication publication = new Publication(linkProvider: link, link: id)
+        PublicationTransportCommand publication = new PublicationTransportCommand(linkProvider: link.toCommandObject(), link: id)
         setFieldIfItExists("pages", publication, slurper.resultList.result.pageInfo, false)
         setFieldIfItExists("title", publication, slurper.resultList.result.title, false)
         setFieldIfItExists("affiliation", publication, slurper.resultList.result.affiliation, false)
@@ -161,28 +161,16 @@ class PubMedService {
      * @param slurper The parsed XML document
      * @param publication The publication to add the authors to
      */
-    private void parseAuthors(def slurper, Publication publication) {
+    private void parseAuthors(def slurper, PublicationTransportCommand publication) {
     	System.out.println("INSIDE PARSE AUTHORS");
-        for (def authorXml in slurper.resultList.result.authorList.author) {
+    	publication.authors=[];
+    	for (def authorXml in slurper.resultList.result.authorList.author) {
             Person author = new Person()
             author.userRealName = authorXml.fullName[0].text()
             if (authorXml.authorId[0]?.@type=="ORCID") {
             	author.orcid = authorXml.authorId[0].text()
             }
-			if (author.orcid && Person.findByOrcid(author.orcid)) {
-				Person existing=Person.findByOrcid(author.orcid)
-				if (author.userRealName == existing.userRealName) {
-					author=existing
-				}
-				else {
-					log.error("Conflicting info available for ORCID ${author.orcid}, with user with id: ${existing.id}.. name from service: ${author.userRealName}, name in repository: ${existing.userRealName}")
-					author.orcid=null
-        		}
-			}
-            author.save()
-            publication.addToAuthors(author)
+            publication.authors.add(author);
         }
-        System.out.println("AUTHORS: "+publication.authors.inspect())
-        System.out.println("AUTHORS: "+publication.authors.getProperties())
     }
 }

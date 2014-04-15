@@ -1149,5 +1149,7 @@ databaseChangeLog = {
 	include file: 'author2person.groovy'
 	include file: 'missing_indices.groovy'
 
-	include file: '20140303-createModelAudit.groovy'
+	include file: '20140410pub-person.groovy'
+	
+	include file: '20140410createPubPerson.groovy'
 }
