@@ -158,11 +158,19 @@ class Publication implements Serializable {
             		if (!newlyCreatedPubAuthor) {
             			newlyCreatedPubAuthor = new Person(userRealName: newAuthor.userRealName, orcid: newAuthor.orcid)
             			newlyCreatedPubAuthor.save(failOnError: true);
+            			System.out.println("NEW PERSON CREATED: "+newlyCreatedPubAuthor.getProperties()	);
             		}
-            		new PublicationPerson(publication: publication, 
+            		def tmp=new PublicationPerson(publication: publication, 
             							  person: newlyCreatedPubAuthor,
             							  pubAlias: newAuthor.userRealName,
-            							  position: index).save(failOnError:true);
+            							  position: index)
+            		try {
+            			tmp.save(failOnError:true, flush: true);
+            			System.out.println("NEW ASSOCIATION: "+tmp);
+            		}
+            		catch(Exception e) {
+            			e.printStackTrace();
+            		}
             	}
             	else {
             		if (existingAuthor.position !=index) {
