@@ -596,11 +596,11 @@ class PharmMlTagLib {
                 if (individuals) {
                    result.append(individuals)
                 }
-                /*if (pm.correlation) {
+                if (pm.correlation) {
                     handleCorrelations(pm.correlation, paramCorrelations,
                                 paramRandomVariableMap, paramCorrelationMatrixMap,
                                 individualParametersInParameterModel, result)
-                }*/
+                }
                 result.append("</div>")
             }
         } catch(Exception e) {
@@ -802,11 +802,11 @@ class PharmMlTagLib {
                 if (individuals) {
                    result.append(individuals)
                 }
-                /*if (om.correlation) {
+                if (om.correlation) {
                     handleCorrelations(om.correlation, obsCorrelations,
                                 obsRandomVariableMap, obsCorrelationMatrixMap,
                                 individualParametersInObservationModel, result)
-                }*/
+                }
                 if (obsErr) {
                     if (obsErr.symbol?.value) {
                         result.append(obsErr.symbol.value)
