@@ -1,11 +1,11 @@
 databaseChangeLog = {
 
 	changeSet(author: "raza (generated)", id: "1397229912672-3") {
-		dropForeignKeyConstraint(baseTableName: "publication_person", baseTableSchemaName: "consortium", constraintName: "FKE7516CC8448831C4")
+		dropForeignKeyConstraint(baseTableName: "publication_person", constraintName: "FKE7516CC8448831C4")
 	}
 
 	changeSet(author: "raza (generated)", id: "1397229912672-4") {
-		dropForeignKeyConstraint(baseTableName: "publication_person", baseTableSchemaName: "consortium", constraintName: "FKE7516CC8A253AE96")
+		dropForeignKeyConstraint(baseTableName: "publication_person", constraintName: "FKE7516CC8A253AE96")
 	}
 
 	changeSet(author: "raza (generated)", id: "1397229912672-5") {
