@@ -772,7 +772,6 @@ class ModelController {
             	    	    String name=parts[0];
             	    	    String orcid=parts[1];
             	    	    String institution=parts[2];
-            	    	    System.out.println("NOW PROCESSING: "+it+"..."+name+"..."+orcid+".."+institution)
             	    	    def authorListSrc=model.publication.authors
             	    	    if (!authorListSrc) {
             	    	    	    authorListSrc=new LinkedList<PersonTransportCommand>();
@@ -787,7 +786,6 @@ class ModelController {
             	    	    	return false
             	    	    }
             	    	    if (!author) {
-            	    	    	System.out.println("COULDNT FIND AUTHOR "+name+" in ${authorListSrc}")
             	    	    	author=new PersonTransportCommand(userRealName:parts[0], 
             	    	    					  orcid: orcid!="no_orcid" ? orcid: null, 
             	    	    					  institution: institution!="no_institution_provided" ? institution:null)
@@ -796,10 +794,8 @@ class ModelController {
             	    	        }
             	    	        model.publication.authors.add(author)
             	    	    }
-            	    	    System.out.println("AUTHORS IN PUBINFO "+model.publication.authors.inspect())
-        	    	        if (author.validate()) {
+            	    	    if (author.validate()) {
         	    	        	validatedAuthors.add(author)
-        	    	        	System.out.println("AUTHORS IN VALIDATED "+validatedAuthors.inspect())
         	    	        }
         	    	        else {
         	    	        	log.error "Submission did not validate: ${author.properties}."
@@ -810,7 +806,6 @@ class ModelController {
         	    	 }
             	   }
             	   model.publication.authors=validatedAuthors
-            	   System.out.println("AUTHOR SIZE" +model.publication.authors.size())
             	   if (!model.publication.validate()) {
             	   	   log.error "Submission did not validate: ${model.publication.properties}."
             	   	   log.error "Errors: ${model.publication.errors.allErrors.inspect()}."

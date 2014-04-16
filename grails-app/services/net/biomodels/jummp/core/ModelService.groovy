@@ -797,11 +797,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 }
                 catch(Exception e) {
                 	e.printStackTrace();
-                	System.out.println("PUBLICATION DATA STRUCTURE IS AS FOLLOWS: "+rev.model.publication.getProperties()+"..."+rev.model.publication.inspect());
             	}
-            }
-            else {
-                System.out.println("THERE IS NO PUBLICATION?!");
             }
             revision.save(failOnError:true)
             model.save(flush: true)
@@ -1177,7 +1173,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (revision.validate()) {
             model.addToRevisions(revision)
             if (meta.publication) {
-            	System.out.println(meta.publication.getProperties()+"..."+meta.publication.inspect());
             	model.publication = Publication.fromCommandObject(meta.publication)
             }
             if (!model.validate()) {
@@ -1692,7 +1687,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 try {
                     aclUtilService.deletePermission(revision, collaborator.username, BasePermission.READ)
                 } catch(Exception e) {
-                    System.out.println("ERROR WHILE REMOVING READ ACCESS FOR "+collaborator.username)
                     e.printStackTrace()
                 }
             }

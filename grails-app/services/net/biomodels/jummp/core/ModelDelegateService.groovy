@@ -126,7 +126,6 @@ class ModelDelegateService implements IModelService {
     }
     
     long createAuditItem(ModelAuditTransportCommand cmd) {
-    	System.out.println(modelService.toString()+"..."+cmd)
     	return modelService.createAuditItem(cmd)
     }
     
