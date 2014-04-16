@@ -44,6 +44,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.authentication.BadCredentialsException
+import net.biomodels.jummp.model.PublicationPerson
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.user.UserNotFoundException
@@ -103,7 +104,6 @@ class UserService implements IUserService {
     }
     
     String getUsername(String realName) {
-    	System.out.println("SEARCHING FOR "+realName);
     	def usernames=User.withCriteria {
     		projections {
    				property('username')
@@ -114,9 +114,6 @@ class UserService implements IUserService {
     	}
     	if (usernames) {
     		return usernames.get(0);
-    	}
-    	else {
-    		System.out.println("NO PERSON FOUND FOR "+realName);
     	}
     	return null;
     }
@@ -139,14 +136,30 @@ class UserService implements IUserService {
     @Profiled(tag="userService.editUser")
     @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
     void editUser(User user) throws UserInvalidException {
-        checkUserValid(user.username)
+    	checkUserValid(user.username)
         User origUser = User.findByUsername(user.username)
+        if (origUser.person.orcid != user.person.orcid) {
+        	Person sameOrcid = Person.findByOrcid(user.person.orcid);
+        	if (sameOrcid) {
+        		if (User.findByPerson(sameOrcid)) {
+					throw new RegistrationException("Someone with this ORCID is already registered in the repository", user.person.orcid)        				
+				}
+        		else {
+        			Person possiblyNoLongerNeeded = origUser.person
+       				origUser.person = sameOrcid
+       				def anyPublications = PublicationPerson.findByPerson(possiblyNoLongerNeeded)
+       				if (!anyPublications) {
+       					possiblyNoLongerNeeded.delete();
+       				}
+       			}
+        	}
+        	origUser.person.orcid = user.person.orcid
+        }
         origUser.person.userRealName = user.person.userRealName
-        origUser.email = user.email
-        origUser.person.orcid = user.person.orcid
         origUser.person.institution = user.person.institution
+        origUser.email = user.email
         if (!origUser.person.validate()) {
-    	    throw new UserInvalidException(user.username)
+        	throw new UserInvalidException(user.username)
         }
         if (!origUser.validate()) {
             throw new UserInvalidException(user.username)
@@ -171,7 +184,6 @@ class UserService implements IUserService {
         if (!user) {
             throw new UserNotFoundException(username)
         }
-        System.out.println("RETURNING USER: "+user.person.userRealName+"..."+user.username);
         return user.sanitizedUser()
     }
     
