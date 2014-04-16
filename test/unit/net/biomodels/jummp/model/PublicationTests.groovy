@@ -72,9 +72,6 @@ class PublicationTests {
         for (int i=1; i<1000; i++) {
             synopsis += "1"
         }
-        Person author =new Person(userRealName:"Ali")
-        publication.authors = []
-        publication.authors << author
         publication.synopsis = synopsis
         assertTrue(publication.validate())
     }

@@ -45,6 +45,8 @@ import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.plugins.security.Person
 import net.biomodels.jummp.plugins.security.UserRole
+import net.biomodels.jummp.model.Publication
+import net.biomodels.jummp.model.PublicationPerson
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.BadCredentialsException
@@ -53,6 +55,7 @@ import static org.junit.Assert.*
 @TestMixin(IntegrationTestMixin)
 class UserServiceTests extends JummpIntegrationTest {
     def userService
+    def pubMedService
     def grailsApplication
 
     @Before
@@ -269,6 +272,23 @@ class UserServiceTests extends JummpIntegrationTest {
         assertNotNull(adminRegisteredUser.registrationInvalidation)
         assertFalse(registeredUser.registrationCode == adminRegisteredUser.registrationCode)
         grailsApplication.config.jummp.security.anonymousRegistration = anonymousRegistration
+        authenticateAnonymous()
+        // publication: Science   (ISSN: 0036-8075)   (ESSN: 1095-9203)
+        Publication publication = Publication.fromCommandObject(pubMedService.fetchPublicationData("20488988"));
+        Person fakeAuthor = new Person(userRealName: "Not Schilling",
+        							   orcid: "0000-0002-9517-5166");
+        User duplicateuser = new User(username: "fakeUser",
+        					 		  password: "nopassword",
+        					 		  person: fakeAuthor,
+        					 		  email: "noemail@hotmail.com");
+        userService.register(duplicateuser)
+        registeredUser = User.findByUsername("fakeUser")
+    	def authorTest=PublicationPerson.findByPublicationAndPerson(publication, registeredUser.person)
+        assertNotNull(authorTest);
+        assertEquals(authorTest.person, registeredUser.person);
+        assertEquals(authorTest.person.userRealName, "Not Schilling");
+        assertEquals(authorTest.pubAlias, "Schilling M");
+        assertEquals(authorTest.position, 1);
     }
 
     //Test no longer relevant until registration link mechanism is reinstated.
