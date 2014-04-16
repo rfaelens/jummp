@@ -202,7 +202,30 @@ Handlebars.registerHelper('setChecked', function(mode) {
 var searchTerm="";
 
 function getHighlighted(text) {
-	return text.replace(searchTerm, "<b>"+searchTerm+"</b>");
+	return text.replace(new RegExp(searchTerm, 'gi'), "<SPAN style='BACKGROUND-COLOR: #ffff00'>"+searchTerm+"</SPAN>");
+}
+
+function obscure(text) {
+	retval=[]
+	for (var i=0; i<text.length; i++) {
+		if (Math.random() > 0.75) {
+			retval.push('_');
+		}
+		else {
+			retval.push(text[i]);
+		}
+	}
+	text=retval.join('');
+	if (text.indexOf("_")==-1) {
+		text=obscure(text);
+	}
+	return text;
+}
+
+function obscureEmail(text) {
+	parts=text.split("@");
+	console.log("SPLIT INTO "+parts[0]+"  and "+parts[1]);
+	return obscure(parts[0])+"@"+obscure(parts[1]);
 }
 
 function main(existing, contURL, submit, autoComp, show) {
@@ -253,7 +276,7 @@ function main(existing, contURL, submit, autoComp, show) {
 					}
 	}).data( "ui-autocomplete" )._renderItem = function( ul, item ) {
       		return $( "<li>" )
-        	.append( "<a>" + getHighlighted(item[2]) + " ("+ getHighlighted(item[1])+")<br/>" + getHighlighted(item[0]) + "<hr style='margin: 0.5em 0 !important;'/></a>" )
+        	.append( "<a>" + getHighlighted(item[2]) + " ("+ getHighlighted(item[1])+")<br/>" + getHighlighted(obscureEmail(item[0])) + "<hr style='margin: 0.5em 0 !important;'/></a>" )
         	.appendTo( ul );
       };
   	  $( "#SaveCollabs" ).click(function(event){
