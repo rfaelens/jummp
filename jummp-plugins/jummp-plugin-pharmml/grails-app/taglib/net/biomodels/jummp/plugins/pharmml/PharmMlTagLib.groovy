@@ -211,7 +211,7 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
-    StringBuilder simpleParams(List<SimpleParameterType> parameters) {
+    StringBuilder simpleParams(List<SimpleParameterType> parameters, Map<String, Equation> transfMap = [:]) {
         def outcome = new StringBuilder()
         if (!parameters) {
             return outcome
@@ -221,7 +221,7 @@ class PharmMlTagLib {
             parameters.inject(outcome) { o, p ->
                 String thisParam
                 if (p.assign) {
-                    thisParam = convertToMathML(p.symbId, p.assign)
+                    thisParam = convertToMathML(p.symbId, p.assign, transfMap)
                 } else {
                     thisParam = ["<math display='inline'><mstyle>", "</mstyle></math>"].join(op(p.symbId))
                 }
@@ -232,6 +232,7 @@ class PharmMlTagLib {
         } catch(Exception e) {
             outcome.append("Cannot display simple parameters.")
             log.error("Error encountered while rendering simple params ${parameters.inspect()}: ${e.message}")
+            e.printStackTrace()
         }
         return outcome.append("</div>")
     }
@@ -609,7 +610,7 @@ class PharmMlTagLib {
                 def individualParameters = pm.commonParameterElement.value.findAll {
                        it instanceof IndividualParameterType
                 }
-                result.append(simpleParams(simpleParameters))
+                result.append(simpleParams(simpleParameters, transfMap))
 
                 // helps us decide the size of each correlation matrix in the parameter model
                 Map<String, List<String>> paramRandomVariableMap = [:]
@@ -727,7 +728,7 @@ class PharmMlTagLib {
                 result.append("<div>")
                 if (c.simpleParameter) {
                     result.append("<div><span class=\"bold\">Parameters</span></div>")
-                    result.append(simpleParams(c.simpleParameter))
+                    result.append(simpleParams(c.simpleParameter, transfMap))
                 }
                 if (c.covariate) {
                     c.covariate.each {
@@ -740,10 +741,10 @@ class PharmMlTagLib {
             }
         } catch(Exception e) {
             result = new StringBuilder();
-        	log.error("Error rendering the covariates ${covariate.inspect()} ${covariate.properties}: ${e.message}")
+            log.error("Error rendering the covariates ${covariate.inspect()} ${covariate.properties}: ${e.message}")
             result.append("Sorry, something went wrong while rendering the covariates.")
         } finally {
-        	out << result.toString()
+            out << result.toString()
         }
     }
 
@@ -1945,54 +1946,56 @@ class PharmMlTagLib {
         return equation
     }
 
-    private void convertEquation(final def equation, StringBuilder builder) {
+    private void convertEquation(def equation, StringBuilder builder, Map<String, Equation> transfMap = [:]) {
         def equationToProcess
-        if ((equation instanceof EquationType) || (equation instanceof Equation)) {
-            equationToProcess = expandEquation(equation, [:])
+        if (!transfMap) {
+            equationToProcess = equation
+        } else if ((equation instanceof EquationType) || (equation instanceof Equation)) {
+            equationToProcess = expandEquation(equation, transfMap)
         } else {
             equationToProcess = equation
         }
         List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equationToProcess).reverse()
-        List<String> stack=new LinkedList<String>()
+        List<String> stack = new LinkedList<String>()
         symbols.each {
            stack.push(it)
         }
         prefixToInfix(builder, stack)
     }
 
-    private String convertToMathML(def equation) {
+    private String convertToMathML(def equation, Map<String, Equation> transfMap = [:]) {
         StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
-        convertEquation(equation, builder)
+        convertEquation(equation, builder, transfMap)
         builder.append("</mstyle></math>")
         return builder.toString()
     }
 
-    private String convertToMathML(String lhs, def equation) {
+    private String convertToMathML(String lhs, def equation, Map<String, Equation> transfMap = [:]) {
         StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
         builder.append(oprand(lhs))
         builder.append(op("="))
-        convertEquation(equation, builder)
+        convertEquation(equation, builder, transfMap)
         builder.append("</mstyle></math>")
         return builder.toString()
     }
 
     //works with EquationType and Equation as well
-    private String convertToMathML(EquationType lhs, EquationType rhs) {
+    private String convertToMathML(EquationType lhs, EquationType rhs, Map<String, Equation> transfMap = [:]) {
         StringBuilder output = new StringBuilder("<div>")
         output.append("<math display='inline'><mstyle>")
         convertEquation(lhs, output)
         output.append(op("="))
-        convertEquation(rhs, output)
+        convertEquation(rhs, output, transfMap)
         output.append("</mstyle></math>")
         return output.append("</div>").toString()
     }
 
-    private String convertToMathML(String lhs, ScalarRhs srhs) {
+    private String convertToMathML(String lhs, ScalarRhs srhs, Map<String, Equation> transfMap = [:]) {
          if (srhs.equation) {
-            return convertToMathML(lhs, srhs.equation)
+            return convertToMathML(lhs, srhs.equation, transfMap)
         }
         if (srhs.symbRef) {
-            return convertToMathML(lhs, srhs.symbRef)
+            return convertToMathML(lhs, srhs.symbRef, transfMap)
         }
         StringBuilder result = new StringBuilder("<math display='inline'><mstyle>")
         result.append(oprand(lhs)).append(op("="))
@@ -2002,12 +2005,12 @@ class PharmMlTagLib {
         return result.append("</mstyle></math>").toString()
     }
 
-    private String convertToMathML(String lhs, Rhs rhs) {
+    private String convertToMathML(String lhs, Rhs rhs, Map<String, Equation> transfMap = [:]) {
         if (rhs.equation) {
-            return convertToMathML(lhs, rhs.equation)
+            return convertToMathML(lhs, rhs.equation, transfMap)
         }
         if (rhs.symbRef) {
-            return convertToMathML(lhs, rhs.symbRef)
+            return convertToMathML(lhs, rhs.symbRef, transfMap)
         }
         StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
         builder.append(oprand(lhs))
