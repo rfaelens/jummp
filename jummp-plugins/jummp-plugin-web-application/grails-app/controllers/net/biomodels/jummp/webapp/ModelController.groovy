@@ -179,24 +179,25 @@ class ModelController {
     }
 
     private boolean isValidId() {
+    	boolean returnValue=true;
     	try {
-    		System.out.println("CHECKING ID: "+params.id);
     		if (params.id) {
     			String[] parts=params.id.split("\\.");
     			parts.each {
-    				System.out.println("CHECKING PART: "+it);
     				long part=Long.parseLong(it);
     				if (part<1) {
-    					return false;
+    					returnValue=false;
     				}
     			}
-    			return true;
+    		}
+    		else {
+    			returnValue=false;
     		}
     	}
     	catch(Exception e) {
-	    		
+	    		returnValue=false;
     	}
-    	return false;
+    	return returnValue;
     }
     
     @ApiOperation(value = "Show a model.", httpMethod = "GET",
@@ -247,92 +248,123 @@ class ModelController {
     }
 
     def files = {
-    	if (isValidId()) 
+    	boolean valid=isValidId();
+    	if (valid) 
          {
-         	 def revisionFiles = modelDelegateService.getRevision(params.id).files
-         	 def responseFiles = revisionFiles.findAll { !it.hidden }
-         	 respond new net.biomodels.jummp.webapp.rest.model.show.ModelFiles(responseFiles)
+         	 try {
+         	 	 def revisionFiles = modelDelegateService.getRevision(params.id).files
+         	 	 def responseFiles = revisionFiles.findAll { !it.hidden }
+         	 	 respond new net.biomodels.jummp.webapp.rest.model.show.ModelFiles(responseFiles)
+         	 }
+         	 catch(Exception err) {
+         	 	 valid=false;
+         	 }
          }
-       else {
+       if (!valid) {
        	   respond net.biomodels.jummp.webapp.rest.error.Error("Invalid Id", "An invalid model id was specified");
        }
     }
 
     def publish = {
-    	if (isValidId()) 
+    	boolean valid=isValidId();
+    	if (valid) 
         {
-        	def rev=new RevisionTransportCommand(id: params.id as int)
-        	modelDelegateService.publishModelRevision(rev)
-        	redirect(action: "showWithMessage", id: modelDelegateService.getRevisionDetails(rev).model.id,
+        	try {
+        		def rev=new RevisionTransportCommand(id: params.id as int)
+        		modelDelegateService.publishModelRevision(rev)
+        		redirect(action: "showWithMessage", id: modelDelegateService.getRevisionDetails(rev).model.id,
                 	params: [flashMessage:"Model has been published."])
+            }
+            catch(Exception e) {
+            	valid=false;
+            }
         }
-        else {
+        if (!valid) {
         	forward(controller: "errors", action: "error403")
         }
     }
 
     def delete = {
-    	if (isValidId()) 
+    	boolean valid=isValidId();
+    	if (valid) 
         {
-        	boolean deleted=modelDelegateService.deleteModel(params.id as int)
-        	redirect(action: "showWithMessage", id: params.id,
+        	try {
+        		boolean deleted=modelDelegateService.deleteModel(params.id as int)
+        		redirect(action: "showWithMessage", id: params.id,
             	     params: [flashMessage: deleted?"Model has been deleted, and moved into archives.":"Model could not be deleted"])
+            }
+            catch(Exception ignore) {
+            	valid=false;
+            }
         }
-        else {
+        if (!valid) {
         	forward(controller: "errors", action: "error403")
         }
     }
     
     def share = {
-    	if (isValidId()) {
-    		def rev=modelDelegateService.getRevisionDetails(new RevisionTransportCommand
+    	boolean valid=isValidId();
+    	if (valid) {
+    		try {
+    			def rev=modelDelegateService.getRevisionDetails(new RevisionTransportCommand
     													(id: Long.parseLong(params.id)));
-    		def perms=modelDelegateService.getPermissionsMap(rev.model.id);
-    		return [revision: rev, permissions: perms as JSON]
+    			def perms=modelDelegateService.getPermissionsMap(rev.model.id);
+    			return [revision: rev, permissions: perms as JSON]
+    		}
+    		catch(Exception error) {
+    			valid=false
+    		}
     	}
-    	else {
+    	if (!valid) {
     		forward(controller: "errors", action: "error403")
         }
     }
     
     def shareUpdate = {
-    	try { 
-	    		if (isValidId() && params.collabMap) {
-	    			def map=JSON.parse(params.collabMap);
-	    			List<PermissionTransportCommand> collabsNew=new LinkedList<PermissionTransportCommand>();
-	    			for (int i=0; i<map.length(); i++) {
-	    				JSONObject perm=map.getJSONObject(i);
-	    				PermissionTransportCommand ptc=new PermissionTransportCommand(
-    														id: perm.getString("id"),
-    														name: perm.getString("name"),
-    														read: perm.getBoolean("read"),
-    														write: perm.getBoolean("write"));
-    					System.out.println("GOT :"+ptc.getProperties());
-    					collabsNew.add(ptc);
-    				}
-    				modelDelegateService.setPermissions(params.id as Long, collabsNew);
-    				render (['success': true, 'permissions': modelDelegateService.getPermissionsMap(params.id as Long)] as JSON)
-    			}
-    			else {
-    				render (['success': false, 'message': "Couldnt update permissions"] as JSON)
-    			}
+    	boolean valid=isValidId() && params.collabMap;
+    	if (valid) {
+    		try { 
+				def map=JSON.parse(params.collabMap);
+				List<PermissionTransportCommand> collabsNew=new LinkedList<PermissionTransportCommand>();
+				for (int i=0; i<map.length(); i++) {
+					JSONObject perm=map.getJSONObject(i);
+					PermissionTransportCommand ptc=new PermissionTransportCommand(
+														id: perm.getString("id"),
+														name: perm.getString("name"),
+														read: perm.getBoolean("read"),
+														write: perm.getBoolean("write"));
+					collabsNew.add(ptc);
+				}
+				modelDelegateService.setPermissions(params.id as Long, collabsNew);
+				render (['success': true, 
+						'permissions': modelDelegateService.getPermissionsMap(params.id as Long)] as JSON)
+    	   }
+    	   catch(Exception e) {
+    	   	   valid=false;
+    	   }
     	}
-    	catch(Exception e) {
-    		render (['success': false, 'message': "Couldnt update permissions: "+e.toString()] as JSON)
+    	if (!valid) {
+    			render (['success': false, 'message': "Couldnt update permissions"] as JSON)
     	}
+    	
     }
     
    @Secured(["isAuthenticated()"])
     def updateFlow = {
         start {
             action {
-            	if (!isValidId()) {
-                    return error()
-                }
-                if ((params.id as Long) < 1 || !modelDelegateService.canAddRevision(params.id as Long)) {
-                	return accessDenied()
-                }
-                conversation.model_id=params.id
+            	try {
+            		if (!isValidId()) {
+            			return error()
+            		}
+            		else if (!modelDelegateService.canAddRevision(params.id as Long)) {
+            			return accessDenied()
+            		}
+            		conversation.model_id=params.id
+            	}
+            	catch(Exception err) {
+            		return error()
+            	}
             }
             on("success").to "uploadPipeline"
             on("error"){
@@ -740,7 +772,6 @@ class ModelController {
             	    	    String name=parts[0];
             	    	    String orcid=parts[1];
             	    	    String institution=parts[2];
-            	    	    System.out.println("NOW PROCESSING: "+it+"..."+name+"..."+orcid+".."+institution)
             	    	    def authorListSrc=model.publication.authors
             	    	    if (!authorListSrc) {
             	    	    	    authorListSrc=new LinkedList<PersonTransportCommand>();
@@ -755,7 +786,6 @@ class ModelController {
             	    	    	return false
             	    	    }
             	    	    if (!author) {
-            	    	    	System.out.println("COULDNT FIND AUTHOR "+name+" in ${authorListSrc}")
             	    	    	author=new PersonTransportCommand(userRealName:parts[0], 
             	    	    					  orcid: orcid!="no_orcid" ? orcid: null, 
             	    	    					  institution: institution!="no_institution_provided" ? institution:null)
@@ -764,10 +794,8 @@ class ModelController {
             	    	        }
             	    	        model.publication.authors.add(author)
             	    	    }
-            	    	    System.out.println("AUTHORS IN PUBINFO "+model.publication.authors.inspect())
-        	    	        if (author.validate()) {
+            	    	    if (author.validate()) {
         	    	        	validatedAuthors.add(author)
-        	    	        	System.out.println("AUTHORS IN VALIDATED "+validatedAuthors.inspect())
         	    	        }
         	    	        else {
         	    	        	log.error "Submission did not validate: ${author.properties}."
@@ -778,7 +806,6 @@ class ModelController {
         	    	 }
             	   }
             	   model.publication.authors=validatedAuthors
-            	   System.out.println("AUTHOR SIZE" +model.publication.authors.size())
             	   if (!model.publication.validate()) {
             	   	   log.error "Submission did not validate: ${model.publication.properties}."
             	   	   log.error "Errors: ${model.publication.errors.allErrors.inspect()}."

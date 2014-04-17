@@ -7,7 +7,7 @@
 <g:else>
 	<g:if test="${session.updateMissingId}">
 		<% session.updateMissingId=null %>
-		<p>A model ID was not specified for the update process. </p>
+		<p>A valid model ID was not specified for the update process. </p>
 	</g:if>
 	<g:else>
 		<p>Something bad happened. That is all we know. Sorry 'bout that.</p>

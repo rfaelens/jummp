@@ -91,6 +91,7 @@
 					<div class="containUI">
 					</div>
 					</div>
+					<hr style="visibility:hidden;"/>
 					<a href="${createLink(action:"show", id:revision.model.id)}">Back to Model</a>
     		   </div>
 			 <g:javascript contextPath="" src="share.js"/>

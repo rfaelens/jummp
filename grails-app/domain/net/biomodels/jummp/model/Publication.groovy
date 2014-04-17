@@ -134,7 +134,6 @@ class Publication implements Serializable {
     }
     
     public static void reconcile(Publication publication, def tobeAdded) {
-    	System.out.println("INSIDE RECONCILE WITH "+publication+" and "+tobeAdded);
     	def existing = PublicationPerson.findAllByPublication(publication, [sort: "position", order: "asc"]);
     	tobeAdded.eachWithIndex { newAuthor, index ->
             	def existingAuthor = existing.find { oldAuthor ->
@@ -147,8 +146,7 @@ class Publication implements Serializable {
             		return false
             	}
             	if (!existingAuthor) {
-            		System.out.println("Creating "+newAuthor);
-    	    		Person newlyCreatedPubAuthor;
+            		Person newlyCreatedPubAuthor;
             		if (newAuthor.orcid) {
             			def personWithSameOrcid=Person.findByOrcid(newAuthor.orcid)
             			if (personWithSameOrcid) {
@@ -157,16 +155,14 @@ class Publication implements Serializable {
             		}
             		if (!newlyCreatedPubAuthor) {
             			newlyCreatedPubAuthor = new Person(userRealName: newAuthor.userRealName, orcid: newAuthor.orcid)
-            			newlyCreatedPubAuthor.save(failOnError: true);
-            			System.out.println("NEW PERSON CREATED: "+newlyCreatedPubAuthor.getProperties()	);
+            			newlyCreatedPubAuthor.save(failOnError: true, flush: true);
             		}
-            		def tmp=new PublicationPerson(publication: publication, 
+            		try {
+            			def tmp=new PublicationPerson(publication: publication, 
             							  person: newlyCreatedPubAuthor,
             							  pubAlias: newAuthor.userRealName,
             							  position: index)
-            		try {
             			tmp.save(failOnError:true, flush: true);
-            			System.out.println("NEW ASSOCIATION: "+tmp);
             		}
             		catch(Exception e) {
             			e.printStackTrace();
@@ -216,7 +212,7 @@ class Publication implements Serializable {
                 linkProvider: PublicationLinkProvider.fromCommandObject(cmd.linkProvider),
                 link: cmd.link
                 )
-        publ.save(flush:true)
+        publ.save(failOnError: true, flush:true)
         reconcile(publ, cmd.authors)
     	return publ
     }

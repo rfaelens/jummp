@@ -61,6 +61,7 @@ class PubMedServiceTests extends JummpIntegrationTest {
         authenticateAnonymous()
         Person fakeAuthor = new Person(userRealName: "Not Schilling",
         							   orcid: "0000-0002-9517-5166");
+        fakeAuthor.save();
         User user = new User(username: "fakeUser",
         					 password: "nopassword",
         					 person: fakeAuthor,
@@ -83,11 +84,12 @@ class PubMedServiceTests extends JummpIntegrationTest {
         assertEquals("Division Systems Biology of Signal Transduction, DKFZ-ZMBH Alliance, German Cancer Research Center, 69120 Heidelberg, Germany.", publication.affiliation)
         assertEquals("Cell surface receptors convert extracellular cues into receptor activation, thereby triggering intracellular signaling networks and controlling cellular decisions. A major unresolved issue is the identification of receptor properties that critically determine processing of ligand-encoded information. We show by mathematical modeling of quantitative data and experimental validation that rapid ligand depletion and replenishment of the cell surface receptor are characteristic features of the erythropoietin (Epo) receptor (EpoR). The amount of Epo-EpoR complexes and EpoR activation integrated over time corresponds linearly to ligand input; this process is carried out over a broad range of ligand concentrations. This relation depends solely on EpoR turnover independent of ligand binding, which suggests an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system.", publication.synopsis)
         // TODO: add tests for author
-        def authors=PublicationPerson.findByPublication(publication)
-        authors.each {
-        	System.out.println("Author: "+it.person.inspect())
-        }
-        System.out.println("AUTHORS: "+authors);
+        def authorTest=PublicationPerson.findByPublicationAndPerson(publication, fakeAuthor)
+        assertNotNull(authorTest);
+        assertEquals(authorTest.person, fakeAuthor);
+        assertEquals(authorTest.person.userRealName, "Not Schilling");
+        assertEquals(authorTest.pubAlias, "Schilling M");
+        assertEquals(authorTest.position, 1);
         // test for 12974500 - no day specified
         publication = Publication.fromCommandObject(pubMedService.fetchPublicationData("12974500"));
         assertNull(publication.day)
