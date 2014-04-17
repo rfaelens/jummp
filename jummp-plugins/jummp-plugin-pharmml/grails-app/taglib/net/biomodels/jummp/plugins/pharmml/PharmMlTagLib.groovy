@@ -236,6 +236,33 @@ class PharmMlTagLib {
         return outcome.append("</div>")
     }
 
+    def simpleParamsClosure = { attrs ->
+        if (!attrs.simpleParameters) {
+            return
+        }
+        def params = []
+        def model = [:]
+        try {
+            attrs.simpleParameters.collect(params) { p ->
+                String thisParam
+                if (p.assign) {
+                    thisParam = convertToMathML(p.symbId, p.assign)
+                } else {
+                    StringBuilder sb = new StringBuilder("<math display='inline'><mstyle>")
+                    sb.append(op(p.symbId)).append("</mstyle></math>")
+                    thisParam = sb.toString()
+                }
+                return thisParam
+            }
+        } catch(Exception e) {
+            params.add("<p>Cannot display simple parameters.</p>")
+            log.error("Error encountered while rendering simple params ${parameters.inspect()}: ${e.message}", e)
+        } finally {
+            model["simpleParameters"] = params
+            out << g.render(template: "/templates/simpleParameters", model: model)
+        }
+    }
+
     StringBuilder randomVariables(List<ParameterRandomVariableType> rv, Map rvMap) {
         def output = new StringBuilder()
         try {
@@ -397,10 +424,9 @@ class PharmMlTagLib {
         if (!functionDefs) {
             return
         }
-        def result = new StringBuilder("<h3>Function Definitions</h3>")
-
+        def definitionList = []
         try {
-            functionDefs.each { d ->
+            functionDefs.collect(definitionList) { d ->
                 def rightHandSide
                 if (d.definition.equation) {
                     rightHandSide = d.definition.equation
@@ -411,14 +437,15 @@ class PharmMlTagLib {
                 }
                 //should not be null by now
                 assert !!rightHandSide
-                result.append("<div>${convertToMathML(d.symbId, d.getFunctionArgument(), rightHandSide)}</div>")
+                return convertToMathML(d.symbId, d.functionArgument, rightHandSide)
             }
         } catch(Exception e) {
-            result = new StringBuilder("<h3>Function Definitions</h3>")
-        	log.error("Error while rendering function definitions ${functionDefs.inspect()}: ${e.message}")
-            result.append("Sorry, cannot render the function definitions.")
+            log.error("Error while rendering function definitions ${functionDefs.inspect()}: ${e.message}", e)
+            definitionList.add("Sorry, cannot render the function definitions.")
+        } finally {
+            out << g.render(template: "/templates/functionDefinitions",
+                    model: [functionDefinitions: definitionList])
         }
-        out << result.toString()
     }
 
     def structuralModel = { sm, iv ->
@@ -426,87 +453,92 @@ class PharmMlTagLib {
             return
         }
 
-        def result
         try {
-            result = new StringBuilder()
             boolean multipleStructuralModels = sm.size() > 1
             if (!multipleStructuralModels) {
-                displayStructuralModel(sm[0], iv, result)
+                displayStructuralModel(sm[0], iv)
             } else {
                 sm.each { s ->
-                    displayStructuralModel(s, iv, result)
+                    displayStructuralModel(s, iv)
                 }
             }
         } catch(Exception e) {
-            log.error("Error while rendering structural model ${sm.inspect()} ${sm.properties}:${e.message}")
-            out << "Sorry, something went wrong while displaying the structural model."
+            log.error("Error while rendering structural model ${sm.inspect()} ${sm.properties}:${e.message}", e)
+            out << "<p>Sorry, something went wrong while displaying the structural model.</p>"
             return
         }
-        out << result.toString()
     }
 
-    void displayStructuralModel(StructuralModelType model, String iv, StringBuilder result) {
-        result.append("<h3>Structural Model <span class='italic'>")
-        result.append(model.name?.value ?: model.blkId).append("</span></h3>\n")
-        if (model.simpleParameter) {
-            result.append("<p class=\"bold\">Parameters </p>")
-            result.append(simpleParams(model.simpleParameter))
+    void displayStructuralModel(StructuralModelType sm, String iv) {
+        String modelName = sm.name?.value ?: sm.blkId
+        def model = [:]
+        model["independentVariable"] = iv
+        model["name"] = modelName
+        if (sm.simpleParameter) {
+            model["simpleParameters"] = sm.simpleParameter
         }
-        if (model.commonVariable) {
-            result.append("<p class=\"bold\">Variable definitions</p>")
-            result.append(["<div>", "</div>\n"].join(
-                commonVariables(model.commonVariable, iv).toString()))
+        if (sm.commonVariable) {
+            model["variableDefinitions"] = sm.commonVariable
         }
+        out << g.render(template: "/templates/structuralModel", model: model)
     }
 
-    StringBuilder commonVariables(List<JAXBElement> vars, def indepVar) {
-        def result = new StringBuilder()
-        if (!vars) {
-            return result
+    def  commonVariables = { attrs ->
+        if (!(attrs.vars)) {
+            return
         }
         def initialConditions = [:]
+        def variableList = []
         try {
-            vars.each { v ->
-                result.append("<div>")
+            attrs.vars.each { v ->
                 switch(v.value) {
                     case DerivativeVariableType:
                         if (v.value.initialCondition) {
                             initialConditions << [(v.value.symbId) : v.value.initialCondition]
                         }
-                        result.append(convertToMathML(v.value, indepVar))
+                        variableList.add(convertToMathML(v.value, attrs.indepVar))
                         break
                     case VariableDefinitionType:
                         if (v.value.assign) {
-                            result.append(convertToMathML(v.value.symbId, v.value.assign))
+                            variableList.add(convertToMathML(v.value.symbId, v.value.assign))
                         } else {
-                            result.append("<math display='inline'><mstyle>").append(op(v.value.symbId)).append(
-                                    "</mstyle></math>")
+                            StringBuilder sb = new StringBuilder()
+                            sb.append("<math display='inline'><mstyle>")
+                            sb.append(op(v.value.symbId)).append("</mstyle></math>")
+                            variableList.add(sb.toString())
                         }
                         break
                     case FunctionDefinitionType:
                         def fd = v.value
-                        result.append(convertToMathML(fd.symbId, fd.functionArgument, fd))
+                        variableList.add(convertToMathML(fd.symbId, fd.functionArgument, fd))
                         break
                     case FuncParameterDefinitionType:
-                        result.append(v.value.symbId)
+                        variableList.add(v.value.symbId)
                         break
                     default:
-                        result.append(v.value.symbId)
+                        variableList.add(v.value.symbId)
                         break
                 }
-                result.append("</div>")
-            }
-            if (initialConditions) {
-                result.append("\n<p class='bold'>Initial conditions</p>\n")
-                initialConditions.keySet().each { s ->
-                    result.append("<div>").append(convertToMathML(s, initialConditions[s].assign)).append("</div>\n")
-                }
+                def model = [:]
+                model["variableDefinitions"] = variableList
+                model["initialConditions"] = initialConditions
+                out << g.render(template: "/templates/commonVariables", model: model)
             }
         } catch(Exception e) {
-            log.error("Error while displaying common variables - arguments ${vars.properties} ${indepVar.inspect()}: ${e.message} ")
-            return new StringBuilder("Sorry, ran into issues while trying to display variable definitions.")
+            log.error("Error while displaying common variables - arguments ${attrs.vars.properties} ${attrs.indepVar.inspect()}: ${e.message} ")
+            out << "<p>Sorry, ran into issues while trying to display variable definitions.</p>"
         }
-        return result
+    }
+
+    def initialConditions = { attrs ->
+        if (!attrs.initialConditions) {
+            return
+        }
+        def conditionsToRender = []
+        attrs.initialConditions.keySet().each { c ->
+            conditionsToRender << convertToMathML(c, attrs.initialConditions[c].assign)
+        }
+        out << g.render(template: "/templates/initialConditions", model: [conditions: conditionsToRender])
     }
 
     def variabilityModel = { variabilityModel ->
@@ -604,7 +636,7 @@ class PharmMlTagLib {
                 result.append("</div>")
             }
         } catch(Exception e) {
-            log.error("Error rendering the parameter model for ${parameterModel.inspect()} ${parameterModel.properties}: ${e.message}\nStacktrace:\n")
+            log.error("Error rendering the parameter model for ${parameterModel.inspect()} ${parameterModel.properties}: ${e.message}", e)
             out << "Sorry, something went wrong while rendering the parameter model."
         }
         out << result.toString()
