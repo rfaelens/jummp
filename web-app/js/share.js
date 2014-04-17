@@ -200,6 +200,7 @@ Handlebars.registerHelper('setChecked', function(mode) {
 });
 
 var searchTerm="";
+var obscured={};
 
 function getHighlighted(text) {
 	return text.replace(new RegExp(searchTerm, 'gi'), "<SPAN style='BACKGROUND-COLOR: #ffff00'>"+searchTerm+"</SPAN>");
@@ -223,9 +224,12 @@ function obscure(text) {
 }
 
 function obscureEmail(text) {
-	parts=text.split("@");
-	console.log("SPLIT INTO "+parts[0]+"  and "+parts[1]);
-	return obscure(parts[0])+"@"+obscure(parts[1]);
+	existing = obscured[text];
+	if (typeof existing === "undefined") {
+		parts=text.split("@");
+		obscured[text]=obscure(parts[0])+"@"+obscure(parts[1]);	
+	}
+	return obscured[text]
 }
 
 function main(existing, contURL, submit, autoComp, show) {

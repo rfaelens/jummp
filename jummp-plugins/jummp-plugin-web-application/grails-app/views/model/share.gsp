@@ -73,7 +73,7 @@
     					<form id="collaboratorAddForm">
     						<div id="formElements">
     							<div class="formElement">
-    								<label for="name">Name</label>
+    								<label for="name">User</label>
     								<input placeholder="Name, username or email" id="nameSearch" name="name" type="text"/>
     							</div>
     							<div class="formElement">
