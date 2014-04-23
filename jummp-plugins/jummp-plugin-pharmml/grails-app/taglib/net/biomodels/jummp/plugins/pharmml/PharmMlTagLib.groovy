@@ -520,11 +520,11 @@ class PharmMlTagLib {
                         variableList.add(v.value.symbId)
                         break
                 }
-                def model = [:]
-                model["variableDefinitions"] = variableList
-                model["initialConditions"] = initialConditions
-                out << g.render(template: "/templates/commonVariables", model: model)
             }
+            def model = [:]
+            model["variableDefinitions"] = variableList
+            model["initialConditions"] = initialConditions
+            out << g.render(template: "/templates/commonVariables", model: model)
         } catch(Exception e) {
             log.error("Error while displaying common variables - arguments ${attrs.vars.properties} ${attrs.indepVar.inspect()}: ${e.message} ")
             out << "<p>Sorry, ran into issues while trying to display variable definitions.</p>"
