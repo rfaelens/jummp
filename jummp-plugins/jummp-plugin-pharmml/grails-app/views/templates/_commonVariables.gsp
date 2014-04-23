@@ -17,10 +17,13 @@
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
 <div>
-    <g:each var="v" in="${variableDefinitions}">
-        <div>${v}</div>
-    </g:each>
+    <div>
+        <g:each var="v" in="${variableDefinitions}">
+            <div>${v}</div>
+        </g:each>
+    </div>
     <g:if test="${initialConditions}">
-        <pharmml:initialConditions initialConditions="${initialConditions}"/>
+        <p class="bold">Initial conditions</p>
+        <div><pharmml:initialConditions initialConditions="${initialConditions}"/></div>
     </g:if>
 </div>
