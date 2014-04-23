@@ -21,9 +21,19 @@ public class TrialDesignStructureTests {
 
    @Test
    void constructorArgumentsGetFilteredCorrectly() {
+        def testFile = new File("test/files/0.2.1/example4.xml")
+        assertTrue testFile.exists()
+        constructorArgumentsTestHelper(testFile)
+        testFile = new File("test/files/0.3/example4.xml")
+        assertTrue testFile.exists()
+        constructorArgumentsTestHelper(testFile)
+   }
+
+   private void constructorArgumentsTestHelper(File f) {
         def pharmMlService = new PharmMlService()
-        def testFile = new File("test/files/example4.xml")
-        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def dom = pharmMlService.getDomFromPharmML(f)
+        assertNotNull dom
+        assertNotNull dom.trialDesign
         def structure = dom.trialDesign.structure
         assertNotNull(structure)
         //test each constructor arg for null and empty values
@@ -59,9 +69,15 @@ public class TrialDesignStructureTests {
 
    @Test
    void cellMatrixFilledCorrectly() {
+        def testFile = new File("test/files/0.2.1/example4.xml")
+        cellMatrixTestHelper(testFile)
+        testFile = new File("test/files/0.3/example4.xml")
+        cellMatrixTestHelper(testFile)
+   }
+
+   private void cellMatrixTestHelper(File f) {
         def pharmMlService = new PharmMlService()
-        def testFile = new File("test/files/example4.xml")
-        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def dom = pharmMlService.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         assertTrue(structure.allCellsDefined())
@@ -78,9 +94,15 @@ public class TrialDesignStructureTests {
 
    @Test
    void findByEpochWorks() {
+        def testFile = new File("test/files/0.2.1/example4.xml")
+        findByEpochTestHelper(testFile)
+        testFile = new File("test/files/0.3/example4.xml")
+        findByEpochTestHelper(testFile)
+   }
+
+   private void findByEpochTestHelper(File f) {
         def pharmMlService = new PharmMlService()
-        def testFile = new File("test/files/example4.xml")
-        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def dom = pharmMlService.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         def expected = [
@@ -102,9 +124,15 @@ public class TrialDesignStructureTests {
 
    @Test
    void findByArmWorks() {
+        def testFile = new File("test/files/0.2.1/example4.xml")
+        findByArmTestHelper(testFile)
+        testFile = new File("test/files/0.3/example4.xml")
+        findByArmTestHelper(testFile)
+   }
+
+   private void findByArmTestHelper(File f) {
         def pharmMlService = new PharmMlService()
-        def testFile = new File("test/files/example4.xml")
-        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def dom = pharmMlService.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         def expected = [
@@ -125,9 +153,15 @@ public class TrialDesignStructureTests {
 
    @Test
    void iteratorWorks() {
+        def testFile = new File("test/files/0.2.1/example4.xml")
+        iteratorTestHelper(testFile)
+        testFile = new File("test/files/0.3/example4.xml")
+        iteratorTestHelper(testFile)
+   }
+
+   private void iteratorTestHelper(File f) {
         def pharmMlService = new PharmMlService()
-        def testFile = new File("test/files/example4.xml")
-        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def dom = pharmMlService.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         def iStructure = structure.iterator()
@@ -143,9 +177,15 @@ public class TrialDesignStructureTests {
 
    @Test
     void getArmsAndEpochsWork() {
+        def testFile = new File("test/files/0.2.1/example4.xml")
+        getArmsAndEpochsTestHelper(testFile)
+        testFile = new File("test/files/0.3/example4.xml")
+        getArmsAndEpochsTestHelper(testFile)
+   }
+
+   private void getArmsAndEpochsTestHelper(File f) {
         def pharmMlService = new PharmMlService()
-        def testFile = new File("test/files/example4.xml")
-        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def dom = pharmMlService.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def struct = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         assertEquals(["a1", "a2"] as Set, struct.getArmRefs())

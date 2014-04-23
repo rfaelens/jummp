@@ -48,12 +48,17 @@ class PharmMlServiceTests {
     @Test
     void pharmMLsGetDetected() {
         def bigModel = []
-        def baseFolder = new File("test/files/")
-        baseFolder.eachFileMatch ~/example.*\.xml/, { File f -> bigModel << f; }
+        def baseFolder = new File("test/files/0.2.1/")
+        baseFolder.eachFileMatch ~/example.*\.xml/, { File f -> bigModel << f }
         assertTrue service.areFilesThisFormat(bigModel)
         bigModel = []
-        // contains a couple of models in SBML
-        baseFolder.eachFileMatch ~/.*.xml/, { File f -> bigModel << f; }
+        // contains a model in SBML
+        bigModel << new File("../../test/files/BIOMD0000000272.xml")
+        baseFolder.eachFileMatch ~/.*.xml/, { File f -> bigModel << f }
+        assertTrue service.areFilesThisFormat(bigModel)
+        bigModel = []
+        baseFolder = new File("test/files/0.3/")
+        baseFolder.eachFileMatch ~/example.*\.xml/, { File f -> bigModel << f }
         assertTrue service.areFilesThisFormat(bigModel)
     }
 
@@ -74,7 +79,13 @@ class PharmMlServiceTests {
             new File("test/files/pdmodel_sbml.xml")
         ]
         assertFalse service.areFilesThisFormat(bigModel)
-        bigModel << new File("test/files/example2.xml")
+        bigModel = [new File("../../test/files/BIOMD0000000272.xml")]
+        assertFalse service.areFilesThisFormat(bigModel)
+
+        bigModel << new File("test/files/0.2.1/example2.xml")
+        assertTrue service.areFilesThisFormat(bigModel)
+
+        bigModel = [new File("test/files/0.3/example2.xml")]
         assertTrue service.areFilesThisFormat(bigModel)
     }
 
@@ -91,11 +102,11 @@ class PharmMlServiceTests {
         //falls back to empty when no name is provided
         def model = [new File("test/files/pdmodel_sbml.xml"), new File("test/files/iov1_data.txt")]
         assertEquals "", service.extractName(model)
-        model = [new File("test/files/example2.xml")]
+        model = [new File("test/files/0.2.1/example2.xml")]
         assertEquals("Example 2 - simulation continuous PK (Bonate 2012)", service.extractName(model))
         model = []
-        def baseFolder = new File("test/files/")
-        baseFolder.eachFileMatch FileType.FILES, ~/.*\.xml/, { File f -> model << f; }
+        def baseFolder = new File("test/files/0.2.1/")
+        baseFolder.eachFileMatch FileType.FILES, ~/.*\.xml/, { File f -> model << f }
         def mergedNames = [ "Example 1 - simulation continuous PK/PD",
                 "Example 2 - simulation continuous PK (Bonate 2012)",
                 "Example 3 - basic Warfarin PK estimation with covariate W",
@@ -105,21 +116,24 @@ class PharmMlServiceTests {
         // the order of the files may not be preserved.
         String result = service.extractName(model)
         mergedNames.each { name -> assertTrue result.contains(name) }
+
+        model = []
+        baseFolder = new File("test/files/0.3/")
+        baseFolder.eachFileMatch FileType.FILES, ~/.*\.xml/, { File f -> model << f }
+        result = service.extractName(model)
+        mergedNames[4] = "Example 5 - estimation for growth tumor model"
+        mergedNames.each { name -> assertTrue result.contains(name) }
+
     }
 
     @Test
     void modelDescriptionGetsExtracted() {
         assertEquals "", service.extractDescription(null)
-        // only return a description when it relates to the root, not just any element
         String expected = '''\
-The following example is based on the CTS1 use case [Lavielle and Grevel, 2011]. 
-        Both PK (the drug concentration) and PD (the drug effect) are simulated. 
-        A one compartment PK model is linked to an indirect response PD model.'''
-        assertEquals(expected, service.extractDescription([new File("test/files/example1.xml")]))
-        expected = '''\
-This model is based on the publication: A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemotherapy or Radiotherapy
+based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemotherapy or Radiotherapy
         Benjamin Ribba, Gentian Kaloshi, Mathieu Peyre, et al. Clin Cancer Res Published OnlineFirst July 3, 2012.'''
-        assertEquals expected, service.extractDescription([new File("test/files/example5.xml")])
+        assertEquals expected, service.extractDescription([new File("test/files/0.2.1/example5.xml")])
+        assertEquals expected, service.extractDescription([new File("test/files/0.3/example5.xml")])
     }
 
     @Test
@@ -130,25 +144,32 @@ This model is based on the publication: A Tumor Growth Inhibition Model for Low-
         model = [new File("../../test/files/BIOMD0000000272.xml")]
         assertFalse service.validate(model)
 
-        model = [ "test/files/example1.xml",
-            "test/files/example2.xml",
-            "test/files/example3.xml",
-            "test/files/Ribba_CCR2012.xml",
+        model = [ "test/files/0.2.1/example1.xml",
+            "test/files/0.2.1/example2.xml",
+            "test/files/0.2.1/example3.xml",
+            "test/files/0.2.1/example5.xml",
         ]
         model.each { pharmML ->
-            println "${pharmML}: ${service.validate([new File(pharmML)])}"
+            assertTrue service.validate([new File(pharmML)])
+        }
+
+        model = []
+        def baseFolder = new File("test/files/0.3/")
+        baseFolder.eachFileMatch ~/example.*\.xml/, { File f -> model << f }
+        model.each { pharmML ->
+            assertTrue service.validate([pharmML])
         }
     }
 
     @Test
     void modellingStepsAreNotCompulsory() {
-        def model = new File("test/files/parameterModel_specExamples.xml")
+        def model = new File("test/files/0.2.1/parameterModel_specExamples.xml")
         assertTrue(model.exists())
         def dom = service.getDomFromPharmML(model)
         assertNull(dom.modellingSteps)
         assertEquals([], service.getCommonModellingSteps(dom.modellingSteps))
         // now try one that does have modellingSteps
-        model = new File("test/files/example1.xml")
+        model = new File("test/files/0.2.1/example1.xml")
         assertTrue(model.exists())
         dom = service.getDomFromPharmML(model)
         assertNotNull(dom.modellingSteps)

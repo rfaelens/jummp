@@ -105,10 +105,6 @@ grails.project.dependency.resolution = {
             excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4', 'xercesImpl'
         }
 
-        compile("eu.ddmore.pharmml:libPharmML:0.1-SNAPSHOT"){
-            excludes 'junit-dep'
-        }
-
         // sbml
         runtime("org.sbml.jsbml:jsbml:1.0-a2") {
             excludes 'woodstox-core-lgpl',
