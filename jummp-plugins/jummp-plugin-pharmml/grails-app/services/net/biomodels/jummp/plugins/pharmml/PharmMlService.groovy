@@ -45,17 +45,12 @@ import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 import eu.ddmore.libpharmml.impl.*
-import groovy.xml.StreamingMarkupBuilder
 import groovy.xml.XmlUtil
-import org.xml.sax.SAXException
-
-import javax.xml.parsers.ParserConfigurationException
-import java.nio.file.Files
-import java.nio.file.Path
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.xml.parsers.ParserConfigurationException
 import net.biomodels.jummp.core.IPharmMlService
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.RevisionTransportCommand
@@ -65,8 +60,7 @@ import org.apache.commons.logging.LogFactory
 import org.apache.tika.detect.DefaultDetector
 import org.apache.tika.metadata.Metadata
 import org.perf4j.aop.Profiled
-
-import static groovy.xml.XmlUtil.*
+import org.xml.sax.SAXException
 
 /**
  * Service class containing the logic to handle models encoded in PharmML.
@@ -421,7 +415,7 @@ class PharmMlService implements FileFormatService, IPharmMlService {
     }
 
     @Profiled(tag="pharmMlService.fetchMainFilesFromRevision")
-    private List<Files> fetchMainFilesFromRevision(RevisionTransportCommand rev) {
+    private List<File> fetchMainFilesFromRevision(RevisionTransportCommand rev) {
         List<File> files = []
         List<File> locations = []
         rev?.files?.findAll{it.mainFile}.each{locations << it.path}
