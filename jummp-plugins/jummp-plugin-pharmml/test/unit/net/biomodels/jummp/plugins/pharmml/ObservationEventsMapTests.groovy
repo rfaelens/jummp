@@ -32,7 +32,6 @@ package net.biomodels.jummp.plugins.pharmml
 
 import grails.test.mixin.*
 import net.biomodels.jummp.plugins.pharmml.ObservationEventsMap
-import net.biomodels.jummp.plugins.pharmml.PharmMlService
 import org.junit.*
 
 public class ObservationEventsMapTests {
@@ -46,8 +45,7 @@ public class ObservationEventsMapTests {
    }
 
    private void constructorArgumentHelper(File f) {
-        def pharmMlService = new PharmMlService()
-        def dom = pharmMlService.getDomFromPharmML(f)
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def structure = dom.trialDesign.structure
         assertNotNull(structure)
         ObservationEventsMap oem
@@ -77,8 +75,7 @@ public class ObservationEventsMapTests {
    }
 
    private void mapPopulationHelper(File f) {
-        def pharmMlService = new PharmMlService()
-        def dom = pharmMlService.getDomFromPharmML(f)
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def structure = dom.trialDesign.structure
         assertNotNull(structure)
         ObservationEventsMap oem = new ObservationEventsMap(structure.studyEvent)
@@ -100,8 +97,7 @@ public class ObservationEventsMapTests {
    }
 
    private void armsEpochsTestHelper(File f) {
-        def pharmMlService = new PharmMlService()
-        def dom = pharmMlService.getDomFromPharmML(f)
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def structure = dom.trialDesign.structure
         assertNotNull(structure)
         ObservationEventsMap oem = new ObservationEventsMap(structure.studyEvent)

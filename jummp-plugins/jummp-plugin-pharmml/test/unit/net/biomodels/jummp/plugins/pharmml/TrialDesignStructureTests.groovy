@@ -32,7 +32,6 @@ package net.biomodels.jummp.plugins.pharmml
 
 import grails.test.mixin.*
 import net.biomodels.jummp.plugins.pharmml.TrialDesignStructure
-import net.biomodels.jummp.plugins.pharmml.PharmMlService
 import org.junit.*
 
 public class TrialDesignStructureTests {
@@ -60,8 +59,7 @@ public class TrialDesignStructureTests {
    }
 
    private void constructorArgumentsTestHelper(File f) {
-        def pharmMlService = new PharmMlService()
-        def dom = pharmMlService.getDomFromPharmML(f)
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         assertNotNull dom
         assertNotNull dom.trialDesign
         def structure = dom.trialDesign.structure
@@ -106,8 +104,7 @@ public class TrialDesignStructureTests {
    }
 
    private void cellMatrixTestHelper(File f) {
-        def pharmMlService = new PharmMlService()
-        def dom = pharmMlService.getDomFromPharmML(f)
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         assertTrue(structure.allCellsDefined())
@@ -131,8 +128,7 @@ public class TrialDesignStructureTests {
    }
 
    private void findByEpochTestHelper(File f) {
-        def pharmMlService = new PharmMlService()
-        def dom = pharmMlService.getDomFromPharmML(f)
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         def expected = [
@@ -161,8 +157,7 @@ public class TrialDesignStructureTests {
    }
 
    private void findByArmTestHelper(File f) {
-        def pharmMlService = new PharmMlService()
-        def dom = pharmMlService.getDomFromPharmML(f)
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         def expected = [
@@ -190,8 +185,7 @@ public class TrialDesignStructureTests {
    }
 
    private void iteratorTestHelper(File f) {
-        def pharmMlService = new PharmMlService()
-        def dom = pharmMlService.getDomFromPharmML(f)
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         def iStructure = structure.iterator()
@@ -214,8 +208,7 @@ public class TrialDesignStructureTests {
    }
 
    private void getArmsAndEpochsTestHelper(File f) {
-        def pharmMlService = new PharmMlService()
-        def dom = pharmMlService.getDomFromPharmML(f)
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def struct = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         assertEquals(["a1", "a2"] as Set, struct.getArmRefs())

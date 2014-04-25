@@ -74,7 +74,7 @@ class SearchControllerSpec extends Specification {
         modelList = createDuplicateModels(COUNT, auth)
         assert COUNT == modelList.size()
         testModel = createModel("PharmML", "Test",
-                "jummp-plugins/jummp-plugin-pharmml/test/files/example2.xml", null)
+                "jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example2.xml", null)
         assert testModel != null
         assert COUNT + 1 == Model.count()
     }
@@ -370,7 +370,7 @@ class SearchControllerSpec extends Specification {
         if (size > 0) {
             size.times {
                 models << createModel("PharmML", "Test",
-                        "jummp-plugins/jummp-plugin-pharmml/test/files/example2.xml", auth)
+                        "jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example2.xml", auth)
             }
         }
         assert models.size() == size

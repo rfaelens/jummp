@@ -23,7 +23,7 @@ package net.biomodels.jummp.plugins.webapp
 class TestSubmitPharmMl extends TestUploadFiles {
     void performRemainingTest() {
         final File MODEL_FILE =
-                new File("jummp-plugins/jummp-plugin-pharmml/test/files/example1.xml")
+                new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example1.xml")
         String[] descriptionTokens = new String[11]
         descriptionTokens[0] = "Model comprised of files: example1.xml"
         (0..<10).each {

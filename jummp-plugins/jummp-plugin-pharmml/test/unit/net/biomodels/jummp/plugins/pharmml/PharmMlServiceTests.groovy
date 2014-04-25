@@ -165,14 +165,14 @@ based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemo
     void modellingStepsAreNotCompulsory() {
         def model = new File("test/files/0.2.1/parameterModel_specExamples.xml")
         assertTrue(model.exists())
-        def dom = service.getDomFromPharmML(model)
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(model)
         assertNull(dom.modellingSteps)
-        assertEquals([], service.getCommonModellingSteps(dom.modellingSteps))
+        assertEquals([], service.getCommonModellingSteps(dom.modellingSteps, dom.writtenVersion))
         // now try one that does have modellingSteps
         model = new File("test/files/0.2.1/example1.xml")
         assertTrue(model.exists())
-        dom = service.getDomFromPharmML(model)
+        dom = AbstractPharmMlHandler.getDomFromPharmML(model)
         assertNotNull(dom.modellingSteps)
-        assertEquals(1, service.getCommonModellingSteps(dom.modellingSteps).size())
+        assertEquals(1, service.getCommonModellingSteps(dom.modellingSteps, dom.writtenVersion).size())
     }
 }

@@ -51,26 +51,29 @@ class PharmMlController {
 
     def show = {
         def model=flash.genericModel
-        PharmML dom = pharmMlService.getDomFromRevision(model.revision)
-        TrialDesignType design = dom?.trialDesign
-        ModellingStepsType steps = pharmMlService.getModellingSteps(model.revision)
+        final RevisionTransportCommand REVISION = model.revision
+        PharmML dom = AbstractPharmMlHandler.getDomFromRevision(model.revision)
+        String version = dom?.writtenVersion
+        if (dom) {
+            TrialDesignType design = pharmMlService.getTrialDesign(dom, version)
+            ModellingStepsType steps = pharmMlService.getModellingSteps(dom, version)
 
-        model["modelDefinition"] = dom.modelDefinition
-        model["trialDesign"] = design
-        model["independentVar"] = pharmMlService.getIndependentVariable(dom)
-        model["functionDefs"] = pharmMlService.getFunctionDefinitions(dom)
-        model["structuralModel"] = pharmMlService.getStructuralModel(dom)
-        model["variabilityModel"] = pharmMlService.getVariabilityModel(dom)
-        model["covariateModel"] = pharmMlService.getCovariateModel(dom)
-        model["parameterModel"] = pharmMlService.getParameterModel(dom)
-        model["observationModel"] = pharmMlService.getObservationModel(dom)
-        model["structure"] = pharmMlService.getTrialDesignStructure(design)
-        model["population"] = pharmMlService.getPopulation(design)
-        model["dosing"] = pharmMlService.getIndividualDosing(design)
-        model["estSteps"] = pharmMlService.getEstimationSteps(steps)
-        model["simSteps"] = pharmMlService.getSimulationSteps(steps)
-        model["stepDeps"] = pharmMlService.getStepDependencies(steps)
-
+            model["modelDefinition"] = pharmMlService.getModelDefinition(dom, version)
+            model["trialDesign"] = design
+            model["independentVar"] = pharmMlService.getIndependentVariable(dom, version)
+            model["functionDefs"] = pharmMlService.getFunctionDefinitions(dom, version)
+            model["structuralModel"] = pharmMlService.getStructuralModel(dom, version)
+            model["variabilityModel"] = pharmMlService.getVariabilityModel(dom, version)
+            model["covariateModel"] = pharmMlService.getCovariateModel(dom, version)
+            model["parameterModel"] = pharmMlService.getParameterModel(dom, version)
+            model["observationModel"] = pharmMlService.getObservationModel(dom, version)
+            model["structure"] = pharmMlService.getTrialDesignStructure(design, version)
+            model["population"] = pharmMlService.getPopulation(design, version)
+            model["dosing"] = pharmMlService.getIndividualDosing(design, version)
+            model["estSteps"] = pharmMlService.getEstimationSteps(steps, version)
+            model["simSteps"] = pharmMlService.getSimulationSteps(steps, version)
+            model["stepDeps"] = pharmMlService.getStepDependencies(steps, version)
+        }
         render(view:"/model/pharmml/show", model: model)
     }
 }

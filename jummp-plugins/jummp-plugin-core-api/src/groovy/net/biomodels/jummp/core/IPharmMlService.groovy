@@ -34,12 +34,13 @@
 
 package net.biomodels.jummp.core
 
-import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.PharmML
+import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 
 /**
  * @short Interface describing the service to access a model encoded in PharmML.
@@ -47,17 +48,9 @@ import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
  * An implementation of this interface is provided by the PharmML plugin, however
  * this interface can be used to provide an alternative one.
  *
- * When argument types or return types are supplied by libPharmML, the interface uses def
- * to avoid adding libPharmML as a dependency of this plugin.
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 interface IPharmMlService {
-
-    /**
-     * @return an instance of eu.ddmore.libpharmml.dom.PharmML corresponding to the
-     * PharmML file in @p rev.
-     */
-    public def getDomFromRevision(RevisionTransportCommand rev)
 
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
@@ -69,7 +62,7 @@ interface IPharmMlService {
      */
     public List getFunctionDefinitions(PharmML dom)
 
-    public List getModelDefinition(RevisionTransportCommand rev)
+    ModelDefinitionType getModelDefinition(PharmML dom)
 
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
@@ -99,13 +92,13 @@ interface IPharmMlService {
     /**
      * @return eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
      */
-    TrialDesignType getTrialDesign(RevisionTransportCommand revision)
+    TrialDesignType getTrialDesign(PharmML dom)
 
     /**
      * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
      * @return eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
      */
-    def getTrialDesignStructure(TrialDesignType design)
+    TrialStructureType getTrialDesignStructure(TrialDesignType design)
 
     /**
      * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
@@ -121,7 +114,7 @@ interface IPharmMlService {
     /**
      * @return an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
      */
-    ModellingStepsType getModellingSteps(RevisionTransportCommand revision)
+    ModellingStepsType getModellingSteps(PharmML dom)
 
     /**
      * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
