@@ -94,28 +94,28 @@ class PharmMl0_2AwareHandler extends AbstractPharmMlHandler {
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getCovariateModel")
-    List getCovariateModel(PharmML dom) {
-        return dom?.getModelDefinition().getCovariateModel()
+    List getCovariateModel(ModelDefinitionType definition) {
+        return definition?.getCovariateModel()
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getVariabilityLevel")
-    List getVariabilityModel(PharmML dom) {
-        return dom?.getModelDefinition().getVariabilityModel()
+    List getVariabilityModel(ModelDefinitionType definition) {
+        return definition?.getVariabilityModel()
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getParameterModel")
-    List getParameterModel(PharmML dom) {
-        return dom?.getModelDefinition().getParameterModel()
+    List getParameterModel(ModelDefinitionType definition) {
+        return definition?.getParameterModel()
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getStructuralModel")
-    List getStructuralModel(PharmML dom) {
-        return dom?.getModelDefinition().getStructuralModel()
+    List getStructuralModel(ModelDefinitionType definition) {
+        return definition?.getStructuralModel()
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getObservationModel")
-    List getObservationModel(PharmML dom) {
-        return dom?.getModelDefinition().getObservationModel()
+    List getObservationModel(ModelDefinitionType definition) {
+        return definition?.getObservationModel()
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getTrialDesign")

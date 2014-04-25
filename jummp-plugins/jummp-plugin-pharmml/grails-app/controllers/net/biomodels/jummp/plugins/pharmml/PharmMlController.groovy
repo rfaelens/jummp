@@ -36,6 +36,7 @@ package net.biomodels.jummp.plugins.pharmml
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.PharmML
+import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 
@@ -55,21 +56,24 @@ class PharmMlController {
         PharmML dom = AbstractPharmMlHandler.getDomFromRevision(model.revision)
         String version = dom?.writtenVersion
         if (dom) {
-            TrialDesignType design = pharmMlService.getTrialDesign(dom, version)
-            ModellingStepsType steps = pharmMlService.getModellingSteps(dom, version)
-
-            model["modelDefinition"] = pharmMlService.getModelDefinition(dom, version)
-            model["trialDesign"] = design
             model["independentVar"] = pharmMlService.getIndependentVariable(dom, version)
             model["functionDefs"] = pharmMlService.getFunctionDefinitions(dom, version)
-            model["structuralModel"] = pharmMlService.getStructuralModel(dom, version)
-            model["variabilityModel"] = pharmMlService.getVariabilityModel(dom, version)
-            model["covariateModel"] = pharmMlService.getCovariateModel(dom, version)
-            model["parameterModel"] = pharmMlService.getParameterModel(dom, version)
-            model["observationModel"] = pharmMlService.getObservationModel(dom, version)
+
+            ModelDefinitionType modelDefinition = pharmMlService.getModelDefinition(dom, version)
+            model["modelDefinition"] = modelDefinition
+            model["structuralModel"] = pharmMlService.getStructuralModel(modelDefinition, version)
+            model["variabilityModel"] = pharmMlService.getVariabilityModel(modelDefinition, version)
+            model["covariateModel"] = pharmMlService.getCovariateModel(modelDefinition, version)
+            model["parameterModel"] = pharmMlService.getParameterModel(modelDefinition, version)
+            model["observationModel"] = pharmMlService.getObservationModel(modelDefinition, version)
+
+            TrialDesignType design = pharmMlService.getTrialDesign(dom, version)
+            model["trialDesign"] = design
             model["structure"] = pharmMlService.getTrialDesignStructure(design, version)
             model["population"] = pharmMlService.getPopulation(design, version)
             model["dosing"] = pharmMlService.getIndividualDosing(design, version)
+
+            ModellingStepsType steps = pharmMlService.getModellingSteps(dom, version)
             model["estSteps"] = pharmMlService.getEstimationSteps(steps, version)
             model["simSteps"] = pharmMlService.getSimulationSteps(steps, version)
             model["stepDeps"] = pharmMlService.getStepDependencies(steps, version)

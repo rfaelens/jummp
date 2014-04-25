@@ -62,32 +62,35 @@ interface IPharmMlService {
      */
     public List getFunctionDefinitions(PharmML dom)
 
+    /**
+     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
+     */
     ModelDefinitionType getModelDefinition(PharmML dom)
 
     /**
-     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
+     * @param definiton an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
      */
-    List getCovariateModel(PharmML dom)
+    List getCovariateModel(ModelDefinitionType definition)
 
     /**
-     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
+     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
      */
-    List getVariabilityModel(PharmML dom)
+    List getVariabilityModel(ModelDefinitionType definition)
 
     /**
-     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
+     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
      */
-    List getParameterModel(PharmML dom)
+    List getParameterModel(ModelDefinitionType definition)
 
     /**
-     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
+     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
      */
-    List getStructuralModel(PharmML dom)
+    List getStructuralModel(ModelDefinitionType definition)
 
     /**
-     * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
+     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
      */
-    List getObservationModel(PharmML dom)
+    List getObservationModel(ModelDefinitionType definition)
 
     /**
      * @return eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType

@@ -280,33 +280,33 @@ class PharmMlService implements FileFormatService {
     }
 
     @Profiled(tag="pharmMlService.getCovariateModel")
-    List getCovariateModel(PharmML dom, final String VERSION) {
+    List getCovariateModel(ModelDefinitionType modelDefinition, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
-        return handler.getCovariateModel(dom)
+        return handler.getCovariateModel(modelDefinition)
     }
 
     @Profiled(tag="pharmMlService.getVariabilityLevel")
-    List getVariabilityModel(PharmML dom, final String VERSION) {
+    List getVariabilityModel(ModelDefinitionType modelDefinition, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
-        return handler.getVariabilityModel(dom)
+        return handler.getVariabilityModel(modelDefinition)
     }
 
     @Profiled(tag="pharmMlService.getParameterModel")
-    List getParameterModel(PharmML dom, final String VERSION) {
+    List getParameterModel(ModelDefinitionType modelDefinition, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
-        return handler.getParameterModel(dom)
+        return handler.getParameterModel(modelDefinition)
     }
 
     @Profiled(tag="pharmMlService.getStructuralModel")
-    List getStructuralModel(PharmML dom, final String VERSION) {
+    List getStructuralModel(ModelDefinitionType modelDefinition, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
-        return handler.getStructuralModel(dom)
+        return handler.getStructuralModel(modelDefinition)
     }
 
     @Profiled(tag="pharmMlService.getObservationModel")
-    List getObservationModel(PharmML dom, final String VERSION) {
+    List getObservationModel(ModelDefinitionType modelDefinition, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
-        return handler.getObservationModel(dom)
+        return handler.getObservationModel(modelDefinition)
     }
 
     @Profiled(tag="pharmMlService.getTrialDesign")
