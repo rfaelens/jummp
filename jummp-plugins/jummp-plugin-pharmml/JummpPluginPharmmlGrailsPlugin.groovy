@@ -33,6 +33,7 @@
 
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
+import net.biomodels.jummp.plugins.pharmml.PharmMlRenderingService
 
 class JummpPluginPharmmlGrailsPlugin {
     // the plugin version
@@ -80,7 +81,7 @@ Provides functionality to support models encoded in PharmML.
     }
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
+        pharmMlRenderingService(PharmMlRenderingService)
     }
 
     def doWithDynamicMethods = { ctx ->

@@ -31,74 +31,73 @@
 
 package net.biomodels.jummp.plugins.pharmml
 
-import net.biomodels.jummp.core.IPharmMlService
+import net.biomodels.jummp.core.IPharmMlRenderer
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
 /**
- * @short Factory class for IPharmMlService implementations.
+ * @short Factory class for IPharmMlRenderer implementations.
  *
  * This class manages the association between versions of PharmML and corresponding
- * IPharmMlService implementations that handle them.
+ * IPharmMlRenderer implementations that handle them.
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-final class PharmMlVersionAwareHandlerFactory {
+final class PharmMlVersionAwareRendererFactory {
     /* Class logger */
     private static final Log log = LogFactory.getLog(this)
     /* Semaphore for the log's verbosity threshold */
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
     /*
-     * This map typically caches singleton instances of IPharmMlService implementations.
+     * This map typically caches singleton instances of IPharmMlRenderer implementations.
      */
-    private static Map<String, IPharmMlService> handlers = [:]
+    private static Map<String, IPharmMlRenderer> renderers = [:]
+
     /* private default constructor */
-    private PharmMlVersionAwareHandlerFactory() {}
+    private PharmMlVersionAwareRendererFactory() {}
 
     /**
-     * Get an instance of a handler for a specific PharmML version.
+     * Get an instance of a renderer for a specific PharmML version.
      *
-     * @param version the version of PharmML in which the model being handled was encoded.
-     * @return an implementation of IPharmMlService that can parse the specified @p version,
-     * or the default one if no handler exists for the version that was provided.
+     * @param version the version of PharmML in which the model being rendered was encoded.
+     * @return an implementation of IPharmMlRenderer that can parse the specified @p version,
+     * or the default one if no renderer exists for the version that was provided.
      */
-    public static IPharmMlService getHandler(String version) {
+    static IPharmMlRenderer getRenderer(String version) {
         if (!version) {
-            if (IS_INFO_ENABLED) {
-                log.info "Returning the default IPharmMlService implementation."
-            }
-            return getDefaultHandler()
+            return getDefaultRenderer()
         }
-
-        if (handlers[version] == null) {
-            synchronized(PharmMlVersionAwareHandlerFactory.class) {
-                if (handlers[version] == null) {
+        if (renderers[version] == null) {
+            synchronized(PharmMlVersionAwareRendererFactory.class) {
+                if (renderers[version] == null) {
                     switch(version) {
-                        case '0.1':
-                            // fall through
+                        case "0.1":
+                            //fall through
                         case "0.2.1":
-                            handlers[version] = PharmMl0_2AwareHandler.getInstance()
+                            renderers[version] = PharmMl0_2AwareRenderer.getInstance()
                             if (IS_INFO_ENABLED) {
-                                log.info "Cached the PharmMl0_2AwareHandler instance."
+                                log.info "Cached the PharmMl0_2AwareRenderer instance."
                             }
                             break
                         case "0.3":
+                            //fall through
                         default:
                             //FIXME update to 0.3
-                            handlers[version] = PharmMl0_2AwareHandler.getInstance()
+                            renderers[version] = PharmMl0_2AwareRenderer.getInstance()
                             if (IS_INFO_ENABLED) {
-                                log.info "Cached the PharmMl0_3AwareHandler instance."
+                                log.info "Cached the PharmMl0_3AwareRenderer instance."
                             }
+                            break
                     }
                 }
             }
         }
-        return handlers[version]
+        return renderers[version]
     }
 
     /**
-     * @return the default PharmML handler that should be used.
+     * @return the default PharmML renderer that should be used.
      */
-    public static IPharmMlService getDefaultHandler() {
-        return getHandler("0.3")
+    static IPharmMlRenderer getDefaultRenderer() {
+        return getRenderer("0.3")
     }
 }

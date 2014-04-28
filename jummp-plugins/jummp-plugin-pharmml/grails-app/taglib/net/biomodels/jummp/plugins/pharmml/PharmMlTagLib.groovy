@@ -73,7 +73,6 @@ import eu.ddmore.libpharmml.dom.modeldefn.LhsTransformationType
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariableType
 import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
 import eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType
-import eu.ddmore.libpharmml.dom.modeldefn.VariabilityLevelDefnType
 import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
@@ -102,6 +101,8 @@ class PharmMlTagLib {
 
     // holds information about which PharmML-specific tabs should be shown
     private Map<String, String> tabsMap
+
+    def pharmMlRenderingService
 
     def decideTabs = { attrs ->
         boolean haveTabsToDisplay = true
@@ -141,16 +142,16 @@ class PharmMlTagLib {
         }
         out << "<div id='${tabsMap["mdef"]}'>"
         if (attrs.iv) {
-            out << "\n<p><strong>Independent variable</strong>&nbsp;${attrs.iv}</p>\n"
+            pharmMlRenderingService.renderIndependentVariable(attrs.iv, attrs.version, out)
         }
         if (attrs.fd) {
-            functionDefinitions(attrs.fd)
+            pharmMlRenderingService.renderFunctionDefinitions(attrs.fd, attrs.version, out)
         }
         if (attrs.sm) {
-            structuralModel(attrs.sm, attrs.iv)
+            pharmMlRenderingService.renderStructuralModel(attrs.sm, attrs.iv, attrs.version, out)
         }
         if (attrs.vm) {
-            variabilityModel(attrs.vm)
+            pharmMlRenderingService.renderVariabilityModel(attrs.vm, attrs.version, out)
         }
         // resolve references to covariates from the parameter model
         Map<String, Equation> continuousCovariateTransformations = [:]
@@ -232,7 +233,6 @@ class PharmMlTagLib {
         } catch(Exception e) {
             outcome.append("Cannot display simple parameters.")
             log.error("Error encountered while rendering simple params ${parameters.inspect()}: ${e.message}")
-            e.printStackTrace()
         }
         return outcome.append("</div>")
     }
@@ -241,27 +241,7 @@ class PharmMlTagLib {
         if (!attrs.simpleParameters) {
             return
         }
-        def params = []
-        def model = [:]
-        try {
-            attrs.simpleParameters.collect(params) { p ->
-                String thisParam
-                if (p.assign) {
-                    thisParam = convertToMathML(p.symbId, p.assign)
-                } else {
-                    StringBuilder sb = new StringBuilder("<math display='inline'><mstyle>")
-                    sb.append(op(p.symbId)).append("</mstyle></math>")
-                    thisParam = sb.toString()
-                }
-                return thisParam
-            }
-        } catch(Exception e) {
-            params.add("<p>Cannot display simple parameters.</p>")
-            log.error("Error encountered while rendering simple params ${parameters.inspect()}: ${e.message}", e)
-        } finally {
-            model["simpleParameters"] = params
-            out << g.render(template: "/templates/simpleParameters", model: model)
-        }
+        pharmMlRenderingService.renderSimpleParameters(attrs.simpleParameters, attrs.version, out)
     }
 
     StringBuilder randomVariables(List<ParameterRandomVariableType> rv, Map rvMap) {
@@ -414,175 +394,25 @@ class PharmMlTagLib {
                 }
             }
         } catch(Exception e) {
-        	output=new StringBuilder("<div class='spaced'>")
+            output = new StringBuilder("<div class='spaced'>")
             output.append("Cannot display individual parameters.")
             log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}")
         }
         return output.append("</div>")
     }
 
-    def functionDefinitions = { functionDefs ->
-        if (!functionDefs) {
-            return
-        }
-        def definitionList = []
-        try {
-            functionDefs.collect(definitionList) { d ->
-                def rightHandSide
-                if (d.definition.equation) {
-                    rightHandSide = d.definition.equation
-                } else if (d.definition.scalar) {
-                    rightHandSide = d.definition.scalar
-                } else if (d.definition.symbRef) {
-                    rightHandSide = d.definition.symbRef
-                }
-                //should not be null by now
-                assert !!rightHandSide
-                return convertToMathML(d.symbId, d.functionArgument, rightHandSide)
-            }
-        } catch(Exception e) {
-            log.error("Error while rendering function definitions ${functionDefs.inspect()}: ${e.message}", e)
-            definitionList.add("Sorry, cannot render the function definitions.")
-        } finally {
-            out << g.render(template: "/templates/functionDefinitions",
-                    model: [functionDefinitions: definitionList])
-        }
-    }
-
-    def structuralModel = { sm, iv ->
-        if (!sm) {
-            return
-        }
-
-        try {
-            boolean multipleStructuralModels = sm.size() > 1
-            if (!multipleStructuralModels) {
-                displayStructuralModel(sm[0], iv)
-            } else {
-                sm.each { s ->
-                    displayStructuralModel(s, iv)
-                }
-            }
-        } catch(Exception e) {
-            log.error("Error while rendering structural model ${sm.inspect()} ${sm.properties}:${e.message}", e)
-            out << "<p>Sorry, something went wrong while displaying the structural model.</p>"
-            return
-        }
-    }
-
-    void displayStructuralModel(StructuralModelType sm, String iv) {
-        String modelName = sm.name?.value ?: sm.blkId
-        def model = [:]
-        model["independentVariable"] = iv
-        model["name"] = modelName
-        if (sm.simpleParameter) {
-            model["simpleParameters"] = sm.simpleParameter
-        }
-        if (sm.commonVariable) {
-            model["variableDefinitions"] = sm.commonVariable
-        }
-        out << g.render(template: "/templates/structuralModel", model: model)
-    }
-
-    def  commonVariables = { attrs ->
+    def commonVariables = { attrs ->
         if (!(attrs.vars)) {
             return
         }
-        def initialConditions = [:]
-        def variableList = []
-        try {
-            attrs.vars.each { v ->
-                switch(v.value) {
-                    case DerivativeVariableType:
-                        if (v.value.initialCondition) {
-                            initialConditions << [(v.value.symbId) : v.value.initialCondition]
-                        }
-                        variableList.add(convertToMathML(v.value, attrs.indepVar))
-                        break
-                    case VariableDefinitionType:
-                        if (v.value.assign) {
-                            variableList.add(convertToMathML(v.value.symbId, v.value.assign))
-                        } else {
-                            StringBuilder sb = new StringBuilder()
-                            sb.append("<math display='inline'><mstyle>")
-                            sb.append(op(v.value.symbId)).append("</mstyle></math>")
-                            variableList.add(sb.toString())
-                        }
-                        break
-                    case FunctionDefinitionType:
-                        def fd = v.value
-                        variableList.add(convertToMathML(fd.symbId, fd.functionArgument, fd))
-                        break
-                    case FuncParameterDefinitionType:
-                        variableList.add(v.value.symbId)
-                        break
-                    default:
-                        variableList.add(v.value.symbId)
-                        break
-                }
-            }
-            def model = [:]
-            model["variableDefinitions"] = variableList
-            model["initialConditions"] = initialConditions
-            out << g.render(template: "/templates/commonVariables", model: model)
-        } catch(Exception e) {
-            log.error("Error while displaying common variables - arguments ${attrs.vars.properties} ${attrs.indepVar.inspect()}: ${e.message} ")
-            out << "<p>Sorry, ran into issues while trying to display variable definitions.</p>"
-        }
+        pharmMlRenderingService.renderCommonVariables(attrs.vars, attrs.iv, attrs.version, out)
     }
 
     def initialConditions = { attrs ->
         if (!attrs.initialConditions) {
             return
         }
-        def conditionsToRender = []
-        attrs.initialConditions.keySet().each { c ->
-            conditionsToRender << convertToMathML(c, attrs.initialConditions[c].assign)
-        }
-        out << g.render(template: "/templates/initialConditions", model: [conditions: conditionsToRender])
-    }
-
-    def variabilityModel = { variabilityModel ->
-        if (!variabilityModel) {
-            return
-        }
-        def result = new StringBuilder("<h3>Variability Model</h3>\n<table class='views-table cols-4'>\n<thead><tr>")
-        result.append("<th>Identifier</th><th>Name</th><th>Level</th><th>Type</th></tr>")
-        result.append("\n</thead>\n<tbody>\n")
-        variabilityModel.each { m ->
-            result.append("<tr><td class=\"value\">")
-            result.append(m.blkId)
-            result.append("</td><td class=\"value\">")
-            String modelName = m.name ? m.name : " "
-            result.append(modelName)
-            result.append("</td><td class=\"value\">")
-            result.append(variabilityLevel(m.level))
-            result.append("</td><td class=\"value\">")
-            result.append(m.type.value())
-            result.append("</td></tr>\n")
-        }
-        out << result.append("</tbody>\n</table>").toString()
-    }
-
-    StringBuilder variabilityLevel(List variabilityLevels) {
-        def result = new StringBuilder()
-        if (!variabilityLevels) {
-            return result.append(" ")
-        }
-        variabilityLevels.each { l ->
-            result.append("<p class=\"default\">")
-            if (l.name) {
-                result.append(l.name.value)
-            } else {
-                result.append(l.symbId)
-            }
-            if (l.parentLevel) {
-                result.append(", ")
-                result.append("parent level:").append(l.parentLevel.symbRef.symbIdRef)
-            }
-            result.append("</p>")
-        }
-        return result
+        pharmMlRenderingService.renderInitialConditions(attrs.initialConditions, attrs.version, out)
     }
 
     /**

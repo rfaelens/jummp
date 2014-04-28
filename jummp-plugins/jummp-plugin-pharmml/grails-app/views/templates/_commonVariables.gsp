@@ -24,6 +24,7 @@
     </div>
     <g:if test="${initialConditions}">
         <p class="bold">Initial conditions</p>
-        <div><pharmml:initialConditions initialConditions="${initialConditions}"/></div>
+        <div><pharmml:initialConditions initialConditions="${initialConditions}"
+                version="${version}"/></div>
     </g:if>
 </div>

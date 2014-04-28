@@ -45,8 +45,8 @@ import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 /**
  * @short Interface describing the service to access a model encoded in PharmML.
  *
- * An implementation of this interface is provided by the PharmML plugin, however
- * this interface can be used to provide an alternative one.
+ * Implementations of this interface are provided by the PharmML plugin, however
+ * this interface can be used to provide alternative ones.
  *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
@@ -68,7 +68,7 @@ interface IPharmMlService {
     ModelDefinitionType getModelDefinition(PharmML dom)
 
     /**
-     * @param definiton an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
      */
     List getCovariateModel(ModelDefinitionType definition)
 
