@@ -177,6 +177,10 @@ class UpdatedRepositoryListener implements ApplicationListener {
 			new Field("submitter",""+revision.owner,Field.Store.YES,Field.Index.ANALYZED)
 		Field contentField = 
 			new Field("content",content,Field.Store.NO,Field.Index.ANALYZED) 
+		Field paperTitleField = 
+			new Field("paperTitle",revision.model.publication? revision.model.publication.title:"",Field.Store.NO,Field.Index.ANALYZED)
+		Field paperAbstractField = 
+			new Field("paperAbstract",revision.model.publication? revision.model.publication.synopsis:"",Field.Store.NO,Field.Index.ANALYZED)
 		
 		doc.add(nameField)
 		doc.add(descriptionField)
@@ -184,6 +188,8 @@ class UpdatedRepositoryListener implements ApplicationListener {
 		doc.add(levelVersionField)
 		doc.add(submitterField)
 		doc.add(contentField)
+		doc.add(paperTitleField)
+		doc.add(paperAbstractField)
 			
 		/*
 		*	Stored fields. Hopefully will be used to display the search results one day
