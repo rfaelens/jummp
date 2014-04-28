@@ -93,14 +93,26 @@ class PharmMlRenderingService {
     }
 
     @Profiled(tag = "pharmMlRenderingService.renderSimpleParameters")
-    void renderSimpleParameters(List simpleParameters, String version, Writer out) {
+    void renderSimpleParameters(List simpleParameters, Map transf, String version, Writer out) {
         IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
-        out << renderer.renderSimpleParameters(simpleParameters)
+        out << renderer.renderSimpleParameters(simpleParameters, transf)
     }
 
     @Profiled(tag = "pharmMlRenderingService.renderVariabilityModel")
     void renderVariabilityModel(List variabilityModels, String version, Writer out) {
         IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
         out << renderer.renderVariabilityModel(variabilityModels)
+    }
+
+    @Profiled(tag = "pharmMlRenderingService.renderCovariateModel")
+    void renderCovariateModel(List covariates, Map transfMap, String version, Writer out) {
+        IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
+        out << renderer.renderCovariateModel(covariates, transfMap)
+    }
+
+    @Profiled(tag = "pharmMlRenderingService.renderCovariates")
+    void renderCovariates(List cov, String id, Map transf, String version, Writer out) {
+        IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
+        out << renderer.renderCovariates(cov, id, transf)
     }
 }

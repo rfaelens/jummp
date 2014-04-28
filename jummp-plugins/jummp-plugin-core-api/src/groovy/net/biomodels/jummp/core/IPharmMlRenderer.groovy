@@ -81,8 +81,9 @@ interface IPharmMlRenderer {
     /**
      * @param covariates a list of
      * {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType}s.
+     * @param transformations a map containing the transformations for continuous covariates.
      */
-    String renderCovariateModel(List<CovariateDefinitionType> covariates)
+    String renderCovariateModel(List<CovariateDefinitionType> covariates, Map transformations)
 
     /**
      * @param variabilityModels a list of
@@ -119,8 +120,9 @@ interface IPharmMlRenderer {
     /**
      * @param simpleParameters a list of
      * {@link eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType}s.
+     * @param transfMap the continuous covariate transformation map
      */
-    String renderSimpleParameters(List<SimpleParameterType> simpleParameters)
+    String renderSimpleParameters(List<SimpleParameterType> simpleParameters, Map transfMap)
 
     /**
      * @param observationModels a list of

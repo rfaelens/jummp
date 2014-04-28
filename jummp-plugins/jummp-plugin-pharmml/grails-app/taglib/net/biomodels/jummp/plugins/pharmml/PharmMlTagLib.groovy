@@ -156,7 +156,9 @@ class PharmMlTagLib {
         // resolve references to covariates from the parameter model
         Map<String, Equation> continuousCovariateTransformations = [:]
         if (attrs.cm) {
-            covariates(attrs.cm, continuousCovariateTransformations)
+            pharmMlRenderingService.renderCovariateModel(attrs.cm,
+                    continuousCovariateTransformations, attrs.version, out)
+            //covariates(attrs.cm, continuousCovariateTransformations)
         }
         if (attrs.pm) {
             parameterModel(attrs.pm, attrs.cm, continuousCovariateTransformations)
@@ -212,6 +214,7 @@ class PharmMlTagLib {
         out << result.toString()
     }
 
+    //TODO REMOVE THIS
     StringBuilder simpleParams(List<SimpleParameterType> parameters, Map<String, Equation> transfMap = [:]) {
         def outcome = new StringBuilder()
         if (!parameters) {
@@ -237,11 +240,35 @@ class PharmMlTagLib {
         return outcome.append("</div>")
     }
 
+    /*TODO rename this to simplePrams and get rid of the other one*/
+    /**
+     * @attr simpleParameters REQUIRED the list of simple parameters to render.
+     * @attr version REQUIRED the version of PharmML used to encode this model.
+     * @attr transfMap OPTIONAL contains the tranformation for each continuous covariate.
+     */
     def simpleParamsClosure = { attrs ->
         if (!attrs.simpleParameters) {
             return
         }
-        pharmMlRenderingService.renderSimpleParameters(attrs.simpleParameters, attrs.version, out)
+        def transf = attrs.transfMap ?: [:]
+        pharmMlRenderingService.renderSimpleParameters(attrs.simpleParameters, transf,
+                attrs.version, out)
+    }
+
+    /**
+     * Renders the continuous covariates from a covariate model.
+     *
+     * @attr covariates REQUIRED the list of continuous covariates to render.
+     * @attr version REQUIRED the version of PharmML used to encode the model.
+     * @attr blkId REQUIRED the block identifier of the covariate model.
+     * @attr transf OPTIONAL the transformations for continuous covariates.
+     */
+    def covariatesClosure = { attrs ->
+        if (!attrs.covariates) {
+            return
+        }
+        pharmMlRenderingService.renderCovariates(attrs.covariates, attrs.blkId, attrs.transf,
+                    attrs.version, out)
     }
 
     StringBuilder randomVariables(List<ParameterRandomVariableType> rv, Map rvMap) {
@@ -548,6 +575,7 @@ class PharmMlTagLib {
     }
 
     def covariates = { covariate, transfMap ->
+        /*replaced by pharmMlRenderingService.renderCovariateModel*/
         if (!covariate) {
             return
         }

@@ -81,7 +81,9 @@ Provides functionality to support models encoded in PharmML.
     }
 
     def doWithSpring = {
-        pharmMlRenderingService(PharmMlRenderingService)
+        pharmMlRenderingService(PharmMlRenderingService) { bean ->
+            bean.autowire = 'byName'
+        }
     }
 
     def doWithDynamicMethods = { ctx ->

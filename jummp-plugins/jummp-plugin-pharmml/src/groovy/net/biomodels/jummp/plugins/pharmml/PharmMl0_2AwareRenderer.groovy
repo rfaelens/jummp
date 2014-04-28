@@ -93,7 +93,15 @@ import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
 import grails.gsp.PageRenderer
 import grails.util.Holders
+import javax.xml.bind.JAXBElement
+import javax.xml.namespace.QName
 import net.biomodels.jummp.core.IPharmMlRenderer
+import net.biomodels.jummp.plugins.pharmml.maths.FunctionSymbol
+import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
+import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
+import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
+import net.biomodels.jummp.plugins.pharmml.maths.PieceSymbol
+import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.perf4j.aop.Profiled
@@ -163,7 +171,7 @@ class PharmMl0_2AwareRenderer implements IPharmMlRenderer {
                 }
                 //should not be null by now
                 assert !!rightHandSide
-                return MathMlRenderingHelper.convertToMathML(d.symbId, d.functionArgument, rightHandSide)
+                return convertToMathML(d.symbId, d.functionArgument, rightHandSide)
             }
         } catch(Exception e) {
             log.error("Error while rendering function definitions ${functionDefs.inspect()}: ${e.message}", e)
@@ -185,7 +193,63 @@ class PharmMl0_2AwareRenderer implements IPharmMlRenderer {
      * {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType}s.
      */
     @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
-    String renderCovariateModel(List<CovariateDefinitionType> covariates) {}
+    String renderCovariateModel(List<CovariateDefinitionType> covModel, Map transfMap) {
+        def model = [:]
+        def result = []
+        try {
+            covModel.each { cm ->
+                def thisCovModel = [:]
+                thisCovModel["blkId"] = cm.blkId
+                if (cm.simpleParameter) {
+                    thisCovModel["parameters"] = cm.simpleParameter
+                }
+                if (cm.covariate) {
+                    thisCovModel["covariates"] = cm.covariate
+                }
+                result.add thisCovModel
+            }
+        } catch (Exception e) {
+            model["error"] = "Sorry, something went wrong while rendering the covariates."
+            log.error("Error rendering the covariates ${covModel.inspect()} ${covModel.properties} ${transfMap.inspect()}: ${e.message}", e)
+
+        } finally {
+            model["covariateModels"] = result
+            model["version"] = "0.2.1"
+            model["transfMap"] = transfMap
+            return groovyPageRenderer.render(template: "/templates/0.2/covariateModel",
+                        model: model)
+        }
+    }
+
+    String renderCovariates(List<CovariateDefinitionType> cov, String blkId, Map transfMap) {
+        def model = [:]
+        def covariates = []
+        cov.inject(covariates) { l, c ->
+            def thisCov = [:]
+            String symbol = c.symbId
+            thisCov["symbId"] = symbol
+            if (c.continuous) {
+                def cc = c.continuous
+                def ccMap = [:]
+                final EquationType TRANSF_EQ = cc.transformation.equation
+                final String TRANSF = convertToMathML("Transformation", TRANSF_EQ)
+                final String DISTRIB = distributionAssignment(symbol,
+                        cc.abstractContinuousUnivariateDistribution)
+                ccMap["transf"] = TRANSF
+                ccMap["dist"] = DISTRIB
+                thisCov["continuous"] = ccMap
+                final String COV_KEY = "${blkId}_${symbol}"
+                transfMap[COV_KEY] = TRANSF_EQ
+            } else if (c.categorical) {
+                thisCov["categorical"] = "TO DO, STILL!"
+            }
+            l.add thisCov
+        }
+        model["covariates"] = covariates
+        model["version"] = "0.2.1"
+        model["transfMap"] = transfMap
+        return groovyPageRenderer.render(template: "/templates/0.2/covariates", model: model)
+    }
 
     /**
      * @param variabilityModels a list of
@@ -255,17 +319,17 @@ class PharmMl0_2AwareRenderer implements IPharmMlRenderer {
         }
     }
 
-    String renderSimpleParameters(List simpleParameters) {
+    String renderSimpleParameters(List simpleParameters, Map transf = [:]) {
         def params = []
         def model = [:]
         try {
             simpleParameters.collect(params) { p ->
                 String thisParam
                 if (p.assign) {
-                    thisParam = MathMlRenderingHelper.convertToMathML(p.symbId, p.assign)
+                    thisParam = convertToMathML(p.symbId, p.assign, transf)
                 } else {
                     StringBuilder sb = new StringBuilder("<math display='inline'><mstyle>")
-                    sb.append(MathMlRenderingHelper.op(p.symbId)).append("</mstyle></math>")
+                    sb.append(op(p.symbId)).append("</mstyle></math>")
                     thisParam = sb.toString()
                 }
                 return thisParam
@@ -293,25 +357,25 @@ class PharmMl0_2AwareRenderer implements IPharmMlRenderer {
                         if (v.value.initialCondition) {
                             initialConditions << [(v.value.symbId) : v.value.initialCondition]
                         }
-                        def dv = MathMlRenderingHelper.convertToMathML(v.value, iv)
+                        def dv = convertToMathML(v.value, iv)
                         variableList.add(dv)
                         break
                     case VariableDefinitionType:
                         if (v.value.assign) {
-                            def vd = MathMlRenderingHelper.convertToMathML(v.value.symbId,
+                            def vd = convertToMathML(v.value.symbId,
                                     v.value.assign)
                             variableList.add(vd)
                         } else {
                             StringBuilder sb = new StringBuilder()
                             sb.append("<math display='inline'><mstyle>")
-                            sb.append(MathMlRenderingHelper.op(v.value.symbId))
+                            sb.append(op(v.value.symbId))
                             sb.append("</mstyle></math>")
                             variableList.add(sb.toString())
                         }
                         break
                     case FunctionDefinitionType:
                         def fd = v.value
-                        variableList.add(MathMlRenderingHelper.convertToMathML(fd.symbId,
+                        variableList.add(convertToMathML(fd.symbId,
                                 fd.functionArgument, fd))
                         break
                     case FuncParameterDefinitionType:
@@ -336,7 +400,7 @@ class PharmMl0_2AwareRenderer implements IPharmMlRenderer {
     String renderInitialConditions(Map conditions) {
         def result = []
         conditions.keySet().each { c ->
-            result.add MathMlRenderingHelper.convertToMathML(c, conditions[c].assign)
+            result.add convertToMathML(c, conditions[c].assign)
         }
         return groovyPageRenderer.render(template: "/templates/0.2/initialConditions",
                     model: [conditions: result])
@@ -402,4 +466,621 @@ class PharmMl0_2AwareRenderer implements IPharmMlRenderer {
      */
     @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
     String renderStepDependencies(StepDependencyType dependencies) {}
+
+    // BEGIN C-P FROM TAGLIB
+    StringBuilder distributionAssignment(String l, def d) {
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(l))
+        builder.append(op("&sim;"))
+        builder.append(distribution(d))
+        builder.append("</mstyle></math>")
+        return builder
+    }
+
+    StringBuilder distribution(def d) {
+        if (!d) {
+            return
+        }
+        def StringBuilder result = new StringBuilder(oprand("N"))
+        result.append(op("("))
+        def distributionType = d.value
+        if (distributionType instanceof NormalDistribution) {
+            result.append(normalDistribution(d))
+        }
+        result.append(op(")"))
+        return result
+    }
+
+    String normalDistribution(def dist) {
+        StringBuilder result = new StringBuilder()
+        NormalDistribution d = dist.value
+        String mean = (d.mean.var?.varId) ? (d.mean.var.varId) : (d.mean.rVal)
+        result.append(oprand(mean))
+        String stdDev = d.stddev?.var?.varId ? d.stddev.var.varId : d.stddev?.prVal
+        if (stdDev) {
+            result.append(op(",")).append(oprand(stdDev))
+        }
+        String variance = d.variance?.var?.varId ? d.variance.var.varId : d.variance?.prVal
+        if (variance) {
+            result.append(op(",")).append(oprand(variance))
+        }
+
+        return result.toString()
+    }
+
+    StringBuilder scalarRhs(def r) {
+        StringBuilder text = new StringBuilder()
+        if (r.scalar) {
+            text.append(scalar(r.scalar.value))
+        } else if (r.equation) {
+            text.append(convertToMathML(r.equation))
+        } else if (r.symbRef) {
+            text.append(r.symbRef.symbIdRef)
+        }
+        return text
+    }
+
+    StringBuilder rhs(Rhs r, StringBuilder text) {
+        if (r.equation) {
+            return text.append(convertToMathML(r.equation))
+        }
+        if (r.sequence) {
+            return text.append(sequence(r.sequence))
+        }
+        if (r.vector) {
+            return text.append(jaxbVector(r.vector))
+        }
+        if (r.symbRef) {
+            return text.append(r.symbRef.symbIdRef)
+        }
+        if (r.scalar) {
+            return text.append(scalar(r.scalar.value))
+        } else {
+            return text.append(r.toString())
+        }
+    }
+
+    String scalar(def s) {
+        switch(s) {
+            case RealValueType:
+            case IntValueType:
+            case StringValueType:
+            case IdValueType:
+                return s.value as String
+                break
+            case TrueBooleanType:
+                return "true"
+                break
+            case FalseBooleanType:
+                return "false"
+                break
+            default:
+                return s.toString()
+        }
+    }
+
+    String sequence(SequenceType s) {
+        return [s.begin, s.stepSize, s.end].collect{rhs(it, new StringBuilder())}.join(":")
+    }
+
+    StringBuilder sequenceAsMathML(def s) {
+        return new StringBuilder(op("[")).append(oprand(s.begin)).append(op(":")).
+                   append(oprand(s.stepSize)).append(op(":")).
+                   append(oprand(s.end)).append(op("]"))
+    }
+
+    StringBuilder vectorAsMathML(def v) {
+        def result = new StringBuilder()
+        if (!v) {
+            return result.append(" ")
+        }
+        result.append(op("["))
+        def iterator = v.vector.sequenceOrScalar.iterator()
+        while (iterator.hasNext()) {
+            //can be a scalar or a sequence
+            def vectorElement = iterator.next().value
+            switch (vectorElement) {
+                case SequenceType:
+                    result.append(sequence(vectorElement))
+                    break
+                case IdValueType:
+                case StringValueType:
+                case IntValueType:
+                case RealValueType:
+                case TrueBooleanType:
+                case FalseBooleanType:
+                    result.append(oprand(vectorElement.value.toString()))
+                    break
+                default:
+                    assert false, "Vectors can only contain scalars or sequences."
+                    log.error("Vectors cant contain ${vectorElement.inspect()} ${vectorElement.properties}")
+                    break
+            }
+            if (iterator.hasNext()) {
+                result.append(op(","))
+            }
+        }
+        result.append(op("]"))
+    }
+
+    StringBuilder vector(def v) {
+        def result = new StringBuilder()
+        if (!v) {
+            return result.append(" ")
+        }
+        result.append("[")
+        def iterator = v.sequenceOrScalar.iterator()
+        while (iterator.hasNext()) {
+            //can be a scalar or a sequence
+            def vectorElement = iterator.next()
+            def item
+            try {
+                item = vectorElement as ScalarRhs
+                result.append(item.value.toPlainString())
+            } catch (ClassCastException ignored) {
+                item = vectorElement as SequenceType
+                result.append(sequence(item))
+            }
+            if (iterator.hasNext()) {
+                result.append(",")
+            }
+        }
+        result.append("]")
+    }
+
+    private void prefixToInfix(StringBuilder builder, List<MathsSymbol> stack) {
+        if (stack.isEmpty()) {
+            return;
+        }
+        MathsSymbol symbol=stack.pop()
+        if (symbol instanceof OperatorSymbol) {
+            OperatorSymbol operator=symbol as OperatorSymbol
+            if (operator.type==OperatorSymbol.OperatorType.BINARY) {
+                builder.append(operator.getOpening())
+                if (operator.needsTermSeparation) {
+                    builder.append("<mrow>")
+                }
+                prefixToInfix(builder,stack)
+                if (operator.needsTermSeparation) {
+                    builder.append("</mrow>")
+                }
+                builder.append(operator.getMapping())
+                if (operator.needsTermSeparation) {
+                    builder.append("<mrow>")
+                }
+                prefixToInfix(builder,stack)
+                if (operator.needsTermSeparation) {
+                    builder.append("</mrow>")
+                }
+                builder.append(operator.getClosing())
+            }
+            // Special case of root/square root, handled differently from other
+            // operators.
+            else if (operator.type==OperatorSymbol.OperatorType.ROOT) {
+                StringBuilder operandBuilder=new StringBuilder()
+                prefixToInfix(operandBuilder, stack)
+                StringBuilder rootBuilder=new StringBuilder()
+                prefixToInfix(rootBuilder, stack)
+                boolean isSquareRoot=false
+                try {
+                    String rootValue=rootBuilder.toString().replace("<mi>","").replace("</mi>","")
+                    double value = Double.parseDouble(rootValue)
+                    if (value==2.0) {
+                        isSquareRoot=true
+                    }
+                } catch(Exception notANumber) {}
+                if (!isSquareRoot) {
+                    builder.append("<mroot><mrow>")
+                    builder.append(operandBuilder)
+                    builder.append("</mrow><mrow>")
+                    builder.append(rootBuilder)
+                    builder.append("</mrow></mroot>")
+                }
+                else {
+                    builder.append("<msqrt>")
+                    builder.append(operandBuilder)
+                    builder.append("</msqrt>")
+                }
+            }
+            // Special case of power, handled differently from other
+            // operators.
+            else if (operator.type==OperatorSymbol.OperatorType.POWER) {
+                StringBuilder operandBuilder=new StringBuilder()
+                prefixToInfix(operandBuilder, stack)
+                StringBuilder powerBuilder=new StringBuilder()
+                prefixToInfix(powerBuilder, stack)
+                boolean isSquareRoot=false
+                builder.append("<msup><mrow>")
+                builder.append(operandBuilder)
+                builder.append("</mrow><mrow>")
+                builder.append(powerBuilder)
+                builder.append("</mrow></msup>")
+            }
+            else {
+                builder.append(operator.getMapping())
+                builder.append(operator.getOpening())
+                prefixToInfix(builder,stack)
+                builder.append(operator.getClosing())
+            }
+        } 
+        else if (symbol instanceof FunctionSymbol) {
+            FunctionSymbol function=symbol as FunctionSymbol
+            builder.append(function.getMapping())
+                builder.append(function.getOpening())
+                for (int i=0; i<function.getArgCount(); i++) {
+                    prefixToInfix(builder, stack)
+                    if (i!=function.getArgCount()-1) {
+                        builder.append(function.getArgSeparator())
+                    }
+                }
+                builder.append(function.getClosing())
+        }
+        else if (symbol instanceof PiecewiseSymbol) {
+            PiecewiseSymbol piecewise=symbol as PiecewiseSymbol
+            builder.append(piecewise.getOpening())
+            for (int i=0; i<piecewise.getPieceCount(); i++) {
+                prefixToInfix(builder, stack)
+            }
+            builder.append(piecewise.getClosing())
+        }
+        else if (symbol instanceof PieceSymbol) {
+            PieceSymbol piece=symbol as PieceSymbol
+            builder.append(piece.getOpening())
+            builder.append(piece.getTermStarter())
+            prefixToInfix(builder, stack)
+            builder.append(piece.getTermEnder())
+            if (piece.type==PieceSymbol.ConditionType.OTHERWISE) {
+                builder.append(piece.getOtherwiseText())
+            }
+            else {
+                builder.append(piece.getIfText())
+                builder.append(piece.getTermStarter())
+                prefixToInfix(builder, stack)
+                builder.append(piece.getTermEnder())
+            }
+            builder.append(piece.getClosing())
+        }
+        else {
+            builder.append(symbol.getMapping())
+        }
+       // prefixToInfix(builder, stack)
+    }
+
+    private JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRefType> symbRef,
+            Map<String, Equation> transformations) {
+        final EquationType TRANSF_EQ = resolveSymbolReference(symbRef.value, transformations)
+        if (TRANSF_EQ) {
+            final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first()
+            final Class ELEM_CLASS = FIRST_ELEM.value.getClass()
+            switch(ELEM_CLASS) {
+                case BinopType:
+                    break
+                case UniopType:
+                    break
+                case SymbolRefType:
+                    break
+                case ConstantType:
+                    break
+                case FunctionCallType:
+                    break
+                case IdValueType:
+                    break
+                case StringValueType:
+                    break
+                case IntValueType:
+                    break
+                case RealValueType:
+                    break
+                default:
+                    assert false, "Cannot have ${ELEM_CLASS.name} inside a transformation."
+                    break
+            }
+            return FIRST_ELEM
+        } else {
+            return symbRef
+        }
+    }
+
+    private JAXBElement expandNestedUniop(JAXBElement<UniopType> jaxbUniop,
+            Map<String, Equation> transfMap) {
+        UniopType uniop = jaxbUniop.value
+        UniopType replacement
+        if (uniop.symbRef) {
+            final EquationType TRANSF_EQ = resolveSymbolReference(uniop.symbRef, transfMap)
+            if (TRANSF_EQ) {
+                final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first().value
+                final Class ELEM_CLASS = FIRST_ELEM.getClass()
+                replacement = new UniopType()
+                replacement.op = uniop.op
+                switch(ELEM_CLASS) {
+                    case BinopType:
+                        replacement.binop = FIRST_ELEM
+                        break
+                    case UniopType:
+                        replacement.uniop = FIRST_ELEM
+                        break
+                    case SymbolRefType:
+                        replacement.symbRef = FIRST_ELEM
+                        break
+                    case ConstantType:
+                        replacement.constant = FIRST_ELEM
+                        break
+                    case FunctionCallType:
+                        replacement.functionCall = FIRST_ELEM
+                        break
+                    case IdValueType:
+                        replacement.scalar = FIRST_ELEM
+                        break
+                    case StringValueType:
+                        break
+                    case IntValueType:
+                        replacement.scalar = FIRST_ELEM
+                        break
+                    case RealValueType:
+                        replacement.scalar = FIRST_ELEM
+                        break
+                    default:
+                        assert false, "Cannot have ${ELEM_CLASS.name} inside a unary operator."
+                        replacement = null
+                        break
+                }
+            }
+        } else if (uniop.uniop) {
+            def expanded = expandNestedUniop(wrapJaxb(uniop.uniop), transfMap)?.value
+            if (expanded && !(expanded.equals(uniop.uniop))) {
+                uniop.uniop = expanded
+            }
+        } else if (uniop.binop) {
+            def expanded = expandNestedBinop(wrapJaxb(uniop.binop), transfMap)?.value
+            if (expanded && !(expanded.equals(uniop.binop))) {
+                uniop.binop = expanded
+            }
+        }
+        if (replacement) {
+            return wrapJaxb(replacement)
+        }
+        return jaxbUniop
+    }
+
+    private JAXBElement expandNestedBinop(JAXBElement<BinopType> jaxbBinop,
+            Map<String, Equation> transfMap) {
+        BinopType binop = jaxbBinop.value
+        List<JAXBElement> terms = binop.content
+        def expandedTerms = terms.collect { c ->
+            switch (c.value) {
+                case SymbolRefType:
+                    return expandNestedSymbRefs(c, transfMap)
+                    break
+                case BinopType:
+                    return expandNestedBinop(c, transfMap)
+                    break
+                case UniopType:
+                    return expandNestedUniop(c, transfMap)
+                    break
+                default:
+                    return c
+                    break
+            }
+        }
+        if (expandedTerms.equals(terms)) {
+            return jaxbBinop
+        }
+        BinopType expanded = new BinopType()
+        expanded.op = binop.op
+        expanded.content = expandedTerms
+        return wrapJaxb(expanded)
+    }
+
+    private EquationType expandEquation(EquationType equation, Map<String, Equation> transfMap) {
+        List<JAXBElement> eqTerms = equation.scalarOrSymbRefOrBinop
+        List<JAXBElement> expandedTerms = eqTerms.collect {
+            switch(it.value) {
+                case BinopType:
+                    return expandNestedBinop(it, transfMap)
+                    break
+                case UniopType:
+                    return expandNestedUniop(it, transfMap)
+                    break
+                case SymbolRefType:
+                    return expandNestedSymbRefs(it, transfMap)
+                    break
+                default:
+                    return it
+                    break
+            }
+        }
+        if (!eqTerms.equals(expandedTerms)) {
+            def newEquation = new EquationType()
+            newEquation.scalarOrSymbRefOrBinop = expandedTerms
+            return newEquation
+        }
+        return equation
+    }
+
+    private void convertEquation(def equation, StringBuilder builder, Map<String, Equation> transfMap = [:]) {
+        def equationToProcess
+        if (!transfMap) {
+            equationToProcess = equation
+        } else if ((equation instanceof EquationType) || (equation instanceof Equation)) {
+            equationToProcess = expandEquation(equation, transfMap)
+        } else {
+            equationToProcess = equation
+        }
+        List<MathsSymbol> symbols = MathsUtil.convertToSymbols(equationToProcess).reverse()
+        List<String> stack = new LinkedList<String>()
+        symbols.each {
+           stack.push(it)
+        }
+        prefixToInfix(builder, stack)
+    }
+
+    private String convertToMathML(def equation, Map<String, Equation> transfMap = [:]) {
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        convertEquation(equation, builder, transfMap)
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    private String convertToMathML(String lhs, def equation, Map<String, Equation> transfMap = [:]) {
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(lhs))
+        builder.append(op("="))
+        convertEquation(equation, builder, transfMap)
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    //works with EquationType and Equation as well
+    private String convertToMathML(EquationType lhs, EquationType rhs, Map<String, Equation> transfMap = [:]) {
+        StringBuilder output = new StringBuilder("<div>")
+        output.append("<math display='inline'><mstyle>")
+        convertEquation(lhs, output)
+        output.append(op("="))
+        convertEquation(rhs, output, transfMap)
+        output.append("</mstyle></math>")
+        return output.append("</div>").toString()
+    }
+
+    private String convertToMathML(String lhs, ScalarRhs srhs, Map<String, Equation> transfMap = [:]) {
+         if (srhs.equation) {
+            return convertToMathML(lhs, srhs.equation, transfMap)
+        }
+        if (srhs.symbRef) {
+            return convertToMathML(lhs, srhs.symbRef, transfMap)
+        }
+        StringBuilder result = new StringBuilder("<math display='inline'><mstyle>")
+        result.append(oprand(lhs)).append(op("="))
+        if (srhs.scalar) {
+            result.append(oprand(scalar(srhs.scalar.value)))
+        }
+        return result.append("</mstyle></math>").toString()
+    }
+
+    private String convertToMathML(String lhs, Rhs rhs, Map<String, Equation> transfMap = [:]) {
+        if (rhs.equation) {
+            return convertToMathML(lhs, rhs.equation, transfMap)
+        }
+        if (rhs.symbRef) {
+            return convertToMathML(lhs, rhs.symbRef, transfMap)
+        }
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(lhs))
+        builder.append(op("="))
+        if (rhs.getScalar()) {
+            builder.append(oprand(scalar(rhs.scalar.value)))
+        }
+        else if (rhs.getSequence()) {
+            builder.append(sequenceAsMathML(rhs.sequence))
+        }
+        else if (rhs.getVector()) {
+            builder.append(vectorAsMathML(rhs))
+        }
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    private String convertToMathML(DerivativeVariableType derivative, def iv) {
+        String independentVariable = derivative.independentVariable?.symbRef?.symbIdRef ?: (iv ?: "t")
+        String derivTerm="d${derivative.symbId}<DIVIDEDBY>d${independentVariable}"
+        return convertToMathML(derivTerm, derivative.getAssign())
+    }
+
+    private String convertToMathML(String lhs, List arguments, def equation) {
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(lhs))
+        builder.append(op("("))
+        for (int i=0; i<arguments.size(); i++) {
+            builder.append(oprand(arguments.get(i).symbId))
+            if (i<arguments.size()-1) {
+                builder.append(op(","))
+            }
+        }
+        builder.append(op(")"))
+        builder.append(op("="))
+        convertEquation(equation, builder)
+        builder.append("</mstyle></math>")
+        return builder.toString()
+    }
+
+    private void convertToMathML(String name, def matrix, List ipNames, StringBuilder output) {
+        output.append("<div class='spaced'>")
+        output.append("<span class='bold'>Correlation matrix for level <span class='italic'>")
+        output.append(name).append("</span> and parameters: ")
+        output.append(ipNames.join(", ")).append("</span></div>\n")
+        output.append("<math display='inline'><mstyle>\n")
+        output.append("<mrow>").append(op("(")).append("<mtable>\n")
+        final int N = matrix.size()
+        for (int i = 0; i < N; i++) {
+            output.append("<mtr>")
+            for (int j = 0; j < N; j++) {
+                output.append("<mtd><mi>")
+                output.append(matrix[i][j])
+                output.append("</mi></mtd>\n")
+            }
+            output.append("</mtr>\n")
+        }
+        output.append("</mtable>\n").append(op(")")).append("</mrow>")
+        output.append("</mstyle></math>")
+    }
+
+    private String op(String o) {
+        return "<mo>${o}</mo>"
+    }
+
+    private String oprand(String o) {
+        if (o.contains("<DIVIDEDBY>")) {
+            String[] parts=o.split("<DIVIDEDBY>")
+            return "<mfrac><mi>${parts[0]}</mi><mi>${parts[1]}</mi></mfrac>"
+        }
+        return "<mi>${o}</mi>"
+    }
+
+    private JAXBElement wrapJaxb(def elem) {
+        return elem instanceof JAXBElement ? elem : new JAXBElement(new QName(""), elem.getClass(), elem)
+    }
+
+    private JAXBElement applyBinopToList(List elements, String operator) {
+        if (elements.size() == 1) {
+            // just return the element
+            return wrapJaxb(elements.first())
+        } else {
+            def result = new BinopType()
+            result.op = operator
+            final int LAST = elements.size() - 1
+            result.content = []
+            result.content.add(wrapJaxb(elements.first()))
+            result.content.add(applyBinopToList(elements[1..LAST], operator))
+            return wrapJaxb(result)
+        }
+    }
+
+    /*
+     * Looks up a symbol reference in continuousCovariateTransformations map.
+     * If the given @p ref contains both a blkIdRef and a symbIdRef, then it returns
+     * the equation corresponding to that continuous covariate, or null if there is no
+     * covariate with that @ref defined in the map.
+     *
+     * If @ref only has a symbIdRef, then it will return the first element from the map
+     * that matches, or null if there were no matches.
+     */
+    private EquationType resolveSymbolReference(SymbolRefType ref, Map<String, Equation> transfMap) {
+        EquationType transfEq
+        if (ref.blkIdRef) {
+            String transfRef = "${ref.blkIdRef}_${ref.symbIdRef}"
+            transfEq = transfMap[transfRef]
+        } else {
+            String transfRef = ref.symbIdRef
+            transfEq = transfMap.find{ it.key.contains("_${transfRef}")}?.value
+        }
+        return transfEq
+    }
+
+    private void populateRandomVariableMap(final String id, final String level, Map rv) {
+        def currentRVs = rv[level]
+        if (!currentRVs) {
+            currentRVs = []
+        }
+        currentRVs.add(id)
+        rv[level] = currentRVs
+    }
 }
