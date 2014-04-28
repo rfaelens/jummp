@@ -34,7 +34,14 @@
 
 package net.biomodels.jummp.core
 
+import eu.ddmore.libpharmml.dom.commontypes.CommonVariableDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType
+import eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType
+import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
+import eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType
+import eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock
 import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
@@ -44,11 +51,6 @@ import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
-import eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType
-import eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType
-import eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock
-import eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
 
 /**
  * @short Interface describing the service to render a model encoded in PharmML.
@@ -100,6 +102,25 @@ interface IPharmMlRenderer {
      * @param indepVar the independent variable of the model, for example time or concentration.
      */
     String renderStructuralModel(List<StructuralModelType> structuralModels, String indepVar)
+
+    /**
+     * @param commonVariables a list of
+     * {@link eu.ddmore.libpharmml.dom.commontypes.CommonVariableDefinitionType}
+     * @param iv the independent variable of the model
+     */
+    String renderCommonVariables(List<CommonVariableDefinitionType> commonVariables, String iv)
+
+    /**
+     * @param initialConditions a map associating dependent variables to their corresponding
+     * inital value, which is an instance of {@link eu.ddmore.libpharmml.dom.commontypes.Rhs}.
+     */
+    String renderInitialConditions(Map initialConditions)
+
+    /**
+     * @param simpleParameters a list of
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType}s.
+     */
+    String renderSimpleParameters(List<SimpleParameterType> simpleParameters)
 
     /**
      * @param observationModels a list of

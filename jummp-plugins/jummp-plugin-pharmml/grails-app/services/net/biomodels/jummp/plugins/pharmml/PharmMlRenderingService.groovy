@@ -81,7 +81,6 @@ class PharmMlRenderingService {
         out << renderer.renderStructuralModel(structuralModels, iv)
     }
 
-    //TODO: add to IPharmMlRenderer
     @Profiled(tag = "pharmMlRenderingService.renderCommonVariables")
     void renderCommonVariables(List vars, String iv, String version, Writer out) {
         IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
