@@ -99,6 +99,7 @@
     		$( "#helpPanel" ).resizable({
     					handles: 'n,e,s,w',
     					maxWidth: maxHelpWidth,
+    					animate: true,
     					resize: function( event, ui ) {
     						if (helpWidth==-1) {
     							helpWidth=ui.originalSize.width;
@@ -137,6 +138,9 @@
     				helpWidth-=stepWidth;
     			}
     			$( "#helpPanel" ).width(helpWidth);
+    			var addedPercentage = (helpWidth - 400) / 400
+    			var basic = 99+addedPercentage;
+    			$( "#helpFrame" ).width(basic+"%");
 		    });
    		    $( "#close" ).button({
 		     	text: false,
