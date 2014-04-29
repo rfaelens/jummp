@@ -81,8 +81,7 @@ final class PharmMlVersionAwareRendererFactory {
                         case "0.3":
                             //fall through
                         default:
-                            //FIXME update to 0.3
-                            renderers[version] = PharmMl0_2AwareRenderer.getInstance()
+                            renderers[version] = PharmMl0_3AwareRenderer.getInstance()
                             if (IS_INFO_ENABLED) {
                                 log.info "Cached the PharmMl0_3AwareRenderer instance."
                             }

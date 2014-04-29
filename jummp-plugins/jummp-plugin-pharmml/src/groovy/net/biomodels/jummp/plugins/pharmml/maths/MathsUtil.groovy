@@ -74,6 +74,7 @@ class MathsUtil {
 
 	private static void convertJAX(List<MathsSymbol> symbols, def jaxObject) {
 		if (jaxObject instanceof JAXBElement) { //shouldnt really happen, but sanity check.
+            println "found jaxbElement which shouldnt be here: $jaxObject"
 			convertJAX(symbols, jaxObject.getValue())
 			return;
 		}
@@ -92,10 +93,20 @@ class MathsUtil {
 	private static List getSubTree(def jaxObject, List<MathsSymbol> symbols) {
 		List subTree=new LinkedList()
 		if (jaxObject instanceof EquationType || jaxObject instanceof Equation) {
-			jaxObject.getScalarOrSymbRefOrBinop().each {
-				subTree.add(it.getValue())
-			}
-		}
+            if (jaxObject.getScalarOrSymbRefOrBinop()) {
+                jaxObject.getScalarOrSymbRefOrBinop().each {
+                    subTree.add(it.getValue())
+                }
+            } else {
+                //assume this is 0.3
+                addIfExists(jaxObject.uniop, subTree)
+                addIfExists(jaxObject.binop, subTree)
+                addIfExists(jaxObject.symbRef, subTree)
+                addIfExists(jaxObject.scalar, subTree)
+                addIfExists(jaxObject.functionCall, subTree)
+                addIfExists(jaxObject.piecewise, subTree)
+            }
+        }
 		else if (jaxObject instanceof BinopType || jaxObject instanceof LogicBinOpType) {
 			jaxObject.getContent().each {
 				subTree.add(it.getValue())

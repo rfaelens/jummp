@@ -83,8 +83,7 @@ final class PharmMlVersionAwareHandlerFactory {
                             break
                         case "0.3":
                         default:
-                            //FIXME update to 0.3
-                            handlers[version] = PharmMl0_2AwareHandler.getInstance()
+                            handlers[version] = PharmMl0_3AwareHandler.getInstance()
                             if (IS_INFO_ENABLED) {
                                 log.info "Cached the PharmMl0_3AwareHandler instance."
                             }
