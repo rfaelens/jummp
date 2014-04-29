@@ -136,6 +136,7 @@ class UserService implements IUserService {
     @Profiled(tag="userService.editUser")
     @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
     void editUser(User user) throws UserInvalidException {
+    	try {
     	checkUserValid(user.username)
         User origUser = User.findByUsername(user.username)
         if (origUser.person.orcid != user.person.orcid) {
@@ -153,7 +154,15 @@ class UserService implements IUserService {
        				}
        			}
         	}
-        	origUser.person.orcid = user.person.orcid
+        	else {
+        		def anyPublications = PublicationPerson.findByPerson(origUser.person)
+        		if (!anyPublications) {
+        			origUser.person.orcid = user.person.orcid
+        		}
+        		else {
+        			origUser.person = new Person(orcid: user.person.orcid);
+        		}
+        	}
         }
         origUser.person.userRealName = user.person.userRealName
         origUser.person.institution = user.person.institution
@@ -166,6 +175,11 @@ class UserService implements IUserService {
         }
         origUser.person.save(flush: true, failOnError: true)
         origUser.save(flush: true)
+        }
+        catch(Exception e) {
+        	e.printStackTrace();
+        	throw e
+        }
     }
 
     @PostLogging(LoggingEventType.RETRIEVAL)
