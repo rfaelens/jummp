@@ -84,7 +84,10 @@ class Model implements Serializable {
                 creators.add(revision.owner.person.userRealName)
             }
         }
-        def latestRev=modelService.getLatestRevision(this);
+        def latestRev=modelService?.getLatestRevision(this);
+        if (!latestRev) {
+        	latestRev = revisions? revisions.sort{ it.revisionNumber }.last() : null
+        }
         return new ModelTransportCommand(
         		id: id,
         		name: latestRev ? latestRev.name : null,
