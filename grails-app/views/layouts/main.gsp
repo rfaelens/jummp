@@ -94,7 +94,7 @@
     		$('#toggleHelp').text("Hide help");
     		$('#toggleHelp').attr("title", "Hide help");
     	}
-    	
+    	var isDragged=false;
     	$(function() {
     		$( "#helpPanel" ).resizable({
     					handles: 'n,e,s,w',
@@ -107,8 +107,26 @@
     						adjustWidth(ui.size.width);
     					}
     		});
-    		$( "#helpPanel" ).draggable({ cursor: "move", revert: false});
+    		$( "#helpPanel" ).draggable({ cursor: "move", 
+    									  revert: false, 
+    									  containment: "body",
+    									  start: function() {
+    									  	isDragged=true;
+    									  },
+    									  stop: function( event, ui ) {
+    									  	isDragged=false;
+    									  }
+    									});
     		$( "#helpPanel" ).hide();
+    		
+    		$("#toolbar").mouseleave(function() {
+    			if (isDragged) {
+    				$( "#helpPanel" ).draggable( "disable" );
+    				$( "#helpPanel" ).draggable( "enable" );
+    			}
+			})
+    		
+    		
 		    $( "#expand" ).button({
 		     	text: false,
 		     	icons: {
@@ -122,7 +140,17 @@
     			else {
     				helpWidth+=stepWidth;
     			}
+    			var windowRight = document.body.getBoundingClientRect ().right
     			$( "#helpPanel" ).width(helpWidth);
+    			var el= document.getElementById ("helpPanel");
+    			var helpRight = el.getBoundingClientRect ().right
+    			if (helpRight > windowRight) {
+    				var offset = helpRight - windowRight + 10
+    				$('#helpPanel').animate({
+    					'marginLeft' : "-=" + offset + "px" 
+    				});
+    			}
+    			
 		    });
 		    $( "#contract" ).button({
 		     	text: false,
