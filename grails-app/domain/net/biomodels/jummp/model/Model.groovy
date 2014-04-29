@@ -85,7 +85,6 @@ class Model implements Serializable {
             }
         }
         def latestRev=modelService.getLatestRevision(this);
-        System.out.println("STATE: "+latestRev.state);
         return new ModelTransportCommand(
         		id: id,
         		name: latestRev ? latestRev.name : null,
@@ -95,6 +94,7 @@ class Model implements Serializable {
                 publication: publication ? publication.toCommandObject() : null,
                 deleted:deleted,
                 submitter: revisions ? revisions.sort{ it.revisionNumber }.first().owner.person.userRealName : null,
+                submitterUsername: revisions ? revisions.sort{ it.revisionNumber }.first().owner.username : null,
                 submissionDate: revisions ? revisions.sort{ it.revisionNumber }.first().uploadDate : null,
                 creators: creators
         )

@@ -71,4 +71,5 @@ class ModelTransportCommand implements Serializable {
      */
     Set<String> creators
     ModelState state
+    String submitterUsername
 }

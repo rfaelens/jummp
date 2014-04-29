@@ -63,12 +63,18 @@
                 			<td>${model.submitter}</td>
                 			<td>${model.submissionDate.format('yyyy/MM/dd')}</td>
                 			<td>${model.lastModifiedDate.format('yyyy/MM/dd')}</td>
-                			<td>
+                			<td style="text-align: center;">
                 				<g:if test="${model.state==ModelState.PUBLISHED}">
-                					<img style="float:none;" title="This version of the model is public" alt="public model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/unlock.png"/>
+                					<img style="width:14px" title="Published" alt="public model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/unlock.png"/>
                 				</g:if>
                 				<g:else>
-                					<img style="float:none;" title="This version of the model is unpublished" alt="unpublished model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/lock.png"/>
+                					<img style="width:12px" title="Unpublished" alt="unpublished model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/lock.png"/>
+									<g:if test="${model.submitterUsername.toString() == sec.username().toString() }">
+										<img style="width:14px" title="You own this model" alt="own model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Generic/Generic%20icons/meetus.png"/>
+									</g:if>
+									<g:else>
+										<img style="width:14px" title="This model is shared with you" alt="shared model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Generic/Generic%20icons/Face_to_Face.png"/>
+									</g:else>
                 				</g:else>
                 			</td>
                 		</tr>
