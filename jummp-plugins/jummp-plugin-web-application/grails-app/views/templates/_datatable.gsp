@@ -1,4 +1,5 @@
-<%l
+<%@ page import="net.biomodels.jummp.core.model.ModelState"%>
+<%
 	def totalCount
 	if (matches) {
 		totalCount=matches
@@ -47,6 +48,7 @@
                 	<g:render template="/templates/tableheader" model="[action: action, 'sortColumn': 'submitter','msgCode':'model.list.submitter']"/>
                 	<g:render template="/templates/tableheader" model="[action: action, 'sortColumn': 'submitted','msgCode':'model.list.submissionDate']"/>
                 	<g:render template="/templates/tableheader" model="[action: action, 'sortColumn': 'modified','msgCode':'model.list.modifiedDate']"/>
+                	<th>Status</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -61,6 +63,14 @@
                 			<td>${model.submitter}</td>
                 			<td>${model.submissionDate.format('yyyy/MM/dd')}</td>
                 			<td>${model.lastModifiedDate.format('yyyy/MM/dd')}</td>
+                			<td>
+                				<g:if test="${model.state==ModelState.PUBLISHED}">
+                					<img style="float:none;" title="This version of the model is public" alt="public model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/unlock.png"/>
+                				</g:if>
+                				<g:else>
+                					<img style="float:none;" title="This version of the model is unpublished" alt="unpublished model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/lock.png"/>
+                				</g:else>
+                			</td>
                 		</tr>
                 	</g:each>
                 </tbody>

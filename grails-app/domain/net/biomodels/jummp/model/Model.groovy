@@ -63,6 +63,9 @@ class Model implements Serializable {
     static mapping = {
         publication lazy: false
     }
+    
+    def modelService
+    static transients=['modelService']
 
     static constraints = {
         vcsIdentifier(nullable: false, blank: false, unique: true)
@@ -81,11 +84,14 @@ class Model implements Serializable {
                 creators.add(revision.owner.person.userRealName)
             }
         }
+        def latestRev=modelService.getLatestRevision(this);
+        System.out.println("STATE: "+latestRev.state);
         return new ModelTransportCommand(
         		id: id,
-        		name: revisions ? revisions.sort{ it.revisionNumber }.last().name : null,
-                lastModifiedDate: revisions ? revisions.sort{ it.revisionNumber }.last().uploadDate : null,
-                format: revisions ? revisions.sort{ it.revisionNumber }.last().format.toCommandObject() : null,
+        		name: latestRev ? latestRev.name : null,
+        		state: latestRev ? latestRev.state: null,
+                lastModifiedDate: latestRev ? latestRev.uploadDate : null,
+                format: latestRev ? latestRev.format.toCommandObject() : null,
                 publication: publication ? publication.toCommandObject() : null,
                 deleted:deleted,
                 submitter: revisions ? revisions.sort{ it.revisionNumber }.first().owner.person.userRealName : null,

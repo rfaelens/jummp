@@ -35,6 +35,7 @@ package net.biomodels.jummp.core.model
  * The object can also be used as a command object for the web interface.
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class ModelTransportCommand implements Serializable {
     private static final long serialVersionUID = 1L
@@ -69,4 +70,5 @@ class ModelTransportCommand implements Serializable {
      * The names of all users who have worked on this Model.
      */
     Set<String> creators
+    ModelState state
 }
