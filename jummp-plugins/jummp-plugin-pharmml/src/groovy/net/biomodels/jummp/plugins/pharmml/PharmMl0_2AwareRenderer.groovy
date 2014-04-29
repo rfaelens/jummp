@@ -224,31 +224,52 @@ class PharmMl0_2AwareRenderer implements IPharmMlRenderer {
     String renderCovariates(List<CovariateDefinitionType> cov, String blkId, Map transfMap) {
         def model = [:]
         def covariates = []
-        cov.inject(covariates) { l, c ->
-            def thisCov = [:]
-            String symbol = c.symbId
-            thisCov["symbId"] = symbol
-            if (c.continuous) {
-                def cc = c.continuous
-                def ccMap = [:]
-                final EquationType TRANSF_EQ = cc.transformation.equation
-                final String TRANSF = convertToMathML("Transformation", TRANSF_EQ)
-                final String DISTRIB = distributionAssignment(symbol,
-                        cc.abstractContinuousUnivariateDistribution)
-                ccMap["transf"] = TRANSF
-                ccMap["dist"] = DISTRIB
-                thisCov["continuous"] = ccMap
-                final String COV_KEY = "${blkId}_${symbol}"
-                transfMap[COV_KEY] = TRANSF_EQ
-            } else if (c.categorical) {
-                thisCov["categorical"] = "TO DO, STILL!"
+        try {
+            cov.each { c ->
+                def thisCov = [:]
+                String symbol = c.symbId
+                thisCov["symbId"] = symbol
+                if (c.continuous) {
+                    def cc = c.continuous
+                    def ccMap = [:]
+                    final EquationType TRANSF_EQ = cc.transformation.equation
+                    final String TRANSF = convertToMathML("Transformation", TRANSF_EQ)
+                    final def COV_DISTRIB = cc.abstractContinuousUnivariateDistribution
+                    if (COV_DISTRIB) {
+                        final String DISTRIB = distributionAssignment(symbol, COV_DISTRIB)
+                        ccMap["dist"] = DISTRIB
+                    }
+                    ccMap["transf"] = TRANSF
+                    thisCov["continuous"] = ccMap
+                    final String COV_KEY = "${blkId}_${symbol}"
+                    transfMap[COV_KEY] = TRANSF_EQ
+                } else if (c.categorical) {
+                    List cc = c.categorical.category
+                    List categoryList = []
+                    cc.each{ cat ->
+                        StringBuilder sb = new StringBuilder(cat.catId)
+                        if (cat.name) {
+                            sb.append("(").append(cat.name.value).append(")")
+                        }
+                        if (cat.probability) {
+                            sb.append("&emdash;").append(scalarRhs(cat.probability))
+                        }
+                        categoryList.add(sb.toString())
+                    }
+                    String categories = categoryList.join("; ")
+                    thisCov["categorical"] = categories
+                }
+                covariates.add(thisCov)
             }
-            l.add thisCov
+        } catch (Exception e) {
+            log.error("Error rendering the covariates ${covariates.inspect()}:${e.message}", e)
+            model["error"] = "Sorry, something went wrong while rendering the covariates."
+        } finally {
+            model["covariates"] = covariates
+            model["version"] = "0.2.1"
+            model["transfMap"] = transfMap
+            return groovyPageRenderer.render(template: "/templates/0.2/covariates", model: model)
         }
-        model["covariates"] = covariates
-        model["version"] = "0.2.1"
-        model["transfMap"] = transfMap
-        return groovyPageRenderer.render(template: "/templates/0.2/covariates", model: model)
     }
 
     /**

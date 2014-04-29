@@ -158,7 +158,6 @@ class PharmMlTagLib {
         if (attrs.cm) {
             pharmMlRenderingService.renderCovariateModel(attrs.cm,
                     continuousCovariateTransformations, attrs.version, out)
-            //covariates(attrs.cm, continuousCovariateTransformations)
         }
         if (attrs.pm) {
             parameterModel(attrs.pm, attrs.cm, continuousCovariateTransformations)
@@ -263,7 +262,7 @@ class PharmMlTagLib {
      * @attr blkId REQUIRED the block identifier of the covariate model.
      * @attr transf OPTIONAL the transformations for continuous covariates.
      */
-    def covariatesClosure = { attrs ->
+    def covariates = { attrs ->
         if (!attrs.covariates) {
             return
         }
@@ -572,80 +571,6 @@ class PharmMlTagLib {
         matrices.entrySet().each {
             convertToMathML(it.key, it.value, paramNames, output)
         }
-    }
-
-    def covariates = { covariate, transfMap ->
-        /*replaced by pharmMlRenderingService.renderCovariateModel*/
-        if (!covariate) {
-            return
-        }
-        out << "<h3>Covariate Model</h3>"
-        def result = new StringBuilder()
-        try {
-            covariate.each { c ->
-                result.append("<div>")
-                if (c.simpleParameter) {
-                    result.append("<div><span class=\"bold\">Parameters</span></div>")
-                    result.append(simpleParams(c.simpleParameter, transfMap))
-                }
-                if (c.covariate) {
-                    c.covariate.each {
-                        result.append(
-                            it.getCategorical() ? categCov(it.getCategorical(), it.symbId) :
-                                    contCov(it.symbId, c.blkId, it.getContinuous(), transfMap))
-                    }
-                }
-               result.append("</div>")
-            }
-        } catch(Exception e) {
-            result = new StringBuilder();
-            log.error("Error rendering the covariates ${covariate.inspect()} ${covariate.properties}: ${e.message}")
-            result.append("Sorry, something went wrong while rendering the covariates.")
-        } finally {
-            out << result.toString()
-        }
-    }
-
-    StringBuilder categCov = { c, symbId ->
-        def result = new StringBuilder("<p>\n")
-        result.append("<span class=\"bold\">Categorical covariate ${symbId}</span><p>\n")
-        c.category.inject(result) { r, categ ->
-            if (categ.probability) {
-                r.append(distributionAssignment(symbId,categ.probability))
-            }
-        }
-        result.append("</p>\n")
-        result.append("<p>Categories:")
-        assert c.category instanceof List
-        c.category.inject(result) { StringBuilder sb, CategoryType cat ->
-            sb =  sb ? sb : new StringBuilder()
-            sb.append(cat.catId)
-            if (cat.name) {
-                sb.append("(").append(cat.name.value).append(")")
-            }
-            sb.append(" ")
-        }
-        result.append("</p>\n")
-        return result
-    }
-
-    StringBuilder contCov(String symbId, String blkId, ContinuousCovariateType c, Map<String, Equation> transfMap ) {
-        def result = new StringBuilder("<p>")
-        result.append("<span class=\"bold\">Continuous covariate ${symbId}</span>\n</p>\n<p>")
-        if (c.abstractContinuousUnivariateDistribution) {
-            result.append(distributionAssignment(symbId, c.abstractContinuousUnivariateDistribution))
-            result.append("</p><p>")
-        }
-
-        final String COV_KEY = "${blkId}_${symbId}"
-        // there is no need to expand the symbRef here, so temporarily pop it from the map
-        final EquationType TRANSF_REF = transfMap.remove(COV_KEY)
-        final EquationType TRANSF_EQ =  TRANSF_REF ?: c.transformation.equation
-        result.append(convertToMathML("Transformation", TRANSF_EQ))
-        assert !(transfMap[COV_KEY])
-        transfMap[COV_KEY] = TRANSF_EQ
-
-        return result.append("</p>")
     }
 
     def observations = { observations, covariates ->
