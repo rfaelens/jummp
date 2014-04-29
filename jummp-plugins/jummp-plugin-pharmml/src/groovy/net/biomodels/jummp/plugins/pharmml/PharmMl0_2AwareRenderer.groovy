@@ -62,6 +62,7 @@ import eu.ddmore.libpharmml.dom.modeldefn.ContinuousCovariateType
 import eu.ddmore.libpharmml.dom.modeldefn.CorrelatedRandomVarType
 import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
@@ -189,11 +190,12 @@ class PharmMl0_2AwareRenderer implements IPharmMlRenderer {
     String renderModelDefinition(ModelDefinitionType modelDefinition) {}
 
     /**
-     * @param covariates a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType}s.
+     * @param covModel a list of
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType}s.
+     * @param transfMap the transformations for continuous covariates.
      */
-    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
-    String renderCovariateModel(List<CovariateDefinitionType> covModel, Map transfMap) {
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderCovariateModel")
+    String renderCovariateModel(List<CovariateModelType> covModel, Map transfMap) {
         def model = [:]
         def result = []
         try {
@@ -221,6 +223,12 @@ class PharmMl0_2AwareRenderer implements IPharmMlRenderer {
         }
     }
 
+    /**
+     * @param cov a a list of {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType}s.
+     * @param blkId the block identifier of the covariate model where @p cov are defined.
+     * @param transfMap the transformations for continuous covariates.
+     */
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderCovariates")
     String renderCovariates(List<CovariateDefinitionType> cov, String blkId, Map transfMap) {
         def model = [:]
         def covariates = []
@@ -308,7 +316,7 @@ class PharmMl0_2AwareRenderer implements IPharmMlRenderer {
      * @param parameterModels a list of
      * {@link eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType}s.
      */
-    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderParameterModel")
     String renderParameterModel(List<ParameterModelType> parameterModels) {}
 
     /**
@@ -316,7 +324,7 @@ class PharmMl0_2AwareRenderer implements IPharmMlRenderer {
      * {@link eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType}s.
      * @param iv the independent variable of the model
      */
-    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderStructuralModel")
     String renderStructuralModel(List<StructuralModelType> structuralModels, String iv) {
         def model = [:]
         try {
@@ -431,61 +439,61 @@ class PharmMl0_2AwareRenderer implements IPharmMlRenderer {
      * @param observationModels a list of
      * {@link eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType}s.
      */
-    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderObservationModel")
     String renderObservationModel(List<ObservationModelType> observationModels) {}
 
     /**
      * @param trialDesign an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType}
      */
-    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderTrialDesign")
     String renderTrialDesign(TrialDesignType trialDesign) {}
 
     /**
      * @param structure - an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType}
      */
-    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderTrialDesignStructure")
     String renderTrialDesignStructure(TrialStructureType structure) {}
 
     /**
      * @param dosing - a list of {@link eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType}
      */
-    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndividualDosing")
     String renderIndividualDosing(List<IndividualDosingType> dosing) {}
 
     /**
      * @param population an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.PopulationType}
      */
-    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderPopulation")
     String renderPopulation(PopulationType population) {}
 
     /**
      * @param steps an instance of {@link eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType}
      */
-    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderModellingSteps")
     String renderModellingSteps(ModellingStepsType steps) {}
 
     /**
      * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType}s.
      */
-    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderCommonModellingSteps")
     String renderCommonModellingSteps(List<CommonModellingStepType> steps) {}
 
     /**
      * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType}s.
      */
-    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderSimulationSteps")
     String renderSimulationSteps(List<SimulationStepType> steps) {}
 
     /**
      * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType}s.
      */
-    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderEstimationSteps")
     String renderEstimationSteps(List<EstimationStepType> steps) {}
 
     /**
      * @param dependencies a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType}s.
      */
-    @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndependentVariable")
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderStepDependencies")
     String renderStepDependencies(StepDependencyType dependencies) {}
 
     // BEGIN C-P FROM TAGLIB

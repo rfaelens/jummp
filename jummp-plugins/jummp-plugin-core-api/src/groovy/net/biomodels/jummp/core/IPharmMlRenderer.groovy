@@ -36,6 +36,7 @@ package net.biomodels.jummp.core
 
 import eu.ddmore.libpharmml.dom.commontypes.CommonVariableDefinitionType
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
 import eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType
@@ -80,10 +81,10 @@ interface IPharmMlRenderer {
 
     /**
      * @param covariates a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType}s.
      * @param transformations a map containing the transformations for continuous covariates.
      */
-    String renderCovariateModel(List<CovariateDefinitionType> covariates, Map transformations)
+    String renderCovariateModel(List<CovariateModelType> covariates, Map transformations)
 
     /**
      * @param variabilityModels a list of
