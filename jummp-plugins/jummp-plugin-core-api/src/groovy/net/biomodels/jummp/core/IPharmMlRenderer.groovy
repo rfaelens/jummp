@@ -35,7 +35,7 @@
 package net.biomodels.jummp.core
 
 import eu.ddmore.libpharmml.dom.commontypes.CommonVariableDefinitionType
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
+import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
 import eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType
@@ -84,7 +84,8 @@ interface IPharmMlRenderer {
      * {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType}s.
      * @param transformations a map containing the transformations for continuous covariates.
      */
-    String renderCovariateModel(List<CovariateModelType> covariates, Map transformations)
+    String renderCovariateModel(List<CovariateModelType> covariates,
+                Map<String, Equation> transformations)
 
     /**
      * @param variabilityModels a list of
@@ -95,8 +96,11 @@ interface IPharmMlRenderer {
     /**
      * @param parameterModels a list of
      * {@link eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType}s.
+     * @param covariates a list of covariate models.
+     * @param transformations the transformations for continuous covariates
      */
-    String renderParameterModel(List<ParameterModelType> parameterModels)
+    String renderParameterModel(List<ParameterModelType> parameterModels,
+                List<CovariateModelType> covariates, Map<String, Equation> transformations)
 
     /**
      * @param structuralModels a list of
@@ -123,13 +127,16 @@ interface IPharmMlRenderer {
      * {@link eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType}s.
      * @param transfMap the continuous covariate transformation map
      */
-    String renderSimpleParameters(List<SimpleParameterType> simpleParameters, Map transfMap)
+    String renderSimpleParameters(List<SimpleParameterType> simpleParameters,
+                Map<String, Equation> transfMap)
 
     /**
      * @param observationModels a list of
      * {@link eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType}s.
+     * @param covariateModels a list of covariate models
      */
-    String renderObservationModel(List<ObservationModelType> observationModels)
+    String renderObservationModel(List<ObservationModelType> observationModels,
+                List<CovariateModelType> covariateModels)
 
     /**
      * @param trialDesign an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType}
@@ -163,8 +170,9 @@ interface IPharmMlRenderer {
 
     /**
      * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType}s.
+     * @param indepVar the independent variable of the model.
      */
-    String renderSimulationSteps(List<SimulationStepType> steps)
+    String renderSimulationSteps(List<SimulationStepType> steps, String indepVar)
 
     /**
      * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType}s.

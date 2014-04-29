@@ -54,7 +54,7 @@ import org.perf4j.aop.Profiled
 /**
  * @short Service that routes PharmML rendering requests to the appropriate delegate class.
  *
- * This class contains convenience methods for rendering PharmML representations.
+ * This class  for rendering PharmML representations.
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class PharmMlRenderingService {
@@ -114,5 +114,55 @@ class PharmMlRenderingService {
     void renderCovariates(List cov, String id, Map transf, String version, Writer out) {
         IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
         out << renderer.renderCovariates(cov, id, transf)
+    }
+
+    @Profiled(tag = "pharmMlRenderingService.renderParameterModel")
+    void renderParameterModel(List parameterModel, List covariateModel, Map transfMap,
+                String version, Writer out) {
+        IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
+        out << renderer.renderParameterModel(parameterModel, covariateModel, transfMap)
+    }
+
+    @Profiled(tag = "pharmMlRenderingService.renderObservationModel")
+    void renderObservationModel(List obsModel, List covModel, String version, Writer out) {
+        IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
+        out << renderer.renderObservationModel(obsModel, covModel)
+    }
+
+    @Profiled(tag = "pharmMlRenderingService.renderTrialDesignStructure")
+    void renderTrialDesignStructure(TrialStructureType struct, String version, Writer out) {
+        IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
+        out << renderer.renderTrialDesignStructure(struct)
+    }
+
+    @Profiled(tag = "pharmMlRenderingService.renderIndividualDosing")
+    void renderIndividualDosing(List<IndividualDosingType> doses, String version, Writer o) {
+        IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
+        o << renderer.renderIndividualDosing(doses)
+    }
+
+    @Profiled(tag = "pharmMlRenderingService.renderPopulation")
+    void renderPopulation(PopulationType population, String version, Writer out) {
+        IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
+        out << renderer.renderPopulation(population)
+    }
+
+    @Profiled(tag = "pharmMlRenderingService.renderEstimationSteps")
+    void renderEstimationSteps(List<EstimationStepType> steps, String version, Writer out) {
+        IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
+        out << renderer.renderEstimationSteps(steps)
+    }
+
+    @Profiled(tag = "pharmMlRenderingService.renderSimulationSteps")
+    void renderSimulationSteps(List<SimulationStepType> steps, String independentVariable,
+                    String version, Writer out) {
+        IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
+        out << renderer.renderSimulationSteps(steps, independentVariable)
+    }
+
+    @Profiled(tag = "pharmMlRenderingService.renderStepDependencies")
+    void renderStepDependencies(StepDependencyType deps, String version, Writer out) {
+        IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
+        out << renderer.renderStepDependencies(deps)
     }
 }
