@@ -80,7 +80,7 @@ class PharmMl0_3AwareHandler extends AbstractPharmMlHandler {
 
     @Profiled(tag="pharmMl0_3AwareHandler.getIndependentVariable")
     String getIndependentVariable(PharmML dom) {
-        return dom?.independentVariable.symbId
+        return dom?.independentVariable?.symbId ?: "time"
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getFunctionDefinitions")
