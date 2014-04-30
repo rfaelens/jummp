@@ -1105,7 +1105,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
             Map<String, Equation> transformations) {
         final EquationType TRANSF_EQ = resolveSymbolReference(symbRef.value, transformations)
         if (TRANSF_EQ) {
-            final def ELEM = extractAttributeFromEquation(TRANSF_EQ)
+            final def ELEM = wrapJaxb(extractAttributeFromEquation(TRANSF_EQ))
             final Class ELEM_CLASS = ELEM.value.getClass()
             switch(ELEM_CLASS) {
                 case BinopType:
@@ -1130,7 +1130,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                     assert false, "Cannot have ${ELEM_CLASS.name} inside a transformation."
                     break
             }
-            return ELEM instanceof JAXBElement ? ELEM : wrapJaxb(ELEM)
+            return ELEM
         } else {
             return symbRef
         }
