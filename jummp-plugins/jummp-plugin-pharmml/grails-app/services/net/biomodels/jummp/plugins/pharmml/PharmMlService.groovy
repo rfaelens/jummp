@@ -102,29 +102,40 @@ class PharmMlService implements FileFormatService {
         if (IS_INFO_ENABLED) {
             log.info"Pre-validation checks completed in ${(step1-start)/1000000.0}ms."
         }
-        IPharmMLResource resource = AbstractPharmMlHandler.getResourceFromPharmML(pharmMlFile)
-        long step2 = System.nanoTime()
-        if (IS_INFO_ENABLED) {
-            log.info("libPharmML validation took ${(step2-step1)/1000000.0}ms.")
-        }
-        IValidationReport report = resource.getCreationReport()
-        if (IS_INFO_ENABLED) {
-            final int ERR_COUNT = report.numErrors()
-            if (ERR_COUNT) {
-                def err = []
-                Iterator<IValidationError> iErr = report.errorIterator()
-                while (iErr.hasNext()) {
-                    IValidationError e = iErr.next()
-                    err << new StringBuffer(e.getRuleId()).append(':')
-                            .append(e.getErrorMsg()).append("\n").toString()
-                }
-                log.info(err.inspect())
+        IPharmMLResource resource
+        try {
+            resource = AbstractPharmMlHandler.getResourceFromPharmML(pharmMlFile)
+            if (!resource) {
+                return false
             }
+            long step2 = System.nanoTime()
+            if (IS_INFO_ENABLED) {
+                log.info("libPharmML validation took ${(step2-step1)/1000000.0}ms.")
+            }
+            IValidationReport report = resource.getCreationReport()
+            if (IS_INFO_ENABLED) {
+                final int ERR_COUNT = report.numErrors()
+                if (ERR_COUNT) {
+                    def err = []
+                    Iterator<IValidationError> iErr = report.errorIterator()
+                    while (iErr.hasNext()) {
+                        IValidationError e = iErr.next()
+                        err << new StringBuffer(e.getRuleId()).append(':')
+                                .append(e.getErrorMsg()).append("\n").toString()
+                    }
+                    log.info(err.inspect())
+                }
+            }
+            if (IS_INFO_ENABLED) {
+                log.info "Validation report check took ${(System.nanoTime()-step2)/1000000.0}ms."
+            }
+            return report.isValid()
+        } catch (Exception e) {
+            def sb = new StringBuilder("PharmML model ${pharmMlFile} does not validate: ")
+            sb.append(e.message)
+            log.error(sb.toString(), e)
+            return false
         }
-        if (IS_INFO_ENABLED) {
-            log.info "Validation report check took ${(System.nanoTime()-step2)/1000000.0}ms."
-        }
-        return report.isValid()
     }
 
     @Profiled(tag="pharmMlService.extractName")
@@ -143,7 +154,10 @@ class PharmMlService implements FileFormatService {
             return "application/xml".equals(mime)
         }
         String theName = model.inject(new StringBuilder()) { name, f ->
-            name.append(JummpXmlUtils.findModelElement(f, "Name")).append(" ")
+            final String thisName = JummpXmlUtils.findModelElement(f, "Name")
+            if (thisName) {
+                name.append(thisName).append(" ")
+            }
         }.toString().trim()
         if (IS_INFO_ENABLED) {
             log.info("PharmML model ${model.inspect()} is entitled ${theName}")
@@ -178,8 +192,10 @@ class PharmMlService implements FileFormatService {
         }
         final String SEP = System.properties["line.separator"]
         String theDescription = model.inject(new StringBuilder()) { desc, m ->
-            String d = AbstractPharmMlHandler.getDomFromPharmML(m).description?.value ?: ""
-            desc.append(d).append(SEP)
+            String d = AbstractPharmMlHandler.getDomFromPharmML(m)?.description?.value ?: ""
+            if (d) {
+                desc.append(d).append(SEP)
+            }
         }.toString().trim()
         if (IS_INFO_ENABLED) {
             log.info("PharmML model ${model.inspect()} has description ${theDescription}.")
