@@ -32,7 +32,6 @@
 package net.biomodels.jummp.plugins.pharmml
 
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
-import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType

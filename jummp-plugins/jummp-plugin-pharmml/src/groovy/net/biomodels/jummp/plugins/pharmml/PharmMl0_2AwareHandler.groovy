@@ -35,7 +35,6 @@ import eu.ddmore.libpharmml.*
 import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
