@@ -208,6 +208,14 @@
 					}
 				}
 				content.push("<div class='metapanel'><div class='padleft padright padbottom'>")
+				$.ajax({
+					url: "${g.createLink(controller: 'model', action: 'getFileDetails', id: revision.id).replace("%3A",".")}"
+										+"?filename="+encodeURIComponent(fileProps.Name),
+					dataType: "text",
+					success: function(data) {
+						console.log(data);
+					}
+				});
 				content.push("<table cellpadding='2' cellspacing='5'>")
 				for (var prop in fileProps) {
 					if (prop!="isInternal" && prop!="Name" && fileProps[prop] && fileProps[prop]!="null" && prop!="mime") {

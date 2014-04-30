@@ -53,6 +53,7 @@ import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.perf4j.aop.Profiled
+import net.biomodels.jummp.core.vcs.VcsFileDetails
 
 /**
  * @short GitManager provides the interface to a local git clone.
@@ -304,6 +305,38 @@ class GitManager implements VcsManager {
             unlockModelRepository(modelDirectory)
         }
         return revision
+    }
+    
+    
+    public List<VcsFileDetails> getFileDetails(File modelDirectory, String path) {
+    	List<VcsFileDetails> fileDetails=new ArrayList<VcsFileDetails>();
+    	try {
+    		FileRepositoryBuilder builder = new FileRepositoryBuilder()
+    		Repository repository = builder.setWorkTree(modelDirectory)
+                .readEnvironment() // scan environment GIT_* variables
+                .setGitDir(modelDirectory) // use the current directory for the repository
+                .build()
+            Git git = new Git(repository)
+            RevWalk walk = new RevWalk(repository,100);
+            RevCommit commit = null;
+			LogCommand cmd = git.log();
+			cmd.addPath(path);
+			Iterable<RevCommit> logs = cmd.call();
+			Iterator<RevCommit> i = logs.iterator();
+			
+			while (i.hasNext()) {
+				def iterated = i.next()
+				commit = walk.parseCommit( iterated );
+				VcsFileDetails details = new VcsFileDetails(revisionId: iterated.toString(),
+															commit:new Date((long)commit.getCommitTime() * 1000),
+															msg: commit.getFullMessage())
+				fileDetails.add(details);
+			}   
+		} 
+		catch (Exception ex) {
+				throw new IOException("Git command could not be executed", ex)	
+		}
+		return fileDetails
     }
 
     /*

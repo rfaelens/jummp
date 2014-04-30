@@ -133,7 +133,10 @@ class ModelDelegateService implements IModelService {
     	modelService.updateAuditSuccess(itemId, success)
     }
     
-
+    List<VcsFileDetails> getFileDetails(long revID, String filename) {
+    	return modelService.getFileDetails(
+    }
+    
     ModelTransportCommand getModel(long modelId) {
         return modelService.getModel(modelId).toCommandObject()
     }

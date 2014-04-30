@@ -138,4 +138,9 @@ public interface VcsManager {
     * Updates the working copy to the latest remote HEAD.
     */
     public void updateWorkingCopy(File modelDirectory);
+
+    /**
+    * Retrieves the creation and last modified dates for a file
+    */
+    public List<VcsFileDetails> getFileDetails(File modelDirectory, String path);
 }

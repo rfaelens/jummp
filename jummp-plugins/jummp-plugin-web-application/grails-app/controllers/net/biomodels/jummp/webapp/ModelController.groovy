@@ -98,9 +98,9 @@ class ModelController {
     */
     def mailService
     
-    def beforeInterceptor = [action: this.&auditBefore, except: ['updateFlow', 'createFlow', 'uploadFlow', 'showWithMessage', 'share']]
+    def beforeInterceptor = [action: this.&auditBefore, except: ['updateFlow', 'createFlow', 'uploadFlow', 'showWithMessage', 'share', 'getFileDetails']]
     
-    def afterInterceptor = [ action: this.&auditAfter, except: ['updateFlow', 'createFlow', 'uploadFlow', 'showWithMessage', 'share']] 
+    def afterInterceptor = [ action: this.&auditAfter, except: ['updateFlow', 'createFlow', 'uploadFlow', 'showWithMessage', 'share', 'getFileDetails']] 
     
     
     private String getUsername() {
@@ -300,6 +300,16 @@ class ModelController {
         if (!valid) {
         	forward(controller: "errors", action: "error403")
         }
+    }
+    
+    def getFileDetails = {
+    	boolean valid=isValidId();
+    	if (valid) {
+    		def retval=modelDelegateService.getFileDetails(params.id as int, params.filename)
+    		System.out.println(retval.getProperties());
+    		System.out.println(retval.inspect());
+    		return retval as JSON;
+    	}
     }
     
     def share = {
