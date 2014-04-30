@@ -74,7 +74,6 @@ class MathsUtil {
 
 	private static void convertJAX(List<MathsSymbol> symbols, def jaxObject) {
 		if (jaxObject instanceof JAXBElement) { //shouldnt really happen, but sanity check.
-            println "found jaxbElement which shouldnt be here: $jaxObject"
 			convertJAX(symbols, jaxObject.getValue())
 			return;
 		}
