@@ -980,9 +980,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                     //RANDOM EFFECTS
                     def randomEffects = []
                     if (gaussianModel.randomEffects) {
-                        gaussianModel.randomEffects.symbRef.each { re ->
+                        gaussianModel.randomEffects.each { gmre ->
                             def randomEffectSymbol = new SymbolRefType()
-                            randomEffectSymbol.symbIdRef = re.symbIdRef
+                            //ASSUME THERE IS ONLY ONE SYMBREF HERE
+                            randomEffectSymbol.symbIdRef = gmre.symbRef[0].symbIdRef
                             randomEffects << wrapJaxb(randomEffectSymbol)
                         }
                     }
