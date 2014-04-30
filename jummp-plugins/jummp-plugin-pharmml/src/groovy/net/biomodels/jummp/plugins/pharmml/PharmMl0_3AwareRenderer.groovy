@@ -818,6 +818,9 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                     }
                 }
             }
+            if (s.operation) {
+                result.append formatOperations(s.operation, false)
+            }
         }
         return result
     }
@@ -837,7 +840,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                 result.append(paramsToEstimate(s.parametersToEstimate))
             }
             if (s.operation) {
-                result.append(estimationOps(s.operation))
+                result.append(formatOperations(s.operation))
             }
             if (s.objectiveDataSet) {
                 result.append(objectiveDataSetMapping(s.objectiveDataSet))

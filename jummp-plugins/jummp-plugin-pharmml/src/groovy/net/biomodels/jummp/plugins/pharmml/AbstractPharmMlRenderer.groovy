@@ -558,16 +558,19 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return result
     }
 
-    protected StringBuilder estimationOps(def operations) {
+    protected StringBuilder formatOperations(def operations, boolean isEstimation = true) {
         if (!operations) {
             return new StringBuilder()
         }
-        def result = new StringBuilder("<h5>Estimation operations</h5>\n")
+        final String TYPE = isEstimation ? "Estimation" : "Simulation"
+        def result = new StringBuilder("<h5>").append(TYPE).append(" operations</h5>\n")
         // It is nicer to display the long description than the enum value.
         def operationMeaningMap = [
                 "estFIM"   : "Calculate the Fisher Information Matrix",
                 "estIndiv" : "Estimate the individual parameters",
-                "estPop"   : "Estimate the population parameters"
+                "estPop"   : "Estimate the population parameters",
+                "simulatePK" : "Simulate PK profile(s)",
+                "simulatePD" : "Simulate PD profile(s)"
         ]
         operations.each { o ->
             result.append("<div><span class=\"bold\">")

@@ -835,7 +835,7 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
                 result.append(paramsToEstimate(s.parametersToEstimate))
             }
             if (s.operation) {
-                result.append(estimationOps(s.operation))
+                result.append(formatOperations(s.operation))
             }
             if (s.objectiveDataSet) {
                 result.append(objectiveDataSetMapping(s.objectiveDataSet))
