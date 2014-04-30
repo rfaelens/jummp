@@ -491,10 +491,11 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 o.append("</span>\n")
             }
         } catch(Exception e) {
-            outcome.append("Cannot display simple parameters.")
+            outcome.append("<p>Cannot display simple parameters.<p>")
             log.error("Error encountered while rendering simple params ${parameters.inspect()}: ${e.message}")
+        } finally {
+            return outcome.append("</div>")
         }
-        return outcome.append("</div>")
     }
 
     protected StringBuilder jaxbVector(VectorType vector) {
