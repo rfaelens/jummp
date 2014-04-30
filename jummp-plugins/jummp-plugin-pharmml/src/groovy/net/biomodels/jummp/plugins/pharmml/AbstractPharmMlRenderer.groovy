@@ -33,8 +33,6 @@ package net.biomodels.jummp.plugins.pharmml
 
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
 import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
-import eu.ddmore.libpharmml.dom.commontypes.FuncParameterDefinitionType
-import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.IdValueType
 import eu.ddmore.libpharmml.dom.commontypes.IntValueType
 import eu.ddmore.libpharmml.dom.commontypes.RealValueType
@@ -45,7 +43,6 @@ import eu.ddmore.libpharmml.dom.commontypes.StringValueType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
 import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
-import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
 import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
@@ -57,40 +54,21 @@ import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
 import eu.ddmore.libpharmml.dom.maths.UniopType
-import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
-import eu.ddmore.libpharmml.dom.modeldefn.ContinuousCovariateType
-import eu.ddmore.libpharmml.dom.modeldefn.CorrelatedRandomVarType
 import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
-import eu.ddmore.libpharmml.dom.modeldefn.LhsTransformationType
-import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
-import eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType
-import eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariableType
 import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
-import eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType
-import eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock
-import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
-import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
 import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
-import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
 import eu.ddmore.libpharmml.dom.trialdesign.ActivityType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
-import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
-import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
 import javax.xml.bind.JAXBElement
 import javax.xml.namespace.QName
@@ -217,9 +195,9 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                     //RANDOM EFFECTS
                     def randomEffects = []
                     if (gaussianModel.randomEffects) {
-                        gaussianModel.randomEffects.symbRef.each { re ->
+                        gaussianModel.randomEffects.each { re ->
                             def randomEffectSymbol = new SymbolRefType()
-                            randomEffectSymbol.symbIdRef = re.symbIdRef
+                            randomEffectSymbol.symbIdRef = re.symbRef[0].symbIdRef
                             randomEffects << wrapJaxb(randomEffectSymbol)
                         }
                     }
