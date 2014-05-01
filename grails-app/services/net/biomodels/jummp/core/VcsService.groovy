@@ -40,6 +40,7 @@ import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
 import org.perf4j.aop.Profiled
 import org.springframework.security.access.prepost.PreAuthorize
+import net.biomodels.jummp.core.vcs.VcsFileDetails
 
 /**
  * @short Service providing access to the version control system.
@@ -161,6 +162,6 @@ class VcsService {
     	if (!isValid()) {
             throw new VcsException("Version Control System is not valid")
         }
-        return vcsManager.getFileDetails(revision.model.vcsIdentifier, path);
+        return vcsManager.getFileDetails(new File(revision.model.vcsIdentifier), path);
     }
 }

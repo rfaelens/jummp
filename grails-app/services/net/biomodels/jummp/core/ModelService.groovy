@@ -65,6 +65,7 @@ import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
 import org.apache.lucene.document.Document
 import static java.util.UUID.randomUUID
+import net.biomodels.jummp.core.vcs.VcsFileDetails
 
 /**
  * @short Service class for managing Models
@@ -123,7 +124,7 @@ class ModelService {
      * Dependency Injection of userService
      */
     def userService
-
+    
     static transactional = true
 
     /**
@@ -853,6 +854,36 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
+    * Retreives information related to a file from the VCS
+    * Passes the @p revision and filename to the vcsService, gets 
+    * info related to the specified @p filename, and filters the returned
+    * values based on the revisions available to the user
+    * @param rev The model revision
+    * @param filename The file to be queried
+    * @return A list of VcsFileDetails objects
+    **/
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="modelService.getRevisionByIdentifier")
+    List<VcsFileDetails> getFileDetails(Revision rev, String filename) {
+    	def details=vcsService.getFileDetails(rev, filename)
+    	def accessibleRevs=getAllRevisions(rev.model)
+    	return details.findAll { detail ->
+    		boolean retval=false;
+    		accessibleRevs.each { revision ->
+    			if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(
+                springSecurityService.authentication, revision, BasePermission.READ))
+            	{
+            		if (revision.vcsId == detail.revisionId) {
+            			retval=true;
+            		}
+            	}
+    		}
+    		return retval;
+    	}
+    }
+    
+    
+    /**
     * Creates a new Model and stores it in the VCS. Stripped down version suitable
     * for calling from SubmissionService, where model has already been validated
     *
@@ -860,7 +891,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * The Model will have one Revision attached to it. The MetaInformation for this
     * Model is taken from @p meta. The user who uploads the Model becomes the owner of
     * this Model. The new Model is not visible to anyone except the owner.
-    * @param repoFiles The list of command objects corresponding to the files of the model that is to be stored in the VCS.
+    * @param repoFiles The list of command objects corresponding to the files 
+    * of the model that is to be stored in the VCS.
     * @param rev Meta Information to be added to the model
     * @return The new created Model, or null if the model could not be created
     * @throws ModelException If Model File is not valid or the Model could not be stored in VCS

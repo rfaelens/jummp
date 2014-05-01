@@ -171,7 +171,7 @@
 				content.push(fileProps["Name"])
 				var fileLink="${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}"
 										+"?filename="+encodeURIComponent(fileProps.Name)
-				content.push("<a title='Download ",fileProps[prop], "'","href='",fileLink);
+				content.push("<a title='Download ",fileProps.Name, "'","href='",fileLink);
 				fileLink=fileLink+"&inline=true";
 				content.push("'><img style='width:20px;margin-left:10px;float:none' alt='Download' src='http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png'/></a></h3></div>");
 				if (mimeType!=null) {
@@ -207,23 +207,44 @@
 						}
 					}
 				}
-				content.push("<div class='metapanel'><div class='padleft padright padbottom'>")
-				$.ajax({
-					url: "${g.createLink(controller: 'model', action: 'getFileDetails', id: revision.id).replace("%3A",".")}"
-										+"?filename="+encodeURIComponent(fileProps.Name),
-					dataType: "text",
-					success: function(data) {
-						console.log(data);
-					}
-				});
-				content.push("<table cellpadding='2' cellspacing='5'>")
-				for (var prop in fileProps) {
-					if (prop!="isInternal" && prop!="Name" && fileProps[prop] && fileProps[prop]!="null" && prop!="mime") {
-						content.push("<tr><td><b>",prop.replace("_"," "),"</b></td><td>",fileProps[prop])
-						content.push("</td></tr>");
+				content.push("<div class='metapanel'><div id='tableGoesHere' class='padleft padright padbottom'>")
+				if (!fileProps.isInternal) {
+					$.ajax({
+						url: "${g.createLink(controller: 'model', action: 'getFileDetails', id: revision.id).replace("%3A",".")}"
+											+"?filename="+encodeURIComponent(fileProps.Name),
+						dataType: "text",
+						success: function(data) {
+							data=JSON.parse(data);
+							var tcontent=[];						
+							tcontent.push("<table cellpadding='2' cellspacing='5'>")
+							for (var prop in fileProps) {
+								if (prop!="isInternal" && prop!="Name" && fileProps[prop] && fileProps[prop]!="null" && prop!="mime") {
+									tcontent.push("<tr><td><b>",prop.replace("_"," "),"</b></td><td>",fileProps[prop])
+									tcontent.push("</td></tr>");
+								}
+							}
+							tcontent.push("<tr><td><b>Submitted</b></td><td>",new Date(data[0].commit))
+							tcontent.push("</td></tr>")
+							tcontent.push("<tr><td><b>Last Modified</b></td><td>",new Date(data[data.length-1].commit))
+							tcontent.push("</td></tr>")
+									
+							tcontent.push("</table>");
+							$("#tableGoesHere").html(tcontent.join(""));
+							$("#Files").equalize({reset: true});
 						}
+					});
 				}
-				content.push("</table></div></div></div>");
+				else {
+					content.push("<table cellpadding='2' cellspacing='5'>")
+					for (var prop in fileProps) {
+						if (prop!="isInternal" && prop!="Name" && fileProps[prop] && fileProps[prop]!="null" && prop!="mime") {
+							content.push("<tr><td><b>",prop.replace("_"," "),"</b></td><td>",fileProps[prop])
+							content.push("</td></tr>");
+						}
+					}
+					content.push("</table>");
+				}
+				content.push("</div></div></div>");
 				$("#Files #detailsBox").html(content.join(""));
 				if (makeAjaxCall) {
 					if (mdlType) {

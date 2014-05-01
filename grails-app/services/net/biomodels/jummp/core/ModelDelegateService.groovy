@@ -50,6 +50,7 @@ import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.core.model.PermissionTransportCommand
 import java.util.List
 import java.util.Map
+import net.biomodels.jummp.core.vcs.VcsFileDetails
 
 /**
  * @short Service delegating methods to ModelService.
@@ -134,7 +135,7 @@ class ModelDelegateService implements IModelService {
     }
     
     List<VcsFileDetails> getFileDetails(long revID, String filename) {
-    	return modelService.getFileDetails(
+    	return modelService.getFileDetails(Revision.get(revID), filename)
     }
     
     ModelTransportCommand getModel(long modelId) {

@@ -303,13 +303,14 @@ class ModelController {
     }
     
     def getFileDetails = {
+    	System.out.println("CALLED GET FILE DETAILS WITH ID: "+params.id);
     	boolean valid=isValidId();
     	if (valid) {
-    		def retval=modelDelegateService.getFileDetails(params.id as int, params.filename)
-    		System.out.println(retval.getProperties());
-    		System.out.println(retval.inspect());
-    		return retval as JSON;
+    		def retval=modelDelegateService.getFileDetails(params.id as long, params.filename)
+    		System.out.println(retval as JSON);
+    		render retval as JSON;
     	}
+    	return "INVALID ID"
     }
     
     def share = {

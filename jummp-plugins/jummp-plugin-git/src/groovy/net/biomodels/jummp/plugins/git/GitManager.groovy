@@ -50,9 +50,11 @@ import org.eclipse.jgit.lib.Config
 import org.eclipse.jgit.lib.ConfigConstants
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.revwalk.DepthWalk.RevWalk;
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.perf4j.aop.Profiled
+import org.eclipse.jgit.api.LogCommand;
 import net.biomodels.jummp.core.vcs.VcsFileDetails
 
 /**
@@ -312,10 +314,11 @@ class GitManager implements VcsManager {
     	List<VcsFileDetails> fileDetails=new ArrayList<VcsFileDetails>();
     	try {
     		FileRepositoryBuilder builder = new FileRepositoryBuilder()
-    		Repository repository = builder.setWorkTree(modelDirectory)
-                .readEnvironment() // scan environment GIT_* variables
-                .setGitDir(modelDirectory) // use the current directory for the repository
-                .build()
+    		System.out.println("MODEL DIRECTORY: "+modelDirectory);
+    		Repository repository;
+            repository = builder.setGitDir(new File(".git", modelDirectory)).readEnvironment()
+                                                  .findGitDir().build();
+
             Git git = new Git(repository)
             RevWalk walk = new RevWalk(repository,100);
             RevCommit commit = null;
@@ -327,10 +330,13 @@ class GitManager implements VcsManager {
 			while (i.hasNext()) {
 				def iterated = i.next()
 				commit = walk.parseCommit( iterated );
-				VcsFileDetails details = new VcsFileDetails(revisionId: iterated.toString(),
-															commit:new Date((long)commit.getCommitTime() * 1000),
-															msg: commit.getFullMessage())
-				fileDetails.add(details);
+				System.out.println(iterated)
+				long timestamp = commit.getCommitTime();
+				VcsFileDetails detail = new VcsFileDetails();
+				detail.revisionId=iterated.getName()
+				detail.commit=timestamp * 1000
+				detail.msg=commit.getFullMessage()
+				fileDetails.add(detail);
 			}   
 		} 
 		catch (Exception ex) {

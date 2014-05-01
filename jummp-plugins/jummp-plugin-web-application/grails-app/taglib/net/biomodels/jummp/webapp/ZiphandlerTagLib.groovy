@@ -153,7 +153,6 @@ class ZiphandlerTagLib {
                             it.description.encodeAsJavaScript(), true)
 				}
 				addFileAttributesJS(builder, file.name, "mime", it.mimeType, true); 
-				addFileAttributesJS(builder,file.name,"Last_Modified","${new Date(attr.lastModifiedTime().toMillis())}".toString(), true) 
 				addFileAttributesJS(builder,file.name,"isInternal","false", false) 
 				
 				if (it.mimeType.contains('zip')) {

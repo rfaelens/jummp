@@ -36,6 +36,6 @@ package net.biomodels.jummp.core.vcs
 class VcsFileDetails implements Serializable {
     private static final long serialVersionUID = 1L
     String revisionId;
-    Date commit;
+    long commit;
     String msg;
 }
