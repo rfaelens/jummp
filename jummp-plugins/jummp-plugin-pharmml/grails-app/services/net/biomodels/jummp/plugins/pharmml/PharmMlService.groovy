@@ -188,12 +188,14 @@ class PharmMlService implements FileFormatService {
             return ""
         }
         final String SEP = System.properties["line.separator"]
-        String theDescription = model.inject(new StringBuilder()) { desc, m ->
-            String d = AbstractPharmMlHandler.getDomFromPharmML(m)?.description?.value ?: ""
+        def merged = model.inject(new StringBuilder()) { desc, m ->
+            def dom = AbstractPharmMlHandler.getDomFromPharmML(m)
+            String d = dom?.description?.value
             if (d) {
                 desc.append(d).append(SEP)
             }
-        }.toString().trim()
+        }
+        String theDescription = merged?.toString()?.trim() ?: ""
         if (IS_INFO_ENABLED) {
             log.info("PharmML model ${model.inspect()} has description ${theDescription}.")
         }

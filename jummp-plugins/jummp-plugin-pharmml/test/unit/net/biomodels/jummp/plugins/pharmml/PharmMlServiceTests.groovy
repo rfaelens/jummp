@@ -134,6 +134,7 @@ based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemo
         Benjamin Ribba, Gentian Kaloshi, Mathieu Peyre, et al. Clin Cancer Res Published OnlineFirst July 3, 2012.'''
         assertEquals expected, service.extractDescription([new File("test/files/0.2.1/example5.xml")])
         assertEquals expected, service.extractDescription([new File("test/files/0.3/example5.xml")])
+        assertEquals '', service.extractDescription([new File("test/files/0.2.1/example1.xml")])
     }
 
     @Test
