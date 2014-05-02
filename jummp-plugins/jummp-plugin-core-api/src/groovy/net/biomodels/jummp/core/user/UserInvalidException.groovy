@@ -39,4 +39,7 @@ class UserInvalidException extends UserManagementException implements Serializab
     UserInvalidException(String userName) {
         super("The user ${userName} does not validate".toString(), userName)
     }
+    UserInvalidException(String msg, long id) {
+    	super(msg, id);
+    }
 }

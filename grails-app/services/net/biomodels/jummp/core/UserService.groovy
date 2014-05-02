@@ -136,14 +136,14 @@ class UserService implements IUserService {
     @Profiled(tag="userService.editUser")
     @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
     void editUser(User user) throws UserInvalidException {
-    	try {
     	checkUserValid(user.username)
         User origUser = User.findByUsername(user.username)
         if (origUser.person.orcid != user.person.orcid) {
         	Person sameOrcid = Person.findByOrcid(user.person.orcid);
         	if (sameOrcid) {
         		if (User.findByPerson(sameOrcid)) {
-					throw new RegistrationException("Someone with this ORCID is already registered in the repository", user.person.orcid)        				
+        			log.warn("User ${user.username} tried to register orcid ${user.person.orcid} which is already in use by ${sameOrcid.userRealName}")
+            		throw new UserInvalidException("Someone with this ORCID is already registered in the repository", origUser.id)        				
 				}
         		else {
         			Person possiblyNoLongerNeeded = origUser.person
@@ -175,13 +175,8 @@ class UserService implements IUserService {
         }
         origUser.person.save(flush: true, failOnError: true)
         origUser.save(flush: true)
-        }
-        catch(Exception e) {
-        	e.printStackTrace();
-        	throw e
-        }
     }
-
+ 
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="userService.getCurrentUser")
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -343,31 +338,25 @@ class UserService implements IUserService {
             throw new RegistrationException("User with same name already exists", user.username)
         }
         User newUser = user.sanitizedUser()
-        try
-        {
-        	if (newUser.person.orcid) {
-        		def existing=Person.findByOrcid(newUser.person.orcid)
-        		if (existing) {
-        			if (User.findByPerson(existing)) {
-						throw new RegistrationException("Someone with this ORCID is already registered in the repository", newUser.person.orcid)        				
-        			}
-        			else {
-        				existing.userRealName = newUser.person.userRealName
-        				existing.institution = newUser.person.institution
-        				newUser.person=existing
-        			}
-        		}
-        		else {
-        			newUser.person.save(flush:true, failOnError:true)
-        		}
-        	}
-        	else {
-        		newUser.person.save(flush:true, failOnError:true)
-        	}
-        }
-        catch(Exception e) {
-        	e.printStackTrace()
-        }
+        if (newUser.person.orcid) {
+			def existing=Person.findByOrcid(newUser.person.orcid)
+			if (existing) {
+				if (User.findByPerson(existing)) {
+					throw new RegistrationException("Someone with this ORCID is already registered in the repository", newUser.person.orcid)        				
+				}
+				else {
+					existing.userRealName = newUser.person.userRealName
+					existing.institution = newUser.person.institution
+					newUser.person=existing
+				}
+			}
+			else {
+				newUser.person.save(flush:true, failOnError:true)
+			}
+		}
+		else {
+			newUser.person.save(flush:true, failOnError:true)
+		}
         boolean adminRegistration = false
         String p=generator( (('A'..'Z')+('0'..'9')).join(), 6 )
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {

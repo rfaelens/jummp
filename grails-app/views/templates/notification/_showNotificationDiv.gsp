@@ -10,7 +10,7 @@
 <g:else>
 	<g:if test="${validationErrorOn}">
 		<g:hasErrors bean="${validationErrorOn}">
-        		<g:renderErrors bean="${validationErrorOn}" as="list" />
+				<g:renderErrors bean="${validationErrorOn}" as="list" />
         		<a onclick = "hideNow()" class="close">&times;</a>
         </g:hasErrors>
     </g:if>

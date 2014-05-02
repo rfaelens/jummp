@@ -45,6 +45,7 @@ class UsermanagementController {
     def simpleCaptchaService
     def userService
     def springSecurityService
+    def messageSource
     			
     private String checkForMessage() {
         String flashMessage=""
@@ -122,6 +123,9 @@ class UsermanagementController {
     boolean validateUserData(def cmd, def params) {
     	bindData(cmd, params)
     	if (!cmd.validate()) {
+    		cmd.errors?.allErrors?.each{
+    			println messageSource.getMessage(it, Locale.ENGLISH)
+    		};
     		flash.validationError=cmd
         	return false
     	}
@@ -144,8 +148,9 @@ class UsermanagementController {
     		userService.editUser(cmd.toUser())
     	}
     	catch(Exception e) {
-    		flash.message=e.toString().split(":")[0]
-   			return redirect(action:"edit")
+    		flash.message=e.getMessage()
+   			System.out.println("GOT BACK ERROR: "+flash.message);
+    		return redirect(action:"edit")
     	}
     	flash.message="Profile was updated successfully"
     	redirect(action:"show")
@@ -191,7 +196,7 @@ class UsermanagementController {
     		userService.changePassword(cmd.oldPassword, cmd.newPassword)
     	}
     	catch(Exception e) {
-    		flash.message=e.toString().split(":")[0]
+    		flash.message=e.getMessage();
    			return redirect(action:"editPassword")
     	}
     	flash.message="Password was updated successfully"
@@ -245,7 +250,7 @@ class UsermanagementController {
     		userService.register(cmd.toUser())
     	}
     	catch(Exception e) {
-    		flash.message=e.toString().split(":")[0]
+    		flash.message=e.getMessage()
    			return redirect(action:"create")
     	}
     	render view: "successfulregistration"
