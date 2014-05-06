@@ -63,7 +63,7 @@ class SearchController {
             }
             int value = Integer.parseInt(input)
             if (minValueCheck) {
-                return value >= minValue
+                return value > minValue
             }
             return true
         }
