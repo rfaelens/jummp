@@ -16,14 +16,6 @@
  You should have received a copy of the GNU Affero General Public License along 
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
-<h3>Structural Model <span class='italic'>${name}</span></h3>
-<g:if test="${simpleParameters}">
-    <p class='bold'>Parameters</p>
-    <pharmml:simpleParamsClosure simpleParameters="${simpleParameters}"/>
-</g:if>
-<g:if test="${variableDefinitions}">
-    <p class='bold'>Variable definitions</p>
-    <div>
-        <pharmml:commonVariables vars="${variableDefinitions}" indepVar="${independentVariable}"/>
-    </div>
-</g:if>
+<g:each in="${conditions}">
+    <div>${it}</div>
+</g:each>

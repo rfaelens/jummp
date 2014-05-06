@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2010-2013 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
 * Deutsches Krebsforschungszentrum (DKFZ)
 *
 * This file is part of Jummp.
@@ -36,6 +36,7 @@ package net.biomodels.jummp.plugins.pharmml
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.PharmML
+import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 
@@ -51,26 +52,33 @@ class PharmMlController {
 
     def show = {
         def model=flash.genericModel
-        PharmML dom = pharmMlService.getDomFromRevision(model.revision)
-        TrialDesignType design = dom?.trialDesign
-        ModellingStepsType steps = pharmMlService.getModellingSteps(model.revision)
+        final RevisionTransportCommand REVISION = model.revision
+        PharmML dom = AbstractPharmMlHandler.getDomFromRevision(model.revision)
+        final String VERSION = dom?.writtenVersion
+        if (dom) {
+            model["independentVar"] = pharmMlService.getIndependentVariable(dom, VERSION)
+            model["functionDefs"] = pharmMlService.getFunctionDefinitions(dom, VERSION)
+            model["version"] = VERSION
 
-        model["modelDefinition"] = dom.modelDefinition
-        model["trialDesign"] = design
-        model["independentVar"] = pharmMlService.getIndependentVariable(dom)
-        model["functionDefs"] = pharmMlService.getFunctionDefinitions(dom)
-        model["structuralModel"] = pharmMlService.getStructuralModel(dom)
-        model["variabilityModel"] = pharmMlService.getVariabilityModel(dom)
-        model["covariateModel"] = pharmMlService.getCovariateModel(dom)
-        model["parameterModel"] = pharmMlService.getParameterModel(dom)
-        model["observationModel"] = pharmMlService.getObservationModel(dom)
-        model["structure"] = pharmMlService.getTrialDesignStructure(design)
-        model["population"] = pharmMlService.getPopulation(design)
-        model["dosing"] = pharmMlService.getIndividualDosing(design)
-        model["estSteps"] = pharmMlService.getEstimationSteps(steps)
-        model["simSteps"] = pharmMlService.getSimulationSteps(steps)
-        model["stepDeps"] = pharmMlService.getStepDependencies(steps)
+            ModelDefinitionType modelDefinition = pharmMlService.getModelDefinition(dom, VERSION)
+            model["modelDefinition"] = modelDefinition
+            model["structuralModel"] = pharmMlService.getStructuralModel(modelDefinition, VERSION)
+            model["variabilityModel"] = pharmMlService.getVariabilityModel(modelDefinition, VERSION)
+            model["covariateModel"] = pharmMlService.getCovariateModel(modelDefinition, VERSION)
+            model["parameterModel"] = pharmMlService.getParameterModel(modelDefinition, VERSION)
+            model["observationModel"] = pharmMlService.getObservationModel(modelDefinition, VERSION)
 
+            TrialDesignType design = pharmMlService.getTrialDesign(dom, VERSION)
+            model["trialDesign"] = design
+            model["structure"] = pharmMlService.getTrialDesignStructure(design, VERSION)
+            model["population"] = pharmMlService.getPopulation(design, VERSION)
+            model["dosing"] = pharmMlService.getIndividualDosing(design, VERSION)
+
+            ModellingStepsType steps = pharmMlService.getModellingSteps(dom, VERSION)
+            model["estSteps"] = pharmMlService.getEstimationSteps(steps, VERSION)
+            model["simSteps"] = pharmMlService.getSimulationSteps(steps, VERSION)
+            model["stepDeps"] = pharmMlService.getStepDependencies(steps, VERSION)
+        }
         render(view:"/model/pharmml/show", model: model)
     }
 }

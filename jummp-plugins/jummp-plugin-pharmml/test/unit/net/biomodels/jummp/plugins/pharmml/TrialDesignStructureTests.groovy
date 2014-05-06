@@ -1,8 +1,37 @@
+/**
+* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Deutsches Krebsforschungszentrum (DKFZ)
+*
+* This file is part of Jummp.
+*
+* Jummp is free software; you can redistribute it and/or modify it under the
+* terms of the GNU Affero General Public License as published by the Free
+* Software Foundation; either version 3 of the License, or (at your option) any
+* later version.
+*
+* Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
+* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+* A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+* details.
+*
+* You should have received a copy of the GNU Affero General Public License along
+* with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
+*
+* Additional permission under GNU Affero GPL version 3 section 7
+*
+* If you modify Jummp, or any covered work, by linking or combining it with
+* Xerces, LibPharmml, Grails, JUnit (or a modified version of that library), containing parts
+* covered by the terms of Common Public License, Apache License v2.0, the licensors of this
+* Program grant you additional permission to convey the resulting work.
+* {Corresponding Source for a non-source form of such a combination shall
+* include the source code for the parts of Xerces, LibPharmml, Grails, JUnit used as well as
+* that of the covered work.}
+**/
+
 package net.biomodels.jummp.plugins.pharmml
 
 import grails.test.mixin.*
 import net.biomodels.jummp.plugins.pharmml.TrialDesignStructure
-import net.biomodels.jummp.plugins.pharmml.PharmMlService
 import org.junit.*
 
 public class TrialDesignStructureTests {
@@ -21,9 +50,18 @@ public class TrialDesignStructureTests {
 
    @Test
    void constructorArgumentsGetFilteredCorrectly() {
-        def pharmMlService = new PharmMlService()
-        def testFile = new File("test/files/example4.xml")
-        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def testFile = new File("test/files/0.2.1/example4.xml")
+        assertTrue testFile.exists()
+        constructorArgumentsTestHelper(testFile)
+        testFile = new File("test/files/0.3/example4.xml")
+        assertTrue testFile.exists()
+        constructorArgumentsTestHelper(testFile)
+   }
+
+   private void constructorArgumentsTestHelper(File f) {
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
+        assertNotNull dom
+        assertNotNull dom.trialDesign
         def structure = dom.trialDesign.structure
         assertNotNull(structure)
         //test each constructor arg for null and empty values
@@ -59,9 +97,14 @@ public class TrialDesignStructureTests {
 
    @Test
    void cellMatrixFilledCorrectly() {
-        def pharmMlService = new PharmMlService()
-        def testFile = new File("test/files/example4.xml")
-        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def testFile = new File("test/files/0.2.1/example4.xml")
+        cellMatrixTestHelper(testFile)
+        testFile = new File("test/files/0.3/example4.xml")
+        cellMatrixTestHelper(testFile)
+   }
+
+   private void cellMatrixTestHelper(File f) {
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         assertTrue(structure.allCellsDefined())
@@ -78,9 +121,14 @@ public class TrialDesignStructureTests {
 
    @Test
    void findByEpochWorks() {
-        def pharmMlService = new PharmMlService()
-        def testFile = new File("test/files/example4.xml")
-        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def testFile = new File("test/files/0.2.1/example4.xml")
+        findByEpochTestHelper(testFile)
+        testFile = new File("test/files/0.3/example4.xml")
+        findByEpochTestHelper(testFile)
+   }
+
+   private void findByEpochTestHelper(File f) {
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         def expected = [
@@ -102,9 +150,14 @@ public class TrialDesignStructureTests {
 
    @Test
    void findByArmWorks() {
-        def pharmMlService = new PharmMlService()
-        def testFile = new File("test/files/example4.xml")
-        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def testFile = new File("test/files/0.2.1/example4.xml")
+        findByArmTestHelper(testFile)
+        testFile = new File("test/files/0.3/example4.xml")
+        findByArmTestHelper(testFile)
+   }
+
+   private void findByArmTestHelper(File f) {
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         def expected = [
@@ -125,9 +178,14 @@ public class TrialDesignStructureTests {
 
    @Test
    void iteratorWorks() {
-        def pharmMlService = new PharmMlService()
-        def testFile = new File("test/files/example4.xml")
-        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def testFile = new File("test/files/0.2.1/example4.xml")
+        iteratorTestHelper(testFile)
+        testFile = new File("test/files/0.3/example4.xml")
+        iteratorTestHelper(testFile)
+   }
+
+   private void iteratorTestHelper(File f) {
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         def iStructure = structure.iterator()
@@ -143,9 +201,14 @@ public class TrialDesignStructureTests {
 
    @Test
     void getArmsAndEpochsWork() {
-        def pharmMlService = new PharmMlService()
-        def testFile = new File("test/files/example4.xml")
-        def dom = pharmMlService.getDomFromPharmML(testFile)
+        def testFile = new File("test/files/0.2.1/example4.xml")
+        getArmsAndEpochsTestHelper(testFile)
+        testFile = new File("test/files/0.3/example4.xml")
+        getArmsAndEpochsTestHelper(testFile)
+   }
+
+   private void getArmsAndEpochsTestHelper(File f) {
+        def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def struct = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         assertEquals(["a1", "a2"] as Set, struct.getArmRefs())

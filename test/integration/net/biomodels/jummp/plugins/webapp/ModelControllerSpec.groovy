@@ -52,12 +52,14 @@ import org.springframework.security.core.authority.GrantedAuthorityImpl
 import org.springframework.security.core.context.SecurityContextHolder
 
 import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
 import spock.lang.*
 
+@TestMixin(IntegrationTestMixin)
 @TestFor(ModelController)
 class ModelControllerSpec extends Specification {
-    @Shared def modelService = H.applicationContext.getBean("modelService")
+    def modelService
     @Shared def grailsApplication = H.grailsApplication
     @Shared def springSecurityService = H.applicationContext.getBean("springSecurityService")
     @Shared def authenticationManager = H.applicationContext.getBean("authenticationManager")

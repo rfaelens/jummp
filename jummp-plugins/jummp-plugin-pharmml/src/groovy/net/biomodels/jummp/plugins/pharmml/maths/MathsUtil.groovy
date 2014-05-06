@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2010-2013 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
 * Deutsches Krebsforschungszentrum (DKFZ)
 *
 * This file is part of Jummp.
@@ -92,10 +92,20 @@ class MathsUtil {
 	private static List getSubTree(def jaxObject, List<MathsSymbol> symbols) {
 		List subTree=new LinkedList()
 		if (jaxObject instanceof EquationType || jaxObject instanceof Equation) {
-			jaxObject.getScalarOrSymbRefOrBinop().each {
-				subTree.add(it.getValue())
-			}
-		}
+            if (jaxObject.getScalarOrSymbRefOrBinop()) {
+                jaxObject.getScalarOrSymbRefOrBinop().each {
+                    subTree.add(it.getValue())
+                }
+            } else {
+                //assume this is 0.3
+                addIfExists(jaxObject.uniop, subTree)
+                addIfExists(jaxObject.binop, subTree)
+                addIfExists(jaxObject.symbRef, subTree)
+                addIfExists(jaxObject.scalar, subTree)
+                addIfExists(jaxObject.functionCall, subTree)
+                addIfExists(jaxObject.piecewise, subTree)
+            }
+        }
 		else if (jaxObject instanceof BinopType || jaxObject instanceof LogicBinOpType) {
 			jaxObject.getContent().each {
 				subTree.add(it.getValue())

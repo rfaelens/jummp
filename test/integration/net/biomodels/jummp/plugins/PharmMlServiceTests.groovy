@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2010-2013 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
 * Deutsches Krebsforschungszentrum (DKFZ)
 *
 * This file is part of Jummp.
@@ -93,7 +93,7 @@ class PharmMlServiceTests extends JummpIntegrationTest {
         FileUtils.touch modelFile
         modelFile.setText("I am the main entry of this model submission.")
         assertFalse pharmMlService.areFilesThisFormat([modelFile])
-        modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/example2.xml")
+        modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example2.xml")
         assertTrue pharmMlService.areFilesThisFormat([modelFile])
         modelFile = new File("test/files/BIOMD0000000272.xml")
         assertFalse pharmMlService.areFilesThisFormat([modelFile])
@@ -101,7 +101,7 @@ class PharmMlServiceTests extends JummpIntegrationTest {
 
     @Test
     void testGetVersionFormat() {
-        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/example2.xml")
+        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example2.xml")
         authenticateAsTestUser()
         def rf = new RepositoryFileTransportCommand(path: modelFile.absolutePath,
                     description: "A very interesting model.", mainFile: true)
@@ -114,7 +114,7 @@ class PharmMlServiceTests extends JummpIntegrationTest {
 
     @Test
     void testValidate() {
-        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/example1.xml")
+        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example1.xml")
         authenticateAsTestUser()
         def rf = new RepositoryFileTransportCommand(path: modelFile.absolutePath,
                     description: "A very interesting model.", mainFile: true)

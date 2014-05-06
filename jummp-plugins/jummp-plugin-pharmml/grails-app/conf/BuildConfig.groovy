@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2010-2013 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
 * Deutsches Krebsforschungszentrum (DKFZ)
 *
 * This file is part of Jummp.
@@ -60,7 +60,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
     dependencies {
-        compile("eu.ddmore.pharmml:libPharmML:0.1-SNAPSHOT") {
+        compile("eu.ddmore.pharmml:libPharmML:0.3") {
             excludes 'junit-dep'
         }
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }

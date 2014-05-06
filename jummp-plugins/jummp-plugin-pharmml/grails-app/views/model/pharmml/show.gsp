@@ -1,5 +1,5 @@
 <%--
- Copyright (C) 2010-2013 EMBL-European Bioinformatics Institute (EMBL-EBI),
+ Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
  Deutsches Krebsforschungszentrum (DKFZ)
 
  This file is part of Jummp.
@@ -42,14 +42,17 @@
     </style>
 </head>
 <content tag="modelspecifictabs">
-    <pharmml:decideTabs iv="${independentVar}" fd="${functionDefs}" md="${modelDefinition}" td="${trialDesign}" est="${estSteps}" sim="${simSteps}" />
+    <pharmml:decideTabs iv="${independentVar}" fd="${functionDefs}" md="${modelDefinition}"
+            td="${trialDesign}" est="${estSteps}" sim="${simSteps}" />
 </content>
 <content tag="modelspecifictabscontent">
+    <pharmml:handleModelDefinitionTab version="${version}" iv="${independentVar}"
+            fd="${functionDefs}" sm="${structuralModel}" vm="${variabilityModel}"
+            cm="${covariateModel}" pm="${parameterModel}" om="${observationModel}" />
 
-    <pharmml:handleModelDefinitionTab iv="${independentVar}" fd="${functionDefs}" sm="${structuralModel}" vm="${variabilityModel}" cm="${covariateModel}" pm="${parameterModel}" om="${observationModel}" />
-
-    <pharmml:handleTrialDesignTab ts="${structure}" td="${dosing}" tp="${population}" />
+    <pharmml:handleTrialDesignTab version="${version}" ts="${structure}"
+            td="${dosing}" tp="${population}" />
 
     <pharmml:handleModellingStepsTabs estimation="${estSteps}" simulation="${simSteps}"
-        independentVariable="${independentVar}" deps="${stepDeps}" />
+        independentVariable="${independentVar}" deps="${stepDeps}" version="${version}" />
 </content>

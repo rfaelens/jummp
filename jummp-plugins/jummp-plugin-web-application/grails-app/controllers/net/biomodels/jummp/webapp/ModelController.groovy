@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2010-2013 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
 * Deutsches Krebsforschungszentrum (DKFZ)
 *
 * This file is part of Jummp.
@@ -680,7 +680,7 @@ class ModelController {
                 // read this parameter to display option to upload without
                 // validation in upload files view
                 flash.showProceedWithoutValidationDialog = true
-            }.to "inferModelInfo"
+            }.to "uploadFiles"
             on("FilesNotValid") {
                 flash.error="submission.upload.error.fileerror"
             }.to "uploadFiles"
@@ -753,7 +753,7 @@ class ModelController {
         							getPublication(model.publication)
         				}
         				catch(Exception e) {
-        					e.printStackTrace()
+                            log.error(e.message, e)
         				}
         				if (retrieved) {
         					model.publication = retrieved

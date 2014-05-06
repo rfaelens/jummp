@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2010-2013 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
 * Deutsches Krebsforschungszentrum (DKFZ)
 *
 * This file is part of Jummp.
@@ -80,7 +80,6 @@ Provides functionality to support models encoded in PharmML.
     }
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
     }
 
     def doWithDynamicMethods = { ctx ->
@@ -90,7 +89,7 @@ Provides functionality to support models encoded in PharmML.
     def doWithApplicationContext = { applicationContext ->
           try {
             def service = applicationContext.getBean("modelFileFormatService")
-            ["*", "0.1", "0.2.1"].each {
+            ["*", "0.1", "0.2.1", "0.3"].each {
                 def modelFormat = service.registerModelFormat("PharmML",
                         "PharmML", it)
                 service.handleModelFormat(modelFormat, "pharmMlService", "pharmMl")

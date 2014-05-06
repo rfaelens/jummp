@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2010-2013 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
 * Deutsches Krebsforschungszentrum (DKFZ)
 *
 * This file is part of Jummp.
@@ -302,18 +302,10 @@ class SubmissionService {
         }
 
         protected String getModelDescriptionFromFiles(List<File> allFiles) {
-        	StringBuilder desc=new StringBuilder("Model comprised of files: ")
-        	boolean first=true
-        	allFiles.each {
-        		if (!first) {
-        			desc.append(", ")
-        		}        		
-        		desc.append(it.name)
-        		first=false
-        	}
-        	return desc.toString()
+            StringBuilder desc=new StringBuilder("Model comprised of files: ")
+            String fileNames = allFiles.collect{ it.name }.join(', ')
+            return desc.append(fileNames).toString()
         }
-        
 
         /**
          * Purpose Convenience function to update the revision dom from the files
@@ -328,11 +320,11 @@ class SubmissionService {
             ModelFormat modelFormat=ModelFormat.findByIdentifierAndFormatVersion(revision.format.identifier, formatVersion)
             revision.name = modelFileFormatService.extractName(files,modelFormat)
             if (!revision.name) {
-            	    revision.name=getModelNameFromFiles(files)
+                revision.name=getModelNameFromFiles(files)
             }
             revision.description=modelFileFormatService.extractDescription(files, modelFormat)
             if (!revision.description) {
-            	    revision.description=getModelDescriptionFromFiles(getFilesFromMemory(workingMemory, false))
+                revision.description=getModelDescriptionFromFiles(getFilesFromMemory(workingMemory, false))
             }
             revision.validated=workingMemory.get("model_validation_result") as Boolean
         }
