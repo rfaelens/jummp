@@ -104,6 +104,8 @@ import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
 import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PieceSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
+import net.biomodels.jummp.plugins.pharmml.util.correlation.CorrelationMatrix
+import net.biomodels.jummp.plugins.pharmml.util.correlation.PharmMl0_3AwareCorrelationProcessor
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.perf4j.aop.Profiled
@@ -344,27 +346,24 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                 }
                 result.append(simpleParams(simpleParameters, transfMap))
 
-                // helps us decide the size of each correlation matrix in the parameter model
+                Map<String, String> re_ip = [:]
                 Map<String, List<String>> paramRandomVariableMap = [:]
-                // pairs("${level}|${randomVar1}|${randomVar2}", covarianceOrCorrelationCoefficient)
-                Map<String, String> paramCorrelations = [:]
-                List<String> individualParametersInParameterModel = []
-                // pairs (variabilityLevel, correlationMatrix), must not entangle with observation model params
-                Map<String, String[][]> paramCorrelationMatrixMap = [:]
-
                 String randoms = randomVariables(rv, paramRandomVariableMap)
                 if (randoms) {
                    result.append(randoms)
                 }
                 StringBuilder individuals = individualParams(individualParameters, rv, covariates,
-                            individualParametersInParameterModel, transfMap)
+                            re_ip, transfMap)
                 if (individuals) {
                    result.append(individuals)
                 }
                 if (pm.correlation) {
-                    handleCorrelations(pm.correlation, paramCorrelations,
-                                paramRandomVariableMap, paramCorrelationMatrixMap,
-                                individualParametersInParameterModel, result)
+                    def processor = new PharmMl0_3AwareCorrelationProcessor()
+                    List<CorrelationMatrix> matrices = processor.convertToStringMatrix(
+                                pm.correlation, paramRandomVariableMap, re_ip)
+                    if (matrices) {
+                        displayCorrelationMatrices(matrices, result)
+                    }
                 }
                 result.append("</div>")
             }
@@ -522,28 +521,26 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                 }
                 result.append(simpleParams(simpleParameters))
 
-                // helps us decide the size of each correlation matrix in the observation model
                 Map<String, List<String>> obsRandomVariableMap = [:]
-                // pairs("${level}|${randomVar1}|${randomVar2}", covarianceOrCorrelationCoefficient)
-                Map<String, String> obsCorrelations = [:]
-                List<String> individualParametersInObservationModel = []
-                // pairs (variabilityLevel, correlationMatrix)
-                Map<String, String[][]> obsCorrelationMatrixMap = [:]
+                Map<String, String> re_ip = [:]
 
                 String randoms = randomVariables(rv, obsRandomVariableMap)
                 if (randoms) {
                     result.append(randoms)
                 }
                 StringBuilder individuals = individualParams(individualParameters, rv, covariates,
-                            individualParametersInObservationModel, [:])
+                            re_ip, [:])
                 if (individuals) {
                    result.append(individuals)
                 }
                 if (om.correlation) {
-                    handleCorrelations(om.correlation, obsCorrelations,
-                                obsRandomVariableMap, obsCorrelationMatrixMap,
-                                individualParametersInObservationModel, result)
-                }
+                    def processor = new PharmMl0_3AwareCorrelationProcessor()
+                    List<CorrelationMatrix> matrices = processor.convertToStringMatrix(
+                        om.correlation, re_ip, obsRandomVariableMap)
+                    if (matrices) {
+                        displayCorrelationMatrices(matrices, result)
+                    }
+               }
                 if (obsErr) {
                     if (obsErr.symbol?.value) {
                         result.append(obsErr.symbol.value)
@@ -876,17 +873,21 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
      */
     @Override
     protected void buildCorrelationMap(CorrelationType c, Map correlationsMap) {
-        PairwiseType p = c.pairwise
-        final ScalarRhs VALUE = p.covariance ?: p.correlationCoefficient
+        try {
+            PairwiseType p = c.pairwise
+            final ScalarRhs VALUE = p.covariance ?: p.correlationCoefficient
 
-        String var = c.variabilityReference.symbRef?.symbIdRef ?:
-                        c.variabilityReference.symbRef?.blkIdRef ?: "undefined"
-        String r1 = p.randomVariable1.symbRef?.symbIdRef
-        String r2 = p.randomVariable2.symbRef?.symbIdRef
-        final String KEY = "$var|$r1|$r2"
-        correlationsMap[KEY] = VALUE.symbRef.symbIdRef
-        final String KEY_REV = "$var|$r2|$r1"
-        correlationsMap[KEY_REV] = VALUE.symbRef.symbIdRef
+            String var = c.variabilityReference.symbRef?.symbIdRef ?:
+                            c.variabilityReference.symbRef?.blkIdRef ?: "undefined"
+            String r1 = p.randomVariable1.symbRef?.symbIdRef
+            String r2 = p.randomVariable2.symbRef?.symbIdRef
+            final String KEY = "$var|$r1|$r2"
+            correlationsMap[KEY] = VALUE.symbRef.symbIdRef
+            final String KEY_REV = "$var|$r2|$r1"
+            correlationsMap[KEY_REV] = VALUE.symbRef.symbIdRef
+        } catch (Exception e) {
+            log.error(e.message, e)
+        }
     }
 
     /* EquationType no longer has scalarOrSymbRefOrBinop list, just one element*/
@@ -961,13 +962,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     @Override
     protected StringBuilder individualParams(List<IndividualParameterType> parameters,
                 List<ParameterRandomVariableType> rv, List<CovariateDefinitionType> covariates,
-                List<String> indivParamNameList, Map<String, Equation> transfMap) {
+                Map<String, String> re_ip, Map<String, Equation> transfMap) {
         def output = new StringBuilder("<div class='spaced'>")
         try {
             parameters.each { p ->
-                if (!indivParamNameList.contains(p.symbId)) {
-                    indivParamNameList.add(p.symbId)
-                }
                 if (p.assign) {
                     String converted = convertToMathML(p.symbId, p.assign)
                     output.append("<div>")
@@ -985,6 +983,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                             //ASSUME THERE IS ONLY ONE SYMBREF HERE
                             randomEffectSymbol.symbIdRef = gmre.symbRef[0].symbIdRef
                             randomEffects << wrapJaxb(randomEffectSymbol)
+                            re_ip << [(randomEffectSymbol.symbIdRef) : p.symbId]
                         }
                     }
                     if (gaussianModel.linearCovariate) {

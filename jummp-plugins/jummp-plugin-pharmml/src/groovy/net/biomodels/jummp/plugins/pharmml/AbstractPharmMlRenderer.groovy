@@ -79,6 +79,7 @@ import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
 import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PieceSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
+import net.biomodels.jummp.plugins.pharmml.util.correlation.CorrelationMatrix
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -176,13 +177,14 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
 
     protected StringBuilder individualParams(List<IndividualParameterType> parameters,
                 List<ParameterRandomVariableType> rv, List<CovariateDefinitionType> covariates,
-                List<String> indivParamNameList, Map<String, Equation> transfMap) {
-        def output = new StringBuilder("<div class='spaced'>")
+                Map<String, String> randEffIndParMap, Map<String, Equation> transfMap) {
+        def output = new StringBuilder()
+        if (!parameters) {
+            return output
+        }
+        output.append "<div class='spaced'>"
         try {
             parameters.each { p ->
-                if (!indivParamNameList.contains(p.symbId)) {
-                    indivParamNameList.add(p.symbId)
-                }
                 if (p.assign) {
                     String converted = convertToMathML(p.symbId, p.assign)
                     output.append("<div>")
@@ -199,6 +201,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                             def randomEffectSymbol = new SymbolRefType()
                             randomEffectSymbol.symbIdRef = re.symbRef[0].symbIdRef
                             randomEffects << wrapJaxb(randomEffectSymbol)
+                            randEffIndParMap << [(randomEffectSymbol.symbIdRef) : p.symbId]
                         }
                     }
                     if (gaussianModel.linearCovariate) {
@@ -311,81 +314,12 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return output.append("</div>")
     }
 
-    /*
-     * Processes and displays correlations between covariates.
-     * @param corList:     correlations to be displayed.
-     * @param corMap:      covariate pair mapped to correlation coefficient or covariance
-     * @param rvMap:       random variables grouped by variability level
-     * @param matrix:      correlation matrices grouped by variability level
-     * @param indivParams: the names of the individual parameters.
-     * @param result:      StringBuilder where the output is accumulated.
-     */
-    protected void handleCorrelations(List<CorrelationType> corList, Map corMap, Map rvMap,
-                Map matrix, List indivParams, StringBuilder result) {
-        corList.each { cor ->
-           buildCorrelationMap(cor, corMap)
-        }
-        processCorrelations(corMap, rvMap,
-                    matrix)
-        if (matrix) {
-            displayCorrelationMatrices(matrix,
-                        indivParams, result)
-        }
-    }
-
-    protected void buildCorrelationMap(CorrelationType c, Map correlationsMap) {
-        final ScalarRhs VALUE = c.covariance ?: c.correlationCoefficient
-
-        String var = c.variabilityReference.symbRef?.symbIdRef ?:
-                        c.variabilityReference.symbRef?.blkIdRef ?: "undefined"
-        String r1 = c.randomVariable1.symbRef?.symbIdRef
-        String r2 = c.randomVariable2.symbRef?.symbIdRef
-        final String KEY = "$var|$r1|$r2"
-        correlationsMap[KEY] = VALUE.symbRef.symbIdRef
-        final String KEY_REV = "$var|$r2|$r1"
-        correlationsMap[KEY_REV] = VALUE.symbRef.symbIdRef
-    }
-
-    protected void processCorrelations(Map<String, String> c, Map<String, List<String>> rv,
-                Map<String, String[][]> corrMatrixMap) {
-        rv.entrySet().each {
-            final String LVL = it.key
-            if (!corrMatrixMap[LVL]) {
-                final int MATRIX_SIZE = it.value.size()
-                String[][] corrMatrix = new String[MATRIX_SIZE][MATRIX_SIZE]
-                for (int i = 0; i < MATRIX_SIZE; i++) {
-                    for (int j = 0; j < MATRIX_SIZE; j++) {
-                        final String R1 = it.value[i]
-                        final String R2 = it.value[j]
-                        final String KEY = "$LVL|$R1|$R2"
-                        final String KEY_REV = "$LVL|$R2|$R1"
-                        final String RHO = c[KEY]
-                        final String RHO_REV = c[KEY_REV]
-                        if (i == j) {
-                            corrMatrix[i][j] = "1"
-                        } else if (RHO) {
-                            corrMatrix[i][j] = RHO
-                        } else if (RHO_REV) {
-                            corrMatrix[i][j] = RHO_REV
-                        }else {
-                            corrMatrix[i][j] = "0"
-                        }
-                    }
-                }
-                corrMatrixMap[LVL] = corrMatrix
-            }
-        }
-    }
-
-    protected void displayCorrelationMatrices(Map<String, String[][]> matrices,
-                List<String> paramNames, StringBuilder output) {
-        matrices.entrySet().each {
-            convertToMathML(it.key, it.value, paramNames, output)
-        }
+    protected void displayCorrelationMatrices(List<CorrelationMatrix> m, StringBuilder sb) {
+        m.each { convertToMathML(it, sb) }
     }
 
     protected StringBuilder gaussianObsErr(GaussianObsError e) {
-        def result = new StringBuilder("<div class='spaced'>")
+        def result = new StringBuilder()
 
         // could be an Equation or just a String
         def lhs
@@ -434,7 +368,12 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         sum.content.add(errModelTimesResidualErr)
         rhsEquation = new Equation()
         rhsEquation.scalarOrSymbRefOrBinop.add(wrapJaxb(sum))
-        return result.append(convertToMathML(lhs, rhsEquation)).append("</div>")
+        if (lhs && rhsEquation) {
+            result.append("<div class='spaced'>")
+            return result.append(convertToMathML(lhs, rhsEquation)).append("</div>")
+        } else {
+            return result
+        }
     }
 
     protected StringBuilder generalObsErr(GeneralObsError e) {
@@ -1232,11 +1171,21 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return builder.toString()
     }
 
-    protected void convertToMathML(String name, def matrix, List ipNames, StringBuilder output) {
+    protected void convertToMathML(CorrelationMatrix corrMatrix, StringBuilder output) {
+        final String TYPE = corrMatrix.type
+        final String LVL = corrMatrix.variabilityLevel
+        final List<String> IP = corrMatrix.individualParameters.values() as List
+        def matrix = corrMatrix.matrix
+        if (!matrix) {
+            log.info("$corrMatrix contains undefined correlation matrix.")
+            return
+        }
+
         output.append("<div class='spaced'>")
-        output.append("<span class='bold'>Correlation matrix for level <span class='italic'>")
-        output.append(name).append("</span> and parameters: ")
-        output.append(ipNames.join(", ")).append("</span></div>\n")
+        output.append("<span class='bold'>").append(TYPE)
+        output.append(" matrix for level <span class='italic'>")
+        output.append(LVL).append("</span> and parameters: ")
+        output.append(IP.join(", ")).append("</span></div>\n")
         output.append("<math display='inline'><mstyle>\n")
         output.append("<mrow>").append(op("(")).append("<mtable>\n")
         final int N = matrix.size()
