@@ -823,6 +823,35 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 }
                 builder.append(operator.getClosing())
             }
+            else if (operator.type == OperatorSymbol.OperatorType.MINMAX) {
+            	builder.append(operator.getMapping())
+            	builder.append(operator.getOpening())
+            	prefixToInfix(builder, stack)
+            	builder.append(op(","))
+            	prefixToInfix(builder, stack)
+                builder.append(operator.getClosing())
+            }
+            else if (operator.type == OperatorSymbol.OperatorType.GAMMALN) {
+            	builder.append(op("ln"));
+            	builder.append(operator.getOpening())
+            	builder.append(operator.getMapping())
+                builder.append(operator.getOpening())
+            	prefixToInfix(builder, stack)
+                builder.append(operator.getClosing())
+                builder.append(operator.getClosing())
+            }
+            else if (operator.type == OperatorSymbol.OperatorType.FACTLN) {
+            	builder.append(op("ln"));
+            	builder.append(operator.getOpening())
+            	prefixToInfix(builder, stack)
+                builder.append(operator.getMapping())
+                builder.append(operator.getClosing())
+            }
+            else if (operator.type == OperatorSymbol.OperatorType.SQROOT) {
+            	builder.append("<msqrt>")
+            	prefixToInfix(builder, stack)
+            	builder.append("</msqrt>")
+            }
             // Special case of root/square root, handled differently from other
             // operators.
             else if (operator.type==OperatorSymbol.OperatorType.ROOT) {

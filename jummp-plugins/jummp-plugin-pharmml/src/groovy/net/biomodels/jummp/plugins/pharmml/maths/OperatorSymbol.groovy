@@ -25,7 +25,7 @@
 package net.biomodels.jummp.plugins.pharmml.maths
 
 class OperatorSymbol extends MathsSymbol {
-	public enum OperatorType {BINARY,UNARY, ROOT, POWER};
+	public enum OperatorType {BINARY,UNARY, ROOT, POWER, SQROOT, MINMAX, GAMMALN, FACTLN};
 	boolean omitBraces=false;
 	boolean needsTermSeparation=false;
 	String pre

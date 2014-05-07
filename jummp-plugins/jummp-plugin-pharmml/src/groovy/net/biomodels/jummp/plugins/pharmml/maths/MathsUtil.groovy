@@ -63,6 +63,8 @@ class MathsUtil {
 					"neq":"&ne;",
 					"and":"&and;",
 					"or":"&or;",
+					"gammaln":"&Gamma;",
+					"factln": "!"
 					]
 	
 	public static List<MathsSymbol> convertToSymbols(def equation) {
@@ -201,6 +203,11 @@ class MathsUtil {
 			if (jaxObject.getOp() == "divide") {
 				return OperatorSymbol.DivideSymbol()
 			}
+			if (jaxObject.getOp() == "min" || jaxObject.getOp() == "max") {
+				return new OperatorSymbol(jaxObject.getOp(), 
+					  					  convertTextToSymbol(jaxObject.getOp()), 
+					  					  OperatorSymbol.OperatorType.MINMAX)
+			}
 			if (jaxObject.getOp() == "root") {
 				return new OperatorSymbol(jaxObject.getOp(), 
 					  convertTextToSymbol(jaxObject.getOp()), 
@@ -216,6 +223,21 @@ class MathsUtil {
 						  OperatorSymbol.OperatorType.BINARY)
 		}
 		if (jaxObject instanceof UniopType || jaxObject instanceof LogicUniOpType) {
+			if (jaxObject.getOp() == "gammaln") {
+				return new OperatorSymbol(jaxObject.getOp(), 
+					  convertTextToSymbol(jaxObject.getOp()), 
+					  OperatorSymbol.OperatorType.GAMMALN)
+			}
+			if (jaxObject.getOp() == "factln") {
+				return new OperatorSymbol(jaxObject.getOp(), 
+					  convertTextToSymbol(jaxObject.getOp()), 
+					  OperatorSymbol.OperatorType.FACTLN)
+			}
+			if (jaxObject.getOp() == "sqrt") {
+				return new OperatorSymbol(jaxObject.getOp(), 
+					  					  convertTextToSymbol(jaxObject.getOp()), 
+					  					  OperatorSymbol.OperatorType.SQROOT)
+			}
 			OperatorSymbol op= new OperatorSymbol(jaxObject.getOp(), 
 						  convertTextToSymbol(jaxObject.getOp()), 
 						  OperatorSymbol.OperatorType.UNARY)
