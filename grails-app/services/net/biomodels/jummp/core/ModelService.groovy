@@ -281,26 +281,28 @@ ORDER BY
         }
         String query = '''
 SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
-FROM Revision AS r, AclEntry AS ace, Revision AS allRevs
-JOIN r.model AS m JOIN r.owner as u 
-JOIN ace.aclObjectIdentity AS aoi
-JOIN aoi.aclClass AS ac
-JOIN ace.sid AS sid
-WHERE
+FROM Revision AS r
+JOIN r.model AS m
+JOIN r.owner as u 
+WHERE r.deleted = false
 '''
-        if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) {
-            query += '''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) {
+            query += '''AND r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2, 
+            			AclEntry ace2  where r.model=r2.model 
+            			AND r2.id=ace2.aclObjectIdentity.objectId 
+            			AND ace2.aclObjectIdentity.aclClass.className = :className
+            			AND ace2.sid.sid IN (:roles) AND ace2.mask IN (:permissions)
+            			AND ace2.granting = true)'''
         }
         else if (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE) {
-            query += '''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+            query += '''AND r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2,
+            			AclEntry ace2  where r.model=r2.model
+            			AND r2.id=ace2.aclObjectIdentity.objectId
+            			AND ace2.aclObjectIdentity.aclClass.className = :className
+            			AND ace2.sid.sid IN (:roles) AND ace2.mask IN (:permissions)
+            			AND ace2.granting = true)'''
         }
-        query += '''r.model = allRevs.model AND aoi.objectId = allRevs.id
-AND ac.className = :className
-AND sid.sid IN (:roles)
-AND ace.mask IN (:permissions)
-AND ace.granting = true
-AND r.deleted = false
-'''
+        
         query += " AND m.deleted = ${deletedOnly} "
         if (filter && filter.length() >= 3) {
             query += '''
