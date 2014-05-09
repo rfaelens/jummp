@@ -30,7 +30,7 @@
 **/
 
 package net.biomodels.jummp.plugins.pharmml
-
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
 import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
 import eu.ddmore.libpharmml.dom.commontypes.FuncParameterDefinitionType
@@ -702,13 +702,13 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
      * @param dosing - a list of {@link eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType}
      */
     @Profiled(tag = "pharmMl0_2AwareRenderer.renderIndividualDosing")
-    String renderIndividualDosing(List<IndividualDosingType> dosing) {
+    String renderIndividualDosing(List<IndividualDosingType> dosing, RevisionTransportCommand rev, String downloadLink) {
         def result = new StringBuilder()
         try {
             result.append("<h4>Individual dosing</h4>\n")
             dosing.each { d ->
                 if (d.dataSet) {
-                    dataSet(d.dataSet, null, result)
+                    dataSet(d.dataSet, null, result, rev, downloadLink)
                 }
             }
         } catch(Exception e) {
@@ -725,7 +725,7 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
      * @param population an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.PopulationType}
      */
     @Profiled(tag = "pharmMl0_2AwareRenderer.renderPopulation")
-    String renderPopulation(PopulationType pop) {
+    String renderPopulation(PopulationType pop, RevisionTransportCommand rev, String downloadLink) {
         def result = new StringBuilder("<h4>Population</h4>\n")
         if (pop.variabilityReference) {
             result.append("<span><strong>Variability level: </strong>")
@@ -733,7 +733,7 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
         }
         try {
             if (pop.dataSet) {
-                dataSet(pop.dataSet, null, result)
+                dataSet(pop.dataSet, null, result, rev, downloadLink)
             }
         } catch (Exception e) {
             result.append("Cannot display population data set.")
@@ -823,7 +823,7 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
      * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType}s.
      */
     @Profiled(tag = "pharmMl0_2AwareRenderer.renderEstimationSteps")
-    String renderEstimationSteps(List<EstimationStepType> steps) {
+    String renderEstimationSteps(List<EstimationStepType> steps, RevisionTransportCommand rev, String downloadLink) {
         def result = new StringBuilder("<h3>Estimation Steps</h3>\n")
         steps.each { s ->
             result.append("<h4>Estimation Step ${s.oid}</h4>\n")
@@ -837,7 +837,7 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
                 result.append(formatOperations(s.operation))
             }
             if (s.objectiveDataSet) {
-                result.append(objectiveDataSetMapping(s.objectiveDataSet))
+                result.append(objectiveDataSetMapping(s.objectiveDataSet, rev, downloadLink))
             }
         }
         return result.toString()

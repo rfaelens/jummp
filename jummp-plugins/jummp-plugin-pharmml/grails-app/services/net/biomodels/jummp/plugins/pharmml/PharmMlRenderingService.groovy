@@ -30,7 +30,7 @@
 **/
 
 package net.biomodels.jummp.plugins.pharmml
-
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
@@ -135,21 +135,21 @@ class PharmMlRenderingService {
     }
 
     @Profiled(tag = "pharmMlRenderingService.renderIndividualDosing")
-    void renderIndividualDosing(List<IndividualDosingType> doses, String version, Writer o) {
-        IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
-        o << renderer.renderIndividualDosing(doses)
+    void renderIndividualDosing(List<IndividualDosingType> doses, String version, Writer o, RevisionTransportCommand rev, String link) {
+    	IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
+        o << renderer.renderIndividualDosing(doses, rev, link)
     }
 
     @Profiled(tag = "pharmMlRenderingService.renderPopulation")
-    void renderPopulation(PopulationType population, String version, Writer out) {
-        IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
-        out << renderer.renderPopulation(population)
+    void renderPopulation(PopulationType population, String version, Writer out, RevisionTransportCommand rev, String link) {
+    	IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
+        out << renderer.renderPopulation(population, rev, link)
     }
 
     @Profiled(tag = "pharmMlRenderingService.renderEstimationSteps")
-    void renderEstimationSteps(List<EstimationStepType> steps, String version, Writer out) {
+    void renderEstimationSteps(List<EstimationStepType> steps, String version, Writer out, RevisionTransportCommand rev, String link) {
         IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
-        out << renderer.renderEstimationSteps(steps)
+        out << renderer.renderEstimationSteps(steps, rev, link)
     }
 
     @Profiled(tag = "pharmMlRenderingService.renderSimulationSteps")

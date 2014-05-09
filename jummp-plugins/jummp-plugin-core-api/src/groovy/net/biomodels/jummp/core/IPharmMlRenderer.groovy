@@ -35,6 +35,7 @@
 package net.biomodels.jummp.core
 
 import eu.ddmore.libpharmml.dom.commontypes.CommonVariableDefinitionType
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
@@ -151,12 +152,12 @@ interface IPharmMlRenderer {
     /**
      * @param dosing - a list of {@link eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType}
      */
-    String renderIndividualDosing(List<IndividualDosingType> dosing)
+    String renderIndividualDosing(List<IndividualDosingType> dosing, RevisionTransportCommand rev, String downloadLink)
 
     /**
      * @param population an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.PopulationType}
      */
-    String renderPopulation(PopulationType population)
+    String renderPopulation(PopulationType population, RevisionTransportCommand rev, String downloadLink)
 
     /**
      * @param steps an instance of {@link eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType}
@@ -177,7 +178,7 @@ interface IPharmMlRenderer {
     /**
      * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType}s.
      */
-    String renderEstimationSteps(List<EstimationStepType> steps)
+    String renderEstimationSteps(List<EstimationStepType> steps, RevisionTransportCommand rev, String downloadLink)
 
     /**
      * @param dependencies a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType}s.

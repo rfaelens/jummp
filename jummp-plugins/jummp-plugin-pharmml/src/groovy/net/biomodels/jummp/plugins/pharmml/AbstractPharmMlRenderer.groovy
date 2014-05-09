@@ -30,7 +30,7 @@
 **/
 
 package net.biomodels.jummp.plugins.pharmml
-
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
 import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
 import eu.ddmore.libpharmml.dom.commontypes.IdValueType
@@ -88,7 +88,6 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
     private static final Log log = LogFactory.getLog(this)
     private static final String IS_DEBUG_ENABLED = log.isDebugEnabled()
     private static final String IS_INFO_ENABLED = log.isInfoEnabled()
-
     /*
      * Parses an activity and writes it to a StringBuilder.
      * Returns whether to display a dosing footnote or not.
@@ -526,8 +525,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return result
     }
 
-    StringBuilder objectiveDataSetMapping(List<DatasetMappingType> mappings) {
-        def result = new StringBuilder("<h5>Dataset mapping")
+    StringBuilder objectiveDataSetMapping(List<DatasetMappingType> mappings, RevisionTransportCommand rev, String downloadLink) {
+    	def result = new StringBuilder("<h5>Dataset mapping")
         if (mappings.size() > 1) {
             result.append("s")
         }
@@ -547,7 +546,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 }
             }
             if (dsm.dataSet) {
-                dataSet(dsm.dataSet, variableMap, result)
+                dataSet(dsm.dataSet, variableMap, result, rev, downloadLink)
             }
         }
         return result
@@ -557,56 +556,79 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return new StringBuilder().append(convertToMathML(prop.name, prop.assign))
     }
 
-    protected StringBuilder dataSet(DataSetType dataSet, Map variableMap, StringBuilder sb) {
-        def columnOrder = [:]
-        List tables = dataSet.definition.columnOrTable
-        tables.each {
-            if (it instanceof ColumnDefnType) {
-                columnOrder << [ (it.columnNum) : (it.columnId) ]
-            } else if (it instanceof DataSetTableDefnType) {
-                columnOrder << [ (it.columnNum) : (it.tableId) ]
-            }
+    protected StringBuilder dataSet(DataSetType dataSet, Map variableMap, 
+    								StringBuilder sb, RevisionTransportCommand rev,
+    								String downloadLink) {
+        if (dataSet.table) {
+			def columnOrder = [:]
+			List tables = dataSet.definition.columnOrTable
+			tables.each {
+				if (it instanceof ColumnDefnType) {
+					columnOrder << [ (it.columnNum) : (it.columnId) ]
+				} else if (it instanceof DataSetTableDefnType) {
+					columnOrder << [ (it.columnNum) : (it.tableId) ]
+				}
+			}
+			sb.append("\n<table><thead><tr>")
+	
+			tables.inject(sb) { txt, d ->
+				def key = columnOrder[d.columnNum]
+				if (key && variableMap && variableMap[key]) {
+					txt.append(["<th>", "</th>"].join(variableMap[key]))
+				} else if (d instanceof ColumnDefnType) {
+					txt.append(["<th>", "</th>"].join(d.columnId))
+				} else if (d instanceof DataSetTableDefnType) {
+					txt.append(["<th>", "</th>"].join(d.tableId))
+				}
+			}
+			sb.append("</tr></thead><tbody>")
+        	dataSet.table.row.each { i ->
+				sb.append("\n<tr>")
+				i.scalarOrTable.each { td ->
+					if (td.value instanceof DataSetTableType) {
+						def content = new StringBuilder("<table class='default'>")
+						td.value.row.inject(content) { cont, r ->
+							cont.append("<tr class='default'>")
+							r.scalarOrTable.inject(cont) { s, val ->
+								s.append("<td class='default'>")
+								if (val instanceof DataSetTableType) {
+									s.append("*")
+								} else {
+									s.append(scalar(val.value))
+								}
+								s.append("</td>")
+							}
+							cont.append("</tr>")
+						}
+						String ready = content.append("</table>").toString()
+						sb.append(["<td class='default'>", "</td>"].join(ready))
+					} else {
+						sb.append(["<td class='default'>", "</td>"].join(scalar(td.value)))
+					}
+				}
+				sb.append("</tr>")
+				sb.append("</tbody></table>\n")
+			}
         }
-        sb.append("\n<table><thead><tr>")
-
-        tables.inject(sb) { txt, d ->
-            def key = columnOrder[d.columnNum]
-            if (key && variableMap && variableMap[key]) {
-                txt.append(["<th>", "</th>"].join(variableMap[key]))
-            } else if (d instanceof ColumnDefnType) {
-                txt.append(["<th>", "</th>"].join(d.columnId))
-            } else if (d instanceof DataSetTableDefnType) {
-                txt.append(["<th>", "</th>"].join(d.tableId))
-            }
+        if (dataSet.importData) {
+        		def rftc = rev.files.find {
+        			File file=new File(it.path);
+        			return file.getName() == dataSet.importData.name 
+        		}
+        		if (rftc) {
+        			sb.append("This model refers to an external data file: <a href='");
+        			sb.append(downloadLink)
+        			sb.append("?filename=")
+        			sb.append(dataSet.importData.name)
+        			sb.append("'>Download</a>");
+        		}
+        		else {
+        			sb.append("This model refers to an external data file named '");
+        			sb.append(dataSet.importData.name);
+        			sb.append("', but the file is not available in the repository. ");
+        		}
         }
-        sb.append("</tr></thead><tbody>")
-        dataSet.table.row.each { i ->
-            sb.append("\n<tr>")
-            i.scalarOrTable.each { td ->
-                if (td.value instanceof DataSetTableType) {
-                    def content = new StringBuilder("<table class='default'>")
-                    td.value.row.inject(content) { cont, r ->
-                        cont.append("<tr class='default'>")
-                        r.scalarOrTable.inject(cont) { s, val ->
-                            s.append("<td class='default'>")
-                            if (val instanceof DataSetTableType) {
-                                s.append("*")
-                            } else {
-                                s.append(scalar(val.value))
-                            }
-                            s.append("</td>")
-                        }
-                        cont.append("</tr>")
-                    }
-                    String ready = content.append("</table>").toString()
-                    sb.append(["<td class='default'>", "</td>"].join(ready))
-                } else {
-                    sb.append(["<td class='default'>", "</td>"].join(scalar(td.value)))
-                }
-            }
-            sb.append("</tr>")
-        }
-        return sb.append("</tbody></table>\n")
+        return sb
     }
 
      protected StringBuilder steadyState(def ss) {

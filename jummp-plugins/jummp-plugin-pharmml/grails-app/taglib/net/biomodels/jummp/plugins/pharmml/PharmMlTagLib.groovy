@@ -113,15 +113,18 @@ class PharmMlTagLib {
         if (!tabsMap["td"]) {
             return
         }
+       	String link=g.createLink(controller: 'model',
+       							 action: 'download',
+       							 id: attrs.rev.identifier()).replace("%3A",".");
         out << "<div id='${tabsMap["td"]}'>"
         if (attrs.ts) {
             pharmMlRenderingService.renderTrialDesignStructure(attrs.ts, attrs.version, out)
         }
         if (attrs.td) {
-            pharmMlRenderingService.renderIndividualDosing(attrs.td, attrs.version, out)
+            pharmMlRenderingService.renderIndividualDosing(attrs.td, attrs.version, out, attrs.rev, link)
         }
         if (attrs.tp) {
-            pharmMlRenderingService.renderPopulation(attrs.tp, attrs.version, out)
+            pharmMlRenderingService.renderPopulation(attrs.tp, attrs.version, out, attrs.rev, link)
         }
         out << "</div>\n"
     }
@@ -137,7 +140,10 @@ class PharmMlTagLib {
 
         if (attrs.estimation) {
             out << "<div id='${tabsMap["est"]}'>"
-            pharmMlRenderingService.renderEstimationSteps(attrs.estimation, attrs.version, out)
+            String link=g.createLink(controller: 'model', 
+            						 action: 'download',
+            						 id: attrs.rev.identifier()).replace("%3A",".");
+            pharmMlRenderingService.renderEstimationSteps(attrs.estimation, attrs.version, out, attrs.rev, link)
             //only consider step dependencies here when there are no simulation steps
             if (!tabsMap["sim"]) {
                 pharmMlRenderingService.renderStepDependencies(attrs.deps, attrs.version, out)

@@ -51,8 +51,9 @@
             cm="${covariateModel}" pm="${parameterModel}" om="${observationModel}" />
 
     <pharmml:handleTrialDesignTab version="${version}" ts="${structure}"
-            td="${dosing}" tp="${population}" />
+            td="${dosing}" tp="${population}" rev="${revision}"/>
 
     <pharmml:handleModellingStepsTabs estimation="${estSteps}" simulation="${simSteps}"
-        independentVariable="${independentVar}" deps="${stepDeps}" version="${version}" />
+        independentVariable="${independentVar}" deps="${stepDeps}" version="${version}"
+        rev="${revision}"/>
 </content>
