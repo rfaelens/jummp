@@ -794,9 +794,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             if (rev.model.publication) {
                 try {
                 	model.publication = Publication.fromCommandObject(rev.model.publication)
-                	int a=0;
-                	int b=1;
-                	int c=b/a;
                 }
                 catch(Exception e) {
                 	e.printStackTrace();
