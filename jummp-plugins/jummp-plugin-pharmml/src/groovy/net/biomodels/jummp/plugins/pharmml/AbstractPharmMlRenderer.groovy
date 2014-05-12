@@ -620,7 +620,9 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         			sb.append(downloadLink)
         			sb.append("?filename=")
         			sb.append(dataSet.importData.name)
-        			sb.append("'>Download</a>");
+        			sb.append("' title='Download ");
+        			sb.append(rftc.mimeType);
+        			sb.append(" file'>Download</a>");
         		}
         		else {
         			sb.append("This model refers to an external data file named '");
