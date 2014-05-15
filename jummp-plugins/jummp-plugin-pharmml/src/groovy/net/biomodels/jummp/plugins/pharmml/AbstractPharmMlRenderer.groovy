@@ -613,13 +613,16 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         if (dataSet.importData) {
         		def rftc = rev.files.find {
         			File file=new File(it.path);
-        			return file.getName() == dataSet.importData.name 
+        			boolean retval = file.getName() == dataSet.importData.name
+        			if (!retval) {
+        				retval = file.getName().toLowerCase() == ( dataSet.importData.name + "." + dataSet.importData.format ).toLowerCase() 
+        			}
         		}
         		if (rftc) {
         			sb.append("This model refers to an external data file: <a href='");
         			sb.append(downloadLink)
         			sb.append("?filename=")
-        			sb.append(dataSet.importData.name)
+        			sb.append(new File(rftc.path).getName())
         			sb.append("' title='Download ");
         			sb.append(rftc.mimeType);
         			sb.append(" file'>Download</a>");
