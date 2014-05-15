@@ -383,6 +383,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderStructuralModel")
     String renderStructuralModel(List<StructuralModelType> structuralModels, String iv) {
         def model = [:]
+        model["version"] = "0.3"
         try {
             structuralModels.each { sm ->
                 String modelName = sm.name?.value ?: sm.blkId
@@ -432,7 +433,8 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     String renderCommonVariables(List vars, String iv) {
         def model = [:]
         // manually set this because we need it for rendering initial conditions
-        model["version"] = "0.2.1"
+        //model["version"] = "0.2.1"
+        model["version"] = "0.3"
         def initialConditions = [:]
         def variableList = []
         try {
@@ -485,7 +487,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     String renderInitialConditions(Map conditions) {
         def result = []
         conditions.keySet().each { c ->
-            result.add convertToMathML(c, conditions[c].assign)
+        	result.add convertToMathML(c, conditions[c].initialValue?.assign)
         }
         return groovyPageRenderer.render(template: "/templates/0.2/initialConditions",
                     model: [conditions: result])
