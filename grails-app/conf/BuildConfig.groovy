@@ -156,6 +156,7 @@ grails.project.dependency.resolution = {
         }
         //weceem, feeds
         runtime("rome:rome:1.0RC2") { excludes 'junit', 'jdom' }
+        compile 'org.apache.ant:ant:1.9.4'
 
         // cobertura
         compile "asm:asm:3.1"
