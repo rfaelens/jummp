@@ -46,7 +46,7 @@ import org.apache.commons.logging.LogFactory
  * Class that provides convenience methods for processing Correlations for PharmML 0.3.
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-public class PharmMl0_3AwareCorrelationProcessor implements ICorrelationProcessor{
+public class PharmMl0_3AwareCorrelationProcessor implements ICorrelationProcessor {
     /* the class logger */
     private static final Log log = LogFactory.getLog(this)
     private static final String IS_DEBUG_ENABLED = log.isDebugEnabled()
