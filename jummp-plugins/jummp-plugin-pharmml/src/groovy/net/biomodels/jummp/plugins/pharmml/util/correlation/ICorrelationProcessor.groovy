@@ -41,11 +41,9 @@ interface ICorrelationProcessor {
     /**
      * Processes the @p correlations and generates the corresponding matrices.
      * @param correlations
-     * @param randomEffectIndividualParameterMap
      * @param randomEffectsPerLevel
      * @return a list of correlation matrices that can be easily rendered.
      */
     List<CorrelationMatrix> convertToStringMatrix(List<CorrelationType> correlations,
-                Map<String, String> randomEffectIndividualParameterMap,
                 Map<String, List<String>> randomEffectsPerLevel)
 }

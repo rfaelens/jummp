@@ -52,7 +52,6 @@ public class PharmMl0_2AwareCorrelationProcessor implements ICorrelationProcesso
      */
     @Override
     List<CorrelationMatrix> convertToStringMatrix(List<CorrelationType> correlations,
-                Map<String, String> randomEffectIndividualParameterMap,
                 Map<String, List<String>> randomEffectsPerLevel) {
 
         def matricesByLevel = new HashMap<String, CorrelationMatrix>()
@@ -83,29 +82,26 @@ public class PharmMl0_2AwareCorrelationProcessor implements ICorrelationProcesso
                 final String VALUE_STRING = value.symbRef.symbIdRef
                 cm.put(KEY, VALUE_STRING)
                 cm.put(KEY_REV, VALUE_STRING)
-                final String R1_P = randomEffectIndividualParameterMap[R1]
-                final String R2_P = randomEffectIndividualParameterMap[R2]
-                cm.addIndividualParameter(R1, R1_P)
-                cm.addIndividualParameter(R2, R2_P)
+                cm.addRandomEffect(R1)
+                cm.addRandomEffect(R2)
             } catch (Exception e) {
                 log.error(e.message, e)
             }
         }
-        matricesByLevel.values().each {println "94. CM " + it}
         matricesByLevel.entrySet().each {
             try {
                 final String LVL = it.key
                 final CorrelationMatrix cm = it.value
                 final int MATRIX_SIZE = cm.size()
-                final List PARAMS = cm.individualParameters?.keySet() as List
+                final List EFFECTS = cm.randomEffects as List
                 String[][] corrMatrix = new String[MATRIX_SIZE][MATRIX_SIZE]
                 for (int i = 0; i < MATRIX_SIZE; i++) {
                     for (int j = 0; j < MATRIX_SIZE; j++) {
                         if (i == j) {
                             corrMatrix[i][j] = "1"
                         } else {
-                            final String R1 = PARAMS[i]
-                            final String R2 = PARAMS[j]
+                            final String R1 = EFFECTS[i]
+                            final String R2 = EFFECTS[j]
                             final String KEY = "$LVL|$R1|$R2"
                             final String KEY_REV = "$LVL|$R2|$R1"
                             final String RHO = cm.get(KEY)

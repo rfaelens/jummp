@@ -344,21 +344,20 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
                 }
                 result.append(simpleParams(simpleParameters, transfMap))
 
-                Map<String, String> re_ip = [:]
                 Map<String, List<String>> paramRandomVariableMap = [:]
                 String randoms = randomVariables(rv, paramRandomVariableMap)
                 if (randoms) {
                    result.append(randoms)
                 }
                 StringBuilder individuals = individualParams(individualParameters, rv, covariates,
-                            re_ip, transfMap)
+                                                transfMap)
                 if (individuals) {
                    result.append(individuals)
                 }
                 if (pm.correlation) {
                     def processor = new PharmMl0_2AwareCorrelationProcessor()
                     List<CorrelationMatrix> matrices = processor.convertToStringMatrix(
-                                pm.correlation, re_ip, paramRandomVariableMap)
+                                pm.correlation, paramRandomVariableMap)
                     if (matrices) {
                         displayCorrelationMatrices(matrices, result)
                     }
@@ -521,22 +520,20 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
                 result.append(simpleParams(simpleParameters))
 
                 Map<String, List<String>> obsRandomVariableMap = [:]
-                // pairs (variabilityLevel, correlationMatrix)
-                Map<String, String> re_ip = [:]
 
                 String randoms = randomVariables(rv, obsRandomVariableMap)
                 if (randoms) {
                     result.append(randoms)
                 }
                 StringBuilder individuals = individualParams(individualParameters, rv, covariates,
-                            re_ip, [:])
+                            [:])
                 if (individuals) {
                    result.append(individuals)
                 }
                 if (om.correlation) {
                     def processor = new PharmMl0_2AwareCorrelationProcessor()
                     List<CorrelationMatrix> matrices = processor.convertToStringMatrix(
-                                om.correlation, re_ip, obsRandomVariableMap)
+                                om.correlation, obsRandomVariableMap)
                     if (matrices) {
                         displayCorrelationMatrices(matrices, result)
                     }

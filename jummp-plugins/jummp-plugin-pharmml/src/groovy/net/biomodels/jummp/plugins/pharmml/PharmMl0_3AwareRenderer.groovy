@@ -346,21 +346,20 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                 }
                 result.append(simpleParams(simpleParameters, transfMap))
 
-                Map<String, String> re_ip = [:]
                 Map<String, List<String>> paramRandomVariableMap = [:]
                 String randoms = randomVariables(rv, paramRandomVariableMap)
                 if (randoms) {
                    result.append(randoms)
                 }
                 StringBuilder individuals = individualParams(individualParameters, rv, covariates,
-                            re_ip, transfMap)
+                            transfMap)
                 if (individuals) {
                    result.append(individuals)
                 }
                 if (pm.correlation) {
                     def processor = new PharmMl0_3AwareCorrelationProcessor()
                     List<CorrelationMatrix> matrices = processor.convertToStringMatrix(
-                                pm.correlation, paramRandomVariableMap, re_ip)
+                                pm.correlation, paramRandomVariableMap)
                     if (matrices) {
                         displayCorrelationMatrices(matrices, result)
                     }
@@ -524,21 +523,20 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                 result.append(simpleParams(simpleParameters))
 
                 Map<String, List<String>> obsRandomVariableMap = [:]
-                Map<String, String> re_ip = [:]
 
                 String randoms = randomVariables(rv, obsRandomVariableMap)
                 if (randoms) {
                     result.append(randoms)
                 }
                 StringBuilder individuals = individualParams(individualParameters, rv, covariates,
-                            re_ip, [:])
+                            [:])
                 if (individuals) {
                    result.append(individuals)
                 }
                 if (om.correlation) {
                     def processor = new PharmMl0_3AwareCorrelationProcessor()
                     List<CorrelationMatrix> matrices = processor.convertToStringMatrix(
-                        om.correlation, re_ip, obsRandomVariableMap)
+                        om.correlation, obsRandomVariableMap)
                     if (matrices) {
                         displayCorrelationMatrices(matrices, result)
                     }
@@ -964,7 +962,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     @Override
     protected StringBuilder individualParams(List<IndividualParameterType> parameters,
                 List<ParameterRandomVariableType> rv, List<CovariateDefinitionType> covariates,
-                Map<String, String> re_ip, Map<String, Equation> transfMap) {
+                Map<String, Equation> transfMap) {
         def output = new StringBuilder("<div class='spaced'>")
         try {
             parameters.each { p ->
@@ -985,7 +983,6 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                             //ASSUME THERE IS ONLY ONE SYMBREF HERE
                             randomEffectSymbol.symbIdRef = gmre.symbRef[0].symbIdRef
                             randomEffects << wrapJaxb(randomEffectSymbol)
-                            re_ip << [(randomEffectSymbol.symbIdRef) : p.symbId]
                         }
                     }
                     if (gaussianModel.linearCovariate) {

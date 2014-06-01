@@ -176,7 +176,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
 
     protected StringBuilder individualParams(List<IndividualParameterType> parameters,
                 List<ParameterRandomVariableType> rv, List<CovariateDefinitionType> covariates,
-                Map<String, String> randEffIndParMap, Map<String, Equation> transfMap) {
+                Map<String, Equation> transfMap) {
         def output = new StringBuilder()
         if (!parameters) {
             return output
@@ -200,7 +200,6 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                             def randomEffectSymbol = new SymbolRefType()
                             randomEffectSymbol.symbIdRef = re.symbRef[0].symbIdRef
                             randomEffects << wrapJaxb(randomEffectSymbol)
-                            randEffIndParMap << [(randomEffectSymbol.symbIdRef) : p.symbId]
                         }
                     }
                     if (gaussianModel.linearCovariate) {
@@ -1230,7 +1229,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
     protected void convertToMathML(CorrelationMatrix corrMatrix, StringBuilder output) {
         final String TYPE = corrMatrix.type
         final String LVL = corrMatrix.variabilityLevel
-        final List<String> IP = corrMatrix.individualParameters.values() as List
+        final List<String> EFFECTS = corrMatrix.randomEffects as List
         def matrix = corrMatrix.matrix
         if (!matrix) {
             log.info("$corrMatrix contains undefined correlation matrix.")
@@ -1240,8 +1239,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         output.append("<div class='spaced'>")
         output.append("<span class='bold'>").append(TYPE)
         output.append(" matrix for level <span class='italic'>")
-        output.append(LVL).append("</span> and parameters: ")
-        output.append(IP.join(", ")).append("</span></div>\n")
+        output.append(LVL).append("</span> and random effects: ")
+        output.append(EFFECTS.join(", ")).append("</span></div>\n")
         output.append("<math display='inline'><mstyle>\n")
         output.append("<mrow>").append(op("(")).append("<mtable>\n")
         final int N = matrix.size()

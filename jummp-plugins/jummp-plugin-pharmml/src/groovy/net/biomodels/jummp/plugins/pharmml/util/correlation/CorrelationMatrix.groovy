@@ -45,17 +45,19 @@ public class CorrelationMatrix {
      */
     private String variabilityLevel
     /**
-     * The individual parameters associated with the random effects from this matrix.
+     * The random effects for used in this matrix.
      */
-    private Map<String, String> individualParameters
+    private Set<String> randomEffects
     /**
      * A two-dimensional square matrix of Strings representing this correlation matrix.
      */
     private String[][] matrix = null
-
+    /**
+     * A map for storing the correlations between random effects.
+     */
     private Map<String, String> matrixMap
 
-    /*
+    /**
      * Public constructor.
      *
      * @param t - the matrix type.
@@ -64,7 +66,7 @@ public class CorrelationMatrix {
     public CorrelationMatrix(String t, String l) {
         type = t
         variabilityLevel = l
-        individualParameters = new HashMap<String, String>()
+        randomEffects = new HashSet<String>()
         matrixMap = new HashMap<String, String>()
     }
 
@@ -73,17 +75,16 @@ public class CorrelationMatrix {
      *
      * @param type - the matrix type.
      * @param level - the variability level.
-     * @param indParams - the individual parameters which are used in this matrix.
+     * @param randEff - the random effects which are used in this matrix.
      * @param mtrx - the matrix representation
      */
-    public CorrelationMatrix(String type, String level, Map<String, String> indParams,
-                String[][] mtrx) {
+    public CorrelationMatrix(String type, String level, Set<String> randEff, String[][] mtrx) {
         this.type = type
         variabilityLevel = level
-        if (indParams) {
-            individualParameters.addAll indParams
+        if (randEff) {
+            randomEffects.addAll randEff
         } else {
-            individualParameters = new HashMap<String, String>()
+            randomEffects = new HashSet<String>()
         }
         if (mtrx) {
             matrix = mtrx
@@ -92,6 +93,11 @@ public class CorrelationMatrix {
         }
     }
 
+    /**
+     * Add a correlation between two random effects to the matrix map.
+     * @param key String of form variabilityLevel|effect1|effect2
+     * @param value the value of the correlation.
+     */
     protected void put(String key, String value) {
         if (!matrixMap) {
             matrixMap = new HashMap<String, String>()
@@ -104,6 +110,12 @@ Refused to add <$key, $value> pair to correlation matrix $matrix and map $matrix
         }
     }
 
+    /**
+     * Returns the value of a correlation between to random effects.
+     *
+     * @param key String of form variabilityLevel|effect1|effect2
+     * @return the value defined for @p key, or null if it has not been defined.
+     */
     protected String get(String key) {
         if (key) {
             return matrixMap[key]
@@ -111,15 +123,25 @@ Refused to add <$key, $value> pair to correlation matrix $matrix and map $matrix
         return null
     }
 
+    /**
+     * Returns the size of the correlation matrix based on the number of random effects defined.
+     */
     protected int size() {
-        return individualParameters?.size()
+        return randomEffects?.size()
     }
 
-    protected void addIndividualParameter(String re, String ip) {
-        if (re && ip && !individualParameters[re]) {
-            individualParameters[re] = ip
+    /**
+     * Defines a new random effect for this correlation matrix.
+     * @param re the random effect to define.
+     */
+    protected void addRandomEffect(String re) {
+        if (re) {
+            boolean randomEffectAdded = randomEffects.add re
+            if (!randomEffectAdded) {
+                log.warn "Random effect $re is defined multiple times."
+            }
         } else {
-            log.error "rejected $re,$ip in param map $individualParameters of $this"
+            log.error "rejected $re in random effects $randomEffects of $this"
         }
     }
 
@@ -129,7 +151,6 @@ Refused to add <$key, $value> pair to correlation matrix $matrix and map $matrix
             return
         }
         final int SIZE = m.size()
-        println "size: $SIZE"
         if (!matrix) {
             matrix = new String[SIZE][SIZE]
         }
@@ -140,8 +161,11 @@ Refused to add <$key, $value> pair to correlation matrix $matrix and map $matrix
         }
     }
 
+    /**
+     * @return a String representation for objects of this class.
+     */
     public String toString() {
         return """\
-CorrelationMatrix(type:$type,variability:$variabilityLevel,indivParams:$individualParameters,matrix:$matrix,matrixMap:$matrixMap)"""
+CorrelationMatrix(type:$type,variability:$variabilityLevel,randomEffects:$randomEffects,matrix:$matrix,matrixMap:$matrixMap)"""
     }
 }
