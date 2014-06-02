@@ -122,7 +122,9 @@
                     var hi = "<input type='hidden' value='" + oldName + "' name='deletedMain'/>";
                     document.getElementById("noMains").innerHTML += hi;
                     var id = "mainName_" + oldName;
-                    document.getElementById(id).innerHTML = this.value;
+                    var newValue = this.value;
+                    var newName = trimElementName("\\", newValue);
+                    document.getElementById(id).innerHTML = newName;
                 });
                 $(document).on("click", 'a.killer', function (e) {
                     e.preventDefault();
@@ -171,6 +173,26 @@
                     $("#fileUpload").reset();
                 });
             });
+            /*
+             * Greedy removal of a string's prefix.
+             *
+             * This method does not change the original string. If it contains the supplied
+             * separator, this method will return a new string that starts from the character
+             * that follows the last occurance of the separator. Otherwise, the string is returned
+             * as-is.
+             * @param sep The character that marks the end of the prefix to be removed.
+             * @param elemName The string that should be trimmed
+             * @return a new string stripped of the specified prefix.
+             */
+            function trimElementName(sep, elemName) {
+                if (elemName.indexOf(sep) > -1) {
+                    var idx = elemName.lastIndexOf(sep) + 1;
+                    var stopIdx = elemName.length;
+                    var trimmedName = elemName.substring(idx, stopIdx);
+                    return trimmedName;
+                }
+                return elemName;
+            }
         </g:javascript>
     </body>
    <g:render template="/templates/decorateSubmission" />
