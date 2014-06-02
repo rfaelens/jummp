@@ -37,7 +37,7 @@
         <title><g:message code="submission.summary.header"/></title>
     </head>
     <body>
-    	<h2><g:message code="submission.summary.header"/></h2>
+        <h2><g:message code="submission.summary.header"/></h2>
         <%
             ModelTransportCommand model = workingMemory.get("ModelTC")
             RevisionTransportCommand revision = workingMemory.get("RevisionTC")
@@ -48,7 +48,7 @@
                     <tbody>
                         <tr class="prop">
                             <td class="name" style="vertical-align:top;">
-                                <label for="name">
+                                <label for="${g.message(code: 'submission.summary.nameLabel')}">
                                     <g:message code="submission.summary.nameLabel"/>
                                 </label>
                             </td>
@@ -63,12 +63,12 @@
                         </tr>
                         <tr class="prop">
                             <td class="name" style="vertical-align:top;">
-                                <label for="description">
+                                <label for="${g.message(code: 'submission.summary.descriptionLabel')}">
                                     <g:message code="submission.summary.descriptionLabel"/>
                                 </label>
                             </td>
                             <td class="value" style="vertical-align:top;">
-                            	<div class="displayDescription">
+                                <div class="displayDescription">
                                     <g:if test="${workingMemory["new_description"]}">
                                         ${workingMemory["new_description"]}
                                     </g:if>
@@ -81,7 +81,7 @@
                         <g:if test="${revision.model.publication}">
                             <tr class="prop">
                                 <td class="name" style="vertical-align:top;">
-                                    <label for="description">
+                                    <label for="${g.message(code: 'submission.summary.publication')}">
                                         <g:message code="submission.summary.publication"/>
                                     </label>
                                 </td>
@@ -96,7 +96,7 @@
                             <tr class="prop">
                                 <td class="name">
                                     <label for="RevisionComments">
-                                    	<g:message code="submission.summary.revisionLabel"/>
+                                        <g:message code="submission.summary.revisionLabel"/>
                                     </label>
                                 </td>
                                 <td class="value">
