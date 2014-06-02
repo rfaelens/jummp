@@ -46,9 +46,7 @@ class Model
         name = revision.name
         description = revision.description
         format = new Format(revision.format)
-        if (!model.publication) {
-            publication  = "Not Provided"
-        } else {
+        if (model.publication) {
             publication = model.publication.linkProvider.identifiersPrefix ?
                           model.publication.linkProvider.identifiersPrefix + model.publication.link :
                           model.publication.link

@@ -452,19 +452,19 @@
 		    <td><label><g:message code="model.model.format"/></label></td>
 		    <td><div class='spaced'>${revision.format.name} ${revision.format.formatVersion!="*"?"(${revision.format.formatVersion})":""}</div></td>
 		</tr>
-		<tr>
-		    <td><label><g:message code="model.model.publication"/>:</label></td>
-		    <td>
-		    	<%
-		    		model=revision.model
-		    	%>
-		    	<div class='spaced'>
-		    		<g:render  model="[model:model]" template="/templates/showPublication" />
-		    	</div>
-		    </td>
-		<tr>
-		</tr>
-		</tr>
+        <%
+            model = revision.model
+        %>
+        <g:if test="${model.publication}">
+            <tr>
+                <td><label><g:message code="model.model.publication"/>:</label></td>
+                <td>
+                    <div class='spaced'>
+                        <g:render  model="[model:model]" template="/templates/showPublication" />
+                    </div>
+                </td>
+            </tr>
+        </g:if>
 		<tr>
 		    <td><label><g:message code="model.model.authors"/></label></td>
 		    <td>

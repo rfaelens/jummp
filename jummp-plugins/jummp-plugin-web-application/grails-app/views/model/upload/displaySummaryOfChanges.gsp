@@ -38,6 +38,10 @@
     </head>
     <body>
     	<h2><g:message code="submission.summary.header"/></h2>
+        <%
+            ModelTransportCommand model = workingMemory.get("ModelTC")
+            RevisionTransportCommand revision = workingMemory.get("RevisionTC")
+        %>
         <g:form>
             <div class="dialog">
                 <table class="formtable">
@@ -53,7 +57,7 @@
                                     ${workingMemory["new_name"]}
                                 </g:if>
                                 <g:else>
-                                    ${(workingMemory.get("RevisionTC") as RevisionTransportCommand).name}
+                                    ${revision.name}
                                 </g:else>
                             </td>
                         </tr>
@@ -69,26 +73,25 @@
                                         ${workingMemory["new_description"]}
                                     </g:if>
                                     <g:else>
-                                        ${(workingMemory.get("RevisionTC") as RevisionTransportCommand).description}
+                                        ${revision.description}
                                     </g:else>
                                 </div>
                             </td>
                         </tr>
-                        <tr class="prop">
-                            <td class="name" style="vertical-align:top;">
-                                <label for="description">
-                                    <g:message code="submission.summary.publication"/>
-                                </label>
-                            </td>
-                            <td class="value" style="vertical-align:top;">
-                            	<div class="displayDescription">
-                            		<%
-                            			model=(workingMemory.get("ModelTC") as ModelTransportCommand)
-                            		%>
-                            		<g:render  model="[model:model]" template="/templates/showPublication" />
-                                </div>
-                            </td>
-                        </tr>
+                        <g:if test="${revision.model.publication}">
+                            <tr class="prop">
+                                <td class="name" style="vertical-align:top;">
+                                    <label for="description">
+                                        <g:message code="submission.summary.publication"/>
+                                    </label>
+                                </td>
+                                <td class="value" style="vertical-align:top;">
+                                    <div class="displayDescription">
+                                        <g:render  model="[model:model]" template="/templates/showPublication" />
+                                    </div>
+                                </td>
+                            </tr>
+                        </g:if>
                         <g:if test="${workingMemory.get("isUpdateOnExistingModel") as Boolean}">
                             <tr class="prop">
                                 <td class="name">

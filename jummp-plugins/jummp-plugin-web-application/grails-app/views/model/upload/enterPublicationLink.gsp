@@ -38,45 +38,40 @@
         <title><g:message code="submission.publicationLink.header"/></title>
     </head>
     <body>
-    	<h2><g:message code="submission.publicationLink.header"/></h2>
-    	<g:form>
+        <h2><g:message code="submission.publicationLink.header"/></h2>
+        <g:form>
             <g:message code="submission.publink.publication"/>
-            <% 
-            	model=(workingMemory.get('ModelTC') as ModelTransportCommand) 
+            <%
+                model = workingMemory.get('ModelTC') as ModelTransportCommand
+                revision = workingMemory.get("RevisionTC") as RevisionTransportCommand
+                publication = revision?.model?.publication
             %>
-            <g:if test="${model.publication}">
-				Currently, the model is associated with: 
-            	<g:render  model="[model:model]" template="/templates/showPublication" />
-			</g:if>
-			<div class="dialog">
+            <g:if test="${publication}">
+                Currently, the model is associated with: 
+                <g:render  model="[model:model]" template="/templates/showPublication" />
+            </g:if>
+            <div class="dialog">
                 <table class="formtable">
                     <tbody>
-                     	<tr class="prop">
+                         <tr class="prop">
                             <td class="value" style="vertical-align:top;">
-                          		<g:if test="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).model.publication}">
-                          					<g:select name="PubLinkProvider" 
-                          					from="${PublicationLinkProvider.LinkType.
-                          							values().collect(new LinkedList()) { it.toString() }}" 
-                          							value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).
-                          																		model.
-                          																		publication.
-                          																		linkProvider.linkType.
-                          																		toString()}" 
-                          							noSelection="['':'-Please select publication link type-']"/>
-                          					<g:textField name="PublicationLink"
-                          								 value="${(workingMemory.get("RevisionTC") as RevisionTransportCommand).
-                          								 												model.
-                          								 												publication.
-                          								 												link}"/>
-                          		</g:if>
-                          		<g:else>
-                          					<g:select name="PubLinkProvider" 
-                          					from="${PublicationLinkProvider.LinkType.
-                          							values().collect(new LinkedList()) { it.toString() }}" 
-                          					noSelection="['':'-Please select publication link type-']"/>
-                          					<g:textField name="PublicationLink"/>
-                          		</g:else>
-                          	</td>
+                                <g:if test="${publication}">
+                                            <g:select name="PubLinkProvider"
+                                            from="${PublicationLinkProvider.LinkType.
+                                                    values().collect(new LinkedList()) { it.toString() }}"
+                                                    value="${publication.linkProvider.linkType.toString()}"
+                                                    noSelection="['':'-Please select publication link type-']"/>
+                                            <g:textField name="PublicationLink"
+                                                         value="${publication.link}"/>
+                                </g:if>
+                                <g:else>
+                                            <g:select name="PubLinkProvider"
+                                            from="${PublicationLinkProvider.LinkType.
+                                                    values().collect(new LinkedList()) { it.toString() }}"
+                                            noSelection="['':'-Please select publication link type-']"/>
+                                            <g:textField name="PublicationLink"/>
+                                </g:else>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
