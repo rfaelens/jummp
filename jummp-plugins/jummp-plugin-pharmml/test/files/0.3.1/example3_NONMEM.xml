@@ -63,8 +63,6 @@
             <SimpleParameter symbId="omega_Tlag"/>
             <SimpleParameter symbId="pop_ka"/>
             <SimpleParameter symbId="omega_ka"/>
-            <SimpleParameter symbId="pop_Tlag"/>
-            <SimpleParameter symbId="omega_Tlag"/>
             <SimpleParameter symbId="pop_V"/>
             <SimpleParameter symbId="omega_V"/>
             <SimpleParameter symbId="beta_V"/>
