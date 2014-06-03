@@ -104,7 +104,6 @@ Unexpected value for correlation matrix type ${MATRIX.matrixType} in $c."""
                         }
                     }
                     cm = new CorrelationMatrix(TYPE, VAR)
-                    println "created cm with $TYPE and $VAR"
                     matricesByLevel[VAR] = cm
                 }
                 if (MATRIX) {
