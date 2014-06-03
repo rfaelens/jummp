@@ -277,7 +277,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
             model["error"] = "Sorry, something went wrong while rendering the covariates."
         } finally {
             model["covariates"] = covariates
-            model["version"] = "0.2.1"
+            model["version"] = "0.3.1"
             model["transfMap"] = transfMap
             return groovyPageRenderer.render(template: "/templates/0.2/covariates", model: model)
         }
