@@ -610,27 +610,24 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
 			}
         }
         if (dataSet.importData) {
-        		def rftc = rev.files.find {
-        			File file=new File(it.path);
-        			boolean retval = file.getName() == dataSet.importData.name
-        			if (!retval) {
-        				retval = file.getName().toLowerCase() == ( dataSet.importData.name + "." + dataSet.importData.format ).toLowerCase() 
-        			}
-        		}
-        		if (rftc) {
-        			sb.append("This model refers to an external data file: <a href='");
-        			sb.append(downloadLink)
-        			sb.append("?filename=")
-        			sb.append(new File(rftc.path).getName())
-        			sb.append("' title='Download ");
-        			sb.append(rftc.mimeType);
-        			sb.append(" file'>Download</a>");
-        		}
-        		else {
-        			sb.append("This model refers to an external data file named '");
-        			sb.append(dataSet.importData.name);
-        			sb.append("', but the file is not available in the repository. ");
-        		}
+            def rftc = rev.files.find {
+                File file = new File(it.path)
+                return file.getName() == dataSet.importData.path
+            }
+            if (rftc) {
+                sb.append("This model refers to an external data file: <a href='");
+                sb.append(downloadLink)
+                sb.append("?filename=")
+                sb.append(new File(rftc.path).getName())
+                sb.append("' title='Download ")
+                sb.append(rftc.mimeType)
+                sb.append(" file'>Download</a>")
+            }
+            else {
+                sb.append("This model refers to an external data file named '")
+                sb.append(dataSet.importData.name)
+                sb.append("', but the file is not available in the repository. ")
+            }
         }
         return sb
     }
