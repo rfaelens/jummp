@@ -80,6 +80,7 @@ final class PharmMlVersionAwareRendererFactory {
                             break
                         case "0.3":
                             //fall through
+                        case "0.3.1":
                         default:
                             renderers[version] = PharmMl0_3AwareRenderer.getInstance()
                             if (IS_INFO_ENABLED) {
@@ -97,6 +98,6 @@ final class PharmMlVersionAwareRendererFactory {
      * @return the default PharmML renderer that should be used.
      */
     static IPharmMlRenderer getDefaultRenderer() {
-        return getRenderer("0.3")
+        return getRenderer("0.3.1")
     }
 }

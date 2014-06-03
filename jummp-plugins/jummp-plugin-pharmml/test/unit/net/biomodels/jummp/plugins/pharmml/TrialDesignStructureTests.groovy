@@ -50,10 +50,10 @@ public class TrialDesignStructureTests {
 
    @Test
    void constructorArgumentsGetFilteredCorrectly() {
-        def testFile = new File("test/files/0.2.1/example4.xml")
+        def testFile = new File("test/files/0.2.1/example1.xml")
         assertTrue testFile.exists()
         constructorArgumentsTestHelper(testFile)
-        testFile = new File("test/files/0.3/example4.xml")
+        testFile = new File("test/files/0.3.1/example1.xml")
         assertTrue testFile.exists()
         constructorArgumentsTestHelper(testFile)
    }
@@ -97,9 +97,9 @@ public class TrialDesignStructureTests {
 
    @Test
    void cellMatrixFilledCorrectly() {
-        def testFile = new File("test/files/0.2.1/example4.xml")
+        def testFile = new File("test/files/0.2.1/example1.xml")
         cellMatrixTestHelper(testFile)
-        testFile = new File("test/files/0.3/example4.xml")
+        testFile = new File("test/files/0.3.1/example1.xml")
         cellMatrixTestHelper(testFile)
    }
 
@@ -109,21 +109,19 @@ public class TrialDesignStructureTests {
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         assertTrue(structure.allCellsDefined())
         def expected = [
-                "ep1_a1": ["ta"],
-                "ep2_a1": ["wash"],
-                "ep3_a1": ["tb"],
-                "ep1_a2": ["tb"],
-                "ep2_a2": ["wash"],
-                "ep3_a2": ["ta"]
+                "e1_a1": ["ta"],
+                "e1_a2": ["tb"],
+                "e1_a3": ["tc"],
+                "e1_a4": ["td"]
         ]
         assertEquals(expected, structure.trialDesignStructure)
    }
 
    @Test
    void findByEpochWorks() {
-        def testFile = new File("test/files/0.2.1/example4.xml")
+        def testFile = new File("test/files/0.2.1/example1.xml")
         findByEpochTestHelper(testFile)
-        testFile = new File("test/files/0.3/example4.xml")
+        testFile = new File("test/files/0.3.1/example1.xml")
         findByEpochTestHelper(testFile)
    }
 
@@ -131,11 +129,7 @@ public class TrialDesignStructureTests {
         def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
-        def expected = [
-            "ep1" : ["ta", "tb"],
-            "ep2" : ["wash", "wash"],
-            "ep3" : ["tb", "ta"]
-        ]
+        def expected = [ "e1" : ["ta", "tb", "tc", "td"] ]
         def out     = [:]
         def refOut  = [:]
         expected.each { it ->
@@ -150,9 +144,9 @@ public class TrialDesignStructureTests {
 
    @Test
    void findByArmWorks() {
-        def testFile = new File("test/files/0.2.1/example4.xml")
+        def testFile = new File("test/files/0.2.1/example1.xml")
         findByArmTestHelper(testFile)
-        testFile = new File("test/files/0.3/example4.xml")
+        testFile = new File("test/files/0.3.1/example1.xml")
         findByArmTestHelper(testFile)
    }
 
@@ -161,8 +155,10 @@ public class TrialDesignStructureTests {
         def tds = dom.trialDesign.structure
         def structure = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
         def expected = [
-            "a1" : ["ta", "wash", "tb"],
-            "a2" : ["tb", "wash", "ta"]
+            "a1" : ["ta"],
+            "a2" : ["tb"],
+            "a3" : ["tc"],
+            "a4" : ["td"]
         ]
         def out     = [:]
         def refOut  = [:]
@@ -178,9 +174,9 @@ public class TrialDesignStructureTests {
 
    @Test
    void iteratorWorks() {
-        def testFile = new File("test/files/0.2.1/example4.xml")
+        def testFile = new File("test/files/0.2.1/example1.xml")
         iteratorTestHelper(testFile)
-        testFile = new File("test/files/0.3/example4.xml")
+        testFile = new File("test/files/0.3.1/example1.xml")
         iteratorTestHelper(testFile)
    }
 
@@ -201,9 +197,9 @@ public class TrialDesignStructureTests {
 
    @Test
     void getArmsAndEpochsWork() {
-        def testFile = new File("test/files/0.2.1/example4.xml")
+        def testFile = new File("test/files/0.2.1/example1.xml")
         getArmsAndEpochsTestHelper(testFile)
-        testFile = new File("test/files/0.3/example4.xml")
+        testFile = new File("test/files/0.3.1/example1.xml")
         getArmsAndEpochsTestHelper(testFile)
    }
 
@@ -211,8 +207,8 @@ public class TrialDesignStructureTests {
         def dom = AbstractPharmMlHandler.getDomFromPharmML(f)
         def tds = dom.trialDesign.structure
         def struct = new TrialDesignStructure(tds.arm, tds.epoch, tds.cell, tds.segment)
-        assertEquals(["a1", "a2"] as Set, struct.getArmRefs())
-        assertEquals(["ep1", "ep2", "ep3"] as Set, struct.getEpochRefs())
+        assertEquals(["a1", "a2", "a3", "a4"] as Set, struct.getArmRefs())
+        assertEquals(["e1"] as Set, struct.getEpochRefs())
    }
 
    boolean nonEmptyList(List l) {

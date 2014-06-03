@@ -57,7 +57,7 @@ class PharmMlServiceTests {
         baseFolder.eachFileMatch ~/.*.xml/, { File f -> bigModel << f }
         assertTrue service.areFilesThisFormat(bigModel)
         bigModel = []
-        baseFolder = new File("test/files/0.3/")
+        baseFolder = new File("test/files/0.3.1/")
         baseFolder.eachFileMatch ~/example.*\.xml/, { File f -> bigModel << f }
         assertTrue service.areFilesThisFormat(bigModel)
     }
@@ -85,7 +85,7 @@ class PharmMlServiceTests {
         bigModel << new File("test/files/0.2.1/example2.xml")
         assertTrue service.areFilesThisFormat(bigModel)
 
-        bigModel = [new File("test/files/0.3/example2.xml")]
+        bigModel = [new File("test/files/0.3.1/example2.xml")]
         assertTrue service.areFilesThisFormat(bigModel)
     }
 
@@ -118,10 +118,12 @@ class PharmMlServiceTests {
         mergedNames.each { name -> assertTrue result.contains(name) }
 
         model = []
-        baseFolder = new File("test/files/0.3/")
+        baseFolder = new File("test/files/0.3.1/")
         baseFolder.eachFileMatch FileType.FILES, ~/.*\.xml/, { File f -> model << f }
         result = service.extractName(model)
-        mergedNames[4] = "Example 5 - estimation for growth tumor model"
+        mergedNames[2] = "Example 3 - basic Warfarin PK estimation with covariate W - with NONMEM dataset"
+
+        mergedNames[4] = "Example 5 - estimation for growth tumor model - with NONMEM dataset"
         mergedNames.each { name -> assertTrue result.contains(name) }
 
     }
@@ -133,7 +135,7 @@ class PharmMlServiceTests {
 based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemotherapy or Radiotherapy
         Benjamin Ribba, Gentian Kaloshi, Mathieu Peyre, et al. Clin Cancer Res Published OnlineFirst July 3, 2012.'''
         assertEquals expected, service.extractDescription([new File("test/files/0.2.1/example5.xml")])
-        assertEquals expected, service.extractDescription([new File("test/files/0.3/example5.xml")])
+        assertEquals expected, service.extractDescription([new File("test/files/0.3.1/example5_NONMEM.xml")])
         assertEquals '', service.extractDescription([new File("test/files/0.2.1/example1.xml")])
     }
 
@@ -155,7 +157,7 @@ based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemo
         }
 
         model = []
-        def baseFolder = new File("test/files/0.3/")
+        def baseFolder = new File("test/files/0.3.1/")
         baseFolder.eachFileMatch ~/example.*\.xml/, { File f -> model << f }
         model.each { pharmML ->
             assertTrue service.validate([pharmML])

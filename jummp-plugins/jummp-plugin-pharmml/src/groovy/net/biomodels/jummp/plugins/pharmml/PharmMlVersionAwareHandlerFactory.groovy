@@ -82,6 +82,7 @@ final class PharmMlVersionAwareHandlerFactory {
                             }
                             break
                         case "0.3":
+                        case "0.3.1":
                         default:
                             handlers[version] = PharmMl0_3AwareHandler.getInstance()
                             if (IS_INFO_ENABLED) {
@@ -98,6 +99,6 @@ final class PharmMlVersionAwareHandlerFactory {
      * @return the default PharmML handler that should be used.
      */
     public static IPharmMlService getDefaultHandler() {
-        return getHandler("0.3")
+        return getHandler("0.3.1")
     }
 }
