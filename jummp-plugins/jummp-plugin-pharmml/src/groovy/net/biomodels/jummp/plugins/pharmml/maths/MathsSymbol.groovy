@@ -35,18 +35,18 @@ class MathsSymbol {
 		mapsTo=m;
 	}
 	
-	private String simplifyNumber() {
-		try
-		{
-			double number=Double.parseDouble(mapsTo)
-			if (number==Math.ceil(number)) {
-				return ""+(int)number
-			}
-		}
-		catch(Exception ignore) {
-		}
-		return mapsTo
-	}
+    private String simplifyNumber() {
+        if (!mapsTo.equals("NaN")) {
+            try {
+                double number = Double.parseDouble(mapsTo)
+                if (number == Math.ceil(number)) {
+                    return "" + (int)number
+                }
+            }
+            catch(Exception ignore) { }
+        }
+        return mapsTo
+    }
 	
 	public String getMapping() {
 		if (format==OutputFormat.MATHML) {

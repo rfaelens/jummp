@@ -38,6 +38,7 @@ import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.Equation
 import javax.xml.bind.JAXBElement
 import eu.ddmore.libpharmml.dom.maths.BinopType
+import eu.ddmore.libpharmml.dom.maths.ConstantType
 import eu.ddmore.libpharmml.dom.maths.UniopType
 import eu.ddmore.libpharmml.dom.maths.LogicUniOpType
 import eu.ddmore.libpharmml.dom.maths.LogicBinOpType
@@ -197,7 +198,21 @@ class MathsUtil {
 	private static MathsSymbol getSymbol(FalseBooleanType jaxObject) {
 		return new MathsSymbol("false", "false");
 	}
-	
+
+    private static MathsSymbol getSymbol(ConstantType jaxObject) {
+        String op = jaxObject.op
+        switch(op) {
+            case "pi":
+                return new MathsSymbol(op, "&Pi;")
+            case "notanumber":
+                return new MathsSymbol(op, "NaN")
+            case "exponentiale":
+                return new MathsSymbol(op, "&ee;")
+            case "infinity":
+                return new MathsSymbol(op, "&infin;")
+        }
+    }
+
 	private static MathsSymbol getSymbol(def jaxObject) {
 		if (jaxObject instanceof BinopType || jaxObject instanceof LogicBinOpType) {
 			if (jaxObject.getOp() == "divide") {
