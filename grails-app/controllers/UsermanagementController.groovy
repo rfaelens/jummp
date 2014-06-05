@@ -114,46 +114,45 @@ class UsermanagementController {
     **/
     @Secured(["isAnonymous()"])
     def reset = {
-    	render view: "reset", model: [postUrl: "", flashMessage:checkForMessage(), 
-    								validationErrorOn: checkForErrorBean(), 
+    	render view: "reset", model: [postUrl: "", flashMessage:checkForMessage(),
+    								validationErrorOn: checkForErrorBean(),
     								hashCode: flash.hashCode]
     }
-    				   
-    
+
+
     boolean validateUserData(def cmd, def params) {
-    	bindData(cmd, params)
-    	if (!cmd.validate()) {
-    		cmd.errors?.allErrors?.each{
-    			println messageSource.getMessage(it, Locale.ENGLISH)
-    		};
-    		flash.validationError=cmd
-        	return false
-    	}
-    	return true
+        bindData(cmd, params)
+        if (!cmd.validate()) {
+            cmd.errors?.allErrors?.each{
+                log.error(messageSource.getMessage(it, Locale.ENGLISH))
+            }
+            flash.validationError = cmd
+            return false
+        }
+        return true
     }
-    
-    
+
+
     /**
      * Validates the command object and then uses the user service to 
      * edit a user. If an error occurs at any point, the method redirects
      * to edit action and sends the user a helpful message.
      */
     def editUser = {
-    	EditUserCommand cmd=new EditUserCommand()
-    	if (!validateUserData(cmd, params)) {
-    		return redirect(action:"edit")
-    	}
-    	try 
-    	{
-    		userService.editUser(cmd.toUser())
-    	}
-    	catch(Exception e) {
-    		flash.message=e.getMessage()
-   			System.out.println("GOT BACK ERROR: "+flash.message);
-    		return redirect(action:"edit")
-    	}
-    	flash.message="Profile was updated successfully"
-    	redirect(action:"show")
+        EditUserCommand cmd = new EditUserCommand()
+        if (!validateUserData(cmd, params)) {
+            return redirect(action:"edit")
+        }
+        try {
+            userService.editUser(cmd.toUser())
+        }
+        catch(Exception e) {
+            flash.message = e.getMessage()
+            log.error(e.message, e)
+            return redirect(action:"edit")
+        }
+        flash.message = "Profile was updated successfully"
+        redirect(action:"show")
     }
 
     /**
@@ -207,24 +206,29 @@ class UsermanagementController {
     * Requests a password link from the user service, hiding the exception thrown
     * if the username provided does not exist.
     **/
-    
     def requestPassword = {
-    	if (params.username) {
-    		try
-    		{
-    			userService.requestPassword(params.username)
-    		}
-    		catch(Exception e) {
-    			e.printStackTrace()
-    		}
-   			flash.message="Thank you. Please check the email associated with ${params.username}'s account"
-    	}
-    	else {
-    		flash.message="Please provide a username.";
-    	}
-    	redirect(action:"forgot")
+        String username = params.username
+        boolean usernameExists = true
+        if (username) {
+            try {
+                userService.requestPassword(username)
+            }
+            catch(Exception e) {
+                log.warn(e.message, e)
+                usernameExists = false
+            }
+            if (usernameExists) {
+                flash.message = "Thank you. Please check the email associated with ${username}'s account"
+            } else {
+                flash.message = "Username ${username} does not exist."
+            }
+        }
+        else {
+            flash.message = "Please provide a username.";
+        }
+        redirect(action:"forgot")
     }
-    
+
      /**
      * Performs validation on the captcha, ensures that the empty security parameter is not
      * filled (as is commonly done by robots), validates the command object and then uses

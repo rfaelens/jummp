@@ -61,9 +61,7 @@
                 <div class="buttons">
                     <input type="submit" value="Reset Password"/>
                 </div>
-                <label class="verysecure">You shouldnt see me</label>
                 <input class="verysecure" name="hashCode" value="${hashCode}"/>
-                 
             </g:form>
         </div>
         </body>
