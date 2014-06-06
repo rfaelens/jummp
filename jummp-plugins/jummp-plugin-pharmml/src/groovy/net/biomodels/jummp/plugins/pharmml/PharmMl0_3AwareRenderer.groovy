@@ -219,7 +219,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
 
         } finally {
             model["covariateModels"] = result
-            model["version"] = "0.2.1"
+            model["version"] = "0.3.1"
             model["transfMap"] = transfMap
             return groovyPageRenderer.render(template: "/templates/0.2/covariateModel",
                         model: model)
@@ -432,8 +432,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     String renderCommonVariables(List vars, String iv) {
         def model = [:]
         // manually set this because we need it for rendering initial conditions
-        //model["version"] = "0.2.1"
-        model["version"] = "0.3"
+        model["version"] = "0.3.1"
         def initialConditions = [:]
         def variableList = []
         try {

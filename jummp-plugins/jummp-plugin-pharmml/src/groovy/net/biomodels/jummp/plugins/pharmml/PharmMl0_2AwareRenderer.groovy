@@ -381,6 +381,7 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
     @Profiled(tag = "pharmMl0_2AwareRenderer.renderStructuralModel")
     String renderStructuralModel(List<StructuralModelType> structuralModels, String iv) {
         def model = [:]
+        model["version"] = "0.2.1"
         try {
             structuralModels.each { sm ->
                 String modelName = sm.name?.value ?: sm.blkId
