@@ -130,16 +130,16 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
             synchronized(PharmMl0_3AwareRenderer.class) {
                 if (instance == null) {
                     if (IS_DEBUG_ENABLED) {
-                        log.debug "Initialising the renderer for PharmML 0.2"
+                        log.debug "Initialising the renderer for PharmML 0.3"
                     }
                     instance = new PharmMl0_3AwareRenderer()
                 }
             }
         } else if (IS_DEBUG_ENABLED) {
-            log.debug "Returning the already-initialised instance of the PharmML 0.2 renderer"
+            log.debug "Returning the already-initialised instance of the PharmML 0.3 renderer"
         }
         if (IS_INFO_ENABLED) {
-            log.info "Returning the PharmML 0.2 renderer."
+            log.info "Returning the PharmML 0.3 renderer."
         }
         return instance
     }
