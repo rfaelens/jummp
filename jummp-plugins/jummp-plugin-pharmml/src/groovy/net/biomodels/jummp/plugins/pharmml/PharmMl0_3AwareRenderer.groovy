@@ -986,83 +986,99 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                     }
                     if (gaussianModel.linearCovariate) {
                         def linearCovariate = gaussianModel.linearCovariate
-                        if (gaussianModel.transformation) {
-                            final String TRANSFORMATION = gaussianModel.transformation.value()
-                            //LHS
+                        final String TRANSFORMATION = gaussianModel.transformation?.value()
+                        if (!TRANSFORMATION) {
+                            log.warn """\
+Individual parameter ${p.symbId} is missing mandatory Transformation element."""
+                        }
+                        final boolean APPLY_TRANSFORMATION = "identity" != TRANSFORMATION
+                        // left hand side can be equation or string
+                        def lhsEquation
+                        //LHS
+                        if (!APPLY_TRANSFORMATION) {
+                            lhsEquation = p.symbId
+                        } else {
                             UniopType indivParam = new UniopType()
                             indivParam.op = TRANSFORMATION
                             def paramSymbRef = new SymbolRefType()
                             paramSymbRef.symbIdRef = p.symbId
                             indivParam.symbRef = paramSymbRef
-                            def lhsEquation = new Equation()
+                            lhsEquation = new Equation()
                             lhsEquation.uniop = indivParam
-                            //POPULATION
-                            def popParam
-                            if (linearCovariate.populationParameter.assign.symbRef) {
+                        }
+                        //POPULATION
+                        def popParam
+                        if (linearCovariate.populationParameter.assign.symbRef) {
+                            if (APPLY_TRANSFORMATION) {
                                 popParam = new UniopType()
                                 popParam.op = TRANSFORMATION
-                                popParam.symbRef = linearCovariate.populationParameter.assign.symbRef
+                                popParam.symbRef = linearCovariate.populationParameter.
+                                            assign.symbRef
+                            } else {
+                                popParam = new SymbolRefType()
+                                popParam.symbIdRef = linearCovariate.populationParameter.
+                                            assign.symbRef.symbIdRef
                             }
-                            def fixedEffectsCovMap = [:]
-                            linearCovariate.covariate.each { c ->
-                                //fixed effects
-                                if (!c.fixedEffect) {
-                                    return
-                                }
-                                def fixedEffects = []
-                                def covEffectKey
-                                c.fixedEffect.each { fe ->
-                                    if (fe.category) {
-                                        def catIdSymbRef = new SymbolRefType()
-                                        def trickReference = new StringBuilder("<msub><mi>")
-                                        trickReference.append(c.symbRef.symbIdRef).append("</mi><mi>")
-                                        trickReference.append(fe.category.catId).append("</mi></msub>")
-                                        catIdSymbRef.symbIdRef = trickReference.toString()
-                                        covEffectKey = catIdSymbRef
-                                    } else {
-                                        //RESOLVE REFERENCE TO CONT COV TRANSF
-                                        final EquationType transfEq = resolveSymbolReference(c.symbRef, transfMap)
-                                        if (transfEq) {
-                                            covEffectKey = transfEq
-                                        } else {
-                                            covEffectKey = c.symbRef
-                                        }
-                                    }
-                                    fixedEffects << fe.symbRef
-                                }
-                                fixedEffectsCovMap[covEffectKey] = fixedEffects
-                            }
-                            def fixedEffectsTimesCovariateList = []
-                            if (fixedEffectsCovMap) {
-                                fixedEffectsCovMap.each{
-                                    def thisCov = []
-                                    def key = it.key
-                                    if ( key instanceof Equation) {
-                                        def thisKey = key.scalar ?: wrapJaxb(key.uniop ?:
-                                                key.binop ?: key.symbRef ?: key.functionCall ?:
-                                                key.piecewise)
-                                        thisCov.add thisKey
-                                    } else if (key instanceof JAXBElement ) {
-                                        thisCov.add key
-                                    } else {
-                                        thisCov.add(wrapJaxb(key))
-                                    }
-                                    it.value.collect{ v -> thisCov.add(wrapJaxb(v)) }
-                                    fixedEffectsTimesCovariateList.add(applyBinopToList(thisCov, "times"))
-                                }
-                            }
-                            def sumElements = []
-                            sumElements.add(wrapJaxb(popParam))
-                            if (fixedEffectsTimesCovariateList) {
-                                sumElements.addAll(fixedEffectsTimesCovariateList)
-                            }
-                            sumElements.addAll(randomEffects)
-
-                            Equation rhsEquation = new Equation()
-                            rhsEquation.binop = applyBinopToList(sumElements, "plus").value
-                            output.append(convertToMathML(lhsEquation, rhsEquation))
-                            output.append("\n")
                         }
+                        def fixedEffectsCovMap = [:]
+                        linearCovariate.covariate.each { c ->
+                            //fixed effects
+                            if (!c.fixedEffect) {
+                                return
+                            }
+                            def fixedEffects = []
+                            def covEffectKey
+                            c.fixedEffect.each { fe ->
+                                if (fe.category) {
+                                    def catIdSymbRef = new SymbolRefType()
+                                    def trickReference = new StringBuilder("<msub><mi>")
+                                    trickReference.append(c.symbRef.symbIdRef).append("</mi><mi>")
+                                    trickReference.append(fe.category.catId).append("</mi></msub>")
+                                    catIdSymbRef.symbIdRef = trickReference.toString()
+                                    covEffectKey = catIdSymbRef
+                                } else {
+                                    //RESOLVE REFERENCE TO CONT COV TRANSF
+                                    final EquationType transfEq = resolveSymbolReference(c.symbRef, transfMap)
+                                    if (transfEq) {
+                                        covEffectKey = transfEq
+                                    } else {
+                                        covEffectKey = c.symbRef
+                                    }
+                                }
+                                fixedEffects << fe.symbRef
+                            }
+                            fixedEffectsCovMap[covEffectKey] = fixedEffects
+                        }
+                        def fixedEffectsTimesCovariateList = []
+                        if (fixedEffectsCovMap) {
+                            fixedEffectsCovMap.each{
+                                def thisCov = []
+                                def key = it.key
+                                if ( key instanceof Equation) {
+                                    def thisKey = key.scalar ?: wrapJaxb(key.uniop ?:
+                                            key.binop ?: key.symbRef ?: key.functionCall ?:
+                                            key.piecewise)
+                                    thisCov.add thisKey
+                                } else if (key instanceof JAXBElement ) {
+                                    thisCov.add key
+                                } else {
+                                    thisCov.add(wrapJaxb(key))
+                                }
+                                it.value.collect{ v -> thisCov.add(wrapJaxb(v)) }
+                                fixedEffectsTimesCovariateList.add(applyBinopToList(thisCov, "times"))
+                            }
+                        }
+                        def sumElements = []
+                        sumElements.add(wrapJaxb(popParam))
+                        if (fixedEffectsTimesCovariateList) {
+                            sumElements.addAll(fixedEffectsTimesCovariateList)
+                        }
+                        sumElements.addAll(randomEffects)
+
+                        Equation rhsEquation = new Equation()
+                        rhsEquation.binop = applyBinopToList(sumElements, "plus").value
+                        output.append(convertToMathML(lhsEquation, rhsEquation))
+                        output.append("\n")
                     } else if (gaussianModel.generalCovariate) {
                         def rhsEquation
                         def covModel
