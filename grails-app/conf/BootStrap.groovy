@@ -28,17 +28,13 @@
 * that of the covered work.}
 **/
 
-
-
-
-
 import grails.util.Environment
 import net.biomodels.jummp.core.model.PublicationLinkProviderTransportCommand as PubLinkProvTC
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.PublicationLinkProvider
+import net.biomodels.jummp.plugins.security.Person
 import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
-import net.biomodels.jummp.plugins.security.Person
 import net.biomodels.jummp.plugins.security.UserRole
 import org.codehaus.groovy.grails.commons.ApplicationAttributes
 import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
@@ -49,15 +45,14 @@ class BootStrap {
     def searchableService
 
     void addPublicationLinkProvider(PubLinkProvTC cmd) {
-    	def publinkType=PublicationLinkProvider.LinkType.valueOf(cmd.linkType)
-    	if (!PublicationLinkProvider.findByLinkType(publinkType)) {
-    		def publinkprov=new PublicationLinkProvider(linkType:publinkType,
-    													pattern:cmd.pattern,
-    													identifiersPrefix:cmd.identifiersPrefix)
-    		publinkprov.save(flush:true)
-    	}
+        def publinkType=PublicationLinkProvider.LinkType.valueOf(cmd.linkType)
+        if (!PublicationLinkProvider.findByLinkType(publinkType)) {
+            def publinkprov = new PublicationLinkProvider(linkType: publinkType,
+                        pattern:cmd.pattern, identifiersPrefix: cmd.identifiersPrefix)
+            publinkprov.save(flush: true)
+        }
     }
-    
+
     def init = { servletContext ->
         ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*")
         if (!format) {
@@ -68,46 +63,45 @@ class BootStrap {
         def service = ctx.getBean("modelFileFormatService")
         def modelFormat = service.registerModelFormat("UNKNOWN", "UNKNOWN")
         service.handleModelFormat(modelFormat, "unknownFormatService", "unknown")
-        
+
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.PUBMED,
-        											 pattern:"^\\d+",
-        											 identifiersPrefix:"http://identifiers.org/pubmed/"))
-        											 
+                         pattern:"^\\d+",
+                         identifiersPrefix:"http://identifiers.org/pubmed/"))
+
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.DOI,
-        											 pattern:"^(doi\\:)?\\d{2}\\.\\d{4}.*",
-        											 identifiersPrefix:"http://identifiers.org/doi/"))
-        
+                         pattern:"^(doi\\:)?\\d{2}\\.\\d{4}.*",
+                         identifiersPrefix:"http://identifiers.org/doi/"))
+
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.ARXIV,
-        											 pattern:"^(\\w+(\\-\\w+)?(\\.\\w+)?/)?\\d{4,7}(\\.\\d{4}(v\\d+)?)?",
-        											 identifiersPrefix:"http://identifiers.org/arxiv/"))
-        
+                         pattern:"^(\\w+(\\-\\w+)?(\\.\\w+)?/)?\\d{4,7}(\\.\\d{4}(v\\d+)?)?",
+                         identifiersPrefix:"http://identifiers.org/arxiv/"))
+
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.ISBN,
-        											 pattern:"^(ISBN)?(-13|-10)?[:]?[ ]?(\\d{2,3}[ -]?)?\\d{1,5}[ -]?\\d{1,7}[ -]?\\d{1,6}[ -]?(\\d|X)",
-        											 identifiersPrefix:"http://identifiers.org/isbn/"))
-        
+                         pattern:"^(ISBN)?(-13|-10)?[:]?[ ]?(\\d{2,3}[ -]?)?\\d{1,5}[ -]?\\d{1,7}[ -]?\\d{1,6}[ -]?(\\d|X)",
+                         identifiersPrefix:"http://identifiers.org/isbn/"))
+
          addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.ISSN,
-        											 pattern:"^\\d{4}\\-\\d{4}",
-        											 identifiersPrefix:"http://identifiers.org/issn/"))
+                         pattern:"^\\d{4}\\-\\d{4}",
+                         identifiersPrefix:"http://identifiers.org/issn/"))
 
          addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.JSTOR,
-        											 pattern:"^\\d+",
-        											 identifiersPrefix:"http://identifiers.org/jstor/"))
+                         pattern:"^\\d+",
+                         identifiersPrefix:"http://identifiers.org/jstor/"))
 
          addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.NARCIS,
-        											 pattern:"^oai\\:cwi\\.nl\\:\\d+",
-        											 identifiersPrefix:"http://identifiers.org/narcis/"))
+                         pattern:"^oai\\:cwi\\.nl\\:\\d+",
+                         identifiersPrefix:"http://identifiers.org/narcis/"))
 
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.NBN,
-        											 pattern:"^urn\\:nbn\\:[A-Za-z_0-9]+\\:([A-Za-z_0-9]+\\:)?[A-Za-z_0-9]+",
-        											 identifiersPrefix:"http://identifiers.org/nbn/"))
-        
+                        pattern:"^urn\\:nbn\\:[A-Za-z_0-9]+\\:([A-Za-z_0-9]+\\:)?[A-Za-z_0-9]+",
+                        identifiersPrefix:"http://identifiers.org/nbn/"))
+
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.PMC,
-        											 pattern:"PMC\\d+",
-        											 identifiersPrefix:"http://identifiers.org/pmc/"))
-											 
+                         pattern:"PMC\\d+",
+                         identifiersPrefix:"http://identifiers.org/pmc/"))
+
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.CUSTOM,
-        											 pattern:"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",
-        							))
+                         pattern:"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",))
         if (Environment.getCurrent() != Environment.TEST) {
              if (!Role.findByAuthority("ROLE_USER")) {
                 new Role(authority: "ROLE_USER").save(flush: true)
@@ -121,7 +115,7 @@ class BootStrap {
             if (!User.findByUsername("administrator")) {
                 def person = new Person(userRealName: "administrator")
                 person.save(flush: true)
-            	def user = new User(username: "administrator",
+                def user = new User(username: "administrator",
                         password: springSecurityService.encodePassword("administrator"),
                         email: "user@test.com",
                         person: person,
@@ -140,9 +134,7 @@ class BootStrap {
                 UserRole.create(user, userRole, true)
             }
             // Manually start Searchable's mirroring process to ensure that it comes after the automated migrations.
-            println "Performing bulk index"
             searchableService.reindex()
-            println "Starting mirror service"
             searchableService.startMirroring()
         }
 
@@ -205,8 +197,8 @@ class BootStrap {
                 }
             }
         ]
-
     }
+
     def destroy = {
     }
 }
