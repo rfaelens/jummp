@@ -35,21 +35,45 @@ public class ModelIdentifier {
     private static final Log log = LogFactory.getLog(this)
     /* semaphore for the log threshold */
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
-    StringBuilder id
+    /* the value of this model identifier */
+    private StringBuilder id
 
     ModelIdentifier() {
         id = new StringBuilder()
     }
 
     ModelIdentifier decorate(ModelIdentifierDecorator decorator) {
+        if (!decorator) {
+            log.warn "Undefined decorator asked to append $this"
+            return this
+        }
         if (IS_INFO_ENABLED) {
             log.info "Asking $decorator to decorate $this."
         }
         decorator.decorate(this)
     }
 
+    ModelIdentifier append(String snippet) {
+        if (!snippet) {
+            log.warn "Ignoring request to add null/empty snippet to $this"
+        } else {
+            if (IS_INFO_ENABLED) {
+                log.info "Appending $snippet to $this"
+            }
+            id.append(snippet)
+        }
+        return this
+    }
+
     @Override
     String toString() {
         return "ModelIdentifier $id"
+    }
+
+    public String getCurrentId() {
+        return id.toString()
+    }
+
+    private void setId(StringBuilder ignored) {
     }
 }

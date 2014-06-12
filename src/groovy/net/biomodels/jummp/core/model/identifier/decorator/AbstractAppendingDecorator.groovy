@@ -50,7 +50,7 @@ abstract class AbstractAppendingDecorator implements OrderedModelIdentifierDecor
     }
 
     /**
-     * Do not allow access to nextValue outside of an implementation of 
+     * Do not allow access to nextValue outside of an implementation of
      * ModelIdentifierDecorator.
      */
     String getNextValue() {

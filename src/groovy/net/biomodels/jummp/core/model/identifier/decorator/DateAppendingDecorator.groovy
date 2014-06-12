@@ -59,7 +59,7 @@ class DateAppendingDecorator extends AbstractAppendingDecorator {
         }
         if (!format) {
             log.error("Cowardly refusing to create a date decorator for format $format")
-            throw IllegalArgumentException("Please use non-empty date suffixes for model ids.")
+            throw new IllegalArgumentException("Please use non-empty date suffixes for model ids.")
         }
         //TODO sanitise!!
         String sampleDate = new Date().format(format)
@@ -76,11 +76,11 @@ class DateAppendingDecorator extends AbstractAppendingDecorator {
     ModelIdentifier decorate(ModelIdentifier modelIdentifier) {
         updateNextValueIfNeeded()
         if (modelIdentifier) {
-            String currentId = modelIdentifier.id.toString()
+            String currentId = modelIdentifier.getCurrentId()
             if (IS_INFO_ENABLED) {
                 log.info "Decorating $currentId with $nextValue."
             }
-            modelIdentifier.id.append(nextValue)
+            modelIdentifier.append(nextValue)
             return modelIdentifier
         } else {
             log.warn "Undefined model identifier encountered - decorating a new one instead."

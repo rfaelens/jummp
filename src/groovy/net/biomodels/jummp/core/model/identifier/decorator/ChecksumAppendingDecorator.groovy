@@ -83,12 +83,12 @@ final class ChecksumAppendingDecorator extends FixedLiteralAppendingDecorator {
             log.error "Undefined model identifier encountered - cannot compute checksum."
             throw new Exception("Cannot compute checksum for undefined model identifier.")
         }
-        String currentId = modelIdentifier.id.toString()
+        String currentId = modelIdentifier.getCurrentId()
         String nextValue = currentId.encodeAsSHA256().encodeAsSHA256()
         if (IS_INFO_ENABLED) {
             log.info "Decorating $currentId with $nextValue."
         }
-        modelIdentifier.id.append(SEPARATOR).append(nextValue)
+        modelIdentifier.append(SEPARATOR).append(nextValue)
         return modelIdentifier
     }
 

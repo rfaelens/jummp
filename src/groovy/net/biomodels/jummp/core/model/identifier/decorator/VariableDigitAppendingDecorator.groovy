@@ -32,13 +32,13 @@ class VariableDigitAppendingDecorator extends AbstractAppendingDecorator {
     /* the width of the suffix used to decorate model identifiers. */
     final int WIDTH
     /* the number used in the last model id, without padding. */
-    long lastUsedSuffix = -1
+    private long lastUsedSuffix = -1
     /* the value to use in the next id, without padding. Effectively, the dual of nextValue */
-    long nextSuffix
+    private long nextSuffix
     /* the class logger */
-    static final Log log = LogFactory.getLog(this)
+    private static final Log log = LogFactory.getLog(this)
     /* semaphore for the log threshold */
-    static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
+    private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
 
     protected VariableDigitAppendingDecorator() {
     }
@@ -58,7 +58,7 @@ class VariableDigitAppendingDecorator extends AbstractAppendingDecorator {
         }
         if (seed < 1) {
             log.error("Cowardly refusing to create a variable digit decorator for seed $seed")
-            throw IllegalArgumentException("Please use strictly positive values in model ids.")
+            throw new IllegalArgumentException("Please use strictly positive values in model ids.")
         }
         final int SUFFIX_WIDTH = "$seed".length()
         if (width <= SUFFIX_WIDTH) {
@@ -79,17 +79,17 @@ class VariableDigitAppendingDecorator extends AbstractAppendingDecorator {
     ModelIdentifier decorate(ModelIdentifier modelIdentifier) {
         updateNextValueIfNeeded()
         if (modelIdentifier) {
-            String currentId = modelIdentifier.id.toString()
+            String currentId = modelIdentifier.getCurrentId()
             if (IS_INFO_ENABLED) {
                 log.info "Decorating $currentId with $nextValue."
             }
-            modelIdentifier.id.append(nextValue)
+            modelIdentifier.append(nextValue)
             lastUsedSuffix = nextSuffix
             return modelIdentifier
         } else {
             log.warn "Undefined model identifier encountered - decorating a new one instead."
             ModelIdentifier result = new ModelIdentifier()
-            result.id.append(nextValue)
+            result.append(nextValue)
             lastUsedSuffix = nextSuffix
             return result
         }
@@ -119,20 +119,4 @@ class VariableDigitAppendingDecorator extends AbstractAppendingDecorator {
             }
         }
     }
-
-    // Tell Groovy not to generate public getters and setters for internal variables.
-    private void setLastUsedSuffix(long ignored) {
-    }
-
-    private long getLastUsedSuffix() {
-        return -1
-    }
-
-    private void setNextSuffix(long ignored) {
-    }
-
-    private long getNextSuffix() {
-        return -1
-    }
 }
-

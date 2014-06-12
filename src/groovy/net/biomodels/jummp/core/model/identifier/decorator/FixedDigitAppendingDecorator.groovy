@@ -53,7 +53,7 @@ class FixedDigitAppendingDecorator extends AbstractAppendingDecorator {
         }
         if (suffix < 1) {
             log.error("Cowardly refusing to create a fixed digit decorator for suffix $suffix")
-            throw IllegalArgumentException("Please use strictly positive values in model ids.")
+            throw new IllegalArgumentException("Please use strictly positive values in model ids.")
         }
         final int SUFFIX_WIDTH = "$suffix".length()
         if (width <= SUFFIX_WIDTH) {
@@ -72,16 +72,16 @@ class FixedDigitAppendingDecorator extends AbstractAppendingDecorator {
      */
     ModelIdentifier decorate(ModelIdentifier modelIdentifier) {
         if (modelIdentifier) {
-            String currentId = modelIdentifier.id.toString()
+            String currentId = modelIdentifier.getCurrentId()
             if (IS_INFO_ENABLED) {
                 log.info "Decorating $currentId with $nextValue."
             }
-            modelIdentifier.id.append(nextValue)
+            modelIdentifier.append(nextValue)
             return modelIdentifier
         } else {
             log.warn "Undefined model identifier encountered - decorating a new one instead."
             ModelIdentifier result = new ModelIdentifier()
-            result.id.append(nextValue)
+            result.append(nextValue)
             return result
         }
     }
