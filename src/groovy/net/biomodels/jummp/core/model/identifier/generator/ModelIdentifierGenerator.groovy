@@ -20,8 +20,6 @@
 
 package net.biomodels.jummp.core.model.identifier.generator
 
-import net.biomodels.jummp.core.model.identifier.decorator.OrderedModelIdentifierDecorator
-
 /**
  * @short Interface defining the contract for components that wish to produce model identifiers.
  *
@@ -29,15 +27,11 @@ import net.biomodels.jummp.core.model.identifier.decorator.OrderedModelIdentifie
  */
 interface ModelIdentifierGenerator {
     /**
-     * The registry of decorators which an implementation may use to generate model identifiers.
-     */
-    final TreeSet<OrderedModelIdentifierDecorator> DECORATOR_REGISTRY
-    /**
      * Generates a model identifier.
      */
     String generate()
     /**
      * Asks its variable decorators to prepare the values they will use for the next identifier.
      */
-    void updateDecorators()
+    void update()
 }

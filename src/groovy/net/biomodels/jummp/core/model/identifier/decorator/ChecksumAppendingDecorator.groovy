@@ -52,11 +52,11 @@ final class ChecksumAppendingDecorator extends FixedLiteralAppendingDecorator {
      * pre-compute the next value to be appended, hence from the perspective of external
      * components, it behaves like a fixed decorator.
      */
-    public ChecksumAppendingDecorator(char sep, short order) {
+    public ChecksumAppendingDecorator(int order, char sep) {
         boolean orderOk = validateOrderValue(order)
         if (!orderOk) {
             log.warn "Invalid order $order for $this."
-            ORDER = Short.MAX_VALUE
+            ORDER = Integer.MAX_VALUE
         } else {
             ORDER = order
         }
@@ -96,8 +96,8 @@ final class ChecksumAppendingDecorator extends FixedLiteralAppendingDecorator {
      * Instances of this class are expected to be last in the decorator order and never first.
      */
     @Override
-    protected boolean validateOrderValue(short value) {
-        return value > 0 && value <= Short.MAX_VALUE
+    protected boolean validateOrderValue(int value) {
+        return value > 0 && value <= Integer.MAX_VALUE
     }
 
     @Override

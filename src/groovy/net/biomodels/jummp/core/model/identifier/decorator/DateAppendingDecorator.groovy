@@ -28,16 +28,13 @@ import org.apache.commons.logging.LogFactory
  * @short ModelIdentifierDecorator implementation that appends a formatted date to a model id.
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-class DateAppendingDecorator extends AbstractAppendingDecorator {
+public class DateAppendingDecorator extends AbstractAppendingDecorator {
     /* the suffix used to decorate model identifiers. */
     final String FORMAT
     /* the class logger */
     private static final Log log = LogFactory.getLog(this)
     /* semaphore for the log threshold */
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
-
-    protected DateAppendingDecorator() {
-    }
 
     /**
      * An IllegalArgumentException will be thrown if @p order is negative or
@@ -49,7 +46,7 @@ class DateAppendingDecorator extends AbstractAppendingDecorator {
      * allowed by SimpleDateFormat, are rejected by this method due to the impact on the URIs
      * which will use the generated model identifiers containing these characters.
      */
-    public DateAppendingDecorator(short order, String format) throws IllegalArgumentException {
+    public DateAppendingDecorator(Integer order, String format) throws IllegalArgumentException {
         boolean orderOk = validateOrderValue(order)
         if (!orderOk) {
             log.error "Invalid order $order for $this."

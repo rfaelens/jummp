@@ -36,15 +36,15 @@ class FixedLiteralAppendingDecorator extends AbstractAppendingDecorator {
     /* semaphore for the log threshold */
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
 
-    protected FixedLiteralAppendingDecorator() {
-    }
-
     /**
      * Don't pass an empty String or null to avoid an IllegalArgumentException.
      */
-    public FixedLiteralAppendingDecorator(short order, String suffix)
+    public FixedLiteralAppendingDecorator(int order, String suffix)
                 throws IllegalArgumentException {
         boolean orderOk = validateOrderValue(order)
+        println "current order is $ORDER"
+        ORDER = order
+        println "new order is $ORDER"
         if (!orderOk) {
             log.error "Invalid order $order for $this."
             throw new Exception("Incorrect position at which to insert $this")

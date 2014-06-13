@@ -20,35 +20,20 @@
 
 package net.biomodels.jummp.core.model.identifier.generator
 
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
+import net.biomodels.jummp.core.model.identifier.decorator.OrderedModelIdentifierDecorator
 
 /**
- * @short ModelIdentifierGenerator implementation that always returns a null model identifier.
+ * @short Abstract implementation for producing model identifiers.
  *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-final class NullModelIdentifierGenerator implements ModelIdentifierGenerator {
-    /* the class logger */
-    private static final Log log = LogFactory.getLog(this)
-    /* semaphore for the log threshold */
-    private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
-
-    public NullModelIdentifierGenerator() {
-    }
-
+abstract class AbstractModelIdentifierGenerator implements ModelIdentifierGenerator {
     /**
-     * Always returns null.
+     * The registry of decorators which an implementation may use to generate model identifiers.
      */
-    String generate() {
-        if (IS_INFO_ENABLED) {
-            log.info "Producing a new null model identifier."
-        }
-        return null
-    }
-    /**
-     * Nothing to do.
-     */
-    void update() {
-    }
+    protected TreeSet<OrderedModelIdentifierDecorator> DECORATOR_REGISTRY
+
+    abstract String generate()
+
+    abstract void update()
 }

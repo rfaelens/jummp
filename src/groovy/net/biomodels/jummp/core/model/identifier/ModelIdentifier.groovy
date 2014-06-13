@@ -20,6 +20,7 @@
 
 package net.biomodels.jummp.core.model.identifier
 
+import net.biomodels.jummp.core.model.identifier.decorator.ModelIdentifierDecorator
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 

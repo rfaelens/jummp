@@ -28,6 +28,4 @@ package net.biomodels.jummp.core.model.identifier.decorator
  */
 interface OrderedModelIdentifierDecorator extends ModelIdentifierDecorator,
             Comparable<OrderedModelIdentifierDecorator> {
-    /* the position of the decorator in the queue of a ModelIdentifierGenerator. */
-    final short ORDER
 }

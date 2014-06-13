@@ -28,9 +28,9 @@ import org.apache.commons.logging.LogFactory
  * @short ModelIdentifierDecorator implementation that adds a numerical suffix to a model id.
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-class VariableDigitAppendingDecorator extends AbstractAppendingDecorator {
+public class VariableDigitAppendingDecorator extends AbstractAppendingDecorator {
     /* the width of the suffix used to decorate model identifiers. */
-    final int WIDTH
+    final Integer WIDTH
     /* the number used in the last model id, without padding. */
     private long lastUsedSuffix = -1
     /* the value to use in the next id, without padding. Effectively, the dual of nextValue */
@@ -40,14 +40,11 @@ class VariableDigitAppendingDecorator extends AbstractAppendingDecorator {
     /* semaphore for the log threshold */
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
 
-    protected VariableDigitAppendingDecorator() {
-    }
-
     /**
      * Throws an IllegalArgumentException if @p seed is below 1 or @p width is narrower than
      * the width of @p seed.
      */
-    public VariableDigitAppendingDecorator(short order, int seed, int width)
+    public VariableDigitAppendingDecorator(Integer order, int seed, int width)
                 throws IllegalArgumentException {
         boolean orderOk = validateOrderValue(order)
         if (!orderOk) {

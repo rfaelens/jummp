@@ -29,6 +29,8 @@ import net.biomodels.jummp.core.model.identifier.ModelIdentifier
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 abstract class AbstractAppendingDecorator implements OrderedModelIdentifierDecorator {
+    /* the position of the decorator in the queue of a ModelIdentifierGenerator. */
+    protected int ORDER
 
     abstract ModelIdentifier decorate(ModelIdentifier modelIdentifier)
 
@@ -66,8 +68,12 @@ abstract class AbstractAppendingDecorator implements OrderedModelIdentifierDecor
     /**
      * Helper method that checks whether the supplied @p order falls within the range [0, 2^15-1).
      */
-    protected boolean validateOrderValue(short order) {
-        return order >= 0 && order < Short.MAX_VALUE
+    protected boolean validateOrderValue(int order) {
+        return order >= 0 && order < Integer.MAX_VALUE
+    }
+
+    protected void setOrder(int order) {
+        ORDER = order
     }
 }
 

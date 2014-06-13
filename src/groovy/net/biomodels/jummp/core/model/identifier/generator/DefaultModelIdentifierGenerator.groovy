@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory
  *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-class DefaultModelIdentifierGenerator implements ModelIdentifierGenerator {
+class DefaultModelIdentifierGenerator extends AbstractModelIdentifierGenerator {
     /* the class logger */
     private static final Log log = LogFactory.getLog(this)
     /* semaphore for the log threshold */
@@ -71,7 +71,7 @@ class DefaultModelIdentifierGenerator implements ModelIdentifierGenerator {
     /**
      * Asks decorators in DECORATOR_REGISTRY to prepare new values for the next identifier.
      */
-    void updateDecorators() {
+    void update() {
         DECORATOR_REGISTRY.each { it.isFixed() ?: it.refresh() }
     }
 }
