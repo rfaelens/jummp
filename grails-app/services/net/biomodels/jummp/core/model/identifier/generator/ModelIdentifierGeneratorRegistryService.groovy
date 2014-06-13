@@ -24,7 +24,7 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
 /**
- * @short Service for registering and storing model 
+ * @short Service for registering and storing model identifier generators.
  *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
@@ -58,7 +58,7 @@ class ModelIdentifierGeneratorRegistryService {
         if (IS_INFO_ENABLED) {
             log.info "Registering ${generator.getClass().getName()} as $name"
         }
-        register[name] = generator
+        registry[name] = generator
         return true
     }
 
