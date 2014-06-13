@@ -121,4 +121,5 @@ beans = {
         persistenceInterceptor = ref("persistenceInterceptor")
         executor = Executors.newFixedThreadPool(grailsApplication.config.jummp.threadPool.size)
     }
+    springConfig.addAlias("identifierGeneratorRegistry", "modelIdentifierGeneratorRegistryService")
 }
