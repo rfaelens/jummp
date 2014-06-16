@@ -35,6 +35,10 @@
 import grails.util.Environment
 import grails.util.Holders
 import java.util.concurrent.Executors
+import net.biomodels.jummp.core.model.identifier.generator.AbstractModelIdentifierGenerator
+import net.biomodels.jummp.core.model.identifier.generator.DefaultModelIdentifierGenerator
+import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
+import net.biomodels.jummp.core.model.identifier.generator.ModelIdentifierGeneratorRegistryService
 
 // Place your Spring DSL code here
 beans = {
@@ -121,5 +125,18 @@ beans = {
         persistenceInterceptor = ref("persistenceInterceptor")
         executor = Executors.newFixedThreadPool(grailsApplication.config.jummp.threadPool.size)
     }
-    springConfig.addAlias("identifierGeneratorRegistry", "modelIdentifierGeneratorRegistryService")
+    Map R = grailsApplication.config.jummp.id.generators
+    identifierGeneratorRegistry(ModelIdentifierGeneratorRegistryService) {
+        registry = R
+    }
+
+    R.each { name, generator ->
+        def clazz = generator.getClass()
+        if (generator instanceof AbstractModelIdentifierGenerator) {
+            "$name"(clazz, generator.DECORATOR_REGISTRY)
+        } else {
+            "$name"(clazz)
+        }
+    }
+    grailsApplication.config.jummp.id.clear()
 }

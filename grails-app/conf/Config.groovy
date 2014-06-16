@@ -18,7 +18,7 @@
 * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 **/
 
-
+import net.biomodels.jummp.core.model.identifier.ModelIdentifierUtils
 
 // locations to search for config files that get merged into the main config
 // config files can either be Java properties files or ConfigSlurper scripts
@@ -525,6 +525,21 @@ if (!(jummpConfig.jummp.security.mailer.tlsrequired instanceof ConfigObject)) {
 	grails.mail.props["mail.smtp.starttls.required"]=jummpConfig.jummp.security.mailer.tlsrequired
 }
 
+ConfigObject modelIdentifierSettings = jummpConfig.jummp.model.id
+if (!modelIdentifierSettings) {
+    throw new Exception("""\
+The settings for generating model identifiers are missing. For model identifiers
+of the form MODEL0001, MODEL0002, MODEL0003 please use the following settings:
+\tjummp.model.id.submission.part1.type=literal
+\tjummp.model.id.submission.part1.suffix=MODEL
+\tjummp.model.id.submission.part2.type=numerical
+\tjummp.model.id.submission.part2.width=4
+""")
+}
+jummp.model.id = [:]
+modelIdentifierSettings?.entrySet().each {
+    jummp.model.id."${it.key}" = it.value
+}
 
 // Uncomment and edit the following lines to start using Grails encoding & escaping improvements
 
@@ -552,9 +567,11 @@ remove this line */
 if (!(jummpConfig.jummp.context.help.root instanceof ConfigObject)) {
     def pages=["root", "browse", "search", "login", "display", "archives", "submission", "update", "profile", "sharing"]
     pages.each {
-    	if (!(jummpConfig.jummp.context.help."${it}" instanceof ConfigObject)) {
-    		jummp.context.help."${it}" = jummpConfig.jummp.context.help."${it}"
-    	}
+        if (!(jummpConfig.jummp.context.help."${it}" instanceof ConfigObject)) {
+            jummp.context.help."${it}" = jummpConfig.jummp.context.help."${it}"
+        }
     }
 }
 jummp.config.maintenance = false
+
+jummp.id.generators = ModelIdentifierUtils.testDynamicBeanCreation()

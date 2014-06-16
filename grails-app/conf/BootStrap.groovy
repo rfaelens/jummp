@@ -30,6 +30,7 @@
 
 import grails.util.Environment
 import net.biomodels.jummp.core.model.PublicationLinkProviderTransportCommand as PubLinkProvTC
+import net.biomodels.jummp.core.model.identifier.ModelIdentifierUtils
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.PublicationLinkProvider
 import net.biomodels.jummp.plugins.security.Person
@@ -43,6 +44,7 @@ class BootStrap {
     def springSecurityService
     def wcmSecurityService
     def searchableService
+    def grailsApplication
 
     void addPublicationLinkProvider(PubLinkProvTC cmd) {
         def publinkType=PublicationLinkProvider.LinkType.valueOf(cmd.linkType)
@@ -59,7 +61,7 @@ class BootStrap {
             format = new ModelFormat(identifier: "UNKNOWN", name: "Unknown format", formatVersion: "*")
             format.save(flush: true)
         }
-        def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT) 
+        def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT)
         def service = ctx.getBean("modelFileFormatService")
         def modelFormat = service.registerModelFormat("UNKNOWN", "UNKNOWN")
         service.handleModelFormat(modelFormat, "unknownFormatService", "unknown")
@@ -197,6 +199,7 @@ class BootStrap {
                 }
             }
         ]
+        ModelIdentifierUtils.grailsApplication = grailsApplication
     }
 
     def destroy = {
