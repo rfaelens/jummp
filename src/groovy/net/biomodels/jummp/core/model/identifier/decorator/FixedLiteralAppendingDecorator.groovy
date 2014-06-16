@@ -42,9 +42,7 @@ class FixedLiteralAppendingDecorator extends AbstractAppendingDecorator {
     public FixedLiteralAppendingDecorator(int order, String suffix)
                 throws IllegalArgumentException {
         boolean orderOk = validateOrderValue(order)
-        println "current order is $ORDER"
         ORDER = order
-        println "new order is $ORDER"
         if (!orderOk) {
             log.error "Invalid order $order for $this."
             throw new Exception("Incorrect position at which to insert $this")
