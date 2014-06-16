@@ -30,14 +30,14 @@ import org.apache.commons.logging.LogFactory
  */
 class ModelIdentifierGeneratorRegistryService {
     // No interaction with the database, so disable the proxy providing transactional behaviour
-    static transactional = false
+    //static transactional = false
 
     /* the class logger */
     private static final Log log = LogFactory.getLog(this)
     /* semaphore for the log threshold */
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
     /* association between a model id generator and its corresponding name */
-    private Map<String, ModelIdentifierGenerator> registry = [:]
+    Map<String, ModelIdentifierGenerator> registry = [:]
 
     /**
      * Adds @p generator to the registry under the name @p name.
