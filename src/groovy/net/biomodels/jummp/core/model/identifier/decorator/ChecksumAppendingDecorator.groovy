@@ -35,16 +35,19 @@ import org.apache.commons.logging.LogFactory
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 final class ChecksumAppendingDecorator extends FixedLiteralAppendingDecorator {
-    /* the separator used to separate the hash from the rest of the model identifier. */
+    /** the separator used to separate the hash from the rest of the model identifier. */
     final char SEPARATOR
-    /* the default separator that precedes the auto-generated checksum. */
-    final char DEFAULT_SEPARATOR = '-'
-    /* the class logger */
+    /** the default separator that precedes the auto-generated checksum. */
+    static final char DEFAULT_SEPARATOR = '-'
+    /** The size of the checksum hash excluding the SEPARATOR. */
+    private static final int CHECKSUM_WIDTH = 4
+    /** the class logger */
     private static final Log log = LogFactory.getLog(this)
-    /* semaphore for the log threshold */
+    /** semaphore for the log threshold */
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
 
     private ChecksumAppendingDecorator() {
+        super(Integer.MAX_VALUE)
     }
 
     /*
@@ -52,14 +55,8 @@ final class ChecksumAppendingDecorator extends FixedLiteralAppendingDecorator {
      * pre-compute the next value to be appended, hence from the perspective of external
      * components, it behaves like a fixed decorator.
      */
-    public ChecksumAppendingDecorator(int order, char sep) {
-        boolean orderOk = validateOrderValue(order)
-        if (!orderOk) {
-            log.warn "Invalid order $order for $this."
-            ORDER = Integer.MAX_VALUE
-        } else {
-            ORDER = order
-        }
+    public ChecksumAppendingDecorator(int order, char sep) throws IllegalArgumentException {
+        super(order)
         if (!sep) {
             log.warn "ChecksumAppendingDecorator(char) expects a non-empty argument."
             sep = DEFAULT_SEPARATOR
@@ -84,7 +81,9 @@ final class ChecksumAppendingDecorator extends FixedLiteralAppendingDecorator {
             throw new Exception("Cannot compute checksum for undefined model identifier.")
         }
         String currentId = modelIdentifier.getCurrentId()
-        String nextValue = currentId.encodeAsSHA256().encodeAsSHA256()
+        String idHash = currentId.encodeAsSHA256().encodeAsSHA256()
+        final int UPPER = CHECKSUM_WIDTH - 1
+        String nextValue = idHash[0..UPPER]
         if (IS_INFO_ENABLED) {
             log.info "Decorating $currentId with $nextValue."
         }
@@ -103,5 +102,13 @@ final class ChecksumAppendingDecorator extends FixedLiteralAppendingDecorator {
     @Override
     String toString() {
         "${this.getClass().name}, separator: $SEPARATOR, nextValue: $nextValue, order: $ORDER"
+    }
+
+    /**
+     * Returns the width of the string which this instance appends to a model identifier.
+     */
+    public static int getChecksumWidth() {
+        int result = CHECKSUM_WIDTH + 1
+        return result
     }
 }
