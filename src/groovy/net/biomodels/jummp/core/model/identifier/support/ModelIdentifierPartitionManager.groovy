@@ -51,7 +51,8 @@ class ModelIdentifierPartitionManager {
         if (lastIdentifier) {
             modelIdentifier = lastIdentifier
         }
-        registry = new ModelIdentifierCursorPartitionRegistry(lastIdentifier)
+        registry = lastIdentifier ? new ModelIdentifierCursorPartitionRegistry(lastIdentifier) :
+                        new ModelIdentifierCursorPartitionRegistry()
         parseSettings(settings, modelIdentifier)
     }
 
@@ -81,20 +82,39 @@ class ModelIdentifierPartitionManager {
                     final String TYPE = config.type
                     switch(TYPE) {
                         case 'date':
-                            String dateFormat = config.format
+                            String dateFormat
+                            boolean dateFormatMissing = config.format instanceof ConfigObject ||
+                                        config.format.isEmpty()
+                            if (!dateFormatMissing) {
+                                dateFormat = config.format
+                            }
                             partition = new DateModelIdentifierPartition()
                             partition.format = dateFormat
                             break
                         case 'literal':
+                            String suffix
+                            boolean suffixMissing = config.suffix instanceof ConfigObject ||
+                                        config.suffix.isEmpty()
+                            if (!suffixMissing) {
+                                suffix = config.suffix
+                            }
                             String isFixed = config.fixed ?: 'true'
-                            String suffix = config.suffix
                             partition = new LiteralModelIdentifierPartition(isFixed, suffix)
                             break
                         case 'numerical':
+                            String width
+                            boolean widthMissing = config.width instanceof ConfigObject ||
+                                        config.width.isEmpty()
+                            if (!widthMissing) {
+                                width = config.width
+                            }
                             String isFixed = config.fixed ?: 'true'
-                            String width = config.width
                             partition = new NumericalModelIdentifierPartition(isFixed, width)
+                            break
                         default:
+                            final String M = "Unknown model id part type for $actualValue: $TYPE"
+                            log.error M
+                            throw new Exception(M)
                             break
                     }
                 }
@@ -144,8 +164,12 @@ class ModelIdentifierPartitionManager {
          * for deciding their next values.
          */
         ModelIdentifierCursorPartitionRegistry(String id) {
-            ID = id
-            registry = new HashMap<Integer, ModelIdentifierPartition>(ID.length())
+            if (!id) {
+                registry = new HashMap<Integer, ModelIdentifierPartition>()
+            } else {
+                ID = id
+                registry = new HashMap<Integer, ModelIdentifierPartition>(ID.length())
+            }
         }
 
         /** Computes the partition's start- and end indices and then adds it to the registry. */
