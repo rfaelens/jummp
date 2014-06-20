@@ -20,6 +20,8 @@
 
 package net.biomodels.jummp.core.model.identifier.support
 
+import java.util.regex.Pattern
+
 /**
  * @short Responsible for holding information about the date part of a model identifier.
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
@@ -27,17 +29,34 @@ package net.biomodels.jummp.core.model.identifier.support
 class DateModelIdentifierPartition extends ModelIdentifierPartition {
     /* The pattern that the date must follow. */
     String format
+    private static final List<Pattern> EXCLUSIONS = [
+        Pattern.compile("^.*\\p{Punct}.*\$"),
+        Pattern.compile("^.*\\s.*\$"),
+        Pattern.compile("^.*\\p{Cntrl}.*\$"),
+        ~/^.*E.*$/,
+        ~/^.*G.*$/,
+        ~/^.*K.*$/,
+        ~/^.*M{3}.*$/,
+        ~/^.*X.*$/,
+        ~/^.*[zZ].*$/,
+        ~/^.*a.*$/
+    ]
 
     void setFormat(String fmt) {
         String today
         try {
             today = new Date().format(fmt)
-        } catch(IllegalArgumentException e) {
+            format = fmt
+            if (!validateFormat()) {
+                // this has already been logged.
+                throw new IllegalArgumentException("The use of $format is not allowed.")
+            }
+        } catch(Exception e) {
+            value = ''
             final String M = "Date format $fmt is not appropriate. Try 'yyyyMMdd' or 'yyMMdd'."
-            log.error(M)
-            throw IllegalArgumentException(M, e)
+            log.error(M, e)
+            throw new IllegalArgumentException(M, e)
         }
-        format = fmt
         width = today.length()
         value = today
     }
@@ -48,7 +67,16 @@ class DateModelIdentifierPartition extends ModelIdentifierPartition {
     }
 
     protected boolean validateFormat() {
-        //TODO further restrict allowed values
-        return format
+        if (!format) {
+            return false
+        }
+        boolean allOk = true
+        EXCLUSIONS.each { p ->
+            if (allOk && format ==~ p) {
+                log.error "Cannot accept date format $format because of pattern ${p}"
+                allOk = false
+            }
+        }
+        return allOk
     }
 }

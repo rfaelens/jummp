@@ -20,6 +20,8 @@
 
 package net.biomodels.jummp.core.model.identifier.support
 
+import java.util.regex.Pattern
+
 /**
  * @short Responsible for storing information about the literal part of a model identifier.
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
@@ -27,16 +29,38 @@ package net.biomodels.jummp.core.model.identifier.support
 class LiteralModelIdentifierPartition extends ModelIdentifierPartition {
     /* Indicates whether a literal part of the model identifier is constant or not. */
     boolean fixed
+    /* Bad patterns for the suffix */
+    private static List<Pattern> EXCLUSIONS = [
+        Pattern.compile("^.*\\p{Punct}.*\$"),
+        Pattern.compile("^.*\\s.*\$"),
+        Pattern.compile("^.*\\p{Cntrl}.*\$")
+    ]
 
     LiteralModelIdentifierPartition(String fixedSetting, String suffix) {
         fixed = Boolean.parseBoolean(fixedSetting)
         value = suffix
         width = suffix?.length()
+        if (!validateValue()) {
+            throw new Exception(
+                        "Literal suffix ${value.trim()} is not valid.")
+        }
     }
 
     @Override
     boolean validate() {
-        return validateFixed() && super.validate()
+        return validateFixed() && validateValue() && super.validate()
+    }
+
+    @Override
+    boolean validateValue() {
+        boolean valueOk = true
+        EXCLUSIONS.each { p ->
+            if (valueOk && value ==~ p) {
+                log.error "Literal suffix ${value.trim()} is not valid because it matches $p."
+                valueOk = false
+            }
+        }
+        return valueOk
     }
 
     protected boolean validateFixed() {

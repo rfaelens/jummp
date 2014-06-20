@@ -185,4 +185,81 @@ Model id part order invalid: Expected part1, not part2. Please review the settin
             assertEquals expected, firstLine
         }
     }
+
+    void testParseSettingsRejectsTrickyDateFormats() {
+        def conf = '''
+            model {
+                id {
+                    submission {
+                        part1 {
+                            type = "literal"
+                            suffix = "MODEL"
+                        }
+                        part2 {
+                            type = 'date'
+                            format = 'yy.MM ddZZ'
+                        }
+                        part3 {
+                            type = 'numerical'
+                            fixed = 'false'
+                            width = '12'
+                        }
+                    }
+                }
+            }
+            database {
+                username = 'sa'
+                password = ''
+                type = 'h2'
+                // fall back to an in-memory H2 database instance
+            }'''
+        ConfigObject settings = new ConfigSlurper().parse(conf)
+        try {
+            ModelIdentifierUtils.processGeneratorSettings(settings)
+            fail("An exception should have been thrown by DateModelIdentifierPartition.")
+        } catch (Exception e) {
+            assertTrue e instanceof Exception
+            String expected = """Date format yy.MM ddZZ is not appropriate. Try 'yyyyMMdd' or \
+'yyMMdd'."""
+            assertTrue e.message == expected
+        }
+    }
+
+    void testParseSettingsRejectsTrickyLiteralSuffixFormats() {
+        def conf = '''
+            model {
+                id {
+                    submission {
+                        part1 {
+                            type = "literal"
+                            suffix = "S\tMILE"
+                        }
+                        part2 {
+                            type = 'date'
+                            format = 'yyMMdd'
+                        }
+                        part3 {
+                            type = 'numerical'
+                            fixed = 'false'
+                            width = '12'
+                        }
+                    }
+                }
+            }
+            database {
+                username = 'sa'
+                password = ''
+                type = 'h2'
+                // fall back to an in-memory H2 database instance
+            }'''
+        ConfigObject settings = new ConfigSlurper().parse(conf)
+        try {
+            ModelIdentifierUtils.processGeneratorSettings(settings)
+            fail("An exception should have been thrown by LiteralModelIdentifierPartition.")
+        } catch (Exception e) {
+            assertTrue e instanceof Exception
+            String expected = "Literal suffix S\tMILE is not valid."
+            assertTrue e.message == expected
+        }
+    }
 }
