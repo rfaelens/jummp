@@ -51,13 +51,7 @@ class FixedLiteralAppendingDecorator extends AbstractAppendingDecorator {
      */
     public FixedLiteralAppendingDecorator(int order, String suffix)
                 throws IllegalArgumentException {
-        boolean orderOk = validateOrderValue(order)
-        if (!orderOk) {
-            log.error "Invalid order $order for $this."
-            throw new IllegalArgumentException("Incorrect position at which to insert $this")
-        } else {
-            ORDER = order
-        }
+        this(order)
         if (!suffix) {
             log.error("Cowardly refusing to create a string decorator for suffix $suffix")
             throw new IllegalArgumentException("Please use non-empty string suffixes in model ids.")

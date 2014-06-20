@@ -41,6 +41,8 @@ final class ChecksumAppendingDecorator extends FixedLiteralAppendingDecorator {
     static final char DEFAULT_SEPARATOR = '-'
     /** The size of the checksum hash excluding the SEPARATOR. */
     private static final int CHECKSUM_WIDTH = 4
+    /** The width of the string that is appended by this decorator, including the SEPARATOR. */
+    public static final TOTAL_WIDTH = CHECKSUM_WIDTH + 1
     /** the class logger */
     private static final Log log = LogFactory.getLog(this)
     /** semaphore for the log threshold */
@@ -102,13 +104,5 @@ final class ChecksumAppendingDecorator extends FixedLiteralAppendingDecorator {
     @Override
     String toString() {
         "${this.getClass().name}, separator: $SEPARATOR, nextValue: $nextValue, order: $ORDER"
-    }
-
-    /**
-     * Returns the width of the string which this instance appends to a model identifier.
-     */
-    public static int getChecksumWidth() {
-        int result = CHECKSUM_WIDTH + 1
-        return result
     }
 }

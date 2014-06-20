@@ -31,6 +31,11 @@ import net.biomodels.jummp.core.model.identifier.ModelIdentifier
 abstract class AbstractAppendingDecorator implements OrderedModelIdentifierDecorator {
     /* the position of the decorator in the queue of a ModelIdentifierGenerator. */
     protected int ORDER
+    /**
+     * The value that an implementation of this interface will use to decorate the next model
+     * identifier.
+     */
+    String nextValue
 
     abstract ModelIdentifier decorate(ModelIdentifier modelIdentifier)
 
@@ -49,20 +54,6 @@ abstract class AbstractAppendingDecorator implements OrderedModelIdentifierDecor
     @Override
     String toString() {
         "${this.getClass().name} order: $ORDER nextValue: $nextValue"
-    }
-
-    /**
-     * Do not allow access to nextValue outside of an implementation of
-     * ModelIdentifierDecorator.
-     */
-    String getNextValue() {
-        return null
-    }
-
-    /**
-     * Do not allow nextValue to be modified outside of ModelIdentifierDecorator implementations.
-     */
-    void setNextValue(String ignoredValue) {
     }
 
     /**

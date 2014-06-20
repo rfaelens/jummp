@@ -36,11 +36,6 @@ import net.biomodels.jummp.core.model.identifier.ModelIdentifier
  */
 interface ModelIdentifierDecorator {
     /**
-     * The value that an implementation of this interface will use to decorate the next model
-     * identifier.
-     */
-    String nextValue
-    /**
      * Modify model identifier @p modelIdentifier.
      */
     ModelIdentifier decorate(ModelIdentifier modelIdentifier)
