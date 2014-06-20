@@ -29,16 +29,17 @@ class DateModelIdentifierPartition extends ModelIdentifierPartition {
     String format
 
     void setFormat(String fmt) {
-        String today = new Date().format(fmt)
-        if (today) {
-            format = fmt
-            width = today.length()
-            value = today
-        } else {
+        String today
+        try {
+            today = new Date().format(fmt)
+        } catch(IllegalArgumentException e) {
             final String M = "Date format $fmt is not appropriate. Try 'yyyyMMdd' or 'yyMMdd'."
             log.error(M)
-            throw IllegalArgumentException(M)
+            throw IllegalArgumentException(M, e)
         }
+        format = fmt
+        width = today.length()
+        value = today
     }
 
     @Override
