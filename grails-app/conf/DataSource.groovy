@@ -18,9 +18,7 @@
 * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 **/
 
-
-
-
+import net.biomodels.jummp.core.model.identifier.ModelIdentifierUtils
 
 Properties databaseProperties = new Properties()
 try {
@@ -33,21 +31,34 @@ try {
     String server = databaseProperties.getProperty("jummp.database.server")
     String port = databaseProperties.getProperty("jummp.database.port")
     String database = databaseProperties.getProperty("jummp.database.database")
-    String protocol = "mysql"
+    String protocol
     switch (databaseProperties.getProperty("jummp.database.type")) {
         case "POSTGRESQL":
             protocol = "postgresql"
             databaseProperties.setProperty("jummp.database.driver", "org.postgresql.Driver")
-            databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.PostgreSQLDialect")
+            databaseProperties.setProperty("jummp.database.dialect",
+                        "org.hibernate.dialect.PostgreSQLDialect")
             break
-            case "MYSQL": // mysql is our default
-        default:
+        case "MYSQL":
+            protocol = "mysql"
             databaseProperties.setProperty("jummp.database.driver", "com.mysql.jdbc.Driver")
-                databaseProperties.setProperty("jummp.database.dialect", "org.hibernate.dialect.MySQL5InnoDBDialect")
-                break
+            databaseProperties.setProperty("jummp.database.dialect",
+                        "org.hibernate.dialect.MySQL5InnoDBDialect")
+            break
+        default:
+            protocol = ModelIdentifierUtils.DEFAULT_PROTOCOL
+            databaseProperties.setProperty("jummp.database.driver", DEFAULT_DRIVER)
+            databaseProperties.setProperty("jummp.database.dialect", DEFAULT_DIALECT)
+            databaseProperties.setProperty("jummp.database.username", DEFAULT_USERNAME)
+            databaseProperties.setProperty("jummp.database.password", DEFAULT_PASSWORD)
+            databaseProperties.setProperty("jummp.database.url", DEFAULT_URL)
+            databaseProperties.setProperty("jummp.database.pooled", 'false')
     }
-    databaseProperties.setProperty("jummp.database.url", "jdbc:${protocol}://${server}:${port}/${database}")
-    databaseProperties.setProperty("jummp.database.pooled", "true")
+    if (protocol != ModelIdentifierUtils.DEFAULT_PROTOCOL) {
+        databaseProperties.setProperty("jummp.database.url",
+                    "jdbc:${protocol}://${server}:${port}/${database}")
+        databaseProperties.setProperty("jummp.database.pooled", "true")
+    }
     def databaseConfig = new ConfigSlurper().parse(databaseProperties)
 
     dataSource {
@@ -56,21 +67,25 @@ try {
         username = databaseConfig.jummp.database.username
         password = databaseConfig.jummp.database.password
         dialect  = databaseConfig.jummp.database.dialect
-        properties {
-            maxActive = 50
-            maxIdle = 25
-            minIdle =1
-            initialSize = 1
-            minEvictableIdleTimeMillis = 60000
-            timeBetweenEvictionRunsMillis = 60000
-            numTestsPerEvictionRun = 3
-            maxWait = 10000
+        if (protocol != ModelIdentifierUtils.DEFAULT_PROTOCOL) {
+            properties {
+                maxActive = 50
+                maxIdle = 25
+                minIdle =1
+                initialSize = 1
+                minEvictableIdleTimeMillis = 60000
+                timeBetweenEvictionRunsMillis = 60000
+                numTestsPerEvictionRun = 3
+                maxWait = 10000
 
-            testOnBorrow = true
-            testWhileIdle = true
-            testOnReturn = false
+                testOnBorrow = true
+                testWhileIdle = true
+                testOnReturn = false
 
-            validationQuery = "SELECT 1"
+                validationQuery = "SELECT 1"
+            }
+        } else {
+            dbCreate = 'update'
         }
     }
     hibernate {
@@ -96,12 +111,12 @@ try {
             }
             dataSource {
                 url = "jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE"
-                username = "sa"
-                password = ""
-                dialect = ""
-                driverClassName = "org.h2.Driver"
+                username = ModelIdentifierUtils.DEFAULT_USERNAME
+                password = ModelIdentifierUtils.DEFAULT_PASSWORD
+                dialect = ModelIdentifierUtils.DEFAULT_DIALECT
+                driverClassName = ModelIdentifierUtils.DEFAULT_DRIVER
                 // can't use databaseMigrations
-                dbCreate = "create-drop"
+                dbCreate = "update"
             }
         }
         production {
@@ -122,11 +137,10 @@ try {
         cache.use_query_cache = false
     }
     dataSource {
-        url = "jdbc:h2:mem:tempDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE"
-        username = "sa"
-        password = ""
-        dialect = ""
-        driverClassName = "org.h2.Driver"
+        url = ModelIdentifierUtils.DEFAULT_URL
+        username = ModelIdentifierUtils.DEFAULT_USERNAME
+        password = ModelIdentifierUtils.DEFAULT_PASSWORD
+        dialect = ModelIdentifierUtils.DEFAULT_DIALECT
+        driverClassName = ModelIdentifierUtils.DEFAULT_DRIVER
     }
 }
-

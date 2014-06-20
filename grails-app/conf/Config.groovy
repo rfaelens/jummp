@@ -31,7 +31,6 @@ import net.biomodels.jummp.core.model.identifier.ModelIdentifierUtils
 // if(System.properties["${appName}.config.location"]) {
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
 // }
-
 Properties jummpProperties = new Properties()
 try {
 	def service = new net.biomodels.jummp.plugins.configuration.ConfigurationService()
@@ -378,38 +377,26 @@ if (!(jummpConfig.jummp.branding.externalColor instanceof ConfigObject)) {
 // The type of the database server
 if (!(jummpConfig.jummp.database.type instanceof ConfigObject)) {
     jummp.database.type = jummpConfig.jummp.database.type
-} else {
-    jummp.database.type = "MYSQL"
 }
 // The location of the database server
 if (!(jummpConfig.jummp.database.server instanceof ConfigObject)) {
     jummp.database.server = jummpConfig.jummp.database.server
-} else {
-    jummp.database.server = "localhost"
 }
 // The port of the database server
 if (!(jummpConfig.jummp.database.port instanceof ConfigObject)) {
     jummp.database.port = jummpConfig.jummp.database.port as Integer
-} else {
-    jummp.database.port = 3306
 }
 // The name of the database
 if (!(jummpConfig.jummp.database.database instanceof ConfigObject)) {
     jummp.database.database = jummpConfig.jummp.database.database
-} else {
-    jummp.database.database = "jummp"
 }
 // The user of the database server
 if (!(jummpConfig.jummp.database.username instanceof ConfigObject)) {
     jummp.database.username = jummpConfig.jummp.database.username
-} else {
-    jummp.database.username = "jummp"
 }
 // The user's password of the database server
 if (!(jummpConfig.jummp.database.password instanceof ConfigObject)) {
     jummp.database.password = jummpConfig.jummp.database.password
-} else {
-    jummp.database.password = "jummp"
 }
 
 if (jummpConfig.jummp.firstRun instanceof ConfigObject || !Boolean.parseBoolean(jummpConfig.jummp.firstRun)) {
@@ -574,4 +561,4 @@ if (!(jummpConfig.jummp.context.help.root instanceof ConfigObject)) {
 }
 jummp.config.maintenance = false
 
-jummp.id.generators = ModelIdentifierUtils.testDynamicBeanCreation()
+jummp.id.generators = ModelIdentifierUtils.processGeneratorSettings(jummp)
