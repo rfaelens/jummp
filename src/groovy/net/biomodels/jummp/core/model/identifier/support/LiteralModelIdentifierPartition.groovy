@@ -41,8 +41,7 @@ class LiteralModelIdentifierPartition extends ModelIdentifierPartition {
         value = suffix
         width = suffix?.length()
         if (!validateValue()) {
-            throw new Exception(
-                        "Literal suffix ${value.trim()} is not valid.")
+            throw new Exception("Literal suffix ${value.trim()} is not valid.")
         }
     }
 
