@@ -20,6 +20,7 @@
 
 package net.biomodels.jummp.core.model.identifier.decorator
 
+import net.biomodels.jummp.core.events.ModelIdentifierDecoratorUpdatedEvent
 import net.biomodels.jummp.core.model.identifier.ModelIdentifier
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -114,6 +115,7 @@ public class VariableDigitAppendingDecorator extends AbstractAppendingDecorator 
             if (IS_INFO_ENABLED) {
                 log.info "Incremented nextValue to $nextValue"
             }
+            super.publishEvent(new ModelIdentifierDecoratorUpdatedEvent(this, nextValue))
         }
     }
 }

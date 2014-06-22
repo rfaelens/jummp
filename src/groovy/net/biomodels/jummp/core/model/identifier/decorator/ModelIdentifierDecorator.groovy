@@ -21,6 +21,7 @@
 package net.biomodels.jummp.core.model.identifier.decorator
 
 import net.biomodels.jummp.core.model.identifier.ModelIdentifier
+import org.springframework.context.ApplicationEventPublisher
 
 /**
  * @short Interface for influencing the generation of model identifiers.
@@ -32,9 +33,14 @@ import net.biomodels.jummp.core.model.identifier.ModelIdentifier
  * to decorate a model identifier. Requests to do so will come from services which observe
  * relevant events in the application such as bootstrap, the start of the model submission
  * process, or its end.
+ *
+ * Decorators can use {@link org.springframework.context.ApplicationEventPublisher}'s
+ * publishEvent() method to issue events to denote changes to the decorator's suffix. Interested
+ * parties, such as ModelIdentifierGenerator implementations, can respond to these events through
+ * a callback defined by {@link org.springframework.context.event.ApplicationEventListener}.
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-interface ModelIdentifierDecorator {
+interface ModelIdentifierDecorator extends ApplicationEventPublisher {
     /**
      * Modify model identifier @p modelIdentifier.
      */

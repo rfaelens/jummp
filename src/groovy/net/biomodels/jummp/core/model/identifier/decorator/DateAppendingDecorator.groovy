@@ -20,6 +20,7 @@
 
 package net.biomodels.jummp.core.model.identifier.decorator
 
+import net.biomodels.jummp.core.events.DateModelIdentifierDecoratorUpdatedEvent
 import net.biomodels.jummp.core.model.identifier.ModelIdentifier
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -45,6 +46,7 @@ public class DateAppendingDecorator extends AbstractAppendingDecorator {
      * colons(:), semicolons(;), punctuation marks, quotation marks, brackets etc, although
      * allowed by SimpleDateFormat, are rejected by this method due to the impact on the URIs
      * which will use the generated model identifiers containing these characters.
+     * @see {@link net.biomodels.jummp.core.model.identifier.support.DateModelIdentifierPartition}
      */
     public DateAppendingDecorator(Integer order, String format) throws IllegalArgumentException {
         boolean orderOk = validateOrderValue(order)
@@ -58,7 +60,7 @@ public class DateAppendingDecorator extends AbstractAppendingDecorator {
             log.error("Cowardly refusing to create a date decorator for format $format")
             throw new IllegalArgumentException("Please use non-empty date suffixes for model ids.")
         }
-        //TODO sanitise!!
+        // The format has already been sanitised by DateModelIdentifierPartition
         String sampleDate = new Date().format(format)
         if (IS_INFO_ENABLED) {
             log.info "Creating $this that formats ${new Date()} as $sampleDate"
@@ -110,6 +112,7 @@ public class DateAppendingDecorator extends AbstractAppendingDecorator {
                 log.info "Updating nextValue from $nextValue to $currentDate."
             }
             nextValue = currentDate
+            super.publishEvent(new DateModelIdentifierDecoratorUpdatedEvent(this, nextValue))
         }
     }
 }

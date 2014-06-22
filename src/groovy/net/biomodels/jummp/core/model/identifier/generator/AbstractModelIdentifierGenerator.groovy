@@ -20,14 +20,30 @@
 
 package net.biomodels.jummp.core.model.identifier.generator
 
+import net.biomodels.jummp.core.events.DateModelIdentifierDecoratorUpdatedEvent
+import net.biomodels.jummp.core.events.ModelIdentifierDecoratorUpdatedEvent
+import net.biomodels.jummp.core.model.identifier.decorator.ModelIdentifierDecorator
 import net.biomodels.jummp.core.model.identifier.decorator.OrderedModelIdentifierDecorator
+import net.biomodels.jummp.core.model.identifier.decorator.VariableDigitAppendingDecorator
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.springframework.context.ApplicationEvent
+import org.springframework.context.event.SmartApplicationListener
 
 /**
  * @short Abstract implementation for producing model identifiers.
  *
+ * This class also implements the SmartApplicationListener in order to respond to events issued
+ * by ModelIdentifierDecorator implementations.
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-abstract class AbstractModelIdentifierGenerator implements ModelIdentifierGenerator {
+abstract class AbstractModelIdentifierGenerator implements ModelIdentifierGenerator,
+            SmartApplicationListener {
+    /** Required by SmartApplicationListener#getOrder() */
+    int order = 10
+    /** the class logger. */
+    private static final Log log = LogFactory.getLog(this)
+    private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
     /**
      * The registry of decorators which an implementation may use to generate model identifiers.
      */
@@ -36,4 +52,34 @@ abstract class AbstractModelIdentifierGenerator implements ModelIdentifierGenera
     abstract String generate()
 
     abstract void update()
+
+    @Override
+    boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
+        return eventType instanceof ModelIdentifierDecoratorUpdatedEvent
+    }
+
+    @Override
+    boolean supportsSourceType(Class<?> sourceType) {
+        return sourceType instanceof ModelIdentifierDecorator
+    }
+
+    @Override
+    void onApplicationEvent(ModelIdentifierDecoratorUpdatedEvent decoratorUpdatedEvent) {
+        if (IS_INFO_ENABLED) {
+            log.info "Processing event ${decoratorUpdatedEvent.inspect()}"
+        }
+        if (decoratorUpdatedEvent instanceof DateModelIdentifierDecoratorUpdatedEvent) {
+            // finds the first variable digit decorator and reset its value.
+            VariableDigitAppendingDecorator d = DECORATOR_REGISTRY.find { d ->
+                d instanceof VariableDigitAppendingDecorator
+            }
+            if (d) {
+                final String NEW_VALUE = "1".padLeft(d.WIDTH, '0')
+                d.nextValue = NEW_VALUE
+                if (IS_INFO_ENABLED) {
+                    log.info "Attribute 'nextValue' of $d has been reset to $NEW_VALUE."
+                }
+            }
+        }
+    }
 }
