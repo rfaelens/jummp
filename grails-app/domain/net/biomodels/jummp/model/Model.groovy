@@ -57,13 +57,13 @@ class Model implements Serializable {
     /*
      * Whether the model has been deleted
     */
-    boolean deleted=false
+    boolean deleted = false
     // TODO: unique Identifier for the model? UML diagram lists an "accessionNumber"?
 
     static mapping = {
         publication lazy: false
     }
-    
+
     def modelService
     static transients=['modelService']
 
@@ -84,18 +84,18 @@ class Model implements Serializable {
                 creators.add(revision.owner.person.userRealName)
             }
         }
-        def latestRev=modelService?.getLatestRevision(this);
+        def latestRev = modelService?.getLatestRevision(this);
         if (!latestRev) {
-        	latestRev = revisions? revisions.sort{ it.revisionNumber }.last() : null
+            latestRev = revisions? revisions.sort{ it.revisionNumber }.last() : null
         }
         return new ModelTransportCommand(
-        		id: id,
-        		name: latestRev ? latestRev.name : null,
-        		state: latestRev ? latestRev.state: null,
+                id: id,
+                name: latestRev ? latestRev.name : null,
+                state: latestRev ? latestRev.state: null,
                 lastModifiedDate: latestRev ? latestRev.uploadDate : null,
                 format: latestRev ? latestRev.format.toCommandObject() : null,
                 publication: publication ? publication.toCommandObject() : null,
-                deleted:deleted,
+                deleted: deleted,
                 submitter: revisions ? revisions.sort{ it.revisionNumber }.first().owner.person.userRealName : null,
                 submitterUsername: revisions ? revisions.sort{ it.revisionNumber }.first().owner.username : null,
                 submissionDate: revisions ? revisions.sort{ it.revisionNumber }.first().uploadDate : null,
