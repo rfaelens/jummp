@@ -42,7 +42,6 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.tomcat.jdbc.pool.DataSource
 import org.apache.tomcat.jdbc.pool.PoolProperties
-import org.codehaus.groovy.grails.commons.GrailsApplication
 
 /**
  * @short Helper class containing methods for interacting with model id scheme settings.
@@ -73,8 +72,6 @@ class ModelIdentifierUtils {
     static final String DEFAULT_DIALECT = ""
     static final String DEFAULT_DRIVER = "org.h2.Driver"
     static final String DEFAULT_PROTOCOL = "h2"
-    /* the grailsApplication bean set during bootstrap initialisation */
-    static GrailsApplication grailsApplication
     /* stores the patterns that are used to generate a model identifier */
     static ConfigObject settings
 
