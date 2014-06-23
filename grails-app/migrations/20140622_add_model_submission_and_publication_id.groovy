@@ -23,8 +23,8 @@ databaseChangeLog = {
                 def pig = ctx.getBean("publicationIdGenerator")
                 final boolean HAVE_PUBLICATION_ID = !(pig instanceof NullModelIdentifierGenerator)
                 sql.eachRow("select * from model") { m ->
-                    m.submissionId = sig.generate()
-                    m.publicationId = HAVE_PUBLICATION_ID ? pig.generate() : null
+                    m.submission_id = sig.generate()
+                    m.perennialPublicationIdentifier = HAVE_PUBLICATION_ID ? pig.generate() : null
                 }
             }
         }

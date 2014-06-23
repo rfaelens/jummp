@@ -119,7 +119,7 @@ A sample configuration is
                  * to be more generic, but the current query is more optimised for our needs.
                  */
                 mostRecentModelDetails = sql.firstRow("""\
-select max(id) as id, submissionId, publicationId from model""")
+select max(id) as id, submission_id, perennialPublicationIdentifier from model""")
             } catch (Exception e) {
                 final String W = """Unable to access the database - model IDs will be created \
 using the default values."""
