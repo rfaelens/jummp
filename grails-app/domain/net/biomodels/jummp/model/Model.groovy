@@ -36,6 +36,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
  * @see Revision
  * @see Publication
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class Model implements Serializable {
     private static final long serialVersionUID = 1L
@@ -58,14 +59,24 @@ class Model implements Serializable {
      * Whether the model has been deleted
     */
     boolean deleted = false
+    /**
+     * The perennial submission identifier of this model.
+     */
+    String submissionId
+    /**
+     * The perennial publication identifier of this model.
+     */
+    String publicationId
     // TODO: unique Identifier for the model? UML diagram lists an "accessionNumber"?
 
     static mapping = {
         publication lazy: false
+        // publication_id is already taken
+        publicationId column: 'perennialPublicationIdentifier'
     }
 
     def modelService
-    static transients=['modelService']
+    static transients = ['modelService']
 
     static constraints = {
         vcsIdentifier(nullable: false, blank: false, unique: true)
@@ -74,6 +85,8 @@ class Model implements Serializable {
         })
         publication(nullable: true)
         deleted(nullable: false)
+        submissionId blank: false
+        publicationId nullable: true
     }
 
     ModelTransportCommand toCommandObject() {
@@ -90,6 +103,8 @@ class Model implements Serializable {
         }
         return new ModelTransportCommand(
                 id: id,
+                submissionId: submissionId,
+                publicationId: publicationId,
                 name: latestRev ? latestRev.name : null,
                 state: latestRev ? latestRev.state: null,
                 lastModifiedDate: latestRev ? latestRev.uploadDate : null,

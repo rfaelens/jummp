@@ -36,11 +36,29 @@ package net.biomodels.jummp.core.model
  *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class ModelTransportCommand implements Serializable {
     private static final long serialVersionUID = 1L
+    /**
+     * The model id.
+     */
     Long id
+    /**
+     * The perennial submission identifier.
+     */
+    String submissionId
+    /**
+     * The perennial publication identifier.
+     */
+    String publicationId
+    /**
+     * The name of this model
+     */
     String name
+    /**
+     * Whether this model has been deleted.
+     */
     boolean deleted
     /**
      * Only needed to upload new Models. When retrieving Models set to format of latest revision.
@@ -70,6 +88,12 @@ class ModelTransportCommand implements Serializable {
      * The names of all users who have worked on this Model.
      */
     Set<String> creators
+    /**
+     * The state of the model.
+     */
     ModelState state
+    /**
+     * The username of the original submitter.
+     */
     String submitterUsername
 }

@@ -34,13 +34,14 @@ import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.ModelCreatedEvent
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.events.RevisionCreatedEvent
+import net.biomodels.jummp.core.model.ModelAuditTransportCommand
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.core.model.ModelTransportCommand
-import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.core.model.ModelAuditTransportCommand
-import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.PermissionTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelAudit
@@ -124,7 +125,15 @@ class ModelService {
      * Dependency Injection of userService
      */
     def userService
-    
+    /**
+     * Dependency injection of submissionIdGenerator
+     */
+    def submissionIdGenerator
+    /**
+     * Dependency injection of publicationIdGenerator
+     */
+    def publicationIdGenerator
+    final boolean MAKE_PUBLICATION_ID = !(publicationIdGenerator instanceof NullModelIdentifierGenerator)
     static transactional = true
 
     /**
@@ -1206,6 +1215,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             if (meta.publication) {
             	model.publication = Publication.fromCommandObject(meta.publication)
             }
+            model.submissionId = submissionIdGenerator.generate()
             if (!model.validate()) {
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
                 revision.discard()
@@ -1978,6 +1988,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                         BasePermission.ADMINISTRATION)) {
                 throw new AccessDeniedException("You cannot publish this model.");
             }
+        }
+        Model model = revision.model
+        if (MAKE_PUBLICATION_ID) {
+            model.publicationId = model.publicationId ?: publicationIdGenerator.generate()
         }
         if (!revision) {
             throw new IllegalArgumentException("Revision may not be null")

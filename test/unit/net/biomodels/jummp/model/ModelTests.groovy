@@ -65,13 +65,19 @@ class ModelTests {
         assertFalse(model.validate())
         assertEquals("nullable", model.errors["vcsIdentifier"])
         assertEquals("validator", model.errors["revisions"])
-        // try a valid model
         model = new Model()
         User owner = new User(username: "testUser", password: "secret", userRealName: "Test User", email: "test@user.org", enabled: true, accountExpired: false, accountLocked: false, passwordExpired: false)
         Revision revision = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: owner, minorRevision: true, uploadDate: new Date(), name:'test',description:'pointless', comment: 'fictional', format: new ModelFormat(identifier: "UNKNOWN", name: "unknown"))
         mockDomain(Revision, [revision])
         model.revisions = [revision] as Set
         model.vcsIdentifier = "1234"
+        assertFalse model.validate()
+        assertEquals 1, model.errors.errorCount
+        model.submissionId = ""
+        assertFalse model.validate()
+        assertEquals 1, model.errors.errorCount
+        // try a valid model
+        model.submissionId = "MODEL1234"
         assertTrue(model.validate())
         assertFalse(model.hasErrors())
     }

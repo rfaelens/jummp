@@ -1152,4 +1152,6 @@ databaseChangeLog = {
 	include file: '20140410pub-person.groovy'
 	
 	include file: '20140410createPubPerson.groovy'
+
+	include file: '20140622_add_model_submission_and_publication_id.groovy'
 }
