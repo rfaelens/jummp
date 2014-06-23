@@ -199,6 +199,7 @@ class BootStrap {
                 }
             }
         ]
+        AbstractAppendingDecorator.context = ctx
     }
 
     def destroy = {

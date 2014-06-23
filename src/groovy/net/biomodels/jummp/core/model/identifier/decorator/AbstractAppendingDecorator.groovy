@@ -43,7 +43,7 @@ abstract class AbstractAppendingDecorator implements OrderedModelIdentifierDecor
     /* the class logger */
     private static final Log log = LogFactory.getLog(this)
     /* The main application context, set during bootstrap. */
-    protected GrailsApplicationContext context
+    protected static GrailsApplicationContext context
     /* the position of the decorator in the queue of a ModelIdentifierGenerator. */
     protected int ORDER
 
@@ -62,9 +62,9 @@ abstract class AbstractAppendingDecorator implements OrderedModelIdentifierDecor
             return
         }
         if (log.isInfoEnabled()) {
-            log.info("Publishing event ${event.properties}")
+            log.info("Publishing event ${evt.properties}")
         }
-        context.publishEvent(event)
+        context.publishEvent(evt)
     }
 
     /**
