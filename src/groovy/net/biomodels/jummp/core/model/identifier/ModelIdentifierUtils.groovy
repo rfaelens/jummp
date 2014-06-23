@@ -112,9 +112,14 @@ A sample configuration is
             DataSource ds = new DataSource()
             ds.poolProperties = pp
             sql = new Sql(ds)
-            //TODO UPDATE QUERY WHEN more columns are added to the 'model' table
             try {
-                mostRecentModelDetails = sql.firstRow("select max(id) as id from model")
+                /*
+                 * may need to rewrite this query in the future as
+                 * select * from model where id = (select max(id) from model),
+                 * to be more generic, but the current query is more optimised for our needs.
+                 */
+                mostRecentModelDetails = sql.firstRow("""\
+select max(id) as id, submissionId, publicationId from model""")
             } catch (Exception e) {
                 final String W = """Unable to access the database - model IDs will be created \
 using the default values."""
@@ -123,9 +128,6 @@ using the default values."""
             if (IS_DEBUG_ENABLED) {
                 log.debug "Most recent model in database is ${mostRecentModelDetails}"
             }
-            // TODO REMOVE THESE TWO VALUES ONCE Model contains these attributes!
-            //mostRecentModelDetails["submissionId"] = "DDMORE201406020002"
-            //mostRecentModelDetails["publicationId"] = null
             sql.close() // very important
         }
         Map<String, ModelIdentifierGenerator> generatorBeans = [:]
