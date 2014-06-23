@@ -942,6 +942,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         model.vcsIdentifier = modelPath
         //model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
 
+        model.submissionId = submissionIdGenerator.generate()
         Revision revision = new Revision(model: model,
                 revisionNumber: 1,
                 owner: User.findByUsername(springSecurityService.authentication.name),
@@ -1207,6 +1208,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         stopWatch.lap("Finished importing model in VCS.")
         stopWatch.setTag("modelService.uploadModelAsList.gormValidation")
+        model.submissionId = submissionIdGenerator.generate()
         domainObjects.each {
             revision.addToRepoFiles(it)
         }
@@ -1215,7 +1217,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             if (meta.publication) {
             	model.publication = Publication.fromCommandObject(meta.publication)
             }
-            model.submissionId = submissionIdGenerator.generate()
             if (!model.validate()) {
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
                 revision.discard()
@@ -1266,7 +1267,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             revision.discard()
             domainObjects.each {it.discard()}
             model.discard()
-            println("New Model ${model.properties} with properties ${meta.properties} does not validate:${revision.errors.allErrors.inspect()}")
             log.error("New Model ${model.properties} with properties ${meta.properties} does not validate:${revision.errors.allErrors.inspect()}")
             throw new ModelException(model.toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
         }
