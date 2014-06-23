@@ -64,7 +64,7 @@ abstract class AbstractModelIdentifierGenerator implements ModelIdentifierGenera
     }
 
     @Override
-    void onApplicationEvent(ModelIdentifierDecoratorUpdatedEvent decoratorUpdatedEvent) {
+    void onApplicationEvent(ApplicationEvent decoratorUpdatedEvent) {
         if (IS_INFO_ENABLED) {
             log.info "Processing event ${decoratorUpdatedEvent.inspect()}"
         }
