@@ -9,8 +9,11 @@ databaseChangeLog = {
                 def sig = ctx.getBean("submissionIdGenerator")
                 def modelTable = sql.dataSet("model")
                 modelTable.rows().each { m ->
-                    String sId = sig.generate()
-                    sql.executeUpdate "update model set submission_id = $sId where id = ${m.id}"
+                    final boolean GENERATE_IDENTIFIER = !(m.submission_id)
+                    if (GENERATE_IDENTIFIER) {
+                        String sId = sig.generate()
+                        sql.executeUpdate "update model set submission_id = $sId where id = ${m.id}"
+                    }
                 }
             }
         }
