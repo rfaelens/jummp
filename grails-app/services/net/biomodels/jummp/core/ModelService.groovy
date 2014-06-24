@@ -295,7 +295,8 @@ JOIN r.model AS m
 JOIN r.owner as u 
 WHERE r.deleted = false
 '''
-if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) {
+//do we want to show information from the latest revision?
+if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) { 
             query += '''AND r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2, 
             			AclEntry ace2  where r.model=r2.model 
             			AND r2.id=ace2.aclObjectIdentity.objectId 
@@ -303,7 +304,7 @@ if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.F
             			AND ace2.sid.sid IN (:roles) AND ace2.mask IN (:permissions)
             			AND ace2.granting = true)'''
         }
-        else if (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE) {
+        else  {                                      ////otherwise sortColumn must be the following .. ie we want to sort by the first revision (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE)
             query += '''AND r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2,
             			AclEntry ace2  where r.model=r2.model
             			AND r2.id=ace2.aclObjectIdentity.objectId
@@ -356,11 +357,10 @@ ORDER BY
         Map params = [
             className: Revision.class.getName(),
             permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
-            roles: roles, max: count, offset: offset]
+            max: count, offset: offset, roles: roles]
         if (filter && filter.length() >= 3) {
             params.put("filter", "%${filter.toLowerCase()}%");
         }
-
         List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, params)
         return resultSet.collect {it.first()}
     }
