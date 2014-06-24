@@ -101,7 +101,7 @@ class ModelHistoryService {
         while (ModelHistoryItem.countByUser(user) >= maxNumber) {
             // exceeded the maximum number - drop oldest item
             // TODO: write a proper query to faster delete the item
-            ModelHistoryItem.findAllByUser(user).sort { a, b -> a.lastAccessedDate <=> b.lastAccessedDate }.first().delete()
+            ModelHistoryItem.findAllByUser(user).sort { it.lastAccessedDate }.first().delete()
         }
         ModelHistoryItem newItem = ModelHistoryItem.create(model, user)
         newItem.save(flush: true)
