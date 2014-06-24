@@ -2016,7 +2016,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      */
     @PreAuthorize("(hasRole('ROLE_CURATOR') and hasPermission(#revision, admin)) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
-    @Profiled(tag="modelService.publishModelRevision")
+    @Profiled(tag="modelService.unpublishModelRevision")
     public void unpublishModelRevision(Revision revision) {
         if (!revision) {
             throw new IllegalArgumentException("Revision may not be null")
