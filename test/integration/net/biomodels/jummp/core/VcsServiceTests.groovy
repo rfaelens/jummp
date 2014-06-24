@@ -142,7 +142,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         String modelIdentifier="target/vcs/git"
         assertFalse(vcsService.isValid())
         // first create a model
-        Model model = new Model(vcsIdentifier: modelIdentifier)
+        Model model = new Model(vcsIdentifier: modelIdentifier, submissionId: "MODEL001")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name: "test", description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
@@ -217,7 +217,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         String modelIdentifier="target/vcs/git"
         assertFalse(vcsService.isValid())
         // first create a model
-        Model model = new Model(vcsIdentifier: modelIdentifier)
+        Model model = new Model(vcsIdentifier: modelIdentifier, submissionId: "MODEL001")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"test",description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
@@ -434,7 +434,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         String modelIdentifier="target/vcs/git"
         assertFalse(vcsService.isValid())
         // first create a model
-        Model model = new Model(vcsIdentifier: modelIdentifier)
+        Model model = new Model(vcsIdentifier: modelIdentifier, submissionId: "MODEL001")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"test",description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifier("UNKNOWN"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
