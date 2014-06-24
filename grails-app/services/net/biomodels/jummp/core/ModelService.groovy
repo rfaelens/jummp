@@ -1145,7 +1145,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         model.vcsIdentifier = modelPath
         //model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
-
+        model.submissionId = submissionIdGenerator.generate()
         Revision revision = new Revision(model: model,
                 revisionNumber: 1,
                 owner: User.findByUsername(springSecurityService.authentication.name),
