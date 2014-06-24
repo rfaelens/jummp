@@ -1989,15 +1989,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 throw new AccessDeniedException("You cannot publish this model.");
             }
         }
-        Model model = revision.model
-        if (MAKE_PUBLICATION_ID) {
-            model.publicationId = model.publicationId ?: publicationIdGenerator.generate()
-        }
         if (!revision) {
             throw new IllegalArgumentException("Revision may not be null")
         }
         if (revision.deleted) {
             throw new IllegalArgumentException("Revision may not be deleted")
+        }
+        Model model = revision.model
+        if (MAKE_PUBLICATION_ID) {
+            model.publicationId = model.publicationId ?: publicationIdGenerator.generate()
         }
         aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
         aclUtilService.addPermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)

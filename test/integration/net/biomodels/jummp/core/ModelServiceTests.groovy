@@ -1133,7 +1133,7 @@ class ModelServiceTests extends JummpIntegrationTest {
     @Test
     void testGrantReadAccess() {
         // create a model with some revisions
-        Model model = new Model(vcsIdentifier: "test.xml", submission: "model12345")
+        Model model = new Model(vcsIdentifier: "test.xml", submissionId: "model12345")
         Revision rev1 = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
         Revision rev2 = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
         Revision rev3 = new Revision(model: model, vcsId: "3", revisionNumber: 3, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
