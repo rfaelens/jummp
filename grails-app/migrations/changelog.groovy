@@ -1146,14 +1146,16 @@ databaseChangeLog = {
 		addForeignKeyConstraint(baseColumnNames: "target_content_id", baseTableName: "wcm_related_content", constraintName: "FKDE7BDB47361353A8", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "wcm_content", referencesUniqueColumn: "false")
 	}
 
-	include file: 'author2person.groovy'
-	include file: 'missing_indices.groovy'
+    include file: 'author2person.groovy'
+    include file: 'missing_indices.groovy'
 
-	include file: '20140410pub-person.groovy'
-	
-	include file: '20140410createPubPerson.groovy'
+    include file: '20140410pub-person.groovy'
 
-	include file: '20140622_add_model_submission_and_publication_id.groovy'
+    include file: '20140410createPubPerson.groovy'
+
+    include file: '20140622_add_model_submission_and_publication_id.groovy'
 
     include file: '20140623populate_model_submission_and_publication_id.groovy'
+
+    include file: '20140625make_perennial_id_unique.groovy'
 }

@@ -85,7 +85,7 @@ class Model implements Serializable {
         })
         publication(nullable: true)
         deleted(nullable: false)
-        submissionId blank: false
+        submissionId blank: false, unique: true
         publicationId nullable: true
     }
 
