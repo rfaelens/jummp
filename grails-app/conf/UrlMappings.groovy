@@ -24,42 +24,35 @@
 
 class UrlMappings {
 
-	static mappings = {
-		/*"/$controller/$action?/$id?(.${format})?"{
+    static mappings = {
+        "/$controller/$action?/$id?"{
             constraints {
                 // apply constraints here
-            }*/
-            "/$controller/$action?/$id?"{
-            	constraints {
-            		// apply constraints here
-            	}
             }
+        }
 
-	"/"(view:"/index")
-	"/maintenance"(controller: 'maintenance')
-	"/maintenance/turnOn"(controller: 'maintenance', action: 'turnOn')
-	"403"(controller: "errors", action: "error403")
+        "/"(view:"/index")
+        "/maintenance"(controller: 'maintenance')
+        "/maintenance/turnOn"(controller: 'maintenance', action: 'turnOn')
+        "403"(controller: "errors", action: "error403")
         "404"(controller: "errors", action: "error404")
         "500"(controller: "errors", action: "error500")
-        "500"(controller: "errors", action: "error403", exception: org.springframework.security.access.AccessDeniedException)
+        "500"(controller: "errors", action: "error403", exception:
+                    org.springframework.security.access.AccessDeniedException)
         "/models"(controller: "search", action: "list")
-	"/search"(controller: "search", action: "search")
-	"/share"(controller: "model", action: "share")
-	"/archive"(controller: "search", action: "archive")
-	"/feedback"(controller:"jummp", action:"feedback")
-	"/lookupUser"(controller:"jummp", action:"lookupUser")
-	"/registration"(controller:"usermanagement", action:"create")
-	"/forgotpassword"(controller:"usermanagement", action:"forgot")
-	"/user/editUser"(controller:"usermanagement", action:"edit")
-	"/user/editPassword"(controller:"usermanagement", action:"editPassword")
-	"/user"(controller:"usermanagement", action:"show")
-	"/model/create"(controller: "model", action: "create")
-	"/model/$id"(controller:"model", action:"show")
-	"/model/update"(controller: "model", action: "update")
-	"/model/publish"(controller: "model", action: "publish")
-	/*"/model/$id"(controller:"model") {
-       action = [GET:"show", PUT:"update", DELETE:"delete", POST:"save"]
-    }*/
-	
-        }
+        "/search"(controller: "search", action: "search")
+        "/share"(controller: "model", action: "share")
+        "/archive"(controller: "search", action: "archive")
+        "/feedback"(controller:"jummp", action:"feedback")
+        "/lookupUser"(controller:"jummp", action:"lookupUser")
+        "/registration"(controller:"usermanagement", action:"create")
+        "/forgotpassword"(controller:"usermanagement", action:"forgot")
+        "/user/editUser"(controller:"usermanagement", action:"edit")
+        "/user/editPassword"(controller:"usermanagement", action:"editPassword")
+        "/user"(controller:"usermanagement", action:"show")
+        "/model/create"(controller: "model", action: "create")
+        "/model/$id"(controller:"model", action:"show")
+        "/model/update"(controller: "model", action: "update")
+        "/model/publish"(controller: "model", action: "publish")
+    }
 }

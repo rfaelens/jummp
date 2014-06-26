@@ -2070,10 +2070,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 ModelAudit audit = ModelAudit.lock(itemId)
                 audit.success = success
                 audit.save()
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 log.error("Failed to update audit for "+itemId+" with success: "+success)
-                e.printStackTrace();
             }
         }
     }
