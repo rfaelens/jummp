@@ -159,10 +159,6 @@ log4j = {
 
     // configure the performanceStatsAppender to log at INFO level
     info   performanceStatsAppender: 'org.perf4j.TimingLogger'
-    debug  jummpAppender: [
-            'grails.app', //everything provided by grails-app, e.g. services
-            'net.biomodels.jummp' // everything from jummp
-    ]
     error  jummpAppender: [
         'org.codehaus.groovy.grails.web.servlet',  //  controllers
         'org.codehaus.groovy.grails.web.pages', //  GSP
@@ -183,6 +179,7 @@ log4j = {
 
     rollingFile name: "debugAppender", file: "logs/jummp-debug.log", threshold: org.apache.log4j.Level.DEBUG
     debug  debugAppender: [
+        'grails.app', //everything provided by grails-app, e.g. services
         'net.biomodels.jummp'
     ]
 }
