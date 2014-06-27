@@ -57,14 +57,13 @@ class ModelIdentifierUtilsSpec {
                     }
                 }
             }
-            database { //TODO MOVE TO H2
-                username = 'jummp'
-                password = 'jummpHigher'
-                type = 'MYSQL'
-                server = 'localhost'
-                port = '3306'
-                database = 'ddmore-live'
-            }'''
+            database {
+                    username = 'sa'
+                    password = ''
+                    type = 'h2'
+                    // fall back to an in-memory H2 database instance
+                }
+        '''
         ConfigObject settings = new ConfigSlurper().parse(conf)
         try {
             ModelIdentifierUtils.processGeneratorSettings(settings)
