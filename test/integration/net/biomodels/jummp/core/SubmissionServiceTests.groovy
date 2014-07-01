@@ -37,7 +37,7 @@ package net.biomodels.jummp.core
 import static org.junit.Assert.*
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
-import java.util.UUID.randomUUID
+import java.util.UUID
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
@@ -107,7 +107,7 @@ class SubmissionServiceTests extends JummpIntegrationTest {
     }
 
     private String addTestFile(Map<String, Object> workingMemory) {
-        String guid = randomUUID() as String
+        String guid = UUID.randomUUID() as String
         def mains = [getFile("mainFile.txt", "this is a main file")]
         File additional = getFile("addFile.txt", guid)
         Map<File, String> adds=new HashMap<File, String>()
@@ -130,7 +130,7 @@ class SubmissionServiceTests extends JummpIntegrationTest {
     }
 
     private String addAdditionalFile(Map<String, Object> workingMemory, String directory=null) {
-        String guid = randomUUID() as String
+        String guid = UUID.randomUUID() as String
         File additional
         if (!directory) {
             additional = getFile("addFile.txt", guid)
@@ -272,7 +272,7 @@ class SubmissionServiceTests extends JummpIntegrationTest {
         workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
         submissionService.initialise(workingMemory)
         String directory = new File(workingMemory.get("LastRevision").getFiles()[0].path).getParent()
-        String guid = randomUUID() as String
+        String guid = UUID.randomUUID() as String
         File newMain = getFile("newMain.txt", guid, directory)
         workingMemory.put("submitted_mains", [newMain])
         def deleteThese = ["mainFile.txt"]
