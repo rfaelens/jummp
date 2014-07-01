@@ -34,16 +34,14 @@
 
 package net.biomodels.jummp.core
 
-import net.biomodels.jummp.core.model.ModelListSorting
-import org.springframework.security.access.AccessDeniedException
-import net.biomodels.jummp.core.model.ModelTransportCommand
-import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
-import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.core.model.ModelListSorting
+import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.PublicationTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.plugins.security.User
-import java.util.List
-import java.util.Map
+import org.springframework.security.access.AccessDeniedException
 
 /**
  * @short Service Interface for accessing the Model Service from a Remote Adapter.
@@ -113,17 +111,17 @@ public interface IModelService {
     **/
     public Integer getModelCount()
     /**
-     * Returns the Model identified by @p modelId
+     * Returns the Model identified by perennial identifier @p modelId
      * @param modelId The Model to be returned
      * @return The Model if available
      */
-    public ModelTransportCommand getModel(long modelId)
+    public ModelTransportCommand getModel(String modelId)
     /**
     * Queries the model for the latest available revision the user has read access to.
     * @param modelId The id of the Model for which the latest revision should be retrieved.
     * @return Latest Revision the current user has read access to. If there is no such revision null is returned
     **/
-    public RevisionTransportCommand getLatestRevision(long modelId)
+    public RevisionTransportCommand getLatestRevision(String modelId)
     /**
     * Queries the model for all revisions the user has read access to.
     * The returned list is ordered by revision number of the model.
@@ -131,14 +129,14 @@ public interface IModelService {
     * @return List of Revisions ordered by revision numbers of underlying VCS. If the user has no access to any revision an empty list is returned
     * @todo: add paginated version with offset and count. Problem: filter
     **/
-    public List<RevisionTransportCommand> getAllRevisions(long modelId)
+    public List<RevisionTransportCommand> getAllRevisions(String modelId)
     /**
      * Retrieves the Revision for the Model identified by @p modelId and @p revisionNumber
      * @param modelId The Id of the model
      * @param revisionNumber The revision in context of the Model
      * @return The Revision or @c null if there is no such Revision
      */
-    public RevisionTransportCommand getRevision(long modelId, int revisionNumber)
+    public RevisionTransportCommand getRevision(String modelId, int revisionNumber)
     /**
      * Returns the reference publication of this model.
      * @param modelId The if of the Model for which the reference publication should be returned.
@@ -146,7 +144,7 @@ public interface IModelService {
      * @throws IllegalArgumentException if @p model is null
      * @throws AccessDeniedException if the current user is not allowed to access at least one Model Revision
      */
-    public PublicationTransportCommand getPublication(final long modelId) throws AccessDeniedException, IllegalArgumentException
+    public PublicationTransportCommand getPublication(final String modelId) throws AccessDeniedException, IllegalArgumentException
     /**
     * Creates a new Model and stores it in the VCS.
     *
@@ -172,13 +170,13 @@ public interface IModelService {
     * @return The new added Revision. In case an error occurred while accessing the VCS @c null will be returned.
     * @throws ModelException If either @p model, @p file or @p comment are null or if the file does not exists or is a directory
     **/
-    public RevisionTransportCommand addRevision(long modelId, final File file, final ModelFormatTransportCommand format, final String comment) throws ModelException
+    public RevisionTransportCommand addRevision(String modelId, final File file, final ModelFormatTransportCommand format, final String comment) throws ModelException
     /**
      * Returns whether the current user has the right to add a revision to the model.
      * @param modelId The id of the model to check
      * @return @c true if the user has write permission on the revision or is an admin user, @c false otherwise.
      */
-    public Boolean canAddRevision(final long modelId)
+    public Boolean canAddRevision(final String modelId)
     /**
      * Retrieves the model file for the @p revision.
      * @param revision The Model Revision for which the file should be retrieved.
@@ -192,7 +190,7 @@ public interface IModelService {
      * @return Byte Array of the content of the Model file.
      * @throws ModelException In case retrieving from VCS fails.
      */
-    List<RepositoryFileTransportCommand> retrieveModelFiles(final long modelId) throws ModelException
+    List<RepositoryFileTransportCommand> retrieveModelFiles(final String modelId) throws ModelException
 
     /**
     * Grants read access for model to @p collaborator.
@@ -206,7 +204,7 @@ public interface IModelService {
     * @param collaborator The user who should receive read access
     * @todo Might be better in a CollaborationService?
     **/
-    public void grantReadAccess(long modelId, User collaborator)
+    public void grantReadAccess(String modelId, User collaborator)
     /**
     * Grants write access for model to @p collaborator.
     *
@@ -218,7 +216,7 @@ public interface IModelService {
     * @param collaborator The user who should receive write access
     * @todo Might be better in a CollaborationService?
     **/
-    public void grantWriteAccess(long modelId, User collaborator)
+    public void grantWriteAccess(String modelId, User collaborator)
     /**
     * Revokes read access for model from @p collaborator.
     *
@@ -233,7 +231,7 @@ public interface IModelService {
     * @return @c true if the right has been revoked, @c false otherwise
     * @todo Might be better in a CollaborationService?
     **/
-    public boolean revokeReadAccess(long modelId, User collaborator)
+    public boolean revokeReadAccess(String modelId, User collaborator)
     /**
     * Revokes write access for model from @p collaborator.
     *
@@ -245,7 +243,7 @@ public interface IModelService {
     * @return @c true if the right has been revoked, @c false otherwise
     * @todo Might be better in a CollaborationService?
     **/
-    public boolean revokeWriteAccess(long modelId, User collaborator)
+    public boolean revokeWriteAccess(String modelId, User collaborator)
     /**
     * Transfers the ownership of the model to @p collaborator.
     *
@@ -263,7 +261,7 @@ public interface IModelService {
     * @param collaborator The User who becomes the new owner
     * @todo Might be better in a CollaborationService?
     **/
-    public void transferOwnerShip(long modelId, User collaborator)
+    public void transferOwnerShip(String modelId, User collaborator)
     /**
     * Deletes the model including all Revisions.
     *
@@ -276,7 +274,7 @@ public interface IModelService {
     * @return @c true in case the Model has been deleted, @c false otherwise.
     * @see restoreModel
     **/
-    public boolean deleteModel(long modelId)
+    public boolean deleteModel(String modelId)
     /**
     * Restores the deleted model.
     *
@@ -286,7 +284,15 @@ public interface IModelService {
     * @see deleteModel
     * @todo might belong in an administration service?
     **/
-    public boolean restoreModel(long modelId)
+    public boolean restoreModel(String modelId)
     public boolean deleteRevision(RevisionTransportCommand revision)
     public void publishModelRevision(RevisionTransportCommand revision)
+    /**
+     * Finds the model with the specified perennial identifier.
+     *
+     * @p identifier the perennial identifier against which to perform the search.
+     * @return @c null if there was no match, @c the ModelTransportCommand of the corresponding
+     * model otherwise.
+     */
+    public ModelTransportCommand findByPerennialIdentifier(String identifier)
 }

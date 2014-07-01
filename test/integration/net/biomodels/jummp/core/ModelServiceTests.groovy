@@ -34,6 +34,8 @@
 
 package net.biomodels.jummp.core
 
+import static org.junit.Assert.*
+import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
@@ -45,6 +47,7 @@ import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.git.GitManagerFactory
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.webapp.ModelController
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Constants
@@ -56,8 +59,6 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
-import static org.junit.Assert.*
-import net.biomodels.jummp.webapp.ModelController
 
 @TestMixin(IntegrationTestMixin)
 class ModelServiceTests extends JummpIntegrationTest {
@@ -78,13 +79,13 @@ class ModelServiceTests extends JummpIntegrationTest {
     }
 
     @After
-     void tearDown() {
+    void tearDown() {
         try {
-     	     FileUtils.deleteDirectory(new File("target/vcs/git"))
-     	     FileUtils.deleteDirectory(new File("target/vcs/exchange"))
-     	}
-     	catch(Exception ignore) {
-     	}
+            FileUtils.deleteDirectory(new File("target/vcs/git"))
+            FileUtils.deleteDirectory(new File("target/vcs/exchange"))
+        }
+        catch(Exception ignore) {
+        }
         modelService.vcsService.vcsManager = null
         modelService.modelFileFormatService = modelFileFormatService
     }
@@ -291,11 +292,11 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertSame(rev6, modelService.getLatestRevision(model))
         authenticateAsAdmin()
         assertSame(rev6, modelService.getLatestRevision(model))
-        
+
         def modelController = new ModelController()
-        modelController.params.id = ""+model.id
+        modelController.params.id = "${model.submissionId}"
         modelController.show()
-        
+
         // let's delete the model
         authenticateAsAdmin()
         assertTrue(modelService.deleteModel(model))
@@ -304,7 +305,6 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertFalse(modelService.canAddRevision(model))
     }
 
-    
     @Test
     void testGetByRevisionIdentifier() {
         // create Model with one revision, without ACL
@@ -318,24 +318,24 @@ class ModelServiceTests extends JummpIntegrationTest {
         // only admin should see the revision
         authenticateAsTestUser()
         shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}")
+        	modelService.getRevision("${model.submissionId}")
         }
         authenticateAsUser()
         shouldFail(AccessDeniedException) {
-        	modelService.getRevision("${model.id}")
+        	modelService.getRevision("${model.submissionId}")
         }
         authenticateAsAdmin()
-        assertSame(revision, modelService.getRevision("${model.id}"))
+        assertSame(revision, modelService.getRevision("${model.submissionId}"))
         // adding permission for the users
         aclUtilService.addPermission(revision, "username", BasePermission.READ)
         aclUtilService.addPermission(revision, "testuser", BasePermission.READ)
         // now our users should see the revision
         authenticateAsTestUser()
-        assertSame(revision, modelService.getRevision("${model.id}"))
+        assertSame(revision, modelService.getRevision("${model.submissionId}"))
         authenticateAsUser()
-        assertSame(revision, modelService.getRevision("${model.id}"))
+        assertSame(revision, modelService.getRevision("${model.submissionId}"))
         authenticateAsAdmin()
-        assertSame(revision, modelService.getRevision("${model.id}"))
+        assertSame(revision, modelService.getRevision("${model.submissionId}"))
         // add some more revisions
         Revision rev2 = new Revision(model: model, vcsId: "2", revisionNumber: 2, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
         Revision rev3 = new Revision(model: model, vcsId: "3", revisionNumber: 3, owner: User.findByUsername("username"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
@@ -356,33 +356,31 @@ class ModelServiceTests extends JummpIntegrationTest {
         model.save()
         // no acl set for these new revisions, user should still see previous revision, admin should see rev6
         authenticateAsTestUser()
-        assertSame(revision, modelService.getRevision("${model.id}"))
+        assertSame(revision, modelService.getRevision("${model.submissionId}"))
         authenticateAsUser()
-        assertSame(revision, modelService.getRevision("${model.id}"))
+        assertSame(revision, modelService.getRevision("${model.submissionId}"))
         authenticateAsAdmin()
-        assertSame(rev6, modelService.getRevision("${model.id}"))
+        assertSame(rev6, modelService.getRevision("${model.submissionId}"))
         // let's add some ACL
         aclUtilService.addPermission(rev3, "testuser", BasePermission.READ)
         aclUtilService.addPermission(rev6, "username", BasePermission.READ)
         authenticateAsTestUser()
-        assertSame(rev3, modelService.getRevision("${model.id}.${rev3.revisionNumber}"))
+        assertSame(rev3, modelService.getRevision("${model.submissionId}.${rev3.revisionNumber}"))
         authenticateAsUser()
-        assertSame(rev6, modelService.getRevision("${model.id}.${rev6.revisionNumber}"))
+        assertSame(rev6, modelService.getRevision("${model.submissionId}.${rev6.revisionNumber}"))
         // admin should see everything
         authenticateAsAdmin()
-        assertSame(rev2, modelService.getRevision("${model.id}.${rev2.revisionNumber}"))
-        assertSame(rev3, modelService.getRevision("${model.id}.${rev3.revisionNumber}"))
-        assertSame(rev4, modelService.getRevision("${model.id}.${rev4.revisionNumber}"))
-        assertSame(rev5, modelService.getRevision("${model.id}.${rev5.revisionNumber}"))
-        assertSame(rev6, modelService.getRevision("${model.id}.${rev6.revisionNumber}"))
+        assertSame(rev2, modelService.getRevision("${model.submissionId}.${rev2.revisionNumber}"))
+        assertSame(rev3, modelService.getRevision("${model.submissionId}.${rev3.revisionNumber}"))
+        assertSame(rev4, modelService.getRevision("${model.submissionId}.${rev4.revisionNumber}"))
+        assertSame(rev5, modelService.getRevision("${model.submissionId}.${rev5.revisionNumber}"))
+        assertSame(rev6, modelService.getRevision("${model.submissionId}.${rev6.revisionNumber}"))
     }
 
-    
-    
     @Test
     @SuppressWarnings('UnusedVariable')
     void testGetAllModels() {
-        for (int i=0; i<30; i++) {
+        30.times { i ->
             // create thirty models
             final String rootPath = fileSystemService.root.getCanonicalPath()
             // the vcs identifier for a model should always be relative to the root where all models are stored
@@ -402,7 +400,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertEquals(10, testElements.size())
         assertSame(Revision.findByName("0").model, testElements.first())
         // use a loop on all elements
-        for (int i=0; i<10; i++) {
+        10.times { i ->
             assertSame(Revision.findByName("${i}").model, testElements[i])
         }
         // get five elements starting from 15

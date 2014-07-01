@@ -178,13 +178,13 @@ class SearchController {
 
     @Secured(['ROLE_ADMIN'])
     def regen = {
-        long start=System.currentTimeMillis()
+        long start = System.currentTimeMillis()
         modelService.regenerateIndices()
-        [regenTime:System.currentTimeMillis() - start]
+        [regenTime: System.currentTimeMillis() - start]
     }
 
     private def searchCore(String query, String sortBy, String sortDirection, int offset, int length) {
-        List<MTC> models=[]
+        List<MTC> models = []
         if (query?.trim()) {
             models.addAll(modelService.searchModels(query))
         }

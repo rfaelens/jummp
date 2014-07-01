@@ -550,10 +550,10 @@ class SubmissionService {
         @Profiled(tag = "submissionService.NewModelStateMachine.completeSubmission")
         HashSet<String> completeSubmission(Map<String,Object> workingMemory) {
             List<RFTC> repoFiles = getRepFiles(workingMemory)
-            RTC revision=workingMemory.get("RevisionTC") as RTC
-            MTC model=revision.model
-            model.format=revision.format
-            revision.comment="Import of ${revision.name}".toString()
+            RTC revision = workingMemory.get("RevisionTC") as RTC
+            MTC model = revision.model
+            model.format = revision.format
+            revision.comment = "Import of ${revision.name}".toString()
             Model newModel = modelService.uploadValidatedModel(repoFiles, revision)
             Revision latest = modelService.getLatestRevision(newModel)
             RTC latestRTC = latest.toCommandObject()
@@ -571,8 +571,9 @@ class SubmissionService {
                 latestRTC.comment = "Edited model metadata online."
                 modelService.addValidatedRevision(latestRTC.files, [], latestRTC)
             }
-            workingMemory.put("model_id", newModel.id)
-            return new TreeSet<String>(); //no need to track changes made during submission
+            println "setting new model id to ${newModel.submissionId}"
+            workingMemory.put("model_id", newModel.submissionId)
+            return new TreeSet<String>() //no need to track changes made during submission
         }
     }
 
@@ -673,23 +674,23 @@ class SubmissionService {
          */
         @Profiled(tag = "submissionService.NewRevisionStateMachine.completeSubmission")
         HashSet<String> completeSubmission(Map<String,Object> workingMemory) {
-            HashSet<String> changes=new TreeSet<String>();
-            RTC revision=workingMemory.get("RevisionTC") as RTC
+            HashSet<String> changes = new TreeSet<String>()
+            RTC revision = workingMemory.get("RevisionTC") as RTC
             List<RFTC> repoFiles = getRepFiles(workingMemory)
-            List<RFTC> deleteFiles= getRepFiles(workingMemory, "removeFromVCS")
+            List<RFTC> deleteFiles = getRepFiles(workingMemory, "removeFromVCS")
             deleteFiles.each {
-            	File file=new File(it.path)
+            	File file = new File(it.path)
             	changes.add("Deleted file: ${file.getName()}")
             }
-            def existing=workingMemory.get("existing_files") as List<RFTC>
-        	repoFiles.each { it ->
-        		String fileAdded=new File(it.path).getName();
-            	def exists= existing.find {	fileExisting ->
-            			fileAdded == new File(fileExisting.path).getName()
-            	}
-            	if (!exists) {
-            		changes.add("Added file: ${fileAdded}")
-            	}
+            def existing = workingMemory.get("existing_files") as List<RFTC>
+            repoFiles.each { it ->
+                String fileAdded = new File(it.path).getName();
+                def exists = existing.find { fileExisting ->
+                    fileAdded == new File(fileExisting.path).getName()
+                }
+                if (!exists) {
+                    changes.add("Added file: ${fileAdded}")
+                }
             }
             Revision newlyCreated = modelService.addValidatedRevision(repoFiles, deleteFiles, revision)
             RTC newlyCreatedRTC = newlyCreated.toCommandObject()
@@ -708,9 +709,11 @@ class SubmissionService {
                 newlyCreatedRTC.comment = "Edited model metadata online."
                 def updated = modelService.addValidatedRevision(
                         newlyCreatedRTC.files, [], newlyCreatedRTC)
-                workingMemory.put("model_id", updated.model.id)
+                println "setting updated model id to ${updated.model.submissionId}"
+                workingMemory.put("model_id", updated.model.submissionId)
             } else {
-                workingMemory.put("model_id", newlyCreated.model.id)
+                println "setting updated model id to ${newlyCreated.model.submissionId}"
+                workingMemory.put("model_id", newlyCreated.model.submissionId)
             }
             return changes
         }

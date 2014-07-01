@@ -31,7 +31,7 @@ class NumericalModelIdentifierPartition extends ModelIdentifierPartition {
     NumericalModelIdentifierPartition(String fixedSetting, String widthSetting) {
         fixed = Boolean.parseBoolean(fixedSetting)
         width = Integer.parseInt(widthSetting)
-        value = "1".padLeft(width, '0')
+        value = "0".padLeft(width, '0')
     }
 
     @Override

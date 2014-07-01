@@ -34,11 +34,11 @@
          <g:javascript contextPath="" src="jquery/jquery-ui-v1.10.3.js"/>
     </head>
     <body>
-    	<g:render template="/templates/datatable" model="['action': 'archive']"/>
+        <g:render template="/templates/datatable" model="['action': 'archive']"/>
     </body>
     <content tag="title">
-		Archived Models
-	</content>
+        Archived Models
+    </content>
     <content tag="contexthelp">
-		archives
-	</content>
+        archives
+    </content>

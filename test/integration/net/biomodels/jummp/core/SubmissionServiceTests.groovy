@@ -34,6 +34,8 @@
 
 package net.biomodels.jummp.core
 
+import static java.util.UUID.randomUUID
+import static org.junit.Assert.*
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
@@ -49,9 +51,7 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.junit.*
-import static java.util.UUID.randomUUID
 import org.springframework.security.acls.domain.BasePermission
-import static org.junit.Assert.*
 
 @TestMixin(IntegrationTestMixin)
 class SubmissionServiceTests extends JummpIntegrationTest {
@@ -67,7 +67,7 @@ class SubmissionServiceTests extends JummpIntegrationTest {
     * Dependency injection of modelService
     */
     def modelService
-    
+
     @Before
     void setUp() {
         // Setup logic here
@@ -107,344 +107,335 @@ class SubmissionServiceTests extends JummpIntegrationTest {
     }
 
     private String addTestFile(Map<String, Object> workingMemory) {
-    	String guid=randomUUID() as String
-    	def mains=[getFile("mainFile.txt", "this is a main file")]
-    	File additional=getFile("addFile.txt", guid)
-    	Map<File, String> adds=new HashMap<File, String>()
-    	adds.put(additional, "this is a desc")
-    	workingMemory.put("submitted_mains", mains)
-    	workingMemory.put("submitted_additionals", adds)
-    	submissionService.handleFileUpload(workingMemory)
-    	assertTrue(workingMemory.containsKey("repository_files"))
-    	assertTrue(workingMemory.get("repository_files").size() == 2)
-    	submissionService.inferModelFormatType(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_type"))
-    	assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
-    	submissionService.performValidation(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_validation_result"))
-    	assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
-    	workingMemory.put("Valid", true)
-    	submissionService.inferModelInfo(workingMemory)
-    	assertTrue(workingMemory.containsKey("RevisionTC"))
-    	return guid
+        String guid = randomUUID() as String
+        def mains = [getFile("mainFile.txt", "this is a main file")]
+        File additional = getFile("addFile.txt", guid)
+        Map<File, String> adds=new HashMap<File, String>()
+        adds.put(additional, "this is a desc")
+        workingMemory.put("submitted_mains", mains)
+        workingMemory.put("submitted_additionals", adds)
+        submissionService.handleFileUpload(workingMemory)
+        assertTrue(workingMemory.containsKey("repository_files"))
+        assertTrue(workingMemory.get("repository_files").size() == 2)
+        submissionService.inferModelFormatType(workingMemory)
+        assertTrue(workingMemory.containsKey("model_type"))
+        assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
+        submissionService.performValidation(workingMemory)
+        assertTrue(workingMemory.containsKey("model_validation_result"))
+        assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
+        workingMemory.put("Valid", true)
+        submissionService.inferModelInfo(workingMemory)
+        assertTrue(workingMemory.containsKey("RevisionTC"))
+        return guid
     }
-    
+
     private String addAdditionalFile(Map<String, Object> workingMemory, String directory=null) {
-    	String guid=randomUUID() as String
-    	File additional
-    	if (!directory) {
-    		additional=getFile("addFile.txt", guid)
-    	}
-    	else {
-    		additional=getFile("addFile.txt", guid, directory)
-    	}
-    	Map<File, String> adds=new HashMap<File, String>()
-    	adds.put(additional, "this is a desc")
-    	workingMemory.put("submitted_mains", [])
-    	workingMemory.put("submitted_additionals", adds)
-    	submissionService.handleFileUpload(workingMemory)
-    	assertTrue(workingMemory.containsKey("repository_files"))
-    	assertTrue(workingMemory.get("repository_files").size() == 2)
-    	submissionService.inferModelFormatType(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_type"))
-    	assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
-    	submissionService.performValidation(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_validation_result"))
-    	assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
-    	workingMemory.put("Valid", true)
-    	submissionService.inferModelInfo(workingMemory)
-    	assertTrue(workingMemory.containsKey("RevisionTC"))
-    	return guid
+        String guid = randomUUID() as String
+        File additional
+        if (!directory) {
+            additional = getFile("addFile.txt", guid)
+        }
+        else {
+            additional = getFile("addFile.txt", guid, directory)
+        }
+        Map<File, String> adds = new HashMap<File, String>()
+        adds.put(additional, "this is a desc")
+        workingMemory.put("submitted_mains", [])
+        workingMemory.put("submitted_additionals", adds)
+        submissionService.handleFileUpload(workingMemory)
+        assertTrue(workingMemory.containsKey("repository_files"))
+        assertTrue(workingMemory.get("repository_files").size() == 2)
+        submissionService.inferModelFormatType(workingMemory)
+        assertTrue(workingMemory.containsKey("model_type"))
+        assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
+        submissionService.performValidation(workingMemory)
+        assertTrue(workingMemory.containsKey("model_validation_result"))
+        assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
+        workingMemory.put("Valid", true)
+        submissionService.inferModelInfo(workingMemory)
+        assertTrue(workingMemory.containsKey("RevisionTC"))
+        return guid
     }
 
-   
+
     private void deleteAdditionalFile(Map<String, Object> workingMemory) {
-    	def deleteThese=["addFile.txt"]
-    	workingMemory.put("deleted_filenames", deleteThese)
-    	submissionService.handleFileUpload(workingMemory)
-    	assertTrue(workingMemory.containsKey("repository_files"))
-    	assertTrue(workingMemory.get("repository_files").size() == 1)
-    	submissionService.inferModelFormatType(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_type"))
-    	assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
-    	submissionService.performValidation(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_validation_result"))
-    	assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
-    	workingMemory.put("Valid", true)
-    	submissionService.inferModelInfo(workingMemory)
-    	assertTrue(workingMemory.containsKey("RevisionTC"))
+        def deleteThese = ["addFile.txt"]
+        workingMemory.put("deleted_filenames", deleteThese)
+        submissionService.handleFileUpload(workingMemory)
+        assertTrue(workingMemory.containsKey("repository_files"))
+        assertTrue(workingMemory.get("repository_files").size() == 1)
+        submissionService.inferModelFormatType(workingMemory)
+        assertTrue(workingMemory.containsKey("model_type"))
+        assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
+        submissionService.performValidation(workingMemory)
+        assertTrue(workingMemory.containsKey("model_validation_result"))
+        assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
+        workingMemory.put("Valid", true)
+        submissionService.inferModelInfo(workingMemory)
+        assertTrue(workingMemory.containsKey("RevisionTC"))
     }
-   
 
-    private void confirmFile(String modelID, String confirmationText, String fileName="addFile.txt") {
-    	List<File> files=modelService
-    						.retrieveModelRepFiles(
-    									modelService.getLatestRevision(
-    											modelService.getModel(Long.parseLong(modelID))))
-    	if (!confirmationText) { //no confirmation text means the file shouldnt exist
-    		assertNull(files.find { it.getName() == fileName})
-    	}
-    	else {
-    		File testFile=files.find { it.getName() == fileName }
-    		String fileText=testFile.getText()
-    		assertEquals(fileText, confirmationText)
-    		assertFalse(fileText == "not this text")
-    	}
+    private void confirmFile(String modelID, String confirmationText,
+                String fileName = "addFile.txt") {
+        List<File> files = modelService.retrieveModelRepFiles(
+                modelService.getLatestRevision(modelService.getModel(modelID)))
+        if (!confirmationText) { //no confirmation text means the file shouldnt exist
+            assertNull(files.find { it.getName() == fileName})
+        }
+        else {
+            File testFile = files.find { it.getName() == fileName }
+            String fileText = testFile.getText()
+            assertEquals(fileText, confirmationText)
+            assertFalse(fileText == "not this text")
+        }
     }
 
     // Creates a model and submits it
     @Test
     void testModelSubmission() {
-    	assertNotNull(authenticateAsTestUser())
-        Map<String, Object> workingMemory=new HashMap<String, Object>()
-    	workingMemory.put("isUpdateOnExistingModel", false)
-    	submissionService.initialise(workingMemory)
-    	String testThis=addTestFile(workingMemory)
-    	def revSummary=['RevisionComments':'Model revised without commit message']
-    	submissionService.updateFromSummary(workingMemory, revSummary)
-    	submissionService.handleSubmission(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_id"))
-		confirmFile(workingMemory.get("model_id") as String, testThis) 	
+        assertNotNull(authenticateAsTestUser())
+        Map<String, Object> workingMemory = new HashMap<String, Object>()
+        workingMemory.put("isUpdateOnExistingModel", false)
+        submissionService.initialise(workingMemory)
+        String testThis = addTestFile(workingMemory)
+        def revSummary = ['RevisionComments':'Model revised without commit message']
+        submissionService.updateFromSummary(workingMemory, revSummary)
+        submissionService.handleSubmission(workingMemory)
+        assertTrue(workingMemory.containsKey("model_id"))
+        confirmFile(workingMemory.get("model_id") as String, testThis)
     }
-    
+
     // Creates a model with a delete after upload
     @Test
     void testModelSubmissionWithDelete() {
-    	assertNotNull(authenticateAsTestUser())
-        Map<String, Object> workingMemory=new HashMap<String, Object>()
-    	workingMemory.put("isUpdateOnExistingModel", false)
-    	submissionService.initialise(workingMemory)
-    	String testThis=addTestFile(workingMemory)
-    	// delete the additional file just uploaded
-    	deleteAdditionalFile(workingMemory)
-    	def revSummary=['RevisionComments':'Model revised without commit message']
-    	submissionService.updateFromSummary(workingMemory, revSummary)
-    	submissionService.handleSubmission(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_id"))
-		confirmFile(workingMemory.get("model_id") as String, null) 	
+        assertNotNull(authenticateAsTestUser())
+        Map<String, Object> workingMemory = new HashMap<String, Object>()
+        workingMemory.put("isUpdateOnExistingModel", false)
+        submissionService.initialise(workingMemory)
+        String testThis = addTestFile(workingMemory)
+        // delete the additional file just uploaded
+        deleteAdditionalFile(workingMemory)
+        def revSummary = ['RevisionComments':'Model revised without commit message']
+        submissionService.updateFromSummary(workingMemory, revSummary)
+        submissionService.handleSubmission(workingMemory)
+        assertTrue(workingMemory.containsKey("model_id"))
+        confirmFile(workingMemory.get("model_id") as String, null) 	
     }
-    
+
     // Updates a file, tests whether the text is the updated text
     @Test
     void testModelUpdate() {
-    	Map<String, Object> workingMemory=new HashMap<String, Object>()
-    	assertNotNull(authenticateAsTestUser())
+        Map<String, Object> workingMemory = new HashMap<String, Object>()
+        assertNotNull(authenticateAsTestUser())
         workingMemory.put("isUpdateOnExistingModel", false)
-    	submissionService.initialise(workingMemory)
-    	String testThis=addTestFile(workingMemory)
-    	def revSummary=['RevisionComments':'Model revised without commit message']
-    	submissionService.updateFromSummary(workingMemory, revSummary)
-    	submissionService.handleSubmission(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_id"))
-    	long model_id=Long.parseLong(workingMemory.get("model_id") as String)
-		confirmFile(""+model_id, testThis)
-		// model created
-		workingMemory=new HashMap<String, Object>()
-    	workingMemory.put("isUpdateOnExistingModel", true)
-    	workingMemory.put("model_id", model_id)
-    	workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
-    	submissionService.initialise(workingMemory)
-    	String directory=new File(workingMemory.get("LastRevision").getFiles()[0].path).getParent()
-    	String text=addAdditionalFile(workingMemory, directory)
-    	submissionService.updateFromSummary(workingMemory, revSummary)
-    	submissionService.handleSubmission(workingMemory)
-    	//model updated... test that the text is what it should be
-    	confirmFile(workingMemory.get("model_id") as String, text)
+        submissionService.initialise(workingMemory)
+        String testThis = addTestFile(workingMemory)
+        def revSummary = ['RevisionComments':'Model revised without commit message']
+        submissionService.updateFromSummary(workingMemory, revSummary)
+        submissionService.handleSubmission(workingMemory)
+        assertTrue(workingMemory.containsKey("model_id"))
+        String model_id = workingMemory.get("model_id")
+        confirmFile("$model_id", testThis)
+        // model created
+        workingMemory = new HashMap<String, Object>()
+        workingMemory.put("isUpdateOnExistingModel", true)
+        workingMemory.put("model_id", model_id)
+        workingMemory.put("LastRevision", modelService.getLatestRevision(
+                    modelService.getModel(model_id)).toCommandObject())
+        submissionService.initialise(workingMemory)
+        String directory = new File(workingMemory.get("LastRevision").getFiles()[0].path).getParent()
+        String text = addAdditionalFile(workingMemory, directory)
+        submissionService.updateFromSummary(workingMemory, revSummary)
+        submissionService.handleSubmission(workingMemory)
+        //model updated... test that the text is what it should be
+        confirmFile(workingMemory.get("model_id") as String, text)
     }
-    
+
     // Updates a file, tests whether the text is the updated text
     @Test
     void testModelUpdateReplaceMainFile() {
-    	Map<String, Object> workingMemory=new HashMap<String, Object>()
-    	assertNotNull(authenticateAsTestUser())
+        Map<String, Object> workingMemory = new HashMap<String, Object>()
+        assertNotNull(authenticateAsTestUser())
         workingMemory.put("isUpdateOnExistingModel", false)
-    	submissionService.initialise(workingMemory)
-    	String testThis=addTestFile(workingMemory)
-    	def revSummary=['RevisionComments':'Model revised without commit message']
-    	submissionService.updateFromSummary(workingMemory, revSummary)
-    	submissionService.handleSubmission(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_id"))
-    	long model_id=Long.parseLong(workingMemory.get("model_id") as String)
-		confirmFile(""+model_id, testThis)
-		// model created
-		workingMemory=new HashMap<String, Object>()
-    	workingMemory.put("isUpdateOnExistingModel", true)
-    	workingMemory.put("model_id", model_id)
-    	workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
-    	submissionService.initialise(workingMemory)
-    	String directory=new File(workingMemory.get("LastRevision").getFiles()[0].path).getParent()
-    	String guid=randomUUID() as String
-    	File newMain=getFile("newMain.txt", guid, directory)
-    	workingMemory.put("submitted_mains", [newMain])
-    	def deleteThese=["mainFile.txt"]
-    	workingMemory.put("deleted_filenames", deleteThese)
-    	submissionService.handleFileUpload(workingMemory)
-    	assertTrue(workingMemory.containsKey("repository_files"))
-    	assertTrue(workingMemory.get("repository_files").size() == 2)
-    	submissionService.inferModelFormatType(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_type"))
-    	assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
-    	submissionService.performValidation(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_validation_result"))
-    	assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
-    	workingMemory.put("Valid", true)
-    	submissionService.inferModelInfo(workingMemory)
-    	assertTrue(workingMemory.containsKey("RevisionTC"))
-    	submissionService.updateFromSummary(workingMemory, revSummary)
-    	submissionService.handleSubmission(workingMemory)
-    	//model updated... test that the text is what it should be
-    	confirmFile(workingMemory.get("model_id") as String, guid, "newMain.txt")
+        submissionService.initialise(workingMemory)
+        String testThis = addTestFile(workingMemory)
+        def revSummary = ['RevisionComments':'Model revised without commit message']
+        submissionService.updateFromSummary(workingMemory, revSummary)
+        submissionService.handleSubmission(workingMemory)
+        assertTrue(workingMemory.containsKey("model_id"))
+        String model_id = workingMemory.get("model_id")
+        confirmFile(model_id, testThis)
+        // model created
+        workingMemory = new HashMap<String, Object>()
+        workingMemory.put("isUpdateOnExistingModel", true)
+        workingMemory.put("model_id", model_id)
+        workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
+        submissionService.initialise(workingMemory)
+        String directory = new File(workingMemory.get("LastRevision").getFiles()[0].path).getParent()
+        String guid = randomUUID() as String
+        File newMain = getFile("newMain.txt", guid, directory)
+        workingMemory.put("submitted_mains", [newMain])
+        def deleteThese = ["mainFile.txt"]
+        workingMemory.put("deleted_filenames", deleteThese)
+        submissionService.handleFileUpload(workingMemory)
+        assertTrue(workingMemory.containsKey("repository_files"))
+        assertTrue(workingMemory.get("repository_files").size() == 2)
+        submissionService.inferModelFormatType(workingMemory)
+        assertTrue(workingMemory.containsKey("model_type"))
+        assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
+        submissionService.performValidation(workingMemory)
+        assertTrue(workingMemory.containsKey("model_validation_result"))
+        assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
+        workingMemory.put("Valid", true)
+        submissionService.inferModelInfo(workingMemory)
+        assertTrue(workingMemory.containsKey("RevisionTC"))
+        submissionService.updateFromSummary(workingMemory, revSummary)
+        submissionService.handleSubmission(workingMemory)
+        //model updated... test that the text is what it should be
+        confirmFile(workingMemory.get("model_id") as String, guid, "newMain.txt")
     }
-    
-    
+
     //Creates a model, updates it, with a file first updated then deleted. Should be a delete
     @Test
     void testModelUpdateThenDelete() {
-    	Map<String, Object> workingMemory=new HashMap<String, Object>()
-    	assertNotNull(authenticateAsTestUser())
+        Map<String, Object> workingMemory = new HashMap<String, Object>()
+        assertNotNull(authenticateAsTestUser())
         workingMemory.put("isUpdateOnExistingModel", false)
-    	submissionService.initialise(workingMemory)
-    	String testThis=addTestFile(workingMemory)
-    	def revSummary=['RevisionComments':'Model revised without commit message']
-    	submissionService.updateFromSummary(workingMemory, revSummary)
-    	submissionService.handleSubmission(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_id"))
-    	long model_id=Long.parseLong(workingMemory.get("model_id") as String)
-		confirmFile(""+model_id, testThis)
-		// model created
-		workingMemory=new HashMap<String, Object>()
-    	workingMemory.put("isUpdateOnExistingModel", true)
-    	workingMemory.put("model_id", model_id)
-    	workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
-    	submissionService.initialise(workingMemory)
-    	String directory=new File(workingMemory.get("LastRevision").getFiles()[0].path).getParent()
-    	String text=addAdditionalFile(workingMemory, directory)
-    	// delete the file now
-    	def deleteThese=["addFile.txt"]
-    	workingMemory.put("deleted_filenames", deleteThese)
-    	submissionService.handleFileUpload(workingMemory)
-    	assertTrue(workingMemory.containsKey("repository_files"))
-    	assertTrue(workingMemory.get("repository_files").size() == 1)
-    	submissionService.inferModelFormatType(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_type"))
-    	assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
-    	submissionService.performValidation(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_validation_result"))
-    	assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
-    	workingMemory.put("Valid", true)
-    	submissionService.inferModelInfo(workingMemory)
-    	assertTrue(workingMemory.containsKey("RevisionTC"))
-    	
-    	// complete update, and test that the file does not exist in repository
-    	submissionService.updateFromSummary(workingMemory, revSummary)
-    	submissionService.handleSubmission(workingMemory)
-    	confirmFile(workingMemory.get("model_id") as String, null)
-    }
+        submissionService.initialise(workingMemory)
+        String testThis = addTestFile(workingMemory)
+        def revSummary = ['RevisionComments':'Model revised without commit message']
+        submissionService.updateFromSummary(workingMemory, revSummary)
+        submissionService.handleSubmission(workingMemory)
+        assertTrue(workingMemory.containsKey("model_id"))
+        String model_id = workingMemory.get("model_id")
+        confirmFile(""+model_id, testThis)
+        // model created
+        workingMemory = new HashMap<String, Object>()
+        workingMemory.put("isUpdateOnExistingModel", true)
+        workingMemory.put("model_id", model_id)
+        workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
+        submissionService.initialise(workingMemory)
+        String directory = new File(workingMemory.get("LastRevision").getFiles()[0].path).getParent()
+        String text = addAdditionalFile(workingMemory, directory)
+        // delete the file now
+        def deleteThese = ["addFile.txt"]
+        workingMemory.put("deleted_filenames", deleteThese)
+        submissionService.handleFileUpload(workingMemory)
+        assertTrue(workingMemory.containsKey("repository_files"))
+        assertTrue(workingMemory.get("repository_files").size() == 1)
+        submissionService.inferModelFormatType(workingMemory)
+        assertTrue(workingMemory.containsKey("model_type"))
+        assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
+        submissionService.performValidation(workingMemory)
+        assertTrue(workingMemory.containsKey("model_validation_result"))
+        assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
+        workingMemory.put("Valid", true)
+        submissionService.inferModelInfo(workingMemory)
+        assertTrue(workingMemory.containsKey("RevisionTC"))
 
+        // complete update, and test that the file does not exist in repository
+        submissionService.updateFromSummary(workingMemory, revSummary)
+        submissionService.handleSubmission(workingMemory)
+        confirmFile(workingMemory.get("model_id") as String, null)
+    }
 
     //Creates a model, updates it, with a file first deleted then updated. Should be an update
     @Test
     void testModelDeleteThenUpdate() {
-    	Map<String, Object> workingMemory=new HashMap<String, Object>()
-    	assertNotNull(authenticateAsTestUser())
+        Map<String, Object> workingMemory = new HashMap<String, Object>()
+        assertNotNull(authenticateAsTestUser())
         workingMemory.put("isUpdateOnExistingModel", false)
-    	submissionService.initialise(workingMemory)
-    	String testThis=addTestFile(workingMemory)
-    	def revSummary=['RevisionComments':'Model revised without commit message']
-    	submissionService.updateFromSummary(workingMemory, revSummary)
-    	submissionService.handleSubmission(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_id"))
-    	long model_id=Long.parseLong(workingMemory.get("model_id") as String)
-		confirmFile(""+model_id, testThis)
-		// model created
-		workingMemory=new HashMap<String, Object>()
-    	workingMemory.put("isUpdateOnExistingModel", true)
-    	workingMemory.put("model_id", model_id)
-    	workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
-    	submissionService.initialise(workingMemory)
-    	def deleteThese=["addFile.txt"]
-    	workingMemory.put("deleted_filenames", deleteThese)
-    	submissionService.handleFileUpload(workingMemory)
-    	assertTrue(workingMemory.containsKey("repository_files"))
-    	assertTrue(workingMemory.get("repository_files").size() == 1)
-    	// file deleted
-    	submissionService.inferModelFormatType(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_type"))
-    	assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
-    	submissionService.performValidation(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_validation_result"))
-    	assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
-    	workingMemory.put("Valid", true)
-    	submissionService.inferModelInfo(workingMemory)
-    	assertTrue(workingMemory.containsKey("RevisionTC"))
-		// add the file again    	
-    	String directory=new File(workingMemory.get("LastRevision").getFiles()[0].path).getParent()
-    	String text=addAdditionalFile(workingMemory, directory)
-    	submissionService.handleFileUpload(workingMemory)
-    	assertTrue(workingMemory.containsKey("repository_files"))
-    	assertTrue(workingMemory.get("repository_files").size() == 2)
-    	submissionService.inferModelFormatType(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_type"))
-    	assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
-    	submissionService.performValidation(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_validation_result"))
-    	assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
-    	workingMemory.put("Valid", true)
-    	submissionService.inferModelInfo(workingMemory)
-    	assertTrue(workingMemory.containsKey("RevisionTC"))
-    	// submit and ensure that the text is the new text
-    	submissionService.updateFromSummary(workingMemory, revSummary)
-    	submissionService.handleSubmission(workingMemory)
-    	confirmFile(workingMemory.get("model_id") as String, text)
+        submissionService.initialise(workingMemory)
+        String testThis = addTestFile(workingMemory)
+        def revSummary = ['RevisionComments':'Model revised without commit message']
+        submissionService.updateFromSummary(workingMemory, revSummary)
+        submissionService.handleSubmission(workingMemory)
+        assertTrue(workingMemory.containsKey("model_id"))
+        String model_id = workingMemory.get("model_id")
+        confirmFile(model_id, testThis)
+        // model created
+        workingMemory = new HashMap<String, Object>()
+        workingMemory.put("isUpdateOnExistingModel", true)
+        workingMemory.put("model_id", model_id)
+        workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
+        submissionService.initialise(workingMemory)
+        def deleteThese = ["addFile.txt"]
+        workingMemory.put("deleted_filenames", deleteThese)
+        submissionService.handleFileUpload(workingMemory)
+        assertTrue(workingMemory.containsKey("repository_files"))
+        assertTrue(workingMemory.get("repository_files").size() == 1)
+        // file deleted
+        submissionService.inferModelFormatType(workingMemory)
+        assertTrue(workingMemory.containsKey("model_type"))
+        assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
+        submissionService.performValidation(workingMemory)
+        assertTrue(workingMemory.containsKey("model_validation_result"))
+        assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
+        workingMemory.put("Valid", true)
+        submissionService.inferModelInfo(workingMemory)
+        assertTrue(workingMemory.containsKey("RevisionTC"))
+        // add the file again
+        String directory = new File(workingMemory.get("LastRevision").getFiles()[0].path).getParent()
+        String text = addAdditionalFile(workingMemory, directory)
+        submissionService.handleFileUpload(workingMemory)
+        assertTrue(workingMemory.containsKey("repository_files"))
+        assertTrue(workingMemory.get("repository_files").size() == 2)
+        submissionService.inferModelFormatType(workingMemory)
+        assertTrue(workingMemory.containsKey("model_type"))
+        assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
+        submissionService.performValidation(workingMemory)
+        assertTrue(workingMemory.containsKey("model_validation_result"))
+        assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
+        workingMemory.put("Valid", true)
+        submissionService.inferModelInfo(workingMemory)
+        assertTrue(workingMemory.containsKey("RevisionTC"))
+        // submit and ensure that the text is the new text
+        submissionService.updateFromSummary(workingMemory, revSummary)
+        submissionService.handleSubmission(workingMemory)
+        confirmFile(workingMemory.get("model_id") as String, text)
     }
 
-
-    
-    
     @Test
     void testModelDelete() {
-    	Map<String, Object> workingMemory=new HashMap<String, Object>()
-    	assertNotNull(authenticateAsTestUser())
+        Map<String, Object> workingMemory = new HashMap<String, Object>()
+        assertNotNull(authenticateAsTestUser())
         workingMemory.put("isUpdateOnExistingModel", false)
-    	submissionService.initialise(workingMemory)
-    	String testThis=addTestFile(workingMemory)
-    	def revSummary=['RevisionComments':'Model revised without commit message']
-    	submissionService.updateFromSummary(workingMemory, revSummary)
-    	submissionService.handleSubmission(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_id"))
-    	long model_id=Long.parseLong(workingMemory.get("model_id") as String)
-		confirmFile(""+model_id, testThis)
-		workingMemory=new HashMap<String, Object>()
-    	workingMemory.put("isUpdateOnExistingModel", true)
-    	workingMemory.put("model_id", model_id)
-    	workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
-    	submissionService.initialise(workingMemory)
-    	def deleteThese=["addFile.txt"]
-    	workingMemory.put("deleted_filenames", deleteThese)
-    	submissionService.handleFileUpload(workingMemory)
-    	assertTrue(workingMemory.containsKey("repository_files"))
-    	assertTrue(workingMemory.get("repository_files").size() == 1)
-    	submissionService.inferModelFormatType(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_type"))
-    	assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
-    	submissionService.performValidation(workingMemory)
-    	assertTrue(workingMemory.containsKey("model_validation_result"))
-    	assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
-    	workingMemory.put("Valid", true)
-    	submissionService.inferModelInfo(workingMemory)
-    	assertTrue(workingMemory.containsKey("RevisionTC"))
-    	submissionService.updateFromSummary(workingMemory, revSummary)
-    	submissionService.handleSubmission(workingMemory)
-    	confirmFile(workingMemory.get("model_id") as String, null)
+        submissionService.initialise(workingMemory)
+        String testThis = addTestFile(workingMemory)
+        def revSummary = ['RevisionComments':'Model revised without commit message']
+        submissionService.updateFromSummary(workingMemory, revSummary)
+        submissionService.handleSubmission(workingMemory)
+        assertTrue(workingMemory.containsKey("model_id"))
+        String model_id = workingMemory.get("model_id")
+        confirmFile(model_id, testThis)
+        workingMemory = new HashMap<String, Object>()
+        workingMemory.put("isUpdateOnExistingModel", true)
+        workingMemory.put("model_id", model_id)
+        workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
+        submissionService.initialise(workingMemory)
+        def deleteThese = ["addFile.txt"]
+        workingMemory.put("deleted_filenames", deleteThese)
+        submissionService.handleFileUpload(workingMemory)
+        assertTrue(workingMemory.containsKey("repository_files"))
+        assertTrue(workingMemory.get("repository_files").size() == 1)
+        submissionService.inferModelFormatType(workingMemory)
+        assertTrue(workingMemory.containsKey("model_type"))
+        assertEquals(workingMemory.get("model_type") as String, "UNKNOWN")
+        submissionService.performValidation(workingMemory)
+        assertTrue(workingMemory.containsKey("model_validation_result"))
+        assertEquals(workingMemory.get("model_validation_result") as Boolean, true)
+        workingMemory.put("Valid", true)
+        submissionService.inferModelInfo(workingMemory)
+        assertTrue(workingMemory.containsKey("RevisionTC"))
+        submissionService.updateFromSummary(workingMemory, revSummary)
+        submissionService.handleSubmission(workingMemory)
+        confirmFile(workingMemory.get("model_id") as String, null)
     }
-    
 
-    protected File getFile(String filename, String text, String directory=grailsApplication.config.jummp.vcs.exchangeDirectory)
-    {
-        File testFile=new File(new File(directory),
-        					   filename)
+    protected File getFile(String filename, String text,
+                String directory=grailsApplication.config.jummp.vcs.exchangeDirectory) {
+        File testFile = new File(new File(directory), filename)
         testFile.setText(text)
         return testFile
     }
-      
 }

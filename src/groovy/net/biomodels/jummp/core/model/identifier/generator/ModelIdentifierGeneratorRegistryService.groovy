@@ -29,8 +29,6 @@ import org.apache.commons.logging.LogFactory
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class ModelIdentifierGeneratorRegistryService {
-    // No interaction with the database, so disable the proxy providing transactional behaviour
-    //static transactional = false
 
     /* the class logger */
     private static final Log log = LogFactory.getLog(this)

@@ -22,22 +22,23 @@ package net.biomodels.jummp.core.model.identifier
 
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
-import net.biomodels.jummp.core.model.identifier.decorator.OrderedModelIdentifierDecorator
+import net.biomodels.jummp.core.model.identifier.decorator.ChecksumAppendingDecorator
 import net.biomodels.jummp.core.model.identifier.decorator.DateAppendingDecorator
 import net.biomodels.jummp.core.model.identifier.decorator.FixedDigitAppendingDecorator
-import net.biomodels.jummp.core.model.identifier.decorator.VariableDigitAppendingDecorator
-import net.biomodels.jummp.core.model.identifier.decorator.OrderedModelIdentifierDecorator
 import net.biomodels.jummp.core.model.identifier.decorator.FixedLiteralAppendingDecorator
-import net.biomodels.jummp.core.model.identifier.decorator.ChecksumAppendingDecorator
-import net.biomodels.jummp.core.model.identifier.generator.ModelIdentifierGenerator
+import net.biomodels.jummp.core.model.identifier.decorator.OrderedModelIdentifierDecorator
+import net.biomodels.jummp.core.model.identifier.decorator.OrderedModelIdentifierDecorator
+import net.biomodels.jummp.core.model.identifier.decorator.VariableDigitAppendingDecorator
 import net.biomodels.jummp.core.model.identifier.generator.DefaultModelIdentifierGenerator
+import net.biomodels.jummp.core.model.identifier.generator.ModelIdentifierGenerator
 import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
-import net.biomodels.jummp.core.model.identifier.support.ModelIdentifierPartitionManager
-import net.biomodels.jummp.core.model.identifier.support.ModelIdentifierPartition
-import net.biomodels.jummp.core.model.identifier.support.DateModelIdentifierPartition
-import net.biomodels.jummp.core.model.identifier.support.NumericalModelIdentifierPartition
-import net.biomodels.jummp.core.model.identifier.support.LiteralModelIdentifierPartition
 import net.biomodels.jummp.core.model.identifier.support.ChecksumModelIdentifierPartition
+import net.biomodels.jummp.core.model.identifier.support.DateModelIdentifierPartition
+import net.biomodels.jummp.core.model.identifier.support.LiteralModelIdentifierPartition
+import net.biomodels.jummp.core.model.identifier.support.ModelIdentifierPartition
+import net.biomodels.jummp.core.model.identifier.support.ModelIdentifierPartitionManager
+import net.biomodels.jummp.core.model.identifier.support.NumericalModelIdentifierPartition
+import net.biomodels.jummp.model.Model
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.tomcat.jdbc.pool.DataSource
@@ -74,6 +75,7 @@ class ModelIdentifierUtils {
     static final String DEFAULT_PROTOCOL = "h2"
     /* stores the patterns that are used to generate a model identifier */
     static ConfigObject settings
+    static TreeSet perennialFields
 
     /* hide constructor - all non-private methods are static. */
     protected ModelIdentifierUtils() {}
@@ -155,6 +157,7 @@ The configuration settings lack the rules for generating model identifiers!"""
             ModelIdentifierGenerator generator = new DefaultModelIdentifierGenerator(decorators)
             generatorBeans[BEAN_NAME] = generator
         }
+        perennialFields = idSettings.keySet()
         final String PUBLICATION_ID_BEAN_NAME = "publication$GENERATOR_BEAN_SUFFIX"
         boolean publicationIdBeanMissing = !generatorBeans[PUBLICATION_ID_BEAN_NAME]
         if (publicationIdBeanMissing) {

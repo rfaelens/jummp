@@ -21,14 +21,15 @@
 
 
 package net.biomodels.jummp.plugins.webapp
+
 import grails.test.WebFlowTestCase
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
+import net.biomodels.jummp.webapp.ModelController
+import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.mock.web.MockMultipartHttpServletRequest
 import org.springframework.web.context.request.RequestContextHolder
-import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
-import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
-import net.biomodels.jummp.webapp.ModelController
 
 /**
  * WebFlowTestCase seems unable to cope with branching(different routes)
@@ -45,7 +46,7 @@ import net.biomodels.jummp.webapp.ModelController
  */
 
 abstract class FlowBase extends WebFlowTestCase {
-    abstract def getFlow(); 
+    abstract def getFlow()
     abstract void performTest()
 
     /*
@@ -55,7 +56,8 @@ abstract class FlowBase extends WebFlowTestCase {
     protected void setUp() {
         super.setUp()
         mockRequest = new MockMultipartHttpServletRequest()
-        RequestContextHolder.setRequestAttributes(new GrailsWebRequest(mockRequest,mockResponse,mockServletContext,applicationContext))
+        RequestContextHolder.setRequestAttributes(new GrailsWebRequest(mockRequest,
+                    mockResponse, mockServletContext, applicationContext))
         registerFlow("model/upload", new ModelController().uploadFlow)
     }
 
@@ -102,13 +104,13 @@ abstract class FlowBase extends WebFlowTestCase {
 
     /*
      * Convenience function to create arbitrary additional files with corresponding
-     * descriptions. 
+     * descriptions.
      */
-    protected Map<File,String> getRandomAdditionalFiles(int num) {
-        Map<File,String> returnMe=new HashMap<File,String>()
-        for (int i=0; i<num; i++) {
-            returnMe.put(getFileForTest("add_file_"+i+".xml", "my text is "+num),
-            "this is a description for file "+i)
+    protected Map<File, String> getRandomAdditionalFiles(int num) {
+        Map<File,String> returnMe = new HashMap<File,String>()
+        for (int i = 0; i < num; i++) {
+            returnMe.put(getFileForTest("add_file_${i}.xml", "my text is $num"),
+                        "this is a description for file $i")
         }
         return returnMe
     }
@@ -119,14 +121,14 @@ abstract class FlowBase extends WebFlowTestCase {
      */
     protected void validateFiles(List<RepositoryFileTransportCommand> retrieved, List<File> testFiles) {
         assert retrieved
-        Map<String,byte[]> files=new HashMap<String,byte[]>()
+        Map<String, byte[]> files = new HashMap<String, byte[]>()
         retrieved.each {
-            File file=new File(it.path)
+            File file = new File(it.path)
             files.put(file.getName(), file.getBytes())
         }
         testFiles.each {
             assert files.containsKey(it.getName())
-            byte[] savedFile=files.get(it.getName())
+            byte[] savedFile = files.get(it.getName())
             assert savedFile == it.getBytes()
         }
     }

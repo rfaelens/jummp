@@ -25,9 +25,32 @@
 class UrlMappings {
 
     static mappings = {
-        "/$controller/$action?/$id?"{
+        "/model/create"(controller: "model", action: "create")
+        "/model/update"(controller: "model", action: "update")
+        "/model/publish"(controller: "model", action: "publish")
+        "/share"(controller: "model", action: "share")
+        "/model/$id(.$revisionId)?" {
+            controller = "model"
+            action = 'show'
             constraints {
-                // apply constraints here
+                //TODO expand the list to include a-zA-Z_-
+                id(nullable: false, matches: /[a-zA-Z-_0-9]+/)
+                revisionId(matches: /\d+/)
+            }
+        }
+        "/model/$action/$id(.$revisionId)?" {
+            controller = 'model'
+            action = action
+            constraints {
+                //TODO expand the list to include a-zA-Z_-
+                id(nullable: false, matches: /[a-zA-Z-_0-9]+/)
+                action(nullable: false)
+                revisionId(matches: /\d+/)
+            }
+        }
+        "/$controller/$action?/$id?" {
+            constraints {
+                controller(notEqual: 'model')
             }
         }
 
@@ -41,7 +64,6 @@ class UrlMappings {
                     org.springframework.security.access.AccessDeniedException)
         "/models"(controller: "search", action: "list")
         "/search"(controller: "search", action: "search")
-        "/share"(controller: "model", action: "share")
         "/archive"(controller: "search", action: "archive")
         "/feedback"(controller:"jummp", action:"feedback")
         "/lookupUser"(controller:"jummp", action:"lookupUser")
@@ -50,9 +72,5 @@ class UrlMappings {
         "/user/editUser"(controller:"usermanagement", action:"edit")
         "/user/editPassword"(controller:"usermanagement", action:"editPassword")
         "/user"(controller:"usermanagement", action:"show")
-        "/model/create"(controller: "model", action: "create")
-        "/model/$id"(controller:"model", action:"show")
-        "/model/update"(controller: "model", action: "update")
-        "/model/publish"(controller: "model", action: "publish")
     }
 }

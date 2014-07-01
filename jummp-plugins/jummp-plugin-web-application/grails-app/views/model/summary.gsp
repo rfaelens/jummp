@@ -58,7 +58,7 @@
         </tr>
         <tr>
             <td><strong><g:message code="model.summary.model.format"/></strong></td>
-            <td>${revision.format.name} <a href="${g.createLink(controller: 'model', action: 'downloadModelRevision', id: revision.id)}"><g:message code="model.summary.model.download"/></a></td>
+            <td>${revision.format.name} <a href="${g.createLink(controller: 'model', action: 'downloadModelRevision', id: revision.identifier())}"><g:message code="model.summary.model.download"/></a></td>
         </tr>
         <tr>
             <td><strong><g:message code="model.summary.model.creators"/></strong></td>

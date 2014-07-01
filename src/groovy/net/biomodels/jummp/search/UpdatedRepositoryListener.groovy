@@ -33,23 +33,22 @@
 
 
 package net.biomodels.jummp.search
-import org.springframework.context.ApplicationEvent
-import org.springframework.context.ApplicationListener
+
+import grails.util.Environment
+import grails.util.Holders
+import net.biomodels.jummp.core.events.ModelCreatedEvent
 import net.biomodels.jummp.core.events.RevisionCreatedEvent
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.core.events.ModelCreatedEvent
-import org.apache.lucene.store.FSDirectory
-import org.apache.lucene.store.Directory
-import org.apache.lucene.index.IndexWriter
-import org.codehaus.groovy.grails.commons.cfg.ConfigurationHelper
-import grails.util.Environment
+import org.apache.lucene.analysis.Analyzer
+import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.document.Document
 import org.apache.lucene.document.Field
+import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy
-import org.apache.lucene.analysis.standard.StandardAnalyzer
-import org.apache.lucene.analysis.Analyzer
-import grails.util.Holders
-import grails.util.Environment
+import org.apache.lucene.store.Directory
+import org.apache.lucene.store.FSDirectory
+import org.springframework.context.ApplicationEvent
+import org.springframework.context.ApplicationListener
 
 /* Lucene 4.4 imports
 import org.apache.lucene.index.IndexDeletionPolicy
@@ -75,159 +74,163 @@ import org.apache.lucene.search.IndexSearcher
  */
 class UpdatedRepositoryListener implements ApplicationListener {
 
-	def modelDelegateService
-	def grailsApplication = Holders.grailsApplication
-	Directory fsDirectory
-	File location
-	/**
-	* Creates/Opens a lucene index based on the config properties (unless test, 
-	* otherwise a default location is used, to avoid corrupting the index). 
-	*/
-	public UpdatedRepositoryListener() {
-		String path=grailsApplication.config.jummp.search.index
-		if (Environment.current == Environment.TEST) {
-			path = "target/search/index"
-			File deleteMe=new File(path)
-			deleteMe.deleteDir()
-		}
-		location=new File(path)
-		location.mkdirs()
-		//Create instance of Directory where index files will be stored
-		fsDirectory =  FSDirectory.getDirectory(location)
-		/* Create instance of analyzer, which will be used to tokenize
-		the input data */
-		
-		/*
-		LUCENE 4.4 CODE.
-		
-		//Create the instance of deletion policy
-		Analyzer standardAnalyzer = new StandardAnalyzer(Version.LUCENE_44)
-		IndexDeletionPolicy deletionPolicy = new KeepOnlyLastCommitDeletionPolicy() 
-		
-		IndexWriterConfig conf=new IndexWriterConfig(Version.LUCENE_44,standardAnalyzer)
-		conf.setIndexDeletionPolicy(deletionPolicy)
-		conf.setOpenMode(OpenMode.CREATE_OR_APPEND)
-		indexWriter =new IndexWriter(fsDirectory,conf)
-		*/
-		
-	}
-	
-	/**
-	* Responds to model creation/update events
-	*
-	* Responds to the @param event, if it is a model create/update, it is indexed
-	* in the lucene index.
-	* @param event The event, to be handled if it a model create/update event
-	**/
-	public void onApplicationEvent(ApplicationEvent event) {
-		if (event instanceof RevisionCreatedEvent) {
-			updateIndex((event as RevisionCreatedEvent).revision)
-		}
-		if (event instanceof ModelCreatedEvent) {
-			ModelCreatedEvent modEvent=event as ModelCreatedEvent
-			updateIndex(modelDelegateService.
-						getLatestRevision(modEvent.model.id))
-													
-		}
-	}
-	
-	/*
-		Clears the index. Handle with care.
-	*/
-	public void clearIndex() {
-		/*Analyzer standardAnalyzer = new StandardAnalyzer()
-		IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer)
-		indexWriter.deleteAll()
-		indexWriter.optimize()
-		indexWriter.close()*/
-		location.deleteDir()
-		location.mkdirs()
-		fsDirectory =  FSDirectory.getDirectory(location)
-	}
-	
-	/**
-	* Adds a revision to the index
-	*
-	* Adds the specified @param revision to the lucene index
-	* @param revision The revision to be indexed
-	**/
-	public void updateIndex(RevisionTransportCommand revision) {
-		
-		Analyzer standardAnalyzer = new StandardAnalyzer()
-		IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer)
-		indexWriter.setMaxFieldLength(25000)
-		
-		String name = revision.name ?: ""
-		String description = revision.description ?: ""
-		String content = modelDelegateService.getSearchIndexingContent(revision) ?: ""
-		Document doc = new Document()
-		
-		/*
-		*	Indexed fields
-		*/
-		Field nameField =
-			new Field("name",name,Field.Store.YES,Field.Index.ANALYZED)
-		Field descriptionField = 
-			new Field("description",description,Field.Store.NO,Field.Index.ANALYZED) 
-		Field formatField = 
-			new Field("modelFormat",""+revision.format.name,Field.Store.YES,Field.Index.ANALYZED)
-		Field levelVersionField = 
-			new Field("levelVersion",""+revision.format.formatVersion,Field.Store.NO,Field.Index.ANALYZED)
-		Field submitterField = 
-			new Field("submitter",""+revision.owner,Field.Store.YES,Field.Index.ANALYZED)
-		Field contentField = 
-			new Field("content",content,Field.Store.NO,Field.Index.ANALYZED) 
-		Field paperTitleField = 
-			new Field("paperTitle",revision.model.publication? revision.model.publication.title:"",Field.Store.NO,Field.Index.ANALYZED)
-		Field paperAbstractField = 
-			new Field("paperAbstract",revision.model.publication? revision.model.publication.synopsis:"",Field.Store.NO,Field.Index.ANALYZED)
-		
-		doc.add(nameField)
-		doc.add(descriptionField)
-		doc.add(formatField)
-		doc.add(levelVersionField)
-		doc.add(submitterField)
-		doc.add(contentField)
-		doc.add(paperTitleField)
-		doc.add(paperAbstractField)
-			
-		/*
-		*	Stored fields. Hopefully will be used to display the search results one day
-		*	instead of going to the database for each model. When we find a solution to needing to
-		*	look in the database to figure out if the user has access to a model. 
-		*/
-		Field idField = 
-			new Field("model_id",""+revision.model.id,Field.Store.YES,Field.Index.NO) 
-		Field versionField = 
-			new Field("versionNumber",""+revision.revisionNumber,Field.Store.YES,Field.Index.NO)
-		Field submittedField = 
-			new Field("submissionDate",""+revision.model.submissionDate,Field.Store.YES,Field.Index.NO)
-		doc.add(idField)
-		doc.add(versionField)
-		doc.add(submittedField)
-		
-		indexWriter.addDocument(doc)
-		//indexWriter.commit() // To do: investigate a more optimised commit mechanism (4.4)
-		indexWriter.optimize()
-		indexWriter.close()
-	}
-	
-	
-	public Directory getDirectory() {
-		return fsDirectory
-	}
-	
-	/**
-	* Gets a searchermanager linked to the indexwriter (4.4)
-	*
-	* @returns A searchermanager linked to the indexwriter, so that changes made in the writer will be
-	* reflected in the searcher.
-	public SearcherManager getSearcherManager() {
-		boolean applyAllDeletes = true
-		SearcherManager mgr = new SearcherManager(indexWriter, true, new SearcherFactory())
-                return mgr
-	}
-	*/
-	
-	
+    def modelDelegateService
+    def grailsApplication = Holders.grailsApplication
+    Directory fsDirectory
+    File location
+
+    /**
+     * Creates/Opens a lucene index based on the config properties (unless test, 
+     * otherwise a default location is used, to avoid corrupting the index). 
+     */
+    public UpdatedRepositoryListener() {
+        String path = grailsApplication.config.jummp.search.index
+        if (Environment.current == Environment.TEST) {
+            path = "target/search/index"
+            File deleteMe = new File(path)
+            deleteMe.deleteDir()
+        }
+        location = new File(path)
+        location.mkdirs()
+        //Create instance of Directory where index files will be stored
+        fsDirectory = FSDirectory.getDirectory(location)
+        /* Create instance of analyzer, which will be used to tokenize
+        the input data */
+
+        /*
+        LUCENE 4.4 CODE.
+
+        //Create the instance of deletion policy
+        Analyzer standardAnalyzer = new StandardAnalyzer(Version.LUCENE_44)
+        IndexDeletionPolicy deletionPolicy = new KeepOnlyLastCommitDeletionPolicy()
+
+        IndexWriterConfig conf = new IndexWriterConfig(Version.LUCENE_44,standardAnalyzer)
+        conf.setIndexDeletionPolicy(deletionPolicy)
+        conf.setOpenMode(OpenMode.CREATE_OR_APPEND)
+        indexWriter = new IndexWriter(fsDirectory,conf)
+         */
+
+    }
+
+    /**
+     * Responds to model creation/update events
+     *
+     * Responds to the @param event, if it is a model create/update, it is indexed
+     * in the lucene index.
+     * @param event The event, to be handled if it a model create/update event
+     **/
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof RevisionCreatedEvent) {
+            updateIndex((event as RevisionCreatedEvent).revision)
+        }
+        if (event instanceof ModelCreatedEvent) {
+            ModelCreatedEvent modEvent = event as ModelCreatedEvent
+            final String MODEL_ID = modEvent.model.publicationId ?: modEvent.model.submissionId
+            updateIndex(modelDelegateService.getLatestRevision(MODEL_ID))
+        }
+    }
+
+    /**
+     * Clears the index. Handle with care.
+     */
+    public void clearIndex() {
+        /*Analyzer standardAnalyzer = new StandardAnalyzer()
+        IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer)
+        indexWriter.deleteAll()
+        indexWriter.optimize()
+        indexWriter.close()*/
+        location.deleteDir()
+        location.mkdirs()
+        fsDirectory = FSDirectory.getDirectory(location)
+    }
+
+    /**
+     * Adds a revision to the index
+     *
+     * Adds the specified @param revision to the lucene index
+     * @param revision The revision to be indexed
+     **/
+    public void updateIndex(RevisionTransportCommand revision) {
+
+        Analyzer standardAnalyzer = new StandardAnalyzer()
+        IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer)
+        indexWriter.setMaxFieldLength(25000)
+
+        String name = revision.name ?: ""
+        String description = revision.description ?: ""
+        String content = modelDelegateService.getSearchIndexingContent(revision) ?: ""
+        String submissionId = revision.model.submissionId
+        String publicationId = revision.model.publicationId ?: ""
+        Document doc = new Document()
+
+        /*
+         * Indexed fields
+         */
+        //TODO ADD SUBMISSION_ID AND PUBLICATION_ID
+        Field submissionIdField = new Field('submissionId', submissionId, Field.Store.YES,
+                    Field.Index.ANALYZED)
+        Field publicationIdField = new Field('publicationId', publicationId, Field.Store.YES,
+                    Field.Index.ANALYZED)
+        Field nameField = new Field("name", name, Field.Store.YES, Field.Index.ANALYZED)
+        Field descriptionField = new Field("description", description, Field.Store.NO,
+                    Field.Index.ANALYZED)
+        Field formatField = new Field("modelFormat", revision.format.name, Field.Store.YES,
+                    Field.Index.ANALYZED)
+        Field levelVersionField = new Field("levelVersion", revision.format.formatVersion,
+                    Field.Store.NO, Field.Index.ANALYZED)
+        Field submitterField = new Field("submitter", revision.owner, Field.Store.YES,
+                    Field.Index.ANALYZED)
+        Field contentField = new Field("content", content, Field.Store.NO, Field.Index.ANALYZED)
+        Field paperTitleField = new Field("paperTitle", revision.model.publication ?
+                    revision.model.publication.title : "", Field.Store.NO, Field.Index.ANALYZED)
+        Field paperAbstractField = new Field("paperAbstract", revision.model.publication ?
+                    revision.model.publication.synopsis : "", Field.Store.NO, Field.Index.ANALYZED)
+
+        doc.add(submissionIdField)
+        doc.add(publicationIdField)
+        doc.add(nameField)
+        doc.add(descriptionField)
+        doc.add(formatField)
+        doc.add(levelVersionField)
+        doc.add(submitterField)
+        doc.add(contentField)
+        doc.add(paperTitleField)
+        doc.add(paperAbstractField)
+
+        /*
+         * Stored fields. Hopefully will be used to display the search results one day
+         * instead of going to the database for each model. When we find a solution to needing to
+         * look in the database to figure out if the user has access to a model.
+         */
+        Field idField = new Field("model_id", "${revision.model.id}", Field.Store.YES,
+                    Field.Index.NO)
+        Field versionField = new Field("versionNumber", "${revision.revisionNumber}",
+                    Field.Store.YES, Field.Index.NO)
+        Field submittedField = new Field("submissionDate", "${revision.model.submissionDate}",
+                    Field.Store.YES, Field.Index.NO)
+        doc.add(idField)
+        doc.add(versionField)
+        doc.add(submittedField)
+
+        indexWriter.addDocument(doc)
+        //indexWriter.commit() // To do: investigate a more optimised commit mechanism (4.4)
+        indexWriter.optimize()
+        indexWriter.close()
+    }
+
+    public Directory getDirectory() {
+        return fsDirectory
+    }
+
+    /**
+     * Gets a searchermanager linked to the indexwriter (4.4)
+     *
+     * @returns A searchermanager linked to the indexwriter, so that changes made in the writer will be
+     * reflected in the searcher.
+     public SearcherManager getSearcherManager() {
+     boolean applyAllDeletes = true
+     SearcherManager mgr = new SearcherManager(indexWriter, true, new SearcherFactory())
+     return mgr
+     }
+     */
 }

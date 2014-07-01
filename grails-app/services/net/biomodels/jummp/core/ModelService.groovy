@@ -30,6 +30,7 @@
 
 package net.biomodels.jummp.core
 
+import static java.util.UUID.randomUUID
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.ModelCreatedEvent
 import net.biomodels.jummp.core.events.PostLogging
@@ -43,6 +44,7 @@ import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
 import net.biomodels.jummp.core.vcs.VcsException
+import net.biomodels.jummp.core.vcs.VcsFileDetails
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelAudit
 import net.biomodels.jummp.model.ModelFormat
@@ -50,9 +52,10 @@ import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.model.PublicationLinkProvider
 import net.biomodels.jummp.model.RepositoryFile
 import net.biomodels.jummp.model.Revision
-import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.plugins.security.Role
+import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.io.FileUtils
+import org.apache.lucene.document.Document
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.perf4j.log4j.Log4JStopWatch
@@ -64,9 +67,6 @@ import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
-import org.apache.lucene.document.Document
-import static java.util.UUID.randomUUID
-import net.biomodels.jummp.core.vcs.VcsFileDetails
 
 /**
  * @short Service class for managing Models
@@ -147,23 +147,25 @@ class ModelService {
     @Profiled(tag="modelService.searchModels")
     public Set<ModelTransportCommand> searchModels(String query) {
         def searchEngine = grailsApplication.mainContext.getBean("searchEngine")
-        String[] fields = ["name","description","content","modelFormat", "levelVersion", "submitter", "paperTitle", "paperAbstract"]
+        String[] fields = ["submissionId", "publicationId", "name", "description", "content",
+                    "modelFormat", "levelVersion", "submitter", "paperTitle", "paperAbstract"]
         Set<Document> results = searchEngine.performSearch(fields, query)
+        println "Query $query yields ${results.size()} results: ${results.dump()}"
 
         Set<ModelTransportCommand> returnVals = new HashSet<ModelTransportCommand>()
         results.each {
-            try {
-                def existingModel = returnVals.find { prevs ->
-                    prevs.id == Integer.parseInt(it.get("model_id"))
-                }
-                if (!existingModel) {
-                    Model returned = getModel(Integer.parseInt(it.get("model_id")))
-                    if (returned && !returned.deleted) {
-                        returnVals.add(returned.toCommandObject())
-                    }
-                }
+            def existingModel = returnVals.find { prevs ->
+                prevs.submissionId == it.get("submissionId")
             }
-            catch(Exception ignore) {
+            if (!existingModel) {
+                String perennialField= it.get("publicationId")
+                if (perennialField.isEmpty()) {
+                    perennialField= it.get("submissionId")
+                }
+                Model returned = getModel(perennialField)
+                if (returned && !returned.deleted) {
+                    returnVals.add(returned.toCommandObject())
+                }
             }
         }
         return returnVals
@@ -179,7 +181,7 @@ class ModelService {
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.regenerateIndices")
     public void regenerateIndices() {
-        def searchEngine=grailsApplication.mainContext.getBean("indexingEventListener")
+        def searchEngine = grailsApplication.mainContext.getBean("indexingEventListener")
         searchEngine.clearIndex()
         int offset = 0
         int count = 10
@@ -500,14 +502,15 @@ OR lower(m.publication.affiliation) like :filter
     }
 
     /**
-     * Returns the Model identified by @p id.
-     * @param id The id of the model.
+     * Returns the Model identified by perennial identifier @p id.
+     * @param id The perennial id of the model.
      * @return The Model
      */
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getModel")
-    public Model getModel(long id) {
-        Model model = Model.get(id)
+    public Model getModel(String id) {
+        println "get model with id $id"
+        Model model = Model.findByPerennialIdentifier(id)
         if (model) {
             if (!getLatestRevision(model)) {
                 throw new AccessDeniedException("No access to Model with Id ${id}")
@@ -611,19 +614,17 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * @param identifier The identifier in the format Model.Revision
      * @return The revision or @c null if there is no such revision
      */
-    @PostAuthorize("hasPermission(returnObject, read) or hasRole('ROLE_ADMIN')")
+    /*
+     * The authorisation has been disabled because model.findByPerennialIdentifier calls
+     * this method indirectly.
+     */
+    //@PostAuthorize("hasPermission(returnObject, read) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getRevisionByIdentifier")
     public Revision getRevision(String identifier) {
-        String[] parts=identifier.split("\\.");
-        parts.each {
-            try {
-                Long.parseLong(it)
-            } catch(Exception e) {
-                throw new IllegalArgumentException("Identifier ${identifier} could not be parsed")
-            }
-        }
-        Model model = Model.get(parts[0])
+        String[] parts = identifier.split("\\.")
+        String modelId = parts[0]
+        Model model = Model.findByPerennialIdentifier(modelId)
         if (parts.length == 1) {
             Revision revision = getLatestRevision(model)
             if (!revision) {
@@ -744,7 +745,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         List<File> filesToDelete = getFilesFromRF(deleteFiles)
 
         final User currentUser = User.findByUsername(springSecurityService.authentication.name)
-        Model model = getModel(rev.model.id)
+        final String PERENNIAL_ID = (rev.model.publicationId) ?: (rev.model.submissionId)
+        Model model = getModel(PERENNIAL_ID)
         final String formatVersion = modelFileFormatService.getFormatVersion(rev)
         Revision revision = new Revision(model: model, name: rev.name, description: rev.description,
                     comment: rev.comment, uploadDate: new Date(), owner: currentUser, minorRevision: false,
@@ -862,7 +864,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Retreives information related to a file from the VCS
+    * Retrieves information related to a file from the VCS
     * Passes the @p revision and filename to the vcsService, gets 
     * info related to the specified @p filename, and filters the returned
     * values based on the revisions available to the user
@@ -871,26 +873,24 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * @return A list of VcsFileDetails objects
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="modelService.getRevisionByIdentifier")
+    @Profiled(tag="modelService.getFileDetails")
     List<VcsFileDetails> getFileDetails(Revision rev, String filename) {
-    	def details=vcsService.getFileDetails(rev, filename)
-    	def accessibleRevs=getAllRevisions(rev.model)
-    	return details.findAll { detail ->
-    		boolean retval=false;
-    		accessibleRevs.each { revision ->
-    			if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(
-                springSecurityService.authentication, revision, BasePermission.READ))
-            	{
-            		if (revision.vcsId == detail.revisionId) {
-            			retval=true;
-            		}
-            	}
-    		}
-    		return retval;
-    	}
+        def details = vcsService.getFileDetails(rev, filename)
+        def accessibleRevs = getAllRevisions(rev.model)
+        return details.findAll { detail ->
+            boolean retval = false
+            accessibleRevs.each { revision ->
+                if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(
+                    springSecurityService.authentication, revision, BasePermission.READ)) {
+                        if (revision.vcsId == detail.revisionId) {
+                            retval = true
+                        }
+                    }
+            }
+            return retval
+        }
     }
-    
-    
+
     /**
     * Creates a new Model and stores it in the VCS. Stripped down version suitable
     * for calling from SubmissionService, where model has already been validated
@@ -1273,7 +1273,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         return model
     }
 
-    /* *
+    /**
     * Adds a new Revision to the model.
     *
     * The provided @p file will be stored in the VCS as an update to an existing file of the same @p model.
@@ -1596,14 +1596,14 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         else {
             throw new AccessDeniedException("You cant access permissions if you dont have them.")
         }
-        return map.values();
+        return map.values()
     }
 
     /**
     * Grants permissions to a @model given a list of @permissions
     *
     *
-    * @param model The Model 
+    * @param model The Model
     * @param permissions A list of permissions 
     **/
    // @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
@@ -1808,8 +1808,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (model.deleted) {
             return false
         }
-        List<Revision> revs=getAllRevisions(model)
-        Revision publicRev=revs.find { it.state != ModelState.UNPUBLISHED }
+        List<Revision> revs = getAllRevisions(model)
+        Revision publicRev = revs.find { it.state != ModelState.UNPUBLISHED }
         if (publicRev) {
             return false
         }
@@ -2043,7 +2043,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         def model = Model.get(cmd.model.id)
         if (model) {
-            ModelAudit audit = new ModelAudit(model: Model.get(cmd.model.id),
+            ModelAudit audit = new ModelAudit(model: model,
                     user: user,
                     format: cmd.format,
                     type: cmd.type,
@@ -2067,11 +2067,29 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     void updateAuditSuccess(Long itemId, boolean success) {
         if (itemId != -1) {
             try {
-                ModelAudit audit = ModelAudit.lock(itemId)
+                ModelAudit audit = ModelAudit.get(itemId)
                 audit.success = success
-                audit.save()
+                /*
+                 * FIXME Clicking the download link next to a revision results in two separate
+                 * requests which need to be merged manually.
+                 */
+                if (audit.isDirty()) {
+                    StringBuilder warnMsg = new StringBuilder("""\
+Model audit $audit has been updated in a separate thread:\n""")
+                    def modifiedFieldNames = audit.getDirtyPropertyNames()
+                    for (field in modifiedFieldNames) {
+                        def current = audit."$field"
+                        def old = audit.getPersistentValue(field)
+                        if (old != current) {
+                            warnMsg.append("\t$field: $old ==> $current\n")
+                            current = old
+                        }
+                    }
+                    log.warn warnMsg.toString()
+                    audit.save()
+                }
             } catch(Exception e) {
-                log.error("Failed to update audit for "+itemId+" with success: "+success)
+                throw new RuntimeException("Failed to update audit for "+itemId+" with success: "+success, e)
             }
         }
     }

@@ -35,7 +35,7 @@
         <title><g:message code="Regeneration Complete"/></title>
     </head>
     <body>
-    	<h2>Index regenerated!</h2>
-        <p>Regenerated in ${regenTime}</p>
+        <h2>Index regenerated!</h2>
+        <p>Regenerated in ${regenTime/1000f}ms</p>
     </body>
 

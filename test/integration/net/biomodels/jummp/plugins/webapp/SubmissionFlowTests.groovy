@@ -35,34 +35,26 @@
 
 package net.biomodels.jummp.plugins.webapp
 
-import grails.test.WebFlowTestCase
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
-import grails.util.Holders
 import net.biomodels.jummp.core.JummpIntegrationTest
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
-import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.core.plugins.webapp.*
 import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.model.Revision
-import net.biomodels.jummp.webapp.ModelController
 import org.apache.commons.io.FileUtils
-import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
-import org.junit.*
-import org.springframework.mock.web.MockHttpServletRequest
-import org.springframework.mock.web.MockMultipartFile
-import org.springframework.mock.web.MockMultipartHttpServletRequest
-import org.springframework.web.context.request.RequestContextHolder
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 import static org.junit.Assert.*
 
+@TestMixin(IntegrationTestMixin)
 class SubmissionFlowTests extends JummpIntegrationTest {
-    
-    def grailsApplication=Holders.grailsApplication
-    def fileSystemService=Holders.applicationContext.getBean("fileSystemService")
-    def modelService=Holders.applicationContext.getBean("modelService")
-    
+    def grailsApplication
+    def fileSystemService
+    def modelService
+
     @Before
     void setUp() {
         super.createUserAndRoles()
@@ -104,19 +96,21 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         new TestUploadFilesCancel().testrun()
     }
 
-    /* Tests upload pipeline, first with an empty list, 
+    /* Tests upload pipeline, first with an empty list,
      * then with an unknown model */
     @Test
     void testUploadFilesContinue() {
         assertNotNull(authenticateAsTestUser())
-        TestUploadFilesContinue continued=new TestUploadFilesContinue()
+        TestUploadFilesContinue continued = new TestUploadFilesContinue()
         continued.testrun()
     }
 
     @Test
     void testUpdateUploadedModel() {
         assertNotNull(authenticateAsAdmin())
-        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "test", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"))
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment",
+                name: "test", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"),
+                submissionId: "M123")
         File importFile = new File("target/vcs/exchange/import.xml")
         FileUtils.touch(importFile)
         importFile.append("Test\n")
@@ -126,7 +120,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         new TestUpdateSbml(model.id, importFile).testrun()
     }
 
-    /* Tests upload pipeline, first with an empty list, 
+    /* Tests upload pipeline, first with an empty list,
      * then with a known SBML model */
     @Test
     void testSubmitSBML() {

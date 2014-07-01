@@ -112,7 +112,7 @@
                         modal: true,
                         buttons: {
                             "Confirm Delete": function() {
-                                openPage('${g.createLink(controller: 'model', action: 'delete', id: revision.model.id)}');
+                                openPage('${g.createLink(controller: 'model', action: 'delete', id: (revision.model.publicationId) ?: (revision.model.submissionId))}');
                             	$( this ).dialog( "close" );
                             },
                             Cancel: function() {
@@ -169,7 +169,7 @@
 				var csvType=false;
 				content.push("<div class='ui-widget-content ui-corner-all'><div class='padleft padright padtop'><h3>")
 				content.push(fileProps["Name"])
-				var fileLink="${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}"
+				var fileLink="${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}"
 										+"?filename="+encodeURIComponent(fileProps.Name)
 				content.push("<a title='Download ",fileProps.Name, "'","href='",fileLink);
 				fileLink=fileLink+"&inline=true";
@@ -210,7 +210,7 @@
 				content.push("<div class='metapanel'><div id='tableGoesHere' class='padleft padright padbottom'>")
 				if (!fileProps.isInternal) {
 					$.ajax({
-						url: "${g.createLink(controller: 'model', action: 'getFileDetails', id: revision.id).replace("%3A",".")}"
+						url: "${g.createLink(controller: 'model', action: 'getFileDetails', id: revision.identifier())}"
 											+"?filename="+encodeURIComponent(fileProps.Name),
 						dataType: "text",
 						success: function(data) {
@@ -323,7 +323,7 @@
 						updateFileDetailsPanel(fileProps)
 					}
 					else {
-						$("#Files #detailsBox").html("");						
+						$("#Files #detailsBox").html("");
 					}
 				}).jstree({
 				"ui" : {
@@ -404,9 +404,9 @@
     			</div>
     	        <div style="float:right;margin-top:10px;">
                     <div id="modeltoolbar" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>
-                            <button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier()).replace("%3A",".")}')">Download</button>
+                            <button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}')">Download</button>
                             <g:if test="${canUpdate}">
-                                <button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}')">Update</button>
+                                <button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Update</button>
                             </g:if>
                             <g:if test="${canDelete}">
                             	<div id="dialog-confirm" title="Confirm Delete">
@@ -415,7 +415,7 @@
                                 <button id="delete" onclick='return $( "#dialog-confirm" ).dialog( "open" );'>Delete</button>
                             </g:if>
                             <g:if test="${showPublishOption}">
-                                <button id="publish" onclick="return publishModel('${g.createLink(controller: 'model', action: 'publish', id: revision.id)}')">Publish</button>
+                                <button id="publish" onclick="return publishModel('${g.createLink(controller: 'model', action: 'publish', id: revision.identifier())}')">Publish</button>
                             </g:if>
                             <g:else>
                             	<g:if test="${revision.state==ModelState.PUBLISHED}">
@@ -426,13 +426,13 @@
 								</g:else>                                
                             </g:else>
                             <g:if test="${canShare}">
-                                <button id="share" onclick="return openPage('${g.createLink(controller: 'model', action: 'share', id: revision.id)}')">Share</button>
+                                <button id="share" onclick="return openPage('${g.createLink(controller: 'model', action: 'share', id: revision.identifier())}')">Share</button>
                             </g:if>
                      </div>
     	         </div>
    
-    	        <%--        <a class="submit" title="Update Model" href="${g.createLink(controller: 'model', action: 'update', id: revision.model.id)}">Update</a> 	
-        	<a class="submit" title="Download Model" href="${g.createLink(controller: 'model', action: 'download', id: revision.id)}">Download</a> 	
+    	        <%--        <a class="submit" title="Update Model" href="${g.createLink(controller: 'model', action: 'update', id: (revision.model.publicationId) ?: (revision.model.submissionId))}">Update</a>
+        	<a class="submit" title="Download Model" href="${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}">Download</a>
 	 --%></div>
     	<div id="tablewrapper">
     	<div id="tabs">
@@ -529,11 +529,11 @@
 							<img style="width:12px;margin:2px;float:none;" title="This version of the model is unpublished" alt="unpublished model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/lock.png"/>
 					</g:else>
 	  	     		<g:if test="${revision.id!=rv.id}">
-	  	     			<a class="versionDownload" title="go to version ${rv.revisionNumber}" href="${g.createLink(controller: 'model', action: 'show', id: rv.identifier()).replace("%3A",".")}">
+	  	     			<a class="versionDownload" title="go to version ${rv.revisionNumber}" href="${g.createLink(controller: 'model', action: 'show', id: rv.identifier())}">
 	  	     				<img style="width:12px;margin:2px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Generic/Generic%20icons/external_link.png"/> 
 	  	     			</a>
 	  	     		</g:if>
-	  	     				<a class="versionDownload" title="download" href="${g.createLink(controller: 'model', action: 'download', id: rv.identifier()).replace("%3A",".")}">
+	  	     				<a class="versionDownload" title="download" href="${g.createLink(controller: 'model', action: 'download', id: rv.identifier())}">
 	  	     					<img alt="Download this version" style="width:15px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/download.png"/>
 	  	     				</a>
 	  	     			<ul>

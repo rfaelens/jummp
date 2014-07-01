@@ -74,8 +74,9 @@ abstract class AbstractModelIdentifierGenerator implements ModelIdentifierGenera
                 d instanceof VariableDigitAppendingDecorator
             }
             if (d) {
-                final String NEW_VALUE = "1".padLeft(d.WIDTH, '0')
+                final String NEW_VALUE = "0".padLeft(d.WIDTH, '0')
                 d.nextValue = NEW_VALUE
+                d.nextSuffix = 0
                 if (IS_INFO_ENABLED) {
                     log.info "Attribute 'nextValue' of $d has been reset to $NEW_VALUE."
                 }

@@ -158,10 +158,11 @@ class VcsService {
         return vcsManager.retrieveModel(new File(revision.model.vcsIdentifier), revision.vcsId)
     }
 
-    public List<VcsFileDetails> getFileDetails(final Revision revision, String path) throws VcsException {
-    	if (!isValid()) {
+    public List<VcsFileDetails> getFileDetails(final Revision revision, String path)
+                throws VcsException {
+        if (!isValid()) {
             throw new VcsException("Version Control System is not valid")
         }
-        return vcsManager.getFileDetails(new File(revision.model.vcsIdentifier), path);
+        return vcsManager.getFileDetails(new File(revision.model.vcsIdentifier), path)
     }
 }

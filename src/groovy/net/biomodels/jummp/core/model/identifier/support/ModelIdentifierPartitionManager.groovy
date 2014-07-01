@@ -235,6 +235,7 @@ class ModelIdentifierPartitionManager {
             }
             final String NEW_VALUE = ID[START..END]
             p.value = NEW_VALUE
+            println "updatePartitionValue:: $p has new value $NEW_VALUE"
             return true
         }
 

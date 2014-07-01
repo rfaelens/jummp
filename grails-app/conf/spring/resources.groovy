@@ -131,6 +131,7 @@ beans = {
     }
 
     R.each { name, generator ->
+        println "wiring bean reference $name -> $generator"
         def clazz = generator.getClass()
         if (generator instanceof AbstractModelIdentifierGenerator) {
             "$name"(clazz, generator.DECORATOR_REGISTRY)

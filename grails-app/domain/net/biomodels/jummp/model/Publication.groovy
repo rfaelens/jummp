@@ -25,8 +25,8 @@
 package net.biomodels.jummp.model
 
 import net.biomodels.jummp.core.model.PublicationTransportCommand
-import net.biomodels.jummp.plugins.security.PersonTransportCommand
 import net.biomodels.jummp.plugins.security.Person
+import net.biomodels.jummp.plugins.security.PersonTransportCommand
 
 /**
  * @short Representation for a Publication.
@@ -111,7 +111,7 @@ class Publication implements Serializable {
     }
 
     PublicationTransportCommand toCommandObject() {
-       PublicationTransportCommand pubTC=new PublicationTransportCommand(journal: journal,
+       PublicationTransportCommand pubTC = new PublicationTransportCommand(journal: journal,
                 title: title,
                 affiliation: affiliation,
                 synopsis: synopsis,
@@ -124,82 +124,85 @@ class Publication implements Serializable {
                 linkProvider: linkProvider.toCommandObject(),
                 link: link,
                 authors: new LinkedList<PersonTransportCommand>())
-        def authors=PublicationPerson.findAllByPublication(this, [sort: "position", order: "asc"])
-    	authors.each {
-    		PersonTransportCommand personAlias= it.person.toCommandObject();
-    		personAlias.userRealName = it.pubAlias;
-    		pubTC.authors.add(personAlias);
-    	}
-        return pubTC;
+        def authors = PublicationPerson.findAllByPublication(this,
+                    [sort: "position", order: "asc"])
+        authors.each {
+            PersonTransportCommand personAlias = it.person.toCommandObject()
+            personAlias.userRealName = it.pubAlias
+            pubTC.authors.add(personAlias)
+        }
+        return pubTC
     }
-    
+
     public static void reconcile(Publication publication, def tobeAdded) {
-    	def existing = PublicationPerson.findAllByPublication(publication, [sort: "position", order: "asc"]);
-    	tobeAdded.eachWithIndex { newAuthor, index ->
-            	def existingAuthor = existing.find { oldAuthor ->
-            		if (newAuthor.id) {
-            			return newAuthor.id == oldAuthor.person.id
-            		}
-            		else if (newAuthor.orcid) {
-            			return newAuthor.orcid == oldAuthor.person.orcid
-            		}
-            		return false
-            	}
-            	if (!existingAuthor) {
-            		Person newlyCreatedPubAuthor;
-            		if (newAuthor.orcid) {
-            			def personWithSameOrcid=Person.findByOrcid(newAuthor.orcid)
-            			if (personWithSameOrcid) {
-            				newlyCreatedPubAuthor=personWithSameOrcid
-            			}
-            		}
-            		if (!newlyCreatedPubAuthor) {
-            			newlyCreatedPubAuthor = new Person(userRealName: newAuthor.userRealName, orcid: newAuthor.orcid)
-            			newlyCreatedPubAuthor.save(failOnError: true, flush: true);
-            		}
-            		try {
-            			def tmp=new PublicationPerson(publication: publication, 
-            							  person: newlyCreatedPubAuthor,
-            							  pubAlias: newAuthor.userRealName,
-            							  position: index)
-            			tmp.save(failOnError:true, flush: true);
-            		}
-            		catch(Exception e) {
-            			e.printStackTrace();
-            		}
-            	}
-            	else {
-            		if (existingAuthor.position !=index) {
-            			existingAuthor.position = index;
-            			existingAuthor.save();
-            		}
-            	}
+        def existing = PublicationPerson.findAllByPublication(publication,
+                    [sort: "position", order: "asc"])
+        tobeAdded.eachWithIndex { newAuthor, index ->
+            def existingAuthor = existing.find { oldAuthor ->
+                if (newAuthor.id) {
+                    return newAuthor.id == oldAuthor.person.id
+                }
+                else if (newAuthor.orcid) {
+                    return newAuthor.orcid == oldAuthor.person.orcid
+                }
+                return false
+            }
+            if (!existingAuthor) {
+                Person newlyCreatedPubAuthor
+                if (newAuthor.orcid) {
+                    def personWithSameOrcid = Person.findByOrcid(newAuthor.orcid)
+                    if (personWithSameOrcid) {
+                        newlyCreatedPubAuthor = personWithSameOrcid
+                    }
+                }
+                if (!newlyCreatedPubAuthor) {
+                    newlyCreatedPubAuthor = new Person(userRealName: newAuthor.userRealName,
+                                orcid: newAuthor.orcid)
+                    newlyCreatedPubAuthor.save(failOnError: true, flush: true);
+                }
+                try {
+                    def tmp = new PublicationPerson(publication: publication,
+                                person: newlyCreatedPubAuthor,
+                                pubAlias: newAuthor.userRealName,
+                                position: index)
+                    tmp.save(failOnError:true, flush: true);
+                }
+                catch(Exception e) {
+                    e.printStackTrace()
+                }
+            }
+            else {
+                if (existingAuthor.position != index) {
+                    existingAuthor.position = index
+                    existingAuthor.save()
+                }
+            }
          }
     }
-    
+
     static Publication fromCommandObject(PublicationTransportCommand cmd) {
         Publication publication = Publication.createCriteria().get() {
-    		eq("link",cmd.link)
-    		linkProvider {
-    			eq("linkType",PublicationLinkProvider.LinkType.valueOf(cmd.linkProvider.linkType))
-    		}
-    	}
-    	if (publication) {
-    		publication.title=cmd.title;
-        	publication.affiliation=cmd.affiliation;
-            publication.synopsis=cmd.synopsis;
-            publication.journal=cmd.journal;
-            publication.year=cmd.year;
-            publication.month=cmd.month;
-            publication.day=cmd.day;
-            publication.volume=cmd.volume;
-            publication.issue=cmd.issue;
-            publication.pages=cmd.pages;
-            publication.save(flush:true)
+            eq("link",cmd.link)
+            linkProvider {
+                eq("linkType", PublicationLinkProvider.LinkType.valueOf(cmd.linkProvider.linkType))
+            }
+        }
+        if (publication) {
+            publication.title = cmd.title
+            publication.affiliation = cmd.affiliation
+            publication.synopsis = cmd.synopsis
+            publication.journal = cmd.journal
+            publication.year = cmd.year
+            publication.month = cmd.month
+            publication.day = cmd.day
+            publication.volume = cmd.volume
+            publication.issue = cmd.issue
+            publication.pages = cmd.pages
+            publication.save(flush: true)
             reconcile(publication, cmd.authors)
             return publication
         }
-    	Publication publ=new Publication(journal: cmd.journal,
+        Publication publ = new Publication(journal: cmd.journal,
                 title: cmd.title,
                 affiliation: cmd.affiliation,
                 synopsis: cmd.synopsis,
@@ -210,10 +213,9 @@ class Publication implements Serializable {
                 issue: cmd.issue,
                 pages: cmd.pages,
                 linkProvider: PublicationLinkProvider.fromCommandObject(cmd.linkProvider),
-                link: cmd.link
-                )
-        publ.save(failOnError: true, flush:true)
+                link: cmd.link)
+        publ.save(failOnError: true, flush: true)
         reconcile(publ, cmd.authors)
-    	return publ
+        return publ
     }
 }

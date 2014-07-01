@@ -311,7 +311,7 @@ class GitManager implements VcsManager {
     
     
     public List<VcsFileDetails> getFileDetails(File modelDirectory, String path) {
-    	List<VcsFileDetails> fileDetails=new ArrayList<VcsFileDetails>();
+    	List<VcsFileDetails> fileDetails = new ArrayList<VcsFileDetails>()
     	try {
     		FileRepositoryBuilder builder = new FileRepositoryBuilder()
     		System.out.println("MODEL DIRECTORY: "+modelDirectory);

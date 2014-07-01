@@ -35,15 +35,15 @@
          <g:javascript contextPath="" src="jquery/jquery-ui-v1.10.3.js"/>
     </head>
     <body activetab="search">
-    	<g:render template="/templates/${grailsApplication.config.jummp.branding.style}/searchBox"/>
-    	<g:render template="/templates/datatable" model="['action': 'search']"/>
+        <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/searchBox"/>
+        <g:render template="/templates/datatable" model="['action': 'search']"/>
     </body>
     <content tag="searchQuery">
-    		${query}
+        ${query}
     </content>
     <content tag="title">
-		Search Model Repository
-	</content>
+        Search Model Repository
+    </content>
     <content tag="contexthelp">
-		search
-	</content>
+        search
+    </content>

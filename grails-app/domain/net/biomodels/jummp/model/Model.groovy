@@ -24,7 +24,10 @@
 
 package net.biomodels.jummp.model
 
+import net.biomodels.jummp.core.model.identifier.ModelIdentifierUtils
 import net.biomodels.jummp.core.model.ModelTransportCommand
+import org.apache.commons.logging.LogFactory
+import org.apache.commons.logging.Log
 
 /**
  * @short Representation of one Model.
@@ -40,12 +43,21 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
  */
 class Model implements Serializable {
     private static final long serialVersionUID = 1L
+    /* the class logger */
+    private static final Log log = LogFactory.getLog(this)
+    /* semaphore for the log threshold */
+    private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
     /**
      * A Model has many Revision
      * IMPORTANT: never access revisions directly as this circumvents the ACL!
      * Use ModelService.getAllRevisions()
      */
     static hasMany = [revisions: Revision]
+    static final Set<String> PERENNIAL_IDENTIFIER_TYPES = ModelIdentifierUtils.perennialFields
+    static final String FIND_BY_PERENNIAL_ID_CRITERIA = PERENNIAL_IDENTIFIER_TYPES.collect {
+        it.capitalize() + "Id"
+    }.join('Or')
+    static final String FIND_BY_PERENNIAL_ID_QUERY = "findByIdOr$FIND_BY_PERENNIAL_ID_CRITERIA"
     /**
      * The path, relative to the folder containing all models,
      * of the folder dedicated to this model
@@ -97,7 +109,7 @@ class Model implements Serializable {
                 creators.add(revision.owner.person.userRealName)
             }
         }
-        def latestRev = modelService?.getLatestRevision(this);
+        def latestRev = modelService?.getLatestRevision(this)
         if (!latestRev) {
             latestRev = revisions? revisions.sort{ it.revisionNumber }.last() : null
         }
@@ -116,5 +128,26 @@ class Model implements Serializable {
                 submissionDate: revisions ? revisions.sort{ it.revisionNumber }.first().uploadDate : null,
                 creators: creators
         )
+    }
+
+    static Model findByPerennialIdentifier(String perennialId) {
+        if (!perennialId) {
+            return null
+        }
+        List<Model> modelList = Model.withCriteria {
+            or {
+                eq('publicationId', perennialId)
+                eq('submissionId', perennialId)
+            }
+            maxResults(1)
+        }
+        if (!modelList.isEmpty()) {
+            Model model = modelList.first()
+            if (IS_INFO_ENABLED) {
+                log.info "Model $model has perennial identifier $perennialId."
+            }
+            return model
+        }
+        return null
     }
 }

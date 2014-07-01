@@ -51,7 +51,7 @@ class PharmMlController {
     def pharmMlService
 
     def show = {
-        def model=flash.genericModel
+        def model = flash.genericModel
         final RevisionTransportCommand REVISION = model.revision
         PharmML dom = AbstractPharmMlHandler.getDomFromRevision(model.revision)
         final String VERSION = dom?.writtenVersion

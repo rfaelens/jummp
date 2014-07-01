@@ -55,7 +55,7 @@
                 	<g:each status="i" in="${models}" var="model">
                 		<tr class="${ (i % 2) == 0 ? 'even' : 'odd'}">
                 			<td>
-                				<a href="${createLink(controller: 'model', id: model.id, action: 'show')}">
+                				<a href="${createLink(controller: 'model', id: model.publicationId ?: model.submissionId, action: 'show')}">
                 					${model.name}
                 				</a>
                 			</td>

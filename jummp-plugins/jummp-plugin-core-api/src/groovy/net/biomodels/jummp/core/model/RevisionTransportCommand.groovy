@@ -106,6 +106,7 @@ class RevisionTransportCommand implements Serializable {
      }
 
      String identifier() {
-         return model.id+":"+revisionNumber
+         final PERENNIAL_ID = model.publicationId ?: model.submissionId
+         return new StringBuffer(PERENNIAL_ID).append(".").append(revisionNumber).toString()
      }
 }

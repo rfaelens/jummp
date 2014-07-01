@@ -23,6 +23,7 @@
 
 
 package net.biomodels.jummp.plugins.combine
+
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 /**
@@ -30,10 +31,9 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
  * @author  Raza Ali <raza.ali@ebi.ac.uk>
  */
 class CombineController {
-	
-	def modelDelegateService
-	
-	def show={
-		render(view:"/model/combine/show", model: flash.genericModel)
-	}
+    def modelDelegateService
+
+    def show = {
+        render(view: "/model/combine/show", model: flash.genericModel)
+    }
 }

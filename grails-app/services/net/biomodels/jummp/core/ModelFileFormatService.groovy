@@ -39,7 +39,6 @@ import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.Revision
-import java.util.List
 import org.perf4j.aop.Profiled
 
 /**

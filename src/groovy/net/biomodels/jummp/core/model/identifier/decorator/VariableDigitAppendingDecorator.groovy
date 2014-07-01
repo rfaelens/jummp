@@ -54,7 +54,7 @@ public class VariableDigitAppendingDecorator extends AbstractAppendingDecorator 
         } else {
             ORDER = order
         }
-        if (seed < 1) {
+        if (seed < 0) {
             log.error("Cowardly refusing to create a variable digit decorator for seed $seed")
             throw new IllegalArgumentException("Please use strictly positive values in model ids.")
         }
