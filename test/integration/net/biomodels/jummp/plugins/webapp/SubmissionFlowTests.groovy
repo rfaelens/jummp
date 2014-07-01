@@ -35,13 +35,11 @@
 
 package net.biomodels.jummp.plugins.webapp
 
-import grails.test.mixin.TestMixin
-import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.core.JummpIntegrationTest
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
-import net.biomodels.jummp.core.plugins.webapp.*
+import net.biomodels.jummp.plugins.webapp.*
 import net.biomodels.jummp.model.Model
 import org.apache.commons.io.FileUtils
 import org.junit.After
@@ -49,7 +47,6 @@ import org.junit.Before
 import org.junit.Test
 import static org.junit.Assert.*
 
-@TestMixin(IntegrationTestMixin)
 class SubmissionFlowTests extends JummpIntegrationTest {
     def grailsApplication
     def fileSystemService

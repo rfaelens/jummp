@@ -21,8 +21,6 @@
 package net.biomodels.jummp.plugins.webapp
 
 import static org.junit.Assert.*
-import grails.test.mixin.TestMixin
-import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
@@ -35,7 +33,6 @@ import net.biomodels.jummp.model.Revision
  * behaviour. Includes a method for clicking through the pipeline with
  * supplied files
  * */
-@TestMixin(IntegrationTestMixin)
 abstract class TestUploadFiles extends CreateBase {
     String model = "M1"
     def modelService
@@ -80,7 +77,9 @@ abstract class TestUploadFiles extends CreateBase {
         //add tests for when displayModelInfo does something interesting
         signalEvent("Continue")
 
-        assertEquals flowExecutionOutcome.id, "displayConfirmationPage"
+        assertFlowExecutionOutcomeEquals("displayConfirmationPage")
+        
+       // assertEquals flowExecutionOutcome.id, "displayConfirmationPage"
 
         //test that the model is infact saved in the database
         model = mockRequest.session.result_submission as String
