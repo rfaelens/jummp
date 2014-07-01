@@ -54,10 +54,7 @@ class Model implements Serializable {
      */
     static hasMany = [revisions: Revision]
     static final Set<String> PERENNIAL_IDENTIFIER_TYPES = ModelIdentifierUtils.perennialFields
-    static final String FIND_BY_PERENNIAL_ID_CRITERIA = PERENNIAL_IDENTIFIER_TYPES.collect {
-        it.capitalize() + "Id"
-    }.join('Or')
-    static final String FIND_BY_PERENNIAL_ID_QUERY = "findByIdOr$FIND_BY_PERENNIAL_ID_CRITERIA"
+    static final Set<String> FIND_BY_PERENNIAL_ID_CRITERIA = populateFindByCriteria()
     /**
      * The path, relative to the folder containing all models,
      * of the folder dedicated to this model
@@ -136,8 +133,9 @@ class Model implements Serializable {
         }
         List<Model> modelList = Model.withCriteria {
             or {
-                eq('publicationId', perennialId)
-                eq('submissionId', perennialId)
+                FIND_BY_PERENNIAL_ID_CRITERIA.each {
+                    eq(it, perennialId)
+                }
             }
             maxResults(1)
         }
@@ -149,5 +147,15 @@ class Model implements Serializable {
             return model
         }
         return null
+    }
+
+    static Set<String> populateFindByCriteria() {
+        def result = PERENNIAL_IDENTIFIER_TYPES.collect { it + "Id" }
+        ['submissionId', 'publicationId'].each {
+            if (!result.contains(it)) {
+                result.add it
+            }
+        }
+        return result
     }
 }

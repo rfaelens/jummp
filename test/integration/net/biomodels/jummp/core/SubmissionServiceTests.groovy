@@ -34,10 +34,10 @@
 
 package net.biomodels.jummp.core
 
-import static java.util.UUID.randomUUID
 import static org.junit.Assert.*
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
+import java.util.UUID.randomUUID
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
