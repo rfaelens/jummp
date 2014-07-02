@@ -116,29 +116,30 @@ class ModelController {
         try {
             String modelIdParam = params.id
             String revisionIdParam = params.revisionId
-            Long modelId = null
+            String modelId = null
             String username = getUsername()
             String accessType = actionUri
             String formatType = params.format ?: "html"
             String changesMade = null
 
+            final boolean HAS_ONLY_DIGITS = isPositiveNumber(modelIdParam)
             //perennial model identifiers include literals
-            final boolean IS_REVISION_ID = !revisionIdParam && isPositiveNumber(modelIdParam)
+            final boolean IS_REVISION_ID = !revisionIdParam && HAS_ONLY_DIGITS
             if (IS_REVISION_ID) {
                 // publish uses revision ids, annoyingly enough.
                 if (accessType.contains("publish")) {
                     def rev = modelDelegateService.getRevisionDetails(
                                 new RevisionTransportCommand(id: modelIdParam))
                     if (rev) {
-                        modelId = rev.model.id
+                        modelId = rev.model.publicationId ?: rev.model.submissionId
                     }
                 }
             }
             if (!modelId) {
-                modelId = modelDelegateService.findByPerennialIdentifier(modelIdParam)?.id
+                def model = modelDelegateService.findByPerennialIdentifier(modelIdParam)
+                modelId = (model.publicationId) ?: model.submissionId
             }
             if (!modelId) {
-                println "Ignoring invalid request for $actionUri with params $params."
                 log.error "Ignoring invalid request for $actionUri with params $params."
                 session.updateMissingId = "True"
                 render(template: "/templates/errorTemplate")
@@ -169,7 +170,7 @@ class ModelController {
         }
     }
 
-    private int updateHistory(long model, String user, String accessType,
+    private int updateHistory(String modelId, String user, String accessType,
                 String formatType, String changesMade, boolean success=false) {
         accessType = accessType.replace("/model/","")
         AccessFormat format = AccessFormat.HTML
@@ -178,14 +179,14 @@ class ModelController {
         }
         catch(Exception ignore) {
         }
+        ModelTransportCommand model = modelDelegateService.findByPerennialIdentifier(modelId)
         ModelAuditTransportCommand audit = new ModelAuditTransportCommand(
-                    model: new ModelTransportCommand(id: model),
+                    model: model,
                     username: user,
                     format: format,
                     type: AccessType.fromAction(accessType),
                     changesMade: changesMade,
                     success: success)
-        println "createAuditItem $audit.model.id $audit.username $audit.success"
         long returned = modelDelegateService.createAuditItem(audit)
         return returned
     }
@@ -197,7 +198,6 @@ class ModelController {
 
     //TODO REMOVE
     private boolean isValidId() {
-        println "validating model id ${params.id}"
         if (!params.id) {
             return false
         }
@@ -323,7 +323,6 @@ class ModelController {
 
     // uses revision id and filename
     def getFileDetails = {
-        println("CALLED GET FILE DETAILS WITH ID ${params.id} AND FILE NAME ${params.filename}")
         boolean valid = isValidId()
         if (valid) {
             def revision = modelDelegateService.getLatestRevision(params.id)
@@ -396,7 +395,6 @@ class ModelController {
                         return accessDenied()
                     }
                     conversation.model_id = params.id
-                    println "in update flow model_id is ${conversation.model_id}"
                 }
                 catch(Exception err) {
                     return error()
@@ -437,8 +435,9 @@ class ModelController {
             subflow(controller: "model", action: "upload", input: [isUpdate:false])
             on("abort").to "abort"
             on("displayConfirmationPage") {
-                println "in create flow model_id is ${session.result_submission}"
-                updateHistory(session.result_submission, getUsername(), "create", "html", null, true)
+                final String USERNAME = getUsername()
+                final String AUDIT_ID = session.result_submission
+                updateHistory(AUDIT_ID, USERNAME, "create", "html", null, true)
             }.to "displayConfirmationPage"
             on("displayErrorPage").to "displayErrorPage"
         }
@@ -850,7 +849,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
         }
         saveModel {
             action {
-                def changes = submissionService.handleSubmission(flow.workingMemory);
+                def changes = submissionService.handleSubmission(flow.workingMemory)
                 changes.each {
                     conversation.changesMade.add(it.toString())
                 }
@@ -938,12 +937,10 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
     }
 
     private void serveModelAsFile(RFTC rf, def resp, boolean inline) {
-        println "serve ${rf.dump()} as file; inline : $inline"
         File file = new File(rf.path)
         resp.setContentType(rf.mimeType)
         final String INLINE = inline ? "inline" : "attachment"
         final String F_NAME = file.name
-        println "${INLINE};filename=\"${F_NAME}\""
         resp.setHeader("Content-disposition", "${INLINE};filename=\"${F_NAME}\"")
         resp.outputStream << new ByteArrayInputStream(file.getBytes())
     }
@@ -952,15 +949,12 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
      * File download of the model file for a model by id
      */
     def download = {
-        println "HELLO AND WELCOME TO DOWNLOAD!!"
         try {
             if (!params.filename) {
                 final List<RFTC> FILES = modelDelegateService.retrieveModelFiles(
                                 modelDelegateService.getRevision(params.id as String))
-                println "FILES with no filename IS ${FILES}"
                 List<RFTC> mainFiles = FILES.findAll { it.mainFile }
                 if (FILES.size() == 1) {
-                    println "serving model because files is 1"
                     serveModelAsFile(FILES.first(), response, false)
                 } else if (mainFiles.size() == 1) {
                     serveModelAsFile(mainFiles.first(), response, false)
@@ -970,7 +964,6 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
             } else {
                 final List<RFTC> FILES = modelDelegateService.retrieveModelFiles(
                                 modelDelegateService.getRevision(params.id as String))
-                println "FILES with file name ${params.filename} IS ${FILES}"
                 RFTC requested = FILES.find {
                     if (it.hidden) {
                         return false

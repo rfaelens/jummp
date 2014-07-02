@@ -571,8 +571,8 @@ class SubmissionService {
                 latestRTC.comment = "Edited model metadata online."
                 modelService.addValidatedRevision(latestRTC.files, [], latestRTC)
             }
-            println "setting new model id to ${newModel.submissionId}"
-            workingMemory.put("model_id", newModel.submissionId)
+            String modelId = newModel.submissionId
+            workingMemory.put("model_id", modelId)
             return new TreeSet<String>() //no need to track changes made during submission
         }
     }
@@ -709,10 +709,8 @@ class SubmissionService {
                 newlyCreatedRTC.comment = "Edited model metadata online."
                 def updated = modelService.addValidatedRevision(
                         newlyCreatedRTC.files, [], newlyCreatedRTC)
-                println "setting updated model id to ${updated.model.submissionId}"
                 workingMemory.put("model_id", updated.model.submissionId)
             } else {
-                println "setting updated model id to ${newlyCreated.model.submissionId}"
                 workingMemory.put("model_id", newlyCreated.model.submissionId)
             }
             return changes
@@ -727,10 +725,9 @@ class SubmissionService {
      */
     @Profiled(tag = "submissionService.initialise")
     void initialise(Map<String, Object> workingMemory) {
-    	getStrategyFromContext(workingMemory).initialise(workingMemory)
+        getStrategyFromContext(workingMemory).initialise(workingMemory)
     }
 
-    
     /**
     * Called by ModelController for adding or removing files from the working memory
     *

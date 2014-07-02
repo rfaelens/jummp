@@ -150,7 +150,6 @@ class ModelService {
         String[] fields = ["submissionId", "publicationId", "name", "description", "content",
                     "modelFormat", "levelVersion", "submitter", "paperTitle", "paperAbstract"]
         Set<Document> results = searchEngine.performSearch(fields, query)
-        println "Query $query yields ${results.size()} results: ${results.dump()}"
 
         Set<ModelTransportCommand> returnVals = new HashSet<ModelTransportCommand>()
         results.each {
@@ -509,7 +508,6 @@ OR lower(m.publication.affiliation) like :filter
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getModel")
     public Model getModel(String id) {
-        println "get model with id $id"
         Model model = Model.findByPerennialIdentifier(id)
         if (model) {
             if (!getLatestRevision(model)) {
@@ -925,7 +923,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         stopWatch.lap("Finished adding RepositoryFiles to the Model")
         stopWatch.setTag("modelService.uploadValidatedModel.prepareVcsStorage")
         final String formatVersion = modelFileFormatService.getFormatVersion(rev)
-        ModelFormat format=ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion)
+        ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion)
 
         // vcs identifier is upload date + name - this should by all means be unique
         String pathPrefix =
@@ -1009,7 +1007,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (revision.validate()) {
             model.addToRevisions(revision)
             if (rev.model.publication) {
-            	model.publication = Publication.fromCommandObject(rev.model.publication)
+                model.publication = Publication.fromCommandObject(rev.model.publication)
             }
             if (!model.validate()) {
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
