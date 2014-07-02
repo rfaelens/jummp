@@ -21,8 +21,6 @@
 package net.biomodels.jummp.plugins.webapp
 
 import static org.junit.Assert.*
-import net.biomodels.jummp.core.model.ModelFormatTransportCommand
-import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.model.Model
@@ -74,12 +72,9 @@ abstract class TestUploadFiles extends CreateBase {
         //add tests for when displayModelInfo does something interesting
         assertFlowState("displaySummaryOfChanges")
 
-        //add tests for when displayModelInfo does something interesting
         signalEvent("Continue")
 
         assertFlowExecutionOutcomeEquals("displayConfirmationPage")
-        
-       // assertEquals flowExecutionOutcome.id, "displayConfirmationPage"
 
         //test that the model is infact saved in the database
         model = mockRequest.session.result_submission as String

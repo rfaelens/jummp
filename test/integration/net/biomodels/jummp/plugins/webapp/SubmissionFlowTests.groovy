@@ -35,6 +35,7 @@
 
 package net.biomodels.jummp.plugins.webapp
 
+import grails.util.Holders as H
 import net.biomodels.jummp.core.JummpIntegrationTest
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -48,9 +49,9 @@ import org.junit.Test
 import static org.junit.Assert.*
 
 class SubmissionFlowTests extends JummpIntegrationTest {
-    def grailsApplication
-    def fileSystemService
-    def modelService
+    def grailsApplication = H.grailsApplication
+    def fileSystemService = H.getApplicationContext().getBean("fileSystemService")
+    def modelService = H.getApplicationContext().getBean("modelService")
 
     @Before
     void setUp() {
