@@ -35,6 +35,11 @@ abstract class TestUploadFiles extends CreateBase {
     String model = "M1"
     def modelService
 
+    TestUploadFiles(def ctx) {
+        super()
+        modelService = ctx.getBean("modelService")
+    }
+
     //String getModel() { return modelId }
 
     void performTest() {

@@ -18,14 +18,16 @@
 * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 **/
 
-
 package net.biomodels.jummp.plugins.webapp
 
+/* Clicks cancel as soon as you get to the upload files page */
+class TestUploadFilesCancel extends TestUploadFiles {
 
-    /* Clicks cancel as soon as you get to the upload files page */
-    class TestUploadFilesCancel extends TestUploadFiles {
-        void performRemainingTest() {
-            clickCancelEndFlow()
-        }
+    TestUploadFilesCancel(def ctx) {
+        super(ctx)
     }
-    
+
+    void performRemainingTest() {
+        clickCancelEndFlow()
+    }
+}

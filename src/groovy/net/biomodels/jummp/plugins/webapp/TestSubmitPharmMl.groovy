@@ -21,6 +21,10 @@
 package net.biomodels.jummp.plugins.webapp
 
 class TestSubmitPharmMl extends TestUploadFiles {
+    TestSubmitPharmMl(def ctx) {
+        super(ctx)
+    }
+
     void performRemainingTest() {
         final File MODEL_FILE =
                 new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example1.xml")

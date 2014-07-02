@@ -21,6 +21,10 @@
 package net.biomodels.jummp.plugins.webapp
 
 class TestSubmitMdl extends TestUploadFiles {
+    TestSubmitMdl(def ctx) {
+        super(ctx)
+    }
+
     void performRemainingTest() {
         final File MODEL_FILE =
                 new File("jummp-plugins/jummp-plugin-mdl/test/files/alzheimer/Alzheimer.mdl")

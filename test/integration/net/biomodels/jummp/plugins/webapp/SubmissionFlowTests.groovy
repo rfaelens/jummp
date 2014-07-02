@@ -35,8 +35,9 @@
 
 package net.biomodels.jummp.plugins.webapp
 
-import grails.util.Holders as H
+import static org.junit.Assert.*
 import net.biomodels.jummp.core.JummpIntegrationTest
+import net.biomodels.jummp.core.FileSystemService
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
@@ -45,13 +46,19 @@ import net.biomodels.jummp.model.Model
 import org.apache.commons.io.FileUtils
 import org.junit.After
 import org.junit.Before
+import grails.util.Holders
 import org.junit.Test
-import static org.junit.Assert.*
 
 class SubmissionFlowTests extends JummpIntegrationTest {
-    def grailsApplication = H.grailsApplication
-    def fileSystemService = H.getApplicationContext().getBean("fileSystemService")
-    def modelService = H.getApplicationContext().getBean("modelService")
+    static def grailsApplication
+    static def fileSystemService
+    static def modelService
+
+    static {
+        grailsApplication = Holders.getGrailsApplication()
+        fileSystemService = Holders.getApplicationContext().getBean("fileSystemService")
+        modelService = Holders.getApplicationContext().getBean("modelService")
+    }
 
     @Before
     void setUp() {
@@ -91,7 +98,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     @Test
     void testUploadFilesAbort() {
         assertNotNull(authenticateAsTestUser())
-        new TestUploadFilesCancel().testrun()
+        new TestUploadFilesCancel(grailsApplication.mainContext).testrun()
     }
 
     /* Tests upload pipeline, first with an empty list,
@@ -99,7 +106,8 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     @Test
     void testUploadFilesContinue() {
         assertNotNull(authenticateAsTestUser())
-        TestUploadFilesContinue continued = new TestUploadFilesContinue()
+        TestUploadFilesContinue continued =
+                    new TestUploadFilesContinue(grailsApplication.mainContext)
         continued.testrun()
     }
 
@@ -115,7 +123,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         def rf = new RepositoryFileTransportCommand(path: importFile.absolutePath, description: "")
         Model model = modelService.uploadModelAsFile(rf, meta)
         assertTrue(model.validate())
-        new TestUpdateSbml(model.id, importFile).testrun()
+        new TestUpdateSbml(model.id, importFile, grailsApplication.mainContext).testrun()
     }
 
     /* Tests upload pipeline, first with an empty list,
@@ -123,24 +131,24 @@ class SubmissionFlowTests extends JummpIntegrationTest {
     @Test
     void testSubmitSBML() {
         assertNotNull(authenticateAsTestUser())
-        new TestSubmitSBML().testrun()
+        new TestSubmitSBML(grailsApplication.mainContext).testrun()
     }
 
     @Test
     void testSubmitOmex() {
         authenticateAsTestUser()
-        new TestSubmitOmex().testrun()
+        new TestSubmitOmex(grailsApplication.mainContext).testrun()
     }
 
    @Test
    void testSubmitPharmML() {
         authenticateAsTestUser()
-        new TestSubmitPharmMl().testrun()
+        new TestSubmitPharmMl(grailsApplication.mainContext).testrun()
    }
 
    @Test
    void testSubmitMDL() {
         authenticateAsTestUser()
-        new TestSubmitMdl().testrun()
+        new TestSubmitMdl(grailsApplication.mainContext).testrun()
    }
 }

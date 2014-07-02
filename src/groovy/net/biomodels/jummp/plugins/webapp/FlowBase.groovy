@@ -46,6 +46,7 @@ import org.springframework.web.context.request.RequestContextHolder
  */
 
 abstract class FlowBase extends WebFlowTestCase {
+
     abstract def getFlow()
     abstract void performTest()
 
