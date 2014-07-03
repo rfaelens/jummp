@@ -37,7 +37,7 @@
     <body>
         <h2><g:message code="submission.confirmation.create.header"/></h2>
         <p><g:message code="submission.confirmation.create.first.message"/></p>
-        <p><g:message code="submission.confirmation.create.second.message" args="${[createLink(action:"show", id:session.result_submission)]}"/></p>        
+        <p><g:message code="submission.confirmation.create.second.message" args="${[createLink(action:"show", id:session.result_submission), session.result_submission]}"/></p>
     </body>
     <content tag="submit">
     	selected
