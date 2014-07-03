@@ -131,6 +131,7 @@ class Model implements Serializable {
         if (!perennialId) {
             return null
         }
+        perennialId = perennialId.contains("\\.") ? perennialId : perennialId.split("\\.")[0]
         List<Model> modelList = Model.withCriteria {
             or {
                 FIND_BY_PERENNIAL_ID_CRITERIA.each {
