@@ -61,7 +61,7 @@ class DefaultModelIdentifierGenerator extends AbstractModelIdentifierGenerator {
         DECORATOR_REGISTRY.each { decorator ->
             identifier.decorate(decorator)
         }
-        final String MODEL_ID = identifier.id.toString()
+        final String MODEL_ID = identifier.getCurrentId()
         if (IS_INFO_ENABLED) {
             log.info "Produced a new model identifier $MODEL_ID."
         }
