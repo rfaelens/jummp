@@ -27,7 +27,6 @@ import net.biomodels.jummp.core.model.identifier.decorator.DateAppendingDecorato
 import net.biomodels.jummp.core.model.identifier.decorator.FixedDigitAppendingDecorator
 import net.biomodels.jummp.core.model.identifier.decorator.FixedLiteralAppendingDecorator
 import net.biomodels.jummp.core.model.identifier.decorator.OrderedModelIdentifierDecorator
-import net.biomodels.jummp.core.model.identifier.decorator.OrderedModelIdentifierDecorator
 import net.biomodels.jummp.core.model.identifier.decorator.VariableDigitAppendingDecorator
 import net.biomodels.jummp.core.model.identifier.generator.DefaultModelIdentifierGenerator
 import net.biomodels.jummp.core.model.identifier.generator.ModelIdentifierGenerator
@@ -38,7 +37,6 @@ import net.biomodels.jummp.core.model.identifier.support.LiteralModelIdentifierP
 import net.biomodels.jummp.core.model.identifier.support.ModelIdentifierPartition
 import net.biomodels.jummp.core.model.identifier.support.ModelIdentifierPartitionManager
 import net.biomodels.jummp.core.model.identifier.support.NumericalModelIdentifierPartition
-import net.biomodels.jummp.model.Model
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.tomcat.jdbc.pool.DataSource
@@ -121,7 +119,10 @@ A sample configuration is
                  * to be more generic, but the current query is more optimised for our needs.
                  */
                 mostRecentModelDetails = sql.firstRow("""\
-select max(id) as id, submission_id, perennialPublicationIdentifier from model""")
+select max(id) as id,
+submission_id as submissionId,
+perennialPublicationIdentifier as publicationId
+from model""")
             } catch (Exception e) {
                 final String W = """Unable to access the database - model IDs will be created \
 using the default values."""
@@ -246,6 +247,8 @@ The configuration settings lack the rules for generating model identifiers!"""
                 case DateModelIdentifierPartition:
                     // this decorator sets nextValue to today's date, which is sensible
                     d = new DateAppendingDecorator(i, p.format)
+                    // don't lose the last value used by this decorator
+                    d.nextValue = p.value
                     break
                 case ChecksumModelIdentifierPartition:
                     char sep = ChecksumAppendingDecorator.DEFAULT_SEPARATOR
