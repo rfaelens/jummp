@@ -22,13 +22,12 @@ package net.biomodels.jummp.core.model.identifier.generator
 
 import net.biomodels.jummp.core.events.DateModelIdentifierDecoratorUpdatedEvent
 import net.biomodels.jummp.core.events.ModelIdentifierDecoratorUpdatedEvent
-import net.biomodels.jummp.core.model.identifier.decorator.ModelIdentifierDecorator
 import net.biomodels.jummp.core.model.identifier.decorator.OrderedModelIdentifierDecorator
 import net.biomodels.jummp.core.model.identifier.decorator.VariableDigitAppendingDecorator
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.springframework.context.ApplicationEvent
-import org.springframework.context.event.SmartApplicationListener
+import org.springframework.context.ApplicationListener
 
 /**
  * @short Abstract implementation for producing model identifiers.
@@ -38,9 +37,7 @@ import org.springframework.context.event.SmartApplicationListener
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 abstract class AbstractModelIdentifierGenerator implements ModelIdentifierGenerator,
-            SmartApplicationListener {
-    /** Required by SmartApplicationListener#getOrder() */
-    int order = 10
+            ApplicationListener {
     /** the class logger. */
     private static final Log log = LogFactory.getLog(this)
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
@@ -54,17 +51,10 @@ abstract class AbstractModelIdentifierGenerator implements ModelIdentifierGenera
     abstract void update()
 
     @Override
-    boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
-        return eventType instanceof ModelIdentifierDecoratorUpdatedEvent
-    }
-
-    @Override
-    boolean supportsSourceType(Class<?> sourceType) {
-        return sourceType instanceof ModelIdentifierDecorator
-    }
-
-    @Override
     void onApplicationEvent(ApplicationEvent decoratorUpdatedEvent) {
+        if (!(decoratorUpdatedEvent instanceof ModelIdentifierDecoratorUpdatedEvent)) {
+            return
+        }
         if (IS_INFO_ENABLED) {
             log.info "Processing event ${decoratorUpdatedEvent.inspect()}"
         }
@@ -74,9 +64,10 @@ abstract class AbstractModelIdentifierGenerator implements ModelIdentifierGenera
                 d instanceof VariableDigitAppendingDecorator
             }
             if (d) {
-                final String NEW_VALUE = "0".padLeft(d.WIDTH, '0')
+                final String NEW_VALUE = "1".padLeft(d.WIDTH, '0')
                 d.nextValue = NEW_VALUE
-                d.nextSuffix = 0
+                d.nextSuffix = 1
+                d.lastUsedSuffix = -1
                 if (IS_INFO_ENABLED) {
                     log.info "Attribute 'nextValue' of $d has been reset to $NEW_VALUE."
                 }
