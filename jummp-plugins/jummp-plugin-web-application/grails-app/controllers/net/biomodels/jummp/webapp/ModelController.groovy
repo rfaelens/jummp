@@ -380,7 +380,6 @@ class ModelController {
         if (!valid) {
             render (['success': false, 'message': "Couldnt update permissions"] as JSON)
         }
-
     }
 
     @Secured(["isAuthenticated()"])
