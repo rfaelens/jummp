@@ -395,7 +395,8 @@
     		<div class='PermanentMessage'>
     			You are viewing a version of a model that has been updated. 
     			To access the latest version, and a more detailed display please 
-    			go <a href="${createLink(controller: "model", action: "show", id: revision.model.id)}">here</a>.
+    			go <a href="${createLink(controller: "model", action: "show", id:
+                    (revision.model.publicationId) ?: (revision.model.submissionId))}">here</a>.
     		</div>
     	</g:if>
     	<div id="topBar">
