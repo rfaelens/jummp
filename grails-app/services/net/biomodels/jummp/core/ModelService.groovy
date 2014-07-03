@@ -35,13 +35,7 @@ import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.ModelCreatedEvent
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.events.RevisionCreatedEvent
-import net.biomodels.jummp.core.model.ModelAuditTransportCommand
-import net.biomodels.jummp.core.model.ModelListSorting
-import net.biomodels.jummp.core.model.ModelState
-import net.biomodels.jummp.core.model.ModelTransportCommand
-import net.biomodels.jummp.core.model.PermissionTransportCommand
-import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
-import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.*
 import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsFileDetails
@@ -49,12 +43,9 @@ import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelAudit
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Publication
-import net.biomodels.jummp.model.PublicationLinkProvider
 import net.biomodels.jummp.model.RepositoryFile
 import net.biomodels.jummp.model.Revision
-import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
-import org.apache.commons.io.FileUtils
 import org.apache.lucene.document.Document
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
