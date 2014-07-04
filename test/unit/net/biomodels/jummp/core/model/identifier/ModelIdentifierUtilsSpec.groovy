@@ -170,7 +170,7 @@ Model id part order invalid: Expected part1, not part2. Please review the settin
         assertEquals 2, numericalDecorator.ORDER
         final int WIDTH = 12
         assertEquals WIDTH, numericalDecorator.WIDTH
-        assertEquals "1".padLeft(12, '0'), numericalDecorator.nextValue
+        assertEquals "0".padLeft(12, '0'), numericalDecorator.nextValue
     }
 
     void testParseSettingsHasMandatoryConfigAttribute() {

@@ -212,7 +212,7 @@ class ModelControllerSpec extends Specification {
         }
         assert auth != null
         def format = new ModelFormatTransportCommand(identifier: formatId)
-        def model = new MTC(name: "My model", format: format,
+        def model = new MTC(name: "My model", format: format, submissionId: "M1",
                 comment: "Import my model.")
         def file = new RepositoryFileTransportCommand(mainFile: true, path: filePath,
                userSubmitted: true, description: "what a wonderful model")

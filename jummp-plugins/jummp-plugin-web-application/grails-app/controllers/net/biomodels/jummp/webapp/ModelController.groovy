@@ -100,7 +100,6 @@ class ModelController {
 
     def afterInterceptor = [ action: this.&auditAfter, except: AUDIT_EXCEPTIONS]
 
-
     private String getUsername() {
         String username="anonymous"
         def principal = springSecurityService.principal
@@ -202,7 +201,8 @@ class ModelController {
                 notes = "Pass the expected media type of the request as a parameter e.g. /model/id?format=json")
     @ApiImplicitParam(name = "modelId", value = "The model identifier", required = true, allowMultiple = false)
     def show() {
-        RevisionTransportCommand rev = getRevisionFromParams(params.id, params.revisionId)
+        RevisionTransportCommand rev = modelDelegateService.getRevisionFromParams(params.id,
+                    params.revisionId)
         if (!params.format || (params.format != "json" && params.format != "xml") ) {
             if (!rev) {
                 forward(controller: 'errors', action: 'error403')
@@ -252,7 +252,8 @@ class ModelController {
 
     def files = {
         try {
-            def revisionFiles = getRevisionFromParams(params.id, params.revisionId).files
+            def revisionFiles = modelDelegateService.getRevisionFromParams(params.id,
+                        params.revisionId).files
             def responseFiles = revisionFiles.findAll { !it.hidden }
             respond new net.biomodels.jummp.webapp.rest.model.show.ModelFiles(responseFiles)
         } catch(Exception err) {
@@ -265,7 +266,7 @@ class ModelController {
     def publish = {
         RevisionTransportCommand rev
         try {
-            rev = getRevisionFromParams(params.id, params.revisionId)
+            rev = modelDelegateService.getRevisionFromParams(params.id, params.revisionId)
             modelDelegateService.publishModelRevision(rev)
             redirect(action: "showWithMessage",
                         id: rev.identifier(),
@@ -298,8 +299,8 @@ class ModelController {
     // uses revision id and filename
     def getFileDetails = {
         try {
-            final RevisionTransportCommand REVISION = getRevisionFromParams(params.id,
-                        params.revisionId)
+            final RevisionTransportCommand REVISION =
+                        modelDelegateService.getRevisionFromParams(params.id, params.revisionId)
             def retval = modelDelegateService.getFileDetails(REVISION.id, params.filename)
             if (IS_DEBUG_ENABLED) {
                 log.debug("Permissions for ${REVISION.identifier()}: ${retval as JSON}")
@@ -313,7 +314,7 @@ class ModelController {
 
     def share = {
         try {
-            def rev = getRevisionFromParams(params.id)
+            def rev = modelDelegateService.getRevisionFromParams(params.id)
             def perms = modelDelegateService.getPermissionsMap(rev.model.submissionId)
             return [revision: rev, permissions: perms as JSON]
         } catch(Exception error) {
@@ -919,7 +920,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
         try {
             if (!params.filename) {
                 final List<RFTC> FILES = modelDelegateService.retrieveModelFiles(
-                                getRevisionFromParams(params.id, params.revisionId))
+                                modelDelegateService.getRevisionFromParams(params.id, params.revisionId))
                 List<RFTC> mainFiles = FILES.findAll { it.mainFile }
                 if (FILES.size() == 1) {
                     serveModelAsFile(FILES.first(), response, false)
@@ -930,7 +931,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
                 }
             } else {
                 final List<RFTC> FILES = modelDelegateService.retrieveModelFiles(
-                                getRevisionFromParams(params.id, params.revisionId))
+                                modelDelegateService.getRevisionFromParams(params.id, params.revisionId))
                 RFTC requested = FILES.find {
                     if (it.hidden) {
                         return false
@@ -952,7 +953,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
      * Display basic information about the model
      */
     def summary = {
-        RevisionTransportCommand rev = getRevisionFromParams(params.id)
+        RevisionTransportCommand rev = modelDelegateService.getRevisionFromParams(params.id)
         [
             publication: modelDelegateService.getPublication(params.id),
             revision: rev,
@@ -962,7 +963,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
     }
 
     def overview = {
-        RevisionTransportCommand rev = getRevisionFromParams(params.id)
+        RevisionTransportCommand rev = modelDelegateService.getRevisionFromParams(params.id)
         [
             reactions: sbmlService.getReactions(rev),
             rules: sbmlService.getRules(rev),
@@ -980,7 +981,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
     }
 
     def notes = {
-        RevisionTransportCommand rev = getRevisionFromParams(params.id)
+        RevisionTransportCommand rev = modelDelegateService.getRevisionFromParams(params.id)
         [notes: sbmlService.getNotes(rev)]
     }
 
@@ -988,7 +989,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
      * Retrieve annotations and hand them over to the view
      */
     def annotations = {
-        RevisionTransportCommand rev = getRevisionFromParams(params.id)
+        RevisionTransportCommand rev = modelDelegateService.getRevisionFromParams(params.id)
         [annotations: sbmlService.getAnnotations(rev)]
     }
 
@@ -996,7 +997,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
      * File download of the model file for a model by id
      */
     def downloadModelRevision = {
-        RevisionTransportCommand rev = getRevisionFromParams(params.id)
+        RevisionTransportCommand rev = modelDelegateService.getRevisionFromParams(params.id)
         byte[] bytes = modelDelegateService.retrieveModelFiles(rev)
         response.setContentType("application/xml")
         // TODO: set a proper name for the model
@@ -1055,36 +1056,5 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
             }
         }
         return true
-    }
-
-    private RevisionTransportCommand getRevisionFromParams(final String MODEL,
-                String REVISION = null) {
-        String sanitisedModelId
-        String sanitisedRevisionId
-        final RevisionTransportCommand REV
-        try {
-            final boolean MODEL_ID_HAS_DOT = MODEL.contains('.')
-            if (MODEL_ID_HAS_DOT) {
-                String[] parts = MODEL.split("\\.")
-                sanitisedModelId = parts[0]
-                sanitisedRevisionId = parts[1]
-            } else {
-                sanitisedModelId = MODEL
-            }
-            final boolean PARSE_REVISION_ID = REVISION != null && sanitisedRevisionId == null
-            if (PARSE_REVISION_ID) {
-                // if revision is not an integer, then UrlMappings will error out.
-                final int REVISION_ID = Integer.parseInt(REVISION)
-                REV = modelDelegateService.getRevision(sanitisedModelId, REVISION_ID)
-            } else if (sanitisedRevisionId) {
-                final int REVISION_ID = Integer.parseInt(sanitisedRevisionId)
-                REV = modelDelegateService.getRevision(sanitisedModelId, REVISION_ID)
-            } else { // no revision was specified - pull the latest one.
-                REV = modelDelegateService.getRevision(sanitisedModelId)
-            }
-        } catch (AccessDeniedException e) {
-            log.warn "${getUsername()} attempted to access model $MODEL version $REVISION."
-        }
-        return REV
     }
 }

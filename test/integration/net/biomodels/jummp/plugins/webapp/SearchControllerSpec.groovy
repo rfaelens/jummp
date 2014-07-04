@@ -30,7 +30,6 @@
 
 package net.biomodels.jummp.plugins.webapp
 
-import grails.util.Holders as H
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
@@ -53,18 +52,18 @@ import org.springframework.security.core.authority.GrantedAuthorityImpl
 import org.springframework.security.core.context.SecurityContextHolder
 
 import grails.test.mixin.TestFor
+import grails.test.spock.IntegrationSpec
 import spock.lang.FailsWith
 import spock.lang.Shared
-import spock.lang.Specification
 
 @TestFor(SearchController)
-class SearchControllerSpec extends Specification {
-    @Shared def modelService = H.applicationContext.getBean("modelService")
-    @Shared def grailsApplication = H.grailsApplication
-    @Shared def springSecurityService = H.applicationContext.getBean("springSecurityService")
-    @Shared def authenticationManager = H.applicationContext.getBean("authenticationManager")
-    @Shared Model testModel
-    @Shared List<Model> modelList
+class SearchControllerSpec extends IntegrationSpec {
+    def modelService
+    def grailsApplication
+    def springSecurityService
+    def authenticationManager = grailsApplication.mainContext.getBean("authenticationManager")
+    Model testModel
+    List<Model> modelList
 
     def setupSpec() {
         createUserAndRoles()
@@ -357,7 +356,7 @@ class SearchControllerSpec extends Specification {
         }
         assert auth != null
         def format = new ModelFormatTransportCommand(identifier: formatId)
-        def model = new MTC(name: "My model", format: format,
+        def model = new MTC(name: "My model", format: format, submissionId: "M1",
                 comment: "Import my model.")
         def file = new RepositoryFileTransportCommand(mainFile: true, path: filePath,
                userSubmitted: true, description: "what a wonderful model")

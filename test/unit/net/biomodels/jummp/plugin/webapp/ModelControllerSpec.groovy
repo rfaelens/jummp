@@ -20,58 +20,47 @@ class ModelControllerSpec extends Specification {
 
     void "share throws exception when called without a model revision id"() {
         when:
-            controller.share()
+        controller.share()
+
         then:
-        	controller.actionUri == '/errors/error403'
+        controller.actionUri == '/errors/error403'
     }
 
     void "share can handle rubbish input"() {
-        given:
-            def mds = mockFor(ModelDelegateService)
-            mds.demand.getRevisionDetails() { skel ->
-                new RevisionTransportCommand(
-                    id: 1234,
-                    name: "foobar",
-                    model: new ModelTransportCommand(id: 1)
-                )
-            }
-            controller.modelDelegateService = mds.createMock()
-        when:
-            controller.request.parameters = [id: "one"]
-            controller.share()
-        then:
-        	controller.actionUri == '/errors/error403'
+        when: 'I access a model identifier with an invalid identifier'
+        controller.request.parameters = [id: "1"]
+        controller.share()
+
+        then: 'I get an error.'
+        controller.actionUri == '/errors/error403'
     }
 
     void "share returns a model if there exists a Revision with the supplied id "() {
-        given:
-            def mds = mockFor(ModelDelegateService)
-            mds.demand.getRevisionDetails() { skel ->
-                new RevisionTransportCommand(
-                    id: skel.id,
-                    name: "mock model version",
-                    model: new ModelTransportCommand(id: 1)
-                )
-            }
-            mds.demand.getPermissionsMap() { id ->
-                [ new PermissionTransportCommand(id: "0", name: "Me", read: true, write: true),
-                    new PermissionTransportCommand(id: "1", name: "Myself", read: true),
-                    new PermissionTransportCommand(id: "2", name: "I", read: true),
-                ]
-            }
-            controller.modelDelegateService = mds.createMock()
-        when:
-            controller.request.parameters = [id: "1"]
-            def model = controller.share()
-        then:
-            model != null
-            def rev = model.revision
-            rev.id == 1
-            rev.name == "mock model version"
-            grails.converters.JSON perms = model.permissions
-            String jsonPerms = perms.toString(false)
-            String expected = """\
+        given: "a model is shared with me, myself and I"
+        def mds = mockFor(ModelDelegateService)
+        mds.demand.getRevisionFromParams() { String mId, String rId ->
+            new RevisionTransportCommand( id: Integer.parseInt(rId), name: "mock model version",
+                        model: new ModelTransportCommand(submissionId: "${mId}.${rId}")
+            )
+        }
+        mds.demand.getPermissionsMap() { id ->
+            [ new PermissionTransportCommand(id: "0", name: "Me", read: true, write: true),
+            new PermissionTransportCommand(id: "1", name: "Myself", read: true),
+            new PermissionTransportCommand(id: "2", name: "I", read: true),
+            ]
+        }
+        controller.modelDelegateService = mds.createMock()
+
+        when: "the access permissions of that model are checked"
+        controller.request.parameters = [id: "MODEL123.4"]
+        def model = controller.share()
+
+        then: "the correct permissions are returned"
+        model != null
+        grails.converters.JSON perms = model.permissions
+        String jsonPerms = perms.toString(false)
+        String expected = """\
 [{"disabledEdit":false,"id":"0","name":"Me","read":true,"show":true,"write":true},{"disabledEdit":false,"id":"1","name":"Myself","read":true,"show":true,"write":false},{"disabledEdit":false,"id":"2","name":"I","read":true,"show":true,"write":false}]"""
-            jsonPerms == expected
+        jsonPerms == expected
     }
 }
