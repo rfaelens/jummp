@@ -73,16 +73,18 @@
     					<form id="collaboratorAddForm">
     						<div id="formElements">
     							<div class="formElement">
-    								<label for="name">User</label>
+    								<label for="nameSearch">User</label>
     								<input placeholder="Name, username or email" id="nameSearch" name="name" type="text"/>
     							</div>
     							<div class="formElement">
 									<label for="read">Read</label>
-									<input id="radioReader" type="radio" name="read" checked></input>
+									<input id="radioReader" type="radio" id="read" name="read"
+                                           checked></input>
 								</div>
 								<div class="formElement">
 									<label for="write">Write</label>
-									<input id="radioWriter" type="radio" name="write"></input>
+									<input id="radioWriter" type="radio"
+                                           id="write" name="write"></input>
 								</div>
 							</div>
 						<button id="AddButton">Add</button>
@@ -92,16 +94,18 @@
 					</div>
 					</div>
 					<hr style="visibility:hidden;"/>
-					<a href="${createLink(action:"show", id:revision.model.id)}">Back to Model</a>
+					<a href="${createLink(action:"show", id:revision.identifier())}">Back to
+                    Model</a>
     		   </div>
 			 <g:javascript contextPath="" src="share.js"/>
     		<g:javascript>
     			$( document ).ready(function() {
     					main(JSON.parse('${permissions}'),
     						'<g:createLink controller="jummp" action="lookupUser"/>',
-    						'<g:createLink controller="model" action="shareUpdate" id="${revision.model.id}"/>',
+    						'<g:createLink controller="model" action="shareUpdate" id="${revision.identifier()}"/>',
     						'<g:createLink controller="jummp" action="autoCompleteUser"/>',
-    						'<g:createLink controller="model" action="show" id="${revision.model.id}"/>');
+    						'<g:createLink controller="model" action="show"
+                                           id="${revision.identifier()}"/>');
     			});
     		</g:javascript>
     </body>
