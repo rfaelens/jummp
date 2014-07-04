@@ -113,16 +113,11 @@ A sample configuration is
             ds.poolProperties = pp
             sql = new Sql(ds)
             try {
-                /*
-                 * may need to rewrite this query in the future as
-                 * select * from model where id = (select max(id) from model),
-                 * to be more generic, but the current query is more optimised for our needs.
-                 */
                 mostRecentModelDetails = sql.firstRow("""\
-select max(id) as id,
+select id,
 submission_id as submissionId,
 perennialPublicationIdentifier as publicationId
-from model""")
+from model where model.id = (select max(id) from model)""")
             } catch (Exception e) {
                 final String W = """Unable to access the database - model IDs will be created \
 using the default values."""
