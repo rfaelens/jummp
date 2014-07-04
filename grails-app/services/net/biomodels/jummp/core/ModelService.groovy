@@ -1990,8 +1990,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
         aclUtilService.addPermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
-        revision.state=ModelState.PUBLISHED
-        revision.save(flush:true)
+        revision.state = ModelState.PUBLISHED
+        // TODO FIXME this should not need to bypass validation in order to save successfully!
+        // TODO make sure that only relative file paths are stored in the database!!
+        try {
+            revision.save(validate: false, failOnError: true, flush: true)
+            model.save()
+        } catch (Throwable e) {
+            log.error e.message, e
+        }
     }
 
     /**
@@ -2075,7 +2082,7 @@ Model audit $audit has been updated in a separate thread:\n""")
                         }
                     }
                     log.warn warnMsg.toString()
-                    audit.save()
+                    audit.save(flush: true)
                 }
             } catch(Exception e) {
                 throw new RuntimeException("Failed to update audit for "+itemId+" with success: "+success, e)
