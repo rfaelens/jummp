@@ -123,7 +123,7 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         def rf = new RepositoryFileTransportCommand(path: importFile.absolutePath, description: "")
         Model model = modelService.uploadModelAsFile(rf, meta)
         assertTrue(model.validate())
-        new TestUpdateSbml(model.id, importFile, grailsApplication.mainContext).testrun()
+        new TestUpdateSbml(model.submissionId, importFile, grailsApplication.mainContext).testrun()
     }
 
     /* Tests upload pipeline, first with an empty list,

@@ -36,7 +36,7 @@ class TestUpdateSbml extends UpdateBase {
     File existing
     def modelService
 
-    TestUpdateSbml(long m, File uploaded, def ctx) {
+    TestUpdateSbml(String m, File uploaded, def ctx) {
         super(m)
         existing = uploaded
         modelService = ctx.getBean("modelService")
@@ -75,7 +75,7 @@ class TestUpdateSbml extends UpdateBase {
         signalEvent("Continue")
         //assert flowExecutionOutcome.id == "displayConfirmationPage"
 
-        //test that the model is infact saved in the database
+        //test that the model is in fact saved in the database
         Revision rev=modelService.getLatestRevision(model)
         //test that revision is saved correctly
         assert rev
