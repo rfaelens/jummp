@@ -25,8 +25,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 
 @ApiModel(value = "Model")
-class Model
-{
+class Model {
     @ApiModelProperty(value = "model name", required = true)
     String name
     @ApiModelProperty(value = "model description", required = true)
@@ -39,9 +38,11 @@ class Model
     ModelFiles files
     @ApiModelProperty(value = "the version history of this model")
     History history
+    /** perennial model identifiers */
+    String submissionId
+    String publicationId
 
-    public Model(RevisionTransportCommand revision)
-    {
+    public Model(RevisionTransportCommand revision) {
         ModelTransportCommand model = revision.model
         name = revision.name
         description = revision.description
@@ -52,6 +53,8 @@ class Model
                           model.publication.link
         }
         files = new ModelFiles(revision.files.findAll{ !it.hidden })
-        history = new History(model.id)
+        history = new History(model.submissionId)
+        submissionId = model.submissionId
+        publicationId = model.publicationId
     }
 }

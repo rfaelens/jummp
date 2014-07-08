@@ -18,6 +18,12 @@
 * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 **/
 
+import grails.converters.JSON
+import grails.converters.XML
+import net.biomodels.jummp.core.IModelService
+import net.biomodels.jummp.webapp.rest.marshaller.ModelXmlMarshaller
+import net.biomodels.jummp.webapp.rest.model.show.Model
+
 class JummpPluginWebApplicationGrailsPlugin {
     // the plugin version
     def version = "0.1"
@@ -124,6 +130,32 @@ Brief summary/description of the plugin.
 
     def doWithApplicationContext = { applicationContext ->
         // TODO Implement post initialization spring config (optional)
+        XML.registerObjectMarshaller(new ModelXmlMarshaller())
+        JSON.registerObjectMarshaller(Model) { Model M ->
+            Map result = [:]
+            IModelService modelDelegateService =
+                        applicationContext.getBean("modelDelegateService")
+            final boolean MANY_IDENTIFIERS =
+                        modelDelegateService.haveMultiplePerennialIdentifierTypes()
+            if (MANY_IDENTIFIERS) {
+                Map<String, String> identifiersMap = [:]
+                final Set<String> ID_TYPES = modelDelegateService.getPerennialIdentifierTypes()
+                ID_TYPES.each {
+                    identifiersMap[it.endsWith('Id') ? it.append("entifier") : it] = M."$it"
+                }
+                result['identifiers'] = identifiersMap
+            } else {
+                result['identifier'] = M.submissionId
+            }
+
+            ['name', 'description', 'publication', 'format', 'files', 'history'].each { field ->
+                final def VALUE = M."$field"
+                if (VALUE) {
+                    result[field] = VALUE
+                }
+            }
+            return result
+        }
     }
 
     def onChange = { event ->
