@@ -48,6 +48,8 @@ import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.core.model.identifier.generator.AbstractModelIdentifierGenerator
+import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
 import org.springframework.security.access.AccessDeniedException
 
 /**
@@ -66,6 +68,7 @@ class ModelDelegateService implements IModelService {
     def modelService
     def modelFileFormatService
     def grailsApplication
+    def publicationIdGenerator
 
     String getPluginForFormat(ModelFormatTransportCommand format) {
         return modelFileFormatService.getPluginForFormat(format)
@@ -327,5 +330,19 @@ class ModelDelegateService implements IModelService {
             log.warn "Unauthorised attempt to access model $MODEL version $REVISION."
         }
         return REV
+    }
+
+    Set<String> getPerennialIdentifierTypes() {
+        return Model.PERENNIAL_IDENTIFIER_TYPES
+    }
+
+    boolean haveMultiplePerennialIdentifierTypes() {
+        final boolean HAVE_PERENNIAL_PUBLICATION_ID = publicationIdGenerator instanceof
+                    AbstractModelIdentifierGenerator && !(publicationIdGenerator instanceof
+                    NullModelIdentifierGenerator)
+
+        final Set<String> ID_TYPES = getPerennialIdentifierTypes()
+        final boolean MANY_IDENTIFIERS = HAVE_PERENNIAL_PUBLICATION_ID || ID_TYPES.size() >= 2
+        return MANY_IDENTIFIERS
     }
 }

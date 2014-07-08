@@ -295,4 +295,28 @@ public interface IModelService {
      * model otherwise.
      */
     public ModelTransportCommand findByPerennialIdentifier(String identifier)
+    /**
+     * Finds the Revision corresponding to the supplied identifier arguments.
+     *
+     * @param model a perennial model identifier which may include the revision identifier or not.
+     * @param revision the specific revision number of the model in question. If this argument is null, the latest revision of the model should be retrieved.
+     * @return a RevisionTransportCommand representation of the requested model revision.
+     */
+    public RevisionTransportCommand getRevisionFromParams(final String model, final String revision)
+    /**
+     * @short Returns the types of perennial model identifiers that have been declared.
+     *
+     * This must include the submissionId field, but may contain others, such as publicationId.
+     * The set must be equivalent to the one which is constructed by ModelIdentifierUtils when
+     * parsing the externalised settings for perennial model identifier generators.
+     */
+    public Set<String> getPerennialIdentifierTypes()
+    /**
+     * @short Specifies whether there are one or more kinds of perennial identifiers defined.
+     *
+     * In effect, this method returns false if the model identifier settings only cover
+     * submission, and true if there are multiple identifier schemes defined - e.g. submission,
+     * publication etc.
+     */
+    public boolean haveMultiplePerennialIdentifierTypes()
 }
