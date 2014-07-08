@@ -22,12 +22,10 @@ package net.biomodels.jummp.webapp.rest.model.show
 
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 
-class AdditionalFile extends ModelFile
-{
+class AdditionalFile extends ModelFile {
     String description
 
-    public AdditionalFile(RepositoryFileTransportCommand file)
-    {
+    public AdditionalFile(RepositoryFileTransportCommand file) {
         super(file)
         description = file.description
     }

@@ -22,13 +22,11 @@ package net.biomodels.jummp.webapp.rest.model.show
 
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 
-class Format
-{
+class Format {
     String name
     String version
 
-    public Format(ModelFormatTransportCommand f)
-    {
+    public Format(ModelFormatTransportCommand f) {
         name = f.name
         version = f.formatVersion
     }

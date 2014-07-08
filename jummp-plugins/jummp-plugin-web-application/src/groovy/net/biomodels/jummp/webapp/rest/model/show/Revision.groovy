@@ -22,15 +22,13 @@ package net.biomodels.jummp.webapp.rest.model.show
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
-class Revision
-{
+class Revision {
     int version
     long submitted
     String submitter
     String comment
 
-    public Revision(RevisionTransportCommand revision)
-    {
+    public Revision(RevisionTransportCommand revision) {
         version = revision.revisionNumber
         submitted = revision.uploadDate.getTime()
         submitter = revision.owner

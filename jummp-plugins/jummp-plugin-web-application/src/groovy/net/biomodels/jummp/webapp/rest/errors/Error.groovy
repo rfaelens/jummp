@@ -20,13 +20,11 @@
 
 package net.biomodels.jummp.webapp.rest.error
 
-class Error
-{
+class Error {
     String errorType
     String errorMessage
 
-    public Error(String e, String msg)
-    {
+    public Error(String e, String msg) {
         errorType = e
         errorMessage = msg
     }
