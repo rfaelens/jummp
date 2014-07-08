@@ -23,12 +23,10 @@ package net.biomodels.jummp.webapp.rest.model.show
 import grails.util.Holders
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
-class History
-{
+class History {
     List<Revision> revisions = []
 
-    public History(long modelId)
-    {
+    public History(String modelId) {
         List<RevisionTransportCommand> revs = Holders.grailsApplication.mainContext
                                               .getBean("modelDelegateService").getAllRevisions(modelId)
 

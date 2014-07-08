@@ -23,19 +23,17 @@ package net.biomodels.jummp.webapp.rest.search
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
 import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 
-
-class ModelSummary
-{
-    long id
+class ModelSummary {
+    String id
     String url
     String name
     String format
     String submitter
     Date submissionDate
     Date lastModified
-    public ModelSummary(MTC model)
-    {
-        id = model.id
+
+    public ModelSummary(MTC model) {
+        id = (model.publicationId) ?: (model.submissionId)
         def linker = new ApplicationTagLib()
         url = linker.createLink(controller: 'model', action: 'show', absolute: 'true', id: id)
         name = model.name
