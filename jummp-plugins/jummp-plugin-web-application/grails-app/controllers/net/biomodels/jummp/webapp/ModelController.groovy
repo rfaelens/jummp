@@ -147,10 +147,12 @@ class ModelController {
             } else {
                 log.error "Ignoring invalid request for $actionUri with params $params."
                 forward(controller: "errors", action: "error403")
+                return false
             }
         } catch(Exception e) {
             log.error(e.message, e)
             forward(controller: "errors", action: "error403")
+            return false
         }
         return true
     }
