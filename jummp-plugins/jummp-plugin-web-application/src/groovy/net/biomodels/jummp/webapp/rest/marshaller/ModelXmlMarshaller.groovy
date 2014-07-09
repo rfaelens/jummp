@@ -67,10 +67,10 @@ class ModelXmlMarshaller implements ObjectMarshaller<XML> {
         }
 
         ['name', 'description', 'publication', "format", "files", "history" ].each { String f ->
-            final String VALUE = M."$f"
+            final def VALUE = M."$f"
             if (VALUE) {
                 converter.startNode f
-                converter.chars VALUE
+                converter.convertAnother VALUE
                 converter.end()
             }
         }
