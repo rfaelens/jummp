@@ -46,12 +46,17 @@ class ModelXmlMarshaller implements ObjectMarshaller<XML> {
     void marshalObject(Object o, XML converter) {
         final Model M = (Model) o
 
+        converter.startNode 'identifier'
+        converter.chars M.submissionId
+        converter.end()
         def ctx = H.grailsApplication.mainContext
         IModelService modelDelegateService = ctx.getBean("modelDelegateService")
         final boolean MANY_IDENTIFIERS = modelDelegateService.haveMultiplePerennialIdentifierTypes()
         if (MANY_IDENTIFIERS) {
-            converter.startNode 'identifiers'
             ID_TYPES.each { String t ->
+                if (t == 'submissionId') {
+                    return // have already dealt with this one.
+                }
                 final String VALUE = M."$t"
                 if (VALUE) {
                     converter.startNode(t.endsWith('Id') ? t.append('entifier') : t)
@@ -59,18 +64,13 @@ class ModelXmlMarshaller implements ObjectMarshaller<XML> {
                     converter.end()
                 }
             }
-            converter.end()
-        } else {
-            converter.startNode 'identifier'
-            converter.chars M.submissionId
-            converter.end()
         }
 
         ['name', 'description', 'publication', "format", "files", "history" ].each { String f ->
-            final String VALUE = M."$f"
+            final def VALUE = M."$f"
             if (VALUE) {
                 converter.startNode f
-                converter.chars VALUE
+                converter.convertAnother VALUE
                 converter.end()
             }
         }
