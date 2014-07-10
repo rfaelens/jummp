@@ -1158,4 +1158,6 @@ databaseChangeLog = {
     include file: '20140623populate_model_submission_and_publication_id.groovy'
 
     include file: '20140625make_perennial_id_unique.groovy'
+
+	include file: '20140708users_have_teams.groovy'
 }

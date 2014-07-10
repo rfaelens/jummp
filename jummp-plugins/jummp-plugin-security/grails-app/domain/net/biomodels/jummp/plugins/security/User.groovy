@@ -83,9 +83,9 @@ class User implements Serializable {
      * @return User without any security relevant information.
      */
     User sanitizedUser() {
-        return new User(id: this.id, username: this.username, email: this.email, 
-        				person: new Person(userRealName: this.person.userRealName, 
-        								   institution: this.person.institution,
-        								   orcid:this.person.orcid))
+        return new User(id: this.id, username: this.username, email: this.email,
+                    person: new Person(userRealName: this.person.userRealName,
+                    institution: this.person.institution,
+                    orcid:this.person.orcid))
     }
 }
