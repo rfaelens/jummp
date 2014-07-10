@@ -1,11 +1,9 @@
 <div class='flashNotificationDiv'>
 <g:if test="${flashMessage && flashMessage.length()>0}">
-   		<%
-   			flashMessage=message(code: flashMessage, default:flashMessage)
-   		%>
-		${flashMessage}
-		<a onclick = "hideNow()" class="close">&times;</a>
-   		<% flashMessage="" %>
+    <% flashMessage=message(code: flashMessage, default:flashMessage) %>
+    ${flashMessage}
+    <a onclick = "hideNow()" class="close">&times;</a>
+    <% flashMessage="" %>
 </g:if>
 <g:else>
 	<g:if test="${validationErrorOn}">
