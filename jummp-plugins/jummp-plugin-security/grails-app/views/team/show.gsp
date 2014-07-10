@@ -22,7 +22,7 @@
 <html>
     <head>
         <meta name="layout" content="main"/>
-        <title>Create a team</title>
+        <title>View team</title>
     </head>
     <body>
         <g:if test="${team.description}">

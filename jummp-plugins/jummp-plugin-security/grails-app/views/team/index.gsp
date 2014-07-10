@@ -33,15 +33,15 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Description</th>
+                        <th class='spaced'>Name</th>
+                        <th class='spaced'>Description</th>
                     </tr>
                 </thead>
                 <tbody>
                     <g:each in="${teams}" var="t" status="i">
                         <tr class="${ (i % 2) == 0 ? 'even' : 'odd'}">
-                            <td><g:link action="show" id="${t.id}">${t.name}</g:link></td>
-                            <td>${t.description}</td>
+                            <td class='spaced'><g:link action="show" id="${t.id}">${t.name}</g:link></td>
+                            <td class='spaced'>${t.description}</td>
                         </tr>
                     </g:each>
                 </tbody>
