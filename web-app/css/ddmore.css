@@ -971,7 +971,9 @@ col {
 tr {
 }
 td {
-    padding: 0.75em;
+}
+.spaced {
+    padding: 0.5em;
 }
 form {
     margin: 0;
