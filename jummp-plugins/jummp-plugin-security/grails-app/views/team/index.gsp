@@ -47,6 +47,9 @@
                 </tbody>
             </table>
         </g:if>
+        <span class='spaced'>
+            <g:link controller="team" action="create">Create a team</g:link>
+        </span>
     </body>
 </html>
 <content tag="teams">
