@@ -49,4 +49,7 @@
         </g:if>
     </body>
 </html>
+<content tag="teams">
+    selected
+</content>
 <content tag="title">View my teams</content>
