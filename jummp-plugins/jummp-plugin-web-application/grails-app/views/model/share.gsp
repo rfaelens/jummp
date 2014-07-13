@@ -29,10 +29,10 @@
 
 <%@ page contentType="text/html;charset=UTF-8" %>
     <head>
-        <meta name="layout" content="main" />
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js" type="text/javascript" charset="utf-8"></script>
+        <meta name="layout" content="main"/>
+        <g:javascript src="underscore-min.js"/>
+        <g:javascript src="handlebars.min.js"/>
+        <g:javascript src="backbone-min.js"/>
         <script id="collaborator-list-template" type="text/x-handlebars-template">
     			
         		<div id="currentCollabs">
@@ -103,7 +103,7 @@
     					main(JSON.parse('${permissions}'),
     						'<g:createLink controller="jummp" action="lookupUser"/>',
     						'<g:createLink controller="model" action="shareUpdate" id="${revision.identifier()}"/>',
-    						'<g:createLink controller="jummp" action="autoCompleteUser"/>'
+                            '<g:createLink controller="jummp" action="autoCompleteUser"/>')
     			});
     		</g:javascript>
     </body>
