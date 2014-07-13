@@ -103,9 +103,7 @@
     					main(JSON.parse('${permissions}'),
     						'<g:createLink controller="jummp" action="lookupUser"/>',
     						'<g:createLink controller="model" action="shareUpdate" id="${revision.identifier()}"/>',
-    						'<g:createLink controller="jummp" action="autoCompleteUser"/>',
-    						'<g:createLink controller="model" action="show"
-                                           id="${revision.identifier()}"/>');
+    						'<g:createLink controller="jummp" action="autoCompleteUser"/>'
     			});
     		</g:javascript>
     </body>

@@ -20,7 +20,6 @@ function makeBoolean(value) {
 var lookupURL="";
 var submitURL="";
 var autoURL="";
-var showURL="";
 var selectedItem;
 collaborators = new Collaborators;
 CollaboratorTable = Backbone.View.extend({
@@ -212,14 +211,13 @@ function obscureEmail(text) {
     return obscured[text]
 }
 
-function main(existing, contURL, submit, autoComp, show) {
+function main(existing, contURL, submit, autoComp) {
     collaboratorList = new CollaboratorTable({
         collection: collaborators
     });
     lookupURL=contURL;
     submitURL=submit;
     autoURL=autoComp;
-    showURL=show;
     $('.containUI').html(collaboratorList.$el);
     _.each(existing, function(collab) {
         if (collab.write) {
