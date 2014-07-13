@@ -45,11 +45,9 @@ CollaboratorTable = Backbone.View.extend({
     },
     performSubmission:function() {
         var collabString=JSON.stringify(this.collection);
-        console.log(collabString);
         $(":input").prop('disabled', true);
         $.post(submitURL, { collabMap: collabString }, function(returnedData) {
             if (returnedData.success) {
-                //window.location=showURL;
                 $(":input").prop('disabled', false);
             }
             else {
@@ -69,8 +67,6 @@ CollaboratorTable = Backbone.View.extend({
         }
         objectCreated.disabledEdit=false;
         objectCreated.show=true;
-        console.log(JSON.stringify(collaborators));
-        console.log(JSON.stringify(objectCreated));
         var that = this;
         if (selectedItem && selectedItem.name==objectCreated.name) {
             objectCreated.id = selectedItem[1];
@@ -97,7 +93,6 @@ CollaboratorTable = Backbone.View.extend({
         var id=buttonElement.data("person");
         var field=buttonElement.data("field");
         var collab=this.collection.get(id);
-        console.log("Collab before: "+JSON.stringify(collab))
         collab.set(field, buttonElement.is(':checked'));
         if (field==="write") {
             if (collab.get("write")) {
@@ -133,13 +128,11 @@ CollaboratorTable = Backbone.View.extend({
     render: function() {
         willBeRendered=this.collection.length;
         this.collection.each(function(collab) {
-            console.log(collab);
             if (!collab.get("show")) {
             willBeRendered--;
             }
         });
         var renderThis = {collabsList: this.collection.toJSON(), hasCollabs: willBeRendered>0};
-        console.log(renderThis);
         var html = template(renderThis);
         this.$el.html(html);
         addButtonEvents();
@@ -227,11 +220,8 @@ function main(existing, contURL, submit, autoComp, show) {
     submitURL=submit;
     autoURL=autoComp;
     showURL=show;
-    console.log(submitURL);
-    console.log(collaboratorList.el);
     $('.containUI').html(collaboratorList.$el);
     _.each(existing, function(collab) {
-        console.log(JSON.stringify(collab))
         if (collab.write) {
             collab.read=true;
         }
@@ -260,19 +250,16 @@ function autoComplete(collabs, url) {
             searchTerm=request.term;
             $.getJSON( url, request, function( data, status, xhr ) {
                 if (collabs.length == 0) {
-                    console.log("Returning auto-completion results without any filter.");
                     response(data);
                 } else {
                     var filtered=[];
                     $.each(data, function(result) {
                         if (collabs.findWhere({name: data[result][2], id: data[result][1]})) {
-                            console.log("EXCLUDED "+data[result][2]);
                         }
                         else {
                             filtered.push(data[result]);
                         }
                     });
-                    console.log(filtered);
                     response( filtered );
                 }
             });
