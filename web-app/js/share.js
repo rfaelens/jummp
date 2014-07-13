@@ -5,7 +5,6 @@ var toJSON = function(form) {
       return json;
     },{});
   };
-var thisIsATest = "HELLO WORLD";
 var Collaborator = Backbone.Model.extend({
 });
 var Collaborators = Backbone.Collection.extend({
@@ -46,6 +45,7 @@ CollaboratorTable = Backbone.View.extend({
     },
     performSubmission:function() {
         var collabString=JSON.stringify(this.collection);
+        console.log(collabString);
         $(":input").prop('disabled', true);
         $.post(submitURL, { collabMap: collabString }, function(returnedData) {
             if (returnedData.success) {
@@ -259,17 +259,22 @@ function autoComplete(collabs, url) {
             var term = request.term;
             searchTerm=request.term;
             $.getJSON( url, request, function( data, status, xhr ) {
-                var filtered=[];
-                $.each(data, function(result) {
-                    if (collabs.findWhere({name: data[result][2], id: data[result][1]})) {
-                        console.log("EXCLUDED "+data[result][2]);
-                    }
-                    else {
-                        filtered.push(data[result]);
-                    }
-                });
-                console.log(filtered);
-                response( filtered );
+                if (collabs.length == 0) {
+                    console.log("Returning auto-completion results without any filter.");
+                    response(data);
+                } else {
+                    var filtered=[];
+                    $.each(data, function(result) {
+                        if (collabs.findWhere({name: data[result][2], id: data[result][1]})) {
+                            console.log("EXCLUDED "+data[result][2]);
+                        }
+                        else {
+                            filtered.push(data[result]);
+                        }
+                    });
+                    console.log(filtered);
+                    response( filtered );
+                }
             });
         },
         select: function( event, ui ) {
