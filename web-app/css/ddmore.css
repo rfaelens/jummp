@@ -1,3 +1,18 @@
+/* begin custom styles */
+.spaced {
+    padding: 0.5em;
+}
+.tip {
+    padding-top: 0;
+    margin-top: 0
+    padding-bottom: 0.25em;
+    font-size: 0.9em;
+}
+.tipNote {
+    font-weight: bold;
+    color: #cc0000;
+}
+/* end custom styles */
 #autocomplete {
     border: 1px solid;
     overflow: hidden;
@@ -971,9 +986,6 @@ col {
 tr {
 }
 td {
-}
-.spaced {
-    padding: 0.5em;
 }
 form {
     margin: 0;
