@@ -72,7 +72,6 @@ CollaboratorTable = Backbone.View.extend({
             collaborators.add(objectCreated);
             this.performSubmission();
         } else {
-            var that=this;
             $.post(lookupURL, { name: objectCreated.name }, function(returnedData) {
                 if (returnedData.found) {
                     objectCreated.id=returnedData.username;
@@ -150,14 +149,6 @@ function addButtonEvents() {
         $("#collabUI").height($("#currentCollabs").height());
     }
  }
-
-function s4() {
-  return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-}
-
-function mangleEmail(mail) {
-    parts=mail.split("@");
-}
 
 function switchRadio(me, opposite) {
     if ($(me).is(':checked')) {
