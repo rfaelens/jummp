@@ -67,7 +67,7 @@ CollaboratorTable = Backbone.View.extend({
         objectCreated.disabledEdit=false;
         objectCreated.show=true;
         var that = this;
-        if (selectedItem && selectedItem.name==objectCreated.name) {
+        if (selectedItem && selectedItem[2]==objectCreated.name) {
             objectCreated.id = selectedItem[1];
             collaborators.add(objectCreated);
             this.performSubmission();
@@ -264,7 +264,7 @@ function autoComplete(collabs, url) {
         },
         select: function( event, ui ) {
             $( "#nameSearch" ).val( ui.item[2] );
-            selectedItem=ui.item[2];
+            selectedItem=ui.item;
             return false;
         }
     }).data( "ui-autocomplete" )._renderItem = function( ul, item ) {
