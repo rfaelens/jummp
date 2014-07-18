@@ -23,40 +23,41 @@
     <head>
         <meta name="layout" content="main"/>
         <title>Create a team</title>
-         <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js" type="text/javascript" charset="utf-8"></script>
+        <g:javascript src="underscore-min.js" plugin="jummp-plugin-web-application"/>
+        <g:javascript src="handlebars.min.js" plugin="jummp-plugin-web-application"/>
+        <g:javascript src="backbone-min.js" plugin="jummp-plugin-web-application"/>
         <script src="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: "/js", file: 'share.js')}"></script>
-        <g:javascript src="teams.js" plugin="jummp-plugin-security"/>
-        <script id="team-members-template" type="text/x-handlebars-template">
-        <div id="members">
-        <h2>Team Members</h2>
-        {{#if isEmpty}}
-            Use the search box to add collaborators to this team.
-        {{else}}
-            <table id="membersTable">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>&nbsp;</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each}}
-                        <tr>
-                            <td>{{this.name}}</td>
-                            <td><button id=remove-{{this.id}} data</td>
-                        </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        {{/if}
-        </div>
+        <script id="team-member-template" type="text/x-handlebars-template">
+            <td>{{this.name}}</td>
+            <td><button type='button' id='remove-{{this.id}}' class='.remove'>Remove</button></td>
         </script>
+        <script id="team-members-template" type="text/x-handlebars-template">
+            {{#if isEmpty}}
+                <p>Use the search box to add collaborators to this team.</p>
+            {{else}}
+                <table id="membersTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each}}
+                            <tr>
+                                <td>{{this.name}}</td>
+                                <td><button id='remove-{{this.id}}' class='.remove'></button></td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            {{/if}
+        </script>
+        <g:javascript src="teams.js" plugin="jummp-plugin-security"/>
    </head>
     <body>
         <g:form name="newTeamForm" action="save">
-            <table>
+            <table class='spaced'>
                 <tbody>
                     <tr>
                         <td><label class="required" for="name">Name</label></td>
@@ -68,14 +69,38 @@
                     </tr>
                 </tbody>
             </table>
+            <div id="membersContainer" class='spaced'>
+                <h2>Team Members</h2>
+                <div>
+                    <label for="nameSearch">User</label>
+                    <input placeholder="Name, username or email" id="nameSearch" name="nameSearch" type="text"/>
+                </div>
+                <span class="tip">
+                    <span class='tipNote'>Tip:</span>
+                    Choose the collaborator, then press enter to add them to this team.
+                </span>
+                <div class="spaced" id="members">
+                    <table id="membersTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody id="membersTableBody">
+                            <!-- ADD MEMBERS HERE. -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <g:submitButton name="create" value="Create"/>
         </g:form>
-        <label for="nameSearch">User</label>
-        <input placeholder="Name, username or email" id="nameSearch" name="nameSearch" type="text"/>
         <g:javascript>
             $(function() {
                 var url = '<g:createLink controller="jummp" action="autoCompleteUser"/>';
-                autoComplete(collaborators, url);
+                // collaborators are declared in share.js
+                autoComplete([], url);
             });
         </g:javascript>
     </body>
