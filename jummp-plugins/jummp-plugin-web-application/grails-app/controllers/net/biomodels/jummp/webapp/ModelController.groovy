@@ -825,7 +825,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
                 }
                 session.result_submission = flow.workingMemory.get("model_id")
                 if (flow.isUpdate) {
-                    flash.sendMessage = "Model ${session.result_submission} has been updated."
+                    flash.sendMessage = "Model has been updated."
                     session.removeAttribute(flow.workingMemory.get("SafeReferenceVariable") as String)
                     return redirectWithMessage()
                 }
