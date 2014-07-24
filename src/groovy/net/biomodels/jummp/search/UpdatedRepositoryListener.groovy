@@ -152,7 +152,7 @@ class UpdatedRepositoryListener implements ApplicationListener {
      **/
     public void updateIndex(RevisionTransportCommand revision) {
 
-        Analyzer standardAnalyzer = new StandardAnalyzer()
+        Analyzer standardAnalyzer = new StemmingAnalyzer()
         IndexWriter indexWriter = new IndexWriter(fsDirectory, standardAnalyzer)
         indexWriter.setMaxFieldLength(25000)
 
