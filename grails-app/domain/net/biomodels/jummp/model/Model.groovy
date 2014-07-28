@@ -106,10 +106,19 @@ class Model implements Serializable {
                 creators.add(revision.owner.person.userRealName)
             }
         }
-        def latestRev = modelService?.getLatestRevision(this)
-        if (!latestRev) {
-            latestRev = revisions? revisions.sort{ it.revisionNumber }.last() : null
+        def latestRev;
+        
+        try 
+        { 
+        	latestRev = modelService?.getLatestRevision(this)
         }
+        catch(Exception ignore) {
+        	//Can happen if the model isnt saved yet
+        }
+        if (!latestRev) {
+        	latestRev = revisions? revisions.sort{ it.revisionNumber }.last() : null
+        }
+        
         return new ModelTransportCommand(
                 id: id,
                 submissionId: submissionId,
