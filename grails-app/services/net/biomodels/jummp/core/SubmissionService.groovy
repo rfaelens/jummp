@@ -527,7 +527,8 @@ class SubmissionService {
             RTC revision=new RTC(files: getRepFiles(workingMemory), 
                                 model: model,
                                 format: ModelFormat.
-                                            findByIdentifier(workingMemory.get("model_type").identifier).
+                                            findByIdentifierAndFormatVersion(workingMemory.get("model_type").identifier,
+                                            								 workingMemory.get("model_type").formatVersion).
                                             toCommandObject()) 
             storeTCs(workingMemory, model, revision)
         }
@@ -631,7 +632,7 @@ class SubmissionService {
                 String formatId = workingMemory["model_type"].identifier
                 final String formatVersion
                 if (formatId != revision.format.identifier) {
-                	formatVersion="*"
+                	formatVersion=revision.format.formatVersion
                 }
                 else {
                 	formatVersion = revision.format.formatVersion ? revision.format.formatVersion : "*"
