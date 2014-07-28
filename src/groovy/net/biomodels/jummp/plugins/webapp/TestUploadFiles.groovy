@@ -68,7 +68,7 @@ abstract class TestUploadFiles extends CreateBase {
         signalEvent("Continue")
 
         assertFalse((Boolean) flowScope.workingMemory.get("isUpdateOnExistingModel"))
-        assertEquals format, flowScope.workingMemory.get("model_type") as String
+        assertEquals format, flowScope.workingMemory.get("model_type").identifier
         RTC revision = flowScope.workingMemory.get("RevisionTC") as RTC
         //test name
         assertEquals mname, revision.name

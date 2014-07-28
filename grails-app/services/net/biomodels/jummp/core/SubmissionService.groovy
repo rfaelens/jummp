@@ -213,9 +213,9 @@ class SubmissionService {
         @Profiled(tag = "submissionService.inferModelFormatType")
         void inferModelFormatType(Map<String, Object> workingMemory) {
             if (processingRequired(workingMemory)) {
-            	MFTC format=modelFileFormatService.inferModelFormat(getFilesFromMemory(workingMemory, true))
+            	MFTC format=modelFileFormatService.inferModelFormat(getRepFiles(workingMemory))
             	if (format) {
-            		workingMemory.put("model_type",format.identifier)
+            		workingMemory.put("model_type",format)
             	}
             }
          }
@@ -241,7 +241,7 @@ class SubmissionService {
                 }
                 boolean modelsAreValid = modelFileFormatService.validate(
                         						getFilesFromMemory(workingMemory, true),
-                        						workingMemory.get("model_type") as String)
+                        						workingMemory.get("model_type").identifier)
                         						workingMemory.put("model_validation_result", 
                         						modelsAreValid)
                 if (!workingMemory.containsKey("model_type")) {
@@ -527,7 +527,7 @@ class SubmissionService {
             RTC revision=new RTC(files: getRepFiles(workingMemory), 
                                 model: model,
                                 format: ModelFormat.
-                                            findByIdentifier(workingMemory.get("model_type") as String).
+                                            findByIdentifier(workingMemory.get("model_type").identifier).
                                             toCommandObject()) 
             storeTCs(workingMemory, model, revision)
         }
@@ -628,7 +628,7 @@ class SubmissionService {
         protected void createTransportObjects(Map<String,Object> workingMemory) {
             RTC revision=workingMemory.get("LastRevision") as RTC
             if (workingMemory.containsKey("reprocess_files")) {
-                String formatId = workingMemory["model_type"] as String
+                String formatId = workingMemory["model_type"].identifier
                 final String formatVersion
                 if (formatId != revision.format.identifier) {
                 	formatVersion="*"
@@ -640,7 +640,7 @@ class SubmissionService {
                         ModelFormat.findByIdentifierAndFormatVersion(formatId, formatVersion).toCommandObject()
             }
             else {
-               workingMemory.put("model_type",revision.format.identifier)
+               workingMemory.put("model_type",revision.format)
                workingMemory.put("model_validation_result",revision.validated)
             }
             storeTCs(workingMemory, revision.model, revision)

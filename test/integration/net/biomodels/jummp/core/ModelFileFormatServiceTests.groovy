@@ -41,6 +41,7 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.UnknownFormatService
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.plugins.sbml.SbmlService
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import org.apache.commons.io.FileUtils
 import org.junit.*
 import static org.junit.Assert.*
@@ -85,8 +86,9 @@ class ModelFileFormatServiceTests {
 
         // an unknown format file
         File validUnknown = new File("target/sbml/unknown")
+        RFTC rftc = new RFTC(path: validUnknown.getCanonicalPath(), mainFile: true);
         validUnknown.setText('What is my name')
-        assertEquals("UNKNOWN", modelFileFormatService.inferModelFormat([validUnknown]).identifier)
+        assertEquals("UNKNOWN", modelFileFormatService.inferModelFormat([rftc]).identifier)
 
         // an SBML file should be detected. Make less restrictive to accept invalid SBML files
         File validSbml = new File("target/sbml/validSbml")
@@ -111,7 +113,8 @@ class ModelFileFormatServiceTests {
     </listOfReactions>
   </model>
 </sbml>''')
-        assertEquals("SBML", modelFileFormatService.inferModelFormat([validSbml]).identifier)
+		rftc.path = validSbml.getCanonicalPath();
+        assertEquals("SBML", modelFileFormatService.inferModelFormat([rftc]).identifier)
     }
 
     @Ignore("Don't test SBML validation because of interoperability issues between JSBML and libSBML.")

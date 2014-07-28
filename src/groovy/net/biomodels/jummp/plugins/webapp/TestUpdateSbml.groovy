@@ -56,7 +56,7 @@ class TestUpdateSbml extends UpdateBase {
         assert true == (Boolean) flowScope.
                                     workingMemory.
                                     get("isUpdateOnExistingModel")
-        assert "SBML" == flowScope.workingMemory.get("model_type") as String
+        assert "SBML" == flowScope.workingMemory.get("model_type").identifier
         RTC revision=flowScope.workingMemory.get("RevisionTC") as RTC
         //test name
         assert "Becker2010_EpoR_AuxiliaryModel" == revision.name

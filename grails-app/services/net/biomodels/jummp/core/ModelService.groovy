@@ -913,8 +913,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         List<File> modelFiles = getFilesFromRF(repoFiles)
         stopWatch.lap("Finished adding RepositoryFiles to the Model")
         stopWatch.setTag("modelService.uploadValidatedModel.prepareVcsStorage")
-        final String formatVersion = modelFileFormatService.getFormatVersion(rev)
-        ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion)
+        ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, rev.format.formatVersion)
 
         // vcs identifier is upload date + name - this should by all means be unique
         String pathPrefix =
@@ -977,12 +976,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
         } catch (VcsException e) {
-            revision.discard()
+        	revision.discard()
             domainObjects.each { it.discard() }
             model.discard()
             //TODO undo the addition of the files to the VCS.
             def errMsg = new StringBuffer("Exception occurred while storing new Model ")
-            errMsg.append("${model.toCommandObject().properties} to VCS: ${e.getMessage()}.\n")
+           // errMsg.append("${model.toCommandObject().properties} to VCS: ${e.getMessage()}.\n")
             errMsg.append("${model.errors.allErrors.inspect()}\n")
             errMsg.append("${revision.errors.allErrors.inspect()}\n")
             log.error(errMsg)
@@ -1181,8 +1180,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
         } catch (VcsException e) {
-            e.printStackTrace()
-            revision.discard()
+        	revision.discard()
             domainObjects.each { it.discard() }
             model.discard()
             //TODO undo the addition of the files to the VCS.

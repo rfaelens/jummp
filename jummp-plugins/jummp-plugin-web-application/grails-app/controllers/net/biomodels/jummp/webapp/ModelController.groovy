@@ -44,6 +44,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.PermissionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.audit.*
 import net.biomodels.jummp.plugins.security.PersonTransportCommand
@@ -633,7 +634,11 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                     submissionService.inferModelFormatType(flow.workingMemory)
                 }
                 submissionService.performValidation(flow.workingMemory)
-                if (!flow.workingMemory.containsKey("validation_error")) {
+                MFTC format = flow.workingMemory.get("model_type")
+                if (format && format.identifier !="UNKNOWN" && format.formatVersion == "*") {
+                	UnknownFormatVersion();                    	
+                }
+                else if (!flow.workingMemory.containsKey("validation_error")) {
                     Valid()
                 }
                 else
@@ -655,6 +660,14 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                 // read this parameter to display option to upload without
                 // validation in upload files view
                 flash.showProceedWithoutValidationDialog = true
+            }.to "uploadFiles"
+            on("UnknownFormatVersion") {
+                flow.workingMemory.put("FormatVersionUnsupported", true)
+                // read this parameter to display option to upload without
+                // validation in upload files view
+                flash.showProceedAsUnknownFormat = true
+                flash.modelFormatDetectedAs = flow.workingMemory.get("model_type").identifier
+                flow.workingMemory.get("model_type").identifier = "UNKNOWN"
             }.to "uploadFiles"
             on("FilesNotValid") {
                 flash.error = "submission.upload.error.fileerror"
