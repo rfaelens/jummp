@@ -61,6 +61,8 @@
         <g:javascript src="syntax/shCore.js"/>
         <g:javascript src="syntax/shBrushMdl.js"/>
         <g:javascript src="syntax/shBrushXml.js"/>
+        <g:javascript src="jquery.handsontable.full.js"></g:javascript>
+        <link rel="stylesheet" href="${resource(dir: 'css', file: 'jquery.handsontable.full.min.css')}"></link>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'filegrid.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shCore.css')}" /> 
@@ -125,8 +127,14 @@
 		
 		function getCSVData(data) {
 			var lines=data.match(/[^\r\n]+/g);
-			var content=[];
-			content.push("<table>");
+			/*var content=[];
+			content.push("<table>");*/
+			var data = [];
+			for (var line in lines) {
+				var fields=lines[line].split(",");
+				data.push(fields);
+			}
+			/*
 			for (var line in lines) {
 				if (line==0) {
 					content.push("<thead>");
@@ -154,7 +162,8 @@
 				}
 			}
 			content.push("</table>");
-			return content.join("");
+			return content.join("");*/
+			return data;
 		}
 		
 		function updateFileDetailsPanel(fileProps) {
@@ -279,7 +288,15 @@
 							dataType: "text",
 							success : function (data) {
 								var plottingData=getCSVData(data)
-								$("#filegoeshere").html(plottingData);
+								//$("#filegoeshere").html(plottingData);
+								$("#filegoeshere").handsontable({
+														data: plottingData,
+														width: 625,
+														height: 300,
+														stretchH: 'all',
+														readOnly: true,
+														colHeaders: true,
+								});
 								$("#Files").equalize({reset: true});
 							}
 						});
