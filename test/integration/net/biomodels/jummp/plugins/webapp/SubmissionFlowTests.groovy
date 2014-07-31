@@ -133,6 +133,27 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         assertNotNull(authenticateAsTestUser())
         new TestSubmitSBML(grailsApplication.mainContext).testrun()
     }
+    
+    /* Tests upload pipeline with an invalid SBML model */
+    @Test
+    void testSubmitInvalidSBML() {
+        assertNotNull(authenticateAsTestUser())
+        new TestSubmitInvalidSbml(grailsApplication.mainContext).testrun()
+    }
+
+    /* Tests upload pipeline with an invalid Pharmml model */
+    @Test
+    void testSubmitInvalidPharmml() {
+        assertNotNull(authenticateAsTestUser())
+        new TestSubmitInvalidPharmml(grailsApplication.mainContext).testrun()
+    }
+    
+     /* Tests upload pipeline with an invalid Pharmml model */
+    @Test
+    void testSubmitInvalidVersion() {
+        assertNotNull(authenticateAsTestUser())
+        new TestSubmitInvalidVersion(grailsApplication.mainContext).testrun()
+    }
 
     @Test
     void testSubmitOmex() {
