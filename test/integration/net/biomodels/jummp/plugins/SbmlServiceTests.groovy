@@ -200,7 +200,12 @@ class SbmlServiceTests extends JummpIntegrationTest {
         rf.path = modelWithNotes.absolutePath
         RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf, 
                 ModelFormat.findByIdentifierAndFormatVersion("SBML", "L1V1"), "test").toCommandObject()
-        assertEquals('''<notes>\n  <body xmlns="http://www.w3.org/1999/xhtml">\n<p>Test</p>\n    </body>\n  \n</notes>''', sbmlService.getNotes(rev2))
+        String notes  = sbmlService.getNotes(rev2);
+        assertTrue(notes.contains("<notes>"));
+        assertTrue(notes.contains("http://www.w3.org/1999/xhtml"));
+        assertTrue(notes.contains("Test"));
+        assertTrue(notes.contains("</body>"));
+        assertTrue(notes.contains("</notes>"));
     }
 
     private void setupVcs() {
