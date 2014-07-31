@@ -34,7 +34,6 @@
 
 package net.biomodels.jummp.core
 
-import grails.util.Holders
 import java.io.FilenameFilter
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
@@ -45,7 +44,7 @@ import org.springframework.beans.factory.InitializingBean
  * to fetch the location where a new repository should be created.
  *
  * @author Mihai Glonț <mglont@ebi.ac.uk>
- * @date 20130521
+ * @date 20140731
  */
 class FileSystemService implements IFileSystemService, InitializingBean {
     static transactional = false
