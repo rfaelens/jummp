@@ -92,7 +92,7 @@ class ModelServiceTests extends JummpIntegrationTest {
 
     @Test
     void testGetAllModelsSecurity() {
-        Model model = new Model(vcsIdentifier: "${fileSystemService.findCurrentModelContainer()}/test/", submissionId: "M1")
+        Model model = new Model(vcsIdentifier: "test/", submissionId: "M1")
         FileUtils.touch(new File("${model.vcsIdentifier}test.xml".toString()))
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
         assertTrue(revision.validate())
@@ -130,7 +130,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         authenticateAsAdmin()
         assertEquals(0, modelService.getModelCount())
         // create one model
-        Model model = new Model(vcsIdentifier: "${fileSystemService.findCurrentModelContainer()}test/", submissionId: "m1")
+        Model model = new Model(vcsIdentifier: "test/", submissionId: "m1")
         FileUtils.touch(new File("${model.vcsIdentifier}test.xml".toString()))
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
         assertTrue(revision.validate())
@@ -176,7 +176,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertEquals(1, modelService.getModelCount())
         // create another ten models
         for (int i=0; i<10; i++) {
-            Model m = new Model(vcsIdentifier: "${fileSystemService.findCurrentModelContainer()}test${i}/", submissionId: "MODEL$i")
+            Model m = new Model(vcsIdentifier: "test${i}/", submissionId: "MODEL$i")
             FileUtils.touch(new File("${model.vcsIdentifier}test${i}.xml".toString()))
             Revision r = new Revision(model: m, vcsId: "rev${i}", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"${i}", description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
             assertTrue(r.validate())
@@ -308,7 +308,7 @@ class ModelServiceTests extends JummpIntegrationTest {
     @Test
     void testGetByRevisionIdentifier() {
         // create Model with one revision, without ACL
-        Model model = new Model(vcsIdentifier: "${fileSystemService.findCurrentModelContainer()}/test/", submissionId: "m2")
+        Model model = new Model(vcsIdentifier: "test/", submissionId: "m2")
         FileUtils.touch(new File("${model.vcsIdentifier}test.xml".toString()))
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
         assertTrue(revision.validate())

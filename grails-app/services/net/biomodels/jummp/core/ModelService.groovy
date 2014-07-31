@@ -917,10 +917,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion)
 
         // vcs identifier is upload date + name - this should by all means be unique
-        String pathPrefix =
-                fileSystemService.findCurrentModelContainer() + File.separator
+        //String pathPrefix =
+        //        fileSystemService.findCurrentModelContainer() + File.separator
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(rev.name).
+        String modelPath = new StringBuilder(timestamp).append("_").append(rev.name).
                 append(File.separator).toString()
         boolean success = new File(modelPath).mkdirs()
         if (!success) {
@@ -1058,6 +1058,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
+     * See https://bitbucket.org/jummp/jummp/issue/120
      * Creates a new Model and stores it in the VCS.
      *
      * Stores the @p modelFile as a new file in the VCS and creates a Model for it.

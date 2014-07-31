@@ -54,11 +54,12 @@ import net.biomodels.jummp.core.vcs.VcsFileDetails
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class VcsService {
-    static transactional = true
     @SuppressWarnings('GrailsStatelessService')
     VcsManager vcsManager
     @SuppressWarnings('GrailsStatelessService')
     def grailsApplication
+    def fileSystemService
+    final String CURRENT_MODEL_CONTAINER = fileSystemService.findCurrentModelContainer()
 
     /**
      * Checks whether the Version Control System is configured properly
@@ -86,10 +87,11 @@ class VcsService {
             throw new VcsException("Version Control System is not valid")
         }
 
+        final File MODEL_FOLDER = new File(CURRENT_MODEL_CONTAINER, model.vcsIdentifier)
         if (commitMessage == null || commitMessage.isEmpty()) {
-            return vcsManager.updateModel(new File(model.vcsIdentifier), files, deleted, "Updated at ${new Date().toGMTString()}")
+            return vcsManager.updateModel(MODEL_FOLDER, files, deleted, "Updated at ${new Date().toGMTString()}")
         } else {
-            return vcsManager.updateModel(new File(model.vcsIdentifier), files, deleted, commitMessage)
+            return vcsManager.updateModel(MODEL_FOLDER, files, deleted, commitMessage)
         }
     }
 
@@ -114,7 +116,8 @@ class VcsService {
             throw new VcsException("Version Control System is not valid")
         }
 
-        return vcsManager.updateModel(new File(model.vcsIdentifier), files, null, "Imported model at ${new Date().toGMTString()}")
+        final File MODEL_FOLDER = new File(CURRENT_MODEL_CONTAINER, model.vcsIdentifier)
+        return vcsManager.updateModel(MODEL_FOLDER, files, null, "Imported model at ${new Date().toGMTString()}")
     }
 
     /**
@@ -151,11 +154,12 @@ class VcsService {
                 max("revisionNumber")
             }
         }
+        final File MODEL_FOLDER = new File(CURRENT_MODEL_CONTAINER, revision.model.vcsIdentifier)
         if (revision.revisionNumber == latestRevId) {
-            return vcsManager.retrieveModel(new File(revision.model.vcsIdentifier))
+            return vcsManager.retrieveModel(MODEL_FOLDER)
         }
 
-        return vcsManager.retrieveModel(new File(revision.model.vcsIdentifier), revision.vcsId)
+        return vcsManager.retrieveModel(MODEL_FOLDER, revision.vcsId)
     }
 
     public List<VcsFileDetails> getFileDetails(final Revision revision, String path)
@@ -163,6 +167,7 @@ class VcsService {
         if (!isValid()) {
             throw new VcsException("Version Control System is not valid")
         }
-        return vcsManager.getFileDetails(new File(revision.model.vcsIdentifier), path)
+        final File MODEL_FOLDER = new File(CURRENT_MODEL_CONTAINER, revision.model.vcsIdentifier)
+        return vcsManager.getFileDetails(MODEL_FOLDER, path)
     }
 }
