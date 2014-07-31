@@ -42,9 +42,10 @@ public interface FileFormatService {
     /**
      * Validate the @p model.
      * @param model File handle containing the Model to be validated.
+     * @param errors Is populated with a list of errors, if any
      * @return @c true if the Model is valid, @c false otherwise
      */
-    public boolean validate(final List<File> model);
+    public boolean validate(final List<File> model, final List<String> errors);
 
     /**
      * Extracts the name from the @p model.

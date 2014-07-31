@@ -158,8 +158,8 @@ class ModelFileFormatService {
         getControllers().put(format.identifier, controller)
     }
 
-    boolean validate(final List<File> model, String formatId) {
-        return validate(model, ModelFormat.findByIdentifier(formatId))
+    boolean validate(final List<File> model, String formatId, final List<String> errors) {
+        return validate(model, ModelFormat.findByIdentifier(formatId), errors)
     }
 
     /**
@@ -168,10 +168,10 @@ class ModelFileFormatService {
      * @param format The format of the Model file
      * @return @c true, if the @p model is valid, @c false otherwise
      */
-    boolean validate(final List<File> model, final ModelFormat format) {
+    boolean validate(final List<File> model, final ModelFormat format, final List<String> errors) {
         FileFormatService service = serviceForFormat(format)
         if (service != null) {
-            return service.validate(model)
+            return service.validate(model, errors)
         } else {
             return false
         }

@@ -72,22 +72,26 @@ class PharmMlService implements FileFormatService {
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
 
     @Profiled(tag="pharmMlService.validate")
-    public boolean validate(List<File> model) {
+    public boolean validate(List<File> model, final List<String> errors) {
         long start = System.nanoTime()
         if (!model) {
             if (IS_INFO_ENABLED) {
-                log.info "Refusing to validate an undefined list of files as a PharmML submission."
+            	String error = "Refusing to validate an undefined list of files as a PharmML submission."
+                log.info error
+                errors.add(error)
             }
             return false
         }
         model = model.findAll{it && it.canRead()}
         if (IS_INFO_ENABLED) {
-            log.info "Validating ${model.inspect()} as a PharmML submission."
+        	log.info "Validating ${model.inspect()} as a PharmML submission."
         }
         File pharmMlFile = AbstractPharmMlHandler.findPharmML(model)
         if (!pharmMlFile) {
             if (IS_INFO_ENABLED) {
-                log.info("No PharmML file found in ${model.inspect()}, hence nothing to validate.")
+                String error = "No PharmML file found in ${model.inspect()}, hence nothing to validate." 
+            	log.info(error)
+            	errors.add(error)
             }
             return false
         }
@@ -117,8 +121,10 @@ class PharmMlService implements FileFormatService {
                     Iterator<IValidationError> iErr = report.errorIterator()
                     while (iErr.hasNext()) {
                         IValidationError e = iErr.next()
-                        err << new StringBuffer(e.getRuleId()).append(':')
-                                .append(e.getErrorMsg()).append("\n").toString()
+                        String error  = new StringBuffer(e.getRuleId()).append(':')
+                                .append(e.getErrorMsg()).append("\n").toString(); 
+                        err << error
+                        errors.add(error)
                     }
                     log.info(err.inspect())
                 }
@@ -130,7 +136,9 @@ class PharmMlService implements FileFormatService {
         } catch (Exception e) {
             def sb = new StringBuilder("PharmML model ${pharmMlFile} does not validate: ")
             sb.append(e.message)
-            log.error(sb.toString(), e)
+            String error = sb.toString();
+            log.error(error, e)
+            errors.add(error)
             return false
         }
     }

@@ -146,7 +146,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         }
     }
 
-    private SBMLDocument getFileAsValidatedSBMLDocument(final File model)
+    private SBMLDocument getFileAsValidatedSBMLDocument(final File model, final List<String> errors)
     {
         // TODO: we should insert the parsed model into the cache
         SBMLDocument doc
@@ -154,12 +154,17 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         try {
             doc = reader.readSBML(model)
         } catch (XMLStreamException e) {
-            log.error("SBMLDocument could not be read from ${model.name}")
+            e.printStackTrace();
+        	String error = "SBMLDocument could not be read from ${model.name}"
+            log.error(error)
+            errors.add(error)
             return null
         }
         if (doc == null) {
             // although the API documentation states that an Exception is thrown for incorrect files, it seems that null is returned
-            log.error("SBMLDocument is not valid for file ${model.name}")
+            String error = "SBMLDocument is not valid for file ${model.name}"
+            log.error(error)
+            errors.add(error)
             return null
         }
         // TODO: WARNING: checkConsistency uses an online validator. This might render timeouts during model upload
@@ -174,7 +179,9 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 // search for an error
                 for (SBMLError error in doc.getListOfErrors().validationErrors) {
                     if (error.isFatal() || error.isInternal() || error.isSystem() || error.isXML() || error.isError()) {
-                        log.debug(error.getMessage())
+                        String errorMsg = error.getMessage() 
+                    	log.debug(errorMsg)
+                    	errors.add(errorMsg);
                         doc = null
                         break
                     }
@@ -182,7 +189,8 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             }
             return doc
         } catch (ConversionException e) {
-            log.error(e.getMessage(), e)
+            e.printStackTrace();
+        	log.error(e.getMessage(), e)
             return null
         }
     }
@@ -227,7 +235,8 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 }
                 areAllSbml &= foundSbmlDeclarationLine
             } catch(IOException ex) {
-                def msg = new StringBuffer("Could not check if files ${files.inspect()} are valid SBML.")
+                ex.printStackTrace();
+            	def msg = new StringBuffer("Could not check if files ${files.inspect()} are valid SBML.")
                 msg.append(" Encountered ${ex.message} while reading line $currentLine of file ${files[iFiles]}")
                 log.error(msg.toString())
                 return false
@@ -239,27 +248,28 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         return areAllSbml
     }
 
-    private SBMLDocument getDocumentFromFiles(final List<File> model){
+    private SBMLDocument getDocumentFromFiles(final List<File> model, final List<String> errors  = []){
         SBMLDocument retval=null
         model.each {
             try {
-                SBMLDocument doc  = getFileAsValidatedSBMLDocument(it);
+                SBMLDocument doc  = getFileAsValidatedSBMLDocument(it, errors);
                 if (doc) {
                     retval=doc
                 }
             } catch(Exception ignore) {
+            	ignore.printStackTrace();
             }
         }
         return retval
     }
 
     @Profiled(tag="SbmlService.validate")
-    public boolean validate(final List<File> model) {
+    public boolean validate(final List<File> model, final List<String> errors) {
         if (!grailsApplication.config.jummp.plugins.sbml.validation) {
             log.info("Validation for ${model.inspect()} skipped due to configuration option")
             return true
         }
-        if (getDocumentFromFiles(model)) {
+        if (getDocumentFromFiles(model, errors)) {
             return true
         }
         return false

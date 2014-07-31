@@ -48,7 +48,13 @@
         </g:if>
         <g:if test ="${showProceedWithoutValidationDialog}">
           <div id="dialog-confirm" title="Validation Error">
-            <p>The model files did not pass validation. Would you like to proceed?</p>
+            <p>The model files did not pass validation, with errors as below. Would you like to proceed?</p>
+            <ul>
+            	<g:each in="${workingMemory['validationErrorList']}">
+            		<li>${it}</li>
+            	</g:each>
+            </ul>
+            </p>
           </div>
         </g:if>
         <g:render template="/templates/errorMessage"/>

@@ -239,11 +239,12 @@ class SubmissionService {
                     	workingMemory.put("validation_error", "Directory passed as input")
                 	}
                 }
+                final List<String> errors = new LinkedList<String>();
                 boolean modelsAreValid = modelFileFormatService.validate(
                         						getFilesFromMemory(workingMemory, true),
-                        						workingMemory.get("model_type").identifier)
-                        						workingMemory.put("model_validation_result", 
-                        						modelsAreValid)
+                        						workingMemory.get("model_type").identifier,
+                        						errors)
+                workingMemory.put("model_validation_result", modelsAreValid)
                 if (!workingMemory.containsKey("model_type")) {
                 	workingMemory.put("validation_error",
                 					  "Missing Format Error: Validation could not be performed, format unknown")
@@ -251,6 +252,7 @@ class SubmissionService {
                 else if (!modelsAreValid) {
                 	//TODO be more specific to the user about what went wrong.
                 	workingMemory.put("validation_error", "ModelValidationError")
+                	workingMemory.put("validationErrorList", errors)
                 }
             }
         }
