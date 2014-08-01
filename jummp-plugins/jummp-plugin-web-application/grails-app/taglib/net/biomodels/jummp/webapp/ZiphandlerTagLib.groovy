@@ -47,6 +47,7 @@ import java.text.DateFormat
 
 class ZiphandlerTagLib {
 	static namespace="Ziphandler"
+	def grailsApplication
 	 
 	class ZipVisitor extends SimpleFileVisitor<Path> {
 		boolean jsOutput=true;
@@ -148,6 +149,7 @@ class ZiphandlerTagLib {
 				builder.append("fileData[\"").append(file.name).append("\"]=new Object();");
 				addFileAttributesJS(builder, file.name, "Name", FilenameUtils.getName(it.path), true); 
 				addFileAttributesJS(builder, file.name, "Size", "window.readablizeBytes(${attr.size()})", false); 
+				addFileAttributesJS(builder, file.name, "showPreview", "${attr.size() > grailsApplication.config.jummp.web.file.preview};", false); 
 				if (!it.mainFile) {
 					addFileAttributesJS(builder, file.name, "Description",
                             it.description.encodeAsJavaScript(), true)

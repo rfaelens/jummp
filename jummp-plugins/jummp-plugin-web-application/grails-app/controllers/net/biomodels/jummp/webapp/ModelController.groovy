@@ -53,6 +53,7 @@ import org.apache.commons.lang.exception.ExceptionUtils
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.multipart.MultipartFile
+import java.util.Arrays
 
 @Api(value = "/model", description = "Operations related to models")
 class ModelController {
@@ -60,7 +61,9 @@ class ModelController {
      * Flag that checks whether the dynamically-inserted logger is set to DEBUG or higher.
      */
     private final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
-
+    /*
+    * Size files should be truncated to when previews are fetched
+    */
     def springSecurityService
     /**
      * Dependency injection of modelDelegateService.
@@ -919,13 +922,17 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
         resp.outputStream << new ByteArrayInputStream(byteBuffer.toByteArray())
     }
 
-    private void serveModelAsFile(RFTC rf, def resp, boolean inline) {
+    private void serveModelAsFile(RFTC rf, def resp, boolean inline, boolean preview = false) {
         File file = new File(rf.path)
         resp.setContentType(rf.mimeType)
         final String INLINE = inline ? "inline" : "attachment"
         final String F_NAME = file.name
         resp.setHeader("Content-disposition", "${INLINE};filename=\"${F_NAME}\"")
-        resp.outputStream << new ByteArrayInputStream(file.getBytes())
+        byte[] fileData = file.readBytes()
+        if (!preview) {
+        	resp.outputStream << new ByteArrayInputStream(fileData)
+        }
+        resp.outputStream << new ByteArrayInputStream(Arrays.copyOf(fileData, grailsApplication.config.jummp.web.file.preview))
     }
 
     /**
@@ -954,9 +961,10 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
                     File file = new File(it.path)
                     file.getName() == params.filename
                 }
-                boolean inline = params.inline
+                boolean inline = params.inline == "true"
+                boolean preview  = params.preview == "true"
                 if (requested) {
-                    serveModelAsFile(requested, response, inline)
+                    serveModelAsFile(requested, response, inline, preview)
                 }
             }
         } catch(Exception e) {

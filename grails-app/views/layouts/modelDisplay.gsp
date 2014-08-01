@@ -166,6 +166,20 @@
 			return data;
 		}
 		
+		function addPreviewNotification(showNotification, fileProps) {
+			if (showNotification) {
+					$("#notificationgoeshere").html("As this is a large file, only a part of it is loaded below. <a id='loadFileCompletely' href=''>Click here</a> to load the file completely. Please be warned that this may be slow.");
+					$("#loadFileCompletely").click( function(event) {
+							event.preventDefault();
+							fileProps.showPreview = false;
+							updateFileDetailsPanel(fileProps);
+					});
+			}
+			else {
+				$("#notificationgoeshere").hide();
+			}
+		}
+		
 		function updateFileDetailsPanel(fileProps) {
 			if (typeof(fileProps) != "undefined") {
 				var formats=["text","txt","xml","pdf", "jpg","jpeg", "gif", "png", "bmp"];
@@ -202,7 +216,7 @@
 									csvType=true;
 								}
 							}
-							content.push("<div id='filegoeshere' class='padright padbottom")
+							content.push("<div id='notificationgoeshere' class='padleft padbottom'></div><div id='filegoeshere' class='padright padbottom")
 							if (!mdlType && !xmlType) {
 								content.push(" padleft") 
 							}
@@ -218,11 +232,14 @@
 				}
 				content.push("<div class='metapanel'><div id='tableGoesHere' class='padleft padright padbottom'>")
 				if (!fileProps.isInternal) {
+					var detailsURL = "${g.createLink(controller: 'model', action: 'getFileDetails', id: revision.identifier())}"
+											+"?filename="+encodeURIComponent(fileProps.Name)
+					console.log(detailsURL);
 					$.ajax({
-						url: "${g.createLink(controller: 'model', action: 'getFileDetails', id: revision.identifier())}"
-											+"?filename="+encodeURIComponent(fileProps.Name),
+						url: detailsURL,
 						dataType: "text",
 						success: function(data) {
+							console.log(data);
 							data=JSON.parse(data);
 							var tcontent=[];						
 							tcontent.push("<table cellpadding='2' cellspacing='5'>")
@@ -240,6 +257,9 @@
 							tcontent.push("</table>");
 							$("#tableGoesHere").html(tcontent.join(""));
 							$("#Files").equalize({reset: true});
+						},
+						error: function(jq, status, errorThrown) {
+							alert(status+".."+errorThrown);
 						}
 					});
 				}
@@ -258,33 +278,35 @@
 				if (makeAjaxCall) {
 					if (mdlType) {
 						$.ajax({
-							url : fileLink,
+							url : fileLink+"&preview="+encodeURIComponent(fileProps.showPreview),
 							dataType: "text",
 							success : function (data) {
 								var brush=new SyntaxHighlighter.brushes.mdl()
 								brush.init({ toolbar: false });
 								var html=brush.getHtml(data)
 								$("#filegoeshere").html(html);
+								addPreviewNotification(fileProps.showPreview, fileProps);
 								$("#Files").equalize({reset: true});
 							}
 						});
 					}
 					else if (xmlType) {
 						$.ajax({
-							url : fileLink,
+							url : fileLink+"&preview="+encodeURIComponent(fileProps.showPreview),
 							dataType: "text",
 							success : function (data) {
 								var brush=new SyntaxHighlighter.brushes.Xml()
 								brush.init({ toolbar: false });
 								var html=brush.getHtml(data)
 								$("#filegoeshere").html(html);
+								addPreviewNotification(fileProps.showPreview, fileProps);
 								$("#Files").equalize({reset: true});
 							}
 						});
 					}
 					else if (csvType) {
 						$.ajax({
-							url : fileLink,
+							url : fileLink+"&preview="+encodeURIComponent(fileProps.showPreview),
 							dataType: "text",
 							success : function (data) {
 								var plottingData=getCSVData(data)
@@ -297,16 +319,18 @@
 														readOnly: true,
 														colHeaders: true,
 								});
+								addPreviewNotification(fileProps.showPreview, fileProps);
 								$("#Files").equalize({reset: true});
 							}
 						});
 					}
 					else if (mimeType.indexOf("txt") != -1 || mimeType.indexOf("text") != -1) {
 						$.ajax({
-							url : fileLink,
+							url : fileLink+"&preview="+encodeURIComponent(fileProps.showPreview),
 							dataType: "text",
 							success : function (data) {
 								$("#filegoeshere").text(data);
+								addPreviewNotification(fileProps.showPreview, fileProps);
 								$("#Files").equalize({reset: true});
 							}
 						});
