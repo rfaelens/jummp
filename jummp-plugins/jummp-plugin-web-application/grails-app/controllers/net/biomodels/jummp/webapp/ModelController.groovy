@@ -61,9 +61,7 @@ class ModelController {
      * Flag that checks whether the dynamically-inserted logger is set to DEBUG or higher.
      */
     private final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
-    /*
-    * Size files should be truncated to when previews are fetched
-    */
+    
     def springSecurityService
     /**
      * Dependency injection of modelDelegateService.
