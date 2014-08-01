@@ -33,15 +33,15 @@
 			.hiddenContent {display:none;}
 		</style>
     	<ul style="list-style-type: none;margin: 0px;padding:0px;">
-		<li><b>${model.publication.title}
+		<li><a title="View publication - this will open an external site" class="publicationLink" href="${model.publication.linkProvider.identifiersPrefix?model.publication.linkProvider.identifiersPrefix+model.publication.link:model.publication.link}">
+			<b>${model.publication.title}</b></a>
 		<a class="expander" title="Click to see more" href="#">
 			<span>
 				<img style="width:12px;margin:2px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/expand.png"/>
 			</span>
 		</a>
-		<a title="View publication" class="publicationLink" href="${model.publication.linkProvider.identifiersPrefix?model.publication.linkProvider.identifiersPrefix+model.publication.link:model.publication.link}">
-			<img style="width:12px;margin:2px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Generic/Generic%20icons/external_link.png"/>
-		</a></b></li>		
+		
+			</li>		
 		<li>${model.publication.authors.collect{"${it.userRealName}"}.join(", ")}</li>
     	<li><i>${model.publication.journal}</i>${model.publication.month?", ${model.publication.month}/":""}${model.publication.year?"${model.publication.year}":""}${model.publication.volume?", Volume ${model.publication.volume}":""}${model.publication.issue?", Issue ${model.publication.issue}":""}${model.publication.pages?", pages: ${model.publication.pages}":""}</li>
  		<div class="hiddenContent">
