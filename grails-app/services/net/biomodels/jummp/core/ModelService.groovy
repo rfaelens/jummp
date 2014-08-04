@@ -513,11 +513,12 @@ OR lower(m.publication.affiliation) like :filter
     /**
     * Queries the @p model for the latest available revision the user has read access to.
     * @param model The Model for which the latest revision should be retrieved.
+    * @param addToHistory Optional field to allow history not to be modified - e.g. if called from modelhistoryService
     * @return Latest Revision the current user has read access to. If there is no such revision null is returned
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getLatestRevision")
-    public Revision getLatestRevision(Model model) {
+    public Revision getLatestRevision(Model model, boolean addToHistory = true) {
         if (!model) {
             return null
         }
@@ -572,7 +573,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             if (!result) {
                 return null
             }
-            modelHistoryService.addModelToHistory(model)
+            if (addToHistory) {
+            	modelHistoryService.addModelToHistory(model)
+            }
             return Revision.get(result[0])
     }
 

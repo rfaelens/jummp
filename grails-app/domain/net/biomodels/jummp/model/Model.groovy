@@ -98,7 +98,7 @@ class Model implements Serializable {
         publicationId nullable: true
     }
 
-    ModelTransportCommand toCommandObject() {
+    ModelTransportCommand toCommandObject(boolean saveHistory = true) {
         // TODO: is it correct to show the latest upload date as the lastModifiedDate or does it need ACL restrictions?
         Set<String> creators = []
         if (revisions) {
@@ -110,7 +110,7 @@ class Model implements Serializable {
         
         try 
         { 
-        	latestRev = modelService?.getLatestRevision(this)
+        	latestRev = modelService?.getLatestRevision(this, saveHistory)
         }
         catch(Exception ignore) {
         	//Can happen if the model isnt saved yet
