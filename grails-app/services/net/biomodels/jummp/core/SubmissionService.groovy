@@ -213,9 +213,9 @@ class SubmissionService {
         @Profiled(tag = "submissionService.inferModelFormatType")
         void inferModelFormatType(Map<String, Object> workingMemory) {
             if (processingRequired(workingMemory)) {
-            	MFTC format=modelFileFormatService.inferModelFormat(getFilesFromMemory(workingMemory, true))
+            	MFTC format=modelFileFormatService.inferModelFormat(getRepFiles(workingMemory))
             	if (format) {
-            		workingMemory.put("model_type",format.identifier)
+            		workingMemory.put("model_type",format)
             	}
             }
          }
@@ -239,11 +239,12 @@ class SubmissionService {
                     	workingMemory.put("validation_error", "Directory passed as input")
                 	}
                 }
+                final List<String> errors = new LinkedList<String>();
                 boolean modelsAreValid = modelFileFormatService.validate(
                         						getFilesFromMemory(workingMemory, true),
-                        						workingMemory.get("model_type") as String)
-                        						workingMemory.put("model_validation_result", 
-                        						modelsAreValid)
+                        						workingMemory.get("model_type").identifier,
+                        						errors)
+                workingMemory.put("model_validation_result", modelsAreValid)
                 if (!workingMemory.containsKey("model_type")) {
                 	workingMemory.put("validation_error",
                 					  "Missing Format Error: Validation could not be performed, format unknown")
@@ -251,6 +252,7 @@ class SubmissionService {
                 else if (!modelsAreValid) {
                 	//TODO be more specific to the user about what went wrong.
                 	workingMemory.put("validation_error", "ModelValidationError")
+                	workingMemory.put("validationErrorList", errors)
                 }
             }
         }
@@ -527,7 +529,8 @@ class SubmissionService {
             RTC revision=new RTC(files: getRepFiles(workingMemory), 
                                 model: model,
                                 format: ModelFormat.
-                                            findByIdentifier(workingMemory.get("model_type") as String).
+                                            findByIdentifierAndFormatVersion(workingMemory.get("model_type").identifier,
+                                            								 workingMemory.get("model_type").formatVersion).
                                             toCommandObject()) 
             storeTCs(workingMemory, model, revision)
         }
@@ -628,10 +631,10 @@ class SubmissionService {
         protected void createTransportObjects(Map<String,Object> workingMemory) {
             RTC revision=workingMemory.get("LastRevision") as RTC
             if (workingMemory.containsKey("reprocess_files")) {
-                String formatId = workingMemory["model_type"] as String
+                String formatId = workingMemory["model_type"].identifier
                 final String formatVersion
                 if (formatId != revision.format.identifier) {
-                	formatVersion="*"
+                	formatVersion=revision.format.formatVersion
                 }
                 else {
                 	formatVersion = revision.format.formatVersion ? revision.format.formatVersion : "*"
@@ -640,7 +643,7 @@ class SubmissionService {
                         ModelFormat.findByIdentifierAndFormatVersion(formatId, formatVersion).toCommandObject()
             }
             else {
-               workingMemory.put("model_type",revision.format.identifier)
+               workingMemory.put("model_type",revision.format)
                workingMemory.put("model_validation_result",revision.validated)
             }
             storeTCs(workingMemory, revision.model, revision)

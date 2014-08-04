@@ -101,7 +101,7 @@ class SearchProvider {
 	* @return A set of documents corresponding to search results
 	**/
 	public Set<Document> performSearch(String[] fields, String query) {
-		QueryParser queryParser=new MultiFieldQueryParser(fields, new StandardAnalyzer())		
+		QueryParser queryParser=new MultiFieldQueryParser(fields, new StemmingAnalyzer())		
 		return search(queryParser.parse(query))
 	}
 	
@@ -115,7 +115,7 @@ class SearchProvider {
 	* @return A set of documents corresponding to search results
 	**/
 	public Set<Document> performSearch(String field, String query) {
-		QueryParser queryParser = new QueryParser(new StandardAnalyzer());
+		QueryParser queryParser = new QueryParser(new StemmingAnalyzer());
 		return search(queryParser.parse(query))
 	}
 	

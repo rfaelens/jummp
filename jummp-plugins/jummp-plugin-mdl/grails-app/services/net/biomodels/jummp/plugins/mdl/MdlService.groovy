@@ -76,7 +76,7 @@ class MdlService implements FileFormatService {
      */
     @Override
     @Profiled(tag="mdlService.validate")
-    public boolean validate(List<File> modelFiles) { return true }
+    public boolean validate(List<File> modelFiles, final List<String> errors) { return true }
 
     /**
      * {@inheritDoc}

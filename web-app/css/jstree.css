@@ -104,4 +104,7 @@
   *+html #modeltoolbar {
     display: inline;
   }
-
+.syntaxhighlighter
+{
+	max-height: 450px;
+}

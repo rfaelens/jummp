@@ -127,7 +127,7 @@ class ModelHistoryService {
             // history is empty
             return new ModelTransportCommand()
         }
-        return history.sort { it.lastAccessedDate }.last().model.toCommandObject()
+        return history.sort { it.lastAccessedDate }.last().model.toCommandObject(false)
     }
 
     /**
@@ -149,7 +149,7 @@ class ModelHistoryService {
         List<ModelTransportCommand> retList = []
         history.reverseEach {
             if (!it.model.deleted) {
-            	retList << it.model.toCommandObject()
+            	retList << it.model.toCommandObject(false)
             }
         }
         return retList

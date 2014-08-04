@@ -38,6 +38,7 @@ import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.model.Revision
 import org.perf4j.aop.Profiled
 
@@ -79,9 +80,15 @@ class ModelFileFormatService {
      * @returns the corresponding model format, or unknown if this cannot be inferred. 
      */
     @Profiled(tag = "modelFileFormatService.inferModelFormat")
-    ModelFormatTransportCommand inferModelFormat(List<File> modelFiles) {
+    ModelFormatTransportCommand inferModelFormat(List<RFTC> modelFiles) {
         if (!modelFiles) {
             return null
+        }
+        List<File> fileList=new LinkedList<File>()
+        modelFiles.each {
+        	if (it.mainFile) {
+        		fileList.add(new File(it.path))
+        	}
         }
         Map<String, String> services=getServices()
 
@@ -89,12 +96,19 @@ class ModelFileFormatService {
             if (it == "UNKNOWN") return false
             String serviceName = services.getAt(it)
             def ffs = grailsApplication.mainContext.getBean(serviceName)
-            return ffs.areFilesThisFormat(modelFiles)
+            return ffs.areFilesThisFormat(fileList)
         }
         if (!match) {
             return ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*").toCommandObject()
         } else {
-            return ModelFormat.findByIdentifierAndFormatVersion(match, "*").toCommandObject()
+        	ModelFormatTransportCommand unknownVersionFormat = ModelFormat.findByIdentifierAndFormatVersion(match, "*").toCommandObject()
+        	RevisionTransportCommand rev = new RevisionTransportCommand(files: modelFiles, format: unknownVersionFormat)
+            String formatVersion = getFormatVersion(rev)
+            ModelFormat knownVersionFormat = ModelFormat.findByIdentifierAndFormatVersion(match, formatVersion);
+            if (knownVersionFormat) {
+            	return knownVersionFormat.toCommandObject()
+            }
+            return unknownVersionFormat
         }
     }
 
@@ -144,8 +158,8 @@ class ModelFileFormatService {
         getControllers().put(format.identifier, controller)
     }
 
-    boolean validate(final List<File> model, String formatId) {
-        return validate(model, ModelFormat.findByIdentifier(formatId))
+    boolean validate(final List<File> model, String formatId, final List<String> errors) {
+        return validate(model, ModelFormat.findByIdentifier(formatId), errors)
     }
 
     /**
@@ -154,10 +168,10 @@ class ModelFileFormatService {
      * @param format The format of the Model file
      * @return @c true, if the @p model is valid, @c false otherwise
      */
-    boolean validate(final List<File> model, final ModelFormat format) {
+    boolean validate(final List<File> model, final ModelFormat format, final List<String> errors) {
         FileFormatService service = serviceForFormat(format)
         if (service != null) {
-            return service.validate(model)
+            return service.validate(model, errors)
         } else {
             return false
         }

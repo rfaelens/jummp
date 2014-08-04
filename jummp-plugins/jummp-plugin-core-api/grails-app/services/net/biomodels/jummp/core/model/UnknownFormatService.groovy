@@ -34,7 +34,7 @@ class UnknownFormatService implements FileFormatService {
      * @param model File handle containing the Model to be validated.
      * @return @c true if the Model is valid, @c false otherwise
      */
-    public final boolean validate(final List<File> model) {
+    public final boolean validate(final List<File> model, List<String> errors) {
         return areFilesThisFormat(model)
     }
 

@@ -58,7 +58,7 @@ class OmexService implements FileFormatService {
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
 
     @Profiled(tag="omexService.validate")
-    public boolean validate(final List<File> model) {
+    public boolean validate(final List<File> model, final List<String> errors) {
         //TODO delegate the validation to libCombineArchive API
         return areFilesThisFormat(model)
     }

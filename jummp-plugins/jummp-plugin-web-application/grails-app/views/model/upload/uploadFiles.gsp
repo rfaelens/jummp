@@ -34,34 +34,27 @@
         <title><g:message code="submission.upload.header"/></title>
         <link rel="stylesheet" href="<g:resource dir="css/jqueryui/smoothness" file="jquery-ui-1.10.3.custom.css"/>" />
         <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
-        <style>
-        </style>
-        <g:if test ="${showProceedWithoutValidationDialog}">
+        <g:if test ="${showProceedWithoutValidationDialog || showProceedAsUnknownFormat}">
           <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-          <script>
-              $(function() {
-                  $( "#dialog-confirm" ).dialog({
-                        resizable: false,
-                        height:300,
-                        modal: true,
-                        buttons: {
-                            "Proceed Without Validation": function() {
-                                document.getElementById('_eventId_ProceedWithoutValidation').click();
-                                $( this ).dialog( "close" );
-                            },
-                            Cancel: function() {
-                                $( this ).dialog( "close" );
-                       }
-                    }
-                });
-            });
-        </script>
       </g:if>
     </head>
     <body>
+    	<g:if test="${showProceedAsUnknownFormat}">
+          <div id="dialog-confirm" title="Model Format Error">
+            <p>The model was detected as ${modelFormatDetectedAs} but is not a
+            supported version. You can proceed with the submission but the model
+            will be stored as an unknown model. Would you like to proceed?</p>
+          </div>
+        </g:if>
         <g:if test ="${showProceedWithoutValidationDialog}">
           <div id="dialog-confirm" title="Validation Error">
-            <p>The model files did not pass validation. Would you like to proceed?</p>
+            <p>The model files did not pass validation, with errors as below. Would you like to proceed?</p>
+            <ul>
+            	<g:each in="${workingMemory['validationErrorList']}">
+            		<li>${it}</li>
+            	</g:each>
+            </ul>
+            </p>
           </div>
         </g:if>
         <g:render template="/templates/errorMessage"/>
@@ -93,7 +86,7 @@
                     	<g:submitButton name="Back" value="${g.message(code: 'submission.common.backButton')}" />
                     </g:if>
                     <g:submitButton name="Upload" value="${g.message(code: 'submission.upload.uploadButton')}" />
-                    <g:if test ="${showProceedWithoutValidationDialog}">
+                    <g:if test ="${showProceedWithoutValidationDialog || showProceedAsUnknownFormat}">
                       <g:submitButton name="ProceedWithoutValidation" value="ProceedWithoutValidation" hidden="true"/> 
                     </g:if>
                 </div>
@@ -173,6 +166,21 @@
                     $("#fileUpload").reset();
                 });
             });
+            $( "#dialog-confirm" ).dialog({
+                        resizable: false,
+                        height:300,
+                        width:500,
+                        modal: true,
+                        buttons: {
+                            "Proceed Without Validation": function() {
+                                document.getElementById('_eventId_ProceedWithoutValidation').click();
+                                $( this ).dialog( "close" );
+                            },
+                            Cancel: function() {
+                                $( this ).dialog( "close" );
+                       }
+                    }
+                });
             /*
              * Greedy removal of a string's prefix.
              *

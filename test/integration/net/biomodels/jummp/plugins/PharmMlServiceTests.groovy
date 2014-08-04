@@ -132,7 +132,7 @@ class PharmMlServiceTests extends JummpIntegrationTest {
             }
         }
         assertTrue !!files
-        assertTrue pharmMlService.validate(files)
+        assertTrue pharmMlService.validate(files, [])
     }
 
     private void setupVcs() {

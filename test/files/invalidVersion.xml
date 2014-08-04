@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<PharmML xmlns="http://www.pharmml.org/2013/03/PharmML"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.pharmml.org/2013/03/PharmML http://www.pharmml.org/2013/03/PharmML"
+    xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes"
+    writtenVersion="500.3.1">
+
+    <ct:Name>ISSUE 116 - identity transformation</ct:Name>
+
+    <ct:Description>Test model</ct:Description>
+
+    <IndependentVariable symbId="t"/>
+    <ModelDefinition xmlns="http://www.pharmml.org/2013/03/ModelDefinition">
+
+        <VariabilityModel blkId="modelVar" type="parameterVariability">
+            <Level symbId="indiv"/>
+        </VariabilityModel>
+
+        <VariabilityModel blkId="obsErr" type="residualError">
+            <Level symbId="residual"/>
+        </VariabilityModel>
+
+        <ParameterModel blkId="pm1">
+
+            <RandomVariable symbId="eta_P1">
+                <ct:VariabilityReference xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes">
+                    <ct:SymbRef blkIdRef="modelVar" symbIdRef="indiv"/>
+                </ct:VariabilityReference>
+                <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="http://www.uncertml.org/distributions/normal">
+                    <mean>
+                        <rVal>0</rVal>
+                    </mean>
+                    <stddev>
+                        <var varId="omega_P1"/>
+                    </stddev>
+                </NormalDistribution>
+            </RandomVariable>
+            <IndividualParameter symbId="P1">
+                <GaussianModel>
+                    <Transformation>identity</Transformation>
+                    <LinearCovariate>
+                        <PopulationParameter>
+                            <ct:Assign xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes">
+                                <ct:SymbRef symbIdRef="pop_P1"/>
+                            </ct:Assign>
+                        </PopulationParameter>
+                    </LinearCovariate>
+                    <RandomEffects>
+                        <ct:SymbRef xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes" symbIdRef="eta_P1"/>
+                    </RandomEffects>
+                </GaussianModel>
+            </IndividualParameter>
+
+            <RandomVariable symbId="eta_P2">
+                <ct:VariabilityReference xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes">
+                    <ct:SymbRef blkIdRef="modelVar" symbIdRef="indiv"/>
+                </ct:VariabilityReference>
+                <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="http://www.uncertml.org/distributions/normal">
+                    <mean>
+                        <rVal>0</rVal>
+                    </mean>
+                    <stddev>
+                        <var varId="omega_P2"/>
+                    </stddev>
+                </NormalDistribution>
+            </RandomVariable>
+            <IndividualParameter symbId="P2">
+                <GaussianModel>
+                    <Transformation>log</Transformation>
+                    <LinearCovariate>
+                        <PopulationParameter>
+                            <ct:Assign xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes">
+                                <ct:SymbRef symbIdRef="pop_P2"/>
+                            </ct:Assign>
+                        </PopulationParameter>
+                    </LinearCovariate>
+                    <RandomEffects>
+                        <ct:SymbRef xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes" symbIdRef="eta_P2"/>
+                    </RandomEffects>
+                </GaussianModel>
+            </IndividualParameter>
+        </ParameterModel>
+
+        <StructuralModel blkId="sm1">
+            <ct:Variable symbId="C" symbolType="real">
+                <ct:Assign>
+                    <Equation xmlns="http://www.pharmml.org/2013/03/Maths">
+                        <ct:SymbRef blkIdRef="om1" symbIdRef="P1"/>
+                    </Equation>
+                </ct:Assign>
+            </ct:Variable>
+
+        </StructuralModel>
+
+        <ObservationModel blkId="om1">
+            <SimpleParameter symbId="CV"/>
+            <RandomVariable symbId="epsilon">
+                <ct:VariabilityReference>
+                    <ct:SymbRef blkIdRef="obsErr" symbIdRef="residual"/>
+                </ct:VariabilityReference>
+                <NormalDistribution xmlns="http://www.uncertml.org/3.0" definition="http://www.uncertml.org/distributions/normal">
+                    <mean>
+                        <rVal>0</rVal>
+                    </mean>
+                    <variance>
+                        <prVal>1</prVal>
+                    </variance>
+                </NormalDistribution>
+            </RandomVariable>
+            <Standard symbId="y">
+                <Output>
+                    <ct:SymbRef symbIdRef="C" blkIdRef="sm1"/>
+                </Output>
+                <ErrorModel>
+                    <ct:Assign>
+                        <Equation xmlns="http://www.pharmml.org/2013/03/Maths">
+                            <FunctionCall>
+                                <ct:SymbRef symbIdRef="proportionalErrorModel"/>
+                                <FunctionArgument symbId="b">
+                                    <ct:SymbRef symbIdRef="CV"/>
+                                </FunctionArgument>
+                                <FunctionArgument symbId="f">
+                                    <ct:SymbRef symbIdRef="C" blkIdRef="sm1"/>
+                                </FunctionArgument>
+                            </FunctionCall>
+                        </Equation>
+                    </ct:Assign>
+                </ErrorModel>
+                <ResidualError>
+                    <ct:SymbRef symbIdRef="epsilon"/>
+                </ResidualError>
+            </Standard>
+        </ObservationModel>
+   </ModelDefinition>
+</PharmML>

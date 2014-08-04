@@ -96,4 +96,5 @@ class ModelTransportCommand implements Serializable {
      * The username of the original submitter.
      */
     String submitterUsername
+    
 }

@@ -106,7 +106,7 @@ grails.project.dependency.resolution = {
         }
 
         // sbml
-        runtime("org.sbml.jsbml:jsbml:1.0-a2") {
+        runtime("org.sbml.jsbml:jsbml:1.0-beta") {
             excludes 'woodstox-core-lgpl',
                         'staxmate',
                         'stax2-api',

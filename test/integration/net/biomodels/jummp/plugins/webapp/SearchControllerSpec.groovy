@@ -62,8 +62,8 @@ class SearchControllerSpec extends IntegrationSpec {
     def grailsApplication
     def springSecurityService
     def authenticationManager = grailsApplication.mainContext.getBean("authenticationManager")
-    Model testModel
-    List<Model> modelList
+    static Model testModel
+    static List<Model> modelList
 
     def setupSpec() {
         createUserAndRoles()

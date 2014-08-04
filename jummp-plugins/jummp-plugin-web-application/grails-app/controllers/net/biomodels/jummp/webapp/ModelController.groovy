@@ -44,6 +44,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.PermissionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.audit.*
 import net.biomodels.jummp.plugins.security.PersonTransportCommand
@@ -52,6 +53,7 @@ import org.apache.commons.lang.exception.ExceptionUtils
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.multipart.MultipartFile
+import java.util.Arrays
 
 @Api(value = "/model", description = "Operations related to models")
 class ModelController {
@@ -59,7 +61,7 @@ class ModelController {
      * Flag that checks whether the dynamically-inserted logger is set to DEBUG or higher.
      */
     private final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
-
+    
     def springSecurityService
     /**
      * Dependency injection of modelDelegateService.
@@ -633,7 +635,11 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                     submissionService.inferModelFormatType(flow.workingMemory)
                 }
                 submissionService.performValidation(flow.workingMemory)
-                if (!flow.workingMemory.containsKey("validation_error")) {
+                MFTC format = flow.workingMemory.get("model_type")
+                if (format && format.identifier !="UNKNOWN" && format.formatVersion == "*") {
+                	UnknownFormatVersion();                    	
+                }
+                else if (!flow.workingMemory.containsKey("validation_error")) {
                     Valid()
                 }
                 else
@@ -655,6 +661,14 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                 // read this parameter to display option to upload without
                 // validation in upload files view
                 flash.showProceedWithoutValidationDialog = true
+            }.to "uploadFiles"
+            on("UnknownFormatVersion") {
+                flow.workingMemory.put("FormatVersionUnsupported", true)
+                // read this parameter to display option to upload without
+                // validation in upload files view
+                flash.showProceedAsUnknownFormat = true
+                flash.modelFormatDetectedAs = flow.workingMemory.get("model_type").identifier
+                flow.workingMemory.get("model_type").identifier = "UNKNOWN"
             }.to "uploadFiles"
             on("FilesNotValid") {
                 flash.error = "submission.upload.error.fileerror"
@@ -825,7 +839,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
                 }
                 session.result_submission = flow.workingMemory.get("model_id")
                 if (flow.isUpdate) {
-                    flash.sendMessage = "Model ${session.result_submission} has been updated."
+                    flash.sendMessage = "Model has been updated."
                     session.removeAttribute(flow.workingMemory.get("SafeReferenceVariable") as String)
                     return redirectWithMessage()
                 }
@@ -906,13 +920,17 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
         resp.outputStream << new ByteArrayInputStream(byteBuffer.toByteArray())
     }
 
-    private void serveModelAsFile(RFTC rf, def resp, boolean inline) {
+    private void serveModelAsFile(RFTC rf, def resp, boolean inline, boolean preview = false) {
         File file = new File(rf.path)
         resp.setContentType(rf.mimeType)
         final String INLINE = inline ? "inline" : "attachment"
         final String F_NAME = file.name
         resp.setHeader("Content-disposition", "${INLINE};filename=\"${F_NAME}\"")
-        resp.outputStream << new ByteArrayInputStream(file.getBytes())
+        byte[] fileData = file.readBytes()
+        if (!preview) {
+        	resp.outputStream << new ByteArrayInputStream(fileData)
+        }
+        resp.outputStream << new ByteArrayInputStream(Arrays.copyOf(fileData, grailsApplication.config.jummp.web.file.preview))
     }
 
     /**
@@ -941,9 +959,10 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
                     File file = new File(it.path)
                     file.getName() == params.filename
                 }
-                boolean inline = params.inline
+                boolean inline = params.inline == "true"
+                boolean preview  = params.preview == "true"
                 if (requested) {
-                    serveModelAsFile(requested, response, inline)
+                    serveModelAsFile(requested, response, inline, preview)
                 }
             }
         } catch(Exception e) {

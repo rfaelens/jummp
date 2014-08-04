@@ -513,11 +513,12 @@ OR lower(m.publication.affiliation) like :filter
     /**
     * Queries the @p model for the latest available revision the user has read access to.
     * @param model The Model for which the latest revision should be retrieved.
+    * @param addToHistory Optional field to allow history not to be modified - e.g. if called from modelhistoryService
     * @return Latest Revision the current user has read access to. If there is no such revision null is returned
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getLatestRevision")
-    public Revision getLatestRevision(Model model) {
+    public Revision getLatestRevision(Model model, boolean addToHistory = true) {
         if (!model) {
             return null
         }
@@ -572,7 +573,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             if (!result) {
                 return null
             }
-            modelHistoryService.addModelToHistory(model)
+            if (addToHistory) {
+            	modelHistoryService.addModelToHistory(model)
+            }
             return Revision.get(result[0])
     }
 
@@ -913,8 +916,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         List<File> modelFiles = getFilesFromRF(repoFiles)
         stopWatch.lap("Finished adding RepositoryFiles to the Model")
         stopWatch.setTag("modelService.uploadValidatedModel.prepareVcsStorage")
-        final String formatVersion = modelFileFormatService.getFormatVersion(rev)
-        ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion)
+        ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, rev.format.formatVersion)
 
         // vcs identifier is upload date + name - this should by all means be unique
         //String pathPrefix =
@@ -972,12 +974,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
         } catch (VcsException e) {
-            revision.discard()
+        	revision.discard()
             domainObjects.each { it.discard() }
             model.discard()
             //TODO undo the addition of the files to the VCS.
             def errMsg = new StringBuffer("Exception occurred while storing new Model ")
-            errMsg.append("${model.toCommandObject().properties} to VCS: ${e.getMessage()}.\n")
+           // errMsg.append("${model.toCommandObject().properties} to VCS: ${e.getMessage()}.\n")
             errMsg.append("${model.errors.allErrors.inspect()}\n")
             errMsg.append("${revision.errors.allErrors.inspect()}\n")
             log.error(errMsg)
@@ -1105,7 +1107,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         stopWatch.setTag("modelService.uploadModelAsList.prepareVcsStorage")
         boolean valid = true
         ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(meta.format.identifier, "*")
-        if (!modelFileFormatService.validate(modelFiles, format)) {
+        if (!modelFileFormatService.validate(modelFiles, format, [])) {
             def err = "The files ${modelFiles.inspect()} do no comprise valid ${meta.format.identifier}"
             log.error(err)
        //     throw new ModelException(meta, "Invalid ${meta.format.identifier} submission.")v
@@ -1177,8 +1179,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
         } catch (VcsException e) {
-            e.printStackTrace()
-            revision.discard()
+        	revision.discard()
             domainObjects.each { it.discard() }
             model.discard()
             //TODO undo the addition of the files to the VCS.
@@ -1334,7 +1335,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             modelFiles.add(f)
         }
         boolean valid = true
-        if (!modelFileFormatService.validate(modelFiles, format)) {
+        if (!modelFileFormatService.validate(modelFiles, format, [])) {
             final def m = model.toCommandObject()
             log.warn("New revision of model ${m.properties} containing ${modelFiles.inspect()} does not comprise valid ${format.identifier}")
             //throw new ModelException(m, "The file list does not comprise valid ${format.identifier}")
