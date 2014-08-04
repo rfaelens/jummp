@@ -922,7 +922,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
         String modelPath = new StringBuilder(timestamp).append("_").append(rev.name).
                 append(File.separator).toString()
-        boolean success = new File(modelPath).mkdirs()
+        File modelFolder = new File(fileSystemService.findCurrentModelContainer(), modelPath)
+        boolean success = modelFolder.mkdirs()
         if (!success) {
             def err = "Cannot create the directory where the ${rev.name} should be stored"
             log.error(err)
@@ -946,12 +947,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         // keep a list of RFs closeby, as we may need to discard all of them
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
-            /*
-             * only store the name of the file in the database, as the location can change and
-             * we generate the correct path when the RepositoryFileTransportCommand wrapper is created
-             */
-            String sep = File.separator.equals("/") ? "/" : "\\\\"
-            String fileName = rf.path.split(sep).last()
             final def domain = new RepositoryFile(path: rf.path, description: rf.description,
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
