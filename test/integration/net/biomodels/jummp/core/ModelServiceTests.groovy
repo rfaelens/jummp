@@ -93,7 +93,7 @@ class ModelServiceTests extends JummpIntegrationTest {
     @Test
     void testGetAllModelsSecurity() {
         Model model = new Model(vcsIdentifier: "test/", submissionId: "M1")
-        FileUtils.touch(new File("${model.vcsIdentifier}test.xml".toString()))
+        FileUtils.touch(new File("${fileSystemService.findCurrentModelContainer()}/${model.vcsIdentifier}test.xml".toString()))
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
@@ -131,7 +131,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertEquals(0, modelService.getModelCount())
         // create one model
         Model model = new Model(vcsIdentifier: "test/", submissionId: "m1")
-        FileUtils.touch(new File("${model.vcsIdentifier}test.xml".toString()))
+        FileUtils.touch(new File("${fileSystemService.findCurrentModelContainer()}/${model.vcsIdentifier}test.xml".toString()))
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description: "", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
@@ -176,8 +176,8 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertEquals(1, modelService.getModelCount())
         // create another ten models
         for (int i=0; i<10; i++) {
-            Model m = new Model(vcsIdentifier: "test${i}/", submissionId: "MODEL$i")
-            FileUtils.touch(new File("${model.vcsIdentifier}test${i}.xml".toString()))
+            Model m = new Model(vcsIdentifier: "target/vcs/git/test${i}/", submissionId: "MODEL$i")
+            FileUtils.touch(new File("${fileSystemService.findCurrentModelContainer()}/${m.vcsIdentifier}test${i}.xml".toString()))
             Revision r = new Revision(model: m, vcsId: "rev${i}", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"${i}", description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
             assertTrue(r.validate())
             m.addToRevisions(r)
@@ -224,8 +224,8 @@ class ModelServiceTests extends JummpIntegrationTest {
     @Test
     void testGetLatestRevision() {
         // create Model with one revision, without ACL
-        Model model = new Model(vcsIdentifier: "${fileSystemService.findCurrentModelContainer()}/test/", submissionId: "m1")
-        FileUtils.touch(new File("${model.vcsIdentifier}test.xml".toString()))
+        Model model = new Model(vcsIdentifier: "test/", submissionId: "m1")
+        FileUtils.touch(new File("${fileSystemService.findCurrentModelContainer()}/${model.vcsIdentifier}test.xml".toString()))
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
@@ -309,7 +309,7 @@ class ModelServiceTests extends JummpIntegrationTest {
     void testGetByRevisionIdentifier() {
         // create Model with one revision, without ACL
         Model model = new Model(vcsIdentifier: "test/", submissionId: "m2")
-        FileUtils.touch(new File("${model.vcsIdentifier}test.xml".toString()))
+        FileUtils.touch(new File("${fileSystemService.findCurrentModelContainer()}/${model.vcsIdentifier}test.xml".toString()))
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1, owner: User.findByUsername("testuser"), minorRevision: false, name:"", description:"", comment: "", uploadDate: new Date(), format: ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"))
         assertTrue(revision.validate())
         model.addToRevisions(revision)
@@ -685,14 +685,6 @@ class ModelServiceTests extends JummpIntegrationTest {
                 new RepositoryFileTransportCommand(path: importFile.path, description: ""),
                     ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"), "")
         }
-        // setup VCS
-        File clone = new File("${rootPath}/${model.vcsIdentifier}".toString())
-        clone.mkdirs()
-        FileRepositoryBuilder builder = new FileRepositoryBuilder()
-        Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
-        .build()
 
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
@@ -915,8 +907,6 @@ class ModelServiceTests extends JummpIntegrationTest {
 
     @Test
     void testUploadModel() {
-        String modelIdentifier="target/vcs/git"
-        
         // anonymous user is not allowed to invoke method
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -925,7 +915,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         // try importing with null file - should fail
         def auth = authenticateAsTestUser()
         ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"))
-        
+
         shouldFail(ModelException) {
             modelService.uploadModelAsFile(null, meta)
         }
@@ -954,26 +944,29 @@ class ModelServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.plugins.sbml.validation = true
         modelService.vcsService.vcsManager = gitService.getInstance()
+        String currentContainer = fileSystemService.findCurrentModelContainer()
+        modelService.vcsService.currentModelContainer = currentContainer
         assertTrue(modelService.vcsService.isValid())
         rf.path = importFile.absolutePath
         // import should work now
         Model model = modelService.uploadModelAsFile(rf, meta)
         assertTrue(model.validate())
-        assertEquals(ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"), model.revisions.toList().first().format)
+        assertEquals(ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"),
+                model.revisions.toList().first().format)
         // complete name cannot be tested, as it uses a generated date and we do not know the date
         assertTrue(model.vcsIdentifier.endsWith("blankname/"))
+        File parent = new File(currentContainer, model.vcsIdentifier)
 
-        File gitFile = new File(model.vcsIdentifier + System.getProperty("file.separator") + importFile.getName())
+        File gitFile = new File(parent, importFile.getName())
         List<String> lines = gitFile.readLines()
         assertEquals(1, lines.size())
         assertEquals("Test", lines[0])
         // ensure the revision and commit message is correct
-        File clone = new File(model.vcsIdentifier)
         FileRepositoryBuilder builder = new FileRepositoryBuilder()
-        Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir(clone) // scan up the file system tree
-        .build()
+        Repository repository = builder.setWorkTree(parent)
+                .readEnvironment() // scan environment GIT_* variables
+                .findGitDir(parent) // scan up the file system tree
+                .build()
         ObjectId commit = repository.resolve(Constants.HEAD)
         RevWalk revWalk = new RevWalk(repository)
         RevCommit revCommit = revWalk.parseCommit(commit)
@@ -1058,30 +1051,25 @@ class ModelServiceTests extends JummpIntegrationTest {
 
     @Test
     void testRetrieveModelFiles() {
-        // first create the VCS
-        File clone = new File("target/vcs/git")
-        clone.mkdirs()
-        FileRepositoryBuilder builder = new FileRepositoryBuilder()
-        Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
-        .build()
-        Git git = new Git(repository)
-        git.init().setDirectory(clone).call()
+        def currentContainer = fileSystemService.findCurrentModelContainer()
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.vcs.workingDirectory = currentContainer
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         modelService.vcsService.vcsManager = gitService.getInstance()
+        modelService.vcsService.currentModelContainer = currentContainer
         assertTrue(modelService.vcsService.isValid())
         // import a file
         authenticateAsTestUser()
-        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment", name: "test", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"))
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment",
+                name: "test", format: new ModelFormatTransportCommand(identifier: "UNKNOWN",
+                formatVersion: "*"))
         File importFile = new File("target/vcs/exchange/import.xml")
         FileUtils.touch(importFile)
         importFile.append("Test\n")
-        def rf = new RepositoryFileTransportCommand(path: importFile.absolutePath, description: "")
+        def rf = new RepositoryFileTransportCommand(path: importFile.absolutePath,
+                description: "")
         Model model = modelService.uploadModelAsFile(rf, meta)
         Revision revision = modelService.getLatestRevision(model)
         // Anonymous user should not be allowed to download the revision
