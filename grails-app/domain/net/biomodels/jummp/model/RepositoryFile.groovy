@@ -81,20 +81,6 @@ class RepositoryFile implements Serializable {
      */
     String mimeType
 
-    /* using beforeInsert causes a Hibernate assertion failure. */
-    def afterInsert() {
-        /*
-         * only store the name of the file in the database, as the location can change.
-         * We generate the correct path when the RepositoryFileTransportCommand wrapper is created
-         */
-        String sep = File.separator.equals("/") ? "/" : "\\\\"
-        if (path.contains(sep)) {
-            String fileName = path.split(sep).last()
-            path = fileName
-        }
-        this.save()
-    }
-
     static constraints = {
         path(blank: false, nullable: false,
             validator: { p, rf ->

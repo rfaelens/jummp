@@ -1009,6 +1009,18 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 throw new ModelException(model.toCommandObject(), "New model does not validate")
             }
             model.save(flush: true)
+            domainObjects.each { rf ->
+                if (!rf.isAttached()) {
+                    rf.attach()
+                }
+                String path = rf.path
+                String sep = File.separator.equals("/") ? "/" : "\\\\"
+                if (path.contains(sep)) {
+                    String fileName = path.split(sep).last()
+                    rf.path = fileName
+                }
+                rf.save()
+            }
             stopWatch.lap("Finished GORM validation.")
             stopWatch.setTag("modelService.uploadValidatedModel.grantPermissions")
             // let's add the required rights
@@ -1119,12 +1131,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (!name && meta.name ) {
         	name = meta.name
         }
-        String pathPrefix =
-                fileSystemService.findCurrentModelContainer() + File.separator
+        String pathPrefix = fileSystemService.findCurrentModelContainer() + File.separator
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(name?.length() > 0 ? name:(randomUUID() as String)+"_blankname").
+        String modelPath = new StringBuilder(timestamp).append("_").append(
+                name?.length() > 0 ? name : (randomUUID() as String) + "_blankname").
                 append(File.separator).toString()
-        boolean success = new File(modelPath).mkdirs()
+        File modelFolder = new File(fileSystemService.findCurrentModelContainer(), modelPath)
+        boolean success = modelFolder.mkdirs()
         if (!success) {
             def err = "Cannot create the directory where the ${name} should be stored"
             log.error(err)
