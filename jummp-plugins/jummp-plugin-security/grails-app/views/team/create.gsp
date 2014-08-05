@@ -82,7 +82,7 @@
                 </span>
                 <div class="spaced" id="members">
                     <table id="membersTable">
-                        <thead>
+                        <thead id='nameLabel'>
                             <tr>
                                 <th>Name</th>
                                 <th>&nbsp;</th>

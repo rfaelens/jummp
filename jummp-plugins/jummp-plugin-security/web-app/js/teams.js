@@ -67,6 +67,7 @@ Team = Backbone.View.extend({
     addMember: function(member) {
         var m = new TeamMember({ model: member });
         $('#membersTableBody').append(m.render().el);
+       	$('#nameLabel').show();
     },
 
     addAll: function() {
@@ -75,18 +76,23 @@ Team = Backbone.View.extend({
     },
 
     render: function() {
-        _.each(this.collection, function(c) {
-            var memberView = new TeamMember();
-            $('#membersTableBody').html(this.tpl(memberView.render().el));
-        });
+    	if (this.collection.length == 0) {
+    		$('#nameLabel').hide();
+    	}
+    	else {
+    		_.each(this.collection, function(c) {
+				var memberView = new TeamMember();
+				$('#membersTableBody').html(this.tpl(memberView.render().el));
+			});
+		}
     }
 });
 
 // create a view.
-teamMembers = new Team();
-// add a new collaborator by pressing the return key (magic code 13)
+teamMembers = new Team({collection: collaborators});
+// add a new collaborator by pressing the return key (magic code 13) or by the add button
 $(function() {
-    $('#nameSearch').keypress(function(e) {
+	$('#nameSearch').keypress(function(e) {
         if (e.which == RETURN_KEY && $('#nameSearch').val().trim()) {
         	addCollab(e);
         }
@@ -96,6 +102,7 @@ $(function() {
         	addCollab(e);
         }
     });
+    teamMembers.render();
 });
 
 function addCollab(e) {
@@ -105,4 +112,5 @@ function addCollab(e) {
     thisCollaborator.userId = selectedItem[1];
     // triggers Team.addMember()
     collaborators.add(thisCollaborator);
+    		
 }
