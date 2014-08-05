@@ -74,6 +74,7 @@
                 <div>
                     <label for="nameSearch">User</label>
                     <input placeholder="Name, username or email" id="nameSearch" name="nameSearch" type="text"/>
+                    <g:submitButton name="add" value="Add"/>
                 </div>
                 <span class="tip">
                     <span class='tipNote'>Tip:</span>

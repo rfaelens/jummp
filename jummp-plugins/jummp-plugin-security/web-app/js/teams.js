@@ -88,12 +88,21 @@ teamMembers = new Team();
 $(function() {
     $('#nameSearch').keypress(function(e) {
         if (e.which == RETURN_KEY && $('#nameSearch').val().trim()) {
-            e.preventDefault();
-            var thisCollaborator = {};
-            thisCollaborator.name = selectedItem[2];
-            thisCollaborator.userId = selectedItem[1];
-            // triggers Team.addMember()
-            collaborators.add(thisCollaborator);
+        	addCollab(e);
+        }
+    });
+    $('#add').click(function(e) {
+    	if ($('#nameSearch').val().trim()) {
+        	addCollab(e);
         }
     });
 });
+
+function addCollab(e) {
+    e.preventDefault();
+    var thisCollaborator = {};
+    thisCollaborator.name = selectedItem[2];
+    thisCollaborator.userId = selectedItem[1];
+    // triggers Team.addMember()
+    collaborators.add(thisCollaborator);
+}
