@@ -47,7 +47,6 @@ class TeamController {
     }
 
     def save() {
-    	System.out.println("PARAMS: "+params);
     	String name="";
     	String description="";
     	Set<User> users=new HashSet<User>();
