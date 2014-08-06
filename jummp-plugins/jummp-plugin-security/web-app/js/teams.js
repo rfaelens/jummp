@@ -20,11 +20,6 @@ TeamMember = Backbone.View.extend({
     /** the Mustache template used by this view */
     memberTpl: Handlebars.compile(memberSource),
 
-    events: {
-        /** When the button with class 'remove' is clicked, call the remove function. */
-        "click .remove": "remove",
-    },
-
     initialize: function(opts) {
         //make options available in the view.
         this.options = opts || {};
@@ -34,17 +29,8 @@ TeamMember = Backbone.View.extend({
         this.$el.html(this.memberTpl(this.model.attributes));
         // be nice and allow chaining.
         return this;
-    },
-
-    remove: function(event) {
-        var buttonId = event.currentTarget.id;
-        //the id of the button is rmBtn-<id>
-        var collaboratorId = buttonId.substring("rmBtn-".length);
-        // TODO remove it from collection too.
-        // this.collection.remove(id)
-        this.parent().parent().remove();
-        this.render();
     }
+    
 });
 
 /**
@@ -57,11 +43,13 @@ Team = Backbone.View.extend({
     initialize: function() {
         this.$membersTableBody = $('#membersTableBody');
         this.$nameSearch = $('#nameSearch');
-        this.listenTo(collaborators, "add", this.addMember);
+        this.listenTo(this.collection, "add", this.render);
+        this.listenTo(this.collection, "remove", this.render);
+        this.listenTo(this.collection,"update",this.render);
         /**
          * We issue a reset when the team information is first displayed.
          */
-        this.listenTo(collaborators, "reset", this.addAll);
+        this.listenTo(this.collection, "reset", this.addAll);
     },
 
     addMember: function(member) {
@@ -78,13 +66,30 @@ Team = Backbone.View.extend({
     render: function() {
     	if (this.collection.length == 0) {
     		$('#nameLabel').hide();
+    		$('#membersTableBody').html('');
     	}
     	else {
-    		_.each(this.collection, function(c) {
-				var memberView = new TeamMember();
-				$('#membersTableBody').html(this.tpl(memberView.render().el));
+    		$('#nameLabel').show();
+    		$('#membersTableBody').html('');
+    		var that = this;
+    		this.collection.forEach(function(c) {
+    			var memberView = new TeamMember({model: c});
+				$('#membersTableBody').append(memberView.render().el);
+				$("#remove-"+c.attributes.userId).click(function(e) {
+					that.remove(e);
+        		});
 			});
+			
 		}
+    }, 
+    remove: function(event) {
+    	var buttonId = event.currentTarget.id;
+        var collaboratorId = buttonId.substring("remove-".length);
+        var toRemove  = this.collection.find(function(element) {
+        		return element.attributes.userId == collaboratorId
+        });
+        this.collection.remove(toRemove);
+        this.render();
     }
 });
 

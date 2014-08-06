@@ -29,7 +29,7 @@
         <script src="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: "/js", file: 'share.js')}"></script>
         <script id="team-member-template" type="text/x-handlebars-template">
             <td>{{this.name}}</td>
-            <td><button type='button' id='remove-{{this.id}}' class='.remove'>Remove</button></td>
+            <td><button type='button' id='remove-{{this.userId}}' class='remove'>Remove</button></td>
         </script>
         <script id="team-members-template" type="text/x-handlebars-template">
             {{#if isEmpty}}
