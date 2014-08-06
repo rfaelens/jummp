@@ -919,12 +919,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, rev.format.formatVersion)
 
         // vcs identifier is upload date + name - this should by all means be unique
-        String pathPrefix =
-                fileSystemService.findCurrentModelContainer() + File.separator
+        //String pathPrefix =
+        //        fileSystemService.findCurrentModelContainer() + File.separator
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(rev.name).
+        String modelPath = new StringBuilder(timestamp).append("_").append(rev.name).
                 append(File.separator).toString()
-        boolean success = new File(modelPath).mkdirs()
+        File modelFolder = new File(fileSystemService.findCurrentModelContainer(), modelPath)
+        boolean success = modelFolder.mkdirs()
         if (!success) {
             def err = "Cannot create the directory where the ${rev.name} should be stored"
             log.error(err)
@@ -948,12 +949,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         // keep a list of RFs closeby, as we may need to discard all of them
         List<RepositoryFile> domainObjects = []
         for (rf in repoFiles) {
-            /*
-             * only store the name of the file in the database, as the location can change and
-             * we generate the correct path when the RepositoryFileTransportCommand wrapper is created
-             */
-            String sep = File.separator.equals("/") ? "/" : "\\\\"
-            String fileName = rf.path.split(sep).last()
             final def domain = new RepositoryFile(path: rf.path, description: rf.description,
                     mimeType: rf.mimeType, revision: revision)
             if (rf.mainFile) {
@@ -1014,6 +1009,18 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 throw new ModelException(model.toCommandObject(), "New model does not validate")
             }
             model.save(flush: true)
+            domainObjects.each { rf ->
+                if (!rf.isAttached()) {
+                    rf.attach()
+                }
+                String path = rf.path
+                String sep = File.separator.equals("/") ? "/" : "\\\\"
+                if (path.contains(sep)) {
+                    String fileName = path.split(sep).last()
+                    rf.path = fileName
+                }
+                rf.save()
+            }
             stopWatch.lap("Finished GORM validation.")
             stopWatch.setTag("modelService.uploadValidatedModel.grantPermissions")
             // let's add the required rights
@@ -1060,6 +1067,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
+     * See https://bitbucket.org/jummp/jummp/issue/120
      * Creates a new Model and stores it in the VCS.
      *
      * Stores the @p modelFile as a new file in the VCS and creates a Model for it.
@@ -1123,12 +1131,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (!name && meta.name ) {
         	name = meta.name
         }
-        String pathPrefix =
-                fileSystemService.findCurrentModelContainer() + File.separator
+        String pathPrefix = fileSystemService.findCurrentModelContainer() + File.separator
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(pathPrefix).append(timestamp).append("_").append(name?.length() > 0 ? name:(randomUUID() as String)+"_blankname").
+        String modelPath = new StringBuilder(timestamp).append("_").append(
+                name?.length() > 0 ? name : (randomUUID() as String) + "_blankname").
                 append(File.separator).toString()
-        boolean success = new File(modelPath).mkdirs()
+        File modelFolder = new File(fileSystemService.findCurrentModelContainer(), modelPath)
+        boolean success = modelFolder.mkdirs()
         if (!success) {
             def err = "Cannot create the directory where the ${name} should be stored"
             log.error(err)

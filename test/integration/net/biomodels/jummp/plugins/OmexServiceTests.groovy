@@ -74,7 +74,9 @@ class OmexServiceTests extends JummpIntegrationTest {
         createUserAndRoles()
         setupVcs()
         fileSystemService.root = new File("target/omex/git/").getCanonicalFile()
-        fileSystemService.currentModelContainer = fileSystemService.root.absolutePath + "/aaa/"
+        String containerPath = fileSystemService.root.absolutePath + "/aaa/"
+        fileSystemService.currentModelContainer = containerPath
+        modelService.vcsService.currentModelContainer = containerPath
    }
 
     @After

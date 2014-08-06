@@ -17,19 +17,9 @@
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
 
-
-
-
-
-
-
-
-
-
-
-<body>
+<g:render template="/templates/jummp/bodyTag" />
 <div class='modal' id='overlayContainer'><div class="contentWrap"></div></div>
 <div id="topBackground"></div>
 <div id="middleBackground"></div>
 <div id="logo"></div>
-    
+

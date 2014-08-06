@@ -34,18 +34,17 @@
 
 package net.biomodels.jummp.core
 
-import grails.util.Holders
 import java.io.FilenameFilter
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
 import org.perf4j.aop.Profiled
 import org.springframework.beans.factory.InitializingBean
+
 /**
  * Provides an implementation of IFileSystemService. VcsManager implementations should use it
  * to fetch the location where a new repository should be created.
  *
  * @author Mihai Glonț <mglont@ebi.ac.uk>
- * @date 20130521
  */
 class FileSystemService implements IFileSystemService, InitializingBean {
     static transactional = false
@@ -85,16 +84,16 @@ class FileSystemService implements IFileSystemService, InitializingBean {
      * Sets the location of the root and of the current model container.
      */
     void afterPropertiesSet() throws Exception {
-        root = findRoot() 
+        root = findRoot()
         if (root) {
-        	StringBuffer currentModelContainerPath = new StringBuffer(root.absolutePath)
-        	currentModelContainerPath.append(File.separator).append(CONTAINER_PATTERN_SEED)
-        	currentModelContainer = currentModelContainerPath.toString()
-        	ensureFolderExists(currentModelContainer)
-        	log.debug("New model to be deposited in $currentModelContainer")
+            StringBuffer currentModelContainerPath = new StringBuffer(root.absolutePath)
+            currentModelContainerPath.append(File.separator).append(CONTAINER_PATTERN_SEED)
+            currentModelContainer = currentModelContainerPath.toString()
+            ensureFolderExists(currentModelContainer)
+            log.debug("New model to be deposited in $currentModelContainer")
         }
         else {
-        	log.debug("Root for FileSystemService was not configured!")
+            log.debug("Root for FileSystemService was not configured!")
         }
     }
 

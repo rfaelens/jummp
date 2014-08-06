@@ -410,18 +410,25 @@
 						primary:"ui-icon-person"
 					}
 			});
+            $('#confirm-model-publish').dialog({
+                resizable: false,
+                autoOpen: false,
+                height: 300,
+                modal: true,
+                buttons: {
+                    Confirm: function() {
+                        openPage("${g.createLink(controller: 'model', action: 'publish', id: revision.identifier() )}");
+                        $( this ).dialog( "close" );
+                    },
+                    Cancel: function() {
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
 		});
-	
-	</script>
-	<script>
+
         function openPage(loc) {
             window.location.href = loc;
-        }
-        function publishModel(url) {
-            var shouldPublish = window.confirm("Make this version of the model visible to anyone without logging in?\nThis step is not reversible.");
-            if (shouldPublish) {
-                openPage(url);
-            }
         }
     </script>
     <g:layoutHead/>
@@ -457,7 +464,10 @@
                                 <button id="delete" onclick='return $( "#dialog-confirm" ).dialog( "open" );'>Delete</button>
                             </g:if>
                             <g:if test="${showPublishOption}">
-                                <button id="publish" onclick="return publishModel('${g.createLink(controller: 'model', action: 'publish', id: revision.identifier())}')">Publish</button>
+                                <div id="confirm-model-publish" title="You are about to publish this model version">
+                                    <p>Make this version of the model visible to anyone without logging in?</p>
+                                </div>
+                                <button id="publish" onclick="return $( '#confirm-model-publish' ).dialog( 'open' );">Publish</button>
                             </g:if>
                             <g:else>
                             	<g:if test="${revision.state==ModelState.PUBLISHED}">

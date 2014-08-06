@@ -70,7 +70,8 @@ class SbmlServiceTests extends JummpIntegrationTest {
         createUserAndRoles()
         //setupVcs()
         fileSystemService.root = new File("target/sbml/git/").getCanonicalFile()
-        fileSystemService.currentModelContainer = fileSystemService.root.absolutePath + "/ttt/"
+        String containerPath = fileSystemService.root.absolutePath + "/ttt/"
+        fileSystemService.currentModelContainer = containerPath
         // disable validation as it is broken
         grailsApplication.config.jummp.plugins.sbml.validation = false
         GitManagerFactory gitService = new GitManagerFactory()
@@ -79,6 +80,7 @@ class SbmlServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.plugins.sbml.validation = true
+        modelService.vcsService.currentModelContainer = containerPath
         modelService.vcsService.vcsManager = gitService.getInstance()
     }
 

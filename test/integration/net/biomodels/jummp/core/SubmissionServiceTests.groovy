@@ -67,6 +67,10 @@ class SubmissionServiceTests extends JummpIntegrationTest {
     * Dependency injection of modelService
     */
     def modelService
+    /**
+     * Dependency injection of fileSystemService
+     */
+    def fileSystemService
 
     @Before
     void setUp() {
@@ -79,23 +83,17 @@ class SubmissionServiceTests extends JummpIntegrationTest {
     void tearDown() {
         // Tear down logic here
         FileUtils.deleteDirectory(new File("target/vcs/git"))
-        FileUtils.deleteDirectory(new File("target/vcs/resource"))
-        FileUtils.deleteDirectory(new File("target/vcs/repository"))
         FileUtils.deleteDirectory(new File("target/vcs/exchange"))
         modelService.vcsService.vcsManager = null
     }
 
     // TODO: remove this copy from JmsAdapterServiceTest
     private void setupVcs() {
-        File clone = new File("target/vcs/git")
-        clone.mkdirs()
-        FileRepositoryBuilder builder = new FileRepositoryBuilder()
-        Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
-        .build()
-        Git git = new Git(repository)
-        git.init().setDirectory(clone).call()
+        File root = new File("target/vcs/git")
+        root.mkdirs()
+        fileSystemService.root = root
+        String containerPath = root.absolutePath + "/aaa/"
+        fileSystemService.currentModelContainer = containerPath
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
@@ -103,11 +101,12 @@ class SubmissionServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         new File("target/vcs/exchange/").mkdirs()
         modelService.vcsService.vcsManager = gitService.getInstance()
+        modelService.vcsService.currentModelContainer = containerPath
         assertTrue(modelService.vcsService.isValid())
     }
 
     private String addTestFile(Map<String, Object> workingMemory) {
-        String guid = UUID.randomUUID() as String
+        String guid = UUID.randomUUID()
         def mains = [getFile("mainFile.txt", "this is a main file")]
         File additional = getFile("addFile.txt", guid)
         Map<File, String> adds=new HashMap<File, String>()
@@ -130,7 +129,7 @@ class SubmissionServiceTests extends JummpIntegrationTest {
     }
 
     private String addAdditionalFile(Map<String, Object> workingMemory, String directory=null) {
-        String guid = UUID.randomUUID() as String
+        String guid = UUID.randomUUID()
         File additional
         if (!directory) {
             additional = getFile("addFile.txt", guid)
@@ -219,7 +218,7 @@ class SubmissionServiceTests extends JummpIntegrationTest {
         submissionService.updateFromSummary(workingMemory, revSummary)
         submissionService.handleSubmission(workingMemory)
         assertTrue(workingMemory.containsKey("model_id"))
-        confirmFile(workingMemory.get("model_id") as String, null) 	
+        confirmFile(workingMemory.get("model_id") as String, null)
     }
 
     // Updates a file, tests whether the text is the updated text

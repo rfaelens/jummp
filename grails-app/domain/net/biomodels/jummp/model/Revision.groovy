@@ -44,9 +44,9 @@ import net.biomodels.jummp.core.model.ModelState
  */
 class Revision implements Serializable {
     private static final long serialVersionUID = 1L
-    
+
     def modelService
-    
+
     /**
      * The revision belongs to one Model
      */
@@ -75,7 +75,7 @@ class Revision implements Serializable {
      * Whether the revision is a minor change or not.
      */
     Boolean minorRevision
-    
+
     /**
      * Whether the revision has been validated
      */
@@ -84,12 +84,12 @@ class Revision implements Serializable {
      * The name of the 'model'. Stored in revision as it may change. Annoying.
      */
     String name
-    
+
     /**
      * The description of the 'model'. Stored in revision as it may change
      */
     String description
-    
+
     /**
      * The "commit message" of this revision.
      */
@@ -132,15 +132,14 @@ class Revision implements Serializable {
         deleted(nullable: false)
         state(nullable: false)
     }
-    
-    
+
     List<RFTC> getRepositoryFilesForRevision() {
         List<RFTC> repFiles=new LinkedList<RFTC>()
         List<File> files=modelService.retrieveModelRepFiles(this)
         repoFiles.each { rf ->
             File tmpFile=files.find { it.getName() == (new File(rf.path)).getName() }
             RFTC rftc=new RFTC(
-            	id: rf.id,
+                id: rf.id,
                 path: tmpFile.getCanonicalPath(),
                 description: rf.description,
                 hidden: rf.hidden,

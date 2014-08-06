@@ -91,7 +91,6 @@ class RepositoryFile implements Serializable {
                 def sherlock = new DefaultDetector()
                 String properType = sherlock.detect(new BufferedInputStream(
                         new FileInputStream(f)), new Metadata()).toString()
-                p = f.name
                 if (!rf.mimeType.equals(properType)) {
                     rf.mimeType = properType
                 }
