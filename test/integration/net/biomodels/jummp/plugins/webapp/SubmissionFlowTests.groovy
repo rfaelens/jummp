@@ -67,10 +67,12 @@ class SubmissionFlowTests extends JummpIntegrationTest {
         exchangeDirectory.mkdirs()
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange/"
         grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git/"
-        File parentLocation = new File(grailsApplication.config.jummp.vcs.workingDirectory )
+        File parentLocation = new File(grailsApplication.config.jummp.vcs.workingDirectory)
         parentLocation.mkdirs()
         fileSystemService.root = parentLocation
-        fileSystemService.currentModelContainer = parentLocation.absolutePath + File.separator + "ttt"
+        String containerPath = parentLocation.absolutePath + File.separator + "ttt"
+        fileSystemService.currentModelContainer = containerPath
+        modelService.vcsService.currentModelContainer = containerPath
     }
 
     @After
