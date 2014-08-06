@@ -19,7 +19,7 @@
  */
 
 package net.biomodels.jummp.plugins.security
-
+import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
 
 /**
@@ -47,15 +47,35 @@ class TeamController {
     }
 
     def save() {
-        def team = new Team(params)
-        team.owner = springSecurityService.getCurrentUser()
-        if (!team.validate()) {
-            render view: "create", model: [team: team]
-            return
+    	System.out.println("PARAMS: "+params);
+    	String name="";
+    	String description="";
+    	Set<User> users=new HashSet<User>();
+    	try {
+    		def map = JSON.parse(params.teamData);
+    		name = map.getString("name");
+    		description = map.getString("description");
+    		def collabs = map.getJSONArray("members");
+    		for (int i = 0; i < collabs.length(); i++) {
+    			users.add(User.findByUsername(collabs.getJSONObject(i).getString("userId")));
+    		}
+    	}
+    	catch(Exception e) {
+    		render "Error processing parameters: "+e.getMessage();
+    		return;
+    	}
+    	def team = new Team(name: name, description: description)
+    	team.owner=springSecurityService.getCurrentUser();
+    	if (!team.validate()) {
+            render "Error creating team. Team could not be validated."
         }
-        team.save(flush: true)
-        flash.message = "Team ${team.name} created successfully."
-        redirect(action: "show", id: team.id)
+        else {
+        	team.save(flush: true)
+        	users.each {
+        		UserTeam.create(it, team)
+        	}
+        	render team.id
+        }
     }
 
     /**

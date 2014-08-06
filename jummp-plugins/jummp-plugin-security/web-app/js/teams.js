@@ -64,13 +64,12 @@ Team = Backbone.View.extend({
     },
 
     render: function() {
+    	$('#membersTableBody').html('');
     	if (this.collection.length == 0) {
     		$('#nameLabel').hide();
-    		$('#membersTableBody').html('');
     	}
     	else {
     		$('#nameLabel').show();
-    		$('#membersTableBody').html('');
     		var that = this;
     		this.collection.forEach(function(c) {
     			var memberView = new TeamMember({model: c});
@@ -96,7 +95,7 @@ Team = Backbone.View.extend({
 // create a view.
 teamMembers = new Team({collection: collaborators});
 // add a new collaborator by pressing the return key (magic code 13) or by the add button
-$(function() {
+function startTeams(teamsUrl, successUrl) {
 	$('#nameSearch').keypress(function(e) {
         if (e.which == RETURN_KEY && $('#nameSearch').val().trim()) {
         	addCollab(e);
@@ -107,8 +106,23 @@ $(function() {
         	addCollab(e);
         }
     });
+    $('#create').click(function(e) {
+    		e.preventDefault();
+    		var teamData = {};
+    		teamData['name']=$("#teamName").val();
+    		teamData['description']=$("#teamDescription").val();
+    		teamData['members']=collaborators;
+    		$.post(teamsUrl, {teamData: JSON.stringify(teamData)}, function(returnedData) {
+    			if (returnedData.indexOf("Error") == -1) {
+                	window.location = successUrl+"/"+returnedData;
+            	}
+            	else {
+                	showNotification(returnedData);
+                }
+            });
+    });
     teamMembers.render();
-});
+}
 
 function addCollab(e) {
     e.preventDefault();

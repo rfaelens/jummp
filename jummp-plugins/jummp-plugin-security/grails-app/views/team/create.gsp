@@ -61,11 +61,11 @@
                 <tbody>
                     <tr>
                         <td><label class="required" for="name">Name</label></td>
-                        <td><span><g:textField required="true" autofocus="true" maxlength="255" name="name"/></span></td>
+                        <td><span><g:textField required="true" autofocus="true" maxlength="255" id="teamName" name="name"/></span></td>
                     </tr>
                     <tr>
                         <td><label for="description">Description</label></td>
-                        <td><span><g:textField maxlength="255" name="description"/></span></td>
+                        <td><span><g:textField maxlength="255" id="teamDescription" name="description"/></span></td>
                     </tr>
                 </tbody>
             </table>
@@ -102,6 +102,8 @@
                 var url = '<g:createLink controller="jummp" action="autoCompleteUser"/>';
                 // collaborators are declared in share.js
                 autoComplete([], url);
+                startTeams('<g:createLink controller="team" action="save"/>',
+                		   '<g:createLink controller="team" action="show"/>')
             });
         </g:javascript>
     </body>
