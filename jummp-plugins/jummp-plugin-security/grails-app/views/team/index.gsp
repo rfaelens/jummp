@@ -35,6 +35,7 @@
                     <tr>
                         <th class='spaced'>Name</th>
                         <th class='spaced'>Description</th>
+                        <th class='spaced'>Creator</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -42,6 +43,7 @@
                         <tr class="${ (i % 2) == 0 ? 'even' : 'odd'}">
                             <td class='spaced'><g:link action="show" id="${t.id}">${t.name}</g:link></td>
                             <td class='spaced'>${t.description}</td>
+                            <td class='spaced'>${t.owner.person.userRealName}</td>
                         </tr>
                     </g:each>
                 </tbody>
