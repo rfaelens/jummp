@@ -72,7 +72,10 @@ class ModelController {
      * Dependency injection of modelFileFormatService
      **/
     def modelFileFormatService
-
+    /**
+     * Dependency injection of userService.
+     */
+    def userService
     /**
      * Dependency injection of sbmlService.
      */
@@ -331,10 +334,10 @@ class ModelController {
 
     private List<Team> getTeamsForCurrentUser() {
 		try {
-			def teams = Team.findAllByOwner(springSecurityService.getCurrentUser())
-			return teams
+			return userService.getTeamsForUser(springSecurityService.getCurrentUser())
 		}
 		catch(Exception ignore) {
+			ignore.printStackTrace();
 			return []
 		}
     }

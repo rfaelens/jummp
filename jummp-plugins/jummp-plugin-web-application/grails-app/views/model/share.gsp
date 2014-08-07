@@ -93,7 +93,7 @@
     								<label for="teamSearch">Team</label>
     								<select id="teamSearch" name="team">
     									<g:each in="${teams}">
-    										<option value="${it.id}">${it.name}</option>
+    										<option value="${it.id}">${it.name} (Created by ${it.owner.person.userRealName})</option>
     									</g:each>
     								</select>
     							</div>
