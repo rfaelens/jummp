@@ -54,6 +54,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.multipart.MultipartFile
 import java.util.Arrays
+import net.biomodels.jummp.plugins.security.Team
 
 @Api(value = "/model", description = "Operations related to models")
 class ModelController {
@@ -320,7 +321,8 @@ class ModelController {
         try {
             def rev = modelDelegateService.getRevisionFromParams(params.id)
             def perms = modelDelegateService.getPermissionsMap(rev.model.submissionId)
-            return [revision: rev, permissions: perms as JSON]
+            def teams = Team.findAllByOwner(springSecurityService.getCurrentUser())
+            return [revision: rev, permissions: perms as JSON, teams: teams]
         } catch(Exception error) {
             log.error error.message, error
             forward(controller: "errors", action: "error403")

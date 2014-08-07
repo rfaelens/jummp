@@ -38,6 +38,8 @@ import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.plugins.security.Person
 import net.biomodels.jummp.plugins.security.UserRole
+import net.biomodels.jummp.plugins.security.Team
+import net.biomodels.jummp.plugins.security.UserTeam
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.springframework.security.access.prepost.PreAuthorize
@@ -579,6 +581,19 @@ class UserService implements IUserService {
             throw new RoleNotFoundException(authority)
         }
         return role
+    }
+    
+    @PostLogging(LoggingEventType.RETRIEVAL)
+    @Profiled(tag="userService.getUsersFromTeam")
+    @PreAuthorize("isAuthenticated()") //used to be: authentication.name==#username
+    List<String> getUsersFromTeam(Long teamID) {
+    	Team team = Team.get(teamID)
+    	def usersInTeam = UserTeam.findAllByTeam(team)
+    	return usersInTeam.collect {[
+    			"email": it.user.email,
+    			"username": it.user.username,
+    			"userRealName": it.user.person.userRealName
+    	]};
     }
 
     boolean createAdmin(UserCommand user) {

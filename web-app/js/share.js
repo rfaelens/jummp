@@ -20,6 +20,7 @@ function makeBoolean(value) {
 var lookupURL="";
 var submitURL="";
 var autoURL="";
+var teamLookup="";
 var selectedItem;
 collaborators = new Collaborators;
 CollaboratorTable = Backbone.View.extend({
@@ -84,6 +85,31 @@ CollaboratorTable = Backbone.View.extend({
             });
         }
     },
+    createTeam: function(evt) {
+    	evt.preventDefault();
+        var objectCreated=toJSON($("#collaboratorAddForm"));
+        objectCreated.read=makeBoolean(objectCreated.teamRead);
+        objectCreated.write=makeBoolean(objectCreated.teamWrite);
+        if (objectCreated.write) {
+            objectCreated.read=true;
+        }
+        objectCreated.disabledEdit=false;
+        objectCreated.show=true;
+        var that = this;
+        $.post(teamLookup, { teamID: objectCreated.team }, function(returnedData) {
+                _.each(returnedData, function(teamMember) {
+                		var collaborator = {};
+                		collaborator.id = teamMember.username;
+                		collaborator.name = teamMember.userRealName;
+                		collaborator.read = objectCreated.read;
+                		collaborator.write = objectCreated.write;
+                		collaborator.disabledEdit=false;
+                		collaborator.show=true;
+                		that.collection.add(collaborator);
+                });
+                that.performSubmission();
+        });
+    },
     updateCollab: function(evt) {
         //evt.preventDefault();
         //evt.stopPropagation();
@@ -138,7 +164,7 @@ CollaboratorTable = Backbone.View.extend({
 });
 
 function addButtonEvents() {
-    if (collaborators.length < 2) {
+    if (collaborators.length < 3) {
         $("#collabCreate").removeClass('hideRightBorder');
         $("#currentCollabs").addClass('hideLeftBorder');
         $("#collabUI").height($("#collabCreate").height());
@@ -202,13 +228,14 @@ function obscureEmail(text) {
     return obscured[text]
 }
 
-function main(existing, contURL, submit, autoComp) {
+function main(existing, contURL, submit, autoComp, teamURL) {
     collaboratorList = new CollaboratorTable({
         collection: collaborators
     });
     lookupURL=contURL;
     submitURL=submit;
     autoURL=autoComp;
+    teamLookup = teamURL;
     $('.containUI').html(collaboratorList.$el);
     _.each(existing, function(collab) {
         if (collab.write) {
@@ -222,6 +249,12 @@ function main(existing, contURL, submit, autoComp) {
     $("#radioReader").click(function() {
         switchRadio("#radioReader", "#radioWriter");
     });
+    $("#teamRadioReader").click(function() {
+        switchRadio("#teamRadioReader", "#teamRadioWriter");
+    });
+    $("#teamRadioWriter").click(function() {
+        switchRadio("#teamRadioWriter", "#teamRadioReader");
+    });
     autoComplete(collaborators, autoURL);
     addButtonEvents();
     $( "#SaveCollabs" ).click(function(event){
@@ -230,6 +263,10 @@ function main(existing, contURL, submit, autoComp) {
     $( "#AddButton" ).click(function(event){
         collaboratorList.create(event);
     });
+    $( "#TeamAddButton" ).click(function(event) {
+        collaboratorList.createTeam(event);
+    });
+    $("#teamSearch").width($("#nameSearch").width()*0.94);
 }
 
 function autoComplete(collabs, url) {

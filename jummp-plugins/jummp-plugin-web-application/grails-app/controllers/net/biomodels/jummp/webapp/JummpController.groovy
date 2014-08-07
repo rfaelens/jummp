@@ -46,4 +46,21 @@ class JummpController {
         def usersFound = userService.searchUsers(params.term)
         render (usersFound as JSON)
     }
+    
+    def teamLookup = {
+		if (params.teamID) {
+			long teamID;
+			try {
+				teamID = Long.parseLong(params.teamID)
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+				render "Invalid team specified"
+				return;
+			}
+			def users = userService.getUsersFromTeam(teamID)
+    		render (users as JSON)
+    	}
+    	render "No team specified"
+    }
 }

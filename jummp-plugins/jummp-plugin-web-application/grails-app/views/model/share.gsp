@@ -71,23 +71,44 @@
     				<div id="collabCreate">
     					<h2>Add New Collaborator</h2>
     					<form id="collaboratorAddForm">
-    						<div id="formElements">
+    						<div id="formElements" class="formElements">
     							<div class="formElement">
     								<label for="nameSearch">User</label>
     								<input placeholder="Name, username or email" id="nameSearch" name="name" type="text"/>
     							</div>
     							<div class="formElement">
 									<label for="read">Read</label>
-									<input id="radioReader" type="radio" id="read" name="read"
+									<input id="radioReader" type="radio" name="read"
                                            checked></input>
 								</div>
 								<div class="formElement">
 									<label for="write">Write</label>
 									<input id="radioWriter" type="radio"
-                                           id="write" name="write"></input>
+                                           name="write"></input>
 								</div>
 							</div>
 						<button id="AddButton">Add</button>
+						<div id="teamFormElements" class="formElements">
+    							<div class="formElement">
+    								<label for="teamSearch">Team</label>
+    								<select id="teamSearch" name="team">
+    									<g:each in="${teams}">
+    										<option value="${it.id}">${it.name}</option>
+    									</g:each>
+    								</select>
+    							</div>
+    							<div class="formElement">
+									<label for="teamRead">Read</label>
+									<input id="teamRadioReader" type="radio" name="teamRead" checked></input>
+								</div>
+								<div class="formElement">
+									<label for="teamWrite">Write</label>
+									<input id="teamRadioWriter" type="radio"
+                                           name="teamWrite"></input>
+								</div>
+							</div>
+						<br/>
+						<button id="TeamAddButton" style='margin-left:10px;'>Add</button>
 					   </form>
 					</div>
 					<div class="containUI">
@@ -103,7 +124,8 @@
     					main(JSON.parse('${permissions}'),
     						'<g:createLink controller="jummp" action="lookupUser"/>',
     						'<g:createLink controller="model" action="shareUpdate" id="${revision.identifier()}"/>',
-                            '<g:createLink controller="jummp" action="autoCompleteUser"/>')
+                            '<g:createLink controller="jummp" action="autoCompleteUser"/>',
+                            '<g:createLink controller="jummp" action="teamLookup"/>')
     			});
     		</g:javascript>
     </body>
