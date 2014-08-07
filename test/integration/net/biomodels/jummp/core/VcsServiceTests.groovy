@@ -286,12 +286,6 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
-        // setup VCS
-        FileRepositoryBuilder builder = new FileRepositoryBuilder()
-        Repository repository = builder.setWorkTree(modelDirectory)
-                .readEnvironment() // scan environment GIT_* variables
-                .findGitDir() // scan up the file system tree
-                .build()
 
         String rev = vcsService.updateModel(model, imports, null, null)
         for (i in 0..9) {
@@ -301,6 +295,12 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
             assertEquals("Test - ${i}".toString(), lines[0])
         }
 
+        // setup VCS
+        FileRepositoryBuilder builder = new FileRepositoryBuilder()
+        Repository repository = builder.setWorkTree(modelDirectory)
+                .readEnvironment() // scan environment GIT_* variables
+                .findGitDir(modelDirectory) // scan up the file system tree
+                .build()
         // ensure the revision and commit message is correct
         ObjectId commit = repository.resolve(Constants.HEAD)
         RevWalk revWalk = new RevWalk(repository)
