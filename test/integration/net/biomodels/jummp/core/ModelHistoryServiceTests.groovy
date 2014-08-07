@@ -212,6 +212,12 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
 
     // TODO: remove this copy from JmsAdapterServiceTest
     private void setupVcs() {
+        File root = new File("target/vcs/git")
+        root.mkdirs()
+        def fss = modelService.fileSystemService
+        String containerPath = root.absolutePath + "/hhh/"
+        fss.currentModelContainer = containerPath
+        modelService.vcsService.currentModelContainer = containerPath
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
