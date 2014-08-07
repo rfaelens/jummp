@@ -29,6 +29,8 @@ import grails.converters.JSON
 class JummpController {
 
     def userService
+    
+    def teamService
 
     def feedback = { }
 
@@ -58,7 +60,7 @@ class JummpController {
 				render "Invalid team specified"
 				return;
 			}
-			def users = userService.getUsersFromTeam(teamID)
+			def users = teamService.getUsersFromTeam(teamID)
     		render (users as JSON)
     	}
     	render "No team specified"

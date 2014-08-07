@@ -73,9 +73,9 @@ class ModelController {
      **/
     def modelFileFormatService
     /**
-     * Dependency injection of userService.
+     * Dependency injection of teamService.
      */
-    def userService
+    def teamService
     /**
      * Dependency injection of sbmlService.
      */
@@ -334,7 +334,7 @@ class ModelController {
 
     private List<Team> getTeamsForCurrentUser() {
 		try {
-			return userService.getTeamsForUser(springSecurityService.getCurrentUser())
+			return teamService.getTeamsForUser(springSecurityService.getCurrentUser())
 		}
 		catch(Exception ignore) {
 			ignore.printStackTrace();

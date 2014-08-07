@@ -583,29 +583,6 @@ class UserService implements IUserService {
         return role
     }
     
-    @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="userService.getUsersFromTeam")
-    @PreAuthorize("isAuthenticated()") //used to be: authentication.name==#username
-    List<String> getUsersFromTeam(Long teamID) {
-    	Team team = Team.get(teamID)
-    	def usersInTeam = UserTeam.findAllByTeam(team)
-    	return usersInTeam.collect {[
-    			"email": it.user.email,
-    			"username": it.user.username,
-    			"userRealName": it.user.person.userRealName
-    	]};
-    }
-    
-    @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="userService.getTeamsForUser")
-    @PreAuthorize("isAuthenticated()") //used to be: authentication.name==#username
-    List<String> getTeamsForUser(User user) {
-    	def teamsIveCreated = Team.findAllByOwner(user)
-		def teamsImAMemberOf = UserTeam.findAllByUser(springSecurityService.getCurrentUser()).collect { it.team }
-		return teamsIveCreated.plus(teamsImAMemberOf)
-    }
-    
-    
     
     boolean createAdmin(UserCommand user) {
         User person = new User()

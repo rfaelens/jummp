@@ -82,8 +82,7 @@ class TeamController {
      */
     def index() {
         def user = springSecurityService.getCurrentUser()
-        Set<Team> teams = Team.findAllByOwner(user) as Set
-        [teams: teams]
+        [teams: teamService.getTeamsForUser(user)]
     }
 
     //TODO
