@@ -83,8 +83,6 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
     void tearDown() {
         // Tear down logic here
         FileUtils.deleteDirectory(new File("target/vcs/git"))
-        FileUtils.deleteDirectory(new File("target/vcs/resource"))
-        FileUtils.deleteDirectory(new File("target/vcs/repository"))
         FileUtils.deleteDirectory(new File("target/vcs/exchange"))
         modelService.vcsService.vcsManager = null
     }
@@ -214,15 +212,6 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
 
     // TODO: remove this copy from JmsAdapterServiceTest
     private void setupVcs() {
-        File clone = new File("target/vcs/git")
-        assertTrue(clone.mkdirs())
-        FileRepositoryBuilder builder = new FileRepositoryBuilder()
-        Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir() // scan up the file system tree
-        .build()
-        Git git = new Git(repository)
-        git.init().setDirectory(clone).call()
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
