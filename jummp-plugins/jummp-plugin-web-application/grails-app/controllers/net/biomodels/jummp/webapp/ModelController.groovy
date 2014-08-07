@@ -321,7 +321,7 @@ class ModelController {
         try {
             def rev = modelDelegateService.getRevisionFromParams(params.id)
             def perms = modelDelegateService.getPermissionsMap(rev.model.submissionId)
-            def teams = Team.findAllByOwner(springSecurityService.getCurrentUser())
+            def teams = getTeamsForCurrentUser()
             return [revision: rev, permissions: perms as JSON, teams: teams]
         } catch(Exception error) {
             log.error error.message, error
@@ -329,6 +329,16 @@ class ModelController {
         }
     }
 
+    private List<Team> getTeamsForCurrentUser() {
+		try {
+			def teams = Team.findAllByOwner(springSecurityService.getCurrentUser())
+			return teams
+		}
+		catch(Exception ignore) {
+			return []
+		}
+    }
+    
     def shareUpdate = {
         boolean valid = params.collabMap
         if (valid) {
