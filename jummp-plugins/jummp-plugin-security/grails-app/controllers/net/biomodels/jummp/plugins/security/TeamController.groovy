@@ -102,6 +102,7 @@ class TeamController {
             redirect(action: 'index')
             return
         }
-        [team: team]
+        def usersInTeam = UserTeam.findAllByTeam(team);
+        [team: team, users: usersInTeam.collect { it.user.person.toCommandObject()}]
     }
 }

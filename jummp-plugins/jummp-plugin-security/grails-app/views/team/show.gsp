@@ -27,11 +27,16 @@
     <body>
         <g:if test="${team.description}">
         <div>
-            <span class="bold">Description </span><span>${team.description}</span>
+            <strong>Description </strong><span>${team.description}</span>
         </div>
         </g:if>
         <div>
             <h2>Members</h2>
+            	<ul>
+            		<g:each in="${users}">
+            			<li>${it.userRealName}</it>
+            		</g:each>
+            	</ul>
         </div>
     </body>
 </html>
