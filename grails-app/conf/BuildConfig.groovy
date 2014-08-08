@@ -92,10 +92,6 @@ grails.project.dependency.resolution = {
         // dependencies of plugins
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
-        // dependencies of jsbml
-        runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api', 'stax-api' }
-        runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api', 'stax-api' }
-        runtime "org.codehaus.woodstox:stax2-api:3.1.0"
         //compile ('org.apache.lucene:lucene-core:4.4.0')
         //compile ('org.apache.lucene:lucene-analyzers-common:4.4.0')
         //compile ('org.apache.lucene:lucene-queryparser:4.4.0')
@@ -103,18 +99,6 @@ grails.project.dependency.resolution = {
 
         compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") {
             excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4', 'xercesImpl'
-        }
-
-        // sbml
-        runtime("org.sbml.jsbml:jsbml:1.0-beta") {
-            excludes 'woodstox-core-lgpl',
-                        'staxmate',
-                        'stax2-api',
-                        'log4j',
-                        'junit',
-                        'commons-pool',
-                        'commons-dbcp',
-                        'xstream'
         }
 
         // bives
