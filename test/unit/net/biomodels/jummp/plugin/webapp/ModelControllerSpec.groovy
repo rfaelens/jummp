@@ -49,7 +49,13 @@ class ModelControllerSpec extends Specification {
             new PermissionTransportCommand(id: "2", name: "I", read: true),
             ]
         }
+        def springSecurityService = new Object()
+        springSecurityService.metaClass.getCurrentUser = {
+        	return null;
+        }
+        
         controller.modelDelegateService = mds.createMock()
+        controller.springSecurityService = springSecurityService;
 
         when: "the access permissions of that model are checked"
         controller.request.parameters = [id: "MODEL123.4"]

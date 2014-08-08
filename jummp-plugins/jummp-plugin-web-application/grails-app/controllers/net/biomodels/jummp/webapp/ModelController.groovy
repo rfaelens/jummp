@@ -333,13 +333,11 @@ class ModelController {
     }
 
     private List<Team> getTeamsForCurrentUser() {
-		try {
-			return teamService.getTeamsForUser(springSecurityService.getCurrentUser())
+		def user = springSecurityService.getCurrentUser()
+		if (user) {
+			return teamService.getTeamsForUser(user)
 		}
-		catch(Exception ignore) {
-			ignore.printStackTrace();
-			return []
-		}
+		return []
     }
     
     def shareUpdate = {
