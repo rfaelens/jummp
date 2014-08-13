@@ -538,6 +538,10 @@ New submission started. Main files: ${mainMultipartList.inspect()}.""")
                 flow.workingMemory.put("UploadCommand", cmd)
             }.to "transferFilesToService"
             on("ProceedWithoutValidation"){
+            	
+            }.to "inferModelInfo"
+            on("ProceedAsUnknown"){
+            	flow.workingMemory.get("model_type").identifier = "UNKNOWN"
             }.to "inferModelInfo"
             on("Cancel").to "cleanUpAndTerminate"
             on("Back"){}.to "displayDisclaimer"
@@ -681,7 +685,6 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                 // validation in upload files view
                 flash.showProceedAsUnknownFormat = true
                 flash.modelFormatDetectedAs = flow.workingMemory.get("model_type").identifier
-                flow.workingMemory.get("model_type").identifier = "UNKNOWN"
             }.to "uploadFiles"
             on("FilesNotValid") {
                 flash.error = "submission.upload.error.fileerror"
