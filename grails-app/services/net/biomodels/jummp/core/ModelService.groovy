@@ -152,10 +152,10 @@ class ModelService {
                 if (perennialField.isEmpty()) {
                     perennialField= it.get("submissionId")
                 }
-                Model returned = getModel(perennialField)
-                if (returned && !returned.deleted) {
-                    returnVals.add(returned.toCommandObject())
-                }
+               	Model returned = Model.findByPerennialIdentifier(perennialField)
+               	if (returned && !returned.deleted && getLatestRevision(returned, false)) {
+               		returnVals.add(returned.toCommandObject())
+               	}
             }
         }
         return returnVals
