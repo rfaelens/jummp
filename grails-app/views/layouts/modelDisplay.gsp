@@ -244,7 +244,7 @@
 							var tcontent=[];						
 							tcontent.push("<table cellpadding='2' cellspacing='5'>")
 							for (var prop in fileProps) {
-								if (prop!="isInternal" && prop!="Name" && fileProps[prop] && fileProps[prop]!="null" && prop!="mime") {
+								if (prop!="isInternal" && prop!="Name" && fileProps[prop] && fileProps[prop]!="null" && prop!="mime" && prop!="showPreview") {
 									tcontent.push("<tr><td><b>",prop.replace("_"," "),"</b></td><td>",fileProps[prop])
 									tcontent.push("</td></tr>");
 								}
