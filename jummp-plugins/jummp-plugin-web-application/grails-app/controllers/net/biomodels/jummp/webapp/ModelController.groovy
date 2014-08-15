@@ -943,10 +943,14 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
         final String F_NAME = file.name
         resp.setHeader("Content-disposition", "${INLINE};filename=\"${F_NAME}\"")
         byte[] fileData = file.readBytes()
-        if (!preview) {
+        int previewSize = grailsApplication.config.jummp.web.file.preview as Integer
+
+        if (!preview || previewSize > fileData.length) {
         	resp.outputStream << new ByteArrayInputStream(fileData)
         }
-        resp.outputStream << new ByteArrayInputStream(Arrays.copyOf(fileData, grailsApplication.config.jummp.web.file.preview))
+        else {
+       		resp.outputStream << new ByteArrayInputStream(Arrays.copyOf(fileData, previewSize))
+        }
     }
 
     /**
