@@ -58,3 +58,6 @@
     selected
 </content>
 <content tag="title">View my teams</content>
+<content tag="contexthelp">
+	teams
+</content>
