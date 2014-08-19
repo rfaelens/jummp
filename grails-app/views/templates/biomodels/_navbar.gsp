@@ -41,7 +41,6 @@
        whichever one will show up last...
        For example: -->
     <sec:ifLoggedIn>
-	</a>
         <li class="functional first">
             <a href="${grailsApplication.config.grails.serverURL}/user" class="icon icon-functional" data-icon="5">
                 ${sec.username()}'s Profile
