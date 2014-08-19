@@ -12,6 +12,9 @@
     font-weight: bold;
     color: #cc0000;
 }
+#nameSearch {
+    padding-right: 1em;
+}
 /* end custom styles */
 #autocomplete {
     border: 1px solid;
