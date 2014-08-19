@@ -89,6 +89,9 @@
                     <g:if test ="${showProceedWithoutValidationDialog || showProceedAsUnknownFormat}">
                       <g:submitButton name="ProceedWithoutValidation" value="ProceedWithoutValidation" hidden="true"/> 
                     </g:if>
+                    <g:if test ="${showProceedAsUnknownFormat}">
+                      <g:submitButton name="ProceedAsUnknown" value="ProceedAsUnknown" hidden="true"/> 
+                    </g:if>
                 </div>
             </div>
         </g:uploadForm>
@@ -173,7 +176,11 @@
                         modal: true,
                         buttons: {
                             "Proceed Without Validation": function() {
-                                document.getElementById('_eventId_ProceedWithoutValidation').click();
+                            	var eventID = '_eventId_ProceedWithoutValidation';
+                            	<g:if test='${showProceedAsUnknownFormat}'>
+                            		eventID = '_eventId_ProceedAsUnknown';
+                            	</g:if>
+                                document.getElementById(eventID).click();
                                 $( this ).dialog( "close" );
                             },
                             Cancel: function() {

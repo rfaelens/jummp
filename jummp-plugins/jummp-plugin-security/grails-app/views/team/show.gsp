@@ -41,3 +41,6 @@
     </body>
 </html>
 <content tag="title">View team '${team.name}'</content>
+<content tag="contexthelp">
+	teams
+</content>

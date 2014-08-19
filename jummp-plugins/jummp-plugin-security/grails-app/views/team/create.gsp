@@ -109,3 +109,6 @@
     </body>
 </html>
 <content tag="title">Create a team</content>
+<content tag="contexthelp">
+	teams
+</content>

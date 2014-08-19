@@ -538,6 +538,10 @@ New submission started. Main files: ${mainMultipartList.inspect()}.""")
                 flow.workingMemory.put("UploadCommand", cmd)
             }.to "transferFilesToService"
             on("ProceedWithoutValidation"){
+            	
+            }.to "inferModelInfo"
+            on("ProceedAsUnknown"){
+            	flow.workingMemory.get("model_type").identifier = "UNKNOWN"
             }.to "inferModelInfo"
             on("Cancel").to "cleanUpAndTerminate"
             on("Back"){}.to "displayDisclaimer"
@@ -681,7 +685,6 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                 // validation in upload files view
                 flash.showProceedAsUnknownFormat = true
                 flash.modelFormatDetectedAs = flow.workingMemory.get("model_type").identifier
-                flow.workingMemory.get("model_type").identifier = "UNKNOWN"
             }.to "uploadFiles"
             on("FilesNotValid") {
                 flash.error = "submission.upload.error.fileerror"
@@ -940,10 +943,14 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
         final String F_NAME = file.name
         resp.setHeader("Content-disposition", "${INLINE};filename=\"${F_NAME}\"")
         byte[] fileData = file.readBytes()
-        if (!preview) {
+        int previewSize = grailsApplication.config.jummp.web.file.preview as Integer
+
+        if (!preview || previewSize > fileData.length) {
         	resp.outputStream << new ByteArrayInputStream(fileData)
         }
-        resp.outputStream << new ByteArrayInputStream(Arrays.copyOf(fileData, grailsApplication.config.jummp.web.file.preview))
+        else {
+       		resp.outputStream << new ByteArrayInputStream(Arrays.copyOf(fileData, previewSize))
+        }
     }
 
     /**
