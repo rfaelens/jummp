@@ -101,13 +101,15 @@
 	    	</g:if>
     		title="submit a model">Submit</a>
     	</li>
-        <li class="expanded">
-            <a href="${g.createLink(controller: 'team', action: 'index')}"
-            <g:if test="${g.pageProperty(name:'page.teams')?.length()}">
-                class="active-trail active"
-            </g:if>
-            title="view my teams">My Teams</a>
-        </li>
+        <sec:ifLoggedIn>
+            <li class="expanded">
+                <a href="${g.createLink(controller: 'team', action: 'index')}"
+                <g:if test="${g.pageProperty(name:'page.teams')?.length()}">
+                    class="active-trail active"
+                </g:if>
+                title="view my teams">My Teams</a>
+            </li>
+        </sec:ifLoggedIn>
     	<li class="expanded">
     		<a href="${g.createLink(controller: 'jummp', action: 'feedback')}" 
     		<g:if test="${g.pageProperty(name:'page.feedback')?.length()}">

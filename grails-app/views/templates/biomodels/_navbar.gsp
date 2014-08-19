@@ -37,10 +37,12 @@
   	<g:if test="${g.pageProperty(name:'page.submit')?.length()}">
 	    	class="active"
 	</g:if>><a href="${g.createLink(controller: 'model', action: 'create')}">Submit</a></li>
+  <sec:ifLoggedIn>
   <li
       <g:if test="${g.pageProperty(name:'page.teams')?.length()}">
       class="active"
       </g:if>><a href="${g.createLink(controller: 'team', action: 'index')}">My Teams</a></li>
+  </sec:ifLoggedIn>
   <li
   	<g:if test="${g.pageProperty(name:'page.help')?.length()}">
 	    	class="active"
