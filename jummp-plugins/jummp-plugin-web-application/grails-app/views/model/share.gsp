@@ -88,27 +88,29 @@
 								</div>
 							</div>
 						<button id="AddButton">Add</button>
-						<div id="teamFormElements" class="formElements">
-    							<div class="formElement">
-    								<label for="teamSearch">Team</label>
-    								<select id="teamSearch" name="team">
-    									<g:each in="${teams}">
-    										<option value="${it.id}">${it.name} (Created by ${it.owner.person.userRealName})</option>
-    									</g:each>
-    								</select>
-    							</div>
-    							<div class="formElement">
-									<label for="teamRead">Read</label>
-									<input id="teamRadioReader" type="radio" name="teamRead" checked></input>
+						<g:if test="${teams.size() > 0}">
+							<div id="teamFormElements" class="formElements">
+									<div class="formElement">
+										<label for="teamSearch">Team</label>
+										<select id="teamSearch" name="team">
+											<g:each in="${teams}">
+												<option value="${it.id}">${it.name} (Created by ${it.owner.person.userRealName})</option>
+											</g:each>
+										</select>
+									</div>
+									<div class="formElement">
+										<label for="teamRead">Read</label>
+										<input id="teamRadioReader" type="radio" name="teamRead" checked></input>
+									</div>
+									<div class="formElement">
+										<label for="teamWrite">Write</label>
+										<input id="teamRadioWriter" type="radio"
+											   name="teamWrite"></input>
+									</div>
 								</div>
-								<div class="formElement">
-									<label for="teamWrite">Write</label>
-									<input id="teamRadioWriter" type="radio"
-                                           name="teamWrite"></input>
-								</div>
-							</div>
-						<br/>
-						<button id="TeamAddButton" style='margin-left:10px;'>Add</button>
+							<br/>
+							<button id="TeamAddButton" style='margin-left:10px;'>Add</button>
+						</g:if>
 					   </form>
 					</div>
 					<div class="containUI">
