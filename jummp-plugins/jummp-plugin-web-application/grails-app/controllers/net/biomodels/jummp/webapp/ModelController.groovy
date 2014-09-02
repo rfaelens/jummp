@@ -453,7 +453,7 @@ class ModelController {
                     String model_id = conversation.model_id
                     flow.workingMemory.put("model_id", model_id)
                     flow.workingMemory.put("LastRevision",
-                                modelDelegateService.getLatestRevision(model_id))
+                                modelDelegateService.getLatestRevision(model_id, false))
                     /* Maintain reference to the previous revision in session
                        memory to ensure it is not overwritten. Do it with a
                        random variable name to allow updating of multiple
@@ -944,7 +944,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
         resp.setHeader("Content-disposition", "${INLINE};filename=\"${F_NAME}\"")
         byte[] fileData = file.readBytes()
         int previewSize = grailsApplication.config.jummp.web.file.preview as Integer
-
+        System.out.println("UPDATED CODE");
         if (!preview || previewSize > fileData.length) {
         	resp.outputStream << new ByteArrayInputStream(fileData)
         }

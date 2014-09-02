@@ -142,12 +142,12 @@ class ModelDelegateService implements IModelService {
         return modelService.getModel(modelId).toCommandObject()
     }
 
-    RevisionTransportCommand getLatestRevision(String modelId) {
+    RevisionTransportCommand getLatestRevision(String modelId, boolean addToHistory = true) {
         Model model = Model.findByPerennialIdentifier(modelId)
         if (!model) {
             throw new AccessDeniedException("No access to any revision of Model ${modelId}")
         }
-        Revision rev = modelService.getLatestRevision(model)
+        Revision rev = modelService.getLatestRevision(model, addToHistory)
         if (rev) {
             return rev.toCommandObject()
         } else {

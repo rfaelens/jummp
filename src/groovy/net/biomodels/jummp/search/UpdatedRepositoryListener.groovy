@@ -126,7 +126,7 @@ class UpdatedRepositoryListener implements ApplicationListener {
         if (event instanceof ModelCreatedEvent) {
             ModelCreatedEvent modEvent = event as ModelCreatedEvent
             final String MODEL_ID = modEvent.model.publicationId ?: modEvent.model.submissionId
-            updateIndex(modelDelegateService.getLatestRevision(MODEL_ID))
+            updateIndex(modelDelegateService.getLatestRevision(MODEL_ID, false))
         }
     }
 

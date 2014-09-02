@@ -37,22 +37,22 @@ class SbmlController {
     def sbmlService
 
     def reactionMetaOverview = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long, false)
         [reaction: sbmlService.getReaction(rev)]
     }
 
     def compartmentMetaOverview = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long, false)
         [compartment: sbmlService.getCompartment(rev)]
     }
 
     def parameterMetaOverview = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long, false)
         [parameter: sbmlService.getParameter(rev)]
     }
 
     def math = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long, false)
         [
                 reactions: sbmlService.getReactions(rev),
                 rules: sbmlService.getRules(rev),
@@ -62,27 +62,27 @@ class SbmlController {
     }
 
     def entity = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long, false)
         [compartments: sbmlService.getCompartments(rev)]
     }
 
     def compartmentMeta = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long, false)
         [compartment: sbmlService.getCompartment(rev)]
     }
 
     def speciesMeta = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long, false)
         [species: sbmlService.getSpecies(rev)]
     }
 
     def parameterMeta = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long, false)
         [parameter: sbmlService.getParameter(rev)]
     }
 
     def parameter = {
-        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long)
+        RevisionTransportCommand rev = modelDelegateService.getLatestRevision(params.id as Long, false)
         [parameters: sbmlService.getParameters(rev), reactionParameters: sbmlService.getLocalParameters(rev)]
     }
 
