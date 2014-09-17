@@ -108,7 +108,7 @@ class FetchAnnotationsThread implements Runnable {
             threadModel = Model.get(model)
         }
         if (!revisionId) {
-            revision = modelService.getLatestRevision(threadModel)
+            revision = modelService.getLatestRevision(threadModel, false)
         } else {
             revision = Revision.get(revisionId)
             if (!revision) {

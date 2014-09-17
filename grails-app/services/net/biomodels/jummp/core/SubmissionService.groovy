@@ -558,7 +558,7 @@ class SubmissionService {
             model.format = revision.format
             revision.comment = "Import of ${revision.name}".toString()
             Model newModel = modelService.uploadValidatedModel(repoFiles, revision)
-            Revision latest = modelService.getLatestRevision(newModel)
+            Revision latest = modelService.getLatestRevision(newModel, false)
             RTC latestRTC = latest.toCommandObject()
 
             final String NEW_NAME = workingMemory["new_name"]

@@ -178,7 +178,7 @@ class ModelService {
         while (true) {
             List<Model> models = getAllModels(offset, count)
             models.each {
-                searchEngine.updateIndex(getLatestRevision(it).toCommandObject())
+                searchEngine.updateIndex(getLatestRevision(it, false).toCommandObject())
             }
             if (models.size() < count) {
                 break
@@ -662,7 +662,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (!model) {
             throw new IllegalArgumentException("Model may not be null")
         }
-        if (!getLatestRevision(model)) {
+        if (!getLatestRevision(model, false)) {
             throw new AccessDeniedException("You are not allowed to view Model with id ${model.id}")
         }
         return model.publication
@@ -1503,7 +1503,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.retrieveModelFiles")
     List<RepositoryFileTransportCommand> retrieveModelFiles(final Model model) throws ModelException {
-        final Revision revision = getLatestRevision(model)
+        final Revision revision = getLatestRevision(model, false)
         if (!revision) {
             throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
         }
@@ -2110,7 +2110,7 @@ Model audit $audit has been updated in a separate thread:\n""")
         if (!model) {
             return null
         }
-        Revision revision = getLatestRevision(model)
+        Revision revision = getLatestRevision(model, false)
         if (!revision) {
             return null
         }

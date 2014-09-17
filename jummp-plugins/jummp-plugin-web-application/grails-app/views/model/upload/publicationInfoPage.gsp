@@ -41,6 +41,13 @@
         </title>
         <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'publicationPageStyle.css')}" />
         <g:javascript contextPath="" src="publicationSubmission.js"/>
+        <g:javascript>
+        	$( document ).ready(function() {
+        		$("#synopsis").width("94%");
+        		$("#affiliation").width("94%");
+        		$("#authorList").width("97%");
+			});
+        </g:javascript>
     </head>
     <body>
         <h2>Update Publication Information</h2>
@@ -107,7 +114,7 @@
                                 </label>
                             </td>
                             <td>
-                          	<g:textArea name="synopsis" rows="13" cols="32" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.synopsis}"/>
+                          	<g:textArea name="synopsis" id="synopsis" rows="13" cols="32" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.synopsis}"/>
                             </td>
                         </tr>
                         <tr>
@@ -117,7 +124,7 @@
                                 </label>
                             </td>
                             <td>
-                          	<g:textArea name="affiliation" rows="5" cols="32" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.affiliation}"/>
+                          	<g:textArea name="affiliation" id="affiliation" rows="5" cols="32" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.affiliation}"/>
                             </td>
                             <td>
                                 <label>
