@@ -380,7 +380,29 @@
 			tree.bind("loaded.jstree", function (event, data) {
 				tree.jstree("open_all");
 			});
-			$( "#download" ).button({
+			$('#confirm-model-publish').dialog({
+                resizable: false,
+                autoOpen: false,
+                height: 300,
+                modal: true,
+                buttons: {
+                    Confirm: function() {
+                        openPage("${g.createLink(controller: 'model', action: 'publish', id: revision.identifier() )}");
+                        $( this ).dialog( "close" );
+                    },
+                    Cancel: function() {
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
+            $("body").append("<div id='modelToolbar' class='collapsibleContainer' title='Model Toolbar'><button title='Expand Toolbar' data-showing='0' id='panelToggle'>Expand</button></div>	");
+            $("#buttonContainer").prependTo("#modelToolbar");
+            $("#panelToggle").click(function (evt){
+            		displayToolbar($("#panelToggle").data("showing") == '0', true);
+            });
+         	displayToolbar(false, false);
+            $("#modelToolbar").width("2%");
+            $( "#download" ).button({
 					text:false,
 					icons: {
 						primary:"ui-icon-arrowthickstop-1-s"
@@ -410,23 +432,39 @@
 						primary:"ui-icon-person"
 					}
 			});
-            $('#confirm-model-publish').dialog({
-                resizable: false,
-                autoOpen: false,
-                height: 300,
-                modal: true,
-                buttons: {
-                    Confirm: function() {
-                        openPage("${g.createLink(controller: 'model', action: 'publish', id: revision.identifier() )}");
-                        $( this ).dialog( "close" );
-                    },
-                    Cancel: function() {
-                        $( this ).dialog( "close" );
-                    }
-                }
-            });
+			$("#panelToggle").button({
+					text:false,
+					icons: {
+						primary: "ui-icon-circle-triangle-e"
+					}
+			});
 		});
 
+		function displayToolbar(show, firstTime) {
+			if (show) {
+					$("#panelToggle").data("showing", '1');
+            		$(".pagecontent").width("98%");
+	            	$(".pagecontent").css('margin-left', '7%');
+	            	$(".buttonLabel").show();
+	            	$("#modelToolbar").width("7%");
+	            	$( "#panelToggle" ).button("option", {
+			    			icons: { primary: "ui-icon-circle-triangle-w" }
+			    	});
+			}
+			else {
+					$("#panelToggle").data("showing", '0');
+            		$(".pagecontent").width("100%");
+	            	$(".pagecontent").css('margin-left', '2%');
+	            	$(".buttonLabel").hide();
+			    	$("#modelToolbar").width("2%");
+			    	if (firstTime) {
+			    		$( "#panelToggle" ).button("option", {
+			    			icons: { primary: "ui-icon-circle-triangle-e" }
+			    		});
+			    	}
+			}
+		}
+		
         function openPage(loc) {
             window.location.href = loc;
         }
@@ -434,7 +472,43 @@
     <g:layoutHead/>
     </head>
     <body>
-    	<g:if test="${revision.model.deleted}">
+    	<div id="buttonContainer" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>
+				<table><tr><td>
+				<button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}')">Download</button></td>
+				<td><div class="buttonLabel">Download</div></td></tr>
+				<g:if test="${canUpdate}">
+					<tr>
+					<td><button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Update</button></td>
+					<td><div class="buttonLabel">Update</div></td>
+					</tr>
+				</g:if>
+				<g:if test="${canDelete}">
+					<div id="dialog-confirm" title="Confirm Delete">
+						<p>Are you sure you want to delete the model?</p>
+					</div>
+					<tr>
+					<td><button id="delete" onclick='return $( "#dialog-confirm" ).dialog( "open" );'>Delete</button></td>
+					<td><div class="buttonLabel">Delete</div></td>
+					</tr>
+				</g:if>
+				<g:if test="${showPublishOption}">
+					<div id="confirm-model-publish" title="You are about to publish this model version">
+						<p>Make this version of the model visible to anyone without logging in?</p>
+					</div>
+					<tr>
+					<td><button id="publish" onclick="return $( '#confirm-model-publish' ).dialog( 'open' );">Publish</button></td>
+					<td><div class="buttonLabel">Publish</div></td>
+					</tr>
+				</g:if>
+				<g:if test="${canShare}">
+					<tr>
+					<td><button id="share" onclick="return openPage('${g.createLink(controller: 'model', action: 'share', id: revision.identifier())}')">Share</button></td>
+					<td><div class="buttonLabel">Share</div></td>
+					</tr>
+				</g:if>
+				</table>
+         </div>
+       	<g:if test="${revision.model.deleted}">
     		<div class='PermanentMessage'>
     			This is an archived model.
     		</div>
@@ -451,37 +525,14 @@
     		    <div style="float:left;width:75%;">
     				<h2>${revision.name}</h2>
     			</div>
-    	        <div style="float:right;margin-top:10px;">
-                    <div id="modeltoolbar" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>
-                            <button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}')">Download</button>
-                            <g:if test="${canUpdate}">
-                                <button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Update</button>
-                            </g:if>
-                            <g:if test="${canDelete}">
-                            	<div id="dialog-confirm" title="Confirm Delete">
-                            		<p>Are you sure you want to delete the model?</p>
-                            	</div>
-                                <button id="delete" onclick='return $( "#dialog-confirm" ).dialog( "open" );'>Delete</button>
-                            </g:if>
-                            <g:if test="${showPublishOption}">
-                                <div id="confirm-model-publish" title="You are about to publish this model version">
-                                    <p>Make this version of the model visible to anyone without logging in?</p>
-                                </div>
-                                <button id="publish" onclick="return $( '#confirm-model-publish' ).dialog( 'open' );">Publish</button>
-                            </g:if>
-                            <g:else>
-                            	<g:if test="${revision.state==ModelState.PUBLISHED}">
-                                	<img style="float:right;margin-top:0;" title="This version of the model is public" alt="public model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/unlock.png"/>
-                                </g:if>
-								<g:else>
-									<img style="float:right;margin-top:0;" title="This version of the model is unpublished" alt="unpublished model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/lock.png"/>
-								</g:else>                                
-                            </g:else>
-                            <g:if test="${canShare}">
-                                <button id="share" onclick="return openPage('${g.createLink(controller: 'model', action: 'share', id: revision.identifier())}')">Share</button>
-                            </g:if>
-                     </div>
-    	         </div>
+    			<div style="float:right;margin-top:10px;">
+    				<g:if test="${revision.state==ModelState.PUBLISHED}">
+						<img style="float:right;margin-top:0;" title="This version of the model is public" alt="public model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/unlock.png"/>
+					</g:if>
+					<g:else>
+						<img style="float:right;margin-top:0;" title="This version of the model is unpublished" alt="unpublished model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/lock.png"/>
+					</g:else>                                
+				</div>
    
     	        <%--        <a class="submit" title="Update Model" href="${g.createLink(controller: 'model', action: 'update', id: (revision.model.publicationId) ?: (revision.model.submissionId))}">Update</a>
         	<a class="submit" title="Download Model" href="${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}">Download</a>

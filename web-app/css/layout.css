@@ -5,13 +5,8 @@
 #helpbutton { 
 		 height: 40px; 
 		 position: fixed;
-		 margin-left: -40px;
-		 top: 40%; 
-		 transform: rotate(-90deg);
-		 -webkit-transform: rotate(-90deg); 
-		 -moz-transform: rotate(-90deg); 
-		 -o-transform: rotate(-90deg); 
-		 filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+		 margin-left: 85%;
+		 top: 87%; 
 }
 #helpPanel {
 	height:600px;
@@ -63,3 +58,17 @@ border: 0px solid #ffffff;
 .ui-widget a:visited {color: #008000; text-decoration: underline; !important}
 .ui-widget a:hover {color: #ff0000; text-decoration: none; !important}
 .required:after { content:" *"; }
+
+#modelToolbar { 
+		 min-height: 70%; 
+		 position: fixed;
+		 top: 16%;
+		 width:10%;
+}
+.collapsibleContainerContent {
+	border-right: thick double #ff0000;
+	height: 100%
+}
+#helpPanel {
+	height:600px;
+}

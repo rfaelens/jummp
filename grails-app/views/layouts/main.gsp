@@ -45,6 +45,38 @@
     		mode: "map"
     	});
     	var helpHidden=1;
+    	
+    	(function($) {
+    		$.fn.extend({
+    			collapsiblePanel: function() {
+    			// Call the ConfigureCollapsiblePanel function for the selected element
+    			return $(this).each(ConfigureCollapsiblePanel);
+    			}
+    	});
+    	})(jQuery);
+    	
+    	function ConfigureCollapsiblePanel() {
+    		// Wrap the contents of the container within a new div.
+    		$(this).children().wrapAll("<div class='collapsibleContainerContent'></div>");
+    		// Create a new div as the first item within the container.  Put the title of the panel in here.
+    		$("<div class='collapsibleContainerTitle ui-widget-header'><div>" + $(this).attr("title") + "</div></div>").prependTo($(this));
+    		// Assign a call to CollapsibleContainerTitleOnClick for the click event of the new title div.
+    		$(".collapsibleContainerTitle", this).click(CollapsibleContainerTitleOnClick);
+    	}
+
+    	function CollapsibleContainerTitleOnClick() {
+    		// Set the effect type
+    		var effect = 'slide';
+
+    		// Set the options for the effect type chosen
+    		var options = { direction: 'left' };
+
+    		// Set the duration (default: 400 milliseconds)
+    		var duration = 500;	
+    		// The item clicked is the title div... get this parent (the overall container) and toggle the content within it.
+    		$(".collapsibleContainerContent", $(this).parent()).toggle(effect, options, duration);
+    	}
+    	
     	<g:if test="${contextHelpLocation}">
     	var helpWidth=-1;
     	var maxWidth=-1;
@@ -69,6 +101,7 @@
     			helpWidth=newWidth;
     		}
     	}
+    	
     	
     	function hideHelp() {
 	    	adjustWidth(0);

@@ -33,7 +33,7 @@
   		sidebarContent=sidebarContent.trim()
   	}
 %>
-<div id="content" role="main" class="grid_24 clearfix">
+<div id="content" role="main" class="grid_24 clearfix pagecontent">
 	
 	<g:if test="${sidebarContent}">
 		<section class="grid_18 alpha"> 
