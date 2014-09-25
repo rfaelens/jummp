@@ -485,7 +485,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     String renderInitialConditions(Map conditions) {
         def result = []
         conditions.keySet().each { c ->
-        	result.add convertToMathML(c, conditions[c].initialValue?.assign)
+            result.add convertToMathML(c, conditions[c].initialValue?.assign)
         }
         return groovyPageRenderer.render(template: "/templates/0.2/initialConditions",
                     model: [conditions: result])
