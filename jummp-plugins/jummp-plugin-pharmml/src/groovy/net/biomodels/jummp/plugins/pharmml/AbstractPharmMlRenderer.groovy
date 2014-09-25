@@ -727,8 +727,6 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         }
         if (r.scalar) {
             return text.append(scalar(r.scalar.value))
-        } else {
-            return text.append(r.toString())
         }
     }
 
