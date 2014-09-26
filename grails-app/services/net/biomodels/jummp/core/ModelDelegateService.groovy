@@ -328,6 +328,7 @@ class ModelDelegateService implements IModelService {
             }
         } catch (AccessDeniedException e) {
             log.warn "Unauthorised attempt to access model $MODEL version $REVISION."
+            throw e;
         }
         return REV
     }
