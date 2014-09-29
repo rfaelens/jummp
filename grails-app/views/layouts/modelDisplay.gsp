@@ -330,6 +330,7 @@
 							dataType: "text",
 							success : function (data) {
 								$("#filegoeshere").text(data);
+								$("#filegoeshere").html($("#filegoeshere").html().replace(/(\r\n|\n|\r)/gm,'<br/>'));
 								addPreviewNotification(fileProps.showPreview, fileProps);
 								$("#Files").equalize({reset: true});
 							}
