@@ -332,7 +332,7 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
         result.append("<span class=\"bold\">Parameters </span>")
         try {
             parameterModel.each { pm ->
-                result.append("<div class='spaced'>")
+                result.append("<div class='spaced-top-bottom'>")
                 def simpleParameters = pm.commonParameterElement.value.findAll {
                        it instanceof SimpleParameterType
                 }

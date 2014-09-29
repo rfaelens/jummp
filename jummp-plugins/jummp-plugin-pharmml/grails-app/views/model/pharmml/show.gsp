@@ -33,9 +33,6 @@
         .bold {
             font-weight: bold;
         }
-        .spaced {
-            padding: 10px 0px;
-        }
         .italic {
             font-style: italic;
         }

@@ -181,7 +181,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         if (!parameters) {
             return output
         }
-        output.append "<div class='spaced'>"
+        output.append "<div class='spaced-top-bottom'>"
         try {
             parameters.each { p ->
                 if (p.assign) {
@@ -305,7 +305,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 }
             }
         } catch(Exception e) {
-            output = new StringBuilder("<div class='spaced'>")
+            output = new StringBuilder("<div class='spaced-top-bottom'>")
             output.append("Cannot display individual parameters.")
             log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}")
         }
@@ -367,7 +367,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         rhsEquation = new Equation()
         rhsEquation.scalarOrSymbRefOrBinop.add(wrapJaxb(sum))
         if (lhs && rhsEquation) {
-            result.append("<div class='spaced'>")
+            result.append("<div class='spaced-top-bottom'>")
             return result.append(convertToMathML(lhs, rhsEquation)).append("</div>")
         } else {
             return result
@@ -392,7 +392,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         if (!parameters) {
             return outcome
         }
-        outcome.append("<div class='spaced'>")
+        outcome.append("<div class='spaced-top-bottom'>")
         try {
             parameters.inject(outcome) { o, p ->
                 String thisParam
@@ -1233,7 +1233,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             return
         }
 
-        output.append("<div class='spaced'>")
+        output.append("<div class='spaced-top-bottom'>")
         output.append("<span class='bold'>").append(TYPE)
         output.append(" matrix for level <span class='italic'>")
         output.append(LVL).append("</span> and random effects: ")

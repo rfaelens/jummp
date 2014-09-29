@@ -334,7 +334,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
         result.append("<span class=\"bold\">Parameters </span>")
         try {
             parameterModel.each { pm ->
-                result.append("<div class='spaced'>")
+                result.append("<div class='spaced-top-bottom'>")
                 def simpleParameters = pm.commonParameterElement.value.findAll {
                        it instanceof SimpleParameterType
                 }
@@ -892,7 +892,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     /* EquationType no longer has scalarOrSymbRefOrBinop list, just one element*/
     @Override
     protected StringBuilder gaussianObsErr(GaussianObsError e) {
-        def result = new StringBuilder("<div class='spaced'>")
+        def result = new StringBuilder("<div class='spaced-top-bottom'>")
 
         // could be an Equation or just a String
         def lhs
@@ -962,7 +962,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     protected StringBuilder individualParams(List<IndividualParameterType> parameters,
                 List<ParameterRandomVariableType> rv, List<CovariateDefinitionType> covariates,
                 Map<String, Equation> transfMap) {
-        def output = new StringBuilder("<div class='spaced'>")
+        def output = new StringBuilder("<div class='spaced-top-bottom'>")
         try {
             parameters.each { p ->
                 if (p.assign) {
@@ -1110,7 +1110,7 @@ Individual parameter ${p.symbId} is missing mandatory Transformation element."""
                 }
             }
         } catch(Exception e) {
-            output = new StringBuilder("<div class='spaced'>")
+            output = new StringBuilder("<div class='spaced-top-bottom'>")
             output.append("Cannot display individual parameters.")
             log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}")
         }
