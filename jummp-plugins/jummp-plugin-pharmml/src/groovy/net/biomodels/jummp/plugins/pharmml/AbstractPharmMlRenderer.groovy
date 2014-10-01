@@ -727,8 +727,6 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         }
         if (r.scalar) {
             return text.append(scalar(r.scalar.value))
-        } else {
-            return text.append(r.toString())
         }
     }
 
@@ -1189,11 +1187,9 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         builder.append(op("="))
         if (rhs.getScalar()) {
             builder.append(oprand(scalar(rhs.scalar.value)))
-        }
-        else if (rhs.getSequence()) {
+        } else if (rhs.getSequence()) {
             builder.append(sequenceAsMathML(rhs.sequence))
-        }
-        else if (rhs.getVector()) {
+        } else if (rhs.getVector()) {
             builder.append(vectorAsMathML(rhs))
         }
         builder.append("</mstyle></math>")
