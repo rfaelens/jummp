@@ -134,35 +134,6 @@
 				var fields=lines[line].split(",");
 				data.push(fields);
 			}
-			/*
-			for (var line in lines) {
-				if (line==0) {
-					content.push("<thead>");
-				}
-				content.push("<tr>");
-				var fields=lines[line].split(",");
-				for (var field in fields) {
-					if (line==0) {
-						content.push("<th class='padleft padright'>");
-					}
-					else {
-						content.push("<td class='padleft padright'>");
-					}
-					content.push(fields[field]);
-					if (line==0) {
-						content.push("</th>");
-					}
-					else {
-						content.push("</td>");
-					}
-				}
-				content.push("</tr>");
-				if (line==0) {
-					content.push("</thead>");
-				}
-			}
-			content.push("</table>");
-			return content.join("");*/
 			return data;
 		}
 		
@@ -524,7 +495,7 @@
     	</g:if>
     	<div id="topBar">
     		    <div style="float:left;width:75%;">
-    				<h2>${revision.name}</h2>
+    				<h1>${revision.name}</h1>
     			</div>
     			<div style="float:right;margin-top:10px;">
     				<g:if test="${revision.state==ModelState.PUBLISHED}">
