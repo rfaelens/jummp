@@ -5,8 +5,8 @@
 #helpbutton { 
 		 height: 40px; 
 		 position: fixed;
-		 margin-left: 85%;
-		 top: 87%; 
+		 right:0;
+		 top: 95%; 
 }
 #helpPanel {
 	height:600px;
@@ -60,11 +60,26 @@ border: 0px solid #ffffff;
 .required:after { content:" *"; }
 
 #modelToolbar { 
-		 min-height: 70%; 
-		 position: fixed;
-		 top: 16%;
-		 width:10%;
+	box-sizing: border-box;
+	border-right-width-value: 1px;
+	border-right-style-value: solid;
+	border-right-color-value: #cccccc;
+	background-color: #f5f5f5;
+	position: fixed;
+	top: 20%;
+	bottom: auto;
 }
+#toolbarList {
+	padding:0; 
+	margin:0; 
+	text-align: center;
+}
+#toolbarList li { 
+    list-style-type:none;
+    -webkit-column-break-inside: avoid;
+    break-inside: avoid-column;
+    text-align: center;
+} 
 .collapsibleContainerContent {
 	border-right: thick double #ff0000;
 	height: 100%
