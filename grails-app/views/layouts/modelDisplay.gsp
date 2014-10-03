@@ -62,6 +62,12 @@
         <g:javascript src="syntax/shBrushMdl.js"/>
         <g:javascript src="syntax/shBrushXml.js"/>
         <g:javascript src="jquery.handsontable.full.js"></g:javascript>
+        <style>
+        	/* Only relevant here therefore not externalised */
+        	.ui-icon {
+        		zoom: 1.5;
+        	}
+        </style>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jquery.handsontable.full.min.css')}"></link>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'filegrid.css')}" /> 
@@ -372,68 +378,71 @@
             $("#panelToggle").click(function (evt){
             		displayToolbar($("#panelToggle").data("showing") == '0', true);
             });
-         	displayToolbar(false, false);
-            $("#modelToolbar").width("2%");
-            $( "#download" ).button({
+         	$( "#download" ).button({
 					text:false,
 					icons: {
 						primary:"ui-icon-arrowthickstop-1-s"
 					}
-			});
+			}).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
 			$( "#update" ).button({
 					text:false,
 					icons: {
 						primary:"ui-icon-refresh"
 					}
-			});
+			}).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
 			$( "#delete" ).button({
 					text:false,
 					icons: {
 						primary:"ui-icon-trash"
 					}
-			});
+			}).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
 			$( "#publish" ).button({
 					text:false,
 					icons: {
 						primary:"ui-icon-unlocked"
 					}
-			});
+			}).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
 			$( "#share" ).button({
 					text:false,
 					icons: {
 						primary:"ui-icon-person"
 					}
-			});
+			}).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
 			$("#panelToggle").button({
 					text:false,
 					icons: {
-						primary: "ui-icon-circle-triangle-e"
+						primary: "ui-icon-circle-arrow-e"
 					}
-			});
+			}).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px', 'float':'right'  });;
 		});
-
+		displayToolbar(false, false);
+            
 		function displayToolbar(show, firstTime) {
 			if (show) {
 					$("#panelToggle").data("showing", '1');
-            		$(".pagecontent").width("98%");
-	            	$(".pagecontent").css('margin-left', '7%');
+            		$(".pagecontent").width("95%");
+	            	$(".pagecontent").css('margin-left', '80px');
 	            	$(".buttonLabel").show();
-	            	$("#modelToolbar").width("7%");
+	            	$("#modelToolbar").width("120px");
 	            	$( "#panelToggle" ).button("option", {
-			    			icons: { primary: "ui-icon-circle-triangle-w" }
+			    			icons: { primary: "ui-icon-circle-arrow-w" }
 			    	});
+			    	$( ".toolbutton" ).button("option", "text", true);
+			    	$( ".toolbutton" ).css({ width: '120px', 'padding-top': '10px', 'padding-bottom': '10px' });
 			}
 			else {
 					$("#panelToggle").data("showing", '0');
             		$(".pagecontent").width("100%");
-	            	$(".pagecontent").css('margin-left', '2%');
+	            	$(".pagecontent").css('margin-left', '5px');
 	            	$(".buttonLabel").hide();
-			    	$("#modelToolbar").width("2%");
+			    	$("#modelToolbar").width("45px");
+			    	$( ".toolbutton" ).button("option", "text", false);
 			    	if (firstTime) {
 			    		$( "#panelToggle" ).button("option", {
-			    			icons: { primary: "ui-icon-circle-triangle-e" }
+			    			icons: { primary: "ui-icon-circle-arrow-e" }
 			    		});
 			    	}
+			    	$( ".toolbutton" ).css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });
 			}
 		}
 		
@@ -445,40 +454,35 @@
     </head>
     <body>
     	<div id="buttonContainer" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>
-				<table><tr><td>
-				<button id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}')">Download</button></td>
-				<td><div class="buttonLabel">Download</div></td></tr>
+				<ul id='toolbarList'><li>
+    			<button class='toolbutton' id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}')">Download</button>
 				<g:if test="${canUpdate}">
-					<tr>
-					<td><button id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Update</button></td>
-					<td><div class="buttonLabel">Update</div></td>
-					</tr>
+					<li>
+					<button class='toolbutton' id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Update</button>
+					</li>
 				</g:if>
 				<g:if test="${canDelete}">
 					<div id="dialog-confirm" title="Confirm Delete">
 						<p>Are you sure you want to delete the model?</p>
 					</div>
-					<tr>
-					<td><button id="delete" onclick='return $( "#dialog-confirm" ).dialog( "open" );'>Delete</button></td>
-					<td><div class="buttonLabel">Delete</div></td>
-					</tr>
+					<li>
+					<button class='toolbutton' id="delete" onclick='return $( "#dialog-confirm" ).dialog( "open" );'>Delete</button>
+					</li>
 				</g:if>
 				<g:if test="${showPublishOption}">
 					<div id="confirm-model-publish" title="You are about to publish this model version">
 						<p>Make this version of the model visible to anyone without logging in?</p>
 					</div>
-					<tr>
-					<td><button id="publish" onclick="return $( '#confirm-model-publish' ).dialog( 'open' );">Publish</button></td>
-					<td><div class="buttonLabel">Publish</div></td>
-					</tr>
+					<li>
+					<button class='toolbutton' id="publish" onclick="return $( '#confirm-model-publish' ).dialog( 'open' );">Publish</button>
+					</li>
 				</g:if>
 				<g:if test="${canShare}">
-					<tr>
-					<td><button id="share" onclick="return openPage('${g.createLink(controller: 'model', action: 'share', id: revision.identifier())}')">Share</button></td>
-					<td><div class="buttonLabel">Share</div></td>
-					</tr>
+					<li>
+					<button class='toolbutton' id="share" onclick="return openPage('${g.createLink(controller: 'model', action: 'share', id: revision.identifier())}')">Share</button>
+					</li>
 				</g:if>
-				</table>
+				</ul>
          </div>
        	<g:if test="${revision.model.deleted}">
     		<div class='PermanentMessage'>
