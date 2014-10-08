@@ -37,18 +37,17 @@
 
 package net.biomodels.jummp.plugins.sbml
 
-import net.biomodels.jummp.core.ISbmlService
-import net.biomodels.jummp.core.model.FileFormatService
-import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
-import net.biomodels.jummp.plugins.sbml.SbmlCache
 import com.thoughtworks.xstream.converters.ConversionException
-
 import grails.util.Environment
 import java.util.regex.Pattern
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamException
 import javax.xml.stream.XMLStreamReader
+import net.biomodels.jummp.core.ISbmlService
+import net.biomodels.jummp.core.model.FileFormatService
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.plugins.sbml.SbmlCache
 import org.apache.commons.io.FileUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
