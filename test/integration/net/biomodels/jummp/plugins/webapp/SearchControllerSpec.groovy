@@ -53,10 +53,12 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 import grails.test.mixin.TestFor
 import grails.test.spock.IntegrationSpec
+import spock.lang.Ignore
 import spock.lang.FailsWith
 import spock.lang.Shared
 
 @TestFor(SearchController)
+@Ignore
 class SearchControllerSpec extends IntegrationSpec {
     def modelService
     def grailsApplication

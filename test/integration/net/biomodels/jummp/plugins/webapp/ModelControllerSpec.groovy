@@ -58,6 +58,7 @@ import spock.lang.*
 
 @TestMixin(IntegrationTestMixin)
 @TestFor(ModelController)
+@Ignore
 class ModelControllerSpec extends Specification {
     def modelService
     @Shared def grailsApplication = H.grailsApplication
