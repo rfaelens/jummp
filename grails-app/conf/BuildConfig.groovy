@@ -214,12 +214,12 @@ grails.plugin.location.'jummp-plugin-combine-archive' = "jummp-plugins/jummp-plu
 grails.plugin.location.'jummp-plugin-pharmml' = "jummp-plugins/jummp-plugin-pharmml"
 grails.plugin.location.'jummp-plugin-mdl' = "jummp-plugins/jummp-plugin-mdl"
 grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
-//grails.plugin.location.'jummp-plugin-search' = "jummp-plugins/jummp-plugin-search"
 grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plugin-simple-logging"
 grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"
 //grails.plugin.location.'jummp-plugin-jms-remote' = "jummp-plugins/jummp-plugin-jms-remote"
 if ("jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
     println "Enabling JMS remoting..."
+    grails.plugin.location.'jummp-plugin-ast' = 'jummp-plugins/jummp-plugin-ast'
     grails.plugin.location.'jummp-plugin-remote' = "jummp-plugins/jummp-plugin-remote"
     grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
 } else {
