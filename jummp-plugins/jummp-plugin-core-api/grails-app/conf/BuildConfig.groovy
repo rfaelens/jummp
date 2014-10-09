@@ -81,7 +81,7 @@ grails.project.dependency.resolution = {
         compile "xml-apis:xml-apis:1.4.01"
 
         // plugin dependencies
-        compile("eu.ddmore.pharmml:libPharmML:0.1-SNAPSHOT") {
+        compile("eu.ddmore.pharmml:libPharmML:0.3.2-b3") {
             excludes 'junit-dep'
         }
     }
