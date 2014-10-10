@@ -31,7 +31,6 @@ grails.project.work.dir = "target/work"
 grails.project.groupId = "net.biomodels.jummp.plugins.git"
 grails.project.source.level = 1.7
 grails.project.target.level = 1.7
-// maven can't handle flatDirs, would break sbml and bives
 grails.project.dependency.resolver = "maven"
 
 grails.project.fork = [
@@ -71,9 +70,6 @@ grails.project.dependency.resolution = {
         //flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-
-        // runtime 'mysql:mysql-connector-java:5.1.5'
         compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
     }
     plugins {

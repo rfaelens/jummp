@@ -44,7 +44,6 @@ grails.project.fork = [
 ]
 
 
-// maven can't handle flatDirs, would break sbml and bives
 grails.project.dependency.resolver = "maven"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
@@ -79,10 +78,8 @@ grails.project.dependency.resolution = {
         compile ":spring-security-core:1.2.7.3"
         compile ":perf4j:0.1.1"
 
-        // default grails plugins
         compile ":hibernate:3.6.10.3"
         compile ":jquery:1.10.0"
-        //compile ":resources:1.0.2"
 
         build ":tomcat:7.0.50"
     }

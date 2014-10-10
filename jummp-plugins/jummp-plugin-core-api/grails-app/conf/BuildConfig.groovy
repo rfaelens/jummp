@@ -69,12 +69,8 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
-        //flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-
-        // runtime 'mysql:mysql-connector-java:5.1.5'
         // perf4j dependency
         compile "org.perf4j:perf4j:0.9.13"
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
@@ -88,10 +84,8 @@ grails.project.dependency.resolution = {
     plugins {
         compile ":spring-security-core:1.2.7.3"
 
-        // default grails plugins
         compile ":hibernate:3.6.10.3"
         compile ":jquery:1.10.0"
-        //compile ":resources:1.0.2"
 
         build ":tomcat:7.0.50"
     }

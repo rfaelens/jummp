@@ -31,7 +31,6 @@ grails.project.work.dir = "target/work"
 grails.project.groupId = "net.biomodels.jummp.plugins.simplelogging"
 grails.project.source.level = 1.7
 grails.project.target.level = 1.7
-// maven can't handle flatDirs, would break sbml and bives
 grails.project.dependency.resolver = "maven"
 
 grails.project.fork = [
@@ -75,10 +74,8 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.13'
     }
     plugins {
-        // default grails plugins
         compile ":hibernate:3.6.10.3"
         compile ":jquery:1.10.0"
-        //compile ":resources:1.0.2"
 
         build ":tomcat:7.0.50"
     }

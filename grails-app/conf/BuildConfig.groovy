@@ -31,7 +31,6 @@ grails.project.war.file = "target/${appName}.war"
 grails.project.groupId = "net.biomodels.jummp"
 grails.project.source.level = 1.7
 grails.project.target.level = 1.7
-// maven can't handle flatDirs, would break sbml and bives
 grails.project.dependency.resolver = "maven"
 
 customJvmArgs = ["-server", "-noverify", "-XX:+UseConcMarkSweepGC", "-XX:+UseParNewGC" ]
@@ -80,16 +79,11 @@ grails.project.dependency.resolution = {
         mavenRepo "http://www.biojava.org/download/maven/"
     }
     dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-
-        // runtime 'mysql:mysql-connector-java:5.1.5'
         // required by OntologyLookupResolver
         compile "org.ccil.cowan.tagsoup:tagsoup:1.2"
         compile "com.googlecode.multithreadedtc:multithreadedtc:1.01"
         runtime 'mysql:mysql-connector-java:5.1.17'
         runtime "postgresql:postgresql:9.1-901.jdbc4"
-        // plugin dependencies
-        // dependencies of plugins
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
         //compile ('org.apache.lucene:lucene-core:4.4.0')
@@ -163,8 +157,6 @@ grails.project.dependency.resolution = {
         compile ":simple-captcha:0.9.4"
         //compile ":quartz:0.4.2"
         compile(":quartz:1.0-RC6") { excludes 'hibernate-core' /* don't need 3.6.10.Final */ }
-        // to see the status of quartz jobs
-        //compile(":quartz-monitor:0.2") { export = false } //requires quartz plugin version 0.4.2 
 
         compile ":spring-security-acl:1.1.1"
         //compile ":svn:1.0.2"
