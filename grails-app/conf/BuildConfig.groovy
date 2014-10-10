@@ -132,9 +132,6 @@ grails.project.dependency.resolution = {
                       'ant',
                       'log4j'
         }
-        //weceem, feeds
-        runtime("rome:rome:1.0RC2") { excludes 'junit', 'jdom' }
-        compile 'org.apache.ant:ant:1.9.4'
 
         // cobertura
         compile "asm:asm:3.1"
@@ -165,29 +162,16 @@ grails.project.dependency.resolution = {
         test ":code-coverage:1.2.6"
         compile(":codenarc:0.20")
         test ":gmetrics:0.3.1"
-        runtime(":weceem:1.1.3-SNAPSHOT") {
-            excludes 'xstream',
-                     'quartz',
-                     'jquery',
-                     'jquery-ui',
-                     'ant',     // 1.7 is too old
-                     //also exclude java feeds API rome in order to avoid conflicting revisions
-                     'feeds',
-                     'ckeditor',
-                     'searchable' // 0.6.5+ needed for Grails 2.3
-        }
-        compile(":searchable:0.6.6")
-        runtime(":feeds:1.6") { excludes 'rome', 'jdom' }
-        runtime(":ckeditor:3.6.3.0") { excludes 'svn' }
         compile ":jquery-datatables:1.7.5"
-        compile ":jquery-ui:1.8.24"
         // Locale plugin
         compile ":locale-variant:0.1"
+        runtime ":weceem:1.2"
+        runtime ":jquery-ui:1.10.4"
         runtime ":database-migration:1.3.8"
         // default grails plugins
         compile ":hibernate:3.6.10.6"
         compile ":webflow:2.0.8.1"
-        compile ":jquery:1.10.2.2"
+        runtime ":jquery:1.11.1"
         //compile ":resources:1.2"
 
         build ":tomcat:7.0.50"
