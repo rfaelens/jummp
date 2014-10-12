@@ -70,9 +70,8 @@ grails.project.dependency.resolution = {
         //flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-
-        // runtime 'mysql:mysql-connector-java:5.1.13'
+        // maven does not pick up the jar from target/work/plugins/perf4j-*/lib
+        compile 'org.perf4j:perf4j:0.9.12'
     }
     plugins {
         build ":tomcat:7.0.50"
