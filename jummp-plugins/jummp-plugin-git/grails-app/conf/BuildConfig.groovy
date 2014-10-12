@@ -73,17 +73,7 @@ grails.project.dependency.resolution = {
         compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
     }
     plugins {
-        compile ":spring-security-core:1.2.7.3"
-        test ":code-coverage:1.2.5"
-
-        // default grails plugins
-        compile ":hibernate:3.6.10.3"
-        compile ":jquery:1.10.0"
-        //compile ":resources:1.0.2"
-
         build ":tomcat:7.0.50"
     }
 }
-grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"
-grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"
 grails.plugin.location.'jummp-plugin-configuration'="../jummp-plugin-configuration"
