@@ -133,8 +133,6 @@ grails.project.dependency.resolution = {
                       'log4j'
         }
 
-        // cobertura
-        compile "asm:asm:3.1"
         compile "log4j:log4j:1.2.16"
         compile "com.thoughtworks.xstream:xstream:1.4.3"
 
@@ -160,7 +158,6 @@ grails.project.dependency.resolution = {
         compile ":spring-security-core:1.2.7.3"
         compile ":spring-security-ldap:1.0.6"
         test ":code-coverage:1.2.6"
-        compile(":codenarc:0.20")
         test ":gmetrics:0.3.1"
         compile ":jquery-datatables:1.7.5"
         // Locale plugin
@@ -205,26 +202,6 @@ if ("jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
 // Remove any files not needed in production mode
 grails.war.resources = { stagingDir ->
 }
-
-codenarc.reports = {
-    CodeNarcXmlReport('xml') {
-        outputFile = 'target/CodeNarc-Report.xml'
-        title = "JUMMP CodeNarc Report"
-    }
-    CodeNarcHtmlReport('html') {
-        outputFile = 'target/CodeNarc-Report.html'
-        title = "JUMMP CodeNarc Report"
-    }
-}
-codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
-                             'jummp-plugins/*/grails-app/controllers',
-                             'jummp-plugins/*/grails-app/domain',
-                             'jummp-plugins/*/grails-app/services',
-                             'jummp-plugins/*/grails-app/taglib',
-                             'jummp-plugins/*/grails-app/utils',
-                             'jummp-plugins/*/test/unit',
-                             'jummp-plugins/*/test/integration']
-
 
 //ensure that AST.jar is put in the right place. See scripts/AST.groovy
 System.setProperty("jummp.basePath", new File("./").getAbsolutePath())
