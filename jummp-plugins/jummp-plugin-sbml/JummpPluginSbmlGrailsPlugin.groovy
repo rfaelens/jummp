@@ -42,7 +42,7 @@ class JummpPluginSbmlGrailsPlugin {
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.6 > *"
     // the other plugins this plugin depends on
-    def loadAfter = ["jummp-plugin-core-api"]
+    def loadAfter = ["jummp-plugin-configuration"]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"
@@ -73,6 +73,7 @@ Brief description of the plugin.
             }
             props.load(new FileInputStream(pathToConfig))
         } catch (Exception ignored) {
+            println "Exception occured while loading properties: $ignored.message"
         }
         def jummpConfig = new ConfigSlurper().parse(props)
  /*
