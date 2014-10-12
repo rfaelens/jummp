@@ -74,18 +74,11 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
         compile "de.unirostock.sems:BiVeS:1.1-SNAPSHOT"
-        // broken Grails 2.3.2 dependecy
-        compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core' }
     }
     plugins {
-        compile ":perf4j:0.1.1"
-        compile ":spring-security-core:1.2.7.3"
-        // default grails plugins
-        compile ":hibernate:3.6.10.3"
-        compile ":jquery:1.10.0"
-        //compile ":resources:1.0.2"
-
         build ":tomcat:7.0.50"
+
+        compile ":perf4j:0.1.1"
     }
 }
 grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"
