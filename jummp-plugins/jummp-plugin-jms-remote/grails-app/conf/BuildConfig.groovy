@@ -97,14 +97,14 @@ grails.project.dependency.resolution = {
 
     }
     plugins {
+        build ":tomcat:7.0.50"
+
         compile ":spring-security-core:1.2.7.3"
         compile ":perf4j:0.1.1"
         compile ":jms:1.2"
 
-        compile ":hibernate:3.6.10.3"
-        compile ":jquery:1.10.0"
-
-        build ":tomcat:7.0.50"
+        runtime ":hibernate:3.6.10.7"
+        runtime ":jquery:1.11.1"
     }
 }
 grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"
