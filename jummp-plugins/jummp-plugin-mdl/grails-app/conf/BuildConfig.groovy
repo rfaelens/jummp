@@ -57,10 +57,7 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        build(":release:3.0.1",
-              ":rest-client-builder:1.0.3") {
-            export = false
-        }
+        build ":tomcat:7.0.50"
     }
 }
 grails.plugin.location.'jummp-plugin-security' = "../jummp-plugin-security"
