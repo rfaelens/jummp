@@ -91,13 +91,6 @@ grails.project.dependency.resolution = {
         //compile ('org.apache.lucene:lucene-queryparser:4.4.0')
         //compile ('org.apache.lucene:lucene-misc:4.4.0')
 
-        compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") {
-            excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4', 'xercesImpl'
-        }
-
-        // bives
-        //runtime('org.apache.commons:commons-compress:1.1') { excludes 'commons-io' }
-
         /* jms
         runtime('org.apache.activemq:activeio-core:3.1.2',
                 'org.apache.activemq:activemq-core:5.5.0',
@@ -123,55 +116,34 @@ grails.project.dependency.resolution = {
         compile "org.jdom:jdom:1.1.3"
 
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
-
-        //git
-        runtime 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
-
-        compile("net.sourceforge.cobertura:cobertura:1.9.4.1") { 
-            excludes 'asm',
-                      'ant',
-                      'log4j'
-        }
-
-        compile "log4j:log4j:1.2.16"
-        compile "com.thoughtworks.xstream:xstream:1.4.3"
-
-        compile "org.apache.tika:tika-core:1.3"
-
-        // broken Grails 2.3.2 dependecies
-        compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core', 'junit-dep' }
-        compile "org.springframework:spring-test:3.2.4.RELEASE"
     }
 
     plugins {
+        build ":tomcat:7.0.50"
+
+        provided(":codenarc:0.21")
+
         compile ":webxml:1.4.1"
         compile ":perf4j:0.1.1"
         //compile ":jms:1.2"
         compile ":executor:0.3"
-        compile(":mail:1.0.1") { excludes 'spring-test' }
-        compile ":simple-captcha:0.9.4"
-        //compile ":quartz:0.4.2"
-        compile(":quartz:1.0-RC6") { excludes 'hibernate-core' /* don't need 3.6.10.Final */ }
-
+        compile(":mail:1.0.7")
+        compile ":simple-captcha:1.0.0"
+        compile(":quartz:1.0.2")
         compile ":spring-security-acl:1.1.1"
-        //compile ":svn:1.0.2"
         compile ":spring-security-core:1.2.7.3"
         compile ":spring-security-ldap:1.0.6"
-        test ":code-coverage:1.2.6"
-        test ":gmetrics:0.3.1"
-        compile ":jquery-datatables:1.7.5"
-        // Locale plugin
+        //compile ":svn:1.0.2"
         compile ":locale-variant:0.1"
-        runtime ":weceem:1.2"
-        runtime ":jquery-ui:1.10.4"
-        runtime ":database-migration:1.3.8"
-        // default grails plugins
-        compile ":hibernate:3.6.10.6"
         compile ":webflow:2.0.8.1"
-        runtime ":jquery:1.11.1"
-        //compile ":resources:1.2"
 
-        build ":tomcat:7.0.50"
+        runtime ":database-migration:1.3.8"
+        runtime ":hibernate:3.6.10.7"
+        runtime ":jquery:1.11.1"
+        runtime ":jquery-datatables:1.7.5"
+        runtime ":jquery-ui:1.10.4"
+
+        test ":gmetrics:0.3.1"
 
     }
 }
