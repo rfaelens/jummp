@@ -75,15 +75,9 @@ grails.project.dependency.resolution = {
         // plugin dependencies
     }
     plugins {
-        compile ":spring-security-core:1.2.7.3"
-        compile ":webflow:2.0.8.1"
-        test ":code-coverage:1.2.5"
-
-        compile ":hibernate:3.6.10.3"
-        compile ":jquery:1.10.0"
-
         build ":tomcat:7.0.50"
+
+        compile ":webflow:2.0.8.1"
     }
 }
-grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"
 grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"
