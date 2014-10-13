@@ -95,7 +95,7 @@ Team = Backbone.View.extend({
 // create a view.
 teamMembers = new Team({collection: collaborators});
 // add a new collaborator by pressing the return key (magic code 13) or by the add button
-function startTeams(teamsUrl, successUrl) {
+function startTeams(teamsUrl, successUrl, existing) {
 	$('#nameSearch').keypress(function(e) {
         if (e.which == RETURN_KEY && $('#nameSearch').val().trim()) {
         	addCollab(e);
@@ -106,7 +106,7 @@ function startTeams(teamsUrl, successUrl) {
         	addCollab(e);
         }
     });
-    $('#create').click(function(e) {
+    $('.submitButton').click(function(e) {
     		e.preventDefault();
     		var teamData = {};
     		teamData['name']=$("#teamName").val();
@@ -120,6 +120,13 @@ function startTeams(teamsUrl, successUrl) {
                 	showNotification(returnedData);
                 }
             });
+    });
+    console.log(existing);
+    _.each(existing, function(collab) {
+        if (collab.write) {
+            collab.read=true;
+        }
+        collaborators.add(collab);
     });
     teamMembers.render();
 }

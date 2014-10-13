@@ -26,19 +26,20 @@
         <g:render template="teamTemplate"/>
    </head>
     <body>
-        <g:render template="teamBody" model="['name':'','description':'', 'buttonLabel': 'Create']" />
+    	<g:render template="teamBody" model="['name':team.name,'description':team.description, 'buttonLabel': 'Update']" />
         <g:javascript>
             $(function() {
                 var url = '<g:createLink controller="jummp" action="autoCompleteUser"/>';
                 // collaborators are declared in share.js
                 autoComplete([], url);
-                startTeams('<g:createLink controller="team" action="save"/>',
-                		   '<g:createLink controller="team" action="show"/>', [])
+                startTeams('<g:createLink controller="team" action="update" id="${team.id}"/>',
+                		   '<g:createLink controller="team" action="show"/>',
+                		   JSON.parse('${users}'))
             });
         </g:javascript>
     </body>
 </html>
-<content tag="title">Create a team</content>
+<content tag="title">Edit a team</content>
 <content tag="contexthelp">
 	teams
 </content>
