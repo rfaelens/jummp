@@ -78,9 +78,6 @@ Brief description of the plugin.
             application.config.jummp.plugins.git.enabled = true
         }
 
-//        if (Environment.getCurrent() == Environment.TEST) {
-            servletContext(org.springframework.mock.web.MockServletContext)
- //       }
         gitManagerFactory(GitManagerFactory) {
             grailsApplication = ref("grailsApplication")
             servletContext = ref("servletContext")
