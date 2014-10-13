@@ -209,7 +209,10 @@ class ModelController {
                 notes = "Pass the expected media type of the request as a parameter e.g. /model/id?format=json")
     @ApiImplicitParam(name = "modelId", value = "The model identifier", required = true, allowMultiple = false)
     def show() {
-        RevisionTransportCommand rev = modelDelegateService.getRevisionFromParams(params.id,
+    	def myMessage = [name:"foo",data:"bar", body: "this is a body"]
+    	sendMessage("seda:input.queue", myMessage)
+    	
+    	RevisionTransportCommand rev = modelDelegateService.getRevisionFromParams(params.id,
                     params.revisionId)
         if (!params.format || (params.format != "json" && params.format != "xml") ) {
             if (!rev) {

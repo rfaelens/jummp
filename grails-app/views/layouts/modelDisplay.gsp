@@ -264,6 +264,7 @@
 								$("#filegoeshere").html(html);
 								addPreviewNotification(fileProps.showPreview, fileProps);
 								$("#Files").equalize({reset: true});
+								$(".syntaxhighlighter").css({'max-height': (screen.height * 0.45)+'px'});
 							}
 						});
 					}
@@ -278,6 +279,7 @@
 								$("#filegoeshere").html(html);
 								addPreviewNotification(fileProps.showPreview, fileProps);
 								$("#Files").equalize({reset: true});
+								$(".syntaxhighlighter").css({'max-height': (screen.height * 0.45)+'px'});
 							}
 						});
 					}

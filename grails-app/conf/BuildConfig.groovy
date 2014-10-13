@@ -157,6 +157,7 @@ grails.project.dependency.resolution = {
     plugins {
         compile ":webxml:1.4.1"
         compile ":perf4j:0.1.1"
+        compile ":routing:1.3.2"
         //compile ":jms:1.2"
         compile ":executor:0.3"
         compile(":mail:1.0.1") { excludes 'spring-test' }
