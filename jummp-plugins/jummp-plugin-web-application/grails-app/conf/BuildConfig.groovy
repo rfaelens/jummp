@@ -62,6 +62,8 @@ grails.project.dependency.resolution = {
         // from public Maven repositories
         mavenCentral()
         mavenLocal()
+        // compass 2.2.1
+        mavenRepo "http://repo.grails.org/grails/core"
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
