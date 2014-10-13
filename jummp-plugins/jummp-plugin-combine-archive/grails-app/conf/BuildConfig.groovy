@@ -61,28 +61,19 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") { 
-            excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4' 
+            excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4'
         }
-        //test "org.junit:junit:4.10"
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
         compile "commons-io:commons-io:2.1"
         compile 'xml-apis:xml-apis:1.4.01'
         // mime-type detection
         compile "org.apache.tika:tika-core:1.3"
-        // broken Grails 2.3.2 dependecy
-        compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core' }
     }
 
     plugins {
-        build(":tomcat:7.0.47",
-              ":release:2.2.1",
-              ":rest-client-builder:1.0.3") {
-            export = false
-        }
-        test ":code-coverage:1.2.6"
-        test(":codenarc:0.18.1") { transitive = false }
+        build ":tomcat:7.0.50"
+        provided(":codenarc:0.21")
         test ":gmetrics:0.3.1"
     }
 }
-grails.plugin.location.'jummp-plugin-security' = "../jummp-plugin-security"
 grails.plugin.location.'jummp-plugin-core-api' = "../jummp-plugin-core-api"

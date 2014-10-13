@@ -58,8 +58,8 @@
 <!-- NB: for additional title style patterns, see http://frontier.ebi.ac.uk/web/style/patterns -->
 <div id="local-title" class="grid_12 alpha logo-title"> 
 	<span>
-	<a href="${createLink(uri: '/', absolute: true)}" title="Back to Biomodels homepage">
-		<h1>Biomodels</h1>
+	<a href="${createLink(uri: '/', absolute: true)}" title="Back to BioModels homepage">
+		<h1>BioModels</h1>
 		<%-- <r:img uri="/images/biomodels/logo_small.png"/>
 		<img src="[service-logo]" alt="[service-name] logo" width="x" height="y"> --%>
 	</a> 

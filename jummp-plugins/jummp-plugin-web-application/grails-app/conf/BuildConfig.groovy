@@ -62,6 +62,8 @@ grails.project.dependency.resolution = {
         // from public Maven repositories
         mavenCentral()
         mavenLocal()
+        // compass 2.2.1
+        mavenRepo "http://repo.grails.org/grails/core"
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
@@ -74,13 +76,14 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        build(":tomcat:7.0.47",
-              ":release:3.0.1") {
-            export = false
+        build ":tomcat:7.0.50"
+
+        runtime(":weceem:1.2") {
+            excludes 'ckeditor'
         }
-        compile ":jquery:1.10.0"
-        compile ":jquery-datatables:1.7.5"
-        compile ":spring-security-core:1.2.7.3"
+        runtime ":ckeditor:3.6.6.1.1"
+        runtime ":jquery:1.11.1"
+        runtime ":jquery-datatables:1.7.5"
     }
 }
 grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"

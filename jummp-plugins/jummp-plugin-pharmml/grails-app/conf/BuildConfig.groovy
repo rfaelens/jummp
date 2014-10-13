@@ -29,7 +29,6 @@ grails.project.test.reports.dir = "target/test-reports"
 grails.project.work.dir = "target/work"
 grails.project.source.level = 1.7
 grails.project.target.level = 1.7
-// maven can't handle flatDirs, would break sbml and bives
 grails.project.dependency.resolver = "maven"
 
 grails.project.fork = [
@@ -60,7 +59,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
     dependencies {
-        compile("eu.ddmore.pharmml:libPharmML:0.3.1-b2") {
+        compile("eu.ddmore.pharmml:libPharmML:0.3.2-b3") {
             excludes 'junit-dep'
         }
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
@@ -68,12 +67,7 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        build(":tomcat:7.0.47",
-              ":release:3.0.1",
-              ":rest-client-builder:1.0.3") {
-            export = false
-        }
+        build ":tomcat:7.0.50"
     }
 }
-grails.plugin.location.'jummp-plugin-security' = "../jummp-plugin-security"
-grails.plugin.location.'jummp-plugin-core-api' = "../jummp-plugin-core-api"
+grails.plugin.location.'jummp-plugin-configuration' = "../jummp-plugin-configuration"

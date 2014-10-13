@@ -37,6 +37,7 @@ import eu.ddmore.libpharmml.dom.commontypes.FuncParameterDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.IdValueType
 import eu.ddmore.libpharmml.dom.commontypes.IntValueType
+import eu.ddmore.libpharmml.dom.commontypes.InterpolationType
 import eu.ddmore.libpharmml.dom.commontypes.RealValueType
 import eu.ddmore.libpharmml.dom.commontypes.Rhs
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
@@ -315,6 +316,25 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
         return result
     }
 
+    protected StringBuilder rhs(Rhs r, StringBuilder text) {
+        super.rhs(r, text)
+        if (r.interpolation) {
+            return text.append(renderInterpolation(r.interpolation))
+        }
+    }
+
+    protected String renderInterpolation(InterpolationType i) {
+            String algorithm = i?.algorithm
+            String variable = i?.interpIndepVar?.symbRef?.symbIdRef
+            if (!algorithm) {
+                return "Missing interpolation algorithm"
+            }
+            if (!variable) {
+                return "Missing interpolation independent variable"
+            }
+            return "$algorithm interpolation over $variable"
+    }
+
     /**
      * Expects as arguments the parameter model as well as the covariate model.
      * The latter is necessary to display the transformations that are defined
@@ -485,7 +505,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     String renderInitialConditions(Map conditions) {
         def result = []
         conditions.keySet().each { c ->
-        	result.add convertToMathML(c, conditions[c].initialValue?.assign)
+            result.add convertToMathML(c, conditions[c].initialValue?.assign)
         }
         return groovyPageRenderer.render(template: "/templates/0.2/initialConditions",
                     model: [conditions: result])
@@ -1268,5 +1288,29 @@ Individual parameter ${p.symbId} is missing mandatory Transformation element."""
             return
         }
         return eq.uniop ?: eq.binop ?: eq.symbRef ?: eq.scalar ?: eq.functionCall ?: eq.piecewise
+    }
+
+    @Override
+    protected String convertToMathML(String lhs, Rhs rhs, Map<String, Equation> transfMap = [:]) {
+        if (rhs.equation) {
+            return convertToMathML(lhs, rhs.equation, transfMap)
+        }
+        if (rhs.symbRef) {
+            return convertToMathML(lhs, rhs.symbRef, transfMap)
+        }
+        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        builder.append(oprand(lhs))
+        builder.append(op("="))
+        if (rhs.getScalar()) {
+            builder.append(oprand(scalar(rhs.scalar.value)))
+        } else if (rhs.getSequence()) {
+            builder.append(sequenceAsMathML(rhs.sequence))
+        } else if (rhs.getVector()) {
+            builder.append(vectorAsMathML(rhs))
+        } else if (rhs.interpolation) {
+            builder.append(oprand(renderInterpolation(rhs.interpolation)))
+        }
+        builder.append("</mstyle></math>")
+        return builder.toString()
     }
 }

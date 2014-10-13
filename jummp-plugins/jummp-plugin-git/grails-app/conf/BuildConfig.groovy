@@ -31,7 +31,6 @@ grails.project.work.dir = "target/work"
 grails.project.groupId = "net.biomodels.jummp.plugins.git"
 grails.project.source.level = 1.7
 grails.project.target.level = 1.7
-// maven can't handle flatDirs, would break sbml and bives
 grails.project.dependency.resolver = "maven"
 
 grails.project.fork = [
@@ -71,23 +70,10 @@ grails.project.dependency.resolution = {
         //flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-
-        // runtime 'mysql:mysql-connector-java:5.1.5'
         compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
     }
     plugins {
-        compile ":spring-security-core:1.2.7.3"
-        test ":code-coverage:1.2.5"
-
-        // default grails plugins
-        compile ":hibernate:3.6.10.3"
-        compile ":jquery:1.10.0"
-        //compile ":resources:1.0.2"
-
-        build ":tomcat:7.0.47"
+        build ":tomcat:7.0.50"
     }
 }
-grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"
-grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"
 grails.plugin.location.'jummp-plugin-configuration'="../jummp-plugin-configuration"

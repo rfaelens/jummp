@@ -44,7 +44,6 @@ grails.project.fork = [
 ]
 
 
-// maven can't handle flatDirs, would break sbml and bives
 grails.project.dependency.resolver = "maven"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
@@ -71,19 +70,15 @@ grails.project.dependency.resolution = {
         //flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-
-        // runtime 'mysql:mysql-connector-java:5.1.13'
+        // maven does not pick up the jar from target/work/plugins/perf4j-*/lib
+        compile 'org.perf4j:perf4j:0.9.12'
     }
     plugins {
+        build ":tomcat:7.0.50"
+
         compile ":spring-security-core:1.2.7.3"
         compile ":perf4j:0.1.1"
 
-        // default grails plugins
-        compile ":hibernate:3.6.10.3"
-        compile ":jquery:1.10.0"
-        //compile ":resources:1.0.2"
-
-        build ":tomcat:7.0.47"
+        runtime ":hibernate:3.6.10.7"
     }
 }

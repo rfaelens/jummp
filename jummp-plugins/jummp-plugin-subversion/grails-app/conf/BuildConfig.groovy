@@ -29,7 +29,6 @@ grails.project.test.reports.dir = "target/test-reports"
 grails.project.groupId = "net.biomodels.jummp.plugins.subversion"
 grails.project.source.level = 1.7
 grails.project.target.level = 1.7
-// maven can't handle flatDirs, would break sbml and bives
 grails.project.dependency.resolver = "maven"
 
 grails.project.fork = [
@@ -82,7 +81,7 @@ grails.project.dependency.resolution = {
         compile ":jquery:1.10.0"
         //compile ":resources:1.0.2"
 
-        build ":tomcat:7.0.47"
+        build ":tomcat:7.0.50"
     }
 }
 grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"

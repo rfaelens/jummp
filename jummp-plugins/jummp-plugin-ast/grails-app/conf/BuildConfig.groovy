@@ -30,7 +30,6 @@ grails.project.work.dir = "target/work"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 grails.project.source.level = 1.7
 grails.project.target.level = 1.7
-// maven can't handle flatDirs, would break sbml and bives
 grails.project.dependency.resolver = "maven"
 
 grails.project.fork = [
@@ -68,5 +67,8 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.13'
+    }
+    plugins {
+        build ":tomcat:7.0.50"
     }
 }

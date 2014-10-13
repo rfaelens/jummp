@@ -31,7 +31,6 @@ grails.project.war.file = "target/${appName}.war"
 grails.project.groupId = "net.biomodels.jummp"
 grails.project.source.level = 1.7
 grails.project.target.level = 1.7
-// maven can't handle flatDirs, would break sbml and bives
 grails.project.dependency.resolver = "maven"
 
 customJvmArgs = ["-server", "-noverify", "-XX:+UseConcMarkSweepGC", "-XX:+UseParNewGC" ]
@@ -75,34 +74,20 @@ grails.project.dependency.resolution = {
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
         mavenRepo "http://download.eclipse.org/jgit/maven"
-        // compass 2.2.1
-        mavenRepo "http://repo.grails.org/grails/core"
         mavenRepo "http://www.biojava.org/download/maven/"
     }
     dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-
-        // runtime 'mysql:mysql-connector-java:5.1.5'
         // required by OntologyLookupResolver
         compile "org.ccil.cowan.tagsoup:tagsoup:1.2"
         compile "com.googlecode.multithreadedtc:multithreadedtc:1.01"
         runtime 'mysql:mysql-connector-java:5.1.17'
         runtime "postgresql:postgresql:9.1-901.jdbc4"
-        // plugin dependencies
-        // dependencies of plugins
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
         //compile ('org.apache.lucene:lucene-core:4.4.0')
         //compile ('org.apache.lucene:lucene-analyzers-common:4.4.0')
         //compile ('org.apache.lucene:lucene-queryparser:4.4.0')
         //compile ('org.apache.lucene:lucene-misc:4.4.0')
-
-        compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") {
-            excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4', 'xercesImpl'
-        }
-
-        // bives
-        //runtime('org.apache.commons:commons-compress:1.1') { excludes 'commons-io' }
 
         /* jms
         runtime('org.apache.activemq:activeio-core:3.1.2',
@@ -129,76 +114,34 @@ grails.project.dependency.resolution = {
         compile "org.jdom:jdom:1.1.3"
 
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
-
-        //git
-        runtime 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
-
-        compile("net.sourceforge.cobertura:cobertura:1.9.4.1") { 
-            excludes 'asm',
-                      'ant',
-                      'log4j'
-        }
-        //weceem, feeds
-        runtime("rome:rome:1.0RC2") { excludes 'junit', 'jdom' }
-        compile 'org.apache.ant:ant:1.9.4'
-
-        // cobertura
-        compile "asm:asm:3.1"
-        compile "log4j:log4j:1.2.16"
-        compile "com.thoughtworks.xstream:xstream:1.4.3"
-
-        compile "org.apache.tika:tika-core:1.3"
-
-        // broken Grails 2.3.2 dependecies
-        compile("org.spockframework:spock-core:0.7-groovy-2.0") { excludes 'hamcrest-core', 'junit-dep' }
-        compile "org.springframework:spring-test:3.2.4.RELEASE"
     }
 
     plugins {
+        build ":tomcat:7.0.50"
+
+        provided(":codenarc:0.21")
+
         compile ":webxml:1.4.1"
         compile ":perf4j:0.1.1"
         //compile ":jms:1.2"
         compile ":executor:0.3"
-        compile(":mail:1.0.1") { excludes 'spring-test' }
-        compile ":simple-captcha:0.9.4"
-        //compile ":quartz:0.4.2"
-        compile(":quartz:1.0-RC6") { excludes 'hibernate-core' /* don't need 3.6.10.Final */ }
-        // to see the status of quartz jobs
-        //compile(":quartz-monitor:0.2") { export = false } //requires quartz plugin version 0.4.2 
-
+        compile(":mail:1.0.7")
+        compile ":simple-captcha:1.0.0"
+        compile(":quartz:1.0.2")
         compile ":spring-security-acl:1.1.1"
-        //compile ":svn:1.0.2"
         compile ":spring-security-core:1.2.7.3"
         compile ":spring-security-ldap:1.0.6"
-        test ":code-coverage:1.2.6"
-        compile(":codenarc:0.20")
-        test ":gmetrics:0.3.1"
-        runtime(":weceem:1.1.3-SNAPSHOT") {
-            excludes 'xstream',
-                     'quartz',
-                     'jquery',
-                     'jquery-ui',
-                     'ant',     // 1.7 is too old
-                     //also exclude java feeds API rome in order to avoid conflicting revisions
-                     'feeds',
-                     'ckeditor',
-                     'searchable' // 0.6.5+ needed for Grails 2.3
-        }
-        compile(":searchable:0.6.6")
-        runtime(":feeds:1.6") { excludes 'rome', 'jdom' }
-        runtime(":ckeditor:3.6.3.0") { excludes 'svn' }
-        compile ":jquery-datatables:1.7.5"
-        compile ":jquery-ui:1.8.24"
-        // Locale plugin
+        //compile ":svn:1.0.2"
         compile ":locale-variant:0.1"
-        runtime ":database-migration:1.3.8"
-        // default grails plugins
-        compile ":hibernate:3.6.10.6"
         compile ":webflow:2.0.8.1"
-        compile ":jquery:1.10.2.2"
-        //compile ":resources:1.2"
 
-        build ":tomcat:7.0.47"
+        runtime ":database-migration:1.3.8"
+        runtime ":hibernate:3.6.10.7"
+        runtime ":jquery:1.11.1"
+        runtime ":jquery-datatables:1.7.5"
+        runtime ":jquery-ui:1.10.4"
+
+        test ":gmetrics:0.3.1"
 
     }
 }
@@ -214,12 +157,12 @@ grails.plugin.location.'jummp-plugin-combine-archive' = "jummp-plugins/jummp-plu
 grails.plugin.location.'jummp-plugin-pharmml' = "jummp-plugins/jummp-plugin-pharmml"
 grails.plugin.location.'jummp-plugin-mdl' = "jummp-plugins/jummp-plugin-mdl"
 grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
-//grails.plugin.location.'jummp-plugin-search' = "jummp-plugins/jummp-plugin-search"
 grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plugin-simple-logging"
 grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"
 //grails.plugin.location.'jummp-plugin-jms-remote' = "jummp-plugins/jummp-plugin-jms-remote"
 if ("jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
     println "Enabling JMS remoting..."
+    grails.plugin.location.'jummp-plugin-ast' = 'jummp-plugins/jummp-plugin-ast'
     grails.plugin.location.'jummp-plugin-remote' = "jummp-plugins/jummp-plugin-remote"
     grails.plugin.location.'jummp-plugin-jms' = "jummp-plugins/jummp-plugin-jms"
 } else {
@@ -229,26 +172,6 @@ if ("jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
 // Remove any files not needed in production mode
 grails.war.resources = { stagingDir ->
 }
-
-codenarc.reports = {
-    CodeNarcXmlReport('xml') {
-        outputFile = 'target/CodeNarc-Report.xml'
-        title = "JUMMP CodeNarc Report"
-    }
-    CodeNarcHtmlReport('html') {
-        outputFile = 'target/CodeNarc-Report.html'
-        title = "JUMMP CodeNarc Report"
-    }
-}
-codenarc.extraIncludeDirs = ['jummp-plugins/*/src/groovy',
-                             'jummp-plugins/*/grails-app/controllers',
-                             'jummp-plugins/*/grails-app/domain',
-                             'jummp-plugins/*/grails-app/services',
-                             'jummp-plugins/*/grails-app/taglib',
-                             'jummp-plugins/*/grails-app/utils',
-                             'jummp-plugins/*/test/unit',
-                             'jummp-plugins/*/test/integration']
-
 
 //ensure that AST.jar is put in the right place. See scripts/AST.groovy
 System.setProperty("jummp.basePath", new File("./").getAbsolutePath())

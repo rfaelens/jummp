@@ -34,8 +34,6 @@ import grails.transaction.Transactional
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.springframework.security.access.prepost.PreAuthorize
-import net.biomodels.jummp.core.events.LoggingEventType
-import net.biomodels.jummp.core.events.PostLogging
 
 @Transactional
 class TeamService {
@@ -44,7 +42,6 @@ class TeamService {
 
     }
     
-    @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="teamService.getUsersFromTeam")
     @PreAuthorize("isAuthenticated()") //used to be: authentication.name==#username
     List<String> getUsersFromTeam(Long teamID) {
@@ -57,7 +54,6 @@ class TeamService {
     	]};
     }
     
-    @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="teamService.getTeamsForUser")
     @PreAuthorize("isAuthenticated()") //used to be: authentication.name==#username
     List<Team> getTeamsForUser(User user) {

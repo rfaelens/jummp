@@ -43,7 +43,6 @@ grails.project.fork = [
     console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256]
 ]
 
-// maven can't handle flatDirs, would break sbml and bives
 grails.project.dependency.resolver = "maven"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
@@ -69,31 +68,16 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
-        //flatDir name: "jummpLibs", dirs: "../../lib/"
     }
     dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-
-        // runtime 'mysql:mysql-connector-java:5.1.5'
-        // perf4j dependency
-        compile "org.perf4j:perf4j:0.9.13"
-        runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
-        compile "xml-apis:xml-apis:1.4.01"
-
-        // plugin dependencies
-        compile("eu.ddmore.pharmml:libPharmML:0.1-SNAPSHOT") {
+        compile("eu.ddmore.pharmml:libPharmML:0.3.2-b3") {
             excludes 'junit-dep'
         }
     }
     plugins {
-        compile ":spring-security-core:1.2.7.3"
-
-        // default grails plugins
-        compile ":hibernate:3.6.10.3"
-        compile ":jquery:1.10.0"
-        //compile ":resources:1.0.2"
-
-        build ":tomcat:7.0.47"
+        build ":tomcat:7.0.50"
+        compile ":perf4j:0.1.1"
+        runtime ":hibernate:3.6.10.7"
     }
 }
 grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"
