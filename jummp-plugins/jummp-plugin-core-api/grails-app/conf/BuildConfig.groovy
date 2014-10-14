@@ -75,9 +75,9 @@ grails.project.dependency.resolution = {
         }
     }
     plugins {
-        build ":tomcat:7.0.50"
+        build ":tomcat:7.0.50.1"
         compile ":perf4j:0.1.1"
-        runtime ":hibernate:3.6.10.7"
+        runtime ":hibernate:3.6.10.8"
     }
 }
 grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"
