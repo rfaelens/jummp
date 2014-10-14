@@ -70,6 +70,10 @@ class ModelDelegateService implements IModelService {
     def grailsApplication
     def publicationIdGenerator
 
+    void printMessage(def body) {
+    	System.out.println("MESSAGE SENT: "+body);
+    }
+    
     String getPluginForFormat(ModelFormatTransportCommand format) {
         return modelFileFormatService.getPluginForFormat(format)
     }
