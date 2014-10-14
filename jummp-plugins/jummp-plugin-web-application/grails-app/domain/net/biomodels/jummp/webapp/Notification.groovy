@@ -31,17 +31,17 @@ package net.biomodels.jummp.webapp
  */
 class Notification implements Serializable {
     private static final long serialVersionUID = 1L
-    /* the class logger */
-    private static final Log log = LogFactory.getLog(this)
     
     String from;
     String title;
     String body;
     Date dateCreated;
+    NotificationType notificationType;
     
     static constraints = {
         from(nullable: false, blank: false, unique: false)
         title(nullable: false, blank: false, unique: false)
         body(nullable: false, blank: false, unique: false)
+        notificationType(nullable: false, blank: false, unique: false)
     }
 }

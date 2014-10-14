@@ -1164,4 +1164,7 @@ databaseChangeLog = {
    include file: "20140801_make_vcsIdentifier_paths_relative.groovy"
 
    include file: "20140804_make_repoFile_path_relative.groovy"
+
+
+	include file: 'notifications.groovy'
 }
