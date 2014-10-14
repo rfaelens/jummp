@@ -93,7 +93,7 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        build ":tomcat:7.0.50"
+        build ":tomcat:7.0.50.1"
 
         compile ":perf4j:0.1.1"
     }
