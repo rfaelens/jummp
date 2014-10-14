@@ -37,9 +37,9 @@ enum NotificationType {
    final int id 
    final String textRepresentation 
 
-   private NotificationType(int id, String name) { 
+   private NotificationType(int id, String textRepresentation) { 
       this.id = id 
-      this.name = name 
+      this.textRepresentation = textRepresentation 
    } 
    
    String toString() { name } 

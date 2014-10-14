@@ -23,7 +23,7 @@
 
 
 package net.biomodels.jummp.webapp
-
+import net.biomodels.jummp.plugins.security.User
 /**
  * @short Representation of one NotificationTypePreferences.
  * This class is the representation of how users want to receive different types
@@ -32,8 +32,6 @@ package net.biomodels.jummp.webapp
  */
 class NotificationTypePreferences implements Serializable {
     private static final long serialVersionUID = 1L
-    /* the class logger */
-    private static final Log log = LogFactory.getLog(this)
     
     NotificationType notificationType;
     boolean sendMail = false;

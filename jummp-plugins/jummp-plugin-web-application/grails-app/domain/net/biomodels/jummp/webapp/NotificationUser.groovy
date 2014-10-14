@@ -23,7 +23,7 @@
 
 
 package net.biomodels.jummp.webapp
-
+import net.biomodels.jummp.plugins.security.User
 /**
  * @short Representation of the Notification User relationship.
  * This class is the representation of a Notification send to a User. 
@@ -31,8 +31,6 @@ package net.biomodels.jummp.webapp
  */
 class NotificationUser implements Serializable {
     private static final long serialVersionUID = 1L
-    /* the class logger */
-    private static final Log log = LogFactory.getLog(this)
     
     Notification notification;
     User user;
