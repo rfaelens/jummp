@@ -80,7 +80,6 @@ Brief description of the plugin.
 
         gitManagerFactory(GitManagerFactory) {
             grailsApplication = ref("grailsApplication")
-            servletContext = ref("servletContext")
         }
         if (!(application.config.jummp.plugins.git.enabled instanceof ConfigObject) && application.config.jummp.plugins.git.enabled) {
             vcsManager(gitManagerFactory: "getInstance")

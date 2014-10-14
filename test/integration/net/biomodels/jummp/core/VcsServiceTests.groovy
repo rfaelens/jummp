@@ -94,8 +94,6 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
     void setUp() {
         createUserAndRoles()
         vcsService.vcsManager = null
-        appCtx.getBean("gitManagerFactory").servletContext = new MockServletContext("./target", new FileSystemResourceLoader())
-        //appCtx.getBean("svnManagerFactory").servletContext = new MockServletContext("./target", new FileSystemResourceLoader())
         assertTrue(new File("target/vcs/exchange/").mkdirs())
     }
 
