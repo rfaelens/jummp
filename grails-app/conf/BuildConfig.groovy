@@ -74,8 +74,6 @@ grails.project.dependency.resolution = {
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
         mavenRepo "http://download.eclipse.org/jgit/maven"
-        // compass 2.2.1
-        mavenRepo "http://repo.grails.org/grails/core"
         mavenRepo "http://www.biojava.org/download/maven/"
     }
     dependencies {
