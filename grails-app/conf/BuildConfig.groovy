@@ -119,7 +119,7 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        build ":tomcat:7.0.50"
+        build ":tomcat:7.0.50.1"
 
         provided(":codenarc:0.21")
 
@@ -138,7 +138,7 @@ grails.project.dependency.resolution = {
         compile ":webflow:2.0.8.1"
 
         runtime ":database-migration:1.3.8"
-        runtime ":hibernate:3.6.10.7"
+        runtime ":hibernate:3.6.10.8"
         runtime ":jquery:1.11.1"
         runtime ":jquery-datatables:1.7.5"
         runtime ":jquery-ui:1.10.4"
