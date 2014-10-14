@@ -63,9 +63,9 @@
         <g:javascript src="syntax/shBrushXml.js"/>
         <g:javascript src="jquery.handsontable.full.js"></g:javascript>
         <style>
-        	/* Only relevant here therefore not externalised */
-        	.ui-icon {
-        		zoom: 1.5;
+        	.ui-button {
+        		border-left: none;
+        		margin: 0;
         	}
         </style>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jquery.handsontable.full.min.css')}"></link>

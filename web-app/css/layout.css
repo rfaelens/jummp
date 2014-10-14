@@ -75,7 +75,9 @@ border: 0px solid #ffffff;
 	text-align: center;
 }
 #toolbarList li { 
-    list-style-type:none;
+    margin-top:0; 
+	margin-bottom:0; 
+	list-style-type:none;
     -webkit-column-break-inside: avoid;
     break-inside: avoid-column;
     text-align: center;
