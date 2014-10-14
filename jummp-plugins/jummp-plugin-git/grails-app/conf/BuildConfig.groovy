@@ -73,7 +73,7 @@ grails.project.dependency.resolution = {
         compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
     }
     plugins {
-        build ":tomcat:7.0.50"
+        build ":tomcat:7.0.50.1"
     }
 }
 grails.plugin.location.'jummp-plugin-configuration'="../jummp-plugin-configuration"
