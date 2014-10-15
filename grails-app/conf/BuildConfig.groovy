@@ -114,10 +114,11 @@ grails.project.dependency.resolution = {
         compile "org.jdom:jdom:1.1.3"
 
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
+        test "org.grails:grails-datastore-test-support:1.0-grails-2.3"
     }
 
     plugins {
-        build ":tomcat:7.0.50.1"
+        build ":tomcat:7.0.54"
 
         provided(":codenarc:0.21")
 
@@ -135,8 +136,8 @@ grails.project.dependency.resolution = {
         compile ":locale-variant:0.1"
         compile ":webflow:2.0.8.1"
 
-        runtime ":database-migration:1.3.8"
-        runtime ":hibernate:3.6.10.8"
+        runtime ":database-migration:1.4.0"
+        runtime ":hibernate:3.6.10.16"
         runtime ":jquery:1.11.1"
         runtime ":jquery-datatables:1.7.5"
         runtime ":jquery-ui:1.10.4"

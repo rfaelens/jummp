@@ -99,14 +99,14 @@ grails.project.dependency.resolution = {
         //compile "org.springframework:spring-test:3.2.4.RELEASE"
     }
     plugins {
-        build ":tomcat:7.0.50.1"
+        build ":tomcat:7.0.54"
 
         compile ":perf4j:0.1.1"
         compile ":spring-security-core:1.2.7.3"
         compile(":spring-security-ldap:1.0.6")
         compile ":jms:1.2"
 
-        runtime ":hibernate:3.6.10.8"
+        runtime ":hibernate:3.6.10.16"
         runtime ":jquery:1.11.1"
     }
 }
