@@ -34,9 +34,13 @@ class NotificationUser implements Serializable {
     
     Notification notification;
     User user;
+    boolean mailSent = false;
+    boolean webNotificationSent = false;
     
     static constraints = {
         notification(nullable: false, unique: false)
         user(nullable: false, unique: false)
+        mailSent(nullable: false, unique: false)
+        webNotificationSent(nullable: false, unique: false)
     }
 }

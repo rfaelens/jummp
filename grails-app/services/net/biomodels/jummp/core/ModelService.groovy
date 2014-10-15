@@ -278,7 +278,7 @@ ORDER BY
                     SpringSecurityUtils.getPrincipalAuthorities())
         if (springSecurityService.isLoggedIn()) {
             // anonymous users do not have a principal
-            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+            roles.add(getUsername())
         }
         String query = '''
 SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
@@ -453,7 +453,7 @@ ORDER BY
         Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
         if (springSecurityService.isLoggedIn()) {
             // anonymous users do not have a principal
-            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+            roles.add(getUsername())
         }
 
         String query = '''
@@ -547,7 +547,7 @@ OR lower(m.publication.affiliation) like :filter
         Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
         if (springSecurityService.isLoggedIn()) {
             // anonymous users do not have a principal
-            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+            roles.add(getUsername())
         }
         List<Long> result = Revision.executeQuery('''
 SELECT rev.id
@@ -1536,6 +1536,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 aclUtilService.addPermission(revision, collaborator.username, BasePermission.READ)
             }
         }
+        def notification = [model:model, user:getUsername(), grantedTo: collaborator]
+        sendMessage("seda:model.readAccessGranted", notification)
     }
 
     private String getPermissionString(int p) {
@@ -1659,6 +1661,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new AccessDeniedException("You cant access permissions if you dont have them.")
         }
     }
+    
+    private String getUsername() {
+    	if (springSecurityService.isLoggedIn()) {
+    		return (springSecurityService.getPrincipal() as UserDetails).getUsername()
+    	}
+    	return "anonymous"
+    }
 
     /**
     * Grants write access for @p model to @p collaborator.
@@ -1683,6 +1692,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION)
             }
         }
+        def notification = [model:model, user:getUsername(), grantedTo: collaborator]
+        sendMessage("seda:model.writeAccessGranted", notification)
     }
 
     /**
