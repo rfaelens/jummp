@@ -23,7 +23,7 @@
 
 
 package net.biomodels.jummp.webapp
-
+import net.biomodels.jummp.plugins.security.User
 /**
  * @short Representation of one Notification.
  * This class is the representation of one Notification. 
@@ -37,6 +37,8 @@ class Notification implements Serializable {
     String body;
     Date dateCreated;
     NotificationType notificationType;
+    User sender;
+    
     
     static constraints = {
         from(nullable: false, blank: false, unique: false)

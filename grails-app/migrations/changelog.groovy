@@ -1167,4 +1167,6 @@ databaseChangeLog = {
 
 
 	include file: 'notifications.groovy'
+
+	include file: 'addSenderToNotification.groovy'
 }
