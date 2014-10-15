@@ -62,6 +62,7 @@ try {
     def databaseConfig = new ConfigSlurper().parse(databaseProperties)
 
     dataSource {
+        jmxEnabled = true
         pooled = Boolean.parseBoolean(databaseConfig.jummp.database.pooled)
         driverClassName = databaseConfig.jummp.database.driver
         username = databaseConfig.jummp.database.username
@@ -77,12 +78,15 @@ try {
                 timeBetweenEvictionRunsMillis = 60000
                 numTestsPerEvictionRun = 3
                 maxWait = 10000
+                maxAge = 10 * 60000
 
                 testOnBorrow = true
                 testWhileIdle = true
                 testOnReturn = false
 
                 validationQuery = "SELECT 1"
+                validationQueryTimeout = 3
+                validationInterval = 15000
             }
         } else {
             dbCreate = 'update'
@@ -122,6 +126,34 @@ try {
         production {
             dataSource {
                 driverClassName = databaseConfig.jummp.database.driver
+                properties {
+                    ignoreExceptionOnPreLoad = true
+                    jdbcInterceptors = "ConnectionState;StatementCache(max=200)"
+                    abandonWhenPercentageFull = 100
+                    removeAbandoned = true
+                    removeAbandonedTimeout = 120
+                    logAbandoned = false
+                    if (driverClassName == "com.mysql.jdbc.Driver") {
+                        dbProperties {
+                            autoReconnect = false
+                            jdbcCompliantTruncation = false
+                            zeroDateTimeBehavior = 'convertToNull'
+                            cachePrepStmts = false
+                            cacheCallableStmts = false
+                            dontTrackOpenResources = false
+                            holdResultsOpenOverStatementClose = true
+                            useServerPrepStmts = false
+                            cacheServerConfiguration = true
+                            cacheResultSetMetadata = true
+                            metadataCacheSize = 100
+                            connectionTimeout = 15000
+                            socketTimeout = 120000
+                            maintainTimeStats = false
+                            enableQueryTimeouts = false
+                            noDatetimeStringSync = true
+                        }
+                    }
+                }
                 username = databaseConfig.jummp.database.username
                 password = databaseConfig.jummp.database.password
                 dialect  = databaseConfig.jummp.database.dialect
