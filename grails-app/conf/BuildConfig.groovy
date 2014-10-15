@@ -110,6 +110,7 @@ grails.project.dependency.resolution = {
         }*/
         compile "xml-apis:xml-apis:1.4.01"
         compile "jaxen:jaxen:1.1.4"
+        compile 'log4j:log4j:1.2.17'
 
         compile "org.jdom:jdom:1.1.3"
 
