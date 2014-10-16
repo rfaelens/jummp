@@ -306,29 +306,24 @@ class ModelDelegateService implements IModelService {
         String sanitisedModelId
         String sanitisedRevisionId
         final RevisionTransportCommand REV
-        try {
-            final boolean MODEL_ID_HAS_DOT = MODEL.contains('.')
-            if (MODEL_ID_HAS_DOT) {
-                String[] parts = MODEL.split("\\.")
-                sanitisedModelId = parts[0]
-                sanitisedRevisionId = parts[1]
-            } else {
-                sanitisedModelId = MODEL
-            }
-            final boolean PARSE_REVISION_ID = REVISION != null && sanitisedRevisionId == null
-            if (PARSE_REVISION_ID) {
-                // if revision is not an integer, then UrlMappings will error out.
-                final int REVISION_ID = Integer.parseInt(REVISION)
-                REV = getRevision(sanitisedModelId, REVISION_ID)
-            } else if (sanitisedRevisionId) {
-                final int REVISION_ID = Integer.parseInt(sanitisedRevisionId)
-                REV = getRevision(sanitisedModelId, REVISION_ID)
-            } else { // no revision was specified - pull the latest one.
-                REV = getRevision(sanitisedModelId)
-            }
-        } catch (AccessDeniedException e) {
-            log.warn "Unauthorised attempt to access model $MODEL version $REVISION."
-            throw e;
+        final boolean MODEL_ID_HAS_DOT = MODEL.contains('.')
+        if (MODEL_ID_HAS_DOT) {
+            String[] parts = MODEL.split("\\.")
+            sanitisedModelId = parts[0]
+            sanitisedRevisionId = parts[1]
+        } else {
+            sanitisedModelId = MODEL
+        }
+        final boolean PARSE_REVISION_ID = REVISION != null && sanitisedRevisionId == null
+        if (PARSE_REVISION_ID) {
+            // if revision is not an integer, then UrlMappings will error out.
+            final int REVISION_ID = Integer.parseInt(REVISION)
+            REV = getRevision(sanitisedModelId, REVISION_ID)
+        } else if (sanitisedRevisionId) {
+            final int REVISION_ID = Integer.parseInt(sanitisedRevisionId)
+            REV = getRevision(sanitisedModelId, REVISION_ID)
+        } else { // no revision was specified - pull the latest one.
+            REV = getRevision(sanitisedModelId)
         }
         return REV
     }
