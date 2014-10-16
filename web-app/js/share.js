@@ -20,7 +20,11 @@ var spaceReplacement = guid();
 var Collaborators = Backbone.Collection.extend({
     model: Collaborator,
     add: function(newCollab) {
-		newCollab.id = newCollab.id.replace(" ", spaceReplacement);    	
+		try {
+			newCollab.id = newCollab.id.replace(" ", spaceReplacement);
+		}
+		catch(ignoreException) {
+		}
      	Backbone.Collection.prototype.add.call(this, newCollab);
     }
 
