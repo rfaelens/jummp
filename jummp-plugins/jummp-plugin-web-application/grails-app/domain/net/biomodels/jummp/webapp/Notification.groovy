@@ -32,7 +32,6 @@ import net.biomodels.jummp.plugins.security.User
 class Notification implements Serializable {
     private static final long serialVersionUID = 1L
     
-    String from;
     String title;
     String body;
     Date dateCreated;
@@ -41,9 +40,9 @@ class Notification implements Serializable {
     
     
     static constraints = {
-        from(nullable: false, blank: false, unique: false)
         title(nullable: false, blank: false, unique: false)
         body(nullable: false, blank: false, unique: false)
         notificationType(nullable: false, blank: false, unique: false)
+        sender(nullable: false, blank: false, unique: false)
     }
 }
