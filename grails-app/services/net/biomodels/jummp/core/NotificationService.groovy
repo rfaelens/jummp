@@ -35,6 +35,10 @@ package net.biomodels.jummp.core
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.webapp.Notification
 import net.biomodels.jummp.webapp.NotificationType
+import net.biomodels.jummp.webapp.NotificationTypePreferences
+import net.biomodels.jummp.webapp.NotificationUser
+import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ModelTransportCommand
 
 /**
  * Service asynchronously called by Camel plugin, in response to various messages. 
@@ -45,21 +49,66 @@ import net.biomodels.jummp.webapp.NotificationType
  */
 class NotificationService {
 	
-	def userService
 	def modelDelegateService
+	def grailsApplication
+	def mailService
+
+	Set<User> getNotificationRecipients(ModelTransportCommand model, NotificationType type) {
+		Set<String> creators  = model.creators;
+		Set<User> users = new HashSet<User>();
+		creators.each {
+			users.add(User.findByUsername(it));
+		}
+		return creators;
+	}
+	
+	NotificationTypePreferences getPreference(User user, NotificationType type) {
+		NotificationTypePreferences pref = NotificationTypePreferences.findByUserAndNotificationType(user, type);
+		if (!pref) {
+			pref = NotificationTypePreferences.getDefault(user, type);
+		}
+		return pref;
+	}
+	
+	void sendNotificationToUser(User user, Notification notification) {
+		NotificationTypePreferences pref = getPreference(user, notification.notificationType);
+		if (NotificationTypePreferences.sendMail) {
+			String emailBody = notification.body
+            String emailSubject = notification.title
+            mailService.sendMail {
+                to recipient
+                from grailsApplication.config.jummp.security.registration.email.sender
+                subject emailSubject
+                body emailBody
+            }
+		}
+		if (NotificationTypePreferences.sendNotification) {
+			NotificationUser userNotify = new NotificationUser(notification: notification,
+															   user: user);
+			userNotify.save(failOnError: true);
+		}
+	}
+	
+	void sendNotification(ModelTransportCommand model, Notification notification) {
+		notification.save(failOnError:true);
+		Set<User> watchers = getNotificationRecipients(model, NotificationType.PUBLISH);
+		watchers.each {
+			sendNotificationToUser(it, notification);
+		}
+	}
 	
 	void modelPublished(def body) {
-		RevisionTransportCommand rev  = body.rev;
-		Set<User> watchers = getNotificationRecipients(rev.model);
+		RevisionTransportCommand rev  = body.revision as RevisionTransportCommand;
+		System.out.println(body);
+		System.out.println(body.rev);
+		System.out.println(body.rev.inspect());
 		Notification notification = new Notification();
-		notification.from = body.user;
 		notification.title = "Model Published: "+rev.name;
 		notification.body = "Dear Jummp User. "+rev.name+" has been published";
 		notification.notificationType = NotificationType.PUBLISH;
-		notification.sender = userService.getUser(body.user);
-		
-    	System.out.println("modelPublished MESSAGE SENT: "+body);
-    }
+		notification.sender = User.findByUsername(body.user);
+		sendNotification(rev.model, notification);
+	}
     
     void readAccessGranted(def body) {
     	System.out.println("readAccessGranted MESSAGE SENT: "+body);
