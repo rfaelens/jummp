@@ -297,7 +297,7 @@ class ModelController {
     def delete = {
         try {
             boolean deleted = modelDelegateService.deleteModel(params.id)
-            def notification = [revision:rev, user:getUsername()]
+            def notification = [model:modelDelegateService.getModel(params.id), user:getUsername()]
             sendMessage("seda:model.delete", notification)
             redirect(action: "showWithMessage", id: params.id,
                         params: [ flashMessage: deleted ?
@@ -408,7 +408,9 @@ class ModelController {
                 String model = conversation.model_id
                 String user = getUsername()
                 updateHistory(session.result_submission, user, "update", "html", update, true)
-                def notification = [modelID:conversation.model_id, user:user, update: conversation.changesMade]
+                def notification = [model:modelDelegateService.getModel(conversation.model_id), 
+                					user:user, 
+                					update: conversation.changesMade]
                 sendMessage("seda:model.update", notification)
             }.to "displayConfirmationPage"
             on("displayErrorPage").to "displayErrorPage"

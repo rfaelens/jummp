@@ -44,10 +44,10 @@ class NotificationTypePreferences implements Serializable {
         sendNotification(nullable: false, unique: false)
     }
     
-    public NotificationTypePreferences getDefault(User user, NotificationType type) {
+    public static NotificationTypePreferences getDefault(User user, NotificationType type) {
     	NotificationTypePreferences defaultPref = new NotificationTypePreferences();
     	defaultPref.user = user;
     	defaultPref.notificationType = type;
-    	return notificationType;
+    	return defaultPref;
     }
 }

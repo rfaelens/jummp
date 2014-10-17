@@ -33,6 +33,7 @@ enum NotificationType {
    PUBLISH (1, "PUBLISH"), 
    VERSION_CREATED (2, "VERSION_CREATED"), 
    ACCESS_GRANTED (3, "ACCESS_GRANTED"), 
+   DELETED (4, "MODEL_DELETED"), 
    
    final int id 
    final String textRepresentation 

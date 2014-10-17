@@ -54,12 +54,12 @@ class NotificationService {
 	def mailService
 
 	Set<User> getNotificationRecipients(ModelTransportCommand model, NotificationType type) {
-		Set<String> creators  = model.creators;
+		Set<String> creators  = model.creatorUsernames;
 		Set<User> users = new HashSet<User>();
 		creators.each {
 			users.add(User.findByUsername(it));
 		}
-		return creators;
+		return users;
 	}
 	
 	NotificationTypePreferences getPreference(User user, NotificationType type) {
@@ -72,26 +72,25 @@ class NotificationService {
 	
 	void sendNotificationToUser(User user, Notification notification) {
 		NotificationTypePreferences pref = getPreference(user, notification.notificationType);
-		if (NotificationTypePreferences.sendMail) {
+		if (pref.sendMail) {
 			String emailBody = notification.body
             String emailSubject = notification.title
             mailService.sendMail {
-                to recipient
+                to user.email
                 from grailsApplication.config.jummp.security.registration.email.sender
                 subject emailSubject
                 body emailBody
             }
 		}
-		if (NotificationTypePreferences.sendNotification) {
+		if (pref.sendNotification) {
 			NotificationUser userNotify = new NotificationUser(notification: notification,
 															   user: user);
 			userNotify.save(failOnError: true);
 		}
 	}
 	
-	void sendNotification(ModelTransportCommand model, Notification notification) {
+	void sendNotification(ModelTransportCommand model, Notification notification, Set<User> watchers) {
 		notification.save(failOnError:true);
-		Set<User> watchers = getNotificationRecipients(model, NotificationType.PUBLISH);
 		watchers.each {
 			sendNotificationToUser(it, notification);
 		}
@@ -99,15 +98,14 @@ class NotificationService {
 	
 	void modelPublished(def body) {
 		RevisionTransportCommand rev  = body.revision as RevisionTransportCommand;
-		System.out.println(body);
-		System.out.println(body.rev);
-		System.out.println(body.rev.inspect());
 		Notification notification = new Notification();
 		notification.title = "Model Published: "+rev.name;
-		notification.body = "Dear Jummp User. "+rev.name+" has been published";
+		notification.body = rev.name+" has been published by "+body.user;
 		notification.notificationType = NotificationType.PUBLISH;
 		notification.sender = User.findByUsername(body.user);
-		sendNotification(rev.model, notification);
+		Set<User> watchers = getNotificationRecipients(model, notification.notificationType);
+		watchers = watchers - [notification.sender]
+		sendNotification(rev.model, notification, watchers);
 	}
     
     void readAccessGranted(def body) {
@@ -119,11 +117,27 @@ class NotificationService {
     }
     
     void delete(def body) {
-    	System.out.println("delete MESSAGE SENT: "+body);
+		ModelTransportCommand model  = body.model as ModelTransportCommand;
+		Notification notification = new Notification();
+		notification.title = "Model Deleted: "+model.name;
+		notification.body = model.name+" has been published by "+body.user;
+		notification.notificationType = NotificationType.DELETED;
+		notification.sender = User.findByUsername(body.user);
+		Set<User> watchers = getNotificationRecipients(model, notification.notificationType);
+		watchers = watchers - [notification.sender]
+		sendNotification(model, notification, watchers);
     }
     
     void update(def body) {
-    	System.out.println("update MESSAGE SENT: "+body);
+		ModelTransportCommand model  = body.model as ModelTransportCommand;
+		Notification notification = new Notification();
+		notification.title = "Model Updated: "+model.name;
+		notification.body = model.name+" has been updated by "+body.user+". Changes include: "+body.update;
+		notification.notificationType = NotificationType.VERSION_CREATED;
+		notification.sender = User.findByUsername(body.user);
+		Set<User> watchers = getNotificationRecipients(model, notification.notificationType);
+		watchers = watchers - [notification.sender]
+		sendNotification(model, notification, watchers);
     }
     
 }
