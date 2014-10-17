@@ -101,9 +101,11 @@ class Model implements Serializable {
     ModelTransportCommand toCommandObject(boolean saveHistory = true) {
         // TODO: is it correct to show the latest upload date as the lastModifiedDate or does it need ACL restrictions?
         Set<String> creators = []
+        Set<String> creatorUsernames = []
         if (revisions) {
             revisions.each { revision ->
                 creators.add(revision.owner.person.userRealName)
+                creatorUsernames.add(revision.owner.username)
             }
         }
         def latestRev;
@@ -132,7 +134,8 @@ class Model implements Serializable {
                 submitter: revisions ? revisions.sort{ it.revisionNumber }.first().owner.person.userRealName : null,
                 submitterUsername: revisions ? revisions.sort{ it.revisionNumber }.first().owner.username : null,
                 submissionDate: revisions ? revisions.sort{ it.revisionNumber }.first().uploadDate : null,
-                creators: creators
+                creators: creators,
+                creatorUsernames:creatorUsernames
         )
     }
 
