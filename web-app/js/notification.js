@@ -18,4 +18,12 @@ function showNotification(message) {
 	$(".flashNotificationDiv").text(message)
 }
 
-
+function pollForNotifications(url, period) {
+	setInterval(function() {
+		$.get( url, function( data ) {
+				if (data != "0") {
+					alert( "You have "+data+" notifications" );
+				}
+		});
+	}, period);
+}
