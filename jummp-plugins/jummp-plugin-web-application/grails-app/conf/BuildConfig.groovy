@@ -76,7 +76,7 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        build ":tomcat:7.0.50"
+        build ":tomcat:7.0.54"
 
         runtime(":weceem:1.2") {
             excludes 'ckeditor'

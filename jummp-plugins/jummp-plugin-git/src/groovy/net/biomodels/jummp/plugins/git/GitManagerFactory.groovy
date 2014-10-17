@@ -34,6 +34,8 @@
 
 package net.biomodels.jummp.plugins.git
 
+import grails.util.Environment
+import javax.servlet.ServletContext
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsNotInitedException
 import org.apache.log4j.Logger
@@ -47,13 +49,8 @@ import org.apache.log4j.Logger
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  */
 class GitManagerFactory {
-    static transactional = true
     GitManager git
     Logger log = Logger.getLogger(GitManagerFactory)
-    /**
-     * Dependency Injection of Servlet Context
-     */
-    def servletContext
     /**
      * Dependency Injection of grailsApplication
      */
@@ -62,6 +59,13 @@ class GitManagerFactory {
     GitManager getInstance() throws Exception {
         if (git) {
             return git
+        }
+
+        ServletContext servletContext
+        if (Environment.current == Environment.TEST) {
+            servletContext = new org.springframework.mock.web.MockServletContext()
+        } else {
+            servletContext = grails.util.Holders.getServletContext()
         }
         ConfigObject config = grailsApplication.config
         File exchangeDirectory

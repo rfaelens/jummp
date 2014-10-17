@@ -76,7 +76,7 @@ grails.project.dependency.resolution = {
         compile "de.unirostock.sems:BiVeS:1.1-SNAPSHOT"
     }
     plugins {
-        build ":tomcat:7.0.50"
+        build ":tomcat:7.0.54"
 
         compile ":perf4j:0.1.1"
     }
