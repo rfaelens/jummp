@@ -50,6 +50,7 @@ grails.project.dependency.resolution = {
     inherits("global") {
         // uncomment to disable ehcache
         // excludes 'ehcache'
+        excludes 'javassist'
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     legacyResolve true
@@ -116,6 +117,7 @@ grails.project.dependency.resolution = {
 
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
         test "org.grails:grails-datastore-test-support:1.0-grails-2.3"
+        runtime 'org.javassist:javassist:3.17.1-GA'
     }
 
     plugins {
