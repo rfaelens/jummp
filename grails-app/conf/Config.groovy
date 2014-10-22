@@ -183,8 +183,7 @@ log4j = {
         'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
         'org.springframework',
         'org.hibernate',
-        'net.sf.ehcache.hibernate',
-        'org.weceem.services'
+        'net.sf.ehcache.hibernate'
     ]
 
     warn   jummpAppender: 'org.mortbay.log'
@@ -205,7 +204,8 @@ log4j = {
         'net.biomodels.jummp.core.model.identifier',
         'net.biomodels.jummp.core.model.identifier.decorator',
         'net.biomodels.jummp.core.model.identifier.generator',
-        'net.biomodels.jummp.core.model.identifier.support'
+        'net.biomodels.jummp.core.model.identifier.support',
+        'net.biomodels.jummp.plugins.pharmml'
     ]
 }
 
