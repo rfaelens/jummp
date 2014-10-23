@@ -39,6 +39,7 @@ import net.biomodels.jummp.webapp.NotificationTypePreferences
 import net.biomodels.jummp.webapp.NotificationUser
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
+import org.springframework.security.access.prepost.PreAuthorize
 
 /**
  * Service asynchronously called by Camel plugin, in response to various messages. 
@@ -52,6 +53,7 @@ class NotificationService {
 	def modelDelegateService
 	def grailsApplication
 	def mailService
+	def springSecurityService
 
 	Set<User> getNotificationRecipients(ModelTransportCommand model, NotificationType type) {
 		Set<String> creators  = model.creatorUsernames;
@@ -114,6 +116,29 @@ class NotificationService {
     
     void writeAccessGranted(def body) {
     	System.out.println("writeAccessGranted MESSAGE SENT: "+body);
+    }
+    
+    int unreadNotificationCount() {
+    	User notificationsFor = User.findByUsername(springSecurityService.authentication.name)
+    	def notifications = NotificationUser.findAllNotNotificationSeenByUser(notificationsFor);
+    	if (notifications) {
+    		return notifications.size();
+    	}
+		return 0;    	
+    }
+    
+    @PreAuthorize("isAuthenticated()") 
+    def list(String username) {
+    	User notificationsFor = User.findByUsername(username)
+    	return NotificationUser.findAllByUser(notificationsFor).reverse();
+    }
+    
+    void markAsRead(def msgID, String username) {
+    	Notification notification = Notification.get(msgID);
+    	User notificationsFor = User.findByUsername(username)
+    	NotificationUser notificationUser = NotificationUser.findByNotificationAndUser(notification, notificationsFor);
+		notificationUser.setNotificationSeen(true);
+    	notificationUser.save();
     }
     
     void delete(def body) {

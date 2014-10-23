@@ -89,3 +89,6 @@ border: 0px solid #ffffff;
 #helpPanel {
 	height:600px;
 }
+.unseenNotification {
+	font-weight:bold;
+}
