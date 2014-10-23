@@ -35,35 +35,40 @@
     	<div class="content">
     		<div class="view view-dom-id-9c00a92f557689f996511ded36a88594">
     		<div class="view-content">
-    		<table>
-    	    <thead>
-    	    	<th>Sender</th>
-    	    	<th>Title</th>
-    	    	<th>Sent</th>
-            </thead>
-            <tbody>
-            	<g:each status="i" in="${notifications}" var="msg">
-                	<tr class="${ (i % 2) == 0 ? 'even' : 'odd'}">
-                		<td>${msg.notification.sender.person.userRealName}</td>
-                		<g:if test="${msg.notificationSeen}">
-                			<td class="msgTitle" data-msgid="${msg.notification.id}" data-seen='${msg.notificationSeen}'>
-                		</g:if>
-                		<g:else>
-                			<td class="msgTitle unseenNotification" data-msgid="${msg.notification.id}" data-seen='${msg.notificationSeen}'>
-                		</g:else>
-               				${msg.notification.title}
-               			</td>
-                		<td>${msg.notification.dateCreated}</td>
-                		<tr id='msgbody-${msg.notification.id}' style="display: none;" class="msgbody ${ (i % 2) == 0 ? 'even' : 'odd'}">
-                			<td colspan="3">
-                				${msg.notification.body}
-                			</td>
+    		<g:if test="${notifications.size() > 0}">
+            	<table>
+            	<thead>
+    	    		<th>Sender</th>
+    	    		<th>Title</th>
+    	    		<th>Sent</th>
+    	    		</thead>
+    	    		<tbody>
+    	    		<g:each status="i" in="${notifications}" var="msg">
+                		<tr class="${ (i % 2) == 0 ? 'even' : 'odd'}">
+                			<td>${msg.notification.sender.person.userRealName}</td>
+                			<g:if test="${msg.notificationSeen}">
+                				<td class="msgTitle" data-msgid="${msg.notification.id}" data-seen='${msg.notificationSeen}'>
+                			</g:if>
+                			<g:else>
+                				<td class="msgTitle unseenNotification" data-msgid="${msg.notification.id}" data-seen='${msg.notificationSeen}'>
+                			</g:else>
+               					${msg.notification.title}
+               				</td>
+               				<td>${msg.notification.dateCreated}</td>
+               				<tr id='msgbody-${msg.notification.id}' style="display: none;" class="msgbody ${ (i % 2) == 0 ? 'even' : 'odd'}">
+                				<td colspan="3">
+                					${msg.notification.body}
+                				</td>
+                			</tr>
                 		</tr>
-                	</tr>
-                </g:each>
-            </tbody>
+                	</g:each>
+              </tbody>
             </table>
-           </div>
+            </g:if>
+            <g:else>
+               	You have received no notifications.
+            </g:else>
+         </div>
           </div>
          </div>
          <g:javascript>
