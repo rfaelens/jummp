@@ -966,36 +966,32 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
      * File download of the model file for a model by id
      */
     def download = {
-        try {
-            if (!params.filename) {
-                final List<RFTC> FILES = modelDelegateService.retrieveModelFiles(
-                                modelDelegateService.getRevisionFromParams(params.id, params.revisionId))
-                List<RFTC> mainFiles = FILES.findAll { it.mainFile }
-                if (FILES.size() == 1) {
-                    serveModelAsFile(FILES.first(), response, false)
-                } else if (mainFiles.size() == 1) {
-                    serveModelAsFile(mainFiles.first(), response, false)
-                } else {
-                    serveModelAsZip(FILES, response)
-                }
+        if (!params.filename) {
+            final List<RFTC> FILES = modelDelegateService.retrieveModelFiles(
+                            modelDelegateService.getRevisionFromParams(params.id, params.revisionId))
+            List<RFTC> mainFiles = FILES.findAll { it.mainFile }
+            if (FILES.size() == 1) {
+                serveModelAsFile(FILES.first(), response, false)
+            } else if (mainFiles.size() == 1) {
+                serveModelAsFile(mainFiles.first(), response, false)
             } else {
-                final List<RFTC> FILES = modelDelegateService.retrieveModelFiles(
-                                modelDelegateService.getRevisionFromParams(params.id, params.revisionId))
-                RFTC requested = FILES.find {
-                    if (it.hidden) {
-                        return false
-                    }
-                    File file = new File(it.path)
-                    file.getName() == params.filename
-                }
-                boolean inline = params.inline == "true"
-                boolean preview  = params.preview == "true"
-                if (requested) {
-                    serveModelAsFile(requested, response, inline, preview)
-                }
+                serveModelAsZip(FILES, response)
             }
-        } catch(Exception e) {
-            log.error e.message, e
+        } else {
+            final List<RFTC> FILES = modelDelegateService.retrieveModelFiles(
+                            modelDelegateService.getRevisionFromParams(params.id, params.revisionId))
+            RFTC requested = FILES.find {
+                if (it.hidden) {
+                    return false
+                }
+                File file = new File(it.path)
+                file.getName() == params.filename
+            }
+            boolean inline = params.inline == "true"
+            boolean preview  = params.preview == "true"
+            if (requested) {
+                serveModelAsFile(requested, response, inline, preview)
+            }
         }
     }
 
