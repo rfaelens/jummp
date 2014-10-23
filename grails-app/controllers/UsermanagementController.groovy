@@ -46,6 +46,7 @@ class UsermanagementController {
     def userService
     def springSecurityService
     def messageSource
+    def notificationService
     			
     private String checkForMessage() {
         String flashMessage=""
@@ -73,9 +74,11 @@ class UsermanagementController {
     
     @Secured(["isAuthenticated()"])
     def edit = {
+    	String user = springSecurityService.principal.username
     	render view: "edit", model: [postUrl: "", flashMessage:checkForMessage(), 
     								validationErrorOn: checkForErrorBean(), 
-    								user: userService.getUser(springSecurityService.principal.username)]
+    								user: userService.getUser(user),
+    								notificationPermissions: notificationService.getNotificationPermissions(user)]
     }
     
     @Secured(["isAuthenticated()"])
@@ -87,9 +90,11 @@ class UsermanagementController {
     
     @Secured(["isAuthenticated()"])
     def show = {
+    	String user = springSecurityService.principal.username
     	render view: "show", model: [postUrl: "", flashMessage:checkForMessage(), 
     								validationErrorOn: checkForErrorBean(), 
-    								user: userService.getUser(springSecurityService.principal.username)]
+    								user: userService.getUser(user),
+    								notificationPermissions: notificationService.getNotificationPermissions(user)]
     }
     
     @Secured(["isAnonymous()"])
@@ -144,7 +149,9 @@ class UsermanagementController {
             return redirect(action:"edit")
         }
         try {
-            userService.editUser(cmd.toUser())
+            def user = cmd.toUser()
+        	userService.editUser(user)
+        	notificationService.updatePreferences(cmd.getPreferences(user))
         }
         catch(Exception e) {
             flash.message = e.getMessage()

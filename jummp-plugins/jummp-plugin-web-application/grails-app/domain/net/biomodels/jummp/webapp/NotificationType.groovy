@@ -30,10 +30,10 @@ package net.biomodels.jummp.webapp
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 enum NotificationType { 
-   PUBLISH (1, "PUBLISH"), 
-   VERSION_CREATED (2, "VERSION_CREATED"), 
-   ACCESS_GRANTED (3, "ACCESS_GRANTED"), 
-   DELETED (4, "MODEL_DELETED"), 
+   PUBLISH (1, "Publish"), 
+   VERSION_CREATED (2, "Version Created"), 
+   ACCESS_GRANTED (3, "Access Granted"), 
+   DELETED (4, "Model Deleted"), 
    
    final int id 
    final String textRepresentation 
@@ -43,5 +43,14 @@ enum NotificationType {
       this.textRepresentation = textRepresentation 
    } 
    
-   String toString() { name } 
+   static NotificationType getById(int id) {
+   	   switch(id) {
+   	   	   case 1: return PUBLISH;
+   	   	   case 2: return VERSION_CREATED;
+   	   	   case 3: return ACCESS_GRANTED;
+   	   	   case 4: return DELETED;
+   	   }
+   }
+   
+   String toString() { textRepresentation } 
 } 

@@ -72,6 +72,18 @@ class NotificationService {
 		return pref;
 	}
 	
+	void updatePreferences(List<NotificationTypePreferences> preferences) {
+		User user = User.findByUsername(preferences.first().user.username);
+		preferences.each { updated ->
+			NotificationTypePreferences existing = getPreference(user, updated.notificationType);
+			if (existing.sendMail != updated.sendMail || existing.sendNotification != updated.sendNotification) {
+				existing.sendMail = updated.sendMail;
+				existing.sendNotification = updated.sendNotification;
+				existing.save(failOnError: true);
+			}
+		}
+	}
+	
 	void sendNotificationToUser(User user, Notification notification) {
 		NotificationTypePreferences pref = getPreference(user, notification.notificationType);
 		if (pref.sendMail) {
@@ -125,6 +137,16 @@ class NotificationService {
     		return notifications.size();
     	}
 		return 0;    	
+    }
+    
+    @PreAuthorize("isAuthenticated()") 
+    def getNotificationPermissions(String username) {
+    	User notificationsFor = User.findByUsername(username)
+    	def retval = [];
+    	NotificationType.values().each {
+    		retval.add(getPreference(notificationsFor, it));
+    	}
+    	return retval
     }
     
     @PreAuthorize("isAuthenticated()") 

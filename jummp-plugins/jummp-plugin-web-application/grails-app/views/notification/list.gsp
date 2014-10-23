@@ -44,7 +44,7 @@
     	    		</thead>
     	    		<tbody>
     	    		<g:each status="i" in="${notifications}" var="msg">
-                		<tr class="${ (i % 2) == 0 ? 'even' : 'odd'}">
+                		<tr id='msgtitle-${msg.notification.id}' class="titleRow ${ (i % 2) == 0 ? 'even' : 'odd'}">
                 			<td>${msg.notification.sender.person.userRealName}</td>
                 			<g:if test="${msg.notificationSeen}">
                 				<td class="msgTitle" data-msgid="${msg.notification.id}" data-seen='${msg.notificationSeen}'>
@@ -75,8 +75,12 @@
          	$(function() {
          		$(".msgTitle").click(function() {
          			$(".msgbody").hide();
+         			$(".msgbody").removeClass("selectedNotification");
+         			$(".titleRow" ).removeClass("selectedNotification");
          			var showThis = $(this).data("msgid");
          			$("#msgbody-"+showThis).show();
+         			$("#msgtitle-"+showThis).addClass("selectedNotification");
+         			$("#msgbody-"+showThis).addClass("selectedNotification");
          			var seen = $(this).data("seen");
          			if (!seen) {
          				$( this ).removeClass( "unseenNotification" )

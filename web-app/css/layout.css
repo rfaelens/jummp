@@ -92,3 +92,6 @@ border: 0px solid #ffffff;
 .unseenNotification {
 	font-weight:bold;
 }
+.selectedNotification {
+	background-color:#F5EBCC !important;
+}

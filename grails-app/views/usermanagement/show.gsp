@@ -28,6 +28,9 @@
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
      </head>
     <body>
+    	<div class="content">
+    		<div class="view view-dom-id-9c00a92f557689f996511ded36a88594">
+    		<div class="view-content">
         <div>
 			<table>
 				<thead></thead>
@@ -54,10 +57,42 @@
 				</tr>
 				</tbody>
 			</table>
+			<h2>Notifications</h2>
+			<table>
+				<thead>
+					<th>Notification Type</th>
+					<th>Web Notification</th>
+					<th>Email Notification</th>
+				</thead>
+				<tbody>
+					<g:each status="i" in="${notificationPermissions}" var="perm">
+						<tr><td><label>${perm.notificationType.toString()}</label></td>
+						<td>
+							<g:if test="${perm.sendNotification}">
+								<img width="20px" height="auto" title="Receiving notifications on the website" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/Accept.png"/>
+							</g:if>
+							<g:else>
+								<img width="20px" height="auto" title="Not receiving notifications on the website" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/close.png"/>
+							</g:else>
+						</td>
+						<td>
+							<g:if test="${perm.sendMail}">
+								<img width="20px" height="auto" title="Receiving notifications by email" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/Accept.png"/>
+							</g:if>
+							<g:else>
+								<img width="20px" height="auto" title="Not receiving notifications by email" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/close.png"/>
+							</g:else>
+						</td></tr>
+					</g:each>
+				</tbody>
+			</table>
 			<ul id="optionsList">
 				<li><a href='<g:createLink action="edit"/>'>Edit User</a></li>
 				<li><a href='<g:createLink action="editPassword" />'>Change Password</a></li>
 			</ul>
+        </div>
+        </div>
+        </div>
         </div>
    </body>
 </html>
