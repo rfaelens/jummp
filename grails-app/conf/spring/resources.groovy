@@ -88,10 +88,6 @@ beans = {
 			bean.autowire = "byName"
 			bean.singleton = true
     }
-    searchEngine(net.biomodels.jummp.search.SearchProvider) { bean ->
-			bean.autowire = "byName"
-			bean.singleton = true
-    }
     referenceTracker(net.biomodels.jummp.core.ReferenceTracker) { bean ->
 			bean.autowire = "byName"
 			bean.singleton = true
@@ -125,6 +121,11 @@ beans = {
         persistenceInterceptor = ref("persistenceInterceptor")
         executor = Executors.newFixedThreadPool(grailsApplication.config.jummp.threadPool.size)
     }
+
+    searchService(net.biomodels.jummp.core.SearchService) { bean ->
+        bean.initMethod = 'initialize'
+    }
+
     Map R = grailsApplication.config.jummp.id.generators
     identifierGeneratorRegistry(ModelIdentifierGeneratorRegistryService) {
         registry = R

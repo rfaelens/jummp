@@ -45,6 +45,7 @@ import static org.junit.Assert.*
 
 @TestMixin(IntegrationTestMixin)
 class SearchTests extends JummpIntegrationTest {
+    def searchService
     def modelService
     def fileSystemService
     def grailsApplication
@@ -69,9 +70,15 @@ class SearchTests extends JummpIntegrationTest {
                 mainFile: true, description: "")
         Model upped = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
-        // Search for the model using the unique name and description, and ensure its the same we uploaded       
-        assertSame(upped.id,searchForModel(nameTag).id)
-        assertSame(upped.id, searchForModel(descriptionTag).id)
+        //wait a bit for the model to be indexed
+        Thread.sleep(200)
+        ModelTransportCommand result = searchForModel(nameTag)
+        assertNotNull result
+        // Search for the model using the unique name and description, and ensure its the same we uploaded
+        assertSame(upped.id, result.id)
+        result = searchForModel(descriptionTag)
+        assertNotNull result
+        assertSame(upped.id, result.id)
     }
 
     @Before
@@ -96,11 +103,11 @@ class SearchTests extends JummpIntegrationTest {
     }
 
     ModelTransportCommand searchForModel(String query) {
-    	 Set<Model> mods=modelService.searchModels(query)
-    	 if (mods.isEmpty()) {
-    	 	 return null;
-    	 }
-    	 return mods.first()
+        Set<Model> mods = searchService.searchModels(query)
+        if (mods.isEmpty()) {
+            return null
+        }
+        return mods.first()
     }
 
     // Convenience functions follow..
