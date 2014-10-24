@@ -51,9 +51,9 @@ class SearchTests extends JummpIntegrationTest {
 
     @Test
     void testGetLatestRevision() {
-    	// generate unique ids for the name and description
-        String nameTag=UUID.randomUUID().toString()
-        String descriptionTag=UUID.randomUUID().toString()
+        // generate unique ids for the name and description
+        String nameTag = "testModel"
+        String descriptionTag = "test description"
         authenticateAsTestUser()
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
