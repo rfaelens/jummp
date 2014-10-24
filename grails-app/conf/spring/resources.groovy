@@ -120,7 +120,7 @@ beans = {
         timingAspect(org.perf4j.log4j.aop.TimingAspect)
     }
 
-    executorService(  grails.plugin.executor.PersistenceContextExecutorWrapper ) { bean->
+    executorService(grails.plugin.executor.PersistenceContextExecutorWrapper) { bean ->
         bean.destroyMethod = 'destroy' //keep this destroy method so it can try and clean up nicely
         persistenceInterceptor = ref("persistenceInterceptor")
         executor = Executors.newFixedThreadPool(grailsApplication.config.jummp.threadPool.size)

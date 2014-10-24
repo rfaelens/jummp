@@ -28,10 +28,6 @@
 * that of the covered work.}
 **/
 
-
-
-
-
 package net.biomodels.jummp.core
 
 import grails.test.mixin.TestMixin
@@ -55,7 +51,6 @@ class SearchTests extends JummpIntegrationTest {
 
     @Test
     void testGetLatestRevision() {
-    	    
     	// generate unique ids for the name and description
         String nameTag=UUID.randomUUID().toString()
         String descriptionTag=UUID.randomUUID().toString()
@@ -68,13 +63,12 @@ class SearchTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.plugins.sbml.validation = false
         modelService.vcsService.vcsManager = gitService.getInstance()
 
-    	// upload the model
-        def rf = new RepositoryFileTransportCommand(path: smallModel("importModel.xml", nameTag, descriptionTag).absolutePath, mainFile:true, description: "")
+        // upload the model
+        def rf = new RepositoryFileTransportCommand(path:
+                smallModel("importModel.xml", nameTag, descriptionTag).absolutePath,
+                mainFile: true, description: "")
         Model upped = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
-        // refresh the search index (we dont want to wait 5 mins) (once we switch to 4.4)       
-        //grailsApplication.mainContext.getBean("searchEngine").refreshIndex()
-        
         // Search for the model using the unique name and description, and ensure its the same we uploaded       
         assertSame(upped.id,searchForModel(nameTag).id)
         assertSame(upped.id, searchForModel(descriptionTag).id)
@@ -93,11 +87,10 @@ class SearchTests extends JummpIntegrationTest {
     @After
      void tearDown() {
         try {
-     	     FileUtils.deleteDirectory(new File("target/vcs/git"))
-     	     FileUtils.deleteDirectory(new File("target/vcs/exchange"))
-     	}
-     	catch(Exception ignore) {
-     	}
+            FileUtils.deleteDirectory(new File("target/vcs/git"))
+            FileUtils.deleteDirectory(new File("target/vcs/exchange"))
+        } catch(Exception ignore) {
+        }
         modelService.vcsService.vcsManager = null
     }
 
@@ -109,13 +102,14 @@ class SearchTests extends JummpIntegrationTest {
     	 return mods.first()
     }
 
-    
     // Convenience functions follow..
-    
-    
     private File smallModel(String filename, String id, String desc) {
-        return getFileForTest(filename, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><sbml xmlns=\"http://www.sbml.org/sbml/level1\" level=\"1\" version=\"1\">  <model name=\"${id}\">"
-+ "<notes>${desc}</notes>"+'''   <listOfCompartments>
+        return getFileForTest(filename,
+"""<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
+<model name="${id}">"
+    <notes>${desc}</notes>
+    <listOfCompartments>
       <compartment name="x"/>
     </listOfCompartments>
     <listOfSpecies>
@@ -132,11 +126,10 @@ class SearchTests extends JummpIntegrationTest {
       </reaction>
     </listOfReactions>
   </model>
-</sbml>''')
+</sbml>""")
     }
-    
-    private File getFileForTest(String filename, String text)
-    {
+
+    private File getFileForTest(String filename, String text) {
         def tempDir = FileUtils.getTempDirectory()
         def testFile = new File(tempDir.absolutePath + File.separator + filename)
         if (text) {
@@ -144,6 +137,4 @@ class SearchTests extends JummpIntegrationTest {
         }
         return testFile
     }
-
 }
-
