@@ -85,7 +85,7 @@ grails.project.dependency.resolution = {
         runtime "postgresql:postgresql:9.1-901.jdbc4"
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
-        compile "org.apache.solr:solr-solrj:1.4.0"
+        compile "org.apache.solr:solr-solrj:4.10.1"
 
         /* jms
         runtime('org.apache.activemq:activeio-core:3.1.2',
