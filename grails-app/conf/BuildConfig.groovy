@@ -85,10 +85,7 @@ grails.project.dependency.resolution = {
         runtime "postgresql:postgresql:9.1-901.jdbc4"
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
-        //compile ('org.apache.lucene:lucene-core:4.4.0')
-        //compile ('org.apache.lucene:lucene-analyzers-common:4.4.0')
-        //compile ('org.apache.lucene:lucene-queryparser:4.4.0')
-        //compile ('org.apache.lucene:lucene-misc:4.4.0')
+        compile "org.apache.solr:solr-solrj:1.4.0"
 
         /* jms
         runtime('org.apache.activemq:activeio-core:3.1.2',
