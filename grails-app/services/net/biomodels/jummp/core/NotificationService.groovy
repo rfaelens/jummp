@@ -54,6 +54,7 @@ class NotificationService {
 	def grailsApplication
 	def mailService
 	def springSecurityService
+	def messageSource
 
 	Set<User> getNotificationRecipients(ModelTransportCommand model, NotificationType type) {
 		Set<String> creators  = model.creatorUsernames;
@@ -113,8 +114,8 @@ class NotificationService {
 	void modelPublished(def body) {
 		RevisionTransportCommand rev  = body.revision as RevisionTransportCommand;
 		Notification notification = new Notification();
-		notification.title = "Model Published: "+rev.name;
-		notification.body = rev.name+" has been published by "+body.user;
+		notification.title = messageSource.getMessage("notification.model.published.title", [rev.name] as String[], null)
+		notification.body = messageSource.getMessage("notification.model.published.body", [rev.name, body.user] as String[], null) 
 		notification.notificationType = NotificationType.PUBLISH;
 		notification.sender = User.findByUsername(body.user);
 		Set<User> watchers = getNotificationRecipients(model, notification.notificationType);
@@ -166,8 +167,8 @@ class NotificationService {
     void delete(def body) {
 		ModelTransportCommand model  = body.model as ModelTransportCommand;
 		Notification notification = new Notification();
-		notification.title = "Model Deleted: "+model.name;
-		notification.body = model.name+" has been published by "+body.user;
+		notification.title = messageSource.getMessage("notification.model.deleted.title", [model.name] as String[], null)
+		notification.body = messageSource.getMessage("notification.model.deleted.body", [model.name, body.user] as String[], null) 
 		notification.notificationType = NotificationType.DELETED;
 		notification.sender = User.findByUsername(body.user);
 		Set<User> watchers = getNotificationRecipients(model, notification.notificationType);
@@ -178,8 +179,12 @@ class NotificationService {
     void update(def body) {
 		ModelTransportCommand model  = body.model as ModelTransportCommand;
 		Notification notification = new Notification();
-		notification.title = "Model Updated: "+model.name;
-		notification.body = model.name+" has been updated by "+body.user+". Changes include: "+body.update;
+		def updates = []
+		body.update.each {
+			updates.add(it);
+		}
+		notification.title = messageSource.getMessage("notification.model.updated.title", [model.name] as String[], null)
+		notification.body = messageSource.getMessage("notification.model.updated.body", [model.name, body.user, updates.join(",")] as String[], null) 
 		notification.notificationType = NotificationType.VERSION_CREATED;
 		notification.sender = User.findByUsername(body.user);
 		Set<User> watchers = getNotificationRecipients(model, notification.notificationType);
