@@ -143,7 +143,7 @@ class SearchService {
             indexWriter.setMaxFieldLength(25000)
 
             if (IS_DEBUG_ENABLED) {
-                log.debug "About to update index with ${revision.properties}"
+                log.debug "About to update index with revision ${revision.id}"
             }
             String name = revision.name ?: ""
             String description = revision.description ?: ""
@@ -205,11 +205,11 @@ class SearchService {
         }
         p.onComplete {
             if (IS_DEBUG_ENABLED) {
-                log.debug "Finished indexing ${revision.model.submissionId}"
+                log.debug "Finished indexing revision ${revision.id}"
             }
         }
         p.onError { Throwable t ->
-            log.error("Could not index revision ${revision.properties} due to ${t.message}", t)
+            log.error("Could not index revision ${revision.id} due to ${t.message}", t)
         }
     }
 
