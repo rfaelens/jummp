@@ -214,11 +214,9 @@ class SearchService {
     }
 
     /**
-     * Returns search results for query restricted Models the user has access to.
+     * Clears the existing index and then regenerates it.
      *
-     * Executes the @p query, restricting results to Models the current user has access to, 
-     * @param query freetext search on models
-     * @return List of Models
+     * This method requires ROLE_ADMIN permissions.
      **/
     @Secured(['ROLE_ADMIN'])
     @PostLogging(LoggingEventType.CREATION)
