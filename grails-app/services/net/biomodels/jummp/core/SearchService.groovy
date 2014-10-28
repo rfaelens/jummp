@@ -30,6 +30,7 @@ import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.search.StemmingAnalyzer
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
@@ -136,7 +137,7 @@ class SearchService {
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="searchService.updateIndex")
     void updateIndex(RevisionTransportCommand revision) {
-        Promise p = Promises.task {
+        Promise p = Revision.async.task {
             Analyzer analyser = new StemmingAnalyzer()
             IndexWriter indexWriter = new IndexWriter(fsDirectory, analyser)
             indexWriter.setMaxFieldLength(25000)
@@ -223,19 +224,16 @@ class SearchService {
     @PostLogging(LoggingEventType.CREATION)
     @Profiled(tag="searchService.regenerateIndices")
     void regenerateIndices() {
-        Promise p = Promises.task {
-            clearIndex()
-            int offset = 0
-            int count = 10
-            while (true) {
-                List<Model> models = modelService.getAllModels(offset, count)
-                models.each {
-                    updateIndex(modelService.getLatestRevision(it, false).toCommandObject())
-                }
-                if (models.size() < count) {
-                    break
-                }
-                offset += count
+        clearIndex()
+        List<RevisionTransportCommand> revisions = Revision.list(fetch: [model: "eager"]).collect { r ->
+            r.toCommandObject()
+        }
+        if (IS_DEBUG_ENABLED) {
+            log.debug "Indexing ${revisions.size()} revisions."
+        }
+        Promise p = Revision.async.task {
+            revisions.each {
+                updateIndex(it)
             }
         }
         p.onComplete {
