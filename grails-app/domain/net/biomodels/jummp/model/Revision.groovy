@@ -164,7 +164,7 @@ class Revision implements Serializable {
                 comment: comment,
                 uploadDate: uploadDate,
                 format: format.toCommandObject(),
-                model: model.toCommandObject(),
+                model: model.toCommandObject()
         )
         return rev
     }
