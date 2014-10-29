@@ -183,7 +183,8 @@ log4j = {
         'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
         'org.springframework',
         'org.hibernate',
-        'net.sf.ehcache.hibernate'
+        'net.sf.ehcache.hibernate',
+        'org.weceem'
     ]
 
     warn   jummpAppender: 'org.mortbay.log'
@@ -191,12 +192,7 @@ log4j = {
     info   eventsAppender: 'net.biomodels.jummp.plugins.simplelogging'
 
     rollingFile name: "debugAppender", file: "logs/jummp-debug.log", threshold: org.apache.log4j.Level.DEBUG
-    info debugAppender: [
-        'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
-        'org.codehaus.groovy.grails.web.mapping' // URL mapping
-    ]
     debug debugAppender: [
-        'grails.app', //everything provided by grails-app, e.g. services
         'net.biomodels.jummp',
         'net.biomodels.jummp.core',
         'net.biomodels.jummp.model',
