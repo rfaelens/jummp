@@ -36,7 +36,7 @@
     		<div class="view view-dom-id-9c00a92f557689f996511ded36a88594">
     		<div class="view-content">
     		<g:if test="${notifications.size() > 0}">
-            	<g:if test="${partial}">
+            	<g:if test="${partial && notifications.size() == 10}">
             		<p>You are viewing your ten most recent notifications. To access the complete list, <a href="${createLink(action: "list", params: [all: true])}">click here</a></p>
             	</g:if>
     			<table>
