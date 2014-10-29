@@ -302,6 +302,8 @@ if (jummp.search.index instanceof ConfigObject) {
 }
 println "INFO\t Using ${jummp.search.index} for storing the search index."
 
+jummp.search.url = "http://localhost:8983/solr/jummp"
+
 // registration settings
 if (!(jummpConfig.jummp.security.registration.email.send instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.send)) {
     jummp.security.registration.email.send         = Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.send)

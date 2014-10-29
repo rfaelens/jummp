@@ -122,8 +122,11 @@ beans = {
         executor = Executors.newFixedThreadPool(grailsApplication.config.jummp.threadPool.size)
     }
 
-    searchService(net.biomodels.jummp.core.SearchService) { bean ->
-        bean.initMethod = 'initialize'
+    solrServerHolder(net.biomodels.jummp.search.SolrServerHolder) { bean ->
+        bean.scope = "singleton"
+        bean.autowire = "byName"
+        bean.initMethod = "init"
+        bean.destroyMethod = "destroy"
     }
 
     Map R = grailsApplication.config.jummp.id.generators
