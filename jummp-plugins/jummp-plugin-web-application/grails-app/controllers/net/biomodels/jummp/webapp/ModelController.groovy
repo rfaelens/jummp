@@ -276,7 +276,7 @@ class ModelController {
         try {
             rev = modelDelegateService.getRevisionFromParams(params.id, params.revisionId)
             modelDelegateService.publishModelRevision(rev)
-            def notification = [revision:rev, user:getUsername()]
+            def notification = [revision:rev, user:getUsername(), perms: modelDelegateService.getPermissionsMap(rev.model.submissionId)]
             sendMessage("seda:model.publish", notification)
     	
             redirect(action: "showWithMessage",
@@ -297,7 +297,9 @@ class ModelController {
     def delete = {
         try {
             boolean deleted = modelDelegateService.deleteModel(params.id)
-            def notification = [model:modelDelegateService.getModel(params.id), user:getUsername()]
+            def notification = [model:modelDelegateService.getModel(params.id), 
+            					user:getUsername(),
+            					perms: modelDelegateService.getPermissionsMap(params.id)]
             sendMessage("seda:model.delete", notification)
             redirect(action: "showWithMessage", id: params.id,
                         params: [ flashMessage: deleted ?
@@ -407,10 +409,12 @@ class ModelController {
                 String update = conversation.changesMade.join(". ")
                 String model = conversation.model_id
                 String user = getUsername()
+                System.out.println(conversation.model_id);
                 updateHistory(session.result_submission, user, "update", "html", update, true)
                 def notification = [model:modelDelegateService.getModel(conversation.model_id), 
                 					user:user, 
-                					update: conversation.changesMade]
+                					update: conversation.changesMade,
+                					perms: modelDelegateService.getPermissionsMap(conversation.model_id, false)]
                 sendMessage("seda:model.update", notification)
             }.to "displayConfirmationPage"
             on("displayErrorPage").to "displayErrorPage"

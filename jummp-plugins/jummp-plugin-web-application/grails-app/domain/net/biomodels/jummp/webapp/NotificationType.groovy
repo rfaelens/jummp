@@ -32,8 +32,9 @@ package net.biomodels.jummp.webapp
 enum NotificationType { 
    PUBLISH (1, "Publish"), 
    VERSION_CREATED (2, "Version Created"), 
-   ACCESS_GRANTED (3, "Access Granted"), 
-   DELETED (4, "Model Deleted"), 
+   ACCESS_GRANTED (3, "Another user is granted access to a model"), 
+   DELETED (4, "Model Deleted"),
+   ACCESS_GRANTED_TO (5, "Access is granted to you")
    
    final int id 
    final String textRepresentation 

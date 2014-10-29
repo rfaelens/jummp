@@ -272,8 +272,8 @@ class ModelDelegateService implements IModelService {
         return modelService.deleteRevision(Revision.get(revision.id))
     }
 
-    Collection<PermissionTransportCommand> getPermissionsMap(String modelId) {
-        return modelService.getPermissionsMap(Model.findByPerennialIdentifier(modelId))
+    Collection<PermissionTransportCommand> getPermissionsMap(String modelId, boolean authenticated = true) {
+        return modelService.getPermissionsMap(Model.findByPerennialIdentifier(modelId), authenticated)
     }
 
     void setPermissions(String modelId, List<PermissionTransportCommand> permissions) {

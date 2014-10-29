@@ -1536,7 +1536,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 aclUtilService.addPermission(revision, collaborator.username, BasePermission.READ)
             }
         }
-        def notification = [model:model, user:getUsername(), grantedTo: collaborator]
+        def notification = [model:model.toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
         sendMessage("seda:model.readAccessGranted", notification)
     }
 
@@ -1549,7 +1549,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Returns permissions of a @p model.
+    * Returns permissions of a @p model. The @p autenticated parameter allows
+    * notifications to be generated from non-admin updaters of the model. 
     *
     * returns the users with access to the model
     *
@@ -1558,9 +1559,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
    // @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getPermissionsMap")
-    public Collection<PermissionTransportCommand> getPermissionsMap(Model model) {
+    public Collection<PermissionTransportCommand> getPermissionsMap(Model model, boolean authenticated = true) {
         HashMap<String, PermissionTransportCommand> map = new HashMap<String, PermissionTransportCommand>()
-        if (aclUtilService.hasPermission(springSecurityService.authentication, model,
+        if (!authenticated || aclUtilService.hasPermission(springSecurityService.authentication, model,
                     BasePermission.ADMINISTRATION ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
             def permissions = aclUtilService.readAcl(model).getEntries()
             permissions.each {
@@ -1692,7 +1693,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION)
             }
         }
-        def notification = [model:model, user:getUsername(), grantedTo: collaborator]
+        def notification = [model:model.toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
         sendMessage("seda:model.writeAccessGranted", notification)
     }
 

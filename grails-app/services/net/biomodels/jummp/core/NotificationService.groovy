@@ -56,13 +56,24 @@ class NotificationService {
 	def springSecurityService
 	def messageSource
 
-	Set<User> getNotificationRecipients(ModelTransportCommand model, NotificationType type) {
-		Set<String> creators  = model.creatorUsernames;
+	Set<User> getUsersFromUsernames(def usernames) {
 		Set<User> users = new HashSet<User>();
-		creators.each {
+		usernames.each {
 			users.add(User.findByUsername(it));
 		}
 		return users;
+	}
+	
+	Set<User> getNotificationRecipients(ModelTransportCommand model, NotificationType type) {
+		Set<String> creators  = model.creatorUsernames;
+		return getUsersFromUsernames(creators);
+	}
+	
+	Set<User> getNotificationRecipients(def permissionsMap) {
+		def usernames = permissionsMap.findAll { ptc ->
+			ptc.write
+		}
+		return getUsersFromUsernames(usernames.collect { it.id });
 	}
 	
 	NotificationTypePreferences getPreference(User user, NotificationType type) {
@@ -113,22 +124,75 @@ class NotificationService {
 	
 	void modelPublished(def body) {
 		RevisionTransportCommand rev  = body.revision as RevisionTransportCommand;
-		Notification notification = new Notification();
-		notification.title = messageSource.getMessage("notification.model.published.title", [rev.name] as String[], null)
-		notification.body = messageSource.getMessage("notification.model.published.body", [rev.name, body.user] as String[], null) 
-		notification.notificationType = NotificationType.PUBLISH;
-		notification.sender = User.findByUsername(body.user);
-		Set<User> watchers = getNotificationRecipients(model, notification.notificationType);
-		watchers = watchers - [notification.sender]
-		sendNotification(rev.model, notification, watchers);
+		useGenericNotificationStructure("notification.model.published.title",
+    								 	[rev.name] as String[],
+    								    "notification.model.published.body",
+    								    [rev.name, body.user] as String[],
+    								    NotificationType.PUBLISH,
+    								    body.user,
+    								    getNotificationRecipients(body.perms),
+    								    rev.model)
 	}
     
     void readAccessGranted(def body) {
-    	System.out.println("readAccessGranted MESSAGE SENT: "+body);
+    	ModelTransportCommand model  = body.model as ModelTransportCommand;
+		useGenericNotificationStructure("notification.model.readgranted.title",
+    								 	[model.name] as String[],
+    								    "notification.model.readgranted.body",
+    								    [model.name, body.user, body.grantedTo.username] as String[],
+    								    NotificationType.ACCESS_GRANTED,
+    								    body.user,
+    								    getNotificationRecipients(body.perms),
+    								    model)
+    	
+		useGenericNotificationStructure("notification.model.readgrantedTo.title",
+    								 	[model.name] as String[],
+    								    "notification.model.readgrantedTo.body",
+    								    [model.name, body.user] as String[],
+    								    NotificationType.ACCESS_GRANTED_TO,
+    								    body.user,
+    								    getUsersFromUsernames([body.grantedTo.username]),
+    								    model)
     }
     
     void writeAccessGranted(def body) {
-    	System.out.println("writeAccessGranted MESSAGE SENT: "+body);
+    	ModelTransportCommand model  = body.model as ModelTransportCommand;
+		useGenericNotificationStructure("notification.model.writegranted.title",
+    								 	[model.name] as String[],
+    								    "notification.model.writegranted.body",
+    								    [model.name, body.user, body.grantedTo.username] as String[],
+    								    NotificationType.ACCESS_GRANTED,
+    								    body.user,
+    								    getNotificationRecipients(body.perms) - User.findByUsername(body.grantedTo.username),
+    								    model)
+    	
+		useGenericNotificationStructure("notification.model.writegrantedTo.title",
+    								 	[model.name] as String[],
+    								    "notification.model.writegrantedTo.body",
+    								    [model.name, body.user] as String[],
+    								    NotificationType.ACCESS_GRANTED_TO,
+    								    body.user,
+    								    getUsersFromUsernames([body.grantedTo.username]),
+    								    model)
+
+    }
+    
+    void useGenericNotificationStructure(String notificationTitle,
+    								  String[] titleParams,
+    								  String notificationBody,
+    								  String[] bodyParams,
+    								  NotificationType type,
+    								  String sender,
+    								  Set<User> watchers,
+    								  ModelTransportCommand model) {
+    	Notification notification = new Notification();
+		notification.title = messageSource.getMessage(notificationTitle, titleParams, null)
+		notification.body = messageSource.getMessage(notificationBody, bodyParams, null) 
+		notification.notificationType = type;
+		notification.sender = User.findByUsername(sender);
+		watchers = watchers - [notification.sender]
+		sendNotification(model, notification, watchers);
+    
     }
     
     int unreadNotificationCount() {
@@ -151,9 +215,13 @@ class NotificationService {
     }
     
     @PreAuthorize("isAuthenticated()") 
-    def list(String username) {
+    def list(String username, int maxSize = -1) {
     	User notificationsFor = User.findByUsername(username)
-    	return NotificationUser.findAllByUser(notificationsFor).reverse();
+    	def notifications = NotificationUser.findAllByUser(notificationsFor).reverse();
+    	if (maxSize==-1 || notifications.size() < maxSize) {
+    		return notifications
+    	}
+    	return notifications[0..maxSize-1]
     }
     
     void markAsRead(def msgID, String username) {
@@ -165,31 +233,31 @@ class NotificationService {
     }
     
     void delete(def body) {
-		ModelTransportCommand model  = body.model as ModelTransportCommand;
-		Notification notification = new Notification();
-		notification.title = messageSource.getMessage("notification.model.deleted.title", [model.name] as String[], null)
-		notification.body = messageSource.getMessage("notification.model.deleted.body", [model.name, body.user] as String[], null) 
-		notification.notificationType = NotificationType.DELETED;
-		notification.sender = User.findByUsername(body.user);
-		Set<User> watchers = getNotificationRecipients(model, notification.notificationType);
-		watchers = watchers - [notification.sender]
-		sendNotification(model, notification, watchers);
+    	ModelTransportCommand model  = body.model as ModelTransportCommand;
+		useGenericNotificationStructure("notification.model.deleted.title",
+    								 	[model.name] as String[],
+    								    "notification.model.published.body",
+    								    [model.name, body.user] as String[],
+    								    NotificationType.DELETED,
+    								    body.user,
+    								    getNotificationRecipients(body.perms),
+    								    model)
     }
     
     void update(def body) {
 		ModelTransportCommand model  = body.model as ModelTransportCommand;
-		Notification notification = new Notification();
 		def updates = []
 		body.update.each {
 			updates.add(it);
 		}
-		notification.title = messageSource.getMessage("notification.model.updated.title", [model.name] as String[], null)
-		notification.body = messageSource.getMessage("notification.model.updated.body", [model.name, body.user, updates.join(",")] as String[], null) 
-		notification.notificationType = NotificationType.VERSION_CREATED;
-		notification.sender = User.findByUsername(body.user);
-		Set<User> watchers = getNotificationRecipients(model, notification.notificationType);
-		watchers = watchers - [notification.sender]
-		sendNotification(model, notification, watchers);
-    }
+		useGenericNotificationStructure("notification.model.updated.title",
+    								 	[model.name] as String[],
+    								    "notification.model.updated.body",
+    								    [model.name, body.user, updates.join(",")] as String[],
+    								    NotificationType.VERSION_CREATED,
+    								    body.user,
+    								    getNotificationRecipients(body.perms),
+    								    model)
+   }
     
 }
