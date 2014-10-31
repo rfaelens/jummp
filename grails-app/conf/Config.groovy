@@ -18,6 +18,7 @@
 * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 **/
 
+import java.util.regex.Pattern
 import net.biomodels.jummp.core.model.identifier.ModelIdentifierUtils
 
 // locations to search for config files that get merged into the main config
@@ -272,33 +273,27 @@ if (jummpConfig.jummp.vcs.exchangeDirectory) {
 if (jummpConfig.jummp.vcs.workingDirectory) {
     jummp.vcs.workingDirectory = jummpConfig.jummp.vcs.workingDirectory
 }
-// search plugin
-if (!(jummpConfig.jummp.search.index instanceof ConfigObject)) {
-    String indexLocation = jummpConfig.jummp.search.index
-    final File indexFolder = new File(indexLocation)
-    if (indexFolder.exists()) {
-        if (indexFolder.isDirectory() && indexFolder.canRead() && indexFolder.canWrite() && indexFolder.canExecute()) {
-            jummp.search.index = indexLocation
-        } else {
-            //permission issues
-            println "ERROR\t Cannot use ${indexLocation} for storing the search index. Please review the folder's permissions."
-        }
+// search config
+if (!(jummpConfig.jummp.search.url instanceof ConfigObject)) {
+    final Pattern URL_PATTERN = ~/http:\/\/[a-zA-Z0-9\.\-_]+(:[0-9]+)?(\/[a-zA-Z0-9\-\._]+)*/
+    final String solrSetting = jummpConfig.jummp.search.url
+    final String solrUrl
+    if (solrSetting?.endsWith("/")) {
+        solrUrl = solrSetting.substring(0, solrSetting.length() - 1)
     } else {
-        // location does not exist
-            println "ERROR\t Cannot use ${indexLocation} for storing the search index because the folder does not exist. Please create it."
+        solrUrl = solrSetting
     }
+    if (!solrUrl || ! (solrUrl ==~ URL_PATTERN)) {
+        throw new IllegalArgumentException("""The URL for the search server ($solrUrl) does \
+not look right. Check the value of setting 'jummp.search.url'.""")
+    } else {
+        jummp.search.url = solrUrl
+        println "INFO\tUsing $solrUrl as the URL of the search server."
+    }
+} else {
+    throw new IllegalArgumentException("""\
+Please add the setting 'jummp.search.url', pointing to a Solr core, to your configuration.""")
 }
-// handle the situation gracefully
-if (jummp.search.index instanceof ConfigObject) {
-    // prefer StringBuffer to StringBuilder just to be defensive
-    StringBuffer tmp = new StringBuffer(System.getProperty("java.io.tmpdir"))
-    File idx = new File(tmp.append(File.separator).append("search_index").toString())
-    idx.mkdirs()
-    jummp.search.index = idx.canonicalPath
-}
-println "INFO\t Using ${jummp.search.index} for storing the search index."
-
-jummp.search.url = "http://localhost:8983/solr/jummp"
 
 // registration settings
 if (!(jummpConfig.jummp.security.registration.email.send instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.send)) {
