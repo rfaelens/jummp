@@ -186,28 +186,26 @@ class SearchService {
     *
     * Executes the @p query, restricting results to Models the current user has access to.
     * @param query freetext search on models
-    * @return Set of ModelTransportCommand of relevant models available to the user.
+    * @return Collection of ModelTransportCommand of relevant models available to the user.
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="searchService.searchModels")
-    public Set<ModelTransportCommand> searchModels(String query) {
+    public Collection<ModelTransportCommand> searchModels(String query) {
         SolrDocumentList results = search(query)
-
-        Set<ModelTransportCommand> returnVals = new LinkedHashSet<ModelTransportCommand>()
+        final int COUNT = results.size()
+        Map<String, ModelTransportCommand> returnVals = new LinkedHashMap<>(COUNT + 1, 1.0f)
         results.each {
-            def existingModel = returnVals.find { prevs ->
-                prevs.submissionId == it.get("submissionId")
-            }
-            if (!existingModel) {
-                String perennialField = it.get("publicationId") ?: it.get("submissionId")
+            final String thisSubmissionId = it.get("submissionId")
+            if (!returnVals.containsKey(thisSubmissionId)) {
+                String perennialField = it.get("publicationId") ?: thisSubmissionId
                 Model returned = Model.findByPerennialIdentifier(perennialField)
                 if (returned && !returned.deleted &&
                         modelService.getLatestRevision(returned, false)) {
-                    returnVals.add(returned.toCommandObject())
+                    returnVals.put(thisSubmissionId, returned.toCommandObject())
                 }
             }
         }
-        return returnVals
+        return returnVals.values()
     }
 
     /**
