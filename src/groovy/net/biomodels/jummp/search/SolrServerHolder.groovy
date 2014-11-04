@@ -20,11 +20,10 @@
 
 package net.biomodels.jummp.search
 
-import grails.util.Environment
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
-import org.apache.solr.client.solrj.SolrServer
 import org.apache.solr.client.solrj.impl.HttpSolrServer
+import org.apache.solr.client.solrj.SolrServer
 import org.apache.solr.client.solrj.response.SolrPingResponse
 import org.perf4j.aop.Profiled
 
@@ -32,7 +31,6 @@ import org.perf4j.aop.Profiled
  * @short Simple holder of the reference to the Solr server.
  *
  * This singleton-scoped bean creates and maintains a reference to the Solr server.
- * An EmbeddedSolrServer is used for testing, while a HttpSolrServer is used otherwise.
  */
 class SolrServerHolder {
     /**
@@ -66,11 +64,8 @@ class SolrServerHolder {
             throw new IllegalStateException("""\
 URL of Solr server not found. Please check the setting jummp.server.url in the config file.""")
         }
-        if (Environment.current == Environment.TEST) {
-            //TODO
-        } else {
-            server = new HttpSolrServer(url)
-        }
+
+        server = new HttpSolrServer(url)
         if (IS_INFO_ENABLED) {
             log.info "Connected to Solr instance $url."
         }

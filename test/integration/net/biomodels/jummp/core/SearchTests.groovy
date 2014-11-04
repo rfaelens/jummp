@@ -33,12 +33,10 @@ package net.biomodels.jummp.core
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
-import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.plugins.git.GitManagerFactory
-import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.io.FileUtils
 import org.junit.*
 import static org.junit.Assert.*
@@ -49,6 +47,7 @@ class SearchTests extends JummpIntegrationTest {
     def modelService
     def fileSystemService
     def grailsApplication
+    def solrServerHolder
 
     @Test
     void testGetLatestRevision() {
@@ -71,12 +70,21 @@ class SearchTests extends JummpIntegrationTest {
         Model upped = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         //wait a bit for the model to be indexed
-        Thread.sleep(200)
+        Thread.sleep(500)
+        // Search for the model using the name and description, and ensure it's the same we uploaded
         ModelTransportCommand result = searchForModel(nameTag)
         assertNotNull result
-        // Search for the model using the unique name and description, and ensure its the same we uploaded
         assertSame(upped.id, result.id)
         result = searchForModel(descriptionTag)
+        assertNotNull result
+        assertSame(upped.id, result.id)
+        result = searchForModel(upped.submissionId)
+        assertNotNull result
+        assertSame(upped.id, result.id)
+        result = searchForModel("submissionId:${upped.submissionId}")
+        assertNotNull result
+        assertSame(upped.id, result.id)
+        result = searchForModel("SBML")
         assertNotNull result
         assertSame(upped.id, result.id)
     }
@@ -90,6 +98,9 @@ class SearchTests extends JummpIntegrationTest {
         fileSystemService.root = container.getParentFile()
         modelService.vcsService.currentModelContainer = container.getCanonicalPath()
         createUserAndRoles()
+        assertNotNull solrServerHolder.server
+        solrServerHolder.server.deleteByQuery("*:*")
+        solrServerHolder.server.commit()
     }
 
     @After
@@ -103,7 +114,7 @@ class SearchTests extends JummpIntegrationTest {
     }
 
     ModelTransportCommand searchForModel(String query) {
-        Set<Model> mods = searchService.searchModels(query)
+        Collection<Model> mods = searchService.searchModels(query)
         if (mods.isEmpty()) {
             return null
         }

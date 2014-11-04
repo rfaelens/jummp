@@ -21,7 +21,6 @@
 package net.biomodels.jummp.core
 
 import grails.async.Promise
-import grails.async.Promises
 import grails.plugins.springsecurity.Secured
 import grails.util.Holders
 import net.biomodels.jummp.core.events.LoggingEventType
@@ -30,14 +29,12 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
-import net.biomodels.jummp.search.SolrServerHolder
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.solr.client.solrj.SolrQuery
 import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.SolrDocumentList
 import org.apache.solr.common.SolrInputDocument
-import org.apache.solr.common.SolrInputField
 import org.perf4j.aop.Profiled
 
 /**
@@ -48,7 +45,7 @@ import org.perf4j.aop.Profiled
  *
  * @author Raza Ali, raza.ali@ebi.ac.uk
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @date   20141028
+ * @date   20141104
  */
 class SearchService {
     /**
@@ -78,7 +75,7 @@ class SearchService {
     /**
      * Dependency injection of SolrServerHolder
      */
-    SolrServerHolder solrServerHolder
+    def  solrServerHolder
 
     /**
      * Clears the index. Handle with care.
@@ -221,10 +218,9 @@ class SearchService {
     private SolrDocumentList search(String q) {
         SolrQuery query = new SolrQuery()
         /*TODO optimise this*/
-        query.setQuery("{!edismax}*${q.encodeAsHTML()}*")
         String[] fields = [ "name" ,"description", "content", "submissionId", "publicationId",
                 "modelFormat", "levelVersion", "submitter", "paperTitle", "paperAbstract"]
-        query.setFields(fields)
+        query.setParam("q", "*:*").setParam("q.alt", "{!edismax}$q").setParam("qf", fields)
         QueryResponse response = solrServerHolder.server.query(query)
         SolrDocumentList docs = response.getResults()
         return docs
