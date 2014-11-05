@@ -28,37 +28,32 @@
 * that of the covered work.}
 **/
 
-
-
-
-
 package net.biomodels.jummp.core
 
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
-import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.plugins.git.GitManagerFactory
-import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.io.FileUtils
 import org.junit.*
 import static org.junit.Assert.*
 
 @TestMixin(IntegrationTestMixin)
 class SearchTests extends JummpIntegrationTest {
+    def searchService
     def modelService
     def fileSystemService
     def grailsApplication
+    def solrServerHolder
 
     @Test
     void testGetLatestRevision() {
-    	    
-    	// generate unique ids for the name and description
-        String nameTag=UUID.randomUUID().toString()
-        String descriptionTag=UUID.randomUUID().toString()
+        // generate unique ids for the name and description
+        String nameTag = "testModel"
+        String descriptionTag = "test description"
         authenticateAsTestUser()
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
@@ -68,16 +63,30 @@ class SearchTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.plugins.sbml.validation = false
         modelService.vcsService.vcsManager = gitService.getInstance()
 
-    	// upload the model
-        def rf = new RepositoryFileTransportCommand(path: smallModel("importModel.xml", nameTag, descriptionTag).absolutePath, mainFile:true, description: "")
+        // upload the model
+        def rf = new RepositoryFileTransportCommand(path:
+                smallModel("importModel.xml", nameTag, descriptionTag).absolutePath,
+                mainFile: true, description: "")
         Model upped = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
-        // refresh the search index (we dont want to wait 5 mins) (once we switch to 4.4)       
-        //grailsApplication.mainContext.getBean("searchEngine").refreshIndex()
-        
-        // Search for the model using the unique name and description, and ensure its the same we uploaded       
-        assertSame(upped.id,searchForModel(nameTag).id)
-        assertSame(upped.id, searchForModel(descriptionTag).id)
+        //wait a bit for the model to be indexed
+        Thread.sleep(500)
+        // Search for the model using the name and description, and ensure it's the same we uploaded
+        ModelTransportCommand result = searchForModel(nameTag)
+        assertNotNull result
+        assertSame(upped.id, result.id)
+        result = searchForModel(descriptionTag)
+        assertNotNull result
+        assertSame(upped.id, result.id)
+        result = searchForModel(upped.submissionId)
+        assertNotNull result
+        assertSame(upped.id, result.id)
+        result = searchForModel("submissionId:${upped.submissionId}")
+        assertNotNull result
+        assertSame(upped.id, result.id)
+        result = searchForModel("SBML")
+        assertNotNull result
+        assertSame(upped.id, result.id)
     }
 
     @Before
@@ -87,35 +96,39 @@ class SearchTests extends JummpIntegrationTest {
         new File("target/vcs/exchange/").mkdirs()
         fileSystemService.currentModelContainer = container.getCanonicalPath()
         fileSystemService.root = container.getParentFile()
+        modelService.vcsService.currentModelContainer = container.getCanonicalPath()
         createUserAndRoles()
+        assertNotNull solrServerHolder.server
+        solrServerHolder.server.deleteByQuery("*:*")
+        solrServerHolder.server.commit()
     }
 
     @After
      void tearDown() {
         try {
-     	     FileUtils.deleteDirectory(new File("target/vcs/git"))
-     	     FileUtils.deleteDirectory(new File("target/vcs/exchange"))
-     	}
-     	catch(Exception ignore) {
-     	}
+            FileUtils.deleteDirectory(new File("target/vcs/git"))
+            FileUtils.deleteDirectory(new File("target/vcs/exchange"))
+        } catch(Exception ignore) {
+        }
         modelService.vcsService.vcsManager = null
     }
 
     ModelTransportCommand searchForModel(String query) {
-    	 Set<Model> mods=modelService.searchModels(query)
-    	 if (mods.isEmpty()) {
-    	 	 return null;
-    	 }
-    	 return mods.first()
+        Collection<Model> mods = searchService.searchModels(query)
+        if (mods.isEmpty()) {
+            return null
+        }
+        return mods.first()
     }
 
-    
     // Convenience functions follow..
-    
-    
     private File smallModel(String filename, String id, String desc) {
-        return getFileForTest(filename, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><sbml xmlns=\"http://www.sbml.org/sbml/level1\" level=\"1\" version=\"1\">  <model name=\"${id}\">"
-+ "<notes>${desc}</notes>"+'''   <listOfCompartments>
+        return getFileForTest(filename,
+"""<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
+<model name="${id}">"
+    <notes>${desc}</notes>
+    <listOfCompartments>
       <compartment name="x"/>
     </listOfCompartments>
     <listOfSpecies>
@@ -132,11 +145,10 @@ class SearchTests extends JummpIntegrationTest {
       </reaction>
     </listOfReactions>
   </model>
-</sbml>''')
+</sbml>""")
     }
-    
-    private File getFileForTest(String filename, String text)
-    {
+
+    private File getFileForTest(String filename, String text) {
         def tempDir = FileUtils.getTempDirectory()
         def testFile = new File(tempDir.absolutePath + File.separator + filename)
         if (text) {
@@ -144,6 +156,4 @@ class SearchTests extends JummpIntegrationTest {
         }
         return testFile
     }
-
 }
-

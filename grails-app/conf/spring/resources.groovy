@@ -37,8 +37,8 @@ import grails.util.Holders
 import java.util.concurrent.Executors
 import net.biomodels.jummp.core.model.identifier.generator.AbstractModelIdentifierGenerator
 import net.biomodels.jummp.core.model.identifier.generator.DefaultModelIdentifierGenerator
-import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
 import net.biomodels.jummp.core.model.identifier.generator.ModelIdentifierGeneratorRegistryService
+import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
 
 // Place your Spring DSL code here
 beans = {
@@ -85,24 +85,20 @@ beans = {
     }
 
     indexingEventListener(net.biomodels.jummp.search.UpdatedRepositoryListener) { bean ->
-			bean.autowire = "byName"
-			bean.singleton = true
-    }
-    searchEngine(net.biomodels.jummp.search.SearchProvider) { bean ->
-			bean.autowire = "byName"
-			bean.singleton = true
+        bean.autowire = "byName"
+        bean.singleton = true
     }
     referenceTracker(net.biomodels.jummp.core.ReferenceTracker) { bean ->
-			bean.autowire = "byName"
-			bean.singleton = true
+        bean.autowire = "byName"
+        bean.singleton = true
     }
     maintenanceMode(net.biomodels.jummp.core.MaintenanceBean) { bean ->
-			bean.autowire = "byName"
-			bean.singleton = true
+        bean.autowire = "byName"
+        bean.singleton = true
     }
     modelFileFormatConfig(net.biomodels.jummp.core.ModelFileFormatConfig) { bean ->
-			bean.autowire = "byName"
-			bean.singleton = true
+        bean.autowire = "byName"
+        bean.singleton = true
     }
     ontologyLookupServiceResolver(net.biomodels.jummp.core.miriam.OntologyLookupResolver) { bean ->
         bean.scope = "prototype"
@@ -120,11 +116,19 @@ beans = {
         timingAspect(org.perf4j.log4j.aop.TimingAspect)
     }
 
-    executorService(  grails.plugin.executor.PersistenceContextExecutorWrapper ) { bean->
+    executorService(grails.plugin.executor.PersistenceContextExecutorWrapper) { bean ->
         bean.destroyMethod = 'destroy' //keep this destroy method so it can try and clean up nicely
         persistenceInterceptor = ref("persistenceInterceptor")
         executor = Executors.newFixedThreadPool(grailsApplication.config.jummp.threadPool.size)
     }
+
+    solrServerHolder(net.biomodels.jummp.search.SolrServerHolder) { bean ->
+        bean.scope = "singleton"
+        bean.autowire = "byName"
+        bean.initMethod = "init"
+        bean.destroyMethod = "destroy"
+    }
+
     Map R = grailsApplication.config.jummp.id.generators
     identifierGeneratorRegistry(ModelIdentifierGeneratorRegistryService) {
         registry = R

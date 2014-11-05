@@ -314,7 +314,6 @@ class GitManager implements VcsManager {
     	List<VcsFileDetails> fileDetails = new ArrayList<VcsFileDetails>()
     	try {
     		FileRepositoryBuilder builder = new FileRepositoryBuilder()
-    		System.out.println("MODEL DIRECTORY: "+modelDirectory);
     		Repository repository;
             repository = builder.setGitDir(new File(".git", modelDirectory)).readEnvironment()
                                                   .findGitDir().build();
@@ -330,7 +329,6 @@ class GitManager implements VcsManager {
 			while (i.hasNext()) {
 				def iterated = i.next()
 				commit = walk.parseCommit( iterated );
-				System.out.println(iterated)
 				long timestamp = commit.getCommitTime();
 				VcsFileDetails detail = new VcsFileDetails();
 				detail.revisionId=iterated.getName()

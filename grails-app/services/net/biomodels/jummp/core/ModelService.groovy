@@ -71,7 +71,7 @@ import org.springframework.security.core.userdetails.UserDetails
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
- * @date 20130715
+ * @date 20141024
  */
 @SuppressWarnings("GroovyUnusedCatchParameter")
 class ModelService {
@@ -124,68 +124,9 @@ class ModelService {
      * Dependency injection of publicationIdGenerator
      */
     def publicationIdGenerator
+
     final boolean MAKE_PUBLICATION_ID = !(publicationIdGenerator instanceof NullModelIdentifierGenerator)
     static transactional = true
-
-    /**
-    * Returns search results for query restricted Models the user has access to.
-    *
-    * Executes the @p query, restricting results to Models the current user has access to,
-    * @param query freetext search on models
-    * @return List of Models
-    **/
-    @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="modelService.searchModels")
-    public Set<ModelTransportCommand> searchModels(String query) {
-        def searchEngine = grailsApplication.mainContext.getBean("searchEngine")
-        String[] fields = ["submissionId", "publicationId", "name", "description", "content",
-                    "modelFormat", "levelVersion", "submitter", "paperTitle", "paperAbstract"]
-        Set<Document> results = searchEngine.performSearch(fields, query)
-
-        Set<ModelTransportCommand> returnVals = new HashSet<ModelTransportCommand>()
-        results.each {
-            def existingModel = returnVals.find { prevs ->
-                prevs.submissionId == it.get("submissionId")
-            }
-            if (!existingModel) {
-                String perennialField= it.get("publicationId")
-                if (perennialField.isEmpty()) {
-                    perennialField= it.get("submissionId")
-                }
-               	Model returned = Model.findByPerennialIdentifier(perennialField)
-               	if (returned && !returned.deleted && getLatestRevision(returned, false)) {
-               		returnVals.add(returned.toCommandObject())
-               	}
-            }
-        }
-        return returnVals
-    }
-
-     /**
-    * Returns search results for query restricted Models the user has access to.
-    *
-    * Executes the @p query, restricting results to Models the current user has access to, 
-    * @param query freetext search on models
-    * @return List of Models
-    **/
-    @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="modelService.regenerateIndices")
-    public void regenerateIndices() {
-        def searchEngine = grailsApplication.mainContext.getBean("indexingEventListener")
-        searchEngine.clearIndex()
-        int offset = 0
-        int count = 10
-        while (true) {
-            List<Model> models = getAllModels(offset, count)
-            models.each {
-                searchEngine.updateIndex(getLatestRevision(it, false).toCommandObject())
-            }
-            if (models.size() < count) {
-                break
-            }
-            offset += count
-        }
-    }
 
     /**
     * Returns list of Models the user has access to.

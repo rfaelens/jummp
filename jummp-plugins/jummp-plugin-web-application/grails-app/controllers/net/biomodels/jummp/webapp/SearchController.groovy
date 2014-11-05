@@ -44,6 +44,10 @@ class SearchController {
      */
      def springSecurityService
      /**
+      * Dependency injection of searchService.
+      */
+     def searchService
+     /**
      * Dependency injection of modelService.
      **/
     def modelService
@@ -179,14 +183,14 @@ class SearchController {
     @Secured(['ROLE_ADMIN'])
     def regen = {
         long start = System.currentTimeMillis()
-        modelService.regenerateIndices()
+        searchService.regenerateIndices()
         [regenTime: System.currentTimeMillis() - start]
     }
 
     private def searchCore(String query, String sortBy, String sortDirection, int offset, int length) {
         List<MTC> models = []
         if (query?.trim()) {
-            models.addAll(modelService.searchModels(query))
+            models.addAll(searchService.searchModels(query))
         }
         int sortDir = 1
         if (sortDirection && sortDirection == "asc") {
