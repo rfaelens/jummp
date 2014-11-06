@@ -99,8 +99,6 @@ class SearchTests extends JummpIntegrationTest {
         modelService.vcsService.currentModelContainer = container.getCanonicalPath()
         createUserAndRoles()
         assertNotNull solrServerHolder.server
-        solrServerHolder.server.deleteByQuery("*:*")
-        solrServerHolder.server.commit()
     }
 
     @After
@@ -111,6 +109,8 @@ class SearchTests extends JummpIntegrationTest {
         } catch(Exception ignore) {
         }
         modelService.vcsService.vcsManager = null
+        solrServerHolder.server.deleteByQuery("*:*")
+        solrServerHolder.server.commit()
     }
 
     ModelTransportCommand searchForModel(String query) {
