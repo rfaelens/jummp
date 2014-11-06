@@ -292,7 +292,14 @@ not look right. Check the value of setting 'jummp.search.url'.""")
     }
 } else {
     throw new IllegalArgumentException("""\
-Please add the setting 'jummp.search.url', pointing to a Solr core, to your configuration.""")
+Please add the setting 'jummp.search.url', pointing to a Solr instance, to your configuration.""")
+}
+if (!(jummpConfig.jummp.search.folder instanceof ConfigObject)) {
+    final String searchFolder = jummpConfig.jummp.search.folder
+    jummp.search.folder = searchFolder
+    println "INFO\tSOLR_HOME is set to $searchFolder."
+} else {
+    println "WARN\tSetting jummp.search.folder is undefined. Have you set $SOLR_HOME?"
 }
 
 // registration settings
