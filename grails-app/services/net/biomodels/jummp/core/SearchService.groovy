@@ -134,8 +134,6 @@ class SearchService {
             doc.addField("versionNumber", revision.revisionNumber)
             doc.addField("submissionDate", revision.model.submissionDate)
             solrServerHolder.server.add(doc)
-            solrServerHolder.server.commit()
-            solrServerHolder.server.optimize()
         }
         p.onComplete {
             if (IS_DEBUG_ENABLED) {
