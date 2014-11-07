@@ -34,34 +34,37 @@
 
 package net.biomodels.jummp.core
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import org.quartz.JobExecutionException
-import org.quartz.JobExecutionContext
+import grails.util.Holders
 
 /**
  * @short Job initializing and executing a trigger removing authentication hashes.
  *
- * The authentication hashes are getting removed when a configurable period of inactivity is expired.
+ * The authentication hashes are getting removed when a configurable period of inactivity
+ * is reached.
  * The job uses the Grails Quartz Plugin.
  *
  * @author Jochen Schramm <j.schramm@dkfz-heidelberg.de>
  */
 class AuthenticationOutdaterJob {
+    /**
+     * Dependency injection of AuthenticationHashManager.
+     */
     def authenticationHashService
+    /**
+     * The application configuration.
+     */
+    static final ConfigObject cfg = Holders.grailsApplication.config
 
     static triggers = {
-        // TODO: find a solution for ConfigurationHolder as it is deprecated
-        simple name: 'authenticationRemoveTrigger', startDelay: Long.valueOf(ConfigurationHolder.config.jummp.authenticationHash.startRemoveOffset), repeatInterval: Long.valueOf(ConfigurationHolder.config.jummp.authenticationHash.removeInterval)
+        simple name: 'authenticationRemoveTrigger',
+                startDelay: Long.valueOf(cfg.jummp.authenticationHash.startRemoveOffset),
+                repeatInterval: Long.valueOf(cfg.jummp.authenticationHash.removeInterval)
     }
 
     /**
      * Triggers removal of inactive authentications.
-     * @param context the JobExecutionContext
-     * @throws JobExecutionException
      */
-
-    def execute(JobExecutionContext context) throws JobExecutionException {
+    def execute() {
         authenticationHashService.checkAuthenticationExpired()
     }
-
 }
