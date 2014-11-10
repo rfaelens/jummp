@@ -109,6 +109,8 @@ class SearchService {
             String content = modelDelegateService.getSearchIndexingContent(revision) ?: ""
             String submissionId = revision.model.submissionId
             String publicationId = revision.model.publicationId ?: ""
+            int versionNumber = revision.revisionNumber
+            final String uniqueId = "${submissionId}.${versionNumber}"
             SolrInputDocument doc = new SolrInputDocument()
             /*
              * Indexed fields
@@ -131,8 +133,9 @@ class SearchService {
              * look in the database to figure out if the user has access to a model.
              */
             doc.addField("model_id", revision.model.id)
-            doc.addField("versionNumber", revision.revisionNumber)
+            doc.addField("versionNumber", versionNumber)
             doc.addField("submissionDate", revision.model.submissionDate)
+            doc.addField("uniqueId", uniqueId)
             solrServerHolder.server.add(doc)
         }
         p.onComplete {
@@ -216,9 +219,7 @@ class SearchService {
     private SolrDocumentList search(String q) {
         SolrQuery query = new SolrQuery()
         /*TODO optimise this*/
-        String[] fields = [ "name" ,"description", "content", "submissionId", "publicationId",
-                "modelFormat", "levelVersion", "submitter", "paperTitle", "paperAbstract"]
-        query.setParam("q", "*:*").setParam("q.alt", "{!edismax}$q").setParam("qf", fields)
+        query.setQuery("*${q}*")
         QueryResponse response = solrServerHolder.server.query(query)
         SolrDocumentList docs = response.getResults()
         return docs
