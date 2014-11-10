@@ -216,9 +216,7 @@ class SearchService {
     private SolrDocumentList search(String q) {
         SolrQuery query = new SolrQuery()
         /*TODO optimise this*/
-        String[] fields = [ "name" ,"description", "content", "submissionId", "publicationId",
-                "modelFormat", "levelVersion", "submitter", "paperTitle", "paperAbstract"]
-        query.setParam("q", "*:*").setParam("q.alt", "{!edismax}$q").setParam("qf", fields)
+        query.setQuery("*${q}*")
         QueryResponse response = solrServerHolder.server.query(query)
         SolrDocumentList docs = response.getResults()
         return docs
