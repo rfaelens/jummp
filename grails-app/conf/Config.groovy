@@ -299,7 +299,7 @@ if (!(jummpConfig.jummp.search.folder instanceof ConfigObject)) {
     jummp.search.folder = searchFolder
     println "INFO\tSOLR_HOME is set to $searchFolder."
 } else {
-    println "WARN\tSetting jummp.search.folder is undefined. Have you set $SOLR_HOME?"
+    println "WARN\tSetting jummp.search.folder is undefined. Have you set \$SOLR_HOME?"
 }
 
 // registration settings
