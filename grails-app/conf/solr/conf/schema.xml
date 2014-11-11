@@ -92,17 +92,17 @@
    <field name="model_id" type="int" indexed="false" stored="true"/>
    <field name="versionNumber" type="int" indexed="false" stored="true"/>
    <field name="submissionDate" type="date" indexed="false" stored="true"/>
-   <field name="publicationAuthors" type="text_general" index="true" stored="false" multiValued="true"/>
-   <field name="modelCurators" type="text_general" index="true" stored="false" multiValued="true"/>
-   <field name="modelAuthors" type="text_general" index="true" stored="false" multiValued="true"/>
-   <field name="derivations" type="text_general" index="true" stored="false" multiValued="true"/>
-   <field name="disease" type="text_general" index="true" stored="false" multiValued="true"/>
-   <field name="elementName" type="text_general" index="true" stored="false" multiValued="true"/>
-   <field name="elementDescription" type="text_general" index="true" stored="false" multiValued="true"/>
-   <field name="elementID" type="text_general" index="true" stored="false" multiValued="true"/>
-   <field name="externalReferenceID" type="text_general" index="true" stored="false" multiValued="true"/>
-   <field name="externalReferenceName" type="text_general" index="true" stored="false" multiValued="true"/>
-   <field name="public" type="boolean" index="true" stored="true"/>
+   <field name="publicationAuthors" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="modelCurators" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="modelAuthors" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="derivations" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="disease" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="elementName" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="elementDescription" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="elementID" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="externalReferenceID" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="externalReferenceName" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="public" type="boolean" indexed="true" stored="true"/>
    <field name="uniqueId" type="string" indexed="true" stored="false"/>
 
  <!-- Field to use to determine and enforce document uniqueness.
