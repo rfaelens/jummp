@@ -246,11 +246,11 @@ class ModelFileFormatService {
     /**
      * Retrieves the content of a @p revisiontransportcommand to be indexed by the search engine
      * @param revision the revision from which content to be indexed is extracted
-     * @return The content to be indexed in Lucene
+     * @return The content to be indexed in Lucene: returns a map with field as key, and a list of values for each field
      */
-    String getSearchIndexingContent(RevisionTransportCommand revision) {
+    Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand revision) {
         FileFormatService service = serviceForFormat(revision?.format)
-        return service ? service.getSearchIndexingContent(revision) : ""
+        return service ? service.getSearchIndexingContent(revision) : [:]
     }
 
     /**

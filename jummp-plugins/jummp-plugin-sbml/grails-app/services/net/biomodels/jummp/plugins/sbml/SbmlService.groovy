@@ -94,6 +94,8 @@ import org.sbml.jsbml.SpeciesReference
 import org.sbml.jsbml.Symbol
 import org.sbml.jsbml.Variable
 import org.springframework.beans.factory.InitializingBean
+import java.util.List
+import java.util.Map
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -409,8 +411,8 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     }
     
     @Profiled(tag="SbmlService.getSearchIndexingContent")
-    public String getSearchIndexingContent(RevisionTransportCommand revision) {
-    	    return ""
+    public Map<String, List<String>>  getSearchIndexingContent(RevisionTransportCommand revision) {
+    	    return [:]
     }
 
     @Profiled(tag="SbmlService.getAnnotations")

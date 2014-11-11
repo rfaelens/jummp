@@ -59,6 +59,8 @@ import org.apache.tika.detect.DefaultDetector
 import org.apache.tika.metadata.Metadata
 import org.perf4j.aop.Profiled
 import org.xml.sax.SAXException
+import java.util.List
+import java.util.Map
 
 /**
  * Service class containing the logic to handle models encoded in PharmML.
@@ -181,8 +183,8 @@ class PharmMlService implements FileFormatService {
     }
 
     @Profiled(tag="pharmMlService.getSearchIndexingContent")
-    public String getSearchIndexingContent(RevisionTransportCommand revision) {
-        return ""
+    public Map<String, List<String>>  getSearchIndexingContent(RevisionTransportCommand revision) {
+        return [:]
     }
 
     /**

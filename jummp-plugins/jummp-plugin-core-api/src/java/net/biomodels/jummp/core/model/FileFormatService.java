@@ -27,6 +27,7 @@ package net.biomodels.jummp.core.model;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service interface for handling a specific ModelFormat.
@@ -109,5 +110,5 @@ public interface FileFormatService {
      * @param revision the Revision of a model
      * @return the textual representation of the format indexing content
      */
-    public String getSearchIndexingContent(RevisionTransportCommand revision);
+    public Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand revision);
 }

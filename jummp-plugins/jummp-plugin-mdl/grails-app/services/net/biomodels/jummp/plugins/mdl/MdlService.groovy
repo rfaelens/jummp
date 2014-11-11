@@ -28,6 +28,8 @@ import org.apache.commons.logging.LogFactory
 import org.apache.tika.detect.DefaultDetector
 import org.apache.tika.metadata.Metadata
 import org.perf4j.aop.Profiled
+import java.util.Map
+import java.util.List
 
 /**
  * Service class containing the logic to handle models encoded in MDL.
@@ -123,7 +125,7 @@ class MdlService implements FileFormatService {
      */
     @Override
     @Profiled(tag="mdlService.getSearchIndexingContent")
-    public String getSearchIndexingContent(RevisionTransportCommand revision) { return "" }
+    public Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand revision) { return [:] }
 
     /**
      * {@inheritDoc}
