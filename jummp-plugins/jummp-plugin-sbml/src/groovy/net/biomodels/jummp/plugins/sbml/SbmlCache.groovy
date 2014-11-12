@@ -52,12 +52,12 @@ import java.util.concurrent.locks.ReentrantLock
  *
  * @autor Martin Gräßlin <m.graesslin@dkfz.de> 
  */
-class SbmlCache<K extends RevisionTransportCommand, V extends SBMLDocument> implements Map<K, V> {
+class SbmlCache<K, V> implements Map<K, V> {
 
     /**
      * Internal cache extending LinkedHashMap with the contract of a last recently used cache.
      */
-    private class InternalCache<K extends Long, V extends SBMLDocument> extends LinkedHashMap<K, V> {
+    private class InternalCache<A, B> extends LinkedHashMap<A, B> {
         private Integer maxSize
         InternalCache(int maxSize) {
             super(0, 0.75, true)
@@ -65,7 +65,7 @@ class SbmlCache<K extends RevisionTransportCommand, V extends SBMLDocument> impl
         }
 
         @Override
-        protected boolean removeEldestEntry(Map.Entry<? super Long, ? extends SBMLDocument> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<A,B> eldest) {
             return (size() > maxSize)
         }
     }
@@ -216,8 +216,8 @@ class SbmlCache<K extends RevisionTransportCommand, V extends SBMLDocument> impl
         return revisions
     }
 
-    Collection<SBMLDocument> values() {
-        Collection<SBMLDocument> retVals = []
+    Collection<V> values() {
+        Collection<V> retVals = []
         lock.lock()
         try {
             retVals = cache.values()
