@@ -22,7 +22,6 @@ package net.biomodels.jummp.core
 
 import grails.async.Promise
 import grails.plugins.springsecurity.Secured
-import grails.util.Holders
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -45,7 +44,7 @@ import org.perf4j.aop.Profiled
  *
  * @author Raza Ali, raza.ali@ebi.ac.uk
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @date   20141104
+ * @date   20141113
  */
 class SearchService {
     /**
@@ -67,11 +66,11 @@ class SearchService {
     /**
      * Dependency injection of ModelService.
      */
-    def modelService = Holders.grailsApplication.mainContext.getBean("modelService")
+    def modelService
     /**
      * Dependency injection of ModelDelegateService.
      */
-    def modelDelegateService = Holders.grailsApplication.mainContext.getBean("modelDelegateService")
+    def modelDelegateService
     /**
      * Dependency injection of SolrServerHolder
      */
@@ -94,7 +93,7 @@ class SearchService {
     /**
      * Adds a revision to the index
      *
-     * Adds the specified @param revision to the lucene index
+     * Adds the specified @param revision to the index.
      * @param revision The revision to be indexed
      **/
     @PostLogging(LoggingEventType.UPDATE)
