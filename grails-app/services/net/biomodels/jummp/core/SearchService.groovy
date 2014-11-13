@@ -22,6 +22,7 @@ package net.biomodels.jummp.core
 
 import grails.async.Promise
 import grails.plugins.springsecurity.Secured
+import java.util.concurrent.atomic.AtomicReference
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -35,6 +36,8 @@ import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.SolrDocumentList
 import org.apache.solr.common.SolrInputDocument
 import org.perf4j.aop.Profiled
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * @short Singleton-scoped facade for interacting with a Solr instance.
@@ -72,6 +75,10 @@ class SearchService {
      */
     def modelDelegateService
     /**
+     * Dependency injection of SpringSecurityService.
+     */
+    def springSecurityService
+    /**
      * Dependency injection of SolrServerHolder
      */
     def  solrServerHolder
@@ -99,7 +106,10 @@ class SearchService {
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="searchService.updateIndex")
     void updateIndex(RevisionTransportCommand revision) {
+        Authentication auth = springSecurityService.authentication
+        AtomicReference<Authentication> authRef = new AtomicReference<>(auth)
         Promise p = Revision.async.task {
+            SecurityContextHolder.context.authentication = authRef.get()
             if (IS_DEBUG_ENABLED) {
                 log.debug "About to update index with revision ${revision.id}"
             }
@@ -163,7 +173,10 @@ class SearchService {
         if (IS_DEBUG_ENABLED) {
             log.debug "Indexing ${revisions.size()} revisions."
         }
+        Authentication auth = springSecurityService.authentication
+        AtomicReference<Authentication> authRef = new AtomicReference<>(auth)
         Promise p = Revision.async.task {
+            SecurityContextHolder.context.authentication = authRef.get()
             revisions.each {
                 updateIndex(it)
             }
