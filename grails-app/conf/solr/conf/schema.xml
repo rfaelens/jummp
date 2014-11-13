@@ -103,7 +103,7 @@
    <field name="externalReferenceID" type="text_general" indexed="true" stored="false" multiValued="true"/>
    <field name="externalReferenceName" type="text_general" indexed="true" stored="false" multiValued="true"/>
    <field name="public" type="boolean" indexed="true" stored="true"/>
-   <field name="uniqueId" type="string" indexed="true" stored="false"/>
+   <field name="uniqueId" type="string" indexed="true" stored="true"/>
 
  <!-- Field to use to determine and enforce document uniqueness.
       Unless this field is marked with required="false", it will be a required field
