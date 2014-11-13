@@ -105,6 +105,18 @@
    <field name="public" type="boolean" indexed="true" stored="true"/>
    <field name="uniqueId" type="string" indexed="true" stored="true"/>
 
+   <!-- PharmML-specific fields -->
+   <field name="pharmmlPublicationSourceText" type="text_general" indexed="true" stored="false"/>
+   <field name="pharmmlModelIndication" type="text_general" indexed="true" stored="false" multiValued="true"/>
+    <field name="pharmmlModelRationale" type="text_general" indexed="true" stored="false"/>
+    <field name="pharmmlLimitations" type="text_general" indexed="true" stored="false"/>
+    <field name="pharmmlPopulation" type="text_general" indexed="true" stored="false" multiValued="true"/>
+    <field name="pharmmlModelDrug" type="text_general" indexed="true" stored="false" multiValued="true"/>
+    <field name="pharmmlTherapeuticArea" type="text_general" indexed="true" stored="false" multiValued="true"/>
+    <field name="pharmmlGenericType" type="text_general" indexed="true" stored="false" multiValued="true"/>
+    <!-- catch-all field -->
+    <dynamicField name="pharmml*" type="text_general" indexed="true"  stored="false"/>
+
  <!-- Field to use to determine and enforce document uniqueness.
       Unless this field is marked with required="false", it will be a required field
    -->
