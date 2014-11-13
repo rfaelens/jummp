@@ -100,6 +100,7 @@ class SearchService {
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="searchService.updateIndex")
     void updateIndex(RevisionTransportCommand revision) {
+    	revision.files //load files from VCS
         Promise p = Revision.async.task {
             if (IS_DEBUG_ENABLED) {
                 log.debug "About to update index with revision ${revision.id}"
@@ -189,11 +190,14 @@ class SearchService {
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="searchService.searchModels")
     public Collection<ModelTransportCommand> searchModels(String query) {
-        SolrDocumentList results = search(query)
+        long start = System.currentTimeMillis();
+    	SolrDocumentList results = search(query)
+    	System.out.println("Solr returned in "+(System.currentTimeMillis() - start));
         final int COUNT = results.size()
         Map<String, ModelTransportCommand> returnVals = new LinkedHashMap<>(COUNT + 1, 1.0f)
         results.each {
-            final String thisSubmissionId = it.get("submissionId")
+        	start = System.currentTimeMillis();
+        	final String thisSubmissionId = it.get("submissionId")
             if (!returnVals.containsKey(thisSubmissionId)) {
                 String perennialField = it.get("publicationId") ?: thisSubmissionId
                 Model returned = Model.findByPerennialIdentifier(perennialField)
@@ -202,6 +206,7 @@ class SearchService {
                     returnVals.put(thisSubmissionId, returned.toCommandObject())
                 }
             }
+            System.out.println("Processing took "+(System.currentTimeMillis() - start));
         }
         return returnVals.values()
     }
