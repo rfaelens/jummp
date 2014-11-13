@@ -47,6 +47,8 @@ import org.perf4j.aop.Profiled
 import org.apache.tika.detect.DefaultDetector
 import org.apache.tika.metadata.Metadata
 import org.apache.tika.mime.MediaType
+import java.util.List
+import java.util.Map
 
 /**
  * Provides methods to handle the COMBINE archive format.
@@ -137,8 +139,8 @@ class OmexService implements FileFormatService {
     }
     
     @Profiled(tag="omexService.getSearchIndexingContent")
-    public String getSearchIndexingContent(RevisionTransportCommand revision) {
-    	    return ""
+    public Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand revision) {
+    	    return [:]
     }
 
     /*

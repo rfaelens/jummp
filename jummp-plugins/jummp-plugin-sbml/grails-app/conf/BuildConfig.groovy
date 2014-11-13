@@ -79,7 +79,7 @@ grails.project.dependency.resolution = {
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3')// { transitive = false }
         // dependencies of jsbml
-        compile("org.sbml.jsbml:jsbml:1.0-a2") {
+        compile("org.sbml.jsbml:jsbml:1.0-a3") {
             excludes 'junit', 'log4j', 'commons-pool', 'commons-dbcp'
         }
         compile "com.thoughtworks.xstream:xstream:1.4.7"

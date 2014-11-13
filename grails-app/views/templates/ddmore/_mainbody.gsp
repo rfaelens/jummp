@@ -52,7 +52,7 @@
       
   <div class="content">
     
-  	<div class="content">
+  	<div class="content pagecontent">
   		<g:pageProperty name="page.main-content" />
   		<g:layoutBody/>
   	</div>

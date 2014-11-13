@@ -1726,7 +1726,7 @@ a:hover {
 }
 #header .user-menu {
     position: absolute;
-    left: 64%;
+    left: 51%;
     top: 14px;
     width: 20%;
 }
@@ -1760,7 +1760,7 @@ a:hover {
 }
 #header .search {
     position: absolute;
-    left: 85%;
+    left: 72%;
     top: 12px;
 }
 #header .search form {
@@ -1776,6 +1776,7 @@ a:hover {
     padding: 2px 10px;
     color: #999999;
     font-size: 11px;
+    width:300px;
 }
 #header .search form input.form-text:focus {
     box-shadow: 0 0 8px #c9f0ff;

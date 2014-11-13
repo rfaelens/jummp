@@ -38,6 +38,11 @@
             		</g:each>
             	</ul>
         </div>
+        <sec:ifLoggedIn>
+      		<g:if test="${sec.username() == team.owner.username}">
+      			<a href="${createLink(action:'edit', id:team.id)}">Edit Team</a>
+      		</g:if>
+      	</sec:ifLoggedIn>
     </body>
 </html>
 <content tag="title">View team '${team.name}'</content>

@@ -1159,9 +1159,18 @@ databaseChangeLog = {
 
     include file: '20140625make_perennial_id_unique.groovy'
 
-	include file: '20140708users_have_teams.groovy'
+    include file: '20140708users_have_teams.groovy'
 
-    include file: "20140801_make_vcsIdentifier_paths_relative.groovy"
+   include file: "20140801_make_vcsIdentifier_paths_relative.groovy"
 
-    include file: "20140804_make_repoFile_path_relative.groovy"
+   include file: "20140804_make_repoFile_path_relative.groovy"
+
+
+	include file: 'notifications.groovy'
+
+	include file: 'addSenderToNotification.groovy'
+
+	include file: 'trackNotificationSeenByUser.groovy'
+
+	include file: 'removeFromFieldFromNotification.groovy'
 }

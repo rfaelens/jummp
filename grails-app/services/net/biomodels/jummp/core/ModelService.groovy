@@ -219,7 +219,7 @@ ORDER BY
                     SpringSecurityUtils.getPrincipalAuthorities())
         if (springSecurityService.isLoggedIn()) {
             // anonymous users do not have a principal
-            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+            roles.add(getUsername())
         }
         String query = '''
 SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
@@ -394,7 +394,7 @@ ORDER BY
         Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
         if (springSecurityService.isLoggedIn()) {
             // anonymous users do not have a principal
-            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+            roles.add(getUsername())
         }
 
         String query = '''
@@ -488,7 +488,7 @@ OR lower(m.publication.affiliation) like :filter
         Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
         if (springSecurityService.isLoggedIn()) {
             // anonymous users do not have a principal
-            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
+            roles.add(getUsername())
         }
         List<Long> result = Revision.executeQuery('''
 SELECT rev.id
@@ -1477,6 +1477,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 aclUtilService.addPermission(revision, collaborator.username, BasePermission.READ)
             }
         }
+        def notification = [model:model.toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
+        sendMessage("seda:model.readAccessGranted", notification)
     }
 
     private String getPermissionString(int p) {
@@ -1488,7 +1490,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Returns permissions of a @p model.
+    * Returns permissions of a @p model. The @p autenticated parameter allows
+    * notifications to be generated from non-admin updaters of the model. 
     *
     * returns the users with access to the model
     *
@@ -1497,9 +1500,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
    // @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getPermissionsMap")
-    public Collection<PermissionTransportCommand> getPermissionsMap(Model model) {
+    public Collection<PermissionTransportCommand> getPermissionsMap(Model model, boolean authenticated = true) {
         HashMap<String, PermissionTransportCommand> map = new HashMap<String, PermissionTransportCommand>()
-        if (aclUtilService.hasPermission(springSecurityService.authentication, model,
+        if (!authenticated || aclUtilService.hasPermission(springSecurityService.authentication, model,
                     BasePermission.ADMINISTRATION ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
             def permissions = aclUtilService.readAcl(model).getEntries()
             permissions.each {
@@ -1600,6 +1603,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new AccessDeniedException("You cant access permissions if you dont have them.")
         }
     }
+    
+    private String getUsername() {
+    	if (springSecurityService.isLoggedIn()) {
+    		return (springSecurityService.getPrincipal() as UserDetails).getUsername()
+    	}
+    	return "anonymous"
+    }
 
     /**
     * Grants write access for @p model to @p collaborator.
@@ -1624,6 +1634,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION)
             }
         }
+        def notification = [model:model.toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
+        sendMessage("seda:model.writeAccessGranted", notification)
     }
 
     /**

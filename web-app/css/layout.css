@@ -5,13 +5,8 @@
 #helpbutton { 
 		 height: 40px; 
 		 position: fixed;
-		 margin-left: -40px;
-		 top: 40%; 
-		 transform: rotate(-90deg);
-		 -webkit-transform: rotate(-90deg); 
-		 -moz-transform: rotate(-90deg); 
-		 -o-transform: rotate(-90deg); 
-		 filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+		 right:0;
+		 top: 95%; 
 }
 #helpPanel {
 	height:600px;
@@ -63,3 +58,40 @@ border: 0px solid #ffffff;
 .ui-widget a:visited {color: #008000; text-decoration: underline; !important}
 .ui-widget a:hover {color: #ff0000; text-decoration: none; !important}
 .required:after { content:" *"; }
+
+#modelToolbar { 
+	box-sizing: border-box;
+	border-right-width-value: 1px;
+	border-right-style-value: solid;
+	border-right-color-value: #cccccc;
+	background-color: #f5f5f5;
+	position: fixed;
+	top: 20%;
+	bottom: auto;
+}
+#toolbarList {
+	padding:0; 
+	margin:0; 
+	text-align: center;
+}
+#toolbarList li { 
+    margin-top:0; 
+	margin-bottom:0; 
+	list-style-type:none;
+    -webkit-column-break-inside: avoid;
+    break-inside: avoid-column;
+    text-align: center;
+} 
+.collapsibleContainerContent {
+	border-right: thick double #ff0000;
+	height: 100%
+}
+#helpPanel {
+	height:600px;
+}
+.unseenNotification {
+	font-weight:bold;
+}
+.selectedNotification {
+	background-color:#F5EBCC !important;
+}

@@ -48,6 +48,12 @@
       						${sec.username()}'s Profile
       					</a>
       				</li>
+      				<li class="leaf" id="notificationCount">
+      					<a title="View ${sec.username()}'s Notifications" href='<g:createLink controller="notification" action="list"/>'>
+      						<img width="20px" height="auto" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Generic/Generic%20icons/email.png"/>
+      						<span id="notificationLink" style="display: none;"></span>
+      					</a>
+      				</li>
       				<li class="last leaf">
       					<a title="Logout" href="${grailsApplication.config.grails.serverURL}/logout">
       						<g:message code="jummp.main.logout"/>
@@ -73,7 +79,7 @@
       	 <div class="content">
       	 	<g:form controller="search" action="searchRedir">
       	 	<%-- <form action="/" method="post" id="search-block-form" accept-charset="UTF-8"> --%><div><div class="container-inline">
-      	 			<input title="Enter the terms you wish to search for." type="text" id="edit-search-block-form--2" name="search_block_form" value="" maxlength="128" class="form-text" />
+      	 			<input title="Enter the terms you wish to search for." type="text" id="edit-search-block-form--2" name="search_block_form" value="" maxlength="256" class="form-text" />
       	 			<input type="submit" id="edit-submit" value="" class="form-submit" />
      		</div></div>
     	 	</g:form>

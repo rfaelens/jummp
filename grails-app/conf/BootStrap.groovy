@@ -136,7 +136,7 @@ class BootStrap {
                 UserRole.create(user, userRole, true)
             }
             // Manually start Searchable's mirroring process to ensure that it comes after the automated migrations.
-            searchableService.reindex()
+            //searchableService.reindex()
             searchableService.startMirroring()
         }
 

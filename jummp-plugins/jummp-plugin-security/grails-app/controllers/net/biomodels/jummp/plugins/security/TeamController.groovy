@@ -77,6 +77,11 @@ class TeamController {
         }
     }
 
+    void showStandardErrorMessage() {
+    	flash.message = "Could not find that team. Please select one from the list below."
+        redirect(action: 'index')
+    }
+    
     /**
      * Lists the teams belonging to the current user.
      */
@@ -85,23 +90,80 @@ class TeamController {
         [teams: teamService.getTeamsForUser(user)]
     }
 
-    //TODO
-    def update() {
+    def edit(Long id) {
+    	if (!id) {
+    		showStandardErrorMessage()
+    	}
+    	else {
+    		Team team = Team.get(id)
+    		def user = springSecurityService.getCurrentUser()
+    		if (!team || team.owner != user) {
+    			showStandardErrorMessage()
+    		}
+    		else {
+    			def usersInTeam = UserTeam.findAllByTeam(team);
+    			[team: team, users: usersInTeam.collect { [name: it.user.person.userRealName, userId: it.user.username] } as JSON]
+    		}
+    	}
     }
-
-    //TODO
-    def edit() {
+    
+    def update(Long id) {
+    	if (!id) {
+    		showStandardErrorMessage()
+    	}
+    	else {
+    		Team team = Team.get(id)
+    		def user = springSecurityService.getCurrentUser()
+    		if (team && user == team.owner) {
+    			String name="";
+    			String description="";
+    			Set<User> users=new HashSet<User>();
+    			try {
+    				def map = JSON.parse(params.teamData);
+    				team.name = map.getString("name");
+    				team.description = map.getString("description");
+    				def collabs = map.getJSONArray("members");
+    				for (int i = 0; i < collabs.length(); i++) {
+    					users.add(User.findByUsername(collabs.getJSONObject(i).getString("userId")));
+    				}
+    			}
+    			catch(Exception e) {
+    				render "Error processing parameters: "+e.getMessage();
+    				return;
+    			}
+    			if (!team.validate()) {
+    				render "Error updating team. Team could not be validated."
+    			}
+    			else {
+    				team.save(flush: true)
+    				Set<User> existingUsers = UserTeam.findAllByTeam(team).collect{ it.user };
+    				Set<User> newUsers = users - existingUsers;
+    				newUsers.each {
+    					UserTeam.create(it, team)
+    				}
+    				Set<User> removeThese = existingUsers - users;
+    				removeThese.each {
+    					UserTeam userTeam = UserTeam.findByUserAndTeam(it, team)
+    					userTeam.delete();
+    				}
+    				render team.id
+    			}
+    		}
+    		else {
+    			showStandardErrorMessage()
+    		}
+        }
     }
 
     // TODO secure this action to ensure that the user has access to the team being accessed
     def show(Long id) {
         Team team = Team.get(id)
         if (!team) {
-            flash.message = "Could not find that team. Please select one from the list below."
-            redirect(action: 'index')
-            return
+            showStandardErrorMessage();
         }
-        def usersInTeam = UserTeam.findAllByTeam(team);
-        [team: team, users: usersInTeam.collect { it.user.person.toCommandObject()}]
+        else {
+        	def usersInTeam = UserTeam.findAllByTeam(team);
+        	[team: team, users: usersInTeam.collect { it.user.person.toCommandObject()}]
+        }
     }
 }

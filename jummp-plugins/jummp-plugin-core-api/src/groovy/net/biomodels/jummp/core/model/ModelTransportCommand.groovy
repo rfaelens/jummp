@@ -88,6 +88,10 @@ class ModelTransportCommand implements Serializable {
      * The names of all users who have worked on this Model.
      */
     Set<String> creators
+    /*
+    * The user names of all users who have worked on this model
+    */
+    Set<String> creatorUsernames
     /**
      * The state of the model.
      */

@@ -28,6 +28,9 @@
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
      </head>
     <body>
+    	<div class="content">
+    	<div class="view view-dom-id-9c00a92f557689f996511ded36a88594">
+    	<div class="view-content">
         <div>
 			<g:form action="editUser">
 				<table>
@@ -55,10 +58,42 @@
 					</tr>
 					</tbody>
 				</table>
+				<h2>Notifications</h2>
+				<table>
+					<thead>
+						<th>Notification Type</th>
+						<th>Web Notification</th>
+						<th>Email Notification</th>
+					</thead>
+					<tbody>
+						<g:each status="i" in="${notificationPermissions}" var="perm">
+							<tr><td><label>${perm.notificationType.toString()}</label></td>
+							<td>
+								<g:if test="${perm.sendNotification}">
+									<input type="checkbox" name="sendNotification${perm.notificationType.id}" checked/>
+								</g:if>
+								<g:else>
+									<input type="checkbox" name="sendNotification${perm.notificationType.id}"/>
+								</g:else>
+							</td>
+							<td>
+								<g:if test="${perm.sendMail}">
+									<input type="checkbox" name="sendMail${perm.notificationType.id}" checked/>
+								</g:if>
+								<g:else>
+									<input type="checkbox" name="sendMail${perm.notificationType.id}"/>
+								</g:else>
+							</td></tr>
+						</g:each>
+					</tbody>
+				</table>
 				<div class="buttons">
 						<input type="submit" value="${g.message(code: 'user.administration.edit')}"/>
 				</div>
 			</g:form>
+        </div>
+        </div>
+        </div>
         </div>
    </body>
 </html>

@@ -18,4 +18,20 @@ function showNotification(message) {
 	$(".flashNotificationDiv").text(message)
 }
 
-
+function pollForNotifications(url) {
+	$.get( url, function( data ) {
+		if (data > 0) {
+			$("#notificationLink").text(' ('+data+')');
+			$("#notificationLink").show();
+		}
+		else {
+			$("#notificationLink").hide();
+		}
+	});
+}
+function markAsRead(url, updateCount) {
+	$.get( url, function() {});
+	setTimeout(function() {
+			pollForNotifications(updateCount);
+	},1000);
+}

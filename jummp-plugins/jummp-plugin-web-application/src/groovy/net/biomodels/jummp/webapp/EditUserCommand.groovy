@@ -24,6 +24,8 @@ import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.plugins.security.Person
 import java.util.regex.Pattern
 import java.util.regex.Matcher
+import net.biomodels.jummp.webapp.NotificationTypePreferences
+import net.biomodels.jummp.webapp.NotificationType
 
 /**
  * @short Command Object to validate the user before editing.
@@ -37,6 +39,16 @@ class EditUserCommand implements Serializable {
     String email
     String institution
     String orcid
+    
+    boolean sendNotification1;
+    boolean sendNotification2;
+    boolean sendNotification3;
+    boolean sendNotification4;
+
+    boolean sendMail1;
+    boolean sendMail2;
+    boolean sendMail3;
+    boolean sendMail4;
 
     static constraints = {
         username(nullable: false, blank: false)
@@ -58,6 +70,19 @@ class EditUserCommand implements Serializable {
      * @return The command object as a User
      */
     User toUser() {
-        return new User(username: this.username, person: new Person(userRealName: this.userRealName, institution:this.institution, orcid:this.orcid), email: this.email)
+    	return new User(username: this.username, person: new Person(userRealName: this.userRealName, institution:this.institution, orcid:this.orcid), email: this.email)
+    }
+    
+    List<NotificationTypePreferences> getPreferences(User user) {
+    	List<NotificationTypePreferences> prefs = new LinkedList<NotificationTypePreferences>();
+    	for (int i=1; i<=4; i++) {
+    		NotificationType type = NotificationType.getById(i);
+    		NotificationTypePreferences pref = new NotificationTypePreferences(user: user, 
+    																		   notificationType: type, 
+    																		   sendMail: this."sendMail${i}", 
+    																		   sendNotification: this."sendNotification${i}")
+            prefs.add(pref)
+    	}
+    	return prefs
     }
 }

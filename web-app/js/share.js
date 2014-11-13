@@ -7,8 +7,27 @@ var toJSON = function(form) {
   };
 var Collaborator = Backbone.Model.extend({
 });
+
+function guid(){
+ function S4() {
+   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+ }
+ return [S4()+S4(),S4(),S4(),S4(),S4()+S4()+S4()].join('').toUpperCase();
+}
+
+var spaceReplacement = guid();
+
 var Collaborators = Backbone.Collection.extend({
-    model: Collaborator
+    model: Collaborator,
+    add: function(newCollab) {
+		try {
+			newCollab.id = newCollab.id.replace(" ", spaceReplacement);
+		}
+		catch(ignoreException) {
+		}
+     	Backbone.Collection.prototype.add.call(this, newCollab);
+    }
+
 });
 function makeBoolean(value) {
     value=value||false;
@@ -45,6 +64,7 @@ CollaboratorTable = Backbone.View.extend({
     },
     performSubmission:function() {
         var collabString=JSON.stringify(this.collection);
+        collabString = collabString.replace(new RegExp(spaceReplacement, 'g'), " ");
         $(":input").prop('disabled', true);
         $.post(submitURL, { collabMap: collabString }, function(returnedData) {
             if (returnedData.success) {
