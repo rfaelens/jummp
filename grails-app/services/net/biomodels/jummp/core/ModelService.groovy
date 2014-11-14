@@ -788,12 +788,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     /**
     * Uses the modelfileformatservice to get content to be used for indexing a model
     *
-    * Passes the @p revision to the modelfileformatservice, gets content to be used for indexing the model
+    * Passes the @p r to the modelfileformatservice, gets content to be used for indexing the model
     * @param revision The model revision
     * @return The model content
     **/
-    public String getSearchIndexingContent(RevisionTransportCommand revision) {
-        return modelFileFormatService.getSearchIndexingContent(revision)
+    public Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand r) {
+        return modelFileFormatService.getSearchIndexingContent(r)
     }
 
     /**

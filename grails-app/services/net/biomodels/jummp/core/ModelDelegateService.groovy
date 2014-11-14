@@ -240,7 +240,7 @@ class ModelDelegateService implements IModelService {
                     User.get(collaborator.id))
     }
 
-    String getSearchIndexingContent(RevisionTransportCommand revision) {
+    Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand revision) {
         modelService.getSearchIndexingContent(revision)
     }
 
