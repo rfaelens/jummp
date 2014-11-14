@@ -66,6 +66,7 @@ import org.springframework.security.access.AccessDeniedException
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class ModelDelegateService implements IModelService {
+    static transactional = false
     private static final Log log = LogFactory.getLog(this)
 
     def modelService
