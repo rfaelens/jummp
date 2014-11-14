@@ -50,6 +50,8 @@ import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.core.model.identifier.generator.AbstractModelIdentifierGenerator
 import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.springframework.security.access.AccessDeniedException
 
 /**
@@ -64,6 +66,7 @@ import org.springframework.security.access.AccessDeniedException
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class ModelDelegateService implements IModelService {
+    private static final Log log = LogFactory.getLog(this)
 
     def modelService
     def modelFileFormatService
