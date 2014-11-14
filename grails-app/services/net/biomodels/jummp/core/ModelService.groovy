@@ -1400,7 +1400,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      */
     //@PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')") Not working. Seems related to: https://bitbucket.org/jummp/jummp/issue/23/spring-security-doesnt-work-as-expected-in
     @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="modelService.retrieveModelFiles")
+    @Profiled(tag="modelService.retrieveModelRepFiles")
     List<File> retrieveModelRepFiles(final Revision revision) throws ModelException {
         if (!aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)
                 && !SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
@@ -1490,8 +1490,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Returns permissions of a @p model. The @p autenticated parameter allows
-    * notifications to be generated from non-admin updaters of the model. 
+    * Returns permissions of a @p model. The @p authenticated parameter allows
+    * notifications to be generated from non-admin updaters of the model.
     *
     * returns the users with access to the model
     *
