@@ -1429,8 +1429,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)
                 || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
             return revision.getRepositoryFilesForRevision()
-        }
-        else {
+        } else {
             throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
         }
     }

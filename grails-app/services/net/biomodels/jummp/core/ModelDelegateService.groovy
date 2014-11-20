@@ -219,14 +219,18 @@ class ModelDelegateService implements IModelService {
         return false
     }
 
-    List<RepositoryFileTransportCommand> retrieveModelFiles(RevisionTransportCommand revision) throws ModelException {
-        List<RepositoryFileTransportCommand> files = modelService.retrieveModelFiles(Revision.get(revision.id))
+    List<RepositoryFileTransportCommand> retrieveModelFiles(RevisionTransportCommand revision)
+            throws ModelException {
+        Revision theRevision = Revision.get(revision.id)
+        List<RepositoryFileTransportCommand> files = modelService.retrieveModelFiles(theRevision)
         if (files && !files.isEmpty()) {
             files.each { it.revision = revision }
             /*
-             * Add revision to the weak reference data structures, so its files are released from disk.
+             * Add revision to the weak reference data structures, so its files are released
+             * from disk.
              */
-            grailsApplication.mainContext.getBean("referenceTracker").addReference(revision, files.first().path)
+            grailsApplication.mainContext.getBean("referenceTracker").addReference(revision,
+                    files.first().path)
         }
         return files
     }
