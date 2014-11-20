@@ -1430,6 +1430,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
             return revision.getRepositoryFilesForRevision()
         } else {
+            log.error "you can't access revision ${revision.id}!"
             throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
         }
     }
@@ -1445,6 +1446,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     List<RepositoryFileTransportCommand> retrieveModelFiles(final Model model) throws ModelException {
         final Revision revision = getLatestRevision(model, false)
         if (!revision) {
+            log.error("you cant access model ${model}")
             throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
         }
         return retrieveModelFiles(revision)
