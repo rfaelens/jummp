@@ -115,7 +115,8 @@ class SearchService {
             }
             String name = revision.name ?: ""
             String description = revision.description ?: ""
-            String content = modelDelegateService.getSearchIndexingContent(revision) ?: ""
+            Map<String, List<String>> formatSpecificContent =
+                    modelDelegateService.getSearchIndexingContent(revision)
             String submissionId = revision.model.submissionId
             String publicationId = revision.model.publicationId ?: ""
             int versionNumber = revision.revisionNumber
@@ -131,11 +132,15 @@ class SearchService {
             doc.addField("modelFormat", revision.format.name)
             doc.addField("levelVersion", revision.format.formatVersion)
             doc.addField("submitter", revision.owner)
-            doc.addField("content", content)
             doc.addField("paperTitle", revision.model.publication ?
                     revision.model.publication.title : "")
             doc.addField("paperAbstract", revision.model.publication ?
                     revision.model.publication.synopsis : "")
+            if (formatSpecificContent) {
+                formatSpecificContent.each { fieldName, value ->
+                    doc.addField(fieldName, value)
+                }
+            }
             /*
              * Stored fields. Hopefully will be used to display the search results one day
              * instead of going to the database for each model. When we find a solution to needing to
