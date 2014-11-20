@@ -22,7 +22,7 @@ package net.biomodels.jummp.core
 
 import grails.async.Promise
 import grails.plugins.springsecurity.Secured
-import grails.util.Holders
+import java.util.concurrent.atomic.AtomicReference
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -36,6 +36,8 @@ import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.SolrDocumentList
 import org.apache.solr.common.SolrInputDocument
 import org.perf4j.aop.Profiled
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * @short Singleton-scoped facade for interacting with a Solr instance.
@@ -45,7 +47,7 @@ import org.perf4j.aop.Profiled
  *
  * @author Raza Ali, raza.ali@ebi.ac.uk
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @date   20141104
+ * @date   20141113
  */
 class SearchService {
     /**
@@ -67,11 +69,15 @@ class SearchService {
     /**
      * Dependency injection of ModelService.
      */
-    def modelService = Holders.grailsApplication.mainContext.getBean("modelService")
+    def modelService
     /**
      * Dependency injection of ModelDelegateService.
      */
-    def modelDelegateService = Holders.grailsApplication.mainContext.getBean("modelDelegateService")
+    def modelDelegateService
+    /**
+     * Dependency injection of SpringSecurityService.
+     */
+    def springSecurityService
     /**
      * Dependency injection of SolrServerHolder
      */
@@ -94,20 +100,23 @@ class SearchService {
     /**
      * Adds a revision to the index
      *
-     * Adds the specified @param revision to the lucene index
+     * Adds the specified @param revision to the index.
      * @param revision The revision to be indexed
      **/
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="searchService.updateIndex")
     void updateIndex(RevisionTransportCommand revision) {
-    	revision.files //load files from VCS
+        Authentication auth = springSecurityService.authentication
+        AtomicReference<Authentication> authRef = new AtomicReference<>(auth)
         Promise p = Revision.async.task {
+            SecurityContextHolder.context.authentication = authRef.get()
             if (IS_DEBUG_ENABLED) {
                 log.debug "About to update index with revision ${revision.id}"
             }
             String name = revision.name ?: ""
             String description = revision.description ?: ""
-            String content = modelDelegateService.getSearchIndexingContent(revision) ?: ""
+            Map<String, List<String>> formatSpecificContent =
+                    modelDelegateService.getSearchIndexingContent(revision)
             String submissionId = revision.model.submissionId
             String publicationId = revision.model.publicationId ?: ""
             int versionNumber = revision.revisionNumber
@@ -123,11 +132,15 @@ class SearchService {
             doc.addField("modelFormat", revision.format.name)
             doc.addField("levelVersion", revision.format.formatVersion)
             doc.addField("submitter", revision.owner)
-            doc.addField("content", content)
             doc.addField("paperTitle", revision.model.publication ?
                     revision.model.publication.title : "")
             doc.addField("paperAbstract", revision.model.publication ?
                     revision.model.publication.synopsis : "")
+            if (formatSpecificContent) {
+                formatSpecificContent.each { fieldName, value ->
+                    doc.addField(fieldName, value)
+                }
+            }
             /*
              * Stored fields. Hopefully will be used to display the search results one day
              * instead of going to the database for each model. When we find a solution to needing to
@@ -165,7 +178,10 @@ class SearchService {
         if (IS_DEBUG_ENABLED) {
             log.debug "Indexing ${revisions.size()} revisions."
         }
+        Authentication auth = springSecurityService.authentication
+        AtomicReference<Authentication> authRef = new AtomicReference<>(auth)
         Promise p = Revision.async.task {
+            SecurityContextHolder.context.authentication = authRef.get()
             revisions.each {
                 updateIndex(it)
             }

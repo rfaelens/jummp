@@ -50,6 +50,8 @@ import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.core.model.identifier.generator.AbstractModelIdentifierGenerator
 import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.springframework.security.access.AccessDeniedException
 
 /**
@@ -64,6 +66,8 @@ import org.springframework.security.access.AccessDeniedException
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class ModelDelegateService implements IModelService {
+    static transactional = false
+    private static final Log log = LogFactory.getLog(this)
 
     def modelService
     def modelFileFormatService
@@ -215,14 +219,18 @@ class ModelDelegateService implements IModelService {
         return false
     }
 
-    List<RepositoryFileTransportCommand> retrieveModelFiles(RevisionTransportCommand revision) throws ModelException {
-        List<RepositoryFileTransportCommand> files = modelService.retrieveModelFiles(Revision.get(revision.id))
+    List<RepositoryFileTransportCommand> retrieveModelFiles(RevisionTransportCommand revision)
+            throws ModelException {
+        Revision theRevision = Revision.get(revision.id)
+        List<RepositoryFileTransportCommand> files = modelService.retrieveModelFiles(theRevision)
         if (files && !files.isEmpty()) {
             files.each { it.revision = revision }
             /*
-             * Add revision to the weak reference data structures, so its files are released from disk.
+             * Add revision to the weak reference data structures, so its files are released
+             * from disk.
              */
-            grailsApplication.mainContext.getBean("referenceTracker").addReference(revision, files.first().path)
+            grailsApplication.mainContext.getBean("referenceTracker").addReference(revision,
+                    files.first().path)
         }
         return files
     }
@@ -236,7 +244,7 @@ class ModelDelegateService implements IModelService {
                     User.get(collaborator.id))
     }
 
-    String getSearchIndexingContent(RevisionTransportCommand revision) {
+    Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand revision) {
         modelService.getSearchIndexingContent(revision)
     }
 

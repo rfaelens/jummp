@@ -788,12 +788,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     /**
     * Uses the modelfileformatservice to get content to be used for indexing a model
     *
-    * Passes the @p revision to the modelfileformatservice, gets content to be used for indexing the model
+    * Passes the @p r to the modelfileformatservice, gets content to be used for indexing the model
     * @param revision The model revision
     * @return The model content
     **/
-    public String getSearchIndexingContent(RevisionTransportCommand revision) {
-        return modelFileFormatService.getSearchIndexingContent(revision)
+    public Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand r) {
+        return modelFileFormatService.getSearchIndexingContent(r)
     }
 
     /**
@@ -1400,7 +1400,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      */
     //@PreAuthorize("hasPermission(#revision, read) or hasRole('ROLE_ADMIN')") Not working. Seems related to: https://bitbucket.org/jummp/jummp/issue/23/spring-security-doesnt-work-as-expected-in
     @PostLogging(LoggingEventType.RETRIEVAL)
-    @Profiled(tag="modelService.retrieveModelFiles")
+    @Profiled(tag="modelService.retrieveModelRepFiles")
     List<File> retrieveModelRepFiles(final Revision revision) throws ModelException {
         if (!aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)
                 && !SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
@@ -1429,8 +1429,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)
                 || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
             return revision.getRepositoryFilesForRevision()
-        }
-        else {
+        } else {
+            log.error "you can't access revision ${revision.id}!"
             throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
         }
     }
@@ -1446,6 +1446,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     List<RepositoryFileTransportCommand> retrieveModelFiles(final Model model) throws ModelException {
         final Revision revision = getLatestRevision(model, false)
         if (!revision) {
+            log.error("you cant access model ${model}")
             throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
         }
         return retrieveModelFiles(revision)
@@ -1490,8 +1491,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Returns permissions of a @p model. The @p autenticated parameter allows
-    * notifications to be generated from non-admin updaters of the model. 
+    * Returns permissions of a @p model. The @p authenticated parameter allows
+    * notifications to be generated from non-admin updaters of the model.
     *
     * returns the users with access to the model
     *
