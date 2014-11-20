@@ -127,7 +127,7 @@ class PharmMlService implements FileFormatService {
                     while (iErr.hasNext()) {
                         IValidationError e = iErr.next()
                         String error  = new StringBuffer(e.getRuleId()).append(':')
-                                .append(e.getErrorMsg()).append("\n").toString(); 
+                                .append(e.getErrorMsg()).append("\n").toString();
                         err << error
                         errors.add(error)
                     }

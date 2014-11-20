@@ -135,17 +135,17 @@ class Revision implements Serializable {
 
     List<RFTC> getRepositoryFilesForRevision() {
         List<RFTC> repFiles=new LinkedList<RFTC>()
-        List<File> files=modelService.retrieveModelRepFiles(this)
+        List<File> files = modelService.retrieveModelRepFiles(this)
         repoFiles.each { rf ->
-            File tmpFile=files.find { it.getName() == (new File(rf.path)).getName() }
-            RFTC rftc=new RFTC(
-                id: rf.id,
-                path: tmpFile.getCanonicalPath(),
-                description: rf.description,
-                hidden: rf.hidden,
-                mainFile: rf.mainFile,
-                userSubmitted: rf.userSubmitted,
-                mimeType: rf.mimeType)
+            File tmpFile = files.find { it.getName() == (new File(rf.path)).getName() }
+            RFTC rftc = new RFTC(
+                    id: rf.id,
+                    path: tmpFile.getCanonicalPath(),
+                    description: rf.description,
+                    hidden: rf.hidden,
+                    mainFile: rf.mainFile,
+                    userSubmitted: rf.userSubmitted,
+                    mimeType: rf.mimeType)
             repFiles.add(rftc)
         }
         return repFiles
