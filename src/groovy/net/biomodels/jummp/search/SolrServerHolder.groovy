@@ -101,6 +101,8 @@ class SolrServerHolder {
      * Singleton instance of SolrServer.
      */
     SolrServer server
+    
+    String SOLR_CORE_URL
 
     @Profiled(tag="solrServerHolder.init")
     void init() {
@@ -118,7 +120,7 @@ URL of Solr server not found. Please check the setting jummp.search.url in the c
                 DEFAULT_CORE_NAME
         prepareSolrCoreSetup(coreName, grailsConfig)
 
-        final String SOLR_CORE_URL = getSolrCoreUrl(SOLR_URL)
+        SOLR_CORE_URL = getSolrCoreUrl(SOLR_URL)
         server = new HttpSolrServer(SOLR_CORE_URL)
         if (IS_INFO_ENABLED) {
             log.info "Connected to Solr instance $SOLR_CORE_URL."
