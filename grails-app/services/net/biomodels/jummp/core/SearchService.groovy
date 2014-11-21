@@ -22,6 +22,7 @@ package net.biomodels.jummp.core
 
 import grails.async.Promise
 import grails.plugins.springsecurity.Secured
+import groovy.json.JsonBuilder
 import java.util.concurrent.atomic.AtomicReference
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.PostLogging
@@ -38,7 +39,7 @@ import org.apache.solr.common.SolrInputDocument
 import org.perf4j.aop.Profiled
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
-import groovy.json.JsonBuilder
+
 /**
  * @short Singleton-scoped facade for interacting with a Solr instance.
  *
@@ -47,7 +48,7 @@ import groovy.json.JsonBuilder
  *
  * @author Raza Ali, raza.ali@ebi.ac.uk
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @date   20141113
+ * @date   20141121
  */
 class SearchService {
     /**
@@ -99,11 +100,11 @@ class SearchService {
 
     List<String> fetchFilesFromRevision(RevisionTransportCommand rev, boolean filterMains) {
         if (filterMains) {
-        	return rev?.files?.findAll{it.mainFile}.collect{it.path}
+            return rev?.files?.findAll{it.mainFile}.collect{it.path}
         }
-       	return rev?.files?.collect{it.path}
+        return rev?.files?.collect{it.path}
     }
-    
+
     /**
      * Adds a revision to the index
      *
@@ -113,87 +114,39 @@ class SearchService {
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="searchService.updateIndex")
     void updateIndex(RevisionTransportCommand revision) {
-    	String name = revision.name ?: ""
-		String description = revision.description ?: ""
-		String submissionId = revision.model.submissionId
-		String publicationId = revision.model.publicationId ?: ""
-		int versionNumber = revision.revisionNumber
-		final String uniqueId = "${submissionId}.${versionNumber}"
-    	String exchangeFolder = new File(revision.files.first.path).getParent()
-		def builder = new groovy.json.JsonBuilder()
-    	def partialData=[
-    					'submissionId':submissionId,
-    					'publicationId':publicationId,
-    					'name':name,
-    					'description':description,
-    					'modelFormat':revision.format.name,
-    					'levelVersion':revision.format.formatVersion,
-    					'submitter':revision.owner,
-    					'paperTitle':revision.model.publication ? revision.model.publication.title : "",
-    					'paperAbstract':revision.model.publication ? revision.model.publication.synopsis : "",
-    					'model_id':revision.model.id,
-    					'versionNumber':versionNumber,
-    					'submissionDate':revision.model.submissionDate,
-    					'uniqueId':uniqueId
-    	]
-    	builder(partialData: partialData, 
-    			'folder':exchangeFolder, 
-    			'mainFiles': fetchFilesFromRevision(revision, true),
-    			'allFiles': fetchFilesFromRevision(revision, false),
-    			'solrServer': solrServerHolder.SOLR_CORE_URL); 
-    	File indexingData = new File(exchangeFolder, "indexData.json");
-    	indexingData.setText(builder.toString())
+        String name = revision.name ?: ""
+        String description = revision.description ?: ""
+        String submissionId = revision.model.submissionId
+        String publicationId = revision.model.publicationId ?: ""
+        int versionNumber = revision.revisionNumber
+        final String uniqueId = "${submissionId}.${versionNumber}"
+        String exchangeFolder = new File(revision.files.first.path).getParent()
+        def builder = new groovy.json.JsonBuilder()
+        def partialData=[
+                'submissionId':submissionId,
+                'publicationId':publicationId,
+                'name':name,
+                'description':description,
+                'modelFormat':revision.format.name,
+                'levelVersion':revision.format.formatVersion,
+                'submitter':revision.owner,
+                'paperTitle':revision.model.publication ?
+                        revision.model.publication.title : "",
+                'paperAbstract':revision.model.publication ?
+                        revision.model.publication.synopsis : "",
+                'model_id':revision.model.id,
+                'versionNumber':versionNumber,
+                'submissionDate':revision.model.submissionDate,
+                'uniqueId':uniqueId
+        ]
+        builder(partialData: partialData,
+            'folder':exchangeFolder,
+            'mainFiles': fetchFilesFromRevision(revision, true),
+            'allFiles': fetchFilesFromRevision(revision, false),
+            'solrServer': solrServerHolder.SOLR_CORE_URL)
+        File indexingData = new File(exchangeFolder, "indexData.json")
+        indexingData.setText(builder.toString())
         sendMessage("direct:exec", indexingData.getCanonicalPath())
-    	//System.out.println(builder.toString())
-    	/*
-    	Authentication auth = springSecurityService.authentication
-        AtomicReference<Authentication> authRef = new AtomicReference<>(auth)
-        Promise p = Revision.async.task {
-            SecurityContextHolder.context.authentication = authRef.get()
-            if (IS_DEBUG_ENABLED) {
-                log.debug "About to update index with revision ${revision.id}"
-            }
-           
-            SolrInputDocument doc = new SolrInputDocument()
-            /*
-             * Indexed fields
-             
-            doc.addField('submissionId', submissionId)
-            doc.addField('publicationId', publicationId)
-            doc.addField("name", name)
-            doc.addField("description", description)
-            doc.addField("modelFormat", revision.format.name)
-            doc.addField("levelVersion", revision.format.formatVersion)
-            doc.addField("submitter", revision.owner)
-            doc.addField("paperTitle", revision.model.publication ?
-                    revision.model.publication.title : "")
-            doc.addField("paperAbstract", revision.model.publication ?
-                    revision.model.publication.synopsis : "")
-            if (formatSpecificContent) {
-                formatSpecificContent.each { fieldName, value ->
-                    doc.addField(fieldName, value)
-                }
-            }
-            /*
-             * Stored fields. Hopefully will be used to display the search results one day
-             * instead of going to the database for each model. When we find a solution to needing to
-             * look in the database to figure out if the user has access to a model.
-             
-            doc.addField("model_id", revision.model.id)
-            doc.addField("versionNumber", versionNumber)
-            doc.addField("submissionDate", revision.model.submissionDate)
-            doc.addField("uniqueId", uniqueId)
-            solrServerHolder.server.add(doc)
-        }
-        p.onComplete {
-            if (IS_DEBUG_ENABLED) {
-                log.debug "Finished indexing revision ${revision.id}"
-            }
-        }
-        p.onError { Throwable t ->
-            log.error("Could not index revision ${revision.id} due to ${t.message}", t)
-        }
-        */
     }
 
     /**
@@ -241,13 +194,13 @@ class SearchService {
     @Profiled(tag="searchService.searchModels")
     public Collection<ModelTransportCommand> searchModels(String query) {
         long start = System.currentTimeMillis();
-    	SolrDocumentList results = search(query)
-    	System.out.println("Solr returned in "+(System.currentTimeMillis() - start));
+        SolrDocumentList results = search(query)
+        System.out.println("Solr returned in "+(System.currentTimeMillis() - start));
         final int COUNT = results.size()
         Map<String, ModelTransportCommand> returnVals = new LinkedHashMap<>(COUNT + 1, 1.0f)
         results.each {
-        	start = System.currentTimeMillis();
-        	final String thisSubmissionId = it.get("submissionId")
+            start = System.currentTimeMillis();
+            final String thisSubmissionId = it.get("submissionId")
             if (!returnVals.containsKey(thisSubmissionId)) {
                 String perennialField = it.get("publicationId") ?: thisSubmissionId
                 Model returned = Model.findByPerennialIdentifier(perennialField)
