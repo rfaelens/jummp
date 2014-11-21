@@ -58,7 +58,7 @@ class GarbageCollectionBasedCleanerJob {
     }
   
     def execute() {
-   	    if (forcedGC) {
+   	    /*if (forcedGC) {
    	    		System.out.println("RUNNING GC")
    	    	    System.gc()
    	    }
@@ -71,7 +71,7 @@ class GarbageCollectionBasedCleanerJob {
 			   }
 			   System.out.println("GC Cleaner deleting: "+ref.id()+" ..."+ref.deleteFolder())
 			   refTracker.clearReference(ref.id())
-		}
+		}*/
     }
 
 }
