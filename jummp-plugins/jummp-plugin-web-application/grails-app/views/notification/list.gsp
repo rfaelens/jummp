@@ -97,3 +97,6 @@
     <content tag="title">
         <g:message code="user.notifications.heading"/>
     </content>
+    <content tag="contexthelp">
+       	notifications
+    </content>
