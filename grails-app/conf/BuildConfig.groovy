@@ -115,6 +115,8 @@ grails.project.dependency.resolution = {
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
         test "org.grails:grails-datastore-test-support:1.0-grails-2.3"
         runtime 'org.javassist:javassist:3.17.1-GA'
+        runtime "org.apache.camel:camel-exec:2.13.0"
+        
     }
 
     plugins {
