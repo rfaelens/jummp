@@ -38,7 +38,7 @@ import org.apache.solr.common.SolrInputDocument
 import org.perf4j.aop.Profiled
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
-
+import groovy.json.JsonBuilder
 /**
  * @short Singleton-scoped facade for interacting with a Solr instance.
  *
@@ -97,6 +97,13 @@ class SearchService {
         log.info "Cleared the search index."
     }
 
+    List<String> fetchFilesFromRevision(RevisionTransportCommand rev, boolean filterMains) {
+        if (filterMains) {
+        	return rev?.files?.findAll{it.mainFile}.collect{it.path}
+        }
+       	return rev?.files?.collect{it.path}
+    }
+    
     /**
      * Adds a revision to the index
      *
@@ -106,25 +113,51 @@ class SearchService {
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="searchService.updateIndex")
     void updateIndex(RevisionTransportCommand revision) {
-        Authentication auth = springSecurityService.authentication
+    	String name = revision.name ?: ""
+		String description = revision.description ?: ""
+		String submissionId = revision.model.submissionId
+		String publicationId = revision.model.publicationId ?: ""
+		int versionNumber = revision.revisionNumber
+		final String uniqueId = "${submissionId}.${versionNumber}"
+    	String exchangeFolder = new File(revision.files.first.path).getParent()
+		def builder = new groovy.json.JsonBuilder()
+    	def partialData=[
+    					'submissionId':submissionId,
+    					'publicationId':publicationId,
+    					'name':name,
+    					'description':description,
+    					'modelFormat':revision.format.name,
+    					'levelVersion':revision.format.formatVersion,
+    					'submitter':revision.owner,
+    					'paperTitle':revision.model.publication ? revision.model.publication.title : "",
+    					'paperAbstract':revision.model.publication ? revision.model.publication.synopsis : "",
+    					'model_id':revision.model.id,
+    					'versionNumber':versionNumber,
+    					'submissionDate':revision.model.submissionDate,
+    					'uniqueId':uniqueId
+    	]
+    	builder(partialData: partialData, 
+    			'folder':exchangeFolder, 
+    			'mainFiles': fetchFilesFromRevision(revision, true),
+    			'allFiles': fetchFilesFromRevision(revision, false),
+    			'solrServer': solrServerHolder.SOLR_CORE_URL); 
+    	File indexingData = new File(exchangeFolder, "indexData.json");
+    	indexingData.setText(builder.toString())
+        sendMessage("direct:exec", indexingData.getCanonicalPath())
+    	//System.out.println(builder.toString())
+    	/*
+    	Authentication auth = springSecurityService.authentication
         AtomicReference<Authentication> authRef = new AtomicReference<>(auth)
         Promise p = Revision.async.task {
             SecurityContextHolder.context.authentication = authRef.get()
             if (IS_DEBUG_ENABLED) {
                 log.debug "About to update index with revision ${revision.id}"
             }
-            String name = revision.name ?: ""
-            String description = revision.description ?: ""
-            Map<String, List<String>> formatSpecificContent =
-                    modelDelegateService.getSearchIndexingContent(revision)
-            String submissionId = revision.model.submissionId
-            String publicationId = revision.model.publicationId ?: ""
-            int versionNumber = revision.revisionNumber
-            final String uniqueId = "${submissionId}.${versionNumber}"
+           
             SolrInputDocument doc = new SolrInputDocument()
             /*
              * Indexed fields
-             */
+             
             doc.addField('submissionId', submissionId)
             doc.addField('publicationId', publicationId)
             doc.addField("name", name)
@@ -145,7 +178,7 @@ class SearchService {
              * Stored fields. Hopefully will be used to display the search results one day
              * instead of going to the database for each model. When we find a solution to needing to
              * look in the database to figure out if the user has access to a model.
-             */
+             
             doc.addField("model_id", revision.model.id)
             doc.addField("versionNumber", versionNumber)
             doc.addField("submissionDate", revision.model.submissionDate)
@@ -160,6 +193,7 @@ class SearchService {
         p.onError { Throwable t ->
             log.error("Could not index revision ${revision.id} due to ${t.message}", t)
         }
+        */
     }
 
     /**
