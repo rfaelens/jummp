@@ -82,7 +82,10 @@ class SearchService {
      * Dependency injection of SolrServerHolder
      */
     def  solrServerHolder
-
+    /*
+    * Dependency injection of grailsApplication
+    */
+    def grailsApplication
     /**
      * Clears the index. Handle with care.
      */
@@ -136,6 +139,7 @@ class SearchService {
     					'submissionDate':revision.model.submissionDate,
     					'uniqueId':uniqueId
     	]
+    	
     	builder(partialData: partialData, 
     			'folder':exchangeFolder, 
     			'mainFiles': fetchFilesFromRevision(revision, true),
@@ -143,7 +147,9 @@ class SearchService {
     			'solrServer': solrServerHolder.SOLR_CORE_URL); 
     	File indexingData = new File(exchangeFolder, "indexData.json");
     	indexingData.setText(builder.toString())
-        sendMessage("direct:exec", indexingData.getCanonicalPath())
+    	String jarPath = grailsApplication.config.jummp.search.pathToIndexerExecutable
+    	sendMessage("direct:exec", [jarPath: jarPath,
+        							jsonPath: indexingData.getCanonicalPath()])
     	//System.out.println(builder.toString())
     	/*
     	Authentication auth = springSecurityService.authentication
