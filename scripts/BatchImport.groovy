@@ -142,7 +142,8 @@ target(sanitiseInput: "Processes user input") {
     def modelFolderParameter = argsMap.get("models")
     def credentialsParameter = argsMap.get("credentials")
     File credentials
-    if (argsMap.size() != 3 || !modelFolderParameter || !credentialsParameter || argsMap.get("params")) {
+    if (argsMap.size() < 3 || !modelFolderParameter || !credentialsParameter ||
+            argsMap.get("params")) {
         error('''USAGE\t\t\
 batch-import --models=<model_folder_location> --credentials=<path_to_credentials_file>''', 1)
     }
