@@ -29,10 +29,6 @@
 **/
 
 import grails.converters.*
-import net.biomodels.jummp.core.model.ModelFormatTransportCommand
-import net.biomodels.jummp.core.model.ModelTransportCommand
-import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
-import net.biomodels.jummp.plugins.security.UserRole
 import org.apache.commons.io.FileUtils
 import org.codehaus.groovy.grails.web.json.*
 import org.springframework.orm.hibernate3.SessionFactoryUtils
