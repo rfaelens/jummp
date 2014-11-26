@@ -175,10 +175,10 @@ target(vcsSetup: "Ensures Git is in charge of versioning models") {
 def parseJummpConfig = {
     def props = new Properties()
     def service = appCtx.getBean("configurationService")
-    String pathToConfig=service.getConfigFilePath()
-   	if (!pathToConfig) {
-       		throw new Exception("No config file available.")
-   	}
+    String pathToConfig = service.getConfigFilePath()
+    if (!pathToConfig) {
+        throw new Exception("No config file available.")
+    }
     props.load(new FileInputStream(pathToConfig))
     new ConfigSlurper().parse(props)
 }
