@@ -34,8 +34,6 @@
 
 package net.biomodels.jummp.core
 
-import grails.util.Holders
-
 /**
  * @short Job initializing and executing a trigger removing authentication hashes.
  *
@@ -50,15 +48,13 @@ class AuthenticationOutdaterJob {
      * Dependency injection of AuthenticationHashManager.
      */
     def authenticationHashService
-    /**
-     * The application configuration.
-     */
-    static final ConfigObject cfg = Holders.grailsApplication.config
+    
+    def grailsApplication;
 
     static triggers = {
         simple name: 'authenticationRemoveTrigger',
-                startDelay: Long.valueOf(cfg.jummp.authenticationHash.startRemoveOffset),
-                repeatInterval: Long.valueOf(cfg.jummp.authenticationHash.removeInterval)
+                startDelay: 1000*60*15,
+                repeatInterval: 1000*60*15
     }
 
     /**
