@@ -107,16 +107,44 @@ giving up. Sorry about that.""", vcsIssues)
         error "Wrong auth credentials. Why don't you try again?", authIssues
     }
 
-    def mtc = grailsApp.classLoader.loadClass("net.biomodels.jummp.core.model.ModelTransportCommand")
-    def rftc = grailsApp.classLoader.loadClass("net.biomodels.jummp.core.model.RepositoryFileTransportCommand")
+    def mtc = grailsApp.classLoader.loadClass(
+            "net.biomodels.jummp.core.model.ModelTransportCommand")
+    def rftc = grailsApp.classLoader.loadClass(
+            "net.biomodels.jummp.core.model.RepositoryFileTransportCommand")
     def model
-    def mftc = grailsApp.classLoader.loadClass("net.biomodels.jummp.core.model.ModelFormatTransportCommand")
-    def sbml = mftc.newInstance(identifier:"SBML")
+    def decorator = grailsApp.classLoader.loadClass(
+        "net.biomodels.jummp.core.model.identifier.decorator.AbstractAppendingDecorator")
+    def mftc = grailsApp.classLoader.loadClass(
+            "net.biomodels.jummp.core.model.ModelFormatTransportCommand")
+    def mf = grailsApp.classLoader.loadClass(
+            "net.biomodels.jummp.model.ModelFormat")
+    def rtc = grailsApp.classLoader.loadClass(
+            "net.biomodels.jummp.core.model.RevisionTransportCommand")
+    def formatCommand = mftc.newInstance(identifier: "SBML", formatVersion: "*")
+    def format = mf.findByIdentifierAndFormatVersion(formatCommand.identifier,
+            formatCommand.formatVersion)
+
+    decorator.context = appCtx
+    rtc.context = appCtx
+    def modelService = appCtx.modelService
+    def modelFileFormatService = appCtx.modelFileFormatService
+
+    def symlinkPattern = ~/[A-Z0-9]*\.xml/
+    def targetPattern = ~/[A-Z0-9]*_url\.xml/
+
     modelFolder.eachFileRecurse {
-        if (it.isFile()) {
-            final String MODEL_NAME = it.name - ".xml"
-            model = mtc.newInstance(name: MODEL_NAME, submitter: userAuthenticationDetails.principal,
-                    submissionDate: new Date(), format: sbml, comment: "Import of $MODEL_NAME")
+        boolean modelFileDetected = it.isFile() && symlinkPattern.matcher(it.name).matches()
+        if (modelFileDetected) {
+            log("Importing model file ${it.absolutePath}...")
+            boolean conventionFollowed = targetPattern.matcher(it.canonicalPath).matches()
+            if (!conventionFollowed) {
+                error "${it.absolutePath} should have been a symbolic link!"
+            }
+            final String MODEL_NAME = modelFileFormatService.extractName([it], format)
+            final String DESCRIPTION = modelFileFormatService.extractDescription([it], format)
+            boolean isValid = modelFileFormatService.validate([it], formatCommand.identifier, [])
+            model = mtc.newInstance(submitter: userAuthenticationDetails.principal,
+                    submissionDate: new Date(), format: formatCommand)
             File temp = File.createTempFile("metadata", ".xml")
             def writer = new java.io.FileWriter(temp)
             def xmlWriter = new groovy.xml.MarkupBuilder(writer)
@@ -124,12 +152,17 @@ giving up. Sorry about that.""", vcsIssues)
                 name(MODEL_NAME)
                 date(new Date().format("dd-MM-yyyy'T'HH-mm-ss"))
             }
-            def modelWrapper = rftc.newInstance(path: it.absolutePath, description: "$MODEL_NAME", mainFile: true,
-                    userSubmitted: true, hidden: false)
-            def tempWrapper = rftc.newInstance(path: temp.absolutePath, description: "Sample additional file", mainFile: false,
-                    userSubmitted: true, hidden: false)
-            appCtx.getBean("modelService").uploadModelAsList([modelWrapper, tempWrapper], model)
+            def modelWrapper = rftc.newInstance(path: it.absolutePath, description: "$MODEL_NAME",
+                    mainFile: true, userSubmitted: true, hidden: false)
+            def tempWrapper = rftc.newInstance(path: temp.absolutePath, description:
+                    "Sample additional file", mainFile: false, userSubmitted: true, hidden: false)
+            def files = [modelWrapper, tempWrapper]
+            def revision = rtc.newInstance(model: model, files: files, format: formatCommand,
+                    validated: isValid, name: MODEL_NAME, description: DESCRIPTION,
+                    comment: "Import of $MODEL_NAME".toString())
+            modelService.uploadValidatedModel(files, revision)
             FileUtils.deleteQuietly(temp)
+            log("...finished importing model file ${it.absolutePath}")
         }
     }
 
