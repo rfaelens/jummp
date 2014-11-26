@@ -130,7 +130,7 @@ giving up. Sorry about that.""", vcsIssues)
     def modelFileFormatService = appCtx.modelFileFormatService
 
     def symlinkPattern = ~/[A-Z0-9]*\.xml/
-    def targetPattern = ~/[A-Z0-9]*_url\.xml/
+    def targetPattern = ~/[a-zA-Z_\-\/0-9]*_url\.xml/
 
     modelFolder.eachFileRecurse {
         boolean modelFileDetected = it.isFile() && symlinkPattern.matcher(it.name).matches()
