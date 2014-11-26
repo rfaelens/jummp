@@ -874,12 +874,7 @@ class SubmissionService {
      * @param workingMemory     a Map containing all objects exchanged throughout the flow.
      */
     private List<File> getFilesFromRepFiles(List<RFTC> repFiles) {
-        //would be nice to do this in a groovier way
-        List<File> list=new LinkedList<File>()
-        repFiles.each {
-            list.add(new File(it.path))
-        }
-        return list
+        return repFiles?.collect{ new File(it.path) }
     }
 
     /**
