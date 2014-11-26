@@ -28,10 +28,6 @@
 * that of the covered work.}
 **/
 
-
-
-
-
 import grails.converters.*
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -57,7 +53,7 @@ includeTargets << grailsScript("_GrailsBootstrap")
  *
  * The other argument this script expects is the path to a file with the following format
  * {username:<username>, password:<unencrypted_password>}
- * These credentials should belong to a user with an active JUMMP account on whose behalf 
+ * These credentials should belong to a user with an active JUMMP account on whose behalf
  * the submissions will be made.
  *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
