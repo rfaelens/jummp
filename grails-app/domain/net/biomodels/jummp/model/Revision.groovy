@@ -115,7 +115,6 @@ class Revision implements Serializable {
      * Indicates whether this Revision is marked as deleted.
      */
     Boolean deleted = false
-    // TODO: UML diagram lists a "format" and a "state". Do these belong here? What is the type of them?
 
     static constraints = {
         model(nullable: false)
