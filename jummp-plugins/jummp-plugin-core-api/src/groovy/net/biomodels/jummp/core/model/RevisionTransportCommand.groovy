@@ -34,8 +34,7 @@
 
 package net.biomodels.jummp.core.model
 
-import grails.util.Holders
-
+import org.springframework.context.ApplicationContext
 /**
  * @short Wrapper for a Revision to be transported through JMS.
  *
@@ -50,6 +49,10 @@ import grails.util.Holders
  */
 class RevisionTransportCommand implements Serializable {
     private static final long serialVersionUID = 1L
+    /**
+     * The application context. Populated during bootstrap.
+     */
+    static ApplicationContext context
     Long id
     ModelState state
     /**
@@ -99,8 +102,7 @@ class RevisionTransportCommand implements Serializable {
 
      List<RepositoryFileTransportCommand> getFiles() {
          if (!files) {
-             def ctx = Holders.getApplicationContext()
-             files=ctx.modelDelegateService.retrieveModelFiles(this)
+             files = context.modelDelegateService.retrieveModelFiles(this)
          }
          return files
      }

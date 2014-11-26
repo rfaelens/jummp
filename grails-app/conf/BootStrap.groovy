@@ -31,6 +31,7 @@
 import grails.util.Environment
 import net.biomodels.jummp.core.model.PublicationLinkProviderTransportCommand as PubLinkProvTC
 import net.biomodels.jummp.core.model.identifier.decorator.AbstractAppendingDecorator
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.PublicationLinkProvider
 import net.biomodels.jummp.plugins.security.Person
@@ -200,6 +201,7 @@ class BootStrap {
             }
         ]
         AbstractAppendingDecorator.context = ctx
+        RevisionTransportCommand.context = ctx
     }
 
     def destroy = {
