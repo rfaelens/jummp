@@ -46,7 +46,7 @@ public class JummpXmlUtils {
 
     public static String findModelElement(final File model, final String elementName) {
         if (!model || !model.canRead() || !elementName) {
-            log.error("Refusing to find element ${elementName} in file ${model.properties}.")
+            log.error("Refusing to find element ${elementName} in file ${model?.properties}.")
             return ""
         }
         String elem = parseXmlFile.curry(model)({ XMLStreamReader r ->
