@@ -122,7 +122,7 @@ grails.project.dependency.resolution = {
     plugins {
         build ":tomcat:7.0.54"
 
-        provided(":codenarc:0.21")
+        runtime(":codenarc:0.21")
 
         compile ":webxml:1.4.1"
         compile ":perf4j:0.1.1"
