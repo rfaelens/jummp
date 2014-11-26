@@ -82,7 +82,7 @@ String exchangeDirectory
 def userAuthenticationDetails
 
 target(main: "Puts everything together to import models from a given folder") {
-    bootstrap()
+    bootstrapOnce()
     int inputIssues = sanitiseInput()
     if (inputIssues) {
         error("""There was a problem parsing the input parameters so I'm giving up. \
