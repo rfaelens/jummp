@@ -85,18 +85,18 @@ target(main: "Puts everything together to import models from a given folder") {
     bootstrap()
     int inputIssues = sanitiseInput()
     if (inputIssues) {
-        println "\tERROR There was a problem parsing the input parameters so I'm giving up. Sorry about that."
-        return inputIssues
+        error("""There was a problem parsing the input parameters so I'm giving up. \
+Sorry about that.""", inputIssues)
     }
     int configIssues = resetConfiguration()
     if (configIssues) {
-        println "\tERROR Your \$HOME/.jummp.properties does not look right. Perhaps the working or exchange folders do not exist?"
-        return configIssues
+        error("""Your \$HOME/.jummp.properties does not look right. Perhaps the \
+working or exchange folders do not exist?""", configIssues)
     }
     int vcsIssues = vcsSetup()
     if (vcsIssues) {
-        println "\tERROR There was a problem configuring Jummp's model versioning so I'm giving up. Sorry about that."
-        return vcsIssues
+        error("""There was a problem configuring Jummp's model versioning so I'm \
+giving up. Sorry about that.""", vcsIssues)
     }
     // bind a Hibernate Session to avoid lazy initialization exceptions
     TransactionSynchronizationManager.bindResource(appCtx.sessionFactory,
@@ -104,8 +104,7 @@ target(main: "Puts everything together to import models from a given folder") {
 
     int authIssues = authenticate()
     if (authIssues) {
-        println "\tERROR Why don't you try again?"
-        return authIssues
+        error "Wrong auth credentials. Why don't you try again?", authIssues
     }
 
     def mtc = grailsApp.classLoader.loadClass("net.biomodels.jummp.core.model.ModelTransportCommand")
@@ -144,20 +143,17 @@ target(sanitiseInput: "Processes user input") {
     def credentialsParameter = argsMap.get("credentials")
     File credentials
     if (argsMap.size() != 3 || !modelFolderParameter || !credentialsParameter || argsMap.get("params")) {
-        println '''\tUSAGE
-\t\tbatch-import --models=<model_folder_location> --credentials=<path_to_credentials_file>'''
-        return 1
+        error('''USAGE\t\t\
+batch-import --models=<model_folder_location> --credentials=<path_to_credentials_file>''', 1)
     }
     File location = new File(modelFolderParameter)
     if (!location.exists() || !location.isDirectory()) {
-        println "\tERROR There is no directory that I can access ${location.absolutePath}"
-        return 2
+        error "There is no directory that I can access ${location.absolutePath}", 2
     }
     modelFolder = location.getCanonicalFile()
     location = new File(credentialsParameter)
     if (!location.exists() || !location.isFile()) {
-        println "\tERROR Did not find any credentials in ${location.absolutePath}"
-        return 4
+        error "Did not find any credentials in ${location.absolutePath}", 4
     }
     credentials = location.getCanonicalFile()
     def c = JSON.parse(new FileInputStream(credentials.absolutePath), "UTF8")
@@ -193,8 +189,8 @@ target(resetConfiguration: "Resets the key properties to the user-supplied defau
     if (!wd.exists() || !wd.isDirectory()) {
         workingDirectory = null
         exchangeDirectory = null
-        println "\tERROR Please set jummp.vcs.workingDirectory in .jummp.properties to point to an empty folder"
-        return 8
+        error("""Please set jummp.vcs.workingDirectory in .jummp.properties to point \
+to an empty folder""", 8)
     } else {
         grailsApp.config.jummp.vcs.workingDirectory = workingDirectory
     }
@@ -203,9 +199,8 @@ target(resetConfiguration: "Resets the key properties to the user-supplied defau
     if (!ed.exists() || !ed.isDirectory()) {
         workingDirectory = null
         exchangeDirectory = null
-        println
-            "\tERROR Please set jummp.vcs.exchangeDirectory in .jummp.properties to point to an empty folder"
-        return 8
+        error("""Please set jummp.vcs.exchangeDirectory in .jummp.properties to point to an \
+empty folder""", 8)
     } else {
         grailsApp.config.jummp.vcs.exchangeDirectory = exchangeDirectory
     }
@@ -216,12 +211,23 @@ target(authenticate: "Attempts to authenticate the user or fails badly") {
     def authToken = new UsernamePasswordAuthenticationToken(username, password)
     def auth = appCtx.getBean("authenticationManager").authenticate(authToken)
     if (!auth.authenticated) {
-        println "\tERROR Are you sure that is the right username/password combination for your account?"
-        return 16
+        error("Are you sure that is the right username/password combination for your account?",
+                16)
     }
     SecurityContextHolder.getContext().setAuthentication(auth)
     userAuthenticationDetails = auth
     return 0
+}
+
+error = { String msg, int code = -1 ->
+    event('StatusError', [msg])
+    if (code != -1) {
+        exit code
+    }
+}
+
+log = { msg ->
+    event('StatusUpdate', [msg])
 }
 
 setDefaultTarget(main)
