@@ -46,7 +46,6 @@ import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.model.RepositoryFile
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
-import org.apache.lucene.document.Document
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.perf4j.log4j.Log4JStopWatch
