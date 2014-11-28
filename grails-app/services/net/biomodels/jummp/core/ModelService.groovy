@@ -915,7 +915,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
         } catch (VcsException e) {
-        	revision.discard()
+            revision.discard()
             domainObjects.each { it.discard() }
             model.discard()
             //TODO undo the addition of the files to the VCS.
