@@ -46,6 +46,8 @@ import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.model.RepositoryFile
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.perf4j.log4j.Log4JStopWatch
@@ -70,10 +72,22 @@ import org.springframework.security.core.userdetails.UserDetails
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
- * @date 20141024
+ * @date 20141128
  */
 @SuppressWarnings("GroovyUnusedCatchParameter")
 class ModelService {
+    /**
+     * The class logger.
+     */
+    private static final Log log = LogFactory.getLog(this)
+    /**
+     * Threshold for the verbosity of the logger.
+     */
+    private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
+    /**
+     * Threshold for the verbosity of the logger.
+     */
+    private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
     /**
      * Dependency Injection of Spring Security Service
      */
@@ -842,7 +856,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.uploadValidatedModel")
     public Model uploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles,
             RevisionTransportCommand rev) throws ModelException {
+        println "logging for ModelService: info: $IS_INFO_ENABLED debug: $IS_DEBUG_ENABLED"
         def stopWatch = new Log4JStopWatch("modelService.uploadValidatedModel.catchDuplicate")
+        if (IS_DEBUG_ENABLED) {
+            log.debug "About to store the following model: ${rev.dump()}"
+        }
         // TODO: to support anonymous submissions this method has to be changed
         if (Revision.findByName(rev.name)) {
             final String msg = "There is already a Model with name ${rev.name}".toString()
@@ -872,9 +890,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(rev.model, err)
         }
         model.vcsIdentifier = modelPath
+        if (IS_DEBUG_ENABLED) {
+            log.debug "The new model will be stored in $modelPath"
+        }
         //model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
-
-        model.submissionId = submissionIdGenerator.generate()
+        final String submissionId = submissionIdGenerator.generate()
+        model.submissionId = submissionId
         Revision revision = new Revision(model: model,
                 revisionNumber: 1,
                 owner: User.findByUsername(springSecurityService.authentication.name),
@@ -912,7 +933,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         stopWatch.lap("Finished preparing what to store in the VCS.")
         stopWatch.setTag("modelService.uploadValidatedModel.doVcsStorage")
         try {
-            revision.vcsId = vcsService.importModel(model, modelFiles)
+            String vcsId = vcsService.importModel(model, modelFiles)
+            revision.vcsId = vcsId
+            if (IS_DEBUG_ENABLED) {
+                log.debug "First commit for ${revision.model.vcsIdentifier} is $vcsId"
+            }
         } catch (VcsException e) {
             revision.discard()
             domainObjects.each { it.discard() }
@@ -988,6 +1013,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 }
             } catch (JummpException e) {
                 log.debug(e.message, e)
+            }
+            if (IS_DEBUG_ENABLED) {
+                log.debug("Model $submissionId stored with id ${model.id}")
             }
 
             executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
