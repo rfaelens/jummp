@@ -117,7 +117,7 @@ A sample configuration is
 select id,
 submission_id as submissionId,
 perennialPublicationIdentifier as publicationId
-from model where model.id = (select max(id) from model)""")
+from model where model.submission_id = (select max(submission_id) from model)""")
             } catch (Exception e) {
                 final String W = """Unable to access the database - model IDs will be created \
 using the default values."""
