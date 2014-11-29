@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory
 /**
  * @short ModelIdentifierDecorator implementation that adds a literal suffix to all model ids.
  *
- * If model identifiers follow a predictable pattern, an * attacker might attempt to access
+ * If model identifiers follow a predictable pattern, an attacker might attempt to access
  * models to which they do not have access. This implementation of ModelIdentifierDecorator
  * computes a random hash and appends it to model identifiers in order to mitigate against
  * this behaviour.
