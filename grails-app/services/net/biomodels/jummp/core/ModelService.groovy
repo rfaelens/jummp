@@ -856,10 +856,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.uploadValidatedModel")
     public Model uploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles,
             RevisionTransportCommand rev) throws ModelException {
-        println "logging for ModelService: info: $IS_INFO_ENABLED debug: $IS_DEBUG_ENABLED"
         def stopWatch = new Log4JStopWatch("modelService.uploadValidatedModel.catchDuplicate")
         if (IS_DEBUG_ENABLED) {
-            log.debug "About to store the following model: ${rev.dump()}"
+            log.debug "About to store the following model: ${rev.name}"
         }
         // TODO: to support anonymous submissions this method has to be changed
         if (Revision.findByName(rev.name)) {
