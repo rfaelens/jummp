@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory
 /**
  * @short Simple POGO facilitating the generation of a model identifier.
  *
- * Instances of this class are manipulated by concrete implementations of the 
+ * Instances of this class are manipulated by concrete implementations of the
  * ModelIdentifierDecorator interface.
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
