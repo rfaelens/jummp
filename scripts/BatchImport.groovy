@@ -131,41 +131,46 @@ giving up. Sorry about that.""", vcsIssues)
 
     def symlinkPattern = ~/[A-Z0-9]*\.xml/
     def targetPattern = ~/[a-zA-Z_\-\/0-9]*_url\.xml/
-
-    modelFolder.eachFileRecurse {
-        boolean modelFileDetected = it.isFile() && symlinkPattern.matcher(it.name).matches()
-        if (modelFileDetected) {
-            log("Importing model file ${it.absolutePath}...")
-            boolean conventionFollowed = targetPattern.matcher(it.canonicalPath).matches()
-            if (!conventionFollowed) {
-                error "${it.absolutePath} should have been a symbolic link!"
+    // keep track of the number of models that are processed
+    long processedCount = 0
+    def failures = []
+    long duration = System.currentTimeMillis()
+    try {
+        modelFolder.eachFileRecurse {
+            boolean modelFileDetected = it.isFile() && symlinkPattern.matcher(it.name).matches()
+            if (modelFileDetected) {
+                ++processedCount
+                log("Importing model file ${it.absolutePath}...")
+                boolean conventionFollowed = targetPattern.matcher(it.canonicalPath).matches()
+                if (!conventionFollowed) {
+                    error "${it.absolutePath} should have been a symbolic link!"
+                }
+                final String MODEL_NAME = modelFileFormatService.extractName([it], format)
+                final String DESCRIPTION = modelFileFormatService.extractDescription([it], format)
+                boolean isValid = modelFileFormatService.validate([it], formatCommand.identifier, [])
+                model = mtc.newInstance(submitter: userAuthenticationDetails.principal,
+                submissionDate: new Date(), format: formatCommand)
+                def modelWrapper = rftc.newInstance(path: it.absolutePath, description: "$MODEL_NAME",
+                mainFile: true, userSubmitted: true, hidden: false)
+                def files = [modelWrapper]
+                def revision = rtc.newInstance(model: model, files: files, format: formatCommand,
+                        validated: isValid, name: MODEL_NAME, description: DESCRIPTION,
+                        comment: "Import of $MODEL_NAME".toString())
+                def result = modelService.uploadValidatedModel(files, revision)
+                if (!result) {
+                    failures.add(it.absolutePath)
+                }
+                log("...finished importing model file ${it.absolutePath}")
             }
-            final String MODEL_NAME = modelFileFormatService.extractName([it], format)
-            final String DESCRIPTION = modelFileFormatService.extractDescription([it], format)
-            boolean isValid = modelFileFormatService.validate([it], formatCommand.identifier, [])
-            model = mtc.newInstance(submitter: userAuthenticationDetails.principal,
-                    submissionDate: new Date(), format: formatCommand)
-            File temp = File.createTempFile("metadata", ".xml")
-            def writer = new java.io.FileWriter(temp)
-            def xmlWriter = new groovy.xml.MarkupBuilder(writer)
-            xmlWriter.model {
-                name(MODEL_NAME)
-                date(new Date().format("dd-MM-yyyy'T'HH-mm-ss"))
-            }
-            def modelWrapper = rftc.newInstance(path: it.absolutePath, description: "$MODEL_NAME",
-                    mainFile: true, userSubmitted: true, hidden: false)
-            def tempWrapper = rftc.newInstance(path: temp.absolutePath, description:
-                    "Sample additional file", mainFile: false, userSubmitted: true, hidden: false)
-            def files = [modelWrapper, tempWrapper]
-            def revision = rtc.newInstance(model: model, files: files, format: formatCommand,
-                    validated: isValid, name: MODEL_NAME, description: DESCRIPTION,
-                    comment: "Import of $MODEL_NAME".toString())
-            modelService.uploadValidatedModel(files, revision)
-            FileUtils.deleteQuietly(temp)
-            log("...finished importing model file ${it.absolutePath}")
+        }
+    } finally {
+        duration = (System.currentTimeMillis() - duration) / 1000
+        String formattedDuration = prettify(duration)
+        log("Imported $processedCount models (${failures.size()} failures) in $formattedDuration")
+        if (failures) {
+            log("Failed to import the following models:\n${failures.join('\n')}")
         }
     }
-
     return 0
 }
 
@@ -262,6 +267,39 @@ error = { String msg, int code = -1 ->
 
 log = { msg ->
     event('StatusUpdate', [msg])
+}
+
+prettify = { long time ->
+    if (time < 0) {
+        error("Expected a non-negative time value, not $time.")
+        return
+    }
+    final int SECOND = 1
+    final int MINUTE = 60 * SECOND
+    final int HOUR = 60 * MINUTE
+    final int DAY = 24 * HOUR
+    /*
+     * set the initial capacity to the maximum possible value
+     * assumming double-digit figures for days, hours, minutes and seconds.
+     */
+    final StringBuilder result = new StringBuilder(38)
+    if (time > DAY) {
+        final int count = time / DAY
+        time = time % DAY
+        result.append("$count days ")
+    }
+    if (time > HOUR) {
+        final int count = time / HOUR
+        time = time % HOUR
+        result.append("$count hours ")
+    }
+    if (time > MINUTE) {
+        final int count = time / MINUTE
+        time = time % MINUTE
+        result.append("$count minutes ")
+    }
+    result.append("$time seconds")
+    return result.toString()
 }
 
 setDefaultTarget(main)
