@@ -33,15 +33,17 @@ grails.project.source.level = 1.7
 grails.project.target.level = 1.7
 grails.project.dependency.resolver = "maven"
 
+customJvmArgs = ["-server", "-noverify"]
 grails.project.fork = [
+    //compile: [jvmArgs: [ "-implicit:class", "-Aspi_log=target/spi_log.log", "-Aspi_verbose"]],
     // configure settings for the test-app JVM, uses the daemon by default
     test: false, //[maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, daemon:true],
     // configure settings for the run-app JVM
-    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false, jvmArgs: customJvmArgs],
     // configure settings for the run-war JVM
-    war: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    war: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false, jvmArgs: customJvmArgs],
     // configure settings for the Console UI JVM
-    console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256]
+    console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256, jvmArgs: customJvmArgs]
 ]
 
 grails.project.dependency.resolution = {
@@ -79,15 +81,24 @@ grails.project.dependency.resolution = {
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3')// { transitive = false }
         // dependencies of jsbml
-        compile("org.sbml.jsbml:jsbml:1.0-a2") {
-            excludes 'junit', 'log4j', 'commons-pool', 'commons-dbcp'
-        }
-        compile "com.thoughtworks.xstream:xstream:1.4.7"
+        compile("org.sbml.jsbml:core:1.0")
+        compile("org.sbml.jsbml.ext:arrays:0.9")
+        compile("org.sbml.jsbml.ext:comp:1.0")
+        compile("org.sbml.jsbml.ext:dyn:0.5")
+        compile("org.sbml.jsbml.ext:fbc:1.0")
+        compile("org.sbml.jsbml.ext:groups:0.4")
+        compile("org.sbml.jsbml.ext:layout:1.0")
+        compile("org.sbml.jsbml.ext:multi:0.1")
+        compile("org.sbml.jsbml.ext:qual:2.1")
+        compile("org.sbml.jsbml.ext:render:0.8")
+        compile("org.sbml.jsbml.ext:req:0.2")
+        compile("org.sbml.jsbml.ext:spatial:0.8-b1")
+        //compile "com.thoughtworks.xstream:xstream:1.4.7"
         //runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
         //runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
         //runtime "org.codehaus.woodstox:stax2-api:3.1.0"
         compile "org.sbfc:converter:1.1"
-        compile "org.jdom:jdom:1.1.3"
+        //compile "org.jdom:jdom:1.1.3"
         //compile "xml-apis:xml-apis:1.4.01"
         //compile "jaxen:jaxen:1.1.4"
     }

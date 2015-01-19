@@ -35,6 +35,7 @@ grails.project.dependency.resolver = "maven"
 
 customJvmArgs = ["-server", "-noverify", "-XX:+UseConcMarkSweepGC", "-XX:+UseParNewGC" ]
 grails.project.fork = [
+    //compile: [jvmArgs: [ /*"-implicit:class",*/ "-Aspi_log=target/spi_log.log", "-Aspi_verbose"]],
     // configure settings for the test-app JVM, uses the daemon by default
     test: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, daemon:true],
     // configure settings for the run-app JVM
@@ -106,13 +107,13 @@ grails.project.dependency.resolution = {
                     'xalan',
                     'xml-apis'
         }*/
-        compile "xml-apis:xml-apis:1.4.01"
-        compile "jaxen:jaxen:1.1.4"
+        //compile "xml-apis:xml-apis:1.4.01"
+        //compile "jaxen:jaxen:1.1.4"
         compile 'log4j:log4j:1.2.17'
 
-        compile "org.jdom:jdom:1.1.3"
+       // compile "org.jdom:jdom:1.1.3"
 
-        runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
+        //runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
         test "org.grails:grails-datastore-test-support:1.0-grails-2.3"
         runtime 'org.javassist:javassist:3.17.1-GA'
         runtime "org.apache.camel:camel-exec:2.13.0"
