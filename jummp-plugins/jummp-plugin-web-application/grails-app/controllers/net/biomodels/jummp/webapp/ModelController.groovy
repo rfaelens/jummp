@@ -478,6 +478,7 @@ class ModelController {
                     }
                     flow.workingMemory.put("SafeReferenceVariable", variableName)
                     session."${variableName}" = flow.workingMemory.get("LastRevision")
+                    System.out.println("SYSTEM MEMORY: "+flow.workingMemory);
                 }
                 submissionService.initialise(flow.workingMemory)
                 if (flow.isUpdate) {
@@ -497,8 +498,11 @@ class ModelController {
         }
         uploadFiles {
             on("Upload") {
+            	try {
                 def mainMultipartList = request.getMultiFileMap().mainFile
                 def extraFileField = request.getMultiFileMap().extraFiles
+                System.out.println("Main files: "+mainMultipartList)
+                System.out.println("Extra files: "+extraFileField)
                 List<MultipartFile> extraMultipartList = []
                 if (extraFileField instanceof MultipartFile) {
                     extraMultipartList = [extraFileField]
@@ -547,8 +551,14 @@ New submission started. Main files: ${mainMultipartList.inspect()}.""")
                 cmd.description = descriptionFields
                 if (IS_DEBUG_ENABLED) {
                     log.debug "Data binding done :${cmd.properties}"
+                    System.out.println("Data binding done :${cmd.properties}")
                 }
+                System.out.println("Data binding done :${cmd.properties}")
                 flow.workingMemory.put("UploadCommand", cmd)
+                }
+                catch(Exception e) {
+                	e.printStackTrace();
+                }
             }.to "transferFilesToService"
             on("ProceedWithoutValidation"){
             	
@@ -561,16 +571,20 @@ New submission started. Main files: ${mainMultipartList.inspect()}.""")
         }
         transferFilesToService {
             action {
+            	System.out.println("INSIDE TRANSFER FILES TO SERVICE");
                 UploadFilesCommand cmd =
                             flow.workingMemory.remove("UploadCommand") as UploadFilesCommand
                 boolean fileValidationError = false
                 boolean furtherProcessingRequired = true
                 def deletedMains = cmd.mainDeletes
-                List mainFiles = getMainFiles(flow.workingMemory)
+                List mainFiles = flow.workingMemory.get("repository_files").findAll { it.mainFile }
                 boolean isOK = !mainFileDeleted(mainFiles, cmd.mainFile, deletedMains)
+                isOK = true;
+                System.out.println(flow.workingMemory.toString()+".."+isOK)
                 def multipartDebug = cmd.mainFile.collect { it.getOriginalFilename() }
                 def mainFilesDebug = mainFiles.collect { new File(it.path).name }
                 if (!isOK) {
+                	System.out.println("MAIN FILE DELETED? OR SOMETHING");
                     return MainFileMissingError()
                 }
                 if (!cmd.validate()) {
@@ -586,12 +600,15 @@ New submission started. Main files: ${mainMultipartList.inspect()}.""")
                                     fileValidationError = false
                                     furtherProcessingRequired = true
                                 } else {
+                                	System.out.println("ADDITIONAL REPLACING MAIN")
                                     return AdditionalReplacingMainError()
                                 }
                             } else {
+                            	System.out.println("MAIN FILE MISSING ERROR (inner)")
                                 return MainFileMissingError()
                             }
                         } else {
+                        	System.out.println("MAIN FILE MISSING ERROR")
                             return MainFileMissingError()
                         }
                     } else {
@@ -605,6 +622,7 @@ Error in uploading files. Cmd did not validate: ${cmd.getProperties()}""")
                 }
                 if (!fileValidationError && furtherProcessingRequired) {
                     //should this be in a separate action state?
+                    System.out.println("NO ERROR");
                     def uuid = UUID.randomUUID().toString()
                     if (IS_DEBUG_ENABLED) {
                         log.debug "Generated submission UUID: ${uuid}"
@@ -648,12 +666,15 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                     flow.workingMemory["deleted_filenames"] = deletedFileNames.flatten()
                     submissionService.handleFileUpload(flow.workingMemory)
                 }
+                System.out.println("LEAVING TRANSFER TO SERVICE");
+                
             }
             on("MainFileMissingError") {
                 flash.flashMessage = "submission.upload.error.fileerror"
             }.to "uploadFiles"
             on("AdditionalReplacingMainError") {
-                flash.flashMessage = "submission.upload.error.additional_replacing_main"
+            	System.out.println("GOING BACK TO UPLOAD FILES");
+            	flash.flashMessage = "submission.upload.error.additional_replacing_main"
             }.to "uploadFiles"
             on("success").to "performValidation"
             on(Exception).to "handleException"
@@ -900,6 +921,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
         handleException {
             action {
                 String stackTrace = ExceptionUtils.getStackTrace(flash.flowExecutionException)
+                System.out.println(stackTrace)
                 String ticket = UUID.randomUUID().toString()
                 if (flow.isUpdate) {
                     session.removeAttribute(flow.workingMemory.get("SafeReferenceVariable") as String)
@@ -917,12 +939,12 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
                     }
                 }
                 submissionService.cleanup(flow.workingMemory)
-                mailService.sendMail {
+                /*mailService.sendMail {
                     to grailsApplication.config.jummp.security.registration.email.adminAddress
                     from grailsApplication.config.jummp.security.registration.email.sender
                     subject "Bug in submission: ${ticket}"
                     body stackTrace
-                }
+                }*/
                 session.messageForError = ticket
             }
             on("success").to "displayErrorPage"
@@ -1090,11 +1112,17 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
     }
 
     private boolean mainFileDeleted(List mainFiles, List cmdMains, List<String> mainsToBeDeleted) {
+        System.out.println("Files to be added: "+mainFiles)
+        System.out.println("Files to be deleted: "+mainsToBeDeleted)
+        System.out.println("cmdMains: "+cmdMains)
         def nonEmptyCmdMains = cmdMains?.find{!it.isEmpty()}
         if (nonEmptyCmdMains) {
             return false
         }
-        def mainFileNames = mainFiles.collect { new File(it.path).name }
+        def mainFileNames = mainFiles.collect { 
+        	System.out.println("MAIN FILE: "+it);
+        	new File(it.path).name 
+        }
         def remainingFiles = mainFileNames - mainsToBeDeleted
         return remainingFiles.isEmpty()
     }
