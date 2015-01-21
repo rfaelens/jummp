@@ -83,8 +83,6 @@ grails.project.dependency.resolution = {
         compile "com.googlecode.multithreadedtc:multithreadedtc:1.01"
         runtime 'mysql:mysql-connector-java:5.1.17'
         runtime "postgresql:postgresql:9.1-901.jdbc4"
-        // miriam lib required by sbml converters
-        runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
         compile "org.apache.solr:solr-solrj:4.10.1"
 
         /* jms
@@ -106,13 +104,9 @@ grails.project.dependency.resolution = {
                     'xalan',
                     'xml-apis'
         }*/
-        //compile "xml-apis:xml-apis:1.4.01"
-        //compile "jaxen:jaxen:1.1.4"
         compile 'log4j:log4j:1.2.17'
 
-       // compile "org.jdom:jdom:1.1.3"
-
-        //runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
+        runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
         test "org.grails:grails-datastore-test-support:1.0-grails-2.3"
         runtime 'org.javassist:javassist:3.17.1-GA'
         runtime "org.apache.camel:camel-exec:2.13.0"
