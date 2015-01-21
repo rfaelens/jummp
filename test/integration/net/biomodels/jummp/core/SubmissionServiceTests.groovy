@@ -437,4 +437,5 @@ class SubmissionServiceTests extends JummpIntegrationTest {
         testFile.setText(text)
         return testFile
     }
+    
 }

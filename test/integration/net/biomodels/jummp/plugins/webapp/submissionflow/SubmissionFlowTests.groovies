@@ -1,0 +1,296 @@
+/**
+* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Deutsches Krebsforschungszentrum (DKFZ)
+*
+* This file is part of Jummp.
+*
+* Jummp is free software; you can redistribute it and/or modify it under the
+* terms of the GNU Affero General Public License as published by the Free
+* Software Foundation; either version 3 of the License, or (at your option) any
+* later version.
+*
+* Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
+* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+* A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+* details.
+*
+* You should have received a copy of the GNU Affero General Public License along
+* with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
+*
+* Additional permission under GNU Affero GPL version 3 section 7
+*
+* If you modify Jummp, or any covered work, by linking or combining it with
+* groovy, Apache Commons, Spring Framework, Grails, JUnit 
+* (or a modified version of that library), containing parts covered by the terms 
+* of Common Public License, Apache License v2.0, the licensors of this
+* Program grant you additional permission to convey the resulting work.
+* {Corresponding Source for a non-source form of such a combination shall
+* include the source code for the parts of groovy, Apache Commons, 
+* Spring Framework, Grails, JUnit used as well as that of the covered work.}
+**/
+
+
+
+
+
+package net.biomodels.jummp.plugins.webapp.submissionflow
+
+import static org.junit.Assert.*
+import grails.test.*
+import net.biomodels.jummp.core.JummpIntegrationTest
+import net.biomodels.jummp.core.FileSystemService
+import net.biomodels.jummp.core.model.ModelFormatTransportCommand
+import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
+import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.plugins.webapp.*
+import net.biomodels.jummp.model.Model
+import org.apache.commons.io.FileUtils
+import org.junit.After
+import org.junit.Before
+import grails.util.Holders
+import org.junit.Test
+import net.biomodels.jummp.webapp.ModelController
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.mock.web.MockMultipartFile
+import org.springframework.mock.web.MockHttpServletResponse
+import org.springframework.mock.web.MockMultipartHttpServletRequest
+import net.biomodels.jummp.webapp.ModelController
+
+class SubmissionFlowTests extends JummpIntegrationTest {
+    static def grailsApplication
+    static def fileSystemService
+    static def modelService
+
+    static {
+        grailsApplication = Holders.getGrailsApplication()
+        fileSystemService = Holders.getApplicationContext().getBean("fileSystemService")
+        modelService = Holders.getApplicationContext().getBean("modelService")
+    }
+
+    @Before
+    void setUp() {
+    	System.out.println("RUNNING SETUP"+this.getProperties())
+    	createUserAndRoles()
+        File exchangeDirectory = new File("target/vcs/exchange/")
+        exchangeDirectory.mkdirs()
+        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange/"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git/"
+        File parentLocation = new File(grailsApplication.config.jummp.vcs.workingDirectory)
+        parentLocation.mkdirs()
+        fileSystemService.root = parentLocation
+        String containerPath = parentLocation.absolutePath + File.separator + "ttt"
+        fileSystemService.currentModelContainer = containerPath
+        modelService.vcsService.currentModelContainer = containerPath
+    }
+
+    @After
+    void tearDown() {
+    	FileUtils.deleteDirectory(new File("target/vcs/git"))
+        FileUtils.deleteDirectory(new File("target/vcs/exchange"))
+    }
+
+    
+    
+    /* Continues after the disclaimer 
+    @Test
+    void testDisclaimerContinue() {
+        assertNotNull(authenticateAsTestUser())
+    	initialiseTest(true)
+        signalEvent("Continue")
+        assertFlowState("uploadFiles")
+    }
+    
+    /* Aborts at the first step 
+    @Test
+    void testDisclaimerAbort() {
+        assertNotNull(authenticateAsTestUser())
+        initialiseTest(true)
+        // Click cancel on the first step
+        clickCancelEndFlow()
+    }
+
+
+    /* Tests upload page, then clicks abort
+     *
+    @Test
+    void testUploadFilesAbort() {
+        assertNotNull(authenticateAsTestUser())
+        initialiseTest(true)
+        getToUploadPage()
+        clickCancelEndFlow()
+    }
+*/
+    
+    
+    /* Tests upload pipeline, first with an empty list,
+     * then with an unknown model 
+    @Test
+    void testUploadFilesContinue() {
+        assertNotNull(authenticateAsTestUser())
+  		initialiseTest(true)
+        getToUploadPage()
+        // empty files list shouldnt validate!
+        signalEvent("Upload")
+        assertFlowState("uploadFiles")
+        //random files should validate as unknown
+        fileUploadPipeline(getFileForTest("modelfile.xml","hello world"), "UNKNOWN",
+                    "modelfile", null)
+    }
+
+    @Test
+    void testUpdateUploadedModel() {
+        assertNotNull(authenticateAsAdmin())
+        ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment",
+                name: "test", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"),
+                submissionId: "M123")
+        File importFile = new File("target/vcs/exchange/import.xml")
+        FileUtils.touch(importFile)
+        importFile.append("Test\n")
+        def rf = new RepositoryFileTransportCommand(path: importFile.absolutePath, description: "")
+        Model model = modelService.uploadModelAsFile(rf, meta)
+        assertTrue(model.validate())
+        
+        initialiseTest(false)
+        getToUploadPage()
+        File newFile = bigModel()
+        Map<File,String> additionalFiles = getRandomAdditionalFiles(10)
+        addSubmissionFiles([newFile], additionalFiles)
+        signalEvent("Upload")
+
+        assertFlowState("displayModelInfo")
+        signalEvent("Continue")
+        assert true == (Boolean) flowScope.
+                                    workingMemory.
+                                    get("isUpdateOnExistingModel")
+        assert "SBML" == flowScope.workingMemory.get("model_type").identifier
+        RTC revision=flowScope.workingMemory.get("RevisionTC") as RTC
+        //test name
+        assert "Becker2010_EpoR_AuxiliaryModel" == revision.name
+        assert revision.description.contains("This relation solely depends on EpoR turnover independent of ligand binding, suggesting an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system")
+
+        //add tests for when displayModelInfo does something interesting
+        //signalEvent("Continue") display model info disabled
+
+        //Dont add publication info
+        signalEvent("Continue")
+
+        assertFlowState("displaySummaryOfChanges")
+        model=modelService.getModel(modelid)
+        Revision prev=modelService.getLatestRevision(model)
+        assert prev
+        signalEvent("Continue")
+        //assert flowExecutionOutcome.id == "displayConfirmationPage"
+
+        //test that the model is in fact saved in the database
+        Revision rev=modelService.getLatestRevision(model)
+        //test that revision is saved correctly
+        assert rev
+        assert rev.comment.contains("Model revised without commit message")
+        assert rev.revisionNumber==prev.revisionNumber+1
+
+        //test that files are updated in the repository correctly
+        List<RepositoryFileTransportCommand> files = modelService.retrieveModelFiles(model)
+        validateFiles(files, [existing, newFile]+additionalFiles.keySet())
+    }
+
+    /* Tests upload pipeline, first with an empty list,
+     * then with a known SBML model 
+    @Test
+    void testSubmitSBML() {
+        assertNotNull(authenticateAsTestUser())
+        initialiseTest(true)
+        getToUploadPage()
+        String[] descriptionTests = new String[4]
+        descriptionTests[0]="Verena Becker, Marcel Schilling, Julie Bachmann, Ute Baumann, Andreas Raue, Thomas Maiwald, Jens Timmer and Ursula Klingmüller"
+        descriptionTests[1]="This relation solely depends on EpoR turnover independent of ligand binding, suggesting an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system"
+        descriptionTests[2]="%% Default sampling time points"
+        descriptionTests[3]="BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models"
+        fileUploadPipeline(bigModel(), 
+                           "SBML", 
+                           "Becker2010_EpoR_AuxiliaryModel",
+                           descriptionTests)
+    }
+    
+    /* Tests upload pipeline with an invalid SBML model 
+    @Test
+    void testSubmitInvalidSBML() {
+        assertNotNull(authenticateAsTestUser())
+     	grailsApplication.config.jummp.plugins.sbml.validation = true
+     	initialiseTest(true)
+        def viewSelection = startFlow()
+        assertFlowState("displayDisclaimer")
+        signalEvent("Continue")
+        assertFlowState("uploadFiles")
+        Map<File, String> additionalFiles = getRandomAdditionalFiles(10)
+    	File file = new File("test/files/invalidPharmml.xml");
+    	addSubmissionFiles([file], additionalFiles)
+        signalEvent("Upload")
+        assertFlowState("uploadFiles")
+        List<String> errors = flowScope.workingMemory.get("validationErrorList")
+        assertNotNull(errors)
+        assertEquals(1, errors.size())
+    }
+
+    /* Tests upload pipeline with an invalid Pharmml model 
+    @Test
+    void testSubmitInvalidPharmml() {
+        assertNotNull(authenticateAsTestUser())
+        initialiseTest(true)
+        assertFlowState("displayDisclaimer")
+        signalEvent("Continue")
+        assertFlowState("uploadFiles")
+        Map<File, String> additionalFiles = getRandomAdditionalFiles(10)
+    	File file = new File("test/files/invalidPharmml.xml");
+        addSubmissionFiles([file], additionalFiles)
+        signalEvent("Upload")
+        assertFlowState("uploadFiles")
+        def errors = flowScope.workingMemory.get("validationErrorList")
+        assertNotNull(errors)
+        assertEquals(1, errors.size())
+    }
+    
+     /* Tests upload pipeline with an invalid Pharmml model 
+    @Test
+    void testSubmitInvalidVersion() {
+        assertNotNull(authenticateAsTestUser())
+        initialiseTest(true)
+        assertFlowState("displayDisclaimer")
+        signalEvent("Continue")
+        assertFlowState("uploadFiles")
+        Map<File, String> additionalFiles = getRandomAdditionalFiles(10)
+    	File file = new File("test/files/invalidVersion.xml");
+        addSubmissionFiles([file], additionalFiles)
+        signalEvent("Upload")
+        assertFlowState("uploadFiles")
+        Boolean detectedAs = flowScope.workingMemory.get("FormatVersionUnsupported") as Boolean
+        assertNotNull(detectedAs)
+        assertTrue(detectedAs)
+    }
+
+    
+
+   @Test
+   void testSubmitPharmML() {
+        authenticateAsTestUser()
+        initialiseTest(true)
+        getToUploadPage()
+      //  new TestSubmitPharmMl(grailsApplication.mainContext).testrun()
+      	final File MODEL_FILE =
+                new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example1.xml")
+        String[] descriptionTokens = new String[11]
+        descriptionTokens[0] = "Model comprised of files: example1.xml"
+        (0..<10).each {
+            descriptionTokens[it +1] = "add_file_${it}.xml".toString()
+        }
+
+        fileUploadPipeline(MODEL_FILE, "PharmML", "Example 1 - simulation continuous PK/PD",
+                descriptionTokens)
+   }*/
+
+    
+   /* Clicks cancel, checks that flow is aborted. */
+    
+   
+}
