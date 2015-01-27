@@ -105,6 +105,12 @@ grails.project.dependency.resolution = {
                     'xml-apis'
         }*/
         compile 'log4j:log4j:1.2.17'
+        /**
+         * Weceem lists it as a runtime dependency, while jsbml needs it during compilation.
+         * Unfortunately, Grails misbehaves and leaves xstream out at compile time unless we
+         * explicitly add it as a dependency.
+         */
+        compile "com.thoughtworks.xstream:xstream:1.4.7"
 
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
         test "org.grails:grails-datastore-test-support:1.0-grails-2.3"
@@ -133,6 +139,10 @@ grails.project.dependency.resolution = {
         compile ":locale-variant:0.1"
         compile ":webflow:2.0.8.1"
 
+        runtime(":weceem:1.2") {
+            excludes 'ckeditor', 'xstream'
+        }
+        runtime ":ckeditor:3.6.6.1.1"
         runtime ":database-migration:1.4.0"
         runtime ":hibernate:3.6.10.16"
         runtime ":jquery:1.11.1"
