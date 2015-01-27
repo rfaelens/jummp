@@ -114,9 +114,5 @@ class UnknownFormatService implements FileFormatService {
         } 
         return false
     }
-    
-    public Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand revision) {
-    	    return [:]
-    }
 }
 

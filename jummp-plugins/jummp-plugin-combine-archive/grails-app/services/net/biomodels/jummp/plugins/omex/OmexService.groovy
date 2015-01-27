@@ -137,11 +137,6 @@ class OmexService implements FileFormatService {
     public String getFormatVersion(RevisionTransportCommand revision) {
         return revision ? "0.1" : "*"
     }
-    
-    @Profiled(tag="omexService.getSearchIndexingContent")
-    public Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand revision) {
-    	    return [:]
-    }
 
     /*
      * Helper method that checks if a file appears to be a valid COMBINE archive.
