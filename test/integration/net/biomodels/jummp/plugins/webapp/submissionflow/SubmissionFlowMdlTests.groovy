@@ -144,15 +144,14 @@ public class SubmissionFlowMdlTests extends WebFlowTestCase {
     protected void assertFlowState(String state) {
         assert state == flowExecution.activeSession.state.id
     }
-	def getFlow() {
-		 if (createFlow) {
-			 return controller.createFlow
-		 }
-		 return controller.updateFlow
-	 }
 
     boolean createFlow = true
 
+    def getFlow() {
+        def flow = createFlow ? controller.createFlow : controller.updateFlow
+        flow.delegate = controller
+        flow
+    }
 
     protected void getToUploadPage() {
         assertFlowState("displayDisclaimer")
