@@ -98,9 +98,12 @@ public class SubmissionFlowTestBase extends WebFlowTestCase {
         modelService.vcsService.currentModelContainer = containerPath
     }
     
-    protected void testSetup() {
-        super.setUp()
+    protected void testSetup(String modelID = null) {
+    	super.setUp()
         mockRequest = new MockMultipartHttpServletRequest()
+        if (modelID) {
+        	mockRequest.setParameter("id", modelID)
+        }
         def mockGrailsRequest = new GrailsWebRequest(mockRequest, mockResponse,
                 mockServletContext, applicationContext)
         mockGrailsRequest.setControllerName("model")

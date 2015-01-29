@@ -39,6 +39,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand as RTC
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.webapp.SubmissionFlowTestBase
+import org.apache.commons.io.FileUtils
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -59,9 +60,18 @@ public class SubmissionFlowUpdateTest extends SubmissionFlowTestBase {
 
     @Test
     void testUpdate() {
-    	testSetup()
-        getToUploadPage()
-        File newFile = bigModel()
+    	ModelTransportCommand meta = new ModelTransportCommand(comment: "Test Comment",
+                name: "test", format: new ModelFormatTransportCommand(identifier: "UNKNOWN"),
+                submissionId: "M123")
+        File importFile = new File("target/vcs/exchange/import.xml")
+        FileUtils.touch(importFile)
+        importFile.append("Test\n")
+        def rf = new RepositoryFileTransportCommand(path: importFile.absolutePath, description: "")
+        Model uploadedModel = modelService.uploadModelAsFile(rf, meta)
+        assertTrue(uploadedModel.validate())
+    	testSetup(uploadedModel.submissionId)
+        assertFlowState("uploadFiles")
+        File newFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example1.xml")
         Map<File,String> additionalFiles = getRandomAdditionalFiles(10)
         addSubmissionFiles([newFile], additionalFiles)
         signalEvent("Upload")
@@ -71,12 +81,11 @@ public class SubmissionFlowUpdateTest extends SubmissionFlowTestBase {
         assert true == (Boolean) flowScope.
                                     workingMemory.
                                     get("isUpdateOnExistingModel")
-        assert "SBML" == flowScope.workingMemory.get("model_type").identifier
+        assert "PharmML" == flowScope.workingMemory.get("model_type").identifier
         RTC revision=flowScope.workingMemory.get("RevisionTC") as RTC
         //test name
-        assert "Becker2010_EpoR_AuxiliaryModel" == revision.name
-        assert revision.description.contains("This relation solely depends on EpoR turnover independent of ligand binding, suggesting an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system")
-
+        assert "Example 1 - simulation continuous PK/PD" == revision.name
+        
         //add tests for when displayModelInfo does something interesting
         //signalEvent("Continue") display model info disabled
 
@@ -84,7 +93,7 @@ public class SubmissionFlowUpdateTest extends SubmissionFlowTestBase {
         signalEvent("Continue")
 
         assertFlowState("displaySummaryOfChanges")
-        Model model=modelService.getModel(modelid)
+        Model model=modelService.getModel(uploadedModel.submissionId)
         Revision prev=modelService.getLatestRevision(model)
         assert prev
         signalEvent("Continue")
@@ -99,7 +108,7 @@ public class SubmissionFlowUpdateTest extends SubmissionFlowTestBase {
 
         //test that files are updated in the repository correctly
         List<RepositoryFileTransportCommand> files = modelService.retrieveModelFiles(model)
-        validateFiles(files, [existing, newFile]+additionalFiles.keySet())
+        validateFiles(files, [importFile, newFile]+additionalFiles.keySet())
 
     }
 
