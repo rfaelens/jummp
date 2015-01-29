@@ -37,7 +37,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-public class SubmissionFlowUnknownFormatTests extends SubmissionFlowTestBase {
+public class SubmissionFlowUnknownFormatTest extends SubmissionFlowTestBase {
         
     @After
     void tearDown() {
