@@ -68,20 +68,23 @@ import static org.junit.Assert.*
 
 public class SubmissionFlowTestBase extends WebFlowTestCase {
 	
-	def grailsApplication = Holders.getGrailsApplication()
+    def grailsApplication = Holders.getGrailsApplication()
     def fileSystemService = Holders.getApplicationContext().getBean("fileSystemService")
     def modelService = Holders.getApplicationContext().getBean("modelService")
     def authenticationManager=Holders.applicationContext.getBean("authenticationManager")
     def springSecurityService=Holders.applicationContext.getBean("springSecurityService")
     def controller = new ModelController()
+    protected boolean createFlow
+
 	
-	void tearDown() {
+    void tearDown() {
         super.tearDown()
         FileUtils.deleteDirectory(new File("target/vcs/git"))
         FileUtils.deleteDirectory(new File("target/vcs/exchange"))
     }
     
-    void initialise() {
+    void initialise(boolean createFlowType = true) {
+    	createFlow = createFlowType;
         createUserAndRoles()
         File exchangeDirectory = new File("target/vcs/exchange/")
         exchangeDirectory.mkdirs()
@@ -134,8 +137,6 @@ public class SubmissionFlowTestBase extends WebFlowTestCase {
     protected void assertFlowState(String state) {
         assert state == flowExecution.activeSession.state.id
     }
-
-    boolean createFlow = true
 
     def getFlow() {
         def flow = createFlow ? controller.createFlow : controller.updateFlow

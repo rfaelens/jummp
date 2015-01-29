@@ -20,7 +20,7 @@
  * Additional permission under GNU Affero GPL version 3 section 7
  *
  * If you modify Jummp, or any covered work, by linking or combining it with
- * groovy, Apache Commons, Spring Framework, Grails, JUnit
+ * groovy, Apache Commons, Spring Framework, Grails, JUnit 
  * (or a modified version of that library), containing parts covered by the terms
  * of Common Public License, Apache License v2.0, the licensors of this
  * Program grant you additional permission to convey the resulting work.
@@ -37,9 +37,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-public class SubmissionFlowMdlTests extends SubmissionFlowTestBase {
-
-    
+public class SubmissionFlowOmexTest extends SubmissionFlowTestBase {
+        
     @After
     void tearDown() {
         super.tearDown()
@@ -51,11 +50,11 @@ public class SubmissionFlowMdlTests extends SubmissionFlowTestBase {
     }
 
     @Test
-    void testSubmitMDL() {
-    	submitFileTest("jummp-plugins/jummp-plugin-mdl/test/files/alzheimer/Alzheimer.mdl",
-    				   "MDL",
-    				   "Alzheimer",
-    				   ["Model comprised of files:"] as String[]);
+    void testSubmitOmex() {
+        submitFileTest("jummp-plugins/jummp-plugin-combine-archive/test/files/sample archive.omex",
+    				   "OMEX",
+    				   "sample archive",
+    				   ["sample archive.omex"] as String[]);
     }
 
 }
