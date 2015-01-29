@@ -48,8 +48,7 @@ grails.project.fork = [
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
-        // uncomment to disable ehcache
-        // excludes 'ehcache'
+        // excludes 'javassist'
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     legacyResolve true
@@ -87,6 +86,7 @@ grails.project.dependency.resolution = {
         // XML parsing APIs
         compile "org.jdom:jdom:1.1.3"
         compile "jaxen:jaxen:1.1.4"
+        runtime 'org.javassist:javassist:3.17.1-GA'
     }
 
     plugins {
