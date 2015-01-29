@@ -123,7 +123,7 @@ public class SubmissionFlowTestBase extends WebFlowTestCase {
     					String format, 
     					String mname, 
     					String[] descriptionStrings) {
-        testSetup();
+        testSetup(null)
         getToUploadPage()
         signalEvent("Upload")
         assertFlowState("uploadFiles")
