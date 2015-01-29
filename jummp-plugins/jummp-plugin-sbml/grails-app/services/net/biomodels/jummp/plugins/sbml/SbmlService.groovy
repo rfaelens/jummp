@@ -47,7 +47,6 @@ import net.biomodels.jummp.core.ISbmlService
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.plugins.sbml.SbmlCache
 import org.apache.commons.io.FileUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -94,8 +93,6 @@ import org.sbml.jsbml.SpeciesReference
 import org.sbml.jsbml.Symbol
 import org.sbml.jsbml.Variable
 import org.springframework.beans.factory.InitializingBean
-import java.util.List
-import java.util.Map
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -153,11 +150,10 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         SBMLDocument doc
         SBMLReader reader = new SBMLReader()
         try {
-        	System.out.println("READING FILE: "+model);
             doc = reader.readSBML(model)
         } catch (XMLStreamException e) {
-            e.printStackTrace();
-        	String error = "SBMLDocument could not be read from ${model.name}"
+            e.printStackTrace()
+            String error = "SBMLDocument could not be read from ${model.name}"
             log.error(error)
             errors.add(error)
             return null
@@ -177,7 +173,6 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 return null
             }
             if (CONSISTENCY_ERRORS > 0) {
-                boolean valid = true
                 // search for an error
                 for (SBMLError error in doc.getListOfErrors().validationErrors) {
                     if (error.isFatal() || error.isInternal() || error.isSystem() || error.isXML() || error.isError()) {
@@ -213,7 +208,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         final fileCount = files.size()
         //should work with any value above 2, but sometimes there are comments at the start of the file
         final int DEPTH_LIMIT = 15
-        BufferedReader reader
+        BufferedReader reader = null
         String currentLine
         final def p = Pattern.compile(".*<sbml xmlns=\"http://www\\.sbml\\.org/sbml/level.*\".*")
 
@@ -693,7 +688,6 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     private SBMLDocument getFromCache(RevisionTransportCommand revision) throws XMLStreamException {
         SBMLDocument document = cache.get(revision)
         if (document) {
-        	System.out.println("RETURNING: "+document);
             return document
         }
         //SBMLDocument document=null;
@@ -704,17 +698,17 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         
         files.each {
             try {
-            	File file=new File(it.path)
-                document=(new SBMLReader()).readSBMLFromStream(new ByteArrayInputStream(file.getBytes()));
-            	if (document) {
+                File file=new File(it.path)
+                document=(new SBMLReader()).readSBMLFromStream(
+                        new ByteArrayInputStream(file.getBytes()));
+                if (document) {
                   cache.put(revision, document)
                   //break
                 }
             } catch(Exception ignore) {
-            	ignore.printStackTrace();
+                ignore.printStackTrace();
             }
         }
-        System.out.println("RETURNING: "+document);
         return document
     }
 
@@ -924,7 +918,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     }
 
     private File fetchMainFileFromRevision(RevisionTransportCommand revision) {
-        final String mainFileLocation = revision?.files?.find {it.mainFile}.path
+        final String mainFileLocation = revision?.files?.find {it.mainFile}?.path
         if (!mainFileLocation) {
             log.error "The main file of revision ${revision.properties} is undefined."
             return null
