@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.biomodels</groupId>
+    <artifactId>jummp-plugin-sbml</artifactId>
+    <packaging>jar</packaging>
+    <version>0.1</version>
+
+    <name>jummp-plugin-sbml</name>
+    <description>jummp-plugin-sbml</description>
+
+    <properties>
+        <grails.version>2.3.11</grails.version>
+        <h2.version>1.3.170</h2.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-plugin-async</artifactId>
+            <version>${grails.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-plugin-rest</artifactId>
+            <version>${grails.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-plugin-services</artifactId>
+            <version>${grails.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-plugin-i18n</artifactId>
+            <version>${grails.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-plugin-databinding</artifactId>
+            <version>${grails.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-plugin-filters</artifactId>
+            <version>${grails.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-plugin-gsp</artifactId>
+            <version>${grails.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-plugin-log4j</artifactId>
+            <version>${grails.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-plugin-servlets</artifactId>
+            <version>${grails.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-plugin-url-mappings</artifactId>
+            <version>${grails.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-resources</artifactId>
+            <version>${grails.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-test</artifactId>
+            <version>${grails.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-plugin-testing</artifactId>
+            <version>${grails.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.sbml.jsbml</groupId>
+            <artifactId>jsbml</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.sbfc</groupId>
+            <artifactId>converter</artifactId>
+            <version>1.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom</artifactId>
+            <version>1.1.3</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+            <version>1.1.4</version>
+            <scope>compile</scope>
+        </dependency>
+
+       <dependency>
+            <groupId>org.grails.plugins</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>1.2.7.3</version>
+            <scope>compile</scope>
+            <type>zip</type>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.ddmore.pharmml</groupId>
+            <artifactId>libPharmML</artifactId>
+            <version>0.3.2-b3</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.perf4j</groupId>
+            <artifactId>perf4j</artifactId>
+            <version>0.9.12</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails.plugins</groupId>
+            <artifactId>perf4j</artifactId>
+            <version>0.1.1</version>
+            <scope>compile</scope>
+            <type>zip</type>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.ac.ebi.miriam</groupId>
+            <artifactId>miriam-lib</artifactId>
+            <version>1.1.3</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.17.1-GA</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails.plugins</groupId>
+            <artifactId>webflow</artifactId>
+            <version>2.0.8.1</version>
+            <scope>compile</scope>
+            <type>zip</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails.plugins</groupId>
+            <artifactId>hibernate</artifactId>
+            <version>3.6.10.16</version>
+            <scope>runtime</scope>
+            <type>zip</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails.plugins</groupId>
+            <artifactId>tomcat</artifactId>
+            <version>7.0.54</version>
+            <scope>provided</scope>
+            <type>zip</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement/>
+
+        <plugins>
+            <!-- Disables the Maven surefire plugin for Grails applications, as we have our own test runner -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>surefire-it</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.2</version>
+                <configuration>
+                    <includes>
+                        <include>grails-app/conf</include>
+                        <include>grails-app/controllers</include>
+                        <include>grails-app/domain</include>
+                        <include>grails-app/services</include>
+                    </includes>
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <verbose>true</verbose>
+                    <proc>implicit</proc>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.6.1</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>plugins</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.grails</groupId>
+                <artifactId>grails-maven-plugin</artifactId>
+                <version>2.4.2</version>
+                <configuration>
+                    <grailsVersion>${grails.version}</grailsVersion>
+                </configuration>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>grails</id>
+            <name>grails</name>
+            <url>http://repo.grails.org/grails/core</url>
+        </repository>
+        <repository>
+            <id>grails-plugins</id>
+            <name>grails-plugins</name>
+            <url>http://repo.grails.org/grails/plugins</url>
+        </repository>
+        <repository>
+            <id>ebi-maven-repository</id>
+            <url>http://www.ebi.ac.uk/~maven/m2repo/</url>
+        </repository>
+        <repository>
+            <id>ebi-maven-snapshots-repository</id>
+            <url>http://www.ebi.ac.uk/~maven/m2repo_snapshots/</url>
+        </repository>
+    </repositories>
+
+    <profiles>
+        <profile>
+            <id>tools</id>
+            <activation>
+                <property>
+                    <name>java.vendor</name>
+                    <value>Sun Microsystems Inc.</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.sun</groupId>
+                    <artifactId>tools</artifactId>
+                    <version>${java.version}</version>
+                    <scope>system</scope>
+                    <systemPath>${java.home}/../lib/tools.jar</systemPath>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+</project>
