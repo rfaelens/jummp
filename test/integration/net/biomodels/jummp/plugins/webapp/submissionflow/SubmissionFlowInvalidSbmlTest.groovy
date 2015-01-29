@@ -20,7 +20,7 @@
  * Additional permission under GNU Affero GPL version 3 section 7
  *
  * If you modify Jummp, or any covered work, by linking or combining it with
- * groovy, Apache Commons, Spring Framework, Grails, JUnit 
+ * groovy, Apache Commons, Spring Framework, Grails, JUnit
  * (or a modified version of that library), containing parts covered by the terms
  * of Common Public License, Apache License v2.0, the licensors of this
  * Program grant you additional permission to convey the resulting work.
@@ -37,8 +37,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-public class SubmissionFlowPharmmlTests extends SubmissionFlowTestBase {
-        
+public class SubmissionFlowInvalidSbmlTest extends SubmissionFlowTestBase {
+
+    
     @After
     void tearDown() {
         super.tearDown()
@@ -50,16 +51,20 @@ public class SubmissionFlowPharmmlTests extends SubmissionFlowTestBase {
     }
 
     @Test
-    void testSubmitOmex() {
-    	String[] descriptionTokens = new String[11]
-        descriptionTokens[0] = "Model comprised of files: example1.xml"
-        (0..<10).each {
-            descriptionTokens[it +1] = "add_file_${it}.xml".toString()
-        }
-        submitFileTest("jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example1.xml",
-    				   "PharmML",
-    				   "Example 1 - simulation continuous PK/PD",
-    				   descriptionTokens);
+    void testSubmitInvalidSbml() {
+    	grailsApplication.config.jummp.plugins.sbml.validation = true
+    	testSetup();
+        getToUploadPage()
+        signalEvent("Upload")
+        assertFlowState("uploadFiles")
+        Map<File, String> additionalFiles = getRandomAdditionalFiles(10)
+    	File file = new File("test/files/invalidSbml.xml");
+        addSubmissionFiles([file], additionalFiles)
+        signalEvent("Upload")
+        assertFlowState("uploadFiles")
+        def errors = flowScope.workingMemory.get("validationErrorList")
+        assertNotNull(errors)
+        assertEquals(1, errors.size())
     }
 
 }

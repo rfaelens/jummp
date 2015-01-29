@@ -37,7 +37,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-public class SubmissionFlowSbmlTests extends SubmissionFlowTestBase {
+public class SubmissionFlowSbmlTest extends SubmissionFlowTestBase {
         
     @After
     void tearDown() {
@@ -50,7 +50,7 @@ public class SubmissionFlowSbmlTests extends SubmissionFlowTestBase {
     }
 
     @Test
-    void testSubmitOmex() {
+    void testSubmitSbml() {
     	String[] descriptionTests = new String[4]
         descriptionTests[0]="Verena Becker, Marcel Schilling, Julie Bachmann, Ute Baumann, Andreas Raue, Thomas Maiwald, Jens Timmer and Ursula Klingmüller"
         descriptionTests[1]="This relation solely depends on EpoR turnover independent of ligand binding, suggesting an essential role of large intracellular receptor pools. These receptor properties enable the system to cope with basal and acute demand in the hematopoietic system"
