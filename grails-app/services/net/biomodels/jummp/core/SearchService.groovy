@@ -71,10 +71,6 @@ class SearchService {
      */
     def modelService
     /**
-     * Dependency injection of ModelDelegateService.
-     */
-    def modelDelegateService
-    /**
      * Dependency injection of SpringSecurityService.
      */
     def springSecurityService
