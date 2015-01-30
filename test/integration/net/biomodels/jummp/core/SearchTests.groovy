@@ -68,7 +68,7 @@ class SearchTests extends JummpIntegrationTest {
                 smallModel("importModel.xml", nameTag, descriptionTag).absolutePath,
                 mainFile: true, description: "")
         Model upped = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
-                new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
+                new ModelFormatTransportCommand(identifier: "PharmML"), comment: "test", name: "Test"))
         //wait a bit for the model to be indexed
         Thread.sleep(500)
         // Search for the model using the name and description, and ensure it's the same we uploaded
@@ -84,7 +84,7 @@ class SearchTests extends JummpIntegrationTest {
         result = searchForModel("submissionId:${upped.submissionId}")
         assertNotNull result
         assertSame(upped.id, result.id)
-        result = searchForModel("SBML")
+        result = searchForModel("PharmML")
         assertNotNull result
         assertSame(upped.id, result.id)
     }
@@ -123,29 +123,7 @@ class SearchTests extends JummpIntegrationTest {
 
     // Convenience functions follow..
     private File smallModel(String filename, String id, String desc) {
-        return getFileForTest(filename,
-"""<?xml version="1.0" encoding="UTF-8"?>
-<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
-<model name="${id}">"
-    <notes>${desc}</notes>
-    <listOfCompartments>
-      <compartment name="x"/>
-    </listOfCompartments>
-    <listOfSpecies>
-      <specie name="y" compartment="x" initialAmount="1"/>
-    </listOfSpecies>
-    <listOfReactions>
-      <reaction name="r">
-        <listOfReactants>
-          <specieReference specie="y"/>
-        </listOfReactants>
-        <listOfProducts>
-          <specieReference specie="y"/>
-        </listOfProducts>
-      </reaction>
-    </listOfReactions>
-  </model>
-</sbml>""")
+        return new File("test/files/test.xml")
     }
 
     private File getFileForTest(String filename, String text) {
