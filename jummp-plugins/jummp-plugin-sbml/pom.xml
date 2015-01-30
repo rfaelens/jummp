@@ -200,37 +200,23 @@
         <pluginManagement/>
 
         <plugins>
-            <!-- Disables the Maven surefire plugin for Grails applications, as we have our own test runner -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skip>true</skip>
+                    <includes>
+                        <include>**/*Tests.*</include>
+                    </includes>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>surefire-it</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <skip>false</skip>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.2</version>
                 <configuration>
-                    <includes>
-                        <include>grails-app/conf</include>
-                        <include>grails-app/controllers</include>
-                        <include>grails-app/domain</include>
-                        <include>grails-app/services</include>
-                    </includes>
+                    <compilerId>groovy-eclipse-compiler</compilerId>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
                     <source>1.7</source>
@@ -238,6 +224,13 @@
                     <verbose>true</verbose>
                     <proc>implicit</proc>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-eclipse-compiler</artifactId>
+                        <version>2.7.0-01</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -256,13 +249,36 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.grails</groupId>
-                <artifactId>grails-maven-plugin</artifactId>
-                <version>2.4.2</version>
-                <configuration>
-                    <grailsVersion>${grails.version}</grailsVersion>
-                </configuration>
-                <extensions>true</extensions>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.9.1</version>
+                <executions>
+                    <execution>
+                        <id>add-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals><goal>add-source</goal></goals>
+                        <configuration>
+                            <sources>
+                                <source>grails-app/conf/</source>
+                                <source>grails-app/controllers/</source>
+                                <source>grails-app/domain/</source>
+                                <source>grails-app/services/</source>
+                                <source>grails-app/views/</source>
+                                <source>src/groovy/</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-test-sources</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>test/</sources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
