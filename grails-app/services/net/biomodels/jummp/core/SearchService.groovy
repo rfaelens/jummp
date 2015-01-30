@@ -118,7 +118,7 @@ class SearchService {
         String publicationId = revision.model.publicationId ?: ""
         int versionNumber = revision.revisionNumber
         final String uniqueId = "${submissionId}.${versionNumber}"
-        String exchangeFolder = new File(revision.files.first.path).getParent()
+        String exchangeFolder = new File(revision.files.first().path).getParent()
         def builder = new JsonBuilder()
         def partialData=[
                 'submissionId':submissionId,
