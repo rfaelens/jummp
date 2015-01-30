@@ -195,7 +195,9 @@ class SearchService {
     public Collection<ModelTransportCommand> searchModels(String query) {
         long start = System.currentTimeMillis();
         SolrDocumentList results = search(query)
-        System.out.println("Solr returned in "+(System.currentTimeMillis() - start));
+        if (IS_DEBUG_ENABLED) {
+            log.debug("Solr returned in ${System.currentTimeMillis() - start}")
+        }
         final int COUNT = results.size()
         Map<String, ModelTransportCommand> returnVals = new LinkedHashMap<>(COUNT + 1, 1.0f)
         results.each {
@@ -209,7 +211,9 @@ class SearchService {
                     returnVals.put(thisSubmissionId, returned.toCommandObject())
                 }
             }
-            System.out.println("Processing took "+(System.currentTimeMillis() - start));
+            if (IS_DEBUG_ENABLED) {
+                log.debug("Processing took ${System.currentTimeMillis() - start}")
+            }
         }
         return returnVals.values()
     }
