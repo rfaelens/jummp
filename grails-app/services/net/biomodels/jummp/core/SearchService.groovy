@@ -187,7 +187,7 @@ class SearchService {
     * Returns search results for query restricted Models the user has access to.
     *
     * Executes the @p query, restricting results to Models the current user has access to.
-    * @param query freetext search on models
+    * @param query free text search on models
     * @return Collection of ModelTransportCommand of relevant models available to the user.
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
