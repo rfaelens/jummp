@@ -29,6 +29,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
+import org.apache.commons.lang.StringUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.solr.client.solrj.SolrQuery
@@ -50,6 +51,11 @@ import java.util.concurrent.atomic.AtomicReference
  * @date   20141121
  */
 class SearchService {
+    static final String[] SOLR_SPECIAL_CHARACTERS = ["+", "-", "&", "|", "!", "(", ")",
+            "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "\\"] as String[]
+    static final String[] SOLR_REPLACEMENT_CHARACTERS = ["\\+", "\\-", "\\&", "\\|",
+            "\\!", "\\(", "\\)", "\\{", "\\}", "\\[", "\\]", "\\^", "\\\"", "\\~", "\\*",
+            "\\?", "\\:", "\\\\"] as String[]
     /**
      * The class logger.
      */
@@ -230,8 +236,10 @@ class SearchService {
     @Profiled(tag="searchService.search")
     private SolrDocumentList search(String q) {
         SolrQuery query = new SolrQuery()
+        String newQuery = StringUtils.replaceEach(q, SOLR_SPECIAL_CHARACTERS,
+                SOLR_REPLACEMENT_CHARACTERS)
         /*TODO optimise this*/
-        query.setQuery("*${q}*")
+        query.setQuery("*${newQuery}*")
         QueryResponse response = solrServerHolder.server.query(query)
         SolrDocumentList docs = response.getResults()
         return docs
