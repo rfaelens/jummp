@@ -23,7 +23,6 @@ package net.biomodels.jummp.core
 import grails.async.Promise
 import grails.plugins.springsecurity.Secured
 import groovy.json.JsonBuilder
-import java.util.concurrent.atomic.AtomicReference
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -35,10 +34,10 @@ import org.apache.commons.logging.LogFactory
 import org.apache.solr.client.solrj.SolrQuery
 import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.SolrDocumentList
-import org.apache.solr.common.SolrInputDocument
 import org.perf4j.aop.Profiled
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * @short Singleton-scoped facade for interacting with a Solr instance.
