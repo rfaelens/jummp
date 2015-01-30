@@ -114,7 +114,7 @@ class SearchTests extends JummpIntegrationTest {
     }
 
     ModelTransportCommand searchForModel(String query) {
-        Collection<Model> mods = searchService.searchModels(query)
+        Collection<ModelTransportCommand> mods = searchService.searchModels(query)
         if (mods.isEmpty()) {
             return null
         }
