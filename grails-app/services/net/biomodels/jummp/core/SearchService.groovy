@@ -123,7 +123,7 @@ class SearchService {
         int versionNumber = revision.revisionNumber
         final String uniqueId = "${submissionId}.${versionNumber}"
         String exchangeFolder = new File(revision.files.first.path).getParent()
-        def builder = new groovy.json.JsonBuilder()
+        def builder = new JsonBuilder()
         def partialData=[
                 'submissionId':submissionId,
                 'publicationId':publicationId,
