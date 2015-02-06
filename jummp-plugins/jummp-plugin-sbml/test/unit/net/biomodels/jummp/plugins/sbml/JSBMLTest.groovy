@@ -1,6 +1,5 @@
 package net.biomodels.jummp.plugins.sbml
 
-import grails.test.mixin.TestFor
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -9,8 +8,7 @@ import static org.junit.Assert.*
  * @author Mihai Glonț <mglont@ebi.ac.uk>
  * Date: 27/01/15
  */
-@TestFor(SbmlService)
-class JSBMLTests {
+class JSBMLTest {
 
     @Test
     void jsbmlDoesNotThrowErrors() {

@@ -19,6 +19,24 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.1.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.biopax.paxtools</groupId>
+            <artifactId>paxtools</artifactId>
+            <version>4.2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.ac.ebi.miriam</groupId>
+            <artifactId>miriam-lib</artifactId>
+            <version>1.1.3</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.grails</groupId>
             <artifactId>grails-plugin-async</artifactId>
             <version>${grails.version}</version>
@@ -158,13 +176,6 @@
         </dependency>
 
         <dependency>
-            <groupId>uk.ac.ebi.miriam</groupId>
-            <artifactId>miriam-lib</artifactId>
-            <version>1.1.3</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
             <version>3.17.1-GA</version>
@@ -194,20 +205,59 @@
             <scope>provided</scope>
             <type>zip</type>
         </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <pluginManagement/>
+        <testResources>
+            <testResource>
+                <directory>test/files</directory>
+            </testResource>
+        </testResources>
 
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <includes>
-                        <include>**/*Tests.*</include>
-                    </includes>
-                </configuration>
+                <executions>
+                    <execution>
+                        <id>unit-tests</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>test/unit/**/*.java</include>
+                                <include>test/unit/**/*.groovy</include>
+                            </includes>
+                            <excludes>
+                                <exclude>test/integration/**/*.java</exclude>
+                                <exclude>test/integration/**/*.groovy</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>integration-tests</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>test/integration/**/*.java</include>
+                                <include>test/integration/**/*.groovy</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -218,10 +268,10 @@
                     <source>1.7</source>
                     <target>1.7</target>
                     <showDeprecation>true</showDeprecation>
-                    <showWarnings>true</showWarnings>
+                    <showWarnings>false</showWarnings>
                     <source>1.7</source>
                     <target>1.7</target>
-                    <verbose>true</verbose>
+                    <verbose>false</verbose>
                     <proc>implicit</proc>
                 </configuration>
                 <dependencies>
@@ -265,6 +315,11 @@
                                 <source>grails-app/services/</source>
                                 <source>grails-app/views/</source>
                                 <source>src/groovy/</source>
+                                <source>../jummp-plugin-core-api/src/groovy/</source>
+                                <source>../jummp-plugin-core-api/src/java/</source>
+                                <source>../jummp-plugin-security/src/groovy/</source>
+                                <source>../jummp-plugin-security/src/java/</source>
+                                <source>../jummp-plugin-security/grails-app/domain/</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -275,7 +330,9 @@
                             <goal>add-test-source</goal>
                         </goals>
                         <configuration>
-                            <sources>test/</sources>
+                            <sources>
+                                <source>test/**/*Tests.*</source>
+                            </sources>
                         </configuration>
                     </execution>
                 </executions>

@@ -34,10 +34,11 @@
 
 package net.biomodels.jummp.plugins.sbml
 
-import grails.test.GrailsUnitTestCase
-import net.biomodels.jummp.core.model.RevisionTransportCommand
-import org.sbml.jsbml.SBMLDocument
 import java.util.Map.Entry
+import net.biomodels.jummp.core.model.RevisionTransportCommand
+import org.junit.Test
+import org.sbml.jsbml.SBMLDocument
+import static org.junit.Assert.*
 
 /**
  * Created by IntelliJ IDEA.
@@ -46,15 +47,9 @@ import java.util.Map.Entry
  * Time: 11:48:22 AM
  * To change this template use File | Settings | File Templates.
  */
-class SbmlCacheTest extends GrailsUnitTestCase {
-    protected void setUp() {
-        super.setUp()
-    }
+class SbmlCacheTest {
 
-    protected void tearDown() {
-        super.tearDown()
-    }
-
+    @Test
     void testMaxSize() {
         SbmlCache<RevisionTransportCommand, SBMLDocument> cache = new SbmlCache<RevisionTransportCommand, SBMLDocument>(1)
         assertTrue(cache.isEmpty())
@@ -77,6 +72,7 @@ class SbmlCacheTest extends GrailsUnitTestCase {
         assertEquals(10, cache.size())
     }
 
+    @Test
     void testPut() {
         // tests that put works correctly
         SBMLDocument doc = new SBMLDocument()
@@ -87,6 +83,7 @@ class SbmlCacheTest extends GrailsUnitTestCase {
         assertNotNull(cache.put(new RevisionTransportCommand(id: 2), new SBMLDocument()))
     }
 
+    @Test
     void testPutAll() {
         SbmlCache<RevisionTransportCommand, SBMLDocument> cache = new SbmlCache<RevisionTransportCommand, SBMLDocument>(5)
         Map<RevisionTransportCommand, SBMLDocument> entries = [:]
@@ -103,6 +100,7 @@ class SbmlCacheTest extends GrailsUnitTestCase {
         assertEquals(5, cache.size())
     }
 
+    @Test
     void testContains() {
         SbmlCache<RevisionTransportCommand, SBMLDocument> cache = new SbmlCache<RevisionTransportCommand, SBMLDocument>(5)
         SBMLDocument doc = new SBMLDocument()
@@ -122,6 +120,7 @@ class SbmlCacheTest extends GrailsUnitTestCase {
         assertTrue(cache.containsValue(doc))
     }
 
+    @Test
     void testRemove() {
         SbmlCache<RevisionTransportCommand, SBMLDocument> cache = new SbmlCache<RevisionTransportCommand, SBMLDocument>(1)
         SBMLDocument doc = new SBMLDocument()
@@ -135,6 +134,7 @@ class SbmlCacheTest extends GrailsUnitTestCase {
         assertFalse(cache.isEmpty())
     }
 
+    @Test
     void testEntries() {
         SbmlCache<RevisionTransportCommand, SBMLDocument> cache = new SbmlCache<RevisionTransportCommand, SBMLDocument>(5)
         SBMLDocument doc = new SBMLDocument()
