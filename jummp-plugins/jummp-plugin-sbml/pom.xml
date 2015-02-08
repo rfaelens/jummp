@@ -221,11 +221,13 @@
                 <directory>test/files</directory>
             </testResource>
         </testResources>
+        <testSourceDirectory>test</testSourceDirectory>
 
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.18.1</version>
                 <executions>
                     <execution>
                         <id>unit-tests</id>
@@ -233,27 +235,21 @@
                         <goals>
                             <goal>test</goal>
                         </goals>
-                        <configuration>
-                            <includes>
-                                <include>test/unit/**/*.java</include>
-                                <include>test/unit/**/*.groovy</include>
-                            </includes>
-                            <excludes>
-                                <exclude>test/integration/**/*.java</exclude>
-                                <exclude>test/integration/**/*.groovy</exclude>
-                            </excludes>
-                        </configuration>
                     </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.18.1</version>
+                <executions>
                     <execution>
-                        <id>integration-tests</id>
-                        <phase>integration-test</phase>
                         <goals>
-                            <goal>test</goal>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
                         </goals>
                         <configuration>
                             <includes>
-                                <include>test/integration/**/*.java</include>
-                                <include>test/integration/**/*.groovy</include>
+                                <include>**/*Tests.*</include>
                             </includes>
                         </configuration>
                     </execution>
