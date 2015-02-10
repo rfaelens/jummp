@@ -64,14 +64,8 @@ grails.project.dependency.resolution = {
         grailsHome()
         grailsCentral()
 
-        // uncomment the below to enable remote dependency resolution
-        // from public Maven repositories
         mavenLocal()
         mavenCentral()
-        //mavenRepo "http://snapshots.repository.codehaus.org"
-        //mavenRepo "http://repository.codehaus.org"
-        //mavenRepo "http://download.java.net/maven/2/"
-        //mavenRepo "http://repository.jboss.com/maven2/"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
         mavenRepo "http://download.eclipse.org/jgit/maven"
@@ -105,6 +99,7 @@ grails.project.dependency.resolution = {
                     'xml-apis'
         }*/
         compile 'log4j:log4j:1.2.17'
+        compile "org.apache.tika:tika-core:1.3"
         /**
          * Weceem lists it as a runtime dependency, while jsbml needs it during compilation.
          * Unfortunately, Grails misbehaves and leaves xstream out at compile time unless we
@@ -116,7 +111,6 @@ grails.project.dependency.resolution = {
         test "org.grails:grails-datastore-test-support:1.0-grails-2.3"
         runtime 'org.javassist:javassist:3.17.1-GA'
         runtime "org.apache.camel:camel-exec:2.13.0"
-        
     }
 
     plugins {
