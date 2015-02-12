@@ -124,13 +124,6 @@ class MdlService implements FileFormatService {
      * {@inheritDoc}
      */
     @Override
-    @Profiled(tag="mdlService.getSearchIndexingContent")
-    public Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand revision) { return [:] }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     @Profiled(tag="mdlService.getAllAnnotationURNs")
     public List<String> getAllAnnotationURNs(RevisionTransportCommand revision) { return [] }
 

@@ -33,22 +33,22 @@ grails.project.source.level = 1.7
 grails.project.target.level = 1.7
 grails.project.dependency.resolver = "maven"
 
+customJvmArgs = ["-server", "-noverify"]
 grails.project.fork = [
     // configure settings for the test-app JVM, uses the daemon by default
     test: false, //[maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, daemon:true],
     // configure settings for the run-app JVM
-    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false, jvmArgs: customJvmArgs],
     // configure settings for the run-war JVM
-    war: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
+    war: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false, jvmArgs: customJvmArgs],
     // configure settings for the Console UI JVM
-    console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256]
+    console: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 256, jvmArgs: customJvmArgs]
 ]
 
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
-        // uncomment to disable ehcache
-        // excludes 'ehcache'
+        // excludes 'javassist'
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     legacyResolve true
@@ -78,18 +78,15 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.13'
         // miriam lib required by sbml converters
         runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3')// { transitive = false }
-        // dependencies of jsbml
-        compile("org.sbml.jsbml:jsbml:1.0-a2") {
-            excludes 'junit', 'log4j', 'commons-pool', 'commons-dbcp'
+        compile("org.sbml.jsbml:jsbml:1.0") {
+            // Java 1.6+ already has these classes
+            excludes 'stax-api'
         }
-        compile "com.thoughtworks.xstream:xstream:1.4.7"
-        //runtime('org.codehaus.woodstox:woodstox-core-lgpl:4.0.9') { excludes 'stax2-api' }
-        //runtime('org.codehaus.staxmate:staxmate:2.0.0') { excludes 'stax2-api' }
-        //runtime "org.codehaus.woodstox:stax2-api:3.1.0"
         compile "org.sbfc:converter:1.1"
+        // XML parsing APIs
         compile "org.jdom:jdom:1.1.3"
-        //compile "xml-apis:xml-apis:1.4.01"
-        //compile "jaxen:jaxen:1.1.4"
+        compile "jaxen:jaxen:1.1.4"
+        runtime 'org.javassist:javassist:3.17.1-GA'
     }
 
     plugins {
@@ -98,5 +95,6 @@ grails.project.dependency.resolution = {
         compile ":perf4j:0.1.1"
     }
 }
-//grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"
+grails.plugin.location.'jummp-plugin-security'="../jummp-plugin-security"
+grails.plugin.location.'jummp-plugin-core-api'="../jummp-plugin-core-api"
 grails.plugin.location.'jummp-plugin-configuration'="../jummp-plugin-configuration"

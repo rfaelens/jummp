@@ -185,33 +185,6 @@ class PharmMlService implements FileFormatService {
                 "http://www.pharmml.org/2013/03/CommonTypes", NAME)
     }
 
-    @Profiled(tag="pharmMlService.getSearchIndexingContent")
-    public Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand revision) {
-        Map result = [:]
-        if (IS_INFO_ENABLED) {
-            log.info "Extracting searchable content for revision ${revision.id}"
-        }
-        List<File> revisionFiles = AbstractPharmMlHandler.fetchMainFilesFromRevision(revision)
-        final File pharmML = AbstractPharmMlHandler.findPharmML(revisionFiles)
-        final List<String> descriptions = extractElementDescriptions(pharmML)
-        if (descriptions) {
-            result["elementDescription"] = descriptions
-        }
-
-        final RepositoryFileTransportCommand rdfFileCommand = revision.files.find {
-            it.path.endsWith(".rdf")
-        }
-        final String rdfFileLocation = rdfFileCommand?.path
-        if (rdfFileLocation) {
-            Map annotationsMap = parseAnnotations(rdfFileLocation, pharmML)
-            result = annotationsMap ? result + annotationsMap : result
-        }
-        if (IS_INFO_ENABLED) {
-            log.info "Finished extracting searchable content for revision ${revision.id}"
-        }
-        return result
-    }
-
     /**
      * Retrieves the description element from a file encoded PharmML.
      *

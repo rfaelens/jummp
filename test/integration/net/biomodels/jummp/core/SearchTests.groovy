@@ -70,7 +70,7 @@ class SearchTests extends JummpIntegrationTest {
         Model upped = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
                 new ModelFormatTransportCommand(identifier: "PharmML"), comment: "test", name: "Test"))
         //wait a bit for the model to be indexed
-        Thread.sleep(1000)
+        Thread.sleep(2000)
         // Search for the model using the name and description, and ensure it's the same we uploaded
         ModelTransportCommand result = searchForModel(nameTag)
         assertNotNull result
@@ -81,7 +81,12 @@ class SearchTests extends JummpIntegrationTest {
         result = searchForModel(upped.submissionId)
         assertNotNull result
         assertSame(upped.id, result.id)
-        result = searchForModel("PharmML")
+        /*
+        result = searchForModel("submissionId:${upped.submissionId}")
+        assertNotNull result
+        assertSame(upped.id, result.id)
+        */
+        result = searchForModel("SBML")
         assertNotNull result
         assertSame(upped.id, result.id)
     }
