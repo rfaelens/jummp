@@ -99,9 +99,9 @@
    <field name="disease" type="text_general" indexed="true" stored="false" multiValued="true"/>
    <field name="elementName" type="text_general" indexed="true" stored="false" multiValued="true"/>
    <field name="elementDescription" type="text_general" indexed="true" stored="false" multiValued="true"/>
-   <field name="elementID" type="text_general" indexed="true" stored="false" multiValued="true"/>
-   <field name="externalReferenceID" type="text_general" indexed="true" stored="false" multiValued="true"/>
-   <field name="externalReferenceName" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="elementID" type="string" indexed="true" stored="false" multiValued="true"/>
+   <field name="externalReferenceID" type="string" indexed="true" stored="false" multiValued="true"/>
+   <field name="externalReferenceName" type="string" indexed="true" stored="false" multiValued="true"/>
    <field name="public" type="boolean" indexed="true" stored="true"/>
    <field name="uniqueId" type="string" indexed="true" stored="true"/>
 
