@@ -34,22 +34,20 @@
 
 package net.biomodels.jummp.plugins.sbml
 
-import grails.test.GrailsUnitTestCase
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import org.junit.Test
 import org.sbml.jsbml.*
+import static org.junit.Assert.*
 
-class SubmodelGeneratorTests extends GrailsUnitTestCase {
+@TestMixin(IntegrationTestMixin)
+class SubmodelGeneratorTests {
     def sbmlService
-    protected void setUp() {
-        super.setUp()
-        mockLogging(SubmodelGenerator)
-    }
 
-    protected void tearDown() {
-        super.tearDown()
-    }
-
+    @Test
     void testGenerateSubModel() {
+        assertNotNull sbmlService
         // generate new sub model
         Model subModel = new Model("testSubModel")
         // test sub model

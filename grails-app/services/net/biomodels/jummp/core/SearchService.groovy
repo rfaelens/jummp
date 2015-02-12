@@ -23,22 +23,22 @@ package net.biomodels.jummp.core
 import grails.async.Promise
 import grails.plugins.springsecurity.Secured
 import groovy.json.JsonBuilder
-import java.util.concurrent.atomic.AtomicReference
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Revision
+import org.apache.commons.lang.StringUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.solr.client.solrj.SolrQuery
 import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.SolrDocumentList
-import org.apache.solr.common.SolrInputDocument
 import org.perf4j.aop.Profiled
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * @short Singleton-scoped facade for interacting with a Solr instance.
@@ -51,6 +51,11 @@ import org.springframework.security.core.context.SecurityContextHolder
  * @date   20141121
  */
 class SearchService {
+    static final String[] SOLR_SPECIAL_CHARACTERS = ["+", "-", "&", "|", "!", "(", ")",
+            "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "\\"] as String[]
+    static final String[] SOLR_REPLACEMENT_CHARACTERS = ["\\+", "\\-", "\\&", "\\|",
+            "\\!", "\\(", "\\)", "\\{", "\\}", "\\[", "\\]", "\\^", "\\\"", "\\~", "\\*",
+            "\\?", "\\:", "\\\\"] as String[]
     /**
      * The class logger.
      */
@@ -71,10 +76,6 @@ class SearchService {
      * Dependency injection of ModelService.
      */
     def modelService
-    /**
-     * Dependency injection of ModelDelegateService.
-     */
-    def modelDelegateService
     /**
      * Dependency injection of SpringSecurityService.
      */
@@ -123,8 +124,8 @@ class SearchService {
         String publicationId = revision.model.publicationId ?: ""
         int versionNumber = revision.revisionNumber
         final String uniqueId = "${submissionId}.${versionNumber}"
-        String exchangeFolder = new File(revision.files.first.path).getParent()
-        def builder = new groovy.json.JsonBuilder()
+        String exchangeFolder = new File(revision.files.first().path).getParent()
+        def builder = new JsonBuilder()
         def partialData=[
                 'submissionId':submissionId,
                 'publicationId':publicationId,
@@ -192,7 +193,7 @@ class SearchService {
     * Returns search results for query restricted Models the user has access to.
     *
     * Executes the @p query, restricting results to Models the current user has access to.
-    * @param query freetext search on models
+    * @param query free text search on models
     * @return Collection of ModelTransportCommand of relevant models available to the user.
     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
@@ -200,7 +201,9 @@ class SearchService {
     public Collection<ModelTransportCommand> searchModels(String query) {
         long start = System.currentTimeMillis();
         SolrDocumentList results = search(query)
-        System.out.println("Solr returned in "+(System.currentTimeMillis() - start));
+        if (IS_DEBUG_ENABLED) {
+            log.debug("Solr returned in ${System.currentTimeMillis() - start}")
+        }
         final int COUNT = results.size()
         Map<String, ModelTransportCommand> returnVals = new LinkedHashMap<>(COUNT + 1, 1.0f)
         results.each {
@@ -214,7 +217,9 @@ class SearchService {
                     returnVals.put(thisSubmissionId, returned.toCommandObject())
                 }
             }
-            System.out.println("Processing took "+(System.currentTimeMillis() - start));
+            if (IS_DEBUG_ENABLED) {
+                log.debug("Processing took ${System.currentTimeMillis() - start}")
+            }
         }
         return returnVals.values()
     }
@@ -231,8 +236,10 @@ class SearchService {
     @Profiled(tag="searchService.search")
     private SolrDocumentList search(String q) {
         SolrQuery query = new SolrQuery()
+        String newQuery = StringUtils.replaceEach(q, SOLR_SPECIAL_CHARACTERS,
+                SOLR_REPLACEMENT_CHARACTERS)
         /*TODO optimise this*/
-        query.setQuery("*${q}*")
+        query.setQuery("*${newQuery}*")
         QueryResponse response = solrServerHolder.server.query(query)
         SolrDocumentList docs = response.getResults()
         return docs
