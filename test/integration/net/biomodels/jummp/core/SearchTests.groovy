@@ -81,9 +81,11 @@ class SearchTests extends JummpIntegrationTest {
         result = searchForModel(upped.submissionId)
         assertNotNull result
         assertSame(upped.id, result.id)
+        /*
         result = searchForModel("submissionId:${upped.submissionId}")
         assertNotNull result
         assertSame(upped.id, result.id)
+        */
         result = searchForModel("SBML")
         assertNotNull result
         assertSame(upped.id, result.id)
