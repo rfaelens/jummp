@@ -70,7 +70,7 @@ class SearchTests extends JummpIntegrationTest {
         Model upped = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
         //wait a bit for the model to be indexed
-        Thread.sleep(500)
+        Thread.sleep(2000)
         // Search for the model using the name and description, and ensure it's the same we uploaded
         ModelTransportCommand result = searchForModel(nameTag)
         assertNotNull result
