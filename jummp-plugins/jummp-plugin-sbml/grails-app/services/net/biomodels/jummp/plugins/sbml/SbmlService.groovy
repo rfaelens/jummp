@@ -375,7 +375,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     @Profiled(tag="SbmlService.getMetaId")
     public String getMetaId(RevisionTransportCommand revision) {
-        return getFromCache(revision).model.metaId
+        return getFromCache(revision)?.model?.metaId
     }
 
     @Profiled(tag="SbmlService.getVersion")
@@ -690,18 +690,23 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         //List<RepositoryFileTransportCommand> files = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFiles(revision)
         List<RepositoryFileTransportCommand> files=revision.files
         files = files.findAll { it.mainFile }
-        
+
         files.each {
+            def bis
             try {
                 File file=new File(it.path)
-                document=(new SBMLReader()).readSBMLFromStream(
-                        new ByteArrayInputStream(file.getBytes()));
+                byte[] fileBytes = file.getBytes()
+                bis = new ByteArrayInputStream(fileBytes)
+                def reader = new SBMLReader()
+                document = reader.readSBML(file)
                 if (document) {
                   cache.put(revision, document)
                   //break
                 }
             } catch(Exception ignore) {
                 ignore.printStackTrace();
+            } finally {
+                bis?.close()
             }
         }
         return document
