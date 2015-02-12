@@ -397,13 +397,8 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     @Profiled(tag="SbmlService.getNotes")
     public String getNotes(RevisionTransportCommand revision) {
-        // JSBML may return null - see https://sourceforge.net/tracker/?func=detail&aid=3300490&group_id=279608&atid=1186776
-        String notesString = getFromCache(revision).model.notesString
-        if (!notesString) {
-            return ""
-        } else {
-            return notesString
-        }
+        String notesString = getFromCache(revision)?.model?.notesString ?: ""
+        return notesString
     }
 
     @Profiled(tag="SbmlService.getAnnotations")
