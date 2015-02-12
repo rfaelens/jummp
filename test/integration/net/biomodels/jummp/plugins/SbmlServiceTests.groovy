@@ -34,6 +34,8 @@
 
 package net.biomodels.jummp.plugins
 
+import com.ctc.wstx.api.ReaderConfig
+import com.ctc.wstx.stax.WstxInputFactory
 import net.biomodels.jummp.core.JummpIntegrationTest
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -41,6 +43,7 @@ import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
+import net.biomodels.jummp.plugins.git.GitManagerFactory
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
@@ -48,8 +51,8 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.junit.*
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
+import javax.xml.stream.XMLInputFactory
 import static org.junit.Assert.*
-import net.biomodels.jummp.plugins.git.GitManagerFactory
 /**
  * Test for SbmlService parts which require a running core to retrieve Models.
  */
@@ -120,6 +123,38 @@ class SbmlServiceTests extends JummpIntegrationTest {
 
         assertTrue(sbmlService.areFilesThisFormat([properSbml,smallModel("validSbml.xml")]))
         assertFalse(sbmlService.areFilesThisFormat([properSbml, unknown]))
+    }
+
+    /*
+     * Ensure both XMLInputFactory.newInstance() and new WstxInputFactory() yield a factory
+     * that does not report whitespaces in prologue.
+     *
+     * The setting WstxInputFactory.CFG_REPORT_PROLOG_WS is considered off if
+     *     factory.getConfig().getConfigFlags() & WstxInputFactory.CFG_REPORT_PROLOG_WS == 0
+     * To switch off this setting manually, one would use
+     *     factory.setProperty(XMLInputFactory2.P_REPORT_PROLOG_WHITESPACE, Boolean.FALSE)
+     *
+     * Having this setting enabled messes up the jsbml parsing algorithm.
+     */
+    @Test
+    void checkWstxReaderConfiguration() {
+        ReaderConfig defaultConfig = ReaderConfig.createFullDefaults()
+        int defaultFlags = defaultConfig.getConfigFlags()
+
+        XMLInputFactory genericFactory = XMLInputFactory.newInstance()
+        assertTrue(genericFactory instanceof WstxInputFactory)
+        ReaderConfig cfg = genericFactory.getConfig()
+        int flags = cfg.getConfigFlags()
+        int propertyCheck = flags & WstxInputFactory.CFG_REPORT_PROLOG_WS
+        assertEquals(0, propertyCheck)
+        assertEquals(defaultFlags, flags)
+
+        WstxInputFactory factory = new WstxInputFactory()
+        cfg = factory.getConfig()
+        flags = cfg.getConfigFlags()
+        propertyCheck = flags & WstxInputFactory.CFG_REPORT_PROLOG_WS
+        assertEquals(0, propertyCheck)
+        assertEquals(defaultFlags, flags)
     }
 
 
