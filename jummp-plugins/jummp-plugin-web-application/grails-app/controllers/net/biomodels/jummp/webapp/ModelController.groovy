@@ -297,8 +297,6 @@ class ModelController {
     def delete = {
         try {
             boolean deleted = modelDelegateService.deleteModel(params.id)
-            def notification = [revision:rev, user:getUsername()]
-            sendMessage("seda:model.delete", notification)
             redirect(action: "showWithMessage", id: params.id,
                         params: [ flashMessage: deleted ?
                                     "Model has been deleted, and moved into archives." :
