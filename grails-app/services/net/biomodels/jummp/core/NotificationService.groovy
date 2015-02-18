@@ -32,6 +32,8 @@
 
 
 package net.biomodels.jummp.core
+
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.webapp.Notification
 import net.biomodels.jummp.webapp.NotificationType
