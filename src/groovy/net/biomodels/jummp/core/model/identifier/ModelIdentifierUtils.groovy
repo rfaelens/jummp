@@ -168,7 +168,6 @@ The configuration settings lack the rules for generating model identifiers!"""
 
     /* Builds map of arguments to construct dataSource from the given configuration. */
     private static Map extractDatabaseSettings(ConfigObject dbSettings) {
-
         if (!dbSettings) {
             log.warn "No database settings defined - using the defaults."
         }
