@@ -42,6 +42,7 @@ import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
@@ -72,9 +73,11 @@ class ModelServiceTests extends JummpIntegrationTest {
     void setUp() {
         def container = new File("target/vcs/git/ggg/")
         container.mkdirs()
+        String currentContainer = container.getCanonicalPath()
         new File("target/vcs/exchange/").mkdirs()
-        fileSystemService.currentModelContainer = container.getCanonicalPath()
+        fileSystemService.currentModelContainer = currentContainer
         fileSystemService.root = container.getParentFile()
+        modelService.vcsService.currentModelContainer = currentContainer
         createUserAndRoles()
     }
 
@@ -88,6 +91,8 @@ class ModelServiceTests extends JummpIntegrationTest {
         }
         modelService.vcsService.vcsManager = null
         modelService.modelFileFormatService = modelFileFormatService
+        modelService.vcsService.currentModelContainer = null
+        fileSystemService.currentModelContainer = null
     }
 
     @Test
@@ -1501,6 +1506,19 @@ class ModelServiceTests extends JummpIntegrationTest {
         shouldFail(IllegalArgumentException) {
             modelService.publishModelRevision(revision)
         }
+    }
+
+    @Test
+    void funnyModelNamesAreOK() {
+        def f = new File("test/files/JUM-84.xml")
+        assertTrue f.exists()
+        def rf = new RepositoryFileTransportCommand(path: f.absolutePath, description: "")
+        def fmt = new ModelFormatTransportCommand(identifier: "PharmML", formatVersion: "0.3.1")
+        def mtc = new ModelTransportCommand()
+        def rev = new RevisionTransportCommand(name: "", validated: true, format: fmt, model: mtc)
+        authenticateAsUser()
+        Model m = modelService.uploadValidatedModel([rf], rev)
+        assertNotNull m
     }
 }
 
