@@ -1523,7 +1523,8 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue f.exists()
         String name = JummpXmlUtils.findModelElement(f, "Name").trim()
         assertNotNull name
-        def rf = new RepositoryFileTransportCommand(path: f.absolutePath, description: "")
+        def rf = new RepositoryFileTransportCommand(path: f.absolutePath, description: "",
+                mainFile: true)
         def fmt = new ModelFormatTransportCommand(identifier: "PharmML",
                 formatVersion: "0.3.1")
         def mtc = new ModelTransportCommand()
