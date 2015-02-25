@@ -78,6 +78,8 @@ class ModelServiceTests extends JummpIntegrationTest {
         String currentContainer = container.getCanonicalPath()
         def exchange = new File("target/vcs/exchange/")
         exchange.mkdirs()
+        grailsApplication.config.jummp.vcs.workingDirectory = container.getParent()
+        grailsApplication.config.jummp.vcs.exchangeDirectory = exchange.path
         assertTrue exchange.exists()
         fileSystemService.currentModelContainer = currentContainer
         fileSystemService.root = container.getParentFile()
