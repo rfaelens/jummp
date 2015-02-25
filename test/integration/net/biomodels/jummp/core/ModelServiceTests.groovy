@@ -43,6 +43,7 @@ import net.biomodels.jummp.core.model.ModelState
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.util.JummpXmlUtils
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
@@ -73,11 +74,17 @@ class ModelServiceTests extends JummpIntegrationTest {
     void setUp() {
         def container = new File("target/vcs/git/ggg/")
         container.mkdirs()
+        assertTrue container.exists()
         String currentContainer = container.getCanonicalPath()
-        new File("target/vcs/exchange/").mkdirs()
+        def exchange = new File("target/vcs/exchange/")
+        exchange.mkdirs()
+        assertTrue exchange.exists()
         fileSystemService.currentModelContainer = currentContainer
         fileSystemService.root = container.getParentFile()
         modelService.vcsService.currentModelContainer = currentContainer
+        def gitFactory = grailsApplication.mainContext.getBean("gitManagerFactory")
+        modelService.vcsService.vcsManager = gitFactory.getInstance()
+        assertTrue(modelService.vcsService.isValid())
         createUserAndRoles()
     }
 
@@ -1512,13 +1519,27 @@ class ModelServiceTests extends JummpIntegrationTest {
     void funnyModelNamesAreOK() {
         def f = new File("test/files/JUM-84.xml")
         assertTrue f.exists()
+        String name = JummpXmlUtils.findModelElement(f, "Name").trim()
+        assertNotNull name
         def rf = new RepositoryFileTransportCommand(path: f.absolutePath, description: "")
-        def fmt = new ModelFormatTransportCommand(identifier: "PharmML", formatVersion: "0.3.1")
+        def fmt = new ModelFormatTransportCommand(identifier: "PharmML",
+                formatVersion: "0.3.1")
         def mtc = new ModelTransportCommand()
-        def rev = new RevisionTransportCommand(name: "", validated: true, format: fmt, model: mtc)
+        def rev = new RevisionTransportCommand(name: name, validated: true, format: fmt, model: mtc)
         authenticateAsUser()
         Model m = modelService.uploadValidatedModel([rf], rev)
         assertNotNull m
+        Revision checkout = modelService.getLatestRevision(m, false)
+        assertNotNull checkout
+        assertTrue checkout.model.vcsIdentifier.endsWith("$name/")
+        assertEquals name, checkout.name
+        File vcsFolder = new File(modelService.vcsService.currentModelContainer).listFiles().find {
+            it.isDirectory() && it.name.endsWith("$name")
+        }
+        assertNotNull vcsFolder
+        def checkoutFiles = modelService.vcsService.retrieveFiles(checkout)
+        assertEquals 1, checkoutFiles.size()
+        String checkoutFilePath = checkoutFiles.first().path
+        assertNotNull checkoutFilePath
     }
 }
-
