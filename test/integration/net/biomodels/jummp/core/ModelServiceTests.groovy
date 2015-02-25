@@ -1545,4 +1545,37 @@ class ModelServiceTests extends JummpIntegrationTest {
         String checkoutFilePath = checkoutFiles.first().path
         assertNotNull checkoutFilePath
     }
+
+    @Test
+    void funnySbmlModelNamesAreOK() {
+        authenticateAsUser()
+        def root = new File("test/files/JUM-84/sbml/")
+        root.eachFile { f ->
+            assertTrue f.exists()
+            String name = JummpXmlUtils.findModelAttribute(f, "model", "name").trim()
+            assertNotNull name
+            def rf = new RepositoryFileTransportCommand(path: f.absolutePath, description: "",
+                    mainFile: true)
+            def fmt = new ModelFormatTransportCommand(identifier: "SBML",
+                    formatVersion: "L2V4")
+            def mtc = new ModelTransportCommand()
+            def rev = new RevisionTransportCommand(name: name, validated: true, format: fmt,
+                    model: mtc)
+            Model m = modelService.uploadValidatedModel([rf], rev)
+            assertNotNull m
+            Revision checkout = modelService.getLatestRevision(m, false)
+            assertNotNull checkout
+            assertTrue checkout.model.vcsIdentifier.endsWith("$name/")
+            assertEquals name, checkout.name
+            def vcsRoot = new File(modelService.vcsService.currentModelContainer)
+            File vcsFolder = vcsRoot.listFiles().find {
+                it.isDirectory() && it.name.endsWith("$name")
+            }
+            assertNotNull vcsFolder
+            def checkoutFiles = modelService.vcsService.retrieveFiles(checkout)
+            assertEquals 1, checkoutFiles.size()
+            String checkoutFilePath = checkoutFiles.first().path
+            assertNotNull checkoutFilePath
+        }
+    }
 }
