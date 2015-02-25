@@ -1518,8 +1518,8 @@ class ModelServiceTests extends JummpIntegrationTest {
     }
 
     @Test
-    void funnyModelNamesAreOK() {
-        def f = new File("test/files/JUM-84.xml")
+    void funnyPharmMLModelNamesAreOK() {
+        def f = new File("test/files/JUM-84/pharmml/testPharmML.xml")
         assertTrue f.exists()
         String name = JummpXmlUtils.findModelElement(f, "Name").trim()
         assertNotNull name
