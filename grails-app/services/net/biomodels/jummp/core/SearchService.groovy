@@ -151,7 +151,7 @@ class SearchService {
         File indexingData = new File(exchangeFolder, "indexData.json")
         indexingData.setText(builder.toString())
         String jarPath = grailsApplication.config.jummp.search.pathToIndexerExecutable
-        sendMessage("direct:exec", [jarPath: jarPath,
+        sendMessage("seda:exec", [jarPath: jarPath,
                 jsonPath: indexingData.getCanonicalPath()])
     }
 
