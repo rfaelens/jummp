@@ -1170,7 +1170,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         stopWatch.lap("Finished importing model in VCS.")
         stopWatch.setTag("modelService.uploadModelAsList.gormValidation")
-        model.submissionId = submissionIdGenerator.generate()
         domainObjects.each {
             revision.addToRepoFiles(it)
         }
