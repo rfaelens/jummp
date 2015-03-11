@@ -123,7 +123,6 @@
 												isDragged=false;
 											  }
 											});
-				$("#helpPanel").equalize({reset: true});
 				$( "#helpPanel" ).hide();
 				
 				$("#toolbar").mouseleave(function() {
