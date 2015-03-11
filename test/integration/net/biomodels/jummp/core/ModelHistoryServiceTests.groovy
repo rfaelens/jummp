@@ -211,18 +211,19 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
 
     // TODO: remove this copy from JmsAdapterServiceTest
     private void setupVcs() {
-        File root = new File("target/vcs/git")
+        File root = new File("target/vcs/git/hhh")
         root.mkdirs()
-        def fss = modelService.fileSystemService
-        String containerPath = root.absolutePath + "/hhh/"
-        fss.currentModelContainer = containerPath
+        String containerPath = root.absolutePath
+        File exchangeDir = new File("target/vcs/exchange")
+        exchangeDir.mkdirs()
+        assertTrue exchangeDir.exists()
+        grailsApplication.config.jummp.vcs.workingDirectory = root.parent
+        grailsApplication.config.jummp.vcs.exchangeDirectory = exchangeDir.path
+        modelService.fileSystemService.currentModelContainer = containerPath
         modelService.vcsService.currentModelContainer = containerPath
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
-        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
-        assertTrue(new File("target/vcs/exchange/").mkdirs())
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
     }
@@ -256,7 +257,7 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
   </model>
 </sbml>'''
         File file = File.createTempFile("jummpJms", null)
-        def rf = new RepositoryFileTransportCommand(path: file.absolutePath, description: "")
+        def rf = new RepositoryFileTransportCommand(path: file.absolutePath, description: "", mainFile: true)
         file.append(modelSource)
         Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(comment: "Test Comment",
                 name: "model1", format: new ModelFormatTransportCommand(identifier: "SBML"),
