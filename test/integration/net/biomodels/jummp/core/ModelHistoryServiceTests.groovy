@@ -192,13 +192,12 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
         history = modelHistoryService.history()
         assertEquals(10, history.size())
         assertEquals(currentModel.id, history.first().id)
-        
+
         assertEquals(currentModel.id, modelHistoryService.lastAccessedModel().id)
         assertEquals(Revision.findByName("model2").model.id, history.last().id)
         history.each {
-			assertTrue(model.id != it.id)
+            assertTrue(model.id != it.id)
         }
-        
 
         // turn the feature off again
         grailsApplication.config.jummp.model.history.maxElements = 0
