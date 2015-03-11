@@ -36,23 +36,23 @@
 				<thead></thead>
 				<tbody>
 				<tr>
-					<td><label><g:message code="user.administration.ui.username"/>:</label></td>
+					<td class='tableLabels'><label><g:message code="user.administration.ui.username"/>:</label></td>
 					<td>${user.username}</td>
 				</tr>
 				<tr>
-					<td><label><g:message code="user.administration.ui.realname"/>:</label></td>
+					<td class='tableLabels'><label><g:message code="user.administration.ui.realname"/>:</label></td>
 					<td>${user.person.userRealName}</td>
 				</tr>
 				<tr>
-					<td><label><g:message code="user.administration.ui.email"/>:</label></td>
+					<td class='tableLabels'><label><g:message code="user.administration.ui.email"/>:</label></td>
 					<td>${user.email}</td>
 				</tr>
 				<tr>
-					<td><label><g:message code="user.administration.ui.institution"/>:</label></td>
+					<td class='tableLabels'><label><g:message code="user.administration.ui.institution"/>:</label></td>
 					<td>${user.person.institution}</td>
 				</tr>
 				<tr>
-					<td><label><g:message code="user.administration.ui.orcid"/>:</label></td>
+					<td class='tableLabels'><label><g:message code="user.administration.ui.orcid"/>:</label></td>
 					<td>${user.person.orcid}</td>
 				</tr>
 				</tbody>
@@ -66,7 +66,7 @@
 				</thead>
 				<tbody>
 					<g:each status="i" in="${notificationPermissions}" var="perm">
-						<tr><td><label>${perm.notificationType.toString()}</label></td>
+						<tr><td class='tableLabels'><label>${perm.notificationType.toString()}</label></td>
 						<td>
 							<g:if test="${perm.sendNotification}">
 								<img width="20px" height="auto" title="Receiving notifications on the website" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/Accept.png"/>

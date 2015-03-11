@@ -35,7 +35,6 @@
 	<g:javascript library="jquery" plugin="jquery"/>
     <g:javascript src="jquery/jquery.i18n.properties-min-1.0.9.js"/>
     <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
     <g:javascript>
     	$.appName = "${grailsApplication.metadata["app.name"]}";
     	$.serverUrl = "${grailsApplication.config.grails.serverURL}";
@@ -124,6 +123,7 @@
 												isDragged=false;
 											  }
 											});
+				$("#helpPanel").equalize({reset: true});
 				$( "#helpPanel" ).hide();
 				
 				$("#toolbar").mouseleave(function() {
@@ -218,10 +218,12 @@
     </g:javascript>
     <g:javascript src="jummp.js"/>
     <g:javascript src="notification.js"/>
-    <link rel="stylesheet" href="<g:resource dir="css" file="notification.css"/>" />
-    <link rel="stylesheet" href="<g:resource dir="css" file="layout.css"/>" />
     
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/head" />
+    <link rel="stylesheet" href="<g:resource dir="css" file="notification.css"/>" />
+    <link rel="stylesheet" href="<g:resource dir="css" file="layout.css"/>" />
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    
     <g:layoutHead/>
 </head>
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/bodyTag"/>

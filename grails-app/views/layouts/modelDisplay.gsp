@@ -94,7 +94,7 @@
                 var anchorId = $(this).attr('id');
                 if (anchorClass=="versionDownload" || anchorClass=="publicationLink") {
                     openPage(anchor);
-				} else if (typeof(anchor) != "undefined") {
+				} else if (anchorClass == "ui-tabs-anchor") {
 					e.preventDefault();
 					location.hash = anchor;
 					var toggleHelp=0;
@@ -486,6 +486,7 @@
 				</g:if>
 				</ul>
          </div>
+        <div class="ebiLayout_reduceWidth">
        	<g:if test="${revision.model.deleted}">
     		<div class='PermanentMessage'>
     			This is an archived model.
@@ -517,7 +518,7 @@
 	 --%></div>
     	<div id="tablewrapper">
     	<div id="tabs">
-	  <ul>
+	  <ul class='modelTabs'>
 	    <li><a href="#Overview">Overview</a></li>
 	    <li><a href="#Files">Files</a></li>
 	    <li><a href="#History">History</a></li>
@@ -627,6 +628,7 @@
   		</ul>
 	  </div>
 	  <g:pageProperty name="page.modelspecifictabscontent" />
+	</div>
 	</div>
     </div>
 
