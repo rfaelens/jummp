@@ -88,6 +88,10 @@ class SearchService {
     * Dependency injection of grailsApplication
     */
     def grailsApplication
+    /*
+    * Dependency injection of the configuration service
+    */
+    def configurationService
     /**
      * Clears the index. Handle with care.
      */
@@ -147,9 +151,11 @@ class SearchService {
             'folder':exchangeFolder,
             'mainFiles': fetchFilesFromRevision(revision, true),
             'allFiles': fetchFilesFromRevision(revision, false),
-            'solrServer': solrServerHolder.SOLR_CORE_URL)
+            'solrServer': solrServerHolder.SOLR_CORE_URL,
+            'jummpPropFile': configurationService.getConfigFilePath())
         File indexingData = new File(exchangeFolder, "indexData.json")
         indexingData.setText(builder.toString())
+        System.out.println(builder.toString())
         String jarPath = grailsApplication.config.jummp.search.pathToIndexerExecutable
         sendMessage("direct:exec", [jarPath: jarPath,
                 jsonPath: indexingData.getCanonicalPath()])
