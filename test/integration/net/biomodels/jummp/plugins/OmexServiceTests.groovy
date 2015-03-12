@@ -73,10 +73,6 @@ class OmexServiceTests extends JummpIntegrationTest {
         defaultVcsManager   = modelService.vcsService.vcsManager
         createUserAndRoles()
         setupVcs()
-        fileSystemService.root = new File("target/omex/git/").getCanonicalFile()
-        String containerPath = fileSystemService.root.absolutePath + "/aaa/"
-        fileSystemService.currentModelContainer = containerPath
-        modelService.vcsService.currentModelContainer = containerPath
    }
 
     @After
@@ -113,16 +109,11 @@ class OmexServiceTests extends JummpIntegrationTest {
     }
 
     private void setupVcs() {
-        // setup VCS
-        File clone = new File("target/omex/git/")
-        clone.mkdirs()
-        FileRepositoryBuilder builder = new FileRepositoryBuilder()
-        Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir(clone) // scan up the file system tree
-        .build()
-        Git git = new Git(repository)
-        git.init().setDirectory(clone).call()
+        fileSystemService.root = new File("target/omex/git/").getCanonicalFile()
+        fileSystemService.root.mkdirs()
+        String containerPath = fileSystemService.root.absolutePath + "/ooo/"
+        fileSystemService.currentModelContainer = containerPath
+        modelService.vcsService.modelContainerRoot = fileSystemService.root
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
@@ -131,5 +122,6 @@ class OmexServiceTests extends JummpIntegrationTest {
         exchangeDir.mkdirs()
         grailsApplication.config.jummp.vcs.exchangeDirectory = exchangeDir.path
         modelService.vcsService.vcsManager = gitService.getInstance()
+        assertTrue modelService.vcsService.isValid()
     }
 }

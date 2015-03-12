@@ -69,20 +69,9 @@ class SbmlServiceTests extends JummpIntegrationTest {
     @Before
     void setUp() {
         createUserAndRoles()
-        //setupVcs()
-        fileSystemService.root = new File("target/sbml/git/").getCanonicalFile()
-        String containerPath = fileSystemService.root.absolutePath + "/ttt/"
-        fileSystemService.currentModelContainer = containerPath
+        setupVcs()
         // disable validation as it is broken
         grailsApplication.config.jummp.plugins.sbml.validation = false
-        GitManagerFactory gitService = new GitManagerFactory()
-        gitService.grailsApplication = grailsApplication
-        grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
-        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
-        grailsApplication.config.jummp.plugins.sbml.validation = true
-        modelService.vcsService.currentModelContainer = containerPath
-        modelService.vcsService.vcsManager = gitService.getInstance()
     }
 
     @After
@@ -244,16 +233,11 @@ class SbmlServiceTests extends JummpIntegrationTest {
     }
 
     private void setupVcs() {
-        // setup VCS
-        File clone = new File("target/sbml/git/")
-        clone.mkdirs()
-        FileRepositoryBuilder builder = new FileRepositoryBuilder()
-        Repository repository = builder.setWorkTree(clone)
-                .readEnvironment() // scan environment GIT_* variables
-                .findGitDir(clone) // scan up the file system tree
-                .build()
-        Git git = new Git(repository)
-        git.init().setDirectory(clone).call()
+        fileSystemService.root = new File("target/sbml/git/").getCanonicalFile()
+        fileSystemService.root.mkdirs()
+        String containerPath = fileSystemService.root.absolutePath + "/sss/"
+        fileSystemService.currentModelContainer = containerPath
+        modelService.vcsService.modelContainerRoot = fileSystemService.root
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
