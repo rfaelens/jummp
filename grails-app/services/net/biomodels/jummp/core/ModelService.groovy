@@ -1437,8 +1437,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         try {
             files = vcsService.retrieveFiles(revision)
         } catch (VcsException e) {
-            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.name} from VCS failed.")
-            throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.")
+            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.name} from VCS failed.", e)
+            throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.", e)
         }
         return files
     }
