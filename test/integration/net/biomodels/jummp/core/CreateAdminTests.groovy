@@ -58,7 +58,7 @@ class CreateAdminTests extends JummpIntegrationTest {
 
     @Test
     void testCreateAdmin() {
-    	def person = new Person(userRealName: "Administrator")
+        def person = new Person(userRealName: "Administrator")
         User user = new User(username: "admin", password: "1234", person: person, email: "admin@test.com")
         person.save()
         authenticateAnonymous()

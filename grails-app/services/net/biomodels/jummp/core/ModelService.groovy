@@ -876,10 +876,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, rev.format.formatVersion)
 
         // vcs identifier is upload date + name - this should by all means be unique
-        //String pathPrefix =
-        //        fileSystemService.findCurrentModelContainer() + File.separator
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(timestamp).append("_").append(rev.name).
+        final String submissionId = submissionIdGenerator.generate()
+        String modelPath = new StringBuilder(timestamp).append("_").append(submissionId).
                 append(File.separator).toString()
         File modelFolder = new File(fileSystemService.findCurrentModelContainer(), modelPath)
         boolean success = modelFolder.mkdirs()
@@ -892,8 +891,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (IS_DEBUG_ENABLED) {
             log.debug "The new model will be stored in $modelPath"
         }
-        //model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
-        final String submissionId = submissionIdGenerator.generate()
         model.submissionId = submissionId
         Revision revision = new Revision(model: model,
                 revisionNumber: 1,
@@ -1093,15 +1090,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             valid = false
         }
         // model is valid, create a new repository and store it as revision1
-        // vcs identifier is upload date + name - this should by all means be unique
+        // vcs identifier is upload date + submissionId - this should by all means be unique
         String name = modelFileFormatService.extractName(modelFiles, format)
         if (!name && meta.name ) {
         	name = meta.name
         }
         String pathPrefix = fileSystemService.findCurrentModelContainer() + File.separator
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(timestamp).append("_").append(
-                name?.length() > 0 ? name : (randomUUID() as String) + "_blankname").
+        final String submissionId = submissionIdGenerator.generate()
+        String modelPath = new StringBuilder(timestamp).append("_").append(submissionId).
                 append(File.separator).toString()
         File modelFolder = new File(fileSystemService.findCurrentModelContainer(), modelPath)
         boolean success = modelFolder.mkdirs()
@@ -1111,8 +1108,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(meta, err)
         }
         model.vcsIdentifier = modelPath
-        //model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
-        model.submissionId = submissionIdGenerator.generate()
+        model.submissionId = submissionId
         Revision revision = new Revision(model: model,
                 revisionNumber: 1,
                 owner: User.findByUsername(springSecurityService.authentication.name),
@@ -1174,7 +1170,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         stopWatch.lap("Finished importing model in VCS.")
         stopWatch.setTag("modelService.uploadModelAsList.gormValidation")
-        model.submissionId = submissionIdGenerator.generate()
         domainObjects.each {
             revision.addToRepoFiles(it)
         }
