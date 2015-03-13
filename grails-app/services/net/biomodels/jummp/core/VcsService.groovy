@@ -60,10 +60,10 @@ class VcsService implements InitializingBean {
     @SuppressWarnings('GrailsStatelessService')
     def grailsApplication
     def fileSystemService
-    String currentModelContainer
+    String modelContainerRoot
 
     void afterPropertiesSet() {
-        currentModelContainer = fileSystemService.findCurrentModelContainer()
+        modelContainerRoot = fileSystemService.root
     }
 
     /**
@@ -92,7 +92,9 @@ class VcsService implements InitializingBean {
             throw new VcsException("Version Control System is not valid")
         }
 
-        final File MODEL_FOLDER = new File(currentModelContainer, model.vcsIdentifier)
+        String modelFolderPath = new StringBuffer(modelContainerRoot).append(
+                    File.separator).append(model.vcsIdentifier).toString()
+        final File MODEL_FOLDER = new File(modelFolderPath)
         if (commitMessage == null || commitMessage.isEmpty()) {
             return vcsManager.updateModel(MODEL_FOLDER, files, deleted, "Updated at ${new Date().toGMTString()}")
         } else {
@@ -121,7 +123,8 @@ class VcsService implements InitializingBean {
             throw new VcsException("Version Control System is not valid")
         }
 
-        final File MODEL_FOLDER = new File(currentModelContainer, model.vcsIdentifier)
+        String root = fileSystemService.root
+        final File MODEL_FOLDER = new File(root, model.vcsIdentifier)
         return vcsManager.updateModel(MODEL_FOLDER, files, null, "Imported model at ${new Date().toGMTString()}")
     }
 
@@ -159,7 +162,7 @@ class VcsService implements InitializingBean {
                 max("revisionNumber")
             }
         }
-        final File MODEL_FOLDER = new File(currentModelContainer, revision.model.vcsIdentifier)
+        final File MODEL_FOLDER = new File(modelContainerRoot, revision.model.vcsIdentifier)
         if (revision.revisionNumber == latestRevId) {
             return vcsManager.retrieveModel(MODEL_FOLDER)
         }
@@ -172,7 +175,7 @@ class VcsService implements InitializingBean {
         if (!isValid()) {
             throw new VcsException("Version Control System is not valid")
         }
-        final File MODEL_FOLDER = new File(currentModelContainer, revision.model.vcsIdentifier)
+        final File MODEL_FOLDER = new File(modelContainerRoot, revision.model.vcsIdentifier)
         return vcsManager.getFileDetails(MODEL_FOLDER, path)
     }
 }

@@ -875,19 +875,23 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         stopWatch.setTag("modelService.uploadValidatedModel.prepareVcsStorage")
         ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, rev.format.formatVersion)
 
-        // vcs identifier is upload date + name - this should by all means be unique
+        // vcs identifier is container name + upload date + submissionId - this should by all means be unique
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
         final String submissionId = submissionIdGenerator.generate()
         String modelPath = new StringBuilder(timestamp).append("_").append(submissionId).
                 append(File.separator).toString()
-        File modelFolder = new File(fileSystemService.findCurrentModelContainer(), modelPath)
+        String container = fileSystemService.findCurrentModelContainer()
+        String containerName = new File(container).name
+        File modelFolder = new File(container, modelPath)
         boolean success = modelFolder.mkdirs()
         if (!success) {
             def err = "Cannot create the directory where the ${rev.name} should be stored"
             log.error(err)
             throw new ModelException(rev.model, err)
         }
-        model.vcsIdentifier = modelPath
+        model.vcsIdentifier = new StringBuilder(containerName).append(File.separator).
+                append(modelPath).toString()
+
         if (IS_DEBUG_ENABLED) {
             log.debug "The new model will be stored in $modelPath"
         }
@@ -1093,21 +1097,23 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         // vcs identifier is upload date + submissionId - this should by all means be unique
         String name = modelFileFormatService.extractName(modelFiles, format)
         if (!name && meta.name ) {
-        	name = meta.name
+            name = meta.name
         }
-        String pathPrefix = fileSystemService.findCurrentModelContainer() + File.separator
+        String container = fileSystemService.findCurrentModelContainer()
+        String containerName = new File(container).name
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
         final String submissionId = submissionIdGenerator.generate()
         String modelPath = new StringBuilder(timestamp).append("_").append(submissionId).
                 append(File.separator).toString()
-        File modelFolder = new File(fileSystemService.findCurrentModelContainer(), modelPath)
+        File modelFolder = new File(container, modelPath)
         boolean success = modelFolder.mkdirs()
         if (!success) {
             def err = "Cannot create the directory where the ${name} should be stored"
             log.error(err)
             throw new ModelException(meta, err)
         }
-        model.vcsIdentifier = modelPath
+        model.vcsIdentifier = new StringBuilder(containerName).append(File.separator).
+                    append(modelPath).toString()
         model.submissionId = submissionId
         Revision revision = new Revision(model: model,
                 revisionNumber: 1,
@@ -1431,8 +1437,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         try {
             files = vcsService.retrieveFiles(revision)
         } catch (VcsException e) {
-            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.name} from VCS failed.")
-            throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.")
+            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.name} from VCS failed.", e)
+            throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.", e)
         }
         return files
     }

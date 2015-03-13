@@ -77,7 +77,7 @@ class FileSystemService implements IFileSystemService, InitializingBean {
     /**
      * This class' log
      */
-    private static final Log log = LogFactory.getLog(this)
+    private static final Log log = LogFactory.getLog(this.getClass())
 
     /**
      * Override org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
@@ -86,44 +86,110 @@ class FileSystemService implements IFileSystemService, InitializingBean {
     void afterPropertiesSet() throws Exception {
         root = findRoot()
         if (root) {
-            StringBuffer currentModelContainerPath = new StringBuffer(root.absolutePath)
-            currentModelContainerPath.append(File.separator).append(CONTAINER_PATTERN_SEED)
-            currentModelContainer = currentModelContainerPath.toString()
-            ensureFolderExists(currentModelContainer)
+            File[] containers = getFolders(root)
+            if (containers.length == 0) {
+                StringBuffer currentModelContainerPath = new StringBuffer(root.absolutePath)
+                currentModelContainerPath.append(File.separator).append(CONTAINER_PATTERN_SEED)
+                currentModelContainer = currentModelContainerPath.toString()
+                ensureFolderExists(currentModelContainer)
+            } else {
+                /*
+                 * String comparator that looks first at the length of the string
+                 * and then at the contents. Therefore aaaa would be greater than zzz.
+                 */
+                def cmp = [compare: { a, b ->
+                    if (a.equals(b)) {
+                        return 0
+                    } else {
+                        if (a.length() < b.length()) {
+                            return -1
+                        }
+                        if (a.length() > b.length()) {
+                            return 1
+                        }
+                        if (a.length() == b.length()) {
+                            return a.compareTo(b)
+                        }
+                    }
+                }] as Comparator
+                String lastContainerName = Collections.max(containers.collect{ it.name }, cmp)
+                File lastContainer = new File(root, lastContainerName)
+                currentModelContainer = lastContainer.absolutePath
+                findCurrentModelContainer()
+            }
             log.debug("New model to be deposited in $currentModelContainer")
         }
         else {
-            log.debug("Root for FileSystemService was not configured!")
+            log.error("Root for FileSystemService was not configured!")
         }
     }
 
     /**
      * Returns the folder where the model will be stored.
      *
-     * This can be either the current container, or a new one, depending on the number of models we already have.
+     * This can be either the current container, or a new one,
+     * depending on the number of models we already have.
      */
     @Profiled(tag = "fileSystemService.findCurrentModelContainer")
     public String findCurrentModelContainer() {
         final int MODEL_COUNT
-        File[] dirs = getModelFolders(new File(currentModelContainer))
+        File[] dirs = getFolders(new File(currentModelContainer))
         if (dirs == null) {
             MODEL_COUNT = 0
         } else {
             MODEL_COUNT = dirs.length
         }
         if (MODEL_COUNT == maxContainerSize) {
-            currentModelContainer = currentModelContainer.next()
+            currentModelContainer = incrementModelContainer(currentModelContainer)
             ensureFolderExists(currentModelContainer)
         }
         return currentModelContainer
     }
 
     /*
-     * Finds the folders from the current model container.
+     * Updates the model container name.
+     *
+     * aaa becomes aab, aaz becomes aba, zzz becomes aaaa.
+     * @param current the string to be incremented.
+     * @return the updated model container name.
+     */
+    String incrementModelContainer(String current) {
+        current = new File(current).name
+        ArrayDeque<Character> resultStack = new ArrayDeque()
+        boolean mustIncrementNext = true
+        for (int i = current.length() - 1; i >= 0; i--) {
+            char c = current.charAt(i)
+            if (c < 'a' || c > 'z') {
+                String msg = "Unexpected character $c within model container name $current"
+                throw new IllegalArgumentException(msg)
+            }
+            if (mustIncrementNext) {
+                if (c == 'z') {
+                    resultStack.addFirst('a')
+                } else {
+                    resultStack.addFirst(c.next())
+                    mustIncrementNext = false
+                }
+            } else {
+                resultStack.addFirst(c)
+            }
+        }
+        if (mustIncrementNext) { // have reached maximum capacity - e.g. 'zzz'
+            resultStack.addFirst('a')
+        }
+        int len = root.absolutePath.length() + 1 + resultStack.size()
+        StringBuilder result = new StringBuilder(len)
+        result.append(root.absolutePath).append(File.separator)
+        resultStack.inject(result) { r, c -> r.append(c) }
+        return result.toString()
+    }
+
+    /*
+     * Finds the subfolders from a given parent.
      * @param parent    the location where to look for model folders
      * @return          an array of model folders
      */
-    private File[] getModelFolders(File parent) {
+    private File[] getFolders(File parent) {
         def existingContainers = parent.listFiles( new FilenameFilter() {
             boolean accept(File root, String name) {
                 StringBuffer currentLocation = new StringBuffer(root.absolutePath)

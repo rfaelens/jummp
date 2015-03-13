@@ -44,7 +44,7 @@ import org.springframework.core.io.Resource
  * the bean's lifecycle.
  *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @date 20141106
+ * @date 20150311
  */
 @CompileStatic
 class SolrServerHolder {
@@ -63,23 +63,23 @@ class SolrServerHolder {
     /**
      * The application name.
      */
-    static final String APP_NAME = ((String) Metadata.current.get('app.name')).toLowerCase()
+    String APP_NAME
     /**
      * Reference to the location of the Solr home directory.
      */
-    static final AtomicReference<File> SOLR_HOME_REF = new AtomicReference<>()
+    AtomicReference<File> solrHomeRef
     /**
      * Reference to the location of the Solr core folder.
      */
-     static final AtomicReference<File> SOLR_CORE_REF = new AtomicReference<>()
+    AtomicReference<File> solrCoreRef
      /**
       * Reference to the URL of the Solr instance.
       */
-    static final AtomicReference<String> SOLR_URL_REF = new AtomicReference<>()
+    AtomicReference<String> solrUrlRef
     /**
      * The default name for the Solr core used by the application.
      */
-    static final String DEFAULT_CORE_NAME = "${APP_NAME}_core"
+    String DEFAULT_CORE_NAME
     /**
      * The name for the Solr core used by the application during testing.
      */
@@ -101,7 +101,9 @@ class SolrServerHolder {
      * Singleton instance of SolrServer.
      */
     SolrServer server
-    
+    /**
+     * The base URL for all requests to the SOLR core.
+     */
     String SOLR_CORE_URL
 
     @Profiled(tag="solrServerHolder.init")
@@ -109,13 +111,18 @@ class SolrServerHolder {
         if (IS_DEBUG_ENABLED) {
             log.debug "Initialising solrServerHolder..."
         }
+        APP_NAME = ((String) Metadata.current.get('app.name')).toLowerCase()
+        solrHomeRef = new AtomicReference<>()
+        solrCoreRef = new AtomicReference<>()
+        solrUrlRef = new AtomicReference<>()
+        DEFAULT_CORE_NAME = "${APP_NAME}_core"
         final Map grailsConfig = grailsApplication.config.flatten()
         final String SOLR_URL = grailsConfig.get("jummp.search.url")
         if (!SOLR_URL) {
             throw new IllegalStateException("""\
 URL of Solr server not found. Please check the setting jummp.search.url in the config file.""")
         }
-        SOLR_URL_REF.compareAndSet(null, SOLR_URL)
+        solrUrlRef.compareAndSet(null, SOLR_URL)
         String coreName = Environment.current == Environment.TEST ? TEST_CORE_NAME :
                 DEFAULT_CORE_NAME
         prepareSolrCoreSetup(coreName, grailsConfig)
@@ -143,15 +150,22 @@ URL of Solr server not found. Please check the setting jummp.search.url in the c
             if (IS_INFO_ENABLED) {
                 log.info "Request to unload test Solr core returned status ${response.inspect()}"
             }
-            File testCoreFolder = SOLR_CORE_REF.get()
-            if (testCoreFolder && testCoreFolder.exists()) {
-                boolean result = FileUtils.deleteQuietly(testCoreFolder)
-                if (!result) {
-                    log.error "Could not delete the Solr index used in the test environment."
-                }
-            }
+            File testCoreFolder = solrCoreRef.get()
+            forceDeleteTestSolrCore testCoreFolder
         }
         server = null
+        solrCoreRef = null
+        solrUrlRef = null
+        solrHomeRef = null
+    }
+
+    private void forceDeleteTestSolrCore(File testCoreFolder) {
+        if (testCoreFolder && testCoreFolder.exists()) {
+            boolean result = FileUtils.deleteQuietly(testCoreFolder)
+            if (!result) {
+                log.error "Could not delete the Solr index used in the test environment."
+            }
+        }
     }
 
     @Profiled(tag="solrServerHolder.prepareSolrCoreSetup")
@@ -187,7 +201,7 @@ URL of Solr server not found. Please check the setting jummp.search.url in the c
 
     @Profiled(tag="solrServerHolder.doSolrCoreAdminRequest")
     private Map doSolrCoreAdminRequest(Map paramsMap) {
-        final String baseUrl = SOLR_URL_REF.get()
+        final String baseUrl = solrUrlRef.get()
         final String coresPage = "/admin/cores"
         paramsMap = paramsMap ?: [:]
         paramsMap.put("wt", "json")
@@ -239,7 +253,7 @@ Unable to work out the URL of the Solr core because the base Solr URL is undefin
 
     @Profiled(tag="solrServerHolder.getSolrHomeFolder")
     private File getSolrHomeFolder(Map appConfig) {
-        if (SOLR_HOME_REF.get() == null) {
+        if (solrHomeRef.get() == null) {
             final String SOLR_HOME = appConfig.get("jummp.search.folder") ?:
                     System.getenv("SOLR_HOME")
             if (!SOLR_HOME) {
@@ -259,14 +273,14 @@ Location $SOLR_HOME_FOLDER does not exist. If you do not want to create it, you 
 the setting jummp.search.folder in the config file, or change the SOLR_HOME environment \
 variable. If the former setting is specified,the environment variable is ignored.""")
             }
-            SOLR_HOME_REF.compareAndSet(null, SOLR_HOME_FOLDER)
+            solrHomeRef.compareAndSet(null, SOLR_HOME_FOLDER)
         }
-        return SOLR_HOME_REF.get()
+        return solrHomeRef.get()
     }
 
     @Profiled(tag="solrServerHolder.getSolrCoreFolder")
     private File getSolrCoreFolder(Map cfg) {
-        if (!SOLR_CORE_REF.get()) {
+        if (!solrCoreRef.get()) {
             if (IS_INFO_ENABLED) {
                 log.info "Initialising Solr core folder."
             }
@@ -274,13 +288,15 @@ variable. If the former setting is specified,the environment variable is ignored
             final File CORE_FOLDER
             if (Environment.current == Environment.TEST) {
                 CORE_FOLDER = new File(parent, TEST_CORE_NAME)
+                log.debug "Core folder is $CORE_FOLDER"
+                forceDeleteTestSolrCore CORE_FOLDER
             } else {
                 CORE_FOLDER = new File(parent, DEFAULT_CORE_NAME)
             }
             ensureSolrCoreFolderExists(CORE_FOLDER)
-            SOLR_CORE_REF.compareAndSet(null, CORE_FOLDER)
+            solrCoreRef.compareAndSet(null, CORE_FOLDER)
         }
-        return SOLR_CORE_REF.get()
+        return solrCoreRef.get()
     }
 
     @Profiled(tag="solrServerHolder.getSolrConfigFolder")
