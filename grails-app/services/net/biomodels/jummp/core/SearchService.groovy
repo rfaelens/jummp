@@ -23,11 +23,13 @@ package net.biomodels.jummp.core
 import grails.async.Promise
 import grails.plugins.springsecurity.Secured
 import groovy.json.JsonBuilder
+import java.util.concurrent.atomic.AtomicReference
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
 import org.apache.commons.lang.StringUtils
 import org.apache.commons.logging.Log
@@ -35,10 +37,11 @@ import org.apache.commons.logging.LogFactory
 import org.apache.solr.client.solrj.SolrQuery
 import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.SolrDocumentList
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
-import java.util.concurrent.atomic.AtomicReference
+import org.springframework.security.acls.domain.BasePermission
 
 /**
  * @short Singleton-scoped facade for interacting with a Solr instance.
@@ -92,6 +95,8 @@ class SearchService {
     * Dependency injection of the configuration service
     */
     def configurationService
+    
+    def aclUtilService
     /**
      * Clears the index. Handle with care.
      */
@@ -138,13 +143,16 @@ class SearchService {
                 'modelFormat':revision.format.name,
                 'levelVersion':revision.format.formatVersion,
                 'submitter':revision.owner,
+                'submitterUsername': revision.model.submitterUsername,
                 'paperTitle':revision.model.publication ?
                         revision.model.publication.title : "",
                 'paperAbstract':revision.model.publication ?
                         revision.model.publication.synopsis : "",
                 'model_id':revision.model.id,
+                'revision_id': revision.id,
                 'versionNumber':versionNumber,
                 'submissionDate':revision.model.submissionDate,
+                'lastModified': revision.model.lastModifiedDate, 
                 'uniqueId':uniqueId
         ]
         builder(partialData: partialData,
@@ -208,24 +216,44 @@ class SearchService {
         long start = System.currentTimeMillis();
         SolrDocumentList results = search(query)
         if (IS_DEBUG_ENABLED) {
-            log.debug("Solr returned in ${System.currentTimeMillis() - start}")
+            logger.debug("Solr returned in ${System.currentTimeMillis() - start}")
         }
+        start = System.currentTimeMillis();
         final int COUNT = results.size()
         Map<String, ModelTransportCommand> returnVals = new LinkedHashMap<>(COUNT + 1, 1.0f)
+        boolean isAdmin = SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")
+        Map<Long, Long> modelsAdded = new HashMap<Long, Long>();
         results.each {
-            start = System.currentTimeMillis();
-            final String thisSubmissionId = it.get("submissionId")
-            if (!returnVals.containsKey(thisSubmissionId)) {
-                String perennialField = it.get("publicationId") ?: thisSubmissionId
-                Model returned = Model.findByPerennialIdentifier(perennialField)
-                if (returned && !returned.deleted &&
-                        modelService.getLatestRevision(returned, false)) {
-                    returnVals.put(thisSubmissionId, returned.toCommandObject())
+            boolean okayToProceed = true
+            boolean checkPermissions = !isAdmin
+            long model_id = it.get("model_id")
+            long revision_id = it.get("revision_id")
+            if (!modelsAdded.containsKey(model_id) || modelsAdded.get(model_id) < revision_id) {
+                if (it.containsKey("public") && it.get("public")) {
+                    checkPermissions = false;
+                }
+                if (checkPermissions) {
+                    Revision rev = Revision.get(revision_id)
+                    okayToProceed = aclUtilService.hasPermission(springSecurityService.authentication, rev, BasePermission.READ)
+                }
+                if (okayToProceed) {
+                    ModelTransportCommand mtc = new ModelTransportCommand(submitter: it.get("submitter"),
+                                                                      submitterUsername: it.get("submitterUsername"),
+                                                                      name: it.get("name"),
+                                                                      submissionId: it.get("submissionId"),
+                                                                      publicationId: it.get("publicationId"),
+                                                                      submissionDate: it.get("submissionDate"),
+                                                                      lastModifiedDate: it.get("lastModified"), 
+                                                                      id: it.get("model_id"),
+                                                                      format: ModelFormat.findByName(it.get("modelFormat")).toCommandObject(),
+                                                                      );
+                   returnVals.put(it.get("submissionId"), mtc)
+                   modelsAdded.put(model_id, revision_id)
                 }
             }
-            if (IS_DEBUG_ENABLED) {
-                log.debug("Processing took ${System.currentTimeMillis() - start}")
-            }
+        }
+        if (IS_DEBUG_ENABLED) {
+            logger.debug("Results processed in ${System.currentTimeMillis() - start}")
         }
         return returnVals.values()
     }
