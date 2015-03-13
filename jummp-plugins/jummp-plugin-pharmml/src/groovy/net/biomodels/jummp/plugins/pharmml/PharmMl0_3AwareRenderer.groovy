@@ -244,17 +244,19 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                 if (c.continuous) {
                     def cc = c.continuous
                     def ccMap = [:]
-                    final EquationType TRANSF_EQ = cc.transformation.equation
-                    final String TRANSF = convertToMathML("Transformation", TRANSF_EQ)
-                    final def COV_DISTRIB = cc.abstractContinuousUnivariateDistribution
-                    if (COV_DISTRIB) {
-                        final String DISTRIB = distributionAssignment(symbol, COV_DISTRIB)
-                        ccMap["dist"] = DISTRIB
+                    if (cc.transformation) {
+                        final EquationType TRANSF_EQ = cc.transformation.equation
+                        final String TRANSF = convertToMathML("Transformation", TRANSF_EQ)
+                        final def COV_DISTRIB = cc.abstractContinuousUnivariateDistribution
+                        if (COV_DISTRIB) {
+                            final String DISTRIB = distributionAssignment(symbol, COV_DISTRIB)
+                            ccMap["dist"] = DISTRIB
+                        }
+                        final String COV_KEY = "${blkId}_${symbol}"
+                        transfMap[COV_KEY] = TRANSF_EQ
+                        ccMap["transf"] = TRANSF
                     }
-                    ccMap["transf"] = TRANSF
                     thisCov["continuous"] = ccMap
-                    final String COV_KEY = "${blkId}_${symbol}"
-                    transfMap[COV_KEY] = TRANSF_EQ
                 } else if (c.categorical) {
                     List cc = c.categorical.category
                     List categoryList = []
