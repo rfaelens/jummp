@@ -26,7 +26,7 @@ class IndexingRoute extends RouteBuilder {
 
     @Override
     void configure() {
-        from("direct:exec")
+        from("seda:exec")
         .setHeader("CamelExecCommandArgs", simple('-jar ${body[jarPath]} ${body[jsonPath]}'))
         .to("exec:java")
         .process(new Processor() {
