@@ -1030,16 +1030,20 @@ Individual parameter ${p.symbId} is missing mandatory Transformation element."""
                         }
                         //POPULATION
                         def popParam
-                        if (linearCovariate.populationParameter.assign.symbRef) {
+                        Rhs popParamAssign = linearCovariate.populationParameter.assign
+                        if (popParamAssign) {
+                            SymbolRefType popSymb = popParamAssign.symbRef ?:
+                                    popParamAssign.equation.symbRef
+                            if (!popSymb) {
+                                log.warn "\
+Could not extract the population parameter of individual parameter ${p.symbId}."
+                            }
                             if (APPLY_TRANSFORMATION) {
                                 popParam = new UniopType()
                                 popParam.op = TRANSFORMATION
-                                popParam.symbRef = linearCovariate.populationParameter.
-                                            assign.symbRef
+                                popParam.symbRef = popSymb
                             } else {
-                                popParam = new SymbolRefType()
-                                popParam.symbIdRef = linearCovariate.populationParameter.
-                                            assign.symbRef.symbIdRef
+                                popParam = popSymb
                             }
                         }
                         def fixedEffectsCovMap = [:]
