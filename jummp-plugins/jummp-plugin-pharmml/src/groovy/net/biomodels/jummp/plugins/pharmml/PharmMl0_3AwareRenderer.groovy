@@ -113,7 +113,7 @@ import org.perf4j.aop.Profiled
 
 class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     /* the class logger */
-    private static final Log log = LogFactory.getLog(this)
+    private static final Log log = LogFactory.getLog(this.getClass())
     private static final String IS_DEBUG_ENABLED = log.isDebugEnabled()
     private static final String IS_INFO_ENABLED = log.isInfoEnabled()
     /* Dependency injection for groovyPageRenderer */
