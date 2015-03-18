@@ -45,15 +45,15 @@
                 <table>
                     <tbody>
                     <tr>
-                        <td><label for="register-form-username"><g:message code="user.signup.ui.username"/>:</label></td>
+                        <td class='tableLabels'><label for="register-form-username"><g:message code="user.signup.ui.username"/>:</label></td>
                         <td><span><g:textField name="username"/></span></td>
                     </tr>
                     <tr>
-						<td><label><g:message code="user.administration.updatePassword.newPassword"/>:</label></td>
+						<td class='tableLabels'><label><g:message code="user.administration.updatePassword.newPassword"/>:</label></td>
 						<td><g:passwordField name="newPassword"/></td>
 					</tr>
 					<tr>
-						<td><label><g:message code="user.administration.updatePassword.newPasswordRpt"/>:</label></td>
+						<td class='tableLabels'><label><g:message code="user.administration.updatePassword.newPasswordRpt"/>:</label></td>
 						<td><g:passwordField name="newPasswordRpt"/></td>
 					</tr>
                     </tbody>

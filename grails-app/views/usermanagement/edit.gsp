@@ -37,23 +37,23 @@
 					<thead></thead>
 					<tbody>
 					<tr>
-						<td><label for="edit-user-username"><g:message code="user.administration.ui.username"/>:</label></td>
+						<td class='tableLabels'><label for="edit-user-username"><g:message code="user.administration.ui.username"/>:</label></td>
 						<td><input type="hidden" id="edit-user-username" name="username" value="${user.username}"/>${user.username}</td>
 					</tr>
 					<tr>
-						<td><label for="edit-user-userrealname"><g:message code="user.administration.ui.realname"/>:</label></td>
+						<td class='tableLabels'><label for="edit-user-userrealname"><g:message code="user.administration.ui.realname"/>:</label></td>
 						<td><span><input type="text" id="edit-user-userrealname" name="userRealName" value="${user.person.userRealName}"/></span></td>
 					</tr>
 					<tr>
-						<td><label for="edit-user-email"><g:message code="user.administration.ui.email"/>:</label></td>
+						<td class='tableLabels'><label for="edit-user-email"><g:message code="user.administration.ui.email"/>:</label></td>
 						<td><span><input type="text" id="edit-user-email" name="email" value="${user.email}"/></span></td>
 					</tr>
 					<tr>
-						<td><label for="edit-user-institution"><g:message code="user.administration.ui.institution"/>:</label></td>
+						<td class='tableLabels'><label for="edit-user-institution"><g:message code="user.administration.ui.institution"/>:</label></td>
 						<td><span><input type="text" id="edit-user-institution" name="institution" value="${user.person.institution}"/></span></td>
 					</tr>
 					<tr>
-						<td><label for="edit-user-orcid"><g:message code="user.administration.ui.orcid"/>:</label></td>
+						<td class='tableLabels'><label for="edit-user-orcid"><g:message code="user.administration.ui.orcid"/>:</label></td>
 						<td><span><input type="text" id="edit-user-orcid" name="orcid" value="${user.person.orcid}"/></span></td>
 					</tr>
 					</tbody>
@@ -67,7 +67,7 @@
 					</thead>
 					<tbody>
 						<g:each status="i" in="${notificationPermissions}" var="perm">
-							<tr><td><label>${perm.notificationType.toString()}</label></td>
+							<tr><td class='tableLabels'><label>${perm.notificationType.toString()}</label></td>
 							<td>
 								<g:if test="${perm.sendNotification}">
 									<input type="checkbox" name="sendNotification${perm.notificationType.id}" checked/>

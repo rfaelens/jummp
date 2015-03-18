@@ -45,27 +45,27 @@
                 <table>
                     <tbody>
                     <tr>
-                        <td><label class="required" for="register-form-username"><g:message code="user.signup.ui.username"/>:</label></td>
+                        <td class='tableLabels'><label class="required" for="register-form-username"><g:message code="user.signup.ui.username"/>:</label></td>
                         <td><span><g:textField name="username"/></span></td>
                     </tr>
                     <tr>
-                        <td><label class="required" for="register-form-name"><g:message code="user.signup.ui.realname"/>:</label></td>
+                        <td class='tableLabels'><label class="required" for="register-form-name"><g:message code="user.signup.ui.realname"/>:</label></td>
                         <td><span><g:textField name="userRealName"/></span></td>
                     </tr>
                     <tr>
-                        <td><label class="required" for="register-form-email"><g:message code="user.signup.ui.email"/>:</label></td>
+                        <td class='tableLabels'><label class="required" for="register-form-email"><g:message code="user.signup.ui.email"/>:</label></td>
                         <td><span><g:textField name="email"/></span></td>
                     </tr>
                     <tr>
-                        <td><label for="register-form-institution"><g:message code="user.signup.ui.institution"/>:</label></td>
+                        <td class='tableLabels'><label for="register-form-institution"><g:message code="user.signup.ui.institution"/>:</label></td>
                         <td><span><g:textField name="institution"/></span></td>
                     </tr>
                     <tr>
-                        <td><label for="register-form-orcid"><g:message code="user.signup.ui.orcid"/>:</label></td>
+                        <td class='tableLabels'><label for="register-form-orcid"><g:message code="user.signup.ui.orcid"/>:</label></td>
                         <td><span><g:textField name="orcid"/></span></td>
                     </tr>
                     <tr>
-                        <td><label class="required" for="register-form-captcha"><g:message code="user.signup.ui.captcha"/>:</label></td>
+                        <td class='tableLabels'><label class="required" for="register-form-captcha"><g:message code="user.signup.ui.captcha"/>:</label></td>
                         <td>
                         	<ul style="list-style-type: none;">
                         		<li><img style="margin-top:0;float:none" src="${createLink(controller: 'simpleCaptcha', action: 'captcha')}"/></li>
