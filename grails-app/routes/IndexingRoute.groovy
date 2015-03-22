@@ -33,7 +33,6 @@ class IndexingRoute extends RouteBuilder {
             public void process(Exchange exchange) throws Exception {
                 String indexerOutput = exchange.getIn().getBody(String.class)
                 System.out.println(indexerOutput)
-                // do something with the word count
             }
         })
     }
