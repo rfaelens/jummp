@@ -72,14 +72,14 @@ import org.springframework.security.core.userdetails.UserDetails
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
- * @date 20141128
+ * @date 20150319
  */
 @SuppressWarnings("GroovyUnusedCatchParameter")
 class ModelService {
     /**
      * The class logger.
      */
-    private static final Log log = LogFactory.getLog(this)
+    private static final Log log = LogFactory.getLog(this.getClass())
     /**
      * Threshold for the verbosity of the logger.
      */
@@ -168,7 +168,7 @@ class ModelService {
             String query = '''
 SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
 FROM Revision AS r
-JOIN r.model AS m JOIN r.owner as u 
+JOIN r.model AS m JOIN r.owner as u
 WHERE
 '''
             if ( sortColumn == ModelListSorting.LAST_MODIFIED || sortColumn == ModelListSorting.FORMAT ||
@@ -238,27 +238,27 @@ ORDER BY
 SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
 FROM Revision AS r
 JOIN r.model AS m
-JOIN r.owner as u 
+JOIN r.owner as u
 WHERE r.deleted = false
 '''
 //do we want to show information from the latest revision?
-if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) { 
-            query += '''AND r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2, 
-            			AclEntry ace2  where r.model=r2.model 
-            			AND r2.id=ace2.aclObjectIdentity.objectId 
-            			AND ace2.aclObjectIdentity.aclClass.className = :className
-            			AND ace2.sid.sid IN (:roles) AND ace2.mask IN (:permissions)
-            			AND ace2.granting = true)'''
-        }
+if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) {
+            query += '''AND r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2,
+                        AclEntry ace2  where r.model=r2.model
+                        AND r2.id=ace2.aclObjectIdentity.objectId
+                        AND ace2.aclObjectIdentity.aclClass.className = :className
+                        AND ace2.sid.sid IN (:roles) AND ace2.mask IN (:permissions)
+                        AND ace2.granting = true)'''
+            }
         else  {                                      ////otherwise sortColumn must be the following .. ie we want to sort by the first revision (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE)
             query += '''AND r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2,
-            			AclEntry ace2  where r.model=r2.model
-            			AND r2.id=ace2.aclObjectIdentity.objectId
-            			AND ace2.aclObjectIdentity.aclClass.className = :className
-            			AND ace2.sid.sid IN (:roles) AND ace2.mask IN (:permissions)
-            			AND ace2.granting = true)'''
+                        AclEntry ace2  where r.model=r2.model
+                        AND r2.id=ace2.aclObjectIdentity.objectId
+                        AND ace2.aclObjectIdentity.aclClass.className = :className
+                        AND ace2.sid.sid IN (:roles) AND ace2.mask IN (:permissions)
+                        AND ace2.granting = true)'''
         }
-        
+
         query += " AND m.deleted = ${deletedOnly} "
         if (filter && filter.length() >= 3) {
             query += '''
@@ -660,7 +660,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     /**
     * Adds a new Revision to the model, to be used by SubmissionService
     * The provided @p modelFiles will be stored in the VCS as an update to the existing files of the same @p model.
-    * A new Revision will be created and appended to the list of Revisions of the @p model. 
+    * A new Revision will be created and appended to the list of Revisions of the @p model.
     * The revision will not be validated, as the checks are assumed to have been conducted
     * already
     * @param model The Model the revision should be added
@@ -811,7 +811,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
 
     /**
     * Retrieves information related to a file from the VCS
-    * Passes the @p revision and filename to the vcsService, gets 
+    * Passes the @p revision and filename to the vcsService, gets
     * info related to the specified @p filename, and filters the returned
     * values based on the revisions available to the user
     * @param rev The model revision
@@ -845,7 +845,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * The Model will have one Revision attached to it. The MetaInformation for this
     * Model is taken from @p meta. The user who uploads the Model becomes the owner of
     * this Model. The new Model is not visible to anyone except the owner.
-    * @param repoFiles The list of command objects corresponding to the files 
+    * @param repoFiles The list of command objects corresponding to the files
     * of the model that is to be stored in the VCS.
     * @param rev Meta Information to be added to the model
     * @return The new created Model, or null if the model could not be created
@@ -1523,7 +1523,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     *
     * returns the users with access to the model
     *
-    * @param model The Model 
+    * @param model The Model
     **/
    // @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
@@ -1575,7 +1575,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     *
     *
     * @param model The Model
-    * @param permissions A list of permissions 
+    * @param permissions A list of permissions
     **/
    // @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
@@ -1631,7 +1631,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new AccessDeniedException("You cant access permissions if you dont have them.")
         }
     }
-    
+
     private String getUsername() {
     	if (springSecurityService.isLoggedIn()) {
     		return (springSecurityService.getPrincipal() as UserDetails).getUsername()
@@ -1774,7 +1774,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Checks if the model can be deleted 
+    * Checks if the model can be deleted
     *
     * @param model The Model to be deleted
     * @return @c true in case the Model can be deleted, @c false otherwise.
@@ -1798,7 +1798,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Checks if the model can be shared 
+    * Checks if the model can be shared
     *
     * @param model The Model to be shared
     * @return @c true in case the Model can be shared, @c false otherwise.
