@@ -51,7 +51,7 @@ import org.springframework.security.acls.domain.BasePermission
  *
  * @author Raza Ali, raza.ali@ebi.ac.uk
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @date   20141121
+ * @date   20150320
  */
 class SearchService {
     static final String[] SOLR_SPECIAL_CHARACTERS = ["+", "-", "&", "|", "!", "(", ")",
@@ -95,7 +95,7 @@ class SearchService {
     * Dependency injection of the configuration service
     */
     def configurationService
-    
+
     def aclUtilService
     /**
      * Clears the index. Handle with care.
@@ -152,7 +152,7 @@ class SearchService {
                 'revision_id': revision.id,
                 'versionNumber':versionNumber,
                 'submissionDate':revision.model.submissionDate,
-                'lastModified': revision.model.lastModifiedDate, 
+                'lastModified': revision.model.lastModifiedDate,
                 'uniqueId':uniqueId
         ]
         builder(partialData: partialData,
@@ -216,13 +216,13 @@ class SearchService {
         long start = System.currentTimeMillis();
         SolrDocumentList results = search(query)
         if (IS_DEBUG_ENABLED) {
-            logger.debug("Solr returned in ${System.currentTimeMillis() - start}")
+            log.debug("Solr returned in ${System.currentTimeMillis() - start}")
         }
         start = System.currentTimeMillis();
         final int COUNT = results.size()
         Map<String, ModelTransportCommand> returnVals = new LinkedHashMap<>(COUNT + 1, 1.0f)
         boolean isAdmin = SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")
-        Map<Long, Long> modelsAdded = new HashMap<Long, Long>();
+        Map<Long, Long> modelsAdded = new HashMap<Long, Long>()
         results.each {
             boolean okayToProceed = true
             boolean checkPermissions = !isAdmin
@@ -230,30 +230,32 @@ class SearchService {
             long revision_id = it.get("revision_id")
             if (!modelsAdded.containsKey(model_id) || modelsAdded.get(model_id) < revision_id) {
                 if (it.containsKey("public") && it.get("public")) {
-                    checkPermissions = false;
+                    checkPermissions = false
                 }
                 if (checkPermissions) {
                     Revision rev = Revision.get(revision_id)
-                    okayToProceed = aclUtilService.hasPermission(springSecurityService.authentication, rev, BasePermission.READ)
+                    okayToProceed = aclUtilService.hasPermission(
+                        springSecurityService.authentication, rev, BasePermission.READ)
                 }
                 if (okayToProceed) {
-                    ModelTransportCommand mtc = new ModelTransportCommand(submitter: it.get("submitter"),
-                                                                      submitterUsername: it.get("submitterUsername"),
-                                                                      name: it.get("name"),
-                                                                      submissionId: it.get("submissionId"),
-                                                                      publicationId: it.get("publicationId"),
-                                                                      submissionDate: it.get("submissionDate"),
-                                                                      lastModifiedDate: it.get("lastModified"), 
-                                                                      id: it.get("model_id"),
-                                                                      format: ModelFormat.findByName(it.get("modelFormat")).toCommandObject(),
-                                                                      );
+                    ModelTransportCommand mtc = new ModelTransportCommand(
+                        submitter: it.get("submitter"),
+                        submitterUsername: it.get("submitterUsername"),
+                        name: it.get("name"),
+                        submissionId: it.get("submissionId"),
+                        publicationId: it.get("publicationId"),
+                        submissionDate: it.get("submissionDate"),
+                        lastModifiedDate: it.get("lastModified"),
+                        id: it.get("model_id"),
+                        format: ModelFormat.findByName(it.get("modelFormat")).toCommandObject()
+                    )
                    returnVals.put(it.get("submissionId"), mtc)
                    modelsAdded.put(model_id, revision_id)
                 }
             }
         }
         if (IS_DEBUG_ENABLED) {
-            logger.debug("Results processed in ${System.currentTimeMillis() - start}")
+            log.debug("Results processed in ${System.currentTimeMillis() - start}")
         }
         return returnVals.values()
     }
