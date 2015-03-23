@@ -148,6 +148,7 @@ class SearchService {
                         revision.model.publication.title : "",
                 'publicationAbstract':revision.model.publication ?
                         revision.model.publication.synopsis : "",
+                'publicationYear': revision.model.publication?.year ?: 0,
                 'model_id':revision.model.id,
                 'revision_id': revision.id,
                 'versionNumber':versionNumber,

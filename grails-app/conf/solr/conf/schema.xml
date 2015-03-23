@@ -92,6 +92,7 @@
    <field name="publicationTitle" type="text_general" indexed="true" stored="false"/>
    <field name="publicationAbstract" type="text_general" indexed="true" stored="false"/>
    <field name="publicationAuthors" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="publicationYear" type="int" indexed="true" stored="true"/>
 
    <field name="model_id" type="int" indexed="false" stored="true"/>
    <field name="revision_id" type="int" indexed="false" stored="true"/>
