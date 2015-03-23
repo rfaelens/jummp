@@ -88,14 +88,16 @@
    <field name="submitter" type="text_general" indexed="true" stored="true"/>
    <field name="submitterUsername" type="text_general" indexed="false" stored="true"/>
    <field name="content" type="text_general" indexed="true" stored="false" required="false" default=""/>
-   <field name="paperTitle" type="text_general" indexed="true" stored="false"/>
-   <field name="paperAbstract" type="text_general" indexed="true" stored="false"/>
+   <!-- information related to the publication that describes a model -->
+   <field name="publicationTitle" type="text_general" indexed="true" stored="false"/>
+   <field name="publicationAbstract" type="text_general" indexed="true" stored="false"/>
+   <field name="publicationAuthors" type="text_general" indexed="true" stored="false" multiValued="true"/>
+
    <field name="model_id" type="int" indexed="false" stored="true"/>
    <field name="revision_id" type="int" indexed="false" stored="true"/>
    <field name="versionNumber" type="int" indexed="false" stored="true"/>
    <field name="submissionDate" type="date" indexed="false" stored="true"/>
    <field name="lastModified" type="date" indexed="false" stored="true"/>
-   <field name="publicationAuthors" type="text_general" indexed="true" stored="false" multiValued="true"/>
    <field name="modelCurators" type="text_general" indexed="true" stored="false" multiValued="true"/>
    <field name="modelAuthors" type="text_general" indexed="true" stored="false" multiValued="true"/>
    <field name="derivations" type="text_general" indexed="true" stored="false" multiValued="true"/>

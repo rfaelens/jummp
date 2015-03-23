@@ -144,9 +144,9 @@ class SearchService {
                 'levelVersion':revision.format.formatVersion,
                 'submitter':revision.owner,
                 'submitterUsername': revision.model.submitterUsername,
-                'paperTitle':revision.model.publication ?
+                'publicationTitle':revision.model.publication ?
                         revision.model.publication.title : "",
-                'paperAbstract':revision.model.publication ?
+                'publicationAbstract':revision.model.publication ?
                         revision.model.publication.synopsis : "",
                 'model_id':revision.model.id,
                 'revision_id': revision.id,
