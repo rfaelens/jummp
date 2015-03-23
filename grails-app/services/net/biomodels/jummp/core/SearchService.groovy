@@ -278,8 +278,10 @@ class SearchService {
         SolrQuery query = new SolrQuery()
         String newQuery = StringUtils.replaceEach(q, SOLR_SPECIAL_CHARACTERS,
                 SOLR_REPLACEMENT_CHARACTERS)
-        /*TODO optimise this*/
-        query.setQuery("*${newQuery}*")
+        query.setQuery(q)
+        query.setParam("defType", "edismax")
+        query.setParam("tie", "0.8")
+        query.setParam("q.alt", "*:*")
         QueryResponse response = solrServerHolder.server.query(query)
         SolrDocumentList docs = response.getResults()
         return docs
