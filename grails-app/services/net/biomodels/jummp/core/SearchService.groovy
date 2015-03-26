@@ -148,7 +148,7 @@ class SearchService {
                         revision.model.publication.title : "",
                 'publicationAbstract':revision.model.publication ?
                         revision.model.publication.synopsis : "",
-                'publicationAuthor': revision.model.publication?.authors ?
+                'publicationAuthors': revision.model.publication?.authors ?
                         revision.model.publication.authors.collect {
                             it.userRealName }.join(', ') : "",
                 'publicationYear': revision.model.publication?.year ?: 0,
