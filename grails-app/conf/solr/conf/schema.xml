@@ -91,8 +91,8 @@
    <!-- information related to the publication that describes a model -->
    <field name="publicationTitle" type="text_general" indexed="true" stored="false"/>
    <field name="publicationAbstract" type="text_general" indexed="true" stored="false"/>
-   <field name="publicationAuthors" type="text_general" indexed="true" stored="false" multiValued="true"/>
-   <field name="publicationYear" type="int" indexed="true" stored="true"/>
+   <field name="publicationAuthor" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="publicationYear" type="int" indexed="true" stored="true" required="false" default="0"/>
 
    <field name="model_id" type="int" indexed="false" stored="true"/>
    <field name="revision_id" type="int" indexed="false" stored="true"/>
@@ -114,14 +114,17 @@
    <!-- PharmML-specific fields -->
    <field name="pharmmlPublicationSourceText" type="text_general" indexed="true" stored="false"/>
    <field name="pharmmlModelIndication" type="text_general" indexed="true" stored="false" multiValued="true"/>
-   <field name="pharmmlModelRationale" type="text_general" indexed="true" stored="false"/>
-   <field name="pharmmlLimitations" type="text_general" indexed="true" stored="false"/>
+   <field name="pharmmlModelRationale" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="pharmmlLimitations" type="text_general" indexed="true" stored="false" multiValued="true"/>
    <field name="pharmmlPopulation" type="text_general" indexed="true" stored="false" multiValued="true"/>
    <field name="pharmmlModelDrug" type="text_general" indexed="true" stored="false" multiValued="true"/>
    <field name="pharmmlTherapeuticArea" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="pharmmlElementInterpretation" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="pharmmlElementUnit" type="string" indexed="true" stored="false" multiValued="true"/>
    <field name="pharmmlGenericType" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="pharmmlModelFieldPurpose" type="string" indexed="true" stored="false" multiValued="true"/>
    <!-- catch-all field -->
-   <dynamicField name="pharmml*" type="text_general" indexed="true"  stored="false"/>
+   <dynamicField name="pharmml*" type="text_general" indexed="true"  stored="false" multiValued="true"/>
    <dynamicField name="vCard*" type="text_general" indexed="true"  stored="false" multiValued="true"/>
 
    <!-- catchall text field that indexes tokens both normally and in reverse for efficient
@@ -147,6 +150,18 @@
    <copyField source="elementID" dest="text_rev"/>
    <copyField source="externalReferenceID" dest="text_rev"/>
    <copyField source="externalReferenceName" dest="text_rev"/>
+
+   <copyField source="pharmmlModelIndication" dest="text_rev"/>
+   <copyField source="pharmmlModelRationale" dest="text_rev"/>
+   <copyField source="pharmmlLimitations" dest="text_rev"/>
+   <copyField source="pharmmlPopulation" dest="text_rev"/>
+   <copyField source="pharmmlModelDrug" dest="text_rev"/>
+   <copyField source="pharmmlTherapeuticArea" dest="text_rev"/>
+   <copyField source="pharmmlElementInterpretation" dest="text_rev"/>
+   <copyField source="pharmmlElementUnit" dest="text_rev"/>
+   <copyField source="pharmmlGenericType" dest="text_rev"/>
+   <copyField source="pharmmlModelFieldPurpose" dest="text_rev"/>
+
    <copyField source="uniqueId" dest="text_rev"/>
 
  <!-- Field to use to determine and enforce document uniqueness.
