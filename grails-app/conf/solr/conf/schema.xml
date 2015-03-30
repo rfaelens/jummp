@@ -142,7 +142,7 @@
    <copyField source="modelAuthors" dest="text_rev"/>
    <copyField source="publicationTitle" dest="text_rev"/>
    <copyField source="publicationAbstract" dest="text_rev"/>
-   <copyField source="publicationAuthor" dest="text_rev"/>
+   <copyField source="publicationAuthors" dest="text_rev"/>
    <copyField source="publicationYear" dest="text_rev"/>
    <copyField source="disease" dest="text_rev"/>
    <copyField source="elementName" dest="text_rev"/>
