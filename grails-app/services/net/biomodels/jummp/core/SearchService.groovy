@@ -169,8 +169,22 @@ class SearchService {
         indexingData.setText(builder.toString())
         System.out.println(builder.toString())
         String jarPath = grailsApplication.config.jummp.search.pathToIndexerExecutable
-        sendMessage("seda:exec", [jarPath: jarPath,
-                jsonPath: indexingData.getCanonicalPath()])
+        def argsMap = [jarPath: jarPath,
+                jsonPath: indexingData.getCanonicalPath()]
+
+        String httpProxy = System.getProperty("http.proxyHost")
+        if (httpProxy) {
+            String proxyPort = System.getProperty("http.proxyPort") ?: '80'
+            String nonProxyHosts = "'${System.getProperty("http.nonProxyHosts")}'"
+            StringBuilder proxySettings = new StringBuilder()
+            proxySettings.append(" -Dhttp.proxyHost=").append(httpProxy).append(
+                " -Dhttp.proxyPort=").append(proxyPort).append(" -Dhttp.nonProxyHosts=").append(
+                    nonProxyHosts)
+            argsMap['proxySettings'] = proxySettings.toString()
+        } else {
+            argsMap['proxySettings'] = ""
+        }
+        sendMessage("seda:exec", argsMap)
     }
 
     /**
