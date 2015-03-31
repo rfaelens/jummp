@@ -194,7 +194,12 @@ class SearchService {
         Promise p = Revision.async.task {
             SecurityContextHolder.context.authentication = authRef.get()
             revisions.each {
-                updateIndex(it)
+                try {
+                    updateIndex(it)
+                }
+                catch(Exception e) {
+                    log.error("Exception thrown while indexing ${it}: "+e+" .. "+e.getMessage())
+                }
             }
         }
         p.onComplete {
