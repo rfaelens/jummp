@@ -139,28 +139,33 @@ giving up. Sorry about that.""", vcsIssues)
         modelFolder.eachFileRecurse {
             boolean modelFileDetected = it.isFile() && symlinkPattern.matcher(it.name).matches()
             if (modelFileDetected) {
-                ++processedCount
-                log("Importing model file ${it.absolutePath}...")
-                boolean conventionFollowed = targetPattern.matcher(it.canonicalPath).matches()
-                if (!conventionFollowed) {
-                    error "${it.absolutePath} should have been a symbolic link!"
+                try {
+                    ++processedCount
+                    log("Importing model file ${it.absolutePath}...")
+                    boolean conventionFollowed = targetPattern.matcher(it.canonicalPath).matches()
+                    if (!conventionFollowed) {
+                        error "${it.absolutePath} should have been a symbolic link!"
+                    }
+                    final String MODEL_NAME = modelFileFormatService.extractName([it], format)
+                    final String DESCRIPTION = modelFileFormatService.extractDescription([it], format)
+                    boolean isValid = modelFileFormatService.validate([it], formatCommand.identifier, [])
+                    model = mtc.newInstance(submitter: userAuthenticationDetails.principal,
+                    submissionDate: new Date(), format: formatCommand)
+                    def modelWrapper = rftc.newInstance(path: it.absolutePath, description: "$MODEL_NAME",
+                    mainFile: true, userSubmitted: true, hidden: false)
+                    def files = [modelWrapper]
+                    def revision = rtc.newInstance(model: model, files: files, format: formatCommand,
+                            validated: isValid, name: MODEL_NAME, description: DESCRIPTION,
+                            comment: "Import of $MODEL_NAME".toString())
+                    def result = modelService.uploadValidatedModel(files, revision)
+                    if (!result) {
+                        failures.add(it.absolutePath)
+                    }
+                    log("...finished importing model file ${it.absolutePath}")
+                } catch (Throwable t) {
+                    error("Something went wrong with ${it.name} - ${t.message}")
+                    t.printStackTrace()
                 }
-                final String MODEL_NAME = modelFileFormatService.extractName([it], format)
-                final String DESCRIPTION = modelFileFormatService.extractDescription([it], format)
-                boolean isValid = modelFileFormatService.validate([it], formatCommand.identifier, [])
-                model = mtc.newInstance(submitter: userAuthenticationDetails.principal,
-                submissionDate: new Date(), format: formatCommand)
-                def modelWrapper = rftc.newInstance(path: it.absolutePath, description: "$MODEL_NAME",
-                mainFile: true, userSubmitted: true, hidden: false)
-                def files = [modelWrapper]
-                def revision = rtc.newInstance(model: model, files: files, format: formatCommand,
-                        validated: isValid, name: MODEL_NAME, description: DESCRIPTION,
-                        comment: "Import of $MODEL_NAME".toString())
-                def result = modelService.uploadValidatedModel(files, revision)
-                if (!result) {
-                    failures.add(it.absolutePath)
-                }
-                log("...finished importing model file ${it.absolutePath}")
             }
         }
     } finally {
@@ -170,6 +175,11 @@ giving up. Sorry about that.""", vcsIssues)
         if (failures) {
             log("Failed to import the following models:\n${failures.join('\n')}")
         }
+        def camelContext = appCtx.camelContext
+        duration = (System.currentTimeMillis() - duration) / 1000
+        camelContext.shutdown()
+        duration = (System.currentTimeMillis() - duration) / 1000
+        log("Waited ${prettify(duration)} for Camel to stop gracefully.")
     }
     return 0
 }
