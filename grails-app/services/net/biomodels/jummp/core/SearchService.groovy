@@ -248,7 +248,7 @@ class SearchService {
         query.setQuery("submissionId:"+model.submissionId);
         query.setFields("uniqueId");
         query.set("defType", "edismax");
-        QueryResponse response = getSolrServer().query(query)
+        QueryResponse response = solrServerHolder.server.query(query)
         SolrDocumentList docs = response.getResults()
         docs.each {
             SolrInputDocument doc = getSolrDocumentWithId(it.get("uniqueId"))
@@ -344,15 +344,8 @@ class SearchService {
     *  ///Helper functions to update solr index
     */
     
-    private SolrServer getSolrServer() {
-        if (!solrServerHolder.server) { //is this necessary?
-            solrServerHolder.init()
-        }
-        return solrServerHolder.server
-    }
-    
     private void updateIndexWithDocument(SolrInputDocument doc) {
-        getSolrServer().add(doc)
+        solrServerHolder.server.add(doc)
     }
     
     private SolrInputDocument getSolrDocumentFromRevision(def revision) {
