@@ -55,6 +55,7 @@ class NotificationService {
 	def mailService
 	def springSecurityService
 	def messageSource
+	def searchService
 
 	Set<User> getUsersFromUsernames(def usernames) {
 		Set<User> users = new HashSet<User>();
@@ -132,6 +133,7 @@ class NotificationService {
     								    body.user,
     								    getNotificationRecipients(body.perms),
     								    rev.model)
+         searchService.makePublic(rev)
 	}
     
     void readAccessGranted(def body) {
@@ -242,6 +244,7 @@ class NotificationService {
     								    body.user,
     								    getNotificationRecipients(body.perms),
     								    model)
+    	searchService.setDeleted(model)
     }
     
     void update(def body) {
