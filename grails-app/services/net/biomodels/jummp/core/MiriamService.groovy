@@ -34,36 +34,64 @@
 
 package net.biomodels.jummp.core
 
+import net.biomodels.jummp.core.miriam.IMiriamService
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.perf4j.aop.Profiled
 
 /**
  * Service for handling MIRIAM resources.
  *
  * This component fetches the export of the Identifiers.org registry and stores it
- * in the exchange directory.
+ * in the working directory.
  * @author Martin Gräßlin <m.graesslin@dkfz.de>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class MiriamService implements IMiriamService {
     /**
+     * Disable automatic transactional behaviour of Grails services.
+     */
+    static transactional = false
+    /**
+     * The class logger.
+     */
+    static final Log log = LogFactory.getLog(this.getClass())
+    /**
+     * Flag for logger verbosity.
+     */
+    static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
+    /**
+     * The URL for obtaining the export from the identifiers.org registry.
+     */
+    final String DEFAULT_EXPORT_URL = "http://www.ebi.ac.uk/miriam/main/export/xml/"
+    /**
      * The name of the file containing the export of the identifiers.org registry.
      */
-    final String EXPORT_FILE_NAME = "miriam.xml'
+    final String EXPORT_FILE_NAME = "miriam.xml"
     /**
-     * Dependency injection of Grails Application
+     * Dependency injection of Grails Application.
      */
     @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
-    static transactional = false
-
     @Profiled(tag="MiriamService.updateMiriamResources")
-    public void updateMiriamResources(String url) {
-        String exchangeFolderPath = grailsApplication.config.jummp.vcs.exchangeDirectory
-        File export = new File(exchangeFolderPath, EXPORT_FILE_NAME)
+    public void updateMiriamResources(String url = DEFAULT_EXPORT_URL) {
+        if (IS_INFO_ENABLED) {
+            log.info "Started updating the identifiers.org registry export."
+        }
+        String folderPath = grailsApplication.config.jummp.vcs.workingDirectory
+        File export = new File(folderPath, EXPORT_FILE_NAME)
         def out = new BufferedOutputStream(new FileOutputStream(export))
         // default left shift only works for text streams
-        out << new URL(url).openStream()
-        out.close()
+        try {
+            out << new URL(url).openStream()
+        } catch (IOException e) {
+            log.error("Cannot update identifiers.org registry: ${e.message}", e)
+        } finally {
+            out?.close()
+        }
+        if (IS_INFO_ENABLED) {
+            log.info "Finished updating the identifiers.org registry export."
+        }
     }
 }
