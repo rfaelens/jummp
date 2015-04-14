@@ -35,6 +35,7 @@
 package net.biomodels.jummp.core
 
 import net.biomodels.jummp.core.miriam.IMiriamService
+import org.springframework.beans.factory.InitializingBean
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.perf4j.aop.Profiled
@@ -47,7 +48,7 @@ import org.perf4j.aop.Profiled
  * @author Martin Gräßlin <m.graesslin@dkfz.de>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-class MiriamService implements IMiriamService {
+class MiriamService implements IMiriamService, InitializingBean {
     /**
      * Disable automatic transactional behaviour of Grails services.
      */
@@ -69,19 +70,29 @@ class MiriamService implements IMiriamService {
      */
     final String EXPORT_FILE_NAME = "miriam.xml"
     /**
+     * The file containing the export of the identifiers.org registry.
+     */
+    File registryExport
+    /**
      * Dependency injection of Grails Application.
      */
     @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
+
+    /**
+     * Initialisation for the registry export instance variable.
+     */
+    void afterPropertiesSet() {
+        String folderPath = grailsApplication.config.jummp.vcs.workingDirectory
+        registryExport = new File(folderPath, EXPORT_FILE_NAME)
+    }
 
     @Profiled(tag="MiriamService.updateMiriamResources")
     public void updateMiriamResources(String url = DEFAULT_EXPORT_URL) {
         if (IS_INFO_ENABLED) {
             log.info "Started updating the identifiers.org registry export."
         }
-        String folderPath = grailsApplication.config.jummp.vcs.workingDirectory
-        File export = new File(folderPath, EXPORT_FILE_NAME)
-        def out = new BufferedOutputStream(new FileOutputStream(export))
+        def out = new BufferedOutputStream(new FileOutputStream(registryExport))
         // default left shift only works for text streams
         try {
             out << new URL(url).openStream()
