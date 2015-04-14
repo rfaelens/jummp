@@ -53,37 +53,6 @@ beans = {
     }
     postLogging(net.biomodels.jummp.core.events.PostLoggingAdvice)
 
-    fetchAnnotations(net.biomodels.jummp.core.miriam.FetchAnnotationsThread) { bean ->
-        bean.autowire = "byName"
-        bean.factoryMethod = "getInstance"
-        bean.scope = "prototype"
-    }
-
-    resolveMiriamIdentifier(net.biomodels.jummp.core.miriam.ResolveMiriamIdentifierThread) { bean ->
-        bean.autowire = "byName"
-        bean.factoryMethod = "getInstance"
-        bean.scope = "prototype"
-    }
-
-    uniProtResolver(net.biomodels.jummp.core.miriam.UniProtResolver) { bean ->
-        bean.scope = "prototype"
-        dataTypeIdentifier = "MIR:00000005"
-        resourceIdentifier = "MIR:00100134"
-    }
-
-    taxonomyResolver(net.biomodels.jummp.core.miriam.TaxonomyResolver) { bean ->
-        bean.scope = "prototype"
-        dataTypeIdentifier = "MIR:00000006"
-        resourceIdentifier = "MIR:00100019"
-    }
-
-    geneOntologyResolver(net.biomodels.jummp.core.miriam.GeneOntologyResolver) { bean ->
-        bean.autowire = "byName"
-        bean.scope = "prototype"
-        dataTypeIdentifier = "MIR:00000022"
-        resourceIdentifier = "MIR:00100012"
-    }
-
     indexingEventListener(net.biomodels.jummp.search.UpdatedRepositoryListener) { bean ->
         bean.autowire = "byName"
         bean.singleton = true
@@ -99,17 +68,6 @@ beans = {
     modelFileFormatConfig(net.biomodels.jummp.core.ModelFileFormatConfig) { bean ->
         bean.autowire = "byName"
         bean.singleton = true
-    }
-    ontologyLookupServiceResolver(net.biomodels.jummp.core.miriam.OntologyLookupResolver) { bean ->
-        bean.scope = "prototype"
-        supportedIdentifiers = [
-                "MIR:00000056": "MIR:00100084",
-                "MIR:00000067": "MIR:00100097",
-                "MIR:00100097": "MIR:00100143",
-                "MIR:00000111": "MIR:00100144",
-                "MIR:00000112": "MIR:00100145",
-                "MIR:00000002": "MIR:00100158"
-        ]
     }
 
     if (Environment.getCurrent() == Environment.DEVELOPMENT) {

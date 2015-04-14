@@ -1173,4 +1173,6 @@ databaseChangeLog = {
 	include file: 'trackNotificationSeenByUser.groovy'
 
 	include file: 'removeFromFieldFromNotification.groovy'
+
+    include file: '20150409dropMiriamAnnotationTables.groovy'
 }

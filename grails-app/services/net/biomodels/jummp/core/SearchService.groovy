@@ -214,7 +214,7 @@ class SearchService {
                     updateIndex(it)
                 }
                 catch(Exception e) {
-                    log.error("Exception thrown while indexing ${it}: "+e+" .. "+e.getMessage())
+                    log.error("Exception thrown while indexing ${it} ${e.getMessage()}", e)
                 }
             }
         }
