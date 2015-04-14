@@ -95,8 +95,13 @@ class SearchService {
     * Dependency injection of the configuration service
     */
     def configurationService
+    /**
+     * Dependency injection of miriamService.
+     */
+    def miriamService
 
     def aclUtilService
+
     /**
      * Clears the index. Handle with care.
      */
@@ -134,6 +139,7 @@ class SearchService {
         int versionNumber = revision.revisionNumber
         final String uniqueId = "${submissionId}.${versionNumber}"
         String exchangeFolder = new File(revision.files.first().path).getParent()
+        String registryExport = miriamService.registryExport.canonicalPath
         def builder = new JsonBuilder()
         def partialData=[
                 'submissionId':submissionId,
@@ -164,7 +170,8 @@ class SearchService {
             'mainFiles': fetchFilesFromRevision(revision, true),
             'allFiles': fetchFilesFromRevision(revision, false),
             'solrServer': solrServerHolder.SOLR_CORE_URL,
-            'jummpPropFile': configurationService.getConfigFilePath())
+            'jummpPropFile': configurationService.getConfigFilePath(),
+            'miriamExportFile': registryExport)
         File indexingData = new File(exchangeFolder, "indexData.json")
         indexingData.setText(builder.toString())
         System.out.println(builder.toString())
