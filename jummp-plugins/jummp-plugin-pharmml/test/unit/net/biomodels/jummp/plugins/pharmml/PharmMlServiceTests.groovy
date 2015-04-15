@@ -60,6 +60,8 @@ class PharmMlServiceTests {
         baseFolder = new File("test/files/0.3.1/")
         baseFolder.eachFileMatch ~/example.*\.xml/, { File f -> bigModel << f }
         assertTrue service.areFilesThisFormat(bigModel)
+        bigModel = ["test/files/0.6/timeToEvent_weibullHazard.xml"]
+        assertTrue service.areFilesThisFormat(bigModel)
     }
 
     @Test

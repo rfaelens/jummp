@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PharmML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.pharmml.org/pharmml/0.6/PharmML"
+    xsi:schemaLocation="http://www.pharmml.org/pharmml/0.6/PharmML http://www.pharmml.org/pharmml/0.6/PharmML"
+    xmlns:math="http://www.pharmml.org/pharmml/0.6/Maths"
+    xmlns:ct="http://www.pharmml.org/pharmml/0.6/CommonTypes"
+    xmlns:mdef="http://www.pharmml.org/pharmml/0.6/ModelDefinition"
+    xmlns:ds="http://www.pharmml.org/pharmml/0.6/Dataset"
+    xmlns:mstep="http://www.pharmml.org/pharmml/0.6/ModellingSteps"
+    xmlns:un="http://www.uncertml.org/3.0"
+    implementedBy="MJS" writtenVersion="0.6" id="i1">
+    
+    <ct:Name>TTE - Weibull hazard</ct:Name>
+    
+    <ct:Description>Time-to-event model with Weibull hazard function</ct:Description>
+    
+    <IndependentVariable symbId="t"/>
+    
+    <!-- MODEL -->
+    <ModelDefinition xmlns="http://www.pharmml.org/pharmml/0.6/ModelDefinition">
+        
+        <ParameterModel blkId="pm1">
+            <SimpleParameter symbId="beta"/>
+            <SimpleParameter symbId="lambda"/>
+        </ParameterModel>
+        
+        
+        <!-- OBSERVATIONS -->
+        <ObservationModel blkId="om1">
+            <Discrete>
+                <TimeToEventData>
+                    <EventVariable symbId="y"/>
+                    
+                    <!-- h(t) = beta/lambda * t^(beta-1)/lambda -->
+                    <HazardFunction symbId="h">
+                        <ct:Assign>
+                            <math:Equation>
+                                <math:Binop op="times">
+                                    <math:Binop op="divide">
+                                        <ct:SymbRef blkIdRef="pm1" symbIdRef="beta"/>
+                                        <ct:SymbRef blkIdRef="pm1" symbIdRef="lambda"/>
+                                    </math:Binop>
+                                    <math:Binop op="divide">
+                                        <math:Binop op="power">
+                                            <ct:SymbRef symbIdRef="t"/>
+                                            <math:Binop op="minus">
+                                                <ct:SymbRef blkIdRef="pm1" symbIdRef="beta"/>
+                                                <ct:Real>1</ct:Real>
+                                            </math:Binop>
+                                        </math:Binop>
+                                        <ct:SymbRef blkIdRef="pm1" symbIdRef="lambda"/>
+                                    </math:Binop>
+                                </math:Binop>
+                            </math:Equation>
+                        </ct:Assign>   
+                    </HazardFunction>
+                </TimeToEventData>
+            </Discrete>
+        </ObservationModel>
+    </ModelDefinition>
+
+    <ModellingSteps xmlns="http://www.pharmml.org/pharmml/0.6/ModellingSteps">
+        
+        <ExternalDataSet toolName="NONMEM" oid="NMoid">
+            
+            <ColumnMapping>
+                <ds:ColumnRef columnIdRef="TIME"/>
+                <ct:SymbRef symbIdRef="t"/>
+            </ColumnMapping>
+            
+            <ColumnMapping>
+                <ds:ColumnRef columnIdRef="Y"/>
+                <ct:SymbRef blkIdRef="om1" symbIdRef="y"/>
+            </ColumnMapping>
+            
+            <ds:DataSet>
+                <ds:Definition>
+                    <ds:Column columnId="ID" columnType="id" valueType="string" columnNum="1"/>
+                    <ds:Column columnId="TIME" columnType="time" valueType="real" columnNum="2"/>
+                    <ds:Column columnId="Y" columnType="dv" valueType="int" columnNum="3"/>
+                </ds:Definition>
+                <ds:ExternalFile oid="dataOid">
+                    <ds:path>example.csv</ds:path>
+                    <ds:format>CSV</ds:format>
+                    <ds:delimiter>COMMA</ds:delimiter>
+                </ds:ExternalFile>
+            </ds:DataSet>
+        </ExternalDataSet>
+        
+        <mstep:SimulationStep oid="simStep1">
+            <mstep:ExternalDataSetReference>
+                <ct:OidRef oidRef="NMoid"/>
+            </mstep:ExternalDataSetReference>
+        </mstep:SimulationStep>
+        
+        <mstep:StepDependencies>
+            <mstep:Step>
+                <ct:OidRef oidRef="simStep1"/>
+            </mstep:Step>
+        </mstep:StepDependencies>
+    </ModellingSteps>
+
+</PharmML>
