@@ -46,7 +46,7 @@ import eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType
 import eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock
 import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType
@@ -160,9 +160,9 @@ interface IPharmMlRenderer {
     String renderPopulation(PopulationType population, RevisionTransportCommand rev, String downloadLink)
 
     /**
-     * @param steps an instance of {@link eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType}
+     * @param steps an instance of {@link eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps}
      */
-    String renderModellingSteps(ModellingStepsType steps)
+    String renderModellingSteps(ModellingSteps steps)
 
     /**
      * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType}s.

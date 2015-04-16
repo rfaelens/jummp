@@ -37,7 +37,7 @@ package net.biomodels.jummp.plugins.pharmml
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 
 /**
@@ -74,7 +74,7 @@ class PharmMlController {
             model["population"] = pharmMlService.getPopulation(design, VERSION)
             model["dosing"] = pharmMlService.getIndividualDosing(design, VERSION)
 
-            ModellingStepsType steps = pharmMlService.getModellingSteps(dom, VERSION)
+            ModellingSteps steps = pharmMlService.getModellingSteps(dom, VERSION)
             model["estSteps"] = pharmMlService.getEstimationSteps(steps, VERSION)
             model["simSteps"] = pharmMlService.getSimulationSteps(steps, VERSION)
             model["stepDeps"] = pharmMlService.getStepDependencies(steps, VERSION)

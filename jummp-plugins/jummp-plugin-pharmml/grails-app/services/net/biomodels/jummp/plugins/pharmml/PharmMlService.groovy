@@ -39,7 +39,7 @@ import eu.ddmore.libpharmml.IValidationError
 import eu.ddmore.libpharmml.IValidationReport
 import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
@@ -357,31 +357,31 @@ class PharmMlService implements FileFormatService {
     }
 
     @Profiled(tag="pharmMlService.getModellingSteps")
-    ModellingStepsType getModellingSteps(PharmML dom, final String VERSION) {
+    ModellingSteps getModellingSteps(PharmML dom, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getModellingSteps(dom)
     }
 
     @Profiled(tag="pharmMlService.getCommonModellingSteps")
-    List getCommonModellingSteps(ModellingStepsType steps, final String VERSION) {
+    List getCommonModellingSteps(ModellingSteps steps, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getCommonModellingSteps(steps)
     }
 
     @Profiled(tag="pharmMlService.getSimulationSteps")
-    List getSimulationSteps(ModellingStepsType steps, final String VERSION) {
+    List getSimulationSteps(ModellingSteps steps, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getSimulationSteps(steps)
     }
 
     @Profiled(tag="pharmMlService.getEstimationSteps")
-    List getEstimationSteps(ModellingStepsType steps, final String VERSION) {
+    List getEstimationSteps(ModellingSteps steps, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getEstimationSteps(steps)
     }
 
     @Profiled(tag="pharmMlService.getStepDependencies")
-    StepDependencyType getStepDependencies(ModellingStepsType steps, final String VERSION) {
+    StepDependencyType getStepDependencies(ModellingSteps steps, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getStepDependencies(steps)
     }

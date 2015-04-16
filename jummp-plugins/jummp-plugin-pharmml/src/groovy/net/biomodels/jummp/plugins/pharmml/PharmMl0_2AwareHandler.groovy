@@ -35,7 +35,7 @@ import eu.ddmore.libpharmml.*
 import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
@@ -138,29 +138,29 @@ class PharmMl0_2AwareHandler extends AbstractPharmMlHandler {
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getModellingSteps")
-    ModellingStepsType getModellingSteps(PharmML dom) {
+    ModellingSteps getModellingSteps(PharmML dom) {
         return dom?.modellingSteps
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getCommonModellingSteps")
-    List getCommonModellingSteps(ModellingStepsType steps) {
+    List getCommonModellingSteps(ModellingSteps steps) {
         return steps?.commonModellingStep?.value ?: []
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getSimulationSteps")
-    List getSimulationSteps(ModellingStepsType steps) {
+    List getSimulationSteps(ModellingSteps steps) {
         def allSteps = getCommonModellingSteps(steps)
         return allSteps ? allSteps.findAll {it instanceof SimulationStepType} : []
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getEstimationSteps")
-    List getEstimationSteps(ModellingStepsType steps) {
+    List getEstimationSteps(ModellingSteps steps) {
         def allSteps = getCommonModellingSteps(steps)
         return allSteps ? allSteps.findAll {it instanceof EstimationStepType} : []
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getStepDependencies")
-    StepDependencyType getStepDependencies(ModellingStepsType steps) {
+    StepDependencyType getStepDependencies(ModellingSteps steps) {
         return steps?.stepDependencies
     }
 }

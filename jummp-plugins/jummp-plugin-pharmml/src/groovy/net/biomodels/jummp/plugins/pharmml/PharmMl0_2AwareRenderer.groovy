@@ -77,7 +77,7 @@ import eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock
 import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
@@ -746,10 +746,10 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param steps an instance of {@link eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType}
+     * @param steps an instance of {@link eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps}
      */
     @Profiled(tag = "pharmMl0_2AwareRenderer.renderModellingSteps")
-    String renderModellingSteps(ModellingStepsType steps) {}
+    String renderModellingSteps(ModellingSteps steps) {}
 
     /**
      * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType}s.

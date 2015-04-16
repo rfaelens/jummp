@@ -60,7 +60,7 @@ class PharmMlServiceTests {
         baseFolder = new File("test/files/0.3.1/")
         baseFolder.eachFileMatch ~/example.*\.xml/, { File f -> bigModel << f }
         assertTrue service.areFilesThisFormat(bigModel)
-        bigModel = ["test/files/0.6/timeToEvent_weibullHazard.xml"]
+        bigModel = [new File("test/files/0.6/timeToEvent_weibullHazard.xml")]
         assertTrue service.areFilesThisFormat(bigModel)
     }
 
@@ -143,11 +143,11 @@ based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemo
 
     @Test
     void onlyPharmMLsCanBeValidated() {
-        assertFalse service.validate(null)
+        assertFalse service.validate(null, [])
         def model = []
-        assertFalse service.validate(model)
+        assertFalse service.validate(model, [])
         model = [new File("../../test/files/BIOMD0000000272.xml")]
-        assertFalse service.validate(model)
+        assertFalse service.validate(model, [])
 
         model = [ "test/files/0.2.1/example1.xml",
             "test/files/0.2.1/example2.xml",
@@ -155,14 +155,14 @@ based on A Tumor Growth Inhibition Model for Low-Grade Glioma Treated with Chemo
             "test/files/0.2.1/example5.xml",
         ]
         model.each { pharmML ->
-            assertTrue service.validate([new File(pharmML)])
+            assertTrue service.validate([new File(pharmML)], [])
         }
 
         model = []
         def baseFolder = new File("test/files/0.3.1/")
         baseFolder.eachFileMatch ~/example.*\.xml/, { File f -> model << f }
         model.each { pharmML ->
-            assertTrue service.validate([pharmML])
+            assertTrue service.validate([pharmML], [])
         }
     }
 
