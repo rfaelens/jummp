@@ -31,15 +31,10 @@
 
 package net.biomodels.jummp.plugins.pharmml
 
-import eu.ddmore.libpharmml.dom.trialdesign.ArmDefnType
-import eu.ddmore.libpharmml.dom.trialdesign.CellDefnType
-import eu.ddmore.libpharmml.dom.trialdesign.EpochDefnType
 import eu.ddmore.libpharmml.dom.trialdesign.ObservationsType
-import eu.ddmore.libpharmml.dom.trialdesign.SegmentDefnType
 import eu.ddmore.libpharmml.dom.trialdesign.StudyEventType
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-
 /**
  * Domain-specific language helper for representing ObservationsEvents in PharmML.
  * @see eu.ddmore.libpharmml.dom.trialdesign.StudyEventType
