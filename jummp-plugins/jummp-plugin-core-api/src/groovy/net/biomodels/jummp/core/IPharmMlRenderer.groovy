@@ -38,7 +38,7 @@ import eu.ddmore.libpharmml.dom.commontypes.CommonVariableDefinitionType
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType
-import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType
 import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
@@ -76,9 +76,9 @@ interface IPharmMlRenderer {
     String renderFunctionDefinitions(List functionDefinitions)
 
     /**
-     * @param modelDefinition an instance of {@link eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType}
+     * @param modelDefinition an instance of {@link eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition}
      */
-    String renderModelDefinition(ModelDefinitionType modelDefinition)
+    String renderModelDefinition(ModelDefinition modelDefinition)
 
     /**
      * @param covariates a list of

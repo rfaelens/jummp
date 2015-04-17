@@ -52,7 +52,7 @@ import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
 import eu.ddmore.libpharmml.dom.dataset.DataSetType
-import eu.ddmore.libpharmml.dom.maths.BinopType
+import eu.ddmore.libpharmml.dom.maths.Binop
 import eu.ddmore.libpharmml.dom.maths.ConstantType
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
@@ -69,7 +69,7 @@ import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
 import eu.ddmore.libpharmml.dom.modeldefn.LhsTransformationType
-import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType
 import eu.ddmore.libpharmml.dom.modeldefn.PairwiseType
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType
@@ -188,10 +188,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param modelDefinition an instance of {@link eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType}
+     * @param modelDefinition an instance of {@link eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition}
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderModelDefinition")
-    String renderModelDefinition(ModelDefinitionType modelDefinition) {}
+    String renderModelDefinition(ModelDefinition modelDefinition) {}
 
     /**
      * @param covModel a list of
@@ -966,12 +966,12 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
         } else if (errModelAssign.symbRef) {
             errModel = wrapJaxb(errModelAssign.symbRef)
         }
-        def em_re = new BinopType()
+        def em_re = new Binop()
         em_re.op = "times"
         em_re.content.add(errModel)
         em_re.content.add(wrapJaxb(residualErrorSymb))
         errModelTimesResidualErr = wrapJaxb(em_re)
-        def sum = new BinopType()
+        def sum = new Binop()
         sum.op = "plus"
         sum.content.add(prediction)
         sum.content.add(errModelTimesResidualErr)
@@ -1151,7 +1151,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
             final def ELEM = wrapJaxb(extractAttributeFromEquation(TRANSF_EQ))
             final Class ELEM_CLASS = ELEM.value.getClass()
             switch(ELEM_CLASS) {
-                case BinopType:
+                case Binop:
                     break
                 case UniopType:
                     break
@@ -1192,7 +1192,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                 replacement = new UniopType()
                 replacement.op = uniop.op
                 switch(ELEM_CLASS) {
-                    case BinopType:
+                    case Binop:
                         replacement.binop = ELEM
                         break
                     case UniopType:
@@ -1246,7 +1246,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
         def eqTerms = extractAttributeFromEquation(equation)
         JAXBElement expandedTerms
         switch(eqTerms) {
-            case BinopType:
+            case Binop:
                 expandedTerms = expandNestedBinop(wrapJaxb(eqTerms), transfMap)
                 break
             case UniopType:
@@ -1267,7 +1267,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                 case UniopType:
                     newEquation.uniop = unwrappedExpandedTerms
                     break
-                case BinopType:
+                case Binop:
                     newEquation.binop = unwrappedExpandedTerms
                     break
                 case FunctionCallType:

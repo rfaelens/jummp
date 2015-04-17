@@ -33,7 +33,7 @@ package net.biomodels.jummp.plugins.pharmml
 
 import eu.ddmore.libpharmml.*
 import eu.ddmore.libpharmml.dom.PharmML
-import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
@@ -88,32 +88,32 @@ class PharmMl0_3AwareHandler extends AbstractPharmMlHandler {
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getModelDefinition")
-    ModelDefinitionType getModelDefinition(PharmML dom) {
+    ModelDefinition getModelDefinition(PharmML dom) {
         return dom.getModelDefinition()
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getCovariateModel")
-    List getCovariateModel(ModelDefinitionType definition) {
+    List getCovariateModel(ModelDefinition definition) {
         return definition?.getCovariateModel()
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getVariabilityLevel")
-    List getVariabilityModel(ModelDefinitionType definition) {
+    List getVariabilityModel(ModelDefinition definition) {
         return definition?.getVariabilityModel()
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getParameterModel")
-    List getParameterModel(ModelDefinitionType definition) {
+    List getParameterModel(ModelDefinition definition) {
         return definition?.getParameterModel()
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getStructuralModel")
-    List getStructuralModel(ModelDefinitionType definition) {
+    List getStructuralModel(ModelDefinition definition) {
         return definition?.getStructuralModel()
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getObservationModel")
-    List getObservationModel(ModelDefinitionType definition) {
+    List getObservationModel(ModelDefinition definition) {
         return definition?.getObservationModel()
     }
 

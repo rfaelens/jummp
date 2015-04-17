@@ -51,7 +51,7 @@ import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
 import eu.ddmore.libpharmml.dom.dataset.DataSetType
-import eu.ddmore.libpharmml.dom.maths.BinopType
+import eu.ddmore.libpharmml.dom.maths.Binop
 import eu.ddmore.libpharmml.dom.maths.ConstantType
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
@@ -67,7 +67,7 @@ import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
 import eu.ddmore.libpharmml.dom.modeldefn.LhsTransformationType
-import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariableType
@@ -185,10 +185,10 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param modelDefinition an instance of {@link eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType}
+     * @param modelDefinition an instance of {@link eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition}
      */
     @Profiled(tag = "pharmMl0_2AwareRenderer.renderModelDefinition")
-    String renderModelDefinition(ModelDefinitionType modelDefinition) {}
+    String renderModelDefinition(ModelDefinition modelDefinition) {}
 
     /**
      * @param covModel a list of

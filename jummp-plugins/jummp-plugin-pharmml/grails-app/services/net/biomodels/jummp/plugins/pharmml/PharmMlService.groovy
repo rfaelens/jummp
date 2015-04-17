@@ -38,7 +38,7 @@ import eu.ddmore.libpharmml.IPharmMLResource
 import eu.ddmore.libpharmml.IValidationError
 import eu.ddmore.libpharmml.IValidationReport
 import eu.ddmore.libpharmml.dom.PharmML
-import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
@@ -297,37 +297,37 @@ class PharmMlService implements FileFormatService {
     }
 
     @Profiled(tag="pharmMlService.getModelDefinition")
-    ModelDefinitionType getModelDefinition(PharmML dom, final String VERSION) {
+    ModelDefinition getModelDefinition(PharmML dom, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getModelDefinition(dom)
     }
 
     @Profiled(tag="pharmMlService.getCovariateModel")
-    List getCovariateModel(ModelDefinitionType modelDefinition, final String VERSION) {
+    List getCovariateModel(ModelDefinition modelDefinition, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getCovariateModel(modelDefinition)
     }
 
     @Profiled(tag="pharmMlService.getVariabilityLevel")
-    List getVariabilityModel(ModelDefinitionType modelDefinition, final String VERSION) {
+    List getVariabilityModel(ModelDefinition modelDefinition, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getVariabilityModel(modelDefinition)
     }
 
     @Profiled(tag="pharmMlService.getParameterModel")
-    List getParameterModel(ModelDefinitionType modelDefinition, final String VERSION) {
+    List getParameterModel(ModelDefinition modelDefinition, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getParameterModel(modelDefinition)
     }
 
     @Profiled(tag="pharmMlService.getStructuralModel")
-    List getStructuralModel(ModelDefinitionType modelDefinition, final String VERSION) {
+    List getStructuralModel(ModelDefinition modelDefinition, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getStructuralModel(modelDefinition)
     }
 
     @Profiled(tag="pharmMlService.getObservationModel")
-    List getObservationModel(ModelDefinitionType modelDefinition, final String VERSION) {
+    List getObservationModel(ModelDefinition modelDefinition, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getObservationModel(modelDefinition)
     }

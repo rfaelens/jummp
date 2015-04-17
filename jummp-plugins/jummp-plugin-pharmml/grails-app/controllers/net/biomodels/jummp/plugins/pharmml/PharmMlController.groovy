@@ -36,7 +36,7 @@ package net.biomodels.jummp.plugins.pharmml
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.PharmML
-import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 
@@ -60,7 +60,7 @@ class PharmMlController {
             model["functionDefs"] = pharmMlService.getFunctionDefinitions(dom, VERSION)
             model["version"] = VERSION
 
-            ModelDefinitionType modelDefinition = pharmMlService.getModelDefinition(dom, VERSION)
+            ModelDefinition modelDefinition = pharmMlService.getModelDefinition(dom, VERSION)
             model["modelDefinition"] = modelDefinition
             model["structuralModel"] = pharmMlService.getStructuralModel(modelDefinition, VERSION)
             model["variabilityModel"] = pharmMlService.getVariabilityModel(modelDefinition, VERSION)

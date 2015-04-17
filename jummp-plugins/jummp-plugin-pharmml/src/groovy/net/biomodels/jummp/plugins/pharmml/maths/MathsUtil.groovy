@@ -37,7 +37,7 @@ package net.biomodels.jummp.plugins.pharmml.maths
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.Equation
 import javax.xml.bind.JAXBElement
-import eu.ddmore.libpharmml.dom.maths.BinopType
+import eu.ddmore.libpharmml.dom.maths.Binop
 import eu.ddmore.libpharmml.dom.maths.ConstantType
 import eu.ddmore.libpharmml.dom.maths.UniopType
 import eu.ddmore.libpharmml.dom.maths.LogicUniOpType
@@ -109,7 +109,7 @@ class MathsUtil {
                 addIfExists(jaxObject.piecewise, subTree)
             }
         }
-		else if (jaxObject instanceof BinopType || jaxObject instanceof LogicBinOpType) {
+		else if (jaxObject instanceof Binop || jaxObject instanceof LogicBinOpType) {
 			jaxObject.getContent().each {
 				subTree.add(it.getValue())
 			}
@@ -214,7 +214,7 @@ class MathsUtil {
     }
 
 	private static MathsSymbol getSymbol(def jaxObject) {
-		if (jaxObject instanceof BinopType || jaxObject instanceof LogicBinOpType) {
+		if (jaxObject instanceof Binop || jaxObject instanceof LogicBinOpType) {
 			if (jaxObject.getOp() == "divide") {
 				return OperatorSymbol.DivideSymbol()
 			}

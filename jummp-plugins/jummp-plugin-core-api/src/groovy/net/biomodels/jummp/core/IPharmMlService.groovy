@@ -35,7 +35,7 @@
 package net.biomodels.jummp.core
 
 import eu.ddmore.libpharmml.dom.PharmML
-import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
@@ -65,32 +65,32 @@ interface IPharmMlService {
     /**
      * @param dom an instance of eu.ddmore.libpharmml.dom.PharmML
      */
-    ModelDefinitionType getModelDefinition(PharmML dom)
+    ModelDefinition getModelDefinition(PharmML dom)
 
     /**
-     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
      */
-    List getCovariateModel(ModelDefinitionType definition)
+    List getCovariateModel(ModelDefinition definition)
 
     /**
-     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
      */
-    List getVariabilityModel(ModelDefinitionType definition)
+    List getVariabilityModel(ModelDefinition definition)
 
     /**
-     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
      */
-    List getParameterModel(ModelDefinitionType definition)
+    List getParameterModel(ModelDefinition definition)
 
     /**
-     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
      */
-    List getStructuralModel(ModelDefinitionType definition)
+    List getStructuralModel(ModelDefinition definition)
 
     /**
-     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
+     * @param definition an instance of eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
      */
-    List getObservationModel(ModelDefinitionType definition)
+    List getObservationModel(ModelDefinition definition)
 
     /**
      * @return eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType

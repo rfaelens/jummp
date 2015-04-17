@@ -48,7 +48,7 @@ import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
 import eu.ddmore.libpharmml.dom.dataset.DataSetType
-import eu.ddmore.libpharmml.dom.maths.BinopType
+import eu.ddmore.libpharmml.dom.maths.Binop
 import eu.ddmore.libpharmml.dom.maths.ConstantType
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
@@ -355,12 +355,12 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         } else if (errModelAssign.symbRef) {
             errModel = wrapJaxb(errModelAssign.symbRef)
         }
-        def em_re = new BinopType()
+        def em_re = new Binop()
         em_re.op = "times"
         em_re.content.add(errModel)
         em_re.content.add(wrapJaxb(residualErrorSymb))
         errModelTimesResidualErr = wrapJaxb(em_re)
-        def sum = new BinopType()
+        def sum = new Binop()
         sum.op = "plus"
         sum.content.add(prediction)
         sum.content.add(errModelTimesResidualErr)
@@ -972,7 +972,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first()
             final Class ELEM_CLASS = FIRST_ELEM.value.getClass()
             switch(ELEM_CLASS) {
-                case BinopType:
+                case Binop:
                     break
                 case UniopType:
                     break
@@ -1012,7 +1012,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 replacement = new UniopType()
                 replacement.op = uniop.op
                 switch(ELEM_CLASS) {
-                    case BinopType:
+                    case Binop:
                         replacement.binop = FIRST_ELEM
                         break
                     case UniopType:
@@ -1061,16 +1061,16 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return jaxbUniop
     }
 
-    protected JAXBElement expandNestedBinop(JAXBElement<BinopType> jaxbBinop,
+    protected JAXBElement expandNestedBinop(JAXBElement<Binop> jaxbBinop,
             Map<String, Equation> transfMap) {
-        BinopType binop = jaxbBinop.value
+        Binop binop = jaxbBinop.value
         List<JAXBElement> terms = binop.content
         def expandedTerms = terms.collect { c ->
             switch (c.value) {
                 case SymbolRefType:
                     return expandNestedSymbRefs(c, transfMap)
                     break
-                case BinopType:
+                case Binop:
                     return expandNestedBinop(c, transfMap)
                     break
                 case UniopType:
@@ -1084,7 +1084,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         if (expandedTerms.equals(terms)) {
             return jaxbBinop
         }
-        BinopType expanded = new BinopType()
+        Binop expanded = new BinopType()
         expanded.op = binop.op
         expanded.content = expandedTerms
         return wrapJaxb(expanded)
@@ -1094,7 +1094,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         List<JAXBElement> eqTerms = equation.scalarOrSymbRefOrBinop
         List<JAXBElement> expandedTerms = eqTerms.collect {
             switch(it.value) {
-                case BinopType:
+                case Binop:
                     return expandNestedBinop(it, transfMap)
                     break
                 case UniopType:
@@ -1271,7 +1271,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             // just return the element
             return wrapJaxb(elements.first())
         } else {
-            def result = new BinopType()
+            def result = new Binop()
             result.op = operator
             final int LAST = elements.size() - 1
             result.content = []
