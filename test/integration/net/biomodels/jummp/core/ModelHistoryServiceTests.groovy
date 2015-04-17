@@ -214,13 +214,14 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
         File root = new File("target/vcs/git/hhh")
         root.mkdirs()
         String containerPath = root.absolutePath
+        modelService.fileSystemService.root = root.parentFile
         File exchangeDir = new File("target/vcs/exchange")
         exchangeDir.mkdirs()
         assertTrue exchangeDir.exists()
         grailsApplication.config.jummp.vcs.workingDirectory = root.parent
         grailsApplication.config.jummp.vcs.exchangeDirectory = exchangeDir.path
         modelService.fileSystemService.currentModelContainer = containerPath
-        modelService.vcsService.currentModelContainer = containerPath
+        modelService.vcsService.modelContainerRoot = root.parentFile
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
