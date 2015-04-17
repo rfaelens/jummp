@@ -31,7 +31,6 @@
 
 package net.biomodels.jummp.plugins.pharmml
 
-import eu.ddmore.libpharmml.*
 import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
@@ -41,8 +40,6 @@ import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
-import eu.ddmore.libpharmml.impl.*
-import net.biomodels.jummp.core.IPharmMlService
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.perf4j.aop.Profiled
@@ -84,7 +81,7 @@ class PharmMl0_2AwareHandler extends AbstractPharmMlHandler {
 
     @Profiled(tag="pharmMl0_2AwareHandler.getFunctionDefinitions")
     List getFunctionDefinitions(PharmML dom) {
-        return dom?.functionDefinition
+        return dom?.getListOfFunctionDefinition()
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getModelDefinition")
@@ -94,27 +91,27 @@ class PharmMl0_2AwareHandler extends AbstractPharmMlHandler {
 
     @Profiled(tag="pharmMl0_2AwareHandler.getCovariateModel")
     List getCovariateModel(ModelDefinition definition) {
-        return definition?.getCovariateModel()
+        return definition?.getListOfCovariateModel()
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getVariabilityLevel")
     List getVariabilityModel(ModelDefinition definition) {
-        return definition?.getVariabilityModel()
+        return definition?.getListOfVariabilityModel()
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getParameterModel")
     List getParameterModel(ModelDefinition definition) {
-        return definition?.getParameterModel()
+        return definition?.getListOfParameterModel()
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getStructuralModel")
     List getStructuralModel(ModelDefinition definition) {
-        return definition?.getStructuralModel()
+        return definition?.getListOfStructuralModel()
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getObservationModel")
     List getObservationModel(ModelDefinition definition) {
-        return definition?.getObservationModel()
+        return definition?.getListOfObservationModel()
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getTrialDesign")

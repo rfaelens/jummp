@@ -54,7 +54,6 @@ import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
 import eu.ddmore.libpharmml.dom.maths.UniopType
-import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
@@ -555,7 +554,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return new StringBuilder().append(convertToMathML(prop.name, prop.assign))
     }
 
-    protected StringBuilder dataSet(DataSetType dataSet, Map variableMap, 
+    protected StringBuilder dataSet(DataSetType dataSet, Map variableMap,
     								StringBuilder sb, RevisionTransportCommand rev,
     								String downloadLink) {
         if (dataSet.table) {
@@ -569,7 +568,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
 				}
 			}
 			sb.append("\n<table><thead><tr>")
-	
+
 			tables.inject(sb) { txt, d ->
 				def key = columnOrder[d.columnNum]
 				if (key && variableMap && variableMap[key]) {
@@ -921,7 +920,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 prefixToInfix(builder,stack)
                 builder.append(operator.getClosing())
             }
-        } 
+        }
         else if (symbol instanceof FunctionSymbol) {
             FunctionSymbol function=symbol as FunctionSymbol
             builder.append(function.getMapping())
@@ -1084,7 +1083,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         if (expandedTerms.equals(terms)) {
             return jaxbBinop
         }
-        Binop expanded = new BinopType()
+        Binop expanded = new Binop()
         expanded.op = binop.op
         expanded.content = expandedTerms
         return wrapJaxb(expanded)
