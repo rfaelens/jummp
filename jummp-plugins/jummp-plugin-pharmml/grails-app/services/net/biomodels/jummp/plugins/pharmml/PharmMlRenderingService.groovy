@@ -38,7 +38,7 @@ import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 import eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType

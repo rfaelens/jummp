@@ -32,7 +32,7 @@
 package net.biomodels.jummp.plugins.pharmml
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
-import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
+import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanValue
 import eu.ddmore.libpharmml.dom.commontypes.IdValueType
 import eu.ddmore.libpharmml.dom.commontypes.IntValueType
 import eu.ddmore.libpharmml.dom.commontypes.RealValueType
@@ -41,10 +41,10 @@ import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.commontypes.StringValueType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
-import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
+import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanValue
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
-import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
+import eu.ddmore.libpharmml.dom.dataset.ColumnDefinition
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
 import eu.ddmore.libpharmml.dom.dataset.DataSetType
@@ -561,7 +561,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
 			def columnOrder = [:]
 			List tables = dataSet.definition.columnOrTable
 			tables.each {
-				if (it instanceof ColumnDefnType) {
+				if (it instanceof ColumnDefinition) {
 					columnOrder << [ (it.columnNum) : (it.columnId) ]
 				} else if (it instanceof DataSetTableDefnType) {
 					columnOrder << [ (it.columnNum) : (it.tableId) ]
@@ -573,7 +573,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
 				def key = columnOrder[d.columnNum]
 				if (key && variableMap && variableMap[key]) {
 					txt.append(["<th>", "</th>"].join(variableMap[key]))
-				} else if (d instanceof ColumnDefnType) {
+				} else if (d instanceof ColumnDefinition) {
 					txt.append(["<th>", "</th>"].join(d.columnId))
 				} else if (d instanceof DataSetTableDefnType) {
 					txt.append(["<th>", "</th>"].join(d.tableId))
@@ -737,10 +737,10 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             case IdValueType:
                 return s.value as String
                 break
-            case TrueBooleanType:
+            case TrueBooleanValue:
                 return "true"
                 break
-            case FalseBooleanType:
+            case FalseBooleanValue:
                 return "false"
                 break
             default:
@@ -776,8 +776,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 case StringValueType:
                 case IntValueType:
                 case RealValueType:
-                case TrueBooleanType:
-                case FalseBooleanType:
+                case TrueBooleanValue:
+                case FalseBooleanValue:
                     result.append(oprand(vectorElement.value.toString()))
                     break
                 default:

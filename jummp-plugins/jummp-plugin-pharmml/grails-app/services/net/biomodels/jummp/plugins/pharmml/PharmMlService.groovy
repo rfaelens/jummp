@@ -42,7 +42,7 @@ import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 import groovy.util.slurpersupport.GPathResult
 import groovy.xml.XmlUtil
@@ -333,25 +333,25 @@ class PharmMlService implements FileFormatService {
     }
 
     @Profiled(tag="pharmMlService.getTrialDesign")
-    TrialDesignType getTrialDesign(PharmML dom, final String VERSION) {
+    TrialDesign getTrialDesign(PharmML dom, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getTrialDesign(dom)
     }
 
     @Profiled(tag="pharmMlService.getTrialDesignStructure")
-    TrialStructureType getTrialDesignStructure(TrialDesignType design, final String VERSION) {
+    TrialStructureType getTrialDesignStructure(TrialDesign design, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getTrialDesignStructure(design)
     }
 
     @Profiled(tag="pharmMlService.getIndividualDosing")
-    List getIndividualDosing(TrialDesignType design, final String VERSION) {
+    List getIndividualDosing(TrialDesign design, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getIndividualDosing(design)
     }
 
     @Profiled(tag="pharmMlService.getPopulation")
-    PopulationType getPopulation(TrialDesignType design, final String VERSION) {
+    PopulationType getPopulation(TrialDesign design, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getPopulation(design)
     }

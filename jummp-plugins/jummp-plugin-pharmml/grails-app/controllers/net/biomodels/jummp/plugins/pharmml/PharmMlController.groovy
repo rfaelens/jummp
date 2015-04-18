@@ -38,7 +38,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 
 /**
  * Controller for handling Model files in the PharmML format.
@@ -68,7 +68,7 @@ class PharmMlController {
             model["parameterModel"] = pharmMlService.getParameterModel(modelDefinition, VERSION)
             model["observationModel"] = pharmMlService.getObservationModel(modelDefinition, VERSION)
 
-            TrialDesignType design = pharmMlService.getTrialDesign(dom, VERSION)
+            TrialDesign design = pharmMlService.getTrialDesign(dom, VERSION)
             model["trialDesign"] = design
             model["structure"] = pharmMlService.getTrialDesignStructure(design, VERSION)
             model["population"] = pharmMlService.getPopulation(design, VERSION)

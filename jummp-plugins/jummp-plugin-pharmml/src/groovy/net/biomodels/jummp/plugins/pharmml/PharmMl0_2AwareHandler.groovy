@@ -38,7 +38,7 @@ import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -76,7 +76,7 @@ class PharmMl0_2AwareHandler extends AbstractPharmMlHandler {
 
     @Profiled(tag="pharmMl0_2AwareHandler.getIndependentVariable")
     String getIndependentVariable(PharmML dom) {
-        return dom?.independentVariable.symbId
+        return dom?.independentVariable?.symbId
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getFunctionDefinitions")
@@ -115,22 +115,22 @@ class PharmMl0_2AwareHandler extends AbstractPharmMlHandler {
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getTrialDesign")
-    TrialDesignType getTrialDesign(PharmML dom) {
+    TrialDesign getTrialDesign(PharmML dom) {
         return dom?.trialDesign
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getTrialDesignStructure")
-    TrialStructureType getTrialDesignStructure(TrialDesignType design) {
+    TrialStructureType getTrialDesignStructure(TrialDesign design) {
         return design?.structure
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getIndividualDosing")
-    List getIndividualDosing(TrialDesignType design) {
+    List getIndividualDosing(TrialDesign design) {
         return design?.individualDosing
     }
 
     @Profiled(tag="pharmMl0_2AwareHandler.getPopulation")
-    PopulationType getPopulation(TrialDesignType design) {
+    PopulationType getPopulation(TrialDesign design) {
         return design?.population
     }
 

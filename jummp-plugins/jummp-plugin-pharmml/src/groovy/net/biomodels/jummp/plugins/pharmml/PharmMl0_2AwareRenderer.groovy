@@ -32,7 +32,7 @@
 package net.biomodels.jummp.plugins.pharmml
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
-import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
+import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanValue
 import eu.ddmore.libpharmml.dom.commontypes.FuncParameterDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.IdValueType
@@ -43,11 +43,11 @@ import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.commontypes.StringValueType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
-import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
+import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanValue
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
 import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
-import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
+import eu.ddmore.libpharmml.dom.dataset.ColumnDefinition
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
 import eu.ddmore.libpharmml.dom.dataset.DataSetType
@@ -89,7 +89,7 @@ import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
 import grails.gsp.PageRenderer
@@ -559,10 +559,10 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param trialDesign an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType}
+     * @param trialDesign an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialDesign}
      */
     @Profiled(tag = "pharmMl0_2AwareRenderer.renderTrialDesign")
-    String renderTrialDesign(TrialDesignType trialDesign) {}
+    String renderTrialDesign(TrialDesign trialDesign) {}
 
     /**
      * @param structure - an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType}

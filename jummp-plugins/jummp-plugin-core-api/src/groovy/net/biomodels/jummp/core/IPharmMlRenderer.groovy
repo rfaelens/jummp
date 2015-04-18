@@ -51,7 +51,7 @@ import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 
 /**
@@ -140,9 +140,9 @@ interface IPharmMlRenderer {
                 List<CovariateModelType> covariateModels)
 
     /**
-     * @param trialDesign an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType}
+     * @param trialDesign an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialDesign}
      */
-    String renderTrialDesign(TrialDesignType trialDesign)
+    String renderTrialDesign(TrialDesign trialDesign)
 
     /**
      * @param structure - an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType}

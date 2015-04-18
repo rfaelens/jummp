@@ -39,7 +39,7 @@ import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 
 /**
@@ -93,26 +93,26 @@ interface IPharmMlService {
     List getObservationModel(ModelDefinition definition)
 
     /**
-     * @return eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+     * @return eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
      */
-    TrialDesignType getTrialDesign(PharmML dom)
+    TrialDesign getTrialDesign(PharmML dom)
 
     /**
-     * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+     * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
      * @return eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
      */
-    TrialStructureType getTrialDesignStructure(TrialDesignType design)
+    TrialStructureType getTrialDesignStructure(TrialDesign design)
 
     /**
-     * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+     * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
      */
-    List getIndividualDosing(TrialDesignType design)
+    List getIndividualDosing(TrialDesign design)
 
     /**
-     * @param design an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+     * @param design an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
      * return an instance of eu.ddmore.libpharmml.dom.trialdesign.PopulationType
      */
-    PopulationType getPopulation(TrialDesignType design)
+    PopulationType getPopulation(TrialDesign design)
 
     /**
      * @return an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps

@@ -39,7 +39,7 @@ import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
 import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
 import eu.ddmore.libpharmml.impl.*
 import net.biomodels.jummp.core.IPharmMlService
@@ -118,22 +118,22 @@ class PharmMl0_3AwareHandler extends AbstractPharmMlHandler {
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getTrialDesign")
-    TrialDesignType getTrialDesign(PharmML dom) {
+    TrialDesign getTrialDesign(PharmML dom) {
         return dom?.trialDesign
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getTrialDesignStructure")
-    TrialStructureType getTrialDesignStructure(TrialDesignType design) {
+    TrialStructureType getTrialDesignStructure(TrialDesign design) {
         return design?.structure
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getIndividualDosing")
-    List getIndividualDosing(TrialDesignType design) {
+    List getIndividualDosing(TrialDesign design) {
         return design?.individualDosing
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getPopulation")
-    PopulationType getPopulation(TrialDesignType design) {
+    PopulationType getPopulation(TrialDesign design) {
         return design?.population
     }
 
