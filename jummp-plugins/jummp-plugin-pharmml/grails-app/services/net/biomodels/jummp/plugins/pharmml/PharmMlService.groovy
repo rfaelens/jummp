@@ -44,16 +44,13 @@ import eu.ddmore.libpharmml.dom.modellingsteps.StepDependency
 import eu.ddmore.libpharmml.dom.trialdesign.Population
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
-import groovy.util.slurpersupport.GPathResult
 import groovy.xml.XmlUtil
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.xml.parsers.ParserConfigurationException
-import javax.xml.stream.XMLStreamReader
 import net.biomodels.jummp.core.IPharmMlService
 import net.biomodels.jummp.core.model.FileFormatService
-import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import org.apache.commons.logging.Log
@@ -384,122 +381,6 @@ class PharmMlService implements FileFormatService {
     StepDependency getStepDependencies(ModellingSteps steps, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getStepDependencies(steps)
-    }
-
-    /*
-     * Parses the file located at @p annotationFileLocation and extracts annotations.
-     *
-     * @param annotationFileLocation the location of the annotation file.
-     * @param mainPharmML the PharmML representation containing the entities referenced
-     * by the annotations in @p annotationFileLocation.
-     * @return a Map of annotations which will be empty if the supplied @p
-     * annotationFileLocation is not readable or undefined.
-     */
-    @Profiled(tag="pharmMlService.parseAnnotations")
-    private Map parseAnnotations(String annotationFileLocation, File mainPharmML) {
-        final String PHARMML_FILE_NAME = "has-pharmml-filename"
-        def annotations = [:]
-        if (!annotationFileLocation) {
-            log.warn "Cannot parse annotations for undefined annotation file."
-            return annotations
-        }
-        if (IS_DEBUG_ENABLED) {
-            log.debug "Parsing annotations defined in $annotationFileLocation"
-        }
-        final File rdfFile = new File(annotationFileLocation)
-        if (!rdfFile.canRead()) {
-            log.warn "Cannot access annotations contained in $annotationFileLocation"
-            return annotations
-        }
-        XmlSlurper slurper = new XmlSlurper()
-        GPathResult contents = slurper.parse(rdfFile)
-        //sanity check: the annotation file should reference the pharmml representation
-        GPathResult descriptions = contents.Description
-        GPathResult pharmMlName = descriptions.breadthFirst().find {
-            it.name() == PHARMML_FILE_NAME
-        }
-        final String exp = mainPharmML.name
-        if (!pharmMlName) {
-            log.warn """\
-Missing information about the PharmML file referenced by annotations. Assuming $exp."""
-        }
-        final String actual = pharmMlName.text()
-        if (actual != exp) {
-            log.warn "Annotations defined for $actual, instead of $exp."
-        }
-
-        /*
-         * tag name - schema field mapping for elements from which we need the text.
-         * See {@link groovy.util.slurpersupport.GPathResult#text()}
-         */
-        def contentMappings = [
-            "has-publication-source-textual-reference" : "pharmmlPublicationSourceText",
-            "model-has-indication" : "pharmmlModelIndication",
-            "model-has-rationale" : "pharmmlModelRationale",
-            "has-modelling-limitations-textual" : "pharmmlLimitations",
-            "model-has-population-characteristic" : "pharmmlPopulation",
-            "model-related-to-drug" : "pharmmlModelDrug"
-        ]
-
-        // the same mapping as above, only now for elements for which we're interested
-        // in the value of the rdf:resource attribute.
-        def attributeMappings = [
-            "has-therapeutic-area" : "pharmmlTherapeuticArea",
-            "model-modelling-question": "pharmmlModellingQuestion",
-            "has-generic-type" : "pharmmlGenericType",
-            "model-clinical-context" : "pharmmlClinicalContext",
-            "model-phenomenal-purpose" : "pharmmlPhenomenalPurpose"
-        ]
-        descriptions.breadthFirst().each { n ->
-            filterNode(contentMappings, n, extractText, annotations)
-            filterNode(attributeMappings, n, extractResourceAttribute, annotations)
-        }
-        if (IS_DEBUG_ENABLED) {
-            log.debug "Found ${annotations.size()} annotations defined in the annotation file."
-        }
-        return annotations
-    }
-
-    private def filterNode = { Map elementMap, GPathResult node, Closure collect, Map result ->
-        String name = node.name()
-        if (elementMap.containsKey(name)) {
-            String key = elementMap[name]
-            result.put(key, collect(node))
-        }
-    }
-
-    private def extractText = { GPathResult node -> node.text() }
-
-    private def extractResourceAttribute = { GPathResult node ->
-        extractAttribute(node, "rdf:resource")
-    }
-
-    private def extractAttribute = { GPathResult node, String name -> node."@$name".text() }
-
-    /*
-     * Collects the values of the Description elements from a given PharmML file.
-     *
-     * @param pharmML the file from which to extract the information.
-     * @return a list of Strings corresponding to the extracted descriptions. The list
-     * will be empty if @p pharmML is either undefined or not readable.
-     */
-    @Profiled(tag="pharmMlService.extractElementDescriptions")
-    private List<String> extractElementDescriptions(File pharmML) {
-        final List<String> result = []
-        if (pharmML && pharmML.canRead()) {
-            if (IS_DEBUG_ENABLED) {
-                log.debug "Collecting element descriptions from ${pharmML.name}."
-            }
-            JummpXmlUtils.parseXmlFile.curry(pharmML) { XMLStreamReader r ->
-                if ("Description".equalsIgnoreCase(r.getLocalName())) {
-                    result.add r.getElementText()
-                }
-                return false
-            }
-        } else {
-            log.warn "Cannot extract element descriptions from file $pharmML"
-        }
-        return result
     }
 
     /*
