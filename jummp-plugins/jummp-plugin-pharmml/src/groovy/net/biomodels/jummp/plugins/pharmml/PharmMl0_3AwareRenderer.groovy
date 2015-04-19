@@ -32,7 +32,6 @@
 package net.biomodels.jummp.plugins.pharmml
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
-import eu.ddmore.libpharmml.dom.commontypes.FalseBoolean
 import eu.ddmore.libpharmml.dom.commontypes.FuncParameterDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.IdValueType
@@ -44,14 +43,9 @@ import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.commontypes.StringValueType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
-import eu.ddmore.libpharmml.dom.commontypes.TrueBoolean
-import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
 import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
-import eu.ddmore.libpharmml.dom.dataset.ColumnDefinition
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
-import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
-import eu.ddmore.libpharmml.dom.dataset.DataSetType
 import eu.ddmore.libpharmml.dom.maths.Binop
 import eu.ddmore.libpharmml.dom.maths.ConstantType
 import eu.ddmore.libpharmml.dom.maths.Equation
@@ -59,52 +53,29 @@ import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
 import eu.ddmore.libpharmml.dom.maths.PiecewiseType
 import eu.ddmore.libpharmml.dom.maths.UniopType
-import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
-import eu.ddmore.libpharmml.dom.modeldefn.ContinuousCovariateType
-import eu.ddmore.libpharmml.dom.modeldefn.CorrelatedRandomVariable
 import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateModel
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
-import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameter
-import eu.ddmore.libpharmml.dom.modeldefn.LhsTransformationType
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.ObservationModel
 import eu.ddmore.libpharmml.dom.modeldefn.PairwiseType
-import eu.ddmore.libpharmml.dom.modeldefn.ParameterModel
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariable
 import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameter
 import eu.ddmore.libpharmml.dom.modeldefn.StructuralModel
 import eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock
 import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStep
-import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
 import eu.ddmore.libpharmml.dom.modellingsteps.Estimation
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
-import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
-import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.Simulation
 import eu.ddmore.libpharmml.dom.modellingsteps.StepDependency
-import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
-import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
-import eu.ddmore.libpharmml.dom.trialdesign.ActivityType
-import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosing
-import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.trialdesign.Population
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
-import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
-import grails.gsp.PageRenderer
 import grails.util.Holders
 import javax.xml.bind.JAXBElement
-import javax.xml.namespace.QName
-import net.biomodels.jummp.plugins.pharmml.maths.FunctionSymbol
-import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
-import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
-import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
-import net.biomodels.jummp.plugins.pharmml.maths.PieceSymbol
-import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 import net.biomodels.jummp.plugins.pharmml.util.correlation.CorrelationMatrix
 import net.biomodels.jummp.plugins.pharmml.util.correlation.PharmMl0_3AwareCorrelationProcessor
 import org.apache.commons.logging.Log
@@ -162,7 +133,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
      * {@link eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType}s.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderFunctionDefinitions")
-    String renderFunctionDefinitions(List<FunctionDefinitionType> functionDefinitions) {
+    String renderFunctionDefinitions(List functionDefinitions) {
         def definitionList = []
         try {
             functionDefinitions.collect(definitionList) { d ->
@@ -199,7 +170,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
      * @param transfMap the transformations for continuous covariates.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderCovariateModel")
-    String renderCovariateModel(List<CovariateModel> covModel, Map transfMap) {
+    String renderCovariateModel(List covModel, Map transfMap) {
         def model = [:]
         def result = []
         try {
@@ -348,8 +319,8 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
      * @param transfMap the transformations for the continuous covariates.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderParameterModel")
-    String renderParameterModel(List<ParameterModel> parameterModel,
-            List<CovariateModel> covariates, Map transfMap) {
+    String renderParameterModel(List parameterModel,
+            List covariates, Map transfMap) {
 
         def result = new StringBuilder()
         result.append("<h3>Parameter Model</h3>")
@@ -528,7 +499,8 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                 // the API returns a JAXBElement, not ObservationErrorType
                 def obsErr = om.observationError?.value
                 if (obsErr) {
-                    result.append(" <span class='italic'>")append(obsErr.symbId).append("</span>")
+                    result.append(" <span class='italic'>").append(obsErr.symbId).append
+                    ("</span>")
                 }
                 result.append("</h4>\n")
                 result.append("<span class=\"bold\">Parameters </span>")
