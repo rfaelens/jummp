@@ -34,13 +34,13 @@ package net.biomodels.jummp.plugins.pharmml
 import eu.ddmore.libpharmml.*
 import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
-import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
+import eu.ddmore.libpharmml.dom.modellingsteps.Estimation
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
-import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
-import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
+import eu.ddmore.libpharmml.dom.modellingsteps.Simulation
+import eu.ddmore.libpharmml.dom.modellingsteps.StepDependency
+import eu.ddmore.libpharmml.dom.trialdesign.Population
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
-import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
 import eu.ddmore.libpharmml.impl.*
 import net.biomodels.jummp.core.IPharmMlService
 import org.apache.commons.logging.Log
@@ -123,7 +123,7 @@ class PharmMl0_3AwareHandler extends AbstractPharmMlHandler {
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getTrialDesignStructure")
-    TrialStructureType getTrialDesignStructure(TrialDesign design) {
+    TrialStructure getTrialDesignStructure(TrialDesign design) {
         return design?.structure
     }
 
@@ -133,7 +133,7 @@ class PharmMl0_3AwareHandler extends AbstractPharmMlHandler {
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getPopulation")
-    PopulationType getPopulation(TrialDesign design) {
+    Population getPopulation(TrialDesign design) {
         return design?.population
     }
 
@@ -150,17 +150,17 @@ class PharmMl0_3AwareHandler extends AbstractPharmMlHandler {
     @Profiled(tag="pharmMl0_3AwareHandler.getSimulationSteps")
     List getSimulationSteps(ModellingSteps steps) {
         def allSteps = getCommonModellingSteps(steps)
-        return allSteps ? allSteps.findAll {it instanceof SimulationStepType} : []
+        return allSteps ? allSteps.findAll {it instanceof Simulation} : []
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getEstimationSteps")
     List getEstimationSteps(ModellingSteps steps) {
         def allSteps = getCommonModellingSteps(steps)
-        return allSteps ? allSteps.findAll {it instanceof EstimationStepType} : []
+        return allSteps ? allSteps.findAll {it instanceof Estimation} : []
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getStepDependencies")
-    StepDependencyType getStepDependencies(ModellingSteps steps) {
+    StepDependency getStepDependencies(ModellingSteps steps) {
         return steps?.stepDependencies
     }
 }

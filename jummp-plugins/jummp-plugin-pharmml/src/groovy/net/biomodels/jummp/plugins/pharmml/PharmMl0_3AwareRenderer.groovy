@@ -32,7 +32,7 @@
 package net.biomodels.jummp.plugins.pharmml
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
-import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanValue
+import eu.ddmore.libpharmml.dom.commontypes.FalseBoolean
 import eu.ddmore.libpharmml.dom.commontypes.FuncParameterDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.IdValueType
@@ -44,7 +44,7 @@ import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.commontypes.StringValueType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
-import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanValue
+import eu.ddmore.libpharmml.dom.commontypes.TrueBoolean
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
 import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
@@ -61,39 +61,39 @@ import eu.ddmore.libpharmml.dom.maths.PiecewiseType
 import eu.ddmore.libpharmml.dom.maths.UniopType
 import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
 import eu.ddmore.libpharmml.dom.modeldefn.ContinuousCovariateType
-import eu.ddmore.libpharmml.dom.modeldefn.CorrelatedRandomVarType
+import eu.ddmore.libpharmml.dom.modeldefn.CorrelatedRandomVariable
 import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType
+import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
+import eu.ddmore.libpharmml.dom.modeldefn.CovariateModel
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
-import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
+import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameter
 import eu.ddmore.libpharmml.dom.modeldefn.LhsTransformationType
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
-import eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType
+import eu.ddmore.libpharmml.dom.modeldefn.ObservationModel
 import eu.ddmore.libpharmml.dom.modeldefn.PairwiseType
-import eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType
-import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariableType
-import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
-import eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType
+import eu.ddmore.libpharmml.dom.modeldefn.ParameterModel
+import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariable
+import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameter
+import eu.ddmore.libpharmml.dom.modeldefn.StructuralModel
 import eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock
-import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType
+import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStep
 import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
-import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
+import eu.ddmore.libpharmml.dom.modellingsteps.Estimation
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
 import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
-import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
+import eu.ddmore.libpharmml.dom.modellingsteps.Simulation
+import eu.ddmore.libpharmml.dom.modellingsteps.StepDependency
 import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
 import eu.ddmore.libpharmml.dom.trialdesign.ActivityType
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
-import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType
+import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosing
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
-import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
+import eu.ddmore.libpharmml.dom.trialdesign.Population
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
-import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
 import grails.gsp.PageRenderer
 import grails.util.Holders
@@ -195,11 +195,11 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
 
     /**
      * @param covModel a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateModel}s.
      * @param transfMap the transformations for continuous covariates.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderCovariateModel")
-    String renderCovariateModel(List<CovariateModelType> covModel, Map transfMap) {
+    String renderCovariateModel(List<CovariateModel> covModel, Map transfMap) {
         def model = [:]
         def result = []
         try {
@@ -228,12 +228,12 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param cov a a list of {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType}s.
+     * @param cov a a list of {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition}s.
      * @param blkId the block identifier of the covariate model where @p cov are defined.
      * @param transfMap the transformations for continuous covariates.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderCovariates")
-    String renderCovariates(List<CovariateDefinitionType> cov, String blkId, Map transfMap) {
+    String renderCovariates(List<CovariateDefinition> cov, String blkId, Map transfMap) {
         def model = [:]
         def covariates = []
         try {
@@ -343,13 +343,13 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
      * for each individual parameter.
      *
      * @param parameterModel a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.ParameterModel}s.
      * @param covariates a list of covariate models.
      * @param transfMap the transformations for the continuous covariates.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderParameterModel")
-    String renderParameterModel(List<ParameterModelType> parameterModel,
-            List<CovariateModelType> covariates, Map transfMap) {
+    String renderParameterModel(List<ParameterModel> parameterModel,
+            List<CovariateModel> covariates, Map transfMap) {
 
         def result = new StringBuilder()
         result.append("<h3>Parameter Model</h3>")
@@ -358,13 +358,13 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
             parameterModel.each { pm ->
                 result.append("<div class='spaced-top-bottom'>")
                 def simpleParameters = pm.commonParameterElement.value.findAll {
-                       it instanceof SimpleParameterType
+                       it instanceof SimpleParameter
                 }
                 def rv = pm.commonParameterElement.value.findAll {
-                       it instanceof ParameterRandomVariableType
+                       it instanceof ParameterRandomVariable
                 }
                 def individualParameters = pm.commonParameterElement.value.findAll {
-                       it instanceof IndividualParameterType
+                       it instanceof IndividualParameter
                 }
                 result.append(simpleParams(simpleParameters, transfMap))
 
@@ -398,11 +398,11 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
 
     /**
      * @param structuralModels a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.StructuralModel}s.
      * @param iv the independent variable of the model
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderStructuralModel")
-    String renderStructuralModel(List<StructuralModelType> structuralModels, String iv) {
+    String renderStructuralModel(List<StructuralModel> structuralModels, String iv) {
         def model = [:]
         model["version"] = "0.3"
         try {
@@ -515,11 +515,11 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
 
     /**
      * @param observationModels a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.ObservationModel}s.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderObservationModel")
-    String renderObservationModel(List<ObservationModelType> observations,
-                List<CovariateModelType> covariates) {
+    String renderObservationModel(List<ObservationModel> observations,
+                List<CovariateModel> covariates) {
         StringBuilder result = new StringBuilder()
         result.append("<h3>Observation Model</h3>")
         try {
@@ -533,13 +533,13 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                 result.append("</h4>\n")
                 result.append("<span class=\"bold\">Parameters </span>")
                 def simpleParameters = om.commonParameterElement.value.findAll {
-                    it instanceof SimpleParameterType
+                    it instanceof SimpleParameter
                 }
                 def rv = om.commonParameterElement.value.findAll {
-                    it instanceof ParameterRandomVariableType
+                    it instanceof ParameterRandomVariable
                 }
                 def individualParameters = om.commonParameterElement.value.findAll {
-                       it instanceof IndividualParameterType
+                       it instanceof IndividualParameter
                 }
                 result.append(simpleParams(simpleParameters))
 
@@ -588,10 +588,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     String renderTrialDesign(TrialDesign trialDesign) {}
 
     /**
-     * @param structure - an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType}
+     * @param structure - an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialStructure}
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderTrialDesignStructure")
-    String renderTrialDesignStructure(TrialStructureType structure) {
+    String renderTrialDesignStructure(TrialStructure structure) {
         def result = new StringBuilder()
         TrialDesignStructure tds
         def segmentActivitiesMap
@@ -720,10 +720,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param dosing - a list of {@link eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType}
+     * @param dosing - a list of {@link eu.ddmore.libpharmml.dom.trialdesign.IndividualDosing}
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderIndividualDosing")
-    String renderIndividualDosing(List<IndividualDosingType> dosing, RevisionTransportCommand rev, String downloadLink) {
+    String renderIndividualDosing(List<IndividualDosing> dosing, RevisionTransportCommand rev, String downloadLink) {
         def result = new StringBuilder()
         try {
             result.append("<h4>Individual dosing</h4>\n")
@@ -743,10 +743,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param population an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.PopulationType}
+     * @param population an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.Population}
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderPopulation")
-    String renderPopulation(PopulationType pop, RevisionTransportCommand rev, String downloadLink) {
+    String renderPopulation(Population pop, RevisionTransportCommand rev, String downloadLink) {
         def result = new StringBuilder("<h4>Population</h4>\n")
         if (pop.variabilityReference) {
             result.append("<span><strong>Variability level: </strong>")
@@ -775,16 +775,16 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     String renderModellingSteps(ModellingSteps steps) {}
 
     /**
-     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType}s.
+     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStep}s.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderCommonModellingSteps")
-    String renderCommonModellingSteps(List<CommonModellingStepType> steps) {}
+    String renderCommonModellingSteps(List<CommonModellingStep> steps) {}
 
     /**
-     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType}s.
+     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.Simulation}s.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderSimulationSteps")
-    String renderSimulationSteps(List<SimulationStepType> steps, String iv) {
+    String renderSimulationSteps(List<Simulation> steps, String iv) {
         def result = new StringBuilder("<h3>Simulation Steps</h3>\n")
         steps.each { s ->
             result.append("<h4>Simulation step <span class='italic'>${s.oid}</span></h4>")
@@ -844,10 +844,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType}s.
+     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.Estimation}s.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderEstimationSteps")
-    String renderEstimationSteps(List<EstimationStepType> steps, RevisionTransportCommand rev, String downloadLink) {
+    String renderEstimationSteps(List<Estimation> steps, RevisionTransportCommand rev, String downloadLink) {
         def result = new StringBuilder("<h3>Estimation Steps</h3>\n")
         steps.each { s ->
             result.append("<h4>Estimation Step ${s.oid}</h4>\n")
@@ -868,10 +868,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param dependencies a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType}s.
+     * @param dependencies a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.StepDependency}s.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderStepDependencies")
-    String renderStepDependencies(StepDependencyType dependencies) {
+    String renderStepDependencies(StepDependency dependencies) {
         StringBuilder result = new StringBuilder()
         if (!dependencies || !dependencies.step) {
             return result
@@ -981,8 +981,8 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     @Override
-    protected StringBuilder individualParams(List<IndividualParameterType> parameters,
-                List<ParameterRandomVariableType> rv, List<CovariateDefinitionType> covariates,
+    protected StringBuilder individualParams(List<IndividualParameter> parameters,
+                List<ParameterRandomVariable> rv, List<CovariateDefinition> covariates,
                 Map<String, Equation> transfMap) {
         def output = new StringBuilder("<div class='spaced-top-bottom'>")
         try {

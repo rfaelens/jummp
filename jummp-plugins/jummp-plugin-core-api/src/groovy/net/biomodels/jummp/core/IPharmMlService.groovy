@@ -37,10 +37,10 @@ package net.biomodels.jummp.core
 import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
-import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
-import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
+import eu.ddmore.libpharmml.dom.modellingsteps.StepDependency
+import eu.ddmore.libpharmml.dom.trialdesign.Population
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
-import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
 
 /**
  * @short Interface describing the service to access a model encoded in PharmML.
@@ -99,9 +99,9 @@ interface IPharmMlService {
 
     /**
      * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
-     * @return eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
+     * @return eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
      */
-    TrialStructureType getTrialDesignStructure(TrialDesign design)
+    TrialStructure getTrialDesignStructure(TrialDesign design)
 
     /**
      * @param design - an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
@@ -110,9 +110,9 @@ interface IPharmMlService {
 
     /**
      * @param design an instance of eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
-     * return an instance of eu.ddmore.libpharmml.dom.trialdesign.PopulationType
+     * return an instance of eu.ddmore.libpharmml.dom.trialdesign.Population
      */
-    PopulationType getPopulation(TrialDesign design)
+    Population getPopulation(TrialDesign design)
 
     /**
      * @return an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
@@ -136,7 +136,7 @@ interface IPharmMlService {
 
     /**
      * @param steps an instance of eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
-     * @return an instance of eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
+     * @return an instance of eu.ddmore.libpharmml.dom.modellingsteps.StepDependency
      */
-    StepDependencyType getStepDependencies(ModellingSteps steps)
+    StepDependency getStepDependencies(ModellingSteps steps)
 }

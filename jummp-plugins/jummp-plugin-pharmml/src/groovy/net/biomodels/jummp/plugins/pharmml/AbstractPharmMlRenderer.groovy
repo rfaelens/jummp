@@ -32,7 +32,7 @@
 package net.biomodels.jummp.plugins.pharmml
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
-import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanValue
+import eu.ddmore.libpharmml.dom.commontypes.FalseBoolean
 import eu.ddmore.libpharmml.dom.commontypes.IdValueType
 import eu.ddmore.libpharmml.dom.commontypes.IntValueType
 import eu.ddmore.libpharmml.dom.commontypes.RealValueType
@@ -41,7 +41,7 @@ import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.commontypes.StringValueType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
-import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanValue
+import eu.ddmore.libpharmml.dom.commontypes.TrueBoolean
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
 import eu.ddmore.libpharmml.dom.dataset.ColumnDefinition
@@ -54,12 +54,12 @@ import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
 import eu.ddmore.libpharmml.dom.maths.UniopType
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
+import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
-import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
-import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariableType
-import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
+import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameter
+import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariable
+import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameter
 import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
 import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
@@ -153,7 +153,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 new StringBuilder("[").append(result).append("]")
     }
 
-    protected StringBuilder randomVariables(List<ParameterRandomVariableType> rv, Map rvMap) {
+    protected StringBuilder randomVariables(List<ParameterRandomVariable> rv, Map rvMap) {
         def output = new StringBuilder()
         try {
             rv.inject(output) { o, i ->
@@ -173,8 +173,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return output
     }
 
-    protected StringBuilder individualParams(List<IndividualParameterType> parameters,
-                List<ParameterRandomVariableType> rv, List<CovariateDefinitionType> covariates,
+    protected StringBuilder individualParams(List<IndividualParameter> parameters,
+                List<ParameterRandomVariable> rv, List<CovariateDefinition> covariates,
                 Map<String, Equation> transfMap) {
         def output = new StringBuilder()
         if (!parameters) {
@@ -385,7 +385,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
     }
 
     //TODO REMOVE THIS
-    protected StringBuilder simpleParams(List<SimpleParameterType> parameters,
+    protected StringBuilder simpleParams(List<SimpleParameter> parameters,
                 Map<String, Equation> transfMap = [:]) {
         def outcome = new StringBuilder()
         if (!parameters) {
@@ -737,10 +737,10 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             case IdValueType:
                 return s.value as String
                 break
-            case TrueBooleanValue:
+            case TrueBoolean:
                 return "true"
                 break
-            case FalseBooleanValue:
+            case FalseBoolean:
                 return "false"
                 break
             default:
@@ -776,8 +776,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 case StringValueType:
                 case IntValueType:
                 case RealValueType:
-                case TrueBooleanValue:
-                case FalseBooleanValue:
+                case TrueBoolean:
+                case FalseBoolean:
                     result.append(oprand(vectorElement.value.toString()))
                     break
                 default:

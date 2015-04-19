@@ -48,8 +48,8 @@ import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
 import eu.ddmore.libpharmml.dom.maths.PiecewiseType
 import eu.ddmore.libpharmml.dom.maths.PieceType
 import eu.ddmore.libpharmml.dom.maths.Condition
-import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanValue
-import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanValue
+import eu.ddmore.libpharmml.dom.commontypes.TrueBoolean
+import eu.ddmore.libpharmml.dom.commontypes.FalseBoolean
 
 class MathsUtil {
 	private static def pharmMap = [ "plus":"+",
@@ -191,11 +191,11 @@ class MathsUtil {
 	}
 	
 	
-	private static MathsSymbol getSymbol(TrueBooleanValue jaxObject) {
+	private static MathsSymbol getSymbol(TrueBoolean jaxObject) {
 		return new MathsSymbol("true", "true");
 	}
 	
-	private static MathsSymbol getSymbol(FalseBooleanValue jaxObject) {
+	private static MathsSymbol getSymbol(FalseBoolean jaxObject) {
 		return new MathsSymbol("false", "false");
 	}
 

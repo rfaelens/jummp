@@ -40,10 +40,10 @@ import eu.ddmore.libpharmml.IValidationReport
 import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
-import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
-import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
+import eu.ddmore.libpharmml.dom.modellingsteps.StepDependency
+import eu.ddmore.libpharmml.dom.trialdesign.Population
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
-import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
 import groovy.util.slurpersupport.GPathResult
 import groovy.xml.XmlUtil
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -339,7 +339,7 @@ class PharmMlService implements FileFormatService {
     }
 
     @Profiled(tag="pharmMlService.getTrialDesignStructure")
-    TrialStructureType getTrialDesignStructure(TrialDesign design, final String VERSION) {
+    TrialStructure getTrialDesignStructure(TrialDesign design, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getTrialDesignStructure(design)
     }
@@ -351,7 +351,7 @@ class PharmMlService implements FileFormatService {
     }
 
     @Profiled(tag="pharmMlService.getPopulation")
-    PopulationType getPopulation(TrialDesign design, final String VERSION) {
+    Population getPopulation(TrialDesign design, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getPopulation(design)
     }
@@ -381,7 +381,7 @@ class PharmMlService implements FileFormatService {
     }
 
     @Profiled(tag="pharmMlService.getStepDependencies")
-    StepDependencyType getStepDependencies(ModellingSteps steps, final String VERSION) {
+    StepDependency getStepDependencies(ModellingSteps steps, final String VERSION) {
         IPharmMlService handler = PharmMlVersionAwareHandlerFactory.getHandler(VERSION)
         return handler.getStepDependencies(steps)
     }

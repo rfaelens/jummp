@@ -34,25 +34,25 @@
 
 package net.biomodels.jummp.core
 
-import eu.ddmore.libpharmml.dom.commontypes.CommonVariableDefinitionType
+import eu.ddmore.libpharmml.dom.commontypes.CommonVariableDefinition
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.maths.Equation
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType
+import eu.ddmore.libpharmml.dom.modeldefn.CovariateModel
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
-import eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType
-import eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType
-import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
-import eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType
+import eu.ddmore.libpharmml.dom.modeldefn.ObservationModel
+import eu.ddmore.libpharmml.dom.modeldefn.ParameterModel
+import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameter
+import eu.ddmore.libpharmml.dom.modeldefn.StructuralModel
 import eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock
-import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
+import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStep
+import eu.ddmore.libpharmml.dom.modellingsteps.Estimation
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
-import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
-import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType
-import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
+import eu.ddmore.libpharmml.dom.modellingsteps.Simulation
+import eu.ddmore.libpharmml.dom.modellingsteps.StepDependency
+import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosing
+import eu.ddmore.libpharmml.dom.trialdesign.Population
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
-import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
+import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
 
 /**
  * @short Interface describing the service to render a model encoded in PharmML.
@@ -82,10 +82,10 @@ interface IPharmMlRenderer {
 
     /**
      * @param covariates a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateModel}s.
      * @param transformations a map containing the transformations for continuous covariates.
      */
-    String renderCovariateModel(List<CovariateModelType> covariates,
+    String renderCovariateModel(List<CovariateModel> covariates,
                 Map<String, Equation> transformations)
 
     /**
@@ -96,26 +96,26 @@ interface IPharmMlRenderer {
 
     /**
      * @param parameterModels a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.ParameterModel}s.
      * @param covariates a list of covariate models.
      * @param transformations the transformations for continuous covariates
      */
-    String renderParameterModel(List<ParameterModelType> parameterModels,
-                List<CovariateModelType> covariates, Map<String, Equation> transformations)
+    String renderParameterModel(List<ParameterModel> parameterModels,
+                List<CovariateModel> covariates, Map<String, Equation> transformations)
 
     /**
      * @param structuralModels a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.StructuralModel}s.
      * @param indepVar the independent variable of the model, for example time or concentration.
      */
-    String renderStructuralModel(List<StructuralModelType> structuralModels, String indepVar)
+    String renderStructuralModel(List<StructuralModel> structuralModels, String indepVar)
 
     /**
      * @param commonVariables a list of
-     * {@link eu.ddmore.libpharmml.dom.commontypes.CommonVariableDefinitionType}
+     * {@link eu.ddmore.libpharmml.dom.commontypes.CommonVariableDefinition}
      * @param iv the independent variable of the model
      */
-    String renderCommonVariables(List<CommonVariableDefinitionType> commonVariables, String iv)
+    String renderCommonVariables(List<CommonVariableDefinition> commonVariables, String iv)
 
     /**
      * @param initialConditions a map associating dependent variables to their corresponding
@@ -125,19 +125,19 @@ interface IPharmMlRenderer {
 
     /**
      * @param simpleParameters a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.SimpleParameter}s.
      * @param transfMap the continuous covariate transformation map
      */
-    String renderSimpleParameters(List<SimpleParameterType> simpleParameters,
+    String renderSimpleParameters(List<SimpleParameter> simpleParameters,
                 Map<String, Equation> transfMap)
 
     /**
      * @param observationModels a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.ObservationModel}s.
      * @param covariateModels a list of covariate models
      */
-    String renderObservationModel(List<ObservationModelType> observationModels,
-                List<CovariateModelType> covariateModels)
+    String renderObservationModel(List<ObservationModel> observationModels,
+                List<CovariateModel> covariateModels)
 
     /**
      * @param trialDesign an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialDesign}
@@ -145,19 +145,19 @@ interface IPharmMlRenderer {
     String renderTrialDesign(TrialDesign trialDesign)
 
     /**
-     * @param structure - an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType}
+     * @param structure - an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialStructure}
      */
-    String renderTrialDesignStructure(TrialStructureType structure)
+    String renderTrialDesignStructure(TrialStructure structure)
 
     /**
-     * @param dosing - a list of {@link eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType}
+     * @param dosing - a list of {@link eu.ddmore.libpharmml.dom.trialdesign.IndividualDosing}
      */
-    String renderIndividualDosing(List<IndividualDosingType> dosing, RevisionTransportCommand rev, String downloadLink)
+    String renderIndividualDosing(List<IndividualDosing> dosing, RevisionTransportCommand rev, String downloadLink)
 
     /**
-     * @param population an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.PopulationType}
+     * @param population an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.Population}
      */
-    String renderPopulation(PopulationType population, RevisionTransportCommand rev, String downloadLink)
+    String renderPopulation(Population population, RevisionTransportCommand rev, String downloadLink)
 
     /**
      * @param steps an instance of {@link eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps}
@@ -165,24 +165,24 @@ interface IPharmMlRenderer {
     String renderModellingSteps(ModellingSteps steps)
 
     /**
-     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType}s.
+     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStep}s.
      */
-    String renderCommonModellingSteps(List<CommonModellingStepType> steps)
+    String renderCommonModellingSteps(List<CommonModellingStep> steps)
 
     /**
-     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType}s.
+     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.Simulation}s.
      * @param indepVar the independent variable of the model.
      */
-    String renderSimulationSteps(List<SimulationStepType> steps, String indepVar)
+    String renderSimulationSteps(List<Simulation> steps, String indepVar)
 
     /**
-     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType}s.
+     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.Estimation}s.
      */
-    String renderEstimationSteps(List<EstimationStepType> steps, RevisionTransportCommand rev, String downloadLink)
+    String renderEstimationSteps(List<Estimation> steps, RevisionTransportCommand rev, String downloadLink)
 
     /**
-     * @param dependencies a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType}s.
+     * @param dependencies a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.StepDependency}s.
      */
-    String renderStepDependencies(StepDependencyType dependencies)
+    String renderStepDependencies(StepDependency dependencies)
 }
 
