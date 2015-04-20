@@ -42,7 +42,7 @@ import eu.ddmore.libpharmml.dom.maths.ConstantType
 import eu.ddmore.libpharmml.dom.maths.UniopType
 import eu.ddmore.libpharmml.dom.maths.LogicUniOpType
 import eu.ddmore.libpharmml.dom.maths.LogicBinOpType
-import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
+import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
 import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
 import eu.ddmore.libpharmml.dom.maths.PiecewiseType
@@ -164,7 +164,7 @@ class MathsUtil {
 		}
 	}
 	
-	private static MathsSymbol getSymbol(SymbolRefType jaxObject) {
+	private static MathsSymbol getSymbol(SymbolRef jaxObject) {
 		String varName="";
 		/*if (jaxObject.getBlkIdRef()) {
 			varName=jaxObject.getBlkIdRef()+":";

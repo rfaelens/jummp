@@ -36,7 +36,7 @@ import eu.ddmore.libpharmml.dom.commontypes.MatrixRowType
 import eu.ddmore.libpharmml.dom.commontypes.RealValueType
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.StringValueType
-import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
+import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
 import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
 import eu.ddmore.libpharmml.dom.modeldefn.PairwiseType
 import org.apache.commons.logging.Log
@@ -109,7 +109,7 @@ Unexpected value for correlation matrix type ${MATRIX.matrixType} in $c."""
                 if (MATRIX) {
                     MATRIX.rowNames.stringOrSymbRef.each {
                         switch(it) {
-                            case SymbolRefType:
+                            case SymbolRef:
                                 cm.addRandomEffect(it.symbIdRef)
                                 break
                             case StringValueType:
@@ -135,7 +135,7 @@ Unexpected value for correlation matrix type ${MATRIX.matrixType} in $c."""
                                     case RealValueType:
                                         theMatrix[i][j] = "${o.value}"
                                         break
-                                    case SymbolRefType:
+                                    case SymbolRef:
                                         theMatrix[i][j] = o.symbIdRef
                                         break
                                 }

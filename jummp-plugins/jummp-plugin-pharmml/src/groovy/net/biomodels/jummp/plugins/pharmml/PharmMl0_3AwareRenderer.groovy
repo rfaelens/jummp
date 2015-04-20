@@ -42,7 +42,7 @@ import eu.ddmore.libpharmml.dom.commontypes.Rhs
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.commontypes.StringValueType
-import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
+import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
 import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
@@ -890,7 +890,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
 
         // could be an Equation or just a String
         def lhs
-        def lhsSymb = new SymbolRefType()
+        def lhsSymb = new SymbolRef()
         lhsSymb.symbIdRef = e.symbId
         def prediction
         def predictionSymb = e.output.symbRef
@@ -972,7 +972,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                     def randomEffects = []
                     if (gaussianModel.randomEffects) {
                         gaussianModel.randomEffects.each { gmre ->
-                            def randomEffectSymbol = new SymbolRefType()
+                            def randomEffectSymbol = new SymbolRef()
                             //ASSUME THERE IS ONLY ONE SYMBREF HERE
                             randomEffectSymbol.symbIdRef = gmre.symbRef[0].symbIdRef
                             randomEffects << wrapJaxb(randomEffectSymbol)
@@ -994,7 +994,7 @@ Individual parameter ${p.symbId} is missing mandatory Transformation element."""
                         } else {
                             UniopType indivParam = new UniopType()
                             indivParam.op = TRANSFORMATION
-                            def paramSymbRef = new SymbolRefType()
+                            def paramSymbRef = new SymbolRef()
                             paramSymbRef.symbIdRef = p.symbId
                             indivParam.symbRef = paramSymbRef
                             lhsEquation = new Equation()
@@ -1004,7 +1004,7 @@ Individual parameter ${p.symbId} is missing mandatory Transformation element."""
                         def popParam
                         Rhs popParamAssign = linearCovariate.populationParameter.assign
                         if (popParamAssign) {
-                            SymbolRefType popSymb = popParamAssign.symbRef ?:
+                            SymbolRef popSymb = popParamAssign.symbRef ?:
                                     popParamAssign.equation.symbRef
                             if (!popSymb) {
                                 log.warn "\
@@ -1028,7 +1028,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                             def covEffectKey
                             c.fixedEffect.each { fe ->
                                 if (fe.category) {
-                                    def catIdSymbRef = new SymbolRefType()
+                                    def catIdSymbRef = new SymbolRef()
                                     def trickReference = new StringBuilder("<msub><mi>")
                                     trickReference.append(c.symbRef.symbIdRef).append("</mi><mi>")
                                     trickReference.append(fe.category.catId).append("</mi></msub>")
@@ -1116,7 +1116,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
     }
 
     @Override
-    protected JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRefType> symbRef,
+    protected JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRef> symbRef,
             Map<String, Equation> transformations) {
         final EquationType TRANSF_EQ = resolveSymbolReference(symbRef.value, transformations)
         if (TRANSF_EQ) {
@@ -1127,7 +1127,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                     break
                 case UniopType:
                     break
-                case SymbolRefType:
+                case SymbolRef:
                     break
                 case ConstantType:
                     break
@@ -1170,7 +1170,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                     case UniopType:
                         replacement.uniop = ELEM
                         break
-                    case SymbolRefType:
+                    case SymbolRef:
                         replacement.symbRef = ELEM
                         break
                     case ConstantType:
@@ -1224,7 +1224,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
             case UniopType:
                 expandedTerms = expandNestedUniop(wrapJaxb(eqTerms), transfMap)
                 break
-            case SymbolRefType:
+            case SymbolRef:
                 expandedTerms = expandNestedSymbRefs(wrapJaxb(eqTerms), transfMap)
                 break
             default:
@@ -1248,7 +1248,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                 case PiecewiseType:
                     newEquation.piecewise = unwrappedExpandedTerms
                     break
-                case SymbolRefType:
+                case SymbolRef:
                     newEquation.symbRef = unwrappedExpandedTerms
                     break
                 default: // scalar

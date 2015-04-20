@@ -40,7 +40,7 @@ import eu.ddmore.libpharmml.dom.commontypes.Rhs
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.commontypes.StringValueType
-import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
+import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
 import eu.ddmore.libpharmml.dom.commontypes.TrueBoolean
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
@@ -196,7 +196,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                     def randomEffects = []
                     if (gaussianModel.randomEffects) {
                         gaussianModel.randomEffects.each { re ->
-                            def randomEffectSymbol = new SymbolRefType()
+                            def randomEffectSymbol = new SymbolRef()
                             randomEffectSymbol.symbIdRef = re.symbRef[0].symbIdRef
                             randomEffects << wrapJaxb(randomEffectSymbol)
                         }
@@ -208,7 +208,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                             //LHS
                             UniopType indivParam = new UniopType()
                             indivParam.op = TRANSFORMATION
-                            def paramSymbRef = new SymbolRefType()
+                            def paramSymbRef = new SymbolRef()
                             paramSymbRef.symbIdRef = p.symbId
                             indivParam.symbRef = paramSymbRef
                             def lhsEquation = new Equation()
@@ -230,7 +230,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                                 def covEffectKey
                                 c.fixedEffect.each { fe ->
                                     if (fe.category) {
-                                        def catIdSymbRef = new SymbolRefType()
+                                        def catIdSymbRef = new SymbolRef()
                                         def trickReference = new StringBuilder("<msub><mi>")
                                         trickReference.append(c.symbRef.symbIdRef).append("</mi><mi>")
                                         trickReference.append(fe.category.catId).append("</mi></msub>")
@@ -320,7 +320,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
 
         // could be an Equation or just a String
         def lhs
-        def lhsSymb = new SymbolRefType()
+        def lhsSymb = new SymbolRef()
         lhsSymb.symbIdRef = e.symbId
         def prediction
         def predictionSymb = e.output.symbRef
@@ -964,7 +964,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
        // prefixToInfix(builder, stack)
     }
 
-    protected JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRefType> symbRef,
+    protected JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRef> symbRef,
             Map<String, Equation> transformations) {
         final EquationType TRANSF_EQ = resolveSymbolReference(symbRef.value, transformations)
         if (TRANSF_EQ) {
@@ -975,7 +975,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                     break
                 case UniopType:
                     break
-                case SymbolRefType:
+                case SymbolRef:
                     break
                 case ConstantType:
                     break
@@ -1017,7 +1017,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                     case UniopType:
                         replacement.uniop = FIRST_ELEM
                         break
-                    case SymbolRefType:
+                    case SymbolRef:
                         replacement.symbRef = FIRST_ELEM
                         break
                     case ConstantType:
@@ -1066,7 +1066,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         List<JAXBElement> terms = binop.content
         def expandedTerms = terms.collect { c ->
             switch (c.value) {
-                case SymbolRefType:
+                case SymbolRef:
                     return expandNestedSymbRefs(c, transfMap)
                     break
                 case Binop:
@@ -1099,7 +1099,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 case UniopType:
                     return expandNestedUniop(it, transfMap)
                     break
-                case SymbolRefType:
+                case SymbolRef:
                     return expandNestedSymbRefs(it, transfMap)
                     break
                 default:
@@ -1289,7 +1289,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
      * If @ref only has a symbIdRef, then it will return the first element from the map
      * that matches, or null if there were no matches.
      */
-    protected EquationType resolveSymbolReference(SymbolRefType ref, Map<String, Equation> transfMap) {
+    protected EquationType resolveSymbolReference(SymbolRef ref, Map<String, Equation> transfMap) {
         EquationType transfEq
         if (ref.blkIdRef) {
             String transfRef = "${ref.blkIdRef}_${ref.symbIdRef}"
