@@ -37,7 +37,7 @@ import eu.ddmore.libpharmml.dom.commontypes.RealValueType
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.StringValueType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
-import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
+import eu.ddmore.libpharmml.dom.modeldefn.Correlation
 import eu.ddmore.libpharmml.dom.modeldefn.PairwiseType
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -57,7 +57,7 @@ public class PharmMl0_3AwareCorrelationProcessor implements ICorrelationProcesso
      * {@inheritDoc}
      */
     @Override
-    List<CorrelationMatrix> convertToStringMatrix(List<CorrelationType> correlations,
+    List<CorrelationMatrix> convertToStringMatrix(List<Correlation> correlations,
                 Map<String, List<String>> randomEffectsPerLevel) {
 
         def matricesByLevel = new HashMap<String, CorrelationMatrix>()

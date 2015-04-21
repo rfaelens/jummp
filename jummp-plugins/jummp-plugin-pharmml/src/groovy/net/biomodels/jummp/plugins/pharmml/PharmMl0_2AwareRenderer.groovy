@@ -31,11 +31,11 @@
 
 package net.biomodels.jummp.plugins.pharmml
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
-import eu.ddmore.libpharmml.dom.commontypes.FuncParameterDefinitionType
-import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
+import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
+import eu.ddmore.libpharmml.dom.commontypes.FunctionParameter
+import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinition
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
-import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
+import eu.ddmore.libpharmml.dom.commontypes.VariableDefinition
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
@@ -112,7 +112,7 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
 
     /**
      * @param functionDefinitions the list of
-     * {@link eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType}s.
+     * {@link eu.ddmore.libpharmml.dom.commontypes.FunctionDefinition}s.
      */
     @Profiled(tag = "pharmMl0_2AwareRenderer.renderFunctionDefinitions")
     String renderFunctionDefinitions(List functionDefinitions) {
@@ -391,14 +391,14 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
         try {
             vars.each { v ->
                 switch(v.value) {
-                    case DerivativeVariableType:
+                    case DerivativeVariable:
                         if (v.value.initialCondition) {
                             initialConditions << [(v.value.symbId) : v.value.initialCondition]
                         }
                         def dv = convertToMathML(v.value, iv)
                         variableList.add(dv)
                         break
-                    case VariableDefinitionType:
+                    case VariableDefinition:
                         if (v.value.assign) {
                             def vd = convertToMathML(v.value.symbId,
                                     v.value.assign)
@@ -411,12 +411,12 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
                             variableList.add(sb.toString())
                         }
                         break
-                    case FunctionDefinitionType:
+                    case FunctionDefinition:
                         def fd = v.value
                         variableList.add(convertToMathML(fd.symbId,
                                 fd.functionArgument, fd))
                         break
-                    case FuncParameterDefinitionType:
+                    case FunctionParameter:
                         variableList.add(v.value.symbId)
                         break
                     default:

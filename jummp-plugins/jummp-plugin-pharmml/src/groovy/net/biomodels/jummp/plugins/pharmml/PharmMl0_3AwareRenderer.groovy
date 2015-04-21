@@ -30,10 +30,12 @@
 **/
 
 package net.biomodels.jummp.plugins.pharmml
+
+import eu.ddmore.libpharmml.dom.maths.Binoperator
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
-import eu.ddmore.libpharmml.dom.commontypes.FuncParameterDefinitionType
-import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
+import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
+import eu.ddmore.libpharmml.dom.commontypes.FunctionParameter
+import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinition
 import eu.ddmore.libpharmml.dom.commontypes.IdValueType
 import eu.ddmore.libpharmml.dom.commontypes.IntValueType
 import eu.ddmore.libpharmml.dom.commontypes.InterpolationType
@@ -43,7 +45,7 @@ import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.SequenceType
 import eu.ddmore.libpharmml.dom.commontypes.StringValueType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
-import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
+import eu.ddmore.libpharmml.dom.commontypes.VariableDefinition
 import eu.ddmore.libpharmml.dom.commontypes.VectorType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.maths.Binop
@@ -52,7 +54,7 @@ import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
 import eu.ddmore.libpharmml.dom.maths.PiecewiseType
-import eu.ddmore.libpharmml.dom.maths.UniopType
+import eu.ddmore.libpharmml.dom.maths.Uniop
 import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateModel
@@ -130,7 +132,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
 
     /**
      * @param functionDefinitions the list of
-     * {@link eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType}s.
+     * {@link eu.ddmore.libpharmml.dom.commontypes.FunctionDefinition}s.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderFunctionDefinitions")
     String renderFunctionDefinitions(List functionDefinitions) {
@@ -188,7 +190,6 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
         } catch (Exception e) {
             model["error"] = "Sorry, something went wrong while rendering the covariates."
             log.error("Error rendering the covariates ${covModel.inspect()} ${covModel.properties} ${transfMap.inspect()}: ${e.message}", e)
-
         } finally {
             model["covariateModels"] = result
             model["version"] = "0.3.1"
@@ -375,7 +376,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderStructuralModel")
     String renderStructuralModel(List<StructuralModel> structuralModels, String iv) {
         def model = [:]
-        model["version"] = "0.3"
+        model["version"] = "0.3.1"
         try {
             structuralModels.each { sm ->
                 String modelName = sm.name?.value ?: sm.blkId
@@ -431,14 +432,14 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
         try {
             vars.each { v ->
                 switch(v.value) {
-                    case DerivativeVariableType:
+                    case DerivativeVariable:
                         if (v.value.initialCondition) {
                             initialConditions << [(v.value.symbId) : v.value.initialCondition]
                         }
                         def dv = convertToMathML(v.value, iv)
                         variableList.add(dv)
                         break
-                    case VariableDefinitionType:
+                    case VariableDefinition:
                         if (v.value.assign) {
                             def vd = convertToMathML(v.value.symbId,
                                     v.value.assign)
@@ -451,12 +452,12 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                             variableList.add(sb.toString())
                         }
                         break
-                    case FunctionDefinitionType:
+                    case FunctionDefinition:
                         def fd = v.value
                         variableList.add(convertToMathML(fd.symbId,
                                 fd.functionArgument, fd))
                         break
-                    case FuncParameterDefinitionType:
+                    case FunctionParameter:
                         variableList.add(v.value.symbId)
                         break
                     default:
@@ -499,8 +500,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                 // the API returns a JAXBElement, not ObservationErrorType
                 def obsErr = om.observationError?.value
                 if (obsErr) {
-                    result.append(" <span class='italic'>").append(obsErr.symbId).append
-                    ("</span>")
+                    result.append(" <span class='italic'>").append(obsErr.symbId).append("</span>")
                 }
                 result.append("</h4>\n")
                 result.append("<span class=\"bold\">Parameters </span>")
@@ -547,7 +547,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
             }
         } catch(Exception e) {
             log.error("Error rendering the observations ${observations.inspect()}: ${e.message}")
-            result.append "Sorry, something went wrong while rendering the observations."
+            result.append("Sorry, something went wrong while rendering the observations.")
         } finally {
             return result.toString()
         }
@@ -898,12 +898,12 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
 
         if (e.transformation) {
             final String tr = e.transformation.value()
-            def lhsUniop = new UniopType()
+            def lhsUniop = new Uniop()
             lhsUniop.op = tr
             lhsUniop.symbRef = lhsSymb
             lhs = new Equation()
             lhs.uniop = lhsUniop
-            def predUniop = new UniopType()
+            def predUniop = new Uniop()
             predUniop.op = tr
             predUniop.symbRef = predictionSymb
             prediction = wrapJaxb(predUniop)
@@ -939,14 +939,14 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
             errModel = wrapJaxb(errModelAssign.symbRef)
         }
         def em_re = new Binop()
-        em_re.op = "times"
-        em_re.content.add(errModel)
-        em_re.content.add(wrapJaxb(residualErrorSymb))
+        em_re.operator = Binoperator.TIMES
+        em_re.operand1 = errModel.value
+        em_re.operand2 = residualErrorSymb
         errModelTimesResidualErr = wrapJaxb(em_re)
         def sum = new Binop()
-        sum.op = "plus"
-        sum.content.add(prediction)
-        sum.content.add(errModelTimesResidualErr)
+        sum.operator = Binoperator.PLUS
+        sum.operand1 = prediction.value
+        sum.operand2 = errModelTimesResidualErr.value
         rhsEquation = new Equation()
         rhsEquation.binop = sum
         return result.append(convertToMathML(lhs, rhsEquation)).append("</div>")
@@ -992,7 +992,7 @@ Individual parameter ${p.symbId} is missing mandatory Transformation element."""
                         if (!APPLY_TRANSFORMATION) {
                             lhsEquation = p.symbId
                         } else {
-                            UniopType indivParam = new UniopType()
+                            Uniop indivParam = new Uniop()
                             indivParam.op = TRANSFORMATION
                             def paramSymbRef = new SymbolRef()
                             paramSymbRef.symbIdRef = p.symbId
@@ -1011,7 +1011,7 @@ Individual parameter ${p.symbId} is missing mandatory Transformation element."""
 Could not extract the population parameter of individual parameter ${p.symbId}."
                             }
                             if (APPLY_TRANSFORMATION) {
-                                popParam = new UniopType()
+                                popParam = new Uniop()
                                 popParam.op = TRANSFORMATION
                                 popParam.symbRef = popSymb
                             } else {
@@ -1063,7 +1063,8 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                                     thisCov.add(wrapJaxb(key))
                                 }
                                 it.value.collect{ v -> thisCov.add(wrapJaxb(v)) }
-                                fixedEffectsTimesCovariateList.add(applyBinopToList(thisCov, "times"))
+                                fixedEffectsTimesCovariateList.add(
+                                    applyBinopToList(thisCov, Binoperator.TIMES))
                             }
                         }
                         def sumElements = []
@@ -1074,7 +1075,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                         sumElements.addAll(randomEffects)
 
                         Equation rhsEquation = new Equation()
-                        rhsEquation.binop = applyBinopToList(sumElements, "plus").value
+                        rhsEquation.binop = applyBinopToList(sumElements, Binoperator.PLUS).value
                         output.append(convertToMathML(lhsEquation, rhsEquation))
                         output.append("\n")
                     } else if (gaussianModel.generalCovariate) {
@@ -1099,7 +1100,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                         cm_re.add(covModel)
                         cm_re.addAll(randomEffects)
                         rhsEquation = new Equation()
-                        rhsEquation.binop = applyBinopToList(cm_re, "plus").value
+                        rhsEquation.binop = applyBinopToList(cm_re, Binoperator.PLUS).value
                         String converted = convertToMathML(p.symbId, rhsEquation)
                         output.append("<div>")
                         output.append(converted)
@@ -1125,7 +1126,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
             switch(ELEM_CLASS) {
                 case Binop:
                     break
-                case UniopType:
+                case Uniop:
                     break
                 case SymbolRef:
                     break
@@ -1152,22 +1153,22 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
     }
 
     @Override
-    protected JAXBElement expandNestedUniop(JAXBElement<UniopType> jaxbUniop,
+    protected JAXBElement expandNestedUniop(JAXBElement<Uniop> jaxbUniop,
             Map<String, Equation> transfMap) {
-        UniopType uniop = jaxbUniop.value
-        UniopType replacement
+        Uniop uniop = jaxbUniop.value
+        Uniop replacement
         if (uniop.symbRef) {
             final EquationType TRANSF_EQ = resolveSymbolReference(uniop.symbRef, transfMap)
             if (TRANSF_EQ) {
                 final def ELEM = extractAttributeFromEquation(TRANSF_EQ)
                 final Class ELEM_CLASS = ELEM.getClass()
-                replacement = new UniopType()
+                replacement = new Uniop()
                 replacement.op = uniop.op
                 switch(ELEM_CLASS) {
                     case Binop:
                         replacement.binop = ELEM
                         break
-                    case UniopType:
+                    case Uniop:
                         replacement.uniop = ELEM
                         break
                     case SymbolRef:
@@ -1221,7 +1222,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
             case Binop:
                 expandedTerms = expandNestedBinop(wrapJaxb(eqTerms), transfMap)
                 break
-            case UniopType:
+            case Uniop:
                 expandedTerms = expandNestedUniop(wrapJaxb(eqTerms), transfMap)
                 break
             case SymbolRef:
@@ -1236,7 +1237,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
         if (!eqTerms.equals(unwrappedExpandedTerms)) {
             def newEquation = new EquationType()
             switch(unwrappedExpandedTerms) {
-                case UniopType:
+                case Uniop:
                     newEquation.uniop = unwrappedExpandedTerms
                     break
                 case Binop:

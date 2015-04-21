@@ -30,8 +30,10 @@
 **/
 
 package net.biomodels.jummp.plugins.pharmml
+
+import eu.ddmore.libpharmml.dom.maths.Binoperator
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
+import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
 import eu.ddmore.libpharmml.dom.commontypes.FalseBoolean
 import eu.ddmore.libpharmml.dom.commontypes.IdValueType
 import eu.ddmore.libpharmml.dom.commontypes.IntValueType
@@ -53,7 +55,7 @@ import eu.ddmore.libpharmml.dom.maths.ConstantType
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
-import eu.ddmore.libpharmml.dom.maths.UniopType
+import eu.ddmore.libpharmml.dom.maths.Uniop
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
@@ -206,7 +208,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                         if (gaussianModel.transformation) {
                             final String TRANSFORMATION = gaussianModel.transformation.value()
                             //LHS
-                            UniopType indivParam = new UniopType()
+                            Uniop indivParam = new Uniop()
                             indivParam.op = TRANSFORMATION
                             def paramSymbRef = new SymbolRef()
                             paramSymbRef.symbIdRef = p.symbId
@@ -216,7 +218,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                             //POPULATION
                             def popParam
                             if (linearCovariate.populationParameter.assign.symbRef) {
-                                popParam = new UniopType()
+                                popParam = new Uniop()
                                 popParam.op = TRANSFORMATION
                                 popParam.symbRef = linearCovariate.populationParameter.assign.symbRef
                             }
@@ -260,7 +262,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                                         thisCov.add(wrapJaxb(key))
                                     }
                                     it.value.collect{ v -> thisCov.add(wrapJaxb(v)) }
-                                    fixedEffectsTimesCovariateList.add(applyBinopToList(thisCov, "times"))
+                                    fixedEffectsTimesCovariateList.add(
+                                        applyBinopToList(thisCov, Binoperator.TIMES))
                                 }
                             }
                             def sumElements = []
@@ -271,7 +274,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                             sumElements.addAll(randomEffects)
 
                             Equation rhsEquation = new Equation()
-                            rhsEquation.scalarOrSymbRefOrBinop.add(applyBinopToList(sumElements, "plus"))
+                            rhsEquation.scalarOrSymbRefOrBinop.add(
+                                applyBinopToList(sumElements, Binoperator.PLUS))
                             output.append(convertToMathML(lhsEquation, rhsEquation))
                             output.append("\n")
                         }
@@ -295,7 +299,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                         cm_re.add(covModel)
                         cm_re.addAll(randomEffects)
                         rhsEquation = new Equation()
-                        rhsEquation.scalarOrSymbRefOrBinop.add(applyBinopToList(cm_re, "plus"))
+                        rhsEquation.scalarOrSymbRefOrBinop.add(
+                            applyBinopToList(cm_re, Binoperator.PLUS))
                         String converted = convertToMathML(p.symbId, rhsEquation)
                         output.append("<div>")
                         output.append(converted)
@@ -328,12 +333,12 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
 
         if (e.transformation) {
             final String tr = e.transformation.value()
-            def lhsUniop = new UniopType()
+            def lhsUniop = new Uniop()
             lhsUniop.op = tr
             lhsUniop.symbRef = lhsSymb
             lhs = new Equation()
             lhs.scalarOrSymbRefOrBinop.add(wrapJaxb(lhsUniop))
-            def predUniop = new UniopType()
+            def predUniop = new Uniop()
             predUniop.op = tr
             predUniop.symbRef = predictionSymb
             prediction = wrapJaxb(predUniop)
@@ -355,14 +360,14 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             errModel = wrapJaxb(errModelAssign.symbRef)
         }
         def em_re = new Binop()
-        em_re.op = "times"
-        em_re.content.add(errModel)
-        em_re.content.add(wrapJaxb(residualErrorSymb))
+        em_re.operator = Binoperator.TIMES
+        em_re.operand1 = errModel.value
+        em_re.operand2 = residualErrorSymb
         errModelTimesResidualErr = wrapJaxb(em_re)
         def sum = new Binop()
-        sum.op = "plus"
-        sum.content.add(prediction)
-        sum.content.add(errModelTimesResidualErr)
+        sum.operator = Binoperator.PLUS
+        sum.operand1 = prediction.value
+        sum.operand2 = errModelTimesResidualErr.value
         rhsEquation = new Equation()
         rhsEquation.scalarOrSymbRefOrBinop.add(wrapJaxb(sum))
         if (lhs && rhsEquation) {
@@ -973,7 +978,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             switch(ELEM_CLASS) {
                 case Binop:
                     break
-                case UniopType:
+                case Uniop:
                     break
                 case SymbolRef:
                     break
@@ -999,22 +1004,22 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         }
     }
 
-    protected JAXBElement expandNestedUniop(JAXBElement<UniopType> jaxbUniop,
+    protected JAXBElement expandNestedUniop(JAXBElement<Uniop> jaxbUniop,
             Map<String, Equation> transfMap) {
-        UniopType uniop = jaxbUniop.value
-        UniopType replacement
+        Uniop uniop = jaxbUniop.value
+        Uniop replacement
         if (uniop.symbRef) {
             final EquationType TRANSF_EQ = resolveSymbolReference(uniop.symbRef, transfMap)
             if (TRANSF_EQ) {
                 final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first().value
                 final Class ELEM_CLASS = FIRST_ELEM.getClass()
-                replacement = new UniopType()
+                replacement = new Uniop()
                 replacement.op = uniop.op
                 switch(ELEM_CLASS) {
                     case Binop:
                         replacement.binop = FIRST_ELEM
                         break
-                    case UniopType:
+                    case Uniop:
                         replacement.uniop = FIRST_ELEM
                         break
                     case SymbolRef:
@@ -1063,7 +1068,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
     protected JAXBElement expandNestedBinop(JAXBElement<Binop> jaxbBinop,
             Map<String, Equation> transfMap) {
         Binop binop = jaxbBinop.value
-        List<JAXBElement> terms = binop.content
+        List<JAXBElement> terms = [binop.operand1, binop.operand2].collect {it.toJAXBElement()}
         def expandedTerms = terms.collect { c ->
             switch (c.value) {
                 case SymbolRef:
@@ -1072,7 +1077,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 case Binop:
                     return expandNestedBinop(c, transfMap)
                     break
-                case UniopType:
+                case Uniop:
                     return expandNestedUniop(c, transfMap)
                     break
                 default:
@@ -1084,8 +1089,9 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             return jaxbBinop
         }
         Binop expanded = new Binop()
-        expanded.op = binop.op
-        expanded.content = expandedTerms
+        expanded.operator = binop.operator
+        expanded.operand1 = expandedTerms[0]
+        expanded.operand2 = expandedTerms[1]
         return wrapJaxb(expanded)
     }
 
@@ -1096,7 +1102,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 case Binop:
                     return expandNestedBinop(it, transfMap)
                     break
-                case UniopType:
+                case Uniop:
                     return expandNestedUniop(it, transfMap)
                     break
                 case SymbolRef:
@@ -1195,7 +1201,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return builder.toString()
     }
 
-    protected String convertToMathML(DerivativeVariableType derivative, def iv) {
+    protected String convertToMathML(DerivativeVariable derivative, def iv) {
         String independentVariable = derivative.independentVariable?.symbRef?.symbIdRef ?: (iv ?: "t")
         String derivTerm="d${derivative.symbId}<DIVIDEDBY>d${independentVariable}"
         return convertToMathML(derivTerm, derivative.getAssign())
@@ -1265,17 +1271,15 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return elem instanceof JAXBElement ? elem : new JAXBElement(new QName(""), elem.getClass(), elem)
     }
 
-    protected JAXBElement applyBinopToList(List elements, String operator) {
+    protected JAXBElement applyBinopToList(List elements, Binoperator operator) {
         if (elements.size() == 1) {
             // just return the element
             return wrapJaxb(elements.first())
         } else {
             def result = new Binop()
-            result.op = operator
-            final int LAST = elements.size() - 1
-            result.content = []
-            result.content.add(wrapJaxb(elements.first()))
-            result.content.add(applyBinopToList(elements[1..LAST], operator))
+            result.operator = operator
+            result.operand1 = elements.first().value
+            result.operand2 = applyBinopToList(elements[1..-1], operator)?.value
             return wrapJaxb(result)
         }
     }
