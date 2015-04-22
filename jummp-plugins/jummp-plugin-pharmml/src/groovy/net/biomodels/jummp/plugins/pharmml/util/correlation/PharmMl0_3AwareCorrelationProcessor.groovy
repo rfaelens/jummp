@@ -38,7 +38,7 @@ import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
 import eu.ddmore.libpharmml.dom.commontypes.StringValueType
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
 import eu.ddmore.libpharmml.dom.modeldefn.Correlation
-import eu.ddmore.libpharmml.dom.modeldefn.PairwiseType
+import eu.ddmore.libpharmml.dom.modeldefn.Pairwise
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -65,7 +65,7 @@ public class PharmMl0_3AwareCorrelationProcessor implements ICorrelationProcesso
             try {
                 final String VAR = c.variabilityReference.symbRef?.symbIdRef ?:
                                 c.variabilityReference.symbRef?.blkIdRef ?: "undefined"
-                final PairwiseType PAIRWISE = c.pairwise
+                final Pairwise PAIRWISE = c.pairwise
                 final MatrixType MATRIX = c.matrix
                 assert (PAIRWISE != null) || (MATRIX != null)
                 CorrelationMatrix cm

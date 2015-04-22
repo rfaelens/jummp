@@ -67,7 +67,7 @@ import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
-import eu.ddmore.libpharmml.dom.trialdesign.ActivityType
+import eu.ddmore.libpharmml.dom.trialdesign.Activity
 import eu.ddmore.libpharmml.dom.trialdesign.BolusType
 import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
@@ -93,7 +93,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
      * Parses an activity and writes it to a StringBuilder.
      * Returns whether to display a dosing footnote or not.
      */
-    protected boolean activity(ActivityType activity, boolean isFirst, StringBuilder result) {
+    protected boolean activity(Activity activity, boolean isFirst, StringBuilder result) {
         boolean showDosingFootnote = false
         if (!isFirst) {
             result.append("<tr>")

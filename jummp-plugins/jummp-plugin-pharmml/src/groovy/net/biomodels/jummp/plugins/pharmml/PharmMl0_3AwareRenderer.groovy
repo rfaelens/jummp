@@ -62,7 +62,7 @@ import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameter
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.ObservationModel
-import eu.ddmore.libpharmml.dom.modeldefn.PairwiseType
+import eu.ddmore.libpharmml.dom.modeldefn.Pairwise
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariable
 import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameter
 import eu.ddmore.libpharmml.dom.modeldefn.StructuralModel
@@ -867,7 +867,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     @Override
     protected void buildCorrelationMap(CorrelationType c, Map correlationsMap) {
         try {
-            PairwiseType p = c.pairwise
+            Pairwise p = c.pairwise
             final ScalarRhs VALUE = p.covariance ?: p.correlationCoefficient
 
             String var = c.variabilityReference.symbRef?.symbIdRef ?:
