@@ -34,9 +34,9 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
 import eu.ddmore.libpharmml.dom.commontypes.FunctionParameter
 import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinition
-import eu.ddmore.libpharmml.dom.commontypes.SequenceType
+import eu.ddmore.libpharmml.dom.commontypes.Sequence
 import eu.ddmore.libpharmml.dom.commontypes.VariableDefinition
-import eu.ddmore.libpharmml.dom.commontypes.VectorType
+import eu.ddmore.libpharmml.dom.commontypes.Vector as CTVector
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateModel
@@ -753,10 +753,10 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
                         // put all timepoints here, output them separated by commas
                         List<String> observationTimepoints = []
                         o.timepoints.arrays.each { a ->
-                            //JAXBElement parameterised with SequenceType or VectorType
-                            if (a.value instanceof VectorType) {
+                            //JAXBElement parameterised with Sequence or CTVector
+                            if (a.value instanceof CTVector) {
                                 observationTimepoints << jaxbVector(a.value).toString()
-                            } else if (a.value instanceof SequenceType) {
+                            } else if (a.value instanceof Sequence) {
                                 observationTimepoints << sequence(a.value).toString()
                             }
                         }

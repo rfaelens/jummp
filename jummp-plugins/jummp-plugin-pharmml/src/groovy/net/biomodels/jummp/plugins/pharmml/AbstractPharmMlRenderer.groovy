@@ -32,26 +32,27 @@
 package net.biomodels.jummp.plugins.pharmml
 
 import eu.ddmore.libpharmml.dom.maths.Binoperator
+import eu.ddmore.libpharmml.dom.maths.Unioperator
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
 import eu.ddmore.libpharmml.dom.commontypes.FalseBoolean
-import eu.ddmore.libpharmml.dom.commontypes.IdValueType
-import eu.ddmore.libpharmml.dom.commontypes.IntValueType
-import eu.ddmore.libpharmml.dom.commontypes.RealValueType
+import eu.ddmore.libpharmml.dom.commontypes.IdValue
+import eu.ddmore.libpharmml.dom.commontypes.IntValue
+import eu.ddmore.libpharmml.dom.commontypes.RealValue
 import eu.ddmore.libpharmml.dom.commontypes.Rhs
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
-import eu.ddmore.libpharmml.dom.commontypes.SequenceType
-import eu.ddmore.libpharmml.dom.commontypes.StringValueType
+import eu.ddmore.libpharmml.dom.commontypes.Sequence
+import eu.ddmore.libpharmml.dom.commontypes.StringValue
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
 import eu.ddmore.libpharmml.dom.commontypes.TrueBoolean
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
-import eu.ddmore.libpharmml.dom.commontypes.VectorType
+import eu.ddmore.libpharmml.dom.commontypes.Vector as CTVector
 import eu.ddmore.libpharmml.dom.dataset.ColumnDefinition
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
 import eu.ddmore.libpharmml.dom.dataset.DataSetType
 import eu.ddmore.libpharmml.dom.maths.Binop
-import eu.ddmore.libpharmml.dom.maths.ConstantType
+import eu.ddmore.libpharmml.dom.maths.Constant
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
@@ -68,8 +69,8 @@ import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
 import eu.ddmore.libpharmml.dom.trialdesign.Activity
-import eu.ddmore.libpharmml.dom.trialdesign.BolusType
-import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
+import eu.ddmore.libpharmml.dom.trialdesign.Bolus
+import eu.ddmore.libpharmml.dom.trialdesign.Infusion
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
 import javax.xml.bind.JAXBElement
 import javax.xml.namespace.QName
@@ -106,11 +107,11 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             /* dosingRegimen is a JAXBElement */
             def regimen = activity.dosingRegimen.value
             switch(regimen) {
-                case BolusType:
+                case Bolus:
                     result.append("<td>bolus</td>")
                     //fall through
-                case InfusionType:
-                    if (regimen instanceof InfusionType) {
+                case Infusion:
+                    if (regimen instanceof Infusion) {
                         result.append("<td>infusion</td>")
                     }
                     if (regimen.dosingTimes) {
@@ -209,7 +210,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                             final String TRANSFORMATION = gaussianModel.transformation.value()
                             //LHS
                             Uniop indivParam = new Uniop()
-                            indivParam.op = TRANSFORMATION
+                            indivParam.operator = Unioperator.valueOf(TRANSFORMATION)
                             def paramSymbRef = new SymbolRef()
                             paramSymbRef.symbIdRef = p.symbId
                             indivParam.symbRef = paramSymbRef
@@ -219,7 +220,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                             def popParam
                             if (linearCovariate.populationParameter.assign.symbRef) {
                                 popParam = new Uniop()
-                                popParam.op = TRANSFORMATION
+                                popParam.operator = TRANSFORMATION
                                 popParam.symbRef = linearCovariate.populationParameter.assign.symbRef
                             }
                             def fixedEffectsCovMap = [:]
@@ -334,12 +335,12 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         if (e.transformation) {
             final String tr = e.transformation.value()
             def lhsUniop = new Uniop()
-            lhsUniop.op = tr
+            lhsUniop.operator = Unioperator.valueOf(tr)
             lhsUniop.symbRef = lhsSymb
             lhs = new Equation()
             lhs.scalarOrSymbRefOrBinop.add(wrapJaxb(lhsUniop))
             def predUniop = new Uniop()
-            predUniop.op = tr
+            predUniop.operator = Unioperator.valueOf(tr)
             predUniop.symbRef = predictionSymb
             prediction = wrapJaxb(predUniop)
         } else {
@@ -417,7 +418,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         }
     }
 
-    protected StringBuilder jaxbVector(VectorType vector) {
+    protected StringBuilder jaxbVector(CTVector vector) {
         if (!vector) {
             return new StringBuilder()
         }
@@ -425,7 +426,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         def values = []
         vector.sequenceOrScalar.inject(result) { r, ss ->
             switch(ss.value) {
-               case SequenceType:
+               case Sequence:
                     values << sequence(ss.value)
                     break
                 default:
@@ -736,24 +737,21 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
 
     protected String scalar(def s) {
         switch(s) {
-            case RealValueType:
-            case IntValueType:
-            case StringValueType:
-            case IdValueType:
+            case RealValue:
+            case IntValue:
+            case StringValue:
+            case IdValue:
                 return s.value as String
-                break
             case TrueBoolean:
                 return "true"
-                break
             case FalseBoolean:
                 return "false"
-                break
             default:
                 return s.toString()
         }
     }
 
-    protected String sequence(SequenceType s) {
+    protected String sequence(Sequence s) {
         return [s.begin, s.stepSize, s.end].collect{rhs(it, new StringBuilder())}.join(":")
     }
 
@@ -774,13 +772,13 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             //can be a scalar or a sequence
             def vectorElement = iterator.next().value
             switch (vectorElement) {
-                case SequenceType:
+                case Sequence:
                     result.append(sequence(vectorElement))
                     break
-                case IdValueType:
-                case StringValueType:
-                case IntValueType:
-                case RealValueType:
+                case IdValue:
+                case StringValue:
+                case IntValue:
+                case RealValue:
                 case TrueBoolean:
                 case FalseBoolean:
                     result.append(oprand(vectorElement.value.toString()))
@@ -812,7 +810,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 item = vectorElement as ScalarRhs
                 result.append(item.value.toPlainString())
             } catch (ClassCastException ignored) {
-                item = vectorElement as SequenceType
+                item = vectorElement as Sequence
                 result.append(sequence(item))
             }
             if (iterator.hasNext()) {
@@ -982,17 +980,17 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                     break
                 case SymbolRef:
                     break
-                case ConstantType:
+                case Constant:
                     break
                 case FunctionCallType:
                     break
-                case IdValueType:
+                case IdValue:
                     break
-                case StringValueType:
+                case StringValue:
                     break
-                case IntValueType:
+                case IntValue:
                     break
-                case RealValueType:
+                case RealValue:
                     break
                 default:
                     assert false, "Cannot have ${ELEM_CLASS.name} inside a transformation."
@@ -1014,7 +1012,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first().value
                 final Class ELEM_CLASS = FIRST_ELEM.getClass()
                 replacement = new Uniop()
-                replacement.op = uniop.op
+                replacement.operator = uniop.operator
                 switch(ELEM_CLASS) {
                     case Binop:
                         replacement.binop = FIRST_ELEM
@@ -1025,21 +1023,21 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                     case SymbolRef:
                         replacement.symbRef = FIRST_ELEM
                         break
-                    case ConstantType:
+                    case Constant:
                         replacement.constant = FIRST_ELEM
                         break
                     case FunctionCallType:
                         replacement.functionCall = FIRST_ELEM
                         break
-                    case IdValueType:
+                    case IdValue:
                         replacement.scalar = FIRST_ELEM
                         break
-                    case StringValueType:
+                    case StringValue:
                         break
-                    case IntValueType:
+                    case IntValue:
                         replacement.scalar = FIRST_ELEM
                         break
-                    case RealValueType:
+                    case RealValue:
                         replacement.scalar = FIRST_ELEM
                         break
                     default:

@@ -32,28 +32,29 @@
 package net.biomodels.jummp.plugins.pharmml
 
 import eu.ddmore.libpharmml.dom.maths.Binoperator
+import eu.ddmore.libpharmml.dom.maths.Unioperator
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
 import eu.ddmore.libpharmml.dom.commontypes.FunctionParameter
 import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinition
-import eu.ddmore.libpharmml.dom.commontypes.IdValueType
-import eu.ddmore.libpharmml.dom.commontypes.IntValueType
+import eu.ddmore.libpharmml.dom.commontypes.IdValue
+import eu.ddmore.libpharmml.dom.commontypes.IntValue
 import eu.ddmore.libpharmml.dom.commontypes.InterpolationType
-import eu.ddmore.libpharmml.dom.commontypes.RealValueType
+import eu.ddmore.libpharmml.dom.commontypes.RealValue
 import eu.ddmore.libpharmml.dom.commontypes.Rhs
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
-import eu.ddmore.libpharmml.dom.commontypes.SequenceType
-import eu.ddmore.libpharmml.dom.commontypes.StringValueType
+import eu.ddmore.libpharmml.dom.commontypes.Sequence
+import eu.ddmore.libpharmml.dom.commontypes.StringValue
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
 import eu.ddmore.libpharmml.dom.commontypes.VariableDefinition
-import eu.ddmore.libpharmml.dom.commontypes.VectorType
+import eu.ddmore.libpharmml.dom.commontypes.Vector as CTVector
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.maths.Binop
-import eu.ddmore.libpharmml.dom.maths.ConstantType
+import eu.ddmore.libpharmml.dom.maths.Constant
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
-import eu.ddmore.libpharmml.dom.maths.PiecewiseType
+import eu.ddmore.libpharmml.dom.maths.Piecewise
 import eu.ddmore.libpharmml.dom.maths.Uniop
 import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
@@ -794,10 +795,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                         // put all timepoints here, output them separated by commas
                         List<String> observationTimepoints = []
                         o.timepoints.arrays.each { a ->
-                            //JAXBElement parameterised with SequenceType or VectorType
-                            if (a.value instanceof VectorType) {
+                            //JAXBElement parameterised with Sequence or CTVector
+                            if (a.value instanceof CTVector) {
                                 observationTimepoints << jaxbVector(a.value).toString()
-                            } else if (a.value instanceof SequenceType) {
+                            } else if (a.value instanceof Sequence) {
                                 observationTimepoints << sequence(a.value).toString()
                             }
                         }
@@ -899,12 +900,12 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
         if (e.transformation) {
             final String tr = e.transformation.value()
             def lhsUniop = new Uniop()
-            lhsUniop.op = tr
+            lhsUniop.operator = Unioperator.fromString(tr)
             lhsUniop.symbRef = lhsSymb
             lhs = new Equation()
             lhs.uniop = lhsUniop
             def predUniop = new Uniop()
-            predUniop.op = tr
+            predUniop.operator = Unioperator.fromString(tr)
             predUniop.symbRef = predictionSymb
             prediction = wrapJaxb(predUniop)
         } else {
@@ -993,7 +994,7 @@ Individual parameter ${p.symbId} is missing mandatory Transformation element."""
                             lhsEquation = p.symbId
                         } else {
                             Uniop indivParam = new Uniop()
-                            indivParam.op = TRANSFORMATION
+                            indivParam.operator = Unioperator.fromString(TRANSFORMATION)
                             def paramSymbRef = new SymbolRef()
                             paramSymbRef.symbIdRef = p.symbId
                             indivParam.symbRef = paramSymbRef
@@ -1012,7 +1013,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                             }
                             if (APPLY_TRANSFORMATION) {
                                 popParam = new Uniop()
-                                popParam.op = TRANSFORMATION
+                                popParam.operator = Unioperator.fromString(TRANSFORMATION)
                                 popParam.symbRef = popSymb
                             } else {
                                 popParam = popSymb
@@ -1130,17 +1131,17 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                     break
                 case SymbolRef:
                     break
-                case ConstantType:
+                case Constant:
                     break
                 case FunctionCallType:
                     break
-                case IdValueType:
+                case IdValue:
                     break
-                case StringValueType:
+                case StringValue:
                     break
-                case IntValueType:
+                case IntValue:
                     break
-                case RealValueType:
+                case RealValue:
                     break
                 default:
                     assert false, "Cannot have ${ELEM_CLASS.name} inside a transformation."
@@ -1163,7 +1164,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                 final def ELEM = extractAttributeFromEquation(TRANSF_EQ)
                 final Class ELEM_CLASS = ELEM.getClass()
                 replacement = new Uniop()
-                replacement.op = uniop.op
+                replacement.operator = uniop.operator
                 switch(ELEM_CLASS) {
                     case Binop:
                         replacement.binop = ELEM
@@ -1174,21 +1175,21 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                     case SymbolRef:
                         replacement.symbRef = ELEM
                         break
-                    case ConstantType:
+                    case Constant:
                         replacement.constant = ELEM
                         break
                     case FunctionCallType:
                         replacement.functionCall = ELEM
                         break
-                    case IdValueType:
+                    case IdValue:
                         replacement.scalar = ELEM
                         break
-                    case StringValueType:
+                    case StringValue:
                         break
-                    case IntValueType:
+                    case IntValue:
                         replacement.scalar = ELEM
                         break
-                    case RealValueType:
+                    case RealValue:
                         replacement.scalar = ELEM
                         break
                     default:
@@ -1246,7 +1247,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                 case FunctionCallType:
                     newEquation.functionCall = unwrappedExpandedTerms
                     break
-                case PiecewiseType:
+                case Piecewise:
                     newEquation.piecewise = unwrappedExpandedTerms
                     break
                 case SymbolRef:
