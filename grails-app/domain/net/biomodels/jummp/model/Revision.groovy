@@ -28,7 +28,7 @@ import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.core.model.ModelState
-
+import net.biomodels.jummp.annotationstore.ElementAnnotation
 
 /**
  * @short A Revision represents one version of a Model.
@@ -51,7 +51,7 @@ class Revision implements Serializable {
      * The revision belongs to one Model
      */
     static belongsTo = [model: Model]
-    static hasMany = [repoFiles: RepositoryFile]
+    static hasMany = [repoFiles: RepositoryFile, annotations: ElementAnnotation]
     static mapping = {
         description type: 'text'
     }
