@@ -39,6 +39,17 @@ import net.biomodels.jummp.core.model.identifier.generator.AbstractModelIdentifi
 import net.biomodels.jummp.core.model.identifier.generator.DefaultModelIdentifierGenerator
 import net.biomodels.jummp.core.model.identifier.generator.ModelIdentifierGeneratorRegistryService
 import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
+import org.codehaus.groovy.grails.commons.DomainClassArtefactHandler
+import org.springframework.beans.factory.support.BeanDefinitionRegistry
+import org.springframework.beans.factory.config.BeanDefinition
+import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry
+import org.springframework.context.annotation.ClassPathBeanDefinitionScanner
+import org.springframework.core.type.filter.AnnotationTypeFilter
+import grails.persistence.Entity
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 
 // Place your Spring DSL code here
 beans = {
@@ -101,4 +112,21 @@ beans = {
         }
     }
     grailsApplication.config.jummp.id.clear()
+    
+    //Add annotation store domain classes (defined externally) to the domain model
+    //following: https://github.com/pongasoft/external-domain-classes-grails-plugin/blob/master/ExternalDomainClassesGrailsPlugin.groovy#L84
+    def packages = ["net.biomodels.jummp.annotationstore"] as String[]
+    BeanDefinitionRegistry simpleRegistry = new SimpleBeanDefinitionRegistry()
+    ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(simpleRegistry, false)
+    scanner.includeAnnotationConfig = false
+    scanner.addIncludeFilter(new AnnotationTypeFilter(Entity.class))
+    scanner.scan(packages)
+    simpleRegistry?.beanDefinitionNames?.each { String beanName ->
+        BeanDefinition bean = simpleRegistry.getBeanDefinition(beanName)
+        String beanClassName = bean.beanClassName
+        grailsApplication.addArtefact(DomainClassArtefactHandler.TYPE,
+                                      Class.forName(beanClassName,
+                                      true,
+                                      Thread.currentThread().contextClassLoader))
+    }
 }
