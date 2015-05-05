@@ -34,7 +34,9 @@
 
 package net.biomodels.jummp.core
 
+import net.biomodels.jummp.core.adapters.DomainAdapter 
 import net.biomodels.jummp.model.Publication
+import net.biomodels.jummp.model.PublicationPerson
 import net.biomodels.jummp.model.PublicationLinkProvider
 import org.xml.sax.SAXParseException
 import org.springframework.transaction.annotation.Transactional
@@ -63,7 +65,7 @@ class PubMedService {
     		}
     	}
     	if (publication) {
-            return publication.toCommandObject();
+            return DomainAdapter.getAdapter(publication).toCommandObject();
         } else {
         	return fetchPublicationData(id)
         }
@@ -88,7 +90,23 @@ class PubMedService {
         return m.matches()
     }
     
-
+    public List getPersons(Publication publication) {
+        PublicationPerson.findAllByPublication(publication,
+                    [sort: "position", order: "asc"])
+    }
+    
+    public void addPublicationAuthor(Publication publication,
+                                     Person person,
+                                     String realName,
+                                     Integer position) {
+       def tmp = new PublicationPerson(publication: publication,
+                                person: person,
+                                pubAlias: realName,
+                                position: position)
+      tmp.save(failOnError:true, flush: true);
+     }
+    
+    
     private setFieldIfItExists(String fieldName, PublicationTransportCommand publication, def xmlField, boolean castToInt) {
     	try
     	{
@@ -137,7 +155,7 @@ class PubMedService {
         PublicationLinkProvider link=PublicationLinkProvider.createCriteria().get() {
         	eq("linkType",PublicationLinkProvider.LinkType.PUBMED)
         }
-        PublicationTransportCommand publication = new PublicationTransportCommand(linkProvider: link.toCommandObject(), link: id)
+        PublicationTransportCommand publication = new PublicationTransportCommand(linkProvider: DomainAdapter.getAdapter(link).toCommandObject(), link: id)
         setFieldIfItExists("pages", publication, slurper.resultList.result.pageInfo, false)
         setFieldIfItExists("title", publication, slurper.resultList.result.title, false)
         setFieldIfItExists("affiliation", publication, slurper.resultList.result.affiliation, false)
@@ -172,4 +190,89 @@ class PubMedService {
             publication.authors.add(author);
         }
     }
+    
+    
+    
+    
+    private void reconcile(Publication publication, def tobeAdded) {
+        def existing = getPersons(publication)
+        tobeAdded.eachWithIndex { newAuthor, index ->
+            def existingAuthor = existing.find { oldAuthor ->
+                if (newAuthor.id) {
+                    return newAuthor.id == oldAuthor.person.id
+                }
+                else if (newAuthor.orcid) {
+                    return newAuthor.orcid == oldAuthor.person.orcid
+                }
+                return false
+            }
+            if (!existingAuthor) {
+                Person newlyCreatedPubAuthor
+                if (newAuthor.orcid) {
+                    def personWithSameOrcid = Person.findByOrcid(newAuthor.orcid)
+                    if (personWithSameOrcid) {
+                        newlyCreatedPubAuthor = personWithSameOrcid
+                    }
+                }
+                if (!newlyCreatedPubAuthor) {
+                    newlyCreatedPubAuthor = new Person(userRealName: newAuthor.userRealName,
+                                orcid: newAuthor.orcid)
+                    newlyCreatedPubAuthor.save(failOnError: true, flush: true);
+                }
+                try {
+                    addPublicationAuthor(publication, newlyCreatedPubAuthor, newAuthor.userRealName, index)
+                }
+                catch(Exception e) {
+                    e.printStackTrace()
+                }
+            }
+            else {
+                if (existingAuthor.position != index) {
+                    existingAuthor.position = index
+                    existingAuthor.save()
+                }
+            }
+         }
+    }
+    
+    
+    def fromCommandObject(PublicationTransportCommand cmd) {
+        Publication publication = Publication.createCriteria().get() {
+            eq("link",cmd.link)
+            linkProvider {
+                eq("linkType", PublicationLinkProvider.LinkType.valueOf(cmd.linkProvider.linkType))
+            }
+        }
+        if (publication) {
+            publication.title = cmd.title
+            publication.affiliation = cmd.affiliation
+            publication.synopsis = cmd.synopsis
+            publication.journal = cmd.journal
+            publication.year = cmd.year
+            publication.month = cmd.month
+            publication.day = cmd.day
+            publication.volume = cmd.volume
+            publication.issue = cmd.issue
+            publication.pages = cmd.pages
+            publication.save(flush: true)
+            reconcile(publication, cmd.authors)
+            return getAdapter(publication)
+        }
+        Publication publ = new Publication(journal: cmd.journal,
+                title: cmd.title,
+                affiliation: cmd.affiliation,
+                synopsis: cmd.synopsis,
+                year: cmd.year,
+                month: cmd.month,
+                day: cmd.day,
+                volume: cmd.volume,
+                issue: cmd.issue,
+                pages: cmd.pages,
+                linkProvider: PublicationLinkProvider.fromCommandObject(cmd.linkProvider),
+                link: cmd.link)
+        publ.save(failOnError: true, flush: true)
+        reconcile(publ, cmd.authors)
+        return DomainAdapter.getAdapter(publ)
+    }
+    
 }

@@ -31,6 +31,8 @@
 package net.biomodels.jummp.core
 
 import static java.util.UUID.randomUUID
+import net.biomodels.jummp.core.adapters.DomainAdapter 
+import net.biomodels.jummp.core.adapters.ModelAdapter 
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.ModelCreatedEvent
 import net.biomodels.jummp.core.events.PostLogging
@@ -453,7 +455,7 @@ OR lower(m.publication.affiliation) like :filter
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getModel")
     public Model getModel(String id) {
-        Model model = Model.findByPerennialIdentifier(id)
+        Model model = ModelAdapter.findByPerennialIdentifier(id)
         if (model) {
             if (!getLatestRevision(model)) {
                 throw new AccessDeniedException("No access to Model with Id ${id}")
@@ -570,7 +572,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     public Revision getRevision(String identifier) {
         String[] parts = identifier.split("\\.")
         String modelId = parts[0]
-        Model model = Model.findByPerennialIdentifier(modelId)
+        Model model = ModelAdapter.findByPerennialIdentifier(modelId)
         if (parts.length == 1) {
             Revision revision = getLatestRevision(model)
             if (!revision) {
@@ -715,7 +717,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 domain.hidden = rf.hidden
             }
             if (!domain.validate()) {
-                final def m = model.toCommandObject()
+                final def m = DomainAdapter.getAdapter(model).toCommandObject()
                 def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the update of model ${m.properties}.")
                 msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
                 log.error(msg)
@@ -736,7 +738,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             domainObjects.each{ it.discard() }
             log.error("Exception occurred during uploading a new Model Revision to VCS: ${e.getMessage()}")
             stopWatch.stop()
-            throw new ModelException(model.toCommandObject(),
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
                 "Could not store new Model Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} in VCS", e)
         }
         domainObjects.each {
@@ -783,14 +785,14 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             revision.refresh()
             executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
-                    revision.toCommandObject(), vcsService.retrieveFiles(revision)))
+                    DomainAdapter.getAdapter(revision).toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.errors.allErrors.each {
                log.error(it)
             }
             revision.discard()
-            final def m = model.toCommandObject()
+            final def m = DomainAdapter.getAdapter(model).toCommandObject()
             log.error("New Revision containing ${repoFiles.inspect()} for Model ${m} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")
             stopWatch.stop()
             throw new ModelException(m, "Revision stored in VCS, but not in database")
@@ -949,8 +951,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             errMsg.append("${revision.errors.allErrors.inspect()}\n")
             log.error(errMsg)
             stopWatch.stop()
-            throw new ModelException(model.toCommandObject(),
-                "Could not store new Model ${model.toCommandObject().properties} in VCS", e)
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
+                "Could not store new Model ${DomainAdapter.getAdapter(model).toCommandObject().properties} in VCS", e)
         }
         stopWatch.lap("Finished importing the model into the VCS.")
         stopWatch.setTag("modelService.uploadValidatedModel.gormValidation")
@@ -971,7 +973,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 msg.append("${revision.errors.allErrors.inspect()}\n")
                 log.error(msg)
                 stopWatch.stop()
-                throw new ModelException(model.toCommandObject(), "New model does not validate")
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "New model does not validate")
             }
             model.save(flush: true)
             domainObjects.each { rf ->
@@ -1021,7 +1023,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
 
             // broadcast event
-            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFiles))
+            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, DomainAdapter.getAdapter(model).toCommandObject(), modelFiles))
         } else {
             // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
@@ -1029,7 +1031,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             model.discard()
             log.error("New Model ${model.properties} with properties ${rev.model.properties} does not validate:${revision.errors.allErrors.inspect()}")
             stopWatch.stop()
-            throw new ModelException(model.toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
         }
         return model
     }
@@ -1166,13 +1168,13 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             model.discard()
             //TODO undo the addition of the files to the VCS.
             def errMsg = new StringBuffer("Exception occurred while storing new Model ")
-            errMsg.append("${model.toCommandObject().properties} to VCS: ${e.getMessage()}.\n")
+            errMsg.append("${DomainAdapter.getAdapter(model).toCommandObject().properties} to VCS: ${e.getMessage()}.\n")
             errMsg.append("${model.errors.allErrors.inspect()}\n")
             errMsg.append("${revision.errors.allErrors.inspect()}\n")
             log.error(errMsg)
             stopWatch.stop()
-            throw new ModelException(model.toCommandObject(),
-                "Could not store new Model ${model.toCommandObject().properties} in VCS", e)
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
+                "Could not store new Model ${DomainAdapter.getAdapter(model).toCommandObject().properties} in VCS", e)
         }
         stopWatch.lap("Finished importing model in VCS.")
         stopWatch.setTag("modelService.uploadModelAsList.gormValidation")
@@ -1193,7 +1195,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 msg.append("${revision.errors.allErrors.inspect()}\n")
                 log.error(msg)
                 stopWatch.stop()
-                throw new ModelException(model.toCommandObject(), "New model does not validate")
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "New model does not validate")
             }
             model.save(flush: true)
             stopWatch.lap("Finished GORM validation.")
@@ -1228,14 +1230,14 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
 
             // broadcast event
-            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFiles))
+            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, DomainAdapter.getAdapter(model).toCommandObject(), modelFiles))
         } else {
             // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
             domainObjects.each {it.discard()}
             model.discard()
             log.error("New Model ${model.properties} with properties ${meta.properties} does not validate:${revision.errors.allErrors.inspect()}")
-            throw new ModelException(model.toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
         }
         return model
     }
@@ -1281,43 +1283,43 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(null, "Model may not be null")
         }
         if (model.deleted) {
-            throw new ModelException(model.toCommandObject(), "A new Revision cannot be added to a deleted model")
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "A new Revision cannot be added to a deleted model")
         }
         if (comment == null) {
-            throw new ModelException(model.toCommandObject(), "Comment may not be null, empty comment is allowed")
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "Comment may not be null, empty comment is allowed")
         }
         if (!repoFiles || repoFiles.size() == 0) {
             log.error("No files were provided as part of the update of model ${model.properties}")
-            throw new ModelException(model.toCommandObject(), "A new version of the model must contain at least one file.")
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "A new version of the model must contain at least one file.")
         }
         List<File> modelFiles = []
         for (rf in repoFiles) {
             if (!rf || !rf.path) {
                 log.error("No file was provided as part of the update of model ${model.properties}")
-                throw new ModelException(model.toCommandObject(), "Please supply at least one file for the new version of this model.")
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "Please supply at least one file for the new version of this model.")
             }
             final String path = rf.path
             if (!path || path.isEmpty()) {
                 log.error("Null file encountered while uploading a new revision for ${model.properties}: ${repoFiles.properties}")
-                throw new ModelException(model.toCommandObject(),
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
                     "Sorry, there was something wrong with one of the files you submitted. Please refine the files you wish to upload and try again.")
             }
             final def f = new File(path)
             if (!f.exists()) {
                 log.error("Non-existent file detected while uploading a new revision for ${model.properties}: ${f.properties}")
-                throw new ModelException(model.toCommandObject(),
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
                     "Sorry, one of the files you submitted does not appear to exist. Please refine the files you wish to upload and try again")
             }
             if (f.isDirectory()) {
                 log.error("Folder detected while uploading a new revision for ${model.properties}: ${repoFiles.properties}")
-                throw new ModelException(model.toCommandObject(),
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
                     "Sorry, we currently do not accept model organised into sub-folders.")
             }
             modelFiles.add(f)
         }
         boolean valid = true
         if (!modelFileFormatService.validate(modelFiles, format, [])) {
-            final def m = model.toCommandObject()
+            final def m = DomainAdapter.getAdapter(model).toCommandObject()
             log.warn("New revision of model ${m.properties} containing ${modelFiles.inspect()} does not comprise valid ${format.identifier}")
             //throw new ModelException(m, "The file list does not comprise valid ${format.identifier}")
             valid = false
@@ -1344,7 +1346,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 domain.hidden = rf.hidden
             }
             if (!domain.validate()) {
-                final def m = model.toCommandObject()
+                final def m = DomainAdapter.getAdapter(model).toCommandObject()
                 def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the update of model ${m.properties}.")
                 msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
                 log.error(msg)
@@ -1365,7 +1367,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             revision.discard()
             domainObjects.each{ it.discard() }
             log.error("Exception occurred during uploading a new Model Revision to VCS: ${e.getMessage()}")
-            throw new ModelException(model.toCommandObject(),
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
                 "Could not store new Model Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} in VCS", e)
         }
         domainObjects.each {
@@ -1393,11 +1395,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             executorService.submit(
                     grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
-                    revision.toCommandObject(), vcsService.retrieveFiles(revision)))
+                    DomainAdapter.getAdapter(revision).toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
-            final def m = model.toCommandObject()
+            final def m = DomainAdapter.getAdapter(model).toCommandObject()
             log.error("New Revision containing ${repoFiles.inspect()} for Model ${m} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")
             throw new ModelException(m, "Revision stored in VCS, but not in database")
         }
@@ -1438,7 +1440,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             files = vcsService.retrieveFiles(revision)
         } catch (VcsException e) {
             log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.name} from VCS failed.", e)
-            throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.", e)
+            throw new ModelException(DomainAdapter.getAdapter(revision.model).toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.", e)
         }
         return files
     }
@@ -1505,7 +1507,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 aclUtilService.addPermission(revision, collaborator.username, BasePermission.READ)
             }
         }
-        def notification = [model:model.toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
+        def notification = [model:DomainAdapter.getAdapter(model).toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
         sendMessage("seda:model.readAccessGranted", notification)
     }
 
@@ -1662,7 +1664,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION)
             }
         }
-        def notification = [model:model.toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
+        def notification = [model:DomainAdapter.getAdapter(model).toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
         sendMessage("seda:model.writeAccessGranted", notification)
     }
 

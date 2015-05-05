@@ -55,6 +55,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.multipart.MultipartFile
 import java.util.Arrays
 import net.biomodels.jummp.plugins.security.Team
+import net.biomodels.jummp.annotationstorage.*
 
 @Api(value = "/model", description = "Operations related to models")
 class ModelController {
@@ -209,7 +210,8 @@ class ModelController {
                 notes = "Pass the expected media type of the request as a parameter e.g. /model/id?format=json")
     @ApiImplicitParam(name = "modelId", value = "The model identifier", required = true, allowMultiple = false)
     def show() {
-    	RevisionTransportCommand rev = modelDelegateService.getRevisionFromParams(params.id,
+        System.out.println(net.biomodels.jummp.annotationstore.ResourceReference.count())
+        RevisionTransportCommand rev = modelDelegateService.getRevisionFromParams(params.id,
                     params.revisionId)
         if (!params.format || (params.format != "json" && params.format != "xml") ) {
             if (!rev) {

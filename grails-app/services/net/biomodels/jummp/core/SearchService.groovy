@@ -24,6 +24,7 @@ import grails.async.Promise
 import grails.plugins.springsecurity.Secured
 import groovy.json.JsonBuilder
 import java.util.concurrent.atomic.AtomicReference
+import net.biomodels.jummp.core.adapters.DomainAdapter 
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -200,7 +201,7 @@ class SearchService {
     void regenerateIndices() {
         clearIndex()
         List<RevisionTransportCommand> revisions = Revision.list(fetch: [model: "eager"]).collect { r ->
-            r.toCommandObject()
+            DomainAdapter.getAdapter(r).toCommandObject()
         }
         if (IS_DEBUG_ENABLED) {
             log.debug "Indexing ${revisions.size()} revisions."
@@ -302,7 +303,9 @@ class SearchService {
                             submissionDate: it.get("submissionDate"),
                             lastModifiedDate: it.get("lastModified"),
                             id: it.get("model_id"),
-                            format: ModelFormat.findByName(it.get("modelFormat")).toCommandObject()
+                            format: DomainAdapter.getAdapter(
+                                        ModelFormat.findByName(it.get("modelFormat")))
+                                        .toCommandObject()
                             )
                         returnVals.put(it.get("submissionId"), mtc)
                         modelsAdded.put(model_id, revision_id)

@@ -33,6 +33,7 @@
 
 package net.biomodels.jummp.core
 
+import net.biomodels.jummp.core.adapters.DomainAdapter 
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC //rude?
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
@@ -284,9 +285,9 @@ class SubmissionService {
         		refreshPublication=true;
         	}
         	model.publication.link=publink
-        	model.publication.linkProvider=PublicationLinkProvider.createCriteria().get() {
+        	model.publication.linkProvider=DomainAdapter.getAdapter(PublicationLinkProvider.createCriteria().get() {
         			eq("linkType",linkType)
-        	}.toCommandObject()
+        	}).toCommandObject()
         	return refreshPublication
         }
 
@@ -528,9 +529,9 @@ class SubmissionService {
             MTC model=new MTC()
             RTC revision=new RTC(files: getRepFiles(workingMemory), 
                                 model: model,
-                                format: ModelFormat.
+                                format: DomainAdapter.getAdapter(ModelFormat.
                                             findByIdentifierAndFormatVersion(workingMemory.get("model_type").identifier,
-                                            								 workingMemory.get("model_type").formatVersion).
+                                            								 workingMemory.get("model_type").formatVersion)).
                                             toCommandObject()) 
             storeTCs(workingMemory, model, revision)
         }
@@ -559,7 +560,7 @@ class SubmissionService {
             revision.comment = "Import of ${revision.name}".toString()
             Model newModel = modelService.uploadValidatedModel(repoFiles, revision)
             Revision latest = modelService.getLatestRevision(newModel, false)
-            RTC latestRTC = latest.toCommandObject()
+            RTC latestRTC = DomainAdapter.getAdapter(latest).toCommandObject()
 
             final String NEW_NAME = workingMemory["new_name"]
             final String NEW_DESCRIPTION = workingMemory["new_description"]
@@ -640,7 +641,9 @@ class SubmissionService {
                 	formatVersion = revision.format.formatVersion ? revision.format.formatVersion : "*"
                 }
                 revision.format =
-                        ModelFormat.findByIdentifierAndFormatVersion(formatId, formatVersion).toCommandObject()
+                        DomainAdapter.getAdapter(ModelFormat
+                                                    .findByIdentifierAndFormatVersion(formatId, formatVersion))
+                                                    .toCommandObject()
             }
             else {
                workingMemory.put("model_type",revision.format)
@@ -696,7 +699,7 @@ class SubmissionService {
                 }
             }
             Revision newlyCreated = modelService.addValidatedRevision(repoFiles, deleteFiles, revision)
-            RTC newlyCreatedRTC = newlyCreated.toCommandObject()
+            RTC newlyCreatedRTC = DomainAdapter.getAdapter(newlyCreated).toCommandObject()
             final String NEW_NAME = workingMemory["new_name"]
             final String NEW_DESCRIPTION = workingMemory["new_description"]
             final boolean SHOULD_UPDATE = NEW_NAME || NEW_DESCRIPTION

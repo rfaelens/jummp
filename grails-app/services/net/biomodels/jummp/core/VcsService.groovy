@@ -34,6 +34,7 @@
 
 package net.biomodels.jummp.core
 
+import net.biomodels.jummp.core.adapters.DomainAdapter 
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsFileDetails
 import net.biomodels.jummp.core.vcs.VcsManager

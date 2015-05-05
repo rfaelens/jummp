@@ -31,6 +31,7 @@
 package net.biomodels.jummp.webapp
 
 import grails.converters.JSON
+import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.model.ModelListSorting
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
 import grails.plugins.springsecurity.Secured
@@ -264,7 +265,7 @@ class SearchController {
                 modelService.getAllModels(offset, length, sortDirection == "asc", sort, null, true)
         List models = []
         modelsDomain.each {
-            models.add(it.toCommandObject())
+            models.add(DomainAdapter.getAdapter(it).toCommandObject())
         }
         return [models: models, modelsAvailable: modelService.getModelCount(null, true), sortBy: sortBy,
                     sortDirection: sortDirection, offset: offset, length: length]
@@ -299,7 +300,7 @@ class SearchController {
         List modelsDomain = modelService.getAllModels(offset, length, sortDirection == "asc", sort)
         List models = []
         modelsDomain.each {
-            models.add(it.toCommandObject())
+            models.add(DomainAdapter.getAdapter(it).toCommandObject())
         }
         return [models: models, modelsAvailable: modelService.getModelCount(), sortBy: sortBy,
                 sortDirection: sortDirection, offset: offset, length: length]

@@ -21,6 +21,7 @@
 package net.biomodels.jummp.plugins.security
 import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
+import net.biomodels.jummp.core.adapters.DomainAdapter
 
 /**
  * @short Controller class for interacting with user teams.
@@ -163,7 +164,7 @@ class TeamController {
         }
         else {
         	def usersInTeam = UserTeam.findAllByTeam(team);
-        	[team: team, users: usersInTeam.collect { it.user.person.toCommandObject()}]
+        	[team: team, users: usersInTeam.collect { DomainAdapter.getAdapter(it.user.person).toCommandObject()}]
         }
     }
 }
