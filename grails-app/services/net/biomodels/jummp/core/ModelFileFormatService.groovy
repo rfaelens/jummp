@@ -108,7 +108,7 @@ class ModelFileFormatService {
             String formatVersion = getFormatVersion(rev)
             ModelFormat knownVersionFormat = ModelFormat.findByIdentifierAndFormatVersion(match, formatVersion);
             if (knownVersionFormat) {
-            	return DomainAdapter.getAdapter(knownVersionFormat.toCommandObject())
+            	return DomainAdapter.getAdapter(knownVersionFormat).toCommandObject()
             }
             return unknownVersionFormat
         }

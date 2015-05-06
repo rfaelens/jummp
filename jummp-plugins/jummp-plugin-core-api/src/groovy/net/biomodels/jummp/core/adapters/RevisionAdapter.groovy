@@ -19,6 +19,8 @@
  **/
 
 package net.biomodels.jummp.core.adapters
+
+import grails.util.Holders
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand as RFTC
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.core.model.RevisionTransportCommand
@@ -31,12 +33,12 @@ public class RevisionAdapter extends DomainAdapter {
     Revision revision
     
     
-    def modelService = grailsApplication.mainContext.modelService
+    def modelService = Holders.getGrailsApplication().mainContext.modelService
     
     List<RFTC> getRepositoryFilesForRevision() {
         List<RFTC> repFiles=new LinkedList<RFTC>()
         List<File> files = modelService.retrieveModelRepFiles(revision)
-        repoFiles.each { rf ->
+        revision.repoFiles.each { rf ->
             File tmpFile = files.find { it.getName() == (new File(rf.path)).getName() }
             RFTC rftc = new RFTC(
                     id: rf.id,
@@ -64,7 +66,7 @@ public class RevisionAdapter extends DomainAdapter {
                 comment: revision.comment,
                 uploadDate: revision.uploadDate,
                 format: getAdapter(revision.format).toCommandObject(),
-                model: getAdapter(model).toCommandObject()
+                model: getAdapter(revision.model).toCommandObject()
         )
         return rev
     }

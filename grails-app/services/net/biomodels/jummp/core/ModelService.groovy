@@ -783,7 +783,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
             stopWatch.stop()
             revision.refresh()
-            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
+            //executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
                     DomainAdapter.getAdapter(revision).toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
@@ -929,6 +929,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 log.error(msg)
                 throw new ModelException(rev.model, "The submission appears to contain invalid file ${fileName}. Please review it and try again.")
             } else {
+                System.out.println("ADDING ${domain} ... ${domain.mimeType}")
                 domainObjects.add(domain)
             }
         }
@@ -962,7 +963,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (revision.validate()) {
             model.addToRevisions(revision)
             if (rev.model.publication) {
-                model.publication = Publication.fromCommandObject(rev.model.publication)
+                model.publication = pubMedService.fromCommandObject(rev.model.publication)
             }
             if (!model.validate()) {
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
@@ -1020,7 +1021,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 log.debug("Model $submissionId stored with id ${model.id}")
             }
 
-            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
+           //executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
 
             // broadcast event
             grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, DomainAdapter.getAdapter(model).toCommandObject(), modelFiles))
@@ -1227,7 +1228,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 log.debug(e.message, e)
             }
 
-            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
+            //executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
 
             // broadcast event
             grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, DomainAdapter.getAdapter(model).toCommandObject(), modelFiles))
@@ -1392,8 +1393,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 }
             }
             revision.refresh()
-            executorService.submit(
-                    grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
+           // executorService.submit(
+             //       grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
                     DomainAdapter.getAdapter(revision).toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
@@ -1457,7 +1458,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     List<RepositoryFileTransportCommand> retrieveModelFiles(final Revision revision) throws ModelException {
         if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)
                 || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
-            return revision.getRepositoryFilesForRevision()
+            return DomainAdapter.getAdapter(revision).getRepositoryFilesForRevision()
         } else {
             log.error "you can't access revision ${revision.id}!"
             throw new AccessDeniedException("Sorry you are not allowed to download this Model.")

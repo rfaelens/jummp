@@ -23,6 +23,7 @@ import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.plugins.security.Person
 import net.biomodels.jummp.plugins.security.PersonTransportCommand
+import grails.util.Holders
 /**
  * @short Adapter class for the Publication domain class
  *
@@ -31,7 +32,7 @@ import net.biomodels.jummp.plugins.security.PersonTransportCommand
 public class PublicationAdapter extends DomainAdapter {
     Publication publication
     
-    def publicationService = grailsApplication.mainContext.pubMedService
+    def publicationService = Holders.getGrailsApplication().mainContext.pubMedService
     
     PublicationTransportCommand toCommandObject() {
        PublicationTransportCommand pubTC = new PublicationTransportCommand(journal: publication.journal,

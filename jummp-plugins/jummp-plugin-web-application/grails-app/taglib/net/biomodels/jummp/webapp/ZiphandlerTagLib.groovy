@@ -204,6 +204,7 @@ class ZiphandlerTagLib {
         				filename=filename.substring(0,20)+"..."
         			}
         			builder.append(filename).append("</span></a>")
+        			System.out.println(it.getProperties().toString() +".."+it.inspect().toString())
         			if (it.mimeType.contains('zip')) {
         				builder.append("<ul>")
         				handleZip(builder, false, it.path, loadedZips, zipSupported)

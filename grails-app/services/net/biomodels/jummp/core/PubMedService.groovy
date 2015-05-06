@@ -44,6 +44,7 @@ import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.plugins.security.Person
 import java.util.regex.Pattern
 import java.util.regex.Matcher
+import net.biomodels.jummp.core.adapters.PublicationLinkProviderAdapter
 /**
  * @short Service for fetching Publication Information for PubMed resources.
  *
@@ -236,7 +237,7 @@ class PubMedService {
     }
     
     
-    def fromCommandObject(PublicationTransportCommand cmd) {
+    Publication fromCommandObject(PublicationTransportCommand cmd) {
         Publication publication = Publication.createCriteria().get() {
             eq("link",cmd.link)
             linkProvider {
@@ -256,7 +257,7 @@ class PubMedService {
             publication.pages = cmd.pages
             publication.save(flush: true)
             reconcile(publication, cmd.authors)
-            return getAdapter(publication)
+            return publication
         }
         Publication publ = new Publication(journal: cmd.journal,
                 title: cmd.title,
@@ -268,11 +269,11 @@ class PubMedService {
                 volume: cmd.volume,
                 issue: cmd.issue,
                 pages: cmd.pages,
-                linkProvider: PublicationLinkProvider.fromCommandObject(cmd.linkProvider),
+                linkProvider: PublicationLinkProviderAdapter.fromCommandObject(cmd.linkProvider),
                 link: cmd.link)
         publ.save(failOnError: true, flush: true)
         reconcile(publ, cmd.authors)
-        return DomainAdapter.getAdapter(publ)
+        return publ
     }
     
 }

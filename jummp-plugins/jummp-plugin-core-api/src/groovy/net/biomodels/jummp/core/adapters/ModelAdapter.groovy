@@ -23,6 +23,7 @@ import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.identifier.*
+import grails.util.Holders
 /**
  * @short Adapter class for the Model domain class
  *
@@ -34,7 +35,7 @@ public class ModelAdapter extends DomainAdapter {
     static final Set<String> PERENNIAL_IDENTIFIER_TYPES = ModelIdentifierUtils.perennialFields
     static final Set<String> FIND_BY_PERENNIAL_ID_CRITERIA = populateFindByCriteria()
     
-    def modelService = grailsApplication.mainContext.modelService
+    def modelService = Holders.getGrailsApplication().mainContext.modelService
     
     
     ModelTransportCommand toCommandObject(boolean saveHistory = true) {
@@ -73,8 +74,8 @@ public class ModelAdapter extends DomainAdapter {
                 submitter: model.revisions ? model.revisions.sort{ it.revisionNumber }.first().owner.person.userRealName : null,
                 submitterUsername: model.revisions ? model.revisions.sort{ it.revisionNumber }.first().owner.username : null,
                 submissionDate: model.revisions ? model.revisions.sort{ it.revisionNumber }.first().uploadDate : null,
-                creators: model.creators,
-                creatorUsernames: model.creatorUsernames
+                creators: creators,
+                creatorUsernames: creatorUsernames
         )
     }
     

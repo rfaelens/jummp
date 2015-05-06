@@ -37,12 +37,12 @@ public class DomainObjectComposite {
     
     def invokeMethod(String name, args) {
         def domainObjectSupported = domainObject.metaClass.methods*.name.unique()
-        if (domainObjectSupported.find(name)) {
-            System.out.println("INVOKING ON DOMAIN OBJECT")
+        if (domainObjectSupported.contains(name)) {
+            System.out.println("INVOKING ${name} ON DOMAIN OBJECT")
             domainObject.invokeMethod(name, args)
         }
         else {
-            System.out.println("INVOKING ON ADAPTER")
+            System.out.println("INVOKING ${name} ON ADAPTER")
             adapter.invokeMethod(name, args)
         }
     }
