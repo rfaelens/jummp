@@ -37,11 +37,13 @@ import org.apache.commons.logging.LogFactory
 import org.apache.solr.client.solrj.SolrQuery
 import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.SolrDocumentList
+import org.apache.solr.common.SolrInputDocument
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.acls.domain.BasePermission
+import org.apache.solr.client.solrj.SolrServer
 
 /**
  * @short Singleton-scoped facade for interacting with a Solr instance.
@@ -232,7 +234,36 @@ class SearchService {
             log.error("Error regenerating the index: ${e.message}", e)
         }
     }
-
+    
+    /**
+    * Makes a model public at the specified revision in the solr index
+    *
+    * Makes the @revision public in the solr index. @revision can be domain or transport object
+    **/
+    public void makePublic(def revision) {
+        SolrInputDocument doc = getSolrDocumentFromRevision(revision)
+        updateIndexBase(doc, setPublicField)
+    }
+    
+    /**
+    * Makes a model deleted in the solr index
+    *
+    * Makes the @model deleted in the solr index. @model can be domain or transport object
+    **/
+    public void setDeleted(def model) {
+        SolrQuery query = new SolrQuery();
+        query.setQuery("submissionId:"+model.submissionId);
+        query.setFields("uniqueId");
+        query.set("defType", "edismax");
+        QueryResponse response = solrServerHolder.server.query(query)
+        SolrDocumentList docs = response.getResults()
+        docs.each {
+            SolrInputDocument doc = getSolrDocumentWithId(it.get("uniqueId"))
+            updateIndexBase(doc, setDeletedField)
+        }
+    }
+    
+    
     /**
     * Returns search results for query restricted Models the user has access to.
     *
@@ -254,33 +285,35 @@ class SearchService {
         boolean isAdmin = SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")
         Map<Long, Long> modelsAdded = new HashMap<Long, Long>()
         results.each {
-            boolean okayToProceed = true
-            boolean checkPermissions = !isAdmin
-            long model_id = it.get("model_id")
-            long revision_id = it.get("revision_id")
-            if (!modelsAdded.containsKey(model_id) || modelsAdded.get(model_id) < revision_id) {
-                if (it.containsKey("public") && it.get("public")) {
-                    checkPermissions = false
-                }
-                if (checkPermissions) {
-                    Revision rev = Revision.get(revision_id)
-                    okayToProceed = aclUtilService.hasPermission(
-                        springSecurityService.authentication, rev, BasePermission.READ)
-                }
-                if (okayToProceed) {
-                    ModelTransportCommand mtc = new ModelTransportCommand(
-                        submitter: it.get("submitter"),
-                        submitterUsername: it.get("submitterUsername"),
-                        name: it.get("name"),
-                        submissionId: it.get("submissionId"),
-                        publicationId: it.get("publicationId"),
-                        submissionDate: it.get("submissionDate"),
-                        lastModifiedDate: it.get("lastModified"),
-                        id: it.get("model_id"),
-                        format: ModelFormat.findByName(it.get("modelFormat")).toCommandObject()
-                    )
-                   returnVals.put(it.get("submissionId"), mtc)
-                   modelsAdded.put(model_id, revision_id)
+            if (!it.containsKey("deleted") || it.get("deleted")=="false") {
+                boolean okayToProceed = true
+                boolean checkPermissions = !isAdmin
+                long model_id = it.get("model_id")
+                long revision_id = it.get("revision_id")
+                if (!modelsAdded.containsKey(model_id) || modelsAdded.get(model_id) < revision_id) {
+                    if (it.containsKey("public") && it.get("public")) {
+                        checkPermissions = false
+                    }
+                    if (checkPermissions) {
+                        Revision rev = Revision.get(revision_id)
+                        okayToProceed = aclUtilService.hasPermission(
+                            springSecurityService.authentication, rev, BasePermission.READ)
+                    }
+                    if (okayToProceed) {
+                        ModelTransportCommand mtc = new ModelTransportCommand(
+                            submitter: it.get("submitter"),
+                            submitterUsername: it.get("submitterUsername"),
+                            name: it.get("name"),
+                            submissionId: it.get("submissionId"),
+                            publicationId: it.get("publicationId"),
+                            submissionDate: it.get("submissionDate"),
+                            lastModifiedDate: it.get("lastModified"),
+                            id: it.get("model_id"),
+                            format: ModelFormat.findByName(it.get("modelFormat")).toCommandObject()
+                            )
+                        returnVals.put(it.get("submissionId"), mtc)
+                        modelsAdded.put(model_id, revision_id)
+                    }
                 }
             }
         }
@@ -312,4 +345,49 @@ class SearchService {
         SolrDocumentList docs = response.getResults()
         return docs
     }
+    
+    
+    /**
+    *  ///Helper functions to update solr index
+    */
+    
+    private void updateIndexWithDocument(SolrInputDocument doc) {
+        solrServerHolder.server.add(doc)
+    }
+    
+    private SolrInputDocument getSolrDocumentFromRevision(def revision) {
+        String submissionId = revision.model.submissionId
+        int versionNumber = revision.revisionNumber
+        String id = "${submissionId}.${versionNumber}"
+        return getSolrDocumentWithId(id)
+    }
+    
+    private SolrInputDocument getSolrDocumentWithId(String id) {
+        SolrInputDocument doc = new SolrInputDocument()
+        doc.addField("uniqueId", id)
+        return doc
+    }
+    
+    def updateIndexBase(doc, updateToApply) {
+        updateToApply(doc)
+        updateIndexWithDocument(doc)
+    }
+
+    def setPublicField = { doc ->
+            Map<String, String> partialUpdate = new HashMap<String, String>();
+            partialUpdate.put("set", "true");
+            doc.addField("public", partialUpdate);
+    }
+    
+    def setDeletedField = { doc ->
+            Map<String, String> partialUpdate = new HashMap<String, String>();
+            partialUpdate.put("set", "true");
+            doc.addField("deleted", partialUpdate);
+    }
+    
+    /*
+    *  ///End of helper functions
+    **/
+    
+
 }
