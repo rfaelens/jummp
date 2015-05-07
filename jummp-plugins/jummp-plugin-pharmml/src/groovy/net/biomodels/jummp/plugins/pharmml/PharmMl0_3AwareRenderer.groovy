@@ -30,81 +30,55 @@
 **/
 
 package net.biomodels.jummp.plugins.pharmml
+
+import eu.ddmore.libpharmml.dom.maths.Binoperator
+import eu.ddmore.libpharmml.dom.maths.Unioperator
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
-import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
-import eu.ddmore.libpharmml.dom.commontypes.FuncParameterDefinitionType
-import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType
-import eu.ddmore.libpharmml.dom.commontypes.IdValueType
-import eu.ddmore.libpharmml.dom.commontypes.IntValueType
+import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
+import eu.ddmore.libpharmml.dom.commontypes.FunctionParameter
+import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinition
+import eu.ddmore.libpharmml.dom.commontypes.IdValue
+import eu.ddmore.libpharmml.dom.commontypes.IntValue
 import eu.ddmore.libpharmml.dom.commontypes.InterpolationType
-import eu.ddmore.libpharmml.dom.commontypes.RealValueType
+import eu.ddmore.libpharmml.dom.commontypes.RealValue
 import eu.ddmore.libpharmml.dom.commontypes.Rhs
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
-import eu.ddmore.libpharmml.dom.commontypes.SequenceType
-import eu.ddmore.libpharmml.dom.commontypes.StringValueType
-import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
-import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
-import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
-import eu.ddmore.libpharmml.dom.commontypes.VariableDefinitionType
-import eu.ddmore.libpharmml.dom.commontypes.VectorType
-import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
+import eu.ddmore.libpharmml.dom.commontypes.Sequence
+import eu.ddmore.libpharmml.dom.commontypes.StringValue
+import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
+import eu.ddmore.libpharmml.dom.commontypes.VariableDefinition
+import eu.ddmore.libpharmml.dom.commontypes.Vector as CTVector
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
-import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
-import eu.ddmore.libpharmml.dom.dataset.DataSetType
-import eu.ddmore.libpharmml.dom.maths.BinopType
-import eu.ddmore.libpharmml.dom.maths.ConstantType
+import eu.ddmore.libpharmml.dom.maths.Binop
+import eu.ddmore.libpharmml.dom.maths.Constant
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
-import eu.ddmore.libpharmml.dom.maths.PiecewiseType
-import eu.ddmore.libpharmml.dom.maths.UniopType
-import eu.ddmore.libpharmml.dom.modeldefn.CategoryType
-import eu.ddmore.libpharmml.dom.modeldefn.ContinuousCovariateType
-import eu.ddmore.libpharmml.dom.modeldefn.CorrelatedRandomVarType
+import eu.ddmore.libpharmml.dom.maths.Piecewise
+import eu.ddmore.libpharmml.dom.maths.Uniop
 import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType
+import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
+import eu.ddmore.libpharmml.dom.modeldefn.CovariateModel
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
-import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
-import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
-import eu.ddmore.libpharmml.dom.modeldefn.LhsTransformationType
-import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
-import eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType
-import eu.ddmore.libpharmml.dom.modeldefn.PairwiseType
-import eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType
-import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariableType
-import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
-import eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType
+import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameter
+import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
+import eu.ddmore.libpharmml.dom.modeldefn.ObservationModel
+import eu.ddmore.libpharmml.dom.modeldefn.Pairwise
+import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariable
+import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameter
+import eu.ddmore.libpharmml.dom.modeldefn.StructuralModel
 import eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock
-import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
-import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
-import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
-import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
-import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
-import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
-import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
-import eu.ddmore.libpharmml.dom.trialdesign.ActivityType
-import eu.ddmore.libpharmml.dom.trialdesign.BolusType
-import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType
-import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
-import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
-import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
-import grails.gsp.PageRenderer
+import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStep
+import eu.ddmore.libpharmml.dom.modellingsteps.Estimation
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
+import eu.ddmore.libpharmml.dom.modellingsteps.Simulation
+import eu.ddmore.libpharmml.dom.modellingsteps.StepDependency
+import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosing
+import eu.ddmore.libpharmml.dom.trialdesign.Population
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
+import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
 import grails.util.Holders
 import javax.xml.bind.JAXBElement
-import javax.xml.namespace.QName
-import net.biomodels.jummp.plugins.pharmml.maths.FunctionSymbol
-import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
-import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
-import net.biomodels.jummp.plugins.pharmml.maths.OperatorSymbol
-import net.biomodels.jummp.plugins.pharmml.maths.PieceSymbol
-import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 import net.biomodels.jummp.plugins.pharmml.util.correlation.CorrelationMatrix
 import net.biomodels.jummp.plugins.pharmml.util.correlation.PharmMl0_3AwareCorrelationProcessor
 import org.apache.commons.logging.Log
@@ -159,10 +133,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
 
     /**
      * @param functionDefinitions the list of
-     * {@link eu.ddmore.libpharmml.dom.commontypes.FunctionDefinitionType}s.
+     * {@link eu.ddmore.libpharmml.dom.commontypes.FunctionDefinition}s.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderFunctionDefinitions")
-    String renderFunctionDefinitions(List<FunctionDefinitionType> functionDefinitions) {
+    String renderFunctionDefinitions(List functionDefinitions) {
         def definitionList = []
         try {
             functionDefinitions.collect(definitionList) { d ->
@@ -188,18 +162,18 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param modelDefinition an instance of {@link eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType}
+     * @param modelDefinition an instance of {@link eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition}
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderModelDefinition")
-    String renderModelDefinition(ModelDefinitionType modelDefinition) {}
+    String renderModelDefinition(ModelDefinition modelDefinition) {}
 
     /**
      * @param covModel a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateModelType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateModel}s.
      * @param transfMap the transformations for continuous covariates.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderCovariateModel")
-    String renderCovariateModel(List<CovariateModelType> covModel, Map transfMap) {
+    String renderCovariateModel(List covModel, Map transfMap) {
         def model = [:]
         def result = []
         try {
@@ -217,7 +191,6 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
         } catch (Exception e) {
             model["error"] = "Sorry, something went wrong while rendering the covariates."
             log.error("Error rendering the covariates ${covModel.inspect()} ${covModel.properties} ${transfMap.inspect()}: ${e.message}", e)
-
         } finally {
             model["covariateModels"] = result
             model["version"] = "0.3.1"
@@ -228,12 +201,12 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param cov a a list of {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType}s.
+     * @param cov a a list of {@link eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition}s.
      * @param blkId the block identifier of the covariate model where @p cov are defined.
      * @param transfMap the transformations for continuous covariates.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderCovariates")
-    String renderCovariates(List<CovariateDefinitionType> cov, String blkId, Map transfMap) {
+    String renderCovariates(List<CovariateDefinition> cov, String blkId, Map transfMap) {
         def model = [:]
         def covariates = []
         try {
@@ -343,13 +316,13 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
      * for each individual parameter.
      *
      * @param parameterModel a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.ParameterModel}s.
      * @param covariates a list of covariate models.
      * @param transfMap the transformations for the continuous covariates.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderParameterModel")
-    String renderParameterModel(List<ParameterModelType> parameterModel,
-            List<CovariateModelType> covariates, Map transfMap) {
+    String renderParameterModel(List parameterModel,
+            List covariates, Map transfMap) {
 
         def result = new StringBuilder()
         result.append("<h3>Parameter Model</h3>")
@@ -358,13 +331,13 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
             parameterModel.each { pm ->
                 result.append("<div class='spaced-top-bottom'>")
                 def simpleParameters = pm.commonParameterElement.value.findAll {
-                       it instanceof SimpleParameterType
+                       it instanceof SimpleParameter
                 }
                 def rv = pm.commonParameterElement.value.findAll {
-                       it instanceof ParameterRandomVariableType
+                       it instanceof ParameterRandomVariable
                 }
                 def individualParameters = pm.commonParameterElement.value.findAll {
-                       it instanceof IndividualParameterType
+                       it instanceof IndividualParameter
                 }
                 result.append(simpleParams(simpleParameters, transfMap))
 
@@ -398,13 +371,13 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
 
     /**
      * @param structuralModels a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.StructuralModel}s.
      * @param iv the independent variable of the model
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderStructuralModel")
-    String renderStructuralModel(List<StructuralModelType> structuralModels, String iv) {
+    String renderStructuralModel(List<StructuralModel> structuralModels, String iv) {
         def model = [:]
-        model["version"] = "0.3"
+        model["version"] = "0.3.1"
         try {
             structuralModels.each { sm ->
                 String modelName = sm.name?.value ?: sm.blkId
@@ -460,14 +433,14 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
         try {
             vars.each { v ->
                 switch(v.value) {
-                    case DerivativeVariableType:
+                    case DerivativeVariable:
                         if (v.value.initialCondition) {
                             initialConditions << [(v.value.symbId) : v.value.initialCondition]
                         }
                         def dv = convertToMathML(v.value, iv)
                         variableList.add(dv)
                         break
-                    case VariableDefinitionType:
+                    case VariableDefinition:
                         if (v.value.assign) {
                             def vd = convertToMathML(v.value.symbId,
                                     v.value.assign)
@@ -480,12 +453,12 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                             variableList.add(sb.toString())
                         }
                         break
-                    case FunctionDefinitionType:
+                    case FunctionDefinition:
                         def fd = v.value
                         variableList.add(convertToMathML(fd.symbId,
                                 fd.functionArgument, fd))
                         break
-                    case FuncParameterDefinitionType:
+                    case FunctionParameter:
                         variableList.add(v.value.symbId)
                         break
                     default:
@@ -515,11 +488,11 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
 
     /**
      * @param observationModels a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType}s.
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.ObservationModel}s.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderObservationModel")
-    String renderObservationModel(List<ObservationModelType> observations,
-                List<CovariateModelType> covariates) {
+    String renderObservationModel(List<ObservationModel> observations,
+                List<CovariateModel> covariates) {
         StringBuilder result = new StringBuilder()
         result.append("<h3>Observation Model</h3>")
         try {
@@ -528,18 +501,18 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                 // the API returns a JAXBElement, not ObservationErrorType
                 def obsErr = om.observationError?.value
                 if (obsErr) {
-                    result.append(" <span class='italic'>")append(obsErr.symbId).append("</span>")
+                    result.append(" <span class='italic'>").append(obsErr.symbId).append("</span>")
                 }
                 result.append("</h4>\n")
                 result.append("<span class=\"bold\">Parameters </span>")
                 def simpleParameters = om.commonParameterElement.value.findAll {
-                    it instanceof SimpleParameterType
+                    it instanceof SimpleParameter
                 }
                 def rv = om.commonParameterElement.value.findAll {
-                    it instanceof ParameterRandomVariableType
+                    it instanceof ParameterRandomVariable
                 }
                 def individualParameters = om.commonParameterElement.value.findAll {
-                       it instanceof IndividualParameterType
+                       it instanceof IndividualParameter
                 }
                 result.append(simpleParams(simpleParameters))
 
@@ -575,23 +548,23 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
             }
         } catch(Exception e) {
             log.error("Error rendering the observations ${observations.inspect()}: ${e.message}")
-            result.append "Sorry, something went wrong while rendering the observations."
+            result.append("Sorry, something went wrong while rendering the observations.")
         } finally {
             return result.toString()
         }
     }
 
     /**
-     * @param trialDesign an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType}
+     * @param trialDesign an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialDesign}
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderTrialDesign")
-    String renderTrialDesign(TrialDesignType trialDesign) {}
+    String renderTrialDesign(TrialDesign trialDesign) {}
 
     /**
-     * @param structure - an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType}
+     * @param structure - an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.TrialStructure}
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderTrialDesignStructure")
-    String renderTrialDesignStructure(TrialStructureType structure) {
+    String renderTrialDesignStructure(TrialStructure structure) {
         def result = new StringBuilder()
         TrialDesignStructure tds
         def segmentActivitiesMap
@@ -720,10 +693,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param dosing - a list of {@link eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType}
+     * @param dosing - a list of {@link eu.ddmore.libpharmml.dom.trialdesign.IndividualDosing}
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderIndividualDosing")
-    String renderIndividualDosing(List<IndividualDosingType> dosing, RevisionTransportCommand rev, String downloadLink) {
+    String renderIndividualDosing(List<IndividualDosing> dosing, RevisionTransportCommand rev, String downloadLink) {
         def result = new StringBuilder()
         try {
             result.append("<h4>Individual dosing</h4>\n")
@@ -743,10 +716,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param population an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.PopulationType}
+     * @param population an instance of {@link eu.ddmore.libpharmml.dom.trialdesign.Population}
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderPopulation")
-    String renderPopulation(PopulationType pop, RevisionTransportCommand rev, String downloadLink) {
+    String renderPopulation(Population pop, RevisionTransportCommand rev, String downloadLink) {
         def result = new StringBuilder("<h4>Population</h4>\n")
         if (pop.variabilityReference) {
             result.append("<span><strong>Variability level: </strong>")
@@ -769,22 +742,22 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param steps an instance of {@link eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType}
+     * @param steps an instance of {@link eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps}
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderModellingSteps")
-    String renderModellingSteps(ModellingStepsType steps) {}
+    String renderModellingSteps(ModellingSteps steps) {}
 
     /**
-     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStepType}s.
+     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStep}s.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderCommonModellingSteps")
-    String renderCommonModellingSteps(List<CommonModellingStepType> steps) {}
+    String renderCommonModellingSteps(List<CommonModellingStep> steps) {}
 
     /**
-     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType}s.
+     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.Simulation}s.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderSimulationSteps")
-    String renderSimulationSteps(List<SimulationStepType> steps, String iv) {
+    String renderSimulationSteps(List<Simulation> steps, String iv) {
         def result = new StringBuilder("<h3>Simulation Steps</h3>\n")
         steps.each { s ->
             result.append("<h4>Simulation step <span class='italic'>${s.oid}</span></h4>")
@@ -822,10 +795,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                         // put all timepoints here, output them separated by commas
                         List<String> observationTimepoints = []
                         o.timepoints.arrays.each { a ->
-                            //JAXBElement parameterised with SequenceType or VectorType
-                            if (a.value instanceof VectorType) {
+                            //JAXBElement parameterised with Sequence or CTVector
+                            if (a.value instanceof CTVector) {
                                 observationTimepoints << jaxbVector(a.value).toString()
-                            } else if (a.value instanceof SequenceType) {
+                            } else if (a.value instanceof Sequence) {
                                 observationTimepoints << sequence(a.value).toString()
                             }
                         }
@@ -844,10 +817,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType}s.
+     * @param steps a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.Estimation}s.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderEstimationSteps")
-    String renderEstimationSteps(List<EstimationStepType> steps, RevisionTransportCommand rev, String downloadLink) {
+    String renderEstimationSteps(List<Estimation> steps, RevisionTransportCommand rev, String downloadLink) {
         def result = new StringBuilder("<h3>Estimation Steps</h3>\n")
         steps.each { s ->
             result.append("<h4>Estimation Step ${s.oid}</h4>\n")
@@ -868,10 +841,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /**
-     * @param dependencies a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType}s.
+     * @param dependencies a list of {@link eu.ddmore.libpharmml.dom.modellingsteps.StepDependency}s.
      */
     @Profiled(tag = "pharmMl0_3AwareRenderer.renderStepDependencies")
-    String renderStepDependencies(StepDependencyType dependencies) {
+    String renderStepDependencies(StepDependency dependencies) {
         StringBuilder result = new StringBuilder()
         if (!dependencies || !dependencies.step) {
             return result
@@ -895,7 +868,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     @Override
     protected void buildCorrelationMap(CorrelationType c, Map correlationsMap) {
         try {
-            PairwiseType p = c.pairwise
+            Pairwise p = c.pairwise
             final ScalarRhs VALUE = p.covariance ?: p.correlationCoefficient
 
             String var = c.variabilityReference.symbRef?.symbIdRef ?:
@@ -918,7 +891,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
 
         // could be an Equation or just a String
         def lhs
-        def lhsSymb = new SymbolRefType()
+        def lhsSymb = new SymbolRef()
         lhsSymb.symbIdRef = e.symbId
         def prediction
         def predictionSymb = e.output.symbRef
@@ -926,13 +899,13 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
 
         if (e.transformation) {
             final String tr = e.transformation.value()
-            def lhsUniop = new UniopType()
-            lhsUniop.op = tr
+            def lhsUniop = new Uniop()
+            lhsUniop.operator = Unioperator.fromString(tr)
             lhsUniop.symbRef = lhsSymb
             lhs = new Equation()
             lhs.uniop = lhsUniop
-            def predUniop = new UniopType()
-            predUniop.op = tr
+            def predUniop = new Uniop()
+            predUniop.operator = Unioperator.fromString(tr)
             predUniop.symbRef = predictionSymb
             prediction = wrapJaxb(predUniop)
         } else {
@@ -966,23 +939,23 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
         } else if (errModelAssign.symbRef) {
             errModel = wrapJaxb(errModelAssign.symbRef)
         }
-        def em_re = new BinopType()
-        em_re.op = "times"
-        em_re.content.add(errModel)
-        em_re.content.add(wrapJaxb(residualErrorSymb))
+        def em_re = new Binop()
+        em_re.operator = Binoperator.TIMES
+        em_re.operand1 = errModel.value
+        em_re.operand2 = residualErrorSymb
         errModelTimesResidualErr = wrapJaxb(em_re)
-        def sum = new BinopType()
-        sum.op = "plus"
-        sum.content.add(prediction)
-        sum.content.add(errModelTimesResidualErr)
+        def sum = new Binop()
+        sum.operator = Binoperator.PLUS
+        sum.operand1 = prediction.value
+        sum.operand2 = errModelTimesResidualErr.value
         rhsEquation = new Equation()
         rhsEquation.binop = sum
         return result.append(convertToMathML(lhs, rhsEquation)).append("</div>")
     }
 
     @Override
-    protected StringBuilder individualParams(List<IndividualParameterType> parameters,
-                List<ParameterRandomVariableType> rv, List<CovariateDefinitionType> covariates,
+    protected StringBuilder individualParams(List<IndividualParameter> parameters,
+                List<ParameterRandomVariable> rv, List<CovariateDefinition> covariates,
                 Map<String, Equation> transfMap) {
         def output = new StringBuilder("<div class='spaced-top-bottom'>")
         try {
@@ -1000,7 +973,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                     def randomEffects = []
                     if (gaussianModel.randomEffects) {
                         gaussianModel.randomEffects.each { gmre ->
-                            def randomEffectSymbol = new SymbolRefType()
+                            def randomEffectSymbol = new SymbolRef()
                             //ASSUME THERE IS ONLY ONE SYMBREF HERE
                             randomEffectSymbol.symbIdRef = gmre.symbRef[0].symbIdRef
                             randomEffects << wrapJaxb(randomEffectSymbol)
@@ -1020,9 +993,9 @@ Individual parameter ${p.symbId} is missing mandatory Transformation element."""
                         if (!APPLY_TRANSFORMATION) {
                             lhsEquation = p.symbId
                         } else {
-                            UniopType indivParam = new UniopType()
-                            indivParam.op = TRANSFORMATION
-                            def paramSymbRef = new SymbolRefType()
+                            Uniop indivParam = new Uniop()
+                            indivParam.operator = Unioperator.fromString(TRANSFORMATION)
+                            def paramSymbRef = new SymbolRef()
                             paramSymbRef.symbIdRef = p.symbId
                             indivParam.symbRef = paramSymbRef
                             lhsEquation = new Equation()
@@ -1032,15 +1005,15 @@ Individual parameter ${p.symbId} is missing mandatory Transformation element."""
                         def popParam
                         Rhs popParamAssign = linearCovariate.populationParameter.assign
                         if (popParamAssign) {
-                            SymbolRefType popSymb = popParamAssign.symbRef ?:
+                            SymbolRef popSymb = popParamAssign.symbRef ?:
                                     popParamAssign.equation.symbRef
                             if (!popSymb) {
                                 log.warn "\
 Could not extract the population parameter of individual parameter ${p.symbId}."
                             }
                             if (APPLY_TRANSFORMATION) {
-                                popParam = new UniopType()
-                                popParam.op = TRANSFORMATION
+                                popParam = new Uniop()
+                                popParam.operator = Unioperator.fromString(TRANSFORMATION)
                                 popParam.symbRef = popSymb
                             } else {
                                 popParam = popSymb
@@ -1056,7 +1029,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                             def covEffectKey
                             c.fixedEffect.each { fe ->
                                 if (fe.category) {
-                                    def catIdSymbRef = new SymbolRefType()
+                                    def catIdSymbRef = new SymbolRef()
                                     def trickReference = new StringBuilder("<msub><mi>")
                                     trickReference.append(c.symbRef.symbIdRef).append("</mi><mi>")
                                     trickReference.append(fe.category.catId).append("</mi></msub>")
@@ -1091,7 +1064,8 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                                     thisCov.add(wrapJaxb(key))
                                 }
                                 it.value.collect{ v -> thisCov.add(wrapJaxb(v)) }
-                                fixedEffectsTimesCovariateList.add(applyBinopToList(thisCov, "times"))
+                                fixedEffectsTimesCovariateList.add(
+                                    applyBinopToList(thisCov, Binoperator.TIMES))
                             }
                         }
                         def sumElements = []
@@ -1102,7 +1076,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                         sumElements.addAll(randomEffects)
 
                         Equation rhsEquation = new Equation()
-                        rhsEquation.binop = applyBinopToList(sumElements, "plus").value
+                        rhsEquation.binop = applyBinopToList(sumElements, Binoperator.PLUS).value
                         output.append(convertToMathML(lhsEquation, rhsEquation))
                         output.append("\n")
                     } else if (gaussianModel.generalCovariate) {
@@ -1127,7 +1101,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                         cm_re.add(covModel)
                         cm_re.addAll(randomEffects)
                         rhsEquation = new Equation()
-                        rhsEquation.binop = applyBinopToList(cm_re, "plus").value
+                        rhsEquation.binop = applyBinopToList(cm_re, Binoperator.PLUS).value
                         String converted = convertToMathML(p.symbId, rhsEquation)
                         output.append("<div>")
                         output.append(converted)
@@ -1144,30 +1118,30 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
     }
 
     @Override
-    protected JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRefType> symbRef,
+    protected JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRef> symbRef,
             Map<String, Equation> transformations) {
         final EquationType TRANSF_EQ = resolveSymbolReference(symbRef.value, transformations)
         if (TRANSF_EQ) {
             final def ELEM = wrapJaxb(extractAttributeFromEquation(TRANSF_EQ))
             final Class ELEM_CLASS = ELEM.value.getClass()
             switch(ELEM_CLASS) {
-                case BinopType:
+                case Binop:
                     break
-                case UniopType:
+                case Uniop:
                     break
-                case SymbolRefType:
+                case SymbolRef:
                     break
-                case ConstantType:
+                case Constant:
                     break
                 case FunctionCallType:
                     break
-                case IdValueType:
+                case IdValue:
                     break
-                case StringValueType:
+                case StringValue:
                     break
-                case IntValueType:
+                case IntValue:
                     break
-                case RealValueType:
+                case RealValue:
                     break
                 default:
                     assert false, "Cannot have ${ELEM_CLASS.name} inside a transformation."
@@ -1180,42 +1154,42 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
     }
 
     @Override
-    protected JAXBElement expandNestedUniop(JAXBElement<UniopType> jaxbUniop,
+    protected JAXBElement expandNestedUniop(JAXBElement<Uniop> jaxbUniop,
             Map<String, Equation> transfMap) {
-        UniopType uniop = jaxbUniop.value
-        UniopType replacement
+        Uniop uniop = jaxbUniop.value
+        Uniop replacement
         if (uniop.symbRef) {
             final EquationType TRANSF_EQ = resolveSymbolReference(uniop.symbRef, transfMap)
             if (TRANSF_EQ) {
                 final def ELEM = extractAttributeFromEquation(TRANSF_EQ)
                 final Class ELEM_CLASS = ELEM.getClass()
-                replacement = new UniopType()
-                replacement.op = uniop.op
+                replacement = new Uniop()
+                replacement.operator = uniop.operator
                 switch(ELEM_CLASS) {
-                    case BinopType:
+                    case Binop:
                         replacement.binop = ELEM
                         break
-                    case UniopType:
+                    case Uniop:
                         replacement.uniop = ELEM
                         break
-                    case SymbolRefType:
+                    case SymbolRef:
                         replacement.symbRef = ELEM
                         break
-                    case ConstantType:
+                    case Constant:
                         replacement.constant = ELEM
                         break
                     case FunctionCallType:
                         replacement.functionCall = ELEM
                         break
-                    case IdValueType:
+                    case IdValue:
                         replacement.scalar = ELEM
                         break
-                    case StringValueType:
+                    case StringValue:
                         break
-                    case IntValueType:
+                    case IntValue:
                         replacement.scalar = ELEM
                         break
-                    case RealValueType:
+                    case RealValue:
                         replacement.scalar = ELEM
                         break
                     default:
@@ -1246,13 +1220,13 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
         def eqTerms = extractAttributeFromEquation(equation)
         JAXBElement expandedTerms
         switch(eqTerms) {
-            case BinopType:
+            case Binop:
                 expandedTerms = expandNestedBinop(wrapJaxb(eqTerms), transfMap)
                 break
-            case UniopType:
+            case Uniop:
                 expandedTerms = expandNestedUniop(wrapJaxb(eqTerms), transfMap)
                 break
-            case SymbolRefType:
+            case SymbolRef:
                 expandedTerms = expandNestedSymbRefs(wrapJaxb(eqTerms), transfMap)
                 break
             default:
@@ -1264,19 +1238,19 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
         if (!eqTerms.equals(unwrappedExpandedTerms)) {
             def newEquation = new EquationType()
             switch(unwrappedExpandedTerms) {
-                case UniopType:
+                case Uniop:
                     newEquation.uniop = unwrappedExpandedTerms
                     break
-                case BinopType:
+                case Binop:
                     newEquation.binop = unwrappedExpandedTerms
                     break
                 case FunctionCallType:
                     newEquation.functionCall = unwrappedExpandedTerms
                     break
-                case PiecewiseType:
+                case Piecewise:
                     newEquation.piecewise = unwrappedExpandedTerms
                     break
-                case SymbolRefType:
+                case SymbolRef:
                     newEquation.symbRef = unwrappedExpandedTerms
                     break
                 default: // scalar

@@ -31,20 +31,12 @@
 
 package net.biomodels.jummp.plugins.pharmml
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
-import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
-import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
-import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosingType
-import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
-import eu.ddmore.libpharmml.dom.modeldefn.ObservationModelType
-import eu.ddmore.libpharmml.dom.modeldefn.ParameterModelType
-import eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock
-import eu.ddmore.libpharmml.dom.modeldefn.StructuralModelType
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
+import eu.ddmore.libpharmml.dom.modellingsteps.Estimation
+import eu.ddmore.libpharmml.dom.modellingsteps.Simulation
+import eu.ddmore.libpharmml.dom.modellingsteps.StepDependency
+import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosing
+import eu.ddmore.libpharmml.dom.trialdesign.Population
+import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
 import net.biomodels.jummp.core.IPharmMlRenderer
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -129,38 +121,38 @@ class PharmMlRenderingService {
     }
 
     @Profiled(tag = "pharmMlRenderingService.renderTrialDesignStructure")
-    void renderTrialDesignStructure(TrialStructureType struct, String version, Writer out) {
+    void renderTrialDesignStructure(TrialStructure struct, String version, Writer out) {
         IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
         out << renderer.renderTrialDesignStructure(struct)
     }
 
     @Profiled(tag = "pharmMlRenderingService.renderIndividualDosing")
-    void renderIndividualDosing(List<IndividualDosingType> doses, String version, Writer o, RevisionTransportCommand rev, String link) {
+    void renderIndividualDosing(List<IndividualDosing> doses, String version, Writer o, RevisionTransportCommand rev, String link) {
     	IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
         o << renderer.renderIndividualDosing(doses, rev, link)
     }
 
     @Profiled(tag = "pharmMlRenderingService.renderPopulation")
-    void renderPopulation(PopulationType population, String version, Writer out, RevisionTransportCommand rev, String link) {
+    void renderPopulation(Population population, String version, Writer out, RevisionTransportCommand rev, String link) {
     	IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
         out << renderer.renderPopulation(population, rev, link)
     }
 
     @Profiled(tag = "pharmMlRenderingService.renderEstimationSteps")
-    void renderEstimationSteps(List<EstimationStepType> steps, String version, Writer out, RevisionTransportCommand rev, String link) {
+    void renderEstimationSteps(List<Estimation> steps, String version, Writer out, RevisionTransportCommand rev, String link) {
         IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
         out << renderer.renderEstimationSteps(steps, rev, link)
     }
 
     @Profiled(tag = "pharmMlRenderingService.renderSimulationSteps")
-    void renderSimulationSteps(List<SimulationStepType> steps, String independentVariable,
+    void renderSimulationSteps(List<Simulation> steps, String independentVariable,
                     String version, Writer out) {
         IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
         out << renderer.renderSimulationSteps(steps, independentVariable)
     }
 
     @Profiled(tag = "pharmMlRenderingService.renderStepDependencies")
-    void renderStepDependencies(StepDependencyType deps, String version, Writer out) {
+    void renderStepDependencies(StepDependency deps, String version, Writer out) {
         IPharmMlRenderer renderer = PharmMlVersionAwareRendererFactory.getRenderer(version)
         out << renderer.renderStepDependencies(deps)
     }

@@ -95,11 +95,13 @@ class PharmMlServiceTests extends JummpIntegrationTest {
         assertTrue pharmMlService.areFilesThisFormat([modelFile])
         modelFile = new File("test/files/BIOMD0000000272.xml")
         assertFalse pharmMlService.areFilesThisFormat([modelFile])
+        modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.6/timeToEvent_weibullHazard.xml")
+        assertTrue pharmMlService.areFilesThisFormat([modelFile])
     }
 
     @Test
     void testGetVersionFormat() {
-        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example2.xml")
+        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.6/timeToEvent_weibullHazard.xml")
         authenticateAsTestUser()
         def rf = new RepositoryFileTransportCommand(path: modelFile.absolutePath,
                     description: "A very interesting model.", mainFile: true)
@@ -107,12 +109,12 @@ class PharmMlServiceTests extends JummpIntegrationTest {
         def modelCommand = new ModelTransportCommand(format: defaultFormat, comment: "First commit", name: "Foo")
         Model model = modelService.uploadModelAsFile(rf, modelCommand)
         def revision = modelService.getLatestRevision(model).toCommandObject()
-        assertEquals "0.2.1", pharmMlService.getFormatVersion(revision)
+        assertEquals "0.6", pharmMlService.getFormatVersion(revision)
     }
 
     @Test
     void testValidate() {
-        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example1.xml")
+        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.6/timeToEvent_weibullHazard.xml")
         authenticateAsTestUser()
         def rf = new RepositoryFileTransportCommand(path: modelFile.absolutePath,
                     description: "A very interesting model.", mainFile: true)
@@ -129,7 +131,7 @@ class PharmMlServiceTests extends JummpIntegrationTest {
                 files << f
             }
         }
-        assertTrue !!files
+        assertFalse files.isEmpty()
         assertTrue pharmMlService.validate(files, [])
     }
 

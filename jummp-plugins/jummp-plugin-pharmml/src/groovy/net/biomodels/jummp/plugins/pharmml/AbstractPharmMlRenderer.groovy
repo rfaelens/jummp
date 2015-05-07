@@ -30,45 +30,47 @@
 **/
 
 package net.biomodels.jummp.plugins.pharmml
+
+import eu.ddmore.libpharmml.dom.maths.Binoperator
+import eu.ddmore.libpharmml.dom.maths.Unioperator
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariableType
-import eu.ddmore.libpharmml.dom.commontypes.FalseBooleanType
-import eu.ddmore.libpharmml.dom.commontypes.IdValueType
-import eu.ddmore.libpharmml.dom.commontypes.IntValueType
-import eu.ddmore.libpharmml.dom.commontypes.RealValueType
+import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
+import eu.ddmore.libpharmml.dom.commontypes.FalseBoolean
+import eu.ddmore.libpharmml.dom.commontypes.IdValue
+import eu.ddmore.libpharmml.dom.commontypes.IntValue
+import eu.ddmore.libpharmml.dom.commontypes.RealValue
 import eu.ddmore.libpharmml.dom.commontypes.Rhs
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
-import eu.ddmore.libpharmml.dom.commontypes.SequenceType
-import eu.ddmore.libpharmml.dom.commontypes.StringValueType
-import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
-import eu.ddmore.libpharmml.dom.commontypes.TrueBooleanType
+import eu.ddmore.libpharmml.dom.commontypes.Sequence
+import eu.ddmore.libpharmml.dom.commontypes.StringValue
+import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
+import eu.ddmore.libpharmml.dom.commontypes.TrueBoolean
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
-import eu.ddmore.libpharmml.dom.commontypes.VectorType
-import eu.ddmore.libpharmml.dom.dataset.ColumnDefnType
+import eu.ddmore.libpharmml.dom.commontypes.Vector as CTVector
+import eu.ddmore.libpharmml.dom.dataset.ColumnDefinition
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
 import eu.ddmore.libpharmml.dom.dataset.DataSetType
-import eu.ddmore.libpharmml.dom.maths.BinopType
-import eu.ddmore.libpharmml.dom.maths.ConstantType
+import eu.ddmore.libpharmml.dom.maths.Binop
+import eu.ddmore.libpharmml.dom.maths.Constant
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
-import eu.ddmore.libpharmml.dom.maths.UniopType
-import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinitionType
+import eu.ddmore.libpharmml.dom.maths.Uniop
+import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
-import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameterType
-import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariableType
-import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameterType
+import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameter
+import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariable
+import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameter
 import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
 import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
 import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
 import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
-import eu.ddmore.libpharmml.dom.trialdesign.ActivityType
-import eu.ddmore.libpharmml.dom.trialdesign.BolusType
-import eu.ddmore.libpharmml.dom.trialdesign.InfusionType
+import eu.ddmore.libpharmml.dom.trialdesign.Activity
+import eu.ddmore.libpharmml.dom.trialdesign.Bolus
+import eu.ddmore.libpharmml.dom.trialdesign.Infusion
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
 import javax.xml.bind.JAXBElement
 import javax.xml.namespace.QName
@@ -92,7 +94,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
      * Parses an activity and writes it to a StringBuilder.
      * Returns whether to display a dosing footnote or not.
      */
-    protected boolean activity(ActivityType activity, boolean isFirst, StringBuilder result) {
+    protected boolean activity(Activity activity, boolean isFirst, StringBuilder result) {
         boolean showDosingFootnote = false
         if (!isFirst) {
             result.append("<tr>")
@@ -105,11 +107,11 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             /* dosingRegimen is a JAXBElement */
             def regimen = activity.dosingRegimen.value
             switch(regimen) {
-                case BolusType:
+                case Bolus:
                     result.append("<td>bolus</td>")
                     //fall through
-                case InfusionType:
-                    if (regimen instanceof InfusionType) {
+                case Infusion:
+                    if (regimen instanceof Infusion) {
                         result.append("<td>infusion</td>")
                     }
                     if (regimen.dosingTimes) {
@@ -154,7 +156,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 new StringBuilder("[").append(result).append("]")
     }
 
-    protected StringBuilder randomVariables(List<ParameterRandomVariableType> rv, Map rvMap) {
+    protected StringBuilder randomVariables(List<ParameterRandomVariable> rv, Map rvMap) {
         def output = new StringBuilder()
         try {
             rv.inject(output) { o, i ->
@@ -174,8 +176,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return output
     }
 
-    protected StringBuilder individualParams(List<IndividualParameterType> parameters,
-                List<ParameterRandomVariableType> rv, List<CovariateDefinitionType> covariates,
+    protected StringBuilder individualParams(List<IndividualParameter> parameters,
+                List<ParameterRandomVariable> rv, List<CovariateDefinition> covariates,
                 Map<String, Equation> transfMap) {
         def output = new StringBuilder()
         if (!parameters) {
@@ -197,7 +199,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                     def randomEffects = []
                     if (gaussianModel.randomEffects) {
                         gaussianModel.randomEffects.each { re ->
-                            def randomEffectSymbol = new SymbolRefType()
+                            def randomEffectSymbol = new SymbolRef()
                             randomEffectSymbol.symbIdRef = re.symbRef[0].symbIdRef
                             randomEffects << wrapJaxb(randomEffectSymbol)
                         }
@@ -207,9 +209,9 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                         if (gaussianModel.transformation) {
                             final String TRANSFORMATION = gaussianModel.transformation.value()
                             //LHS
-                            UniopType indivParam = new UniopType()
-                            indivParam.op = TRANSFORMATION
-                            def paramSymbRef = new SymbolRefType()
+                            Uniop indivParam = new Uniop()
+                            indivParam.operator = Unioperator.valueOf(TRANSFORMATION)
+                            def paramSymbRef = new SymbolRef()
                             paramSymbRef.symbIdRef = p.symbId
                             indivParam.symbRef = paramSymbRef
                             def lhsEquation = new Equation()
@@ -217,8 +219,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                             //POPULATION
                             def popParam
                             if (linearCovariate.populationParameter.assign.symbRef) {
-                                popParam = new UniopType()
-                                popParam.op = TRANSFORMATION
+                                popParam = new Uniop()
+                                popParam.operator = TRANSFORMATION
                                 popParam.symbRef = linearCovariate.populationParameter.assign.symbRef
                             }
                             def fixedEffectsCovMap = [:]
@@ -231,7 +233,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                                 def covEffectKey
                                 c.fixedEffect.each { fe ->
                                     if (fe.category) {
-                                        def catIdSymbRef = new SymbolRefType()
+                                        def catIdSymbRef = new SymbolRef()
                                         def trickReference = new StringBuilder("<msub><mi>")
                                         trickReference.append(c.symbRef.symbIdRef).append("</mi><mi>")
                                         trickReference.append(fe.category.catId).append("</mi></msub>")
@@ -261,7 +263,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                                         thisCov.add(wrapJaxb(key))
                                     }
                                     it.value.collect{ v -> thisCov.add(wrapJaxb(v)) }
-                                    fixedEffectsTimesCovariateList.add(applyBinopToList(thisCov, "times"))
+                                    fixedEffectsTimesCovariateList.add(
+                                        applyBinopToList(thisCov, Binoperator.TIMES))
                                 }
                             }
                             def sumElements = []
@@ -272,7 +275,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                             sumElements.addAll(randomEffects)
 
                             Equation rhsEquation = new Equation()
-                            rhsEquation.scalarOrSymbRefOrBinop.add(applyBinopToList(sumElements, "plus"))
+                            rhsEquation.scalarOrSymbRefOrBinop.add(
+                                applyBinopToList(sumElements, Binoperator.PLUS))
                             output.append(convertToMathML(lhsEquation, rhsEquation))
                             output.append("\n")
                         }
@@ -296,7 +300,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                         cm_re.add(covModel)
                         cm_re.addAll(randomEffects)
                         rhsEquation = new Equation()
-                        rhsEquation.scalarOrSymbRefOrBinop.add(applyBinopToList(cm_re, "plus"))
+                        rhsEquation.scalarOrSymbRefOrBinop.add(
+                            applyBinopToList(cm_re, Binoperator.PLUS))
                         String converted = convertToMathML(p.symbId, rhsEquation)
                         output.append("<div>")
                         output.append(converted)
@@ -321,7 +326,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
 
         // could be an Equation or just a String
         def lhs
-        def lhsSymb = new SymbolRefType()
+        def lhsSymb = new SymbolRef()
         lhsSymb.symbIdRef = e.symbId
         def prediction
         def predictionSymb = e.output.symbRef
@@ -329,13 +334,13 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
 
         if (e.transformation) {
             final String tr = e.transformation.value()
-            def lhsUniop = new UniopType()
-            lhsUniop.op = tr
+            def lhsUniop = new Uniop()
+            lhsUniop.operator = Unioperator.valueOf(tr)
             lhsUniop.symbRef = lhsSymb
             lhs = new Equation()
             lhs.scalarOrSymbRefOrBinop.add(wrapJaxb(lhsUniop))
-            def predUniop = new UniopType()
-            predUniop.op = tr
+            def predUniop = new Uniop()
+            predUniop.operator = Unioperator.valueOf(tr)
             predUniop.symbRef = predictionSymb
             prediction = wrapJaxb(predUniop)
         } else {
@@ -355,15 +360,15 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         } else if (errModelAssign.symbRef) {
             errModel = wrapJaxb(errModelAssign.symbRef)
         }
-        def em_re = new BinopType()
-        em_re.op = "times"
-        em_re.content.add(errModel)
-        em_re.content.add(wrapJaxb(residualErrorSymb))
+        def em_re = new Binop()
+        em_re.operator = Binoperator.TIMES
+        em_re.operand1 = errModel.value
+        em_re.operand2 = residualErrorSymb
         errModelTimesResidualErr = wrapJaxb(em_re)
-        def sum = new BinopType()
-        sum.op = "plus"
-        sum.content.add(prediction)
-        sum.content.add(errModelTimesResidualErr)
+        def sum = new Binop()
+        sum.operator = Binoperator.PLUS
+        sum.operand1 = prediction.value
+        sum.operand2 = errModelTimesResidualErr.value
         rhsEquation = new Equation()
         rhsEquation.scalarOrSymbRefOrBinop.add(wrapJaxb(sum))
         if (lhs && rhsEquation) {
@@ -386,7 +391,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
     }
 
     //TODO REMOVE THIS
-    protected StringBuilder simpleParams(List<SimpleParameterType> parameters,
+    protected StringBuilder simpleParams(List<SimpleParameter> parameters,
                 Map<String, Equation> transfMap = [:]) {
         def outcome = new StringBuilder()
         if (!parameters) {
@@ -413,7 +418,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         }
     }
 
-    protected StringBuilder jaxbVector(VectorType vector) {
+    protected StringBuilder jaxbVector(CTVector vector) {
         if (!vector) {
             return new StringBuilder()
         }
@@ -421,7 +426,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         def values = []
         vector.sequenceOrScalar.inject(result) { r, ss ->
             switch(ss.value) {
-               case SequenceType:
+               case Sequence:
                     values << sequence(ss.value)
                     break
                 default:
@@ -555,26 +560,26 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return new StringBuilder().append(convertToMathML(prop.name, prop.assign))
     }
 
-    protected StringBuilder dataSet(DataSetType dataSet, Map variableMap, 
+    protected StringBuilder dataSet(DataSetType dataSet, Map variableMap,
     								StringBuilder sb, RevisionTransportCommand rev,
     								String downloadLink) {
         if (dataSet.table) {
 			def columnOrder = [:]
 			List tables = dataSet.definition.columnOrTable
 			tables.each {
-				if (it instanceof ColumnDefnType) {
+				if (it instanceof ColumnDefinition) {
 					columnOrder << [ (it.columnNum) : (it.columnId) ]
 				} else if (it instanceof DataSetTableDefnType) {
 					columnOrder << [ (it.columnNum) : (it.tableId) ]
 				}
 			}
 			sb.append("\n<table><thead><tr>")
-	
+
 			tables.inject(sb) { txt, d ->
 				def key = columnOrder[d.columnNum]
 				if (key && variableMap && variableMap[key]) {
 					txt.append(["<th>", "</th>"].join(variableMap[key]))
-				} else if (d instanceof ColumnDefnType) {
+				} else if (d instanceof ColumnDefinition) {
 					txt.append(["<th>", "</th>"].join(d.columnId))
 				} else if (d instanceof DataSetTableDefnType) {
 					txt.append(["<th>", "</th>"].join(d.tableId))
@@ -732,24 +737,21 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
 
     protected String scalar(def s) {
         switch(s) {
-            case RealValueType:
-            case IntValueType:
-            case StringValueType:
-            case IdValueType:
+            case RealValue:
+            case IntValue:
+            case StringValue:
+            case IdValue:
                 return s.value as String
-                break
-            case TrueBooleanType:
+            case TrueBoolean:
                 return "true"
-                break
-            case FalseBooleanType:
+            case FalseBoolean:
                 return "false"
-                break
             default:
                 return s.toString()
         }
     }
 
-    protected String sequence(SequenceType s) {
+    protected String sequence(Sequence s) {
         return [s.begin, s.stepSize, s.end].collect{rhs(it, new StringBuilder())}.join(":")
     }
 
@@ -770,15 +772,15 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             //can be a scalar or a sequence
             def vectorElement = iterator.next().value
             switch (vectorElement) {
-                case SequenceType:
+                case Sequence:
                     result.append(sequence(vectorElement))
                     break
-                case IdValueType:
-                case StringValueType:
-                case IntValueType:
-                case RealValueType:
-                case TrueBooleanType:
-                case FalseBooleanType:
+                case IdValue:
+                case StringValue:
+                case IntValue:
+                case RealValue:
+                case TrueBoolean:
+                case FalseBoolean:
                     result.append(oprand(vectorElement.value.toString()))
                     break
                 default:
@@ -808,7 +810,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 item = vectorElement as ScalarRhs
                 result.append(item.value.toPlainString())
             } catch (ClassCastException ignored) {
-                item = vectorElement as SequenceType
+                item = vectorElement as Sequence
                 result.append(sequence(item))
             }
             if (iterator.hasNext()) {
@@ -921,7 +923,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 prefixToInfix(builder,stack)
                 builder.append(operator.getClosing())
             }
-        } 
+        }
         else if (symbol instanceof FunctionSymbol) {
             FunctionSymbol function=symbol as FunctionSymbol
             builder.append(function.getMapping())
@@ -965,30 +967,30 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
        // prefixToInfix(builder, stack)
     }
 
-    protected JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRefType> symbRef,
+    protected JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRef> symbRef,
             Map<String, Equation> transformations) {
         final EquationType TRANSF_EQ = resolveSymbolReference(symbRef.value, transformations)
         if (TRANSF_EQ) {
             final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first()
             final Class ELEM_CLASS = FIRST_ELEM.value.getClass()
             switch(ELEM_CLASS) {
-                case BinopType:
+                case Binop:
                     break
-                case UniopType:
+                case Uniop:
                     break
-                case SymbolRefType:
+                case SymbolRef:
                     break
-                case ConstantType:
+                case Constant:
                     break
                 case FunctionCallType:
                     break
-                case IdValueType:
+                case IdValue:
                     break
-                case StringValueType:
+                case StringValue:
                     break
-                case IntValueType:
+                case IntValue:
                     break
-                case RealValueType:
+                case RealValue:
                     break
                 default:
                     assert false, "Cannot have ${ELEM_CLASS.name} inside a transformation."
@@ -1000,42 +1002,42 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         }
     }
 
-    protected JAXBElement expandNestedUniop(JAXBElement<UniopType> jaxbUniop,
+    protected JAXBElement expandNestedUniop(JAXBElement<Uniop> jaxbUniop,
             Map<String, Equation> transfMap) {
-        UniopType uniop = jaxbUniop.value
-        UniopType replacement
+        Uniop uniop = jaxbUniop.value
+        Uniop replacement
         if (uniop.symbRef) {
             final EquationType TRANSF_EQ = resolveSymbolReference(uniop.symbRef, transfMap)
             if (TRANSF_EQ) {
                 final def FIRST_ELEM = TRANSF_EQ.scalarOrSymbRefOrBinop.first().value
                 final Class ELEM_CLASS = FIRST_ELEM.getClass()
-                replacement = new UniopType()
-                replacement.op = uniop.op
+                replacement = new Uniop()
+                replacement.operator = uniop.operator
                 switch(ELEM_CLASS) {
-                    case BinopType:
+                    case Binop:
                         replacement.binop = FIRST_ELEM
                         break
-                    case UniopType:
+                    case Uniop:
                         replacement.uniop = FIRST_ELEM
                         break
-                    case SymbolRefType:
+                    case SymbolRef:
                         replacement.symbRef = FIRST_ELEM
                         break
-                    case ConstantType:
+                    case Constant:
                         replacement.constant = FIRST_ELEM
                         break
                     case FunctionCallType:
                         replacement.functionCall = FIRST_ELEM
                         break
-                    case IdValueType:
+                    case IdValue:
                         replacement.scalar = FIRST_ELEM
                         break
-                    case StringValueType:
+                    case StringValue:
                         break
-                    case IntValueType:
+                    case IntValue:
                         replacement.scalar = FIRST_ELEM
                         break
-                    case RealValueType:
+                    case RealValue:
                         replacement.scalar = FIRST_ELEM
                         break
                     default:
@@ -1061,19 +1063,19 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return jaxbUniop
     }
 
-    protected JAXBElement expandNestedBinop(JAXBElement<BinopType> jaxbBinop,
+    protected JAXBElement expandNestedBinop(JAXBElement<Binop> jaxbBinop,
             Map<String, Equation> transfMap) {
-        BinopType binop = jaxbBinop.value
-        List<JAXBElement> terms = binop.content
+        Binop binop = jaxbBinop.value
+        List<JAXBElement> terms = [binop.operand1, binop.operand2].collect {it.toJAXBElement()}
         def expandedTerms = terms.collect { c ->
             switch (c.value) {
-                case SymbolRefType:
+                case SymbolRef:
                     return expandNestedSymbRefs(c, transfMap)
                     break
-                case BinopType:
+                case Binop:
                     return expandNestedBinop(c, transfMap)
                     break
-                case UniopType:
+                case Uniop:
                     return expandNestedUniop(c, transfMap)
                     break
                 default:
@@ -1084,9 +1086,10 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         if (expandedTerms.equals(terms)) {
             return jaxbBinop
         }
-        BinopType expanded = new BinopType()
-        expanded.op = binop.op
-        expanded.content = expandedTerms
+        Binop expanded = new Binop()
+        expanded.operator = binop.operator
+        expanded.operand1 = expandedTerms[0]
+        expanded.operand2 = expandedTerms[1]
         return wrapJaxb(expanded)
     }
 
@@ -1094,13 +1097,13 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         List<JAXBElement> eqTerms = equation.scalarOrSymbRefOrBinop
         List<JAXBElement> expandedTerms = eqTerms.collect {
             switch(it.value) {
-                case BinopType:
+                case Binop:
                     return expandNestedBinop(it, transfMap)
                     break
-                case UniopType:
+                case Uniop:
                     return expandNestedUniop(it, transfMap)
                     break
-                case SymbolRefType:
+                case SymbolRef:
                     return expandNestedSymbRefs(it, transfMap)
                     break
                 default:
@@ -1196,7 +1199,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return builder.toString()
     }
 
-    protected String convertToMathML(DerivativeVariableType derivative, def iv) {
+    protected String convertToMathML(DerivativeVariable derivative, def iv) {
         String independentVariable = derivative.independentVariable?.symbRef?.symbIdRef ?: (iv ?: "t")
         String derivTerm="d${derivative.symbId}<DIVIDEDBY>d${independentVariable}"
         return convertToMathML(derivTerm, derivative.getAssign())
@@ -1266,17 +1269,15 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return elem instanceof JAXBElement ? elem : new JAXBElement(new QName(""), elem.getClass(), elem)
     }
 
-    protected JAXBElement applyBinopToList(List elements, String operator) {
+    protected JAXBElement applyBinopToList(List elements, Binoperator operator) {
         if (elements.size() == 1) {
             // just return the element
             return wrapJaxb(elements.first())
         } else {
-            def result = new BinopType()
-            result.op = operator
-            final int LAST = elements.size() - 1
-            result.content = []
-            result.content.add(wrapJaxb(elements.first()))
-            result.content.add(applyBinopToList(elements[1..LAST], operator))
+            def result = new Binop()
+            result.operator = operator
+            result.operand1 = elements.first().value
+            result.operand2 = applyBinopToList(elements[1..-1], operator)?.value
             return wrapJaxb(result)
         }
     }
@@ -1290,7 +1291,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
      * If @ref only has a symbIdRef, then it will return the first element from the map
      * that matches, or null if there were no matches.
      */
-    protected EquationType resolveSymbolReference(SymbolRefType ref, Map<String, Equation> transfMap) {
+    protected EquationType resolveSymbolReference(SymbolRef ref, Map<String, Equation> transfMap) {
         EquationType transfEq
         if (ref.blkIdRef) {
             String transfRef = "${ref.blkIdRef}_${ref.symbIdRef}"

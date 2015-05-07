@@ -70,9 +70,7 @@ grails.project.dependency.resolution = {
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
     }
     dependencies {
-        compile("eu.ddmore.pharmml:libPharmML:0.3.2-b3") {
-            excludes 'junit-dep'
-        }
+        compile("eu.ddmore.pharmml:libPharmML:0.4-beta-b3")
     }
     plugins {
         build ":tomcat:7.0.54"

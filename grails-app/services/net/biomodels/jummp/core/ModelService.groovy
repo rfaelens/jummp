@@ -116,10 +116,6 @@ class ModelService {
      */
     def pubMedService
     /**
-     * Dependency injection for ExecutorService to run threads
-     */
-    def executorService
-    /**
      * Dependency injection of ModelHistoryService
      */
     def modelHistoryService
@@ -783,7 +779,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
             stopWatch.stop()
             revision.refresh()
-            //executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
                     DomainAdapter.getAdapter(revision).toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
@@ -1021,8 +1016,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 log.debug("Model $submissionId stored with id ${model.id}")
             }
 
-           //executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
-
             // broadcast event
             grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, DomainAdapter.getAdapter(model).toCommandObject(), modelFiles))
         } else {
@@ -1228,8 +1221,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 log.debug(e.message, e)
             }
 
-            //executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
-
             // broadcast event
             grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, DomainAdapter.getAdapter(model).toCommandObject(), modelFiles))
         } else {
@@ -1393,8 +1384,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 }
             }
             revision.refresh()
-           // executorService.submit(
-             //       grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
                     DomainAdapter.getAdapter(revision).toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
