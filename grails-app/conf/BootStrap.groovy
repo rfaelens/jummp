@@ -40,6 +40,8 @@ import net.biomodels.jummp.plugins.security.User
 import net.biomodels.jummp.plugins.security.UserRole
 import org.codehaus.groovy.grails.commons.ApplicationAttributes
 import org.codehaus.groovy.grails.plugins.springsecurity.acl.AclSid
+import org.codehaus.groovy.grails.commons.GrailsClass
+import org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin
 
 class BootStrap {
     def springSecurityService
@@ -67,6 +69,12 @@ class BootStrap {
         def modelFormat = service.registerModelFormat("UNKNOWN", "UNKNOWN")
         service.handleModelFormat(modelFormat, "unknownFormatService", "unknown")
 
+         grailsApplication.domainClasses.each { GrailsClass gc ->
+            DomainClassGrailsPlugin.addValidationMethods(grailsApplication,
+                gc, grailsApplication.mainContext)
+        }
+        
+        
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.PUBMED,
                          pattern:"^\\d+",
                          identifiersPrefix:"http://identifiers.org/pubmed/"))
