@@ -115,7 +115,7 @@ class UserService implements IUserService {
     }
 
     @PostLogging(LoggingEventType.UPDATE)
-    @Profiled(tag="userService.changePassword")
+    @Profiled(tag = "userService.changePassword")
     void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {
         User user = (User)springSecurityService.getCurrentUser()
         if (user.password != springSecurityService.encodePassword(oldPassword, null)) {
@@ -129,7 +129,7 @@ class UserService implements IUserService {
     }
 
     @PostLogging(LoggingEventType.UPDATE)
-    @Profiled(tag="userService.editUser")
+    @Profiled(tag = "userService.editUser")
     @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
     void editUser(User user) throws UserInvalidException {
         checkUserValid(user.username)
@@ -156,7 +156,7 @@ class UserService implements IUserService {
                     origUser.person.orcid = user.person.orcid
                 }
                 else {
-                    origUser.person = new Person(orcid: user.person.orcid);
+                    origUser.person = new Person(orcid: user.person.orcid)
                 }
             }
         }
@@ -196,13 +196,13 @@ class UserService implements IUserService {
     @Profiled(tag="userService.hasRole")
     @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
     boolean hasRole(String username, String role) throws UserNotFoundException {
-    	User potentialCurator = User.findByUsername(username)
+        User potentialCurator = User.findByUsername(username)
         if (!potentialCurator) {
             throw new UserNotFoundException(username)
         }
-        Set<Role> roles=potentialCurator.getAuthorities();
-        def isCurator=roles.find {
-        	it.authority==role;
+        Set<Role> roles = potentialCurator.getAuthorities()
+        def isCurator = roles.find {
+            it.authority == role
         }
         return isCurator
     }
