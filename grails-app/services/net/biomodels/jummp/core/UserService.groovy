@@ -28,10 +28,6 @@
 * that of the covered work.}
 **/
 
-
-
-
-
 package net.biomodels.jummp.core
 
 import net.biomodels.jummp.plugins.security.Role
@@ -54,11 +50,11 @@ import net.biomodels.jummp.core.user.UserInvalidException
 import net.biomodels.jummp.core.user.UserCodeInvalidException
 import net.biomodels.jummp.core.user.UserCodeExpiredException
 import net.biomodels.jummp.core.user.RegistrationException
-import net.biomodels.jummp.core.user.UserManagementException
 import net.biomodels.jummp.core.user.RoleNotFoundException
+import net.biomodels.jummp.core.user.UserManagementException
 import org.springframework.transaction.TransactionStatus
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.access.AccessDeniedException
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 /**
@@ -66,13 +62,11 @@ import org.codehaus.groovy.grails.web.mapping.LinkGenerator
  *
  * This service is meant for any kind of user management, such as changing password
  * and administrative tasks like enabling/disabling users, etc.
- * 
+ *
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class UserService implements IUserService {
-
-    static transactional = true
     /**
      * Dependency injection of springSecurityService
      */
@@ -86,7 +80,7 @@ class UserService implements IUserService {
      */
     @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
-    
+
     def grailsLinkGenerator
     /**
      * Random number generator for creating user validation ids.
@@ -94,32 +88,32 @@ class UserService implements IUserService {
     private final Random random = new Random(System.currentTimeMillis())
 
     private void checkUserValid(String user) {
-    	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (user!=auth.getName() && !SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-        	throw new AccessDeniedException("User not valid. You do not have rights to modify this user")
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication()
+        if (user != auth.getName() && !SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            throw new AccessDeniedException("User not valid. You do not have rights to modify this user")
         }
     }
-    
+
     String getRealName(String userName) {
-    	User user=User.findByUsername(userName);
-    	return user.person.userRealName;
+        User user = User.findByUsername(userName)
+        return user.person.userRealName
     }
-    
+
     String getUsername(String realName) {
-    	def usernames=User.withCriteria {
-    		projections {
-   				property('username')
-    		}
-    		person {
-    			 ilike 'userRealName', realName
-    		}
-    	}
-    	if (usernames) {
-    		return usernames.get(0);
-    	}
-    	return null;
+        def usernames = User.withCriteria {
+            projections {
+                property('username')
+            }
+            person {
+                ilike 'userRealName', realName
+             }
+        }
+        if (usernames) {
+            return usernames.get(0)
+        }
+        return null
     }
-    
+
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="userService.changePassword")
     void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {
@@ -138,33 +132,33 @@ class UserService implements IUserService {
     @Profiled(tag="userService.editUser")
     @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
     void editUser(User user) throws UserInvalidException {
-    	checkUserValid(user.username)
+        checkUserValid(user.username)
         User origUser = User.findByUsername(user.username)
         if (origUser.person.orcid != user.person.orcid) {
-        	Person sameOrcid = Person.findByOrcid(user.person.orcid);
-        	if (sameOrcid) {
-        		if (User.findByPerson(sameOrcid)) {
-        			log.warn("User ${user.username} tried to register orcid ${user.person.orcid} which is already in use by ${sameOrcid.userRealName}")
-            		throw new UserInvalidException("Someone with this ORCID is already registered in the repository", origUser.id)        				
-				}
-        		else {
-        			Person possiblyNoLongerNeeded = origUser.person
-       				origUser.person = sameOrcid
-       				def anyPublications = PublicationPerson.findByPerson(possiblyNoLongerNeeded)
-       				if (!anyPublications) {
-       					possiblyNoLongerNeeded.delete();
-       				}
-       			}
-        	}
-        	else {
-        		def anyPublications = PublicationPerson.findByPerson(origUser.person)
-        		if (!anyPublications) {
-        			origUser.person.orcid = user.person.orcid
-        		}
-        		else {
-        			origUser.person = new Person(orcid: user.person.orcid);
-        		}
-        	}
+            Person sameOrcid = Person.findByOrcid(user.person.orcid)
+            if (sameOrcid) {
+                if (User.findByPerson(sameOrcid)) {
+                    log.warn("User ${user.username} tried to register orcid ${user.person.orcid} which is already in use by ${sameOrcid.userRealName}")
+                    throw new UserInvalidException("Someone with this ORCID is already registered in the repository", origUser.id)
+                }
+                else {
+                    Person possiblyNoLongerNeeded = origUser.person
+                    origUser.person = sameOrcid
+                    def anyPublications = PublicationPerson.findByPerson(possiblyNoLongerNeeded)
+                    if (!anyPublications) {
+                        possiblyNoLongerNeeded.delete()
+                    }
+                }
+            }
+            else {
+                def anyPublications = PublicationPerson.findByPerson(origUser.person)
+                if (!anyPublications) {
+                    origUser.person.orcid = user.person.orcid
+                }
+                else {
+                    origUser.person = new Person(orcid: user.person.orcid);
+                }
+            }
         }
         origUser.person.userRealName = user.person.userRealName
         origUser.person.institution = user.person.institution
@@ -178,7 +172,7 @@ class UserService implements IUserService {
         origUser.person.save(flush: true, failOnError: true)
         origUser.save(flush: true)
     }
- 
+
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="userService.getCurrentUser")
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -197,7 +191,7 @@ class UserService implements IUserService {
         }
         return user.sanitizedUser()
     }
-    
+
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="userService.hasRole")
     @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
@@ -223,27 +217,27 @@ class UserService implements IUserService {
         }
         return user
     }
-    
+
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="userService.searchUsers")
     @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
     List<String> searchUsers(String term) {
-    	return User.withCriteria {
-    		projections {
-    			property('email')
- 			    property('username')
- 			    person {
-    				property('userRealName')
-    			}
-    		}
-    		or {
-    			ilike 'email', "%"+term + '%'
-    			ilike 'username', "%"+term + '%'
-    			person {
-    				ilike 'userRealName', "%"+term + '%'
-    			}
-    		}
-    	}
+        return User.withCriteria {
+            projections {
+                property('email')
+                property('username')
+                person {
+                    property('userRealName')
+                }
+            }
+            or {
+                ilike 'email', "%"+term + '%'
+                ilike 'username', "%"+term + '%'
+                person {
+                    ilike 'userRealName', "%"+term + '%'
+                }
+            }
+        }
     }
 
     @PostLogging(LoggingEventType.RETRIEVAL)
@@ -257,12 +251,12 @@ class UserService implements IUserService {
     @Profiled(tag="userService.enableUser")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     Boolean enableUser(Long userId, Boolean enable) throws UserNotFoundException {
-    	User user = User.get(userId)
+        User user = User.get(userId)
         if (!user) {
             throw new UserNotFoundException(userId)
         }
         if (user.enabled != enable) {
-        	user.enabled = enable
+            user.enabled = enable
             user.save(flush: true)
             return (User.get(userId).enabled == enable)
         } else {
@@ -320,16 +314,15 @@ class UserService implements IUserService {
             return false
         }
     }
-    
+
     def generator = { String alphabet, int n ->
-    		new Random().with {
-    				(1..n).collect { alphabet[ nextInt( alphabet.length() ) ] }.join()
-    		}
+        new Random().with {
+            (1..n).collect { alphabet[ nextInt( alphabet.length() ) ] }.join()
+        }
     }
 
-
     @PostLogging(LoggingEventType.CREATION)
-    @Profiled(tag="userService.register")
+    @Profiled(tag = "userService.register")
     @PreAuthorize("isAnonymous() or hasRole('ROLE_ADMIN')")
     Long register(User user) throws RegistrationException, UserInvalidException {
         if (springSecurityService.authentication instanceof AnonymousAuthenticationToken &&
@@ -341,32 +334,32 @@ class UserService implements IUserService {
         }
         User newUser = user.sanitizedUser()
         if (newUser.person.orcid) {
-			def existing=Person.findByOrcid(newUser.person.orcid)
-			if (existing) {
-				if (User.findByPerson(existing)) {
-					throw new RegistrationException("Someone with this ORCID is already registered in the repository", newUser.person.orcid)        				
-				}
-				else {
-					existing.userRealName = newUser.person.userRealName
-					existing.institution = newUser.person.institution
-					newUser.person=existing
-				}
-			}
-			else {
-				newUser.person.save(flush:true, failOnError:true)
-			}
-		}
-		else {
-			newUser.person.save(flush:true, failOnError:true)
-		}
+            def existing = Person.findByOrcid(newUser.person.orcid)
+            if (existing) {
+                if (User.findByPerson(existing)) {
+                    throw new RegistrationException(
+                        "Someone with this ORCID is already registered in the repository",
+                        newUser.person.orcid)
+                } else {
+                    existing.userRealName = newUser.person.userRealName
+                    existing.institution = newUser.person.institution
+                    newUser.person = existing
+                }
+            } else {
+                newUser.person.save(flush:true, failOnError:true)
+            }
+        }
+        else {
+            newUser.person.save(flush:true, failOnError:true)
+        }
         boolean adminRegistration = false
-        String p=generator( (('A'..'Z')+('0'..'9')).join(), 6 )
+        String p = generator( (('A'..'Z')+('0'..'9')).join(), 6 )
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
             // admin creates with a random password that is emailed to the user.
             newUser.password = "*"
             newUser.enabled = true
-            newUser.password =  springSecurityService.encodePassword(p, null)
-            newUser.passwordExpired=false
+            newUser.password = springSecurityService.encodePassword(p, null)
+            newUser.passwordExpired = false
             adminRegistration = true
         } else {
             if (grailsApplication.config.jummp.security.ldap.enabled) {
@@ -582,8 +575,8 @@ class UserService implements IUserService {
         }
         return role
     }
-    
-    
+
+
     boolean createAdmin(UserCommand user) {
         User person = new User()
         person.properties = user
@@ -602,7 +595,7 @@ class UserService implements IUserService {
             if (persistAdminWithRoles(person)) {
                 userCreated = true
             } else {
-            	log.error("The initial user could not be created in the database. Is the database configured properly?")
+                log.error("The initial user could not be created in the database. Is the database configured properly?")
                 userCreated = false
             }
         } else {
