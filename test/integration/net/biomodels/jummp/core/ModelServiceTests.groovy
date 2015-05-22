@@ -61,6 +61,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
+import net.biomodels.jummp.core.adapters.DomainAdapter 
 
 @TestMixin(IntegrationTestMixin)
 class ModelServiceTests extends JummpIntegrationTest {
@@ -1006,7 +1007,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue((modelService.uploadModelAsFile(rf2, meta)).validate())
         // an invalid submission should yield a model with validated flag set to false
         meta.name = "test2"
-        meta.format = ModelFormat.findByIdentifierAndFormatVersion("SBML", "*").toCommandObject()
+        meta.format = DomainAdapter.getAdapter(ModelFormat.findByIdentifierAndFormatVersion("SBML", "*")).toCommandObject()
         File sbmlFile = new File("target/sbml/sbmlTestFile")
         FileUtils.deleteQuietly(sbmlFile)
         FileUtils.touch(sbmlFile)

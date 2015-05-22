@@ -36,6 +36,7 @@ package net.biomodels.jummp.plugins
 
 import com.ctc.wstx.api.ReaderConfig
 import com.ctc.wstx.stax.WstxInputFactory
+import net.biomodels.jummp.core.adapters.DomainAdapter 
 import net.biomodels.jummp.core.JummpIntegrationTest
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -154,13 +155,16 @@ class SbmlServiceTests extends JummpIntegrationTest {
                     description: "", mainFile: true)
         Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
-        RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
+        RevisionTransportCommand rev = DomainAdapter
+                                        .getAdapter(modelService
+                                                    .getLatestRevision(model))
+                                                    .toCommandObject()
         assertEquals(1, sbmlService.getLevel(rev))
         assertEquals(1, sbmlService.getVersion(rev))
         assertEquals("L1V1", sbmlService.getFormatVersion(rev))
         rf.path = "test/files/BIOMD0000000272.xml"
-        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf,
-                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L2V4"), "test").toCommandObject()
+        RevisionTransportCommand rev2 = DomainAdapter.getAdapter(modelService.addRevisionAsFile(model, rf,
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L2V4"),"test")).toCommandObject()
         assertEquals(2, sbmlService.getLevel(rev2))
         assertEquals(4, sbmlService.getVersion(rev2))
         assertEquals("L2V4", sbmlService.getFormatVersion(rev2))
@@ -172,11 +176,13 @@ class SbmlServiceTests extends JummpIntegrationTest {
         def rf = new RepositoryFileTransportCommand(path: smallModel("BIOMD0000000272.xml"), mainFile:true, description: "")
         Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
-        RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
+        RevisionTransportCommand rev = DomainAdapter
+                                        .getAdapter(modelService.getLatestRevision(model))
+                                        .toCommandObject()
         assertEquals("", sbmlService.getMetaId(rev))
         rf.path = "test/files/BIOMD0000000272.xml"
-        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf,
-                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L2V4"), "test").toCommandObject()
+        RevisionTransportCommand rev2 = DomainAdapter.getAdapter(modelService.addRevisionAsFile(model, rf,
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L2V4"), "test")).toCommandObject()
         assertEquals("_688624", sbmlService.getMetaId(rev2))
     }
 
@@ -196,7 +202,7 @@ class SbmlServiceTests extends JummpIntegrationTest {
         def rf = new RepositoryFileTransportCommand(path: smallModel("testModelNotes.xml").absolutePath, mainFile:true, description: "")
         Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format: 
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
-        RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
+        RevisionTransportCommand rev = DomainAdapter.getAdapter(modelService.getLatestRevision(model)).toCommandObject()
         assertEquals("", sbmlService.getNotes(rev))
 
         File modelWithNotes = getFileForTest("testModelNotes.xml",'''<?xml version="1.0" encoding="UTF-8"?>
@@ -222,8 +228,8 @@ class SbmlServiceTests extends JummpIntegrationTest {
   </model>
 </sbml>''')
         rf.path = modelWithNotes.absolutePath
-        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf, 
-                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L1V1"), "test").toCommandObject()
+        RevisionTransportCommand rev2 = DomainAdapter.getAdapter(modelService.addRevisionAsFile(model, rf, 
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L1V1"), "test")).toCommandObject()
         String notes  = sbmlService.getNotes(rev2);
         assertTrue(notes.contains("<notes>"));
         assertTrue(notes.contains("http://www.w3.org/1999/xhtml"));

@@ -38,6 +38,7 @@ import static org.junit.Assert.*
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
 import java.util.UUID
+import net.biomodels.jummp.core.adapters.DomainAdapter 
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
@@ -240,7 +241,7 @@ class SubmissionServiceTests extends JummpIntegrationTest {
         workingMemory.put("isUpdateOnExistingModel", true)
         workingMemory.put("model_id", model_id)
         workingMemory.put("LastRevision", modelService.getLatestRevision(
-                    modelService.getModel(model_id)).toCommandObject())
+                    DomainAdapter.getAdapter(modelService.getModel(model_id))).toCommandObject())
         submissionService.initialise(workingMemory)
         String directory = new File(workingMemory.get("LastRevision").getFiles()[0].path).getParent()
         String text = addAdditionalFile(workingMemory, directory)
@@ -268,7 +269,9 @@ class SubmissionServiceTests extends JummpIntegrationTest {
         workingMemory = new HashMap<String, Object>()
         workingMemory.put("isUpdateOnExistingModel", true)
         workingMemory.put("model_id", model_id)
-        workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
+        workingMemory.put("LastRevision", DomainAdapter
+                                            .getAdapter(modelService.getLatestRevision(modelService.getModel(model_id)))
+                                            .toCommandObject())
         submissionService.initialise(workingMemory)
         String directory = new File(workingMemory.get("LastRevision").getFiles()[0].path).getParent()
         String guid = UUID.randomUUID() as String
@@ -312,7 +315,9 @@ class SubmissionServiceTests extends JummpIntegrationTest {
         workingMemory = new HashMap<String, Object>()
         workingMemory.put("isUpdateOnExistingModel", true)
         workingMemory.put("model_id", model_id)
-        workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
+        workingMemory.put("LastRevision", DomainAdapter
+                                            .getAdapter(modelService.getLatestRevision(modelService.getModel(model_id)))
+                                            .toCommandObject())
         submissionService.initialise(workingMemory)
         String directory = new File(workingMemory.get("LastRevision").getFiles()[0].path).getParent()
         String text = addAdditionalFile(workingMemory, directory)
@@ -356,7 +361,9 @@ class SubmissionServiceTests extends JummpIntegrationTest {
         workingMemory = new HashMap<String, Object>()
         workingMemory.put("isUpdateOnExistingModel", true)
         workingMemory.put("model_id", model_id)
-        workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
+        workingMemory.put("LastRevision", DomainAdapter
+                                            .getAdapter(modelService.getLatestRevision(modelService.getModel(model_id)))
+                                            .toCommandObject())
         submissionService.initialise(workingMemory)
         def deleteThese = ["addFile.txt"]
         workingMemory.put("deleted_filenames", deleteThese)
@@ -410,7 +417,9 @@ class SubmissionServiceTests extends JummpIntegrationTest {
         workingMemory = new HashMap<String, Object>()
         workingMemory.put("isUpdateOnExistingModel", true)
         workingMemory.put("model_id", model_id)
-        workingMemory.put("LastRevision", modelService.getLatestRevision(modelService.getModel(model_id)).toCommandObject())
+        workingMemory.put("LastRevision", DomainAdapter
+                                            .getAdapter(modelService.getLatestRevision(modelService.getModel(model_id)))
+                                            .toCommandObject())
         submissionService.initialise(workingMemory)
         def deleteThese = ["addFile.txt"]
         workingMemory.put("deleted_filenames", deleteThese)
