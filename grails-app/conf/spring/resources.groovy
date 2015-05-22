@@ -112,7 +112,7 @@ beans = {
         }
     }
     grailsApplication.config.jummp.id.clear()
-    
+
     //Add annotation store domain classes (defined externally) to the domain model
     //following: https://github.com/pongasoft/external-domain-classes-grails-plugin/blob/master/ExternalDomainClassesGrailsPlugin.groovy#L84
     def packages = ["net.biomodels.jummp.annotationstore", "net.biomodels.jummp.core.model", "net.biomodels.jummp.model", "net.biomodels.jummp.plugins.security"] as String[]
