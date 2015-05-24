@@ -1971,6 +1971,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (MAKE_PUBLICATION_ID) {
             model.publicationId = model.publicationId ?: publicationIdGenerator.generate()
         }
+        model.firstPublished = new Date()
         aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
         aclUtilService.addPermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
         revision.state = ModelState.PUBLISHED
