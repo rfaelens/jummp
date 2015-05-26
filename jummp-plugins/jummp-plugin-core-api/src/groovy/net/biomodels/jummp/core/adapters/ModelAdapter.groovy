@@ -65,6 +65,7 @@ public class ModelAdapter extends DomainAdapter {
                 id: model.id,
                 submissionId: model.submissionId,
                 publicationId: model.publicationId,
+                firstPublished: model.firstPublished,
                 name: latestRev ? latestRev.name : null,
                 state: latestRev ? latestRev.state: null,
                 lastModifiedDate: latestRev ? latestRev.uploadDate : null,

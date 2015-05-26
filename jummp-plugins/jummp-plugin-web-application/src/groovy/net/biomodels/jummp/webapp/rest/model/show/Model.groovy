@@ -38,6 +38,7 @@ class Model {
     ModelFiles files
     @ApiModelProperty(value = "the version history of this model")
     History history
+    Date firstPublished
     /** perennial model identifiers */
     String submissionId
     String publicationId
@@ -56,5 +57,6 @@ class Model {
         history = new History(model.submissionId)
         submissionId = model.submissionId
         publicationId = model.publicationId
+        firstPublished = model.firstPublished
     }
 }
