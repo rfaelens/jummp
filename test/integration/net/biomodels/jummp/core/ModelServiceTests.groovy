@@ -84,7 +84,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue exchange.exists()
         fileSystemService.currentModelContainer = currentContainer
         fileSystemService.root = container.getParentFile()
-        modelService.vcsService.currentModelContainer = currentContainer
+        modelService.vcsService.modelContainerRoot = container.getParent()
         def gitFactory = grailsApplication.mainContext.getBean("gitManagerFactory")
         modelService.vcsService.vcsManager = gitFactory.getInstance()
         assertTrue(modelService.vcsService.isValid())
@@ -101,7 +101,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         }
         modelService.vcsService.vcsManager = null
         modelService.modelFileFormatService = modelFileFormatService
-        modelService.vcsService.currentModelContainer = null
+        modelService.vcsService.modelContainerRoot = null
         fileSystemService.currentModelContainer = null
     }
 
@@ -960,7 +960,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.plugins.sbml.validation = true
         modelService.vcsService.vcsManager = gitService.getInstance()
         String currentContainer = fileSystemService.findCurrentModelContainer()
-        modelService.vcsService.currentModelContainer = currentContainer
+        modelService.vcsService.modelContainerRoot = "target/vcs/git"
         assertTrue(modelService.vcsService.isValid())
         rf.path = importFile.absolutePath
         // import should work now
@@ -1073,7 +1073,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.vcs.workingDirectory = currentContainer
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         modelService.vcsService.vcsManager = gitService.getInstance()
-        modelService.vcsService.currentModelContainer = currentContainer
+        modelService.vcsService.modelContainerRoot = currentContainer
         assertTrue(modelService.vcsService.isValid())
         // import a file
         authenticateAsTestUser()
@@ -1538,7 +1538,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertNotNull checkout
         assertTrue checkout.model.vcsIdentifier.endsWith("$submissionId/")
         assertEquals name, checkout.name
-        File vcsFolder = new File(modelService.vcsService.currentModelContainer).listFiles().find {
+        File vcsFolder = new File(modelService.vcsService.modelContainerRoot).listFiles().find {
             it.isDirectory() && it.name.endsWith("$submissionId")
         }
         assertNotNull vcsFolder
@@ -1570,7 +1570,7 @@ class ModelServiceTests extends JummpIntegrationTest {
             assertNotNull checkout
             assertTrue checkout.model.vcsIdentifier.endsWith("$submissionId/")
             assertEquals name, checkout.name
-            def vcsRoot = new File(modelService.vcsService.currentModelContainer)
+            def vcsRoot = new File(modelService.vcsService.modelContainerRoot)
             File vcsFolder = vcsRoot.listFiles().find {
                 it.isDirectory() && it.name.endsWith("$submissionId")
             }
