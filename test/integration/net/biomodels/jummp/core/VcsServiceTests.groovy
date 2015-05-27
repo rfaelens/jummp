@@ -116,7 +116,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         File root = new File("target/vcs/")
         String containerPath = root.absolutePath + "/vvv/"
         fileSystemService.currentModelContainer = containerPath
-        vcsService.currentModelContainer = containerPath
+        vcsService.modelContainerRoot = grailsApplication.config.jummp.vcs.workingDirectory
         File gitDirectory = new File("target/vcs/vvv/git/")
         gitDirectory.mkdirs()
 
@@ -154,10 +154,10 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         //modelService ensures that the model folder gets created
         File modelDirectory = new File(new File(containerPath), "test")
         modelDirectory.mkdirs()
-        vcsService.currentModelContainer = containerPath
+        vcsService.modelContainerRoot = "target/vcs/git"
         assertFalse(vcsService.isValid())
         // first create a model
-        Model model = new Model(vcsIdentifier: modelIdentifier, submissionId: "MODEL001")
+        Model model = new Model(vcsIdentifier: "/aaa/${modelIdentifier}", submissionId: "MODEL001")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1,
                 owner: User.findByUsername("testuser"), minorRevision: false, name: "test",
                 description:"", comment: "", uploadDate: new Date(),
@@ -194,6 +194,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         vcsService.vcsManager = gitService.getInstance()
+        vcsService.modelContainerRoot = grailsApplication.config.jummp.vcs.workingDirectory
         assertTrue(vcsService.isValid())
         // now as user we should be able to import
         authenticateAsTestUser()
@@ -233,14 +234,14 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         //modelService ensures that the model folder gets created
         File modelDirectory = new File(new File(containerPath), "testUpdate")
         modelDirectory.mkdirs()
-        vcsService.currentModelContainer = containerPath
+        vcsService.modelContainerRoot = "target/vcs/git"
 
         assertFalse(vcsService.isValid())
         // first create a model
         String modelIdentifier="testUpdate/"
         assertFalse(vcsService.isValid())
         // first create a model
-        Model model = new Model(vcsIdentifier: modelIdentifier, submissionId: "MODEL001")
+        Model model = new Model(vcsIdentifier: "/uuu/"+modelIdentifier, submissionId: "MODEL001")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1,
                 owner: User.findByUsername("testuser"), minorRevision: false, name: "test",
                 description: "", comment: "", uploadDate: new Date(),
@@ -282,6 +283,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         grailsApplication.config.jummp.plugins.git.enabled = true
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        vcsService.modelContainerRoot = grailsApplication.config.jummp.vcs.workingDirectory
         vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
 
@@ -453,16 +455,16 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         fileSystemService.root = new File("target/vcs/git").canonicalFile
         String containerPath = fileSystemService.root.absolutePath + "/aaa/"
         fileSystemService.currentModelContainer = containerPath
-        vcsService.currentModelContainer = containerPath
+        vcsService.modelContainerRoot = "target/vcs/git"
 
         assertFalse(vcsService.isValid())
-        String modelIdentifier="git/"
+        String modelIdentifier="modelid"
         //modelService ensures that the model folder gets created
         File modelDirectory = new File(new File(containerPath), modelIdentifier)
         modelDirectory.mkdirs()
         assertFalse(vcsService.isValid())
         // first create a model
-        Model model = new Model(vcsIdentifier: modelIdentifier, submissionId: "MODEL001")
+        Model model = new Model(vcsIdentifier: "aaa/${modelIdentifier}", submissionId: "MODEL001")
         Revision revision = new Revision(model: model, vcsId: "1", revisionNumber: 1,
                 owner: User.findByUsername("testuser"), minorRevision: false, name: "test",
                 description: "", comment: "", uploadDate: new Date(),
@@ -516,6 +518,7 @@ class VcsServiceTests extends JummpIntegrationTest implements ApplicationContext
         grailsApplication.config.jummp.plugins.git.enabled = true
         grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        vcsService.modelContainerRoot = grailsApplication.config.jummp.vcs.workingDirectory
         vcsService.vcsManager = gitService.getInstance()
         assertTrue(vcsService.isValid())
         // git is valid, but file does not yet exist
