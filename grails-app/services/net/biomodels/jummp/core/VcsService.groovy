@@ -64,7 +64,7 @@ class VcsService implements InitializingBean {
     String modelContainerRoot
 
     void afterPropertiesSet() {
-        modelContainerRoot = fileSystemService.root
+        modelContainerRoot = fileSystemService.root.canonicalPath
     }
 
     /**
