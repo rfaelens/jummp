@@ -695,24 +695,23 @@ class ModelServiceTests extends JummpIntegrationTest {
         File importFile = new File("target/vcs/exchange/test.xml")
         FileUtils.touch(importFile)
 
-        shouldFail(ModelException) {
+        /*shouldFail(ModelException) {
             modelService.addRevisionAsFile(model,
                 new RepositoryFileTransportCommand(path: importFile.path, description: "", mainFile: true),
                     ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"), "")
-        }
+        }*/
 
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
-        fileSystemService.root = new File("target/vcs/git/").getCanonicalFile()
-        fileSystemService.root.mkdirs()
-        fileSystemService.currentModelContainer = "target/vcs/git/sss/"
-        grailsApplication.config.jummp.plugins.sbml.validate = true
+        grailsApplication.config.jummp.plugins.sbml.validation = true
         modelService.vcsService.vcsManager = gitService.getInstance()
+        String currentContainer = fileSystemService.findCurrentModelContainer()
+        modelService.vcsService.modelContainerRoot = "target/vcs/git"
         assertTrue(modelService.vcsService.isValid())
-/**
+
         File updateFile = new File("target/vcs/exchange/update.xml")
         updateFile.append("Test\n")
         FileUtils.touch(updateFile)
@@ -807,7 +806,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         shouldFail(ModelException) {
             modelService.addRevisionAsFile(model, rf, ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*"), "")
         }
-*/
+
     }
     @Test
     void testDeleteRestoreModel() {
@@ -970,8 +969,8 @@ class ModelServiceTests extends JummpIntegrationTest {
                 model.revisions.toList().first().format)
         // complete name cannot be tested, as it uses a generated date and we do not know the date
         assertTrue(model.vcsIdentifier.endsWith("${model.submissionId}/"))
-        File parent = new File(currentContainer, model.vcsIdentifier)
-
+        File parent = new File(grailsApplication.config.jummp.vcs.workingDirectory, model.vcsIdentifier)
+        
         File gitFile = new File(parent, importFile.getName())
         List<String> lines = gitFile.readLines()
         assertEquals(1, lines.size())
@@ -1066,14 +1065,15 @@ class ModelServiceTests extends JummpIntegrationTest {
 
     @Test
     void testRetrieveModelFiles() {
-        def currentContainer = fileSystemService.findCurrentModelContainer()
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.workingDirectory = currentContainer
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
+        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
+        grailsApplication.config.jummp.plugins.sbml.validation = true
         modelService.vcsService.vcsManager = gitService.getInstance()
-        modelService.vcsService.modelContainerRoot = currentContainer
+        String currentContainer = fileSystemService.findCurrentModelContainer()
+        modelService.vcsService.modelContainerRoot = "target/vcs/git"
         assertTrue(modelService.vcsService.isValid())
         // import a file
         authenticateAsTestUser()
