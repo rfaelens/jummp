@@ -69,7 +69,7 @@ class PubMedServiceTests extends JummpIntegrationTest {
         userService.register(user)
         // publication: Science   (ISSN: 0036-8075)   (ESSN: 1095-9203)
         String id = "20488988"
-        Publication publication = Publication.fromCommandObject(pubMedService.fetchPublicationData(id))
+        Publication publication = pubMedService.fromCommandObject(pubMedService.fetchPublicationData(id))
         assertTrue(publication.validate())
         assertEquals("Science (New York, N.Y.)", publication.journal)
         assertEquals(2010, publication.year)
@@ -89,11 +89,11 @@ class PubMedServiceTests extends JummpIntegrationTest {
         assertEquals(authorTest.pubAlias, "Schilling M")
         assertEquals(authorTest.position, 1)
         // test for 12974500 - no day specified
-        publication = Publication.fromCommandObject(pubMedService.fetchPublicationData("12974500"))
+        publication = pubMedService.fromCommandObject(pubMedService.fetchPublicationData("12974500"))
         assertNull(publication.day)
 
         // test for 20955552 - no month and no issue
-        publication = Publication.fromCommandObject(pubMedService.fetchPublicationData("20955552"))
+        publication = pubMedService.fromCommandObject(pubMedService.fetchPublicationData("20955552"))
         assertNull(publication.day)
         assertEquals("0",publication.month)
         assertNull(publication.issue)

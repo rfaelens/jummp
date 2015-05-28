@@ -61,6 +61,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
+import net.biomodels.jummp.core.adapters.DomainAdapter 
 
 @TestMixin(IntegrationTestMixin)
 class ModelServiceTests extends JummpIntegrationTest {
@@ -83,7 +84,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue exchange.exists()
         fileSystemService.currentModelContainer = currentContainer
         fileSystemService.root = container.getParentFile()
-        modelService.vcsService.currentModelContainer = currentContainer
+        modelService.vcsService.modelContainerRoot = container.getParent()
         def gitFactory = grailsApplication.mainContext.getBean("gitManagerFactory")
         modelService.vcsService.vcsManager = gitFactory.getInstance()
         assertTrue(modelService.vcsService.isValid())
@@ -100,7 +101,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         }
         modelService.vcsService.vcsManager = null
         modelService.modelFileFormatService = modelFileFormatService
-        modelService.vcsService.currentModelContainer = null
+        modelService.vcsService.modelContainerRoot = null
         fileSystemService.currentModelContainer = null
     }
 
@@ -959,7 +960,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.plugins.sbml.validation = true
         modelService.vcsService.vcsManager = gitService.getInstance()
         String currentContainer = fileSystemService.findCurrentModelContainer()
-        modelService.vcsService.currentModelContainer = currentContainer
+        modelService.vcsService.modelContainerRoot = "target/vcs/git"
         assertTrue(modelService.vcsService.isValid())
         rf.path = importFile.absolutePath
         // import should work now
@@ -1006,7 +1007,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertTrue((modelService.uploadModelAsFile(rf2, meta)).validate())
         // an invalid submission should yield a model with validated flag set to false
         meta.name = "test2"
-        meta.format = ModelFormat.findByIdentifierAndFormatVersion("SBML", "*").toCommandObject()
+        meta.format = DomainAdapter.getAdapter(ModelFormat.findByIdentifierAndFormatVersion("SBML", "*")).toCommandObject()
         File sbmlFile = new File("target/sbml/sbmlTestFile")
         FileUtils.deleteQuietly(sbmlFile)
         FileUtils.touch(sbmlFile)
@@ -1072,7 +1073,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.vcs.workingDirectory = currentContainer
         grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
         modelService.vcsService.vcsManager = gitService.getInstance()
-        modelService.vcsService.currentModelContainer = currentContainer
+        modelService.vcsService.modelContainerRoot = currentContainer
         assertTrue(modelService.vcsService.isValid())
         // import a file
         authenticateAsTestUser()
@@ -1537,7 +1538,7 @@ class ModelServiceTests extends JummpIntegrationTest {
         assertNotNull checkout
         assertTrue checkout.model.vcsIdentifier.endsWith("$submissionId/")
         assertEquals name, checkout.name
-        File vcsFolder = new File(modelService.vcsService.currentModelContainer).listFiles().find {
+        File vcsFolder = new File(modelService.vcsService.modelContainerRoot).listFiles().find {
             it.isDirectory() && it.name.endsWith("$submissionId")
         }
         assertNotNull vcsFolder
@@ -1569,7 +1570,7 @@ class ModelServiceTests extends JummpIntegrationTest {
             assertNotNull checkout
             assertTrue checkout.model.vcsIdentifier.endsWith("$submissionId/")
             assertEquals name, checkout.name
-            def vcsRoot = new File(modelService.vcsService.currentModelContainer)
+            def vcsRoot = new File(modelService.vcsService.modelContainerRoot)
             File vcsFolder = vcsRoot.listFiles().find {
                 it.isDirectory() && it.name.endsWith("$submissionId")
             }

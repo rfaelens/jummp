@@ -98,7 +98,7 @@ class SearchTests extends JummpIntegrationTest {
         new File("target/vcs/exchange/").mkdirs()
         fileSystemService.currentModelContainer = container.getCanonicalPath()
         fileSystemService.root = container.getParentFile()
-        modelService.vcsService.currentModelContainer = container.getCanonicalPath()
+        modelService.vcsService.modelContainerRoot = fileSystemService.root
         createUserAndRoles()
         assertNotNull solrServerHolder.server
     }

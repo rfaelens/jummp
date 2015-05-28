@@ -95,7 +95,7 @@ public class SubmissionFlowTestBase extends WebFlowTestCase {
         fileSystemService.root = parentLocation
         String containerPath = parentLocation.absolutePath + File.separator + "ttt"
         fileSystemService.currentModelContainer = containerPath
-        modelService.vcsService.currentModelContainer = containerPath
+        modelService.vcsService.modelContainerRoot = "target/vcs/git/"
     }
     
     protected void testSetup(String modelID = null) {

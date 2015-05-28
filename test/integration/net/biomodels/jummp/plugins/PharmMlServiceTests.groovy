@@ -34,6 +34,7 @@
 
 package net.biomodels.jummp.plugins
 
+import net.biomodels.jummp.core.adapters.DomainAdapter 
 import net.biomodels.jummp.core.JummpIntegrationTest
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -108,7 +109,7 @@ class PharmMlServiceTests extends JummpIntegrationTest {
         def defaultFormat = new ModelFormatTransportCommand(identifier: "PharmML")
         def modelCommand = new ModelTransportCommand(format: defaultFormat, comment: "First commit", name: "Foo")
         Model model = modelService.uploadModelAsFile(rf, modelCommand)
-        def revision = modelService.getLatestRevision(model).toCommandObject()
+        def revision = DomainAdapter.getAdapter(modelService.getLatestRevision(model)).toCommandObject()
         assertEquals "0.6", pharmMlService.getFormatVersion(revision)
     }
 
@@ -121,7 +122,7 @@ class PharmMlServiceTests extends JummpIntegrationTest {
         def defaultFormat = new ModelFormatTransportCommand(identifier: "PharmML")
         def modelCommand = new ModelTransportCommand(format: defaultFormat, comment: "First commit", name: "Foo")
         Model model = modelService.uploadModelAsFile(rf, modelCommand)
-        def revision = modelService.getLatestRevision(model).toCommandObject()
+        def revision = DomainAdapter.getAdapter(modelService.getLatestRevision(model)).toCommandObject()
         List<String> locations = []
         revision.files?.findAll{it.mainFile}.each { locations << it.path}
         List<File> files = []
