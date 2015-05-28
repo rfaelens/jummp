@@ -24,6 +24,7 @@ package net.biomodels.jummp.plugins.webapp
 import grails.test.*
 import grails.test.WebFlowTestCase
 import grails.util.Holders
+import net.biomodels.jummp.core.adapters.ModelAdapter
 import net.biomodels.jummp.core.FileSystemService
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -318,7 +319,7 @@ public class SubmissionFlowTestBase extends WebFlowTestCase {
 
         //test that the model is infact saved in the database
         String model = mockRequest.session.result_submission as String
-        Model thisModel = Model.findByPerennialIdentifier(model)
+        Model thisModel = ModelAdapter.findByPerennialIdentifier(model)
         assertNotNull thisModel
         Revision rev = modelService.getLatestRevision(thisModel)
         assertNotNull rev
