@@ -1307,6 +1307,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
                     "Sorry, we currently do not accept model organised into sub-folders.")
             }
+            if (rf.mainFile && f.length() == 0) {
+                def err = "File ${f.name} cannot be empty because it is the main file of the submission."
+                log.error err
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), err)
+            }
             modelFiles.add(f)
         }
         boolean valid = true
