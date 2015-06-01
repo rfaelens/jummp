@@ -40,6 +40,8 @@ import java.nio.channels.FileLock
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
+import net.biomodels.jummp.core.vcs.VcsManager
+import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsFileDetails
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.AddCommand
