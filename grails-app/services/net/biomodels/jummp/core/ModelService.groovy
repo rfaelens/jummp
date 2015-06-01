@@ -924,7 +924,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 log.error(msg)
                 throw new ModelException(rev.model, "The submission appears to contain invalid file ${fileName}. Please review it and try again.")
             } else {
-                System.out.println("ADDING ${domain} ... ${domain.mimeType}")
                 domainObjects.add(domain)
             }
         }

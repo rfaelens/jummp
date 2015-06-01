@@ -171,7 +171,6 @@ public class SubmissionFlowTestBase extends WebFlowTestCase {
      */
     protected def authenticate(String username, String password) {
         def authToken = new UsernamePasswordAuthenticationToken(username, password)
-        System.out.println("Authenticating with "+username+" and "+password)
         def auth = authenticationManager.authenticate(authToken)
         SecurityContextHolder.getContext().setAuthentication(auth)
         return auth
@@ -215,10 +214,8 @@ public class SubmissionFlowTestBase extends WebFlowTestCase {
             assertNotNull(person.save(flush:true, failOnError:true))
             assertNotNull(user.save())
             assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
-            System.out.println("User created: "+user)
         } else {
             user = User.findByUsername("testuser")
-            System.out.println("User exists: "+user)
         }
         if (!User.findByUsername("username")) {
             person=new Person(userRealName: "Test2")
