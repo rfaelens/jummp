@@ -39,14 +39,8 @@ class MathsSymbol {
      * Convenience method that strips ".0" from integers
      */
     private String simplifyNumber() {
-        if (!mapsTo.equals("NaN")) {
-            try {
-                double number = Double.parseDouble(mapsTo)
-                if (number == Math.ceil(number)) {
-                    return "" + (int)number
-                }
-            }
-            catch(Exception ignore) { }
+        if (mapsTo.endsWith(".0")) {
+            return mapsTo[0..-3]
         }
         return mapsTo
     }
