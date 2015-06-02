@@ -45,12 +45,12 @@ import eu.ddmore.libpharmml.dom.commontypes.Sequence
 import eu.ddmore.libpharmml.dom.commontypes.StringValue
 import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
 import eu.ddmore.libpharmml.dom.commontypes.TrueBoolean
-import eu.ddmore.libpharmml.dom.commontypes.VariableAssignmentType
+import eu.ddmore.libpharmml.dom.commontypes.VariableAssignment
 import eu.ddmore.libpharmml.dom.commontypes.Vector as CTVector
 import eu.ddmore.libpharmml.dom.dataset.ColumnDefinition
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
-import eu.ddmore.libpharmml.dom.dataset.DataSetType
+import eu.ddmore.libpharmml.dom.dataset.DataSet
 import eu.ddmore.libpharmml.dom.maths.Binop
 import eu.ddmore.libpharmml.dom.maths.Constant
 import eu.ddmore.libpharmml.dom.maths.Equation
@@ -63,11 +63,11 @@ import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameter
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariable
 import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameter
-import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMappingType
-import eu.ddmore.libpharmml.dom.modellingsteps.OperationPropertyType
-import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimateType
-import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimateType
-import eu.ddmore.libpharmml.dom.modellingsteps.VariableMappingType
+import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMapping
+import eu.ddmore.libpharmml.dom.modellingsteps.OperationProperty
+import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimate
+import eu.ddmore.libpharmml.dom.modellingsteps.ToEstimate
+import eu.ddmore.libpharmml.dom.modellingsteps.VariableMapping
 import eu.ddmore.libpharmml.dom.trialdesign.Activity
 import eu.ddmore.libpharmml.dom.trialdesign.Bolus
 import eu.ddmore.libpharmml.dom.trialdesign.Infusion
@@ -437,7 +437,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return result
     }
 
-    protected StringBuilder variableAssignments(List<VariableAssignmentType> assignments, String heading) {
+    protected StringBuilder variableAssignments(List<VariableAssignment> assignments, String heading) {
         def result = new StringBuilder("\n${heading}\n")
         assignments.inject(result){r,v ->
             r.append("<p>").append(convertToMathML(v.symbRef.symbIdRef, v.assign)).append("</p>")
@@ -445,7 +445,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return result
     }
 
-    protected StringBuilder paramsToEstimate(ToEstimateType params) {
+    protected StringBuilder paramsToEstimate(ToEstimate params) {
         def result = new StringBuilder("<div><h5>Estimation parameters</h5>\n")
         def fixedParams = params.parameterEstimation.findAll{ it.initialEstimate?.fixed }
         if (fixedParams) {
@@ -458,7 +458,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return result.append("</div>")
     }
 
-    protected StringBuilder estimParamsWithInitialEstimate(List<ParameterEstimateType> params,
+    protected StringBuilder estimParamsWithInitialEstimate(List<ParameterEstimate> params,
                 String heading) {
         def result = new StringBuilder("<p class=\"bold\">${heading}</p>\n")
         if (params.size() > 1) {
@@ -529,8 +529,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return result
     }
 
-    StringBuilder objectiveDataSetMapping(List<DatasetMappingType> mappings, RevisionTransportCommand rev, String downloadLink) {
-    	def result = new StringBuilder("<h5>Dataset mapping")
+    StringBuilder objectiveDataSetMapping(List<DatasetMapping> mappings, RevisionTransportCommand rev, String downloadLink) {
+        def result = new StringBuilder("<h5>Dataset mapping")
         if (mappings.size() > 1) {
             result.append("s")
         }
@@ -545,7 +545,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             dsm.mapping.each {
                 //keep track of variableMappings so that we know how to name the columns
                 //deal with JAXBElement
-                if (it.value instanceof VariableMappingType) {
+                if (it.value instanceof VariableMapping) {
                     variableMap << [ (it.value.columnRef.columnIdRef) : (it.value.symbRef.symbIdRef)]
                 }
             }
@@ -556,11 +556,11 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return result
     }
 
-    protected StringBuilder operationProperty(OperationPropertyType prop) {
+    protected StringBuilder operationProperty(OperationProperty prop) {
         return new StringBuilder().append(convertToMathML(prop.name, prop.assign))
     }
 
-    protected StringBuilder dataSet(DataSetType dataSet, Map variableMap,
+    protected StringBuilder dataSet(DataSet dataSet, Map variableMap,
     								StringBuilder sb, RevisionTransportCommand rev,
     								String downloadLink) {
         if (dataSet.table) {

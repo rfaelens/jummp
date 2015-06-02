@@ -39,7 +39,7 @@ import eu.ddmore.libpharmml.dom.commontypes.FunctionParameter
 import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinition
 import eu.ddmore.libpharmml.dom.commontypes.IdValue
 import eu.ddmore.libpharmml.dom.commontypes.IntValue
-import eu.ddmore.libpharmml.dom.commontypes.InterpolationType
+import eu.ddmore.libpharmml.dom.commontypes.Interpolation
 import eu.ddmore.libpharmml.dom.commontypes.RealValue
 import eu.ddmore.libpharmml.dom.commontypes.Rhs
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
@@ -56,7 +56,7 @@ import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
 import eu.ddmore.libpharmml.dom.maths.Piecewise
 import eu.ddmore.libpharmml.dom.maths.Uniop
-import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
+import eu.ddmore.libpharmml.dom.modeldefn.Correlation
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateModel
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
@@ -298,7 +298,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
         }
     }
 
-    protected String renderInterpolation(InterpolationType i) {
+    protected String renderInterpolation(Interpolation i) {
             String algorithm = i?.algorithm
             String variable = i?.interpIndepVar?.symbRef?.symbIdRef
             if (!algorithm) {
@@ -442,8 +442,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                         break
                     case VariableDefinition:
                         if (v.value.assign) {
-                            def vd = convertToMathML(v.value.symbId,
-                                    v.value.assign)
+                            def vd = convertToMathML(v.value.symbId, v.value.assign)
                             variableList.add(vd)
                         } else {
                             StringBuilder sb = new StringBuilder()
@@ -862,11 +861,11 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /*
-     * Override the default implementation because CorrelationType contains a pairwise element
+     * Override the default implementation because Correlation contains a pairwise element
      * where randomVariable1 and randomVariable2 are defined.
      */
     @Override
-    protected void buildCorrelationMap(CorrelationType c, Map correlationsMap) {
+    protected void buildCorrelationMap(Correlation c, Map correlationsMap) {
         try {
             Pairwise p = c.pairwise
             final ScalarRhs VALUE = p.covariance ?: p.correlationCoefficient
