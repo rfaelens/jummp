@@ -491,20 +491,23 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
         try {
             observations.each { om ->
                 result.append("<h4>Observation")
-                // the API returns a JAXBElement, not ObservationErrorType
-                def obsErr = om.observationError?.value
+                def continuousObs = om.continuousData
+                if (!continuousObs) {
+                    log.error "We should support discrete observation ${om.dump()}"
+                }
+                def obsErr = continuousObs.observationError
                 if (obsErr) {
                     result.append(" <span class='italic'>").append(obsErr.symbId).append("</span>")
                 }
                 result.append("</h4>\n")
                 result.append("<span class=\"bold\">Parameters </span>")
-                def simpleParameters = om.commonParameterElement.value.findAll {
+                def simpleParameters = continuousObs.commonParameterElement.value.findAll {
                     it instanceof SimpleParameter
                 }
-                def rv = om.commonParameterElement.value.findAll {
+                def rv = continuousObs.commonParameterElement.value.findAll {
                     it instanceof ParameterRandomVariable
                 }
-                def individualParameters = om.commonParameterElement.value.findAll {
+                def individualParameters = continuousObs.commonParameterElement.value.findAll {
                        it instanceof IndividualParameter
                 }
                 result.append(simpleParams(simpleParameters))
@@ -520,10 +523,10 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 if (individuals) {
                    result.append(individuals)
                 }
-                if (om.correlation) {
+                if (continuousObs.correlation) {
                     def processor = new PharmMl0_3AwareCorrelationProcessor()
                     List<CorrelationMatrix> matrices = processor.convertToStringMatrix(
-                        om.correlation, obsRandomVariableMap)
+                        continuousObs.correlation, obsRandomVariableMap)
                     if (matrices) {
                         displayCorrelationMatrices(matrices, result)
                     }
