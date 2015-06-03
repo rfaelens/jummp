@@ -468,7 +468,7 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
             model["variableDefinitions"] = variableList
             model["initialConditions"] = initialConditions
         } catch(Exception e) {
-            log.error("Error while displaying common variables - arguments ${vars.properties} ${iv}: ${e.message} ")
+            log.error("Error while displaying common variables - arguments ${vars.properties} ${iv}: ${e.message}", e)
             model["error"] = "Sorry, ran into issues while trying to display variable definitions."
         } finally {
             return groovyPageRenderer.render(template: "/templates/commonVariables",
