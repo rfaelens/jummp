@@ -169,9 +169,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 }
             }
         } catch(Exception e) {
-            output = new StringBuilder()
             output.append("Cannot display random variables.")
-            log.error("Error encountered while rendering random variables ${rv.inspect()}: ${e.message}")
+            log.error("Error encountered while rendering random variables ${rv.inspect()}: ${e.message}", e)
         }
         return output
     }
@@ -312,7 +311,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         } catch(Exception e) {
             output = new StringBuilder("<div class='spaced-top-bottom'>")
             output.append("Cannot display individual parameters.")
-            log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}")
+            log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}", e)
         }
         return output.append("</div>")
     }
@@ -412,7 +411,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             }
         } catch(Exception e) {
             outcome.append("<p>Cannot display simple parameters.<p>")
-            log.error("Error encountered while rendering simple params ${parameters.inspect()}: ${e.message}")
+            log.error("Error encountered while rendering simple params ${parameters.inspect()}: ${e.message}", e)
         } finally {
             return outcome.append("</div>")
         }
@@ -495,7 +494,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         operations.each { o ->
             result.append("<div><span class=\"bold\">")
             result.append(o.order).append(") ")
-            result.append(o.name ? o.name.value : operationMeaningMap[o.opType.value()])
+            result.append(o.name ? o.name.value : operationMeaningMap[o.opType])
             result.append("</span>\n")
             if (o.description || o.algorithm || o.property) {
                 result.append("<div>")
@@ -561,63 +560,59 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
     }
 
     protected StringBuilder dataSet(DataSet dataSet, Map variableMap,
-    								StringBuilder sb, RevisionTransportCommand rev,
-    								String downloadLink) {
-        if (dataSet.table) {
-			def columnOrder = [:]
-			List tables = dataSet.definition.columnOrTable
-			tables.each {
-				if (it instanceof ColumnDefinition) {
-					columnOrder << [ (it.columnNum) : (it.columnId) ]
-				} else if (it instanceof DataSetTableDefnType) {
-					columnOrder << [ (it.columnNum) : (it.tableId) ]
-				}
-			}
-			sb.append("\n<table><thead><tr>")
+            StringBuilder sb, RevisionTransportCommand rev, String downloadLink) {
+        List tables = dataSet.getListOfColumnDefinition()
+        if (tables) {
+            tables.each {
+                def columnOrder = tables.inject([:]) { order, colDef ->
+                    order << [(colDef.columnNum) : (colDef.columnId)]
+                }
+                sb.append("\n<table><thead><tr>")
 
-			tables.inject(sb) { txt, d ->
-				def key = columnOrder[d.columnNum]
-				if (key && variableMap && variableMap[key]) {
-					txt.append(["<th>", "</th>"].join(variableMap[key]))
-				} else if (d instanceof ColumnDefinition) {
-					txt.append(["<th>", "</th>"].join(d.columnId))
-				} else if (d instanceof DataSetTableDefnType) {
-					txt.append(["<th>", "</th>"].join(d.tableId))
-				}
-			}
-			sb.append("</tr></thead><tbody>")
-        	dataSet.table.row.each { i ->
-				sb.append("\n<tr>")
-				i.scalarOrTable.each { td ->
-					if (td.value instanceof DataSetTableType) {
-						def content = new StringBuilder("<table class='default'>")
-						td.value.row.inject(content) { cont, r ->
-							cont.append("<tr class='default'>")
-							r.scalarOrTable.inject(cont) { s, val ->
-								s.append("<td class='default'>")
-								if (val instanceof DataSetTableType) {
-									s.append("*")
-								} else {
-									s.append(scalar(val.value))
-								}
-								s.append("</td>")
-							}
-							cont.append("</tr>")
-						}
-						String ready = content.append("</table>").toString()
-						sb.append(["<td class='default'>", "</td>"].join(ready))
-					} else {
-						sb.append(["<td class='default'>", "</td>"].join(scalar(td.value)))
-					}
-				}
-				sb.append("</tr>")
-				sb.append("</tbody></table>\n")
-			}
+                tables.inject(sb) { txt, d ->
+                    def key = columnOrder[d.columnNum]
+                    if (key && variableMap && variableMap[key]) {
+                        txt.append(["<th>", "</th>"].join(variableMap[key]))
+                    } else if (d instanceof ColumnDefinition) {
+                        txt.append(["<th>", "</th>"].join(d.columnId))
+                    } else if (d instanceof DataSetTableDefnType) {
+                        txt.append(["<th>", "</th>"].join(d.tableId))
+                    }
+                }
+                sb.append("</tr></thead><tbody>")
+                dataSet.getListOfRow().each { i ->
+                    sb.append("\n<tr>")
+                    i.getListOfValue().each { td ->
+                        if (td.value instanceof DataSetTableType) {
+                            def content = new StringBuilder("<table class='default'>")
+                            td.value.row.inject(content) { cont, r ->
+                                cont.append("<tr class='default'>")
+                                r.getListOfValue().inject(cont) { s, val ->
+                                    s.append("<td class='default'>")
+                                    if (val instanceof DataSetTableType) {
+                                        s.append("*")
+                                    } else {
+                                        s.append(scalar(val.value))
+                                    }
+                                    s.append("</td>")
+                                }
+                                cont.append("</tr>")
+                            }
+                            String ready = content.append("</table>").toString()
+                            sb.append(["<td class='default'>", "</td>"].join(ready))
+                        } else {
+                            sb.append(["<td class='default'>", "</td>"].join(scalar(td.value)))
+                        }
+                    }
+                    sb.append("</tr>")
+                }
+                sb.append("</tbody></table>\n")
+            }
         }
-        if (dataSet.importData) {
+        if (dataSet.externalFile) {
             def rftc = rev.files.find {
                 File file = new File(it.path)
-                return file.getName() == dataSet.importData.path
+                return file.getName() == dataSet.externalFile.path
             }
             if (rftc) {
                 sb.append("This model refers to an external data file: <a href='");
@@ -630,7 +625,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             }
             else {
                 sb.append("This model refers to an external data file named '")
-                sb.append(dataSet.importData.name)
+                sb.append(dataSet.externalFile.name)
                 sb.append("', but the file is not available in the repository. ")
             }
         }
@@ -889,7 +884,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                     if (value==2.0) {
                         isSquareRoot=true
                     }
-                } catch(Exception notANumber) {}
+                } catch(NumberFormatException notANumber) { }
                 if (!isSquareRoot) {
                     builder.append("<mroot><mrow>")
                     builder.append(operandBuilder)
