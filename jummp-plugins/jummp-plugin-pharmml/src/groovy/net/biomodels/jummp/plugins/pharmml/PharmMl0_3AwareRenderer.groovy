@@ -359,13 +359,12 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
                         displayCorrelationMatrices(matrices, result)
                     }
                 }
-                result.append("</div>")
             }
         } catch(Exception e) {
             log.error("Error rendering the parameter model for ${parameterModel.inspect()} ${parameterModel.properties}: ${e.message}", e)
             result.append("Sorry, something went wrong while rendering the parameter model.")
         } finally {
-            return result.toString()
+            return result.append("</div>").toString()
         }
     }
 
