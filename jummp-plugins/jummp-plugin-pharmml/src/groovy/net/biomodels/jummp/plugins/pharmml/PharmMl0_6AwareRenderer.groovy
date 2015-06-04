@@ -292,6 +292,14 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
         return result
     }
 
+    @Override
+    protected StringBuilder rhs(Rhs r, StringBuilder text) {
+        if (r.interpolation) {
+            return text.append(renderInterpolation(r.interpolation))
+        }
+        return super.rhs(r, text)
+    }
+
     protected String renderInterpolation(Interpolation i) {
             String algorithm = i?.algorithm
             String variable = i?.interpIndepVar?.symbRef?.symbIdRef

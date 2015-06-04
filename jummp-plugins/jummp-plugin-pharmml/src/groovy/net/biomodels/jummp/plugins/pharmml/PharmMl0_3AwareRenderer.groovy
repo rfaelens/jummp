@@ -292,10 +292,10 @@ class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     protected StringBuilder rhs(Rhs r, StringBuilder text) {
-        super.rhs(r, text)
         if (r.interpolation) {
             return text.append(renderInterpolation(r.interpolation))
         }
+        return super.rhs(r, text)
     }
 
     protected String renderInterpolation(Interpolation i) {
