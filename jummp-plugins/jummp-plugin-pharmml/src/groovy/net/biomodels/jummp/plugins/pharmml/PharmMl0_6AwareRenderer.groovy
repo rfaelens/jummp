@@ -218,17 +218,21 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 if (c.continuous) {
                     def cc = c.continuous
                     def ccMap = [:]
-                    if (cc.transformation) {
-                        final EquationType TRANSF_EQ = cc.transformation.equation
-                        final String TRANSF = convertToMathML("Transformation", TRANSF_EQ)
+                    def transformations = cc.getListOfTransformation()
+                    if (transformations) {
+                        ccMap['transf'] = []
+                        transformations.each { t ->
+                            final EquationType TRANSF_EQ = t.equation
+                            final String TRANSF = convertToMathML("Transformation", TRANSF_EQ)
+                            final String COV_KEY = "${blkId}_${t.transformedCovariate.symbId}"
+                            transfMap[COV_KEY] = TRANSF_EQ
+                            ccMap["transf"] << TRANSF
+                        }
                         final def COV_DISTRIB = cc.abstractContinuousUnivariateDistribution
                         if (COV_DISTRIB) {
                             final String DISTRIB = distributionAssignment(symbol, COV_DISTRIB)
                             ccMap["dist"] = DISTRIB
                         }
-                        final String COV_KEY = "${blkId}_${symbol}"
-                        transfMap[COV_KEY] = TRANSF_EQ
-                        ccMap["transf"] = TRANSF
                     }
                     thisCov["continuous"] = ccMap
                 } else if (c.categorical) {
@@ -256,7 +260,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             model["covariates"] = covariates
             model["version"] = "0.6"
             model["transfMap"] = transfMap
-            return groovyPageRenderer.render(template: "/templates/0.2/covariates", model: model)
+            return groovyPageRenderer.render(template: "/templates/0.6/covariates", model: model)
         }
     }
 
@@ -1346,7 +1350,6 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
         }
         return equation
     }
-
 
     protected def extractAttributeFromEquation(EquationType eq) {
         if (!eq) {
