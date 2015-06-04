@@ -90,6 +90,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
     private static final Log log = LogFactory.getLog(this)
     private static final String IS_DEBUG_ENABLED = log.isDebugEnabled()
     private static final String IS_INFO_ENABLED = log.isInfoEnabled()
+
     /*
      * Parses an activity and writes it to a StringBuilder.
      * Returns whether to display a dosing footnote or not.
