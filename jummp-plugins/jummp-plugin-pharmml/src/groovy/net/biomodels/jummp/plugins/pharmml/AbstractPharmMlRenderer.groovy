@@ -1084,8 +1084,8 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         }
         Binop expanded = new Binop()
         expanded.operator = binop.operator
-        expanded.operand1 = expandedTerms[0]
-        expanded.operand2 = expandedTerms[1]
+        expanded.operand1 = expandedTerms[0].value
+        expanded.operand2 = expandedTerms[1].value
         return wrapJaxb(expanded)
     }
 
