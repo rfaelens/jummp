@@ -869,7 +869,8 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 sb.append("</tr>")
             }
             sb.append("</tbody></table>\n")
-        } else if (dataSet.externalFile) {
+        }
+        if (dataSet.externalFile) {
             def rftc = rev.files.find {
                 File file = new File(it.path)
                 return file.getName() == dataSet.externalFile.path
