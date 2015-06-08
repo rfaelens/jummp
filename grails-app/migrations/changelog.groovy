@@ -1177,4 +1177,8 @@ databaseChangeLog = {
     include file: '20150409dropMiriamAnnotationTables.groovy'
 
     include file: '20150522modelFirstPublishedDate.groovy'
+
+    include file: '20150608_resourceReference.groovy'
+
+    include file: '20150608_elementAnnotations.groovy'
 }
