@@ -35,11 +35,11 @@ databaseChangeLog = {
 
             column(name: "accession", type: "varchar(255)")
 
-                column(name: "namespace", type: "varchar(255)")
+            column(name: "namespace", type: "varchar(255)")
 
-                column(name: "qualifier_type", type: "varchar(255)") {
-                    constraints(nullable: "false")
-                }
+            column(name: "qualifier_type", type: "varchar(255)") {
+                constraints(nullable: "false")
+            }
 
             column(name: "uri", type: "varchar(255)")
         }

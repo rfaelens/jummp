@@ -19,31 +19,29 @@ databaseChangeLog = {
 
             column(name: "description", type: "longtext")
 
-                column(name: "name", type: "varchar(255)") {
-                    constraints(nullable: "false")
-                }
+            column(name: "name", type: "varchar(255)") {
+                constraints(nullable: "false")
+            }
 
             column(name: "short_name", type: "varchar(255)")
 
-                column(name: "uri", type: "varchar(255)") {
-                    constraints(nullable: "false")
-                }
+            column(name: "uri", type: "varchar(255)") {
+                constraints(nullable: "false")
+            }
         }
     }
 
     changeSet(author: "mglont (generated)", id: "1433757856028-4") {
         createTable(tableName: "resource_reference_resource_reference") {
             column(name: "resource_reference_parents_id", type: "bigint")
-
-                column(name: "resource_reference_id", type: "bigint")
+            column(name: "resource_reference_id", type: "bigint")
         }
     }
 
     changeSet(author: "mglont (generated)", id: "1433757856028-5") {
         createTable(tableName: "resource_reference_synonyms") {
             column(name: "resource_reference_id", type: "bigint")
-
-                column(name: "synonyms_string", type: "varchar(255)")
+            column(name: "synonyms_string", type: "varchar(255)")
         }
     }
 
