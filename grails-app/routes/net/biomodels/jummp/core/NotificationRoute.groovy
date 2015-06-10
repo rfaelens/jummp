@@ -18,22 +18,21 @@
  * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
  **/
 
-import org.apache.camel.builder.RouteBuilder
-import org.apache.camel.Exchange
-import org.apache.camel.Processor
+package net.biomodels.jummp.core
 
-class IndexingRoute extends RouteBuilder {
+import org.apache.camel.builder.RouteBuilder
+
+class NotificationRoute extends RouteBuilder {
+    def grailsApplication
 
     @Override
     void configure() {
-        from("seda:exec")
-        .setHeader("CamelExecCommandArgs", simple('-jar ${body[jarPath]} ${body[jsonPath]}'))
-        .to("exec:java")
-        .process(new Processor() {
-            public void process(Exchange exchange) throws Exception {
-                String indexerOutput = exchange.getIn().getBody(String.class)
-                System.out.println(indexerOutput)
-            }
-        })
+        def config = grailsApplication?.config
+
+        from("seda:model.publish").to("bean:notificationService?method=modelPublished")
+        from("seda:model.readAccessGranted").to("bean:notificationService?method=readAccessGranted")
+        from("seda:model.writeAccessGranted").to("bean:notificationService?method=writeAccessGranted")
+        from("seda:model.delete").to("bean:notificationService?method=delete")
+        from("seda:model.update").to("bean:notificationService?method=update")
     }
 }
