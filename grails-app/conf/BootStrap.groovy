@@ -70,7 +70,8 @@ class BootStrap {
         service.handleModelFormat(modelFormat, "unknownFormatService", "unknown")
 
          grailsApplication.domainClasses.each { GrailsClass gc ->
-            DomainClassGrailsPlugin.addValidationMethods(grailsApplication,
+             System.out.println("ADDING CONSTRAINTS FOR ${gc}")
+             DomainClassGrailsPlugin.addValidationMethods(grailsApplication,
                 gc, grailsApplication.mainContext)
         }
         

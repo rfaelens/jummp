@@ -774,7 +774,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.READ)
                 }
                 if (ace.sid instanceof PrincipalSid && ace.permission == BasePermission.ADMINISTRATION) {
-                    aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.ADMINISTRATION)
+                  se  aclUtilService.addPermission(revision, ace.sid.principal, BasePermission.ADMINISTRATION)
                 }
             }
             stopWatch.stop()
@@ -1498,7 +1498,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
         }
         def notification = [model:DomainAdapter.getAdapter(model).toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
-        sendMessage("seda:model.readAccessGranted", notification)
+        //sendMessage("seda:model.readAccessGranted", notification)
     }
 
     private String getPermissionString(int p) {
@@ -1655,7 +1655,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
         }
         def notification = [model:DomainAdapter.getAdapter(model).toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
-        sendMessage("seda:model.writeAccessGranted", notification)
+        //sendMessage("seda:model.writeAccessGranted", notification)
     }
 
     /**
