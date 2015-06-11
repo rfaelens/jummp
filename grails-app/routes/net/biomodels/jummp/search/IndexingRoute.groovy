@@ -23,26 +23,13 @@ package net.biomodels.jummp.search
 import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.Exchange
 import org.apache.camel.Processor
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 
 class IndexingRoute extends RouteBuilder {
-    private static final Log log = LogFactory.getLog(IndexingRoute.class)
 
     @Override
     void configure() {
         from("seda:exec")
         .setHeader("CamelExecCommandArgs", simple('-jar ${body[jarPath]} ${body[jsonPath]}'))
         .to("exec:java")
-        .process(new Processor() {
-            public void process(Exchange exchange) throws Exception {
-                Map mapOutput = exchange.in.getBody(LinkedHashMap.class)
-                println "Dear Sir, kindly review the output from the indexer: ${mapOutput.inspect()}"
-                def msg = exchange.in
-                def arg = msg.getHeader("CamelExecCommandArgs")
-                String indexerOutput = msg.getBody(String.class)
-                System.out.println("finished indexing ${arg} with output $indexerOutput")
-            }
-        })
     }
 }
