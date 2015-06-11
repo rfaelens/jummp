@@ -153,7 +153,6 @@ class SearchService {
         String dbUsername = dataSourceUnproxied.username
         String dbPassword = dataSourceUnproxied.password
         def dbSettings = [ 'url': dbUrl, 'username': dbUsername, 'password': dbPassword ]
-        println "dbSettings is $dbSettings"
         def builder = new JsonBuilder()
         def partialData=[
                 'submissionId':submissionId,
