@@ -883,7 +883,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             sb.append("</tbody></table>\n")
         }
         if (dataSet.externalFile) {
-            sb.append("<div class='spaced-top-bottom'>"
+            sb.append("<div class='spaced-top-bottom'>")
             def rftc = rev.files.find {
                 File file = new File(it.path)
                 return file.getName() == dataSet.externalFile.path
