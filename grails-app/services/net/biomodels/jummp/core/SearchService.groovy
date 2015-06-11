@@ -54,7 +54,7 @@ import org.apache.solr.client.solrj.SolrServer
  *
  * @author Raza Ali, raza.ali@ebi.ac.uk
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @date   20150320
+ * @date   20150611
  */
 class SearchService {
     static final String[] SOLR_SPECIAL_CHARACTERS = ["+", "-", "&", "|", "!", "(", ")",
@@ -91,19 +91,25 @@ class SearchService {
      */
     def  solrServerHolder
     /*
-    * Dependency injection of grailsApplication
-    */
+     * Dependency injection of grailsApplication
+     */
     def grailsApplication
     /*
-    * Dependency injection of the configuration service
-    */
+     * Dependency injection of the configuration service
+     */
     def configurationService
     /**
      * Dependency injection of miriamService.
      */
     def miriamService
-
+    /**
+     * Dependency injection of aclUtilService
+     */
     def aclUtilService
+    /**
+     * Dependency injection of unproxied dataSource.
+     */
+    def dataSourceUnproxied
 
     /**
      * Clears the index. Handle with care.
@@ -143,6 +149,11 @@ class SearchService {
         final String uniqueId = "${submissionId}.${versionNumber}"
         String exchangeFolder = new File(revision.files.first().path).getParent()
         String registryExport = miriamService.registryExport.canonicalPath
+        String dbUrl = dataSourceUnproxied.url
+        String dbUsername = dataSourceUnproxied.username
+        String dbPassword = dataSourceUnproxied.password
+        def dbSettings = [ 'url': dbUrl, 'username': dbUsername, 'password': dbPassword ]
+        println "dbSettings is $dbSettings"
         def builder = new JsonBuilder()
         def partialData=[
                 'submissionId':submissionId,
@@ -174,7 +185,8 @@ class SearchService {
             'allFiles': fetchFilesFromRevision(revision, false),
             'solrServer': solrServerHolder.SOLR_CORE_URL,
             'jummpPropFile': configurationService.getConfigFilePath(),
-            'miriamExportFile': registryExport)
+            'miriamExportFile': registryExport,
+            'database': dbSettings)
         File indexingData = new File(exchangeFolder, "indexData.json")
         indexingData.setText(builder.toString())
         String jarPath = grailsApplication.config.jummp.search.pathToIndexerExecutable
