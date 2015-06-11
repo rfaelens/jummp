@@ -1174,7 +1174,7 @@ databaseChangeLog = {
 
 	include file: 'removeFromFieldFromNotification.groovy'
 
-    //include file: '20150409dropMiriamAnnotationTables.groovy'
+    include file: '20150409dropMiriamAnnotationTables.groovy'
 
     include file: '20150522modelFirstPublishedDate.groovy'
 
