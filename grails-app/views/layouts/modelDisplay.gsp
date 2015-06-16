@@ -516,19 +516,19 @@
     	        <%--        <a class="submit" title="Update Model" href="${g.createLink(controller: 'model', action: 'update', id: (revision.model.publicationId) ?: (revision.model.submissionId))}">Update</a>
         	<a class="submit" title="Download Model" href="${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}">Download</a>
 	 --%></div>
-    	<div id="tablewrapper">
-    	<div id="tabs">
-	  <ul class='modelTabs'>
+     <div id="tablewrapper">
+     <div id="tabs">
+     <ul class='modelTabs'>
 	    <li><a href="#Overview">Overview</a></li>
 	    <li><a href="#Files">Files</a></li>
 	    <li><a href="#History">History</a></li>
 	    <g:pageProperty name="page.modelspecifictabs" />
-	  </ul>
+    </ul>
 	  <div id="Overview">
-	  	<label>Model Description:</label>
-	  		<ul style="list-style-type: none;">
-	  			<li>${revision.description}</li>
-	  		</ul>
+          <label>Model Description:</label>
+          <ul style="list-style-type: none;">
+              <li>${revision.description}</li>
+          </ul>
 	    <table style="margin-top:30px">
 		<tr>
 		    <td><label><g:message code="model.model.format"/></label></td>
