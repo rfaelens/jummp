@@ -550,19 +550,10 @@
 		<tr>
 		    <td><label><g:message code="model.model.authors"/></label></td>
 		    <td>
-		    	<div class='spaced'>
-			    	<%
-			    		StringBuilder authorString=new StringBuilder()
-			    		authors.eachWithIndex() { author, i -> 
-			    			if (i!=0) {
-			    				authorString.append(", ")
-			    			}
-			    			authorString.append(author)
-			    		};
-			    	%>
-		    		${authorString.toString()}
-		    	</div>
-		    </td>
+                <div class='spaced'>
+                    <g:join in="${authors}"/>
+                </div>
+            </td>
 		</tr>
 	    </table>
 	
