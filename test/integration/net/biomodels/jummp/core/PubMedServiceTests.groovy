@@ -34,7 +34,6 @@
 
 package net.biomodels.jummp.core
 
-import static org.junit.Assert.*
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
 import net.biomodels.jummp.model.Publication
@@ -43,18 +42,12 @@ import net.biomodels.jummp.plugins.security.Person
 import net.biomodels.jummp.plugins.security.User
 import org.junit.*
 
+import static org.junit.Assert.*
+
 @TestMixin(IntegrationTestMixin)
 class PubMedServiceTests extends JummpIntegrationTest {
     def pubMedService
     def userService
-
-    @Before
-    void setUp() {
-    }
-
-    @After
-    void tearDown() {
-    }
 
     @Test
     void testFetchPublicationData() {
@@ -97,10 +90,5 @@ class PubMedServiceTests extends JummpIntegrationTest {
         assertNull(publication.day)
         assertEquals("0",publication.month)
         assertNull(publication.issue)
-        // should cause a SAXParseException. No longer. Allows for fetching whatever
-        // data possible from the service, and having the user fill out the rest.
-       /* shouldFail(JummpException) {
-        	pubMedService.fetchPublicationData("0")
-        }*/
     }
 }
