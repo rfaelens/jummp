@@ -62,7 +62,7 @@ class SearchTests extends JummpIntegrationTest {
         grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
         grailsApplication.config.jummp.plugins.sbml.validation = false
         modelService.vcsService.vcsManager = gitService.getInstance()
-
+        modelService.vcsService.vcsManager.exchangeDirectory = new File('target/vcs/exchange')
         // upload the model
         def rf = new RepositoryFileTransportCommand(path:
                 smallModel("importModel.xml", nameTag, descriptionTag).absolutePath,
