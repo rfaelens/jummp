@@ -556,6 +556,7 @@
             </td>
 		</tr>
 	    </table>
+        <g:pageProperty name="page.genericAnnotations"/>
 	
 	  </div>
 	  <div id="Files" class="filegrid">
