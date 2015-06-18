@@ -525,10 +525,10 @@
 	    <g:pageProperty name="page.modelspecifictabs" />
     </ul>
 	  <div id="Overview">
-          <label>Model Description:</label>
-          <ul style="list-style-type: none;">
-              <li>${revision.description}</li>
-          </ul>
+          <span class="bold">Model Description:</span>
+          <div style="margin-left: 30px;">
+              ${revision.description}
+          </div>
 	    <table style="margin-top:30px">
 		<tr>
 		    <td><label><g:message code="model.model.format"/></label></td>
