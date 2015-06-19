@@ -160,51 +160,43 @@ class ModelService {
             // safety check
             return []
         }
+
         String sortingDirection = sortOrder ? 'asc' : 'desc'
-        // for Admin - sees all (not deleted) models
-        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-            String query = '''
-SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
-FROM Revision AS r
-JOIN r.model AS m JOIN r.owner as u
-WHERE
-'''
-            if ( sortColumn == ModelListSorting.LAST_MODIFIED || sortColumn == ModelListSorting.FORMAT ||
-                        sortColumn == ModelListSorting.NAME) {
-                query += '''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
-            }
-            else if ( sortColumn == ModelListSorting.SUBMITTER || sortColumn == ModelListSorting.SUBMISSION_DATE) {
-                query += '''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
-            }
-            query += "m.deleted = ${deletedOnly} AND r.deleted = false"
-            if (filterValid(filter)) {
-                query += '''
-AND (
-lower(m.publication.journal) like :filter
-OR lower(m.publication.title) like :filter
-OR lower(m.publication.affiliation) like :filter
-)
-'''
-            }
-            query += '''
-ORDER BY
-'''
-            query += " " + getSortColumnAsString(sortColumn) + " " + sortingDirection
-            Map params = [ max: count, offset: offset]
-            if (filterValid(filter)) {
-                params.put("filter", "%${filter.toLowerCase()}%");
-            }
-            List<List<Model, String, Date, String, Long, String>> resultSet =
-                        Model.executeQuery(query, [:], params)
-            return resultSet.collect{it.first()}
+
+        boolean filterIsValid = filterValid(filter)
+
+        Map metaParams = [
+            max: count, offset: offset
+        ]
+
+        Map namedParams = []
+        if (filterIsValid) {
+            namedParams.put("filter", "%${filter.toLowerCase()}%");
         }
 
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(
-                    SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add(getUsername())
+        // for Admin - sees all (not deleted) models
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            String query = getQueryForAdmin(sortColumn, deletedOnly, filterIsValid, sortingDirection)
+
+        } else {
+            Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+            if (springSecurityService.isLoggedIn()) {
+                // anonymous users do not have a principal
+                roles.add(getUsername())
+            }
+
+            String query = getQueryForUser(sortColumn, deletedOnly, filterIsValid, sortingDirection)
+            namedParams += [
+                className  :  Revision.class.getName(),
+                permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+                roles      :  roles
+            ]
         }
+        List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, namedParams, metaParams)
+        return resultSet.collect{ it.first() }
+    }
+
+    private String getQueryForUser(ModelListSorting sortColumn, boolean deletedOnly, boolean filterIsValid, String sortingDirection) {
         String query = '''
 SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
 FROM Revision AS r
@@ -213,15 +205,15 @@ JOIN r.owner as u
 WHERE r.deleted = false
 '''
 //do we want to show information from the latest revision?
-if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) {
+        if (sortColumn == ModelListSorting.LAST_MODIFIED || sortColumn == ModelListSorting.FORMAT || sortColumn == ModelListSorting.NAME) {
             query += '''AND r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2,
                         AclEntry ace2  where r.model=r2.model
                         AND r2.id=ace2.aclObjectIdentity.objectId
                         AND ace2.aclObjectIdentity.aclClass.className = :className
                         AND ace2.sid.sid IN (:roles) AND ace2.mask IN (:permissions)
                         AND ace2.granting = true)'''
-            }
-        else  {                                      ////otherwise sortColumn must be the following .. ie we want to sort by the first revision (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE)
+        } else {
+            ////otherwise sortColumn must be the following .. ie we want to sort by the first revision (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE)
             query += '''AND r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2,
                         AclEntry ace2  where r.model=r2.model
                         AND r2.id=ace2.aclObjectIdentity.objectId
@@ -231,7 +223,7 @@ if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.F
         }
 
         query += " AND m.deleted = ${deletedOnly} "
-        if (filterValid(filter)) {
+        if (filterIsValid) {
             query += '''
 AND (
 lower(m.publication.journal) like :filter
@@ -244,15 +236,37 @@ OR lower(m.publication.affiliation) like :filter
 ORDER BY
 '''
         query += " " + getSortColumnAsString(sortColumn) + " " + sortingDirection
-        Map params = [
-            className: Revision.class.getName(),
-            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
-            max: count, offset: offset, roles: roles]
-        if (filterValid(filter)) {
-            params.put("filter", "%${filter.toLowerCase()}%");
+        return query
+    }
+
+    private String getQueryForAdmin(ModelListSorting sortColumn, boolean deletedOnly, boolean filterIsValid, String sortingDirection) {
+        String query = '''
+SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
+FROM Revision AS r
+JOIN r.model AS m JOIN r.owner as u
+WHERE
+'''
+        if (sortColumn == ModelListSorting.LAST_MODIFIED || sortColumn == ModelListSorting.FORMAT ||
+            sortColumn == ModelListSorting.NAME) {
+            query += '''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+        } else if (sortColumn == ModelListSorting.SUBMITTER || sortColumn == ModelListSorting.SUBMISSION_DATE) {
+            query += '''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
         }
-        List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, params)
-        return resultSet.collect {it.first()}
+        query += "m.deleted = ${deletedOnly} AND r.deleted = false"
+        if (filterIsValid) {
+            query += '''
+AND (
+lower(m.publication.journal) like :filter
+OR lower(m.publication.title) like :filter
+OR lower(m.publication.affiliation) like :filter
+)
+'''
+        }
+        query += '''
+ORDER BY
+'''
+        query += " " + getSortColumnAsString(sortColumn) + " " + sortingDirection
+        return query
     }
 
     /**
@@ -260,7 +274,7 @@ ORDER BY
      * @param sortColumn
      * @return
      */
-    // ToDo: this should really be a method in the ModelListSorting enum itself..
+    // ToDo: this should really be enum-properties in the ModelListSorting enum itself..
     private java.lang.String getSortColumnAsString(ModelListSorting sortColumn) {
         String result
         switch (sortColumn) {
