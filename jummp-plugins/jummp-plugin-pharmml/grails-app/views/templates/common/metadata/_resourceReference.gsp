@@ -16,14 +16,12 @@
  You should have received a copy of the GNU Affero General Public License along
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
-
-<table>
-<g:each in="${annotations}" var="a">
-    <tr>
-        <td class='bold'>${a.key}:</td>
-        <td>
-            <g:render template="/templates/common/metadata/resourceReference" collection="${a.value}"/>
-        </td>
-    </tr>
-</g:each>
-</table>
+<g:if test="${it.name && it.datatype != 'unknown'}">
+    <a href="${it.uri}" title="Access more information about this ${it.datatype} term">${it.name}</a>
+</g:if>
+<g:elseif test="${it.name}">
+    <a href="${it.uri}" title="Access more information about this term">${it.name}</a>
+</g:elseif>
+<g:else>
+    <a href="${it.uri}" title="Access more information about this term">${it.uri}</a>
+</g:else>
