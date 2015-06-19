@@ -31,8 +31,8 @@
 package net.biomodels.jummp.core
 
 import static java.util.UUID.randomUUID
-import net.biomodels.jummp.core.adapters.DomainAdapter 
-import net.biomodels.jummp.core.adapters.ModelAdapter 
+import net.biomodels.jummp.core.adapters.DomainAdapter
+import net.biomodels.jummp.core.adapters.ModelAdapter
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.ModelCreatedEvent
 import net.biomodels.jummp.core.events.PostLogging
@@ -160,7 +160,7 @@ class ModelService {
             // safety check
             return []
         }
-        String sorting = sortOrder ? 'asc' : 'desc'
+        String sortingDirection = sortOrder ? 'asc' : 'desc'
         // for Admin - sees all (not deleted) models
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
             String query = '''
@@ -189,34 +189,7 @@ OR lower(m.publication.affiliation) like :filter
             query += '''
 ORDER BY
 '''
-            switch (sortColumn) {
-            case ModelListSorting.NAME:
-                query += "r.name"
-                break
-            case ModelListSorting.LAST_MODIFIED:
-                query += "r.uploadDate"
-                break
-            case ModelListSorting.FORMAT:
-                query += "r.format.name"
-                break
-            case ModelListSorting.SUBMITTER:
-                query += "u.person.userRealName"
-                break
-            case ModelListSorting.SUBMISSION_DATE:
-                /*
-                * Hard to get to model submission date directly. However as model ids
-                * are sequentially generated, they are used as a surrogate.
-                */
-                query += "m.id"
-                break
-            case ModelListSorting.PUBLICATION:
-                // TODO: implement, fall through to default
-            case ModelListSorting.ID: // Id is the default
-            default:
-                query += "m.id"
-                break
-            }
-            query += " $sorting"
+            query += " " + getSortColumnAsString(sortColumn) + " " + sortingDirection
             Map params = [ max: count, offset: offset]
             if (filter && filter.length() >= 3) {
                 params.put("filter", "%${filter.toLowerCase()}%");
@@ -270,34 +243,7 @@ OR lower(m.publication.affiliation) like :filter
         query += '''
 ORDER BY
 '''
-        switch (sortColumn) {
-        case ModelListSorting.NAME:
-            query += "r.name"
-            break
-        case ModelListSorting.LAST_MODIFIED:
-            query += "r.uploadDate"
-            break
-        case ModelListSorting.FORMAT:
-            query += "r.format.name"
-            break
-        case ModelListSorting.SUBMITTER:
-            query += "u.person.userRealName"
-            break
-       case ModelListSorting.SUBMISSION_DATE:
-           /*
-            * Hard to get to model submission date directly. However as model ids
-            * are sequentially generated, they are used as a surrogate.
-            */
-            query += "m.id"
-            break
-        case ModelListSorting.PUBLICATION:
-            // TODO: implement, fall through to default
-        case ModelListSorting.ID: // Id is the default
-        default:
-            query += "m.id"
-            break
-        }
-        query += " " + sorting
+        query += " " + getSortColumnAsString(sortColumn) + " " + sortingDirection
         Map params = [
             className: Revision.class.getName(),
             permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
@@ -307,6 +253,44 @@ ORDER BY
         }
         List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, params)
         return resultSet.collect {it.first()}
+    }
+
+    /**
+     * Short method to get the SQL-name of the {@Link ModelListSorting} enum
+     * @param sortColumn
+     * @return
+     */
+    // ToDo: this should really be a method in the ModelListSorting enum itself..
+    private java.lang.String getSortColumnAsString(ModelListSorting sortColumn) {
+        String result
+        switch (sortColumn) {
+            case ModelListSorting.NAME:
+                result = "r.name"
+                break
+            case ModelListSorting.LAST_MODIFIED:
+                result = "r.uploadDate"
+                break
+            case ModelListSorting.FORMAT:
+                result = "r.format.name"
+                break
+            case ModelListSorting.SUBMITTER:
+                result = "u.person.userRealName"
+                break
+            case ModelListSorting.SUBMISSION_DATE:
+                /*
+                 * Hard to get to model submission date directly. However as model ids
+                 * are sequentially generated, they are used as a surrogate.
+                 */
+                result = "m.id"
+                break
+            case ModelListSorting.PUBLICATION:
+                // TODO: implement, fall through to default
+            case ModelListSorting.ID: // Id is the default
+            default:
+                result = "m.id"
+                break
+        }
+        result
     }
 
     /**
