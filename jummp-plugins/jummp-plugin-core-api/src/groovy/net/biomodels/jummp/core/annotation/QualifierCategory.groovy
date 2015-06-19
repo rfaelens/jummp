@@ -40,7 +40,7 @@ class QualifierCategory {
         String ns = this.namespace
         String accession = this.accession
         String uri = this.uri
-        String type = this.type
+        String type = this.qualifierType
         return new QualifierTransportCommand(namespace: ns, accession: accession, uri: uri,
                 type: type)
     }
