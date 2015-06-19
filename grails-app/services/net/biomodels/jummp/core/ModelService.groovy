@@ -169,19 +169,20 @@ class ModelService {
             max: count, offset: offset
         ]
 
-        Map namedParams = []
+        Map namedParams = [:]
         if (filterIsValid) {
             namedParams.put("filter", "%${filter.toLowerCase()}%");
         }
 
+        String query
         // for Admin - sees all (not deleted) models
         if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-            String query = getQueryForAdmin(sortColumn, deletedOnly, filterIsValid, sortingDirection)
+            query = getQueryForAdmin(sortColumn, deletedOnly, filterIsValid, sortingDirection)
 
         } else {
             Set<String> roles = getSpringDatabaseRoles()
 
-            String query = getQueryForUser(sortColumn, deletedOnly, filterIsValid, sortingDirection)
+            query = getQueryForUser(sortColumn, deletedOnly, filterIsValid, sortingDirection)
             namedParams += [
                 className  :  Revision.class.getName(),
                 permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
