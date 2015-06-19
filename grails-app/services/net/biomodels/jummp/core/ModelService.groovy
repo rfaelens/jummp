@@ -179,11 +179,7 @@ class ModelService {
             String query = getQueryForAdmin(sortColumn, deletedOnly, filterIsValid, sortingDirection)
 
         } else {
-            Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-            if (springSecurityService.isLoggedIn()) {
-                // anonymous users do not have a principal
-                roles.add(getUsername())
-            }
+            Set<String> roles = getSpringDatabaseRoles()
 
             String query = getQueryForUser(sortColumn, deletedOnly, filterIsValid, sortingDirection)
             namedParams += [
@@ -400,11 +396,7 @@ ORDER BY
             } as Integer
         }
 
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add(getUsername())
-        }
+        Set<String> roles = getSpringDatabaseRoles()
 
         String query = '''
 SELECT COUNT(DISTINCT m.id) FROM Revision AS r, AclEntry AS ace
@@ -499,11 +491,7 @@ OR lower(m.publication.affiliation) like :filter
             return Revision.get(result[0])
         }
 
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add(getUsername())
-        }
+        Set<String> roles = getSpringDatabaseRoles()
         List<Long> result = Revision.executeQuery('''
 SELECT rev.id
 FROM Revision AS rev, AclEntry AS ace
@@ -532,6 +520,16 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             	modelHistoryService.addModelToHistory(model)
             }
             return Revision.get(result[0])
+    }
+
+    /** deduplication method for getting Spring's authorities as Database-Role strings */
+    private Set<String> getSpringDatabaseRoles() {
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add(getUsername())
+        }
+        return roles
     }
 
     /**
