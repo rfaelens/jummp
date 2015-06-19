@@ -177,7 +177,7 @@ WHERE
                 query += '''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
             }
             query += "m.deleted = ${deletedOnly} AND r.deleted = false"
-            if (filter && filter.length() >= 3) {
+            if (filterValid(filter)) {
                 query += '''
 AND (
 lower(m.publication.journal) like :filter
@@ -191,7 +191,7 @@ ORDER BY
 '''
             query += " " + getSortColumnAsString(sortColumn) + " " + sortingDirection
             Map params = [ max: count, offset: offset]
-            if (filter && filter.length() >= 3) {
+            if (filterValid(filter)) {
                 params.put("filter", "%${filter.toLowerCase()}%");
             }
             List<List<Model, String, Date, String, Long, String>> resultSet =
@@ -231,7 +231,7 @@ if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.F
         }
 
         query += " AND m.deleted = ${deletedOnly} "
-        if (filter && filter.length() >= 3) {
+        if (filterValid(filter)) {
             query += '''
 AND (
 lower(m.publication.journal) like :filter
@@ -248,7 +248,7 @@ ORDER BY
             className: Revision.class.getName(),
             permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
             max: count, offset: offset, roles: roles]
-        if (filter && filter.length() >= 3) {
+        if (filterValid(filter)) {
             params.put("filter", "%${filter.toLowerCase()}%");
         }
         List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, params)
@@ -368,7 +368,7 @@ ORDER BY
             def criteria = Model.createCriteria()
             return criteria.get {
                 ne("deleted", !deletedOnly)
-                if (filter && filter.length() >= 3) {
+                if (filterValid(filter)) {
                     or {
                         ilike("name", "%${filter}%")
                         publication {
@@ -407,7 +407,7 @@ AND ace.granting = true
 AND r.deleted = false
 '''
 query+=" AND m.deleted=${deletedOnly} "
-        if (filter && filter.length() >= 3) {
+        if (filterValid(filter)) {
             query += '''
 AND (
 lower(m.publication.journal) like :filter
@@ -420,11 +420,16 @@ OR lower(m.publication.affiliation) like :filter
             className: Revision.class.getName(),
             permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
             roles: roles]
-        if (filter && filter.length() >= 3) {
+        if (filterValid(filter)) {
             params.put("filter", "%${filter.toLowerCase()}%");
         }
 
         return Model.executeQuery(query, params)[0] as Integer
+    }
+
+    /** convenience method to check if our filter is OK */
+    private java.lang.Boolean filterValid(String filter) {
+        return filter && filter.length() >= 3
     }
 
     /**
