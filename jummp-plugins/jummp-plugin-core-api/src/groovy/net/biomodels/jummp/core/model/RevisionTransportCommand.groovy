@@ -34,7 +34,9 @@
 
 package net.biomodels.jummp.core.model
 
+import net.biomodels.jummp.core.annotation.ElementAnnotationTransportCommand
 import org.springframework.context.ApplicationContext
+
 /**
  * @short Wrapper for a Revision to be transported through JMS.
  *
@@ -99,6 +101,10 @@ class RevisionTransportCommand implements Serializable {
      * The list of files associated with this revision
      */
      List<RepositoryFileTransportCommand> files = null;
+    /**
+     * The list of annotations for this revision.
+     */
+    List<ElementAnnotationTransportCommand> annotations
 
      List<RepositoryFileTransportCommand> getFiles() {
          if (!files) {
