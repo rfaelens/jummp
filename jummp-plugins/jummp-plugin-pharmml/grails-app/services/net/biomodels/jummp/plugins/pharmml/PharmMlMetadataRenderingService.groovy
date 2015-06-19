@@ -72,7 +72,7 @@ class PharmMlMetadataRenderingService {
                     findAllResourceReferencesForQualifier(statements, property)
             anno.put(name, objects)
         }
-        groovyPageRenderer.renderTo(template: "/templates/common/metadata/genericAnnotations",
+        groovyPageRenderer.renderTo(template: "/templates/common/metadata/annotations",
                 model: [annotations: anno], out)
     }
 
