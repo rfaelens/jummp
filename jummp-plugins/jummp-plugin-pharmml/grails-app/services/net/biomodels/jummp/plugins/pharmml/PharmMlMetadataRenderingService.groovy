@@ -67,7 +67,9 @@ class PharmMlMetadataRenderingService {
         GENERIC_ANNOTATIONS.each { String name, String property ->
             List<ResourceReferenceTransportCommand> objects = metadataDelegateService.
                     findAllResourceReferencesForQualifier(revision, property)
-            anno.put(name, objects)
+            if (objects) {
+                anno.put(name, objects)
+            }
         }
         groovyPageRenderer.renderTo(template: "/templates/common/metadata/annotations",
                 model: [annotations: anno], out)
