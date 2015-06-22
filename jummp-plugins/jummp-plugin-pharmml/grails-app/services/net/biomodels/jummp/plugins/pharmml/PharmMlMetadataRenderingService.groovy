@@ -21,14 +21,13 @@
 package net.biomodels.jummp.plugins.pharmml
 
 import grails.gsp.PageRenderer
-import groovy.util.logging.Commons
-import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import net.biomodels.jummp.core.annotation.ElementAnnotationTransportCommand
 import net.biomodels.jummp.core.annotation.QualifierTransportCommand
 import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
 import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.MetadataDelegateService
 import org.perf4j.aop.Profiled
 
 /**
@@ -39,7 +38,6 @@ import org.perf4j.aop.Profiled
  *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-@Commons
 @CompileStatic
 class PharmMlMetadataRenderingService {
     static final String DEVELOPMENT_CONTEXT_PROPERTY ='model-modelling-question'
@@ -60,32 +58,18 @@ class PharmMlMetadataRenderingService {
     static transactional = false
     /* dependency injection for the page renderer */
     PageRenderer groovyPageRenderer
+    /* dependency injection for the metadata delegate service */
+    MetadataDelegateService metadataDelegateService
 
-    @CompileDynamic
     @Profiled(tag = "pharmmlMetadataRenderingService.renderGenericAnnotations")
     void renderGenericAnnotations(RevisionTransportCommand revision, Writer out) {
-        List<ElementAnnotationTransportCommand> annotations = revision.annotations
-        List<StatementTransportCommand> statements = annotations.collect { it.statement }
         Map<String, List<ResourceReferenceTransportCommand>> anno = [:]
         GENERIC_ANNOTATIONS.each { String name, String property ->
-            List<ResourceReferenceTransportCommand> objects =
-                    findAllResourceReferencesForQualifier(statements, property)
+            List<ResourceReferenceTransportCommand> objects = metadataDelegateService.
+                    findAllResourceReferencesForQualifier(revision, property)
             anno.put(name, objects)
         }
         groovyPageRenderer.renderTo(template: "/templates/common/metadata/annotations",
                 model: [annotations: anno], out)
-    }
-
-    @Profiled(tag = "pharmmlMetadataRenderingService.findAllResourceReferencesForQualifier")
-    private List findAllResourceReferencesForQualifier(List<StatementTransportCommand> stmts,
-            String qName) {
-        List result = []
-        stmts.each { StatementTransportCommand s ->
-            QualifierTransportCommand q = s.predicate
-            if (qName == q.uri || qName == q.accession) {
-                result.add s.object
-            }
-        }
-        return result
     }
 }
