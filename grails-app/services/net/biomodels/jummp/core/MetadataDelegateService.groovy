@@ -51,16 +51,4 @@ class MetadataDelegateService implements IMetadataService {
             }
         }
     }
-
-    @Profiled(tag = "metadataDelegateService.findAllResourceReferencesForQualifiers")
-    List<ResourceReferenceTransportCommand> findAllResourceReferencesForQualifiers(
-            RevisionTransportCommand revision, List<String> qualifiers) {
-        List<ResourceReference> references = metadataService.
-                findAllResourceReferencesForQualifiers(revision.id, qualifiers)
-        use(ResourceReferenceCategory) {
-            return references.collect { ResourceReference r
-                r.toCommandObject()
-            }
-        }
-    }
 }
