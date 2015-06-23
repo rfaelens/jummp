@@ -34,7 +34,7 @@ import org.perf4j.aop.Profiled
  *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-class MetadataDelegateService {
+class MetadataDelegateService implements IMetadataService {
     /**
      * Dependency injection for the metadata service.
      */

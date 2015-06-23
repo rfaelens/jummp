@@ -27,7 +27,7 @@ import net.biomodels.jummp.core.annotation.QualifierTransportCommand
 import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
 import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.core.MetadataDelegateService
+import net.biomodels.jummp.core.IMetadataService
 import org.perf4j.aop.Profiled
 
 /**
@@ -59,7 +59,7 @@ class PharmMlMetadataRenderingService {
     /* dependency injection for the page renderer */
     PageRenderer groovyPageRenderer
     /* dependency injection for the metadata delegate service */
-    MetadataDelegateService metadataDelegateService
+    IMetadataService metadataDelegateService
 
     @Profiled(tag = "pharmmlMetadataRenderingService.renderGenericAnnotations")
     void renderGenericAnnotations(RevisionTransportCommand revision, Writer out) {
