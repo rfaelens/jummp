@@ -124,15 +124,10 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     @SuppressWarnings("GrailsStatelessService")
     private def biopaxConverter = null
 
-    /* SbmlCache causes reflection exceptions in Java7 (java.lang.reflect.MalformedParameterizedTypeException)
-     * Therefore it has currently been disabled, until a java7 compliant implementation
-     * can be provided
-     * 
-     *   TODO: move initialization into afterPropertiesSet and make it configuration dependent
+    // TODO: move initialization into afterPropertiesSet and make it configuration dependent
     @SuppressWarnings("GrailsStatelessService")
-    */
     SbmlCache<RevisionTransportCommand, SBMLDocument> cache = new SbmlCache(100)
-    
+
     public void afterPropertiesSet() {
         if (Environment.current == Environment.PRODUCTION) {
             // only initialize the SBML2* Converters during startup in production mode
@@ -144,8 +139,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         }
     }
 
-    private SBMLDocument getFileAsValidatedSBMLDocument(final File model, final List<String> errors)
-    {
+    private SBMLDocument getFileAsValidatedSBMLDocument(final File model, final List<String> errors) {
         // TODO: we should insert the parsed model into the cache
         SBMLDocument doc
         SBMLReader reader = new SBMLReader()
@@ -176,9 +170,9 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 // search for an error
                 for (SBMLError error in doc.getListOfErrors().validationErrors) {
                     if (error.isFatal() || error.isInternal() || error.isSystem() || error.isXML() || error.isError()) {
-                        String errorMsg = error.getMessage() 
-                    	log.debug(errorMsg)
-                    	errors.add(errorMsg);
+                        String errorMsg = error.getMessage()
+                        log.debug(errorMsg)
+                        errors.add(errorMsg)
                         doc = null
                         break
                     }
@@ -186,8 +180,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             }
             return doc
         } catch (ConversionException e) {
-            e.printStackTrace();
-        	log.error(e.getMessage(), e)
+            log.error(e.getMessage(), e)
             return null
         }
     }
@@ -246,15 +239,15 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     }
 
     private SBMLDocument getDocumentFromFiles(final List<File> model, final List<String> errors  = []){
-        SBMLDocument retval=null
+        SBMLDocument retval = null
         model.each {
             try {
-                SBMLDocument doc  = getFileAsValidatedSBMLDocument(it, errors);
+                SBMLDocument doc  = getFileAsValidatedSBMLDocument(it, errors)
                 if (doc) {
-                    retval=doc
+                    retval = doc
                 }
-            } catch(Exception ignore) {
-            	ignore.printStackTrace();
+            } catch(Exception e) {
+                log.error(e.message, e)
             }
         }
         return retval
