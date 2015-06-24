@@ -20,8 +20,6 @@
 
 package net.biomodels.jummp.core
 
-import groovy.transform.CompileStatic
-import groovy.transform.CompileDynamic
 import net.biomodels.jummp.annotationstore.*
 import net.biomodels.jummp.model.Revision
 import org.apache.commons.logging.LogFactory
@@ -36,7 +34,6 @@ import org.perf4j.aop.Profiled
  *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-@CompileStatic
 class MetadataService {
     private static final Log log = LogFactory.getLog(this)
     private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
@@ -45,7 +42,7 @@ class MetadataService {
      * Fetches any ResourceReferences defined for a given qualifier from a revision.
      *
      * Convenience method for fetching statements that match qualifier @p qName in revision
-     * @p $rev.
+     * @p rev.
      *
      * @param rev the identifier of an existing revision.
      * @param qName the accession of the desired qualifier.
@@ -54,11 +51,10 @@ class MetadataService {
      * @see net.biomodels.jummp.annotationstore.ResourceReference
      * @see net.biomodels.jummp.annotationstore.Statement
      */
-    @CompileDynamic
     @Profiled(tag = "metadataService.findAllResourceReferencesForQualifier")
     List<ResourceReference> findAllResourceReferencesForQualifier(Long rev, String qName) {
         if (IS_DEBUG_ENABLED) {
-            log.debug "Finding annotations with qualifier $qName for revision $rev."
+            log.debug "Finding cross references with qualifier $qName for revision $rev."
         }
         Revision revision = Revision.load(rev)
         List<ResourceReference> result = ResourceReference.executeQuery('''
@@ -77,19 +73,92 @@ class MetadataService {
     }
 
     /**
-     * Fetches ResourceReferences associated with the supplied qualifiers.
+     * Fetches all Statements containing a given qualifier from a revision.
+     *
+     * Convenience method for fetching statements that match qualifier @p qualifier
+     * in revision @p $revisionId.
+     *
+     * @param revisionId the identifier of an existing revision.
+     * @param qualifier the accession of the desired qualifier.
+     * @return a list of matching Statements from the revision denoted by @param revisionId.
+     * @see net.biomodels.jummp.annotationstore.Statement
+     */
+    @Profiled(tag = "metadataService.findAllStatementsForQualifier")
+    List<Statement> findAllStatementsForQualifier(Long revisionId, String qualifier) {
+        if (IS_DEBUG_ENABLED) {
+            log.debug "Finding annotations with qualifier $qualifier for revision $revisionId."
+        }
+        Revision revision = Revision.load(revisionId)
+        List<Statement> result = Statement.executeQuery('''select statement
+                from ElementAnnotation elementAnnotation
+                    join elementAnnotation.statement statement
+                    join statement.qualifier qualifier
+                where
+                    elementAnnotation.revision = :revision and
+                    qualifier.accession = :qName''', [revision: revision, qName: qualifier])
+        if (IS_DEBUG_ENABLED) {
+            log.debug "Found ${result.size()} matching annotations."
+        }
+        return result
+    }
+
+    /**
+     * Fetches all Statements containing a given RDF subject from a revision.
+     *
+     * Convenience method for fetching statements that match subject @p subject
+     * in revision @p revisionId.
+     *
+     * @param revisionId the identifier of an existing revision.
+     * @param subject the accession of the desired subject.
+     * @return a list of matching Statements from the revision denoted by @param revisionId.
+     * @see net.biomodels.jummp.annotationstore.Statement
+     */
+    @Profiled(tag = "metadataService.findAllStatementsForSubject")
+    List<Statement> findAllStatementsForSubject(Long revisionId, String subject) {
+        if (IS_DEBUG_ENABLED) {
+            log.debug "Finding annotations with subject $subject for revision $revisionId."
+        }
+        Revision revision = Revision.load(revisionId)
+        List<Statement> result = Statement.executeQuery('''select statement
+                from ElementAnnotation elementAnnotation
+                    join elementAnnotation.statement statement
+                where
+                    elementAnnotation.revision = :revision and
+                    statement.subjectId = :subject''', [revision: revision, subject: subject])
+        if (IS_DEBUG_ENABLED) {
+            log.debug "Found ${result.size()} matching annotations."
+        }
+        return result
+    }
+
+    /**
+     * Fetches any ResourceReferences defined for a given RDF subject from a revision.
+     *
+     * Convenience method for fetching statements that match subject @p subject in revision
+     * @p revisionId.
      *
      * @param revision the identifier of an existing revision.
-     * @param qualifiers a list of qualifiers for which ResourceReferences should be found.
-     * @return a list where the supplied qualifiers  the keys and the corresponding
-     * values are lists of ResourceReferences.
+     * @param subject the accession of the desired subject.
+     * @return a list of ResourceReferences that represent the objects of the statements from
+     * the revision denoted by @param revisionId.
+     * @see net.biomodels.jummp.annotationstore.ResourceReference
      */
-    @CompileStatic
-    @Profiled(tag = "metadataService.findAllResourceReferencesForQualifiers")
-    List<ResourceReference> findAllResourceReferencesForQualifiers(Long revision,
-            List<String> qualifiers) {
-        return qualifiers.collect { String q ->
-            findAllResourceReferencesForQualifier(revision, q)
+    @Profiled(tag = "metadataService.findAllResourceReferencesForSubject")
+    List<ResourceReference> findAllResourceReferencesForSubject(Long revisionId, String subject) {
+        if (IS_DEBUG_ENABLED) {
+            log.debug "Finding cross references with subject $subject for revision $revisionId."
         }
+        Revision revision = Revision.load(revisionId)
+        List<Statement> result = Statement.executeQuery('''select reference
+                from ElementAnnotation elementAnnotation
+                    join elementAnnotation.statement statement
+                    join statement.object reference
+                where
+                    elementAnnotation.revision = :revision and
+                    statement.subjectId = :subject''', [revision: revision, subject: subject])
+        if (IS_DEBUG_ENABLED) {
+            log.debug "Found ${result.size()} matching annotations."
+        }
+        return result
     }
 }

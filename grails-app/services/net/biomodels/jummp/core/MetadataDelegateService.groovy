@@ -20,9 +20,12 @@
 
 package net.biomodels.jummp.core
 
+import net.biomodels.jummp.annotationstore.ResourceReference
+import net.biomodels.jummp.annotationstore.Statement
 import net.biomodels.jummp.core.annotation.ResourceReferenceCategory
 import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
-import net.biomodels.jummp.annotationstore.ResourceReference
+import net.biomodels.jummp.core.annotation.StatementCategory
+import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import org.perf4j.aop.Profiled
 
@@ -40,14 +43,65 @@ class MetadataDelegateService implements IMetadataService {
      */
     MetadataService metadataService
 
+    /**
+     * {@inheritDoc}
+     */
     @Profiled(tag = "metadataDelegateService.findAllResourceReferencesForQualifier")
     List<ResourceReferenceTransportCommand> findAllResourceReferencesForQualifier(
             RevisionTransportCommand revision, String qualifier) {
         List<ResourceReference> references = metadataService.
                 findAllResourceReferencesForQualifier(revision.id, qualifier)
+        wrapResourceReferences(references)
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Profiled(tag = "metadataDelegateService.findAllResourceReferencesForSubject")
+    List<ResourceReferenceTransportCommand> findAllResourceReferencesForSubject(
+            RevisionTransportCommand revision, String subject) {
+        List<ResourceReference> references = metadataService.
+                findAllResourceReferencesForSubject(revision.id, subject)
+        wrapResourceReferences(references)
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Profiled(tag = "metadataDelegateService.findAllStatementsForQualifier")
+    List<StatementTransportCommand> findAllStatementsForQualifier(RevisionTransportCommand
+            revision, String qualifier) {
+        List<Statement> statements = metadataService.findAllStatementsForQualifier(
+                revision.id, qualifier)
+        wrapStatements(statements)
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Profiled(tag = "metadataDelegateService.findAllStatementsForSubject")
+    List<StatementTransportCommand> findAllStatementsForSubject(RevisionTransportCommand
+            revision, String subject) {
+        List<Statement> statements = metadataService.findAllStatementsForSubject(
+                revision.id, subject)
+        wrapStatements(statements)
+    }
+
+    @Profiled(tag = "metadataDelegateService.wrapResourceReferences")
+    private List<ResourceReferenceTransportCommand> wrapResourceReferences(
+            List<ResourceReference> references) {
         use(ResourceReferenceCategory) {
             return references.collect { ResourceReference r ->
                 r.toCommandObject()
+            }
+        }
+    }
+
+    @Profiled(tag = "metadataDelegateService.wrapStatements")
+    private List<StatementTransportCommand> wrapStatements(List<Statement> statements) {
+        use(StatementCategory) {
+            return statement.collect { Statement s ->
+                s.toCommandObject()
             }
         }
     }

@@ -21,6 +21,7 @@
 package net.biomodels.jummp.core
 
 import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
+import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 /**
@@ -34,12 +35,46 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
  */
 interface IMetadataService {
     /**
-     * Retrieves revision annotations with a given property.
+     * Retrieves cross-references for a given property.
      *
      * @param revision the TransportCommand wrapper for the revision where annotations were defined.
      * @param qualifier the accession for the qualifier by which to look up annotations.
      * @return a list of TransportCommand wrappers corresponding to the ResourceReference
+     *      objects that appear in RDF statements containing property @p qualifier.
      */
     List<ResourceReferenceTransportCommand> findAllResourceReferencesForQualifier(
             RevisionTransportCommand revision, String qualifier)
+
+    /**
+     * Retrieves revision statements with a given property.
+     *
+     * @param revision the TransportCommand wrapper for the revision where annotations were defined.
+     * @param qualifier the accession for the qualifier by which to look up annotations.
+     * @return a list of TransportCommand wrappers corresponding to the Statements from the
+     *      supplied @p revision containing property @p qualifier.
+     */
+    List<StatementTransportCommand> findAllStatementsForQualifier(RevisionTransportCommand
+            revision, String qualifier)
+
+    /**
+     * Retrieves cross-references with a given subject.
+     *
+     * @param revision the TransportCommand wrapper for the revision where annotations were defined.
+     * @param subject the subject by which to look up Statements associated with @p revision.
+     * @return a list of TransportCommand wrappers corresponding to the ResourceReference objects
+     *      that appear in the statements of @p revision that have subject @p subject.
+     */
+    List<ResourceReferenceTransportCommand> findAllResourceReferencesForSubject(
+            RevisionTransportCommand revision, String subject)
+
+    /**
+     * Retrieves revision statements with a given subject.
+     *
+     * @param revision the TransportCommand wrapper for the revision where annotations were defined.
+     * @param subject the subject by which to look up Statements associated with @p revision.
+     * @return a list of TransportCommand wrappers corresponding to the Statements from the
+     *      supplied @p revision containing subject @p subject.
+     */
+    List<StatementTransportCommand> findAllStatementsForSubject(RevisionTransportCommand
+            revision, String subject)
 }
