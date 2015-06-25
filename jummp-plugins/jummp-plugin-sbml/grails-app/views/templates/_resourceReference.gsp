@@ -12,26 +12,16 @@
  Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
- 
- You should have received a copy of the GNU Affero General Public License along 
+
+ You should have received a copy of the GNU Affero General Public License along
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
-
-
-
-
-
-
-
-
-
-
-
-<meta name="layout" content="modelDisplay"/>
-<content tag="genericAnnotations">
-<table>
-    <g:render template="/templates/statements" collection="${genericAnnotations}" var="s"/>
-</table>
-</content>
-<content tag="modelspecifictabs"/>
-<content tag="modelspecifictabscontent"/>
+<g:if test="${include}">
+    <g:if test="${include.contains('link')}">
+        <a title="Access to term ${reference.accession}" target="_blank"
+            href="${reference.uri}">${reference.name ?: reference.uri}</a>
+    </g:if>
+    <g:if test="${include.contains('datatype')}">
+        <span style="font-style: italic;">${reference.datatype}</span>
+    </g:if>
+</g:if>

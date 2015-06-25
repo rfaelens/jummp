@@ -24,6 +24,7 @@
 
 package net.biomodels.jummp.plugins.sbml
 
+import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 /**
@@ -31,9 +32,14 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
  * @author  Raza Ali <raza.ali@ebi.ac.uk>
  */
 class SbmlController {
-    def modelDelegateService
+    def sbmlService
 
     def show = {
+        RevisionTransportCommand r = flash.genericModel.revision
+        List<StatementTransportCommand> genericAnno = sbmlService.fetchGenericAnnotations(r)
+        if (genericAnno) {
+            flash.genericModel["genericAnnotations"] = genericAnno
+        }
         render(view: "/model/sbml/show", model: flash.genericModel)
     }
 }

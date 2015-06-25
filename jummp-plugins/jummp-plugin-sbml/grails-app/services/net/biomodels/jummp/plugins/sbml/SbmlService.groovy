@@ -43,7 +43,10 @@ import java.util.regex.Pattern
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamException
 import javax.xml.stream.XMLStreamReader
+import net.biomodels.jummp.core.IMetadataService
 import net.biomodels.jummp.core.ISbmlService
+import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
+import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
@@ -101,15 +104,20 @@ import org.springframework.beans.factory.InitializingBean
  * @author  Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
-
     static transactional = true
     private static final Log log = LogFactory.getLog(this)
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
-
     /**
      * Dependency Injection of MiriamService
      */
     def miriamService
+    /**
+     * Dependency Injection of metadata delegate service.
+     */
+    IMetadataService metadataDelegateService
+    /**
+     * Dependency injection of grails application.
+     */
     @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
 
@@ -664,6 +672,26 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
             pubMedAnnotation.add(cvTerm.filterResources("pubmed"))
         }
         return pubMedAnnotation
+    }
+
+    /**
+     * Retrieves model-level annotations for a given revision.
+     *
+     * @param revision the TransportCommand wrapper for the revision for which
+     *      to find annotations.
+     * @return a list of TransportCommand wrappers of Statements associated with
+     *      the model element.
+     */
+    @Profiled(tag = "SbmlService.fetchGenericAnnotations")
+    List<StatementTransportCommand> fetchGenericAnnotations(
+            RevisionTransportCommand revision) {
+        String subject = getMetaId(revision)
+        if (!subject) {
+            return []
+        }
+        List<StatementTransportCommand> statements = metadataDelegateService.
+                findAllStatementsForSubject(revision, subject)
+        return statements
     }
 
     /**
