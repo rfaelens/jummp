@@ -31,7 +31,6 @@ import groovy.transform.Immutable
  * @see net.biomodels.jummp.annotationstore.Statement
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-@CompileStatic
 @Immutable
 class StatementTransportCommand implements Serializable {
     static final long serialVersionUID = 1L
