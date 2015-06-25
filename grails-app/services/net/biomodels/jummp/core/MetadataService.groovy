@@ -149,9 +149,9 @@ class MetadataService {
             log.debug "Finding cross references with subject $subject for revision $revisionId."
         }
         Revision revision = Revision.load(revisionId)
-        List<Statement> result = Statement.executeQuery('''select reference
                 from ElementAnnotation elementAnnotation
                     join elementAnnotation.statement statement
+        List<ResourceReference> result = ResourceReference.executeQuery('''select reference
                     join statement.object reference
                 where
                     elementAnnotation.revision = :revision and
