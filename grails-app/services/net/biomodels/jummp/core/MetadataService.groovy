@@ -58,13 +58,11 @@ class MetadataService {
         }
         Revision revision = Revision.load(rev)
         List<ResourceReference> result = ResourceReference.executeQuery('''
-                select resourceReference
-                from ElementAnnotation elementAnnotation
-                    join elementAnnotation.statement statement
-                    join statement.object resourceReference
+                select statement.object
+                from Statement statement
                     join statement.qualifier qualifier
                 where
-                    elementAnnotation.revision = ? and
+                    statement.annotation.revision = ? and
                     qualifier.accession = ?''', [revision, qName])
         if (IS_DEBUG_ENABLED) {
             log.debug "Found ${result.size()} matching annotations."
@@ -90,11 +88,10 @@ class MetadataService {
         }
         Revision revision = Revision.load(revisionId)
         List<Statement> result = Statement.executeQuery('''select statement
-                from ElementAnnotation elementAnnotation
-                    join elementAnnotation.statement statement
+                from Statement statement
                     join statement.qualifier qualifier
                 where
-                    elementAnnotation.revision = :revision and
+                    statement.annotation.revision = :revision and
                     qualifier.accession = :qName''', [revision: revision, qName: qualifier])
         if (IS_DEBUG_ENABLED) {
             log.debug "Found ${result.size()} matching annotations."
@@ -119,11 +116,10 @@ class MetadataService {
             log.debug "Finding annotations with subject $subject for revision $revisionId."
         }
         Revision revision = Revision.load(revisionId)
-        List<Statement> result = Statement.executeQuery('''select statement
-                from ElementAnnotation elementAnnotation
-                    join elementAnnotation.statement statement
+        List<Statement> result = Statement.executeQuery('''
+                from Statement statement
                 where
-                    elementAnnotation.revision = :revision and
+                    statement.annotation.revision = :revision and
                     statement.subjectId = :subject''', [revision: revision, subject: subject])
         if (IS_DEBUG_ENABLED) {
             log.debug "Found ${result.size()} matching annotations."
@@ -149,12 +145,11 @@ class MetadataService {
             log.debug "Finding cross references with subject $subject for revision $revisionId."
         }
         Revision revision = Revision.load(revisionId)
-                from ElementAnnotation elementAnnotation
-                    join elementAnnotation.statement statement
         List<ResourceReference> result = ResourceReference.executeQuery('''select reference
+                from Statement statement
                     join statement.object reference
                 where
-                    elementAnnotation.revision = :revision and
+                    statement.annotation.revision = :revision and
                     statement.subjectId = :subject''', [revision: revision, subject: subject])
         if (IS_DEBUG_ENABLED) {
             log.debug "Found ${result.size()} matching annotations."
