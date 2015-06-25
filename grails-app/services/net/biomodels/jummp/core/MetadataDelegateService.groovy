@@ -100,7 +100,7 @@ class MetadataDelegateService implements IMetadataService {
     @Profiled(tag = "metadataDelegateService.wrapStatements")
     private List<StatementTransportCommand> wrapStatements(List<Statement> statements) {
         use(StatementCategory) {
-            return statement.collect { Statement s ->
+            return statements.collect { Statement s ->
                 s.toCommandObject()
             }
         }
