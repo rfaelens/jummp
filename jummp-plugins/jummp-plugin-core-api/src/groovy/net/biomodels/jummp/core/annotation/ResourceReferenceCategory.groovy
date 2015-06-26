@@ -40,6 +40,6 @@ class ResourceReferenceCategory {
     ResourceReferenceTransportCommand toCommandObject() {
         return new ResourceReferenceTransportCommand(datatype: this.datatype, name: this.name,
                 uri: this.uri, accession: this.accession, shortName: this.shortName,
-                description: this.description)
+                description: this.description, collectionName: this.collectionName)
     }
 }

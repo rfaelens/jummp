@@ -35,6 +35,7 @@ import groovy.transform.Immutable
 class ResourceReferenceTransportCommand implements Serializable {
     static final long serialVersionUID = 1L
     String datatype
+    String collectionName
     String name
     String uri
     String accession
