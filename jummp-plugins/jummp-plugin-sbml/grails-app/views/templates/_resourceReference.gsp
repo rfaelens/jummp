@@ -21,7 +21,7 @@
         <a title="Access to term ${reference.accession}" target="_blank"
             href="${reference.uri}">${reference.name ?: reference.uri}</a>
     </g:if>
-    <g:if test="${include.contains('datatype')}">
-        <span style="font-style: italic;">${reference.datatype}</span>
+    <g:if test="${include.contains('collectionName')}">
+        <span style="font-style: italic;">${reference.collectionName}</span>
     </g:if>
 </g:if>

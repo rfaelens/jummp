@@ -25,6 +25,6 @@
     </td>
     <td>
         <g:render template="/templates/resourceReference"
-            model="['reference': s.object, 'include': ['datatype']]"/>
+            model="['reference': s.object, 'include': ['collectionName']]"/>
     </td>
 </tr>
