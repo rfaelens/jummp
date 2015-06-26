@@ -19,7 +19,7 @@
 <g:if test="${include}">
     <g:if test="${include.contains('link')}">
         <a title="Access to term ${reference.accession}" target="_blank"
-            href="${reference.uri}">${reference.name ?: reference.uri}</a>
+            href="${reference.uri}">${reference.name ?: reference.accession ?: reference.uri}</a>
     </g:if>
     <g:if test="${include.contains('collectionName')}">
         <span style="font-style: italic;">${reference.collectionName}</span>
