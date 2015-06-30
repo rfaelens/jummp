@@ -554,7 +554,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 }
             }
         } catch(Exception e) {
-            log.error("Error rendering the observations ${observations.inspect()}: ${e.message}")
+            log.error("Error rendering the observations ${observations.inspect()}: ${e.message}", e)
             result.append("Sorry, something went wrong while rendering the observations.")
         } finally {
             return result.toString()
