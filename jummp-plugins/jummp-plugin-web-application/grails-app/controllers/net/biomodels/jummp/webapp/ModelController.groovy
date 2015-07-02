@@ -49,11 +49,9 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.model.audit.*
 import net.biomodels.jummp.plugins.security.PersonTransportCommand
 import org.apache.commons.io.FileUtils
-import org.apache.commons.lang.exception.ExceptionUtils
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.multipart.MultipartFile
-import java.util.Arrays
 import net.biomodels.jummp.plugins.security.Team
 import net.biomodels.jummp.annotationstorage.*
 
