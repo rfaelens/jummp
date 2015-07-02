@@ -512,13 +512,13 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 }
                 result.append("</h4>\n")
                 result.append("<span class=\"bold\">Parameters </span>")
-                def simpleParameters = continuousObs.commonParameterElement.value.findAll {
+                def simpleParameters = continuousObs.commonParameterElement.findAll {
                     it instanceof SimpleParameter
                 }
-                def rv = continuousObs.commonParameterElement.value.findAll {
+                def rv = continuousObs.commonParameterElement.findAll {
                     it instanceof ParameterRandomVariable
                 }
-                def individualParameters = continuousObs.commonParameterElement.value.findAll {
+                def individualParameters = continuousObs.commonParameterElement.findAll {
                        it instanceof IndividualParameter
                 }
                 result.append(simpleParams(simpleParameters))
