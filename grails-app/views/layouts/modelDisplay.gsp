@@ -63,6 +63,7 @@
         <g:javascript src="syntax/shBrushXml.js"/>
         <g:javascript src="jquery.handsontable.full.js"></g:javascript>
         <style>
+            <%-- class for buttons on sticky left-hand-side menu --%>
         	.ui-button {
         		border-left: none;
         		margin: 0;
