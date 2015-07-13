@@ -365,6 +365,7 @@
                 resizable: false,
                 autoOpen: false,
                 height: 300,
+                width: 500,
                 modal: true,
                 buttons: {
                     Confirm: function() {
