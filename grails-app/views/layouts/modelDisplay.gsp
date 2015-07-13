@@ -466,7 +466,7 @@
 					</li>
 				</g:if>
 				<g:if test="${canDelete}">
-					<div id="dialog-confirm" title="Confirm Delete">
+					<div id="dialog-confirm" title="Confirm Delete" style="display:none;">
 						<p>Are you sure you want to delete the model?</p>
 					</div>
 					<li>
@@ -474,7 +474,7 @@
 					</li>
 				</g:if>
 				<g:if test="${showPublishOption}">
-					<div id="confirm-model-publish" title="You are about to publish this model version">
+					<div id="confirm-model-publish" title="You are about to publish this model version" style="display:none;">
 						<p>Make this version of the model visible to anyone without logging in?</p>
 					</div>
 					<li>
