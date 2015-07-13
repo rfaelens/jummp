@@ -8,14 +8,7 @@ var toJSON = function(form) {
 var Collaborator = Backbone.Model.extend({
 });
 
-function guid(){
- function S4() {
-   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
- }
- return [S4()+S4(),S4(),S4(),S4(),S4()+S4()+S4()].join('').toUpperCase();
-}
-
-var spaceReplacement = guid();
+var spaceReplacement = "%20";
 
 var Collaborators = Backbone.Collection.extend({
     model: Collaborator,
