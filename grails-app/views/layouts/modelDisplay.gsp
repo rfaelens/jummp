@@ -489,7 +489,7 @@
 				</ul>
          </div>
         <div class="ebiLayout_reduceWidth">
-       	<g:if test="${revision.model.deleted}">
+        <g:if test="${revision.model.deleted}">
     		<div class='PermanentMessage'>
     			This is an archived model.
     		</div>
