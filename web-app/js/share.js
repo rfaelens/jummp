@@ -8,13 +8,11 @@ var toJSON = function(form) {
 var Collaborator = Backbone.Model.extend({
 });
 
-var spaceReplacement = "%20";
-
 var Collaborators = Backbone.Collection.extend({
     model: Collaborator,
     add: function(newCollab) {
 		try {
-			newCollab.id = newCollab.id.replace(" ", spaceReplacement);
+			newCollab.id = encodeURIComponent(newCollab.id);
 		}
 		catch(ignoreException) {
 		}
@@ -57,7 +55,7 @@ CollaboratorTable = Backbone.View.extend({
     },
     performSubmission:function() {
         var collabString=JSON.stringify(this.collection);
-        collabString = collabString.replace(new RegExp(spaceReplacement, 'g'), " ");
+        collabString = decodeURIComponent(collabString);
         $(":input").prop('disabled', true);
         $.post(submitURL, { collabMap: collabString }, function(returnedData) {
             if (returnedData.success) {
