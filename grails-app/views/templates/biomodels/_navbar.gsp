@@ -18,7 +18,7 @@
 --%>
 
 <nav>
-<ul class="grid_24 main-menu" id="local-nav">
+<ul class="grid_24 main-menu main-menu" id="local-nav">
     <li <g:if test="${g.pageProperty(name:'page.browse')?.length()}"> class="active" </g:if>>
         <a href="${g.createLink(controller: 'search', action: 'list')}">Browse</a>
     </li>
