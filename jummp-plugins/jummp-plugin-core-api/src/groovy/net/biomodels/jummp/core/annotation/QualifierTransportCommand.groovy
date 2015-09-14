@@ -16,30 +16,25 @@
  *
  * You should have received a copy of the GNU Affero General Public License along
  * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
- **/
+ */
 
+package net.biomodels.jummp.core.annotation
 
-
-
-
-package net.biomodels.jummp.plugins.sbml
-
-import net.biomodels.jummp.core.annotation.StatementTransportCommand
-import net.biomodels.jummp.core.model.RevisionTransportCommand
+import groovy.transform.CompileStatic
+import groovy.transform.Immutable
 
 /**
- * Controller for handling Model files in the SBML format.
- * @author  Raza Ali <raza.ali@ebi.ac.uk>
+ * Lightweight representation of the Qualifier domain class.
+ *
+ * Instances of this class are immutable.
+ *
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-class SbmlController {
-    def sbmlService
-
-    def show = {
-        RevisionTransportCommand r = flash.genericModel.revision
-        List<StatementTransportCommand> genericAnno = sbmlService.fetchGenericAnnotations(r)
-        if (genericAnno) {
-            flash.genericModel["genericAnnotations"] = genericAnno
-        }
-        render(view: "/model/sbml/show", model: flash.genericModel)
-    }
+@Immutable
+class QualifierTransportCommand implements Serializable {
+    private static final long serialVersionUID = 1L
+    String namespace
+    String accession
+    String uri
+    String type
 }

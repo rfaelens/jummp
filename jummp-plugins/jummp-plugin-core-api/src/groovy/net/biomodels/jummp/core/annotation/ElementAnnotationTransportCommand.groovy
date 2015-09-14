@@ -16,30 +16,30 @@
  *
  * You should have received a copy of the GNU Affero General Public License along
  * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
- **/
+ */
 
+package net.biomodels.jummp.core.annotation
 
-
-
-
-package net.biomodels.jummp.plugins.sbml
-
-import net.biomodels.jummp.core.annotation.StatementTransportCommand
+import groovy.transform.CompileStatic
+import groovy.transform.Immutable
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 
 /**
- * Controller for handling Model files in the SBML format.
- * @author  Raza Ali <raza.ali@ebi.ac.uk>
+ * Lightweight representation of the ElementAnnotation domain class.
+ *
+ * Instances of this class are immutable. Unlike the domain class, there is no reference
+ * to the associated Revision. This is because the class
+ * {@link net.biomodels.jummp.core.model.RevisionTransportCommand}, which is the basis for
+ * submission, retrieval, search and display, already has a member that is an instance of
+ * the ElementAnnotationTransportCommand class.
+ *
+ * @see net.biomodels.jummp.annotationstore.ElementAnnotation
+ * @see net.biomodels.jummp.core.model.RevisionTransportCommand
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-class SbmlController {
-    def sbmlService
-
-    def show = {
-        RevisionTransportCommand r = flash.genericModel.revision
-        List<StatementTransportCommand> genericAnno = sbmlService.fetchGenericAnnotations(r)
-        if (genericAnno) {
-            flash.genericModel["genericAnnotations"] = genericAnno
-        }
-        render(view: "/model/sbml/show", model: flash.genericModel)
-    }
+@CompileStatic
+@Immutable
+class ElementAnnotationTransportCommand implements Serializable {
+    String creator
+    StatementTransportCommand statement
 }

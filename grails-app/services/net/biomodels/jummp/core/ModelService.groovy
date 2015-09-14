@@ -74,7 +74,7 @@ import org.springframework.security.core.userdetails.UserDetails
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
- * @date 20150319
+ * @date 20150616
  */
 @SuppressWarnings("GroovyUnusedCatchParameter")
 class ModelService {
@@ -750,11 +750,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             //save repoFiles, revision and model in one go
             if (rev.model.publication) {
                 try {
-                	model.publication = Publication.fromCommandObject(rev.model.publication)
+                    model.publication = pubMedService.fromCommandObject(rev.model.publication)
+                    println "just learned that model publication is ${model.publication}"
+                } catch(Exception e) {
+                    log.error("Unable to record publication for ${rev.model}: ${e.message}", e)
                 }
-                catch(Exception e) {
-                	e.printStackTrace();
-            	}
             }
             revision.save(failOnError:true)
             model.save(flush: true)
@@ -1179,7 +1179,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (revision.validate()) {
             model.addToRevisions(revision)
             if (meta.publication) {
-            	model.publication = Publication.fromCommandObject(meta.publication)
+                model.publication = pubMedService.fromCommandObject(meta.publication)
             }
             if (!model.validate()) {
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
@@ -1205,22 +1205,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             aclUtilService.addPermission(revision, username, BasePermission.DELETE)
             aclUtilService.addPermission(revision, username, BasePermission.READ)
             stopWatch.stop()
-            try {
-                if (!meta.publication) {
-                    String annotation = getPubMedAnnotation(model)
-                    String pubMed
-                    if (annotation) {
-                        if (annotation.contains(":")) {
-                            pubMed = annotation.substring(annotation.lastIndexOf(":")+1, annotation.indexOf("]")).trim()
-                            //TODO Replace CiteXplore with EuropePMC URLs
-                            //model.publication = pubMedService.getPublication(pubMed)
-                            model.publication = null
-                        }
-                    }
-                }
-            } catch (JummpException e) {
-                log.debug(e.message, e)
-            }
 
             // broadcast event
             grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, DomainAdapter.getAdapter(model).toCommandObject(), modelFiles))

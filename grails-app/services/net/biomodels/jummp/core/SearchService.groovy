@@ -106,10 +106,6 @@ class SearchService {
      * Dependency injection of aclUtilService
      */
     def aclUtilService
-    /**
-     * Dependency injection of unproxied dataSource.
-     */
-    def dataSourceUnproxied
 
     /**
      * Clears the index. Handle with care.
@@ -149,11 +145,11 @@ class SearchService {
         final String uniqueId = "${submissionId}.${versionNumber}"
         String exchangeFolder = new File(revision.files.first().path).getParent()
         String registryExport = miriamService.registryExport.canonicalPath
-        String dbUrl = dataSourceUnproxied.url
-        String dbUsername = dataSourceUnproxied.username
-        String dbPassword = dataSourceUnproxied.password
+        def dsConfig = grailsApplication.config.dataSource
+        String dbUrl = dsConfig?.url
+        String dbUsername = dsConfig?.username
+        String dbPassword = dsConfig?.password
         def dbSettings = [ 'url': dbUrl, 'username': dbUsername, 'password': dbPassword ]
-        println "dbSettings is $dbSettings"
         def builder = new JsonBuilder()
         def partialData=[
                 'submissionId':submissionId,

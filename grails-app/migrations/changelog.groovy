@@ -1185,4 +1185,8 @@ databaseChangeLog = {
     include file: '20150608_make_wcm_space_alias_uri_nullable.groovy'
 
     include file: '20150610-DropResourceReferenceConstraints.groovy'
+
+    include file: '20150611-widenResourceReferenceName.groovy'
+
+	include file: '20150626_addCollectionNameToResourceReference.groovy'
 }
