@@ -48,14 +48,14 @@
         <title>${revision.name}</title>
         <link rel="stylesheet" href="<g:resource dir="css/jqueryui/smoothness" file="jquery-ui-1.10.3.custom.css"/>" />
 
-        <script type="text/x-mathjax-config">
-        	MathJax.Hub.Config({
-            	tex2jax: { inlineMath: [['$','$'],['\\(','\\)']] }
-            });
-        </script>
-        <script type='text/javascript' 
-        		src='http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'>
-        </script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: { inlineMath: [['$','$'],['\\(','\\)']] }
+        });
+    </script>
+    <script type='text/javascript'
+            src='http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'>
+    </script>
         <g:javascript src="jstree/jquery.jstree.js"/>
         <g:javascript src="equalize.js"/>
         <g:javascript src="syntax/shCore.js"/>
@@ -68,7 +68,7 @@
         		margin: 0;
         	}
         </style>
-        <link rel="stylesheet" href="${resource(dir: 'css', file: 'jquery.handsontable.full.min.css')}"></link>
+        <link rel="stylesheet" href="${resource(dir: 'css', file: 'jquery.handsontable.full.min.css')}"/>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'filegrid.css')}" /> 
         <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shCore.css')}" /> 
@@ -94,7 +94,7 @@
                 var anchorId = $(this).attr('id');
                 if (anchorClass=="versionDownload" || anchorClass=="publicationLink") {
                     openPage(anchor);
-				} else if (typeof(anchor) != "undefined") {
+				} else if (anchorClass == "ui-tabs-anchor") {
 					e.preventDefault();
 					location.hash = anchor;
 					var toggleHelp=0;
@@ -486,6 +486,7 @@
 				</g:if>
 				</ul>
          </div>
+        <div class="ebiLayout_reduceWidth">
        	<g:if test="${revision.model.deleted}">
     		<div class='PermanentMessage'>
     			This is an archived model.
@@ -517,7 +518,7 @@
 	 --%></div>
     	<div id="tablewrapper">
     	<div id="tabs">
-	  <ul>
+	  <ul class='modelTabs'>
 	    <li><a href="#Overview">Overview</a></li>
 	    <li><a href="#Files">Files</a></li>
 	    <li><a href="#History">History</a></li>
@@ -627,6 +628,7 @@
   		</ul>
 	  </div>
 	  <g:pageProperty name="page.modelspecifictabscontent" />
+	</div>
 	</div>
     </div>
 

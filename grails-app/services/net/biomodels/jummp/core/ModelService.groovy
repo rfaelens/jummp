@@ -31,6 +31,8 @@
 package net.biomodels.jummp.core
 
 import static java.util.UUID.randomUUID
+import net.biomodels.jummp.core.adapters.DomainAdapter
+import net.biomodels.jummp.core.adapters.ModelAdapter
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.ModelCreatedEvent
 import net.biomodels.jummp.core.events.PostLogging
@@ -72,14 +74,14 @@ import org.springframework.security.core.userdetails.UserDetails
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
- * @date 20141128
+ * @date 20150319
  */
 @SuppressWarnings("GroovyUnusedCatchParameter")
 class ModelService {
     /**
      * The class logger.
      */
-    private static final Log log = LogFactory.getLog(this)
+    private static final Log log = LogFactory.getLog(this.getClass())
     /**
      * Threshold for the verbosity of the logger.
      */
@@ -113,10 +115,6 @@ class ModelService {
      * Dependency Injection for PubMedService
      */
     def pubMedService
-    /**
-     * Dependency injection for ExecutorService to run threads
-     */
-    def executorService
     /**
      * Dependency injection of ModelHistoryService
      */
@@ -162,105 +160,67 @@ class ModelService {
             // safety check
             return []
         }
-        String sorting = sortOrder ? 'asc' : 'desc'
-        // for Admin - sees all (not deleted) models
-        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-            String query = '''
-SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
-FROM Revision AS r
-JOIN r.model AS m JOIN r.owner as u 
-WHERE
-'''
-            if ( sortColumn == ModelListSorting.LAST_MODIFIED || sortColumn == ModelListSorting.FORMAT ||
-                        sortColumn == ModelListSorting.NAME) {
-                query += '''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
-            }
-            else if ( sortColumn == ModelListSorting.SUBMITTER || sortColumn == ModelListSorting.SUBMISSION_DATE) {
-                query += '''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
-            }
-            query += "m.deleted = ${deletedOnly} AND r.deleted = false"
-            if (filter && filter.length() >= 3) {
-                query += '''
-AND (
-lower(m.publication.journal) like :filter
-OR lower(m.publication.title) like :filter
-OR lower(m.publication.affiliation) like :filter
-)
-'''
-            }
-            query += '''
-ORDER BY
-'''
-            switch (sortColumn) {
-            case ModelListSorting.NAME:
-                query += "r.name"
-                break
-            case ModelListSorting.LAST_MODIFIED:
-                query += "r.uploadDate"
-                break
-            case ModelListSorting.FORMAT:
-                query += "r.format.name"
-                break
-            case ModelListSorting.SUBMITTER:
-                query += "u.person.userRealName"
-                break
-            case ModelListSorting.SUBMISSION_DATE:
-                /*
-                * Hard to get to model submission date directly. However as model ids
-                * are sequentially generated, they are used as a surrogate.
-                */
-                query += "m.id"
-                break
-            case ModelListSorting.PUBLICATION:
-                // TODO: implement, fall through to default
-            case ModelListSorting.ID: // Id is the default
-            default:
-                query += "m.id"
-                break
-            }
-            query += " $sorting"
-            Map params = [ max: count, offset: offset]
-            if (filter && filter.length() >= 3) {
-                params.put("filter", "%${filter.toLowerCase()}%");
-            }
-            List<List<Model, String, Date, String, Long, String>> resultSet =
-                        Model.executeQuery(query, [:], params)
-            return resultSet.collect{it.first()}
+
+        String sortingDirection = sortOrder ? 'asc' : 'desc'
+
+        boolean filterIsValid = filterValid(filter)
+
+        Map metaParams = [
+            max: count, offset: offset
+        ]
+
+        Map namedParams = [:]
+        if (filterIsValid) {
+            namedParams.put("filter", "%${filter.toLowerCase()}%");
         }
 
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(
-                    SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add(getUsername())
+        String query
+        // for Admin - sees all (not deleted) models
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            query = getQueryForAdmin(sortColumn, deletedOnly, filterIsValid, sortingDirection)
+
+        } else {
+            Set<String> roles = getSpringDatabaseRoles()
+
+            query = getQueryForUser(sortColumn, deletedOnly, filterIsValid, sortingDirection)
+            namedParams += [
+                className  :  Revision.class.getName(),
+                permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+                roles      :  roles
+            ]
         }
+        List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, namedParams, metaParams)
+        return resultSet.collect{ it.first() }
+    }
+
+    private String getQueryForUser(ModelListSorting sortColumn, boolean deletedOnly, boolean filterIsValid, String sortingDirection) {
         String query = '''
 SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
 FROM Revision AS r
 JOIN r.model AS m
-JOIN r.owner as u 
+JOIN r.owner as u
 WHERE r.deleted = false
 '''
 //do we want to show information from the latest revision?
-if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) { 
-            query += '''AND r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2, 
-            			AclEntry ace2  where r.model=r2.model 
-            			AND r2.id=ace2.aclObjectIdentity.objectId 
-            			AND ace2.aclObjectIdentity.aclClass.className = :className
-            			AND ace2.sid.sid IN (:roles) AND ace2.mask IN (:permissions)
-            			AND ace2.granting = true)'''
-        }
-        else  {                                      ////otherwise sortColumn must be the following .. ie we want to sort by the first revision (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE)
+        if (sortColumn == ModelListSorting.LAST_MODIFIED || sortColumn == ModelListSorting.FORMAT || sortColumn == ModelListSorting.NAME) {
+            query += '''AND r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2,
+                        AclEntry ace2  where r.model=r2.model
+                        AND r2.id=ace2.aclObjectIdentity.objectId
+                        AND ace2.aclObjectIdentity.aclClass.className = :className
+                        AND ace2.sid.sid IN (:roles) AND ace2.mask IN (:permissions)
+                        AND ace2.granting = true)'''
+        } else {
+            ////otherwise sortColumn must be the following .. ie we want to sort by the first revision (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE)
             query += '''AND r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2,
-            			AclEntry ace2  where r.model=r2.model
-            			AND r2.id=ace2.aclObjectIdentity.objectId
-            			AND ace2.aclObjectIdentity.aclClass.className = :className
-            			AND ace2.sid.sid IN (:roles) AND ace2.mask IN (:permissions)
-            			AND ace2.granting = true)'''
+                        AclEntry ace2  where r.model=r2.model
+                        AND r2.id=ace2.aclObjectIdentity.objectId
+                        AND ace2.aclObjectIdentity.aclClass.className = :className
+                        AND ace2.sid.sid IN (:roles) AND ace2.mask IN (:permissions)
+                        AND ace2.granting = true)'''
         }
-        
+
         query += " AND m.deleted = ${deletedOnly} "
-        if (filter && filter.length() >= 3) {
+        if (filterIsValid) {
             query += '''
 AND (
 lower(m.publication.journal) like :filter
@@ -272,43 +232,76 @@ OR lower(m.publication.affiliation) like :filter
         query += '''
 ORDER BY
 '''
+        query += " " + getSortColumnAsString(sortColumn) + " " + sortingDirection
+        return query
+    }
+
+    private String getQueryForAdmin(ModelListSorting sortColumn, boolean deletedOnly, boolean filterIsValid, String sortingDirection) {
+        String query = '''
+SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
+FROM Revision AS r
+JOIN r.model AS m JOIN r.owner as u
+WHERE
+'''
+        if (sortColumn == ModelListSorting.LAST_MODIFIED || sortColumn == ModelListSorting.FORMAT ||
+            sortColumn == ModelListSorting.NAME) {
+            query += '''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+        } else if (sortColumn == ModelListSorting.SUBMITTER || sortColumn == ModelListSorting.SUBMISSION_DATE) {
+            query += '''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+        }
+        query += "m.deleted = ${deletedOnly} AND r.deleted = false"
+        if (filterIsValid) {
+            query += '''
+AND (
+lower(m.publication.journal) like :filter
+OR lower(m.publication.title) like :filter
+OR lower(m.publication.affiliation) like :filter
+)
+'''
+        }
+        query += '''
+ORDER BY
+'''
+        query += " " + getSortColumnAsString(sortColumn) + " " + sortingDirection
+        return query
+    }
+
+    /**
+     * Short method to get the SQL-name of the {@Link ModelListSorting} enum
+     * @param sortColumn
+     * @return
+     */
+    // ToDo: this should really be enum-properties in the ModelListSorting enum itself..
+    private java.lang.String getSortColumnAsString(ModelListSorting sortColumn) {
+        String result
         switch (sortColumn) {
-        case ModelListSorting.NAME:
-            query += "r.name"
-            break
-        case ModelListSorting.LAST_MODIFIED:
-            query += "r.uploadDate"
-            break
-        case ModelListSorting.FORMAT:
-            query += "r.format.name"
-            break
-        case ModelListSorting.SUBMITTER:
-            query += "u.person.userRealName"
-            break
-       case ModelListSorting.SUBMISSION_DATE:
-           /*
-            * Hard to get to model submission date directly. However as model ids
-            * are sequentially generated, they are used as a surrogate.
-            */
-            query += "m.id"
-            break
-        case ModelListSorting.PUBLICATION:
-            // TODO: implement, fall through to default
-        case ModelListSorting.ID: // Id is the default
-        default:
-            query += "m.id"
-            break
+            case ModelListSorting.NAME:
+                result = "r.name"
+                break
+            case ModelListSorting.LAST_MODIFIED:
+                result = "r.uploadDate"
+                break
+            case ModelListSorting.FORMAT:
+                result = "r.format.name"
+                break
+            case ModelListSorting.SUBMITTER:
+                result = "u.person.userRealName"
+                break
+            case ModelListSorting.SUBMISSION_DATE:
+                /*
+                 * Hard to get to model submission date directly. However as model ids
+                 * are sequentially generated, they are used as a surrogate.
+                 */
+                result = "m.id"
+                break
+            case ModelListSorting.PUBLICATION:
+                // TODO: implement, fall through to default
+            case ModelListSorting.ID: // Id is the default
+            default:
+                result = "m.id"
+                break
         }
-        query += " " + sorting
-        Map params = [
-            className: Revision.class.getName(),
-            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
-            max: count, offset: offset, roles: roles]
-        if (filter && filter.length() >= 3) {
-            params.put("filter", "%${filter.toLowerCase()}%");
-        }
-        List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, params)
-        return resultSet.collect {it.first()}
+        result
     }
 
     /**
@@ -386,7 +379,7 @@ ORDER BY
             def criteria = Model.createCriteria()
             return criteria.get {
                 ne("deleted", !deletedOnly)
-                if (filter && filter.length() >= 3) {
+                if (filterValid(filter)) {
                     or {
                         ilike("name", "%${filter}%")
                         publication {
@@ -404,11 +397,7 @@ ORDER BY
             } as Integer
         }
 
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add(getUsername())
-        }
+        Set<String> roles = getSpringDatabaseRoles()
 
         String query = '''
 SELECT COUNT(DISTINCT m.id) FROM Revision AS r, AclEntry AS ace
@@ -425,7 +414,7 @@ AND ace.granting = true
 AND r.deleted = false
 '''
 query+=" AND m.deleted=${deletedOnly} "
-        if (filter && filter.length() >= 3) {
+        if (filterValid(filter)) {
             query += '''
 AND (
 lower(m.publication.journal) like :filter
@@ -438,11 +427,16 @@ OR lower(m.publication.affiliation) like :filter
             className: Revision.class.getName(),
             permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
             roles: roles]
-        if (filter && filter.length() >= 3) {
+        if (filterValid(filter)) {
             params.put("filter", "%${filter.toLowerCase()}%");
         }
 
         return Model.executeQuery(query, params)[0] as Integer
+    }
+
+    /** convenience method to check if our filter is OK */
+    private java.lang.Boolean filterValid(String filter) {
+        return filter && filter.length() >= 3
     }
 
     /**
@@ -453,7 +447,7 @@ OR lower(m.publication.affiliation) like :filter
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getModel")
     public Model getModel(String id) {
-        Model model = Model.findByPerennialIdentifier(id)
+        Model model = ModelAdapter.findByPerennialIdentifier(id)
         if (model) {
             if (!getLatestRevision(model)) {
                 throw new AccessDeniedException("No access to Model with Id ${id}")
@@ -498,11 +492,7 @@ OR lower(m.publication.affiliation) like :filter
             return Revision.get(result[0])
         }
 
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add(getUsername())
-        }
+        Set<String> roles = getSpringDatabaseRoles()
         List<Long> result = Revision.executeQuery('''
 SELECT rev.id
 FROM Revision AS rev, AclEntry AS ace
@@ -531,6 +521,16 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             	modelHistoryService.addModelToHistory(model)
             }
             return Revision.get(result[0])
+    }
+
+    /** deduplication method for getting Spring's authorities as Database-Role strings */
+    private Set<String> getSpringDatabaseRoles() {
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add(getUsername())
+        }
+        return roles
     }
 
     /**
@@ -570,7 +570,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     public Revision getRevision(String identifier) {
         String[] parts = identifier.split("\\.")
         String modelId = parts[0]
-        Model model = Model.findByPerennialIdentifier(modelId)
+        Model model = ModelAdapter.findByPerennialIdentifier(modelId)
         if (parts.length == 1) {
             Revision revision = getLatestRevision(model)
             if (!revision) {
@@ -660,7 +660,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     /**
     * Adds a new Revision to the model, to be used by SubmissionService
     * The provided @p modelFiles will be stored in the VCS as an update to the existing files of the same @p model.
-    * A new Revision will be created and appended to the list of Revisions of the @p model. 
+    * A new Revision will be created and appended to the list of Revisions of the @p model.
     * The revision will not be validated, as the checks are assumed to have been conducted
     * already
     * @param model The Model the revision should be added
@@ -715,7 +715,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 domain.hidden = rf.hidden
             }
             if (!domain.validate()) {
-                final def m = model.toCommandObject()
+                final def m = DomainAdapter.getAdapter(model).toCommandObject()
                 def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the update of model ${m.properties}.")
                 msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
                 log.error(msg)
@@ -736,7 +736,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             domainObjects.each{ it.discard() }
             log.error("Exception occurred during uploading a new Model Revision to VCS: ${e.getMessage()}")
             stopWatch.stop()
-            throw new ModelException(model.toCommandObject(),
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
                 "Could not store new Model Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} in VCS", e)
         }
         domainObjects.each {
@@ -781,16 +781,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             }
             stopWatch.stop()
             revision.refresh()
-            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
-                    revision.toCommandObject(), vcsService.retrieveFiles(revision)))
+                    DomainAdapter.getAdapter(revision).toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.errors.allErrors.each {
                log.error(it)
             }
             revision.discard()
-            final def m = model.toCommandObject()
+            final def m = DomainAdapter.getAdapter(model).toCommandObject()
             log.error("New Revision containing ${repoFiles.inspect()} for Model ${m} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")
             stopWatch.stop()
             throw new ModelException(m, "Revision stored in VCS, but not in database")
@@ -811,7 +810,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
 
     /**
     * Retrieves information related to a file from the VCS
-    * Passes the @p revision and filename to the vcsService, gets 
+    * Passes the @p revision and filename to the vcsService, gets
     * info related to the specified @p filename, and filters the returned
     * values based on the revisions available to the user
     * @param rev The model revision
@@ -845,7 +844,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     * The Model will have one Revision attached to it. The MetaInformation for this
     * Model is taken from @p meta. The user who uploads the Model becomes the owner of
     * this Model. The new Model is not visible to anyone except the owner.
-    * @param repoFiles The list of command objects corresponding to the files 
+    * @param repoFiles The list of command objects corresponding to the files
     * of the model that is to be stored in the VCS.
     * @param rev Meta Information to be added to the model
     * @return The new created Model, or null if the model could not be created
@@ -875,25 +874,26 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         stopWatch.setTag("modelService.uploadValidatedModel.prepareVcsStorage")
         ModelFormat format = ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, rev.format.formatVersion)
 
-        // vcs identifier is upload date + name - this should by all means be unique
-        //String pathPrefix =
-        //        fileSystemService.findCurrentModelContainer() + File.separator
+        // vcs identifier is container name + upload date + submissionId - this should by all means be unique
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(timestamp).append("_").append(rev.name).
+        final String submissionId = submissionIdGenerator.generate()
+        String modelPath = new StringBuilder(timestamp).append("_").append(submissionId).
                 append(File.separator).toString()
-        File modelFolder = new File(fileSystemService.findCurrentModelContainer(), modelPath)
+        String container = fileSystemService.findCurrentModelContainer()
+        String containerName = new File(container).name
+        File modelFolder = new File(container, modelPath)
         boolean success = modelFolder.mkdirs()
         if (!success) {
             def err = "Cannot create the directory where the ${rev.name} should be stored"
             log.error(err)
             throw new ModelException(rev.model, err)
         }
-        model.vcsIdentifier = modelPath
+        model.vcsIdentifier = new StringBuilder(containerName).append(File.separator).
+                append(modelPath).toString()
+
         if (IS_DEBUG_ENABLED) {
             log.debug "The new model will be stored in $modelPath"
         }
-        //model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
-        final String submissionId = submissionIdGenerator.generate()
         model.submissionId = submissionId
         Revision revision = new Revision(model: model,
                 revisionNumber: 1,
@@ -948,8 +948,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             errMsg.append("${revision.errors.allErrors.inspect()}\n")
             log.error(errMsg)
             stopWatch.stop()
-            throw new ModelException(model.toCommandObject(),
-                "Could not store new Model ${model.toCommandObject().properties} in VCS", e)
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
+                "Could not store new Model ${DomainAdapter.getAdapter(model).toCommandObject().properties} in VCS", e)
         }
         stopWatch.lap("Finished importing the model into the VCS.")
         stopWatch.setTag("modelService.uploadValidatedModel.gormValidation")
@@ -959,7 +959,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (revision.validate()) {
             model.addToRevisions(revision)
             if (rev.model.publication) {
-                model.publication = Publication.fromCommandObject(rev.model.publication)
+                model.publication = pubMedService.fromCommandObject(rev.model.publication)
             }
             if (!model.validate()) {
                 // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
@@ -970,7 +970,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 msg.append("${revision.errors.allErrors.inspect()}\n")
                 log.error(msg)
                 stopWatch.stop()
-                throw new ModelException(model.toCommandObject(), "New model does not validate")
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "New model does not validate")
             }
             model.save(flush: true)
             domainObjects.each { rf ->
@@ -1017,10 +1017,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 log.debug("Model $submissionId stored with id ${model.id}")
             }
 
-            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
-
             // broadcast event
-            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFiles))
+            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, DomainAdapter.getAdapter(model).toCommandObject(), modelFiles))
         } else {
             // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
@@ -1028,7 +1026,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             model.discard()
             log.error("New Model ${model.properties} with properties ${rev.model.properties} does not validate:${revision.errors.allErrors.inspect()}")
             stopWatch.stop()
-            throw new ModelException(model.toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
         }
         return model
     }
@@ -1093,26 +1091,27 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             valid = false
         }
         // model is valid, create a new repository and store it as revision1
-        // vcs identifier is upload date + name - this should by all means be unique
+        // vcs identifier is upload date + submissionId - this should by all means be unique
         String name = modelFileFormatService.extractName(modelFiles, format)
         if (!name && meta.name ) {
-        	name = meta.name
+            name = meta.name
         }
-        String pathPrefix = fileSystemService.findCurrentModelContainer() + File.separator
+        String container = fileSystemService.findCurrentModelContainer()
+        String containerName = new File(container).name
         String timestamp = new Date().format("yyyy-MM-dd'T'HH-mm-ss-SSS")
-        String modelPath = new StringBuilder(timestamp).append("_").append(
-                name?.length() > 0 ? name : (randomUUID() as String) + "_blankname").
+        final String submissionId = submissionIdGenerator.generate()
+        String modelPath = new StringBuilder(timestamp).append("_").append(submissionId).
                 append(File.separator).toString()
-        File modelFolder = new File(fileSystemService.findCurrentModelContainer(), modelPath)
+        File modelFolder = new File(container, modelPath)
         boolean success = modelFolder.mkdirs()
         if (!success) {
             def err = "Cannot create the directory where the ${name} should be stored"
             log.error(err)
             throw new ModelException(meta, err)
         }
-        model.vcsIdentifier = modelPath
-        //model.vcsIdentifier = model.vcsIdentifier.replace('/', '_').replace(':', '_').replace('\\', '_')
-        model.submissionId = submissionIdGenerator.generate()
+        model.vcsIdentifier = new StringBuilder(containerName).append(File.separator).
+                    append(modelPath).toString()
+        model.submissionId = submissionId
         Revision revision = new Revision(model: model,
                 revisionNumber: 1,
                 owner: User.findByUsername(springSecurityService.authentication.name),
@@ -1159,22 +1158,21 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         try {
             revision.vcsId = vcsService.importModel(model, modelFiles)
         } catch (VcsException e) {
-        	revision.discard()
+            revision.discard()
             domainObjects.each { it.discard() }
             model.discard()
             //TODO undo the addition of the files to the VCS.
             def errMsg = new StringBuffer("Exception occurred while storing new Model ")
-            errMsg.append("${model.toCommandObject().properties} to VCS: ${e.getMessage()}.\n")
+            errMsg.append("${DomainAdapter.getAdapter(model).toCommandObject().properties} to VCS: ${e.getMessage()}.\n")
             errMsg.append("${model.errors.allErrors.inspect()}\n")
             errMsg.append("${revision.errors.allErrors.inspect()}\n")
             log.error(errMsg)
             stopWatch.stop()
-            throw new ModelException(model.toCommandObject(),
-                "Could not store new Model ${model.toCommandObject().properties} in VCS", e)
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
+                "Could not store new Model ${DomainAdapter.getAdapter(model).toCommandObject().properties} in VCS", e)
         }
         stopWatch.lap("Finished importing model in VCS.")
         stopWatch.setTag("modelService.uploadModelAsList.gormValidation")
-        model.submissionId = submissionIdGenerator.generate()
         domainObjects.each {
             revision.addToRepoFiles(it)
         }
@@ -1192,7 +1190,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 msg.append("${revision.errors.allErrors.inspect()}\n")
                 log.error(msg)
                 stopWatch.stop()
-                throw new ModelException(model.toCommandObject(), "New model does not validate")
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "New model does not validate")
             }
             model.save(flush: true)
             stopWatch.lap("Finished GORM validation.")
@@ -1224,17 +1222,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 log.debug(e.message, e)
             }
 
-            executorService.submit(grailsApplication.mainContext.getBean("fetchAnnotations", model.id))
-
             // broadcast event
-            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, model.toCommandObject(), modelFiles))
+            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, DomainAdapter.getAdapter(model).toCommandObject(), modelFiles))
         } else {
             // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
             domainObjects.each {it.discard()}
             model.discard()
             log.error("New Model ${model.properties} with properties ${meta.properties} does not validate:${revision.errors.allErrors.inspect()}")
-            throw new ModelException(model.toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
         }
         return model
     }
@@ -1280,43 +1276,48 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(null, "Model may not be null")
         }
         if (model.deleted) {
-            throw new ModelException(model.toCommandObject(), "A new Revision cannot be added to a deleted model")
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "A new Revision cannot be added to a deleted model")
         }
         if (comment == null) {
-            throw new ModelException(model.toCommandObject(), "Comment may not be null, empty comment is allowed")
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "Comment may not be null, empty comment is allowed")
         }
         if (!repoFiles || repoFiles.size() == 0) {
             log.error("No files were provided as part of the update of model ${model.properties}")
-            throw new ModelException(model.toCommandObject(), "A new version of the model must contain at least one file.")
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "A new version of the model must contain at least one file.")
         }
         List<File> modelFiles = []
         for (rf in repoFiles) {
             if (!rf || !rf.path) {
                 log.error("No file was provided as part of the update of model ${model.properties}")
-                throw new ModelException(model.toCommandObject(), "Please supply at least one file for the new version of this model.")
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "Please supply at least one file for the new version of this model.")
             }
             final String path = rf.path
             if (!path || path.isEmpty()) {
                 log.error("Null file encountered while uploading a new revision for ${model.properties}: ${repoFiles.properties}")
-                throw new ModelException(model.toCommandObject(),
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
                     "Sorry, there was something wrong with one of the files you submitted. Please refine the files you wish to upload and try again.")
             }
             final def f = new File(path)
             if (!f.exists()) {
                 log.error("Non-existent file detected while uploading a new revision for ${model.properties}: ${f.properties}")
-                throw new ModelException(model.toCommandObject(),
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
                     "Sorry, one of the files you submitted does not appear to exist. Please refine the files you wish to upload and try again")
             }
             if (f.isDirectory()) {
                 log.error("Folder detected while uploading a new revision for ${model.properties}: ${repoFiles.properties}")
-                throw new ModelException(model.toCommandObject(),
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
                     "Sorry, we currently do not accept model organised into sub-folders.")
+            }
+            if (rf.mainFile && f.length() == 0) {
+                def err = "File ${f.name} cannot be empty because it is the main file of the submission."
+                log.error err
+                throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), err)
             }
             modelFiles.add(f)
         }
         boolean valid = true
         if (!modelFileFormatService.validate(modelFiles, format, [])) {
-            final def m = model.toCommandObject()
+            final def m = DomainAdapter.getAdapter(model).toCommandObject()
             log.warn("New revision of model ${m.properties} containing ${modelFiles.inspect()} does not comprise valid ${format.identifier}")
             //throw new ModelException(m, "The file list does not comprise valid ${format.identifier}")
             valid = false
@@ -1343,7 +1344,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 domain.hidden = rf.hidden
             }
             if (!domain.validate()) {
-                final def m = model.toCommandObject()
+                final def m = DomainAdapter.getAdapter(model).toCommandObject()
                 def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the update of model ${m.properties}.")
                 msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
                 log.error(msg)
@@ -1364,7 +1365,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             revision.discard()
             domainObjects.each{ it.discard() }
             log.error("Exception occurred during uploading a new Model Revision to VCS: ${e.getMessage()}")
-            throw new ModelException(model.toCommandObject(),
+            throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(),
                 "Could not store new Model Revision for Model ${model.id} with VcsIdentifier ${model.vcsIdentifier} in VCS", e)
         }
         domainObjects.each {
@@ -1389,14 +1390,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 }
             }
             revision.refresh()
-            executorService.submit(
-                    grailsApplication.mainContext.getBean("fetchAnnotations", model.id, revision.id))
             grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
-                    revision.toCommandObject(), vcsService.retrieveFiles(revision)))
+                    DomainAdapter.getAdapter(revision).toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
-            final def m = model.toCommandObject()
+            final def m = DomainAdapter.getAdapter(model).toCommandObject()
             log.error("New Revision containing ${repoFiles.inspect()} for Model ${m} with VcsIdentifier ${model.vcsIdentifier} added to VCS, but not stored in database")
             throw new ModelException(m, "Revision stored in VCS, but not in database")
         }
@@ -1436,8 +1435,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         try {
             files = vcsService.retrieveFiles(revision)
         } catch (VcsException e) {
-            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.name} from VCS failed.")
-            throw new ModelException(revision.model.toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.")
+            log.error("Retrieving Revision ${revision.vcsId} for Model ${revision.name} from VCS failed.", e)
+            throw new ModelException(DomainAdapter.getAdapter(revision.model).toCommandObject(), "Retrieving Revision ${revision.vcsId} from VCS failed.", e)
         }
         return files
     }
@@ -1454,7 +1453,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     List<RepositoryFileTransportCommand> retrieveModelFiles(final Revision revision) throws ModelException {
         if (aclUtilService.hasPermission(springSecurityService.authentication, revision, BasePermission.READ)
                 || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
-            return revision.getRepositoryFilesForRevision()
+            return DomainAdapter.getAdapter(revision).getRepositoryFilesForRevision()
         } else {
             log.error "you can't access revision ${revision.id}!"
             throw new AccessDeniedException("Sorry you are not allowed to download this Model.")
@@ -1504,7 +1503,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 aclUtilService.addPermission(revision, collaborator.username, BasePermission.READ)
             }
         }
-        def notification = [model:model.toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
+        def notification = [model:DomainAdapter.getAdapter(model).toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
         sendMessage("seda:model.readAccessGranted", notification)
     }
 
@@ -1522,7 +1521,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     *
     * returns the users with access to the model
     *
-    * @param model The Model 
+    * @param model The Model
     **/
    // @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
@@ -1574,7 +1573,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     *
     *
     * @param model The Model
-    * @param permissions A list of permissions 
+    * @param permissions A list of permissions
     **/
    // @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.RETRIEVAL)
@@ -1630,7 +1629,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new AccessDeniedException("You cant access permissions if you dont have them.")
         }
     }
-    
+
     private String getUsername() {
     	if (springSecurityService.isLoggedIn()) {
     		return (springSecurityService.getPrincipal() as UserDetails).getUsername()
@@ -1661,7 +1660,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION)
             }
         }
-        def notification = [model:model.toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
+        def notification = [model:DomainAdapter.getAdapter(model).toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
         sendMessage("seda:model.writeAccessGranted", notification)
     }
 
@@ -1773,7 +1772,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Checks if the model can be deleted 
+    * Checks if the model can be deleted
     *
     * @param model The Model to be deleted
     * @return @c true in case the Model can be deleted, @c false otherwise.
@@ -1797,7 +1796,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Checks if the model can be shared 
+    * Checks if the model can be shared
     *
     * @param model The Model to be shared
     * @return @c true in case the Model can be shared, @c false otherwise.
@@ -1978,6 +1977,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (MAKE_PUBLICATION_ID) {
             model.publicationId = model.publicationId ?: publicationIdGenerator.generate()
         }
+        model.firstPublished = new Date()
         aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
         aclUtilService.addPermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
         revision.state = ModelState.PUBLISHED

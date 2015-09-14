@@ -39,6 +39,17 @@ import net.biomodels.jummp.core.model.identifier.generator.AbstractModelIdentifi
 import net.biomodels.jummp.core.model.identifier.generator.DefaultModelIdentifierGenerator
 import net.biomodels.jummp.core.model.identifier.generator.ModelIdentifierGeneratorRegistryService
 import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
+import org.codehaus.groovy.grails.commons.DomainClassArtefactHandler
+import org.springframework.beans.factory.support.BeanDefinitionRegistry
+import org.springframework.beans.factory.config.BeanDefinition
+import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry
+import org.springframework.context.annotation.ClassPathBeanDefinitionScanner
+import org.springframework.core.type.filter.AnnotationTypeFilter
+import grails.persistence.Entity
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 
 // Place your Spring DSL code here
 beans = {
@@ -52,37 +63,6 @@ beans = {
         advisor('pointcut-ref': "postLoggingPointcut", 'advice-ref': "postLogging")
     }
     postLogging(net.biomodels.jummp.core.events.PostLoggingAdvice)
-
-    fetchAnnotations(net.biomodels.jummp.core.miriam.FetchAnnotationsThread) { bean ->
-        bean.autowire = "byName"
-        bean.factoryMethod = "getInstance"
-        bean.scope = "prototype"
-    }
-
-    resolveMiriamIdentifier(net.biomodels.jummp.core.miriam.ResolveMiriamIdentifierThread) { bean ->
-        bean.autowire = "byName"
-        bean.factoryMethod = "getInstance"
-        bean.scope = "prototype"
-    }
-
-    uniProtResolver(net.biomodels.jummp.core.miriam.UniProtResolver) { bean ->
-        bean.scope = "prototype"
-        dataTypeIdentifier = "MIR:00000005"
-        resourceIdentifier = "MIR:00100134"
-    }
-
-    taxonomyResolver(net.biomodels.jummp.core.miriam.TaxonomyResolver) { bean ->
-        bean.scope = "prototype"
-        dataTypeIdentifier = "MIR:00000006"
-        resourceIdentifier = "MIR:00100019"
-    }
-
-    geneOntologyResolver(net.biomodels.jummp.core.miriam.GeneOntologyResolver) { bean ->
-        bean.autowire = "byName"
-        bean.scope = "prototype"
-        dataTypeIdentifier = "MIR:00000022"
-        resourceIdentifier = "MIR:00100012"
-    }
 
     indexingEventListener(net.biomodels.jummp.search.UpdatedRepositoryListener) { bean ->
         bean.autowire = "byName"
@@ -99,17 +79,6 @@ beans = {
     modelFileFormatConfig(net.biomodels.jummp.core.ModelFileFormatConfig) { bean ->
         bean.autowire = "byName"
         bean.singleton = true
-    }
-    ontologyLookupServiceResolver(net.biomodels.jummp.core.miriam.OntologyLookupResolver) { bean ->
-        bean.scope = "prototype"
-        supportedIdentifiers = [
-                "MIR:00000056": "MIR:00100084",
-                "MIR:00000067": "MIR:00100097",
-                "MIR:00100097": "MIR:00100143",
-                "MIR:00000111": "MIR:00100144",
-                "MIR:00000112": "MIR:00100145",
-                "MIR:00000002": "MIR:00100158"
-        ]
     }
 
     if (Environment.getCurrent() == Environment.DEVELOPMENT) {
@@ -143,4 +112,21 @@ beans = {
         }
     }
     grailsApplication.config.jummp.id.clear()
+
+    //Add annotation store domain classes (defined externally) to the domain model
+    //following: https://github.com/pongasoft/external-domain-classes-grails-plugin/blob/master/ExternalDomainClassesGrailsPlugin.groovy#L84
+    def packages = ["net.biomodels.jummp.annotationstore", "net.biomodels.jummp.core.model", "net.biomodels.jummp.model", "net.biomodels.jummp.plugins.security"] as String[]
+    BeanDefinitionRegistry simpleRegistry = new SimpleBeanDefinitionRegistry()
+    ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(simpleRegistry, false)
+    scanner.includeAnnotationConfig = false
+    scanner.addIncludeFilter(new AnnotationTypeFilter(Entity.class))
+    scanner.scan(packages)
+    simpleRegistry?.beanDefinitionNames?.each { String beanName ->
+        BeanDefinition bean = simpleRegistry.getBeanDefinition(beanName)
+        String beanClassName = bean.beanClassName
+        grailsApplication.addArtefact(DomainClassArtefactHandler.TYPE,
+                                      Class.forName(beanClassName,
+                                      true,
+                                      Thread.currentThread().contextClassLoader))
+    }
 }

@@ -47,7 +47,6 @@ import net.biomodels.jummp.core.ISbmlService
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.plugins.sbml.SbmlCache
 import org.apache.commons.io.FileUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -94,8 +93,6 @@ import org.sbml.jsbml.SpeciesReference
 import org.sbml.jsbml.Symbol
 import org.sbml.jsbml.Variable
 import org.springframework.beans.factory.InitializingBean
-import java.util.List
-import java.util.Map
 
 /**
  * Service class for handling Model files in the SBML format.
@@ -153,11 +150,10 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         SBMLDocument doc
         SBMLReader reader = new SBMLReader()
         try {
-        	System.out.println("READING FILE: "+model);
             doc = reader.readSBML(model)
         } catch (XMLStreamException e) {
-            e.printStackTrace();
-        	String error = "SBMLDocument could not be read from ${model.name}"
+            e.printStackTrace()
+            String error = "SBMLDocument could not be read from ${model.name}"
             log.error(error)
             errors.add(error)
             return null
@@ -177,7 +173,6 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
                 return null
             }
             if (CONSISTENCY_ERRORS > 0) {
-                boolean valid = true
                 // search for an error
                 for (SBMLError error in doc.getListOfErrors().validationErrors) {
                     if (error.isFatal() || error.isInternal() || error.isSystem() || error.isXML() || error.isError()) {
@@ -213,7 +208,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         final fileCount = files.size()
         //should work with any value above 2, but sometimes there are comments at the start of the file
         final int DEPTH_LIMIT = 15
-        BufferedReader reader
+        BufferedReader reader = null
         String currentLine
         final def p = Pattern.compile(".*<sbml xmlns=\"http://www\\.sbml\\.org/sbml/level.*\".*")
 
@@ -380,7 +375,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     @Profiled(tag="SbmlService.getMetaId")
     public String getMetaId(RevisionTransportCommand revision) {
-        return getFromCache(revision).model.metaId
+        return getFromCache(revision)?.model?.metaId
     }
 
     @Profiled(tag="SbmlService.getVersion")
@@ -402,164 +397,8 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
 
     @Profiled(tag="SbmlService.getNotes")
     public String getNotes(RevisionTransportCommand revision) {
-        // JSBML may return null - see https://sourceforge.net/tracker/?func=detail&aid=3300490&group_id=279608&atid=1186776
-        String notesString = getFromCache(revision).model.notesString
-        if (!notesString) {
-            return ""
-        } else {
-            return notesString
-        }
-    }
-    
-    @Profiled(tag="SbmlService.getSearchIndexingContent")
-    public Map<String, List<String>>  getSearchIndexingContent(RevisionTransportCommand revision) {
-    	Map<String, List<String>> index = new HashMap<String, LinkedList<String>>();
-    	
-    	// functions definition
-        getFunctionDefinitions(revision).each { funcDef ->
-        	System.out.println(funcDef);
-        }
-        /*
-    	long count = sbml_model.getListOfFunctionDefinitions().size();
-        for (int j=0; j<count; j++)
-        {
-            FunctionDefinition funcDef = sbml_model.getFunctionDefinition(j);
-            String funcDefNotes = null;
-            try
-            {
-				funcDefNotes = funcDef.getNotesString();
-			}
-            catch (XMLStreamException e)
-            {
-            	String desc = "XMLStreamException raised while retrieving the notes of model " + model.getId() + ", during processSBMLModelFields (FunctionDefinition).";
-    			logger.error(desc);
-    			logger.error(e.getMessage());
-    			MailFacade.reportIssue("Unable to retrieve model notes", desc, e.getMessage());
-			}
-            doc = processElementFields(doc, funcDef.getId(), funcDef.getName(), funcDefNotes);
-        }
-        
-        // units definition
-        count = sbml_model.getListOfUnitDefinitions().size();
-        for (int j=0; j<count; j++)
-        {
-            UnitDefinition unitDef = sbml_model.getListOfUnitDefinitions().get(j);
-            String unitDefNotes = null;
-            try
-            {
-				unitDefNotes = unitDef.getNotesString();
-			}
-            catch (XMLStreamException e)
-            {
-            	String desc = "XMLStreamException raised while retrieving the notes of model " + model.getId() + ", during processSBMLModelFields (ListOfUnitDefinitions).";
-    			logger.error(desc);
-    			logger.error(e.getMessage());
-    			MailFacade.reportIssue("Unable to retrieve model notes", desc, e.getMessage());
-			}
-            doc = processElementFields(doc, unitDef.getId(), unitDef.getName(), unitDefNotes);
-        }
-        
-        // compartments
-        count = sbml_model.getListOfCompartments().size();
-        for (int j=0; j<count; j++)
-        {
-            Compartment compartment = sbml_model.getListOfCompartments().get(j);
-            String compartmentNotes = null;
-			try
-			{
-				compartmentNotes = compartment.getNotesString();
-			}
-			catch (XMLStreamException e)
-			{
-				String desc = "XMLStreamException raised while retrieving the notes of model " + model.getId() + ", during processSBMLModelFields (ListOfCompartments).";
-    			logger.error(desc);
-    			logger.error(e.getMessage());
-    			MailFacade.reportIssue("Unable to retrieve model notes", desc, e.getMessage());
-			}
-            doc = processElementFields(doc, compartment.getId(), compartment.getName(), compartmentNotes);
-        }
-        
-        // species
-        count = sbml_model.getListOfSpecies().size();
-        for (int j=0; j<count; j++)
-        {
-            Species species = sbml_model.getListOfSpecies().get(j);
-            String speciesNotes = null;
-            try
-            {
-				speciesNotes = species.getNotesString();
-			}
-            catch (XMLStreamException e)
-            {
-            	String desc = "XMLStreamException raised while retrieving the notes of model " + model.getId() + ", during processSBMLModelFields (ListOfSpecies).";
-    			logger.error(desc);
-    			logger.error(e.getMessage());
-    			MailFacade.reportIssue("Unable to retrieve model notes", desc, e.getMessage());
-			}
-            doc = processElementFields(doc, species.getId(), species.getName(), speciesNotes);
-        }
-        
-        // parameters
-        count = sbml_model.getListOfParameters().size();
-        for (int j=0; j<count; j++)
-        {
-            Parameter para = sbml_model.getListOfParameters().get(j);
-            String paraNotes = null;
-            try
-            {
-				paraNotes = para.getNotesString();
-			}
-            catch (XMLStreamException e)
-            {
-            	String desc = "XMLStreamException raised while retrieving the notes of model " + model.getId() + ", during processSBMLModelFields (ListOfParameters).";
-    			logger.error(desc);
-    			logger.error(e.getMessage());
-    			MailFacade.reportIssue("Unable to retrieve model notes", desc, e.getMessage());
-			}
-            doc = processElementFields(doc, para.getId(), para.getName(), paraNotes);
-        }
-        
-        // reactions
-        count = sbml_model.getListOfReactions().size();
-        for (int j=0; j<count; j++)
-        {
-            Reaction react = sbml_model.getListOfReactions().get(j);
-            String reactNotes = null;
-            try
-            {
-				reactNotes = react.getNotesString();
-			}
-            catch (XMLStreamException e)
-            {
-            	String desc = "XMLStreamException raised while retrieving the notes of model " + model.getId() + ", during processSBMLModelFields (ListOfReactions).";
-    			logger.error(desc);
-    			logger.error(e.getMessage());
-    			MailFacade.reportIssue("Unable to retrieve model notes", desc, e.getMessage());
-			}
-            doc = processElementFields(doc, react.getId(), react.getName(), reactNotes);
-        }
-        
-        // events
-        count = sbml_model.getListOfEvents().size();
-        for (int j=0; j<count; j++)
-        {
-            Event event = sbml_model.getListOfEvents().get(j);
-            String eventNotes = null;
-            try
-            {
-				eventNotes = event.getNotesString();
-			}
-            catch (XMLStreamException e)
-            {
-            	String desc = "XMLStreamException raised while retrieving the notes of model " + model.getId() + ", during processSBMLModelFields (ListOfEvents).";
-    			logger.error(desc);
-    			logger.error(e.getMessage());
-    			MailFacade.reportIssue("Unable to retrieve model notes", desc, e.getMessage());
-			}
-            doc = processElementFields(doc, event.getId(), event.getName(), eventNotes);
-        }
-        */
-        return [:];
+        String notesString = getFromCache(revision)?.model?.notesString ?: ""
+        return notesString
     }
 
     @Profiled(tag="SbmlService.getAnnotations")
@@ -844,7 +683,6 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     private SBMLDocument getFromCache(RevisionTransportCommand revision) throws XMLStreamException {
         SBMLDocument document = cache.get(revision)
         if (document) {
-        	System.out.println("RETURNING: "+document);
             return document
         }
         //SBMLDocument document=null;
@@ -852,20 +690,25 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         //List<RepositoryFileTransportCommand> files = grailsApplication.mainContext.getBean("modelDelegateService").retrieveModelFiles(revision)
         List<RepositoryFileTransportCommand> files=revision.files
         files = files.findAll { it.mainFile }
-        
+
         files.each {
+            def bis
             try {
-            	File file=new File(it.path)
-                document=(new SBMLReader()).readSBMLFromStream(new ByteArrayInputStream(file.getBytes()));
-            	if (document) {
+                File file=new File(it.path)
+                byte[] fileBytes = file.getBytes()
+                bis = new ByteArrayInputStream(fileBytes)
+                def reader = new SBMLReader()
+                document = reader.readSBML(file)
+                if (document) {
                   cache.put(revision, document)
                   //break
                 }
             } catch(Exception ignore) {
-            	ignore.printStackTrace();
+                ignore.printStackTrace();
+            } finally {
+                bis?.close()
             }
         }
-        System.out.println("RETURNING: "+document);
         return document
     }
 
@@ -1075,7 +918,7 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     }
 
     private File fetchMainFileFromRevision(RevisionTransportCommand revision) {
-        final String mainFileLocation = revision?.files?.find {it.mainFile}.path
+        final String mainFileLocation = revision?.files?.find {it.mainFile}?.path
         if (!mainFileLocation) {
             log.error "The main file of revision ${revision.properties} is undefined."
             return null

@@ -1,32 +1,32 @@
 /**
-* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
-* Deutsches Krebsforschungszentrum (DKFZ)
-*
-* This file is part of Jummp.
-*
-* Jummp is free software; you can redistribute it and/or modify it under the
-* terms of the GNU Affero General Public License as published by the Free
-* Software Foundation; either version 3 of the License, or (at your option) any
-* later version.
-*
-* Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
-* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-* A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
-* details.
-*
-* You should have received a copy of the GNU Affero General Public License along
-* with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
-*
-* Additional permission under GNU Affero GPL version 3 section 7
-*
-* If you modify Jummp, or any covered work, by linking or combining it with
-* Apache Commons, JUnit (or a modified version of that library), containing parts
-* covered by the terms of Common Public License, Apache License v2.0, the licensors of this
-* Program grant you additional permission to convey the resulting work.
-* {Corresponding Source for a non-source form of such a combination shall
-* include the source code for the parts of Apache Commons, JUnit used as well as
-* that of the covered work.}
-**/
+ * Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
+ * Deutsches Krebsforschungszentrum (DKFZ)
+ *
+ * This file is part of Jummp.
+ *
+ * Jummp is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along
+ * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
+ *
+ * Additional permission under GNU Affero GPL version 3 section 7
+ *
+ * If you modify Jummp, or any covered work, by linking or combining it with
+ * Apache Commons, JUnit (or a modified version of that library), containing parts
+ * covered by the terms of Common Public License, Apache License v2.0, the licensors of this
+ * Program grant you additional permission to convey the resulting work.
+ * {Corresponding Source for a non-source form of such a combination shall
+ * include the source code for the parts of Apache Commons, JUnit used as well as
+ * that of the covered work.}
+ **/
 
 package net.biomodels.jummp.core
 
@@ -68,25 +68,25 @@ class SearchTests extends JummpIntegrationTest {
                 smallModel("importModel.xml", nameTag, descriptionTag).absolutePath,
                 mainFile: true, description: "")
         Model upped = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
-                new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
+                new ModelFormatTransportCommand(identifier: "PharmML"), comment: "test", name: "Test"))
         //wait a bit for the model to be indexed
-        Thread.sleep(500)
+        Thread.sleep(25000)
         // Search for the model using the name and description, and ensure it's the same we uploaded
         ModelTransportCommand result = searchForModel(nameTag)
         assertNotNull result
-        assertSame(upped.id, result.id)
+        assertEquals(upped.id, result.id)
         result = searchForModel(descriptionTag)
         assertNotNull result
-        assertSame(upped.id, result.id)
+        assertEquals(upped.id, result.id)
         result = searchForModel(upped.submissionId)
         assertNotNull result
-        assertSame(upped.id, result.id)
+        assertEquals(upped.id, result.id)
         result = searchForModel("submissionId:${upped.submissionId}")
         assertNotNull result
-        assertSame(upped.id, result.id)
-        result = searchForModel("SBML")
+        assertEquals(upped.id, result.id)
+        result = searchForModel("pharmml")
         assertNotNull result
-        assertSame(upped.id, result.id)
+        assertEquals(upped.id, result.id)
     }
 
     @Before
@@ -96,7 +96,7 @@ class SearchTests extends JummpIntegrationTest {
         new File("target/vcs/exchange/").mkdirs()
         fileSystemService.currentModelContainer = container.getCanonicalPath()
         fileSystemService.root = container.getParentFile()
-        modelService.vcsService.currentModelContainer = container.getCanonicalPath()
+        modelService.vcsService.modelContainerRoot = fileSystemService.root
         createUserAndRoles()
         assertNotNull solrServerHolder.server
     }
@@ -114,7 +114,7 @@ class SearchTests extends JummpIntegrationTest {
     }
 
     ModelTransportCommand searchForModel(String query) {
-        Collection<Model> mods = searchService.searchModels(query)
+        Collection<ModelTransportCommand> mods = searchService.searchModels(query)
         if (mods.isEmpty()) {
             return null
         }
@@ -123,29 +123,7 @@ class SearchTests extends JummpIntegrationTest {
 
     // Convenience functions follow..
     private File smallModel(String filename, String id, String desc) {
-        return getFileForTest(filename,
-"""<?xml version="1.0" encoding="UTF-8"?>
-<sbml xmlns="http://www.sbml.org/sbml/level1" level="1" version="1">
-<model name="${id}">"
-    <notes>${desc}</notes>
-    <listOfCompartments>
-      <compartment name="x"/>
-    </listOfCompartments>
-    <listOfSpecies>
-      <specie name="y" compartment="x" initialAmount="1"/>
-    </listOfSpecies>
-    <listOfReactions>
-      <reaction name="r">
-        <listOfReactants>
-          <specieReference specie="y"/>
-        </listOfReactants>
-        <listOfProducts>
-          <specieReference specie="y"/>
-        </listOfProducts>
-      </reaction>
-    </listOfReactions>
-  </model>
-</sbml>""")
+        return new File("test/files/test.xml")
     }
 
     private File getFileForTest(String filename, String text) {

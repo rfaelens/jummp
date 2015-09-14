@@ -1173,4 +1173,16 @@ databaseChangeLog = {
 	include file: 'trackNotificationSeenByUser.groovy'
 
 	include file: 'removeFromFieldFromNotification.groovy'
+
+    include file: '20150409dropMiriamAnnotationTables.groovy'
+
+    include file: '20150522modelFirstPublishedDate.groovy'
+
+    include file: '20150608_resourceReference.groovy'
+
+    include file: '20150608_elementAnnotations.groovy'
+
+    include file: '20150608_make_wcm_space_alias_uri_nullable.groovy'
+
+    include file: '20150610-DropResourceReferenceConstraints.groovy'
 }

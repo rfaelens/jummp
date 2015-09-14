@@ -141,16 +141,22 @@ class JummpIntegrationTest {
         }
         ensureRoleExists("ROLE_USER")
         Role userRole = Role.findByAuthority("ROLE_USER")
-        UserRole.create(user, userRole, false)
-        UserRole.create(user2, userRole, false)
-        UserRole.create(admin, userRole, false)
-        UserRole.create(curator, userRole, false)
+        createUserRoleIfNeeded(user, userRole)
+        createUserRoleIfNeeded(user2, userRole)
+        createUserRoleIfNeeded(admin, userRole)
+        createUserRoleIfNeeded(curator, userRole)
         ensureRoleExists("ROLE_ADMIN")
         Role adminRole = Role.findByAuthority("ROLE_ADMIN")
-        UserRole.create(admin, adminRole, false)
+        createUserRoleIfNeeded(admin, adminRole)
         ensureRoleExists("ROLE_CURATOR")
         Role curatorRole = Role.findByAuthority("ROLE_CURATOR")
-        UserRole.create(curator, curatorRole, false)
+        createUserRoleIfNeeded(curator, curatorRole)
+    }
+    
+    private void createUserRoleIfNeeded(User user, Role role) {
+    	if (!UserRole.findByUserAndRole(user, role)) {
+    		UserRole.create(user, role, false)
+    	}
     }
 
     private def ensureRoleExists(String _authority) {

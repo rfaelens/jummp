@@ -18,7 +18,7 @@
 --%>
 
 <nav>
-<ul class="grid_24" id="local-nav">
+<ul class="grid_24 main-menu" id="local-nav">
     <li <g:if test="${g.pageProperty(name:'page.browse')?.length()}"> class="active" </g:if>>
         <a href="${g.createLink(controller: 'search', action: 'list')}">Browse</a>
     </li>
@@ -41,16 +41,22 @@
        whichever one will show up last...
        For example: -->
     <sec:ifLoggedIn>
-        <li class="functional first">
-            <a href="${grailsApplication.config.grails.serverURL}/user" class="icon icon-functional" data-icon="5">
-                ${sec.username()}'s Profile
-            </a>
-        </li>
         <li class="functional last">
             <a href="/jummp/logout" class="icon icon-functional" data-icon="l">
                 <g:message code="jummp.main.logout"/>
             </a>
         </li>
+        <li class="functional first">
+            <a href="${grailsApplication.config.grails.serverURL}/user" class="icon icon-functional" data-icon="5">
+                ${sec.username()}'s Profile
+            </a>
+        </li>
+        <li class="functional" id="notificationCount">
+      		<a title="View ${sec.username()}'s Notifications" href='<g:createLink controller="notification" action="list"/>'>
+                <img width="20" height="auto" title="notifications" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Generic/Generic%20icons/email.png"/>
+      			<span id="notificationLink" style="display: none;"></span>
+      		</a>
+      	</li>
     </sec:ifLoggedIn>
     <sec:ifNotLoggedIn>
         <li class="functional first">

@@ -36,9 +36,9 @@ package net.biomodels.jummp.plugins.pharmml
 
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.PharmML
-import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
+import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 
 /**
  * Controller for handling Model files in the PharmML format.
@@ -60,7 +60,7 @@ class PharmMlController {
             model["functionDefs"] = pharmMlService.getFunctionDefinitions(dom, VERSION)
             model["version"] = VERSION
 
-            ModelDefinitionType modelDefinition = pharmMlService.getModelDefinition(dom, VERSION)
+            ModelDefinition modelDefinition = pharmMlService.getModelDefinition(dom, VERSION)
             model["modelDefinition"] = modelDefinition
             model["structuralModel"] = pharmMlService.getStructuralModel(modelDefinition, VERSION)
             model["variabilityModel"] = pharmMlService.getVariabilityModel(modelDefinition, VERSION)
@@ -68,13 +68,13 @@ class PharmMlController {
             model["parameterModel"] = pharmMlService.getParameterModel(modelDefinition, VERSION)
             model["observationModel"] = pharmMlService.getObservationModel(modelDefinition, VERSION)
 
-            TrialDesignType design = pharmMlService.getTrialDesign(dom, VERSION)
+            TrialDesign design = pharmMlService.getTrialDesign(dom, VERSION)
             model["trialDesign"] = design
             model["structure"] = pharmMlService.getTrialDesignStructure(design, VERSION)
             model["population"] = pharmMlService.getPopulation(design, VERSION)
             model["dosing"] = pharmMlService.getIndividualDosing(design, VERSION)
 
-            ModellingStepsType steps = pharmMlService.getModellingSteps(dom, VERSION)
+            ModellingSteps steps = pharmMlService.getModellingSteps(dom, VERSION)
             model["estSteps"] = pharmMlService.getEstimationSteps(steps, VERSION)
             model["simSteps"] = pharmMlService.getSimulationSteps(steps, VERSION)
             model["stepDeps"] = pharmMlService.getStepDependencies(steps, VERSION)

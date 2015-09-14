@@ -34,6 +34,9 @@
 
 package net.biomodels.jummp.plugins
 
+import com.ctc.wstx.api.ReaderConfig
+import com.ctc.wstx.stax.WstxInputFactory
+import net.biomodels.jummp.core.adapters.DomainAdapter 
 import net.biomodels.jummp.core.JummpIntegrationTest
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -41,7 +44,6 @@ import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
-import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.git.GitManagerFactory
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
@@ -50,8 +52,8 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.junit.*
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
+import javax.xml.stream.XMLInputFactory
 import static org.junit.Assert.*
-import net.biomodels.jummp.plugins.git.GitManagerFactory
 /**
  * Test for SbmlService parts which require a running core to retrieve Models.
  */
@@ -68,20 +70,9 @@ class SbmlServiceTests extends JummpIntegrationTest {
     @Before
     void setUp() {
         createUserAndRoles()
-        //setupVcs()
-        fileSystemService.root = new File("target/sbml/git/").getCanonicalFile()
-        String containerPath = fileSystemService.root.absolutePath + "/ttt/"
-        fileSystemService.currentModelContainer = containerPath
+        setupVcs()
         // disable validation as it is broken
         grailsApplication.config.jummp.plugins.sbml.validation = false
-        GitManagerFactory gitService = new GitManagerFactory()
-        gitService.grailsApplication = grailsApplication
-        grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
-        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
-        grailsApplication.config.jummp.plugins.sbml.validation = true
-        modelService.vcsService.currentModelContainer = containerPath
-        modelService.vcsService.vcsManager = gitService.getInstance()
     }
 
     @After
@@ -124,6 +115,38 @@ class SbmlServiceTests extends JummpIntegrationTest {
         assertFalse(sbmlService.areFilesThisFormat([properSbml, unknown]))
     }
 
+    /*
+     * Ensure both XMLInputFactory.newInstance() and new WstxInputFactory() yield a factory
+     * that does not report whitespaces in prologue.
+     *
+     * The setting WstxInputFactory.CFG_REPORT_PROLOG_WS is considered off if
+     *     factory.getConfig().getConfigFlags() & WstxInputFactory.CFG_REPORT_PROLOG_WS == 0
+     * To switch off this setting manually, one would use
+     *     factory.setProperty(XMLInputFactory2.P_REPORT_PROLOG_WHITESPACE, Boolean.FALSE)
+     *
+     * Having this setting enabled messes up the jsbml parsing algorithm.
+     */
+    @Test
+    void checkWstxReaderConfiguration() {
+        ReaderConfig defaultConfig = ReaderConfig.createFullDefaults()
+        int defaultFlags = defaultConfig.getConfigFlags()
+
+        XMLInputFactory genericFactory = XMLInputFactory.newInstance()
+        assertTrue(genericFactory instanceof WstxInputFactory)
+        ReaderConfig cfg = genericFactory.getConfig()
+        int flags = cfg.getConfigFlags()
+        int propertyCheck = flags & WstxInputFactory.CFG_REPORT_PROLOG_WS
+        assertEquals(0, propertyCheck)
+        assertEquals(defaultFlags, flags)
+
+        WstxInputFactory factory = new WstxInputFactory()
+        cfg = factory.getConfig()
+        flags = cfg.getConfigFlags()
+        propertyCheck = flags & WstxInputFactory.CFG_REPORT_PROLOG_WS
+        assertEquals(0, propertyCheck)
+        assertEquals(defaultFlags, flags)
+    }
+
 
     @Test
     void testLevelAndVersion() {
@@ -132,13 +155,16 @@ class SbmlServiceTests extends JummpIntegrationTest {
                     description: "", mainFile: true)
         Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
-        RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
+        RevisionTransportCommand rev = DomainAdapter
+                                        .getAdapter(modelService
+                                                    .getLatestRevision(model))
+                                                    .toCommandObject()
         assertEquals(1, sbmlService.getLevel(rev))
         assertEquals(1, sbmlService.getVersion(rev))
         assertEquals("L1V1", sbmlService.getFormatVersion(rev))
         rf.path = "test/files/BIOMD0000000272.xml"
-        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf,
-                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L2V4"), "test").toCommandObject()
+        RevisionTransportCommand rev2 = DomainAdapter.getAdapter(modelService.addRevisionAsFile(model, rf,
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L2V4"),"test")).toCommandObject()
         assertEquals(2, sbmlService.getLevel(rev2))
         assertEquals(4, sbmlService.getVersion(rev2))
         assertEquals("L2V4", sbmlService.getFormatVersion(rev2))
@@ -150,11 +176,13 @@ class SbmlServiceTests extends JummpIntegrationTest {
         def rf = new RepositoryFileTransportCommand(path: smallModel("BIOMD0000000272.xml"), mainFile:true, description: "")
         Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format:
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
-        RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
+        RevisionTransportCommand rev = DomainAdapter
+                                        .getAdapter(modelService.getLatestRevision(model))
+                                        .toCommandObject()
         assertEquals("", sbmlService.getMetaId(rev))
         rf.path = "test/files/BIOMD0000000272.xml"
-        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf,
-                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L2V4"), "test").toCommandObject()
+        RevisionTransportCommand rev2 = DomainAdapter.getAdapter(modelService.addRevisionAsFile(model, rf,
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L2V4"), "test")).toCommandObject()
         assertEquals("_688624", sbmlService.getMetaId(rev2))
     }
 
@@ -174,7 +202,7 @@ class SbmlServiceTests extends JummpIntegrationTest {
         def rf = new RepositoryFileTransportCommand(path: smallModel("testModelNotes.xml").absolutePath, mainFile:true, description: "")
         Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(format: 
                 new ModelFormatTransportCommand(identifier: "SBML"), comment: "test", name: "Test"))
-        RevisionTransportCommand rev = modelService.getLatestRevision(model).toCommandObject()
+        RevisionTransportCommand rev = DomainAdapter.getAdapter(modelService.getLatestRevision(model)).toCommandObject()
         assertEquals("", sbmlService.getNotes(rev))
 
         File modelWithNotes = getFileForTest("testModelNotes.xml",'''<?xml version="1.0" encoding="UTF-8"?>
@@ -200,8 +228,8 @@ class SbmlServiceTests extends JummpIntegrationTest {
   </model>
 </sbml>''')
         rf.path = modelWithNotes.absolutePath
-        RevisionTransportCommand rev2 = modelService.addRevisionAsFile(model, rf, 
-                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L1V1"), "test").toCommandObject()
+        RevisionTransportCommand rev2 = DomainAdapter.getAdapter(modelService.addRevisionAsFile(model, rf, 
+                ModelFormat.findByIdentifierAndFormatVersion("SBML", "L1V1"), "test")).toCommandObject()
         String notes  = sbmlService.getNotes(rev2);
         assertTrue(notes.contains("<notes>"));
         assertTrue(notes.contains("http://www.w3.org/1999/xhtml"));
@@ -211,16 +239,11 @@ class SbmlServiceTests extends JummpIntegrationTest {
     }
 
     private void setupVcs() {
-        // setup VCS
-        File clone = new File("target/sbml/git/")
-        clone.mkdirs()
-        FileRepositoryBuilder builder = new FileRepositoryBuilder()
-        Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir(clone) // scan up the file system tree
-        .build()
-        Git git = new Git(repository)
-        git.init().setDirectory(clone).call()
+        fileSystemService.root = new File("target/sbml/git/").getCanonicalFile()
+        fileSystemService.root.mkdirs()
+        String containerPath = fileSystemService.root.absolutePath + "/sss/"
+        fileSystemService.currentModelContainer = containerPath
+        modelService.vcsService.modelContainerRoot = fileSystemService.root
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true

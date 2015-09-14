@@ -34,7 +34,7 @@
 
 package net.biomodels.jummp.plugins.configuration
 
-import grails.test.*
+import grails.test.mixin.TestFor
 import org.apache.commons.io.FileUtils
 import org.junit.After
 import org.junit.Before

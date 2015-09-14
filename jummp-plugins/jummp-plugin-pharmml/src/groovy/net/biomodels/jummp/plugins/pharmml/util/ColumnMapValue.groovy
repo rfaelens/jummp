@@ -31,7 +31,7 @@
 
 package net.biomodels.jummp.plugins.pharmml.util
 
-import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
+import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
 import eu.ddmore.libpharmml.dom.dataset.CategoryMapping
 import org.perf4j.aop.Profiled
 
@@ -42,7 +42,7 @@ class ColumnMapValue {
     protected ColumnMapValue() {
     }
 
-    public ColumnMapValue(SymbolRefType symbRef, List<CategoryMapping> _categoryMaps) {
+    public ColumnMapValue(SymbolRef symbRef, List<CategoryMapping> _categoryMaps) {
         if (!symbRef) {
             throw new IllegalArgumentException("Symbol reference for column mapping undefined.")
         }

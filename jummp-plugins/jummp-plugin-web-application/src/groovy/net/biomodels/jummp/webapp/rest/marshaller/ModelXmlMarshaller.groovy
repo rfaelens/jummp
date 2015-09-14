@@ -66,7 +66,7 @@ class ModelXmlMarshaller implements ObjectMarshaller<XML> {
             }
         }
 
-        ['name', 'description', 'publication', "format", "files", "history" ].each { String f ->
+        ['name', 'description', 'firstPublished', 'publication', "format", "files", "history" ].each { String f ->
             final def VALUE = M."$f"
             if (VALUE) {
                 converter.startNode f

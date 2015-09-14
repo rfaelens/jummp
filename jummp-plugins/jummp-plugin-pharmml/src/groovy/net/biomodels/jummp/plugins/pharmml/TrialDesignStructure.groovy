@@ -30,10 +30,10 @@
 
 package net.biomodels.jummp.plugins.pharmml
 
-import eu.ddmore.libpharmml.dom.trialdesign.ArmDefnType
-import eu.ddmore.libpharmml.dom.trialdesign.CellDefnType
-import eu.ddmore.libpharmml.dom.trialdesign.EpochDefnType
-import eu.ddmore.libpharmml.dom.trialdesign.SegmentDefnType
+import eu.ddmore.libpharmml.dom.trialdesign.ArmDefinition
+import eu.ddmore.libpharmml.dom.trialdesign.CellDefinition
+import eu.ddmore.libpharmml.dom.trialdesign.EpochDefinition
+import eu.ddmore.libpharmml.dom.trialdesign.SegmentDefinition
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -43,10 +43,10 @@ import org.apache.commons.logging.LogFactory
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 public class TrialDesignStructure {
-    private List<ArmDefnType>           arms
-    private List<EpochDefnType>         epochs
-    private List<CellDefnType>          cells
-    private List<SegmentDefnType>       segments
+    private List<ArmDefinition>           arms
+    private List<EpochDefinition>         epochs
+    private List<CellDefinition>          cells
+    private List<SegmentDefinition>       segments
     private Map<String, List<String>>   trialDesignStructure // [epochRef_armRef : segmentRef]
     private def cmp = [compare: { a,b -> a <=> b } ] as Comparator
 
@@ -78,7 +78,7 @@ public class TrialDesignStructure {
         allCellsDefined()
     }
 
-    public List<SegmentDefnType> findSegmentsByEpoch(String epoch) {
+    public List<SegmentDefinition> findSegmentsByEpoch(String epoch) {
         if (!epoch) {
             log.error("Who is interested in the treatments over an undefined epoch?")
             return []
@@ -95,7 +95,7 @@ public class TrialDesignStructure {
         return findMatchingReferences(epoch)
     }
 
-    public List<SegmentDefnType> findSegmentsByArm(String arm) {
+    public List<SegmentDefinition> findSegmentsByArm(String arm) {
         if (!arm) {
             log.error("Who is interested in the treatment over an undefined arm?")
             return []
@@ -140,7 +140,7 @@ public class TrialDesignStructure {
         return trialDesignStructure.findAll{it.key.contains(elem)}.values().flatten()
     }
 
-    private List<SegmentDefnType> linkRefsToSegments(List segRefs) {
+    private List<SegmentDefinition> linkRefsToSegments(List segRefs) {
         return segRefs.collect { r -> segments.find { r.equals(it.oid) } }
     }
 }

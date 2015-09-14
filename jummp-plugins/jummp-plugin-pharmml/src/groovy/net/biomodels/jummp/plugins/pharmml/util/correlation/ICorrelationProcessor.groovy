@@ -31,7 +31,7 @@
 
 package net.biomodels.jummp.plugins.pharmml.util.correlation
 
-import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
+import eu.ddmore.libpharmml.dom.modeldefn.Correlation
 
 /**
  * Strategy interface for handling correlations between random effects.
@@ -44,6 +44,6 @@ interface ICorrelationProcessor {
      * @param randomEffectsPerLevel
      * @return a list of correlation matrices that can be easily rendered.
      */
-    List<CorrelationMatrix> convertToStringMatrix(List<CorrelationType> correlations,
+    List<CorrelationMatrix> convertToStringMatrix(List<Correlation> correlations,
                 Map<String, List<String>> randomEffectsPerLevel)
 }

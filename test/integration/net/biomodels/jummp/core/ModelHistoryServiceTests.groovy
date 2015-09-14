@@ -192,13 +192,12 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
         history = modelHistoryService.history()
         assertEquals(10, history.size())
         assertEquals(currentModel.id, history.first().id)
-        
+
         assertEquals(currentModel.id, modelHistoryService.lastAccessedModel().id)
         assertEquals(Revision.findByName("model2").model.id, history.last().id)
         history.each {
-			assertTrue(model.id != it.id)
+            assertTrue(model.id != it.id)
         }
-        
 
         // turn the feature off again
         grailsApplication.config.jummp.model.history.maxElements = 0
@@ -212,18 +211,20 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
 
     // TODO: remove this copy from JmsAdapterServiceTest
     private void setupVcs() {
-        File root = new File("target/vcs/git")
+        File root = new File("target/vcs/git/hhh")
         root.mkdirs()
-        def fss = modelService.fileSystemService
-        String containerPath = root.absolutePath + "/hhh/"
-        fss.currentModelContainer = containerPath
-        modelService.vcsService.currentModelContainer = containerPath
+        String containerPath = root.absolutePath
+        modelService.fileSystemService.root = root.parentFile
+        File exchangeDir = new File("target/vcs/exchange")
+        exchangeDir.mkdirs()
+        assertTrue exchangeDir.exists()
+        grailsApplication.config.jummp.vcs.workingDirectory = root.parent
+        grailsApplication.config.jummp.vcs.exchangeDirectory = exchangeDir.path
+        modelService.fileSystemService.currentModelContainer = containerPath
+        modelService.vcsService.modelContainerRoot = root.parentFile
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.workingDirectory = "target/vcs/git"
-        grailsApplication.config.jummp.vcs.exchangeDirectory = "target/vcs/exchange"
-        assertTrue(new File("target/vcs/exchange/").mkdirs())
         modelService.vcsService.vcsManager = gitService.getInstance()
         assertTrue(modelService.vcsService.isValid())
     }
@@ -257,7 +258,7 @@ class ModelHistoryServiceTests extends JummpIntegrationTest {
   </model>
 </sbml>'''
         File file = File.createTempFile("jummpJms", null)
-        def rf = new RepositoryFileTransportCommand(path: file.absolutePath, description: "")
+        def rf = new RepositoryFileTransportCommand(path: file.absolutePath, description: "", mainFile: true)
         file.append(modelSource)
         Model model = modelService.uploadModelAsFile(rf, new ModelTransportCommand(comment: "Test Comment",
                 name: "model1", format: new ModelFormatTransportCommand(identifier: "SBML"),

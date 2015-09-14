@@ -34,8 +34,6 @@
 
 package net.biomodels.jummp.plugins.pharmml
 
-import java.nio.file.Files
-import java.nio.file.Path
 import net.biomodels.jummp.core.RunnableModelFormatDetector
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import org.apache.commons.logging.Log

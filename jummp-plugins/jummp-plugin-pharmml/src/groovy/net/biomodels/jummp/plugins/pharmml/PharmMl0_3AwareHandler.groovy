@@ -33,14 +33,14 @@ package net.biomodels.jummp.plugins.pharmml
 
 import eu.ddmore.libpharmml.*
 import eu.ddmore.libpharmml.dom.PharmML
-import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinitionType
-import eu.ddmore.libpharmml.dom.modellingsteps.EstimationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingStepsType
-import eu.ddmore.libpharmml.dom.modellingsteps.SimulationStepType
-import eu.ddmore.libpharmml.dom.modellingsteps.StepDependencyType
-import eu.ddmore.libpharmml.dom.trialdesign.PopulationType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialDesignType
-import eu.ddmore.libpharmml.dom.trialdesign.TrialStructureType
+import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
+import eu.ddmore.libpharmml.dom.modellingsteps.Estimation
+import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
+import eu.ddmore.libpharmml.dom.modellingsteps.Simulation
+import eu.ddmore.libpharmml.dom.modellingsteps.StepDependency
+import eu.ddmore.libpharmml.dom.trialdesign.Population
+import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
+import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
 import eu.ddmore.libpharmml.impl.*
 import net.biomodels.jummp.core.IPharmMlService
 import org.apache.commons.logging.Log
@@ -84,83 +84,83 @@ class PharmMl0_3AwareHandler extends AbstractPharmMlHandler {
 
     @Profiled(tag="pharmMl0_3AwareHandler.getFunctionDefinitions")
     List getFunctionDefinitions(PharmML dom) {
-        return dom?.functionDefinition
+        return dom?.listOfFunctionDefinition
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getModelDefinition")
-    ModelDefinitionType getModelDefinition(PharmML dom) {
-        return dom.getModelDefinition()
+    ModelDefinition getModelDefinition(PharmML dom) {
+        return dom.modelDefinition
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getCovariateModel")
-    List getCovariateModel(ModelDefinitionType definition) {
-        return definition?.getCovariateModel()
+    List getCovariateModel(ModelDefinition definition) {
+        return definition?.listOfCovariateModel
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getVariabilityLevel")
-    List getVariabilityModel(ModelDefinitionType definition) {
-        return definition?.getVariabilityModel()
+    List getVariabilityModel(ModelDefinition definition) {
+        return definition?.listOfVariabilityModel
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getParameterModel")
-    List getParameterModel(ModelDefinitionType definition) {
-        return definition?.getParameterModel()
+    List getParameterModel(ModelDefinition definition) {
+        return definition?.listOfParameterModel
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getStructuralModel")
-    List getStructuralModel(ModelDefinitionType definition) {
-        return definition?.getStructuralModel()
+    List getStructuralModel(ModelDefinition definition) {
+        return definition?.listOfStructuralModel
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getObservationModel")
-    List getObservationModel(ModelDefinitionType definition) {
-        return definition?.getObservationModel()
+    List getObservationModel(ModelDefinition definition) {
+        return definition?.listOfObservationModel
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getTrialDesign")
-    TrialDesignType getTrialDesign(PharmML dom) {
+    TrialDesign getTrialDesign(PharmML dom) {
         return dom?.trialDesign
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getTrialDesignStructure")
-    TrialStructureType getTrialDesignStructure(TrialDesignType design) {
+    TrialStructure getTrialDesignStructure(TrialDesign design) {
         return design?.structure
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getIndividualDosing")
-    List getIndividualDosing(TrialDesignType design) {
+    List getIndividualDosing(TrialDesign design) {
         return design?.individualDosing
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getPopulation")
-    PopulationType getPopulation(TrialDesignType design) {
+    Population getPopulation(TrialDesign design) {
         return design?.population
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getModellingSteps")
-    ModellingStepsType getModellingSteps(PharmML dom) {
+    ModellingSteps getModellingSteps(PharmML dom) {
         return dom?.modellingSteps
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getCommonModellingSteps")
-    List getCommonModellingSteps(ModellingStepsType steps) {
+    List getCommonModellingSteps(ModellingSteps steps) {
         return steps?.commonModellingStep?.value ?: []
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getSimulationSteps")
-    List getSimulationSteps(ModellingStepsType steps) {
+    List getSimulationSteps(ModellingSteps steps) {
         def allSteps = getCommonModellingSteps(steps)
-        return allSteps ? allSteps.findAll {it instanceof SimulationStepType} : []
+        return allSteps ? allSteps.findAll {it instanceof Simulation} : []
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getEstimationSteps")
-    List getEstimationSteps(ModellingStepsType steps) {
+    List getEstimationSteps(ModellingSteps steps) {
         def allSteps = getCommonModellingSteps(steps)
-        return allSteps ? allSteps.findAll {it instanceof EstimationStepType} : []
+        return allSteps ? allSteps.findAll {it instanceof Estimation} : []
     }
 
     @Profiled(tag="pharmMl0_3AwareHandler.getStepDependencies")
-    StepDependencyType getStepDependencies(ModellingStepsType steps) {
+    StepDependency getStepDependencies(ModellingSteps steps) {
         return steps?.stepDependencies
     }
 }

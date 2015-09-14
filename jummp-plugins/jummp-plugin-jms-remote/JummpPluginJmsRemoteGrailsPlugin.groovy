@@ -39,7 +39,6 @@ import net.biomodels.jummp.jms.remote.RemoteJummpApplicationAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteMiriamAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteModelAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteSbmlAdapterJmsImpl
-import net.biomodels.jummp.jms.remote.RemoteGeneOntologyTreeAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteUserAdapterJmsImpl
 import net.biomodels.jummp.jms.remote.RemoteModelHistoryAdapterJmsImpl
 
@@ -90,9 +89,6 @@ Brief description of the plugin.
                 jmsSynchronousService = ref("jmsSynchronousService")
             }
             miriamJmsRemoteAdapter(RemoteMiriamAdapterJmsImpl) {
-                jmsSynchronousService = ref("jmsSynchronousService")
-            }
-            geneOntologyTreeJmsRemoteAdapter(RemoteGeneOntologyTreeAdapterJmsImpl) {
                 jmsSynchronousService = ref("jmsSynchronousService")
             }
             diffDataJmsRemoteAdapter(RemoteDiffDataAdapterJmsImpl) {

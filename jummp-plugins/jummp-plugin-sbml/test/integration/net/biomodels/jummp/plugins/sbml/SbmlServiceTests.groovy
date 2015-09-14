@@ -28,29 +28,30 @@
 * that of the covered work.}
 **/
 
-
-
-
-
 package net.biomodels.jummp.plugins.sbml
 
-import grails.test.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import org.apache.commons.io.FileUtils
+import org.junit.Test
+import org.junit.After
+import static org.junit.Assert.*
 
-class SbmlServiceTests extends GrailsUnitTestCase {
+@TestMixin(IntegrationTestMixin)
+class SbmlServiceTests {
     def sbmlService
     def grailsApplication
-    protected void setUp() {
-        super.setUp()
-    }
 
-    protected void tearDown() {
-        super.tearDown()
+    @After
+    void tearDown() {
         // trying to delete the directory causes a crash. Seems like jsbml does not close the files!
         grailsApplication.config.jummp.plugins.sbml.validate = false
     }
 
+    @Test
     void testValidate() {
+        assertNotNull grailsApplication
+        assertNotNull sbmlService
         grailsApplication.config.jummp.plugins.sbml.validate = true
         // we do not want to test whether the library works correctly
         // we only need to check that an invalid file is marked as invalid and a valid file is marked as valid.

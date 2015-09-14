@@ -24,21 +24,27 @@ import grails.async.Promise
 import grails.plugins.springsecurity.Secured
 import groovy.json.JsonBuilder
 import java.util.concurrent.atomic.AtomicReference
+import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
+import org.apache.commons.lang.StringUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.solr.client.solrj.SolrQuery
 import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.SolrDocumentList
 import org.apache.solr.common.SolrInputDocument
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.acls.domain.BasePermission
+import org.apache.solr.client.solrj.SolrServer
 
 /**
  * @short Singleton-scoped facade for interacting with a Solr instance.
@@ -48,9 +54,14 @@ import org.springframework.security.core.context.SecurityContextHolder
  *
  * @author Raza Ali, raza.ali@ebi.ac.uk
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @date   20141121
+ * @date   20150611
  */
 class SearchService {
+    static final String[] SOLR_SPECIAL_CHARACTERS = ["+", "-", "&", "|", "!", "(", ")",
+            "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "\\"] as String[]
+    static final String[] SOLR_REPLACEMENT_CHARACTERS = ["\\+", "\\-", "\\&", "\\|",
+            "\\!", "\\(", "\\)", "\\{", "\\}", "\\[", "\\]", "\\^", "\\\"", "\\~", "\\*",
+            "\\?", "\\:", "\\\\"] as String[]
     /**
      * The class logger.
      */
@@ -72,10 +83,6 @@ class SearchService {
      */
     def modelService
     /**
-     * Dependency injection of ModelDelegateService.
-     */
-    def modelDelegateService
-    /**
      * Dependency injection of SpringSecurityService.
      */
     def springSecurityService
@@ -84,9 +91,26 @@ class SearchService {
      */
     def  solrServerHolder
     /*
-    * Dependency injection of grailsApplication
-    */
+     * Dependency injection of grailsApplication
+     */
     def grailsApplication
+    /*
+     * Dependency injection of the configuration service
+     */
+    def configurationService
+    /**
+     * Dependency injection of miriamService.
+     */
+    def miriamService
+    /**
+     * Dependency injection of aclUtilService
+     */
+    def aclUtilService
+    /**
+     * Dependency injection of unproxied dataSource.
+     */
+    def dataSourceUnproxied
+
     /**
      * Clears the index. Handle with care.
      */
@@ -123,8 +147,14 @@ class SearchService {
         String publicationId = revision.model.publicationId ?: ""
         int versionNumber = revision.revisionNumber
         final String uniqueId = "${submissionId}.${versionNumber}"
-        String exchangeFolder = new File(revision.files.first.path).getParent()
-        def builder = new groovy.json.JsonBuilder()
+        String exchangeFolder = new File(revision.files.first().path).getParent()
+        String registryExport = miriamService.registryExport.canonicalPath
+        String dbUrl = dataSourceUnproxied.url
+        String dbUsername = dataSourceUnproxied.username
+        String dbPassword = dataSourceUnproxied.password
+        def dbSettings = [ 'url': dbUrl, 'username': dbUsername, 'password': dbPassword ]
+        println "dbSettings is $dbSettings"
+        def builder = new JsonBuilder()
         def partialData=[
                 'submissionId':submissionId,
                 'publicationId':publicationId,
@@ -133,25 +163,49 @@ class SearchService {
                 'modelFormat':revision.format.name,
                 'levelVersion':revision.format.formatVersion,
                 'submitter':revision.owner,
-                'paperTitle':revision.model.publication ?
+                'submitterUsername': revision.model.submitterUsername,
+                'publicationTitle':revision.model.publication ?
                         revision.model.publication.title : "",
-                'paperAbstract':revision.model.publication ?
+                'publicationAbstract':revision.model.publication ?
                         revision.model.publication.synopsis : "",
+                'publicationAuthor': revision.model.publication?.authors ?
+                        revision.model.publication.authors.collect {
+                            it.userRealName }.join(', ') : "",
+                'publicationYear': revision.model.publication?.year ?: 0,
                 'model_id':revision.model.id,
+                'revision_id': revision.id,
                 'versionNumber':versionNumber,
                 'submissionDate':revision.model.submissionDate,
+                'lastModified': revision.model.lastModifiedDate,
                 'uniqueId':uniqueId
         ]
         builder(partialData: partialData,
             'folder':exchangeFolder,
             'mainFiles': fetchFilesFromRevision(revision, true),
             'allFiles': fetchFilesFromRevision(revision, false),
-            'solrServer': solrServerHolder.SOLR_CORE_URL)
+            'solrServer': solrServerHolder.SOLR_CORE_URL,
+            'jummpPropFile': configurationService.getConfigFilePath(),
+            'miriamExportFile': registryExport,
+            'database': dbSettings)
         File indexingData = new File(exchangeFolder, "indexData.json")
         indexingData.setText(builder.toString())
         String jarPath = grailsApplication.config.jummp.search.pathToIndexerExecutable
-        sendMessage("direct:exec", [jarPath: jarPath,
-                jsonPath: indexingData.getCanonicalPath()])
+        def argsMap = [jarPath: jarPath,
+                jsonPath: indexingData.getCanonicalPath()]
+
+        String httpProxy = System.getProperty("http.proxyHost")
+        if (httpProxy) {
+            String proxyPort = System.getProperty("http.proxyPort") ?: '80'
+            String nonProxyHosts = "'${System.getProperty("http.nonProxyHosts")}'"
+            StringBuilder proxySettings = new StringBuilder()
+            proxySettings.append(" -Dhttp.proxyHost=").append(httpProxy).append(
+                " -Dhttp.proxyPort=").append(proxyPort).append(" -Dhttp.nonProxyHosts=").append(
+                    nonProxyHosts)
+            argsMap['proxySettings'] = proxySettings.toString()
+        } else {
+            argsMap['proxySettings'] = ""
+        }
+        sendMessage("seda:exec", argsMap)
     }
 
     /**
@@ -165,7 +219,7 @@ class SearchService {
     void regenerateIndices() {
         clearIndex()
         List<RevisionTransportCommand> revisions = Revision.list(fetch: [model: "eager"]).collect { r ->
-            r.toCommandObject()
+            DomainAdapter.getAdapter(r).toCommandObject()
         }
         if (IS_DEBUG_ENABLED) {
             log.debug "Indexing ${revisions.size()} revisions."
@@ -175,7 +229,12 @@ class SearchService {
         Promise p = Revision.async.task {
             SecurityContextHolder.context.authentication = authRef.get()
             revisions.each {
-                updateIndex(it)
+                try {
+                    updateIndex(it)
+                }
+                catch(Exception e) {
+                    log.error("Exception thrown while indexing ${it} ${e.getMessage()}", e)
+                }
             }
         }
         p.onComplete {
@@ -189,32 +248,90 @@ class SearchService {
     }
 
     /**
-    * Returns search results for query restricted Models the user has access to.
-    *
-    * Executes the @p query, restricting results to Models the current user has access to.
-    * @param query freetext search on models
-    * @return Collection of ModelTransportCommand of relevant models available to the user.
-    **/
+     * Makes a model public at the specified revision in the solr index
+     *
+     * Makes the @revision public in the solr index. @revision can be domain or transport object
+     **/
+    void makePublic(def revision) {
+        SolrInputDocument doc = getSolrDocumentFromRevision(revision)
+        updateIndexBase(doc, setPublicField)
+    }
+
+    /**
+     * Makes a model deleted in the solr index
+     *
+     * Makes the @model deleted in the solr index. @model can be domain or transport object
+     **/
+    void setDeleted(def model) {
+        SolrQuery query = new SolrQuery();
+        query.setQuery("submissionId:"+model.submissionId);
+        query.setFields("uniqueId");
+        query.set("defType", "edismax");
+        QueryResponse response = solrServerHolder.server.query(query)
+        SolrDocumentList docs = response.getResults()
+        docs.each {
+            SolrInputDocument doc = getSolrDocumentWithId(it.get("uniqueId"))
+            updateIndexBase(doc, setDeletedField)
+        }
+    }
+
+    /**
+     * Returns search results for query restricted Models the user has access to.
+     *
+     * Executes the @p query, restricting results to Models the current user has access to.
+     * @param query free text search on models
+     * @return Collection of ModelTransportCommand of relevant models available to the user.
+     **/
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="searchService.searchModels")
-    public Collection<ModelTransportCommand> searchModels(String query) {
+    Collection<ModelTransportCommand> searchModels(String query) {
         long start = System.currentTimeMillis();
         SolrDocumentList results = search(query)
-        System.out.println("Solr returned in "+(System.currentTimeMillis() - start));
+        if (IS_DEBUG_ENABLED) {
+            log.debug("Solr returned in ${System.currentTimeMillis() - start}")
+        }
+        start = System.currentTimeMillis();
         final int COUNT = results.size()
         Map<String, ModelTransportCommand> returnVals = new LinkedHashMap<>(COUNT + 1, 1.0f)
+        boolean isAdmin = SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")
+        Map<Long, Long> modelsAdded = new HashMap<Long, Long>()
         results.each {
-            start = System.currentTimeMillis();
-            final String thisSubmissionId = it.get("submissionId")
-            if (!returnVals.containsKey(thisSubmissionId)) {
-                String perennialField = it.get("publicationId") ?: thisSubmissionId
-                Model returned = Model.findByPerennialIdentifier(perennialField)
-                if (returned && !returned.deleted &&
-                        modelService.getLatestRevision(returned, false)) {
-                    returnVals.put(thisSubmissionId, returned.toCommandObject())
+            if (!it.containsKey("deleted") || it.get("deleted")=="false") {
+                boolean okayToProceed = true
+                boolean checkPermissions = !isAdmin
+                long model_id = it.get("model_id")
+                long revision_id = it.get("revision_id")
+                if (!modelsAdded.containsKey(model_id) || modelsAdded.get(model_id) < revision_id) {
+                    if (it.containsKey("public") && it.get("public")) {
+                        checkPermissions = false
+                    }
+                    if (checkPermissions) {
+                        Revision rev = Revision.get(revision_id)
+                        okayToProceed = aclUtilService.hasPermission(
+                            springSecurityService.authentication, rev, BasePermission.READ)
+                    }
+                    if (okayToProceed) {
+                        ModelTransportCommand mtc = new ModelTransportCommand(
+                            submitter: it.get("submitter"),
+                            submitterUsername: it.get("submitterUsername"),
+                            name: it.get("name"),
+                            submissionId: it.get("submissionId"),
+                            publicationId: it.get("publicationId"),
+                            submissionDate: it.get("submissionDate"),
+                            lastModifiedDate: it.get("lastModified"),
+                            id: it.get("model_id"),
+                            format: DomainAdapter.getAdapter(
+                                        ModelFormat.findByName(it.get("modelFormat")))
+                                        .toCommandObject()
+                            )
+                        returnVals.put(it.get("submissionId"), mtc)
+                        modelsAdded.put(model_id, revision_id)
+                    }
                 }
             }
-            System.out.println("Processing took "+(System.currentTimeMillis() - start));
+        }
+        if (IS_DEBUG_ENABLED) {
+            log.debug("Results processed in ${System.currentTimeMillis() - start}")
         }
         return returnVals.values()
     }
@@ -231,10 +348,57 @@ class SearchService {
     @Profiled(tag="searchService.search")
     private SolrDocumentList search(String q) {
         SolrQuery query = new SolrQuery()
-        /*TODO optimise this*/
-        query.setQuery("*${q}*")
+        String newQuery = StringUtils.replaceEach(q, SOLR_SPECIAL_CHARACTERS,
+                SOLR_REPLACEMENT_CHARACTERS)
+        query.setQuery(q)
+        query.setParam("defType", "edismax")
+        query.setParam("tie", "0.8")
+        query.setParam("q.alt", "*:*")
         QueryResponse response = solrServerHolder.server.query(query)
         SolrDocumentList docs = response.getResults()
         return docs
     }
+
+    /**
+     * Helper functions to update solr index
+     */
+
+    private void updateIndexWithDocument(SolrInputDocument doc) {
+        solrServerHolder.server.add(doc)
+    }
+
+    private SolrInputDocument getSolrDocumentFromRevision(def revision) {
+        String submissionId = revision.model.submissionId
+        int versionNumber = revision.revisionNumber
+        String id = "${submissionId}.${versionNumber}"
+        return getSolrDocumentWithId(id)
+    }
+
+    private SolrInputDocument getSolrDocumentWithId(String id) {
+        SolrInputDocument doc = new SolrInputDocument()
+        doc.addField("uniqueId", id)
+        return doc
+    }
+
+    def updateIndexBase(doc, updateToApply) {
+        updateToApply(doc)
+        updateIndexWithDocument(doc)
+    }
+
+    def setPublicField = { doc ->
+            Map<String, String> partialUpdate = new HashMap<String, String>();
+            partialUpdate.put("set", "true");
+            doc.addField("public", partialUpdate);
+    }
+
+    def setDeletedField = { doc ->
+            Map<String, String> partialUpdate = new HashMap<String, String>();
+            partialUpdate.put("set", "true");
+            doc.addField("deleted", partialUpdate);
+    }
+
+    /*
+     *  ///End of helper functions
+     **/
 }
+

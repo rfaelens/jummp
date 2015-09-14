@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PharmML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.pharmml.org/2013/03/PharmML"
+    xsi:schemaLocation="http://www.pharmml.org/2013/03/PharmML http://www.pharmml.org/2013/03/PharmML"
+    xmlns:ct="http://www.pharmml.org/2013/03/CommonTypes"
+    writtenVersion="0.3.1" id="i1">
+
+    <ct:Name>Deliberately long and awkward model name with funny characters like κ or ℳ </ct:Name>
+    <ct:Description>test description</ct:Description>
+
+    <ModelDefinition xmlns="http://www.pharmml.org/2013/03/ModelDefinition">
+        <ParameterModel blkId="p1"/>
+
+        <StructuralModel blkId="sm1">
+            <ct:Variable symbId="dummy" symbolType="real"/>
+        </StructuralModel>
+    </ModelDefinition>
+</PharmML>

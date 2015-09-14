@@ -1,0 +1,23 @@
+.tableLabels {
+	float: right;
+}
+
+body
+{
+	width: 99% !important;
+	max-width: 99% !important;
+}
+h1 {
+	color: black !important;
+}
+.ebiLayout_reduceWidth {
+	width:95%;
+	margin-left: 4%;
+}
+#modelToolbar {
+	top: 25% !important;
+}
+.modelTabs {
+	float: left;
+	width: 99%;
+}

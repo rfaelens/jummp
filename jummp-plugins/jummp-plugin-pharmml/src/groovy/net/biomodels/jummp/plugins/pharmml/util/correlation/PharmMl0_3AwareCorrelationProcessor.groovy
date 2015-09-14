@@ -31,14 +31,14 @@
 
 package net.biomodels.jummp.plugins.pharmml.util.correlation
 
-import eu.ddmore.libpharmml.dom.commontypes.MatrixType
-import eu.ddmore.libpharmml.dom.commontypes.MatrixRowType
-import eu.ddmore.libpharmml.dom.commontypes.RealValueType
+import eu.ddmore.libpharmml.dom.commontypes.Matrix
+import eu.ddmore.libpharmml.dom.commontypes.MatrixRow
+import eu.ddmore.libpharmml.dom.commontypes.RealValue
 import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
-import eu.ddmore.libpharmml.dom.commontypes.StringValueType
-import eu.ddmore.libpharmml.dom.commontypes.SymbolRefType
-import eu.ddmore.libpharmml.dom.modeldefn.CorrelationType
-import eu.ddmore.libpharmml.dom.modeldefn.PairwiseType
+import eu.ddmore.libpharmml.dom.commontypes.StringValue
+import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
+import eu.ddmore.libpharmml.dom.modeldefn.Correlation
+import eu.ddmore.libpharmml.dom.modeldefn.Pairwise
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -57,16 +57,15 @@ public class PharmMl0_3AwareCorrelationProcessor implements ICorrelationProcesso
      * {@inheritDoc}
      */
     @Override
-    List<CorrelationMatrix> convertToStringMatrix(List<CorrelationType> correlations,
+    List<CorrelationMatrix> convertToStringMatrix(List<Correlation> correlations,
                 Map<String, List<String>> randomEffectsPerLevel) {
-
         def matricesByLevel = new HashMap<String, CorrelationMatrix>()
         correlations.each { c ->
             try {
                 final String VAR = c.variabilityReference.symbRef?.symbIdRef ?:
                                 c.variabilityReference.symbRef?.blkIdRef ?: "undefined"
-                final PairwiseType PAIRWISE = c.pairwise
-                final MatrixType MATRIX = c.matrix
+                final Pairwise PAIRWISE = c.pairwise
+                final Matrix MATRIX = c.matrix
                 assert (PAIRWISE != null) || (MATRIX != null)
                 CorrelationMatrix cm
                 ScalarRhs value
@@ -109,10 +108,10 @@ Unexpected value for correlation matrix type ${MATRIX.matrixType} in $c."""
                 if (MATRIX) {
                     MATRIX.rowNames.stringOrSymbRef.each {
                         switch(it) {
-                            case SymbolRefType:
+                            case SymbolRef:
                                 cm.addRandomEffect(it.symbIdRef)
                                 break
-                            case StringValueType:
+                            case StringValue:
                                 cm.addRandomEffect(it.value)
                                 break
                             default:
@@ -122,7 +121,7 @@ Unexpected value for correlation matrix type ${MATRIX.matrixType} in $c."""
                         }
                     }
 
-                    final List<MatrixRowType> ROWS = MATRIX.matrixRow
+                    final List<MatrixRow> ROWS = MATRIX.matrixRow
                     final int M_SIZE = ROWS.size()
                     String[][] theMatrix = new String[M_SIZE][M_SIZE]
                     ROWS.eachWithIndex { r, i ->
@@ -132,10 +131,10 @@ Unexpected value for correlation matrix type ${MATRIX.matrixType} in $c."""
                             if (j < OBJ_COUNT) {
                                 def o = objects[j]
                                 switch(o) {
-                                    case RealValueType:
+                                    case RealValue:
                                         theMatrix[i][j] = "${o.value}"
                                         break
-                                    case SymbolRefType:
+                                    case SymbolRef:
                                         theMatrix[i][j] = o.symbIdRef
                                         break
                                 }

@@ -42,7 +42,7 @@
                 <table>
                     <tbody>
                     <tr>
-                        <td><label><g:message code="user.forgot.ui.username"/>:</label></td>
+                        <td class='tableLabels'><label><g:message code="user.forgot.ui.username"/>:</label></td>
                         <td><span><g:textField name="username"/></span></td>
                     </tr>
                     </tbody>

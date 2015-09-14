@@ -35,7 +35,6 @@
 	<g:javascript library="jquery" plugin="jquery"/>
     <g:javascript src="jquery/jquery.i18n.properties-min-1.0.9.js"/>
     <g:javascript src="jquery/jquery-ui-v1.10.3.js"/>
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
     <g:javascript>
     	$.appName = "${grailsApplication.metadata["app.name"]}";
     	$.serverUrl = "${grailsApplication.config.grails.serverURL}";
@@ -218,35 +217,36 @@
     </g:javascript>
     <g:javascript src="jummp.js"/>
     <g:javascript src="notification.js"/>
-    <link rel="stylesheet" href="<g:resource dir="css" file="notification.css"/>" />
-    <link rel="stylesheet" href="<g:resource dir="css" file="layout.css"/>" />
     
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/head" />
+    <link rel="stylesheet" href="<g:resource dir="css" file="notification.css"/>" />
+    <link rel="stylesheet" href="<g:resource dir="css" file="layout.css"/>" />
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    
     <g:layoutHead/>
 </head>
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/bodyTag"/>
-	<div id="totality">
-  	<div id="mainframe">
-    	<g:render template="/templates/${grailsApplication.config.jummp.branding.style}/header"/>
-    	<g:render template="/templates/${grailsApplication.config.jummp.branding.style}/mainbody"/>
-    	<g:render template="/templates/${grailsApplication.config.jummp.branding.style}/footer"/>
-    </div>
-  	<g:if test="${contextHelpLocation}">
-    	<div id="helpbutton">
-    		<a id="toggleHelp" title="Access help for this page" href="#">Help</a>
-    	</div>
-	    <div id="helpPanel">
-	    	<div id="toolbar" class="ui-widget-header ui-corner-all">
-	    		<button id="expand">Increase help size</button>
-	    		<button id="contract">Decrease help size</button>
-	    		<button id="snap">Reset help</button>
-	    		<button id="outlink">Open in a new tab</button>
-	    		<button id="close">Close</button>
-	    	</div>
-  			
-  			<ContextHelp:getLink location="${contextHelpLocation}" width="${helpWidth}"/>
-  		</div>
-    </g:if>
+    <div id="totality">
+        <div id="mainframe">
+            <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/header"/>
+            <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/mainbody"/>
+            <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/footer"/>
+        </div>
+        <g:if test="${contextHelpLocation}">
+            <div id="helpbutton">
+                <a id="toggleHelp" title="Access help for this page" href="#">Help</a>
+            </div>
+            <div id="helpPanel">
+                <div id="toolbar" class="ui-widget-header ui-corner-all">
+                    <button id="expand">Increase help size</button>
+                    <button id="contract">Decrease help size</button>
+                    <button id="snap">Reset help</button>
+                    <button id="outlink">Open in a new tab</button>
+                    <button id="close">Close</button>
+                </div>
+                <ContextHelp:getLink location="${contextHelpLocation}" width="${helpWidth}"/>
+            </div>
+        </g:if>
     </div>
     </body>
 </html>

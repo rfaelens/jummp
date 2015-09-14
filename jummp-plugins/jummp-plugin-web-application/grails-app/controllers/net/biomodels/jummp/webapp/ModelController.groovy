@@ -55,6 +55,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.multipart.MultipartFile
 import java.util.Arrays
 import net.biomodels.jummp.plugins.security.Team
+import net.biomodels.jummp.annotationstorage.*
 
 @Api(value = "/model", description = "Operations related to models")
 class ModelController {
@@ -62,7 +63,9 @@ class ModelController {
      * Flag that checks whether the dynamically-inserted logger is set to DEBUG or higher.
      */
     private final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
-    
+    /**
+     * Dependency injection of springSecurityService.
+     */
     def springSecurityService
     /**
      * Dependency injection of modelDelegateService.
@@ -209,7 +212,7 @@ class ModelController {
                 notes = "Pass the expected media type of the request as a parameter e.g. /model/id?format=json")
     @ApiImplicitParam(name = "modelId", value = "The model identifier", required = true, allowMultiple = false)
     def show() {
-    	RevisionTransportCommand rev = modelDelegateService.getRevisionFromParams(params.id,
+        RevisionTransportCommand rev = modelDelegateService.getRevisionFromParams(params.id,
                     params.revisionId)
         if (!params.format || (params.format != "json" && params.format != "xml") ) {
             if (!rev) {
@@ -278,7 +281,7 @@ class ModelController {
             modelDelegateService.publishModelRevision(rev)
             def notification = [revision:rev, user:getUsername(), perms: modelDelegateService.getPermissionsMap(rev.model.submissionId)]
             sendMessage("seda:model.publish", notification)
-    	
+
             redirect(action: "showWithMessage",
                         id: rev.identifier(),
                         params: [flashMessage: "Model has been published."])
@@ -297,7 +300,7 @@ class ModelController {
     def delete = {
         try {
             boolean deleted = modelDelegateService.deleteModel(params.id)
-            def notification = [model:modelDelegateService.getModel(params.id), 
+            def notification = [model:modelDelegateService.getModel(params.id),
             					user:getUsername(),
             					perms: modelDelegateService.getPermissionsMap(params.id)]
             sendMessage("seda:model.delete", notification)
@@ -340,13 +343,13 @@ class ModelController {
     }
 
     private List<Team> getTeamsForCurrentUser() {
-		def user = springSecurityService.getCurrentUser()
-		if (user) {
-			return teamService.getTeamsForUser(user)
-		}
-		return []
+        def user = springSecurityService.getCurrentUser()
+        if (user) {
+            return teamService.getTeamsForUser(user)
+        }
+        return []
     }
-    
+
     def shareUpdate = {
         boolean valid = params.collabMap
         if (valid) {
@@ -409,12 +412,11 @@ class ModelController {
                 String update = conversation.changesMade.join(". ")
                 String model = conversation.model_id
                 String user = getUsername()
-                System.out.println(conversation.model_id);
                 updateHistory(session.result_submission, user, "update", "html", update, true)
-                def notification = [model:modelDelegateService.getModel(conversation.model_id), 
-                					user:user, 
-                					update: conversation.changesMade,
-                					perms: modelDelegateService.getPermissionsMap(conversation.model_id, false)]
+                def notification = [model:modelDelegateService.getModel(conversation.model_id),
+                        user:user,
+                        update: conversation.changesMade,
+                        perms: modelDelegateService.getPermissionsMap(conversation.model_id, false)]
                 sendMessage("seda:model.update", notification)
             }.to "displayConfirmationPage"
             on("displayErrorPage").to "displayErrorPage"
@@ -446,7 +448,7 @@ class ModelController {
      * The flow maintains the 'params' as flow.workingMemory (just to distinguish
      * between request.params and our params. Flow scope requires all objects
      * to be serializable. If this is not possible, there are two solutions:
-     *   1) store in session scope 
+     *   1) store in session scope
      *   2) evict the objects in question from the Hibernate session before the
      * end of the session using <tt>flow.persistenceContext.evict(it)</tt>.
      * See http://grails.org/grails/latest/doc/guide/theWebLayer.html#flowScopes
@@ -497,6 +499,7 @@ class ModelController {
         }
         uploadFiles {
             on("Upload") {
+            	try {
                 def mainMultipartList = request.getMultiFileMap().mainFile
                 def extraFileField = request.getMultiFileMap().extraFiles
                 List<MultipartFile> extraMultipartList = []
@@ -549,9 +552,13 @@ New submission started. Main files: ${mainMultipartList.inspect()}.""")
                     log.debug "Data binding done :${cmd.properties}"
                 }
                 flow.workingMemory.put("UploadCommand", cmd)
+                }
+                catch(Exception e) {
+                	e.printStackTrace();
+                }
             }.to "transferFilesToService"
             on("ProceedWithoutValidation"){
-            	
+
             }.to "inferModelInfo"
             on("ProceedAsUnknown"){
             	flow.workingMemory.get("model_type").identifier = "UNKNOWN"
@@ -566,11 +573,9 @@ New submission started. Main files: ${mainMultipartList.inspect()}.""")
                 boolean fileValidationError = false
                 boolean furtherProcessingRequired = true
                 def deletedMains = cmd.mainDeletes
-                List mainFiles = getMainFiles(flow.workingMemory)
-                boolean isOK = !mainFileDeleted(mainFiles, cmd.mainFile, deletedMains)
-                def multipartDebug = cmd.mainFile.collect { it.getOriginalFilename() }
-                def mainFilesDebug = mainFiles.collect { new File(it.path).name }
-                if (!isOK) {
+                List mainFiles = flow.workingMemory.get("repository_files").findAll { it.mainFile }
+                boolean mainFileDeleted = mainFileDeleted(mainFiles, cmd.mainFile, deletedMains)
+                if (mainFileDeleted) {
                     return MainFileMissingError()
                 }
                 if (!cmd.validate()) {
@@ -648,6 +653,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                     flow.workingMemory["deleted_filenames"] = deletedFileNames.flatten()
                     submissionService.handleFileUpload(flow.workingMemory)
                 }
+
             }
             on("MainFileMissingError") {
                 flash.flashMessage = "submission.upload.error.fileerror"
@@ -667,7 +673,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                 submissionService.performValidation(flow.workingMemory)
                 MFTC format = flow.workingMemory.get("model_type")
                 if (format && format.identifier !="UNKNOWN" && format.formatVersion == "*") {
-                	UnknownFormatVersion();                    	
+                    UnknownFormatVersion()
                 }
                 else if (!flow.workingMemory.containsKey("validation_error")) {
                     Valid()
@@ -899,7 +905,8 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
         }
         handleException {
             action {
-                String stackTrace = ExceptionUtils.getStackTrace(flash.flowExecutionException)
+                Throwable t = flash.flowExecutionException
+                log.error("Exception thrown during the submission process: ${t.message}", t)
                 String ticket = UUID.randomUUID().toString()
                 if (flow.isUpdate) {
                     session.removeAttribute(flow.workingMemory.get("SafeReferenceVariable") as String)
@@ -957,12 +964,11 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
         resp.setHeader("Content-disposition", "${INLINE};filename=\"${F_NAME}\"")
         byte[] fileData = file.readBytes()
         int previewSize = grailsApplication.config.jummp.web.file.preview as Integer
-        System.out.println("UPDATED CODE");
         if (!preview || previewSize > fileData.length) {
-        	resp.outputStream << new ByteArrayInputStream(fileData)
+            resp.outputStream << new ByteArrayInputStream(fileData)
         }
         else {
-       		resp.outputStream << new ByteArrayInputStream(Arrays.copyOf(fileData, previewSize))
+            resp.outputStream << new ByteArrayInputStream(Arrays.copyOf(fileData, previewSize))
         }
     }
 
@@ -1057,7 +1063,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
 
     private List<File> transferFiles(String parent, List multipartFiles) {
         List<File> outcome = []
-        multipartFiles.each { f ->
+        multipartFiles.each { MultipartFile f ->
             final String originalFilename = f.getOriginalFilename()
             if (!originalFilename.isEmpty()) {
                 final def transferredFile = new File(parent + originalFilename)
@@ -1078,9 +1084,9 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
 
     private boolean mainFileOverwritten(List mainFiles, List multipartFiles) {
         boolean returnVal = false
-        mainFiles.each { mainFile ->
-            String name = (new File(mainFile.path)).getName()
-            multipartFiles.each { uploaded ->
+        mainFiles.each { RFTC mainFile ->
+            String name = new File(mainFile.path).name
+            multipartFiles.each { MultipartFile uploaded ->
                 if (uploaded.getOriginalFilename() == name) {
                     returnVal = true
                 }
@@ -1094,7 +1100,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
         if (nonEmptyCmdMains) {
             return false
         }
-        def mainFileNames = mainFiles.collect { new File(it.path).name }
+        def mainFileNames = mainFiles.collect { RFTC rf -> new File(rf.path).name }
         def remainingFiles = mainFileNames - mainsToBeDeleted
         return remainingFiles.isEmpty()
     }

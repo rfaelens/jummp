@@ -64,14 +64,8 @@ grails.project.dependency.resolution = {
         grailsHome()
         grailsCentral()
 
-        // uncomment the below to enable remote dependency resolution
-        // from public Maven repositories
         mavenLocal()
         mavenCentral()
-        //mavenRepo "http://snapshots.repository.codehaus.org"
-        //mavenRepo "http://repository.codehaus.org"
-        //mavenRepo "http://download.java.net/maven/2/"
-        //mavenRepo "http://repository.jboss.com/maven2/"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo"
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
         mavenRepo "http://download.eclipse.org/jgit/maven"
@@ -80,12 +74,16 @@ grails.project.dependency.resolution = {
     dependencies {
         // required by OntologyLookupResolver
         compile "org.ccil.cowan.tagsoup:tagsoup:1.2"
+        compile 'org.codehaus.groovy:groovy-backports-compat23:2.3.5'
         compile "com.googlecode.multithreadedtc:multithreadedtc:1.01"
         runtime 'mysql:mysql-connector-java:5.1.17'
         runtime "postgresql:postgresql:9.1-901.jdbc4"
-        // miriam lib required by sbml converters
-        runtime('uk.ac.ebi.miriam:miriam-lib:1.1.3') { transitive = false }
-        compile "org.apache.solr:solr-solrj:4.10.1"
+        compile "net.biomodels.jummp:AnnotationStore:0.1.2"
+        compile("org.apache.solr:solr-solrj:4.10.1") {
+            excludes 'wstx-asl' //a newer version of woodstox comes with jsbml
+        }
+        //required by both JSBML and SolrJ
+        compile "org.codehaus.woodstox:woodstox-core-lgpl:4.4.1"
 
         /* jms
         runtime('org.apache.activemq:activeio-core:3.1.2',
@@ -106,24 +104,25 @@ grails.project.dependency.resolution = {
                     'xalan',
                     'xml-apis'
         }*/
-        compile "xml-apis:xml-apis:1.4.01"
-        compile "jaxen:jaxen:1.1.4"
         compile 'log4j:log4j:1.2.17'
-
-        compile "org.jdom:jdom:1.1.3"
+        compile "org.apache.tika:tika-core:1.3"
+        /**
+         * Weceem lists it as a runtime dependency, while jsbml needs it during compilation.
+         * Unfortunately, Grails misbehaves and leaves xstream out at compile time unless we
+         * explicitly add it as a dependency.
+         */
+        compile "com.thoughtworks.xstream:xstream:1.4.7"
 
         runtime("commons-jexl:commons-jexl:1.1") { excludes 'junit', 'commons-logging' }
         test "org.grails:grails-datastore-test-support:1.0-grails-2.3"
         runtime 'org.javassist:javassist:3.17.1-GA'
         runtime "org.apache.camel:camel-exec:2.13.0"
-        
     }
 
     plugins {
         build ":tomcat:7.0.54"
 
         runtime(":codenarc:0.21")
-
         compile ":webxml:1.4.1"
         compile ":perf4j:0.1.1"
         compile ":routing:1.3.2"
@@ -139,6 +138,10 @@ grails.project.dependency.resolution = {
         compile ":locale-variant:0.1"
         compile ":webflow:2.0.8.1"
 
+        runtime(":weceem:1.2") {
+            excludes 'ckeditor', 'xstream'
+        }
+        runtime ":ckeditor:3.6.6.1.1"
         runtime ":database-migration:1.4.0"
         runtime ":hibernate:3.6.10.16"
         runtime ":jquery:1.11.1"

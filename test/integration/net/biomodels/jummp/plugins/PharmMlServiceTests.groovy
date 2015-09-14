@@ -34,6 +34,7 @@
 
 package net.biomodels.jummp.plugins
 
+import net.biomodels.jummp.core.adapters.DomainAdapter 
 import net.biomodels.jummp.core.JummpIntegrationTest
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelTransportCommand
@@ -73,10 +74,6 @@ class PharmMlServiceTests extends JummpIntegrationTest {
         defaultVcsManager   = modelService.vcsService.vcsManager
         createUserAndRoles()
         setupVcs()
-        fileSystemService.root = new File("target/pharmml/git/").getCanonicalFile()
-        String containerPath = fileSystemService.root.absolutePath + "/aaa/"
-        fileSystemService.currentModelContainer = containerPath
-        modelService.vcsService.currentModelContainer = containerPath
    }
 
     @After
@@ -99,31 +96,33 @@ class PharmMlServiceTests extends JummpIntegrationTest {
         assertTrue pharmMlService.areFilesThisFormat([modelFile])
         modelFile = new File("test/files/BIOMD0000000272.xml")
         assertFalse pharmMlService.areFilesThisFormat([modelFile])
+        modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.6/timeToEvent_weibullHazard.xml")
+        assertTrue pharmMlService.areFilesThisFormat([modelFile])
     }
 
     @Test
     void testGetVersionFormat() {
-        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example2.xml")
+        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.6/timeToEvent_weibullHazard.xml")
         authenticateAsTestUser()
         def rf = new RepositoryFileTransportCommand(path: modelFile.absolutePath,
                     description: "A very interesting model.", mainFile: true)
         def defaultFormat = new ModelFormatTransportCommand(identifier: "PharmML")
         def modelCommand = new ModelTransportCommand(format: defaultFormat, comment: "First commit", name: "Foo")
         Model model = modelService.uploadModelAsFile(rf, modelCommand)
-        def revision = modelService.getLatestRevision(model).toCommandObject()
-        assertEquals "0.2.1", pharmMlService.getFormatVersion(revision)
+        def revision = DomainAdapter.getAdapter(modelService.getLatestRevision(model)).toCommandObject()
+        assertEquals "0.6", pharmMlService.getFormatVersion(revision)
     }
 
     @Test
     void testValidate() {
-        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.2.1/example1.xml")
+        def modelFile = new File("jummp-plugins/jummp-plugin-pharmml/test/files/0.6/timeToEvent_weibullHazard.xml")
         authenticateAsTestUser()
         def rf = new RepositoryFileTransportCommand(path: modelFile.absolutePath,
                     description: "A very interesting model.", mainFile: true)
         def defaultFormat = new ModelFormatTransportCommand(identifier: "PharmML")
         def modelCommand = new ModelTransportCommand(format: defaultFormat, comment: "First commit", name: "Foo")
         Model model = modelService.uploadModelAsFile(rf, modelCommand)
-        def revision = modelService.getLatestRevision(model).toCommandObject()
+        def revision = DomainAdapter.getAdapter(modelService.getLatestRevision(model)).toCommandObject()
         List<String> locations = []
         revision.files?.findAll{it.mainFile}.each { locations << it.path}
         List<File> files = []
@@ -133,21 +132,16 @@ class PharmMlServiceTests extends JummpIntegrationTest {
                 files << f
             }
         }
-        assertTrue !!files
+        assertFalse files.isEmpty()
         assertTrue pharmMlService.validate(files, [])
     }
 
     private void setupVcs() {
-        // setup VCS
-        File clone = new File("target/pharmml/git/")
-        clone.mkdirs()
-        FileRepositoryBuilder builder = new FileRepositoryBuilder()
-        Repository repository = builder.setWorkTree(clone)
-        .readEnvironment() // scan environment GIT_* variables
-        .findGitDir(clone) // scan up the file system tree
-        .build()
-        Git git = new Git(repository)
-        git.init().setDirectory(clone).call()
+        fileSystemService.root = new File("target/pharmml/git/").getCanonicalFile()
+        fileSystemService.root.mkdirs()
+        String containerPath = fileSystemService.root.absolutePath + "/aaa/"
+        fileSystemService.currentModelContainer = containerPath
+        modelService.vcsService.modelContainerRoot = fileSystemService.root
         GitManagerFactory gitService = new GitManagerFactory()
         gitService.grailsApplication = grailsApplication
         grailsApplication.config.jummp.plugins.git.enabled = true
@@ -156,5 +150,6 @@ class PharmMlServiceTests extends JummpIntegrationTest {
         exchangeDir.mkdirs()
         grailsApplication.config.jummp.vcs.exchangeDirectory = exchangeDir.path
         modelService.vcsService.vcsManager = gitService.getInstance()
+        assertTrue modelService.vcsService.isValid()
     }
 }

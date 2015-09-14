@@ -840,12 +840,13 @@
      <lst name="defaults">
        <str name="defType">edismax</str>
        <str name="qf">
-            name^10 description^5.0 paperTitle^2.0 paperAbstract^1.5 submitter^2.1
-            content submissionId publicationId modelFormat levelVersion
+            name^10 description^5.0 publicationTitle^2.0 publicationAbstract^1.5 submitter^2.1
+            text_rev content submissionId publicationId modelFormat levelVersion
             elementID externalReferenceName elementDescription externalReferenceID
             pharmmlPublicationSourceText pharmmlModelIndication pharmmlModelRationale
             pharmmlLimitations pharmmlPopulation pharmmlModelDrug pharmmlTherapeuticArea
-            pharmmlGenericType
+            pharmmlGenericType publicationAuthor pharmmlElementInterpretation pharmmlElementUnit
+            pharmmlModelFieldPurpose
        </str>
        <str name="mm">100%</str>
        <str name="q.alt">*:*</str>
@@ -911,7 +912,7 @@
        <str name="echoParams">explicit</str>
        <str name="wt">json</str>
        <str name="indent">true</str>
-       <str name="df">name</str>
+       <str name="df">text_rev</str>
      </lst>
   </requestHandler>
 
@@ -979,14 +980,16 @@
        <!-- Query settings -->
        <str name="defType">edismax</str>
        <str name="qf">
-            name^10 description^5.0 paperTitle^2.0 paperAbstract^1.5 submitter^2.1
-            content submissionId publicationId modelFormat levelVersion
+            name^10 description^5.0 publicationTitle^2.0 publicationAbstract^1.5 submitter^2.1
+            text_rev content submissionId publicationId modelFormat levelVersion
             elementID externalReferenceName elementDescription externalReferenceID
             pharmmlPublicationSourceText pharmmlModelIndication pharmmlModelRationale
             pharmmlLimitations pharmmlPopulation pharmmlModelDrug pharmmlTherapeuticArea
-            pharmmlGenericType
+            pharmmlGenericType publicationAuthor pharmmlElementInterpretation pharmmlElementUnit
+            pharmmlModelFieldPurpose
+
        </str>
-       <str name="df">name</str>
+       <str name="df">text_rev</str>
        <str name="mm">100%</str>
        <str name="q.alt">*:*</str>
        <str name="rows">10</str>
@@ -1224,7 +1227,7 @@
     </lst>
     <lst name="defaults">
       <str name="echoParams">all</str>
-      <str name="df">name</str>
+      <str name="df">text_rev</str>
     </lst>
     <!-- An optional feature of the PingRequestHandler is to configure the 
          handler with a "healthcheckFile" which can be used to enable/disable 
@@ -1423,7 +1426,7 @@
     -->
   <requestHandler name="/spell" class="solr.SearchHandler" startup="lazy">
     <lst name="defaults">
-      <str name="df">name</str>
+      <str name="df">text_rev</str>
       <!-- Solr will use suggestions from both the 'default' spellchecker
            and from the 'wordbreak' spellchecker and combine them.
            collations (re-written queries) can include a combination of
@@ -1480,7 +1483,7 @@
     -->
   <requestHandler name="/tvrh" class="solr.SearchHandler" startup="lazy">
     <lst name="defaults">
-      <str name="df">name</str>
+      <str name="df">text_rev</str>
       <bool name="tv">true</bool>
     </lst>
     <arr name="last-components">
@@ -1576,12 +1579,13 @@
       <!-- Configure the remaining request handler parameters. -->
       <str name="defType">edismax</str>
       <str name="qf">
-            name^10 description^5.0 paperTitle^2.0 paperAbstract^1.5 submitter^2.1
-            content submissionId publicationId modelFormat levelVersion
+            name^10 description^5.0 publicationTitle^2.0 publicationAbstract^1.5 submitter^2.1
+            text_rev content submissionId publicationId modelFormat levelVersion
             elementID externalReferenceName elementDescription externalReferenceID
             pharmmlPublicationSourceText pharmmlModelIndication pharmmlModelRationale
             pharmmlLimitations pharmmlPopulation pharmmlModelDrug pharmmlTherapeuticArea
-            pharmmlGenericType
+            pharmmlGenericType publicationAuthor pharmmlElementInterpretation pharmmlElementUnit
+            pharmmlModelFieldPurpose
       </str>
       <str name="q.alt">*:*</str>
       <str name="rows">10</str>

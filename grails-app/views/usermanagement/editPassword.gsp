@@ -34,15 +34,15 @@
 					<thead></thead>
 					<tbody>
 					<tr>
-						<td><label><g:message code="user.administration.updatePassword.oldPassword"/>:</label></td>
+						<td class='tableLabels'><label><g:message code="user.administration.updatePassword.oldPassword"/>:</label></td>
 						<td><g:passwordField name="oldPassword"/></td>
 					</tr>
 					<tr>
-						<td><label><g:message code="user.administration.updatePassword.newPassword"/>:</label></td>
+						<td class='tableLabels'><label><g:message code="user.administration.updatePassword.newPassword"/>:</label></td>
 						<td><g:passwordField name="newPassword"/></td>
 					</tr>
 					<tr>
-						<td><label><g:message code="user.administration.updatePassword.newPasswordRpt"/>:</label></td>
+						<td class='tableLabels'><label><g:message code="user.administration.updatePassword.newPasswordRpt"/>:</label></td>
 						<td><g:passwordField name="newPasswordRpt"/></td>
 					</tr>
 					</tbody>

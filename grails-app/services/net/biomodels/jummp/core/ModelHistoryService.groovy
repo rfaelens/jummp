@@ -38,6 +38,7 @@ import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelHistoryItem
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.core.adapters.DomainAdapter
 import org.perf4j.aop.Profiled
 
 /**
@@ -127,7 +128,7 @@ class ModelHistoryService {
             // history is empty
             return new ModelTransportCommand()
         }
-        return history.sort { it.lastAccessedDate }.last().model.toCommandObject(false)
+        return DomainAdapter.getAdapter(history.sort { it.lastAccessedDate }.last().model).toCommandObject(false)
     }
 
     /**
@@ -149,7 +150,7 @@ class ModelHistoryService {
         List<ModelTransportCommand> retList = []
         history.reverseEach {
             if (!it.model.deleted) {
-            	retList << it.model.toCommandObject(false)
+            	retList << DomainAdapter.getAdapter(it.model).toCommandObject(false)
             }
         }
         return retList
