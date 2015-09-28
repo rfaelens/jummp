@@ -170,6 +170,8 @@ class SearchService {
                 'publicationYear': revision.model.publication?.year ?: 0,
                 'model_id':revision.model.id,
                 'revision_id': revision.id,
+                'deleted': revision.model.deleted,
+                'public': revision.model.firstPublished ? 'true' : 'false',
                 'versionNumber':versionNumber,
                 'submissionDate':revision.model.submissionDate,
                 'lastModified': revision.model.lastModifiedDate,
