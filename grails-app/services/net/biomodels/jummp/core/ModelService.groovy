@@ -749,7 +749,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             if (rev.model.publication) {
                 try {
                     model.publication = pubMedService.fromCommandObject(rev.model.publication)
-                    println "just learned that model publication is ${model.publication}"
                 } catch(Exception e) {
                     log.error("Unable to record publication for ${rev.model}: ${e.message}", e)
                 }
@@ -1828,9 +1827,29 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (publicRev) {
             return false
         }
-        model.deleted = true
-        model.save(flush: true)
-        return model.deleted
+        if (IS_DEBUG_ENABLED) {
+            log.debug("Attempting to delete model ${model.submissionId}")
+        }
+        // can't inject searchService - cyclic dependency
+        def searchService = grailsApplication.mainContext.searchService
+        Model.withTransaction { status ->
+            model.deleted = true
+            searchService.setDeleted(model)
+            if (!searchService.isDeleted(model)) {
+                status.setRollbackOnly()
+                searchService.setDeleted(model, false)
+                log.error("Could not set model ${model.submissionId} as deleted in solr.")
+            }
+        }
+        //quick test to make sure Solr is in sync with the database
+        boolean db = model.deleted
+        boolean solr = searchService.isDeleted(model)
+        if (IS_DEBUG_ENABLED) {
+            def m = new StringBuilder("Deletion status for ").append(model.submissionId
+                    ).append(" - db: ").append(db).append(" solr: ").append(solr)
+            log.debug(m.toString())
+        }
+        return db && solr
     }
 
     /**

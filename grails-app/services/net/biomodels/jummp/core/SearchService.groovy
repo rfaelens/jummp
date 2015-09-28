@@ -256,21 +256,69 @@ class SearchService {
     }
 
     /**
-     * Makes a model deleted in the solr index
+     * Updates the deleted field for a given model in the Solr index.
      *
-     * Makes the @model deleted in the solr index. @model can be domain or transport object
+     * @param model can be domain or transport object
+     * @param deleted the new value that should be put in the Solr index. Defaults
+     *      to true if unspecified
      **/
-    void setDeleted(def model) {
-        SolrQuery query = new SolrQuery();
-        query.setQuery("submissionId:"+model.submissionId);
-        query.setFields("uniqueId");
-        query.set("defType", "edismax");
-        QueryResponse response = solrServerHolder.server.query(query)
-        SolrDocumentList docs = response.getResults()
+    void setDeleted(def model, boolean deleted = true) {
+        def searchService = grailsApplication.mainContext.searchService
+        SolrDocumentList docs = findSolrDocumentByModel(model, ["deleted"])
         docs.each {
             SolrInputDocument doc = getSolrDocumentWithId(it.get("uniqueId"))
-            updateIndexBase(doc, setDeletedField)
+            updateIndexBase(doc, setDeletedField.rcurry(deleted))
         }
+        // force commit as downstream we will query the index directly.
+        solrServerHolder.server.commit()
+    }
+
+    /**
+     * Checks whether a model is marked as deleted in the Solr index.
+     *
+     * @param model An instance of Model or ModelTransportCommand for which to check.
+     * @return true if the corresponding SolrInputDocument is marked as deleted, false otherwise.
+     */
+    boolean isDeleted(def model) {
+        SolrDocumentList docs = findSolrDocumentByModel(model, ["deleted"])
+        if (0 == docs.size()) {
+            return false
+        } else if (1 == docs.size()) {
+            return docs.first().get('deleted')
+        } else {
+            return null == docs.find { it.get('deleted') }
+        }
+    }
+
+
+    /*
+     * Finds the SolrDocument associated with a given model.
+     *
+     * The lookup is done based on the model's submission identifier, which should yield
+     * a single result, but if that is not the case, this method does not truncate the
+     * response from Solr, hence the reason for returning a SolrDocumentList.
+     *
+     * @param model either a ModelTransportCommand or a Model for which to find the SolrDocument.
+     * @param fields a list of fields that should be included for each result. The 'uniqueId'
+     * field is automatically added to @p fields if not already present.
+     */
+    private SolrDocumentList findSolrDocumentByModel(def model,
+            List<String> fields = ['uniqueId']) {
+        SolrQuery query = new SolrQuery()
+        query.setQuery("submissionId:${model?.submissionId}")
+        if (!fields.contains("uniqueId")) {
+            fields.add('uniqueId')
+        }
+        query.setFields(fields.toArray(new String[0]))
+        query.set("defType", "edismax")
+        QueryResponse response = solrServerHolder.server.query(query)
+        SolrDocumentList docs = response.getResults()
+        if (0 == docs.size()) {
+            log.warn("Could not find a Solr document for model ${model?.submissionId}")
+        } else if (docs.size() > 1) {
+            log.error("Multiple Solr documents corresponding to model ${model?.submissionId}")
+        }
+        docs
     }
 
     /**
@@ -384,15 +432,15 @@ class SearchService {
     }
 
     def setPublicField = { doc ->
-            Map<String, String> partialUpdate = new HashMap<String, String>();
-            partialUpdate.put("set", "true");
-            doc.addField("public", partialUpdate);
+        Map<String, String> partialUpdate = new HashMap<String, String>();
+        partialUpdate.put("set", "true");
+        doc.addField("public", partialUpdate);
     }
 
-    def setDeletedField = { doc ->
-            Map<String, String> partialUpdate = new HashMap<String, String>();
-            partialUpdate.put("set", "true");
-            doc.addField("deleted", partialUpdate);
+    def setDeletedField = { doc, flag = true ->
+        Map<String, String> partialUpdate = new HashMap<>()
+        partialUpdate.put("set", flag ? "true" : "false")
+        doc.addField("deleted", partialUpdate)
     }
 
     /*
