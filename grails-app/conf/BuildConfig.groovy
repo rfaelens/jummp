@@ -70,6 +70,7 @@ grails.project.dependency.resolution = {
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
         mavenRepo "http://download.eclipse.org/jgit/maven"
         mavenRepo "http://www.biojava.org/download/maven/"
+        mavenRepo "http://maven.mango-solutions.com/ddmore/"
     }
     dependencies {
         // required by OntologyLookupResolver
@@ -80,10 +81,17 @@ grails.project.dependency.resolution = {
         runtime "postgresql:postgresql:9.1-901.jdbc4"
         compile "net.biomodels.jummp:AnnotationStore:0.2.1"
         compile("org.apache.solr:solr-solrj:4.10.1") {
-            excludes 'wstx-asl' //a newer version of woodstox comes with jsbml
+            excludes 'wstx-asl', //a newer version of woodstox comes with jsbml
+                // httpcomponents 4.3.1 is incompatible with 4.2, which breaks jena-arq
+                'httpclient', 'httpcore', 'httpmime'
         }
         //required by both JSBML and SolrJ
         compile "org.codehaus.woodstox:woodstox-core-lgpl:4.4.1"
+        // fixes https://issues.apache.org/jira/browse/HTTPCLIENT-1418
+        def httpComponentsVersion = '4.3.2'
+        compile "org.apache.httpcomponents:httpclient:$httpComponentsVersion"
+        compile "org.apache.httpcomponents:httpcore:$httpComponentsVersion"
+        compile "org.apache.httpcomponents:httpmime:$httpComponentsVersion"
 
         /* jms
         runtime('org.apache.activemq:activeio-core:3.1.2',
@@ -117,6 +125,19 @@ grails.project.dependency.resolution = {
         test "org.grails:grails-datastore-test-support:1.0-grails-2.3"
         runtime 'org.javassist:javassist:3.17.1-GA'
         runtime "org.apache.camel:camel-exec:2.13.0"
+
+        // DDMoRe Metadata Information Service uses jena 2.13
+        compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") {
+            excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4', 'jena-core'
+        }
+        String ddmoreMetadataIntegrationServiceVersion = "0.0.1-SNAPSHOT"
+        compile "eu.ddmore:lib-metadata-api:$ddmoreMetadataIntegrationServiceVersion"
+        // can't use apache-jena-libs due to pom packaging, rely on jena-tdb instead
+        compile("eu.ddmore:lib-metadata:$ddmoreMetadataIntegrationServiceVersion") {
+            excludes 'apache-jena-libs'
+        }
+        compile "org.apache.jena:jena-tdb:1.1.2"
+
     }
 
     plugins {
