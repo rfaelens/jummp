@@ -342,7 +342,7 @@ class SearchService {
         boolean isAdmin = SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")
         Map<Long, Long> modelsAdded = new HashMap<Long, Long>()
         results.each {
-            if (!it.containsKey("deleted") || it.get("deleted")=="false") {
+            if (!it.containsKey("deleted") || !it.get("deleted")) {
                 boolean okayToProceed = true
                 boolean checkPermissions = !isAdmin
                 long model_id = it.get("model_id")
