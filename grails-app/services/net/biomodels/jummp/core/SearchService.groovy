@@ -331,12 +331,12 @@ class SearchService {
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="searchService.searchModels")
     Collection<ModelTransportCommand> searchModels(String query) {
-        long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis()
         SolrDocumentList results = search(query)
         if (IS_DEBUG_ENABLED) {
             log.debug("Solr returned in ${System.currentTimeMillis() - start}")
         }
-        start = System.currentTimeMillis();
+        start = System.currentTimeMillis()
         final int COUNT = results.size()
         Map<String, ModelTransportCommand> returnVals = new LinkedHashMap<>(COUNT + 1, 1.0f)
         boolean isAdmin = SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")
