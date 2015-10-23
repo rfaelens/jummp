@@ -34,6 +34,8 @@
 
 package net.biomodels.jummp.core
 
+import eu.ddmore.metadata.service.ValidationException
+import eu.ddmore.metadata.service.ValidationStatus
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
 import net.biomodels.jummp.core.model.ModelAuditTransportCommand
@@ -78,7 +80,7 @@ class ModelDelegateService implements IModelService {
     String getPluginForFormat(ModelFormatTransportCommand format) {
         return modelFileFormatService.getPluginForFormat(format)
     }
-    
+
     List<ModelTransportCommand> getAllModels(int offset, int count, boolean sortOrder, ModelListSorting sortColumn) {
         List<ModelTransportCommand> models = []
         modelService.getAllModels(offset, count, sortOrder, sortColumn).each {
@@ -224,6 +226,31 @@ class ModelDelegateService implements IModelService {
         return false
     }
 
+    Boolean canValidate(String modelId) {
+        def revision = getLatestRevision(modelId)
+        if (revision.state != ValidationStatus.APPROVED) {
+            try {
+                return modelService.canValidate(Revision.get(revision.id))
+            }
+            catch(Exception e) {
+                return false
+            }
+        }
+        return false
+    }
+    Boolean canShowValidateReport(String modelId) {
+        def revision = getLatestRevision(modelId)
+        if (revision.state != ValidationStatus.APPROVED ) {
+            try {
+                return modelService.canValidate(Revision.get(revision.id))
+            }
+            catch(Exception e) {
+                return false
+            }
+        }
+        return false
+    }
+
     List<RepositoryFileTransportCommand> retrieveModelFiles(RevisionTransportCommand revision)
             throws ModelException {
         Revision theRevision = Revision.get(revision.id)
@@ -308,6 +335,14 @@ class ModelDelegateService implements IModelService {
 
     void unpublishModelRevision(RevisionTransportCommand revision) {
         modelService.unpublishModelRevision(Revision.get(revision.id))
+    }
+
+    void validateModelRevision(RevisionTransportCommand revision) {
+        try {
+            modelService.validateModelRevision(Revision.get(revision.id))
+        }catch(ValidationException e){
+            throw e
+        }
     }
 
     ModelTransportCommand findByPerennialIdentifier(String perennialId) {

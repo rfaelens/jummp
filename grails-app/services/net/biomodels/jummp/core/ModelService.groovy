@@ -30,6 +30,18 @@
 
 package net.biomodels.jummp.core
 
+import eu.ddmore.metadata.api.MetadataInformationService
+import eu.ddmore.metadata.impl.MetadataInformationServiceImpl
+import eu.ddmore.metadata.service.ValidationException
+import eu.ddmore.metadata.service.ValidationReportImpl
+import eu.ddmore.metadata.service.ValidationStatus
+import grails.spring.BeanBuilder
+import grails.util.Holders
+import net.biomodels.jummp.core.util.JummpXmlUtils
+import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
+
+import javax.activation.MimetypesFileTypeMap
+
 import static java.util.UUID.randomUUID
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
@@ -61,6 +73,8 @@ import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
+import eu.ddmore.metadata.service.ValidationReport
+
 
 /**
  * @short Service class for managing Models
@@ -74,7 +88,8 @@ import org.springframework.security.core.userdetails.UserDetails
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
- * @date 20150616
+ * @author Sarala Wimalaratne <sarala@ebi.ac.uk>
+ * @date 20151014
  */
 @SuppressWarnings("GroovyUnusedCatchParameter")
 class ModelService {
@@ -135,6 +150,11 @@ class ModelService {
      * Dependency injection of publicationIdGenerator
      */
     def publicationIdGenerator
+
+//    def searchService
+
+    def validationReport
+
 
     final boolean MAKE_PUBLICATION_ID = !(publicationIdGenerator instanceof NullModelIdentifierGenerator)
     static transactional = true
@@ -1832,6 +1852,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         model.deleted = true
         model.save(flush: true)
+//        searchService.setDeleted(model)
         return model.deleted
     }
 
@@ -1933,6 +1954,33 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
+         * Tests if the user can validate this revision
+         * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
+         * method.
+         * @param revision The Revision to be validated
+         */
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.canValidate")
+    public boolean canValidate(Revision revision) {
+        if (!revision) {
+            return false
+        }
+        if (revision.deleted) {
+            return false
+        }
+        if (revision.model.deleted) {
+            return false
+        }
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            return true
+        }
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_CURATOR")) {
+            return canAddRevision(revision.model)
+        }
+        return false
+    }
+
+    /**
      * Makes a Model Revision publicly available.
      * This means that ROLE_USER and ROLE_ANONYMOUS gain read access to the Revision and by that also to
      * the Model.
@@ -1998,6 +2046,63 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         aclUtilService.deletePermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
         revision.state=ModelState.UNPUBLISHED
         revision.save(flush:true)
+    }
+
+    /**
+     * Validates the metadata for a model revision.
+     *
+     * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
+     * method.
+     * @param revision The Revision to be validated
+     */
+    @PreAuthorize("hasRole('ROLE_CURATOR') or hasRole('ROLE_ADMIN')") //used to be: (hasRole('ROLE_CURATOR') and hasPermission(#revision, admin))
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.validateModelRevision")
+    public void validateModelRevision(Revision revision){
+        if (!SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            if (!aclUtilService.hasPermission(springSecurityService.authentication, revision,
+                        BasePermission.ADMINISTRATION)) {
+                throw new AccessDeniedException("You cannot validate this model.");
+            }
+        }
+        if (!revision) {
+            throw new IllegalArgumentException("Revision may not be null")
+        }
+        if (revision.deleted) {
+            throw new IllegalArgumentException("Revision may not be deleted")
+        }
+
+        List<File> repFiles = retrieveModelRepFiles(revision)
+        final File pharmML = AbstractPharmMlHandler.findPharmML(repFiles)
+        String metadataFileName = JummpXmlUtils.findModelAttribute(pharmML, "PharmML", "metadataFile")
+
+        File metadataFile = null;
+        for(File file : repFiles){
+            if(file.getName().equals(metadataFileName)){
+                metadataFile = file;
+                break;
+            }
+        }
+
+        if(metadataFile==null)
+            throw new ValidationException("Metadata file not found for "+pharmML.getName())
+        else {
+            validationReport.generateValidationReport(metadataFile, revision.getModel().getSubmissionId())
+        }
+
+        revision.validationReport = validationReport.getValidationReport();
+        revision.validationLevel = validationReport.metadataValidator.getValidationErrorStatus();
+
+        aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
+        aclUtilService.addPermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
+
+        // TODO FIXME this should not need to bypass validation in order to save successfully!
+        // TODO make sure that only relative file paths are stored in the database!!
+        try {
+            revision.save(validate: false, failOnError: true, flush: true)
+        } catch (Throwable e) {
+            log.error e.message, e
+        }
     }
 
     /**

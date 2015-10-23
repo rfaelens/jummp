@@ -106,6 +106,8 @@ try {
                 password = databaseConfig.jummp.database.password
                 dialect  = databaseConfig.jummp.database.dialect
                 url = databaseConfig.jummp.database.url
+
+//                dbCreate = "create"
             }
         }
         test {

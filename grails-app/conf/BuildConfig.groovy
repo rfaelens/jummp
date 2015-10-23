@@ -78,7 +78,9 @@ grails.project.dependency.resolution = {
         compile "com.googlecode.multithreadedtc:multithreadedtc:1.01"
         runtime 'mysql:mysql-connector-java:5.1.17'
         runtime "postgresql:postgresql:9.1-901.jdbc4"
-        compile "net.biomodels.jummp:AnnotationStore:0.2.1"
+
+        //using the latest groovy eclipse compiler 2.9.2-01
+        compile "net.biomodels.jummp:AnnotationStore:0.2.3"
         compile("org.apache.solr:solr-solrj:4.10.1") {
             excludes 'wstx-asl' //a newer version of woodstox comes with jsbml
         }
@@ -117,6 +119,9 @@ grails.project.dependency.resolution = {
         test "org.grails:grails-datastore-test-support:1.0-grails-2.3"
         runtime 'org.javassist:javassist:3.17.1-GA'
         runtime "org.apache.camel:camel-exec:2.13.0"
+        compile ("eu.ddmore.metadata:lib-metadata:1.0-SNAPSHOT") {
+            excludes 'spring-context','spring-core','spring-test'
+        }
     }
 
     plugins {
