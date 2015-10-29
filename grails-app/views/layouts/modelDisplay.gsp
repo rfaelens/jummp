@@ -94,7 +94,7 @@
                 var anchorClass = $(this).attr('class');
                 var anchorId = $(this).attr('id');
                 if (anchorClass=="versionDownload" || anchorClass=="publicationLink") {
-                    openPage(anchor);
+                    $.jummp.openPage(anchor);
 				} else if (anchorClass == "ui-tabs-anchor") {
 					e.preventDefault();
 					location.hash = anchor;
@@ -121,7 +121,7 @@
                         modal: true,
                         buttons: {
                             "Confirm Delete": function() {
-                                openPage('${g.createLink(controller: 'model', action: 'delete', id: (revision.model.publicationId) ?: (revision.model.submissionId))}');
+                                $.jummp.openPage('${g.createLink(controller: 'model', action: 'delete', id: (revision.model.publicationId) ?: (revision.model.submissionId))}');
                             	$( this ).dialog( "close" );
                             },
                             Cancel: function() {
@@ -369,7 +369,7 @@
                 modal: true,
                 buttons: {
                     Confirm: function() {
-                        openPage("${g.createLink(controller: 'model', action: 'publish', id: revision.identifier() )}");
+                        $.jummp.openPage("${g.createLink(controller: 'model', action: 'publish', id: revision.identifier() )}");
                         $( this ).dialog( "close" );
                     },
                     Cancel: function() {
@@ -449,20 +449,16 @@
 			    	$( ".toolbutton" ).css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });
 			}
 		}
-		
-        function openPage(loc) {
-            window.location.href = loc;
-        }
     </script>
     <g:layoutHead/>
     </head>
     <body>
     	<div id="buttonContainer" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>
 				<ul id='toolbarList'><li>
-    			<button class='toolbutton' id="download" onclick="return openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}')">Download</button>
+                <button class='toolbutton' id="download" onclick="return $.jummp.openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}')">Download</button>
 				<g:if test="${canUpdate}">
 					<li>
-					<button class='toolbutton' id="update" onclick="return openPage('${g.createLink(controller: 'model', action: 'update', id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Update</button>
+                    <button class='toolbutton' id="update" onclick="return $.jummp.openPage('${g.createLink(controller: 'model', action: 'update', id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Update</button>
 					</li>
 				</g:if>
 				<g:if test="${canDelete}">
@@ -483,7 +479,7 @@
 				</g:if>
 				<g:if test="${canShare}">
 					<li>
-					<button class='toolbutton' id="share" onclick="return openPage('${g.createLink(controller: 'model', action: 'share', id: revision.identifier())}')">Share</button>
+                    <button class='toolbutton' id="share" onclick="return $.jummp.openPage('${g.createLink(controller: 'model', action: 'share', id: revision.identifier())}')">Share</button>
 					</li>
 				</g:if>
 				</ul>
