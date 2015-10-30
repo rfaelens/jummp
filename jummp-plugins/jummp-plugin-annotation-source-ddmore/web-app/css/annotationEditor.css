@@ -1,0 +1,61 @@
+#leftContainer {
+    float: left;
+    margin-right: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+#rightContainer {
+    float: right;
+    width: 28%;
+    margin-left: 0.5em;
+    margin-top: 0.5em;
+}
+
+.resetFloat {
+    clear: both;
+}
+
+#toolbar {
+    margin: 1em 0em;
+    display: inline-block;
+}
+
+/* IE7 support */
+*+html #toolbar {
+    display: inline;
+}
+
+#leftContainer, #toolbar {
+    width: 70%;
+}
+
+.action {
+    color: rgb(22, 151, 200);
+    background-color: rgb(237, 237, 237);
+}
+
+.success, .failure {
+    padding: 1em;
+    font-size: 2em;
+}
+
+.success {
+    color: green;
+}
+
+.failure {
+    color: red;
+}
+
+select {
+    overflow: hidden;
+}
+
+optgroup[label] {
+    color: #0079FF;
+}
+
+optgroup option {
+    color: #000; /* reset optgroup setting */
+    padding-left: 1em;
+}

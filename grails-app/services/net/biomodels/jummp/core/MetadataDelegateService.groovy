@@ -20,6 +20,7 @@
 
 package net.biomodels.jummp.core
 
+import eu.ddmore.metadata.service.*
 import net.biomodels.jummp.annotationstore.ResourceReference
 import net.biomodels.jummp.annotationstore.Statement
 import net.biomodels.jummp.core.annotation.ResourceReferenceCategory
@@ -27,6 +28,7 @@ import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
 import net.biomodels.jummp.core.annotation.StatementCategory
 import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import org.apache.jena.riot.RDFFormat
 import org.perf4j.aop.Profiled
 
 /**
@@ -104,5 +106,25 @@ class MetadataDelegateService implements IMetadataService {
                 s.toCommandObject()
             }
         }
+    }
+
+    boolean updateModelMetadata(String model, List<StatementTransportCommand> statements) {
+        def metadataWriter = new MetadataWriterImpl()
+        //TODO fix me
+        String subject = "http://localhost:8080/jummp/$model"
+        statements.each { StatementTransportCommand statement ->
+            String predicate = statement.predicate.uri
+            ResourceReferenceTransportCommand xref = statement.object
+            String object = xref.uri ?: xref.name
+            boolean isLiteralTriple = xref.uri ? false : true
+            if (isLiteralTriple) {
+                metadataWriter.generateLiteralTriple(subject, predicate, object)
+            } else {
+                metadataWriter.generateTriple(subject, predicate, object)
+            }
+            println metadataWriter.model.dump()
+        }
+        metadataWriter.writeRDFModel("/tmp/$model.rdf", RDFFormat.RDFXML)
+        return true
     }
 }

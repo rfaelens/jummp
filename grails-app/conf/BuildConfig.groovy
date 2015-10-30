@@ -131,7 +131,7 @@ grails.project.dependency.resolution = {
         compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") {
             excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4', 'jena-core'
         }
-        String ddmoreMetadataIntegrationServiceVersion = "0.0.1-SNAPSHOT"
+        String ddmoreMetadataIntegrationServiceVersion = "0.0.2-SNAPSHOT"
         compile "eu.ddmore:lib-metadata-api:$ddmoreMetadataIntegrationServiceVersion"
         // can't use apache-jena-libs due to pom packaging, rely on jena-tdb instead
         compile("eu.ddmore:lib-metadata:$ddmoreMetadataIntegrationServiceVersion") {
@@ -188,6 +188,8 @@ grails.plugin.location.'jummp-plugin-mdl' = "jummp-plugins/jummp-plugin-mdl"
 grails.plugin.location.'jummp-plugin-bives' = "jummp-plugins/jummp-plugin-bives"
 grails.plugin.location.'jummp-plugin-simple-logging' = "jummp-plugins/jummp-plugin-simple-logging"
 grails.plugin.location.'jummp-plugin-web-application' = "jummp-plugins/jummp-plugin-web-application"
+grails.plugin.location.'jummp-plugin-annotation-source-ddmore' = "jummp-plugins/jummp-plugin-annotation-source-ddmore"
+grails.plugin.location.'jummp-plugin-annotation-core' = "jummp-plugins/jummp-plugin-annotation-core"
 //grails.plugin.location.'jummp-plugin-jms-remote' = "jummp-plugins/jummp-plugin-jms-remote"
 if ("jms".equalsIgnoreCase(System.getenv("JUMMP_EXPORT"))) {
     println "Enabling JMS remoting..."
