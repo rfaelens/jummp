@@ -79,8 +79,9 @@ grails.project.dependency.resolution = {
         compile "com.googlecode.multithreadedtc:multithreadedtc:1.01"
         runtime 'mysql:mysql-connector-java:5.1.17'
         runtime "postgresql:postgresql:9.1-901.jdbc4"
-        compile "net.biomodels.jummp:AnnotationStore:0.2.2"
 
+        //using the latest groovy eclipse compiler 2.9.2-01
+        compile "net.biomodels.jummp:AnnotationStore:0.2.3"
         compile("org.apache.solr:solr-solrj:4.10.1") {
             excludes 'wstx-asl', //a newer version of woodstox comes with jsbml
                 // httpcomponents 4.3.1 is incompatible with 4.2, which breaks jena-arq
@@ -139,6 +140,9 @@ grails.project.dependency.resolution = {
         }
         compile "org.apache.jena:jena-tdb:1.1.2"
 
+        compile ("eu.ddmore.metadata:lib-metadata:1.1-SNAPSHOT") {
+            excludes 'spring-context','spring-core','spring-test'
+        }
     }
 
     plugins {

@@ -1189,4 +1189,6 @@ databaseChangeLog = {
     include file: '20150611-widenResourceReferenceName.groovy'
 
 	include file: '20150626_addCollectionNameToResourceReference.groovy'
+
+	include file: '20151012_addMetadataValidationToRevision.groovy'
 }

@@ -30,6 +30,18 @@
 
 package net.biomodels.jummp.core
 
+import eu.ddmore.metadata.api.MetadataInformationService
+import eu.ddmore.metadata.impl.MetadataInformationServiceImpl
+import eu.ddmore.metadata.service.ValidationException
+import eu.ddmore.metadata.service.ValidationReportImpl
+import eu.ddmore.metadata.service.ValidationStatus
+import grails.spring.BeanBuilder
+import grails.util.Holders
+import net.biomodels.jummp.core.util.JummpXmlUtils
+import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
+
+import javax.activation.MimetypesFileTypeMap
+
 import static java.util.UUID.randomUUID
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
@@ -61,6 +73,8 @@ import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
+import eu.ddmore.metadata.service.ValidationReport
+
 
 /**
  * @short Service class for managing Models
@@ -74,7 +88,8 @@ import org.springframework.security.core.userdetails.UserDetails
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
- * @date 20150616
+ * @author Sarala Wimalaratne <sarala@ebi.ac.uk>
+ * @date 20151014
  */
 @SuppressWarnings("GroovyUnusedCatchParameter")
 class ModelService {
@@ -136,6 +151,11 @@ class ModelService {
      */
     def publicationIdGenerator
 
+//    def searchService
+
+    def validationReport
+
+
     final boolean MAKE_PUBLICATION_ID = !(publicationIdGenerator instanceof NullModelIdentifierGenerator)
     static transactional = true
 
@@ -160,78 +180,40 @@ class ModelService {
             // safety check
             return []
         }
-        String sorting = sortOrder ? 'asc' : 'desc'
-        // for Admin - sees all (not deleted) models
-        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-            String query = '''
-SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
-FROM Revision AS r
-JOIN r.model AS m JOIN r.owner as u
-WHERE
-'''
-            if ( sortColumn == ModelListSorting.LAST_MODIFIED || sortColumn == ModelListSorting.FORMAT ||
-                        sortColumn == ModelListSorting.NAME) {
-                query += '''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
-            }
-            else if ( sortColumn == ModelListSorting.SUBMITTER || sortColumn == ModelListSorting.SUBMISSION_DATE) {
-                query += '''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
-            }
-            query += "m.deleted = ${deletedOnly} AND r.deleted = false"
-            if (filter && filter.length() >= 3) {
-                query += '''
-AND (
-lower(m.publication.journal) like :filter
-OR lower(m.publication.title) like :filter
-OR lower(m.publication.affiliation) like :filter
-)
-'''
-            }
-            query += '''
-ORDER BY
-'''
-            switch (sortColumn) {
-            case ModelListSorting.NAME:
-                query += "r.name"
-                break
-            case ModelListSorting.LAST_MODIFIED:
-                query += "r.uploadDate"
-                break
-            case ModelListSorting.FORMAT:
-                query += "r.format.name"
-                break
-            case ModelListSorting.SUBMITTER:
-                query += "u.person.userRealName"
-                break
-            case ModelListSorting.SUBMISSION_DATE:
-                /*
-                * Hard to get to model submission date directly. However as model ids
-                * are sequentially generated, they are used as a surrogate.
-                */
-                query += "m.id"
-                break
-            case ModelListSorting.PUBLICATION:
-                // TODO: implement, fall through to default
-            case ModelListSorting.ID: // Id is the default
-            default:
-                query += "m.id"
-                break
-            }
-            query += " $sorting"
-            Map params = [ max: count, offset: offset]
-            if (filter && filter.length() >= 3) {
-                params.put("filter", "%${filter.toLowerCase()}%");
-            }
-            List<List<Model, String, Date, String, Long, String>> resultSet =
-                        Model.executeQuery(query, [:], params)
-            return resultSet.collect{it.first()}
+
+        String sortingDirection = sortOrder ? 'asc' : 'desc'
+
+        boolean filterIsValid = filterValid(filter)
+
+        Map metaParams = [
+            max: count, offset: offset
+        ]
+
+        Map namedParams = [:]
+        if (filterIsValid) {
+            namedParams.put("filter", "%${filter.toLowerCase()}%");
         }
 
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(
-                    SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add(getUsername())
+        String query
+        // for Admin - sees all (not deleted) models
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            query = getQueryForAdmin(sortColumn, deletedOnly, filterIsValid, sortingDirection)
+
+        } else {
+            Set<String> roles = getSpringDatabaseRoles()
+
+            query = getQueryForUser(sortColumn, deletedOnly, filterIsValid, sortingDirection)
+            namedParams += [
+                className  :  Revision.class.getName(),
+                permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
+                roles      :  roles
+            ]
         }
+        List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, namedParams, metaParams)
+        return resultSet.collect{ it.first() }
+    }
+
+    private String getQueryForUser(ModelListSorting sortColumn, boolean deletedOnly, boolean filterIsValid, String sortingDirection) {
         String query = '''
 SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
 FROM Revision AS r
@@ -240,15 +222,15 @@ JOIN r.owner as u
 WHERE r.deleted = false
 '''
 //do we want to show information from the latest revision?
-if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.FORMAT || sortColumn==ModelListSorting.NAME) {
+        if (sortColumn == ModelListSorting.LAST_MODIFIED || sortColumn == ModelListSorting.FORMAT || sortColumn == ModelListSorting.NAME) {
             query += '''AND r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2,
                         AclEntry ace2  where r.model=r2.model
                         AND r2.id=ace2.aclObjectIdentity.objectId
                         AND ace2.aclObjectIdentity.aclClass.className = :className
                         AND ace2.sid.sid IN (:roles) AND ace2.mask IN (:permissions)
                         AND ace2.granting = true)'''
-            }
-        else  {                                      ////otherwise sortColumn must be the following .. ie we want to sort by the first revision (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE)
+        } else {
+            ////otherwise sortColumn must be the following .. ie we want to sort by the first revision (sortColumn==ModelListSorting.SUBMITTER || sortColumn==ModelListSorting.SUBMISSION_DATE)
             query += '''AND r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2,
                         AclEntry ace2  where r.model=r2.model
                         AND r2.id=ace2.aclObjectIdentity.objectId
@@ -258,7 +240,7 @@ if (sortColumn==ModelListSorting.LAST_MODIFIED || sortColumn==ModelListSorting.F
         }
 
         query += " AND m.deleted = ${deletedOnly} "
-        if (filter && filter.length() >= 3) {
+        if (filterIsValid) {
             query += '''
 AND (
 lower(m.publication.journal) like :filter
@@ -270,43 +252,76 @@ OR lower(m.publication.affiliation) like :filter
         query += '''
 ORDER BY
 '''
+        query += " " + getSortColumnAsString(sortColumn) + " " + sortingDirection
+        return query
+    }
+
+    private String getQueryForAdmin(ModelListSorting sortColumn, boolean deletedOnly, boolean filterIsValid, String sortingDirection) {
+        String query = '''
+SELECT DISTINCT m, r.name, r.uploadDate, r.format.name, m.id, u.person.userRealName
+FROM Revision AS r
+JOIN r.model AS m JOIN r.owner as u
+WHERE
+'''
+        if (sortColumn == ModelListSorting.LAST_MODIFIED || sortColumn == ModelListSorting.FORMAT ||
+            sortColumn == ModelListSorting.NAME) {
+            query += '''r.uploadDate=(SELECT MAX(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+        } else if (sortColumn == ModelListSorting.SUBMITTER || sortColumn == ModelListSorting.SUBMISSION_DATE) {
+            query += '''r.uploadDate=(SELECT MIN(r2.uploadDate) from Revision r2 where r.model=r2.model) AND '''
+        }
+        query += "m.deleted = ${deletedOnly} AND r.deleted = false"
+        if (filterIsValid) {
+            query += '''
+AND (
+lower(m.publication.journal) like :filter
+OR lower(m.publication.title) like :filter
+OR lower(m.publication.affiliation) like :filter
+)
+'''
+        }
+        query += '''
+ORDER BY
+'''
+        query += " " + getSortColumnAsString(sortColumn) + " " + sortingDirection
+        return query
+    }
+
+    /**
+     * Short method to get the SQL-name of the {@Link ModelListSorting} enum
+     * @param sortColumn
+     * @return
+     */
+    // ToDo: this should really be enum-properties in the ModelListSorting enum itself..
+    private java.lang.String getSortColumnAsString(ModelListSorting sortColumn) {
+        String result
         switch (sortColumn) {
-        case ModelListSorting.NAME:
-            query += "r.name"
-            break
-        case ModelListSorting.LAST_MODIFIED:
-            query += "r.uploadDate"
-            break
-        case ModelListSorting.FORMAT:
-            query += "r.format.name"
-            break
-        case ModelListSorting.SUBMITTER:
-            query += "u.person.userRealName"
-            break
-       case ModelListSorting.SUBMISSION_DATE:
-           /*
-            * Hard to get to model submission date directly. However as model ids
-            * are sequentially generated, they are used as a surrogate.
-            */
-            query += "m.id"
-            break
-        case ModelListSorting.PUBLICATION:
-            // TODO: implement, fall through to default
-        case ModelListSorting.ID: // Id is the default
-        default:
-            query += "m.id"
-            break
+            case ModelListSorting.NAME:
+                result = "r.name"
+                break
+            case ModelListSorting.LAST_MODIFIED:
+                result = "r.uploadDate"
+                break
+            case ModelListSorting.FORMAT:
+                result = "r.format.name"
+                break
+            case ModelListSorting.SUBMITTER:
+                result = "u.person.userRealName"
+                break
+            case ModelListSorting.SUBMISSION_DATE:
+                /*
+                 * Hard to get to model submission date directly. However as model ids
+                 * are sequentially generated, they are used as a surrogate.
+                 */
+                result = "m.id"
+                break
+            case ModelListSorting.PUBLICATION:
+                // TODO: implement, fall through to default
+            case ModelListSorting.ID: // Id is the default
+            default:
+                result = "m.id"
+                break
         }
-        query += " " + sorting
-        Map params = [
-            className: Revision.class.getName(),
-            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
-            max: count, offset: offset, roles: roles]
-        if (filter && filter.length() >= 3) {
-            params.put("filter", "%${filter.toLowerCase()}%");
-        }
-        List<List<Model, String, Date, String, Long, String>> resultSet = Model.executeQuery(query, params)
-        return resultSet.collect {it.first()}
+        result
     }
 
     /**
@@ -384,7 +399,7 @@ ORDER BY
             def criteria = Model.createCriteria()
             return criteria.get {
                 ne("deleted", !deletedOnly)
-                if (filter && filter.length() >= 3) {
+                if (filterValid(filter)) {
                     or {
                         ilike("name", "%${filter}%")
                         publication {
@@ -402,11 +417,7 @@ ORDER BY
             } as Integer
         }
 
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add(getUsername())
-        }
+        Set<String> roles = getSpringDatabaseRoles()
 
         String query = '''
 SELECT COUNT(DISTINCT m.id) FROM Revision AS r, AclEntry AS ace
@@ -423,7 +434,7 @@ AND ace.granting = true
 AND r.deleted = false
 '''
 query+=" AND m.deleted=${deletedOnly} "
-        if (filter && filter.length() >= 3) {
+        if (filterValid(filter)) {
             query += '''
 AND (
 lower(m.publication.journal) like :filter
@@ -436,11 +447,16 @@ OR lower(m.publication.affiliation) like :filter
             className: Revision.class.getName(),
             permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
             roles: roles]
-        if (filter && filter.length() >= 3) {
+        if (filterValid(filter)) {
             params.put("filter", "%${filter.toLowerCase()}%");
         }
 
         return Model.executeQuery(query, params)[0] as Integer
+    }
+
+    /** convenience method to check if our filter is OK */
+    private java.lang.Boolean filterValid(String filter) {
+        return filter && filter.length() >= 3
     }
 
     /**
@@ -496,11 +512,7 @@ OR lower(m.publication.affiliation) like :filter
             return Revision.get(result[0])
         }
 
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add(getUsername())
-        }
+        Set<String> roles = getSpringDatabaseRoles()
         List<Long> result = Revision.executeQuery('''
 SELECT rev.id
 FROM Revision AS rev, AclEntry AS ace
@@ -529,6 +541,16 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             	modelHistoryService.addModelToHistory(model)
             }
             return Revision.get(result[0])
+    }
+
+    /** deduplication method for getting Spring's authorities as Database-Role strings */
+    private Set<String> getSpringDatabaseRoles() {
+        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
+        if (springSecurityService.isLoggedIn()) {
+            // anonymous users do not have a principal
+            roles.add(getUsername())
+        }
+        return roles
     }
 
     /**
@@ -1950,6 +1972,33 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
+         * Tests if the user can validate this revision
+         * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
+         * method.
+         * @param revision The Revision to be validated
+         */
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.canValidate")
+    public boolean canValidate(Revision revision) {
+        if (!revision) {
+            return false
+        }
+        if (revision.deleted) {
+            return false
+        }
+        if (revision.model.deleted) {
+            return false
+        }
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            return true
+        }
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_CURATOR")) {
+            return canAddRevision(revision.model)
+        }
+        return false
+    }
+
+    /**
      * Makes a Model Revision publicly available.
      * This means that ROLE_USER and ROLE_ANONYMOUS gain read access to the Revision and by that also to
      * the Model.
@@ -2015,6 +2064,63 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         aclUtilService.deletePermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
         revision.state=ModelState.UNPUBLISHED
         revision.save(flush:true)
+    }
+
+    /**
+     * Validates the metadata for a model revision.
+     *
+     * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
+     * method.
+     * @param revision The Revision to be validated
+     */
+    @PreAuthorize("hasRole('ROLE_CURATOR') or hasRole('ROLE_ADMIN')") //used to be: (hasRole('ROLE_CURATOR') and hasPermission(#revision, admin))
+    @PostLogging(LoggingEventType.UPDATE)
+    @Profiled(tag="modelService.validateModelRevision")
+    public void validateModelRevision(Revision revision){
+        if (!SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            if (!aclUtilService.hasPermission(springSecurityService.authentication, revision,
+                        BasePermission.ADMINISTRATION)) {
+                throw new AccessDeniedException("You cannot validate this model.");
+            }
+        }
+        if (!revision) {
+            throw new IllegalArgumentException("Revision may not be null")
+        }
+        if (revision.deleted) {
+            throw new IllegalArgumentException("Revision may not be deleted")
+        }
+
+        List<File> repFiles = retrieveModelRepFiles(revision)
+        final File pharmML = AbstractPharmMlHandler.findPharmML(repFiles)
+        String metadataFileName = JummpXmlUtils.findModelAttribute(pharmML, "PharmML", "metadataFile")
+
+        File metadataFile = null;
+        for(File file : repFiles){
+            if(file.getName().equals(metadataFileName)){
+                metadataFile = file;
+                break;
+            }
+        }
+
+        if(metadataFile==null)
+            throw new ValidationException("Metadata file not found for "+pharmML.getName())
+        else {
+            validationReport.generateValidationReport(metadataFile, revision.getModel().getSubmissionId())
+        }
+
+        revision.validationReport = validationReport.getValidationReport();
+        revision.validationLevel = validationReport.metadataValidator.getValidationErrorStatus();
+
+        aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
+        aclUtilService.addPermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
+
+        // TODO FIXME this should not need to bypass validation in order to save successfully!
+        // TODO make sure that only relative file paths are stored in the database!!
+        try {
+            revision.save(validate: false, failOnError: true, flush: true)
+        } catch (Throwable e) {
+            log.error e.message, e
+        }
     }
 
     /**

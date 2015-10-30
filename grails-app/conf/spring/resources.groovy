@@ -129,4 +129,6 @@ beans = {
                                       true,
                                       Thread.currentThread().contextClassLoader))
     }
+
+    importBeans('classpath:/metadatalib-spring-config.xml')
 }

@@ -34,6 +34,7 @@
 
 package net.biomodels.jummp.core.model
 
+import eu.ddmore.metadata.service.ValidationStatus
 import net.biomodels.jummp.core.annotation.ElementAnnotationTransportCommand
 import org.springframework.context.ApplicationContext
 
@@ -106,6 +107,10 @@ class RevisionTransportCommand implements Serializable {
      */
     List<ElementAnnotationTransportCommand> annotations
 
+    ValidationStatus validationLevel
+
+    String validationReport
+
      List<RepositoryFileTransportCommand> getFiles() {
          if (!files) {
              files = context.modelDelegateService.retrieveModelFiles(this)
@@ -117,4 +122,11 @@ class RevisionTransportCommand implements Serializable {
          final PERENNIAL_ID = model.publicationId ?: model.submissionId
          return new StringBuffer(PERENNIAL_ID).append(".").append(revisionNumber).toString()
      }
+
+    String [] getValidationStatementList(){
+        if(validationReport == null){
+            return null;
+        }
+        return validationReport.split("     ");
+    }
 }

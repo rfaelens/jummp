@@ -4,27 +4,27 @@
 
  This file is part of Jummp.
 
- Jummp is free software; you can redistribute it and/or modify it under the 
- terms of the GNU Affero General Public License as published by the Free 
- Software Foundation; either version 3 of the License, or (at your option) any 
+ Jummp is free software; you can redistribute it and/or modify it under the
+ terms of the GNU Affero General Public License as published by the Free
+ Software Foundation; either version 3 of the License, or (at your option) any
  later version.
 
- Jummp is distributed in the hope that it will be useful, but WITHOUT ANY 
- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more 
+ Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
+ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
  details.
 
- You should have received a copy of the GNU Affero General Public License along 
+ You should have received a copy of the GNU Affero General Public License along
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 
  Additional permission under GNU Affero GPL version 3 section 7
 
- If you modify Jummp, or any covered work, by linking or combining it with 
- Apache Commons (or a modified version of that library), containing parts 
- covered by the terms of Apache License v2.0, the licensors of this 
- Program grant you additional permission to convey the resulting work. 
- {Corresponding Source for a non-source form of such a combination shall include 
- the source code for the parts of Apache Commons used as well as that of 
+ If you modify Jummp, or any covered work, by linking or combining it with
+ Apache Commons (or a modified version of that library), containing parts
+ covered by the terms of Apache License v2.0, the licensors of this
+ Program grant you additional permission to convey the resulting work.
+ {Corresponding Source for a non-source form of such a combination shall include
+ the source code for the parts of Apache Commons used as well as that of
  the covered work.}
 --%>
 
@@ -70,11 +70,11 @@
         	}
         </style>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'jquery.handsontable.full.min.css')}"/>
-        <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" /> 
-        <link rel="stylesheet" href="${resource(dir: 'css', file: 'filegrid.css')}" /> 
-        <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shCore.css')}" /> 
+        <link rel="stylesheet" href="${resource(dir: 'css', file: 'jstree.css')}" />
+        <link rel="stylesheet" href="${resource(dir: 'css', file: 'filegrid.css')}" />
+        <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shCore.css')}" />
         <link rel="stylesheet" href="${resource(dir: 'css/syntax', file: 'shThemeDefault.css')}" />
-        
+
         <Ziphandler:outputFileInfoAsJS repFiles="${revision.files.findAll{!it.hidden}}" loadedZips="${loadedZips}" zipSupported="${zipSupported}"/>
         <script>
 		$(function() {
@@ -129,9 +129,9 @@
                        }
                     }
             });
-			
+
 		});
-		
+
 		function getCSVData(data) {
 			var lines=data.match(/[^\r\n]+/g);
 			/*var content=[];
@@ -143,7 +143,7 @@
 			}
 			return data;
 		}
-		
+
 		function addPreviewNotification(showNotification, fileProps) {
 			if (showNotification) {
 					$("#notificationgoeshere").html("As this is a large file, only a part of it is loaded below. <a id='loadFileCompletely' href=''>Click here</a> to load the file completely. Please be warned that this may be slow.");
@@ -157,7 +157,7 @@
 				$("#notificationgoeshere").hide();
 			}
 		}
-		
+
 		function updateFileDetailsPanel(fileProps) {
 			if (typeof(fileProps) != "undefined") {
 				var formats=["text","txt","xml","pdf", "jpg","jpeg", "gif", "png", "bmp"];
@@ -196,7 +196,7 @@
 							}
 							content.push("<div id='notificationgoeshere' class='padleft padbottom'></div><div id='filegoeshere' class='padright padbottom")
 							if (!mdlType && !xmlType) {
-								content.push(" padleft") 
+								content.push(" padleft")
 							}
 							content.push("'>")
 							if (matching=="pdf") {
@@ -219,7 +219,7 @@
 						success: function(data) {
 							console.log(data);
 							data=JSON.parse(data);
-							var tcontent=[];						
+							var tcontent=[];
 							tcontent.push("<table cellpadding='2' cellspacing='5'>")
 							for (var prop in fileProps) {
 								if (prop!="isInternal" && prop!="Name" && fileProps[prop] && fileProps[prop]!="null" && prop!="mime" && prop!="showPreview") {
@@ -231,7 +231,7 @@
 							tcontent.push("</td></tr>")
 							tcontent.push("<tr><td><b>Last Modified</b></td><td>",new Date(data[data.length-1].commit))
 							tcontent.push("</td></tr>")
-									
+
 							tcontent.push("</table>");
 							$("#tableGoesHere").html(tcontent.join(""));
 							$("#Files").equalize({reset: true});
@@ -334,7 +334,7 @@
 			}
 			$("#Files").equalize({reset: true});
 		}
-		
+
 		$(document).ready(function() {
 			// Handler for .ready() called.
 			$("#Files #treeView").bind("select_node.jstree", function(event, data) {
@@ -377,6 +377,22 @@
                     }
                 }
             });
+            $('#confirm-model-validate').dialog({
+                resizable: false,
+                autoOpen: false,
+                height: 300,
+                width: 500,
+                modal: true,
+                buttons: {
+                    Confirm: function() {
+                        openPage("${g.createLink(controller: 'model', action: 'validate', id: revision.identifier() )}");
+                        $( this ).dialog( "close" );
+                    },
+                    Cancel: function() {
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
             $("body").append("<div id='modelToolbar' class='collapsibleContainer' title='Model Toolbar'><button title='Expand Toolbar' data-showing='0' id='panelToggle'>Expand</button></div>	");
             $("#buttonContainer").prependTo("#modelToolbar");
             $("#panelToggle").click(function (evt){
@@ -412,6 +428,12 @@
 						primary:"ui-icon-person"
 					}
 			}).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
+            $( "#validate" ).button({
+                text:false,
+                icons: {
+                    primary:"ui-icon-star"
+                }
+            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
 			$("#panelToggle").button({
 					text:false,
 					icons: {
@@ -420,7 +442,7 @@
 			}).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px', 'float':'right'  });;
 		});
 		displayToolbar(false, false);
-            
+
 		function displayToolbar(show, firstTime) {
 			if (show) {
 					$("#panelToggle").data("showing", '1');
@@ -482,6 +504,14 @@
                     <button class='toolbutton' id="share" onclick="return $.jummp.openPage('${g.createLink(controller: 'model', action: 'share', id: revision.identifier())}')">Share</button>
 					</li>
 				</g:if>
+                <g:if test="${showValidateOption}">
+                    <div id="confirm-model-validate" title="You are about to validate this model version" style="display:none;">
+                        <p>Validate this version of the model?</p>
+                    </div>
+                    <li>
+                        <button class='toolbutton' id="validate" onclick="return $( '#confirm-model-validate' ).dialog( 'open' );">Validate</button>
+                    </li>
+                </g:if>
 				</ul>
          </div>
         <div class="ebiLayout_reduceWidth">
@@ -492,8 +522,8 @@
     	</g:if>
     	<g:if test="${oldVersion}">
     		<div class='PermanentMessage'>
-    			You are viewing a version of a model that has been updated. 
-    			To access the latest version, and a more detailed display please 
+    			You are viewing a version of a model that has been updated.
+    			To access the latest version, and a more detailed display please
     			go <a href="${createLink(controller: "model", action: "show", id:
                     (revision.model.publicationId) ?: (revision.model.submissionId))}">here</a>.
     		</div>
@@ -508,9 +538,9 @@
 					</g:if>
 					<g:else>
 						<img style="float:right;margin-top:0;" title="This version of the model is unpublished" alt="unpublished model" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Functional/Functional%20icons/lock.png"/>
-					</g:else>                                
+					</g:else>
 				</div>
-   
+
     	        <%--        <a class="submit" title="Update Model" href="${g.createLink(controller: 'model', action: 'update', id: (revision.model.publicationId) ?: (revision.model.submissionId))}">Update</a>
         	<a class="submit" title="Download Model" href="${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}">Download</a>
 	 --%></div>
@@ -555,7 +585,21 @@
 		</tr>
 	    </table>
         <g:pageProperty name="page.genericAnnotations"/>
-	
+
+
+          <g:if test="${validationlist!=null}">
+              <span class="bold">Validation Report</span>
+              <ol>
+
+                  <g:each in="${validationlist}">
+                      <li>${it}</li>
+                  </g:each>
+
+              </ol>
+          %{-- ${revision.validationReport}--}%
+          </g:if>
+
+
 	  </div>
 	  <div id="Files" class="filegrid">
 	  	<div class="filecol-1-3">
@@ -602,7 +646,7 @@
 					</g:else>
 	  	     		<g:if test="${revision.id!=rv.id}">
 	  	     			<a class="versionDownload" title="go to version ${rv.revisionNumber}" href="${g.createLink(controller: 'model', action: 'show', id: rv.identifier())}">
-	  	     				<img style="width:12px;margin:2px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Generic/Generic%20icons/external_link.png"/> 
+	  	     				<img style="width:12px;margin:2px;float:none" src="http://www.ebi.ac.uk/web_guidelines/images/icons/EBI-Generic/Generic%20icons/external_link.png"/>
 	  	     			</a>
 	  	     		</g:if>
 	  	     				<a class="versionDownload" title="download" href="${g.createLink(controller: 'model', action: 'download', id: rv.identifier())}">

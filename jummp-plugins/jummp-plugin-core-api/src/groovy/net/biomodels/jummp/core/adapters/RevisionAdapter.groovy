@@ -34,10 +34,10 @@ import net.biomodels.jummp.model.Revision
  */
 public class RevisionAdapter extends DomainAdapter {
     Revision revision
-    
-    
+
+
     def modelService = Holders.getGrailsApplication().mainContext.modelService
-    
+
     List<RFTC> getRepositoryFilesForRevision() {
         List<RFTC> repFiles=new LinkedList<RFTC>()
         List<File> files = modelService.retrieveModelRepFiles(revision)
@@ -74,7 +74,9 @@ public class RevisionAdapter extends DomainAdapter {
                 uploadDate: revision.uploadDate,
                 format: getAdapter(revision.format).toCommandObject(),
                 model: getAdapter(revision.model).toCommandObject(),
-                annotations: annotations
+                annotations: annotations,
+                validationLevel: revision.validationLevel,
+                validationReport: revision.validationReport
         )
         return rev
     }
