@@ -119,7 +119,7 @@ grails.project.dependency.resolution = {
         test "org.grails:grails-datastore-test-support:1.0-grails-2.3"
         runtime 'org.javassist:javassist:3.17.1-GA'
         runtime "org.apache.camel:camel-exec:2.13.0"
-        compile ("eu.ddmore.metadata:lib-metadata:1.0-SNAPSHOT") {
+        compile ("eu.ddmore.metadata:lib-metadata:1.1-SNAPSHOT") {
             excludes 'spring-context','spring-core','spring-test'
         }
     }

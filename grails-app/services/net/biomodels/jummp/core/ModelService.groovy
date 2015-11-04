@@ -34,7 +34,6 @@ import eu.ddmore.metadata.api.MetadataInformationService
 import eu.ddmore.metadata.impl.MetadataInformationServiceImpl
 import eu.ddmore.metadata.service.ValidationException
 import eu.ddmore.metadata.service.ValidationReportImpl
-import eu.ddmore.metadata.service.ValidationStatus
 import grails.spring.BeanBuilder
 import grails.util.Holders
 import net.biomodels.jummp.core.util.JummpXmlUtils
@@ -2092,9 +2091,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
 
         revision.validationReport = validationReport.getValidationReport();
         revision.validationLevel = validationReport.metadataValidator.getValidationErrorStatus();
-
-        aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
-        aclUtilService.addPermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
 
         // TODO FIXME this should not need to bypass validation in order to save successfully!
         // TODO make sure that only relative file paths are stored in the database!!

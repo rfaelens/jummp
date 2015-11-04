@@ -28,7 +28,8 @@ includeTargets << new File("./scripts/WeceemExport.groovy")
  * Script to write the git id of the build into _version.gsp
  */
 eventCompileStart = { msg ->
-    def proc = "\"C:\\Program Files (x86)\\Git\\bin\\git.exe\" log -1 --pretty=format:\"%h|%aD\"".execute()
+    //def proc = "\"C:\\Users\\sarala.EBI\\software\\git\\Git\\bin\\git.exe\" log -1 --pretty=format:\"%h|%aD\"".execute()
+    def proc = "git log -1 --pretty=format:\"%h|%aD\"".execute()
     proc.waitFor()
     ant.mkdir(dir: "grails-app/views/templates/")
 //    new FileOutputStream("grails-app/views/templates/_version.gsp", false) << "<BuildFormat:formatter build="+proc.in.text+"/>"
