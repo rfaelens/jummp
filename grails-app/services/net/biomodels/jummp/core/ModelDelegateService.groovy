@@ -35,7 +35,6 @@
 package net.biomodels.jummp.core
 
 import eu.ddmore.metadata.service.ValidationException
-import eu.ddmore.metadata.service.ValidationStatus
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
 import net.biomodels.jummp.core.model.ModelAuditTransportCommand
@@ -47,6 +46,7 @@ import net.biomodels.jummp.core.model.PermissionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ValidationState
 import net.biomodels.jummp.core.vcs.VcsFileDetails
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
@@ -228,7 +228,7 @@ class ModelDelegateService implements IModelService {
 
     Boolean canValidate(String modelId) {
         def revision = getLatestRevision(modelId)
-        if (revision.state != ValidationStatus.APPROVED) {
+        if (revision.state != ValidationState.APPROVED) {
             try {
                 return modelService.canValidate(Revision.get(revision.id))
             }
@@ -240,7 +240,7 @@ class ModelDelegateService implements IModelService {
     }
     Boolean canShowValidateReport(String modelId) {
         def revision = getLatestRevision(modelId)
-        if (revision.state != ValidationStatus.APPROVED ) {
+        if (revision.state != ValidationState.APPROVED ) {
             try {
                 return modelService.canValidate(Revision.get(revision.id))
             }

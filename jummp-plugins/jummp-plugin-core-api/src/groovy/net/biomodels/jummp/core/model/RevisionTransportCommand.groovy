@@ -34,7 +34,6 @@
 
 package net.biomodels.jummp.core.model
 
-import eu.ddmore.metadata.service.ValidationStatus
 import net.biomodels.jummp.core.annotation.ElementAnnotationTransportCommand
 import org.springframework.context.ApplicationContext
 
@@ -107,7 +106,7 @@ class RevisionTransportCommand implements Serializable {
      */
     List<ElementAnnotationTransportCommand> annotations
 
-    ValidationStatus validationLevel
+    ValidationState validationLevel
 
     String validationReport
 

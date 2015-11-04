@@ -589,14 +589,12 @@
 
           <g:if test="${validationlist!=null}">
               <span class="bold">Validation Report</span>
-              <ol>
-
+              <ul>
                   <g:each in="${validationlist}">
                       <li>${it}</li>
                   </g:each>
 
-              </ol>
-          %{-- ${revision.validationReport}--}%
+              </ul>
           </g:if>
 
 
