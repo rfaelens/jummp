@@ -1191,4 +1191,6 @@ databaseChangeLog = {
 	include file: '20150626_addCollectionNameToResourceReference.groovy'
 
 	include file: '20151012_addMetadataValidationToRevision.groovy'
+
+    include file: '20151105_populate_revision_validation_level.groovy'
 }
