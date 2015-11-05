@@ -385,7 +385,7 @@
                 modal: true,
                 buttons: {
                     Confirm: function() {
-                        openPage("${g.createLink(controller: 'model', action: 'validate', id: revision.identifier() )}");
+                        $.jummp.openPage("${g.createLink(controller: 'model', action: 'validate', id: revision.identifier() )}");
                         $( this ).dialog( "close" );
                     },
                     Cancel: function() {
