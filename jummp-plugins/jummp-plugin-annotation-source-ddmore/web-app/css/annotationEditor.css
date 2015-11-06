@@ -47,15 +47,13 @@
     color: red;
 }
 
-select {
-    overflow: hidden;
-}
-
 optgroup[label] {
+    /* disable italic styling for the optgroup label */
     color: #0079FF;
+    font-style: normal;
 }
 
 optgroup option {
-    color: #000; /* reset optgroup setting */
-    padding-left: 1em;
+    color: #000; /* reset optgroup font settings */
+    padding-left: 2em;
 }
