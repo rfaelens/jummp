@@ -89,7 +89,7 @@
         icons: {
             primary: "ui-icon-check"
         }
-    }).one("click", function(event) {
+    }).on("click", function(event) {
         "use strict";
         event.preventDefault();
         $.ajax({
