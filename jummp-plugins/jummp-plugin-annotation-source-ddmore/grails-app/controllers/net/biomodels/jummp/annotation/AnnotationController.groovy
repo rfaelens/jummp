@@ -32,7 +32,7 @@ class AnnotationController {
 
     def metadataInputSource
     def modelDelegateService
-    def metatadaDelegateService
+    def metadataDelegateService
 
     @Secured(["isAuthenticated()"])
     def show() {
@@ -76,41 +76,26 @@ class AnnotationController {
         String modelId = params.revision
         theSubject.predicates.each {
             String p = it.predicate
-            String o = it.object.object
-            def object
-            if (o.startsWith("http:")) {
-                object = new ResourceReferenceTransportCommand(uri: o)
-            } else {
-                object = new ResourceReferenceTransportCommand(name: o)
-            }
             def predicate = new QualifierTransportCommand(uri: p)
-            def stmt = new StatementTransportCommand(subject: modelId, predicate: predicate,
-                    object: object)
-            stmts.add(stmt)
+
+            def objects = it.object.object
+            if (!(objects instanceof List)) {
+                objects = [objects]
+            }
+            objects.each { String o ->
+                def object
+                if (o.startsWith("http:")) {
+                    object = new ResourceReferenceTransportCommand(uri: o)
+                } else {
+                    object = new ResourceReferenceTransportCommand(name: o)
+                }
+                def stmt = new StatementTransportCommand(subject: modelId, predicate: predicate,
+                        object: object)
+                stmts.add(stmt)
+            }
         }
 
-        def metadataWriter = new MetadataWriterImpl()
-        boolean result = true //metatadaDelegateService.updateModelMetadata(modelId, stmts)
-        try {
-            //TODO fix me
-            String subject = "http://localhost:8080/jummp/$modelId"
-            stmts.each { StatementTransportCommand statement ->
-                String predicate = statement.predicate.uri
-                ResourceReferenceTransportCommand xref = statement.object
-                String object = xref.uri ?: xref.name
-                boolean isLiteralTriple = xref.uri ? false : true
-                if (isLiteralTriple) {
-                    metadataWriter.generateLiteralTriple(subject, predicate, object)
-                } else {
-                    metadataWriter.generateTriple(subject, predicate, object)
-                }
-            }
-            println metadataWriter.model.dump()
-            metadataWriter.writeRDFModel("/tmp/${modelId}.rdf", RDFFormat.RDFXML)
-        } catch(Exception e) {
-            e.printStackTrace()
-            result = false
-        }
+        boolean result = metadataDelegateService.updateModelMetadata(modelId, stmts)
         if (result) {
             render([status: '200', message: "Information successfully saved."] as JSON)
         } else {

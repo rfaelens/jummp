@@ -20,10 +20,16 @@
 
 package net.biomodels.jummp.core
 
+import eu.ddmore.metadata.service.MetadataWriterImpl
+import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.annotationstore.*
 import net.biomodels.jummp.model.Revision
-import org.apache.commons.logging.LogFactory
+import net.biomodels.jummp.model.Model
+import net.biomodels.jummp.core.model.*
+import net.biomodels.jummp.core.annotation.*
 import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.apache.jena.riot.RDFFormat
 import org.perf4j.aop.Profiled
 
 /**
@@ -37,6 +43,14 @@ import org.perf4j.aop.Profiled
 class MetadataService {
     private static final Log log = LogFactory.getLog(this)
     private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
+    /**
+     * Dependency injection for Grails Application.
+     */
+    def grailsApplication
+    /**
+     *
+     */
+    def modelService
 
     /**
      * Fetches any ResourceReferences defined for a given qualifier from a revision.
@@ -155,5 +169,45 @@ class MetadataService {
             log.debug "Found ${result.size()} matching annotations."
         }
         return result
+    }
+
+    @Profiled(tag = "metadataService.updateModelMetadata")
+    boolean updateModelMetadata(String model, List<StatementTransportCommand> statements) {
+        //TODO REPLACE WITH PROTOTYPE BEAN
+        def metadataWriter = new MetadataWriterImpl()
+        def subject = "${grailsApplication.config.grails.serverURL}/model/${model}"
+        try {
+            statements.each { StatementTransportCommand statement ->
+                String predicate = statement.predicate.uri
+                ResourceReferenceTransportCommand xref = statement.object
+                String object = xref.uri ?: xref.name
+                boolean isLiteralTriple = xref.uri ? false : true
+                if (isLiteralTriple) {
+                    metadataWriter.generateLiteralTriple(subject, predicate, object)
+                } else {
+                    metadataWriter.generateTriple(subject, predicate, object)
+                }
+            }
+            String fileBase = System.properties['java.io.tmpdir']
+            String fileName = "${model}.rdf"
+            String path = new File(fileBase, fileName).absolutePath
+            metadataWriter.writeRDFModel(path, RDFFormat.RDFXML)
+
+            RepositoryFileTransportCommand rf = new RepositoryFileTransportCommand(
+                    path: path, description: "annotation file")
+            Model theModel = Model.findBySubmissionIdOrPublicationId(model, model)
+            Revision baseRevision = modelService.getLatestRevision(theModel, false)
+            List<RepositoryFileTransportCommand> files = modelService.retrieveModelFiles(baseRevision)
+            RevisionTransportCommand newRevision = DomainAdapter.getAdapter(baseRevision).toCommandObject()
+            newRevision.comment = "Updated model annotations."
+            files.add rf
+            println "base: ${baseRevision.dump()}"
+            println "new: ${newRevision.dump()}"
+            def result = modelService.addValidatedRevision(files, [], newRevision)
+            return result != null
+        } catch(Exception e) {
+            log.error(e.message, e)
+            return false
+        }
     }
 }
