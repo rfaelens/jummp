@@ -428,6 +428,12 @@
 						primary:"ui-icon-person"
 					}
 			}).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
+            $("#annotate").button({
+                text: false,
+                icons: {
+                    primary: "ui-icon-tag"
+                }
+            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });
             $( "#validate" ).button({
                 text:false,
                 icons: {
@@ -504,6 +510,11 @@
                     <button class='toolbutton' id="share" onclick="return $.jummp.openPage('${g.createLink(controller: 'model', action: 'share', id: revision.identifier())}')">Share</button>
 					</li>
 				</g:if>
+                <g:if test="${canUpdate}">
+                    <li>
+                    <button class='toolbutton' id='annotate' onclick="return $.jummp.openPage('${g.createLink(controller: 'annotation', action: 'show', id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Annotate</button>
+                    </li>
+                </g:if>
                 <g:if test="${showValidateOption}">
                     <div id="confirm-model-validate" title="You are about to validate this model version" style="display:none;">
                         <p>Validate this version of the model?</p>
