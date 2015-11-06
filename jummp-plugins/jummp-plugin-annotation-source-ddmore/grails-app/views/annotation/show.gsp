@@ -122,5 +122,17 @@
         }
     });
 </g:javascript>
+<script>
+    /* display all options at all times by setting the size of the select box */
+    var selects = $('select');
+    var selectCount = selects.length;
+    var i;
+    for(i = 0; i < selectCount; i++) {
+        var thisSelect = selects[i];
+        var actualLength = 1 + thisSelect.length;
+        thisSelect.setAttribute('size', "" + actualLength);
+    }
+
+</script>
 </body>
 

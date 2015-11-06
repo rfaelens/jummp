@@ -26,7 +26,6 @@ Jummp.addRdfStatement = function(subject, predicate, object) {
     } else {
         thisPredicate = subjectPredicates[predicateIdx];
         if (!thisPredicate) {
-            console.log('fuxake', predicateIdx);
             return;
         }
         thisPredicate.object = object;
@@ -239,7 +238,7 @@ Handlebars.registerHelper("renderSingleUnconstrainedValue", function() {
 // as an optgroup.
 Handlebars.registerHelper("renderMultipleConstrainedValues", function() {
     var values = this.values;
-    var result = "<select multiple size='" + values.size() + "'>";
+    var result = "<select multiple >";
     values.each(function(value) {
         result = Jummp.buildValueTree(value, result);
     });
