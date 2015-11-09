@@ -285,7 +285,7 @@ class SearchService {
         } else if (1 == docs.size()) {
             return docs.first().get('deleted')
         } else {
-            return null == docs.find { it.get('deleted') }
+            return null == docs.find { !(it.get('deleted')) }
         }
     }
 
