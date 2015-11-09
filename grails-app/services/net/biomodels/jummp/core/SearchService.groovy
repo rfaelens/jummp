@@ -263,7 +263,6 @@ class SearchService {
      *      to true if unspecified
      **/
     void setDeleted(def model, boolean deleted = true) {
-        def searchService = grailsApplication.mainContext.searchService
         SolrDocumentList docs = findSolrDocumentByModel(model, ["deleted"])
         docs.each {
             SolrInputDocument doc = getSolrDocumentWithId(it.get("uniqueId"))
