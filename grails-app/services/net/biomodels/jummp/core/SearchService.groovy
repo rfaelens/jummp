@@ -276,7 +276,7 @@ class SearchService {
      * Checks whether a model is marked as deleted in the Solr index.
      *
      * @param model An instance of Model or ModelTransportCommand for which to check.
-     * @return true if the corresponding SolrInputDocument is marked as deleted, false otherwise.
+     * @return true if the corresponding SolrInputDocuments are marked as deleted, false otherwise.
      */
     boolean isDeleted(def model) {
         SolrDocumentList docs = findSolrDocumentByModel(model, ["deleted"])
@@ -291,11 +291,11 @@ class SearchService {
 
 
     /*
-     * Finds the SolrDocument associated with a given model.
+     * Finds the SolrDocuments associated with a given model.
      *
-     * The lookup is done based on the model's submission identifier, which should yield
-     * a single result, but if that is not the case, this method does not truncate the
-     * response from Solr, hence the reason for returning a SolrDocumentList.
+     * The lookup is done based on the model's submission identifier. This method returns
+     * the SolrInputDocuments for all revisions of the given model, hence the reason for
+     * returning a SolrDocumentList.
      *
      * @param model either a ModelTransportCommand or a Model for which to find the SolrDocument.
      * @param fields a list of fields that should be included for each result. The 'uniqueId'
@@ -314,8 +314,6 @@ class SearchService {
         SolrDocumentList docs = response.getResults()
         if (0 == docs.size()) {
             log.warn("Could not find a Solr document for model ${model?.submissionId}")
-        } else if (docs.size() > 1) {
-            log.error("Multiple Solr documents corresponding to model ${model?.submissionId}")
         }
         docs
     }
