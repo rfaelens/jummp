@@ -289,7 +289,6 @@ class SearchService {
         }
     }
 
-
     /*
      * Finds the SolrDocuments associated with a given model.
      *
