@@ -30,18 +30,10 @@
 
 package net.biomodels.jummp.core
 
-import eu.ddmore.metadata.api.MetadataInformationService
-import eu.ddmore.metadata.impl.MetadataInformationServiceImpl
 import eu.ddmore.metadata.service.ValidationException
 import eu.ddmore.metadata.service.ValidationReportImpl
-import grails.spring.BeanBuilder
-import grails.util.Holders
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
-
-import javax.activation.MimetypesFileTypeMap
-
-import static java.util.UUID.randomUUID
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
 import net.biomodels.jummp.core.events.LoggingEventType
