@@ -1847,6 +1847,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         def searchService = grailsApplication.mainContext.searchService
         Model.withTransaction { status ->
             model.deleted = true
+            revs.each { Revision r ->
+                r.deleted = true
+                r.save() // will trigger model.save() too
+            }
             searchService.setDeleted(model)
             if (!searchService.isDeleted(model)) {
                 status.setRollbackOnly()
