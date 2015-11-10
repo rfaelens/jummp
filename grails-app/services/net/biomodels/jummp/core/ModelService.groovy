@@ -1833,7 +1833,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (model.deleted) {
             return false
         }
-        List<Revision> revs = getAllRevisions(model)
+        List<Revision> revs = Revision.findAllByModel(model)
         Revision publicRev = revs.find {
             it.state != ModelState.UNPUBLISHED
         }
