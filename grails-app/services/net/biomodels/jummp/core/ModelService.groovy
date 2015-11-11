@@ -1837,6 +1837,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         boolean modelAlreadyPublic = hasPublicRevision(model)
         if (modelAlreadyPublic) {
+            if (IS_DEBUG_ENABLED) {
+                log.debug "Refusing to delete published model ${model.submissionId}"
+            }
             return false
         }
         if (IS_DEBUG_ENABLED) {
