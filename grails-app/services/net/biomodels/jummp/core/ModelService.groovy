@@ -1848,24 +1848,28 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         // can't inject searchService - cyclic dependency
         def searchService = grailsApplication.mainContext.searchService
-        Model.withTransaction { status ->
+        searchService.setDeleted(model)
+        if (!searchService.isDeleted(model)) {
+            // leave the model as not deleted and log the error
+            log.error("Could not set model ${model.submissionId} as deleted in solr.")
+            return false
+        } else {
             model.deleted = true
-            searchService.setDeleted(model)
-            if (!searchService.isDeleted(model)) {
-                status.setRollbackOnly()
-                searchService.setDeleted(model, false)
-                log.error("Could not set model ${model.submissionId} as deleted in solr.")
+            model.save(validate: false, flush: true) //FIXME disable validation bypassing
+            //quick test to make sure Solr is in sync with the database
+            model.refresh()
+            boolean db = model.deleted
+            boolean solr = searchService.isDeleted(model)
+            if (IS_DEBUG_ENABLED) {
+                def m = new StringBuilder("Deletion status for ").append(model.submissionId
+                ).append(" - db: ").append(db).append(" solr: ").append(solr)
+                log.debug(m.toString())
             }
+            return db && solr
         }
-        //quick test to make sure Solr is in sync with the database
-        boolean db = model.deleted
-        boolean solr = searchService.isDeleted(model)
-        if (IS_DEBUG_ENABLED) {
-            def m = new StringBuilder("Deletion status for ").append(model.submissionId
-                    ).append(" - db: ").append(db).append(" solr: ").append(solr)
-            log.debug(m.toString())
+    }
+
         }
-        return db && solr
     }
 
     /**
