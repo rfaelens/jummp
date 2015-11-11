@@ -300,7 +300,8 @@ class ModelDelegateService implements IModelService {
     }
 
     boolean deleteModel(String modelId) {
-        return modelService.deleteModel(ModelAdapter.findByPerennialIdentifier(modelId))
+        def model = ModelAdapter.findByPerennialIdentifier(modelId)
+        modelService.deleteModel(model)
     }
 
     boolean restoreModel(String modelId) {

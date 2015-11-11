@@ -1785,8 +1785,10 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (publicRev) {
             return false
         }
-        return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(
-                springSecurityService.authentication, model, BasePermission.DELETE))
+        boolean isAdmin = SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")
+        boolean hasDeleteRight = aclUtilService.hasPermission(
+                springSecurityService.authentication, model, BasePermission.DELETE)
+        return isAdmin || hasDeleteRight
     }
 
     /**
