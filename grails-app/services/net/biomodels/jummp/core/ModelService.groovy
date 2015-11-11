@@ -1811,11 +1811,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Deletes the @p model including all Revisions.
+    * Deletes the @p model.
     *
-    * Flags the @p model and all its revisions as deleted. A deletion from VCS is for
-    * technical reasons not possible and because of that a deletion of the Model object
-    * is not possible.
+    * Flags the @p model as deleted in the database and the search index.
+    *
+    * The corresponding revision objects are not set as deleted in the database
+    * because that would prevent users from being able to access archived models.
     *
     * Deletion of @p model is only possible if the model is neither under curation nor published.
     * @param model The Model to be deleted
@@ -1849,10 +1850,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         def searchService = grailsApplication.mainContext.searchService
         Model.withTransaction { status ->
             model.deleted = true
-            revs.each { Revision r ->
-                r.deleted = true
-                r.save() // will trigger model.save() too
-            }
             searchService.setDeleted(model)
             if (!searchService.isDeleted(model)) {
                 status.setRollbackOnly()
