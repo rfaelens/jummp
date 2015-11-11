@@ -1780,8 +1780,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (model.deleted) {
             return false
         }
-        List<Revision> revs = getAllRevisions(model)
-        Revision publicRev = revs.find { it.state != ModelState.UNPUBLISHED }
+        boolean publicRev = hasPublicRevision(model)
         if (publicRev) {
             return false
         }
@@ -1836,11 +1835,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (model.deleted) {
             return false
         }
-        List<Revision> revs = Revision.findAllByModel(model)
-        Revision publicRev = revs.find {
-            it.state != ModelState.UNPUBLISHED
-        }
-        if (publicRev) {
+        boolean modelAlreadyPublic = hasPublicRevision(model)
+        if (modelAlreadyPublic) {
             return false
         }
         if (IS_DEBUG_ENABLED) {
@@ -1869,7 +1865,20 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
     }
 
+    /*
+     * Convenience method that checks whether a model has any publicly-available revision.
+     *
+     * @param model the model for which to verify the publication status.
+     */
+    private boolean hasPublicRevision(Model model) {
+        def publicRevisionCriteria = Revision.createCriteria()
+        def publicRevisionCriteriaResults = publicRevisionCriteria.list(max: 1) {
+            and {
+                eq("model", model)
+                ne("state", ModelState.UNPUBLISHED)
+            }
         }
+        [] != publicRevisionCriteriaResults
     }
 
     /**
