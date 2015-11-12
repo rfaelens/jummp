@@ -137,9 +137,6 @@ class BootStrap {
                 new AclSid(sid: user.username, principal: true).save(flush: true)
                 Role userRole = Role.findByAuthority("ROLE_USER")
                 UserRole.create(user, userRole, true)
-                if (!Role.findByAuthority("ROLE_ADMIN")) {
-                    new Role(authority: "ROLE_ADMIN").save(flush: true)
-                }
                 userRole = Role.findByAuthority("ROLE_ADMIN")
                 UserRole.create(user, userRole, true)
             }
