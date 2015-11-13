@@ -91,47 +91,6 @@ class SearchTests extends JummpIntegrationTest {
         assertEquals(upped.id, result.id)
     }
 
-    @Test
-    void modelsAreDeleted() {
-        def exchg = "target/vcs/exchange"
-        def wd ="target/vcs/git"
-        authenticateAsTestUser()
-        GitManagerFactory gitService = new GitManagerFactory()
-        gitService.grailsApplication = grailsApplication
-        grailsApplication.config.jummp.plugins.git.enabled = true
-        grailsApplication.config.jummp.vcs.exchangeDirectory = exchg
-        grailsApplication.config.jummp.vcs.workingDirectory = wd
-        modelService.vcsService.vcsManager = gitService.getInstance()
-        modelService.vcsService.vcsManager.exchangeDirectory = new File(exchg)
-        def modelPath = "test/files/JUM-84/pharmml/testPharmML.xml"
-        def modelFile = new File(modelPath)
-        assertTrue modelFile.exists()
-        // upload the model
-        def model = new RepositoryFileTransportCommand(path: modelFile.absolutePath,
-                mainFile: true, description: "")
-        Model upped = modelService.uploadModelAsFile(model, new ModelTransportCommand(format:
-                new ModelFormatTransportCommand(identifier: "PharmML"), comment: "test", name: "Test"))
-        assertNotNull upped
-        assertEquals 1, Revision.count()
-        def firstRevision = Revision.first()
-        //wait a bit for the model to be indexed
-        Thread.sleep(25000)
-        def secondRevision = DomainAdapter.getAdapter(firstRevision).toCommandObject()
-        secondRevision.name = "Some other name"
-        secondRevision.description = "Some other description"
-        secondRevision.comment = "Some important change"
-        def r2 = modelService.addValidatedRevision([model], [], secondRevision)
-        assertNotNull r2
-        assertTrue modelService.deleteModel(upped)
-        upped = Model.read(upped.id)
-        assertTrue upped.deleted
-        assertTrue searchService.isDeleted(upped)
-        List<Revision> revisions = Revision.findAllByModel(upped)
-        revisions.each {
-            assertTrue it.deleted
-        }
-    }
-
     @Before
     void setUp() {
         def container = new File("target/vcs/git/ggg/")
