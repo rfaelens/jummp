@@ -30,18 +30,10 @@
 
 package net.biomodels.jummp.core
 
-import eu.ddmore.metadata.api.MetadataInformationService
-import eu.ddmore.metadata.impl.MetadataInformationServiceImpl
 import eu.ddmore.metadata.service.ValidationException
 import eu.ddmore.metadata.service.ValidationReportImpl
-import grails.spring.BeanBuilder
-import grails.util.Holders
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
-
-import javax.activation.MimetypesFileTypeMap
-
-import static java.util.UUID.randomUUID
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
 import net.biomodels.jummp.core.events.LoggingEventType
@@ -1788,13 +1780,14 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (model.deleted) {
             return false
         }
-        List<Revision> revs = getAllRevisions(model)
-        Revision publicRev = revs.find { it.state != ModelState.UNPUBLISHED }
+        boolean publicRev = hasPublicRevision(model)
         if (publicRev) {
             return false
         }
-        return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(
-                springSecurityService.authentication, model, BasePermission.DELETE))
+        boolean isAdmin = SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")
+        boolean hasDeleteRight = aclUtilService.hasPermission(
+                springSecurityService.authentication, model, BasePermission.DELETE)
+        return isAdmin || hasDeleteRight
     }
 
     /**
@@ -1817,11 +1810,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Deletes the @p model including all Revisions.
+    * Deletes the @p model.
     *
-    * Flags the @p model and all its revisions as deleted. A deletion from VCS is for
-    * technical reasons not possible and because of that a deletion of the Model object
-    * is not possible.
+    * Flags the @p model as deleted in the database and the search index.
+    *
+    * The corresponding revision objects are not set as deleted in the database
+    * because that would prevent users from being able to access archived models.
     *
     * Deletion of @p model is only possible if the model is neither under curation nor published.
     * @param model The Model to be deleted
@@ -1841,11 +1835,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (model.deleted) {
             return false
         }
-        List<Revision> revs = getAllRevisions(model)
-        Revision publicRev = revs.find {
-            it.state != ModelState.UNPUBLISHED
-        }
-        if (publicRev) {
+        boolean modelAlreadyPublic = hasPublicRevision(model)
+        if (modelAlreadyPublic) {
+            if (IS_DEBUG_ENABLED) {
+                log.debug "Refusing to delete published model ${model.submissionId}"
+            }
             return false
         }
         if (IS_DEBUG_ENABLED) {
@@ -1853,24 +1847,41 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         // can't inject searchService - cyclic dependency
         def searchService = grailsApplication.mainContext.searchService
-        Model.withTransaction { status ->
+        searchService.setDeleted(model)
+        if (!searchService.isDeleted(model)) {
+            // leave the model as not deleted and log the error
+            log.error("Could not set model ${model.submissionId} as deleted in solr.")
+            return false
+        } else {
             model.deleted = true
-            searchService.setDeleted(model)
-            if (!searchService.isDeleted(model)) {
-                status.setRollbackOnly()
-                searchService.setDeleted(model, false)
-                log.error("Could not set model ${model.submissionId} as deleted in solr.")
+            model.save(validate: false, flush: true) //FIXME disable validation bypassing
+            //quick test to make sure Solr is in sync with the database
+            model.refresh()
+            boolean db = model.deleted
+            boolean solr = searchService.isDeleted(model)
+            if (IS_DEBUG_ENABLED) {
+                def m = new StringBuilder("Deletion status for ").append(model.submissionId
+                ).append(" - db: ").append(db).append(" solr: ").append(solr)
+                log.debug(m.toString())
+            }
+            return db && solr
+        }
+    }
+
+    /*
+     * Convenience method that checks whether a model has any publicly-available revision.
+     *
+     * @param model the model for which to verify the publication status.
+     */
+    private boolean hasPublicRevision(Model model) {
+        def publicRevisionCriteria = Revision.createCriteria()
+        def publicRevisionCriteriaResults = publicRevisionCriteria.list(max: 1) {
+            and {
+                eq("model", model)
+                ne("state", ModelState.UNPUBLISHED)
             }
         }
-        //quick test to make sure Solr is in sync with the database
-        boolean db = model.deleted
-        boolean solr = searchService.isDeleted(model)
-        if (IS_DEBUG_ENABLED) {
-            def m = new StringBuilder("Deletion status for ").append(model.submissionId
-                    ).append(" - db: ").append(db).append(" solr: ").append(solr)
-            log.debug(m.toString())
-        }
-        return db && solr
+        [] != publicRevisionCriteriaResults
     }
 
     /**
