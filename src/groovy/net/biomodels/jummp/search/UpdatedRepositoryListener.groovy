@@ -30,16 +30,8 @@
 
 package net.biomodels.jummp.search
 
-import grails.util.Holders
 import net.biomodels.jummp.core.events.ModelCreatedEvent
 import net.biomodels.jummp.core.events.RevisionCreatedEvent
-import net.biomodels.jummp.core.model.RevisionTransportCommand
-import org.apache.lucene.analysis.Analyzer
-import org.apache.lucene.document.Document
-import org.apache.lucene.document.Field
-import org.apache.lucene.index.IndexWriter
-import org.apache.lucene.store.Directory
-import org.apache.lucene.store.FSDirectory
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationListener
 
