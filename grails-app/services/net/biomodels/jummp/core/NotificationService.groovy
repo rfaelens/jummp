@@ -229,7 +229,7 @@ class NotificationService {
         ModelTransportCommand model  = body.model as ModelTransportCommand
         useGenericNotificationStructure("notification.model.deleted.title",
                 [model.name] as String[],
-                "notification.model.published.body",
+                "notification.model.deleted.body",
                 [model.name, body.user] as String[],
                 NotificationType.DELETED,
                 body.user,
