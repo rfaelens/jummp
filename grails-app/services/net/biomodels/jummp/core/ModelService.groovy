@@ -2169,23 +2169,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             try {
                 ModelAudit audit = ModelAudit.get(itemId)
                 audit.success = success
-                /*
-                 * FIXME Clicking the download link next to a revision results in two separate
-                 * requests which need to be merged manually.
-                 */
-                if (audit.isDirty()) {
-                    StringBuilder warnMsg = new StringBuilder("""\
-Model audit $audit has been updated in a separate thread:\n""")
-                    def modifiedFieldNames = audit.getDirtyPropertyNames()
-                    for (field in modifiedFieldNames) {
-                        def current = audit."$field"
-                        def old = audit.getPersistentValue(field)
-                        if (old != current) {
-                            warnMsg.append("\t$field: $old ==> $current\n")
-                            current = old
-                        }
-                    }
-                    log.warn warnMsg.toString()
+                if (audit.isDirty('success')) {
                     audit.save(flush: true)
                 }
             } catch(Exception e) {
