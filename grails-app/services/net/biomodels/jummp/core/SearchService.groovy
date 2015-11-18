@@ -151,34 +151,34 @@ class SearchService {
         String dbPassword = dsConfig?.password
         def dbSettings = [ 'url': dbUrl, 'username': dbUsername, 'password': dbPassword ]
         def builder = new JsonBuilder()
-        def partialData=[
-                'submissionId':submissionId,
-                'publicationId':publicationId,
-                'name':name,
-                'description':description,
-                'modelFormat':revision.format.name,
-                'levelVersion':revision.format.formatVersion,
-                'submitter':revision.owner,
-                'submitterUsername': revision.model.submitterUsername,
-                'publicationTitle':revision.model.publication ?
-                        revision.model.publication.title : "",
-                'publicationAbstract':revision.model.publication ?
+        def partialData = [
+                'submissionId': submissionId,
+                'publicationId' :publicationId,
+                'name': name,
+                'description' : description,
+                'modelFormat' : revision.format.name,
+                'levelVersion' : revision.format.formatVersion,
+                'submitter' : revision.owner,
+                'submitterUsername' :  revision.model.submitterUsername,
+                'publicationTitle' : revision.model.publication ?
+                        revision.model.publication.title  :  "",
+                'publicationAbstract' : revision.model.publication ?
                         revision.model.publication.synopsis : "",
                 'publicationAuthor': revision.model.publication?.authors ?
                         revision.model.publication.authors.collect {
                             it.userRealName }.join(', ') : "",
                 'publicationYear': revision.model.publication?.year ?: 0,
-                'model_id':revision.model.id,
-                'revision_id': revision.id,
-                'deleted': revision.model.deleted,
-                'public': revision.model.firstPublished ? 'true' : 'false',
-                'versionNumber':versionNumber,
-                'submissionDate':revision.model.submissionDate,
-                'lastModified': revision.model.lastModifiedDate,
-                'uniqueId':uniqueId
+                'model_id' : revision.model.id,
+                'revision_id' :  revision.id,
+                'deleted' :  revision.model.deleted,
+                'public' :  revision.model.firstPublished ? 'true'  :  'false',
+                'versionNumber' : versionNumber,
+                'submissionDate' : revision.model.submissionDate,
+                'lastModified' :  revision.model.lastModifiedDate,
+                'uniqueId' : uniqueId
         ]
         builder(partialData: partialData,
-            'folder':exchangeFolder,
+            'folder': exchangeFolder,
             'mainFiles': fetchFilesFromRevision(revision, true),
             'allFiles': fetchFilesFromRevision(revision, false),
             'solrServer': solrServerHolder.SOLR_CORE_URL,
@@ -188,8 +188,7 @@ class SearchService {
         File indexingData = new File(exchangeFolder, "indexData.json")
         indexingData.setText(builder.toString())
         String jarPath = grailsApplication.config.jummp.search.pathToIndexerExecutable
-        def argsMap = [jarPath: jarPath,
-                jsonPath: indexingData.getCanonicalPath()]
+        def argsMap = [jarPath: jarPath, jsonPath: indexingData.getCanonicalPath()]
 
         String httpProxy = System.getProperty("http.proxyHost")
         if (httpProxy) {
