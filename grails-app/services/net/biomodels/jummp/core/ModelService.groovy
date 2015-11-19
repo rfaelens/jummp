@@ -53,6 +53,8 @@ import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.apache.tika.detect.DefaultDetector
+import org.apache.tika.metadata.Metadata
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.perf4j.log4j.Log4JStopWatch
@@ -710,32 +712,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     validated:rev.validated,
                     format: ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion))
         def stopWatch = new Log4JStopWatch("modelService.addValidatedRevision.rftcCreation")
-        List<RepositoryFile> domainObjects = []
-        for (rf in repoFiles) {
-            String sep = File.separator.equals("/") ? "/" : "\\\\"
-            final String fileName = rf.path.split(sep).last()
-            final def domain = new RepositoryFile(path: rf.path, description: rf.description,
-                    mimeType: rf.mimeType, revision: revision)
-            if (rf.mainFile) {
-                domain.mainFile = rf.mainFile
-            }
-            if (rf.userSubmitted) {
-                domain.userSubmitted = rf.userSubmitted
-            }
-            if (rf.hidden) {
-                domain.hidden = rf.hidden
-            }
-            if (!domain.validate()) {
-                final def m = DomainAdapter.getAdapter(model).toCommandObject()
-                def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the update of model ${m.properties}.")
-                msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
-                log.error(msg)
-                final String culprit = new File(rf.path).name
-                throw new ModelException(m, "Your submission appears to contain invalid file ${fileName}. Please review it and try again.")
-            } else {
-                domainObjects.add(domain)
-            }
-        }
+        List<RepositoryFile> domainObjects = convertRepositoryFilesFromTransportCommands(repoFiles, revision)
+
         stopWatch.lap("RepositoryFileTransportCommands created.")
         // save the new model in the database
         stopWatch.setTag("modelService.addValidatedRevision.persistModel")
@@ -805,6 +783,82 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(m, "Revision stored in VCS, but not in database")
         }
         return revision
+    }
+
+    /*
+     * Creates validated RepositoryFile objects from corresponding RepositoryFileTransportCommands.
+     *
+     * This method is used to complement the validation mechanism available for domain
+     * classes because the latter is applied even for operations that don't change repository file
+     * objects such as deletion or publishing of models.
+     *
+     * This method throws ModelException if
+     *      there is at least one entry in the supplied list with an undefined or inexistent path,
+     *      there is at least one empty file, or
+     *      there are no main files.
+     *
+     * @param repoFiles a list of RepositoryFileTransportCommand objects to validate and convert into
+     * domain objects.
+     */
+    private List<RepositoryFile> convertRepositoryFilesFromTransportCommands(
+            List<RepositoryFileTransportCommand> repoFileCmds, Revision revision) {
+        def results = []
+        boolean foundValidMainFile = false
+        for (rf in repoFileCmds) {
+            // validate
+            String filePath = rf.path
+            if (!filePath) {
+                log.error("Missing path for RepositoryFile ${rf.dump()} from ${repoFileCmds.dump()}")
+                throw new ModelException("We lost track of one of the files you provided for this revision.")
+            }
+            File f = new File(filePath)
+            boolean fileExists = f.exists()
+            if (!fileExists) {
+                log.error("Non-existent path for RepositoryFile ${rf.dump()} from ${repoFileCmds.dump()}")
+                throw new ModelException("There was a problem saving file ${f.name} for this revision.")
+            }
+            boolean fileIsEmpty = !f.length()
+            if (fileIsEmpty) {
+                log.error("Empty file ${f.name} included in ${repoFileCmds.dump()}")
+                throw new ModelException("Cannot save empty file ${f.name} for this revision.")
+            }
+            if (rf.mainFile) {
+                foundValidMainFile = true
+            }
+            // work out MIME type
+            def sherlock = new DefaultDetector()
+            def is = new BufferedInputStream(new FileInputStream(f))
+            String mimeType = sherlock.detect(is, new Metadata()).toString()
+
+            // create the domain object
+            final String fileName = f.name
+            final def domain = new RepositoryFile(path: fileName, description: rf.description,
+                    mimeType: mimeType, revision: revision)
+            if (rf.mainFile) {
+                domain.mainFile = rf.mainFile
+            }
+            if (rf.userSubmitted) {
+                domain.userSubmitted = rf.userSubmitted
+            }
+            if (rf.hidden) {
+                domain.hidden = rf.hidden
+            }
+            if (!domain.validate()) {
+                final def m = DomainAdapter.getAdapter(revision.model).toCommandObject()
+                def msg = new StringBuffer("Invalid file ${rf.properties} uploaded for model ${m.properties}.")
+                msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
+                log.error(msg)
+                throw new ModelException("""\
+Your submission appears to contain invalid file ${fileName}. Please review it and try again.""")
+            } else {
+                results.add(domain)
+            }
+        }
+        if (!foundValidMainFile) {
+            log.error("Can't persist repository files ${repoFileCmds.dump()} for revision ${revision.dump()}")
+            throw new ModelException("Missing main file for the new model revision ${revision.name}")
+        }
+        results
     }
 
     /**
@@ -917,28 +971,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 format: format)
 
         // keep a list of RFs closeby, as we may need to discard all of them
-        List<RepositoryFile> domainObjects = []
-        for (rf in repoFiles) {
-            final def domain = new RepositoryFile(path: rf.path, description: rf.description,
-                    mimeType: rf.mimeType, revision: revision)
-            if (rf.mainFile) {
-                domain.mainFile = rf.mainFile
-            }
-            if (rf.userSubmitted) {
-                domain.userSubmitted = rf.userSubmitted
-            }
-            if (rf.hidden) {
-                domain.hidden = rf.hidden
-            }
-            if (!domain.validate()) {
-                def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the creation of model ${rev.model}.")
-                msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
-                log.error(msg)
-                throw new ModelException(rev.model, "The submission appears to contain invalid file ${fileName}. Please review it and try again.")
-            } else {
-                domainObjects.add(domain)
-            }
-        }
+        List<RepositoryFile> domainObjects =
+                convertRepositoryFilesFromTransportCommands(repoFiles, revision)
         stopWatch.lap("Finished preparing what to store in the VCS.")
         stopWatch.setTag("modelService.uploadValidatedModel.doVcsStorage")
         try {
@@ -1133,35 +1167,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 uploadDate: new Date())
 
         // keep a list of RFs closeby, as we may need to discard all of them
-        List<RepositoryFile> domainObjects = []
-        for (rf in repoFiles) {
-            String sep = File.separator.equals("/") ? "/" : "\\\\"
-            /*
-             * only store the name of the file in the database, as the location can change and
-             * we generate the correct path when the RepositoryFileTransportCommand wrapper is created
-             */
-            String fileName = rf.path.split(sep).last()
-            final def domain = new RepositoryFile(path: rf.path, description: rf.description,
-                    mimeType: rf.mimeType, revision: revision)
-            if (rf.mainFile) {
-                domain.mainFile = rf.mainFile
-            }
-            if (rf.userSubmitted) {
-                domain.userSubmitted = rf.userSubmitted
-            }
-            if (rf.hidden) {
-                domain.hidden = rf.hidden
-            }
-            if (!domain.validate()) {
-                def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the creation of model ${meta}.")
-                msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
-                log.error(msg)
-                stopWatch.stop()
-                throw new ModelException(meta, "The submission appears to contain invalid file ${fileName}. Please review it and try again.")
-            } else {
-                domainObjects.add(domain)
-            }
-        }
+        List<RepositoryFile> domainObjects =
+                convertRepositoryFilesFromTransportCommands(repoFiles, revision)
         String formatVersion = modelFileFormatService.getFormatVersion(revision)
         revision.format = ModelFormat.findByIdentifierAndFormatVersion(meta.format.identifier, formatVersion)
         assert formatVersion != null && revision.format != null
@@ -1322,32 +1329,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                         description: modelFileFormatService.extractDescription(modelFiles, format), comment: comment,
                         uploadDate: new Date(), owner: currentUser,
                 minorRevision: false, validated:valid)
-        List<RepositoryFile> domainObjects = []
-        for (rf in repoFiles) {
-            String sep = File.separator.equals("/") ? "/" : "\\\\"
-            final String fileName = rf.path.split(sep).last()
-            final def domain = new RepositoryFile(path: rf.path, description: rf.description,
-                    mimeType: rf.mimeType, revision: revision)
-            if (rf.mainFile) {
-                domain.mainFile = rf.mainFile
-            }
-            if (rf.userSubmitted) {
-                domain.userSubmitted = rf.userSubmitted
-            }
-            if (rf.hidden) {
-                domain.hidden = rf.hidden
-            }
-            if (!domain.validate()) {
-                final def m = DomainAdapter.getAdapter(model).toCommandObject()
-                def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the update of model ${m.properties}.")
-                msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
-                log.error(msg)
-                final String culprit = new File(rf.path).name
-                throw new ModelException(m, "Your submission appears to contain invalid file ${fileName}. Please review it and try again.")
-            } else {
-                domainObjects.add(domain)
-            }
-        }
+        List<RepositoryFile> domainObjects = convertRepositoryFilesFromTransportCommands(repoFiles, revision)
         String formatVersion = modelFileFormatService.getFormatVersion(revision)
         revision.format = ModelFormat.findByIdentifierAndFormatVersion(format.identifier, formatVersion)
 
