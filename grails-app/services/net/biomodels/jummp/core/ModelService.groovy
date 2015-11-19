@@ -743,7 +743,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     log.error("Unable to record publication for ${rev.model}: ${e.message}", e)
                 }
             }
-            revision.save(failOnError:true)
+            revision.save(flush: true)
             model.save(flush: true)
             stopWatch.lap("Model persisted to the database.")
             stopWatch.setTag("modelService.addValidatedRevision.grantPermissions")
@@ -1835,7 +1835,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             return false
         } else {
             model.deleted = true
-            model.save(validate: false, flush: true) //FIXME disable validation bypassing
+            model.save(flush: true)
             //quick test to make sure Solr is in sync with the database
             model.refresh()
             boolean db = model.deleted
@@ -2022,13 +2022,9 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
         aclUtilService.addPermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
         revision.state = ModelState.PUBLISHED
-        // TODO FIXME this should not need to bypass validation in order to save successfully!
-        // TODO make sure that only relative file paths are stored in the database!!
-        try {
-            revision.save(validate: false, failOnError: true, flush: true)
-            model.save()
-        } catch (Throwable e) {
-            log.error e.message, e
+        if (!model.save(flush: true)) {
+            throw new ModelException(
+                    "Cannot publish model ${model.submissionId}:${b.errors.allErrors.inspect()}")
         }
     }
 
@@ -2102,10 +2098,8 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         revision.validationReport = validationReport.getValidationReport();
         revision.validationLevel = validationReport.metadataValidator.getValidationErrorStatus();
 
-        // TODO FIXME this should not need to bypass validation in order to save successfully!
-        // TODO make sure that only relative file paths are stored in the database!!
         try {
-            revision.save(validate: false, failOnError: true, flush: true)
+            revision.save(flush: true)
         } catch (Throwable e) {
             log.error e.message, e
         }
