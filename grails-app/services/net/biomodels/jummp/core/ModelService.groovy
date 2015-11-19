@@ -1881,16 +1881,25 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         if (!model) {
             throw new IllegalArgumentException("Model may not be null")
         }
-        if (!model.deleted) {
+        if (!Model.exists(model.id)) {
+            throw new IllegalArgumentException("Model ${model.properties} absent from database")
+        }
+        def searchService = grailsApplication.mainContext.searchService
+        boolean dbStatus = model.deleted
+        boolean solrStatus = searchService.isDeleted model
+        boolean modelIsDeleted = dbStatus && solrStatus
+        if (!modelIsDeleted) {
             return false
         }
-        // TODO: the code does not check whether the model exists
-        if (model.deleted) {
+        searchService.setDeleted(model, false)
+        if (searchService.isDeleted(model)) {
+            log.error "Could not restore model ${model.submissionId} in Solr"
+            return false
+        } else {
             model.deleted = false
             model.save(flush: true)
-            return model.deleted == false
-        } else {
-            return false
+            model.refresh()
+            return !(model.deleted || searchService.isDeleted(model))
         }
     }
 
