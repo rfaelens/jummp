@@ -68,7 +68,6 @@ import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
 import eu.ddmore.metadata.service.ValidationReport
 
-
 /**
  * @short Service class for managing Models
  *
@@ -89,7 +88,7 @@ class ModelService {
     /**
      * The class logger.
      */
-    private static final Log log = LogFactory.getLog(this.getClass())
+    private static final Log log = LogFactory.getLog(this)
     /**
      * Threshold for the verbosity of the logger.
      */
@@ -1068,7 +1067,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             revision.discard()
             domainObjects.each {it.discard()}
             model.discard()
-            log.error("New Model ${model.properties} with properties ${rev.model.properties} does not validate:${revision.errors.allErrors.inspect()}")
+            log.error("New Model does not validate:${revision.errors.allErrors.inspect()}")
             stopWatch.stop()
             throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
         }
