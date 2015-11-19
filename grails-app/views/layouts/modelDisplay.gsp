@@ -377,22 +377,6 @@
                     }
                 }
             });
-            $('#confirm-model-validate').dialog({
-                resizable: false,
-                autoOpen: false,
-                height: 300,
-                width: 500,
-                modal: true,
-                buttons: {
-                    Confirm: function() {
-                        $.jummp.openPage("${g.createLink(controller: 'model', action: 'validate', id: revision.identifier() )}");
-                        $( this ).dialog( "close" );
-                    },
-                    Cancel: function() {
-                        $( this ).dialog( "close" );
-                    }
-                }
-            });
             $("body").append("<div id='modelToolbar' class='collapsibleContainer' title='Model Toolbar'><button title='Expand Toolbar' data-showing='0' id='panelToggle'>Expand</button></div>	");
             $("#buttonContainer").prependTo("#modelToolbar");
             $("#panelToggle").click(function (evt){
@@ -434,12 +418,6 @@
                     primary: "ui-icon-tag"
                 }
             }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });
-            $( "#validate" ).button({
-                text:false,
-                icons: {
-                    primary:"ui-icon-star"
-                }
-            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
 			$("#panelToggle").button({
 					text:false,
 					icons: {
@@ -513,14 +491,6 @@
                 <g:if test="${canUpdate}">
                     <li>
                     <button class='toolbutton' id='annotate' onclick="return $.jummp.openPage('${g.createLink(controller: 'annotation', action: 'show', id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Annotate</button>
-                    </li>
-                </g:if>
-                <g:if test="${showValidateOption}">
-                    <div id="confirm-model-validate" title="You are about to validate this model version" style="display:none;">
-                        <p>Validate this version of the model?</p>
-                    </div>
-                    <li>
-                        <button class='toolbutton' id="validate" onclick="return $( '#confirm-model-validate' ).dialog( 'open' );">Validate</button>
                     </li>
                 </g:if>
 				</ul>
@@ -598,16 +568,9 @@
         <g:pageProperty name="page.genericAnnotations"/>
 
 
-          <g:if test="${validationlist!=null}">
-              <span class="bold">Validation Report</span>
-              <ul>
-                  <g:each in="${validationlist}">
-                      <li>${it}</li>
-                  </g:each>
 
-              </ul>
-          </g:if>
-
+        <span class="bold">Validation Status:</span>
+          ${validationLevel}
 
 	  </div>
 	  <div id="Files" class="filegrid">

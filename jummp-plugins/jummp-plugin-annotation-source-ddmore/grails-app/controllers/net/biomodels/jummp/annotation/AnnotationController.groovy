@@ -25,6 +25,7 @@ import grails.plugins.springsecurity.Secured
 import groovy.json.JsonSlurper
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.annotation.*
+import net.biomodels.jummp.core.model.ValidationState
 import org.apache.jena.riot.RDFFormat
 import eu.ddmore.metadata.service.*
 
@@ -101,6 +102,29 @@ class AnnotationController {
         } else {
             render([status: '500', message: "Unable to save the information you provided."] as JSON)
         }
+    }
+
+    def validate(){
+        if (!params.revision) {
+            def response = [
+                status: '400',
+                message: 'The request to save model properties lacked the revision parameter.'
+            ]
+            render(response as JSON)
+            return
+        }
+        RevisionTransportCommand rev = null
+        try {
+            rev = modelDelegateService.getRevision(params.revision)
+            modelDelegateService.validateModelRevision(rev)
+        }catch(ValidationException e){
+            render([status: '400', message: 'Metadata could not be validated.' , errorReport:e.getMessage()] as JSON)
+        }
+        if(rev.validationLevel.equals(ValidationState.APPROVED))
+            render([status: '200', message: 'Metadata has been validated.'] as JSON)
+        else if(rev.validationLevel.equals(ValidationState.CONDITIONALLY_APPROVED))
+            render([status: '400', message: 'Metadata has been validated with errors.', errorReport:rev.validationReport.replaceAll("     ","\n")] as JSON)
+
     }
 }
 

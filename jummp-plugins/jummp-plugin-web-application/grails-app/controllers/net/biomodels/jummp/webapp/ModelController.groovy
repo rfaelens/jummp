@@ -223,8 +223,6 @@ class ModelController {
             boolean canUpdate = modelDelegateService.canAddRevision(PERENNIAL_ID)
             boolean canDelete = modelDelegateService.canDelete(PERENNIAL_ID)
             boolean canShare = modelDelegateService.canShare(PERENNIAL_ID)
-            boolean showValidateOption = modelDelegateService.canValidate(PERENNIAL_ID)
-            boolean showValidationReport = modelDelegateService.canShowValidateReport(PERENNIAL_ID)
 
             String flashMessage = ""
             if (flash.now["giveMessage"]) {
@@ -242,9 +240,7 @@ class ModelController {
                         canDelete: canDelete,
                         canShare: canShare,
                         showPublishOption: showPublishOption,
-                        showValidateOption: showValidateOption,
-                        showValidationReport:showValidationReport,
-                        validationlist:rev.getValidationStatementList()
+                        validationLevel: rev.getValidationLevelMessage()
             ]
             if (rev.id == modelDelegateService.getLatestRevision(PERENNIAL_ID).id) {
                 flash.genericModel = model
@@ -256,7 +252,6 @@ class ModelController {
                 model["oldVersion"] = true
                 model["canDelete"] = false
                 model["canShare"] = false
-                model["showValidateOption"] = false
                 return model
             }
         } else {
@@ -302,35 +297,6 @@ class ModelController {
                     id: rev.identifier(),
                     params: [flashMessage: "Model has not been published because there is a " +
                             "problem with this version of the model. Sorry!"])
-        }
-    }
-
-    def validate = {
-        RevisionTransportCommand rev
-        try {
-            rev = modelDelegateService.getRevisionFromParams(params.id, params.revisionId)
-            modelDelegateService.validateModelRevision(rev)
-            def notification = [revision:rev, user:getUsername(), perms: modelDelegateService.getPermissionsMap(rev.model.submissionId)]
-            sendMessage("seda:model.validate", notification)
-
-            redirect(action: "showWithMessage",
-                id: rev.identifier(),
-                params: [flashMessage: "Model has been validated."])
-
-        } catch(AccessDeniedException e) {
-            log.error(e.message, e)
-            forward(controller: "errors", action: "error403")
-        } catch(IllegalArgumentException e) {
-            log.error(e.message)
-            redirect(action: "showWithMessage",
-                id: rev.identifier(),
-                params: [flashMessage: "Model has not been validated because there is a " +
-                    "problem with this version of the model. Sorry!"])
-        } catch(ValidationException e){
-            log.error(e.message)
-            redirect(action: "showWithMessage",
-                id: rev.identifier(),
-                params: [flashMessage: e.message])
         }
     }
 
