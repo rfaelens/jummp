@@ -2150,9 +2150,9 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @Profiled(tag="modelService.updateAuditSuccess")
     void updateAuditSuccess(Long itemId, boolean success) {
         if (itemId != -1) {
-            ModelAudit audit = ModelAudit.get(itemId)
-            audit.success = success
             Model.withTransaction {
+                ModelAudit audit = ModelAudit.get(itemId)
+                audit.success = success
                 if (audit.isDirty('success')) {
                     if (!audit.save(flush: true)) {
                         log.error("""\
