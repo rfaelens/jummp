@@ -18,8 +18,10 @@
 * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 **/
 
-import java.util.regex.Pattern
+
 import net.biomodels.jummp.core.model.identifier.ModelIdentifierUtils
+
+import java.util.regex.Pattern
 
 // locations to search for config files that get merged into the main config
 // config files can either be Java properties files or ConfigSlurper scripts
@@ -119,7 +121,7 @@ environments {
 }
 jummp.app.name=appName
 //branding
-jummp.branding.deployment="biomodels" //used to select messages,and style if jummp.branding.style is not specified 
+jummp.branding.deployment = "biomodels" //used to select messages,and style if jummp.branding.style is not specified
 jummp.branding.style="ddmore" //used to specify any other name for the css file
 // log4j configuration
 log4j = {
@@ -306,7 +308,7 @@ if (!(jummpConfig.jummp.search.pathToIndexerExecutable instanceof ConfigObject))
 }
 else {
 	println "WARN\tSetting jummp.search.pathToIndexerExecutable is undefined. Models will not be indexed correctly in the search engine."
-}	
+}
 // registration settings
 if (!(jummpConfig.jummp.security.registration.email.send instanceof ConfigObject) && Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.send)) {
     jummp.security.registration.email.send         = Boolean.parseBoolean(jummpConfig.jummp.security.registration.email.send)
@@ -569,7 +571,7 @@ modelIdentifierSettings?.entrySet().each {
 
 // Uncomment and edit the following lines to start using Grails encoding & escaping improvements
 
-/* remove this line 
+/* remove this line
 // GSP settings
 grails {
     views {
