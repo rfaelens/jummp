@@ -68,7 +68,6 @@ import eu.ddmore.libpharmml.dom.modeldefn.Pairwise
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariable
 import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameter
 import eu.ddmore.libpharmml.dom.modeldefn.StructuralModel
-import eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock
 import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStep
 import eu.ddmore.libpharmml.dom.modellingsteps.Estimation
 import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
@@ -262,38 +261,6 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             model["transfMap"] = transfMap
             return groovyPageRenderer.render(template: "/templates/0.6/covariates", model: model)
         }
-    }
-
-    /**
-     * @param variabilityModels a list of
-     * {@link eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock}s.
-     */
-    @Profiled(tag = "pharmMl0_6AwareRenderer.renderIndependentVariable")
-    String renderVariabilityModel(List<VariabilityDefnBlock> variabilityModels) {
-        def models = []
-        variabilityModels.each { m ->
-            def thisModel = [:]
-            thisModel["blkId"] = m.blkId
-            thisModel["name"] = m.name ?: "&nbsp;"
-            thisModel["levels"] = formatVariabilityLevels(m.level)
-            thisModel["type"] = m.type.value()
-            models.add thisModel
-        }
-        return groovyPageRenderer.render(template: "/templates/0.2/variabilityModel",
-                    model: [variabilityModels: models])
-    }
-
-    List<String> formatVariabilityLevels(List variabilityLevels) {
-        def result = []
-        variabilityLevels.inject(result){ r, l ->
-            StringBuilder sb = new StringBuilder()
-            sb.append((l.name) ? l.name.value : l.symbId)
-            if (l.parentLevel) {
-                sb.append(", parent level: ").append(l.parentLevel.symbRef.symbIdRef)
-            }
-            result.add sb.toString()
-        }
-        return result
     }
 
     @Override
