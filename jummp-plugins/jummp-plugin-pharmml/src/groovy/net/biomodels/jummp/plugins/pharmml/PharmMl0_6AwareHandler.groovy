@@ -31,7 +31,6 @@
 
 package net.biomodels.jummp.plugins.pharmml
 
-import eu.ddmore.libpharmml.*
 import eu.ddmore.libpharmml.dom.PharmML
 import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
 import eu.ddmore.libpharmml.dom.modellingsteps.Estimation
@@ -41,8 +40,6 @@ import eu.ddmore.libpharmml.dom.modellingsteps.StepDependency
 import eu.ddmore.libpharmml.dom.trialdesign.Population
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
-import eu.ddmore.libpharmml.impl.*
-import net.biomodels.jummp.core.IPharmMlService
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.perf4j.aop.Profiled
@@ -114,6 +111,10 @@ class PharmMl0_6AwareHandler extends AbstractPharmMlHandler {
 
     @Profiled(tag="pharmMl0_6AwareHandler.getObservationModel")
     List getObservationModel(ModelDefinition definition) {
+        println "Testing: ${definition.listOfObservationModel}"
+        definition.listOfObservationModel.each {
+            println("Model: ${it}")
+        }
         return definition?.listOfObservationModel
     }
 
