@@ -86,7 +86,7 @@ import org.perf4j.aop.Profiled
 
 class PharmMl0_3AwareRenderer extends AbstractPharmMlRenderer {
     /* the class logger */
-    private static final Log log = LogFactory.getLog(this.getClass())
+    private static final Log log = LogFactory.getLog(this)
     private static final String IS_DEBUG_ENABLED = log.isDebugEnabled()
     private static final String IS_INFO_ENABLED = log.isInfoEnabled()
     /* Dependency injection for groovyPageRenderer */
@@ -1077,7 +1077,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
         } catch(Exception e) {
             output = new StringBuilder("<div class='spaced-top-bottom'>")
             output.append("Cannot display individual parameters.")
-            log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}")
+            log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}", e)
         }
         return output.append("</div>")
     }
