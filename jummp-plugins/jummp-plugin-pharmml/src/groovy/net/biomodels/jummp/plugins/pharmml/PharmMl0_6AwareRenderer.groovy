@@ -1085,7 +1085,8 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                             }
                             def fixedEffects = []
                             def covEffectKey
-                            c.fixedEffect.each { fe ->
+                            def fe = c.fixedEffect
+                            if (fe) {
                                 if (fe.category) {
                                     def catIdSymbRef = new SymbolRef()
                                     def trickReference = new StringBuilder("<msub><mi>")
