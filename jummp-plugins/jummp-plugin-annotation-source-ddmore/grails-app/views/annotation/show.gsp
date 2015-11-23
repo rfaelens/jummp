@@ -48,6 +48,7 @@
     <h1>Annotate Model ${revision.model.publicationId ?: revision.model.submissionId}</h1>
     <div id="toolbar" class="ui-corner-all">
         <button id="saveButton" title="Save model properties" class="action">Save</button>
+        <button id="validateButton" title="Validate model properties" class="action">Validate</button>
         <button id="backButton" title="Return to the model display page" class="action" onclick="return $.jummp.openPage('${g.createLink(controller: 'model', action: 'show', id: modelId)}')">Return to model display page</button>
     </div>
     <div id="annotationEditor">
@@ -113,6 +114,38 @@
                     $("#message").addClass("failure");
                 }
                 $('#message').html(response.message);
+            }
+        });
+    });
+    $('#validateButton').button({
+        icons: {
+            primary: "ui-icon-star"
+        }
+    }).on("click", function(event) {
+        "use strict";
+        event.preventDefault();
+        $.ajax({
+            dataType: "json",
+            type: "GET",
+            url: $.jummp.createLink("annotation", "validate"),
+            cache: false,
+            data: {
+                revision: "${revision.model.publicationId ?: revision.model.submissionId}"
+            },
+            error: function(jqXHR) {
+                console.error("epic fail", jqXHR.responseText);
+                $("#message").addClass("failure");
+                $('#message').html("There was an internal error while validating the information provided.");
+            },
+            success: function(response) {
+                if ("200" == response.status) {
+                    $("#message").addClass("success");
+                } else {
+                    $("#message").addClass("failure");
+                }
+                $('#message').html(response.message);
+                if(response.errorReport!=null)
+                    window.alert(response.errorReport);
             }
         });
     });

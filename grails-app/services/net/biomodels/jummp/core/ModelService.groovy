@@ -2113,9 +2113,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
 
         if(metadataFile==null)
-            throw new ValidationException("Metadata file not found for "+pharmML.getName())
+            throw new ValidationException("Metadata file not found for "+pharmML.getName()+ ". Please save the metadata first.")
         else {
-            validationReport.generateValidationReport(metadataFile, revision.getModel().getSubmissionId())
+            validationReport.generateValidationReport(metadataFile)
         }
 
         revision.validationReport = validationReport.getValidationReport();

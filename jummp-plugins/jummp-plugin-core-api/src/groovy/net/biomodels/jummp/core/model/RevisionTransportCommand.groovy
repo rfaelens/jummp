@@ -128,4 +128,17 @@ class RevisionTransportCommand implements Serializable {
         }
         return validationReport.split("     ");
     }
+
+    String getValidationLevelMessage(){
+        switch (validationLevel) {
+            case ValidationState.APPROVE:
+                return "Annotations have not been checked."
+            case ValidationState.CONDITIONALLY_APPROVED:
+                return "Annotations have been checked. There are some errors."
+            case ValidationState.APPROVED:
+                return "Metadata is valid."
+            case ValidationState.REJECTED:
+                return "Metadata is invalid."
+        }
+    }
 }
