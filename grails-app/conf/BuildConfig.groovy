@@ -132,6 +132,7 @@ grails.project.dependency.resolution = {
         compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") {
             excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4', 'jena-core'
         }
+        //TODO move these dependencies to the relevant annotation plugins
         String ddmoreMetadataIntegrationServiceVersion = "0.0.3-SNAPSHOT"
         compile "eu.ddmore:lib-metadata-api:$ddmoreMetadataIntegrationServiceVersion"
         // can't use apache-jena-libs due to pom packaging, rely on jena-tdb instead
