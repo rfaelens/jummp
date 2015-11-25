@@ -33,6 +33,7 @@ package net.biomodels.jummp.plugins.pharmml
 
 import eu.ddmore.libpharmml.dom.maths.Binoperator
 import eu.ddmore.libpharmml.dom.maths.Unioperator
+import eu.ddmore.libpharmml.dom.modeldefn.pkmacro.PKMacroList
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
 import eu.ddmore.libpharmml.dom.commontypes.FunctionParameter
@@ -1291,4 +1292,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
         builder.append("</mstyle></math>")
         return builder.toString()
     }
+
+    @Profiled(tag = "pharmMl0_3AwareRenderer.renderPKMacros")
+    String renderPKMacros(PKMacroList pkMacroList) {}
 }

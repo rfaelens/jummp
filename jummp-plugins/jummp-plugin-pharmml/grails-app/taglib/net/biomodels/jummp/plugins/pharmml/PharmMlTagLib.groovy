@@ -141,7 +141,7 @@ class PharmMlTagLib {
 
         if (attrs.estimation) {
             out << "<div id='${pageScope.tabsMap["est"]}'>"
-            String link=g.createLink(controller: 'model', 
+            String link=g.createLink(controller: 'model',
             						 action: 'download',
             						 id: attrs.rev.identifier()).replace("%3A",".");
             pharmMlRenderingService.renderEstimationSteps(attrs.estimation, attrs.version, out, attrs.rev, link)
@@ -202,6 +202,13 @@ class PharmMlTagLib {
             return
         }
         pharmMlRenderingService.renderInitialConditions(attrs.initialConditions, attrs.version, out)
+    }
+
+    def pkMacros = { attrs ->
+        if (!(attrs.vars)) {
+            return
+        }
+        pharmMlRenderingService.renderPKMacros(attrs.vars, attrs.version, out)
     }
 
     /**
