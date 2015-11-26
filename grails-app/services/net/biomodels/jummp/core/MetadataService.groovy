@@ -20,13 +20,13 @@
 
 package net.biomodels.jummp.core
 
-import eu.ddmore.metadata.service.MetadataWriterImpl
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.annotationstore.*
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.core.model.*
 import net.biomodels.jummp.core.annotation.*
+import eu.ddmore.metadata.service.MetadataWriterImpl
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.jena.riot.RDFFormat
@@ -48,9 +48,15 @@ class MetadataService {
      */
     def grailsApplication
     /**
-     *
+     * Dependency injection for Model Service.
      */
     def modelService
+    /**
+     * Dependency injection for Model Format Service.
+     */
+    def modelFileFormatService
+    def pharmMlService
+    def pharmMlMetadataWriter
 
     /**
      * Fetches any ResourceReferences defined for a given qualifier from a revision.
@@ -171,11 +177,17 @@ class MetadataService {
         return result
     }
 
-    @Profiled(tag = "metadataService.updateModelMetadata")
-    boolean updateModelMetadata(String model, List<StatementTransportCommand> statements) {
-        //TODO REPLACE WITH PROTOTYPE BEAN
-        def metadataWriter = new MetadataWriterImpl()
+    @Profiled(tag = "metadataService.saveMetadata")
+    boolean saveMetadata(String model, List<StatementTransportCommand> statements) {
+        Model theModel = Model.findBySubmissionIdOrPublicationId(model, model)
+        Revision baseRevision = modelService.getLatestRevision(theModel, false)
+        RevisionTransportCommand newRevision = DomainAdapter.getAdapter(baseRevision).toCommandObject()
+        newRevision.comment = "Updated model annotations."
         def subject = "${grailsApplication.config.grails.serverURL}/model/${model}"
+        def rdfTypeProperty = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+        def pharmmlModelOntologyTerm = "http://www.pharmml.org/ontology/PHARMMLO_0000001"
+
+        def pharmMlMetadataWriter = new MetadataWriterImpl()
         try {
             statements.each { StatementTransportCommand statement ->
                 String predicate = statement.predicate.uri
@@ -183,27 +195,35 @@ class MetadataService {
                 String object = xref.uri ?: xref.name
                 boolean isLiteralTriple = xref.uri ? false : true
                 if (isLiteralTriple) {
-                    metadataWriter.generateLiteralTriple(subject, predicate, object)
+                    pharmMlMetadataWriter.generateLiteralTriple(subject, predicate, object)
                 } else {
-                    metadataWriter.generateTriple(subject, predicate, object)
+                    pharmMlMetadataWriter.generateTriple(subject, predicate, object)
                 }
             }
+            pharmMlMetadataWriter.generateTriple(subject, rdfTypeProperty,
+                    pharmmlModelOntologyTerm)
             String fileBase = System.properties['java.io.tmpdir']
             String fileName = "${model}.rdf"
-            String path = new File(fileBase, fileName).absolutePath
-            metadataWriter.writeRDFModel(path, RDFFormat.RDFXML)
+            def annoFile = new File(fileBase, fileName)
+            String path = annoFile.absolutePath
+            pharmMlMetadataWriter.writeRDFModel(path, RDFFormat.RDFXML)
 
             RepositoryFileTransportCommand rf = new RepositoryFileTransportCommand(
                     path: path, description: "annotation file")
-            Model theModel = Model.findBySubmissionIdOrPublicationId(model, model)
-            Revision baseRevision = modelService.getLatestRevision(theModel, false)
             List<RepositoryFileTransportCommand> files = modelService.retrieveModelFiles(baseRevision)
-            RevisionTransportCommand newRevision = DomainAdapter.getAdapter(baseRevision).toCommandObject()
-            newRevision.comment = "Updated model annotations."
             files.add rf
-            println "base: ${baseRevision.dump()}"
-            println "new: ${newRevision.dump()}"
+
+            boolean preProcessingOK = pharmMlService.doBeforeSavingAnnotations(annoFile, newRevision)
+            if (!preProcessingOK) {
+                log.error """\
+Metadata ${pharmMlMetadataWriter.dump()} based on revision ${baseRevision.id} will not save cleanly."""
+            }
+
             def result = modelService.addValidatedRevision(files, [], newRevision)
+            if (!result) {
+                log.error """\
+Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataWriter.dump()}"""
+            }
             return result != null
         } catch(Exception e) {
             log.error(e.message, e)
