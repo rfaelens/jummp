@@ -40,7 +40,6 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
     final Id modelId = new Id(MODEL_CONCEPT_NAME, MODEL_CONCEPT_URI)
 
     boolean supports(RevisionTransportCommand revision) {
-        println "ddmore mis supports only PharmML."
         "PharmML" == revision?.format?.name
     }
 
@@ -61,7 +60,6 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
                 def thisSection = new CompositeSection(modelId, n, name)
                 //currently only have 1 property per section, but this could change
                 List<Property> props = service.findPropertiesForSection(thisSection)
-                props.first().dump()
                 props.each { Property p ->
                     Id pId = p.propertyId
                     def pVertex = new PropertyContainer(value: name, uri: pId.uri,
