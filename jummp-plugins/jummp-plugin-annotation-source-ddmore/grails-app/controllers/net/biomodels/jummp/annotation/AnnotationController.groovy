@@ -45,6 +45,12 @@ class AnnotationController {
         def revision = modelDelegateService.getRevisionFromParams(params.id, params.revisionId)
         def modelId = (revision.model.publicationId) ?: (revision.model.submissionId)
 
+        boolean canUpdate = modelDelegateService.canAddRevision modelId
+        if (!canUpdate) {
+            forward controller: 'errors', action: 'error403'
+            return
+        }
+
         def objectModel = metadataInputSource.buildObjectModel() as JSON
         def existingAnnotations = [
             "subjects": [

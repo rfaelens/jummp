@@ -247,24 +247,23 @@ Handlebars.registerHelper("renderMultipleConstrainedValues", function() {
     return escapedResult;
 });
 
-Jummp.buildValueTree = function(item, partialValueTree) {
+Jummp.buildValueTree = function(item, partialValueTree, isLeaf) {
     partialValueTree = partialValueTree || "";
+    isLeaf = isLeaf || false;
     var optionValue = item.get('uri');
     var annotationLabel = item.get('value');
     var subValues = item.get('children') || [];
 
-    if (subValues.length == 0) {
-        var thisItem = "<option value='" + optionValue;
-        thisItem += "'>" + annotationLabel + "</option>\n";
-        partialValueTree += thisItem;
-    } else {
-        var startSubGroup = "<optgroup label='" + annotationLabel + "'>\n";
-        partialValueTree += startSubGroup;
+    var thisItem = "<option value='" + optionValue + "'";
+    if (isLeaf) {
+        thisItem += " class='subvalue'"
+    }
+    thisItem += ">" + annotationLabel + "</option>\n";
+    partialValueTree += thisItem;
+    if (subValues.length > 0) {
         subValues.each(function(child) {
-            partialValueTree = Jummp.buildValueTree(child, partialValueTree);
+            partialValueTree = Jummp.buildValueTree(child, partialValueTree, true);
         });
-        var stopSubGroup = "</optgroup>\n";
-        partialValueTree += stopSubGroup;
     }
     return partialValueTree;
 }

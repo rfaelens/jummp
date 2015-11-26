@@ -31,9 +31,6 @@
 
 package net.biomodels.jummp.plugins.pharmml
 
-import eu.ddmore.libpharmml.dom.maths.Binoperator
-import eu.ddmore.libpharmml.dom.maths.Unioperator
-import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
 import eu.ddmore.libpharmml.dom.commontypes.FalseBoolean
 import eu.ddmore.libpharmml.dom.commontypes.IdValue
@@ -48,15 +45,17 @@ import eu.ddmore.libpharmml.dom.commontypes.TrueBoolean
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignment
 import eu.ddmore.libpharmml.dom.commontypes.Vector as CTVector
 import eu.ddmore.libpharmml.dom.dataset.ColumnDefinition
+import eu.ddmore.libpharmml.dom.dataset.DataSet
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
-import eu.ddmore.libpharmml.dom.dataset.DataSet
 import eu.ddmore.libpharmml.dom.maths.Binop
+import eu.ddmore.libpharmml.dom.maths.Binoperator
 import eu.ddmore.libpharmml.dom.maths.Constant
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
 import eu.ddmore.libpharmml.dom.maths.Uniop
+import eu.ddmore.libpharmml.dom.maths.Unioperator
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
@@ -77,6 +76,7 @@ import grails.util.Holders
 import javax.xml.bind.JAXBElement
 import javax.xml.namespace.QName
 import net.biomodels.jummp.core.IPharmMlRenderer
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.plugins.pharmml.maths.FunctionSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
