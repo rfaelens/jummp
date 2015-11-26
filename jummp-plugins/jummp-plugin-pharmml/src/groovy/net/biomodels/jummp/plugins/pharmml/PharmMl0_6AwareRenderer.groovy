@@ -24,10 +24,9 @@
  * libraries), containing parts covered by the terms of Apache License v2.0,
  * the licensors of this Program grant you additional permission to convey the
  * resulting work.
- * {Corresponding Source for a non-source form of such a combination shall
+ *{Corresponding Source for a non-source form of such a combination shall
  * include the source code for the parts of Apache Tika, Apache Commons,
- * LibPharmml, Perf4j used as well as that of the covered work.}
- **/
+ * LibPharmml, Perf4j used as well as that of the covered work.}**/
 
 package net.biomodels.jummp.plugins.pharmml
 
@@ -63,12 +62,13 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
     private static PharmMl0_6AwareRenderer instance = null
 
     /* Enforce the singleton pattern by keeping the constructor private. */
+
     private PharmMl0_6AwareRenderer() {}
 
     @Profiled(tag = "pharmMl0_6AwareRenderer.getInstance")
     public static PharmMl0_6AwareRenderer getInstance() {
         if (instance == null) {
-            synchronized(PharmMl0_6AwareRenderer.class) {
+            synchronized (PharmMl0_6AwareRenderer.class) {
                 if (instance == null) {
                     if (IS_DEBUG_ENABLED) {
                         log.debug "Initialising the renderer for PharmML 0.6"
@@ -94,7 +94,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             log.info "Rendering independent variable $independentVariable"
         }
         return groovyPageRenderer.render(template: "/templates/common/independentVariable",
-                    model: [independentVariable: independentVariable])
+            model: [independentVariable: independentVariable])
     }
 
     /**
@@ -118,12 +118,12 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 assert !!rightHandSide
                 return convertToMathML(d.symbId, d.functionArgument, rightHandSide)
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Error while rendering function definitions ${functionDefs.inspect()}: ${e.message}", e)
             definitionList.add("Sorry, cannot render the function definitions.")
         } finally {
             return groovyPageRenderer.render(template: "/templates/common/functionDefinitions",
-                    model: [functionDefinitions: definitionList])
+                model: [functionDefinitions: definitionList])
         }
     }
 
@@ -162,7 +162,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             model["version"] = "0.6"
             model["transfMap"] = transfMap
             return groovyPageRenderer.render(template: "/templates/0.2/covariateModel",
-                        model: model)
+                model: model)
         }
     }
 
@@ -203,7 +203,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 } else if (c.categorical) {
                     List cc = c.categorical.category
                     List categoryList = []
-                    cc.each{ cat ->
+                    cc.each { cat ->
                         StringBuilder sb = new StringBuilder(cat.catId)
                         if (cat.name) {
                             sb.append("(").append(cat.name.value).append(")")
@@ -245,12 +245,12 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             models.add thisModel
         }
         return groovyPageRenderer.render(template: "/templates/0.2/variabilityModel",
-                    model: [variabilityModels: models])
+            model: [variabilityModels: models])
     }
 
     List<String> formatVariabilityLevels(List variabilityLevels) {
         def result = []
-        variabilityLevels.inject(result){ r, l ->
+        variabilityLevels.inject(result) { r, l ->
             StringBuilder sb = new StringBuilder()
             sb.append((l.name) ? l.name.value : l.symbId)
             if (l.parentLevel) {
@@ -270,15 +270,15 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     protected String renderInterpolation(Interpolation i) {
-            String algorithm = i?.algorithm
-            String variable = i?.interpIndepVar?.symbRef?.symbIdRef
-            if (!algorithm) {
-                return "Missing interpolation algorithm"
-            }
-            if (!variable) {
-                return "Missing interpolation independent variable"
-            }
-            return "$algorithm interpolation over $variable"
+        String algorithm = i?.algorithm
+        String variable = i?.interpIndepVar?.symbRef?.symbIdRef
+        if (!algorithm) {
+            return "Missing interpolation algorithm"
+        }
+        if (!variable) {
+            return "Missing interpolation independent variable"
+        }
+        return "$algorithm interpolation over $variable"
     }
 
     /**
@@ -293,7 +293,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
      */
     @Profiled(tag = "pharmMl0_6AwareRenderer.renderParameterModel")
     String renderParameterModel(List parameterModel,
-            List covariates, Map transfMap) {
+                                List covariates, Map transfMap) {
 
         def result = new StringBuilder()
         result.append("<h3>Parameter Model</h3>")
@@ -302,36 +302,36 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             parameterModel.each { pm ->
                 result.append("<div class='spaced-top-bottom'>")
                 def simpleParameters = pm.commonParameterElement.value.findAll {
-                       it instanceof SimpleParameter
+                    it instanceof SimpleParameter
                 }
                 def rv = pm.commonParameterElement.value.findAll {
-                       it instanceof ParameterRandomVariable
+                    it instanceof ParameterRandomVariable
                 }
                 def individualParameters = pm.commonParameterElement.value.findAll {
-                       it instanceof IndividualParameter
+                    it instanceof IndividualParameter
                 }
                 result.append(simpleParams(simpleParameters, transfMap))
 
                 Map<String, List<String>> paramRandomVariableMap = [:]
                 String randoms = randomVariables(rv, paramRandomVariableMap)
                 if (randoms) {
-                   result.append(randoms)
+                    result.append(randoms)
                 }
                 StringBuilder individuals = individualParams(individualParameters, rv, covariates,
-                            transfMap)
+                    transfMap)
                 if (individuals) {
-                   result.append(individuals)
+                    result.append(individuals)
                 }
                 if (pm.correlation) {
                     def processor = new PharmMl0_3AwareCorrelationProcessor()
                     List<CorrelationMatrix> matrices = processor.convertToStringMatrix(
-                                pm.correlation, paramRandomVariableMap)
+                        pm.correlation, paramRandomVariableMap)
                     if (matrices) {
                         displayCorrelationMatrices(matrices, result)
                     }
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Error rendering the parameter model for ${parameterModel.inspect()} ${parameterModel.properties}: ${e.message}", e)
             result.append("Sorry, something went wrong while rendering the parameter model.")
         } finally {
@@ -360,12 +360,12 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                     model["variableDefinitions"] = sm.commonVariable
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Error while rendering structural model ${sm.inspect()} ${sm.properties}:${e.message}", e)
             model["error"] = "Sorry, something went wrong while displaying the structural model."
         } finally {
             return groovyPageRenderer.render(template: "/templates/common/structuralModel",
-                        model: model)
+                model: model)
         }
     }
 
@@ -384,13 +384,25 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 }
                 return thisParam
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             model["error"] = "Cannot display simple parameters."
             log.error("Error encountered while rendering simple params ${simpleParameters.inspect()}: ${e.message}", e)
         } finally {
             model["simpleParameters"] = params
             return groovyPageRenderer.render(template: "/templates/simpleParameters",
-                        model: model)
+                model: model)
+        }
+    }
+
+    String convertVariableDefinitionToMathML(VariableDefinition vd) {
+        if (vd.assign) {
+            return convertToMathML(vd.symbId, vd.assign)
+        } else {
+            StringBuilder sb = new StringBuilder()
+            sb.append("<math display='inline'><mstyle>")
+            sb.append(op(vd.symbId))
+            sb.append("</mstyle></math>")
+            return sb.toString()
         }
     }
 
@@ -402,30 +414,22 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
         def variableList = []
         try {
             vars.each { v ->
-                switch(v.value) {
+                switch (v.value) {
                     case DerivativeVariable:
                         if (v.value.initialCondition) {
-                            initialConditions << [(v.value.symbId) : v.value.initialCondition]
+                            initialConditions << [(v.value.symbId): v.value.initialCondition]
                         }
                         def dv = convertToMathML(v.value, iv)
                         variableList.add(dv)
                         break
                     case VariableDefinition:
-                        if (v.value.assign) {
-                            def vd = convertToMathML(v.value.symbId, v.value.assign)
-                            variableList.add(vd)
-                        } else {
-                            StringBuilder sb = new StringBuilder()
-                            sb.append("<math display='inline'><mstyle>")
-                            sb.append(op(v.value.symbId))
-                            sb.append("</mstyle></math>")
-                            variableList.add(sb.toString())
-                        }
+                        String vd = convertVariableDefinitionToMathML(v.value)
+                        variableList.add vd
                         break
                     case FunctionDefinition:
                         def fd = v.value
                         variableList.add(convertToMathML(fd.symbId,
-                                fd.functionArgument, fd))
+                            fd.functionArgument, fd))
                         break
                     case FunctionParameter:
                         variableList.add(v.value.symbId)
@@ -437,12 +441,12 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             }
             model["variableDefinitions"] = variableList
             model["initialConditions"] = initialConditions
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Error while displaying common variables - arguments ${vars.properties} ${iv}: ${e.message}", e)
             model["error"] = "Sorry, ran into issues while trying to display variable definitions."
         } finally {
             return groovyPageRenderer.render(template: "/templates/commonVariables",
-                    model: model)
+                model: model)
         }
     }
 
@@ -452,7 +456,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             result.add convertToMathML(c, conditions[c].initialValue?.assign)
         }
         return groovyPageRenderer.render(template: "/templates/0.2/initialConditions",
-                    model: [conditions: result])
+            model: [conditions: result])
     }
 
     /**
@@ -461,66 +465,217 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
      */
     @Profiled(tag = "pharmMl0_6AwareRenderer.renderObservationModel")
     String renderObservationModel(List<ObservationModel> observations,
-                List<CovariateModel> covariates) {
+                                  List<CovariateModel> covariates) {
         StringBuilder result = new StringBuilder()
         result.append("<h3>Observation Model</h3>")
-        println("Check which types do the observations belong to")
+
         try {
             observations.each { om ->
-                result.append("<h4>Observation")
-                def continuousObs = om.continuousData
-                if (!continuousObs) {
-                    log.error "We should support discrete observation ${om.dump()}"
-                }
-                println "Tung: ${om.getClass()}"
-                def obsErr = continuousObs.observationError
-                if (obsErr) {
-                    result.append(" <span class='italic'>").append(obsErr.symbId).append("</span>")
-                }
-                result.append("</h4>\n")
-                result.append("<span class=\"bold\">Parameters </span>")
-                def simpleParameters = continuousObs.commonParameterElement.findAll {
-                    it instanceof SimpleParameter
-                }
-                def rv = continuousObs.commonParameterElement.findAll {
-                    it instanceof ParameterRandomVariable
-                }
-                def individualParameters = continuousObs.commonParameterElement.findAll {
-                       it instanceof IndividualParameter
-                }
-                result.append(simpleParams(simpleParameters))
+                result.append("<h4>")
 
-                Map<String, List<String>> obsRandomVariableMap = [:]
+                if (om.discrete) {
+                    //log.error "We should support discrete observation ${om.dump()}"
+                    def discreteObs = om.discrete
 
-                String randoms = randomVariables(rv, obsRandomVariableMap)
-                if (randoms) {
-                    result.append(randoms)
-                }
-                StringBuilder individuals = individualParams(individualParameters, rv, covariates,
-                            [:])
-                if (individuals) {
-                   result.append(individuals)
-                }
-                if (continuousObs.correlation) {
-                    def processor = new PharmMl0_3AwareCorrelationProcessor()
-                    List<CorrelationMatrix> matrices = processor.convertToStringMatrix(
-                        continuousObs.correlation, obsRandomVariableMap)
-                    if (matrices) {
-                        displayCorrelationMatrices(matrices, result)
+                    if (discreteObs.countData) {
+                        result.append("Observation ${discreteObs.countData.countVariable.symbId}<br/>")
+                        result.append("<span class='italic'>Discrete / Count Data")
+                        result.append("</span>")
+                        result.append("</h4>")
+                        def data = discreteObs.countData
+
+                        def simpleParameters = data.getListOfCommonParameterElement().findAll {
+                            it instanceof SimpleParameter
+                        }
+                        simpleParameters = simpleParams(simpleParameters, [:], true)
+                        if (simpleParameters) {
+                            result.append("<p><span class=\"bold\">Parameters").append(simpleParameters).append("</span></p>")
+                        }
+
+                        String countVariables = data.countVariable.symbId
+                        if (countVariables) {
+                            result.append("<p><span class=\"bold\">Count Variables:&nbsp;</span>").append(countVariables).append("</p>")
+                        }
+                        String pmfs = convertPMFsToMathML(data.listOfPMF)
+                        if (pmfs) {
+                            result.append("<p class=\"bold\">PMF</p>").append(pmfs)
+                        }
+
+                    } else if (discreteObs.categoricalData) {
+                        result.append("Observation ${discreteObs.categoricalData.categoryVariable.symbId}<br/>")
+                        result.append("<span class='italic'>Discrete / Categorical Data")
+                        result.append("</span>")
+                        result.append("</h4>")
+                        def data = discreteObs.categoricalData
+
+                        String ordered = data.ordered
+                        if (ordered) {
+                            result.append("<p><span class=\"bold\">Ordered:&nbsp;</span>").append(ordered).append("</p>")
+                        }
+
+                        if (data.variable) {
+                            result.append("<p class=\"bold\">Variables</p>")
+                            data.variable.each { VariableDefinition vd ->
+                                result.append(convertVariableDefinitionToMathML(vd))
+                            }
+                        }
+
+                        if (data.listOfCategories) {
+                            def categories = data.listOfCategories.collect { it.symbId }
+                            String categoryString = "{${categories.join(',&nbsp;')}}"
+                            result.append("<p><span class=\"bold\">List of Categories:&nbsp;</span>")
+                            result.append(categoryString).append("</p>")
+                        }
+
+                        String categoryVariable = data.categoryVariable.symbId
+                        if (categoryVariable) {
+                            result.append("<p><span class=\"bold\">Category Variable:&nbsp;</span>").append(categoryVariable).append("</p>")
+                        }
+
+                        if (data.listOfPMF) {
+                            String pmfs = ""
+                            pmfs = convertPMFsToMathML(data.listOfPMF)
+                            pmfs = categoryVariable.concat(op(" ~ ")).concat(pmfs)
+                            result.append("<p class=\"bold\">PMF</p>").append(pmfs)
+                        }
+
+                        if (data.listOfProbabilityAssignment) {
+                            result.append("<p class=\"bold\">Probability Assignment</p>")
+                            //result.append(data.listOfProbabilityAssignment.probability)
+                            data.listOfProbabilityAssignment.each {
+                                it.listOfProbability.each { pro ->
+                                    result.append(convertToMathML(pro.symbId, pro.logicBinop))
+                                }
+                                result.append(convertToMathML("", it.assign))
+                            }
+                        }
+
+                    } else if (discreteObs.timeToEventData) {
+                        result.append("Observation ${discreteObs.timeToEventData.eventVariable.symbId}<br/>")
+                        result.append("<span class='italic'>Discrete / Time-to-Event Data")
+                        result.append("</span>")
+                        result.append("</h4>")
+                        def data = discreteObs.timeToEventData
+
+                        if (data.eventVariable) {
+                            result.append("<p><span class=\"bold\">Event Variable:&nbsp;</span>")
+                            result.append("${data.eventVariable.symbId}</p>")
+                        }
+
+                        if (data.listOfHazardFunction) {
+                            result.append("<p><span class=\"bold\">Hazard function</span><br/>")
+                            // Check the existence of Independant Variable
+                            data.listOfHazardFunction.each {
+                                result.append(convertToMathML("h(t)", it.assign))
+                            }
+                        }
+
+                        if (data.listOfSurvivalFunction) {
+                            result.append("<p><span class=\"bold\">Survival function</span><br/>")
+                            // Check the existence of Independant Variable
+                            data.listOfSurvivalFunction.each {
+                                result.append(convertToMathML("S(t)", it.assign))
+                            }
+                        }
+
+                        if (data.listOfCensoring) {
+                            def censors = data.listOfCensoring
+                            result.append("<p><span class=\"bold\">Censoring</span><br/>")
+                            if (censors.censoringType) {
+                                censors.censoringType.each {
+                                    result.append("Type:&nbsp;${it.toString()}<br/>")
+                                }
+                            }
+
+                            /*
+                            if (censors.leftCensoringTime) {
+                                println censors.leftCensoringTime
+                                censors.leftCensoringTime.each {
+                                    println convertToMathML("Tet", it.assign)
+                                    result.append("Left Censoring Time:&nbsp;${it.toString()}<br/>")
+                                }
+
+                            }
+*/
+                            if (censors.rightCensoringTime) {
+                                censors.rightCensoringTime.each {
+                                    result.append("Right Censoring Time:&nbsp;${it.toString()}<br/>")
+                                }
+                            }
+
+                            if (censors.intervalLength) {
+                                censors.intervalLength.each {
+                                    result.append("Interval Length:&nbsp;${it}<br/>")
+                                }
+                            }
+                        }
+
+                        if (data.listOfMaximumNumberEvents) {
+                            def nbEvents = data.listOfMaximumNumberEvents
+
+                            nbEvents.each {
+                                println it.properties
+                                //result.append("<p><span class=\"bold\">Maximum Number Event:&nbsp;</span>${it.assign}")
+                                println convertToMathML("Test", it.assign)
+                            }
+
+                        }
                     }
-               }
-                if (obsErr) {
-                    if (obsErr.symbol?.value) {
-                        result.append(obsErr.symbol.value)
+
+
+                } else if (om.continuousData) {
+                    def continuousObs = om.continuousData
+                    def obsErr = continuousObs.observationError
+                    if (obsErr) {
+                        result.append("Observation ${obsErr.symbId}<br/>")
+                        result.append("<span class='italic'>").append("Continuous / Residual Data</span>")
                     }
-                    if (obsErr instanceof GaussianObsError) {
-                        result.append(gaussianObsErr(obsErr)).append(" ")
-                    } else { // can only be GeneralObsError
-                        result.append(generalObsErr(obsErr)).append(" ")
+                    result.append("</h4>")
+                    result.append("<span class=\"bold\">Parameters </span>")
+                    def simpleParameters = continuousObs.commonParameterElement.findAll {
+                        it instanceof SimpleParameter
                     }
+                    def rv = continuousObs.commonParameterElement.findAll {
+                        it instanceof ParameterRandomVariable
+                    }
+                    def individualParameters = continuousObs.commonParameterElement.findAll {
+                        it instanceof IndividualParameter
+                    }
+                    result.append(simpleParams(simpleParameters))
+
+                    Map<String, List<String>> obsRandomVariableMap = [:]
+
+                    String randoms = randomVariables(rv, obsRandomVariableMap)
+                    if (randoms) {
+                        result.append(randoms)
+                    }
+                    StringBuilder individuals = individualParams(individualParameters, rv, covariates, [:])
+                    if (individuals) {
+                        result.append(individuals)
+                    }
+                    if (continuousObs.correlation) {
+                        def processor = new PharmMl0_3AwareCorrelationProcessor()
+                        List<CorrelationMatrix> matrices = processor.convertToStringMatrix(
+                            continuousObs.correlation, obsRandomVariableMap)
+                        if (matrices) {
+                            displayCorrelationMatrices(matrices, result)
+                        }
+                    }
+                    if (obsErr) {
+                        if (obsErr.symbol?.value) {
+                            result.append(obsErr.symbol.value)
+                        }
+                        if (obsErr instanceof GaussianObsError) {
+                            result.append(gaussianObsErr(obsErr)).append(" ")
+                        } else { // can only be GeneralObsError
+                            result.append(generalObsErr(obsErr)).append(" ")
+                        }
+                    }
+                } else {
+                    println "This model has not supported by the current version of PharmML."
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Error rendering the observations ${observations.inspect()}: ${e.message}", e)
             result.append("<br/>Sorry, something went wrong while rendering the observations.")
         } finally {
@@ -543,19 +698,19 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
         TrialDesignStructure tds
         def segmentActivitiesMap
         result.append("<h3>Structure overview</h3>\n")
-        StringBuilder structureBuilder=new StringBuilder();
+        StringBuilder structureBuilder = new StringBuilder();
         try {
             tds = new TrialDesignStructure(structure.arm, structure.epoch,
-                        structure.cell, structure.segment)
-            def armRefs     = new ArrayList(tds.getArmRefs())
-            def epochRefs   = new ArrayList(tds.getEpochRefs())
+                structure.cell, structure.segment)
+            def armRefs = new ArrayList(tds.getArmRefs())
+            def epochRefs = new ArrayList(tds.getEpochRefs())
             /* arm-epoch matrix*/
             structureBuilder.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
-            for (String e: epochRefs) {
+            for (String e : epochRefs) {
                 structureBuilder.append("<th class='bold'>").append(e).append("</th>")
             }
             structureBuilder.append("</tr></thead><tbody>\n")
-            for (String a: armRefs) {
+            for (String a : armRefs) {
                 structureBuilder.append("<tr><th class='bold'>").append(a).append("</th>")
                 tds.findSegmentRefsByArm(a).each { s ->
                     structureBuilder.append("<td>").append(s).append("</td>")
@@ -564,7 +719,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             }
             structureBuilder.append("</tbody></table>\n")
             result.append(structureBuilder.toString());
-        } catch(Exception e) {
+        } catch (Exception e) {
             result.append("Cannot display the arm-epoch matrix.")
             def errMsg = new StringBuilder("Error encountered while rendering the arm-epoch matrix of")
             errMsg.append("trial design structure ${structure.properties} ")
@@ -578,7 +733,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             // avoid the need to increase the size of the map, because re-hashing is expensive
             segmentActivitiesMap = new HashMap(activities.size() + 1, 1.0)
             structure.segment.each { s ->
-                segmentActivitiesMap[s.oid] = s.activityRef.collect{ a ->
+                segmentActivitiesMap[s.oid] = s.activityRef.collect { a ->
                     structure.activity.find { a.oidRef.equals(it.oid) }
                 }
             }
@@ -619,7 +774,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 segActBuilder.append("<span>* &ndash; Element defined in the Individual dosing section.</span>")
             }
             result.append(segActBuilder.toString());
-        } catch(Exception e) {
+        } catch (Exception e) {
             result.append("Cannot display the segment-activity overview.")
             def errMsg = new StringBuilder("Cannot display the segment-activity overview for structure ")
             errMsg.append(structure.properties).append(" using helper map ")
@@ -627,7 +782,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             log.error(errMsg, e)
         }
         ObservationEventsMap oem
-        StringBuilder epOccBuilder=new StringBuilder();
+        StringBuilder epOccBuilder = new StringBuilder();
         /* epochs and occasions */
         try {
             if (structure.studyEvent) {
@@ -636,7 +791,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 def epochs = oem.getEpochs()
                 epOccBuilder.append("\n<h4>Epoch-Occasion definition</h4>\n")
                 epOccBuilder.append("<table><thead><tr><th class='bold'>Arm/Epoch</th>")
-                for (String e: epochs) {
+                for (String e : epochs) {
                     epOccBuilder.append("<th class='bold'>").append(e).append("</th>")
                 }
                 epOccBuilder.append("</tr></thead><tbody>\n")
@@ -655,7 +810,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 epOccBuilder.append("</tbody></table>\n")
             }
             result.append(epOccBuilder.toString());
-        } catch(Exception e) {
+        } catch (Exception e) {
             result.append("<p>Cannot display the epoch-occasion overview.</p>")
             def errMsg = new StringBuilder("Cannot display the epoch-occasion overview for structure ")
             errMsg.append(structure.properties).append(" using helper map ")
@@ -679,7 +834,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                     dataSet(d.dataSet, null, result, rev, downloadLink)
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             result.append("Cannot display the trial dosing.")
             def errMsg = new StringBuilder("Cannot display the trial dosing ")
             errMsg.append(d.properties)
@@ -707,7 +862,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             result.append("Cannot display population data set.")
             def errMsg = new StringBuilder()
             errMsg.append("Cannot display population data set ")
-            errMsg.append(pop.dataSet.properties).append( "for population ")
+            errMsg.append(pop.dataSet.properties).append("for population ")
             errMsg.append(pop.properties)
             log.error(errMsg, e)
         } finally {
@@ -755,7 +910,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                             }
                             boolean needBlk = allVars.size() != uniqueVars.unique().size()
                             vars.inject(result) { r, v ->
-                                r.append("${needBlk ? v.blkIdRef + '.': ''}${v.symbIdRef} ")
+                                r.append("${needBlk ? v.blkIdRef + '.' : ''}${v.symbIdRef} ")
                             }
                             result.append("</p>\n")
                         }
@@ -778,7 +933,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                         }
                         result.append(
                             observationTimepoints.size() == 1 ? observationTimepoints[0] :
-                                    "[${observationTimepoints.join(', ')}]")
+                                "[${observationTimepoints.join(', ')}]")
                         result.append("</p>\n")
                     }
                 }
@@ -798,8 +953,8 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
         def result = new StringBuilder("")
         def values = []
         vector.getVectorElements().elements.inject(result) { r, e ->
-            switch(e) {
-               case Sequence:
+            switch (e) {
+                case Sequence:
                     values << sequence(e)
                     break
                 case IntValue:
@@ -823,11 +978,11 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
 
     @Override
     protected StringBuilder dataSet(DataSet dataSet, Map variableMap,
-            StringBuilder sb, RevisionTransportCommand rev, String downloadLink) {
+                                    StringBuilder sb, RevisionTransportCommand rev, String downloadLink) {
         List tables = dataSet.getListOfColumnDefinition()
         if (tables) {
             def columnOrder = tables.inject([:]) { order, colDef ->
-                order << [(colDef.columnNum) : (colDef.columnId)]
+                order << [(colDef.columnNum): (colDef.columnId)]
             }
             sb.append("\n<table><thead><tr>")
 
@@ -863,8 +1018,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 sb.append("' title='Download ")
                 sb.append(rftc.mimeType)
                 sb.append(" file'>Download</a>")
-            }
-            else {
+            } else {
                 sb.append("This model refers to an external data file named '")
                 sb.append(dataSet.externalFile.name)
                 sb.append("', but the file is not available in the repository. ")
@@ -923,6 +1077,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
      * Override the default implementation because Correlation contains a pairwise element
      * where randomVariable1 and randomVariable2 are defined.
      */
+
     @Override
     protected void buildCorrelationMap(Correlation c, Map correlationsMap) {
         try {
@@ -930,7 +1085,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             final ScalarRhs VALUE = p.covariance ?: p.correlationCoefficient
 
             String var = c.variabilityReference.symbRef?.symbIdRef ?:
-                            c.variabilityReference.symbRef?.blkIdRef ?: "undefined"
+                c.variabilityReference.symbRef?.blkIdRef ?: "undefined"
             String r1 = p.randomVariable1.symbRef?.symbIdRef
             String r2 = p.randomVariable2.symbRef?.symbIdRef
             final String KEY = "$var|$r1|$r2"
@@ -943,6 +1098,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
     }
 
     /* EquationType no longer has scalarOrSymbRefOrBinop list, just one element*/
+
     @Override
     protected StringBuilder gaussianObsErr(GaussianObsError e) {
         def result = new StringBuilder("<div class='spaced-top-bottom'>")
@@ -1013,8 +1169,8 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
 
     @Override
     protected StringBuilder individualParams(List<IndividualParameter> parameters,
-                List<ParameterRandomVariable> rv, List<CovariateDefinition> covariates,
-                Map<String, Equation> transfMap) {
+                                             List<ParameterRandomVariable> rv, List<CovariateDefinition> covariates,
+                                             Map<String, Equation> transfMap) {
         def output = new StringBuilder("<div class='spaced-top-bottom'>")
         try {
             parameters.each { p ->
@@ -1064,7 +1220,7 @@ Individual parameter ${p.symbId} is missing mandatory Transformation element."""
                         Rhs popParamAssign = linearCovariate.populationParameter.assign
                         if (popParamAssign) {
                             SymbolRef popSymb = popParamAssign.symbRef ?:
-                                    popParamAssign.equation.symbRef
+                                popParamAssign.equation.symbRef
                             if (!popSymb) {
                                 log.warn "\
 Could not extract the population parameter of individual parameter ${p.symbId}."
@@ -1109,20 +1265,20 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                         }
                         def fixedEffectsTimesCovariateList = []
                         if (fixedEffectsCovMap) {
-                            fixedEffectsCovMap.each{
+                            fixedEffectsCovMap.each {
                                 def thisCov = []
                                 def key = it.key
-                                if ( key instanceof Equation) {
+                                if (key instanceof Equation) {
                                     def thisKey = key.scalar ?: wrapJaxb(key.uniop ?:
-                                            key.binop ?: key.symbRef ?: key.functionCall ?:
+                                        key.binop ?: key.symbRef ?: key.functionCall ?:
                                             key.piecewise)
                                     thisCov.add thisKey
-                                } else if (key instanceof JAXBElement ) {
+                                } else if (key instanceof JAXBElement) {
                                     thisCov.add key
                                 } else {
                                     thisCov.add(wrapJaxb(key))
                                 }
-                                it.value.collect{ v -> thisCov.add(wrapJaxb(v)) }
+                                it.value.collect { v -> thisCov.add(wrapJaxb(v)) }
                                 fixedEffectsTimesCovariateList.add(
                                     applyBinopToList(thisCov, Binoperator.TIMES))
                             }
@@ -1149,7 +1305,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                             if (covariateModelAssign.equation) {
                                 Equation eq = covariateModelAssign.equation
                                 covModel = eq.scalar ?: wrapJaxb(eq.uniop ?: eq.binop ?:
-                                                eq.symbRef ?: eq.functionCall ?: eq.piecewise)
+                                    eq.symbRef ?: eq.functionCall ?: eq.piecewise)
                             } else if (covariateModelAssign.scalar) {
                                 covModel = wrapJaxb(covariateModelAssign.scalar)
                             } else if (covariateModelAssign.symbRef) {
@@ -1168,7 +1324,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                     }
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             output = new StringBuilder("<div class='spaced-top-bottom'>")
             output.append("Cannot display individual parameters.")
             log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}")
@@ -1178,12 +1334,12 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
 
     @Override
     protected JAXBElement expandNestedSymbRefs(JAXBElement<SymbolRef> symbRef,
-            Map<String, Equation> transformations) {
+                                               Map<String, Equation> transformations) {
         final EquationType TRANSF_EQ = resolveSymbolReference(symbRef.value, transformations)
         if (TRANSF_EQ) {
             final def ELEM = wrapJaxb(extractAttributeFromEquation(TRANSF_EQ))
             final Class ELEM_CLASS = ELEM.value.getClass()
-            switch(ELEM_CLASS) {
+            switch (ELEM_CLASS) {
                 case Binop:
                     break
                 case Uniop:
@@ -1214,7 +1370,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
 
     @Override
     protected JAXBElement expandNestedUniop(JAXBElement<Uniop> jaxbUniop,
-            Map<String, Equation> transfMap) {
+                                            Map<String, Equation> transfMap) {
         Uniop uniop = jaxbUniop.value
         Uniop replacement
         if (uniop.symbRef) {
@@ -1224,7 +1380,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                 final Class ELEM_CLASS = ELEM.getClass()
                 replacement = new Uniop()
                 replacement.operator = uniop.operator
-                switch(ELEM_CLASS) {
+                switch (ELEM_CLASS) {
                     case Binop:
                         replacement.binop = ELEM
                         break
@@ -1278,7 +1434,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
     protected EquationType expandEquation(EquationType equation, Map<String, Equation> transfMap) {
         def eqTerms = extractAttributeFromEquation(equation)
         JAXBElement expandedTerms
-        switch(eqTerms) {
+        switch (eqTerms) {
             case Binop:
                 expandedTerms = expandNestedBinop(wrapJaxb(eqTerms), transfMap)
                 break
@@ -1296,7 +1452,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
 
         if (!eqTerms.equals(unwrappedExpandedTerms)) {
             def newEquation = new EquationType()
-            switch(unwrappedExpandedTerms) {
+            switch (unwrappedExpandedTerms) {
                 case Uniop:
                     newEquation.uniop = unwrappedExpandedTerms
                     break
@@ -1336,7 +1492,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
         if (rhs.symbRef) {
             return convertToMathML(lhs, rhs.symbRef, transfMap)
         }
-        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        StringBuilder builder = new StringBuilder("<math display='inline'><mstyle>")
         builder.append(oprand(lhs))
         builder.append(op("="))
         if (rhs.getScalar()) {
