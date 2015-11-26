@@ -35,6 +35,9 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 @CompileStatic
 class DDMoReMetadataInputSource implements MetadataInputSource {
     MetadataInformationService service
+    final String MODEL_CONCEPT_NAME = "Model"
+    final String MODEL_CONCEPT_URI = "http://www.pharmml.org/ontology/PHARMMLO_0000001"
+    final Id modelId = new Id(MODEL_CONCEPT_NAME, MODEL_CONCEPT_URI)
 
     boolean supports(RevisionTransportCommand revision) {
         println "ddmore mis supports only PharmML."
@@ -47,7 +50,6 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
         def root = new SimpleVertex(value: 'root')
         graph.addVertex(root)
 
-        Id modelId = new Id("Model","http://www.pharmml.org/ontology/PHARMMLO_0000001")
         Map<SectionContainer, List<DDMoReSectionAdapter>> sectionsMap = buildSectionContainers(modelId)
         def sections = []
         sectionsMap.each { SectionContainer s, List<DDMoReSectionAdapter> adapters ->
