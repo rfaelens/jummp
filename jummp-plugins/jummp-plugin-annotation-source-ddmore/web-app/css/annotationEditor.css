@@ -47,13 +47,22 @@
     color: red;
 }
 
-optgroup[label] {
-    /* disable italic styling for the optgroup label */
-    color: #0079FF;
-    font-style: normal;
+.info {
+    padding: 0.2em;
+    margin-top: 0.4em;
 }
 
-optgroup option {
-    color: #000; /* reset optgroup font settings */
-    padding-left: 2em;
+.infoLabel {
+    float: left;
+    margin-right: 0.3em;
+    margin-left: 0.3em;
+}
+
+.info p {
+    margin: 0px;
+}
+
+/* leaves of nested annotation values. */
+.subvalue {
+    padding-left: 4em;
 }

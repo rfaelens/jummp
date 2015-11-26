@@ -35,6 +35,10 @@ import eu.ddmore.libpharmml.dom.commontypes.Vector as CTVector
 import eu.ddmore.libpharmml.dom.dataset.DataSet
 import eu.ddmore.libpharmml.dom.maths.*
 import eu.ddmore.libpharmml.dom.modeldefn.*
+import eu.ddmore.libpharmml.dom.modeldefn.pkmacro.CompartmentMacro
+import eu.ddmore.libpharmml.dom.modeldefn.pkmacro.MacroValue
+import eu.ddmore.libpharmml.dom.modeldefn.pkmacro.PKMacro
+import eu.ddmore.libpharmml.dom.modeldefn.pkmacro.PKMacroList
 import eu.ddmore.libpharmml.dom.modellingsteps.*
 import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosing
 import eu.ddmore.libpharmml.dom.trialdesign.Population
@@ -52,7 +56,7 @@ import javax.xml.bind.JAXBElement
 
 class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
     /* the class logger */
-    private static final Log log = LogFactory.getLog(this.getClass())
+    private static final Log log = LogFactory.getLog(this)
     private static final String IS_DEBUG_ENABLED = log.isDebugEnabled()
     private static final String IS_INFO_ENABLED = log.isInfoEnabled()
     /* Dependency injection for groovyPageRenderer */
@@ -358,6 +362,9 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 }
                 if (sm.commonVariable) {
                     model["variableDefinitions"] = sm.commonVariable
+                }
+                if(sm.getPKmacros()){
+                    model["pkMacroList"] = sm.getPKmacros()
                 }
             }
         } catch (Exception e) {
@@ -1327,7 +1334,7 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
         } catch (Exception e) {
             output = new StringBuilder("<div class='spaced-top-bottom'>")
             output.append("Cannot display individual parameters.")
-            log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}")
+            log.error("Error encountered while rendering individual parameters ${parameters.inspect()} using random variables ${rv.inspect()} and covariates ${covariates.inspect()}: ${e.message}", e)
         }
         return output.append("</div>")
     }
@@ -1507,4 +1514,48 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
         builder.append("</mstyle></math>")
         return builder.toString()
     }
+
+    String renderPKMacros(PKMacroList pkMacroList){
+        StringBuilder builder=new StringBuilder()
+
+        for(PKMacro pkMacro : pkMacroList.getListOfMacro()){
+            builder.append("<div>")
+            builder.append("<math display='inline'><mstyle>")
+            builder.append(oprand(pkMacro.name))
+            builder.append(op("("))
+            String prefix = ""
+            for (MacroValue macroValue: pkMacro.getListOfValue()){
+                builder.append(oprand(prefix))
+                prefix = ","
+
+                if(macroValue.argument) {
+                    builder.append(oprand(macroValue.argument))
+                    builder.append(op("="))
+                    Rhs rhs = macroValue.assign
+                    if (rhs.symbRef)
+                        builder.append(oprand(rhs.symbRef.asString()))
+                    if (rhs.scalar)
+                        builder.append(oprand(scalar(rhs.scalar.value)))
+                    if (rhs.equation) {
+                        Equation equation = rhs.equation
+                        if (equation.symbRef)
+                            builder.append(oprand(rhs.equation.symbRef.asString()))
+                        else
+                            builder.append(convertToMathML(equation))
+                    }
+                }
+                else{
+                    if (macroValue.symbRef)
+                        builder.append(oprand(macroValue.symbRef.asString()))
+                }
+
+            }
+            builder.append(op(")"))
+            builder.append("</mstyle></math>")
+            builder.append("</div>")
+        }
+
+        return builder.toString()
+    }
+
 }

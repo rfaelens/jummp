@@ -111,10 +111,6 @@ class PharmMl0_6AwareHandler extends AbstractPharmMlHandler {
 
     @Profiled(tag="pharmMl0_6AwareHandler.getObservationModel")
     List getObservationModel(ModelDefinition definition) {
-        println "Testing: ${definition.listOfObservationModel}"
-        definition.listOfObservationModel.each {
-            println("Model: ${it}")
-        }
         return definition?.listOfObservationModel
     }
 

@@ -316,7 +316,6 @@ class UserService implements IUserService {
     @Profiled(tag = "userService.register")
     @PreAuthorize("isAnonymous() or hasRole('ROLE_ADMIN')")
     Long register(User user) throws RegistrationException, UserInvalidException {
-        println "lets save user ${user.properties}"
         if (springSecurityService.authentication instanceof AnonymousAuthenticationToken &&
                 !grailsApplication.config.jummp.security.anonymousRegistration) {
             throw new AccessDeniedException("Registration disabled for anonymous users")
@@ -325,8 +324,6 @@ class UserService implements IUserService {
             throw new RegistrationException("User with same name already exists", user.username)
         }
         User newUser = user.sanitizedUser()
-        // Test
-        println newUser.properties
 
         if (newUser.person.orcid) {
             def existing = Person.findByOrcid(newUser.person.orcid)

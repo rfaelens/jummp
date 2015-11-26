@@ -204,6 +204,13 @@ class PharmMlTagLib {
         pharmMlRenderingService.renderInitialConditions(attrs.initialConditions, attrs.version, out)
     }
 
+    def pkMacros = { attrs ->
+        if (!(attrs.vars)) {
+            return
+        }
+        pharmMlRenderingService.renderPKMacros(attrs.vars, attrs.version, out)
+    }
+
     /**
      * Renders model-level annotations on the 'Overview' tab of the model display.
      *

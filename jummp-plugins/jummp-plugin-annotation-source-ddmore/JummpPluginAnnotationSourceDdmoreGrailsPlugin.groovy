@@ -24,6 +24,7 @@ import eu.ddmore.metadata.sparql.SparqlQueryExecutor
 import eu.ddmore.metadata.sparql.SparqlQueryService
 
 class JummpPluginAnnotationSourceDdmoreGrailsPlugin {
+    final def DEFAULT_RDF_STORE_URL ="http://open-physiology.org:3030/demo2/query"
     // the plugin version
     def version = "0.1"
     // the version or versions of Grails the plugin is designed for
@@ -69,7 +70,15 @@ statements that can be expressed about a model in PharmML.
     }
 
     def doWithSpring = {
-        String url = "http://open-physiology.org:3030/demo2/query"
+        def cfg = application.config.jummp.ddmore.rdfstore.url
+        String url
+        if (!cfg) {
+            println "WARN\tDid you forget to define the setting jummp.ddmore.rdfstore.url?"
+            url = DEFAULT_RDF_STORE_URL
+        } else {
+            url = cfg
+        }
+        println "INFO\tUsing DDMoRe RDF Store at $url to retrieve annotation schema."
         metadataInputSource(DDMoReMetadataInputSource) {
             service = new MetadataInformationServiceImpl(new SparqlQueryExecutor(
                     new SparqlQueryService(url)))
