@@ -30,6 +30,8 @@
 **/
 
 package net.biomodels.jummp.plugins.pharmml
+
+import eu.ddmore.libpharmml.dom.modeldefn.pkmacro.PKMacroList
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
 import eu.ddmore.libpharmml.dom.commontypes.FunctionParameter
@@ -782,4 +784,7 @@ class PharmMl0_2AwareRenderer extends AbstractPharmMlRenderer {
         }
         return result.append("</ul>").toString()
     }
+
+    @Profiled(tag = "pharmMl0_2AwareRenderer.renderPKMacros")
+    String renderPKMacros(PKMacroList pkMacroList) {}
 }
