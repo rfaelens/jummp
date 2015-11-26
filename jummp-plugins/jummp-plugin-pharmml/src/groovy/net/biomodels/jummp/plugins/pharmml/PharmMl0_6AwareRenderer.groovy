@@ -31,59 +31,25 @@
 
 package net.biomodels.jummp.plugins.pharmml
 
-import eu.ddmore.libpharmml.dom.maths.Binoperator
-import eu.ddmore.libpharmml.dom.maths.Unioperator
-import net.biomodels.jummp.core.model.RevisionTransportCommand
-import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
-import eu.ddmore.libpharmml.dom.commontypes.FunctionParameter
-import eu.ddmore.libpharmml.dom.commontypes.FunctionDefinition
-import eu.ddmore.libpharmml.dom.commontypes.BooleanValue
-import eu.ddmore.libpharmml.dom.commontypes.IdValue
-import eu.ddmore.libpharmml.dom.commontypes.IntValue
-import eu.ddmore.libpharmml.dom.commontypes.Interpolation
-import eu.ddmore.libpharmml.dom.commontypes.RealValue
-import eu.ddmore.libpharmml.dom.commontypes.Rhs
-import eu.ddmore.libpharmml.dom.commontypes.ScalarRhs
-import eu.ddmore.libpharmml.dom.commontypes.Sequence
-import eu.ddmore.libpharmml.dom.commontypes.StringValue
-import eu.ddmore.libpharmml.dom.commontypes.SymbolRef
-import eu.ddmore.libpharmml.dom.commontypes.VariableDefinition
+import eu.ddmore.libpharmml.dom.commontypes.*
 import eu.ddmore.libpharmml.dom.commontypes.Vector as CTVector
 import eu.ddmore.libpharmml.dom.dataset.DataSet
-import eu.ddmore.libpharmml.dom.maths.Binop
-import eu.ddmore.libpharmml.dom.maths.Constant
-import eu.ddmore.libpharmml.dom.maths.Equation
-import eu.ddmore.libpharmml.dom.maths.EquationType
-import eu.ddmore.libpharmml.dom.maths.FunctionCallType
-import eu.ddmore.libpharmml.dom.maths.Piecewise
-import eu.ddmore.libpharmml.dom.maths.Uniop
-import eu.ddmore.libpharmml.dom.modeldefn.Correlation
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
-import eu.ddmore.libpharmml.dom.modeldefn.CovariateModel
-import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
-import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameter
-import eu.ddmore.libpharmml.dom.modeldefn.ModelDefinition
-import eu.ddmore.libpharmml.dom.modeldefn.ObservationModel
-import eu.ddmore.libpharmml.dom.modeldefn.Pairwise
-import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariable
-import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameter
-import eu.ddmore.libpharmml.dom.modeldefn.StructuralModel
-import eu.ddmore.libpharmml.dom.modellingsteps.CommonModellingStep
-import eu.ddmore.libpharmml.dom.modellingsteps.Estimation
-import eu.ddmore.libpharmml.dom.modellingsteps.ModellingSteps
-import eu.ddmore.libpharmml.dom.modellingsteps.Simulation
-import eu.ddmore.libpharmml.dom.modellingsteps.StepDependency
+import eu.ddmore.libpharmml.dom.maths.*
+import eu.ddmore.libpharmml.dom.modeldefn.*
+import eu.ddmore.libpharmml.dom.modellingsteps.*
 import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosing
 import eu.ddmore.libpharmml.dom.trialdesign.Population
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
 import grails.util.Holders
-import javax.xml.bind.JAXBElement
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.plugins.pharmml.util.correlation.CorrelationMatrix
 import net.biomodels.jummp.plugins.pharmml.util.correlation.PharmMl0_3AwareCorrelationProcessor
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.perf4j.aop.Profiled
+
+import javax.xml.bind.JAXBElement
 
 class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
     /* the class logger */
@@ -522,7 +488,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             }
         } catch(Exception e) {
             log.error("Error rendering the observations ${observations.inspect()}: ${e.message}", e)
-            result.append("Sorry, something went wrong while rendering the observations.")
+            result.append("<br/>Sorry, something went wrong while rendering the observations.")
         } finally {
             return result.toString()
         }
