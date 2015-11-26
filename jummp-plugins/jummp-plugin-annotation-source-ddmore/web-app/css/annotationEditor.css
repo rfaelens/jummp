@@ -64,11 +64,9 @@
 
 optgroup[label] {
     /* disable italic styling for the optgroup label */
-    color: #0079FF;
     font-style: normal;
 }
 
 optgroup option {
-    color: #000; /* reset optgroup font settings */
     padding-left: 2em;
 }
