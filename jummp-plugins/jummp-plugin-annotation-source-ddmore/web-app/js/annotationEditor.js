@@ -253,12 +253,11 @@ Jummp.buildValueTree = function(item, partialValueTree) {
     var annotationLabel = item.get('value');
     var subValues = item.get('children') || [];
 
-    if (subValues.length == 0) {
-        var thisItem = "<option value='" + optionValue;
-        thisItem += "'>" + annotationLabel + "</option>\n";
-        partialValueTree += thisItem;
-    } else {
-        var startSubGroup = "<optgroup label='" + annotationLabel + "'>\n";
+    var thisItem = "<option value='" + optionValue;
+    thisItem += "'>" + annotationLabel + "</option>\n";
+    partialValueTree += thisItem;
+    if (subValues.length > 0) {
+        var startSubGroup = "<optgroup>\n";
         partialValueTree += startSubGroup;
         subValues.each(function(child) {
             partialValueTree = Jummp.buildValueTree(child, partialValueTree);
