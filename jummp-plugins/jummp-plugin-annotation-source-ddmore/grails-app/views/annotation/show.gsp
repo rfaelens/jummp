@@ -23,6 +23,14 @@
     <script id="property-template" type="text/x-handlebars-template">
         <h3>{{this.value}}</h3>
         <div class="valueContainer">{{this.uri}} : {{this.range.name}}</div>
+        {{#if tooltip}}
+            <div class="ui-state-highlight ui-state-cornerall info">
+                <p>
+                <span class="ui-icon ui-icon-info infoLabel"></span>
+                    {{this.tooltip}}
+                </p>
+            </div>
+        {{/if}}
     </script>
     <script type="text/x-handlebars-template" id="properties-template"></script>
     <script id="tab-heading-template" type="text/x-handlebars-template">

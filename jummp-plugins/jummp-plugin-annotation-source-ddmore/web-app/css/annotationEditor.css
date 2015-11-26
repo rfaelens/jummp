@@ -47,6 +47,21 @@
     color: red;
 }
 
+.info {
+    padding: 0.2em;
+    margin-top: 0.4em;
+}
+
+.infoLabel {
+    float: left;
+    margin-right: 0.3em;
+    margin-left: 0.3em;
+}
+
+.info p {
+    margin: 0px;
+}
+
 optgroup[label] {
     /* disable italic styling for the optgroup label */
     color: #0079FF;

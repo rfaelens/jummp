@@ -48,10 +48,14 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
         graph.addVertex(root)
 
         Id modelId = new Id("Model","http://www.pharmml.org/ontology/PHARMMLO_0000001")
-        List<SectionContainer> sections = buildSectionContainers(modelId)
-        sections.each { SectionContainer s ->
+        Map<SectionContainer, List<DDMoReSectionAdapter>> sectionsMap = buildSectionContainers(modelId)
+        def sections = []
+        sectionsMap.each { SectionContainer s, List<DDMoReSectionAdapter> adapters ->
             graph.addChild(new SimpleEdge(), root, s)
-            s.children.each { double n, String name ->
+            adapters.each { DDMoReSectionAdapter adapter ->
+                double n = adapter.sectionNumber
+                String name = adapter.label
+                String tooltip = adapter.tooltip
                 def thisSection = new CompositeSection(modelId, n, name)
                 //currently only have 1 property per section, but this could change
                 List<Property> props = service.findPropertiesForSection(thisSection)
@@ -59,12 +63,13 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
                 props.each { Property p ->
                     Id pId = p.propertyId
                     def pVertex = new PropertyContainer(value: name, uri: pId.uri,
-                            range: buildPropertyRange(p.range))
+                            tooltip: tooltip, range: buildPropertyRange(p.range))
                     s.annotationProperties.add(pVertex)
                     graph.addChild new SimpleEdge(), s, pVertex
                     buildValuesForProperty(p, pVertex, graph)
                 }
             }
+            sections << s
         }
         sections
     }
@@ -96,27 +101,40 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
         vVertex
     }
 
-    private List<SectionContainer> buildSectionContainers(Id modelId) {
+    private Map<SectionContainer, List<DDMoReSectionAdapter>> buildSectionContainers(Id modelId) {
         List<Section> sections = service.findSectionsForConcept(modelId)
-        Map<Double, String> bookkeepingRegion = [:]
-        Map<Double, String> ctxOfUseRegion = [:]
+        List<DDMoReSectionAdapter> bookkeepingRegion = []
+        List<DDMoReSectionAdapter> ctxOfUseRegion = []
         sections.each { Section s ->
             double n = s.sectionNumber
+            def dsa = new DDMoReSectionAdapter(sectionNumber: n, label: s.sectionLabel,
+                    tooltip: s.toolTip)
             if (n < 2) {
-                bookkeepingRegion.put(n, s.sectionLabel)
+                bookkeepingRegion.add dsa
             } else {
-                ctxOfUseRegion.put(n, s.sectionLabel)
+                ctxOfUseRegion.add dsa
             }
         }
-        SectionContainer bk = new SectionContainer(name: 'Bookkeeping', id: "section1",
-                children: bookkeepingRegion)
-        SectionContainer cou = new SectionContainer(name: 'Context of Use', id: "section2",
-                children: ctxOfUseRegion)
-        [bk, cou]
+        Map<SectionContainer, List<DDMoReSectionAdapter>> result = [:]
+        SectionContainer bk = new SectionContainer(name: 'Bookkeeping', id: "section1")
+        SectionContainer cou = new SectionContainer(name: 'Context of Use', id: "section2")
+        result.put(bk, bookkeepingRegion)
+        result.put(cou, ctxOfUseRegion)
+        result
     }
 
     private AnnotationPropertyRange buildPropertyRange(PropertyRange r) {
         AnnotationPropertyRange.valueOf(r.toString())
     }
+}
+
+/**
+ * Adapter between {@link eu.ddmore.metadata.api.domain.sections.Section}
+ * and our own {@link net.biomodels.jummp.annotation.PropertyContainer}
+ */
+protected class DDMoReSectionAdapter {
+    double sectionNumber
+    String label
+    String tooltip
 }
 
