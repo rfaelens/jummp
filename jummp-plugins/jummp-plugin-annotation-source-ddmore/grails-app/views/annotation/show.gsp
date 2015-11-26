@@ -170,7 +170,7 @@
     var i;
     for(i = 0; i < selectCount; i++) {
         var thisSelect = selects[i];
-        var actualLength = 1 + thisSelect.length;
+        var actualLength = thisSelect.length;
         thisSelect.setAttribute('size', "" + actualLength);
     }
 
