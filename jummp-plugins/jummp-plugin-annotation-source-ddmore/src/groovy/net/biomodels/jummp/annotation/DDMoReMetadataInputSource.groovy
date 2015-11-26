@@ -38,6 +38,21 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
     final String MODEL_CONCEPT_NAME = "Model"
     final String MODEL_CONCEPT_URI = "http://www.pharmml.org/ontology/PHARMMLO_0000001"
     final Id modelId = new Id(MODEL_CONCEPT_NAME, MODEL_CONCEPT_URI)
+    /**
+     * Compare two Values based on either their rank or their label.
+     * The latter are assumed to never be empty or undefined.
+     */
+    final Comparator VALUE_COMPARATOR = { Value v1, Value v2 ->
+        String v1Name = v1.valueId?.label
+        String v2Name = v2.valueId?.label
+        String v1Rank = v1.valueRank
+        String v2Rank = v2.valueRank
+        if (v1Rank && v2Rank) {
+            return v1Rank <=> v2Rank
+        } else {
+            return v1Name <=> v2Name
+        }
+    } as Comparator
 
     boolean supports(RevisionTransportCommand revision) {
         "PharmML" == revision?.format?.name
@@ -76,11 +91,13 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
 
     private void buildValuesForProperty(Property p, PropertyContainer vtx, DelegateTree g) {
         List<Value> values = service.findValuesForProperty(p)
+        TreeMap orderedValues = new TreeMap(VALUE_COMPARATOR)
         values.each { Value v ->
             ValueContainer vVertex = visit(v)
-            vtx.values.add(vVertex)
+            orderedValues.put(v, vVertex)
             g.addChild(new SimpleEdge(), vtx, vVertex)
         }
+        vtx.values.addAll(orderedValues.values())
     }
 
     private ValueContainer visit(Value v) {
@@ -91,10 +108,12 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
         if (v.valueTree) {
             vVertex = new CompositeValueContainer(value: name, uri: uri)
             List<Value> childValues = ((CompositeValue) v).getValues()
-            List<ValueContainer> children = childValues.collect { Value child ->
-                visit(child)
+            TreeMap orderedValues = new TreeMap(VALUE_COMPARATOR)
+            childValues.each { Value child ->
+                ValueContainer thisValueContainer = visit(child)
+                orderedValues.put(child, thisValueContainer)
             }
-            vVertex.children = children
+            vVertex.children.addAll orderedValues.values()
         } else {
             vVertex = new ValueContainer(value: name, uri: uri)
         }
