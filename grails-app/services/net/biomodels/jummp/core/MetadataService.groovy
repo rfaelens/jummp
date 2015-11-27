@@ -210,7 +210,7 @@ class MetadataService {
 
             RepositoryFileTransportCommand rf = new RepositoryFileTransportCommand(
                     path: path, description: "annotation file")
-            List<RepositoryFileTransportCommand> files = modelService.retrieveModelFiles(baseRevision)
+            List<RepositoryFileTransportCommand> files = newRevision.files
             files.add rf
 
             boolean preProcessingOK = pharmMlService.doBeforeSavingAnnotations(annoFile, newRevision)
