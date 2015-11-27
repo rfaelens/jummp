@@ -360,35 +360,6 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return output.append("</div>")
     }
 
-    protected StringBuilder convertPMFsToMathML(List<CountPMF> pmfList) {
-        def result = new StringBuilder()
-
-        pmfList.each { pmf ->
-            if (pmf.distribution instanceof PoissonDistributionType){
-                PoissonDistributionType psd = pmf.distribution
-                result.append("<math display='inline'><mstyle><mtext>")
-                result.append("Poisson(rate = ${psd.rate.var.varId})")
-                result.append("</mtext></mstyle></math>")
-                result.append("<br/>")
-            } else if (pmf.distribution instanceof  BinomialDistributionType) {
-                BinomialDistribution bmd = pmf.distribution
-                result.append("<math display='inline'><mstyle><mtext>")
-                //StringBuilder binomialDistribution = renderBinomialDistribution()
-                result.append("Binomial(numberOfTrials=${bmd.numberOfTrials.NVal}, probabilityOfSuccess=${bmd.probabilityOfSuccess.var.varId})")
-                result.append("</mtext></mstyle></math>")
-                result.append("<br/>")
-            } else if (pmf.assign) {
-                result.append(convertToMathML(pmf.linkFunction.value(), pmf.logicBinop))
-                result.append(convertToMathML(pmf.assign.symbRef, pmf.assign.equation))
-                result.append("<br/>")
-            }else {
-                log.error ("The function has not supported in the current version of PharmML.")
-            }
-        }
-
-        return result
-    }
-
     protected void displayCorrelationMatrices(List<CorrelationMatrix> m, StringBuilder sb) {
         m.each { convertToMathML(it, sb) }
     }

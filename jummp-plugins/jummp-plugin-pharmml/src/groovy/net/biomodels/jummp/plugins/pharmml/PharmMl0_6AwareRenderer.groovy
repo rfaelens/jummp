@@ -44,6 +44,9 @@ import eu.ddmore.libpharmml.dom.trialdesign.IndividualDosing
 import eu.ddmore.libpharmml.dom.trialdesign.Population
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
+import eu.ddmore.libpharmml.dom.uncertml.BinomialDistribution
+import eu.ddmore.libpharmml.dom.uncertml.BinomialDistributionType
+import eu.ddmore.libpharmml.dom.uncertml.PoissonDistributionType
 import grails.util.Holders
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.plugins.pharmml.util.correlation.CorrelationMatrix
@@ -466,6 +469,185 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             model: [conditions: result])
     }
 
+    String displayProbability(String l, LogicBinOp logicBinOp) {
+        StringBuilder result = oprand(l)
+        result.append(op("("))
+        result.append(logicBinOp.op)
+        result.append(op(")"))
+
+        return  result.toString()
+    }
+
+    String renderDiscreteCountData(CountData data) {
+        StringBuilder result = new StringBuilder()
+        def simpleParameters = data.getListOfCommonParameterElement().findAll {
+            it instanceof SimpleParameter
+        }
+        simpleParameters = simpleParams(simpleParameters, [:], true)
+        if (simpleParameters) {
+            result.append("<p><span class=\"bold\">Parameters").append(simpleParameters).append("</span></p>")
+        }
+
+        String countVariables = data.countVariable.symbId
+        if (countVariables) {
+            result.append("<p><span class=\"bold\">Count Variables:&nbsp;</span>").append(countVariables).append("</p>")
+        }
+        String pmfs = convertPMFsToMathML(data.listOfPMF)
+        if (pmfs) {
+            result.append("<p class=\"bold\">PMF</p>").append(pmfs)
+        }
+
+        return result.toString()
+    }
+
+    String renderDiscreteCategoricalData(CategoricalData data) {
+        StringBuilder result = new StringBuilder()
+
+        String ordered = data.ordered
+        if (ordered) {
+            result.append("<p><span class=\"bold\">Ordered:&nbsp;</span>").append(ordered).append("</p>")
+        }
+
+        if (data.variable) {
+            result.append("<p class=\"bold\">Variables</p>")
+            data.variable.each { VariableDefinition vd ->
+                result.append(convertVariableDefinitionToMathML(vd))
+            }
+        }
+
+        if (data.listOfCategories) {
+            def categories = data.listOfCategories.collect { it.symbId }
+            String categoryString = "{${categories.join(',&nbsp;')}}"
+            result.append("<p><span class=\"bold\">List of Categories:&nbsp;</span>")
+            result.append(categoryString).append("</p>")
+        }
+
+        String categoryVariable = data.categoryVariable.symbId
+        if (categoryVariable) {
+            result.append("<p><span class=\"bold\">Category Variable:&nbsp;</span>").append(categoryVariable).append("</p>")
+        }
+
+        if (data.listOfPMF) {
+            String pmfs = ""
+            pmfs = convertPMFsToMathML(data.listOfPMF)
+            pmfs = categoryVariable.concat(op(" ~ ")).concat(pmfs)
+            result.append("<p class=\"bold\">PMF</p>").append(pmfs)
+        }
+
+        if (data.listOfProbabilityAssignment) {
+            result.append("<p class=\"bold\">Probability Assignment</p>")
+            data.listOfProbabilityAssignment.each {
+                it.listOfProbability.each { pro ->
+                    println convertToMathML("",pro.logicBinop)
+                    result.append(convertToMathML(pro.symbId, pro.logicBinop))
+                }
+                result.append(convertToMathML("",it.assign))
+            }
+        }
+
+        return result.toString()
+    }
+
+    String renderDiscreteTimeToEventData(TimeToEventData data) {
+        StringBuilder result = new StringBuilder()
+        if (data.eventVariable) {
+            result.append("<p><span class=\"bold\">Event Variable:&nbsp;</span>")
+            result.append("${data.eventVariable.symbId}</p>")
+        }
+
+        if (data.listOfHazardFunction) {
+            result.append("<p><span class=\"bold\">Hazard function</span><br/>")
+            // Check the existence of Independant Variable
+            data.listOfHazardFunction.each {
+                result.append(convertToMathML("h(t)", it.assign))
+            }
+        }
+
+        if (data.listOfSurvivalFunction) {
+            result.append("<p><span class=\"bold\">Survival function</span><br/>")
+            // Check the existence of Independant Variable
+            data.listOfSurvivalFunction.each {
+                result.append(convertToMathML("S(t)", it.assign))
+            }
+        }
+
+        if (data.listOfCensoring) {
+            result.append("<p><span class=\"bold\">Censoring</span><br/>")
+            def censors = data.listOfCensoring
+
+            if (censors.censoringType) {
+                result.append("Type:&nbsp;${censors[0].censoringType.toString()}<br/>")
+            }
+
+            if (censors[0].listOfLeftCensoringTime) {
+                String leftCensoringTime = censors[0].listOfLeftCensoringTime[0].assign.scalar.value.toString()
+                result.append("Left Censoring Time:&nbsp;${leftCensoringTime}<br/>")
+            }
+
+            if (censors[0].listOfRightCensoringTime) {
+                String rightCensoringTime = censors[0].listOfRightCensoringTime[0].assign.scalar.value.toString()
+                result.append("Right Censoring Time:&nbsp;${rightCensoringTime}<br/>")
+            }
+
+            if (censors[0].listOfIntervalLength) {
+                String intervalLength = censors[0].listOfIntervalLength[0].assign.scalar.value.toString()
+                result.append("Interval Length:&nbsp;${intervalLength}<br/>")
+            }
+        }
+
+        if (data.listOfMaximumNumberEvents) {
+            def nbEvents = data.listOfMaximumNumberEvents[0]
+            result.append("<p><span class=\"bold\">Maximum Number Event:&nbsp;</span>${nbEvents.assign.scalar.value}")
+        }
+
+        return result.toString()
+    }
+
+    String renderContinuousDataModel(ContinuousObservationModel data) {
+        StringBuilder result = new StringBuilder()
+
+        def simpleParameters = data.commonParameterElement.findAll {
+            it instanceof SimpleParameter
+        }
+        def rv = data.commonParameterElement.findAll {
+            it instanceof ParameterRandomVariable
+        }
+        def individualParameters = data.commonParameterElement.findAll {
+            it instanceof IndividualParameter
+        }
+        result.append(simpleParams(simpleParameters))
+
+        Map<String, List<String>> obsRandomVariableMap = [:]
+
+        String randoms = randomVariables(rv, obsRandomVariableMap)
+        if (randoms) {
+            result.append(randoms)
+        }
+        StringBuilder individuals = individualParams(individualParameters, rv, covariates, [:])
+        if (individuals) {
+            result.append(individuals)
+        }
+        if (data.correlation) {
+            def processor = new PharmMl0_3AwareCorrelationProcessor()
+            List<CorrelationMatrix> matrices = processor.convertToStringMatrix(
+                data.correlation, obsRandomVariableMap)
+            if (matrices) {
+                displayCorrelationMatrices(matrices, result)
+            }
+        }
+        if (data.observationError) {
+            if (data.observationError.symbol?.value) {
+                result.append(data.observationError.symbol.value)
+            }
+            if (data.observationError instanceof GaussianObsError) {
+                result.append(gaussianObsErr(data.observationError)).append(" ")
+            } else { // can only be GeneralObsError
+                result.append(generalObsErr(data.observationError)).append(" ")
+            }
+        }
+
+        return result.toString()
+    }
     /**
      * @param observationModels a list of
      * {@link eu.ddmore.libpharmml.dom.modeldefn.ObservationModel}s.
@@ -481,7 +663,6 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 result.append("<h4>")
 
                 if (om.discrete) {
-                    //log.error "We should support discrete observation ${om.dump()}"
                     def discreteObs = om.discrete
 
                     if (discreteObs.countData) {
@@ -490,162 +671,40 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                         result.append("</span>")
                         result.append("</h4>")
                         def data = discreteObs.countData
-
-                        def simpleParameters = data.getListOfCommonParameterElement().findAll {
-                            it instanceof SimpleParameter
-                        }
-                        simpleParameters = simpleParams(simpleParameters, [:], true)
-                        if (simpleParameters) {
-                            result.append("<p><span class=\"bold\">Parameters").append(simpleParameters).append("</span></p>")
-                        }
-
-                        String countVariables = data.countVariable.symbId
-                        if (countVariables) {
-                            result.append("<p><span class=\"bold\">Count Variables:&nbsp;</span>").append(countVariables).append("</p>")
-                        }
-                        String pmfs = convertPMFsToMathML(data.listOfPMF)
-                        if (pmfs) {
-                            result.append("<p class=\"bold\">PMF</p>").append(pmfs)
-                        }
-
+                        result.append(renderDiscreteCountData(data))
                     } else if (discreteObs.categoricalData) {
                         result.append("Observation ${discreteObs.categoricalData.categoryVariable.symbId}<br/>")
                         result.append("<span class='italic'>Discrete / Categorical Data")
                         result.append("</span>")
                         result.append("</h4>")
                         def data = discreteObs.categoricalData
-
-                        String ordered = data.ordered
-                        if (ordered) {
-                            result.append("<p><span class=\"bold\">Ordered:&nbsp;</span>").append(ordered).append("</p>")
-                        }
-
-                        if (data.variable) {
-                            result.append("<p class=\"bold\">Variables</p>")
-                            data.variable.each { VariableDefinition vd ->
-                                result.append(convertVariableDefinitionToMathML(vd))
-                            }
-                        }
-
-                        if (data.listOfCategories) {
-                            def categories = data.listOfCategories.collect { it.symbId }
-                            String categoryString = "{${categories.join(',&nbsp;')}}"
-                            result.append("<p><span class=\"bold\">List of Categories:&nbsp;</span>")
-                            result.append(categoryString).append("</p>")
-                        }
-
-                        String categoryVariable = data.categoryVariable.symbId
-                        if (categoryVariable) {
-                            result.append("<p><span class=\"bold\">Category Variable:&nbsp;</span>").append(categoryVariable).append("</p>")
-                        }
-
-                        if (data.listOfPMF) {
-                            String pmfs = ""
-                            pmfs = convertPMFsToMathML(data.listOfPMF)
-                            pmfs = categoryVariable.concat(op(" ~ ")).concat(pmfs)
-                            result.append("<p class=\"bold\">PMF</p>").append(pmfs)
-                        }
-
-                        if (data.listOfProbabilityAssignment) {
-                            result.append("<p class=\"bold\">Probability Assignment</p>")
-                            //result.append(data.listOfProbabilityAssignment.probability)
-                            data.listOfProbabilityAssignment.each {
-                                it.listOfProbability.each { pro ->
-                                    result.append(convertToMathML(pro.symbId, pro.logicBinop))
-                                }
-                                result.append(convertToMathML("", it.assign))
-                            }
-                        }
-
+                        result.append(renderDiscreteCategoricalData(data))
                     } else if (discreteObs.timeToEventData) {
                         result.append("Observation ${discreteObs.timeToEventData.eventVariable.symbId}<br/>")
                         result.append("<span class='italic'>Discrete / Time-to-Event Data")
                         result.append("</span>")
                         result.append("</h4>")
                         def data = discreteObs.timeToEventData
-
-                        if (data.eventVariable) {
-                            result.append("<p><span class=\"bold\">Event Variable:&nbsp;</span>")
-                            result.append("${data.eventVariable.symbId}</p>")
-                        }
-
-                        if (data.listOfHazardFunction) {
-                            result.append("<p><span class=\"bold\">Hazard function</span><br/>")
-                            // Check the existence of Independant Variable
-                            data.listOfHazardFunction.each {
-                                result.append(convertToMathML("h(t)", it.assign))
-                            }
-                        }
-
-                        if (data.listOfSurvivalFunction) {
-                            result.append("<p><span class=\"bold\">Survival function</span><br/>")
-                            // Check the existence of Independant Variable
-                            data.listOfSurvivalFunction.each {
-                                result.append(convertToMathML("S(t)", it.assign))
-                            }
-                        }
-
-                        if (data.listOfCensoring) {
-                            def censors = data.listOfCensoring
-                            result.append("<p><span class=\"bold\">Censoring</span><br/>")
-                            if (censors.censoringType) {
-                                censors.censoringType.each {
-                                    result.append("Type:&nbsp;${it.toString()}<br/>")
-                                }
-                            }
-
-                            /*
-                            if (censors.leftCensoringTime) {
-                                println censors.leftCensoringTime
-                                censors.leftCensoringTime.each {
-                                    println convertToMathML("Tet", it.assign)
-                                    result.append("Left Censoring Time:&nbsp;${it.toString()}<br/>")
-                                }
-
-                            }
-*/
-                            if (censors.rightCensoringTime) {
-                                censors.rightCensoringTime.each {
-                                    result.append("Right Censoring Time:&nbsp;${it.toString()}<br/>")
-                                }
-                            }
-
-                            if (censors.intervalLength) {
-                                censors.intervalLength.each {
-                                    result.append("Interval Length:&nbsp;${it}<br/>")
-                                }
-                            }
-                        }
-
-                        if (data.listOfMaximumNumberEvents) {
-                            def nbEvents = data.listOfMaximumNumberEvents
-
-                            nbEvents.each {
-                                println it.properties
-                                //result.append("<p><span class=\"bold\">Maximum Number Event:&nbsp;</span>${it.assign}")
-                                println convertToMathML("Test", it.assign)
-                            }
-
-                        }
+                        result.append(renderDiscreteTimeToEventData(data))
                     }
-
-
                 } else if (om.continuousData) {
-                    def continuousObs = om.continuousData
-                    def obsErr = continuousObs.observationError
+                    def data = om.continuousData
+
+                    def obsErr = data.observationError
                     if (obsErr) {
                         result.append("Observation ${obsErr.symbId}<br/>")
                         result.append("<span class='italic'>").append("Continuous / Residual Data</span>")
                     }
                     result.append("</h4>")
                     result.append("<span class=\"bold\">Parameters </span>")
-                    def simpleParameters = continuousObs.commonParameterElement.findAll {
+
+                    def simpleParameters = data.commonParameterElement.findAll {
                         it instanceof SimpleParameter
                     }
-                    def rv = continuousObs.commonParameterElement.findAll {
+                    def rv = data.commonParameterElement.findAll {
                         it instanceof ParameterRandomVariable
                     }
-                    def individualParameters = continuousObs.commonParameterElement.findAll {
+                    def individualParameters = data.commonParameterElement.findAll {
                         it instanceof IndividualParameter
                     }
                     result.append(simpleParams(simpleParameters))
@@ -660,24 +719,27 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                     if (individuals) {
                         result.append(individuals)
                     }
-                    if (continuousObs.correlation) {
+                    if (data.correlation) {
                         def processor = new PharmMl0_3AwareCorrelationProcessor()
                         List<CorrelationMatrix> matrices = processor.convertToStringMatrix(
-                            continuousObs.correlation, obsRandomVariableMap)
+                            data.correlation, obsRandomVariableMap)
                         if (matrices) {
                             displayCorrelationMatrices(matrices, result)
                         }
                     }
-                    if (obsErr) {
-                        if (obsErr.symbol?.value) {
-                            result.append(obsErr.symbol.value)
+                    if (data.observationError) {
+                        if (data.observationError.symbol?.value) {
+                            result.append(data.observationError.symbol.value)
                         }
-                        if (obsErr instanceof GaussianObsError) {
-                            result.append(gaussianObsErr(obsErr)).append(" ")
+                        if (data.observationError instanceof GaussianObsError) {
+                            result.append(gaussianObsErr(data.observationError)).append(" ")
                         } else { // can only be GeneralObsError
-                            result.append(generalObsErr(obsErr)).append(" ")
+                            result.append(generalObsErr(data.observationError)).append(" ")
                         }
                     }
+
+                    //result.append(renderContinuousDataModel(data))
+
                 } else {
                     println "This model has not supported by the current version of PharmML."
                 }
@@ -1489,6 +1551,35 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
             return
         }
         return eq.uniop ?: eq.binop ?: eq.symbRef ?: eq.scalar ?: eq.functionCall ?: eq.piecewise
+    }
+
+    protected StringBuilder convertPMFsToMathML(List<CountPMF> pmfList) {
+        def result = new StringBuilder()
+
+        pmfList.each { pmf ->
+            if (pmf.distribution instanceof PoissonDistributionType){
+                PoissonDistributionType psd = pmf.distribution
+                result.append("<math display='inline'><mstyle><mtext>")
+                result.append("Poisson(rate = ${psd.rate.var.varId})")
+                result.append("</mtext></mstyle></math>")
+                result.append("<br/>")
+            } else if (pmf.distribution instanceof  BinomialDistributionType) {
+                BinomialDistribution bmd = pmf.distribution
+                result.append("<math display='inline'><mstyle><mtext>")
+                //StringBuilder binomialDistribution = renderBinomialDistribution()
+                result.append("Binomial(numberOfTrials=${bmd.numberOfTrials.NVal}, probabilityOfSuccess=${bmd.probabilityOfSuccess.var.varId})")
+                result.append("</mtext></mstyle></math>")
+                result.append("<br/>")
+            } else if (pmf.assign) {
+                result.append(op("P"))
+                result.append(convertToMathML(pmf.logicBinop)).append(convertToMathML(pmf.assign.equation))
+                result.append("<br/>")
+            }else {
+                log.error ("The function has not supported in the current version of PharmML.")
+            }
+        }
+
+        return result
     }
 
     @Override
