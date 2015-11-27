@@ -31,6 +31,14 @@
 
 package net.biomodels.jummp.plugins.pharmml
 
+import eu.ddmore.libpharmml.dom.maths.Binoperator
+import eu.ddmore.libpharmml.dom.maths.Unioperator
+import eu.ddmore.libpharmml.dom.modeldefn.CountPMF
+import eu.ddmore.libpharmml.dom.uncertml.BinomialDistribution
+import eu.ddmore.libpharmml.dom.uncertml.BinomialDistributionType
+import eu.ddmore.libpharmml.dom.uncertml.PoissonDistribution
+import eu.ddmore.libpharmml.dom.uncertml.PoissonDistributionType
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
 import eu.ddmore.libpharmml.dom.commontypes.FalseBoolean
 import eu.ddmore.libpharmml.dom.commontypes.IdValue
@@ -427,17 +435,19 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
 
     //TODO REMOVE THIS
     protected StringBuilder simpleParams(List<SimpleParameter> parameters,
-                Map<String, Equation> transfMap = [:]) {
+                Map<String, Equation> transfMap = [:], boolean  shownBlk = false) {
         def outcome = new StringBuilder()
         if (!parameters) {
             return outcome
         }
         outcome.append("<div class='spaced-top-bottom'>")
         try {
-            parameters.inject(outcome) { o, p ->
+            parameters.inject(outcome) { StringBuilder o, SimpleParameter p ->
                 String thisParam
                 if (p.assign) {
                     thisParam = convertToMathML(p.symbId, p.assign, transfMap)
+                    String foo = "<mfenced><mi>${p.assign.equation.symbRef.blkIdRef}</mi></mfenced>"
+                    thisParam = "${thisParam}<math display='inline'><mstyle>${ shownBlk ? foo : "" }</mstyle></math>"
                 } else {
                     thisParam = ["<math display='inline'><mstyle>", "</mstyle></math>"].join(op(p.symbId))
                 }
@@ -445,6 +455,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 o.append(thisParam).append(";&nbsp;")
                 o.append("</span>\n")
             }
+
         } catch(Exception e) {
             outcome.append("<p>Cannot display simple parameters.<p>")
             log.error("Error encountered while rendering simple params ${parameters.inspect()}: ${e.message}", e)
@@ -699,7 +710,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
     }
 
     protected StringBuilder distributionAssignment(String l, def d) {
-        StringBuilder builder=new StringBuilder("<math display='inline'><mstyle>")
+        StringBuilder builder = new StringBuilder("<math display='inline'><mstyle>")
         builder.append(oprand(l))
         builder.append(op("&sim;"))
         builder.append(distribution(d))
@@ -721,6 +732,12 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return result
     }
 
+    protected String binomialDistribution(def dist) {
+        StringBuilder result = new StringBuilder()
+        BinomialDistribution d = dist.value
+        return result.toString()
+    }
+
     protected String normalDistribution(def dist) {
         StringBuilder result = new StringBuilder()
         NormalDistribution d = dist.value
@@ -734,6 +751,13 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         if (variance) {
             result.append(op(",")).append(oprand(variance))
         }
+
+        return result.toString()
+    }
+
+    protected String poissonDistribution(def dist) {
+        StringBuilder result = new StringBuilder()
+        PoissonDistribution d = dist.value
 
         return result.toString()
     }

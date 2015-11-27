@@ -58,7 +58,7 @@
                                 <g:if test="${publication}">
                                             <g:select name="PubLinkProvider"
                                             from="${PublicationLinkProvider.LinkType.
-                                                    values().collect(new LinkedList()) { it.toString() }}"
+                                                    values().collect { it.toString() }}"
                                                     value="${publication.linkProvider.linkType.toString()}"
                                                     noSelection="['':'-Please select publication link type-']"/>
                                             <g:textField name="PublicationLink"
@@ -67,7 +67,7 @@
                                 <g:else>
                                             <g:select name="PubLinkProvider"
                                             from="${PublicationLinkProvider.LinkType.
-                                                    values().collect(new LinkedList()) { it.toString() }}"
+                                                    values().collect { it.toString() }}"
                                             noSelection="['':'-Please select publication link type-']"/>
                                             <g:textField name="PublicationLink"/>
                                 </g:else>

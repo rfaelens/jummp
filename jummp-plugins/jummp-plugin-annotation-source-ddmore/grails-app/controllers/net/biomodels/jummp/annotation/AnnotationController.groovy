@@ -102,7 +102,7 @@ class AnnotationController {
             }
         }
 
-        boolean result = metadataDelegateService.updateModelMetadata(modelId, stmts)
+        boolean result = metadataDelegateService.saveMetadata(modelId, stmts)
         if (result) {
             render([status: '200', message: "Information successfully saved."] as JSON)
         } else {
