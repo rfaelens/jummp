@@ -227,7 +227,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                         ccMap['transf'] = []
                         transformations.each { t ->
                             final EquationType TRANSF_EQ = t.equation
-                            final String TRANSF = convertToMathML("Transformation", TRANSF_EQ)
+                            final String TRANSF = convertToMathML(t.transformedCovariate.symbId, TRANSF_EQ)
                             final String COV_KEY = "${blkId}_${t.transformedCovariate.symbId}"
                             transfMap[COV_KEY] = TRANSF_EQ
                             ccMap["transf"] << TRANSF
