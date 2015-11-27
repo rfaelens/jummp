@@ -2107,11 +2107,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         revision.validationReport = validationReport.getValidationReport();
         revision.validationLevel = validationReport.metadataValidator.getValidationErrorStatus();
 
-        try {
-            revision.save(flush: true)
-        } catch (Throwable e) {
-            log.error e.message, e
-        }
+        revision.save(flush: true)
     }
 
     /**
