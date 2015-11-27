@@ -27,7 +27,6 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 class SectionContainer extends SimpleVertex {
-    Map<Double, String> children = [:]
     String name
     String id
     List<PropertyContainer> annotationProperties = []

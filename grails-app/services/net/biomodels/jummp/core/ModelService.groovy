@@ -30,18 +30,10 @@
 
 package net.biomodels.jummp.core
 
-import eu.ddmore.metadata.api.MetadataInformationService
-import eu.ddmore.metadata.impl.MetadataInformationServiceImpl
 import eu.ddmore.metadata.service.ValidationException
 import eu.ddmore.metadata.service.ValidationReportImpl
-import grails.spring.BeanBuilder
-import grails.util.Holders
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
-
-import javax.activation.MimetypesFileTypeMap
-
-import static java.util.UUID.randomUUID
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
 import net.biomodels.jummp.core.events.LoggingEventType
@@ -61,6 +53,8 @@ import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.plugins.security.User
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.apache.tika.detect.DefaultDetector
+import org.apache.tika.metadata.Metadata
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.perf4j.log4j.Log4JStopWatch
@@ -73,7 +67,6 @@ import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
 import eu.ddmore.metadata.service.ValidationReport
-
 
 /**
  * @short Service class for managing Models
@@ -95,7 +88,7 @@ class ModelService {
     /**
      * The class logger.
      */
-    private static final Log log = LogFactory.getLog(this.getClass())
+    private static final Log log = LogFactory.getLog(this)
     /**
      * Threshold for the verbosity of the logger.
      */
@@ -718,32 +711,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     validated:rev.validated,
                     format: ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion))
         def stopWatch = new Log4JStopWatch("modelService.addValidatedRevision.rftcCreation")
-        List<RepositoryFile> domainObjects = []
-        for (rf in repoFiles) {
-            String sep = File.separator.equals("/") ? "/" : "\\\\"
-            final String fileName = rf.path.split(sep).last()
-            final def domain = new RepositoryFile(path: rf.path, description: rf.description,
-                    mimeType: rf.mimeType, revision: revision)
-            if (rf.mainFile) {
-                domain.mainFile = rf.mainFile
-            }
-            if (rf.userSubmitted) {
-                domain.userSubmitted = rf.userSubmitted
-            }
-            if (rf.hidden) {
-                domain.hidden = rf.hidden
-            }
-            if (!domain.validate()) {
-                final def m = DomainAdapter.getAdapter(model).toCommandObject()
-                def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the update of model ${m.properties}.")
-                msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
-                log.error(msg)
-                final String culprit = new File(rf.path).name
-                throw new ModelException(m, "Your submission appears to contain invalid file ${fileName}. Please review it and try again.")
-            } else {
-                domainObjects.add(domain)
-            }
-        }
+        List<RepositoryFile> domainObjects = convertRepositoryFilesFromTransportCommands(repoFiles, revision)
+
         stopWatch.lap("RepositoryFileTransportCommands created.")
         // save the new model in the database
         stopWatch.setTag("modelService.addValidatedRevision.persistModel")
@@ -774,7 +743,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     log.error("Unable to record publication for ${rev.model}: ${e.message}", e)
                 }
             }
-            revision.save(failOnError:true)
+            revision.save(flush: true)
             model.save(flush: true)
             stopWatch.lap("Model persisted to the database.")
             stopWatch.setTag("modelService.addValidatedRevision.grantPermissions")
@@ -813,6 +782,82 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(m, "Revision stored in VCS, but not in database")
         }
         return revision
+    }
+
+    /*
+     * Creates validated RepositoryFile objects from corresponding RepositoryFileTransportCommands.
+     *
+     * This method is used to complement the validation mechanism available for domain
+     * classes because the latter is applied even for operations that don't change repository file
+     * objects such as deletion or publishing of models.
+     *
+     * This method throws ModelException if
+     *      there is at least one entry in the supplied list with an undefined or inexistent path,
+     *      there is at least one empty file, or
+     *      there are no main files.
+     *
+     * @param repoFiles a list of RepositoryFileTransportCommand objects to validate and convert into
+     * domain objects.
+     */
+    private List<RepositoryFile> convertRepositoryFilesFromTransportCommands(
+            List<RepositoryFileTransportCommand> repoFileCmds, Revision revision) {
+        def results = []
+        boolean foundValidMainFile = false
+        for (rf in repoFileCmds) {
+            // validate
+            String filePath = rf.path
+            if (!filePath) {
+                log.error("Missing path for RepositoryFile ${rf.dump()} from ${repoFileCmds.dump()}")
+                throw new ModelException("We lost track of one of the files you provided for this revision.")
+            }
+            File f = new File(filePath)
+            boolean fileExists = f.exists()
+            if (!fileExists) {
+                log.error("Non-existent path for RepositoryFile ${rf.dump()} from ${repoFileCmds.dump()}")
+                throw new ModelException("There was a problem saving file ${f.name} for this revision.")
+            }
+            boolean fileIsEmpty = !f.length()
+            if (fileIsEmpty) {
+                log.error("Empty file ${f.name} included in ${repoFileCmds.dump()}")
+                throw new ModelException("Cannot save empty file ${f.name} for this revision.")
+            }
+            if (rf.mainFile) {
+                foundValidMainFile = true
+            }
+            // work out MIME type
+            def sherlock = new DefaultDetector()
+            def is = new BufferedInputStream(new FileInputStream(f))
+            String mimeType = sherlock.detect(is, new Metadata()).toString()
+
+            // create the domain object
+            final String fileName = f.name
+            final def domain = new RepositoryFile(path: fileName, description: rf.description,
+                    mimeType: mimeType, revision: revision)
+            if (rf.mainFile) {
+                domain.mainFile = rf.mainFile
+            }
+            if (rf.userSubmitted) {
+                domain.userSubmitted = rf.userSubmitted
+            }
+            if (rf.hidden) {
+                domain.hidden = rf.hidden
+            }
+            if (!domain.validate()) {
+                final def m = DomainAdapter.getAdapter(revision.model).toCommandObject()
+                def msg = new StringBuffer("Invalid file ${rf.properties} uploaded for model ${m.properties}.")
+                msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
+                log.error(msg)
+                throw new ModelException("""\
+Your submission appears to contain invalid file ${fileName}. Please review it and try again.""")
+            } else {
+                results.add(domain)
+            }
+        }
+        if (!foundValidMainFile) {
+            log.error("Can't persist repository files ${repoFileCmds.dump()} for revision ${revision.dump()}")
+            throw new ModelException("Missing main file for the new model revision ${revision.name}")
+        }
+        results
     }
 
     /**
@@ -925,28 +970,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 format: format)
 
         // keep a list of RFs closeby, as we may need to discard all of them
-        List<RepositoryFile> domainObjects = []
-        for (rf in repoFiles) {
-            final def domain = new RepositoryFile(path: rf.path, description: rf.description,
-                    mimeType: rf.mimeType, revision: revision)
-            if (rf.mainFile) {
-                domain.mainFile = rf.mainFile
-            }
-            if (rf.userSubmitted) {
-                domain.userSubmitted = rf.userSubmitted
-            }
-            if (rf.hidden) {
-                domain.hidden = rf.hidden
-            }
-            if (!domain.validate()) {
-                def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the creation of model ${rev.model}.")
-                msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
-                log.error(msg)
-                throw new ModelException(rev.model, "The submission appears to contain invalid file ${fileName}. Please review it and try again.")
-            } else {
-                domainObjects.add(domain)
-            }
-        }
+        List<RepositoryFile> domainObjects =
+                convertRepositoryFilesFromTransportCommands(repoFiles, revision)
         stopWatch.lap("Finished preparing what to store in the VCS.")
         stopWatch.setTag("modelService.uploadValidatedModel.doVcsStorage")
         try {
@@ -1042,7 +1067,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             revision.discard()
             domainObjects.each {it.discard()}
             model.discard()
-            log.error("New Model ${model.properties} with properties ${rev.model.properties} does not validate:${revision.errors.allErrors.inspect()}")
+            log.error("New Model does not validate:${revision.errors.allErrors.inspect()}")
             stopWatch.stop()
             throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
         }
@@ -1141,35 +1166,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 uploadDate: new Date())
 
         // keep a list of RFs closeby, as we may need to discard all of them
-        List<RepositoryFile> domainObjects = []
-        for (rf in repoFiles) {
-            String sep = File.separator.equals("/") ? "/" : "\\\\"
-            /*
-             * only store the name of the file in the database, as the location can change and
-             * we generate the correct path when the RepositoryFileTransportCommand wrapper is created
-             */
-            String fileName = rf.path.split(sep).last()
-            final def domain = new RepositoryFile(path: rf.path, description: rf.description,
-                    mimeType: rf.mimeType, revision: revision)
-            if (rf.mainFile) {
-                domain.mainFile = rf.mainFile
-            }
-            if (rf.userSubmitted) {
-                domain.userSubmitted = rf.userSubmitted
-            }
-            if (rf.hidden) {
-                domain.hidden = rf.hidden
-            }
-            if (!domain.validate()) {
-                def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the creation of model ${meta}.")
-                msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
-                log.error(msg)
-                stopWatch.stop()
-                throw new ModelException(meta, "The submission appears to contain invalid file ${fileName}. Please review it and try again.")
-            } else {
-                domainObjects.add(domain)
-            }
-        }
+        List<RepositoryFile> domainObjects =
+                convertRepositoryFilesFromTransportCommands(repoFiles, revision)
         String formatVersion = modelFileFormatService.getFormatVersion(revision)
         revision.format = ModelFormat.findByIdentifierAndFormatVersion(meta.format.identifier, formatVersion)
         assert formatVersion != null && revision.format != null
@@ -1330,32 +1328,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                         description: modelFileFormatService.extractDescription(modelFiles, format), comment: comment,
                         uploadDate: new Date(), owner: currentUser,
                 minorRevision: false, validated:valid)
-        List<RepositoryFile> domainObjects = []
-        for (rf in repoFiles) {
-            String sep = File.separator.equals("/") ? "/" : "\\\\"
-            final String fileName = rf.path.split(sep).last()
-            final def domain = new RepositoryFile(path: rf.path, description: rf.description,
-                    mimeType: rf.mimeType, revision: revision)
-            if (rf.mainFile) {
-                domain.mainFile = rf.mainFile
-            }
-            if (rf.userSubmitted) {
-                domain.userSubmitted = rf.userSubmitted
-            }
-            if (rf.hidden) {
-                domain.hidden = rf.hidden
-            }
-            if (!domain.validate()) {
-                final def m = DomainAdapter.getAdapter(model).toCommandObject()
-                def msg = new StringBuffer("Invalid file ${rf.properties} uploaded during the update of model ${m.properties}.")
-                msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
-                log.error(msg)
-                final String culprit = new File(rf.path).name
-                throw new ModelException(m, "Your submission appears to contain invalid file ${fileName}. Please review it and try again.")
-            } else {
-                domainObjects.add(domain)
-            }
-        }
+        List<RepositoryFile> domainObjects = convertRepositoryFilesFromTransportCommands(repoFiles, revision)
         String formatVersion = modelFileFormatService.getFormatVersion(revision)
         revision.format = ModelFormat.findByIdentifierAndFormatVersion(format.identifier, formatVersion)
 
@@ -1788,13 +1761,14 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (model.deleted) {
             return false
         }
-        List<Revision> revs = getAllRevisions(model)
-        Revision publicRev = revs.find { it.state != ModelState.UNPUBLISHED }
+        boolean publicRev = hasPublicRevision(model)
         if (publicRev) {
             return false
         }
-        return (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || aclUtilService.hasPermission(
-                springSecurityService.authentication, model, BasePermission.DELETE))
+        boolean isAdmin = SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")
+        boolean hasDeleteRight = aclUtilService.hasPermission(
+                springSecurityService.authentication, model, BasePermission.DELETE)
+        return isAdmin || hasDeleteRight
     }
 
     /**
@@ -1817,11 +1791,12 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     }
 
     /**
-    * Deletes the @p model including all Revisions.
+    * Deletes the @p model.
     *
-    * Flags the @p model and all its revisions as deleted. A deletion from VCS is for
-    * technical reasons not possible and because of that a deletion of the Model object
-    * is not possible.
+    * Flags the @p model as deleted in the database and the search index.
+    *
+    * The corresponding revision objects are not set as deleted in the database
+    * because that would prevent users from being able to access archived models.
     *
     * Deletion of @p model is only possible if the model is neither under curation nor published.
     * @param model The Model to be deleted
@@ -1841,11 +1816,11 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (model.deleted) {
             return false
         }
-        List<Revision> revs = getAllRevisions(model)
-        Revision publicRev = revs.find {
-            it.state != ModelState.UNPUBLISHED
-        }
-        if (publicRev) {
+        boolean modelAlreadyPublic = hasPublicRevision(model)
+        if (modelAlreadyPublic) {
+            if (IS_DEBUG_ENABLED) {
+                log.debug "Refusing to delete published model ${model.submissionId}"
+            }
             return false
         }
         if (IS_DEBUG_ENABLED) {
@@ -1853,24 +1828,41 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         }
         // can't inject searchService - cyclic dependency
         def searchService = grailsApplication.mainContext.searchService
-        Model.withTransaction { status ->
+        searchService.setDeleted(model)
+        if (!searchService.isDeleted(model)) {
+            // leave the model as not deleted and log the error
+            log.error("Could not set model ${model.submissionId} as deleted in solr.")
+            return false
+        } else {
             model.deleted = true
-            searchService.setDeleted(model)
-            if (!searchService.isDeleted(model)) {
-                status.setRollbackOnly()
-                searchService.setDeleted(model, false)
-                log.error("Could not set model ${model.submissionId} as deleted in solr.")
+            model.save(flush: true)
+            //quick test to make sure Solr is in sync with the database
+            model.refresh()
+            boolean db = model.deleted
+            boolean solr = searchService.isDeleted(model)
+            if (IS_DEBUG_ENABLED) {
+                def m = new StringBuilder("Deletion status for ").append(model.submissionId
+                ).append(" - db: ").append(db).append(" solr: ").append(solr)
+                log.debug(m.toString())
+            }
+            return db && solr
+        }
+    }
+
+    /*
+     * Convenience method that checks whether a model has any publicly-available revision.
+     *
+     * @param model the model for which to verify the publication status.
+     */
+    private boolean hasPublicRevision(Model model) {
+        def publicRevisionCriteria = Revision.createCriteria()
+        def publicRevisionCriteriaResults = publicRevisionCriteria.list(max: 1) {
+            and {
+                eq("model", model)
+                ne("state", ModelState.UNPUBLISHED)
             }
         }
-        //quick test to make sure Solr is in sync with the database
-        boolean db = model.deleted
-        boolean solr = searchService.isDeleted(model)
-        if (IS_DEBUG_ENABLED) {
-            def m = new StringBuilder("Deletion status for ").append(model.submissionId
-                    ).append(" - db: ").append(db).append(" solr: ").append(solr)
-            log.debug(m.toString())
-        }
-        return db && solr
+        [] != publicRevisionCriteriaResults
     }
 
     /**
@@ -1889,16 +1881,25 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         if (!model) {
             throw new IllegalArgumentException("Model may not be null")
         }
-        if (!model.deleted) {
+        if (!Model.exists(model.id)) {
+            throw new IllegalArgumentException("Model ${model.properties} absent from database")
+        }
+        def searchService = grailsApplication.mainContext.searchService
+        boolean dbStatus = model.deleted
+        boolean solrStatus = searchService.isDeleted model
+        boolean modelIsDeleted = dbStatus && solrStatus
+        if (!modelIsDeleted) {
             return false
         }
-        // TODO: the code does not check whether the model exists
-        if (model.deleted) {
+        searchService.setDeleted(model, false)
+        if (searchService.isDeleted(model)) {
+            log.error "Could not restore model ${model.submissionId} in Solr"
+            return false
+        } else {
             model.deleted = false
             model.save(flush: true)
-            return model.deleted == false
-        } else {
-            return false
+            model.refresh()
+            return !(model.deleted || searchService.isDeleted(model))
         }
     }
 
@@ -2030,13 +2031,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         aclUtilService.addPermission(revision, "ROLE_USER", BasePermission.READ)
         aclUtilService.addPermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
         revision.state = ModelState.PUBLISHED
-        // TODO FIXME this should not need to bypass validation in order to save successfully!
-        // TODO make sure that only relative file paths are stored in the database!!
-        try {
-            revision.save(validate: false, failOnError: true, flush: true)
-            model.save()
-        } catch (Throwable e) {
-            log.error e.message, e
+        if (!model.save(flush: true)) {
+            throw new ModelException(
+                    "Cannot publish model ${model.submissionId}:${b.errors.allErrors.inspect()}")
         }
     }
 
@@ -2110,10 +2107,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         revision.validationReport = validationReport.getValidationReport();
         revision.validationLevel = validationReport.metadataValidator.getValidationErrorStatus();
 
-        // TODO FIXME this should not need to bypass validation in order to save successfully!
-        // TODO make sure that only relative file paths are stored in the database!!
         try {
-            revision.save(validate: false, failOnError: true, flush: true)
+            revision.save(flush: true)
         } catch (Throwable e) {
             log.error e.message, e
         }
@@ -2155,30 +2150,15 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @Profiled(tag="modelService.updateAuditSuccess")
     void updateAuditSuccess(Long itemId, boolean success) {
         if (itemId != -1) {
-            try {
+            Model.withTransaction {
                 ModelAudit audit = ModelAudit.get(itemId)
                 audit.success = success
-                /*
-                 * FIXME Clicking the download link next to a revision results in two separate
-                 * requests which need to be merged manually.
-                 */
-                if (audit.isDirty()) {
-                    StringBuilder warnMsg = new StringBuilder("""\
-Model audit $audit has been updated in a separate thread:\n""")
-                    def modifiedFieldNames = audit.getDirtyPropertyNames()
-                    for (field in modifiedFieldNames) {
-                        def current = audit."$field"
-                        def old = audit.getPersistentValue(field)
-                        if (old != current) {
-                            warnMsg.append("\t$field: $old ==> $current\n")
-                            current = old
-                        }
+                if (audit.isDirty('success')) {
+                    if (!audit.save(flush: true)) {
+                        log.error("""\
+Failed to update audit $itemId to $success: ${audit.errors.allErrors.inspect()}""")
                     }
-                    log.warn warnMsg.toString()
-                    audit.save(flush: true)
                 }
-            } catch(Exception e) {
-                throw new RuntimeException("Failed to update audit for "+itemId+" with success: "+success, e)
             }
         }
     }

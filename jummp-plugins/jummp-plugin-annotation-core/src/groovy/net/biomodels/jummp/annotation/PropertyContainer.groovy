@@ -26,5 +26,6 @@ import groovy.transform.CompileStatic
 class PropertyContainer extends SimpleVertex {
     AnnotationPropertyRange range
     List<ValueContainer> values = []
+    String tooltip
 }
 

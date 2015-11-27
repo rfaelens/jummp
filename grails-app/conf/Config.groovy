@@ -562,6 +562,7 @@ of the form MODEL0001, MODEL0002, MODEL0003 please use the following settings:
 \tjummp.model.id.submission.part2.width=4
 """)
 }
+jummp.ddmore.rdfstore.url = jummpConfig.jummp?.ddmore?.rdfstore?.url
 jummp.model.id = [:]
 modelIdentifierSettings?.entrySet().each {
     jummp.model.id."${it.key}" = it.value

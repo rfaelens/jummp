@@ -151,34 +151,34 @@ class SearchService {
         String dbPassword = dsConfig?.password
         def dbSettings = [ 'url': dbUrl, 'username': dbUsername, 'password': dbPassword ]
         def builder = new JsonBuilder()
-        def partialData=[
-                'submissionId':submissionId,
-                'publicationId':publicationId,
-                'name':name,
-                'description':description,
-                'modelFormat':revision.format.name,
-                'levelVersion':revision.format.formatVersion,
-                'submitter':revision.owner,
-                'submitterUsername': revision.model.submitterUsername,
-                'publicationTitle':revision.model.publication ?
-                        revision.model.publication.title : "",
-                'publicationAbstract':revision.model.publication ?
+        def partialData = [
+                'submissionId': submissionId,
+                'publicationId' :publicationId,
+                'name': name,
+                'description' : description,
+                'modelFormat' : revision.format.name,
+                'levelVersion' : revision.format.formatVersion,
+                'submitter' : revision.owner,
+                'submitterUsername' :  revision.model.submitterUsername,
+                'publicationTitle' : revision.model.publication ?
+                        revision.model.publication.title  :  "",
+                'publicationAbstract' : revision.model.publication ?
                         revision.model.publication.synopsis : "",
                 'publicationAuthor': revision.model.publication?.authors ?
                         revision.model.publication.authors.collect {
                             it.userRealName }.join(', ') : "",
                 'publicationYear': revision.model.publication?.year ?: 0,
-                'model_id':revision.model.id,
-                'revision_id': revision.id,
-                'deleted': revision.model.deleted,
-                'public': revision.model.firstPublished ? 'true' : 'false',
-                'versionNumber':versionNumber,
-                'submissionDate':revision.model.submissionDate,
-                'lastModified': revision.model.lastModifiedDate,
-                'uniqueId':uniqueId
+                'model_id' : revision.model.id,
+                'revision_id' :  revision.id,
+                'deleted' :  revision.model.deleted,
+                'public' :  revision.model.firstPublished ? 'true'  :  'false',
+                'versionNumber' : versionNumber,
+                'submissionDate' : revision.model.submissionDate,
+                'lastModified' :  revision.model.lastModifiedDate,
+                'uniqueId' : uniqueId
         ]
         builder(partialData: partialData,
-            'folder':exchangeFolder,
+            'folder': exchangeFolder,
             'mainFiles': fetchFilesFromRevision(revision, true),
             'allFiles': fetchFilesFromRevision(revision, false),
             'solrServer': solrServerHolder.SOLR_CORE_URL,
@@ -186,10 +186,9 @@ class SearchService {
             'miriamExportFile': registryExport,
             'database': dbSettings)
         File indexingData = new File(exchangeFolder, "indexData.json")
-        indexingData.setText(builder.toString())
+        indexingData.setText(builder.toPrettyString())
         String jarPath = grailsApplication.config.jummp.search.pathToIndexerExecutable
-        def argsMap = [jarPath: jarPath,
-                jsonPath: indexingData.getCanonicalPath()]
+        def argsMap = [jarPath: jarPath, jsonPath: indexingData.getCanonicalPath()]
 
         String httpProxy = System.getProperty("http.proxyHost")
         if (httpProxy) {
@@ -263,7 +262,6 @@ class SearchService {
      *      to true if unspecified
      **/
     void setDeleted(def model, boolean deleted = true) {
-        def searchService = grailsApplication.mainContext.searchService
         SolrDocumentList docs = findSolrDocumentByModel(model, ["deleted"])
         docs.each {
             SolrInputDocument doc = getSolrDocumentWithId(it.get("uniqueId"))
@@ -277,7 +275,7 @@ class SearchService {
      * Checks whether a model is marked as deleted in the Solr index.
      *
      * @param model An instance of Model or ModelTransportCommand for which to check.
-     * @return true if the corresponding SolrInputDocument is marked as deleted, false otherwise.
+     * @return true if the corresponding SolrInputDocuments are marked as deleted, false otherwise.
      */
     boolean isDeleted(def model) {
         SolrDocumentList docs = findSolrDocumentByModel(model, ["deleted"])
@@ -286,17 +284,16 @@ class SearchService {
         } else if (1 == docs.size()) {
             return docs.first().get('deleted')
         } else {
-            return null == docs.find { it.get('deleted') }
+            return null == docs.find { !(it.get('deleted')) }
         }
     }
 
-
     /*
-     * Finds the SolrDocument associated with a given model.
+     * Finds the SolrDocuments associated with a given model.
      *
-     * The lookup is done based on the model's submission identifier, which should yield
-     * a single result, but if that is not the case, this method does not truncate the
-     * response from Solr, hence the reason for returning a SolrDocumentList.
+     * The lookup is done based on the model's submission identifier. This method returns
+     * the SolrInputDocuments for all revisions of the given model, hence the reason for
+     * returning a SolrDocumentList.
      *
      * @param model either a ModelTransportCommand or a Model for which to find the SolrDocument.
      * @param fields a list of fields that should be included for each result. The 'uniqueId'
@@ -315,8 +312,6 @@ class SearchService {
         SolrDocumentList docs = response.getResults()
         if (0 == docs.size()) {
             log.warn("Could not find a Solr document for model ${model?.submissionId}")
-        } else if (docs.size() > 1) {
-            log.error("Multiple Solr documents corresponding to model ${model?.submissionId}")
         }
         docs
     }

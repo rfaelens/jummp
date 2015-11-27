@@ -81,7 +81,7 @@ grails.project.dependency.resolution = {
         runtime "postgresql:postgresql:9.1-901.jdbc4"
 
         //using the latest groovy eclipse compiler 2.9.2-01
-        compile "net.biomodels.jummp:AnnotationStore:0.2.4"
+        compile "net.biomodels.jummp:AnnotationStore:0.2.5"
         compile("org.apache.solr:solr-solrj:4.10.1") {
             excludes 'wstx-asl', //a newer version of woodstox comes with jsbml
                 // httpcomponents 4.3.1 is incompatible with 4.2, which breaks jena-arq
@@ -132,7 +132,8 @@ grails.project.dependency.resolution = {
         compile("org.mbine.co:libCombineArchive:0.1-SNAPSHOT") {
             excludes 'junit', 'slf4j-api', 'slf4j-log4j12', 'jmock-junit4', 'jena-core'
         }
-        String ddmoreMetadataIntegrationServiceVersion = "0.0.2-SNAPSHOT"
+        //TODO move these dependencies to the relevant annotation plugins
+        String ddmoreMetadataIntegrationServiceVersion = "0.0.3-SNAPSHOT"
         compile "eu.ddmore:lib-metadata-api:$ddmoreMetadataIntegrationServiceVersion"
         // can't use apache-jena-libs due to pom packaging, rely on jena-tdb instead
         compile("eu.ddmore:lib-metadata:$ddmoreMetadataIntegrationServiceVersion") {

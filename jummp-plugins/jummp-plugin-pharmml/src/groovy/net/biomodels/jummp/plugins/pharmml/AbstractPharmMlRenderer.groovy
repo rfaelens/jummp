@@ -31,9 +31,6 @@
 
 package net.biomodels.jummp.plugins.pharmml
 
-import eu.ddmore.libpharmml.dom.maths.Binoperator
-import eu.ddmore.libpharmml.dom.maths.Unioperator
-import net.biomodels.jummp.core.model.RevisionTransportCommand
 import eu.ddmore.libpharmml.dom.commontypes.DerivativeVariable
 import eu.ddmore.libpharmml.dom.commontypes.FalseBoolean
 import eu.ddmore.libpharmml.dom.commontypes.IdValue
@@ -48,21 +45,24 @@ import eu.ddmore.libpharmml.dom.commontypes.TrueBoolean
 import eu.ddmore.libpharmml.dom.commontypes.VariableAssignment
 import eu.ddmore.libpharmml.dom.commontypes.Vector as CTVector
 import eu.ddmore.libpharmml.dom.dataset.ColumnDefinition
+import eu.ddmore.libpharmml.dom.dataset.DataSet
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableDefnType
 import eu.ddmore.libpharmml.dom.dataset.DataSetTableType
-import eu.ddmore.libpharmml.dom.dataset.DataSet
 import eu.ddmore.libpharmml.dom.maths.Binop
+import eu.ddmore.libpharmml.dom.maths.Binoperator
 import eu.ddmore.libpharmml.dom.maths.Constant
 import eu.ddmore.libpharmml.dom.maths.Equation
 import eu.ddmore.libpharmml.dom.maths.EquationType
 import eu.ddmore.libpharmml.dom.maths.FunctionCallType
 import eu.ddmore.libpharmml.dom.maths.Uniop
+import eu.ddmore.libpharmml.dom.maths.Unioperator
 import eu.ddmore.libpharmml.dom.modeldefn.CovariateDefinition
 import eu.ddmore.libpharmml.dom.modeldefn.GaussianObsError
 import eu.ddmore.libpharmml.dom.modeldefn.GeneralObsError
 import eu.ddmore.libpharmml.dom.modeldefn.IndividualParameter
 import eu.ddmore.libpharmml.dom.modeldefn.ParameterRandomVariable
 import eu.ddmore.libpharmml.dom.modeldefn.SimpleParameter
+import eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock
 import eu.ddmore.libpharmml.dom.modellingsteps.DatasetMapping
 import eu.ddmore.libpharmml.dom.modellingsteps.OperationProperty
 import eu.ddmore.libpharmml.dom.modellingsteps.ParameterEstimate
@@ -72,9 +72,11 @@ import eu.ddmore.libpharmml.dom.trialdesign.Activity
 import eu.ddmore.libpharmml.dom.trialdesign.Bolus
 import eu.ddmore.libpharmml.dom.trialdesign.Infusion
 import eu.ddmore.libpharmml.dom.uncertml.NormalDistribution
+import grails.util.Holders
 import javax.xml.bind.JAXBElement
 import javax.xml.namespace.QName
 import net.biomodels.jummp.core.IPharmMlRenderer
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.plugins.pharmml.maths.FunctionSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsSymbol
 import net.biomodels.jummp.plugins.pharmml.maths.MathsUtil
@@ -84,12 +86,45 @@ import net.biomodels.jummp.plugins.pharmml.maths.PiecewiseSymbol
 import net.biomodels.jummp.plugins.pharmml.util.correlation.CorrelationMatrix
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.perf4j.aop.Profiled
 
 abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
     /* the class logger */
     private static final Log log = LogFactory.getLog(this)
     private static final String IS_DEBUG_ENABLED = log.isDebugEnabled()
     private static final String IS_INFO_ENABLED = log.isInfoEnabled()
+    /* the groovyPageRenderer */
+    def groovyPageRenderer = Holders.applicationContext.getBean("groovyPageRenderer")
+
+    /**
+     * @param variabilityModels a list of
+     * {@link eu.ddmore.libpharmml.dom.modeldefn.VariabilityDefnBlock}s.
+     */
+    @Profiled(tag = "abstractPharmMlRenderer.renderVariabilityModel")
+    String renderVariabilityModel(List<VariabilityDefnBlock> variabilityModels) {
+        def models = []
+        variabilityModels.each { m ->
+            def thisModel = [:]
+            thisModel["levels"] = formatVariabilityLevels(m.level)
+            thisModel["type"] = m.type.value()
+            models.add thisModel
+        }
+        return groovyPageRenderer.render(template: "/templates/0.2/variabilityModel",
+                    model: [variabilityModels: models])
+    }
+
+    List<String> formatVariabilityLevels(List variabilityLevels) {
+        def result = []
+        variabilityLevels.inject(result){ r, l ->
+            StringBuilder sb = new StringBuilder()
+            sb.append((l.name) ? l.name.value : l.symbId)
+            if (l.parentLevel) {
+                sb.append(", parent level: ").append(l.parentLevel.symbRef.symbIdRef)
+            }
+            result.add sb.toString()
+        }
+        return result
+    }
 
     /*
      * Parses an activity and writes it to a StringBuilder.
