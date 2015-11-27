@@ -148,7 +148,7 @@ abstract class AbstractPharmMlHandler implements IPharmMlService {
             api.save(bos, resource)
             result = true
         } catch(IOException e) {
-            log.error "Cannot save annotations for file $f.name"
+            log.error "Cannot set metadataFile attribute for file $f.name"
         } finally {
             bos?.close()
             return result
