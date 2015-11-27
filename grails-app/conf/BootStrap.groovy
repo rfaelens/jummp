@@ -78,11 +78,11 @@ class BootStrap {
                          pattern:"^\\d+",
                          identifiersPrefix:"http://identifiers.org/pubmed/"))
 
-        /* ignore until we fix the integration with the annotation UI.
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.DOI,
                          pattern:"^(doi\\:)?\\d{2}\\.\\d{4}.*",
                          identifiersPrefix:"http://identifiers.org/doi/"))
 
+        /* ignore until we fix the integration with the annotation UI.
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.ARXIV,
                          pattern:"^(\\w+(\\-\\w+)?(\\.\\w+)?/)?\\d{4,7}(\\.\\d{4}(v\\d+)?)?",
                          identifiersPrefix:"http://identifiers.org/arxiv/"))
