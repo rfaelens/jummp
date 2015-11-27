@@ -537,14 +537,27 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
         if (data.listOfProbabilityAssignment) {
             result.append("<p class=\"bold\">Probability Assignment</p>")
             data.listOfProbabilityAssignment.each {
-                it.listOfProbability.each { pro ->
-                    println convertToMathML("",pro.logicBinop)
-                    result.append(convertToMathML(pro.symbId, pro.logicBinop))
+                StringBuilder strBuider = new StringBuilder()
+                if (it.listOfProbability[0].symbId) {
+                    strBuider.append(oprand(it.listOfProbability[0].symbId))
+                    strBuider.append(op(" := "))
                 }
-                result.append(convertToMathML("",it.assign))
+                strBuider.append("P")
+                convertEquation(it.listOfProbability[0].logicBinop, strBuider)
+                result.append(strBuider)
+
+                def temp = ""
+                if (it.assign) {
+                    temp = convertToMathML("",it.assign)
+                } else if (it.assign.equation) {
+                    temp = convertToMathML(it.assign.equation)
+                } else if (it.assign.symbRef) {
+                    temp = it.assign.symbRef.asString()
+                }
+                result.append(temp)
+                result.append("<br/>")
             }
         }
-
         return result.toString()
     }
 
@@ -557,7 +570,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
 
         if (data.listOfHazardFunction) {
             result.append("<p><span class=\"bold\">Hazard function</span><br/>")
-            // Check the existence of Independant Variable
+            // Should check the existence of Independant Variable in the next improvement
             data.listOfHazardFunction.each {
                 result.append(convertToMathML("h(t)", it.assign))
             }
@@ -565,7 +578,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
 
         if (data.listOfSurvivalFunction) {
             result.append("<p><span class=\"bold\">Survival function</span><br/>")
-            // Check the existence of Independant Variable
+            // Should check the existence of Independant Variable in the next improvement
             data.listOfSurvivalFunction.each {
                 result.append(convertToMathML("S(t)", it.assign))
             }
