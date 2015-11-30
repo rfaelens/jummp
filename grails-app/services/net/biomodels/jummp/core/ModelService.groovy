@@ -2107,11 +2107,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         revision.validationReport = validationReport.getValidationReport();
         revision.validationLevel = validationReport.metadataValidator.getValidationErrorStatus();
 
-        try {
-            revision.save(flush: true)
-        } catch (Throwable e) {
-            log.error e.message, e
-        }
+        revision.save(flush: true)
     }
 
     /**
@@ -2125,8 +2121,9 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         if (cmd.username != "anonymousUser") {
             user = User.findByUsername(cmd.username)
         }
-        def model = Model.get(cmd.model.id)
-        if (model) {
+        def modelId = cmd.model?.id
+        if (Model.exists(modelId)) {
+            def model = Model.load(modelId)
             ModelAudit audit = new ModelAudit(model: model,
                     user: user,
                     format: cmd.format,

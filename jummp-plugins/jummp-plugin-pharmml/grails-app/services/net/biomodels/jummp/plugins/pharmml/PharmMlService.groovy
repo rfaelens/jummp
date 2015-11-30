@@ -383,6 +383,15 @@ class PharmMlService implements FileFormatService {
         return handler.getStepDependencies(steps)
     }
 
+    boolean doBeforeSavingAnnotations(File annoFile, RevisionTransportCommand rev) {
+        List<File> revisionFiles = AbstractPharmMlHandler.fetchMainFilesFromRevision(rev)
+        final File pharmML = AbstractPharmMlHandler.findPharmML(revisionFiles)
+        def res = AbstractPharmMlHandler.getResourceFromPharmML(pharmML)
+        def dom = res.dom
+        dom.metadataFile = annoFile.name
+        AbstractPharmMlHandler.savePharmML(pharmML, res)
+    }
+
     /*
      * Helper function that updates a given element of model encoded in PharmML.
      *

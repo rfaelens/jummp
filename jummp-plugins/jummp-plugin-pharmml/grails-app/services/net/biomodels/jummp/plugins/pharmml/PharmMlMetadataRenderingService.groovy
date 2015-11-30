@@ -21,6 +21,7 @@
 package net.biomodels.jummp.plugins.pharmml
 
 import grails.gsp.PageRenderer
+import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import net.biomodels.jummp.core.annotation.ElementAnnotationTransportCommand
 import net.biomodels.jummp.core.annotation.QualifierTransportCommand
@@ -60,16 +61,26 @@ class PharmMlMetadataRenderingService {
     PageRenderer groovyPageRenderer
     /* dependency injection for the metadata delegate service */
     IMetadataService metadataDelegateService
+    def grailsApplication
 
+    @CompileDynamic
     @Profiled(tag = "pharmmlMetadataRenderingService.renderGenericAnnotations")
     void renderGenericAnnotations(RevisionTransportCommand revision, Writer out) {
         Map<String, List<ResourceReferenceTransportCommand>> anno = [:]
-        GENERIC_ANNOTATIONS.each { String name, String property ->
+        /*GENERIC_ANNOTATIONS.each { String name, String property ->
             List<ResourceReferenceTransportCommand> objects = metadataDelegateService.
                     findAllResourceReferencesForQualifier(revision, property)
             if (objects) {
                 anno.put(name, objects)
             }
+        }*/
+        String model = revision.model.submissionId
+        def subject = "${grailsApplication.config.grails.serverURL}/model/${model}"
+        def stmts = metadataDelegateService.findAllStatementsForSubject(revision, subject)
+        stmts.each { StatementTransportCommand s ->
+            String p = s.predicate.accession
+            String fp = p.replaceAll('-', ' ')
+            anno.put(fp, [s.object])
         }
         groovyPageRenderer.renderTo(template: "/templates/common/metadata/annotations",
                 model: [annotations: anno], out)

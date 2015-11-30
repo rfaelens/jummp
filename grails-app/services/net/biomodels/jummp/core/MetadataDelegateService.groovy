@@ -106,8 +106,8 @@ class MetadataDelegateService implements IMetadataService {
         }
     }
 
-    @Profiled(tag = "metadataDelegateService.updateModelMetadata")
-    boolean updateModelMetadata(String model, List<StatementTransportCommand> statements) {
-        metadataService.updateModelMetadata(model, statements)
+    @Profiled(tag = "metadataDelegateService.saveMetadata")
+    boolean saveMetadata(String model, List<StatementTransportCommand> statements) {
+        metadataService.saveMetadata(model, statements)
     }
 }

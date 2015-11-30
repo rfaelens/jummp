@@ -82,6 +82,7 @@ class BootStrap {
                          pattern:"^(doi\\:)?\\d{2}\\.\\d{4}.*",
                          identifiersPrefix:"http://identifiers.org/doi/"))
 
+        /* ignore until we fix the integration with the annotation UI.
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.ARXIV,
                          pattern:"^(\\w+(\\-\\w+)?(\\.\\w+)?/)?\\d{4,7}(\\.\\d{4}(v\\d+)?)?",
                          identifiersPrefix:"http://identifiers.org/arxiv/"))
@@ -109,7 +110,7 @@ class BootStrap {
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.PMC,
                          pattern:"PMC\\d+",
                          identifiersPrefix:"http://identifiers.org/pmc/"))
-
+        */
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.CUSTOM,
                          pattern:"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",))
         if (Environment.getCurrent() != Environment.TEST) {

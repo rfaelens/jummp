@@ -102,7 +102,7 @@ class AnnotationController {
             }
         }
 
-        boolean result = metadataDelegateService.updateModelMetadata(modelId, stmts)
+        boolean result = metadataDelegateService.saveMetadata(modelId, stmts)
         if (result) {
             render([status: '200', message: "Information successfully saved."] as JSON)
         } else {
@@ -114,7 +114,7 @@ class AnnotationController {
         if (!params.revision) {
             def response = [
                 status: '400',
-                message: 'The request to save model properties lacked the revision parameter.'
+                message: 'The request to validate model properties lacked the revision parameter.'
             ]
             render(response as JSON)
             return
@@ -127,9 +127,9 @@ class AnnotationController {
             render([status: '400', message: 'Metadata could not be validated.' , errorReport:e.getMessage()] as JSON)
         }
         if(rev.validationLevel.equals(ValidationState.APPROVED))
-            render([status: '200', message: 'Metadata has been validated.'] as JSON)
+            render([status: '200', message: rev.getValidationLevelMessage()] as JSON)
         else if(rev.validationLevel.equals(ValidationState.CONDITIONALLY_APPROVED))
-            render([status: '400', message: 'Metadata has been validated with errors.', errorReport:rev.validationReport.replaceAll("     ","\n")] as JSON)
+            render([status: '400', message: rev.getValidationLevelMessage(), errorReport:rev.validationReport.replaceAll("     ","\n")] as JSON)
 
     }
 }
