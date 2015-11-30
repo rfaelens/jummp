@@ -63,7 +63,6 @@ class MetadataService {
      */
     def modelFileFormatService
     def pharmMlService
-    def pharmMlMetadataWriter
 
     /**
      * Fetches any ResourceReferences defined for a given qualifier from a revision.
