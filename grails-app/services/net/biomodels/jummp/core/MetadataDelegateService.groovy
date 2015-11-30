@@ -27,6 +27,7 @@ import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
 import net.biomodels.jummp.core.annotation.StatementCategory
 import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.annotation.SectionContainer
 import org.perf4j.aop.Profiled
 
 /**
@@ -109,5 +110,10 @@ class MetadataDelegateService implements IMetadataService {
     @Profiled(tag = "metadataDelegateService.saveMetadata")
     boolean saveMetadata(String model, List<StatementTransportCommand> statements) {
         metadataService.saveMetadata(model, statements)
+    }
+
+    @Profiled(tag = "metadataDelegateService.persistAnnotationSchema")
+    boolean persistAnnotationSchema(List<SectionContainer> sections) {
+        metadataService.persistAnnotationSchema(sections)
     }
 }
