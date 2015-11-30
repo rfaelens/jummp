@@ -51,7 +51,9 @@ class AnnotationController {
             return
         }
 
-        def objectModel = metadataInputSource.buildObjectModel() as JSON
+        def annotationSections = metadataInputSource.buildObjectModel()
+        metadataDelegateService.persistAnnotationSchema annotationSections
+        def objectModel = annotationSections as JSON
         def existingAnnotations = [
             "subjects": [
                 "theSubject": [:]
