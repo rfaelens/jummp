@@ -774,6 +774,18 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         return text
     }
 
+    protected StringBuilder scalarRhsInline(def r) {
+        StringBuilder text = new StringBuilder()
+        if (r.scalar) {
+            text.append(scalar(r.scalar.value))
+        } else if (r.equation) {
+            convertEquation(r.equation, text)
+        } else if (r.symbRef) {
+            text.append(r.symbRef.symbIdRef)
+        }
+        return text
+    }
+
     protected StringBuilder rhs(Rhs r, StringBuilder text) {
         if (r.equation) {
             return text.append(convertToMathML(r.equation))
@@ -1300,9 +1312,14 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
         for (int i = 0; i < N; i++) {
             output.append("<mtr>")
             for (int j = 0; j < N; j++) {
-                output.append("<mtd><mi>")
-                output.append(matrix[i][j])
-                output.append("</mi></mtd>\n")
+                output.append("<mtd>")
+                String v = matrix[i][j]
+                if (v.startsWith("<mi>")) {
+                    output.append(matrix[i][j])
+                } else {
+                    output.append("<mi>$v</mi>")
+                }
+                output.append("</mtd>\n")
             }
             output.append("</mtr>\n")
         }
