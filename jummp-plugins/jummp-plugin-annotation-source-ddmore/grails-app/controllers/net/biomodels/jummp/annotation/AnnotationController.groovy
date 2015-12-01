@@ -128,6 +128,7 @@ class AnnotationController {
         }catch(ValidationException e){
             render([status: '400', message: 'Annotations could not be checked.' , errorReport:e.getMessage()] as JSON)
         }
+        rev = modelDelegateService.getRevision(params.revision) // force refresh from db
         if(rev.validationLevel.equals(ValidationState.APPROVED))
             render([status: '200', message: rev.getValidationLevelMessage()] as JSON)
         else if(rev.validationLevel.equals(ValidationState.CONDITIONALLY_APPROVED))
