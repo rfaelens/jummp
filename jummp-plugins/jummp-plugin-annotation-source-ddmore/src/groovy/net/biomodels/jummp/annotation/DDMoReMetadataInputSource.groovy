@@ -105,7 +105,7 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
         String name = vId.label
         String uri = vId.uri
         ValueContainer vVertex
-        if (v.valueTree) {
+        if (v.isValueTree()) {
             vVertex = new CompositeValueContainer(value: name, uri: uri)
             List<Value> childValues = ((CompositeValue) v).getValues()
             TreeMap orderedValues = new TreeMap(VALUE_COMPARATOR)
@@ -151,7 +151,7 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
  * Adapter between {@link eu.ddmore.metadata.api.domain.sections.Section}
  * and our own {@link net.biomodels.jummp.annotation.PropertyContainer}
  */
-protected class DDMoReSectionAdapter {
+class DDMoReSectionAdapter {
     double sectionNumber
     String label
     String tooltip
