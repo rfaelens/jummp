@@ -136,9 +136,9 @@ class RevisionTransportCommand implements Serializable {
             case ValidationState.CONDITIONALLY_APPROVED:
                 return "Annotations have been checked. There are some errors."
             case ValidationState.APPROVED:
-                return "Metadata is valid."
+                return "Annotations are correct."
             case ValidationState.REJECTED:
-                return "Metadata is invalid."
+                return "Annotations are incorrect"
         }
     }
 }
