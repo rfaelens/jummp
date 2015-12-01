@@ -151,7 +151,7 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
  * Adapter between {@link eu.ddmore.metadata.api.domain.sections.Section}
  * and our own {@link net.biomodels.jummp.annotation.PropertyContainer}
  */
-protected class DDMoReSectionAdapter {
+class DDMoReSectionAdapter {
     double sectionNumber
     String label
     String tooltip
