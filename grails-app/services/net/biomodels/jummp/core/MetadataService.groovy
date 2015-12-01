@@ -20,6 +20,10 @@
 
 package net.biomodels.jummp.core
 
+import net.biomodels.jummp.annotation.CompositeValueContainer
+import net.biomodels.jummp.annotation.PropertyContainer
+import net.biomodels.jummp.annotation.SectionContainer
+import net.biomodels.jummp.annotation.ValueContainer
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.annotationstore.*
 import net.biomodels.jummp.model.Revision
@@ -43,6 +47,9 @@ import org.perf4j.aop.Profiled
 class MetadataService {
     private static final Log log = LogFactory.getLog(this)
     private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
+    static final String DEFAULT_PHARMML_NAMESPACE = "http://www.pharmml.org/2013/10/PharmMLMetadata"
+    static final String DEFAULT_PKPD_NAMESPACE =
+            "http://www.ddmore.org/ontologies/ontology/pkpd-ontology#"
     /**
      * Dependency injection for Grails Application.
      */
@@ -56,7 +63,6 @@ class MetadataService {
      */
     def modelFileFormatService
     def pharmMlService
-    def pharmMlMetadataWriter
 
     /**
      * Fetches any ResourceReferences defined for a given qualifier from a revision.
@@ -228,6 +234,146 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
         } catch(Exception e) {
             log.error(e.message, e)
             return false
+        }
+    }
+
+    /**
+     * Dumb cache of the annotation schema.
+     *
+     * Persists in the database the qualifiers and corresponding cross-references that make
+     * up the fields and the values rendered by the annotation editor.
+     */
+    boolean persistAnnotationSchema(List<SectionContainer> sections) {
+        def result = false
+        def promise = Qualifier.async.task {
+            sections.each { SectionContainer s ->
+                def qualifiers = s.annotationProperties
+                qualifiers.each { PropertyContainer p ->
+                    String uri = p.uri
+                    String name = p.value
+                    def refreshedQualifier = saveOrUpdateQualifier(uri, name)
+                    if (!refreshedQualifier) {
+                        log.error """\
+Unable to update qualifier with uri $uri:${refreshedQualifier?.errors?.allErrors?.inspect()}"""
+                        result = false
+                    }
+                    if (!p.values) {
+                        return
+                    }
+
+                    List<ValueContainer> values = p.values
+                    values.each { ValueContainer v ->
+                        def xref = saveOrUpdateResourceReference(v)
+                        if (!xref) {
+                            result = false
+                        }
+                    }
+                }
+            }
+            return result
+        }
+        promise.onComplete {
+            result = true
+        }
+        promise.onError { Throwable t ->
+            log.error("Failed to persist annotation schema in database: ${t.message}", t)
+            result = false
+        }
+        promise.get()
+        return result
+    }
+
+    /*
+     * Saves a new qualifier in the database or updates the existing one.
+     *
+     * In the case of existing qualifiers, this triggers an update if the qualifier's label
+     * does not match @p name.
+     * @param uri the URI of the qualifier that should be saved.
+     * @param name the label that the qualifier with URI @p uri should have
+     * @return the updated Qualifier, or null if there was a validation error.
+     */
+    private Qualifier saveOrUpdateQualifier(String uri, String name) {
+        Qualifier.withTransaction {
+            def existingQualifier = Qualifier.findByUri(uri)
+            if (!existingQualifier) {
+                def q = new Qualifier(accession: name, uri: uri)
+                if (uri.startsWith(DEFAULT_PHARMML_NAMESPACE)) {
+                    q.namespace = DEFAULT_PHARMML_NAMESPACE
+                    q.qualifierType = 'pharmML'
+                }
+                return q.save(flush: true)
+            } else {
+                if (existingQualifier.accession != name) {
+                    existingQualifier.accession = name
+                    return existingQualifier.save(flush: true)
+                }
+                return existingQualifier
+            }
+        }
+    }
+
+    /*
+     * Turns a ValueContainer into the appropriate ResourceReference(s) in the database.
+     *
+     * If there is no corresponding ResourceReference in the database, a new one is created.
+     * CompositeValueContainers are converted to nested ResourceReferences.
+     *
+     * Otherwise, if there is already a ResourceReference with the same URI as @p v, then this
+     * method checks that the value of @p v matches the name of the ResourceReference and that
+     * all members of @p parents are included in the set of parents of the corresponding
+     * ResourceReference, triggering a database update if necessary.
+     * @param v the ValueContainer that should be stored in the database
+     * @param parents a collection of ResourceReferences that should be stored as parents
+     * @return the saved ResourceReference or null if there was an error.
+     */
+    private ResourceReference saveOrUpdateResourceReference(ValueContainer v,
+            List<ResourceReference> parents = []) {
+        ResourceReference.withTransaction {
+            String uri = v.uri
+            String name = v.value
+            def existing = ResourceReference.findByUri(uri)
+            if (!existing) {
+                existing = new ResourceReference(uri: uri, shortName: name, name: name)
+                // work out the accession from the presence of the hash (#) or the last /
+                int accessionDelim
+                int hash = uri.indexOf('#')
+                if (-1 != hash) {
+                    accessionDelim = hash
+                } else {
+                    accessionDelim = uri.lastIndexOf('/')
+                }
+                String accession = uri.substring(accessionDelim + 1)
+                existing.accession = accession
+                if (uri.startsWith(DEFAULT_PKPD_NAMESPACE)) {
+                    existing.datatype = 'pkpd'
+                }
+                if (parents) {
+                    existing.parents.addAll(parents)
+                }
+                def savedXref = existing.save(flush: true)
+                if (!savedXref) {
+                    log.error """\
+Unable to save xref with uri ${v.uri}: ${existing?.errors?.allErrors?.inspect()} - will not \
+attempt to save any of its children"""
+                    return savedXref
+                }
+                if (v instanceof CompositeValueContainer && v.children) {
+                    v.children.each { ValueContainer child ->
+                        saveOrUpdateResourceReference(child, parents << existing)
+                    }
+                }
+                return existing
+            } else {
+                if (existing.name != name) {
+                    existing.name = name
+                    return existing.save(flush: true)
+                }
+                if (existing.parents != parents) {
+                    existing.parents.addAll(parents)
+                    return existing.save(flush: true)
+                }
+                return existing
+            }
         }
     }
 }
