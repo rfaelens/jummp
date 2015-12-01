@@ -105,7 +105,7 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
         String name = vId.label
         String uri = vId.uri
         ValueContainer vVertex
-        if (v.valueTree) {
+        if (v.isValueTree()) {
             vVertex = new CompositeValueContainer(value: name, uri: uri)
             List<Value> childValues = ((CompositeValue) v).getValues()
             TreeMap orderedValues = new TreeMap(VALUE_COMPARATOR)
