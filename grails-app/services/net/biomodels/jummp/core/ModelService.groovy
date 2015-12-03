@@ -30,8 +30,11 @@
 
 package net.biomodels.jummp.core
 
+import eu.ddmore.metadata.service.ValidationError
+import eu.ddmore.metadata.service.ValidationErrorStatus
 import eu.ddmore.metadata.service.ValidationException
-import eu.ddmore.metadata.service.ValidationReportImpl
+import eu.ddmore.metadata.service.MetadataValidatorImpl
+import net.biomodels.jummp.annotationstore.Qualifier
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
 import net.biomodels.jummp.core.adapters.DomainAdapter
@@ -66,7 +69,7 @@ import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
-import eu.ddmore.metadata.service.ValidationReport
+import eu.ddmore.metadata.service.MetadataValidator
 
 /**
  * @short Service class for managing Models
@@ -145,7 +148,7 @@ class ModelService {
 
 //    def searchService
 
-    def validationReport
+    def metadataValidator
 
 
     final boolean MAKE_PUBLICATION_ID = !(publicationIdGenerator instanceof NullModelIdentifierGenerator)
@@ -2098,14 +2101,24 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             }
         }
 
+        StringBuffer validationReport = new StringBuffer();
+
         if(metadataFile==null)
             throw new ValidationException("Metadata file not found for "+pharmML.getName()+ ". Please save the metadata first.")
         else {
-            validationReport.generateValidationReport(metadataFile)
+            metadataValidator.validate(metadataFile)
+
+            for(ValidationError validationError: metadataValidator.validationHandler.getValidationList()){
+                validationReport.append(Qualifier.findByUri(validationError.qualifier).accession)
+                validationReport.append(validationError.getMessage())
+                validationReport.append("<br>")
+
+            }
         }
 
-        revision.validationReport = validationReport.getValidationReport();
-        revision.validationLevel = validationReport.metadataValidator.getValidationErrorStatus();
+
+        revision.validationReport = validationReport.toString();
+        revision.validationLevel = metadataValidator.getValidationErrorStatus();
 
         revision.save(flush: true)
     }
