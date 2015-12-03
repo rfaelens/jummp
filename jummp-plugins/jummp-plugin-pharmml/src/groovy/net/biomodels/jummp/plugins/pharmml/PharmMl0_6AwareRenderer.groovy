@@ -542,7 +542,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                     strBuider.append(oprand(it.listOfProbability[0].symbId))
                     strBuider.append(op(" := "))
                 }
-                strBuider.append("P")
+                strBuider.append(op("P"))
                 convertEquation(it.listOfProbability[0].logicBinop, strBuider)
                 result.append(strBuider)
 
@@ -550,9 +550,11 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                 if (it.assign) {
                     temp = convertToMathML("",it.assign)
                 } else if (it.assign.equation) {
-                    temp = convertToMathML(it.assign.equation)
+                    temp.concat(convertToMathML(it.assign.equation).toString())
                 } else if (it.assign.symbRef) {
                     temp = it.assign.symbRef.asString()
+                } else {
+                    println "Other case"
                 }
                 result.append(temp)
                 result.append("<br/>")
@@ -1584,8 +1586,12 @@ Could not extract the population parameter of individual parameter ${p.symbId}."
                 result.append("</mtext></mstyle></math>")
                 result.append("<br/>")
             } else if (pmf.assign) {
-                result.append(op("P"))
-                result.append(convertToMathML(pmf.logicBinop)).append(convertToMathML(pmf.assign.equation))
+
+                //result.append("<math display='inline'><mstyle><mtext>")
+                result.append(oprand("P"))
+                //convertEquation(pmf.logicBinop, result)
+                result.append(convertToMathML(pmf.logicBinop)).append(op(" = ")).append(convertToMathML(pmf.assign.equation))
+                //result.append("</mtext></mstyle></math>")
                 result.append("<br/>")
             }else {
                 log.error ("The function has not supported in the current version of PharmML.")
