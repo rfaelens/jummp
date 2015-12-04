@@ -132,7 +132,9 @@ class AnnotationController {
         if(rev.validationLevel.equals(ValidationState.APPROVED))
             render([status: '200', message: rev.getValidationLevelMessage()] as JSON)
         else if(rev.validationLevel.equals(ValidationState.CONDITIONALLY_APPROVED))
-            render([status: '400', message: rev.getValidationLevelMessage(), errorReport:rev.validationReport.replaceAll("     ","<br>")] as JSON)
+            render([status: '400', message: rev.getValidationLevelMessage(), errorReport:rev.validationReport] as JSON)
+        else
+            render ([status: '500', message: "Unable to validate the annotations you provided."] as JSON)
 
     }
 }
