@@ -67,6 +67,7 @@ import org.springframework.security.access.AccessDeniedException
  * ModelService should be used directly.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
+ * @author Sarala Wimalaratne <sarala@ebi.ac.uk>
  */
 class ModelDelegateService implements IModelService {
     static transactional = false
@@ -338,13 +339,6 @@ class ModelDelegateService implements IModelService {
         modelService.unpublishModelRevision(Revision.get(revision.id))
     }
 
-    void validateModelRevision(RevisionTransportCommand revision) {
-        try {
-            modelService.validateModelRevision(Revision.get(revision.id))
-        }catch(ValidationException e){
-            throw e
-        }
-    }
 
     ModelTransportCommand findByPerennialIdentifier(String perennialId) {
         def model = ModelAdapter.findByPerennialIdentifier(perennialId)

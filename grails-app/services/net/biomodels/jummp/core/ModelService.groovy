@@ -30,8 +30,11 @@
 
 package net.biomodels.jummp.core
 
+import eu.ddmore.metadata.service.ValidationError
+import eu.ddmore.metadata.service.ValidationErrorStatus
 import eu.ddmore.metadata.service.ValidationException
-import eu.ddmore.metadata.service.ValidationReportImpl
+import eu.ddmore.metadata.service.MetadataValidatorImpl
+import net.biomodels.jummp.annotationstore.Qualifier
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
 import net.biomodels.jummp.core.adapters.DomainAdapter
@@ -66,7 +69,7 @@ import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
-import eu.ddmore.metadata.service.ValidationReport
+import eu.ddmore.metadata.service.MetadataValidator
 
 /**
  * @short Service class for managing Models
@@ -145,7 +148,7 @@ class ModelService {
 
 //    def searchService
 
-    def validationReport
+//    def metadataValidator
 
 
     final boolean MAKE_PUBLICATION_ID = !(publicationIdGenerator instanceof NullModelIdentifierGenerator)
@@ -709,7 +712,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
         Revision revision = new Revision(model: model, name: rev.name, description: rev.description,
                     comment: rev.comment, uploadDate: new Date(), owner: currentUser, minorRevision: false,
                     validated:rev.validated,
-                    format: ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion))
+                    format: ModelFormat.findByIdentifierAndFormatVersion(rev.format.identifier, formatVersion),
+                    validationReport: rev.validationReport, validationLevel: rev.validationLevel)
         def stopWatch = new Log4JStopWatch("modelService.addValidatedRevision.rftcCreation")
         List<RepositoryFile> domainObjects = convertRepositoryFilesFromTransportCommands(repoFiles, revision)
 
@@ -2060,54 +2064,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         aclUtilService.deletePermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
         revision.state=ModelState.UNPUBLISHED
         revision.save(flush:true)
-    }
-
-    /**
-     * Validates the metadata for a model revision.
-     *
-     * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
-     * method.
-     * @param revision The Revision to be validated
-     */
-    @PreAuthorize("hasRole('ROLE_CURATOR') or hasRole('ROLE_ADMIN')") //used to be: (hasRole('ROLE_CURATOR') and hasPermission(#revision, admin))
-    @PostLogging(LoggingEventType.UPDATE)
-    @Profiled(tag="modelService.validateModelRevision")
-    public void validateModelRevision(Revision revision){
-        if (!SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-            if (!aclUtilService.hasPermission(springSecurityService.authentication, revision,
-                        BasePermission.ADMINISTRATION)) {
-                throw new AccessDeniedException("You cannot validate this model.");
-            }
-        }
-        if (!revision) {
-            throw new IllegalArgumentException("Revision may not be null")
-        }
-        if (revision.deleted) {
-            throw new IllegalArgumentException("Revision may not be deleted")
-        }
-
-        List<File> repFiles = retrieveModelRepFiles(revision)
-        final File pharmML = AbstractPharmMlHandler.findPharmML(repFiles)
-        String metadataFileName = JummpXmlUtils.findModelAttribute(pharmML, "PharmML", "metadataFile")
-
-        File metadataFile = null;
-        for(File file : repFiles){
-            if(file.getName().equals(metadataFileName)){
-                metadataFile = file;
-                break;
-            }
-        }
-
-        if(metadataFile==null)
-            throw new ValidationException("Metadata file not found for "+pharmML.getName()+ ". Please save the metadata first.")
-        else {
-            validationReport.generateValidationReport(metadataFile)
-        }
-
-        revision.validationReport = validationReport.getValidationReport();
-        revision.validationLevel = validationReport.metadataValidator.getValidationErrorStatus();
-
-        revision.save(flush: true)
     }
 
     /**
