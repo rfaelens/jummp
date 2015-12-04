@@ -113,14 +113,14 @@
             },
             error: function(jqXHR) {
                 console.error("epic fail", jqXHR.responseText);
-                $("#message").addClass("failure");
+                $("#message").removeClass("success").addClass("failure");
                 $('#message').html("There was an internal error while saving the information provided.");
             },
             success: function(response) {
                 if ("200" == response.status) {
-                    $("#message").addClass("success");
+                    $("#message").removeClass("failure").addClass("success");
                 } else {
-                    $("#message").addClass("failure");
+                    $("#message").removeClass("success").addClass("failure");
                 }
                 $('#message').html(response.message);
             }
@@ -145,18 +145,23 @@
             },
             error: function(jqXHR) {
                 console.error("epic fail", jqXHR.responseText);
-                $("#message").addClass("failure");
+                $("#message").removeClass("success").addClass("failure");
                 $('#message').html("There was an internal error while validating the information provided.");
             },
             success: function(response) {
                 if ("200" == response.status) {
-                    $("#message").addClass("success");
+                    $("#message").removeClass("failure").addClass("success");
                 } else {
-                    $("#message").addClass("failure");
+                    $("#message").removeClass("success").addClass("failure");
+                    $("#message").removeClass("success").addClass("failure");
                 }
                 $('#message').html(response.message);
-                if(response.errorReport!=null)
+                if(response.errorReport!=null){
                     $('#report').html(response.errorReport);
+                }else{
+                    $('#report').empty();
+                }
+
             }
         });
     });
