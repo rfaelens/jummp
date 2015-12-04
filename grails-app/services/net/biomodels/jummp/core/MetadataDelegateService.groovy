@@ -20,6 +20,7 @@
 
 package net.biomodels.jummp.core
 
+import eu.ddmore.metadata.service.ValidationException
 import net.biomodels.jummp.annotationstore.ResourceReference
 import net.biomodels.jummp.annotationstore.Statement
 import net.biomodels.jummp.core.annotation.ResourceReferenceCategory
@@ -28,6 +29,7 @@ import net.biomodels.jummp.core.annotation.StatementCategory
 import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.annotation.SectionContainer
+import net.biomodels.jummp.model.Revision
 import org.perf4j.aop.Profiled
 
 /**
@@ -115,5 +117,14 @@ class MetadataDelegateService implements IMetadataService {
     @Profiled(tag = "metadataDelegateService.persistAnnotationSchema")
     boolean persistAnnotationSchema(List<SectionContainer> sections) {
         metadataService.persistAnnotationSchema(sections)
+    }
+
+    @Profiled(tag = "metadataDelegateService.validateModelRevision")
+    void validateModelRevision(RevisionTransportCommand revision, String model,List<StatementTransportCommand> statements) {
+        try {
+            metadataService.validateModelRevision(Revision.get(revision.id), model, statements)
+        }catch(ValidationException e){
+            throw e
+        }
     }
 }

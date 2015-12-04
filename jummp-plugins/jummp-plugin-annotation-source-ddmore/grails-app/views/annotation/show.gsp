@@ -140,6 +140,7 @@
             url: $.jummp.createLink("annotation", "validate"),
             cache: false,
             data: {
+                annotations: JSON.stringify(Jummp.data.existingAnnotations),
                 revision: "${revision.model.publicationId ?: revision.model.submissionId}"
             },
             error: function(jqXHR) {
