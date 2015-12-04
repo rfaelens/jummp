@@ -21,8 +21,6 @@
 package net.biomodels.jummp.search
 
 import org.apache.camel.builder.RouteBuilder
-import org.apache.camel.Exchange
-import org.apache.camel.Processor
 
 class IndexingRoute extends RouteBuilder {
 
