@@ -53,6 +53,7 @@
 </head>
 <body>
     <div id="message"></div>
+    <div id="report"></div>
     <h1>Annotate Model ${revision.model.publicationId ?: revision.model.submissionId}</h1>
     <div id="toolbar" class="ui-corner-all">
         <button id="saveButton" title="Save model properties" class="action">Save</button>
@@ -124,6 +125,7 @@
                 $('#message').html(response.message);
             }
         });
+        $('#report').empty();
     });
     $('#validateButton').button({
         icons: {
@@ -153,7 +155,7 @@
                 }
                 $('#message').html(response.message);
                 if(response.errorReport!=null)
-                    window.alert(response.errorReport);
+                    $('#report').html(response.errorReport);
             }
         });
     });

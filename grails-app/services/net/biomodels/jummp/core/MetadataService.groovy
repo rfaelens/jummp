@@ -63,7 +63,6 @@ class MetadataService {
      */
     def modelFileFormatService
     def pharmMlService
-    def pharmMlMetadataWriter
 
     /**
      * Fetches any ResourceReferences defined for a given qualifier from a revision.
@@ -244,6 +243,7 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
      * Persists in the database the qualifiers and corresponding cross-references that make
      * up the fields and the values rendered by the annotation editor.
      */
+    @Profiled(tag = "metadataService.persistAnnotationSchema")
     boolean persistAnnotationSchema(List<SectionContainer> sections) {
         def result = false
         def promise = Qualifier.async.task {
