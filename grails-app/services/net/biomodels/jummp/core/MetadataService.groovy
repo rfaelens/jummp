@@ -20,21 +20,28 @@
 
 package net.biomodels.jummp.core
 
+import eu.ddmore.metadata.service.ValidationError
+import eu.ddmore.metadata.service.ValidationException
 import net.biomodels.jummp.annotation.CompositeValueContainer
 import net.biomodels.jummp.annotation.PropertyContainer
 import net.biomodels.jummp.annotation.SectionContainer
 import net.biomodels.jummp.annotation.ValueContainer
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.annotationstore.*
+import net.biomodels.jummp.core.util.JummpXmlUtils
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.core.model.*
 import net.biomodels.jummp.core.annotation.*
 import eu.ddmore.metadata.service.MetadataWriterImpl
+import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.jena.riot.RDFFormat
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.acls.domain.BasePermission
 
 /**
  * Service class that facilitates interaction with model metadata.
@@ -63,6 +70,8 @@ class MetadataService {
      */
     def modelFileFormatService
     def pharmMlService
+
+    def metadataValidator
 
     /**
      * Fetches any ResourceReferences defined for a given qualifier from a revision.
@@ -189,25 +198,9 @@ class MetadataService {
         Revision baseRevision = modelService.getLatestRevision(theModel, false)
         RevisionTransportCommand newRevision = DomainAdapter.getAdapter(baseRevision).toCommandObject()
         newRevision.comment = "Updated model annotations."
-        def subject = "${grailsApplication.config.grails.serverURL}/model/${model}"
-        def rdfTypeProperty = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-        def pharmmlModelOntologyTerm = "http://www.pharmml.org/ontology/PHARMMLO_0000001"
 
-        def pharmMlMetadataWriter = new MetadataWriterImpl()
         try {
-            statements.each { StatementTransportCommand statement ->
-                String predicate = statement.predicate.uri
-                ResourceReferenceTransportCommand xref = statement.object
-                String object = xref.uri ?: xref.name
-                boolean isLiteralTriple = xref.uri ? false : true
-                if (isLiteralTriple) {
-                    pharmMlMetadataWriter.generateLiteralTriple(subject, predicate, object)
-                } else {
-                    pharmMlMetadataWriter.generateTriple(subject, predicate, object)
-                }
-            }
-            pharmMlMetadataWriter.generateTriple(subject, rdfTypeProperty,
-                    pharmmlModelOntologyTerm)
+            def pharmMlMetadataWriter = createMetadataWriter(model,statements)
             String fileBase = System.properties['java.io.tmpdir']
             String fileName = "${model}.rdf"
             def annoFile = new File(fileBase, fileName)
@@ -229,6 +222,8 @@ Metadata ${pharmMlMetadataWriter.dump()} based on revision ${baseRevision.id} wi
             if (!result) {
                 log.error """\
 Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataWriter.dump()}"""
+            }else{
+                result.save(flush: true)
             }
             return result != null
         } catch(Exception e) {
@@ -236,6 +231,56 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
             return false
         }
     }
+
+    private MetadataWriterImpl createMetadataWriter(String model, List<StatementTransportCommand> statements){
+        def subject = "${grailsApplication.config.grails.serverURL}/model/${model}"
+        def rdfTypeProperty = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+        def pharmmlModelOntologyTerm = "http://www.pharmml.org/ontology/PHARMMLO_0000001"
+
+        def pharmMlMetadataWriter = new MetadataWriterImpl()
+        statements.each { StatementTransportCommand statement ->
+            String predicate = statement.predicate.uri
+            ResourceReferenceTransportCommand xref = statement.object
+            String object = xref.uri ?: xref.name
+            boolean isLiteralTriple = xref.uri ? false : true
+            if (isLiteralTriple) {
+                pharmMlMetadataWriter.generateLiteralTriple(subject, predicate, object)
+            } else {
+                pharmMlMetadataWriter.generateTriple(subject, predicate, object)
+            }
+        }
+        pharmMlMetadataWriter.generateTriple(subject, rdfTypeProperty, pharmmlModelOntologyTerm)
+
+        return pharmMlMetadataWriter
+    }
+
+
+    @Profiled(tag="metadataService.validateModelRevision")
+    public void validateModelRevision(Revision revision, String model, List<StatementTransportCommand> statements){
+
+        if (!revision) {
+            throw new IllegalArgumentException("Revision may not be null")
+        }
+
+        def pharmMlMetadataWriter = createMetadataWriter(model, statements )
+
+        StringBuffer validationReport = new StringBuffer();
+
+
+        metadataValidator.validate(pharmMlMetadataWriter.model)
+
+        for(ValidationError validationError: metadataValidator.validationHandler.getValidationList()){
+            validationReport.append(Qualifier.findByUri(validationError.qualifier).accession)
+            validationReport.append(validationError.getMessage())
+            validationReport.append("<br>")
+
+        }
+
+        revision.validationReport = validationReport.toString();
+        revision.validationLevel = metadataValidator.getValidationErrorStatus();
+
+    }
+
 
     /**
      * Dumb cache of the annotation schema.

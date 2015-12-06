@@ -288,7 +288,7 @@ public interface IModelService {
     public boolean deleteRevision(RevisionTransportCommand revision)
     public void publishModelRevision(RevisionTransportCommand revision)
 
-    public void validateModelRevision(RevisionTransportCommand revision)
+//    public void validateModelRevision(RevisionTransportCommand revision)
     /**
      * Finds the model with the specified perennial identifier.
      *
