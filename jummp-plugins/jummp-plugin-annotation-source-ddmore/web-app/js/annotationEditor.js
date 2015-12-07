@@ -33,13 +33,13 @@ Jummp.addRdfStatement = function(subject, predicate, object) {
         Jummp.data.existingAnnotations.subjects.theSubject.predicates[predicateIdx] = thisPredicate;
     }
     console.log("done with this stmt", Jummp.data.existingAnnotations.subjects.theSubject.predicates);
-}
+};
 
 Jummp.convertToRdfObject = function(item) {
     return {
         "object": item
     };
-}
+};
 
 Jummp.annoEditor = new Mn.Application();
 Jummp.annoEditor.addRegions({
@@ -200,7 +200,7 @@ var TabbedLayout = Mn.LayoutView.extend({
 
 Marionette.TemplateCache.prototype.compileTemplate = function(rawTemplate, options) {
     return Handlebars.compile(rawTemplate);
-}
+};
 
 $(function() {
     $("#leftContainer").tabs();
