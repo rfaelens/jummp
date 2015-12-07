@@ -50,7 +50,7 @@ grails.project.dependency.resolution = {
         mavenRepo "http://www.ebi.ac.uk/~maven/m2repo_snapshots/"
     }
 
-    String ddmoreMetadataIntegrationServiceVersion = "0.0.3-SNAPSHOT"
+    String ddmoreMetadataIntegrationServiceVersion = "0.0.3"
     String jungVersion = "2.0.1"
 
     dependencies {
