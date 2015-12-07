@@ -217,7 +217,7 @@ $(function() {
 
 Handlebars.registerHelper("renderSingleUnconstrainedValue", function() {
     var isRequired = Handlebars.escapeExpression(this.isRequired);
-    var value = this.values ? Handlebars.escapeExpression(this.values.get(0)) : '';
+    var values = this.values ? this.values.first() : '';
     var isReadOnly = this.readOnly ? true : false;
 
     var result = "<input type='text'";
@@ -227,8 +227,12 @@ Handlebars.registerHelper("renderSingleUnconstrainedValue", function() {
     if (isReadOnly) {
         result += " readonly";
     }
-    if (value) {
-        result += "value='" + value + "'";
+    if (values) {
+        var label = values.get('xref').name;
+        if (!label) {
+            label = values.get('xref').uri;
+        }
+        result += "value='" + label + "'";
     }
     result += " />"
     return new Handlebars.SafeString(result);

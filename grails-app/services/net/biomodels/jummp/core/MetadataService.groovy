@@ -193,7 +193,8 @@ class MetadataService {
     }
 
     @Profiled(tag = "metadataService.saveMetadata")
-    boolean saveMetadata(String model, List<StatementTransportCommand> statements) {
+    boolean saveMetadata(String model, List<StatementTransportCommand> statements,
+            boolean isUpdate = false) {
         Model theModel = Model.findBySubmissionIdOrPublicationId(model, model)
         Revision baseRevision = modelService.getLatestRevision(theModel, false)
         RevisionTransportCommand newRevision = DomainAdapter.getAdapter(baseRevision).toCommandObject()
@@ -201,16 +202,26 @@ class MetadataService {
 
         try {
             def pharmMlMetadataWriter = createMetadataWriter(model,statements)
-            String fileBase = System.properties['java.io.tmpdir']
-            String fileName = "${model}.rdf"
-            def annoFile = new File(fileBase, fileName)
-            String path = annoFile.absolutePath
-            pharmMlMetadataWriter.writeRDFModel(path, RDFFormat.RDFXML)
-
-            RepositoryFileTransportCommand rf = new RepositoryFileTransportCommand(
-                    path: path, description: "annotation file")
             List<RepositoryFileTransportCommand> files = newRevision.files
-            files.add rf
+            String annoFilePath
+            File annoFile
+            RepositoryFileTransportCommand rf
+            if (!isUpdate) {
+                String fileBase = System.properties['java.io.tmpdir']
+                String fileName = "${model}.rdf"
+                annoFile = new File(fileBase, fileName)
+                annoFilePath = annoFile.absolutePath
+                rf = new RepositoryFileTransportCommand( path: annoFilePath, description:
+                        "annotation file")
+                files.add rf
+            } else {
+                rf = files.find {
+                    it.path?.endsWith(".rdf")
+                }
+                annoFilePath = rf.path
+                annoFile = new File(annoFilePath)
+            }
+            pharmMlMetadataWriter.writeRDFModel(annoFilePath, RDFFormat.RDFXML)
 
             boolean preProcessingOK = pharmMlService.doBeforeSavingAnnotations(annoFile, newRevision)
             if (!preProcessingOK) {
@@ -222,9 +233,7 @@ Metadata ${pharmMlMetadataWriter.dump()} based on revision ${baseRevision.id} wi
             if (!result) {
                 log.error """\
 Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataWriter.dump()}"""
-            }else{
-                result.save(flush: true)
-            }
+            }//else{ result.save(flush: true) }
             return result != null
         } catch(Exception e) {
             log.error(e.message, e)
