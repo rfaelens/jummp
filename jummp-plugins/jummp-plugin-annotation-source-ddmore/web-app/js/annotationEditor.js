@@ -35,16 +35,6 @@ Jummp.addRdfStatement = function(subject, predicate, object) {
     console.log("done with this stmt", Jummp.data.existingAnnotations.subjects.theSubject.predicates);
 }
 
-Jummp.buildRdfObject = function(original) {
-    if (_.isArray(original)) {
-        _.map(original, function(o) {
-            return Jummp.convertToRdfObject(o);
-        });
-    } else {
-        return [Jummp.convertToRdfObject(original)];
-    }
-}
-
 Jummp.convertToRdfObject = function(item) {
     return {
         "object": item
