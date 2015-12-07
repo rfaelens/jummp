@@ -8,10 +8,11 @@ Jummp.addRdfStatement = function(subject, predicate, object) {
     var existingSubject = existing.subjects.theSubject || {};
     var subjectPredicates = existingSubject.predicates || [];
     var predicateIdx = _.findIndex(subjectPredicates, { predicate: predicate });
-    console.log(object);
     if (!object) {
         if (-1 != predicateIdx) {
-            Jummp.data.existingAnnotations.subjects.theSubject.predicates.pop(predicateIdx);
+            var removed = Jummp.data.existingAnnotations.subjects.theSubject.predicates.splice(
+                    predicateIdx, 1);
+            return;
         } else {
             return;
         }
