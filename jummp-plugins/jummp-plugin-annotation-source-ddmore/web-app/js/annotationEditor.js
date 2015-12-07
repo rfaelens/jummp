@@ -234,12 +234,11 @@ Handlebars.registerHelper("renderSingleUnconstrainedValue", function() {
         }
         result += "value='" + label + "'";
     }
-    result += " />"
+    result += " />";
     return new Handlebars.SafeString(result);
 });
 
-// builds a select box that allows multiple choice. composite values will appear
-// as an optgroup.
+// builds a select box that allows multiple choice. nested values will appear indented.
 Handlebars.registerHelper("renderMultipleConstrainedValues", function() {
     var values = this.values;
     var result = "<select multiple >";
@@ -254,11 +253,15 @@ Handlebars.registerHelper("renderMultipleConstrainedValues", function() {
 Jummp.buildValueTree = function(item, partialValueTree, isLeaf) {
     partialValueTree = partialValueTree || "";
     isLeaf = isLeaf || false;
+    var isSelected = item.get('options').selected || false;
     var optionValue = item.get('uri');
     var annotationLabel = item.get('value');
     var subValues = item.get('children') || [];
 
     var thisItem = "<option value='" + optionValue + "'";
+    if (isSelected) {
+        thisItem += " selected='selected'";
+    }
     if (isLeaf) {
         thisItem += " class='subvalue'"
     }
@@ -270,5 +273,5 @@ Jummp.buildValueTree = function(item, partialValueTree, isLeaf) {
         });
     }
     return partialValueTree;
-}
+};
 

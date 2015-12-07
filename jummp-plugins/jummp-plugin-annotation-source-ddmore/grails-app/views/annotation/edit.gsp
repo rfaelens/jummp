@@ -72,15 +72,37 @@
         Jummp.annoEditor.on("before:start", function(options) {
             var annotationSections = new AnnotationSections(Jummp.data.objectModel);
             Jummp.annotationSections = annotationSections;
+            var setSelectedForList = function(values, s) {
+                var v = values.findWhere({uri: s.uri});
+                if (v != undefined) {
+                    v.get('options').selected = true;
+                }
+            }
+
             var bind = function (prop, selection) {
-                switch (prop.get('range').name) {
+                var propRange = prop.get('range').name;
+                switch (propRange) {
                     case "SINGLE_UNCONSTRAINED_CHOICE":
                     case "MULTIPLE_UNCONSTRAINED_CHOICE":
                         _.each(selection, function(s) {
                             prop.get('values').push(new Value({xref: s}));
                         });
                         break;
+                    case "SINGLE_CONSTRAINED_CHOICE":
+                    case "MULTIPLE_CONSTRAINED_CHOICE":
+                        _.each(selection, function(s) {
+                            var values = prop.get('values');
+                            setSelectedForList(values, s);
+                            values.each(function(parent) {
+                                var children = parent.get('children');
+                                if (children != undefined) {
+                                    setSelectedForList(children, s);
+                                }
+                            });
+                        });
+                        break;
                     default:
+                        console.warn("unsupported property range type", propRange);
                 }
             };
             annotationSections.each(function(section) {
