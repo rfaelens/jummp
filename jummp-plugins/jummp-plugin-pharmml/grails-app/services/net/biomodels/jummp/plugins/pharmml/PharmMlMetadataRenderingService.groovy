@@ -80,7 +80,11 @@ class PharmMlMetadataRenderingService {
         stmts.each { StatementTransportCommand s ->
             String p = s.predicate.accession
             String fp = p.replaceAll('-', ' ')
-            anno.put(fp, [s.object])
+            if (anno.containsKey(fp)) {
+                anno[fp] << s.object
+            } else {
+                anno.put(fp, [s.object])
+            }
         }
         groovyPageRenderer.renderTo(template: "/templates/common/metadata/annotations",
                 model: [annotations: anno], out)

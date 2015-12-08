@@ -21,15 +21,17 @@
 package net.biomodels.jummp.search
 
 import org.apache.camel.builder.RouteBuilder
-import org.apache.camel.Exchange
-import org.apache.camel.Processor
 
 class IndexingRoute extends RouteBuilder {
+    final String DEBUG_CFG =
+            "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6005"
+    final String JAR_ARGS = '-jar ${body[jarPath]} ${body[jsonPath]}'
+    final String CLI_ARGS = new StringBuilder(DEBUG_CFG).append(' ').append(JAR_ARGS).toString()
 
     @Override
     void configure() {
         from("seda:exec")
-        .setHeader("CamelExecCommandArgs", simple('-jar ${body[jarPath]} ${body[jsonPath]}'))
+        .setHeader("CamelExecCommandArgs", simple(CLI_ARGS))
         .to("exec:java")
     }
 }

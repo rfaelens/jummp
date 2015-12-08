@@ -20,8 +20,13 @@
     <a href="${it.uri}" title="Access more information about this ${it.datatype} term">${it.name}</a>
 </g:if>
 <g:elseif test="${it.name}">
-    <a href="${it.uri}" title="Access more information about this term">${it.name}</a>
+    <g:if test="${it.uri}">
+        <a href="${it.uri}" title="Access more information about this term">${it.name}</a>
+    </g:if>
+    <g:else>
+        <span>${it.name}</span>
+    </g:else>
 </g:elseif>
-<g:else>
+<g:elseif test="${it.uri}">
     <a href="${it.uri}" title="Access more information about this term">${it.uri}</a>
-</g:else>
+</g:elseif>

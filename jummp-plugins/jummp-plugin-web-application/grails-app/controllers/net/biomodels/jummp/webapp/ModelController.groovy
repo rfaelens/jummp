@@ -223,6 +223,7 @@ class ModelController {
             boolean canUpdate = modelDelegateService.canAddRevision(PERENNIAL_ID)
             boolean canDelete = modelDelegateService.canDelete(PERENNIAL_ID)
             boolean canShare = modelDelegateService.canShare(PERENNIAL_ID)
+            boolean haveAnnotations = rev.annotations?.size() > 0
 
             String flashMessage = ""
             if (flash.now["giveMessage"]) {
@@ -239,6 +240,7 @@ class ModelController {
                         canUpdate: canUpdate,
                         canDelete: canDelete,
                         canShare: canShare,
+                        haveAnnotations: haveAnnotations,
                         showPublishOption: showPublishOption,
                         validationLevel: rev.getValidationLevelMessage()
             ]

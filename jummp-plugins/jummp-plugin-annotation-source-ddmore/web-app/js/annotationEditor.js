@@ -8,10 +8,11 @@ Jummp.addRdfStatement = function(subject, predicate, object) {
     var existingSubject = existing.subjects.theSubject || {};
     var subjectPredicates = existingSubject.predicates || [];
     var predicateIdx = _.findIndex(subjectPredicates, { predicate: predicate });
-    console.log(object);
     if (!object) {
         if (-1 != predicateIdx) {
-            Jummp.data.existingAnnotations.subjects.theSubject.predicates.pop(predicateIdx);
+            var removed = Jummp.data.existingAnnotations.subjects.theSubject.predicates.splice(
+                    predicateIdx, 1);
+            return;
         } else {
             return;
         }
@@ -32,23 +33,13 @@ Jummp.addRdfStatement = function(subject, predicate, object) {
         Jummp.data.existingAnnotations.subjects.theSubject.predicates[predicateIdx] = thisPredicate;
     }
     console.log("done with this stmt", Jummp.data.existingAnnotations.subjects.theSubject.predicates);
-}
-
-Jummp.buildRdfObject = function(original) {
-    if (_.isArray(original)) {
-        _.map(original, function(o) {
-            return Jummp.convertToRdfObject(o);
-        });
-    } else {
-        return [Jummp.convertToRdfObject(original)];
-    }
-}
+};
 
 Jummp.convertToRdfObject = function(item) {
     return {
         "object": item
     };
-}
+};
 
 Jummp.annoEditor = new Mn.Application();
 Jummp.annoEditor.addRegions({
@@ -209,7 +200,7 @@ var TabbedLayout = Mn.LayoutView.extend({
 
 Marionette.TemplateCache.prototype.compileTemplate = function(rawTemplate, options) {
     return Handlebars.compile(rawTemplate);
-}
+};
 
 $(function() {
     $("#leftContainer").tabs();
@@ -217,7 +208,7 @@ $(function() {
 
 Handlebars.registerHelper("renderSingleUnconstrainedValue", function() {
     var isRequired = Handlebars.escapeExpression(this.isRequired);
-    var value = this.values ? Handlebars.escapeExpression(this.values.get(0)) : '';
+    var values = this.values ? this.values.first() : '';
     var isReadOnly = this.readOnly ? true : false;
 
     var result = "<input type='text'";
@@ -227,15 +218,18 @@ Handlebars.registerHelper("renderSingleUnconstrainedValue", function() {
     if (isReadOnly) {
         result += " readonly";
     }
-    if (value) {
-        result += "value='" + value + "'";
+    if (values) {
+        var label = values.get('xref').name;
+        if (!label) {
+            label = values.get('xref').uri;
+        }
+        result += "value='" + label + "'";
     }
-    result += " />"
+    result += " />";
     return new Handlebars.SafeString(result);
 });
 
-// builds a select box that allows multiple choice. composite values will appear
-// as an optgroup.
+// builds a select box that allows multiple choice. nested values will appear indented.
 Handlebars.registerHelper("renderMultipleConstrainedValues", function() {
     var values = this.values;
     var result = "<select multiple >";
@@ -250,11 +244,15 @@ Handlebars.registerHelper("renderMultipleConstrainedValues", function() {
 Jummp.buildValueTree = function(item, partialValueTree, isLeaf) {
     partialValueTree = partialValueTree || "";
     isLeaf = isLeaf || false;
+    var isSelected = item.get('options').selected || false;
     var optionValue = item.get('uri');
     var annotationLabel = item.get('value');
     var subValues = item.get('children') || [];
 
     var thisItem = "<option value='" + optionValue + "'";
+    if (isSelected) {
+        thisItem += " selected='selected'";
+    }
     if (isLeaf) {
         thisItem += " class='subvalue'"
     }
@@ -266,5 +264,5 @@ Jummp.buildValueTree = function(item, partialValueTree, isLeaf) {
         });
     }
     return partialValueTree;
-}
+};
 

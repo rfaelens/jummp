@@ -29,13 +29,13 @@ import net.biomodels.jummp.core.model.ValidationState
 import org.apache.jena.riot.RDFFormat
 import eu.ddmore.metadata.service.*
 
+@Secured(["isAuthenticated()"])
 class AnnotationController {
 
     def metadataInputSource
     def modelDelegateService
     def metadataDelegateService
 
-    @Secured(["isAuthenticated()"])
     def show() {
         if (!params.id) {
             forward controller: "errors", action: "error404"
@@ -66,6 +66,70 @@ class AnnotationController {
             modelId: modelId
         ]
         render model: theModel, view: 'show'
+    }
+
+    def edit() {
+        if (!params.id) {
+            forward controller: "errors", action: "error404"
+            return
+        }
+
+        def revision = modelDelegateService.getRevisionFromParams(params.id, params.revisionId)
+        def modelId = (revision.model.publicationId) ?: (revision.model.submissionId)
+
+        boolean canUpdate = modelDelegateService.canAddRevision modelId
+        if (!canUpdate) {
+            forward controller: 'errors', action: 'error403'
+            return
+        }
+
+        def annotations = revision.annotations
+        if (annotations?.size() < 1) {
+            forward action: "show", params: [id: params.id, revisionId: params.revisionId]
+        }
+        def annotationSections = metadataInputSource.buildObjectModel()
+        def objectModel = annotationSections as JSON
+
+        def annoMap = [:]
+        def jsonAnnoList = []
+        annotations.each { ElementAnnotationTransportCommand anno ->
+            def stmt = anno.statement
+            def pred = stmt.predicate
+            String predUri = pred.uri
+            def obj = stmt.object
+            if (annoMap.containsKey(predUri)) {
+                annoMap[predUri] << obj
+            } else {
+                annoMap[predUri] = [obj]
+            }
+        }
+
+        annoMap.each { String key, List<ResourceReferenceTransportCommand> objects ->
+            def thisPred = [:]
+            thisPred['predicate'] = key
+            def allValues = []
+            objects.each { ResourceReferenceTransportCommand o ->
+                def value = [:]
+                value['object'] = o.uri ?: o.name
+                allValues << value
+            }
+            thisPred['object'] = allValues
+            jsonAnnoList << thisPred
+        }
+
+        def existingAnnotations = [
+            "subjects": [
+                "theSubject": [ "predicates" : jsonAnnoList]
+            ]
+        ] as JSON
+        def theModel = [
+            objectModel: objectModel,
+            existingAnnotations: existingAnnotations,
+            annoPropsMap: annoMap as JSON,
+            revision: revision,
+            modelId: modelId
+        ]
+        render model: theModel, view: 'edit'
     }
 
     def save() {
@@ -119,6 +183,25 @@ class AnnotationController {
         else
             render ([status: '500', message: "Unable to validate the annotations you provided."] as JSON)
 
+    }
+
+    def update() {
+        if (!params.revision) {
+            def response = [
+                status: '400',
+                message: 'The request to save model annotations lacked the revision parameter.'
+            ]
+            render(response as JSON)
+            return
+        }
+        List<StatementTransportCommand> stmts = createStatementList()
+        String modelId = params.revision
+        boolean result = metadataDelegateService.updateMetadata(modelId, stmts)
+        if (result) {
+            render([status: '200', message: "Annotations successfully updated."] as JSON)
+        } else {
+            render([status: '500', message: "Unable to save the annotations you provided."] as JSON)
+        }
     }
 
     private List<StatementTransportCommand> createStatementList(){
