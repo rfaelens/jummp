@@ -1716,7 +1716,7 @@ a:hover {
     position: absolute;
     background: #ffffff;
     top: 15%;
-    width:  29.0%;
+    width:  200px;
     height: 130px;
     border-radius: 5px 5px 0 0;
 }
@@ -1798,9 +1798,10 @@ a:hover {
     top: 53px;
     background: url(//ddmore.eu/sites/ddmore/themes/ddmore/images/b_menu.png) 100% 0 repeat-x;
     height: 100px;
-    width:  71.0%;
+    width:  80.0%;
     position: absolute;
     right: 0;
+    left: 200px;
     border-radius: 0 5px 0 0;
 }
 .main-menu ul, .main-menu ul li {
