@@ -71,7 +71,7 @@ class MdlService implements FileFormatService {
      */
     @Override
     @Profiled(tag="mdlService.getFormatVersion")
-    public String getFormatVersion(RevisionTransportCommand revision) { return "5.0.8" }
+    public String getFormatVersion(RevisionTransportCommand revision) { return "7.0" }
 
     /**
      * {@inheritDoc}
