@@ -18,6 +18,9 @@
 .spaced-top-bottom {
     margin: 0.5em 0em;
 }
+.underlined {
+    text-decoration: underline;
+}
 /* end custom styles */
 #autocomplete {
     border: 1px solid;
