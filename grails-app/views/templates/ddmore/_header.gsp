@@ -33,7 +33,7 @@
   <div id="header-full">
       <div id="header"><div class="section clearfix">
 
-          <a href="${createLink(uri: '/', absolute: true)}" title="Home" rel="home" id="logo"><g:img dir="images/ddmore" file="logo.png" alt="DDMoRe Logo"/></a>
+          <a href="${createLink(uri: '/', absolute: true)}" title="Home" rel="home" id="logo"><g:img dir="images/ddmore" file="logo.png" alt="DDMoRe Model Repository Logo"/></a>
 
       <div class="region region-header">
       	<div id="block-system-user-menu" class="block block-system user-menu block-menu first odd">      
