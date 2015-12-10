@@ -61,29 +61,27 @@
                     	</td>
                    </tr>
                     <tr>
-  	                <td/>
                     	<td>
                     		<button>LOGIN</button>
                     	</td>
                    </tr>
                    <tr>
-  	                <td/>
                     	<td>
                     		<a href="${grailsApplication.config.grails.serverURL}/forgotpassword">
 	  	     					Forgot password?
 	  	     				</a>
                     	</td>
                    </tr>
-
-                   <td/>
                     <g:if test="${grailsApplication.config.jummp.security.anonymousRegistration}">
-                    <td>
+                    <tr>
+                        <td>
                         <a href="${grailsApplication.config.grails.serverURL}/registration">
                             Register
                         </a>
-                    </td>
+                        </td>
+                    </tr>
                     </g:if>
-                   </tr>
+
                 </tbody>
             </table>
         </form>
