@@ -202,7 +202,8 @@ class SearchService {
         } else {
             argsMap['proxySettings'] = ""
         }
-        sendMessage("seda:exec", argsMap)
+        //sendMessage("seda:exec", argsMap)
+        sendMessage("direct:exec", argsMap)
     }
 
     /**
