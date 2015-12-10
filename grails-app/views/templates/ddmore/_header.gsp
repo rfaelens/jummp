@@ -12,8 +12,8 @@
  Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
- 
- You should have received a copy of the GNU Affero General Public License along 
+
+ You should have received a copy of the GNU Affero General Public License along
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
 
@@ -36,7 +36,7 @@
           <a href="${createLink(uri: '/', absolute: true)}" title="Home" rel="home" id="logo"><g:img dir="images/ddmore" file="logo.png" alt="DDMoRe Logo"/></a>
 
       <div class="region region-header">
-      	<div id="block-system-user-menu" class="block block-system user-menu block-menu first odd">      
+      	<div id="block-system-user-menu" class="block block-system user-menu block-menu first odd">
       		<div class="content">
       			<ul class="menu">
       			<sec:ifLoggedIn>
@@ -58,16 +58,21 @@
       				</li>
       			</sec:ifLoggedIn>
       			<sec:ifNotLoggedIn>
-      				<li class="first leaf">
-      					<a href="${grailsApplication.config.grails.serverURL}/registration">
-      						<g:message code="jummp.main.register"/>
-      					</a>
-      				</li>
-      				<li class="last leaf">
-      					<a href="${grailsApplication.config.grails.serverURL}/login">
-      						<g:message code="jummp.main.login"/>
-      					</a>
-      				</li>
+                    <g:if test="${grailsApplication.config.jummp.security.anonymousRegistration}">
+                        <li class="first leaf">
+                        <a href="${grailsApplication.config.grails.serverURL}/registration">
+                            <g:message code="jummp.main.register"/>
+                        </a>
+                        </li>
+                        <li class="last leaf">
+                    </g:if>
+                    <g:else>
+                        <li class="first leaf">
+                    </g:else>
+                            <a href="${grailsApplication.config.grails.serverURL}/login">
+                                <g:message code="jummp.main.login"/>
+                            </a>
+      				    </li>
       			</sec:ifNotLoggedIn>
       			</ul>
       		</div><!-- /.block -->
@@ -80,25 +85,25 @@
       	 			<input type="submit" id="edit-submit" value="" class="form-submit" />
      		</div></div>
     	 	</g:form>
-	
+
   </div>
 
 </div>
-      	 		
+
 <div id="block-system-main-menu" class="block block-system main-menu block-menu last odd">
 
-      
+
   <div class="content">
     <ul class="menu">
     	<li class="first expanded active-trail">
-    		<a href="${g.createLink(controller: 'search', action: 'list')}" 
+    		<a href="${g.createLink(controller: 'search', action: 'list')}"
     		<g:if test="${g.pageProperty(name:'page.browse')?.length()}">
 	    		class="active-trail active"
 	    	</g:if>
     		title="browse models">Browse</a>
     	</li>
     	<li class="expanded">
-    		<a href="${g.createLink(controller: 'model', action: 'create')}" 
+    		<a href="${g.createLink(controller: 'model', action: 'create')}"
     		<g:if test="${g.pageProperty(name:'page.submit')?.length()}">
 	    		class="active-trail active"
 	    	</g:if>
@@ -114,19 +119,19 @@
             </li>
         </sec:ifLoggedIn>
     	<li class="expanded">
-    		<a href="${g.createLink(controller: 'jummp', action: 'feedback')}" 
+    		<a href="${g.createLink(controller: 'jummp', action: 'feedback')}"
     		<g:if test="${g.pageProperty(name:'page.feedback')?.length()}">
 	    		class="active-trail active"
 	    	</g:if>
     		title="give feedback">Feedback</a>
     	</li>
-    </ul>  
+    </ul>
 </div>
 <p>${g.pageProperty(name:'page.selectedtab')}</p>
 </div><!-- /.block -->
   </div><!-- /.region -->
 
   </div></div><!-- /.section, /#header -->
-  
+
 </div>
 

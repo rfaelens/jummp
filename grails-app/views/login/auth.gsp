@@ -74,12 +74,15 @@
 	  	     				</a>
                     	</td>
                    </tr>
+
                    <td/>
-                    	<td>
-                    		<a href="${grailsApplication.config.grails.serverURL}/registration">
-	  	     					Register
-	  	     				</a>
-                    	</td>
+                    <g:if test="${grailsApplication.config.jummp.security.anonymousRegistration}">
+                    <td>
+                        <a href="${grailsApplication.config.grails.serverURL}/registration">
+                            Register
+                        </a>
+                    </td>
+                    </g:if>
                    </tr>
                 </tbody>
             </table>
