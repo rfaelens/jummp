@@ -325,9 +325,9 @@ class SubmissionService {
             if (!revision.name) {
                 revision.name=getModelNameFromFiles(files)
             }
-            revision.description=modelFileFormatService.extractDescription(files, modelFormat)
-            if (!revision.description) {
-                revision.description=getModelDescriptionFromFiles(getFilesFromMemory(workingMemory, false))
+            String newDescription = modelFileFormatService.extractDescription(files, modelFormat)
+            if (newDescription) {
+                revision.description = newDescription
             }
             revision.validated=workingMemory.get("model_validation_result") as Boolean
         }
