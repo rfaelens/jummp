@@ -202,8 +202,13 @@ class SearchService {
         } else {
             argsMap['proxySettings'] = ""
         }
-        //sendMessage("seda:exec", argsMap)
-        sendMessage("direct:exec", argsMap)
+        try {
+            //sendMessage("seda:exec", argsMap)
+            sendMessage("direct:exec", argsMap)
+        } catch (Exception e) {
+            log.error("Failed to index revision $revision.properties - ${e.message}", e)
+            //TODO RETRY
+        }
     }
 
     /**
