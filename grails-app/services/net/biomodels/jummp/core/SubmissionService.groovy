@@ -158,6 +158,11 @@ class SubmissionService {
             List<RFTC> additionals
             if (workingMemory.containsKey("repository_files")) {
                 List<RFTC> existing = (workingMemory.get("repository_files") as List<RFTC>)
+                if (!tobeAdded && !filesToDelete) {
+                    workingMemory.put("changedMainFiles", false)
+                    return
+                }
+                def currentMains = existing.findAll { it.mainFile }
                 List<RFTC> toDelete = new LinkedList<RFTC>()
                 Set<RFTC> willBeReplaced = new HashSet<RFTC>()
                 existing.each { oldfile ->
@@ -186,9 +191,15 @@ class SubmissionService {
                     existing.addAll(tobeAdded)
                 }
                 main = existing.findAll { it.mainFile }
+                if (currentMains != main) {
+                    workingMemory.put("changedMainFiles", true)
+                } else {
+                    workingMemory.put("changedMainFiles", false)
+                }
                 additionals = existing - main
             } else {
                 workingMemory.put("repository_files", tobeAdded)
+                workingMemory.put("changedMainFiles", true)
                 main = tobeAdded.findAll { it.mainFile }
                 additionals = tobeAdded - main
             }
@@ -206,10 +217,11 @@ class SubmissionService {
          */
         @Profiled(tag = "submissionService.inferModelFormatType")
         void inferModelFormatType(Map<String, Object> workingMemory) {
-            if (processingRequired(workingMemory)) {
+            if (workingMemory['changedMainFiles']) {
                 MFTC format = modelFileFormatService.inferModelFormat(getRepFiles(workingMemory))
                 if (format) {
                     workingMemory.put("model_type", format)
+                    // revision.format will be updated in updateRevisionFromFiles
                 }
             }
         }
@@ -311,9 +323,14 @@ class SubmissionService {
         @Profiled(tag = "submissionService.updateRevisionComments")
         protected void updateRevisionFromFiles(Map<String, Object> workingMemory) {
             RTC revision = workingMemory.get("RevisionTC") as RTC
+            MFTC fmt = workingMemory["model_type"]
+            if (revision.format != fmt) {
+                revision.format = fmt
+            }
             List<File> files = getFilesFromMemory(workingMemory, true)
-            final String formatVersion = revision.format.formatVersion ? revision.format.formatVersion : ""
-            ModelFormat modelFormat = ModelFormat.findByIdentifierAndFormatVersion(revision.format.identifier, formatVersion)
+            final String fmtVersion = revision.format.formatVersion ?: "*"
+            final String fmtId = revision.format.identifier
+            def modelFormat = ModelFormat.findByIdentifierAndFormatVersion(fmtId, fmtVersion)
             revision.name = modelFileFormatService.extractName(files, modelFormat)
             if (!revision.name) {
                 revision.name = getModelNameFromFiles(files)
@@ -626,17 +643,10 @@ class SubmissionService {
         protected void createTransportObjects(Map<String, Object> workingMemory) {
             RTC revision = workingMemory.get("LastRevision") as RTC
             if (workingMemory.containsKey("reprocess_files")) {
-                String formatId = workingMemory["model_type"].identifier
-                final String formatVersion
-                if (formatId != revision.format.identifier) {
-                    formatVersion = revision.format.formatVersion
-                } else {
-                    formatVersion = revision.format.formatVersion ? revision.format.formatVersion : "*"
+                MFTC format = workingMemory["model_type"] as MFTC
+                if (format != revision.format) {
+                    revision.format = format
                 }
-                revision.format =
-                    DomainAdapter.getAdapter(ModelFormat
-                        .findByIdentifierAndFormatVersion(formatId, formatVersion))
-                        .toCommandObject()
             } else {
                 workingMemory.put("model_type", revision.format)
                 workingMemory.put("model_validation_result", revision.validated)
