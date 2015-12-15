@@ -245,13 +245,12 @@ class SubmissionService {
                         workingMemory.put("validation_error", "Directory passed as input")
                     }
                 }
-                final List<String> errors = new LinkedList<String>();
-                boolean modelsAreValid = modelFileFormatService.validate(
-                        getFilesFromMemory(workingMemory, true),
-                        workingMemory.get("model_type").identifier,
-                        errors)
+                final List<String> errors = new LinkedList<String>()
+                List<File> mainFiles = getFilesFromMemory(workingMemory, true)
+                final String fmt = workingMemory.get("model_type").identifier as String
+                boolean modelsAreValid = modelFileFormatService.validate(mainFiles, fmt, errors)
                 workingMemory.put("model_validation_result", modelsAreValid)
-                if (!workingMemory.containsKey("model_type")) {
+                if (!workingMemory.containsKey("model_type")) {   //TODO IS THIS NEEDED?
                     workingMemory.put("validation_error",
                         "Missing Format Error: Validation could not be performed, format unknown")
                 } else if (!modelsAreValid) {
@@ -536,12 +535,9 @@ class SubmissionService {
         @Profiled(tag = "submissionService.NewModelStateMachine.createTransportObjects")
         protected void createTransportObjects(Map<String,Object> workingMemory) {
             MTC model = new MTC()
-            RTC revision = new RTC(files: getRepFiles(workingMemory),
-                model: model,
-                format: DomainAdapter.getAdapter(ModelFormat.
-                    findByIdentifierAndFormatVersion(workingMemory.get("model_type").identifier,
-                        workingMemory.get("model_type").formatVersion)).
-                    toCommandObject())
+            MFTC format = workingMemory.get("model_type") as MFTC
+            List<RFTC> repoFiles = getRepFiles(workingMemory) as List<RFTC>
+            RTC revision = new RTC(files: repoFiles, model: model, format: format)
             storeTCs(workingMemory, model, revision)
         }
 
