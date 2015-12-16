@@ -1280,11 +1280,7 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
                     if (gaussianModel.linearCovariate) {
                         def linearCovariate = gaussianModel.linearCovariate
                         final String TRANSFORMATION = gaussianModel.transformation?.value()
-                        if (!TRANSFORMATION) {
-                            log.warn """\
-Individual parameter ${p.symbId} is missing mandatory Transformation element."""
-                        }
-                        final boolean APPLY_TRANSFORMATION = "identity" != TRANSFORMATION
+                        final boolean APPLY_TRANSFORMATION = null != TRANSFORMATION
                         // left hand side can be equation or string
                         def lhsEquation
                         //LHS
