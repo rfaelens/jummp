@@ -446,8 +446,10 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 String thisParam
                 if (p.assign) {
                     thisParam = convertToMathML(p.symbId, p.assign, transfMap)
-                    String foo = "<mfenced><mi>${p.assign.equation.symbRef.blkIdRef}</mi></mfenced>"
-                    thisParam = "${thisParam}<math display='inline'><mstyle>${ shownBlk ? foo : "" }</mstyle></math>"
+                    if (p.assign.equation.symbRef) {
+                        String foo = "<mfenced><mi>${p.assign.equation.symbRef.blkIdRef}</mi></mfenced>"
+                        thisParam = "${thisParam}<math display='inline'><mstyle>${ shownBlk ? foo : "" }</mstyle></math>"
+                    }
                 } else {
                     thisParam = ["<math display='inline'><mstyle>", "</mstyle></math>"].join(op(p.symbId))
                 }
