@@ -1318,7 +1318,7 @@ ${thisParam}<math display='inline'><mstyle>${blockIdAsMathML}</mstyle></math>"""
             for (int j = 0; j < N; j++) {
                 output.append("<mtd>")
                 String v = matrix[i][j]
-                if (v.startsWith("<mi>")) {
+                if (v.contains("<mi>")) {
                     output.append(matrix[i][j])
                 } else {
                     output.append("<mi>$v</mi>")
