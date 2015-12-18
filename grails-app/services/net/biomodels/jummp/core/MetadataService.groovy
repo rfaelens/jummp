@@ -55,6 +55,8 @@ class MetadataService {
     private static final Log log = LogFactory.getLog(this)
     private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
     static final String DEFAULT_PHARMML_NAMESPACE = "http://www.pharmml.org/2013/10/PharmMLMetadata"
+    static final String DEFAULT_DDMORE_WAT_NAMESPACE =
+            "http://www.ddmore.org/ontologies/webannotationtool#"
     static final String DEFAULT_PKPD_NAMESPACE =
             "http://www.ddmore.org/ontologies/ontology/pkpd-ontology#"
     /**
@@ -350,7 +352,8 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
             def existingQualifier = Qualifier.findByUri(uri)
             if (!existingQualifier) {
                 def q = new Qualifier(accession: name, uri: uri)
-                if (uri.startsWith(DEFAULT_PHARMML_NAMESPACE)) {
+                if (uri.startsWith(DEFAULT_PHARMML_NAMESPACE) ||
+                        uri.startsWith(DEFAULT_DDMORE_WAT_NAMESPACE)) {
                     q.namespace = DEFAULT_PHARMML_NAMESPACE
                     q.qualifierType = 'pharmML'
                 }
