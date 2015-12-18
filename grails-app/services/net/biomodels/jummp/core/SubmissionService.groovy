@@ -158,7 +158,8 @@ class SubmissionService {
             List<RFTC> additionals
             if (workingMemory.containsKey("repository_files")) {
                 List<RFTC> existing = (workingMemory.get("repository_files") as List<RFTC>)
-                if (!tobeAdded && !filesToDelete) {
+                if (!tobeAdded && !filesToDelete &&
+                        !workingMemory['isUpdateOnExistingModel']) {
                     workingMemory.put("changedMainFiles", false)
                     return
                 }
@@ -199,6 +200,7 @@ class SubmissionService {
                 additionals = existing - main
             } else {
                 workingMemory.put("repository_files", tobeAdded)
+                // DON'T CHANGE IF IS UPDATE ON EXISTING MODEL
                 workingMemory.put("changedMainFiles", true)
                 main = tobeAdded.findAll { it.mainFile }
                 additionals = tobeAdded - main
@@ -217,7 +219,7 @@ class SubmissionService {
          */
         @Profiled(tag = "submissionService.inferModelFormatType")
         void inferModelFormatType(Map<String, Object> workingMemory) {
-            if (workingMemory['changedMainFiles']) {
+            if (workingMemory['changedMainFiles'] || !workingMemory['model_type']) {
                 MFTC format = modelFileFormatService.inferModelFormat(getRepFiles(workingMemory))
                 if (format) {
                     workingMemory.put("model_type", format)
