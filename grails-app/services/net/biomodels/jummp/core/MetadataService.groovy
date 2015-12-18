@@ -308,8 +308,6 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
                     String name = p.value
                     def refreshedQualifier = saveOrUpdateQualifier(uri, name)
                     if (!refreshedQualifier) {
-                        log.error """\
-Unable to update qualifier with uri $uri:${refreshedQualifier?.errors?.allErrors?.inspect()}"""
                         result = false
                     }
                     if (!p.values) {
@@ -356,14 +354,20 @@ Unable to update qualifier with uri $uri:${refreshedQualifier?.errors?.allErrors
                     q.namespace = DEFAULT_PHARMML_NAMESPACE
                     q.qualifierType = 'pharmML'
                 }
-                return q.save(flush: true)
+                if (!q.save(flush: true)) {
+                    log.error "Could not save new qualifier with uri $uri: ${q.errors.allErrors}"
+                }
+                existingQualifier = q
             } else {
                 if (existingQualifier.accession != name) {
                     existingQualifier.accession = name
-                    return existingQualifier.save(flush: true)
+                    existingQualifier.save(flush: true)
+                    if (existingQualifier.hasErrors()) {
+                        log.error "Could not update qualifier $existingQualifier with new name $name"
+                    }
                 }
-                return existingQualifier
             }
+            return existingQualifier
         }
     }
 
