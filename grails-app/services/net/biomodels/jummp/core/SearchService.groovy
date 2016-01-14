@@ -221,6 +221,7 @@ class SearchService {
     @Profiled(tag="searchService.regenerateIndices")
     void regenerateIndices() {
         clearIndex()
+        clearAnnotationStatementsFromDatabase()
         List<RevisionTransportCommand> revisions = Revision.list(fetch: [model: "eager"]).collect { r ->
             DomainAdapter.getAdapter(r).toCommandObject()
         }
@@ -236,7 +237,7 @@ class SearchService {
                     updateIndex(it)
                 }
                 catch(Exception e) {
-                    log.error("Exception thrown while indexing ${it} ${e.getMessage()}", e)
+                    log.error("Exception thrown while indexing ${it.properties} ${e.getMessage()}", e)
                 }
             }
         }
@@ -404,6 +405,20 @@ class SearchService {
         QueryResponse response = solrServerHolder.server.query(query)
         SolrDocumentList docs = response.getResults()
         return docs
+    }
+
+    /*
+     * Removes revision annotations from the database.
+     *
+     * This is necessary to ensure that we keep in sync Solr with the database
+     * at the start of the reindexing process.
+     */
+    @Profiled(tag = "searchService.clearAnnotationStatementsFromDatabase")
+    private void clearAnnotationStatementsFromDatabase() {
+        log.debug("Begin prunning annotation statements from database")
+        Revision.executeUpdate("delete ElementAnnotation")
+        Revision.executeUpdate("delete Statement")
+        log.debug("Finished prunning annotation statements from database")
     }
 
     /**

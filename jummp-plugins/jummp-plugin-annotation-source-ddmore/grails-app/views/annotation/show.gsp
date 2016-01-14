@@ -54,7 +54,7 @@
 <body>
     <div id="message"></div>
     <div id="report"></div>
-    <h1>Annotate Model ${revision.model.publicationId ?: revision.model.submissionId}</h1>
+    <h1>Annotate Model ${revision.name} (${revision.model.publicationId ?: revision.model.submissionId})</h1>
     <div id="toolbar" class="ui-corner-all">
         <button id="saveButton" title="Save model properties" class="action">Save</button>
         <button id="validateButton" title="Validate model properties" class="action">Validate</button>
