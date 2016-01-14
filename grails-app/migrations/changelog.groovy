@@ -1195,4 +1195,6 @@ databaseChangeLog = {
     include file: '20151105_populate_revision_validation_level.groovy'
 
 	include file: '20151207_nullable_xref_uri.groovy'
+
+    include file: '20160114-makeResourceReferenceNameText.groovy'
 }
