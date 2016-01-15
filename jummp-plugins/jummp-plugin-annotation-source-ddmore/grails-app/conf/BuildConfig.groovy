@@ -61,12 +61,12 @@ grails.project.dependency.resolution = {
         }
         compile "org.apache.jena:jena-tdb:1.1.2"
 
-        compile("eu.ddmore.metadata:lib-metadata:1.2-SNAPSHOT") {
+        compile("eu.ddmore.metadata:lib-metadata:1.3-SNAPSHOT") {
             // can't use Spring 4.1 yet, fall back on Grails defaults
             excludes 'spring-core', 'spring-context'
         }
 
-        compile "net.biomodels.jummp:AnnotationStore:0.2.5"
+        compile "net.biomodels.jummp:AnnotationStore:0.2.6"
         compile("net.sf.jung:jung-graph-impl:$jungVersion")
 
         // useful for WordUtils.capitalise()

@@ -55,6 +55,8 @@ class MetadataService {
     private static final Log log = LogFactory.getLog(this)
     private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
     static final String DEFAULT_PHARMML_NAMESPACE = "http://www.pharmml.org/2013/10/PharmMLMetadata"
+    static final String DEFAULT_DDMORE_WAT_NAMESPACE =
+            "http://www.ddmore.org/ontologies/webannotationtool#"
     static final String DEFAULT_PKPD_NAMESPACE =
             "http://www.ddmore.org/ontologies/ontology/pkpd-ontology#"
     /**
@@ -308,8 +310,6 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
                     String name = p.value
                     def refreshedQualifier = saveOrUpdateQualifier(uri, name)
                     if (!refreshedQualifier) {
-                        log.error """\
-Unable to update qualifier with uri $uri:${refreshedQualifier?.errors?.allErrors?.inspect()}"""
                         result = false
                     }
                     if (!p.values) {
@@ -352,18 +352,25 @@ Unable to update qualifier with uri $uri:${refreshedQualifier?.errors?.allErrors
             def existingQualifier = Qualifier.findByUri(uri)
             if (!existingQualifier) {
                 def q = new Qualifier(accession: name, uri: uri)
-                if (uri.startsWith(DEFAULT_PHARMML_NAMESPACE)) {
+                if (uri.startsWith(DEFAULT_PHARMML_NAMESPACE) ||
+                        uri.startsWith(DEFAULT_DDMORE_WAT_NAMESPACE)) {
                     q.namespace = DEFAULT_PHARMML_NAMESPACE
                     q.qualifierType = 'pharmML'
                 }
-                return q.save(flush: true)
+                if (!q.save(flush: true)) {
+                    log.error "Could not save new qualifier with uri $uri: ${q.errors.allErrors}"
+                }
+                existingQualifier = q
             } else {
                 if (existingQualifier.accession != name) {
                     existingQualifier.accession = name
-                    return existingQualifier.save(flush: true)
+                    existingQualifier.save(flush: true)
+                    if (existingQualifier.hasErrors()) {
+                        log.error "Could not update qualifier $existingQualifier with new name $name"
+                    }
                 }
-                return existingQualifier
             }
+            return existingQualifier
         }
     }
 

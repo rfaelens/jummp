@@ -851,15 +851,16 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 def msg = new StringBuffer("Invalid file ${rf.properties} uploaded for model ${m.properties}.")
                 msg.append("The file failed due to ${domain.errors.allErrors.inspect()}")
                 log.error(msg)
-                throw new ModelException("""\
+                throw new ModelException(m, """\
 Your submission appears to contain invalid file ${fileName}. Please review it and try again.""")
             } else {
                 results.add(domain)
             }
         }
         if (!foundValidMainFile) {
-            log.error("Can't persist repository files ${repoFileCmds.dump()} for revision ${revision.dump()}")
-            throw new ModelException("Missing main file for the new model revision ${revision.name}")
+            final def m = DomainAdapter.getAdapter(revision.model).toCommandObject()
+            log.error("Can't persist repository files ${repoFileCmds.dump()} for revision ${revision.dump()} without main file")
+            throw new ModelException(m, "Missing main file for the new model revision ${revision.name}")
         }
         results
     }

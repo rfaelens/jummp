@@ -446,8 +446,12 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
                 String thisParam
                 if (p.assign) {
                     thisParam = convertToMathML(p.symbId, p.assign, transfMap)
-                    String foo = "<mfenced><mi>${p.assign.equation.symbRef.blkIdRef}</mi></mfenced>"
-                    thisParam = "${thisParam}<math display='inline'><mstyle>${ shownBlk ? foo : "" }</mstyle></math>"
+                    if (p.assign.equation.symbRef && shownBlk) {
+                        String blockIdAsMathML = """\
+<mfenced><mi>${p.assign.equation.symbRef.blkIdRef}</mi></mfenced>"""
+                        thisParam = """\
+${thisParam}<math display='inline'><mstyle>${blockIdAsMathML}</mstyle></math>"""
+                    }
                 } else {
                     thisParam = ["<math display='inline'><mstyle>", "</mstyle></math>"].join(op(p.symbId))
                 }
@@ -1314,7 +1318,7 @@ abstract class AbstractPharmMlRenderer implements IPharmMlRenderer {
             for (int j = 0; j < N; j++) {
                 output.append("<mtd>")
                 String v = matrix[i][j]
-                if (v.startsWith("<mi>")) {
+                if (v.contains("<mi>")) {
                     output.append(matrix[i][j])
                 } else {
                     output.append("<mi>$v</mi>")

@@ -672,9 +672,13 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
 
         performValidation {
             action {
-                if (!flow.workingMemory.containsKey("model_type")) {
+                final boolean SHOULD_DETECT_FORMAT = flow.workingMemory["changedMainFiles"] ||
+                    !flow.workingMemory.containsKey("model_type")
+                if (SHOULD_DETECT_FORMAT) {
                     submissionService.inferModelFormatType(flow.workingMemory)
                 }
+                // clear changedMainFiles in case the user clicks back from displayModelInfo
+                flow.workingMemory.remove("changedMainFiles")
                 submissionService.performValidation(flow.workingMemory)
                 MFTC format = flow.workingMemory.get("model_type")
                 if (format && format.identifier !="UNKNOWN" && format.formatVersion == "*") {
