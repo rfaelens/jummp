@@ -21,6 +21,7 @@
 package net.biomodels.jummp.core
 
 import eu.ddmore.metadata.service.ValidationError
+import eu.ddmore.metadata.service.ValidationErrorStatus
 import eu.ddmore.metadata.service.ValidationException
 import net.biomodels.jummp.annotation.CompositeValueContainer
 import net.biomodels.jummp.annotation.PropertyContainer
@@ -37,8 +38,10 @@ import eu.ddmore.metadata.service.MetadataWriterImpl
 import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.apache.commons.validator.UrlValidator
 import org.apache.jena.riot.RDFFormat
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.hibernate.validator.constraints.impl.URLValidator
 import org.perf4j.aop.Profiled
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
@@ -280,9 +283,21 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
 
         metadataValidator.validate(pharmMlMetadataWriter.model)
 
-        for(ValidationError validationError: metadataValidator.validationHandler.getValidationList()){
-            validationReport.append(Qualifier.findByUri(validationError.qualifier).accession)
-            validationReport.append(validationError.getMessage())
+        for(ValidationError validationError: metadataValidator.validationHandler.getValidationList()) {
+            if (validationError.errorStatus == ValidationErrorStatus.EMPTY) {
+                validationReport.append(Qualifier.findByUri(validationError.qualifier).accession)
+                validationReport.append(" is empty.")
+            }else if(validationError.errorStatus == ValidationErrorStatus.INVALID){
+                validationReport.append(Qualifier.findByUri(validationError.qualifier).accession)
+                validationReport.append(" ")
+                UrlValidator urlValidator = new UrlValidator();
+                if(urlValidator.isValid(validationError.getValue())) {
+                    validationReport.append(ResourceReference.findByUri(uri).name)
+                }else{
+                    validationReport.append(validationError.getvalue())
+                }
+                validationReport.append(" is invalid.")
+            }
             validationReport.append("<br>")
 
         }
