@@ -280,21 +280,20 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
 
         StringBuffer validationReport = new StringBuffer();
 
-
         metadataValidator.validate(pharmMlMetadataWriter.model)
 
         for(ValidationError validationError: metadataValidator.validationHandler.getValidationList()) {
             if (validationError.errorStatus == ValidationErrorStatus.EMPTY) {
-                validationReport.append(Qualifier.findByUri(validationError.qualifier).accession)
+                validationReport.append(getQualifierLabel(validationError.qualifier))
                 validationReport.append(" is empty.")
             }else if(validationError.errorStatus == ValidationErrorStatus.INVALID){
-                validationReport.append(Qualifier.findByUri(validationError.qualifier).accession)
+                validationReport.append(getQualifierLabel(validationError.qualifier))
                 validationReport.append(" ")
                 UrlValidator urlValidator = new UrlValidator();
                 if(urlValidator.isValid(validationError.getValue())) {
                     validationReport.append(ResourceReference.findByUri(uri).name)
                 }else{
-                    validationReport.append(validationError.getvalue())
+                    validationReport.append(validationError.getValue())
                 }
                 validationReport.append(" is invalid.")
             }
@@ -305,6 +304,20 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
         revision.validationReport = validationReport.toString();
         revision.validationLevel = metadataValidator.getValidationErrorStatus();
 
+    }
+
+    private String getQualifierLabel(String qualifierString){
+        Qualifier qualifier = Qualifier.findByUri(qualifierString);
+        if(qualifier!=null) {
+            return qualifier.accession;
+        }
+        else{
+            int indexhash = qualifierString.indexOf("#")
+            if(indexhash!= -1)
+                return qualifierString.substring(indexhash+1)
+            else
+                return qualifierString
+        }
     }
 
 
