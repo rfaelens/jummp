@@ -34,6 +34,7 @@ import eu.ddmore.metadata.service.ValidationError
 import eu.ddmore.metadata.service.ValidationErrorStatus
 import eu.ddmore.metadata.service.ValidationException
 import eu.ddmore.metadata.service.MetadataValidatorImpl
+import grails.transaction.Transactional
 import net.biomodels.jummp.annotationstore.Qualifier
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
@@ -70,6 +71,7 @@ import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
 import eu.ddmore.metadata.service.MetadataValidator
+import org.springframework.transaction.annotation.Propagation
 
 /**
  * @short Service class for managing Models
@@ -87,6 +89,7 @@ import eu.ddmore.metadata.service.MetadataValidator
  * @date 20151014
  */
 @SuppressWarnings("GroovyUnusedCatchParameter")
+@Transactional
 class ModelService {
     /**
      * The class logger.
@@ -2104,16 +2107,15 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
      */
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.updateAuditSuccess")
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     void updateAuditSuccess(Long itemId, boolean success) {
         if (itemId != -1) {
-            Model.withTransaction {
-                ModelAudit audit = ModelAudit.get(itemId)
-                audit.success = success
-                if (audit.isDirty('success')) {
-                    if (!audit.save(flush: true)) {
-                        log.error("""\
+            ModelAudit audit = ModelAudit.get(itemId)
+            audit.success = success
+            if (audit.isDirty('success')) {
+                if (!audit.save(flush: true)) {
+                    log.error("""\
 Failed to update audit $itemId to $success: ${audit.errors.allErrors.inspect()}""")
-                    }
                 }
             }
         }
