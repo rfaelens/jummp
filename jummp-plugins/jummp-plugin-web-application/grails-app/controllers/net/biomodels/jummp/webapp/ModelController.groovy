@@ -55,7 +55,6 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.multipart.MultipartFile
 import net.biomodels.jummp.plugins.security.Team
-import net.biomodels.jummp.annotationstorage.*
 
 @Api(value = "/model", description = "Operations related to models")
 class ModelController {
