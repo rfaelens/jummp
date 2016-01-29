@@ -38,6 +38,7 @@ import com.wordnik.swagger.annotations.*
 import eu.ddmore.metadata.service.ValidationException
 import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
+import org.apache.commons.lang3.exception.ExceptionUtils
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import net.biomodels.jummp.core.model.ModelAuditTransportCommand
@@ -937,7 +938,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
                     to grailsApplication.config.jummp.security.registration.email.adminAddress
                     from grailsApplication.config.jummp.security.registration.email.sender
                     subject "Bug in submission: ${ticket}"
-                    body t.message
+                    body "MESSAGE: ${ExceptionUtils.getStackTrace(t)}"
                 }
                 session.messageForError = ticket
             }
