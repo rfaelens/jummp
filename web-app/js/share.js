@@ -80,7 +80,7 @@ CollaboratorTable = Backbone.View.extend({
         objectCreated.show=true;
         var that = this;
         if (selectedItem && selectedItem[2]==objectCreated.name) {
-            objectCreated.id = selectedItem[1];
+            objectCreated.id = selectedItem[3];
             collaborators.add(objectCreated);
             this.performSubmission();
         } else {
@@ -291,7 +291,7 @@ function autoComplete(collabs, url) {
                 } else {
                     var filtered=[];
                     $.each(data, function(result) {
-                        if (collabs.findWhere({name: data[result][2], id: data[result][1]})) {
+                        if (collabs.findWhere({name: data[result][2], id: data[result][3]})) {
                         }
                         else {
                             filtered.push(data[result]);

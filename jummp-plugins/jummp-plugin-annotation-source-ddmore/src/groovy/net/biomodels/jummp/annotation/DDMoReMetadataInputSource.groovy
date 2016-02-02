@@ -25,12 +25,14 @@ import edu.uci.ics.jung.graph.ObservableGraph
 import edu.uci.ics.jung.graph.event.GraphEventListener
 import eu.ddmore.metadata.api.*
 import eu.ddmore.metadata.api.domain.Id
+import eu.ddmore.metadata.api.domain.enums.ValueSetType
 import eu.ddmore.metadata.api.domain.properties.Property
 import eu.ddmore.metadata.api.domain.values.*
 import eu.ddmore.metadata.api.domain.enums.PropertyRange
 import eu.ddmore.metadata.api.domain.sections.*
 import groovy.transform.CompileStatic
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import ontologies.OntologySource
 
 @CompileStatic
 class DDMoReMetadataInputSource implements MetadataInputSource {
@@ -69,7 +71,7 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
         sectionsMap.each { SectionContainer s, List<DDMoReSectionAdapter> adapters ->
             graph.addChild(new SimpleEdge(), root, s)
             adapters.each { DDMoReSectionAdapter adapter ->
-                double n = adapter.sectionNumber
+                String n = String.valueOf(adapter.sectionNumber)
                 String name = adapter.label
                 String tooltip = adapter.tooltip
                 def thisSection = new CompositeSection(modelId, n, name)
@@ -90,7 +92,13 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
     }
 
     private void buildValuesForProperty(Property p, PropertyContainer vtx, DelegateTree g) {
-        List<Value> values = service.findValuesForProperty(p)
+        List<Value> values;
+        if(p.getValueSetType().equals(ValueSetType.ONTOLOGY)){
+            //TODO: connect to ols to get values
+        } else {
+            values = service.findValuesForProperty(p)
+        }
+
         TreeMap orderedValues = new TreeMap(VALUE_COMPARATOR)
         values.each { Value v ->
             ValueContainer vVertex = visit(v)
@@ -125,7 +133,7 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
         List<DDMoReSectionAdapter> bookkeepingRegion = []
         List<DDMoReSectionAdapter> ctxOfUseRegion = []
         sections.each { Section s ->
-            double n = s.sectionNumber
+            double n = Double.parseDouble(s.sectionNumber)
             def dsa = new DDMoReSectionAdapter(sectionNumber: n, label: s.sectionLabel,
                     tooltip: s.toolTip)
             if (n < 2) {

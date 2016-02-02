@@ -1507,35 +1507,37 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="modelService.getPermissionsMap")
     public Collection<PermissionTransportCommand> getPermissionsMap(Model model, boolean authenticated = true) {
-        HashMap<String, PermissionTransportCommand> map = new HashMap<String, PermissionTransportCommand>()
+        def map = new HashMap<Integer, PermissionTransportCommand>()
         if (!authenticated || aclUtilService.hasPermission(springSecurityService.authentication, model,
                     BasePermission.ADMINISTRATION ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
             def permissions = aclUtilService.readAcl(model).getEntries()
             permissions.each {
                 String permission = getPermissionString(it.getPermission().getMask())
-                String user = it.getSid().principal
+                String principal = it.getSid().principal
                 if (permission) {
-                    String userRealName = userService.getRealName(user)
-                    if (!map.containsKey(user)) {
+                    User user= User.findByUsername(principal)
+                    String userRealName = user.person.userRealName
+                    int userId = user.id
+                    if (!map.containsKey(userId)) {
                         PermissionTransportCommand ptc = new PermissionTransportCommand(
-                            name: userRealName, id: user)
-                        map.put(user, ptc)
+                            name: userRealName, id: userId)
+                        map.put(userId, ptc)
                     }
-                    if (user == springSecurityService.principal.username) {
-                        map.get(user).show = false
+                    if (principal == springSecurityService.principal.username) {
+                        map.get(userId).show = false
                     }
                     if (permission == "r") {
-                        map.get(user).read = true
+                        map.get(userId).read = true
                     }
                     else {
-                        map.get(user).write = true
+                        map.get(userId).write = true
                         //disable editing for curators and for users who have contributed revisions
-                        if (userService.hasRole(user, "ROLE_CURATOR")) {
-                            map.get(user).disabledEdit = true
+                        if (userService.hasRole(principal, "ROLE_CURATOR")) {
+                            map.get(userId).disabledEdit = true
                         }
                         getAllRevisions(model).each {
-                            if (it.owner.username == user) {
-                                map.get(user).disabledEdit = true
+                            if (it.owner.username == principal) {
+                                map.get(userId).disabledEdit = true
                             }
                         }
                     }
@@ -1566,7 +1568,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                 PermissionTransportCommand current=existing.find {
                     it.id == newPerm.id
                 }
-                User user = userService.getUser(newPerm.id)
+                User user = User.get(newPerm.id)
                 if (current) {
                     if (current.read && !(newPerm.read)) {  //revoke previously held read access
                         revokeReadAccess(model, user)
@@ -1595,7 +1597,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                     it.id == oldPerm.id
                 }
                 if (!retained) {
-                    User user = userService.getUser(oldPerm.id)
+                    User user = User.get(oldPerm.id)
                     if (oldPerm.read) {
                         revokeReadAccess(model, user)
                     }

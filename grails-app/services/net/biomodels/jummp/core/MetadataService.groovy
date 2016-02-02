@@ -21,6 +21,7 @@
 package net.biomodels.jummp.core
 
 import eu.ddmore.metadata.service.ValidationError
+import eu.ddmore.metadata.service.ValidationErrorStatus
 import eu.ddmore.metadata.service.ValidationException
 import net.biomodels.jummp.annotation.CompositeValueContainer
 import net.biomodels.jummp.annotation.PropertyContainer
@@ -37,8 +38,10 @@ import eu.ddmore.metadata.service.MetadataWriterImpl
 import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.apache.commons.validator.UrlValidator
 import org.apache.jena.riot.RDFFormat
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.hibernate.validator.constraints.impl.URLValidator
 import org.perf4j.aop.Profiled
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
@@ -277,12 +280,23 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
 
         StringBuffer validationReport = new StringBuffer();
 
-
         metadataValidator.validate(pharmMlMetadataWriter.model)
 
-        for(ValidationError validationError: metadataValidator.validationHandler.getValidationList()){
-            validationReport.append(Qualifier.findByUri(validationError.qualifier).accession)
-            validationReport.append(validationError.getMessage())
+        for(ValidationError validationError: metadataValidator.validationHandler.getValidationList()) {
+            if (validationError.errorStatus == ValidationErrorStatus.EMPTY) {
+                validationReport.append(getQualifierLabel(validationError.qualifier))
+                validationReport.append(" is empty.")
+            }else if(validationError.errorStatus == ValidationErrorStatus.INVALID){
+                validationReport.append(getQualifierLabel(validationError.qualifier))
+                validationReport.append(" ")
+                UrlValidator urlValidator = new UrlValidator();
+                if(urlValidator.isValid(validationError.getValue())) {
+                    validationReport.append(ResourceReference.findByUri(uri).name)
+                }else{
+                    validationReport.append(validationError.getValue())
+                }
+                validationReport.append(" is invalid.")
+            }
             validationReport.append("<br>")
 
         }
@@ -290,6 +304,20 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
         revision.validationReport = validationReport.toString();
         revision.validationLevel = metadataValidator.getValidationErrorStatus();
 
+    }
+
+    private String getQualifierLabel(String qualifierString){
+        Qualifier qualifier = Qualifier.findByUri(qualifierString);
+        if(qualifier!=null) {
+            return qualifier.accession;
+        }
+        else{
+            int indexhash = qualifierString.indexOf("#")
+            if(indexhash!= -1)
+                return qualifierString.substring(indexhash+1)
+            else
+                return qualifierString
+        }
     }
 
 
