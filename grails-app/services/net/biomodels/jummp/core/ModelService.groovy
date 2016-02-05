@@ -62,6 +62,7 @@ import org.apache.tika.metadata.Metadata
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.perf4j.log4j.Log4JStopWatch
+import org.springframework.context.ApplicationEvent
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PostFilter
@@ -695,6 +696,49 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     public Revision addValidatedRevision(final List<RepositoryFileTransportCommand> repoFiles,
                 final List<RepositoryFileTransportCommand> deleteFiles, RevisionTransportCommand rev) throws
                 ModelException {
+        /*
+         * The transactional context settings are not enforced when calling a method from
+         * another method of the same class, see the second note in
+         * http://docs.spring.io/spring/docs/3.2.8.RELEASE/spring-framework-reference/htmlsingle/#transaction-declarative-annotations
+         *
+         * For this to work, we need to go back up to the proxy and call the method from there.
+         */
+        def proxy = grailsApplication.mainContext.modelService
+        Revision revision = proxy.doAddValidatedRevision(repoFiles, deleteFiles, rev)
+        if (revision) {
+            /*
+             * the revision was updated in another transaction and is detached from the Session
+             * re-attach the object and its associations to the Hibernate Session
+             * to avoid LazyInitializationExceptions due to uninitialised proxies
+             */
+            revision.model.attach()
+            revision.model.publication.attach()
+            revision.attach()
+            revision.owner.attach()
+            revision.repoFiles*.attach()
+            revision.annotations*.attach()
+            proxy.notifyNewRevisionObservers(revision)
+        }
+        revision
+    }
+
+    /**
+     * Persists a new model revision in the database.
+     *
+     * This unit of work is performed in a dedicated transaction.so as to ensure that it is
+     * committed before the [synchronous] indexing process tries to load the revision from the
+     * database.
+     * @param repoFiles the files of the revision
+     * @param deleteFiles the files that should be deleted compared to the previous revision
+     * @param rev the transport command from which to construct the new revision
+     * @return the new revision
+     * @throws ModelException if there is no model associated with @p rev, if its model has
+     * been deleted or if the comment is null.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    Revision doAddValidatedRevision(List<RepositoryFileTransportCommand> repoFiles,
+            List<RepositoryFileTransportCommand> deleteFiles, RevisionTransportCommand rev)
+            throws ModelException {
         // TODO: the method should be thread safe, add a lock
         if (!rev.model) {
             throw new ModelException(null, "Model may not be null")
@@ -750,8 +794,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     log.error("Unable to record publication for ${rev.model}: ${e.message}", e)
                 }
             }
-            revision.save(flush: true)
-            model.save(flush: true)
+            revision.save()
+            model.save()
             stopWatch.lap("Model persisted to the database.")
             stopWatch.setTag("modelService.addValidatedRevision.grantPermissions")
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.ADMINISTRATION)
@@ -774,9 +818,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 }
             }
             stopWatch.stop()
-            revision.refresh()
-            grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
-                    DomainAdapter.getAdapter(revision).toCommandObject(), vcsService.retrieveFiles(revision)))
+            // !! THIS HAS TO BE IN A SEPARATE METHOD WITH A DEDICATED TRANSACTION CONTEXT !!
+            //grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
+            //        DomainAdapter.getAdapter(revision).toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.errors.allErrors.each {
@@ -789,6 +833,18 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(m, "Revision stored in VCS, but not in database")
         }
         return revision
+    }
+
+    // expect to already have a tx context from incoming request
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
+    void notifyNewRevisionObservers(Revision r) {
+        RevisionTransportCommand cmd = DomainAdapter.getAdapter(r).toCommandObject()
+        List<File> files = vcsService.retrieveFiles r
+        fireEvent(new RevisionCreatedEvent(this, cmd, files))
+    }
+
+    private void fireEvent(ApplicationEvent evt) {
+        grailsApplication.mainContext.publishEvent evt
     }
 
     /*
@@ -926,6 +982,18 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @Profiled(tag="modelService.uploadValidatedModel")
     public Model uploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles,
             RevisionTransportCommand rev) throws ModelException {
+        def proxy = grailsApplication.mainContext.modelService
+        Model model = proxy.doUploadValidatedModel(repoFiles, rev)
+        if (model) {
+            model.attach()
+            proxy.notifyNewModelObservers(model)
+        }
+        model
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    Model doUploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles,
+            RevisionTransportCommand rev) throws ModelException {
         def stopWatch = new Log4JStopWatch("modelService.uploadValidatedModel.catchDuplicate")
         if (IS_DEBUG_ENABLED) {
             log.debug "About to store the following model: ${rev.name}"
@@ -1023,7 +1091,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                 stopWatch.stop()
                 throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "New model does not validate")
             }
-            model.save(flush: true)
+            model.save()
             domainObjects.each { rf ->
                 if (!rf.isAttached()) {
                     rf.attach()
@@ -1068,8 +1136,8 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                 log.debug("Model $submissionId stored with id ${model.id}")
             }
 
-            // broadcast event
-            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, DomainAdapter.getAdapter(model).toCommandObject(), modelFiles))
+            // don't broadcast event yet,wait for the current tx to commit
+            //grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, DomainAdapter.getAdapter(model).toCommandObject(), modelFiles))
         } else {
             // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
@@ -1080,6 +1148,12 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
         }
         return model
+    }
+
+    @Transactional(readOnly =  true, propagation = Propagation.MANDATORY)
+    void notifyNewModelObservers(Model model) {
+        ModelTransportCommand cmd = DomainAdapter.getAdapter(model).toCommandObject()
+        fireEvent new ModelCreatedEvent(this, cmd, null)
     }
 
     /**

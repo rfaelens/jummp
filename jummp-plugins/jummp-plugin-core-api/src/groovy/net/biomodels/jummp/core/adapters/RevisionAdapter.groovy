@@ -57,27 +57,29 @@ public class RevisionAdapter extends DomainAdapter {
     }
 
     RevisionTransportCommand toCommandObject() {
-        List<ElementAnnotationTransportCommand> annotations
-        use(ElementAnnotationCategory) {
-            annotations = revision.annotations.collect { it.toCommandObject() }
+        Revision.withTransaction {
+            List<ElementAnnotationTransportCommand> annotations
+            use(ElementAnnotationCategory) {
+                annotations = revision.annotations.collect { it.toCommandObject() }
+            }
+            RevisionTransportCommand rev = new RevisionTransportCommand(
+                    id: revision.id,
+                    state: revision.state,
+                    revisionNumber: revision.revisionNumber,
+                    owner: revision.owner.person.userRealName,
+                    minorRevision: revision.minorRevision,
+                    validated: revision.validated,
+                    name: revision.name,
+                    description: revision.description,
+                    comment: revision.comment,
+                    uploadDate: revision.uploadDate,
+                    format: getAdapter(revision.format).toCommandObject(),
+                    model: getAdapter(revision.model).toCommandObject(),
+                    annotations: annotations,
+                    validationLevel: revision.validationLevel,
+                    validationReport: revision.validationReport
+            )
+            return rev
         }
-        RevisionTransportCommand rev=new RevisionTransportCommand(
-                id: revision.id,
-                state:revision.state,
-                revisionNumber: revision.revisionNumber,
-                owner: revision.owner.person.userRealName,
-                minorRevision: revision.minorRevision,
-                validated: revision.validated,
-                name: revision.name,
-                description: revision.description,
-                comment: revision.comment,
-                uploadDate: revision.uploadDate,
-                format: getAdapter(revision.format).toCommandObject(),
-                model: getAdapter(revision.model).toCommandObject(),
-                annotations: annotations,
-                validationLevel: revision.validationLevel,
-                validationReport: revision.validationReport
-        )
-        return rev
     }
 }
