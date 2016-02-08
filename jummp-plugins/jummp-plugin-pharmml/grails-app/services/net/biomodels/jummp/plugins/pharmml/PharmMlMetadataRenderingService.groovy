@@ -41,20 +41,6 @@ import org.perf4j.aop.Profiled
  */
 @CompileStatic
 class PharmMlMetadataRenderingService {
-    static final String DEVELOPMENT_CONTEXT_PROPERTY ='model-modelling-question'
-    static final String DEVELOPMENT_CONTEXT = 'Context of model development'
-    static final String NATURE_OF_RESEARCH_PROPERTY = 'model-research-stage'
-    static final String NATURE_OF_RESEARCH = 'Nature of research'
-    static final String THERAPEUTIC_AREA_PROPERTY = 'model-field-purpose'
-    static final String THERAPEUTIC_AREA = 'Therapeutic/disease area'
-    static final String TASK_IN_SCOPE_PROPERTY = 'model-tasks-in-scope'
-    static final String TASK_IN_SCOPE = 'Modelling task in scope'
-    static final Map<String, String> GENERIC_ANNOTATIONS = [
-            (DEVELOPMENT_CONTEXT) : DEVELOPMENT_CONTEXT_PROPERTY,
-            (NATURE_OF_RESEARCH) : NATURE_OF_RESEARCH_PROPERTY,
-            (THERAPEUTIC_AREA) : THERAPEUTIC_AREA_PROPERTY,
-            (TASK_IN_SCOPE) : TASK_IN_SCOPE_PROPERTY
-    ]
     /* disable transactional behaviour */
     static transactional = false
     /* dependency injection for the page renderer */
@@ -67,23 +53,14 @@ class PharmMlMetadataRenderingService {
     @Profiled(tag = "pharmmlMetadataRenderingService.renderGenericAnnotations")
     void renderGenericAnnotations(RevisionTransportCommand revision, Writer out) {
         Map<String, List<ResourceReferenceTransportCommand>> anno = [:]
-        /*GENERIC_ANNOTATIONS.each { String name, String property ->
-            List<ResourceReferenceTransportCommand> objects = metadataDelegateService.
-                    findAllResourceReferencesForQualifier(revision, property)
-            if (objects) {
-                anno.put(name, objects)
-            }
-        }*/
-        String model = revision.model.submissionId
-        def subject = "${grailsApplication.config.grails.serverURL}/model/${model}"
-        def stmts = metadataDelegateService.findAllStatementsForSubject(revision, subject)
-        stmts.each { StatementTransportCommand s ->
+        // this will need to change when we're annotating several model elements.
+        revision.annotations*.statement.each { StatementTransportCommand s ->
             String p = s.predicate.accession
-            String fp = p.replaceAll('-', ' ')
-            if (anno.containsKey(fp)) {
-                anno[fp] << s.object
+            ResourceReferenceTransportCommand o = s.object
+            if (anno.containsKey(p)) {
+                anno[p] << o
             } else {
-                anno.put(fp, [s.object])
+                anno.put(p, [o])
             }
         }
         groovyPageRenderer.renderTo(template: "/templates/common/metadata/annotations",
