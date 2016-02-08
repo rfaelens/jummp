@@ -195,6 +195,8 @@ log4j = {
     info   eventsAppender: 'net.biomodels.jummp.plugins.simplelogging'
 
     rollingFile name: "debugAppender", file: "logs/jummp-debug.log", threshold: org.apache.log4j.Level.DEBUG
+    rollingFile name: "hibernateAppender", file: "logs/jummp-hibernate.log", threshold: org.apache.log4j.Level.DEBUG
+
     debug debugAppender: [
         'net.biomodels.jummp',
         'net.biomodels.jummp.core',
@@ -206,6 +208,14 @@ log4j = {
         'net.biomodels.jummp.core.model.identifier.support',
         'net.biomodels.jummp.plugins.pharmml'
     ]
+    debug hibernateAppender: [
+        'org.codehaus.groovy.grails.orm.hibernate',
+        'org.codehaus.groovy.grails.orm.support',
+        'org.hibernate.SQL',
+        'org.springframework.orm.hibernate3.support'
+
+    ]
+    trace hibernateAppender: 'org.hibernate.type.descriptor.sql.BasicBinder'
 }
 
 // Added by the Spring Security Core plugin:
