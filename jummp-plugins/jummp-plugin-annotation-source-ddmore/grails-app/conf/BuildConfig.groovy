@@ -66,7 +66,7 @@ grails.project.dependency.resolution = {
             excludes 'spring-core', 'spring-context'
         }
 
-        compile "net.biomodels.jummp:AnnotationStore:0.2.6"
+        compile "net.biomodels.jummp:AnnotationStore:0.2.7-SNAPSHOT"
         compile("net.sf.jung:jung-graph-impl:$jungVersion")
 
         // useful for WordUtils.capitalise()
