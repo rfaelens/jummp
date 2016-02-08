@@ -32,7 +32,6 @@ import eu.ddmore.metadata.api.domain.enums.PropertyRange
 import eu.ddmore.metadata.api.domain.sections.*
 import groovy.transform.CompileStatic
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import ontologies.OntologySource
 
 @CompileStatic
 class DDMoReMetadataInputSource implements MetadataInputSource {
