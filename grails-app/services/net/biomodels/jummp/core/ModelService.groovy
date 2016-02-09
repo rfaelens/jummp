@@ -30,14 +30,7 @@
 
 package net.biomodels.jummp.core
 
-import eu.ddmore.metadata.service.ValidationError
-import eu.ddmore.metadata.service.ValidationErrorStatus
-import eu.ddmore.metadata.service.ValidationException
-import eu.ddmore.metadata.service.MetadataValidatorImpl
 import grails.transaction.Transactional
-import net.biomodels.jummp.annotationstore.Qualifier
-import net.biomodels.jummp.core.util.JummpXmlUtils
-import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
 import net.biomodels.jummp.core.events.LoggingEventType
@@ -71,7 +64,6 @@ import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
-import eu.ddmore.metadata.service.MetadataValidator
 import org.springframework.transaction.annotation.Propagation
 
 /**
@@ -149,11 +141,6 @@ class ModelService {
      * Dependency injection of publicationIdGenerator
      */
     def publicationIdGenerator
-
-//    def searchService
-
-//    def metadataValidator
-
 
     final boolean MAKE_PUBLICATION_ID = !(publicationIdGenerator instanceof NullModelIdentifierGenerator)
 
