@@ -156,7 +156,6 @@ class ModelService {
 
 
     final boolean MAKE_PUBLICATION_ID = !(publicationIdGenerator instanceof NullModelIdentifierGenerator)
-    static transactional = true
 
     /**
     * Returns list of Models the user has access to.
