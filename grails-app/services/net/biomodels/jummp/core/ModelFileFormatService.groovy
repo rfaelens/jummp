@@ -74,10 +74,10 @@ class ModelFileFormatService {
 
     /**
      * Extracts the format of the supplied @p modelFiles.
-     * Returns the default ModelFormat representation with an empty formatVersion, since this is expected to exist 
+     * Returns the default ModelFormat representation with an empty formatVersion, since this is expected to exist
      * for every format that is handled.
      * @param modelFiles the list of files corresponding to a model
-     * @returns the corresponding model format, or unknown if this cannot be inferred. 
+     * @returns the corresponding model format, or unknown if this cannot be inferred.
      */
     @Profiled(tag = "modelFileFormatService.inferModelFormat")
     ModelFormatTransportCommand inferModelFormat(List<RFTC> modelFiles) {
