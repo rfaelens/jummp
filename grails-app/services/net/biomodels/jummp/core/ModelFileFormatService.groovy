@@ -246,18 +246,6 @@ class ModelFileFormatService {
     }
 
     /**
-     * Retrieves the content of a revision transport command to be indexed by the search
-     * engine
-     * @param revision the revision from which content to be indexed is extracted
-     * @return The content to be indexed by Solr: returns a map with field as key, and a list
-     * of values for each field
-     */
-    Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand revision) {
-        FileFormatService service = serviceForFormat(revision?.format)
-        return service ? service.getSearchIndexingContent(revision) : [:]
-    }
-
-    /**
      * Retrieves all annotation URNs through the service responsible for the format used
      * by the @p revision.
      * @param rev The Revision for which all URNs should be retrieved

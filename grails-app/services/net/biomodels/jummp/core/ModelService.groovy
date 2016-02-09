@@ -911,17 +911,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     }
 
     /**
-    * Uses the modelfileformatservice to get content to be used for indexing a model
-    *
-    * Passes the @p r to the modelfileformatservice, gets content to be used for indexing the model
-    * @param revision The model revision
-    * @return The model content
-    **/
-    public Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand r) {
-        return modelFileFormatService.getSearchIndexingContent(r)
-    }
-
-    /**
     * Retrieves information related to a file from the VCS
     * Passes the @p revision and filename to the vcsService, gets
     * info related to the specified @p filename, and filters the returned

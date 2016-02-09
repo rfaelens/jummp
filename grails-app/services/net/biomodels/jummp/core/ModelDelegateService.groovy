@@ -276,10 +276,6 @@ class ModelDelegateService implements IModelService {
                     User.get(collaborator.id))
     }
 
-    Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand revision) {
-        modelService.getSearchIndexingContent(revision)
-    }
-
     void grantWriteAccess(String modelId, User collaborator) {
         modelService.grantWriteAccess(ModelAdapter.findByPerennialIdentifier(modelId),
                     User.get(collaborator.id))
