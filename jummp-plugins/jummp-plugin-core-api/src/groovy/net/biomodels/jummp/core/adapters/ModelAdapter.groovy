@@ -31,13 +31,13 @@ import grails.util.Holders
  */
 public class ModelAdapter extends DomainAdapter {
     Model model
-    
+
     static final Set<String> PERENNIAL_IDENTIFIER_TYPES = ModelIdentifierUtils.perennialFields
     static final Set<String> FIND_BY_PERENNIAL_ID_CRITERIA = populateFindByCriteria()
-    
+
     def modelService = Holders.getGrailsApplication().mainContext.modelService
-    
-    
+
+
     ModelTransportCommand toCommandObject(boolean saveHistory = true) {
         // TODO: is it correct to show the latest upload date as the lastModifiedDate or does it need ACL restrictions?
         Set<String> creators = []
@@ -48,38 +48,39 @@ public class ModelAdapter extends DomainAdapter {
                 creatorUsernames.add(revision.owner.username)
             }
         }
-        def latestRev;
-        
-        try 
-        { 
-        	latestRev = modelService?.getLatestRevision(model, saveHistory)
+        def latestRev
+        def firstRev
+        Long modelId = model.id
+        boolean modelIsSaved = null != modelId && Model.exists(modelId)
+        if (modelIsSaved) {
+            latestRev = modelService?.getLatestRevision(model, saveHistory)
+        } else {
+            // if the model is not saved, there can only be at most one revision
+            latestRev = model.revisions ? model.revisions[0] : null
+            firstRev = model.revisions ? model.revisions[0] : null
         }
-        catch(Exception ignore) {
-        	//Can happen if the model isnt saved yet
+        if (!firstRev && model.revisions) {
+            firstRev = model.revisions.sort { it.revisionNumber }.first()
         }
-        if (!latestRev) {
-        	latestRev = model.revisions? model.revisions.sort{ it.revisionNumber }.last() : null
-        }
-        
         return new ModelTransportCommand(
-                id: model.id,
-                submissionId: model.submissionId,
-                publicationId: model.publicationId,
-                firstPublished: model.firstPublished,
-                name: latestRev ? latestRev.name : null,
-                state: latestRev ? latestRev.state: null,
-                lastModifiedDate: latestRev ? latestRev.uploadDate : null,
-                format: latestRev ? getAdapter(latestRev.format).toCommandObject() : null,
-                publication: model.publication ? getAdapter(model.publication).toCommandObject() : null,
-                deleted: model.deleted,
-                submitter: model.revisions ? model.revisions.sort{ it.revisionNumber }.first().owner.person.userRealName : null,
-                submitterUsername: model.revisions ? model.revisions.sort{ it.revisionNumber }.first().owner.username : null,
-                submissionDate: model.revisions ? model.revisions.sort{ it.revisionNumber }.first().uploadDate : null,
-                creators: creators,
-                creatorUsernames: creatorUsernames
+            id: model.id,
+            submissionId: model.submissionId,
+            publicationId: model.publicationId,
+            firstPublished: model.firstPublished,
+            name: latestRev ? latestRev.name : null,
+            state: latestRev ? latestRev.state : null,
+            lastModifiedDate: latestRev ? latestRev.uploadDate : null,
+            format: latestRev ? getAdapter(latestRev.format).toCommandObject() : null,
+            publication: model.publication ? getAdapter(model.publication).toCommandObject() : null,
+            deleted: model.deleted,
+            submitter: firstRev?.owner.person.userRealName,
+            submitterUsername: firstRev?.owner.username,
+            submissionDate: firstRev?.uploadDate,
+            creators: creators,
+            creatorUsernames: creatorUsernames
         )
     }
-    
+
      static Model findByPerennialIdentifier(String perennialId) {
         if (!perennialId) {
             return null
