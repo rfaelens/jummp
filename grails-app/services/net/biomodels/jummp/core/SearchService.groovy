@@ -29,7 +29,6 @@ import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.model.ModelTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
-import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
 import org.apache.commons.lang.StringUtils
@@ -44,7 +43,6 @@ import org.perf4j.aop.Profiled
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.acls.domain.BasePermission
-import org.apache.solr.client.solrj.SolrServer
 
 /**
  * @short Singleton-scoped facade for interacting with a Solr instance.
