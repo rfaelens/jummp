@@ -135,21 +135,22 @@ class SearchService {
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="searchService.updateIndex")
     void updateIndex(RevisionTransportCommand revision) {
-        String name = revision.name ?: ""
-        String description = revision.description ?: ""
-        String submissionId = revision.model.submissionId
-        String publicationId = revision.model.publicationId ?: ""
-        int versionNumber = revision.revisionNumber
-        final String uniqueId = "${submissionId}.${versionNumber}"
-        String exchangeFolder = new File(revision.files.first().path).getParent()
-        String registryExport = miriamService.registryExport.canonicalPath
-        def dsConfig = grailsApplication.config.dataSource
-        String dbUrl = dsConfig?.url
-        String dbUsername = dsConfig?.username
-        String dbPassword = dsConfig?.password
-        def dbSettings = [ 'url': dbUrl, 'username': dbUsername, 'password': dbPassword ]
-        def builder = new JsonBuilder()
-        def partialData = [
+        Revision.withSession {
+            String name = revision.name ?: ""
+            String description = revision.description ?: ""
+            String submissionId = revision.model.submissionId
+            String publicationId = revision.model.publicationId ?: ""
+            int versionNumber = revision.revisionNumber
+            final String uniqueId = "${submissionId}.${versionNumber}"
+            String exchangeFolder = new File(revision.files.first().path).getParent()
+            String registryExport = miriamService.registryExport.canonicalPath
+            def dsConfig = grailsApplication.config.dataSource
+            String dbUrl = dsConfig?.url
+            String dbUsername = dsConfig?.username
+            String dbPassword = dsConfig?.password
+            def dbSettings = [ 'url': dbUrl, 'username': dbUsername, 'password': dbPassword ]
+            def builder = new JsonBuilder()
+            def partialData = [
                 'submissionId': submissionId,
                 'publicationId' :publicationId,
                 'name': name,
@@ -159,12 +160,12 @@ class SearchService {
                 'submitter' : revision.owner,
                 'submitterUsername' :  revision.model.submitterUsername,
                 'publicationTitle' : revision.model.publication ?
-                        revision.model.publication.title  :  "",
+                    revision.model.publication.title  :  "",
                 'publicationAbstract' : revision.model.publication ?
-                        revision.model.publication.synopsis : "",
+                    revision.model.publication.synopsis : "",
                 'publicationAuthor': revision.model.publication?.authors ?
-                        revision.model.publication.authors.collect {
-                            it.userRealName }.join(', ') : "",
+                    revision.model.publication.authors.collect {
+                        it.userRealName }.join(', ') : "",
                 'publicationYear': revision.model.publication?.year ?: 0,
                 'model_id' : revision.model.id,
                 'revision_id' :  revision.id,
@@ -174,38 +175,40 @@ class SearchService {
                 'submissionDate' : revision.model.submissionDate,
                 'lastModified' :  revision.model.lastModifiedDate,
                 'uniqueId' : uniqueId
-        ]
-        builder(partialData: partialData,
-            'folder': exchangeFolder,
-            'mainFiles': fetchFilesFromRevision(revision, true),
-            'allFiles': fetchFilesFromRevision(revision, false),
-            'solrServer': solrServerHolder.SOLR_CORE_URL,
-            'jummpPropFile': configurationService.getConfigFilePath(),
-            'miriamExportFile': registryExport,
-            'database': dbSettings)
-        File indexingData = new File(exchangeFolder, "indexData.json")
-        indexingData.setText(builder.toPrettyString())
-        String jarPath = grailsApplication.config.jummp.search.pathToIndexerExecutable
-        def argsMap = [jarPath: jarPath, jsonPath: indexingData.getCanonicalPath()]
+            ]
+            builder(partialData: partialData,
+                'folder': exchangeFolder,
+                'mainFiles': fetchFilesFromRevision(revision, true),
+                'allFiles': fetchFilesFromRevision(revision, false),
+                'solrServer': solrServerHolder.SOLR_CORE_URL,
+                'jummpPropFile': configurationService.getConfigFilePath(),
+                'miriamExportFile': registryExport,
+                'database': dbSettings)
+            File indexingData = new File(exchangeFolder, "indexData.json")
+            indexingData.setText(builder.toPrettyString())
 
-        String httpProxy = System.getProperty("http.proxyHost")
-        if (httpProxy) {
-            String proxyPort = System.getProperty("http.proxyPort") ?: '80'
-            String nonProxyHosts = "'${System.getProperty("http.nonProxyHosts")}'"
-            StringBuilder proxySettings = new StringBuilder()
-            proxySettings.append(" -Dhttp.proxyHost=").append(httpProxy).append(
-                " -Dhttp.proxyPort=").append(proxyPort).append(" -Dhttp.nonProxyHosts=").append(
+            String jarPath = grailsApplication.config.jummp.search.pathToIndexerExecutable
+            def argsMap = [jarPath: jarPath, jsonPath: indexingData.getCanonicalPath()]
+
+            String httpProxy = System.getProperty("http.proxyHost")
+            if (httpProxy) {
+                String proxyPort = System.getProperty("http.proxyPort") ?: '80'
+                String nonProxyHosts = "'${System.getProperty("http.nonProxyHosts")}'"
+                StringBuilder proxySettings = new StringBuilder()
+                proxySettings.append(" -Dhttp.proxyHost=").append(httpProxy).append(
+                    " -Dhttp.proxyPort=").append(proxyPort).append(" -Dhttp.nonProxyHosts=").append(
                     nonProxyHosts)
-            argsMap['proxySettings'] = proxySettings.toString()
-        } else {
-            argsMap['proxySettings'] = ""
-        }
-        try {
-            //sendMessage("seda:exec", argsMap)
-            sendMessage("direct:exec", argsMap)
-        } catch (Exception e) {
-            log.error("Failed to index revision $revision.properties - ${e.message}", e)
-            //TODO RETRY
+                argsMap['proxySettings'] = proxySettings.toString()
+            } else {
+                argsMap['proxySettings'] = ""
+            }
+            try {
+                //sendMessage("seda:exec", argsMap)
+                sendMessage("direct:exec", argsMap)
+            } catch (Exception e) {
+                log.error("Failed to index revision $revision.properties - ${e.message}", e)
+                //TODO RETRY
+            }
         }
     }
 

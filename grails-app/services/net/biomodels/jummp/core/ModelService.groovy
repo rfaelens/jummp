@@ -64,6 +64,7 @@ import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Propagation
 
 /**
@@ -689,21 +690,19 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
          *
          * For this to work, we need to go back up to the proxy and call the method from there.
          */
-        def proxy = grailsApplication.mainContext.modelService
-        Revision revision = proxy.doAddValidatedRevision(repoFiles, deleteFiles, rev)
+        Revision revision
+        def txDefinition = [
+            propagationBehavior: TransactionDefinition.PROPAGATION_REQUIRES_NEW
+        ]
+        Revision.withTransaction(txDefinition) {
+            // this tx uses a different session than the previous tx, which is not what we want
+            revision = doAddValidatedRevision(repoFiles, deleteFiles, rev)
+        }
         if (revision) {
-            /*
-             * the revision was updated in another transaction and is detached from the Session
-             * re-attach the object and its associations to the Hibernate Session
-             * to avoid LazyInitializationExceptions due to uninitialised proxies
-             */
-            revision.model.attach()
-            revision.model.publication.attach()
-            revision.attach()
-            revision.owner.attach()
-            revision.repoFiles*.attach()
-            revision.annotations*.attach()
-            proxy.notifyNewRevisionObservers(revision)
+            RevisionTransportCommand cmd = DomainAdapter.getAdapter(revision).toCommandObject()
+            // can't inject searchService -- cyclic dependency
+            def searchService = grailsApplication.mainContext.searchService
+            searchService.updateIndex(cmd)
         }
         revision
     }
@@ -721,7 +720,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
      * @throws ModelException if there is no model associated with @p rev, if its model has
      * been deleted or if the comment is null.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     Revision doAddValidatedRevision(List<RepositoryFileTransportCommand> repoFiles,
             List<RepositoryFileTransportCommand> deleteFiles, RevisionTransportCommand rev)
             throws ModelException {
@@ -819,18 +817,6 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             throw new ModelException(m, "Revision stored in VCS, but not in database")
         }
         return revision
-    }
-
-    // expect to already have a tx context from incoming request
-    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
-    void notifyNewRevisionObservers(Revision r) {
-        RevisionTransportCommand cmd = DomainAdapter.getAdapter(r).toCommandObject()
-        List<File> files = vcsService.retrieveFiles r
-        fireEvent(new RevisionCreatedEvent(this, cmd, files))
-    }
-
-    private void fireEvent(ApplicationEvent evt) {
-        grailsApplication.mainContext.publishEvent evt
     }
 
     /*
@@ -957,16 +943,21 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @Profiled(tag="modelService.uploadValidatedModel")
     public Model uploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles,
             RevisionTransportCommand rev) throws ModelException {
-        def proxy = grailsApplication.mainContext.modelService
-        Model model = proxy.doUploadValidatedModel(repoFiles, rev)
+        Model model
+        def txDefinition = [propagationBehavior: TransactionDefinition.PROPAGATION_REQUIRES_NEW]
+        Model.withTransaction(txDefinition) {
+            model = doUploadValidatedModel(repoFiles, rev)
+        }
         if (model) {
-            model.attach()
-            proxy.notifyNewModelObservers(model)
+            Revision r = model.revisions.first()
+            RevisionTransportCommand cmd = DomainAdapter.getAdapter(r).toCommandObject()
+            // can't inject searchService -- cyclic dependency
+            def searchService = grailsApplication.mainContext.searchService
+            searchService.updateIndex(cmd)
         }
         model
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     Model doUploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles,
             RevisionTransportCommand rev) throws ModelException {
         def stopWatch = new Log4JStopWatch("modelService.uploadValidatedModel.catchDuplicate")
@@ -1107,12 +1098,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "Sorry, but the new Model does not seem to be valid.")
         }
         return model
-    }
-
-    @Transactional(readOnly =  true, propagation = Propagation.MANDATORY)
-    void notifyNewModelObservers(Model model) {
-        ModelTransportCommand cmd = DomainAdapter.getAdapter(model).toCommandObject()
-        fireEvent new ModelCreatedEvent(this, cmd, null)
     }
 
     /**
