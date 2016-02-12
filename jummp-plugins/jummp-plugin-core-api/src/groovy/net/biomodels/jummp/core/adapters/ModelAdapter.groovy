@@ -84,18 +84,18 @@ public class ModelAdapter extends DomainAdapter {
     }
 
      static Model findByPerennialIdentifier(String perennialId)  {
-        if (!perennialId) {
-            return null
-        }
-        perennialId = perennialId.contains("\\.") ? perennialId : perennialId.split("\\.")[0]
-        Model model = new DetachedCriteria<Model>(Model).build {
-            or {
-                FIND_BY_PERENNIAL_ID_CRITERIA.each {
-                    eq(it, perennialId)
-                }
-            }
-        }.get()
-        model
+         if (!perennialId) {
+             return null
+         }
+         perennialId = perennialId.contains("\\.") ? perennialId : perennialId.split("\\.")[0]
+         Model model = new DetachedCriteria<Model>(Model).build {
+             or {
+                 FIND_BY_PERENNIAL_ID_CRITERIA.each {
+                     eq(it, perennialId)
+                 }
+             }
+         }.get()
+         model
     }
 
     static Set<String> populateFindByCriteria() {
