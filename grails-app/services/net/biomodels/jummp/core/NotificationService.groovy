@@ -104,7 +104,7 @@ class NotificationService {
             NotificationUser userNotify = new NotificationUser(notification: notification,
                     user: user)
             if (!userNotify.save()) {
-                log.error "Was not able to deliver notification ${userNotify.inspect()}"
+                log.error "Was not able to deliver notification ${userNotify.errors.allErrors}"
             }
         }
     }
