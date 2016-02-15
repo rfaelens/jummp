@@ -83,18 +83,24 @@ public class ModelAdapter extends DomainAdapter {
         )
     }
 
-     static Model findByPerennialIdentifier(String perennialId)  {
+    /**
+     * Convenience method for finding a model based on its externally-defined identifiers.
+     *
+     * @param perennialId The externally-defined ID by which to look up the model.
+     * @return  the model corresponding to the given id, or null if there was no match
+     */
+     static Model findByPerennialIdentifier(String perennialId) {
          if (!perennialId) {
              return null
          }
          perennialId = perennialId.contains("\\.") ? perennialId : perennialId.split("\\.")[0]
-         Model model = new DetachedCriteria<Model>(Model).build {
+         Model model = Model.createCriteria().get {
              or {
                  FIND_BY_PERENNIAL_ID_CRITERIA.each {
                      eq(it, perennialId)
                  }
              }
-         }.get()
+         }
          model
     }
 
