@@ -60,14 +60,10 @@ class NotificationService {
         return usernames.collect { User.findByUsername(it) }
     }
 
-    Set<User> getNotificationRecipients(ModelTransportCommand model, NotificationType type) {
-        Set<String> creators  = model.creatorUsernames
-        return getUsersFromUsernames(creators)
-    }
-
     Set<User> getNotificationRecipients(def permissionsMap) {
-        def usernames = permissionsMap.findAll { ptc -> ptc.write }
-        return getUsersFromUsernames(usernames.collect { it.id })
+        def writeAccessList = permissionsMap.findAll { ptc -> ptc.write }
+        def recipients = writeAccessList.collect { User.get(it.id) }
+        recipients
     }
 
     NotificationTypePreferences getPreference(User user, NotificationType type) {
