@@ -33,6 +33,7 @@ package net.biomodels.jummp.core
 import grails.transaction.Transactional
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
+import net.biomodels.jummp.core.adapters.RevisionAdapter
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.ModelCreatedEvent
 import net.biomodels.jummp.core.events.PostLogging
@@ -55,7 +56,6 @@ import org.apache.tika.metadata.Metadata
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.perf4j.log4j.Log4JStopWatch
-import org.springframework.context.ApplicationEvent
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PostFilter
@@ -118,6 +118,10 @@ class ModelService {
      */
     @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
+    /**
+     * Dependency injection for the SessionFactory (transaction-aware, lazy-connection proxy)
+     */
+    def sessionFactory
     /**
      * Dependency Injection for PubMedService
      */
@@ -683,23 +687,22 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     public Revision addValidatedRevision(final List<RepositoryFileTransportCommand> repoFiles,
                 final List<RepositoryFileTransportCommand> deleteFiles, RevisionTransportCommand rev) throws
                 ModelException {
-        /*
-         * The transactional context settings are not enforced when calling a method from
-         * another method of the same class, see the second note in
-         * http://docs.spring.io/spring/docs/3.2.8.RELEASE/spring-framework-reference/htmlsingle/#transaction-declarative-annotations
-         *
-         * For this to work, we need to go back up to the proxy and call the method from there.
-         */
         Revision revision
         def txDefinition = [
+            // this tx will use a different session than the current one
             propagationBehavior: TransactionDefinition.PROPAGATION_REQUIRES_NEW
         ]
         Revision.withTransaction(txDefinition) {
-            // this tx uses a different session than the previous tx, which is not what we want
+            // the returned revision is detached from the Hibernate session
             revision = doAddValidatedRevision(repoFiles, deleteFiles, rev)
         }
         if (revision) {
-            RevisionTransportCommand cmd = DomainAdapter.getAdapter(revision).toCommandObject()
+            // force the new revision to be fetched from the database
+            def attachedRevision = Revision.findByModelAndRevisionNumber(revision.model,
+                revision.revisionNumber, [fetch: [model: "eager", format: 'eager']])
+
+            def revisionAdapter = DomainAdapter.getAdapter(attachedRevision)
+            RevisionTransportCommand cmd = revisionAdapter.toCommandObject()
             // can't inject searchService -- cyclic dependency
             def searchService = grailsApplication.mainContext.searchService
             searchService.updateIndex(cmd)
@@ -944,11 +947,17 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     public Model uploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles,
             RevisionTransportCommand rev) throws ModelException {
         Model model
+        // this tx will use a different session than the current one
         def txDefinition = [propagationBehavior: TransactionDefinition.PROPAGATION_REQUIRES_NEW]
         Model.withTransaction(txDefinition) {
+            // the returned revision is detached from the Hibernate session
             model = doUploadValidatedModel(repoFiles, rev)
         }
         if (model) {
+            // evict the old model object from the session
+            sessionFactory.currentSession.clear()
+            // now attach the model and all associations to the session again.
+            model = Model.get(model.id)
             Revision r = model.revisions.first()
             RevisionTransportCommand cmd = DomainAdapter.getAdapter(r).toCommandObject()
             // can't inject searchService -- cyclic dependency
