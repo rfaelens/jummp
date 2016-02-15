@@ -180,7 +180,9 @@ class NotificationService {
         notification.body = messageSource.getMessage(notificationBody, bodyParams, null)
         notification.notificationType = type
         notification.sender = User.findByUsername(sender)
-        watchers = watchers - [notification.sender]
+        if (watchers.contains(notification.sender)) {
+            watchers.remove(notification.sender)
+        }
         sendNotification(model, notification, watchers)
     }
 
