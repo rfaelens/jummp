@@ -954,10 +954,10 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             model = doUploadValidatedModel(repoFiles, rev)
         }
         if (model) {
-            // evict the old model object from the session
-            sessionFactory.currentSession.clear()
-            // now attach the model and all associations to the session again.
-            model = Model.get(model.id)
+            // As it was created in a separate transaction, the model is detached from the
+            // persistence context. Reattach it and its associations before attempting to
+            // turn them into transport commands in order to avoid LazyInitialisationExceptions
+            model.attach()
             Revision r = model.revisions.first()
             RevisionTransportCommand cmd = DomainAdapter.getAdapter(r).toCommandObject()
             // can't inject searchService -- cyclic dependency
