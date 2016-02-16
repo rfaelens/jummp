@@ -30,8 +30,13 @@
 
 package net.biomodels.jummp.core
 
+import grails.orm.HibernateCriteriaBuilder
+import groovy.transform.CompileStatic
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.ModelException
+import net.biomodels.jummp.core.adapters.PublicationAdapter
+import net.biomodels.jummp.core.adapters.PublicationLinkProviderAdapter
+import net.biomodels.jummp.core.adapters.RevisionAdapter
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC //rude?
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
@@ -43,6 +48,7 @@ import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
 import net.biomodels.jummp.model.RepositoryFile
+import org.hibernate.SessionFactory
 import org.perf4j.aop.Profiled
 import org.apache.commons.io.FilenameUtils
 
@@ -54,8 +60,9 @@ import org.apache.commons.io.FilenameUtils
  *
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
- * @date 20140312
+ * @date 20160216
  */
+@CompileStatic
 class SubmissionService {
     // concrete strategies for the submission state machine
     private final NewModelStateMachine newModel = new NewModelStateMachine()
@@ -63,23 +70,24 @@ class SubmissionService {
     /**
      * Dependency Injection of ModelFileFormatService
      */
-    def modelFileFormatService
+    ModelFileFormatService modelFileFormatService
     /**
      * Dependency Injection of ModelService
      */
-    def modelService
+    ModelService modelService
 
     /**
      * Dependency Injection of session factory to prevent serialisation of revision
      * domain object.
      */
-    def transient sessionFactory
+    transient SessionFactory sessionFactory
 
     /*
      * Abstract state machine strategy, to be extended by the two concrete
      * strategy implementations
      */
 
+    @CompileStatic
     abstract class StateMachineStrategy {
 
         /**
@@ -111,7 +119,7 @@ class SubmissionService {
             }
             tobeAdded = createRFTCList(mainFiles, additionals)
             if (workingMemory.containsKey("removeFromVCS")) {
-                def removeFromVcs = workingMemory.get("removeFromVCS")
+                def removeFromVcs = workingMemory.get("removeFromVCS") as List<RFTC>
                 removeFromVcs.removeAll(tobeAdded) // update after delete -> update
             }
             if (workingMemory.containsKey("deleted_filenames")) {
@@ -119,7 +127,7 @@ class SubmissionService {
                 workingMemory.put("reprocess_files", true)
                 // check for replacement
                 def overlapping = filesToDelete.findAll {
-                    tobeAdded.find { testFile -> new File(testFile.path).getName() == it }
+                    tobeAdded.find { RFTC testFile -> new File(testFile.path).getName() == it }
                 }
                 if (overlapping) {
                     filesToDelete = filesToDelete - overlapping
@@ -163,12 +171,12 @@ class SubmissionService {
                     workingMemory.put("changedMainFiles", false)
                     return
                 }
-                def currentMains = existing.findAll { it.mainFile }
+                List<RFTC> currentMains = existing.findAll { RFTC it -> it.mainFile }
                 List<RFTC> toDelete = new LinkedList<RFTC>()
                 Set<RFTC> willBeReplaced = new HashSet<RFTC>()
-                existing.each { oldfile ->
+                existing.each { RFTC oldfile ->
                     String oldname = (new File(oldfile.path)).getName()
-                    tobeAdded.each { newfile ->
+                    tobeAdded.each { RFTC newfile ->
                         String newname = (new File(newfile.path)).getName()
                         if (newname == oldname) {
                             willBeReplaced.add(oldfile)
@@ -191,7 +199,7 @@ class SubmissionService {
                 if (tobeAdded) {
                     existing.addAll(tobeAdded)
                 }
-                main = existing.findAll { it.mainFile }
+                main = existing.findAll { RFTC it -> it.mainFile }
                 if (currentMains != main) {
                     workingMemory.put("changedMainFiles", true)
                 } else {
@@ -202,7 +210,7 @@ class SubmissionService {
                 workingMemory.put("repository_files", tobeAdded)
                 // DON'T CHANGE IF IS UPDATE ON EXISTING MODEL
                 workingMemory.put("changedMainFiles", true)
-                main = tobeAdded.findAll { it.mainFile }
+                main = tobeAdded.findAll { RFTC it -> it.mainFile }
                 additionals = tobeAdded - main
             }
             workingMemory.put("main_file", main)
@@ -236,7 +244,7 @@ class SubmissionService {
         void performValidation(Map<String, Object> workingMemory) {
             if (processingRequired(workingMemory)) {
                 List<File> modelFiles = getFilesFromMemory(workingMemory, false)
-                modelFiles.each {
+                modelFiles.each { File it ->
                     if (!it) {
                         workingMemory.put("validation_error", "Null file passed!")
                     }
@@ -249,7 +257,7 @@ class SubmissionService {
                 }
                 final List<String> errors = new LinkedList<String>()
                 List<File> mainFiles = getFilesFromMemory(workingMemory, true)
-                final String fmt = workingMemory.get("model_type").identifier as String
+                final String fmt = ((MFTC) workingMemory.get("model_type")).identifier as String
                 boolean modelsAreValid = modelFileFormatService.validate(mainFiles, fmt, errors)
                 workingMemory.put("model_validation_result", modelsAreValid)
                 if (!workingMemory.containsKey("model_type")) {   //TODO IS THIS NEEDED?
@@ -290,17 +298,19 @@ class SubmissionService {
                 refreshPublication = true;
             }
             model.publication.link = publink
-            def publSrc = PublicationLinkProvider.createCriteria().get() {
+            def criteria = PublicationLinkProvider.createCriteria() as HibernateCriteriaBuilder
+            def publSrc = criteria.get() {
                 eq("linkType", linkType)
             }
-            model.publication.linkProvider = DomainAdapter.getAdapter(publSrc).toCommandObject()
+            model.publication.linkProvider =
+                ((PublicationLinkProviderAdapter) DomainAdapter.getAdapter(publSrc)).toCommandObject()
             return refreshPublication
         }
 
         protected String getModelNameFromFiles(List<File> mainFiles) {
             StringBuilder name = new StringBuilder()
             boolean first = true
-            mainFiles.each {
+            mainFiles.each { File it ->
                 if (!first) {
                     name.append(", ")
                 }
@@ -312,7 +322,7 @@ class SubmissionService {
 
         protected String getModelDescriptionFromFiles(List<File> allFiles) {
             StringBuilder desc = new StringBuilder("Model comprised of files: ")
-            String fileNames = allFiles.collect { it.name }.join(', ')
+            String fileNames = allFiles.collect { File it -> it.name }.join(', ')
             return desc.append(fileNames).toString()
         }
 
@@ -324,7 +334,7 @@ class SubmissionService {
         @Profiled(tag = "submissionService.updateRevisionComments")
         protected void updateRevisionFromFiles(Map<String, Object> workingMemory) {
             RTC revision = workingMemory.get("RevisionTC") as RTC
-            MFTC fmt = workingMemory["model_type"]
+            MFTC fmt = workingMemory["model_type"] as ModelFormatTransportCommand
             if (revision.format != fmt) {
                 revision.format = fmt
             }
@@ -357,7 +367,7 @@ class SubmissionService {
         }
 
         /**
-         * Purpose Update the name/description in the model datastructures and files
+         * Purpose Update the name/description in the model data structures and files
          *
          * @param workingMemory a Map containing all objects exchanged throughout the flow.
          * @param modifications a Map containing the user's modifications to the model information we extracted.
@@ -367,8 +377,8 @@ class SubmissionService {
             RTC revision = workingMemory.get("RevisionTC") as RTC
             final String NAME = revision.name
             final String DESC = revision.description
-            String NEW_NAME = modifications["new_name"]?.trim()
-            String NEW_DESC = modifications["new_description"]?.trim()
+            String NEW_NAME = ((String) modifications["new_name"])?.trim()
+            String NEW_DESC = ((String) modifications["new_description"])?.trim()
             if (modifications["changeStatus"] == "true") {
                 if (!NEW_NAME && !NEW_DESC) {
                     return
@@ -459,7 +469,7 @@ class SubmissionService {
             try {
                 List<RFTC> repoFiles = getRepFiles(workingMemory)
                 File parent = null
-                repoFiles.each {
+                repoFiles.each { RFTC it ->
                     File deleteMe = new File(it.path)
                     if (!parent) {
                         parent = deleteMe.getParentFile()
@@ -486,10 +496,10 @@ class SubmissionService {
         protected List<RFTC> createRFTCList(List<File> mainFiles,
                 Map<File, String> additionalFiles) {
             List<RFTC> returnMe = new LinkedList<RFTC>()
-            mainFiles.each {
+            mainFiles.each { File it ->
                 returnMe.add(createRFTC(it, true, ""))
             }
-            additionalFiles.keySet().each {
+            additionalFiles.keySet().each { File it ->
                 returnMe.add(createRFTC(it, false, additionalFiles.get(it)))
             }
             returnMe
@@ -509,6 +519,7 @@ class SubmissionService {
      * Provides a concrete implementation of the @link{StateMachineStrategy} that is responsible
      * for handling the submission of new models to JUMMP.
      */
+    @CompileStatic
     class NewModelStateMachine extends StateMachineStrategy {
 
         /**
@@ -568,7 +579,7 @@ class SubmissionService {
             revision.comment = "Import of ${revision.name}".toString()
             Model newModel = modelService.uploadValidatedModel(repoFiles, revision)
             Revision latest = modelService.getLatestRevision(newModel, false)
-            RTC latestRTC = DomainAdapter.getAdapter(latest).toCommandObject()
+            RTC latestRTC = ((RevisionAdapter) DomainAdapter.getAdapter(latest)).toCommandObject()
 
             final String NEW_NAME = workingMemory["new_name"]
             final String NEW_DESCRIPTION = workingMemory["new_description"]
@@ -593,6 +604,7 @@ class SubmissionService {
      * Provides a concrete implementation of the @link{StateMachineStrategy} that is responsible
      * for handling the submission of updated versions of existing models.
      */
+    @CompileStatic
     class NewRevisionStateMachine extends StateMachineStrategy {
 
         /**
@@ -615,11 +627,11 @@ class SubmissionService {
             if (!workingMemory.containsKey("removeFromVCS")) {
                 workingMemory.put("removeFromVCS", new LinkedList<RFTC>())
             }
-            def removeFromVcs = workingMemory.get("removeFromVCS")
+            def removeFromVcs = (Collection<RFTC>) workingMemory.get("removeFromVCS")
             def existing = workingMemory.get("existing_files") as List<RFTC>
-            filesToDelete.each { candidate ->
-                if (existing.find {
-                    new File(it.path).getName() == new File(candidate.path).getName()
+            filesToDelete.each { RFTC candidate ->
+                if (existing.find { RFTC r ->
+                    new File(r.path).getName() == new File(candidate.path).getName()
                 }) {
                     removeFromVcs.add(candidate)
                 }
@@ -676,7 +688,7 @@ class SubmissionService {
             revision.comment = modifications.get("RevisionComments")
         }
 
-        /* Submits the revision to modelservice
+        /* Submits the revision to modelService
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
         @Profiled(tag = "submissionService.NewRevisionStateMachine.completeSubmission")
@@ -685,14 +697,14 @@ class SubmissionService {
             RTC revision = workingMemory.get("RevisionTC") as RTC
             List<RFTC> repoFiles = getRepFiles(workingMemory)
             List<RFTC> deleteFiles = getRepFiles(workingMemory, "removeFromVCS")
-            deleteFiles.each {
-                File file = new File(it.path)
+            deleteFiles.each { RFTC rf ->
+                File file = new File(rf.path)
                 changes.add("Deleted file: ${file.getName()}")
             }
             def existing = workingMemory.get("existing_files") as List<RFTC>
-            repoFiles.each { it ->
+            repoFiles.each { RFTC it ->
                 String fileAdded = new File(it.path).getName();
-                def exists = existing.find { fileExisting ->
+                def exists = existing.find { RFTC fileExisting ->
                     fileAdded == new File(fileExisting.path).getName()
                 }
                 if (!exists) {
@@ -700,7 +712,8 @@ class SubmissionService {
                 }
             }
             Revision newlyCreated = modelService.addValidatedRevision(repoFiles, deleteFiles, revision)
-            RTC newlyCreatedRTC = DomainAdapter.getAdapter(newlyCreated).toCommandObject()
+            RTC newlyCreatedRTC =
+                    ((RevisionAdapter) DomainAdapter.getAdapter(newlyCreated)).toCommandObject()
             final String NEW_NAME = workingMemory["new_name"]
             final String NEW_DESCRIPTION = workingMemory["new_description"]
             final boolean SHOULD_UPDATE = NEW_NAME || NEW_DESCRIPTION
@@ -821,11 +834,12 @@ class SubmissionService {
     /**
      * Purpose Create or update DOM objects as necessary
      *
-     * @param workingMemory a Map containing all objects exchanged througho6ut the flow.
+     * @param workingMemory a Map containing all objects exchanged throughout the flow.
      */
     @Profiled(tag = "submissionService.handleSubmission")
     HashSet<String> handleSubmission(Map<String, Object> workingMemory) {
-        return getStrategyFromContext(workingMemory).handleSubmission(workingMemory)
+        def strategy = getStrategyFromContext(workingMemory)
+        strategy.handleSubmission(workingMemory)
     }
 
     /**
@@ -864,7 +878,7 @@ class SubmissionService {
             //only for testing, remove and throw exception perhaps!
         }
         if (filterMain) {
-            repFiles = repFiles.findAll { it.mainFile } //filter out non-main files
+            repFiles = repFiles.findAll { RFTC it -> it.mainFile } //filter out non-main files
         }
         return getFilesFromRepFiles(repFiles)
     }
@@ -875,7 +889,7 @@ class SubmissionService {
      * @param workingMemory a Map containing all objects exchanged throughout the flow.
      */
     private List<File> getFilesFromRepFiles(List<RFTC> repFiles) {
-        return repFiles?.collect { new File(it.path) }
+        return repFiles?.collect { RFTC it -> new File(it.path) }
     }
 
     /**
