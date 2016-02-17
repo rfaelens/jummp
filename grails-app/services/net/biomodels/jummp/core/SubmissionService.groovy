@@ -32,6 +32,8 @@ package net.biomodels.jummp.core
 
 import grails.orm.HibernateCriteriaBuilder
 import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
+import groovy.transform.TypeCheckingMode
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.ModelException
 import net.biomodels.jummp.core.adapters.PublicationAdapter
@@ -162,16 +164,16 @@ class SubmissionService {
         protected void storeRFTC(Map<String, Object> workingMemory,
                                  List<RFTC> tobeAdded,
                                  List<String> filesToDelete) {
-            List<RFTC> main
-            List<RFTC> additionals
+            Collection<RFTC> main
+            Collection<RFTC> additionals
             if (workingMemory.containsKey("repository_files")) {
-                List<RFTC> existing = (workingMemory.get("repository_files") as List<RFTC>)
+                Collection<RFTC> existing = workingMemory.get("repository_files") as List<RFTC>
                 if (!tobeAdded && !filesToDelete &&
                         !workingMemory['isUpdateOnExistingModel']) {
                     workingMemory.put("changedMainFiles", false)
                     return
                 }
-                List<RFTC> currentMains = existing.findAll { RFTC it -> it.mainFile }
+                Collection<RFTC> currentMains = existing.findAll { RFTC it -> it.mainFile }
                 List<RFTC> toDelete = new LinkedList<RFTC>()
                 Set<RFTC> willBeReplaced = new HashSet<RFTC>()
                 existing.each { RFTC oldfile ->
@@ -289,6 +291,7 @@ class SubmissionService {
          */
         protected abstract void createTransportObjects(Map<String, Object> workingMemory);
 
+        @TypeChecked(TypeCheckingMode.SKIP)
         protected boolean updatePubs(MTC model, String publinkType, String publink) {
             boolean refreshPublication = false
             def linkType = PublicationLinkProvider.LinkType.valueOf(publinkType)
@@ -302,8 +305,7 @@ class SubmissionService {
             def publSrc = criteria.get() {
                 eq("linkType", linkType)
             }
-            model.publication.linkProvider =
-                ((PublicationLinkProviderAdapter) DomainAdapter.getAdapter(publSrc)).toCommandObject()
+            model.publication.linkProvider = DomainAdapter.getAdapter(publSrc).toCommandObject()
             return refreshPublication
         }
 
@@ -332,6 +334,7 @@ class SubmissionService {
          * @param workingMemory a Map containing all objects exchanged throughout the flow.
          */
         @Profiled(tag = "submissionService.updateRevisionComments")
+        @TypeChecked(TypeCheckingMode.SKIP)
         protected void updateRevisionFromFiles(Map<String, Object> workingMemory) {
             RTC revision = workingMemory.get("RevisionTC") as RTC
             MFTC fmt = workingMemory["model_type"] as ModelFormatTransportCommand
@@ -570,6 +573,7 @@ class SubmissionService {
          *
          * @param workingMemory a Map containing all objects exchanged throughout the flow.
          */
+        @TypeChecked(TypeCheckingMode.SKIP)
         @Profiled(tag = "submissionService.NewModelStateMachine.completeSubmission")
         HashSet<String> completeSubmission(Map<String, Object> workingMemory) {
             List<RFTC> repoFiles = getRepFiles(workingMemory)
@@ -579,7 +583,7 @@ class SubmissionService {
             revision.comment = "Import of ${revision.name}".toString()
             Model newModel = modelService.uploadValidatedModel(repoFiles, revision)
             Revision latest = modelService.getLatestRevision(newModel, false)
-            RTC latestRTC = ((RevisionAdapter) DomainAdapter.getAdapter(latest)).toCommandObject()
+            RTC latestRTC = DomainAdapter.getAdapter(latest).toCommandObject()
 
             final String NEW_NAME = workingMemory["new_name"]
             final String NEW_DESCRIPTION = workingMemory["new_description"]
@@ -596,7 +600,7 @@ class SubmissionService {
             }
             String modelId = newModel.submissionId
             workingMemory.put("model_id", modelId)
-            return new TreeSet<String>() //no need to track changes made during submission
+            return new HashSet<String>() //no need to track changes made during submission
         }
     }
 
@@ -692,8 +696,9 @@ class SubmissionService {
          * @param workingMemory     a Map containing all objects exchanged throughout the flow.
          */
         @Profiled(tag = "submissionService.NewRevisionStateMachine.completeSubmission")
+        @TypeChecked(TypeCheckingMode.SKIP)
         HashSet<String> completeSubmission(Map<String, Object> workingMemory) {
-            HashSet<String> changes = new TreeSet<String>()
+            HashSet<String> changes = new HashSet<String>()
             RTC revision = workingMemory.get("RevisionTC") as RTC
             List<RFTC> repoFiles = getRepFiles(workingMemory)
             List<RFTC> deleteFiles = getRepFiles(workingMemory, "removeFromVCS")
@@ -712,8 +717,7 @@ class SubmissionService {
                 }
             }
             Revision newlyCreated = modelService.addValidatedRevision(repoFiles, deleteFiles, revision)
-            RTC newlyCreatedRTC =
-                    ((RevisionAdapter) DomainAdapter.getAdapter(newlyCreated)).toCommandObject()
+            RTC newlyCreatedRTC = DomainAdapter.getAdapter(newlyCreated).toCommandObject()
             final String NEW_NAME = workingMemory["new_name"]
             final String NEW_DESCRIPTION = workingMemory["new_description"]
             final boolean SHOULD_UPDATE = NEW_NAME || NEW_DESCRIPTION
@@ -871,8 +875,9 @@ class SubmissionService {
      * @param workingMemory a Map containing all objects exchanged throughout the flow.
      * @param filterMain a boolean parameter specifying whether or not to exclude additional files
      */
-    private List<File> getFilesFromMemory(Map<String, Object> workingMemory, boolean filterMain) {
-        List<RFTC> repFiles = getRepFiles(workingMemory)
+    /* generics + @CompileStatic ==> https://issues.apache.org/jira/browse/GROOVY-7477 */
+    protected List getFilesFromMemory(Map workingMemory, boolean filterMain) {
+        Collection<RFTC> repFiles = getRepFiles(workingMemory)
         if (!repFiles) {
             repFiles = new LinkedList<RFTC>();
             //only for testing, remove and throw exception perhaps!
@@ -880,7 +885,7 @@ class SubmissionService {
         if (filterMain) {
             repFiles = repFiles.findAll { RFTC it -> it.mainFile } //filter out non-main files
         }
-        return getFilesFromRepFiles(repFiles)
+        return getFilesFromRepFiles(repFiles.toList())
     }
 
     /**
@@ -888,7 +893,8 @@ class SubmissionService {
      *
      * @param workingMemory a Map containing all objects exchanged throughout the flow.
      */
-    private List<File> getFilesFromRepFiles(List<RFTC> repFiles) {
+    /* generics + @CompileStatic ==> https://issues.apache.org/jira/browse/GROOVY-7477 */
+    protected List getFilesFromRepFiles(List repFiles) {
         return repFiles?.collect { RFTC it -> new File(it.path) }
     }
 
@@ -897,8 +903,9 @@ class SubmissionService {
      *
      * @param workingMemory a Map containing all objects exchanged throughout the flow.
      */
-    private List<RFTC> getRepFiles(Map<String, Object> workingMemory,
+    /* generics + @CompileStatic ==> https://issues.apache.org/jira/browse/GROOVY-7477 */
+    protected List getRepFiles(Map workingMemory,
             String mapName = "repository_files") {
-        return (List<RFTC>) workingMemory.get(mapName)
+        return (List) workingMemory.get(mapName)
     }
 }
