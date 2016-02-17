@@ -21,6 +21,7 @@
 package net.biomodels.jummp.core
 
 import eu.ddmore.metadata.service.ValidationException
+import grails.transaction.Transactional
 import net.biomodels.jummp.annotationstore.ResourceReference
 import net.biomodels.jummp.annotationstore.Statement
 import net.biomodels.jummp.core.annotation.ResourceReferenceCategory
@@ -31,6 +32,7 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.annotation.SectionContainer
 import net.biomodels.jummp.model.Revision
 import org.perf4j.aop.Profiled
+import org.springframework.transaction.annotation.Isolation
 
 /**
  * Simple delegate for metadataService.
@@ -40,6 +42,7 @@ import org.perf4j.aop.Profiled
  *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
+@Transactional
 class MetadataDelegateService implements IMetadataService {
     /**
      * Dependency injection for the metadata service.
@@ -109,6 +112,8 @@ class MetadataDelegateService implements IMetadataService {
         }
     }
 
+    // this cannot work with isolation level REPEATABLE_READS (MySQL default)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Profiled(tag = "metadataDelegateService.saveMetadata")
     boolean saveMetadata(String model, List<StatementTransportCommand> statements) {
         metadataService.saveMetadata(model, statements)

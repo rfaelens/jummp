@@ -53,6 +53,8 @@ import net.biomodels.jummp.model.RepositoryFile
 import org.hibernate.SessionFactory
 import org.perf4j.aop.Profiled
 import org.apache.commons.io.FilenameUtils
+import org.springframework.transaction.TransactionDefinition
+import org.springframework.transaction.support.DefaultTransactionDefinition
 
 /**
  * Service that provides model building functionality to a wizard-style model
@@ -443,18 +445,24 @@ class SubmissionService {
          *
          * @param workingMemory a Map containing all objects exchanged throughout the flow.
          */
+        @TypeChecked(TypeCheckingMode.SKIP)
         @Profiled(tag = "submissionService.handleSubmission")
         HashSet<String> handleSubmission(Map<String, Object> workingMemory) {
-            HashSet<String> retval;
-            try {
-                retval = completeSubmission(workingMemory)
-                cleanup(workingMemory)
+            def txDef = new DefaultTransactionDefinition()
+            txDef.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED)
+            txDef.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED)
+            Revision.withTransaction(txDef) {
+                HashSet<String> retval
+                try {
+                    retval = completeSubmission(workingMemory)
+                    cleanup(workingMemory)
+                }
+                catch (Exception e) {
+                    log.error "Cannot process submission $workingMemory: ${e.message}", e
+                    throw e // need this to enter error subflow
+                }
+                retval
             }
-            catch (Exception e) {
-                e.printStackTrace()
-                throw e
-            }
-            return retval;
         }
 
         /**
