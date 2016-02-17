@@ -693,7 +693,19 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             revision = doAddValidatedRevision(repoFiles, deleteFiles, rev)
         }
         if (revision) {
-            // force the new revision to be fetched from the database
+            /*
+             * Force the new revision to be fetched from the database.
+             *
+             * With the default MySQL transaction isolation level, the following query would
+             * return null because within the current tx we're already loaded the model's
+             * revisions and REPEATABLE_READS means that we're always going to get the same
+             * result within the same tx (in order to avoid phantom reads).
+             * Here there is no risk of phantom reads, it's actually desired behaviour, so
+             * we need isolation level READ_COMMITTED.
+             *
+             * Use eager loading for the model and the format because we expect them to be
+             * unproxied downstream when we're creating the revision transport command.
+             */
             def attachedRevision = Revision.findByModelAndRevisionNumber(revision.model,
                 revision.revisionNumber, [fetch: [model: "eager", format: 'eager']])
 
