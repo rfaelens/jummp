@@ -65,6 +65,7 @@ import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.transaction.TransactionDefinition
+import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Propagation
 
 /**
@@ -680,6 +681,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.addValidatedRevision")
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Revision addValidatedRevision(final List<RepositoryFileTransportCommand> repoFiles,
                 final List<RepositoryFileTransportCommand> deleteFiles, RevisionTransportCommand rev) throws
                 ModelException {
@@ -699,8 +701,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
              * With the default MySQL transaction isolation level, the following query would
              * return null because within the current tx we're already loaded the model's
              * revisions and REPEATABLE_READS means that we're always going to get the same
-             * result within the same tx (in order to avoid phantom reads).
-             * Here there is no risk of phantom reads, it's actually desired behaviour, so
+             * result within the same tx (in order to avoid dirty reads).
+             * Here there is no risk of dirty reads, it's actually desired behaviour, so
              * we need isolation level READ_COMMITTED.
              *
              * Use eager loading for the model and the format because we expect them to be
@@ -952,6 +954,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostLogging(LoggingEventType.CREATION)
     @Profiled(tag="modelService.uploadValidatedModel")
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Model uploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles,
             RevisionTransportCommand rev) throws ModelException {
         Model model
@@ -965,8 +968,8 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             // As it was created in a separate transaction, the model is detached from the
             // persistence context. Reattach it and its associations before attempting to
             // turn them into transport commands in order to avoid LazyInitialisationExceptions
-            model.attach()
-            Revision r = model.revisions.first()
+            def attachedModel = Model.get(model.id)
+            Revision r = attachedModel.revisions.first()
             RevisionTransportCommand cmd = DomainAdapter.getAdapter(r).toCommandObject()
             // can't inject searchService -- cyclic dependency
             def searchService = grailsApplication.mainContext.searchService

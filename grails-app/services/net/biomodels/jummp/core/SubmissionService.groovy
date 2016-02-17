@@ -11,7 +11,8 @@
  *
  * Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU Affero General Publicc
+ * A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU Affero General Public License along
  * with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
@@ -31,15 +32,10 @@
 package net.biomodels.jummp.core
 
 import grails.orm.HibernateCriteriaBuilder
-import grails.transaction.Transactional
 import groovy.transform.CompileStatic
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import net.biomodels.jummp.core.adapters.DomainAdapter
-import net.biomodels.jummp.core.ModelException
-import net.biomodels.jummp.core.adapters.PublicationAdapter
-import net.biomodels.jummp.core.adapters.PublicationLinkProviderAdapter
-import net.biomodels.jummp.core.adapters.RevisionAdapter
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand as MFTC //rude?
 import net.biomodels.jummp.core.model.ModelTransportCommand as MTC
@@ -50,11 +46,9 @@ import net.biomodels.jummp.model.PublicationLinkProvider
 import net.biomodels.jummp.model.Model
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Revision
-import net.biomodels.jummp.model.RepositoryFile
 import org.hibernate.SessionFactory
 import org.perf4j.aop.Profiled
 import org.apache.commons.io.FilenameUtils
-import org.springframework.transaction.annotation.Isolation
 
 /**
  * Service that provides model building functionality to a wizard-style model
@@ -67,11 +61,14 @@ import org.springframework.transaction.annotation.Isolation
  * @date 20160216
  */
 @CompileStatic
-@Transactional
 class SubmissionService {
     // concrete strategies for the submission state machine
     private final NewModelStateMachine newModel = new NewModelStateMachine()
     private final NewRevisionStateMachine newrevision = new NewRevisionStateMachine()
+    /**
+     * Disable transactional behaviour for this service.
+     */
+    static transactional = false
     /**
      * Dependency Injection of ModelFileFormatService
      */
@@ -447,7 +444,6 @@ class SubmissionService {
          * @param workingMemory a Map containing all objects exchanged throughout the flow.
          */
         @TypeChecked(TypeCheckingMode.SKIP)
-        @Transactional(isolation = Isolation.READ_COMMITTED)
         @Profiled(tag = "submissionService.handleSubmission")
         HashSet<String> handleSubmission(Map<String, Object> workingMemory) {
             HashSet<String> retval

@@ -21,7 +21,6 @@
 package net.biomodels.jummp.core
 
 import eu.ddmore.metadata.service.ValidationException
-import grails.transaction.Transactional
 import net.biomodels.jummp.annotationstore.ResourceReference
 import net.biomodels.jummp.annotationstore.Statement
 import net.biomodels.jummp.core.annotation.ResourceReferenceCategory
@@ -32,8 +31,6 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.annotation.SectionContainer
 import net.biomodels.jummp.model.Revision
 import org.perf4j.aop.Profiled
-import org.springframework.transaction.annotation.Isolation
-import org.springframework.transaction.annotation.Propagation
 
 /**
  * Simple delegate for metadataService.
@@ -41,10 +38,13 @@ import org.springframework.transaction.annotation.Propagation
  * This service is the point of contact for any class outside of Jummp's core
  * that wishes to interact with metadataService.
  *
+ * As this service delegates all database work to metadataService,there is no need for
+ * transactional behaviour.
+ *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-@Transactional(readOnly = true)
 class MetadataDelegateService implements IMetadataService {
+    static transactional = false
     /**
      * Dependency injection for the metadata service.
      */
@@ -113,21 +113,17 @@ class MetadataDelegateService implements IMetadataService {
         }
     }
 
-    // this cannot work with isolation level REPEATABLE_READS (MySQL default)
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Profiled(tag = "metadataDelegateService.saveMetadata")
     boolean saveMetadata(String model, List<StatementTransportCommand> statements) {
         metadataService.saveMetadata(model, statements)
     }
 
     @Profiled(tag = "metadataDelegateService.persistAnnotationSchema")
-    @Transactional
     boolean persistAnnotationSchema(List<SectionContainer> sections) {
         metadataService.persistAnnotationSchema(sections)
     }
 
     @Profiled(tag = "metadataDelegateService.validateModelRevision")
-    @Transactional
     void validateModelRevision(RevisionTransportCommand revision, String model,List<StatementTransportCommand> statements) {
         try {
             metadataService.validateModelRevision(Revision.get(revision.id), model, statements)
@@ -137,8 +133,6 @@ class MetadataDelegateService implements IMetadataService {
     }
 
     @Profiled(tag = "metadataDelegateService.updateMetadata")
-    // this cannot work with isolation level REPEATABLE_READS (MySQL default)
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     boolean updateMetadata(String model, List<StatementTransportCommand> statements) {
         metadataService.saveMetadata(model, statements, true)
     }
