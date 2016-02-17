@@ -31,6 +31,7 @@
 package net.biomodels.jummp.core
 
 import grails.orm.HibernateCriteriaBuilder
+import grails.transaction.Transactional
 import groovy.transform.CompileStatic
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
@@ -53,8 +54,7 @@ import net.biomodels.jummp.model.RepositoryFile
 import org.hibernate.SessionFactory
 import org.perf4j.aop.Profiled
 import org.apache.commons.io.FilenameUtils
-import org.springframework.transaction.TransactionDefinition
-import org.springframework.transaction.support.DefaultTransactionDefinition
+import org.springframework.transaction.annotation.Isolation
 
 /**
  * Service that provides model building functionality to a wizard-style model
@@ -67,6 +67,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition
  * @date 20160216
  */
 @CompileStatic
+@Transactional
 class SubmissionService {
     // concrete strategies for the submission state machine
     private final NewModelStateMachine newModel = new NewModelStateMachine()
@@ -446,23 +447,19 @@ class SubmissionService {
          * @param workingMemory a Map containing all objects exchanged throughout the flow.
          */
         @TypeChecked(TypeCheckingMode.SKIP)
+        @Transactional(isolation = Isolation.READ_COMMITTED)
         @Profiled(tag = "submissionService.handleSubmission")
         HashSet<String> handleSubmission(Map<String, Object> workingMemory) {
-            def txDef = new DefaultTransactionDefinition()
-            txDef.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED)
-            txDef.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED)
-            Revision.withTransaction(txDef) {
-                HashSet<String> retval
-                try {
-                    retval = completeSubmission(workingMemory)
-                    cleanup(workingMemory)
-                }
-                catch (Exception e) {
-                    log.error "Cannot process submission $workingMemory: ${e.message}", e
-                    throw e // need this to enter error subflow
-                }
-                retval
+            HashSet<String> retval
+            try {
+                retval = completeSubmission(workingMemory)
+                cleanup(workingMemory)
             }
+            catch (Exception e) {
+                log.error "Cannot process submission $workingMemory: ${e.message}", e
+                throw e // need this to enter error subflow
+            }
+            retval
         }
 
         /**

@@ -33,6 +33,7 @@ import net.biomodels.jummp.annotation.SectionContainer
 import net.biomodels.jummp.model.Revision
 import org.perf4j.aop.Profiled
 import org.springframework.transaction.annotation.Isolation
+import org.springframework.transaction.annotation.Propagation
 
 /**
  * Simple delegate for metadataService.
@@ -42,7 +43,7 @@ import org.springframework.transaction.annotation.Isolation
  *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
-@Transactional
+@Transactional(readOnly = true)
 class MetadataDelegateService implements IMetadataService {
     /**
      * Dependency injection for the metadata service.
@@ -120,11 +121,13 @@ class MetadataDelegateService implements IMetadataService {
     }
 
     @Profiled(tag = "metadataDelegateService.persistAnnotationSchema")
+    @Transactional
     boolean persistAnnotationSchema(List<SectionContainer> sections) {
         metadataService.persistAnnotationSchema(sections)
     }
 
     @Profiled(tag = "metadataDelegateService.validateModelRevision")
+    @Transactional
     void validateModelRevision(RevisionTransportCommand revision, String model,List<StatementTransportCommand> statements) {
         try {
             metadataService.validateModelRevision(Revision.get(revision.id), model, statements)
@@ -134,6 +137,8 @@ class MetadataDelegateService implements IMetadataService {
     }
 
     @Profiled(tag = "metadataDelegateService.updateMetadata")
+    // this cannot work with isolation level REPEATABLE_READS (MySQL default)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     boolean updateMetadata(String model, List<StatementTransportCommand> statements) {
         metadataService.saveMetadata(model, statements, true)
     }
