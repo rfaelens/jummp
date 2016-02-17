@@ -119,10 +119,6 @@ class ModelService {
     @SuppressWarnings("GrailsStatelessService")
     def grailsApplication
     /**
-     * Dependency injection for the SessionFactory (transaction-aware, lazy-connection proxy)
-     */
-    def sessionFactory
-    /**
      * Dependency Injection for PubMedService
      */
     def pubMedService
