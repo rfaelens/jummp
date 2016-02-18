@@ -70,7 +70,7 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
         sectionsMap.each { SectionContainer s, List<DDMoReSectionAdapter> adapters ->
             graph.addChild(new SimpleEdge(), root, s)
             adapters.each { DDMoReSectionAdapter adapter ->
-                String n = String.valueOf(adapter.sectionNumber)
+                String n = adapter.sectionNumber
                 String name = adapter.label
                 String tooltip = adapter.tooltip
                 def thisSection = new CompositeSection(modelId, n, name)
@@ -132,10 +132,10 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
         List<DDMoReSectionAdapter> bookkeepingRegion = []
         List<DDMoReSectionAdapter> ctxOfUseRegion = []
         sections.each { Section s ->
-            double n = Double.parseDouble(s.sectionNumber)
+            String n = s.sectionNumber
             def dsa = new DDMoReSectionAdapter(sectionNumber: n, label: s.sectionLabel,
                     tooltip: s.toolTip)
-            if (n < 2) {
+            if (n.startsWith('1')) {
                 bookkeepingRegion.add dsa
             } else {
                 ctxOfUseRegion.add dsa
@@ -159,7 +159,7 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
  * and our own {@link net.biomodels.jummp.annotation.PropertyContainer}
  */
 class DDMoReSectionAdapter {
-    double sectionNumber
+    String sectionNumber
     String label
     String tooltip
 }
