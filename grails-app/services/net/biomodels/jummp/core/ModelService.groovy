@@ -1691,7 +1691,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         boolean isCurator = userService.hasRole(collaborator.username, "ROLE_CURATOR")
         if (isCurator) {
             aclUtilService.addPermission(model, collaborator.username, BasePermission.ADMINISTRATION)
-            getAllRevisions(model).each {
+            model.revisions.each { Revision it ->
                 aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION)
             }
         }
