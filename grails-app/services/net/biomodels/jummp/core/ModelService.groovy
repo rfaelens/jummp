@@ -1688,7 +1688,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @Profiled(tag="modelService.grantWriteAccess")
     public void grantWriteAccess(Model model, User collaborator) {
         aclUtilService.addPermission(model, collaborator.username, BasePermission.WRITE)
-        boolean isCurator=userService.hasRole(collaborator.username, "ROLE_CURATOR")
+        boolean isCurator = userService.hasRole(collaborator.username, "ROLE_CURATOR")
         if (isCurator) {
             aclUtilService.addPermission(model, collaborator.username, BasePermission.ADMINISTRATION)
             getAllRevisions(model).each {
