@@ -34,7 +34,9 @@ import eu.ddmore.metadata.service.ValidationError
 import eu.ddmore.metadata.service.ValidationErrorStatus
 import eu.ddmore.metadata.service.ValidationException
 import eu.ddmore.metadata.service.MetadataValidatorImpl
+import net.biomodels.jummp.annotationstore.ElementAnnotation
 import net.biomodels.jummp.annotationstore.Qualifier
+import net.biomodels.jummp.annotationstore.Statement
 import net.biomodels.jummp.core.util.JummpXmlUtils
 import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
 import net.biomodels.jummp.core.adapters.DomainAdapter
@@ -2031,6 +2033,22 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             throw new IllegalArgumentException("Revision may not be deleted")
         }
         Model model = revision.model
+
+        //validating publish process
+
+        Qualifier qualifier = Qualifier.findByUri("http://www.ddmore.org/ontologies/webannotationtool#model-implementation-conforms-to-literature-controlled")
+        def stmtsWithQualifier = revision.annotations*.statement.findAll { it.qualifier == qualifier }
+        def qualifierXrefs = stmtsWithQualifier.collect { Statement s -> s.object }
+
+/*        ElementAnnotation elementAnnotation = ElementAnnotation.findByRevision(revision);
+        elementAnnotation.
+        PubInfo pubinfo = new PubInfo(statement.)
+        Iterator<RepositoryFile> iterator = revision.repoFiles.iterator();
+        while(iterator.hasNext()){
+
+        }*/
+
+
         if (MAKE_PUBLICATION_ID) {
             model.publicationId = model.publicationId ?: publicationIdGenerator.generate()
         }

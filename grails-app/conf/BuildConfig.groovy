@@ -141,7 +141,7 @@ grails.project.dependency.resolution = {
         }
         compile "org.apache.jena:jena-tdb:1.1.2"
 
-        compile ("eu.ddmore.metadata:lib-metadata:1.3-SNAPSHOT") {
+        compile ("eu.ddmore.metadata:lib-metadata:1.5-SNAPSHOT") {
             excludes 'spring-context','spring-core','spring-test'
         }
     }
