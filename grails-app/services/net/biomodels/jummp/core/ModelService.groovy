@@ -1508,7 +1508,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     *
     * @param model The Model for which read access should be granted
     * @param collaborator The user who should receive read access
-    * @todo Might be better in a CollaborationService?
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
