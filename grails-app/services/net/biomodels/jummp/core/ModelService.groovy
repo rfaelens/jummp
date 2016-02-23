@@ -63,7 +63,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Propagation
@@ -1666,10 +1665,10 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     }
 
     private String getUsername() {
-    	if (springSecurityService.isLoggedIn()) {
-    		return (springSecurityService.getPrincipal() as UserDetails).getUsername()
-    	}
-    	return "anonymous"
+        if (springSecurityService.isLoggedIn()) {
+            return (springSecurityService.currentUser as User).getUsername()
+        }
+        return "anonymous"
     }
 
     /**
