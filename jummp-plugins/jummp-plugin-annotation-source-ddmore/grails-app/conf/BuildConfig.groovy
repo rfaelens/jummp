@@ -61,7 +61,7 @@ grails.project.dependency.resolution = {
         }
         compile "org.apache.jena:jena-tdb:1.1.2"
 
-        compile("eu.ddmore.metadata:lib-metadata:1.4-SNAPSHOT") {
+        compile("eu.ddmore.metadata:lib-metadata:1.4") {
             // can't use Spring 4.1 yet, fall back on Grails defaults
             excludes 'spring-core', 'spring-context'
         }
