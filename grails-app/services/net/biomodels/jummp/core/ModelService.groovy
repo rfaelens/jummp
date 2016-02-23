@@ -1515,23 +1515,35 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     *
     * @param model The Model for which read access should be granted
     * @param collaborator The user who should receive read access
-    * @todo Might be better in a CollaborationService?
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.grantReadAccess")
     public void grantReadAccess(Model model, User collaborator) {
+        final String username = collaborator.username
         // Read access is modeled by adding read access to the model (user will get read access for future revisions)
         // and by adding read access to all revisions the user has access to
-        aclUtilService.addPermission(model, collaborator.username, BasePermission.READ)
+        aclUtilService.addPermission(model, username, BasePermission.READ)
         Set<Revision> revisions = model.revisions
-        for (Revision revision in revisions) {
-            if (aclUtilService.hasPermission(springSecurityService.authentication, revision,
-                        BasePermission.READ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
-                aclUtilService.addPermission(revision, collaborator.username, BasePermission.READ)
+        boolean isCurator = userService.hasRole(username, "ROLE_CURATOR")
+        if (isCurator) {
+            aclUtilService.addPermission(model, username, BasePermission.ADMINISTRATION)
+            model.revisions.each { Revision it ->
+                aclUtilService.addPermission(it, username, BasePermission.ADMINISTRATION)
+                aclUtilService.addPermission(it, username, BasePermission.READ)
+            }
+        } else {
+            boolean isAdmin = SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')
+            model.revisions.each { Revision it ->
+                boolean canRead = aclUtilService.hasPermission(
+                        springSecurityService.authentication, it, BasePermission.READ)
+                if ( canRead || isAdmin ) {
+                    aclUtilService.addPermission(it, username, BasePermission.READ)
+                }
             }
         }
-        def notification = [model:DomainAdapter.getAdapter(model).toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
+        def notification = [ model: new ModelAdapter(model).toCommandObject(), user:
+                getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
         sendMessage("seda:model.readAccessGranted", notification)
     }
 
@@ -1683,10 +1695,10 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @Profiled(tag="modelService.grantWriteAccess")
     public void grantWriteAccess(Model model, User collaborator) {
         aclUtilService.addPermission(model, collaborator.username, BasePermission.WRITE)
-        boolean isCurator=userService.hasRole(collaborator.username, "ROLE_CURATOR")
+        boolean isCurator = userService.hasRole(collaborator.username, "ROLE_CURATOR")
         if (isCurator) {
             aclUtilService.addPermission(model, collaborator.username, BasePermission.ADMINISTRATION)
-            getAllRevisions(model).each {
+            model.revisions.each { Revision it ->
                 aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION)
             }
         }
