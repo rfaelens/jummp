@@ -74,10 +74,10 @@ class ModelFileFormatService {
 
     /**
      * Extracts the format of the supplied @p modelFiles.
-     * Returns the default ModelFormat representation with an empty formatVersion, since this is expected to exist 
+     * Returns the default ModelFormat representation with an empty formatVersion, since this is expected to exist
      * for every format that is handled.
      * @param modelFiles the list of files corresponding to a model
-     * @returns the corresponding model format, or unknown if this cannot be inferred. 
+     * @returns the corresponding model format, or unknown if this cannot be inferred.
      */
     @Profiled(tag = "modelFileFormatService.inferModelFormat")
     ModelFormatTransportCommand inferModelFormat(List<RFTC> modelFiles) {
@@ -243,18 +243,6 @@ class ModelFileFormatService {
     String getFormatVersion(def revision) {
         FileFormatService service = serviceForFormat(revision?.format)
         return service ? service.getFormatVersion(revision) : "*"
-    }
-
-    /**
-     * Retrieves the content of a revision transport command to be indexed by the search
-     * engine
-     * @param revision the revision from which content to be indexed is extracted
-     * @return The content to be indexed by Solr: returns a map with field as key, and a list
-     * of values for each field
-     */
-    Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand revision) {
-        FileFormatService service = serviceForFormat(revision?.format)
-        return service ? service.getSearchIndexingContent(revision) : [:]
     }
 
     /**

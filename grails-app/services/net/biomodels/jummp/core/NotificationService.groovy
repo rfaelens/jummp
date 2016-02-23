@@ -60,14 +60,10 @@ class NotificationService {
         return usernames.collect { User.findByUsername(it) }
     }
 
-    Set<User> getNotificationRecipients(ModelTransportCommand model, NotificationType type) {
-        Set<String> creators  = model.creatorUsernames
-        return getUsersFromUsernames(creators)
-    }
-
     Set<User> getNotificationRecipients(def permissionsMap) {
-        def usernames = permissionsMap.findAll { ptc -> ptc.write }
-        return getUsersFromUsernames(usernames.collect { it.id })
+        def writeAccessList = permissionsMap.findAll { ptc -> ptc.write }
+        def recipients = writeAccessList.collect { User.get(it.id) }
+        recipients
     }
 
     NotificationTypePreferences getPreference(User user, NotificationType type) {
@@ -108,7 +104,7 @@ class NotificationService {
             NotificationUser userNotify = new NotificationUser(notification: notification,
                     user: user)
             if (!userNotify.save()) {
-                log.error "Was not able to deliver notification ${userNotify.inspect()}"
+                log.error "Was not able to deliver notification ${userNotify.errors.allErrors}"
             }
         }
     }
@@ -184,7 +180,9 @@ class NotificationService {
         notification.body = messageSource.getMessage(notificationBody, bodyParams, null)
         notification.notificationType = type
         notification.sender = User.findByUsername(sender)
-        watchers = watchers - [notification.sender]
+        if (watchers.contains(notification.sender)) {
+            watchers.remove(notification.sender)
+        }
         sendNotification(model, notification, watchers)
     }
 

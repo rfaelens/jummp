@@ -64,10 +64,6 @@ beans = {
     }
     postLogging(net.biomodels.jummp.core.events.PostLoggingAdvice)
 
-    indexingEventListener(net.biomodels.jummp.search.UpdatedRepositoryListener) { bean ->
-        bean.autowire = "byName"
-        bean.singleton = true
-    }
     referenceTracker(net.biomodels.jummp.core.ReferenceTracker) { bean ->
         bean.autowire = "byName"
         bean.singleton = true

@@ -61,19 +61,24 @@ public class RevisionAdapter extends DomainAdapter {
         use(ElementAnnotationCategory) {
             annotations = revision.annotations.collect { it.toCommandObject() }
         }
-        RevisionTransportCommand rev=new RevisionTransportCommand(
+        def formatAdapter = getAdapter(revision.format)
+        def formatCmd = formatAdapter.toCommandObject()
+        String submitterName = revision.owner.person.userRealName
+        def modelAdapter = new ModelAdapter(model: revision.model)
+        def modelCmd = modelAdapter.toCommandObject()
+        RevisionTransportCommand rev = new RevisionTransportCommand(
                 id: revision.id,
-                state:revision.state,
+                state: revision.state,
                 revisionNumber: revision.revisionNumber,
-                owner: revision.owner.person.userRealName,
+                owner: submitterName,
                 minorRevision: revision.minorRevision,
                 validated: revision.validated,
                 name: revision.name,
                 description: revision.description,
                 comment: revision.comment,
                 uploadDate: revision.uploadDate,
-                format: getAdapter(revision.format).toCommandObject(),
-                model: getAdapter(revision.model).toCommandObject(),
+                format: formatCmd,
+                model: modelCmd,
                 annotations: annotations,
                 validationLevel: revision.validationLevel,
                 validationReport: revision.validationReport
