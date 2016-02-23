@@ -30,7 +30,12 @@
 
 package net.biomodels.jummp.core
 
+import eu.ddmore.publish.service.PublishException
+import eu.ddmore.publish.service.PublishInfo
 import grails.transaction.Transactional
+import net.biomodels.jummp.annotationstore.Qualifier
+import net.biomodels.jummp.annotationstore.ResourceReference
+import net.biomodels.jummp.annotationstore.Statement
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
 import net.biomodels.jummp.core.adapters.RevisionAdapter
@@ -143,6 +148,8 @@ class ModelService {
      * Dependency injection of publicationIdGenerator
      */
     def publicationIdGenerator
+
+    def publishValidator
 
     final boolean MAKE_PUBLICATION_ID = !(publicationIdGenerator instanceof NullModelIdentifierGenerator)
 
@@ -2072,7 +2079,26 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             throw new IllegalArgumentException("Revision may not be deleted")
         }
         Model model = revision.model
-        if (MAKE_PUBLICATION_ID) {
+
+        //validating publish process
+
+/*        Qualifier qualifier = Qualifier.findByUri("http://www.ddmore.org/ontologies/webannotationtool#model-implementation-conforms-to-literature-controlled")
+        def stmtsWithQualifier = revision.annotations*.statement.findAll { it.qualifier == qualifier }
+        def qualifierXrefs = stmtsWithQualifier.collect { Statement s -> s.object }
+        ResourceReference resourceReference = qualifierXrefs.first()
+        System.out.println(resourceReference)*/
+
+        PublishInfo pubinfo = new PublishInfo(true)
+        revision.repoFiles.each {
+            pubinfo.addToFileSet(it.path,it.description);
+        }
+
+        def valid = publishValidator.validatePublish(pubinfo)
+        if(!valid){
+            throw new PublishException("Submission did not match any of the scenarios. Please upload all required files")
+        }
+
+/*        if (MAKE_PUBLICATION_ID) {
             model.publicationId = model.publicationId ?: publicationIdGenerator.generate()
         }
         model.firstPublished = new Date()
@@ -2082,7 +2108,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         if (!model.save(flush: true)) {
             throw new ModelException(
                     "Cannot publish model ${model.submissionId}:${b.errors.allErrors.inspect()}")
-        }
+        }*/
     }
 
     /**

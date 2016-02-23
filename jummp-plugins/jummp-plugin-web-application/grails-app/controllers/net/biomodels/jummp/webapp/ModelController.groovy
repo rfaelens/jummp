@@ -36,6 +36,7 @@ package net.biomodels.jummp.webapp
 
 import com.wordnik.swagger.annotations.*
 import eu.ddmore.metadata.service.ValidationException
+import eu.ddmore.publish.service.PublishException
 import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
 import org.apache.commons.lang3.exception.ExceptionUtils
@@ -299,6 +300,11 @@ class ModelController {
                     id: rev.identifier(),
                     params: [flashMessage: "Model has not been published because there is a " +
                             "problem with this version of the model. Sorry!"])
+        } catch(PublishException e) {
+            log.error(e.message)
+            redirect(action: "showWithMessage",
+                id: rev.identifier(),
+                params: [flashMessage: e.message])
         }
     }
 
