@@ -30,17 +30,10 @@
 
 package net.biomodels.jummp.core
 
-import eu.ddmore.metadata.service.ValidationError
-import eu.ddmore.metadata.service.ValidationErrorStatus
-import eu.ddmore.metadata.service.ValidationException
-import eu.ddmore.metadata.service.MetadataValidatorImpl
-import net.biomodels.jummp.annotationstore.ElementAnnotation
-import net.biomodels.jummp.annotationstore.Qualifier
-import net.biomodels.jummp.annotationstore.Statement
-import net.biomodels.jummp.core.util.JummpXmlUtils
-import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
+import grails.transaction.Transactional
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
+import net.biomodels.jummp.core.adapters.RevisionAdapter
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.ModelCreatedEvent
 import net.biomodels.jummp.core.events.PostLogging
@@ -71,7 +64,9 @@ import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
 import org.springframework.security.core.userdetails.UserDetails
-import eu.ddmore.metadata.service.MetadataValidator
+import org.springframework.transaction.TransactionDefinition
+import org.springframework.transaction.annotation.Isolation
+import org.springframework.transaction.annotation.Propagation
 
 /**
  * @short Service class for managing Models
@@ -89,6 +84,7 @@ import eu.ddmore.metadata.service.MetadataValidator
  * @date 20151014
  */
 @SuppressWarnings("GroovyUnusedCatchParameter")
+@Transactional
 class ModelService {
     /**
      * The class logger.
@@ -148,13 +144,7 @@ class ModelService {
      */
     def publicationIdGenerator
 
-//    def searchService
-
-//    def metadataValidator
-
-
     final boolean MAKE_PUBLICATION_ID = !(publicationIdGenerator instanceof NullModelIdentifierGenerator)
-    static transactional = true
 
     /**
     * Returns list of Models the user has access to.
@@ -691,9 +681,61 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.addValidatedRevision")
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Revision addValidatedRevision(final List<RepositoryFileTransportCommand> repoFiles,
                 final List<RepositoryFileTransportCommand> deleteFiles, RevisionTransportCommand rev) throws
                 ModelException {
+        Revision revision
+        def txDefinition = [
+            // this tx will use a different session than the current one
+            propagationBehavior: TransactionDefinition.PROPAGATION_REQUIRES_NEW
+        ]
+        Revision.withTransaction(txDefinition) {
+            // the returned revision is detached from the Hibernate session
+            revision = doAddValidatedRevision(repoFiles, deleteFiles, rev)
+        }
+        if (revision) {
+            /*
+             * Force the new revision to be fetched from the database.
+             *
+             * With the default MySQL transaction isolation level, the following query would
+             * return null because within the current tx we're already loaded the model's
+             * revisions and REPEATABLE_READS means that we're always going to get the same
+             * result within the same tx (in order to avoid dirty reads).
+             * Here there is no risk of dirty reads, it's actually desired behaviour, so
+             * we need isolation level READ_COMMITTED.
+             *
+             * Use eager loading for the model and the format because we expect them to be
+             * unproxied downstream when we're creating the revision transport command.
+             */
+            def attachedRevision = Revision.findByModelAndRevisionNumber(revision.model,
+                revision.revisionNumber, [fetch: [model: "eager", format: 'eager']])
+
+            def revisionAdapter = DomainAdapter.getAdapter(attachedRevision)
+            RevisionTransportCommand cmd = revisionAdapter.toCommandObject()
+            // can't inject searchService -- cyclic dependency
+            def searchService = grailsApplication.mainContext.searchService
+            searchService.updateIndex(cmd)
+        }
+        revision
+    }
+
+    /**
+     * Persists a new model revision in the database.
+     *
+     * This unit of work is performed in a dedicated transaction.so as to ensure that it is
+     * committed before the [synchronous] indexing process tries to load the revision from the
+     * database.
+     * @param repoFiles the files of the revision
+     * @param deleteFiles the files that should be deleted compared to the previous revision
+     * @param rev the transport command from which to construct the new revision
+     * @return the new revision
+     * @throws ModelException if there is no model associated with @p rev, if its model has
+     * been deleted or if the comment is null.
+     */
+    Revision doAddValidatedRevision(List<RepositoryFileTransportCommand> repoFiles,
+            List<RepositoryFileTransportCommand> deleteFiles, RevisionTransportCommand rev)
+            throws ModelException {
         // TODO: the method should be thread safe, add a lock
         if (!rev.model) {
             throw new ModelException(null, "Model may not be null")
@@ -749,8 +791,8 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                     log.error("Unable to record publication for ${rev.model}: ${e.message}", e)
                 }
             }
-            revision.save(flush: true)
-            model.save(flush: true)
+            revision.save()
+            model.save()
             stopWatch.lap("Model persisted to the database.")
             stopWatch.setTag("modelService.addValidatedRevision.grantPermissions")
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.ADMINISTRATION)
@@ -773,9 +815,9 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
                 }
             }
             stopWatch.stop()
-            revision.refresh()
-            grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
-                    DomainAdapter.getAdapter(revision).toCommandObject(), vcsService.retrieveFiles(revision)))
+            // !! THIS HAS TO BE IN A SEPARATE METHOD WITH A DEDICATED TRANSACTION CONTEXT !!
+            //grailsApplication.mainContext.publishEvent(new RevisionCreatedEvent(this,
+            //        DomainAdapter.getAdapter(revision).toCommandObject(), vcsService.retrieveFiles(revision)))
         } else {
             // TODO: this means we have imported the revision into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.errors.allErrors.each {
@@ -868,17 +910,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     }
 
     /**
-    * Uses the modelfileformatservice to get content to be used for indexing a model
-    *
-    * Passes the @p r to the modelfileformatservice, gets content to be used for indexing the model
-    * @param revision The model revision
-    * @return The model content
-    **/
-    public Map<String, List<String>> getSearchIndexingContent(RevisionTransportCommand r) {
-        return modelFileFormatService.getSearchIndexingContent(r)
-    }
-
-    /**
     * Retrieves information related to a file from the VCS
     * Passes the @p revision and filename to the vcsService, gets
     * info related to the specified @p filename, and filters the returned
@@ -923,7 +954,31 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostLogging(LoggingEventType.CREATION)
     @Profiled(tag="modelService.uploadValidatedModel")
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Model uploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles,
+            RevisionTransportCommand rev) throws ModelException {
+        Model model
+        // this tx will use a different session than the current one
+        def txDefinition = [propagationBehavior: TransactionDefinition.PROPAGATION_REQUIRES_NEW]
+        Model.withTransaction(txDefinition) {
+            // the returned revision is detached from the Hibernate session
+            model = doUploadValidatedModel(repoFiles, rev)
+        }
+        if (model) {
+            // As it was created in a separate transaction, the model is detached from the
+            // persistence context. Reattach it and its associations before attempting to
+            // turn them into transport commands in order to avoid LazyInitialisationExceptions
+            def attachedModel = Model.get(model.id)
+            Revision r = attachedModel.revisions.first()
+            RevisionTransportCommand cmd = DomainAdapter.getAdapter(r).toCommandObject()
+            // can't inject searchService -- cyclic dependency
+            def searchService = grailsApplication.mainContext.searchService
+            searchService.updateIndex(cmd)
+        }
+        model
+    }
+
+    Model doUploadValidatedModel(final List<RepositoryFileTransportCommand> repoFiles,
             RevisionTransportCommand rev) throws ModelException {
         def stopWatch = new Log4JStopWatch("modelService.uploadValidatedModel.catchDuplicate")
         if (IS_DEBUG_ENABLED) {
@@ -1022,7 +1077,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                 stopWatch.stop()
                 throw new ModelException(DomainAdapter.getAdapter(model).toCommandObject(), "New model does not validate")
             }
-            model.save(flush: true)
+            model.save()
             domainObjects.each { rf ->
                 if (!rf.isAttached()) {
                     rf.attach()
@@ -1047,28 +1102,12 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             aclUtilService.addPermission(revision, username, BasePermission.DELETE)
             aclUtilService.addPermission(revision, username, BasePermission.READ)
             stopWatch.stop()
-            try {
-                if (!rev.model.publication) {
-                    String annotation = getPubMedAnnotation(model)
-                    String pubMed
-                    if (annotation) {
-                        if (annotation.contains(":")) {
-                            pubMed = annotation.substring(annotation.lastIndexOf(":")+1, annotation.indexOf("]")).trim()
-                            //TODO Replace CiteXplore with EuropePMC URLs
-                            //model.publication = pubMedService.getPublication(pubMed)
-                            model.publication = null
-                        }
-                    }
-                }
-            } catch (JummpException e) {
-                log.debug(e.message, e)
-            }
             if (IS_DEBUG_ENABLED) {
                 log.debug("Model $submissionId stored with id ${model.id}")
             }
 
-            // broadcast event
-            grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, DomainAdapter.getAdapter(model).toCommandObject(), modelFiles))
+            // don't broadcast event yet,wait for the current tx to commit
+            //grailsApplication.mainContext.publishEvent(new ModelCreatedEvent(this, DomainAdapter.getAdapter(model).toCommandObject(), modelFiles))
         } else {
             // TODO: this means we have imported the file into the VCS, but it failed to be saved in the database, which is pretty bad
             revision.discard()
@@ -2033,22 +2072,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             throw new IllegalArgumentException("Revision may not be deleted")
         }
         Model model = revision.model
-
-        //validating publish process
-
-        Qualifier qualifier = Qualifier.findByUri("http://www.ddmore.org/ontologies/webannotationtool#model-implementation-conforms-to-literature-controlled")
-        def stmtsWithQualifier = revision.annotations*.statement.findAll { it.qualifier == qualifier }
-        def qualifierXrefs = stmtsWithQualifier.collect { Statement s -> s.object }
-
-/*        ElementAnnotation elementAnnotation = ElementAnnotation.findByRevision(revision);
-        elementAnnotation.
-        PubInfo pubinfo = new PubInfo(statement.)
-        Iterator<RepositoryFile> iterator = revision.repoFiles.iterator();
-        while(iterator.hasNext()){
-
-        }*/
-
-
         if (MAKE_PUBLICATION_ID) {
             model.publicationId = model.publicationId ?: publicationIdGenerator.generate()
         }
@@ -2122,16 +2145,15 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
      */
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.updateAuditSuccess")
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     void updateAuditSuccess(Long itemId, boolean success) {
         if (itemId != -1) {
-            Model.withTransaction {
-                ModelAudit audit = ModelAudit.get(itemId)
-                audit.success = success
-                if (audit.isDirty('success')) {
-                    if (!audit.save(flush: true)) {
-                        log.error("""\
+            ModelAudit audit = ModelAudit.get(itemId)
+            audit.success = success
+            if (audit.isDirty('success')) {
+                if (!audit.save(flush: true)) {
+                    log.error("""\
 Failed to update audit $itemId to $success: ${audit.errors.allErrors.inspect()}""")
-                    }
                 }
             }
         }

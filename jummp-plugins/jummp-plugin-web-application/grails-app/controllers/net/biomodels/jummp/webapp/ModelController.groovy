@@ -38,6 +38,7 @@ import com.wordnik.swagger.annotations.*
 import eu.ddmore.metadata.service.ValidationException
 import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
+import org.apache.commons.lang3.exception.ExceptionUtils
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import net.biomodels.jummp.core.model.ModelAuditTransportCommand
@@ -54,7 +55,6 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.multipart.MultipartFile
 import net.biomodels.jummp.plugins.security.Team
-import net.biomodels.jummp.annotationstorage.*
 
 @Api(value = "/model", description = "Operations related to models")
 class ModelController {
@@ -937,7 +937,7 @@ Errors: ${model.publication.errors.allErrors.inspect()}."""
                     to grailsApplication.config.jummp.security.registration.email.adminAddress
                     from grailsApplication.config.jummp.security.registration.email.sender
                     subject "Bug in submission: ${ticket}"
-                    body t.message
+                    body "MESSAGE: ${ExceptionUtils.getStackTrace(t)}"
                 }
                 session.messageForError = ticket
             }

@@ -126,6 +126,8 @@
    <field name="pharmmlElementUnit" type="string" indexed="true" stored="false" multiValued="true"/>
    <field name="pharmmlGenericType" type="text_general" indexed="true" stored="false" multiValued="true"/>
    <field name="pharmmlModelFieldPurpose" type="string" indexed="true" stored="false" multiValued="true"/>
+   <field name="pharmmlCodeFromLiterature" type="string" indexed="true" stored="false" multiValued="false"/>
+   <field name="pharmmlImplementationConformsToLiterature" type="string" indexed="true" stored="false" multiValued="false"/>
    <!-- catch-all field -->
    <dynamicField name="pharmml*" type="text_general" indexed="true"  stored="false" multiValued="true"/>
    <dynamicField name="vCard*" type="text_general" indexed="true"  stored="false" multiValued="true"/>
@@ -164,6 +166,8 @@
    <copyField source="pharmmlElementUnit" dest="text_rev"/>
    <copyField source="pharmmlGenericType" dest="text_rev"/>
    <copyField source="pharmmlModelFieldPurpose" dest="text_rev"/>
+   <copyField source="pharmmlCodeFromLiterature" dest="text_rev"/>
+   <copyField source="pharmmlImplementationConformsToLiterature" dest="text_rev"/>
 
    <copyField source="uniqueId" dest="text_rev"/>
 

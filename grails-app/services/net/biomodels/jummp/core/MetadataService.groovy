@@ -23,6 +23,8 @@ package net.biomodels.jummp.core
 import eu.ddmore.metadata.service.ValidationError
 import eu.ddmore.metadata.service.ValidationErrorStatus
 import eu.ddmore.metadata.service.ValidationException
+import grails.transaction.NotTransactional
+import grails.transaction.Transactional
 import net.biomodels.jummp.annotation.CompositeValueContainer
 import net.biomodels.jummp.annotation.PropertyContainer
 import net.biomodels.jummp.annotation.SectionContainer
@@ -45,6 +47,7 @@ import org.hibernate.validator.constraints.impl.URLValidator
 import org.perf4j.aop.Profiled
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
+import org.springframework.transaction.annotation.Isolation
 
 /**
  * Service class that facilitates interaction with model metadata.
@@ -54,6 +57,7 @@ import org.springframework.security.acls.domain.BasePermission
  *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
+@Transactional(readOnly = true)
 class MetadataService {
     private static final Log log = LogFactory.getLog(this)
     private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
@@ -198,6 +202,8 @@ class MetadataService {
     }
 
     @Profiled(tag = "metadataService.saveMetadata")
+    // this cannot work with isolation level REPEATABLE_READS (MySQL default)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     boolean saveMetadata(String model, List<StatementTransportCommand> statements,
             boolean isUpdate = false) {
         Model theModel = Model.findBySubmissionIdOrPublicationId(model, model)
@@ -246,6 +252,7 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
         }
     }
 
+    @NotTransactional
     private MetadataWriterImpl createMetadataWriter(String model, List<StatementTransportCommand> statements){
         def subject = "${grailsApplication.config.grails.serverURL}/model/${model}"
         def rdfTypeProperty = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
@@ -270,6 +277,7 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
 
 
     @Profiled(tag="metadataService.validateModelRevision")
+    @Transactional
     public void validateModelRevision(Revision revision, String model, List<StatementTransportCommand> statements){
 
         if (!revision) {
@@ -328,6 +336,7 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
      * up the fields and the values rendered by the annotation editor.
      */
     @Profiled(tag = "metadataService.persistAnnotationSchema")
+    @Transactional
     boolean persistAnnotationSchema(List<SectionContainer> sections) {
         def result = false
         def promise = Qualifier.async.task {
@@ -375,31 +384,30 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
      * @param name the label that the qualifier with URI @p uri should have
      * @return the updated Qualifier, or null if there was a validation error.
      */
+    @Transactional
     private Qualifier saveOrUpdateQualifier(String uri, String name) {
-        Qualifier.withTransaction {
-            def existingQualifier = Qualifier.findByUri(uri)
-            if (!existingQualifier) {
-                def q = new Qualifier(accession: name, uri: uri)
-                if (uri.startsWith(DEFAULT_PHARMML_NAMESPACE) ||
-                        uri.startsWith(DEFAULT_DDMORE_WAT_NAMESPACE)) {
-                    q.namespace = DEFAULT_PHARMML_NAMESPACE
-                    q.qualifierType = 'pharmML'
-                }
-                if (!q.save(flush: true)) {
-                    log.error "Could not save new qualifier with uri $uri: ${q.errors.allErrors}"
-                }
-                existingQualifier = q
-            } else {
-                if (existingQualifier.accession != name) {
-                    existingQualifier.accession = name
-                    existingQualifier.save(flush: true)
-                    if (existingQualifier.hasErrors()) {
-                        log.error "Could not update qualifier $existingQualifier with new name $name"
-                    }
+        def existingQualifier = Qualifier.findByUri(uri)
+        if (!existingQualifier) {
+            def q = new Qualifier(accession: name, uri: uri)
+            if (uri.startsWith(DEFAULT_PHARMML_NAMESPACE) ||
+                    uri.startsWith(DEFAULT_DDMORE_WAT_NAMESPACE)) {
+                q.namespace = DEFAULT_PHARMML_NAMESPACE
+                q.qualifierType = 'pharmML'
+            }
+            if (!q.save(flush: true)) {
+                log.error "Could not save new qualifier with uri $uri: ${q.errors.allErrors}"
+            }
+            existingQualifier = q
+        } else {
+            if (existingQualifier.accession != name) {
+                existingQualifier.accession = name
+                existingQualifier.save(flush: true)
+                if (existingQualifier.hasErrors()) {
+                    log.error "Could not update qualifier $existingQualifier with new name $name"
                 }
             }
-            return existingQualifier
         }
+        return existingQualifier
     }
 
     /*
@@ -416,54 +424,53 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
      * @param parents a collection of ResourceReferences that should be stored as parents
      * @return the saved ResourceReference or null if there was an error.
      */
+    @Transactional
     private ResourceReference saveOrUpdateResourceReference(ValueContainer v,
             List<ResourceReference> parents = []) {
-        ResourceReference.withTransaction {
-            String uri = v.uri
-            String name = v.value
-            def existing = ResourceReference.findByUri(uri)
-            if (!existing) {
-                existing = new ResourceReference(uri: uri, shortName: name, name: name)
-                // work out the accession from the presence of the hash (#) or the last /
-                int accessionDelim
-                int hash = uri.indexOf('#')
-                if (-1 != hash) {
-                    accessionDelim = hash
-                } else {
-                    accessionDelim = uri.lastIndexOf('/')
-                }
-                String accession = uri.substring(accessionDelim + 1)
-                existing.accession = accession
-                if (uri.startsWith(DEFAULT_PKPD_NAMESPACE)) {
-                    existing.datatype = 'pkpd'
-                }
-                if (parents) {
-                    existing.parents.addAll(parents)
-                }
-                def savedXref = existing.save(flush: true)
-                if (!savedXref) {
-                    log.error """\
+        String uri = v.uri
+        String name = v.value
+        def existing = ResourceReference.findByUri(uri)
+        if (!existing) {
+            existing = new ResourceReference(uri: uri, shortName: name, name: name)
+            // work out the accession from the presence of the hash (#) or the last /
+            int accessionDelim
+            int hash = uri.indexOf('#')
+            if (-1 != hash) {
+                accessionDelim = hash
+            } else {
+                accessionDelim = uri.lastIndexOf('/')
+            }
+            String accession = uri.substring(accessionDelim + 1)
+            existing.accession = accession
+            if (uri.startsWith(DEFAULT_PKPD_NAMESPACE)) {
+                existing.datatype = 'pkpd'
+            }
+            if (parents) {
+                existing.parents.addAll(parents)
+            }
+            def savedXref = existing.save(flush: true)
+            if (!savedXref) {
+                log.error """\
 Unable to save xref with uri ${v.uri}: ${existing?.errors?.allErrors?.inspect()} - will not \
 attempt to save any of its children"""
-                    return savedXref
-                }
-                if (v instanceof CompositeValueContainer && v.children) {
-                    v.children.each { ValueContainer child ->
-                        saveOrUpdateResourceReference(child, parents << existing)
-                    }
-                }
-                return existing
-            } else {
-                if (existing.name != name) {
-                    existing.name = name
-                    return existing.save(flush: true)
-                }
-                if (existing.parents != parents) {
-                    existing.parents.addAll(parents)
-                    return existing.save(flush: true)
-                }
-                return existing
+                return savedXref
             }
+            if (v instanceof CompositeValueContainer && v.children) {
+                v.children.each { ValueContainer child ->
+                    saveOrUpdateResourceReference(child, parents << existing)
+                }
+            }
+            return existing
+        } else {
+            if (existing.name != name) {
+                existing.name = name
+                return existing.save(flush: true)
+            }
+            if (existing.parents != parents) {
+                existing.parents.addAll(parents)
+                return existing.save(flush: true)
+            }
+            return existing
         }
     }
 }

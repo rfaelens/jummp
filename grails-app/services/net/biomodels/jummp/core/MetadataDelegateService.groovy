@@ -38,9 +38,13 @@ import org.perf4j.aop.Profiled
  * This service is the point of contact for any class outside of Jummp's core
  * that wishes to interact with metadataService.
  *
+ * As this service delegates all database work to metadataService,there is no need for
+ * transactional behaviour.
+ *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class MetadataDelegateService implements IMetadataService {
+    static transactional = false
     /**
      * Dependency injection for the metadata service.
      */
