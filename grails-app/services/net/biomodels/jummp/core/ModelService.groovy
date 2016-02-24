@@ -2005,7 +2005,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
 
     /**
      * Tests if the user can publish this revision
-     * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
+     * Only a Curator or an Administrator are allowed to call this
      * method.
      * @param revision The Revision to be published
      */
@@ -2021,11 +2021,8 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         if (revision.model.deleted) {
             return false
         }
-        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN,ROLE_CURATOR")) {
             return true
-        }
-        if (SpringSecurityUtils.ifAnyGranted("ROLE_CURATOR")) {
-            return canAddRevision(revision.model)
         }
         return false
     }
