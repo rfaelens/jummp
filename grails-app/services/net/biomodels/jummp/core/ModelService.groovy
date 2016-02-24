@@ -1534,7 +1534,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                 }
             }
         }
-        def notification = [ model: new ModelAdapter(model).toCommandObject(), user:
+        def notification = [ model: new ModelAdapter(model: model).toCommandObject(), user:
                 getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
         sendMessage("seda:model.readAccessGranted", notification)
     }
@@ -1694,7 +1694,8 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                 aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION)
             }
         }
-        def notification = [model:DomainAdapter.getAdapter(model).toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
+        def notification = [model: new ModelAdapter(model: model).toCommandObject(),
+                user: getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
         sendMessage("seda:model.writeAccessGranted", notification)
     }
 
