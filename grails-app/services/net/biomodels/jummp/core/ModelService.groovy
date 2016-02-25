@@ -807,7 +807,7 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
             aclUtilService.addPermission(revision, currentUser.username, BasePermission.DELETE)
 
             //grant admin rights to the owner of the model
-            Revision earliest=getRevision(model, 1);
+            Revision earliest = Revision.findByModelAndRevisionNumber(revision.model, 1)
             aclUtilService.addPermission(revision, earliest.owner.username, BasePermission.ADMINISTRATION)
             aclUtilService.addPermission(revision, earliest.owner.username, BasePermission.DELETE)
 
