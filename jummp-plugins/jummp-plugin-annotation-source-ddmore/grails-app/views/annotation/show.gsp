@@ -113,8 +113,8 @@
             },
             beforeSend: function() {
                 console.log("Disable Save, Validate and Return to model display page (Back) buttons while saving annotations into database");
-                $("#message").addClass("failure");
-                $('#message').html('Annotations are being saved into database. Please waiting a while...');
+                $("#message").addClass("warning");
+                $('#message').html('Annotations are being saved into database. Please waiting for a while...');
                 $('#saveButton').attr('disabled',true);
                 $('#validateButton').attr('disabled',true);
                 $('#backButton').attr('disabled',true);
