@@ -34,7 +34,7 @@
     background-color: rgb(237, 237, 237);
 }
 
-.success, .failure, .warning {
+.success, .failure, .jummpWarning {
     padding: 1em;
     font-size: 2em;
 }
@@ -47,7 +47,7 @@
     color: red;
 }
 
-.warning {
+.jummpWarning {
     color: blue;
 }
 .info {
