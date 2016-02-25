@@ -154,6 +154,8 @@
             },
             beforeSend: function() {
                 console.log("Disable Save, Validate and Return to model display page (Back) buttons while saving annotations into database");
+                $("#message").removeClass("success");
+                $("#message").removeClass("failure");
                 $("#message").addClass("jummpWarning");
                 $('#message').html('Annotations are being saved into database. Please waiting for a while...');
                 $('#saveButton').attr('disabled',true);
@@ -162,8 +164,9 @@
             },
             error: function(jqXHR) {
                 console.error("epic fail", jqXHR.responseText);
-                $("#message").addClass("failure");
                 $("#message").removeClass("success");
+                $("#message").removeClass("jummpWarning");
+                $("#message").addClass("failure");
                 $('#message').html("There was an internal error while saving the updated annotations provided.");
                 console.log("Enable Save, Validate and Return to model display page (Back) buttons - due to errors and let modify");
                 $('#saveButton').removeAttr('disabled');
@@ -173,10 +176,12 @@
             },
             success: function(response) {
                 if ("200" == response.status) {
-                    $("#message").addClass("success");
                     $("#message").removeClass("failure");
+                    $("#message").removeClass("jummpWarning");
+                    $("#message").addClass("success");
                 } else {
                     $("#message").removeClass("success");
+                    $("#message").removeClass("jummpWarning");
                     $("#message").addClass("failure");
                 }
                 $('#message').html(response.message);
@@ -206,14 +211,19 @@
             },
             error: function(jqXHR) {
                 console.error("epic fail", jqXHR.responseText);
-                $("#message").addClass("failure");
                 $("#message").removeClass("success");
+                $("#message").removeClass("jummpWarning");
+                $("#message").addClass("failure");
                 $('#message').html("There was an internal error while validating the information provided.");
             },
             success: function(response) {
                 if ("200" == response.status) {
+                    $("#message").removeClass("failure");
+                    $("#message").removeClass("jummpWarning");
                     $("#message").addClass("success");
                 } else {
+                    $("#message").removeClass("success");
+                    $("#message").removeClass("jummpWarning");
                     $("#message").addClass("failure");
                 }
                 $('#message').html(response.message);
