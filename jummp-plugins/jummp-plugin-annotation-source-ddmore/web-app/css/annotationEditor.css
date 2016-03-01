@@ -34,7 +34,7 @@
     background-color: rgb(237, 237, 237);
 }
 
-.success, .failure {
+.success, .failure, .warning {
     padding: 1em;
     font-size: 2em;
 }
@@ -47,6 +47,9 @@
     color: red;
 }
 
+.warning {
+    color: blue;
+}
 .info {
     padding: 0.2em;
     margin-top: 0.4em;

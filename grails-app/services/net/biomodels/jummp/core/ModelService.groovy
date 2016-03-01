@@ -68,7 +68,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.acls.domain.PrincipalSid
 import org.springframework.security.acls.model.Acl
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Propagation
@@ -1542,7 +1541,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                 }
             }
         }
-        def notification = [ model: new ModelAdapter(model).toCommandObject(), user:
+        def notification = [ model: new ModelAdapter(model: model).toCommandObject(), user:
                 getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
         sendMessage("seda:model.readAccessGranted", notification)
     }
@@ -1673,10 +1672,10 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     }
 
     private String getUsername() {
-    	if (springSecurityService.isLoggedIn()) {
-    		return (springSecurityService.getPrincipal() as UserDetails).getUsername()
-    	}
-    	return "anonymous"
+        if (springSecurityService.isLoggedIn()) {
+            return (springSecurityService.currentUser as User).getUsername()
+        }
+        return "anonymous"
     }
 
     /**
@@ -1702,7 +1701,8 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                 aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION)
             }
         }
-        def notification = [model:DomainAdapter.getAdapter(model).toCommandObject(), user:getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
+        def notification = [model: new ModelAdapter(model: model).toCommandObject(),
+                user: getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
         sendMessage("seda:model.writeAccessGranted", notification)
     }
 
@@ -2013,7 +2013,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
 
     /**
      * Tests if the user can publish this revision
-     * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
+     * Only a Curator or an Administrator are allowed to call this
      * method.
      * @param revision The Revision to be published
      */
@@ -2029,11 +2029,8 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         if (revision.model.deleted) {
             return false
         }
-        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN,ROLE_CURATOR")) {
             return true
-        }
-        if (SpringSecurityUtils.ifAnyGranted("ROLE_CURATOR")) {
-            return canAddRevision(revision.model)
         }
         return false
     }

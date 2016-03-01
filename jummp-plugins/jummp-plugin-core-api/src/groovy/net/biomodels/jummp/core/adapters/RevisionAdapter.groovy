@@ -64,7 +64,7 @@ public class RevisionAdapter extends DomainAdapter {
         def formatAdapter = getAdapter(revision.format)
         def formatCmd = formatAdapter.toCommandObject()
         String submitterName = revision.owner.person.userRealName
-        def modelAdapter = getAdapter(revision.model)
+        def modelAdapter = new ModelAdapter(model: revision.model)
         def modelCmd = modelAdapter.toCommandObject()
         RevisionTransportCommand rev = new RevisionTransportCommand(
                 id: revision.id,
