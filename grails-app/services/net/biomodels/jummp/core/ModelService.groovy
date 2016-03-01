@@ -2094,13 +2094,21 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
 
         //validating publish process
 
-/*        Qualifier qualifier = Qualifier.findByUri("http://www.ddmore.org/ontologies/webannotationtool#model-implementation-conforms-to-literature-controlled")
+        if(!revision.validationLevel.equals(ValidationState.APPROVED)){
+            throw new PublishException("You cannot publish this model because some of the anotations are incorrect. Please check the annotations.")
+        }
+
+       // Qualifier qualifier = Qualifier.findByUri("http://www.ddmore.org/ontologies/webannotationtool#model-implementation-conforms-to-literature-controlled")
+        Qualifier qualifier = Qualifier.findByUri("http://www.pharmml.org/2013/10/PharmMLMetadata#model-has-author ")
         def stmtsWithQualifier = revision.annotations*.statement.findAll { it.qualifier == qualifier }
         def qualifierXrefs = stmtsWithQualifier.collect { Statement s -> s.object }
         ResourceReference resourceReference = qualifierXrefs.first()
-        System.out.println(resourceReference)*/
+        boolean orignalModel = false;
+        if(!resourceReference.name.toLowerCase().equals("yes")){
+            orignalModel = true;
+        }
 
-        PublishInfo pubinfo = new PublishInfo(true)
+        PublishInfo pubinfo = new PublishInfo(orignalModel)
         revision.repoFiles.each {
             pubinfo.addToFileSet(it.path,it.description);
         }
