@@ -102,7 +102,7 @@ class ModelController {
      * The list of actions for which we should not automatically create an audit item.
      */
     final List<String> AUDIT_EXCEPTIONS = ['updateFlow', 'createFlow', 'uploadFlow',
-                'showWithMessage', 'share', 'getFileDetails']
+                'showWithMessage', 'share', 'getFileDetails','sendNotificationToCurators']
 
     def beforeInterceptor = [action: this.&auditBefore, except: AUDIT_EXCEPTIONS]
 
@@ -220,6 +220,8 @@ class ModelController {
             }
             final String PERENNIAL_ID = (rev.model.publicationId) ?: (rev.model.submissionId)
             boolean showPublishOption = modelDelegateService.canPublish(PERENNIAL_ID)
+            boolean canSubmitForPublication = modelDelegateService.canSubmitForPublication(PERENNIAL_ID)
+            boolean show = modelDelegateService.canPublish(PERENNIAL_ID)
             boolean canUpdate = modelDelegateService.canAddRevision(PERENNIAL_ID)
             boolean canDelete = modelDelegateService.canDelete(PERENNIAL_ID)
             boolean canShare = modelDelegateService.canShare(PERENNIAL_ID)
@@ -277,6 +279,13 @@ class ModelController {
             respond net.biomodels.jummp.webapp.rest.error.Error("Invalid Id",
             "An invalid model id was specified")
         }
+    }
+
+    def sendNotificationToCurators = {
+        def rev = modelDelegateService.getRevisionFromParams(params.id)
+        redirect(action: "showWithMessage",
+            id: rev.identifier(),
+            params: [flashMessage: "Model has been notified to the curators."])
     }
 
     def publish = {

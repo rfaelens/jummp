@@ -377,6 +377,22 @@
                     }
                 }
             });
+            $('#confirm-model-notify').dialog({
+                resizable: false,
+                autoOpen: false,
+                height: 250,
+                width: 500,
+                modal: true,
+                buttons: {
+                    Confirm: function() {
+                        $.jummp.openPage("${g.createLink(controller: 'model', action: 'sendNotificationToCurators', id: revision.identifier() )}");
+                        $( this ).dialog( "close" );
+                    },
+                    Cancel: function() {
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
             $("body").append("<div id='modelToolbar' class='collapsibleContainer' title='Model Toolbar'><button title='Expand Toolbar' data-showing='0' id='panelToggle'>Expand</button></div>	");
             $("#buttonContainer").prependTo("#modelToolbar");
             $("#panelToggle").click(function (evt){
@@ -388,6 +404,12 @@
 						primary:"ui-icon-arrowthickstop-1-s"
 					}
 			}).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
+            $( "#peer-review" ).button({
+                text:false,
+                icons: {
+                    primary:"ui-icon-signal-diag"
+                }
+            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
 			$( "#update" ).button({
 					text:false,
 					icons: {
@@ -461,7 +483,15 @@
     <body>
     	<div id="buttonContainer" style="display:inline"<%--class="ui-widget-header ui-corner-all"--%>>
 				<ul id='toolbarList'><li>
-                <button class='toolbutton' id="download" onclick="return $.jummp.openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}')">Download</button>
+                <button class='toolbutton' id="download" onclick="return $.jummp.openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}')">Download</button></li>
+                <li>
+                <g:if test="${canSubmitForPublication}">
+                    <div id="confirm-model-notify" title="You are about to notify this model version" style="display:none;">
+                        <p>Make this version of the model to all curators?</p>
+                    </div>
+                    <button class='toolbutton' id="peer-review" onclick='return $( "#confirm-model-notify" ).dialog( "open");'>Submit for publication</button></li>
+                </g:if>
+
 				<g:if test="${canUpdate}">
 					<li>
                     <button class='toolbutton' id="update" onclick="return $.jummp.openPage('${g.createLink(controller: 'model', action: 'update', id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Update</button>

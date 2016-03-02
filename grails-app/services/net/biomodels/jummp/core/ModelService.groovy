@@ -2029,6 +2029,30 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     }
 
     /**
+     * Tests if the user can submit this revision for publication
+     * Only a User or an Administrator or other Curators are allowed to call this
+     * method.
+     * @param revision The Revision to be published
+     */
+    @PostLogging(LoggingEventType.SUBMIT_FOR_PUBLICATION)
+    @Profiled(tag="modelService.canSubmitForPublication")
+    public boolean canSubmitForPublication(Revision revision) {
+        if (!revision) {
+            return false
+        }
+        if (revision.deleted) {
+            return false
+        }
+        if (revision.model.deleted) {
+            return false
+        }
+        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN,ROLE_USER")) {
+            return true
+        }
+        return false
+    }
+
+    /**
          * Tests if the user can validate this revision
          * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
          * method.

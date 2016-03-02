@@ -227,6 +227,17 @@ class ModelDelegateService implements IModelService {
         return false
     }
 
+    Boolean canSubmitForPublication(String modelId) {
+        def revision = getLatestRevision(modelId)
+        if ((revision.state == ModelState.UNPUBLISHED) && (revision.state != ModelState.UNDER_CURATION)) {
+            try {
+                return modelService
+            } catch (Exception e) {
+                return false
+            }
+        }
+        return falsed
+    }
     Boolean canValidate(String modelId) {
         def revision = getLatestRevision(modelId)
         if (revision.state != ValidationState.APPROVED) {
