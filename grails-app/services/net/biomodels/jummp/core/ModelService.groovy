@@ -2090,19 +2090,25 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         Model model = revision.model
 
         //validating publish process
-
-        if(!revision.validationLevel.equals(ValidationState.APPROVED)){
-            throw new PublishException("You cannot publish this model because some of the anotations are incorrect. Please check the annotations.")
+        if(!revision.validated){
+            throw new PublishException("You cannot publish this model. Invalid revision.")
         }
 
-       // Qualifier qualifier = Qualifier.findByUri("http://www.ddmore.org/ontologies/webannotationtool#model-implementation-conforms-to-literature-controlled")
-        Qualifier qualifier = Qualifier.findByUri("http://www.pharmml.org/2013/10/PharmMLMetadata#model-has-author ")
+        if(model.publication==null){
+            throw new PublishException("You cannot publish this model. Please add publication information.")
+        }
+
+        if(!revision.validationLevel.equals(ValidationState.APPROVED)){
+            throw new PublishException("You cannot publish this model. Please check the annotations.")
+        }
+
+        Qualifier qualifier = Qualifier.findByUri("http://www.ddmore.org/ontologies/webannotationtool#model-implementation-conforms-to-literature-controlled")
         def stmtsWithQualifier = revision.annotations*.statement.findAll { it.qualifier == qualifier }
         def qualifierXrefs = stmtsWithQualifier.collect { Statement s -> s.object }
         ResourceReference resourceReference = qualifierXrefs.first()
-        boolean orignalModel = false;
-        if(!resourceReference.name.toLowerCase().equals("yes")){
-            orignalModel = true;
+        boolean orignalModel = true;
+        if(resourceReference.name.toLowerCase().equals("no")){
+            orignalModel = false;
         }
 
         PublishInfo pubinfo = new PublishInfo(orignalModel)
@@ -2115,7 +2121,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             throw new PublishException("Submission did not match any of the scenarios. Please upload all required files")
         }
 
-/*        if (MAKE_PUBLICATION_ID) {
+        if (MAKE_PUBLICATION_ID) {
             model.publicationId = model.publicationId ?: publicationIdGenerator.generate()
         }
         model.firstPublished = new Date()
@@ -2125,7 +2131,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         if (!model.save(flush: true)) {
             throw new ModelException(
                     "Cannot publish model ${model.submissionId}:${b.errors.allErrors.inspect()}")
-        }*/
+        }
     }
 
     /**
