@@ -346,6 +346,9 @@ class ModelDelegateService implements IModelService {
         modelService.unpublishModelRevision(Revision.get(revision.id))
     }
 
+    void submitModelRevisionForPublication(RevisionTransportCommand revision) {
+        modelService.submitModelRevisionForPublication(Revision.get(revision.id))
+    }
 
     ModelTransportCommand findByPerennialIdentifier(String perennialId) {
         def model = ModelAdapter.findByPerennialIdentifier(perennialId)
