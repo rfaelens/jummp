@@ -28,7 +28,6 @@ class UrlMappings {
         "/model/create"(controller: "model", action: "create")
         "/model/update"(controller: "model", action: "update")
         "/model/publish"(controller: "model", action: "publish")
-        "/model/notify"(controller: "model", action: "sendNotificationToCurators")
         "/share"(controller: "model", action: "share")
         "/model/$id(.$revisionId)?" {
             controller = "model"
