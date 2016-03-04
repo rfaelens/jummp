@@ -30,7 +30,12 @@
 
 package net.biomodels.jummp.core
 
+import eu.ddmore.publish.service.PublishException
+import eu.ddmore.publish.service.PublishInfo
 import grails.transaction.Transactional
+import net.biomodels.jummp.annotationstore.Qualifier
+import net.biomodels.jummp.annotationstore.ResourceReference
+import net.biomodels.jummp.annotationstore.Statement
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
 import net.biomodels.jummp.core.adapters.RevisionAdapter
@@ -142,6 +147,8 @@ class ModelService {
      * Dependency injection of publicationIdGenerator
      */
     def publicationIdGenerator
+
+    def publishValidator
 
     final boolean MAKE_PUBLICATION_ID = !(publicationIdGenerator instanceof NullModelIdentifierGenerator)
 
@@ -2081,6 +2088,39 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             throw new IllegalArgumentException("Revision may not be deleted")
         }
         Model model = revision.model
+
+        //validating publish process
+        if(!revision.validated){
+            throw new PublishException("You cannot publish this model. Invalid revision.")
+        }
+
+        if(model.publication==null){
+            throw new PublishException("You cannot publish this model. Please add publication information.")
+        }
+
+        if(!revision.validationLevel.equals(ValidationState.APPROVED)){
+            throw new PublishException("You cannot publish this model. Please check the annotations.")
+        }
+
+        Qualifier qualifier = Qualifier.findByUri("http://www.ddmore.org/ontologies/webannotationtool#model-implementation-conforms-to-literature-controlled")
+        def stmtsWithQualifier = revision.annotations*.statement.findAll { it.qualifier == qualifier }
+        def qualifierXrefs = stmtsWithQualifier.collect { Statement s -> s.object }
+        ResourceReference resourceReference = qualifierXrefs.first()
+        boolean orignalModel = true;
+        if(resourceReference.name.toLowerCase().equals("no")){
+            orignalModel = false;
+        }
+
+        PublishInfo pubinfo = new PublishInfo(orignalModel)
+        revision.repoFiles.each {
+            pubinfo.addToFileSet(it.path,it.description);
+        }
+
+        def valid = publishValidator.validatePublish(pubinfo)
+        if(!valid){
+            throw new PublishException("Submission did not match any of the scenarios. Please upload all required files")
+        }
+
         if (MAKE_PUBLICATION_ID) {
             model.publicationId = model.publicationId ?: publicationIdGenerator.generate()
         }
