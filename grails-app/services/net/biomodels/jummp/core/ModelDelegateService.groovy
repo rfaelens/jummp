@@ -236,7 +236,7 @@ class ModelDelegateService implements IModelService {
                 return false
             }
         }
-        return falsed
+        return false
     }
     Boolean canValidate(String modelId) {
         def revision = getLatestRevision(modelId)
