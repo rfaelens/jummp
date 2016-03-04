@@ -385,7 +385,7 @@
                 modal: true,
                 buttons: {
                     Confirm: function() {
-                        $.jummp.openPage("${g.createLink(controller: 'model', action: 'sendNotificationToCurators', id: revision.identifier() )}");
+                        $.jummp.openPage("${g.createLink(controller: 'model', action: 'submitForPublication', id: revision.identifier() )}");
                         $( this ).dialog( "close" );
                     },
                     Cancel: function() {
@@ -485,13 +485,6 @@
 				<ul id='toolbarList'><li>
                 <button class='toolbutton' id="download" onclick="return $.jummp.openPage('${g.createLink(controller: 'model', action: 'download', id: revision.identifier())}')">Download</button></li>
                 <li>
-                <g:if test="${canSubmitForPublication}">
-                    <div id="confirm-model-notify" title="You are about to notify this model version" style="display:none;">
-                        <p>Make this version of the model to all curators?</p>
-                    </div>
-                    <button class='toolbutton' id="peer-review" onclick='return $( "#confirm-model-notify" ).dialog( "open");'>Submit for publication</button></li>
-                </g:if>
-
 				<g:if test="${canUpdate}">
 					<li>
                     <button class='toolbutton' id="update" onclick="return $.jummp.openPage('${g.createLink(controller: 'model', action: 'update', id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Update</button>
@@ -505,6 +498,12 @@
 					<button class='toolbutton' id="delete" onclick='return $( "#dialog-confirm" ).dialog( "open" );'>Delete</button>
 					</li>
 				</g:if>
+                <g:if test="${canSubmitForPublication}">
+                    <div id="confirm-model-notify" title="You are about to notify this model version" style="display:none;">
+                        <p>Make this version of the model to all curators?</p>
+                    </div>
+                    <button class='toolbutton' id="peer-review" onclick='return $( "#confirm-model-notify" ).dialog( "open");'>Submit for publication</button></li>
+                </g:if>
 				<g:if test="${showPublishOption}">
 					<div id="confirm-model-publish" title="You are about to publish this model version" style="display:none;">
 						<p>Make this version of the model visible to anyone without logging in?</p>

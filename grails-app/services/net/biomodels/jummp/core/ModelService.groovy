@@ -2046,7 +2046,8 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         if (revision.model.deleted) {
             return false
         }
-        if (SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN,ROLE_USER")) {
+        if ((SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || SpringSecurityUtils.ifAnyGranted("ROLE_USER")) &&
+            (!SpringSecurityUtils.ifAnyGranted("ROLE_CURATOR"))) {
             return true
         }
         return false
