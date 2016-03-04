@@ -116,7 +116,7 @@
                 $("#message").removeClass("success");
                 $("#message").removeClass("failure");
                 $("#message").addClass("jummpWarning");
-                $('#message').html('Annotations are being saved into database. Please waiting for a while...');
+                $('#message').html('Annotations are being saved into database. Please wait...');
                 $('#saveButton').attr('disabled',true);
                 $('#validateButton').attr('disabled',true);
                 $('#backButton').attr('disabled',true);
