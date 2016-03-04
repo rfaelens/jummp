@@ -2145,6 +2145,44 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     }
 
     /**
+     * Makes a Model Revision publicly available.
+     * This means that ROLE_USER and ROLE_ANONYMOUS gain read access to the Revision and by that also to
+     * the Model.
+     *
+     * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
+     * method.
+     * @param revision The Revision to be published
+     */
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')") //used to be: (hasRole('ROLE_USER') and hasPermission(#revision, admin))
+    @PostLogging(LoggingEventType.SUBMIT_FOR_PUBLICATION)
+    @Profiled(tag="modelService.submitModelRevisionForPublication")
+    public void submitModelRevisionForPublication(Revision revision) {
+        if (!SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
+            if (!aclUtilService.hasPermission(springSecurityService.authentication, revision,
+                BasePermission.ADMINISTRATION)) {
+                throw new AccessDeniedException("You cannot publish this model.");
+            }
+        }
+        if (!revision) {
+            throw new IllegalArgumentException("Revision may not be null")
+        }
+        if (revision.deleted) {
+            throw new IllegalArgumentException("Revision may not be deleted")
+        }
+        Model model = revision.model
+        if (MAKE_PUBLICATION_ID) {
+            model.publicationId = model.publicationId ?: publicationIdGenerator.generate()
+        }
+        model.firstPublished = new Date()
+        aclUtilService.addPermission(revision, "ROLE_CURATOR", BasePermission.READ)
+        //revision.state = ModelState.PUBLISHED
+        if (!model.save(flush: true)) {
+            throw new ModelException(
+                "Cannot publish model ${model.submissionId}:${b.errors.allErrors.inspect()}")
+        }
+    }
+
+    /**
      * Create a model audit item
      * @param cmd The ModelAuditTransportCommand to be saved in the database
      */

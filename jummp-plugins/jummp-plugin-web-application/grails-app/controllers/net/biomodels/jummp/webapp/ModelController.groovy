@@ -102,7 +102,7 @@ class ModelController {
      * The list of actions for which we should not automatically create an audit item.
      */
     final List<String> AUDIT_EXCEPTIONS = ['updateFlow', 'createFlow', 'uploadFlow',
-                'showWithMessage', 'share', 'getFileDetails','sendNotificationToCurators']
+                'showWithMessage', 'share', 'getFileDetails','submitForPublication']
 
     def beforeInterceptor = [action: this.&auditBefore, except: AUDIT_EXCEPTIONS]
 
@@ -244,6 +244,7 @@ class ModelController {
                         canShare: canShare,
                         haveAnnotations: haveAnnotations,
                         showPublishOption: showPublishOption,
+                        canSubmitForPublication: canSubmitForPublication,
                         validationLevel: rev.getValidationLevelMessage()
             ]
             if (rev.id == modelDelegateService.getLatestRevision(PERENNIAL_ID).id) {
@@ -270,8 +271,7 @@ class ModelController {
 
     def files = {
         try {
-            def revisionFiles = modelDelegateService.getRevisionFromParams(params.id,
-                        params.revisionId).files
+            def revisionFiles = modelDelegateService.getRevisionFromParams(params.id, params.revisionId).files
             def responseFiles = revisionFiles.findAll { !it.hidden }
             respond new net.biomodels.jummp.webapp.rest.model.show.ModelFiles(responseFiles)
         } catch(Exception err) {
@@ -279,13 +279,6 @@ class ModelController {
             respond net.biomodels.jummp.webapp.rest.error.Error("Invalid Id",
             "An invalid model id was specified")
         }
-    }
-
-    def sendNotificationToCurators = {
-        def rev = modelDelegateService.getRevisionFromParams(params.id)
-        redirect(action: "showWithMessage",
-            id: rev.identifier(),
-            params: [flashMessage: "Model has been notified to the curators."])
     }
 
     def publish = {
@@ -308,6 +301,22 @@ class ModelController {
                     id: rev.identifier(),
                     params: [flashMessage: "Model has not been published because there is a " +
                             "problem with this version of the model. Sorry!"])
+        }
+    }
+
+    def submitForPublication = {
+        try {
+            def rev = modelDelegateService.getRevisionFromParams(params.id)
+            modelDelegateService.submitModelRevisionForPublication(rev)
+
+            def notification = [revision:rev, user:getUsername(), perms: modelDelegateService.getPermissionsMap(rev.model.submissionId)]
+            sendMessage("seda:model.submitForPublication", notification)
+
+            redirect(action: "showWithMessage",
+                id: rev.identifier(),
+                params: [flashMessage: "Model has been submitted to the curators for publication."])
+        } catch (Exception e) {
+            log.error(e.message, e)
         }
     }
 
