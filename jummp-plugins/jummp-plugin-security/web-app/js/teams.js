@@ -6,7 +6,7 @@ var RETURN_KEY = 13;
  */
 var selectedItem = selectedItem || ""
 
-var collaborators = new Collaborators();
+var collaborators = new Collaborators;
 var memberSource = $('#team-member-template').html();
 var teamSource = $('#team-members-template').html();
 
