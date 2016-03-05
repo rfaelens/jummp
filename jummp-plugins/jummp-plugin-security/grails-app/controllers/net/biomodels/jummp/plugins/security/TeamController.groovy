@@ -103,7 +103,7 @@ class TeamController {
     		}
     		else {
     			def usersInTeam = UserTeam.findAllByTeam(team);
-    			[team: team, users: usersInTeam.collect { [name: it.user.person.userRealName, userId: it.user.username] } as JSON]
+    			[team: team, users: usersInTeam.collect { [name: it.user.person.userRealName, userId: it.user.username, id: it.user.id] } as JSON]
     		}
     	}
     }
