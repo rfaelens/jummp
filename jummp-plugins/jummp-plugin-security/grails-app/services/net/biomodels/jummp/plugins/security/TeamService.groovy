@@ -59,7 +59,8 @@ class TeamService {
     List<Team> getTeamsForUser(User user) {
     	def teamsIveCreated = Team.findAllByOwner(user)
 		def teamsImAMemberOf = UserTeam.findAllByUser(user).collect { it.team }
-		return teamsIveCreated.plus(teamsImAMemberOf)
+        def teamsForThisUser = teamsIveCreated.plus(teamsImAMemberOf).unique()
+		return teamsForThisUser
     }
   
 }
