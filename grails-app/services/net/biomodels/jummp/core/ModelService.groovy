@@ -2157,12 +2157,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @PostLogging(LoggingEventType.SUBMIT_FOR_PUBLICATION)
     @Profiled(tag="modelService.submitModelRevisionForPublication")
     public void submitModelRevisionForPublication(Revision revision) {
-        if (!SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
-            if (!aclUtilService.hasPermission(springSecurityService.authentication, revision,
-                BasePermission.ADMINISTRATION)) {
-                throw new AccessDeniedException("You cannot publish this model.");
-            }
-        }
         if (!revision) {
             throw new IllegalArgumentException("Revision may not be null")
         }
@@ -2170,16 +2164,13 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             throw new IllegalArgumentException("Revision may not be deleted")
         }
         Model model = revision.model
-        if (MAKE_PUBLICATION_ID) {
-            model.publicationId = model.publicationId ?: publicationIdGenerator.generate()
+        // grant read access this model revision to all existing curators
+        List<User> curators = userService.getUsersByRole("ROLE_CURATOR")
+        curators.each { curator ->
+            grantReadAccess(model, curator)
         }
-        model.firstPublished = new Date()
-        aclUtilService.addPermission(revision, "ROLE_CURATOR", BasePermission.READ)
-        //revision.state = ModelState.PUBLISHED
-        if (!model.save(flush: true)) {
-            throw new ModelException(
-                "Cannot publish model ${model.submissionId}:${b.errors.allErrors.inspect()}")
-        }
+        // grant read access and administration previlege to future curators
+        aclUtilService.addPermission(revision, "ROLE_CURATOR", BasePermission.ADMINISTRATION)
     }
 
     /**
