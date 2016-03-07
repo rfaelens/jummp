@@ -138,5 +138,6 @@ function addCollab(e) {
     thisCollaborator.userId = selectedItem[1];
     // triggers Team.addMember()
     collaborators.add(thisCollaborator);
-    		
+    console.log(thisCollaborator);
+    console.log(JSON.parse(JSON.stringify(collaborators)));
 }
