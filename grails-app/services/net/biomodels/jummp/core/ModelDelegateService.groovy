@@ -227,6 +227,17 @@ class ModelDelegateService implements IModelService {
         return false
     }
 
+    Boolean canSubmitForPublication(String modelId) {
+        def revision = getLatestRevision(modelId)
+        if ((revision.state == ModelState.UNPUBLISHED) && (revision.state != ModelState.UNDER_CURATION)) {
+            try {
+                return modelService.canSubmitForPublication(Revision.get(revision.id))
+            } catch (Exception e) {
+                return false
+            }
+        }
+        return false
+    }
     Boolean canValidate(String modelId) {
         def revision = getLatestRevision(modelId)
         if (revision.state != ValidationState.APPROVED) {
@@ -335,6 +346,9 @@ class ModelDelegateService implements IModelService {
         modelService.unpublishModelRevision(Revision.get(revision.id))
     }
 
+    void submitModelRevisionForPublication(RevisionTransportCommand revision) {
+        modelService.submitModelRevisionForPublication(Revision.get(revision.id))
+    }
 
     ModelTransportCommand findByPerennialIdentifier(String perennialId) {
         def model = ModelAdapter.findByPerennialIdentifier(perennialId)

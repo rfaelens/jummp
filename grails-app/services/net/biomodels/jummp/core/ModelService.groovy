@@ -2036,6 +2036,31 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     }
 
     /**
+     * Tests if the user can submit this revision for publication
+     * Only a User or an Administrator or other Curators are allowed to call this
+     * method.
+     * @param revision The Revision to be published
+     */
+    @PostLogging(LoggingEventType.SUBMIT_FOR_PUBLICATION)
+    @Profiled(tag="modelService.canSubmitForPublication")
+    public boolean canSubmitForPublication(Revision revision) {
+        if (!revision) {
+            return false
+        }
+        if (revision.deleted) {
+            return false
+        }
+        if (revision.model.deleted) {
+            return false
+        }
+        if ((SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN") || SpringSecurityUtils.ifAnyGranted("ROLE_USER")) &&
+            (!SpringSecurityUtils.ifAnyGranted("ROLE_CURATOR"))) {
+            return true
+        }
+        return false
+    }
+
+    /**
          * Tests if the user can validate this revision
          * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
          * method.
@@ -2157,6 +2182,35 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         aclUtilService.deletePermission(revision, "ROLE_ANONYMOUS", BasePermission.READ)
         revision.state=ModelState.UNPUBLISHED
         revision.save(flush:true)
+    }
+
+    /**
+     * Makes a Model Revision publicly available.
+     * This means that ROLE_USER and ROLE_ANONYMOUS gain read access to the Revision and by that also to
+     * the Model.
+     *
+     * Only a Curator with write permission on the Revision or an Administrator are allowed to call this
+     * method.
+     * @param revision The Revision to be published
+     */
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')") //used to be: (hasRole('ROLE_USER') and hasPermission(#revision, admin))
+    @PostLogging(LoggingEventType.SUBMIT_FOR_PUBLICATION)
+    @Profiled(tag="modelService.submitModelRevisionForPublication")
+    public void submitModelRevisionForPublication(Revision revision) {
+        if (!revision) {
+            throw new IllegalArgumentException("Revision may not be null")
+        }
+        if (revision.deleted) {
+            throw new IllegalArgumentException("Revision may not be deleted")
+        }
+        Model model = revision.model
+        // grant read access this model revision to all existing curators
+        List<User> curators = userService.getUsersByRole("ROLE_CURATOR")
+        curators.each { curator ->
+            grantReadAccess(model, curator)
+        }
+        // grant read access and administrative privilege to future curators
+        aclUtilService.addPermission(revision, "ROLE_CURATOR", BasePermission.ADMINISTRATION)
     }
 
     /**

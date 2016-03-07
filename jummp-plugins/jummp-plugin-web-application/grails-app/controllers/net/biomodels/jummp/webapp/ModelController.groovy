@@ -103,7 +103,7 @@ class ModelController {
      * The list of actions for which we should not automatically create an audit item.
      */
     final List<String> AUDIT_EXCEPTIONS = ['updateFlow', 'createFlow', 'uploadFlow',
-                'showWithMessage', 'share', 'getFileDetails']
+                'showWithMessage', 'share', 'getFileDetails','submitForPublication']
 
     def beforeInterceptor = [action: this.&auditBefore, except: AUDIT_EXCEPTIONS]
 
@@ -221,6 +221,8 @@ class ModelController {
             }
             final String PERENNIAL_ID = (rev.model.publicationId) ?: (rev.model.submissionId)
             boolean showPublishOption = modelDelegateService.canPublish(PERENNIAL_ID)
+            boolean canSubmitForPublication = modelDelegateService.canSubmitForPublication(PERENNIAL_ID)
+            boolean show = modelDelegateService.canPublish(PERENNIAL_ID)
             boolean canUpdate = modelDelegateService.canAddRevision(PERENNIAL_ID)
             boolean canDelete = modelDelegateService.canDelete(PERENNIAL_ID)
             boolean canShare = modelDelegateService.canShare(PERENNIAL_ID)
@@ -243,6 +245,7 @@ class ModelController {
                         canShare: canShare,
                         haveAnnotations: haveAnnotations,
                         showPublishOption: showPublishOption,
+                        canSubmitForPublication: canSubmitForPublication,
                         validationLevel: rev.getValidationLevelMessage()
             ]
             if (rev.id == modelDelegateService.getLatestRevision(PERENNIAL_ID).id) {
@@ -269,8 +272,7 @@ class ModelController {
 
     def files = {
         try {
-            def revisionFiles = modelDelegateService.getRevisionFromParams(params.id,
-                        params.revisionId).files
+            def revisionFiles = modelDelegateService.getRevisionFromParams(params.id, params.revisionId).files
             def responseFiles = revisionFiles.findAll { !it.hidden }
             respond new net.biomodels.jummp.webapp.rest.model.show.ModelFiles(responseFiles)
         } catch(Exception err) {
@@ -305,6 +307,22 @@ class ModelController {
             redirect(action: "showWithMessage",
                 id: rev.identifier(),
                 params: [flashMessage: e.message])
+        }
+    }
+
+    def submitForPublication = {
+        try {
+            def rev = modelDelegateService.getRevisionFromParams(params.id)
+            modelDelegateService.submitModelRevisionForPublication(rev)
+
+            def notification = [revision:rev, user:getUsername(), perms: modelDelegateService.getPermissionsMap(rev.model.submissionId)]
+            sendMessage("seda:model.submitForPublication", notification)
+
+            redirect(action: "showWithMessage",
+                id: rev.identifier(),
+                params: [flashMessage: "Model has been submitted to the curators for publication."])
+        } catch (Exception e) {
+            log.error(e.message, e)
         }
     }
 
