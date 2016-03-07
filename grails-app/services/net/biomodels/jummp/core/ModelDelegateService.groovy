@@ -238,30 +238,6 @@ class ModelDelegateService implements IModelService {
         }
         return false
     }
-    Boolean canValidate(String modelId) {
-        def revision = getLatestRevision(modelId)
-        if (revision.state != ValidationState.APPROVED) {
-            try {
-                return modelService.canValidate(Revision.get(revision.id))
-            }
-            catch(Exception e) {
-                return false
-            }
-        }
-        return false
-    }
-    Boolean canShowValidateReport(String modelId) {
-        def revision = getLatestRevision(modelId)
-        if (revision.state != ValidationState.APPROVED ) {
-            try {
-                return modelService.canValidate(Revision.get(revision.id))
-            }
-            catch(Exception e) {
-                return false
-            }
-        }
-        return false
-    }
 
     List<RepositoryFileTransportCommand> retrieveModelFiles(RevisionTransportCommand revision)
             throws ModelException {
