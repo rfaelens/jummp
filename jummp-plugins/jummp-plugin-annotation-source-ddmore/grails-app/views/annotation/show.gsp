@@ -203,4 +203,7 @@
 
 </script>
 </body>
+<content tag="contexthelp">
+    annotate
+</content>
 
