@@ -105,6 +105,13 @@ class UserService implements IUserService {
         return null
     }
 
+    List<User> getUsersByRole(String role) {
+        def users =
+            UserRole.findAllByRole(Role.findByAuthority(role)).collect {
+                it.user }
+        return users
+    }
+
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag = "userService.changePassword")
     void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {
