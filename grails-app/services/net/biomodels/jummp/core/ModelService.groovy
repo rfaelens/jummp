@@ -2169,7 +2169,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         curators.each { curator ->
             grantReadAccess(model, curator)
         }
-        // grant read access and administration previlege to future curators
+        // grant read access and administrative privilege to future curators
         aclUtilService.addPermission(revision, "ROLE_CURATOR", BasePermission.ADMINISTRATION)
     }
 
