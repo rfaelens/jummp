@@ -738,7 +738,6 @@ class SubmissionService {
             } else {
                 workingMemory.put("model_id", newlyCreated.model.submissionId)
             }
-            println("Get all curators and send notifications to them.")
 
             return changes
         }
