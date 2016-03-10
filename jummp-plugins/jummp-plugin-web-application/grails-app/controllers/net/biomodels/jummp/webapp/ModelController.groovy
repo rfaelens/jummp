@@ -776,7 +776,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                     return error()
                 }
                 Map<String,String> modifications = new HashMap<String,String>()
-                    if (params.PubLinkProvider && params.PublicationLink) {
+                    if (params.PubLinkProvider) {
                         if (!pubMedService.verifyLink(params.PubLinkProvider,params.PublicationLink)) {
                             flash.flashMessage = "The link is not a valid ${params.PubLinkProvider}"
                             return error()
