@@ -113,6 +113,9 @@ class BootStrap {
         */
         addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.CUSTOM,
                          pattern:"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",))
+        addPublicationLinkProvider(new PubLinkProvTC(linkType:PublicationLinkProvider.LinkType.MANUAL_ENTRY,
+            pattern:"",))
+
         if (Environment.getCurrent() != Environment.TEST) {
              if (!Role.findByAuthority("ROLE_USER")) {
                 new Role(authority: "ROLE_USER").save(flush: true)
