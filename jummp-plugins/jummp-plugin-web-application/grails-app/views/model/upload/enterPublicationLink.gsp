@@ -54,22 +54,24 @@
                 <table class="formtable">
                     <tbody>
                          <tr class="prop">
+                            <%
+                                linkSourceTypes = PublicationLinkProvider.LinkType.
+                                    values().collect { it.toString() }
+                            %>
                             <td class="value" style="vertical-align:top;">
                                 <g:if test="${publication}">
-                                            <g:select name="PubLinkProvider"
-                                            from="${PublicationLinkProvider.LinkType.
-                                                    values().collect { it.toString() }}"
-                                                    value="${publication.linkProvider.linkType.toString()}"
-                                                    noSelection="['':'-Please select publication link type-']"/>
-                                            <g:textField name="PublicationLink"
-                                                         value="${publication.link}"/>
+                                    <g:select name="PubLinkProvider" id="pubLinkProvider"
+                                    from="${linkSourceTypes}"
+                                            value="${publication.linkProvider.linkType.toString()}"
+                                            noSelection="['':'- No publication available -']"/>
+                                    <g:textField name="PublicationLink" id="publicationLink" size="100"
+                                                 value="${publication.link}"/>
                                 </g:if>
                                 <g:else>
-                                            <g:select name="PubLinkProvider"
-                                            from="${PublicationLinkProvider.LinkType.
-                                                    values().collect { it.toString() }}"
-                                            noSelection="['':'-Please select publication link type-']"/>
-                                            <g:textField name="PublicationLink"/>
+                                    <g:select name="PubLinkProvider" id="pubLinkProvider"
+                                    from="${linkSourceTypes}"
+                                    noSelection="['':'- No publication available -']"/>
+                                    <g:textField name="PublicationLink" id="publicationLink" size="100"/>
                                 </g:else>
                             </td>
                         </tr>
