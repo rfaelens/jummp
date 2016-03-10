@@ -80,13 +80,16 @@ class PubMedService {
     }
 
     boolean verifyLink(String linkTypeAsString, String link) {
-    	PublicationLinkProvider linkType=PublicationLinkProvider.createCriteria().get() {
+    	PublicationLinkProvider pubLinkProvider=PublicationLinkProvider.createCriteria().get() {
         	eq("linkType",PublicationLinkProvider.LinkType.valueOf(linkTypeAsString))
         }
-        if (!linkType) {
+        if (!pubLinkProvider) {
         	return false
         }
-        Pattern p = Pattern.compile(linkType.pattern);
+        if (PublicationLinkProvider.LinkType.MANUAL_ENTRY == pubLinkProvider.linkType) {
+            return true
+        }
+        Pattern p = Pattern.compile(pubLinkProvider.pattern);
         Matcher m = p.matcher(link);
         return m.matches()
     }
