@@ -30,7 +30,7 @@ class DefaultMetadataInputSource implements MetadataInputSource {
         false
     }
 
-    List<SectionContainer> buildObjectModel(RevisionTransportCommand revision) {
-        []
+    Set<SectionContainer> buildObjectModel(RevisionTransportCommand revision) {
+        new LinkedHashSet<SectionContainer>()
     }
 }

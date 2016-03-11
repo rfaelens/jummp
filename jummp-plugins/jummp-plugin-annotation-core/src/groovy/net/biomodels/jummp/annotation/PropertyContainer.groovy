@@ -23,9 +23,14 @@ package net.biomodels.jummp.annotation
 import groovy.transform.CompileStatic
 
 @CompileStatic
-class PropertyContainer extends SimpleVertex {
+class PropertyContainer extends SimpleVertex implements Comparable<PropertyContainer> {
     AnnotationPropertyRange range
     List<ValueContainer> values = []
     String tooltip
+    int relativeOrder
+
+    int compareTo(PropertyContainer other) {
+        this.relativeOrder <=> other?.relativeOrder
+    }
 }
 

@@ -134,7 +134,7 @@ grails.project.dependency.resolution = {
         }
         // need to add this as an explicit dependency to configure exclusions
         // can't use apache-jena-libs due to pom packaging, rely on jena-tdb instead
-        compile("eu.ddmore:lib-metadata:0.1.1-SNAPSHOT") {
+        compile("eu.ddmore:lib-metadata:0.1.2-SNAPSHOT") {
             excludes 'apache-jena-libs'
         }
         compile "org.apache.jena:jena-tdb:1.1.2"

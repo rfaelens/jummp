@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2015 EMBL-European Bioinformatics Institute (EMBL-EBI),
+ * Copyright (C) 2010-2016 EMBL-European Bioinformatics Institute (EMBL-EBI),
  * Deutsches Krebsforschungszentrum (DKFZ)
  *
  * This file is part of Jummp.
@@ -22,20 +22,22 @@ package net.biomodels.jummp.annotation
 
 import groovy.transform.CompileStatic
 
-/*
- * Contains sections that represent the immediate subchildren of the root vertex.
- */
 @CompileStatic
-class SectionContainer extends SimpleVertex implements Comparable<SectionContainer> {
-    String name
-    String id
-    /* The order is relative to other siblings, not global */
-    int relativeOrder
-    TreeSet<PropertyContainer> annotationProperties = new TreeSet<>()
-    String info
+class CompositeSectionContainer extends SectionContainer {
+    Set<SectionContainer> children
 
-    int compareTo(SectionContainer other) {
-        this.relativeOrder <=> other?.relativeOrder
+    boolean add(SectionContainer s) {
+        assert children != null
+        children.add s
+    }
+
+    boolean addAll(Collection<? extends SectionContainer> sections) {
+        assert children != null
+        children.addAll sections
+    }
+
+    Iterator<SectionContainer> iterator() {
+        assert children != null
+        children.iterator()
     }
 }
-

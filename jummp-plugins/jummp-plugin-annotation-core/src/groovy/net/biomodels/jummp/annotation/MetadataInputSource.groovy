@@ -26,6 +26,6 @@ import net.biomodels.jummp.core.model.RevisionTransportCommand
 @CompileStatic
 interface MetadataInputSource {
     boolean supports(RevisionTransportCommand revision)
-    List<SectionContainer> buildObjectModel(RevisionTransportCommand revision)
+    Set<SectionContainer> buildObjectModel(RevisionTransportCommand revision)
 }
 
