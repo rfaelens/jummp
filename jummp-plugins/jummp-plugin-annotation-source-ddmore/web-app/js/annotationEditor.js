@@ -211,7 +211,7 @@ Handlebars.registerHelper("renderSingleUnconstrainedValue", function() {
     var values = this.values ? this.values.first() : '';
     var isReadOnly = this.readOnly ? true : false;
 
-    var result = "<input type='text'";
+    var result = "<input type='text' size='50'";
     if (isRequired) {
         result += " required";
     }
