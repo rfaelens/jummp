@@ -110,7 +110,7 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
             return
         }
         final String name = src.sectionLabel
-        final String tooltip = target.info
+        final String tooltip = src.toolTip
         final int order = src.sectionOrder
         /*
          * src.properties seems to return the properties of the Groovy object src,
