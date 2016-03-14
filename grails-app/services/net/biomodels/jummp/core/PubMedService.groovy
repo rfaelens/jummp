@@ -34,7 +34,7 @@
 
 package net.biomodels.jummp.core
 
-import net.biomodels.jummp.core.adapters.DomainAdapter 
+import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.model.PublicationPerson
 import net.biomodels.jummp.model.PublicationLinkProvider
@@ -71,20 +71,23 @@ class PubMedService {
         	return fetchPublicationData(id)
         }
     }
-    
+
     PublicationTransportCommand getPublication(PublicationTransportCommand cmd) throws JummpException {
-    	if (PublicationLinkProvider.LinkType.valueOf(cmd.linkProvider.linkType)==PublicationLinkProvider.LinkType.PUBMED) {
-    		return getPublication(cmd.link)
-    	}
-    	return null
+        PublicationLinkProvider.LinkType type =
+                PublicationLinkProvider.LinkType.findLinkTypeByLabel(cmd.linkProvider.linkType)
+        if (type == PublicationLinkProvider.LinkType.PUBMED) {
+            return getPublication(cmd.link)
+        }
+        return null
     }
 
     boolean verifyLink(String linkTypeAsString, String link) {
-    	PublicationLinkProvider pubLinkProvider=PublicationLinkProvider.createCriteria().get() {
-        	eq("linkType",PublicationLinkProvider.LinkType.valueOf(linkTypeAsString))
+        def linkProvider = PublicationLinkProvider.LinkType.findLinkTypeByLabel(linkTypeAsString)
+        PublicationLinkProvider pubLinkProvider = PublicationLinkProvider.createCriteria().get() {
+            eq("linkType", linkProvider)
         }
         if (!pubLinkProvider) {
-        	return false
+            return false
         }
         if (PublicationLinkProvider.LinkType.MANUAL_ENTRY == pubLinkProvider.linkType) {
             return true
@@ -93,12 +96,12 @@ class PubMedService {
         Matcher m = p.matcher(link);
         return m.matches()
     }
-    
+
     public List getPersons(Publication publication) {
         PublicationPerson.findAllByPublication(publication,
                     [sort: "position", order: "asc"])
     }
-    
+
     public void addPublicationAuthor(Publication publication,
                                      Person person,
                                      String realName,
@@ -109,8 +112,8 @@ class PubMedService {
                                 position: position)
       tmp.save(failOnError:true, flush: true);
      }
-    
-    
+
+
     private setFieldIfItExists(String fieldName, PublicationTransportCommand publication, def xmlField, boolean castToInt) {
     	try
     	{
@@ -129,7 +132,7 @@ class PubMedService {
     		e.printStackTrace()
     	}
     }
-    
+
     /**
      * Downloads the XML describing the PubMed resource and parses the Publication information.
      * @param id The PubMed Identifier
@@ -149,7 +152,7 @@ class PubMedService {
         def slurper
         try {
             slurper = new XmlSlurper().parse(url.openStream())
-        } 
+        }
         catch (SAXParseException e) {
             throw new JummpException("Could not parse PubMed information", e)
         }
@@ -164,7 +167,7 @@ class PubMedService {
         setFieldIfItExists("title", publication, slurper.resultList.result.title, false)
         setFieldIfItExists("affiliation", publication, slurper.resultList.result.affiliation, false)
         setFieldIfItExists("synopsis", publication, slurper.resultList.result.abstractText, false)
-        
+
         if (slurper.resultList.result.journalInfo) {
         	setFieldIfItExists("month", publication, slurper.resultList.result.journalInfo.monthOfPublication, true)
         	setFieldIfItExists("year", publication, slurper.resultList.result.journalInfo.yearOfPublication, true)
@@ -174,7 +177,7 @@ class PubMedService {
         	setFieldIfItExists("journal", publication, slurper.resultList.result.journalInfo.journal.title, false)
         }
         parseAuthors(slurper, publication)
-        
+
         return publication
     }
 
@@ -194,10 +197,10 @@ class PubMedService {
             publication.authors.add(author);
         }
     }
-    
-    
-    
-    
+
+
+
+
     private void reconcile(Publication publication, def tobeAdded) {
         def existing = getPersons(publication)
         tobeAdded.eachWithIndex { newAuthor, index ->
@@ -238,8 +241,8 @@ class PubMedService {
             }
          }
     }
-    
-    
+
+
     Publication fromCommandObject(PublicationTransportCommand cmd) {
         Publication publication = Publication.createCriteria().get() {
             eq("link",cmd.link)
@@ -278,5 +281,5 @@ class PubMedService {
         reconcile(publ, cmd.authors)
         return publ
     }
-    
+
 }

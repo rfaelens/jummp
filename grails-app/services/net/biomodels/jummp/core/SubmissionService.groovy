@@ -294,15 +294,14 @@ class SubmissionService {
         @TypeChecked(TypeCheckingMode.SKIP)
         protected boolean updatePubs(MTC model, String publinkType, String publink) {
             boolean refreshPublication = false
-            def linkType = PublicationLinkProvider.LinkType.valueOf(publinkType)
-            if (!model.publication || model.publication.link != publink ||
-                    model.publication.linkProvider?.linkType != publinkType) {
+            PublicationLinkProvider.LinkType linkType = PublicationLinkProvider.LinkType.findLinkTypeByLabel(publinkType)
+            if (publinkType) {
                 model.publication = new PublicationTransportCommand()
-                refreshPublication = true;
+                refreshPublication = true
             }
             model.publication.link = publink
             def criteria = PublicationLinkProvider.createCriteria() as HibernateCriteriaBuilder
-            def publSrc = criteria.get() {
+            PublicationLinkProvider publSrc = criteria.get() {
                 eq("linkType", linkType)
             }
             model.publication.linkProvider = DomainAdapter.getAdapter(publSrc).toCommandObject()
@@ -425,6 +424,9 @@ class SubmissionService {
                     updatePubs(workingMemory.get("ModelTC") as MTC,
                         modifications.get("PubLinkProvider"),
                         modifications.get("PubLink")))
+                if (workingMemory.containsKey("Authors")) {
+                    workingMemory.remove("Authors")
+                }
             }
         }
 

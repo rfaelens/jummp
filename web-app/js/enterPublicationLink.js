@@ -6,7 +6,7 @@ $(document).ready(function () {
         $('#publicationLink').hide();
     }
     $('#pubLinkProvider').on('change', function() {
-        if (this.value == 'PUBMED' || this.value == 'DOI' || this.value == 'CUSTOM') {
+        if (this.value == 'PubMed ID' || this.value == 'DOI' || this.value == 'Other Link (URL)') {
             $('#publicationLink').show();
         } else {
             $('#publicationLink').val("");

@@ -12,8 +12,8 @@
  Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
- 
- You should have received a copy of the GNU Affero General Public License along 
+
+ You should have received a copy of the GNU Affero General Public License along
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
 
@@ -48,8 +48,10 @@
                 publication = revision?.model?.publication
             %>
             <g:if test="${publication}">
-                Currently, the model is associated with: 
-                <g:render  model="[model:model]" template="/templates/showPublication" />
+                <g:if test="${publication.title && (publication.affiliation || publication.synopsis)}">
+                    Currently, the model is associated with:
+                    <g:render  model="[model:model]" template="/templates/showPublication" />
+                </g:if>
             </g:if>
             <div class="dialog">
                 <table class="formtable">
@@ -57,13 +59,13 @@
                          <tr class="prop">
                             <%
                                 linkSourceTypes = PublicationLinkProvider.LinkType.
-                                    values().collect { it.toString() }
+                                    values().collect { it.label }
                             %>
                             <td class="value" style="vertical-align:top;">
                                 <g:if test="${publication}">
                                     <g:select name="PubLinkProvider" id="pubLinkProvider"
                                     from="${linkSourceTypes}"
-                                            value="${publication.linkProvider.linkType.toString()}"
+                                            value="${publication.linkProvider.linkType}"
                                             noSelection="['':'- No publication available -']"/>
                                     <g:textField name="PublicationLink" id="publicationLink" size="100"
                                                  value="${publication.link}"/>

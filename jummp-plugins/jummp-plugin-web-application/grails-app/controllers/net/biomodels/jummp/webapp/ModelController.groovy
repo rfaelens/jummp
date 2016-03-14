@@ -39,6 +39,7 @@ import eu.ddmore.metadata.service.ValidationException
 import eu.ddmore.publish.service.PublishException
 import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
+import net.biomodels.jummp.model.PublicationLinkProvider
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -765,6 +766,8 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                 }
                 modifications.put("changeStatus", changeStatus);
                 submissionService.refineModelInfo(flow.workingMemory, modifications)
+                ModelTransportCommand model = flow.workingMemory.get('ModelTC') as ModelTransportCommand
+                RevisionTransportCommand revision = flow.workingMemory.get("RevisionTC") as RevisionTransportCommand
             }.to "enterPublicationLink"
             on("Cancel").to "cleanUpAndTerminate"
             on("Back"){}.to "uploadFiles"
@@ -777,7 +780,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                 }
                 Map<String,String> modifications = new HashMap<String,String>()
                     if (params.PubLinkProvider) {
-                        if (!pubMedService.verifyLink(params.PubLinkProvider,params.PublicationLink)) {
+                        if (!pubMedService.verifyLink(params.PubLinkProvider, params.PublicationLink)) {
                             flash.flashMessage = "The link is not a valid ${params.PubLinkProvider}"
                             return error()
                         }
@@ -792,6 +795,15 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                             flow.workingMemory.put("RetrievePubDetails", false)
                         }
                     } else {
+                        ModelTransportCommand model = flow.workingMemory.get('ModelTC') as ModelTransportCommand
+                        RevisionTransportCommand revision = flow.workingMemory.get("RevisionTC") as RevisionTransportCommand
+                        def publication = revision.model.publication
+                        if (publication) {
+                            revision.model.publication = null
+                            if (flow.workingMemory.containsKey("Authors")) {
+                                flow.workingMemory.remove("Authors")
+                            }
+                        }
                         flow.workingMemory.put("RetrievePubDetails", false)
                     }
             }.to "getPublicationDataIfPossible"
@@ -806,8 +818,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                     if (model.publication.link && model.publication.linkProvider) {
                         def retrieved
                         try {
-                            retrieved = pubMedService.
-                            getPublication(model.publication)
+                            retrieved = pubMedService.getPublication(model.publication)
                         }
                         catch(Exception e) {
                             log.error(e.message, e)
