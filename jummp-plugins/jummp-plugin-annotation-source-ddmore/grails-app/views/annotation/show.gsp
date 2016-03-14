@@ -39,6 +39,7 @@
     <script id="tab-headings-template" type="text/x-handlebars-template"></script>
     <script id="section-template" type="text/x-handlebars-template">
         <div id="{{this.id}}">
+            <p>{{this.info}}</p>
             <div class="properties">
             </div>
         </div>
