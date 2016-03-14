@@ -28,20 +28,20 @@ import net.biomodels.jummp.core.model.PublicationLinkProviderTransportCommand
  */
 public class PublicationLinkProviderAdapter extends DomainAdapter {
     PublicationLinkProvider linkProvider
-    
+
     PublicationLinkProviderTransportCommand toCommandObject() {
-        return new PublicationLinkProviderTransportCommand(linkType:linkProvider.linkType.toString(),
+        return new PublicationLinkProviderTransportCommand(linkType:linkProvider.linkType.label,
                 pattern: linkProvider.pattern,
                 identifiersPrefix: linkProvider.identifiersPrefix
                 )
     }
-    
+
     static PublicationLinkProvider fromCommandObject(PublicationLinkProviderTransportCommand cmd) {
  	    PublicationLinkProvider link=PublicationLinkProvider.findByLinkType(cmd.linkType)
  	    if (link) {
  	    	return link
  	    }
-    	return new PublicationLinkProvider(linkType:PublicationLinkProvider.LinkType.valueOf(cmd.linkType),
+    	return new PublicationLinkProvider(linkType:PublicationLinkProvider.LinkType.findLinkTypeByLabel(cmd.linkType),
     									   pattern:cmd.pattern,
     									   identifiersPrefix:cmd.identifiersPrefix)
     }

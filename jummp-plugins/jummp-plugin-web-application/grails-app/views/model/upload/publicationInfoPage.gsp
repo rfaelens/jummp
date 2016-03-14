@@ -92,21 +92,21 @@
                           					<span><input class="input20" size="20" type="text" id="newAuthorName"/></span>
                           				</li>
                           				<li>
-                          					<label style="display:block;margin-left:0px">Orcid</label>
+                          					<label style="display:block;margin-left:0px">ORCID</label>
                           					<span>
-                          					<input class="input20" size="20" type="text" id="newAuthorOrcid"/>
+                          					<input class="input20" size="20" type="text" id="newAuthorOrcid" title="Enter your ORCID ID. For example, an ORCID profile link is often formed as http://orcid.org/0000-0002-2876-6046, therefore this profile's ORCID ID is 0000-0002-2876-6046"/>
                           					</span>
                           				</li>
-                          				<li>
+                          				<li hidden>
                           					<label style="display:block;margin-left:0px">Institution</label>
                           					<span><input class="input20" size="20" type="text" id="newAuthorInstitution"/></span>
-                          				</li>	
+                          				</li>
                           				<li>
                           					<a href="#" id="addButton" class="addButton">Add</a>
                           				</li>
                           			</ul>
                           		</div>
-                          			
+
                             </td>
                             <td>
                                 <label>
