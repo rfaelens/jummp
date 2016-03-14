@@ -103,6 +103,7 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
         }
         response
     }
+
     void processSectionProperties(Section src, SectionContainer target) {
         if (!target) {
             log.error("BUG:Encountered GenericSection ${src.dump()} without a parent container")
@@ -111,10 +112,18 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
         final String name = src.sectionLabel
         final String tooltip = target.info
         final int order = src.sectionOrder
-        src.properties.each { Property p ->
+        /*
+         * src.properties seems to return the properties of the Groovy object src,
+         * i.e. the instance variables.
+         * the problem goes away if we annotate this method with @CompileDynamic,
+         * but then we'd lose the performance improvements of static compilation.
+         */
+        java.lang.reflect.Method m = src.getClass().getMethod('getProperties', null)
+        List<Property> props = (List<Property>) m.invoke(src, m.parameterTypes)
+        props.each { Property p ->
             Id pId = p.propertyId
             def pVertex = new PropertyContainer(value: name, uri: pId.uri,
-            tooltip: tooltip, range: buildPropertyRange(p.range), relativeOrder: order)
+                    tooltip: tooltip, range: buildPropertyRange(p.range), relativeOrder: order)
             buildValuesForProperty(p, pVertex)
             target.annotationProperties.add(pVertex)
         }
