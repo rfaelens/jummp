@@ -31,6 +31,7 @@ import groovy.transform.CompileStatic
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import ontologies.OntologySource
 
 @CompileStatic
 class DDMoReMetadataInputSource implements MetadataInputSource {
@@ -133,7 +134,15 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
     private void buildValuesForProperty(Property p, PropertyContainer vtx) {
         List<Value> values
         if(p.getValueSetType().equals(ValueSetType.ONTOLOGY)){
-            //TODO: connect to ols to get values
+            def ontologySources = service.findOntologyResourcesForProperty(p)
+            if (ontologySources) {
+                def autoCompletionOpts = [:]
+                List<String> ontologyIDs = ontologySources.collect { OntologySource o ->
+                    o.sourceId
+                }
+                autoCompletionOpts['src'] = ontologyIDs
+                vtx.options['autoCompletion'] = autoCompletionOpts
+            }
         } else {
             values = service.findValuesForProperty(p)
         }
