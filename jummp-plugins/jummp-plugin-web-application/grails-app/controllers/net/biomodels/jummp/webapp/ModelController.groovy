@@ -813,8 +813,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
         getPublicationDataIfPossible {
             action {
                 if (flow.workingMemory.remove("RetrievePubDetails") as Boolean) {
-                    ModelTransportCommand model =
-                                flow.workingMemory.get("ModelTC") as ModelTransportCommand
+                    ModelTransportCommand model = flow.workingMemory.get("ModelTC") as ModelTransportCommand
                     if (model.publication.link && model.publication.linkProvider) {
                         def retrieved
                         try {
