@@ -2115,14 +2115,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         Model model = revision.model
 
         //validating publish process
-        if(!revision.validated){
-            throw new PublishException("You cannot publish this model. Invalid revision.")
-        }
-
-        if(model.publication==null){
-            throw new PublishException("You cannot publish this model. Please add publication information.")
-        }
-
         if(!revision.validationLevel.equals(ValidationState.APPROVED)){
             throw new PublishException("You cannot publish this model. Please check the annotations.")
         }
@@ -2132,7 +2124,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         def qualifierXrefs = stmtsWithQualifier.collect { Statement s -> s.object }
         ResourceReference resourceReference = qualifierXrefs.first()
         boolean orignalModel = true;
-        if(resourceReference.name.toLowerCase().equals("no")){
+        if(resourceReference.name.toLowerCase().equals("n")){
             orignalModel = false;
         }
 
@@ -2142,7 +2134,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         }
 
         def valid = publishValidator.validatePublish(pubinfo)
-        if(!valid){
+        if(valid == null){
             throw new PublishException("Submission did not match any of the scenarios. Please upload all required files")
         }
 
