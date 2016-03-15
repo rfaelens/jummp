@@ -80,7 +80,7 @@
                                 </label>
                             </td>
                             <td>
-                          	<select class="input50" id="authorList" name="authorList" size="2">
+                            <select class="input50" id="authorList" name="authorList" size="${workingMemory.get("Authors").size()}">
                           		<g:each in="${workingMemory.get("Authors")}">
                           			<option value="${it.userRealName}<init>${it.orcid ?: "no_orcid"}<init>${it.institution ?: "no_institution_provided"}">${it.userRealName}</option>
                           		</g:each>
