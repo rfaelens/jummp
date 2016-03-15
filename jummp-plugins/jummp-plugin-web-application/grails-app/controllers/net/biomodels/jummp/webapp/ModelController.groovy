@@ -785,8 +785,10 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                             return error()
                         }
                         ModelTransportCommand model = flow.workingMemory.get("ModelTC") as ModelTransportCommand
-                        if (params.PubLinkProvider !=model.publication?.linkProvider ||
-                                        params.PublicationLink != model.publication?.link) {
+                        boolean providerHasChanged = params.PubLinkProvider !=
+                                model.publication?.linkProvider?.linkType
+                        boolean linkHasChanged = params.PublicationLink != model.publication?.link
+                        if (providerHasChanged || linkHasChanged) {
                             modifications.put("PubLinkProvider", params.PubLinkProvider)
                             modifications.put("PubLink", params.PublicationLink)
                             submissionService.updatePublicationLink(flow.workingMemory,
