@@ -828,6 +828,11 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                             flow.workingMemory.put("Authors", model.publication.authors)
                         }
                     }
+                    // use authors of the existing publication if available
+                    if (model.publication) {
+                        flow.workingMemory.put("Authors", model.publication.authors)
+                    }
+                    flow.workingMemory.put("Authors", model.publication.authors)
                     conversation.changesMade.add("Amended publication details")
                     publicationInfoPage()
                 }

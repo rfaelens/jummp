@@ -28,16 +28,13 @@
 * that of the covered work.}
 **/
 
-
-
-
-
 package net.biomodels.jummp.core
 
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.model.PublicationPerson
 import net.biomodels.jummp.model.PublicationLinkProvider
+import org.springframework.validation.ObjectError
 import org.xml.sax.SAXParseException
 import org.springframework.transaction.annotation.Transactional
 import net.biomodels.jummp.core.model.PublicationTransportCommand
@@ -45,6 +42,8 @@ import net.biomodels.jummp.plugins.security.Person
 import java.util.regex.Pattern
 import java.util.regex.Matcher
 import net.biomodels.jummp.core.adapters.PublicationLinkProviderAdapter
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 /**
  * @short Service for fetching Publication Information for PubMed resources.
  *
@@ -55,20 +54,20 @@ import net.biomodels.jummp.core.adapters.PublicationLinkProviderAdapter
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  */
 class PubMedService {
-
+    final Log log = LogFactory.getLog(getClass())
     static transactional = true
 
     PublicationTransportCommand getPublication(String id) throws JummpException {
-    	Publication publication = Publication.createCriteria().get() {
-    		eq("link",id)
-    		linkProvider {
-    			eq("linkType",PublicationLinkProvider.LinkType.PUBMED)
-    		}
-    	}
-    	if (publication) {
+        Publication publication = Publication.createCriteria().get() {
+            eq("link",id)
+            linkProvider {
+                eq("linkType",PublicationLinkProvider.LinkType.PUBMED)
+            }
+        }
+        if (publication) {
             return DomainAdapter.getAdapter(publication).toCommandObject();
         } else {
-        	return fetchPublicationData(id)
+            return fetchPublicationData(id)
         }
     }
 
@@ -115,22 +114,22 @@ class PubMedService {
 
 
     private setFieldIfItExists(String fieldName, PublicationTransportCommand publication, def xmlField, boolean castToInt) {
-    	try
-    	{
-    		if (xmlField && xmlField.size()==1) {
-    			String text=xmlField.text()
-    			def fields=Publication.getFields()
-    			if (castToInt) {
-    				publication."${fieldName}"=Integer.parseInt(text)
-    			}
-    			else {
-    				publication."${fieldName}"=text
-    			}
-    		}
-    	}
-    	catch(Exception e) {
-    		e.printStackTrace()
-    	}
+        try
+        {
+            if (xmlField && xmlField.size()==1) {
+                String text=xmlField.text()
+                def fields=Publication.getFields()
+                if (castToInt) {
+                    publication."${fieldName}"=Integer.parseInt(text)
+                }
+                else {
+                    publication."${fieldName}"=text
+                }
+            }
+        }
+        catch(Exception e) {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -160,7 +159,7 @@ class PubMedService {
             throw new JummpException("Error retrieving publication info", e)
         }
         PublicationLinkProvider link=PublicationLinkProvider.createCriteria().get() {
-        	eq("linkType",PublicationLinkProvider.LinkType.PUBMED)
+            eq("linkType",PublicationLinkProvider.LinkType.PUBMED)
         }
         PublicationTransportCommand publication = new PublicationTransportCommand(linkProvider: DomainAdapter.getAdapter(link).toCommandObject(), link: id)
         setFieldIfItExists("pages", publication, slurper.resultList.result.pageInfo, false)
@@ -169,12 +168,12 @@ class PubMedService {
         setFieldIfItExists("synopsis", publication, slurper.resultList.result.abstractText, false)
 
         if (slurper.resultList.result.journalInfo) {
-        	setFieldIfItExists("month", publication, slurper.resultList.result.journalInfo.monthOfPublication, true)
-        	setFieldIfItExists("year", publication, slurper.resultList.result.journalInfo.yearOfPublication, true)
-        	//setFieldIfItExists("day", publication, slurper.resultList.result.journalInfo.dateOfPublication, true) //we have integer, this returns a string
-        	setFieldIfItExists("volume", publication, slurper.resultList.result.journalInfo.volume, true)
-        	setFieldIfItExists("issue", publication, slurper.resultList.result.journalInfo.issue, true)
-        	setFieldIfItExists("journal", publication, slurper.resultList.result.journalInfo.journal.title, false)
+            setFieldIfItExists("month", publication, slurper.resultList.result.journalInfo.monthOfPublication, true)
+            setFieldIfItExists("year", publication, slurper.resultList.result.journalInfo.yearOfPublication, true)
+            //setFieldIfItExists("day", publication, slurper.resultList.result.journalInfo.dateOfPublication, true) //we have integer, this returns a string
+            setFieldIfItExists("volume", publication, slurper.resultList.result.journalInfo.volume, true)
+            setFieldIfItExists("issue", publication, slurper.resultList.result.journalInfo.issue, true)
+            setFieldIfItExists("journal", publication, slurper.resultList.result.journalInfo.journal.title, false)
         }
         parseAuthors(slurper, publication)
 
@@ -187,19 +186,16 @@ class PubMedService {
      * @param publication The publication to add the authors to
      */
     private void parseAuthors(def slurper, PublicationTransportCommand publication) {
-    	publication.authors=[];
-    	for (def authorXml in slurper.resultList.result.authorList.author) {
+        publication.authors=[];
+        for (def authorXml in slurper.resultList.result.authorList.author) {
             Person author = new Person()
             author.userRealName = authorXml.fullName[0].text()
             if (authorXml.authorId[0]?.@type=="ORCID") {
-            	author.orcid = authorXml.authorId[0].text()
+                author.orcid = authorXml.authorId[0].text()
             }
             publication.authors.add(author);
         }
     }
-
-
-
 
     private void reconcile(Publication publication, def tobeAdded) {
         def existing = getPersons(publication)
@@ -247,7 +243,7 @@ class PubMedService {
         Publication publication = Publication.createCriteria().get() {
             eq("link",cmd.link)
             linkProvider {
-                eq("linkType", PublicationLinkProvider.LinkType.valueOf(cmd.linkProvider.linkType))
+                eq("linkType", PublicationLinkProvider.LinkType.findLinkTypeByLabel(cmd.linkProvider.linkType))
             }
         }
         if (publication) {
@@ -277,8 +273,15 @@ class PubMedService {
                 pages: cmd.pages,
                 linkProvider: PublicationLinkProviderAdapter.fromCommandObject(cmd.linkProvider),
                 link: cmd.link)
-        publ.save(failOnError: true, flush: true)
-        reconcile(publ, cmd.authors)
+        if (publ.save(flush: true)) {
+            reconcile(publ, cmd.authors)
+        } else {
+            StringBuilder err = new StringBuilder()
+            publ.errors?.allErrors?.each { ObjectError e ->
+                err.append(e.defaultMessage).append('. ')
+            }
+            log.error("Error encountered while saving publication ${publ.dump()}: $err".toString())
+        }
         return publ
     }
 

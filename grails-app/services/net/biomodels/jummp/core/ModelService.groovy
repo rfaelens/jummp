@@ -789,14 +789,19 @@ HAVING rev.revisionNumber = max(revisions.revisionNumber)''', [
 
         if (revision.validate()) {
             model.addToRevisions(revision)
-            //save repoFiles, revision and model in one go
-            if (rev.model.publication) {
+            PublicationTransportCommand publicationTC = rev.model.publication
+            if (!publicationTC && model.publication) {
+                // delete db association if corresponding publication was removed in the UI
+                model.publication = null
+            } else if (publicationTC) {
+                // update db association with the value from the UI
                 try {
-                    model.publication = pubMedService.fromCommandObject(rev.model.publication)
+                    model.publication = pubMedService.fromCommandObject(publicationTC)
                 } catch(Exception e) {
                     log.error("Unable to record publication for ${rev.model}: ${e.message}", e)
                 }
             }
+            //save repoFiles, revision and model in one go
             revision.save()
             model.save()
             stopWatch.lap("Model persisted to the database.")
