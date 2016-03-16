@@ -337,7 +337,7 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
      */
     @Profiled(tag = "metadataService.persistAnnotationSchema")
     @Transactional
-    boolean persistAnnotationSchema(List<SectionContainer> sections) {
+    boolean persistAnnotationSchema(Collection<SectionContainer> sections) {
         def result = false
         def promise = Qualifier.async.task {
             sections.each { SectionContainer s ->
