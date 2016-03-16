@@ -296,7 +296,9 @@ class SubmissionService {
             boolean refreshPublication = false
             PublicationLinkProvider.LinkType linkType = PublicationLinkProvider.LinkType.findLinkTypeByLabel(publinkType)
             if (publinkType) {
-                model.publication = new PublicationTransportCommand()
+                if (!model.publication) {
+                    model.publication = new PublicationTransportCommand()
+                }
                 refreshPublication = true
             }
             model.publication.link = publink
