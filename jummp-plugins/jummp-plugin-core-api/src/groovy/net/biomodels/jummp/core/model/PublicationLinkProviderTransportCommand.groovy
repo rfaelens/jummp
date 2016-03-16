@@ -20,21 +20,8 @@
 
 package net.biomodels.jummp.core.model
 
-import org.grails.databinding.BindUsing
-
 class PublicationLinkProviderTransportCommand implements Serializable {
     String linkType
-    /*
-     * As of Grails 2.3, empty strings are coerced to null by the default data binder.
-     * We define a custom binding policy for this field that does not modify empty strings
-     * because we're trying to register a publication link provider (manual entry) which has
-     * an empty pattern and null patterns fail validation.
-     *
-     * See http://grails.github.io/grails-doc/2.3.11/api/org/grails/databinding/BindUsing.html
-     */
-    @BindUsing({
-        target, dataBindingSource -> dataBindingSource['pattern']
-    })
     String pattern
     String identifiersPrefix
 }
