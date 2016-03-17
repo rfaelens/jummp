@@ -33,17 +33,19 @@
             <table>
                 <thead>
                     <tr>
-                        <th class='spaced'>Name</th>
-                        <th class='spaced'>Description</th>
-                        <th class='spaced'>Creator</th>
+                        <th class="spaced">Name</th>
+                        <th class="spaced">Description</th>
+                        <th class="spaced">Creator</th>
+                        <th class="spaced">&nbsp;</th>
                     </tr>
                 </thead>
                 <tbody>
                     <g:each in="${teams}" var="t" status="i">
                         <tr class="${ (i % 2) == 0 ? 'even' : 'odd'}">
-                            <td class='spaced'><g:link action="show" id="${t.id}">${t.name}</g:link></td>
-                            <td class='spaced'>${t.description}</td>
-                            <td class='spaced'>${t.owner.person.userRealName}</td>
+                            <td class="spaced"><g:link action="show" id="${t.id}">${t.name}</g:link></td>
+                            <td class="spaced">${t.description}</td>
+                            <td class="spaced">${t.owner.person.userRealName}</td>
+                            <td class="spaced"><g:link action="delete" id="${t.id}">Delete</g:link></td>
                         </tr>
                     </g:each>
                 </tbody>
