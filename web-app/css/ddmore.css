@@ -2938,3 +2938,13 @@ ul.links .comment-add a {
 .mini-search {
 	padding-bottom:15px;
 }
+.hyperlink {
+    text-decoration: underline;
+    -moz-text-decoration-line: underline;
+    color: #179349;
+}
+.hyperlink:hover {
+    color: #FF0000;
+    text-decoration: none;
+    -moz-text-decoration-line: none;
+}
