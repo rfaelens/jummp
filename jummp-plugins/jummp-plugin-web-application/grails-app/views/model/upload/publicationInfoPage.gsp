@@ -43,10 +43,14 @@
                     if (authorDetail[0]) {
                         $("#newAuthorName").val(authorDetail[0]);
                     }
-                    if (authorDetail[0] === 'no_orcid') {
+                    if (authorDetail[1] === 'no_orcid') {
+                        $("#newAuthorOrcid").val(null);
+                    } else {
                         $("#newAuthorOrcid").val(authorDetail[1]);
                     }
-                    if (authorDetail[0] === 'no_institution_provided') {
+                    if (authorDetail[2] === 'no_institution_provided') {
+                        $("#newAuthorInstitution").val(null);
+                    } else {
                         $("#newAuthorInstitution").val(authorDetail[2]);
                     }
                 });
