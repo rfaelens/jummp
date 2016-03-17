@@ -121,7 +121,6 @@ function startTeams(teamsUrl, successUrl, existing) {
                 }
             });
     });
-    console.log(existing);
     _.each(existing, function(collab) {
         if (collab.write) {
             collab.read=true;
