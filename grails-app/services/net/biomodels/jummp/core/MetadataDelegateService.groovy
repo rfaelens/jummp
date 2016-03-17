@@ -119,7 +119,7 @@ class MetadataDelegateService implements IMetadataService {
     }
 
     @Profiled(tag = "metadataDelegateService.persistAnnotationSchema")
-    boolean persistAnnotationSchema(List<SectionContainer> sections) {
+    boolean persistAnnotationSchema(Collection<SectionContainer> sections) {
         metadataService.persistAnnotationSchema(sections)
     }
 
