@@ -23,8 +23,6 @@ package net.biomodels.jummp.plugins.pharmml
 import grails.gsp.PageRenderer
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
-import net.biomodels.jummp.core.annotation.ElementAnnotationTransportCommand
-import net.biomodels.jummp.core.annotation.QualifierTransportCommand
 import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
 import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
