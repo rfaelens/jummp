@@ -38,6 +38,22 @@ $(document).ready(function () {
     $("#synopsis").width("94%");
     $("#affiliation").width("94%");
     $("#authorList").width("97%");
+
+    /* Testing, should be removed out in the production */
+    var v = $('#authorFieldTotal').val();
+    if (v) {
+        console.log(v);
+    } else {
+        console.log("Rong! That means the list of authors has not got into the author field total hidden.");
+    }
+
+    /* Get the authors from the list box and add them into the array of authors */
+    $("#authorList > option").each(function() {
+        if (this.value) {
+            authors.push(this.value);
+        }
+    });
+
     $("#authorList").change(function() {
         var value = $(this).val();
         var authorDetail = value.split('<init>');
@@ -60,30 +76,11 @@ $(document).ready(function () {
         setHiddenFieldValue()
     });
     $('#deleteButton').click(function() {
-        console.log("Delete");
-        var value = $("#authorList").val();
-        var fullName = value.split('<init>')[0];
-        console.log(fullName);
-        var selectedItem = $("#authorList option:selected").val();
-        console.log(selectedItem);
-        console.log(authors);
-        //var res = jQuery.inArray(selectedItem,authors);
-        var res = authors.indexOf(selectedItem);
-        console.log("Position: ", res);
-        if (res >=0 || res < authors.size) {
-            console.log("Found: ", res);
-            var au = authors.splice(res,1);
-            console.log(authors);
-        } else {
-            console.log("Not Found");
-        }
         $("#authorList option:selected").remove();
         $('#newAuthorName').val("")
         $('#newAuthorOrcid').val("")
         $('#newAuthorInstitution').val("")
         $('#authorFieldTotal').val(authors);
-        console.log(authors);
-        console.log($('#authorFieldTotal').val());
     });
 });
 
