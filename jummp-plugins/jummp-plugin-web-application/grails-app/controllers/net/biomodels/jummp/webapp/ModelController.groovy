@@ -850,7 +850,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                 ModelTransportCommand model =
                             flow.workingMemory.get("ModelTC") as ModelTransportCommand
                 bindData(model.publication, params, [exclude: ['authors']])
-                String[] authorList = params.authorFieldTotal.split("!!author!!")
+                String[] authorList = params.authorFieldTotal.split(",")
                 List<PersonTransportCommand> validatedAuthors = new LinkedList<PersonTransportCommand>()
                 authorList.each {
                     if (it) {
