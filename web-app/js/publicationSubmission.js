@@ -1,35 +1,35 @@
 var authors = [];
 function addText() {
-	if ($('#newAuthorName').val()) {
-	var fullName=$('#newAuthorName').val();
-	var orcid = $('#newAuthorOrcid').val();
-	if (orcid.length==0) {
-		orcid="no_orcid";
-	}
-	var institution = $('#newAuthorInstitution').val()
-	if (institution.length==0) {
-		institution="no_institution_provided";
-	}
-	var id=fullName+"<init>"+orcid+"<init>"+institution
-	var alreadyPresent=false
-	$("#authorList > option").each(function() {
-		if (this.value === id) {
-			alreadyPresent=true
-		}
-	});
-	if (!alreadyPresent) {
-		$('#authorList')
-			.append($('<option>', { value : id })
-			.text(fullName));
+    if ($('#newAuthorName').val()) {
+    var fullName=$('#newAuthorName').val();
+    var orcid = $('#newAuthorOrcid').val();
+    if (orcid.length==0) {
+        orcid="no_orcid";
+    }
+    var institution = $('#newAuthorInstitution').val()
+    if (institution.length==0) {
+        institution="no_institution_provided";
+    }
+    var id=fullName+"<init>"+orcid+"<init>"+institution
+    var alreadyPresent=false
+    $("#authorList > option").each(function() {
+        if (this.value.toLowerCase() === id.toLowerCase()) {
+            alreadyPresent=true
+        }
+    });
+    if (!alreadyPresent) {
+        $('#authorList')
+            .append($('<option>', { value : id })
+            .text(fullName));
         authors.push(id);
         setHiddenFieldValue();
-	}
-	else {
-		showNotification("An author by that name is already added to the publication.")
-	}
-	$('#newAuthorName').val("")
-	$('#newAuthorOrcid').val("")
-	$('#newAuthorInstitution').val("")
+    }
+    else {
+        showNotification("An author by that name is already added to the publication.")
+    }
+    $('#newAuthorName').val("")
+    $('#newAuthorOrcid').val("")
+    $('#newAuthorInstitution').val("")
 }
 }
 
