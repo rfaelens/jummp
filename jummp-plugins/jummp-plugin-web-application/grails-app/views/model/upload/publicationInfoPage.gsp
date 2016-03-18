@@ -31,31 +31,6 @@
         <link rel="stylesheet"
               href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'publicationPageStyle.css')}" />
         <g:javascript contextPath="" src="publicationSubmission.js"/>
-        <g:javascript>
-            $( document ).ready(function() {
-                $("#synopsis").width("94%");
-                $("#affiliation").width("94%");
-                $("#authorList").width("97%");
-                $("#authorList").change(function() {
-                    var value = $(this).val();
-                    var authorDetail = value.split('<init>');
-                    console.log(authorDetail);
-                    if (authorDetail[0]) {
-                        $("#newAuthorName").val(authorDetail[0]);
-                    }
-                    if (authorDetail[1] === 'no_orcid') {
-                        $("#newAuthorOrcid").val(null);
-                    } else {
-                        $("#newAuthorOrcid").val(authorDetail[1]);
-                    }
-                    if (authorDetail[2] === 'no_institution_provided') {
-                        $("#newAuthorInstitution").val(null);
-                    } else {
-                        $("#newAuthorInstitution").val(authorDetail[2]);
-                    }
-                });
-            });
-        </g:javascript>
     </head>
     <body>
         <h2>Update Publication Information</h2>
