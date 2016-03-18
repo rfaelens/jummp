@@ -36,6 +36,16 @@ $(document).ready(function () {
 			addText()
 		});
 		setHiddenFieldValue()
+        $('#deleteButton').click(function() {
+            console.log("Delete");
+            var value = $("#authorList").val();
+            var fullName = value.split('<init>')[0];
+            console.log(fullName);
+            $("#authorList option:selected").remove();
+            $('#newAuthorName').val("")
+            $('#newAuthorOrcid').val("")
+            $('#newAuthorInstitution').val("")
+        });
 });
 
 function setHiddenFieldValue() {
