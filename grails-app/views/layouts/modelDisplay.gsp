@@ -500,7 +500,7 @@
 				</g:if>
                 <g:if test="${canSubmitForPublication}">
                     <div id="confirm-model-notify" title="You are about to notify this model version" style="display:none;">
-                        <p>Make this version of the model to all curators?</p>
+                        <p>Make this version of the model visible to all curators?</p>
                     </div>
                     <button class='toolbutton' id="peer-review" onclick='return $( "#confirm-model-notify" ).dialog( "open");'>Submit for publication</button></li>
                 </g:if>
