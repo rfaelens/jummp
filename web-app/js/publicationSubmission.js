@@ -1,3 +1,4 @@
+var authors = [];
 function addText() {
 	if ($('#newAuthorName').val()) {
 	var fullName=$('#newAuthorName').val();
@@ -20,7 +21,8 @@ function addText() {
 		$('#authorList')
 			.append($('<option>', { value : id })
 			.text(fullName));
-			setHiddenFieldValue();
+        authors.push(id);
+        setHiddenFieldValue();
 	}
 	else {
 		showNotification("An author by that name is already added to the publication.")
@@ -32,13 +34,13 @@ function addText() {
 }
 
 $(document).ready(function () {
+    /* Basic initialisations */
     $("#synopsis").width("94%");
     $("#affiliation").width("94%");
     $("#authorList").width("97%");
     $("#authorList").change(function() {
         var value = $(this).val();
         var authorDetail = value.split('<init>');
-        console.log(authorDetail);
         if (authorDetail[0]) {
             $("#newAuthorName").val(authorDetail[0]);
         }
@@ -55,8 +57,8 @@ $(document).ready(function () {
     });
     $('#addButton').click(function() {
         addText()
+        setHiddenFieldValue()
     });
-    setHiddenFieldValue()
     $('#deleteButton').click(function() {
         console.log("Delete");
         var value = $("#authorList").val();
@@ -64,19 +66,32 @@ $(document).ready(function () {
         console.log(fullName);
         var selectedItem = $("#authorList option:selected").val();
         console.log(selectedItem);
+        console.log(authors);
+        //var res = jQuery.inArray(selectedItem,authors);
+        var res = authors.indexOf(selectedItem);
+        console.log("Position: ", res);
+        if (res >=0 || res < authors.size) {
+            console.log("Found: ", res);
+            var au = authors.splice(res,1);
+            console.log(authors);
+        } else {
+            console.log("Not Found");
+        }
         $("#authorList option:selected").remove();
         $('#newAuthorName').val("")
         $('#newAuthorOrcid').val("")
         $('#newAuthorInstitution').val("")
+        $('#authorFieldTotal').val(authors);
+        console.log(authors);
         console.log($('#authorFieldTotal').val());
     });
 });
 
 function setHiddenFieldValue() {
-	var text=""
-	$('#authorList > option').each(function(i, option) {
-			text=text+"!!author!!"+$(option).val();
-	});
-	$('#authorFieldTotal').val(text);
+    var text=""
+    $('#authorList > option').each(function(i, option) {
+        text = text+ $(option).val();
+    });
+    $('#authorFieldTotal').val(authors);
 }
 
