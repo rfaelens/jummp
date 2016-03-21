@@ -89,7 +89,7 @@
                                     </li>
                                     <li>
                                         <a href="#" id="addButton" class="button">Add</a>
-                                        <a href="#" id="updateButton" class="button">Update</a>
+                                        %{--<a href="#" id="updateButton" class="button">Update</a>--}%
                                         <a href="#" id="deleteButton" class="button">Delete</a>
                                     </li>
                                 </ul>
