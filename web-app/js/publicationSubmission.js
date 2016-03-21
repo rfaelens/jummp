@@ -38,15 +38,7 @@ $(document).ready(function () {
     $("#synopsis").width("94%");
     $("#affiliation").width("94%");
     $("#authorList").width("97%");
-
-    /* Testing, should be removed out in the production */
-    var v = $('#authorFieldTotal').val();
-    if (v) {
-        console.log(v);
-    } else {
-        console.log("Rong! That means the list of authors has not got into the author field total hidden.");
-    }
-
+    
     /* Get the authors from the list box and add them into the array of authors */
     $("#authorList > option").each(function() {
         if (this.value) {
