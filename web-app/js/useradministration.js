@@ -29,7 +29,7 @@ $.jummp.userAdministration.loadUserList = function () {
     };
     $('#userTable').dataTable({
         // TODO: in future it might be interesting to allow filtering
-        bFilter: false,
+        bFilter: true,
         bProcessing: true,
         bServerSide: true,
         bJQueryUI: true,
@@ -61,6 +61,9 @@ $.jummp.userAdministration.loadUserList = function () {
             });
         }
     });
+    $('.dataTables_filter input[type="search"]').
+        attr('placeholder','Type in username, email or real name...').
+        css({'width':'250px','display':'inline-block'});
 };
 
 $.jummp.userAdministration.editUser = function () {
