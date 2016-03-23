@@ -283,6 +283,7 @@ class ModelController {
         }
     }
 
+    @Secured(["isAuthenticated()"])
     def publish = {
         RevisionTransportCommand rev
         try {
@@ -311,6 +312,7 @@ class ModelController {
         }
     }
 
+    @Secured(["isAuthenticated()"])
     def submitForPublication = {
         try {
             def rev = modelDelegateService.getRevisionFromParams(params.id)
@@ -327,6 +329,7 @@ class ModelController {
         }
     }
 
+    @Secured(["isAuthenticated()"])
     def delete = {
         try {
             boolean deleted = modelDelegateService.deleteModel(params.id)
@@ -360,6 +363,7 @@ class ModelController {
         }
     }
 
+    @Secured(["isAuthenticated()"])
     def share = {
         try {
             def rev = modelDelegateService.getRevisionFromParams(params.id)
@@ -380,6 +384,7 @@ class ModelController {
         return []
     }
 
+    @Secured(["isAuthenticated()"])
     def shareUpdate = {
         boolean valid = params.collabMap
         if (valid) {
