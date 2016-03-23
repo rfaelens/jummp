@@ -33,8 +33,8 @@
         <title>User Administration</title>
         <meta name="layout" content="main" />
         <g:javascript contextPath="" src="useradministration.js"/>
-        <g:javascript contextPath="" src="jquery/jquery.dataTables.js"/>
-        <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'datatablestyle.css')}" />
+        <g:javascript contextPath="" src="jquery/jquery.dataTables.min.js"/>
+        <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'jquery.dataTables.min.css')}" />
     </head>
     <body>
     
