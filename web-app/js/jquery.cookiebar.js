@@ -23,8 +23,8 @@
 			var doReturn = false;
 		}
 		var defaults = {
-			message: 'DDMoRe repository is optimally displayed with Chrome version 48 and after, ' +
-            'Safari version 9 and after, Mozilla version  44 and after.', //Message displayed on bar
+			message: 'DDMoRe repository supports optimally the following web browsers: Google Chrome version 19 or above, ' +
+            'Firefox 10 or above, Internet Explorer 10 or above, and Safari 5 or above.', //Message displayed on bar
 			acceptButton: true, //Set to true to show accept/enable button
 			acceptText: 'I Understand', //Text on accept/enable button
 			acceptFunction: function(cookieValue){if(cookieValue!='enabled' && cookieValue!='accepted') window.location = window.location.href;}, //Function to run after accept
