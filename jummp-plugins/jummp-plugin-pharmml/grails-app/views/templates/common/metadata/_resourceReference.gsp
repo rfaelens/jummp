@@ -16,17 +16,12 @@
  You should have received a copy of the GNU Affero General Public License along
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
-<g:if test="${it.name && it.datatype != 'unknown'}">
-    <a href="${it.uri}" title="Access more information about this ${it.datatype} term">${it.name}</a>
-</g:if>
-<g:elseif test="${it.name}">
+
+<g:if test="${it.name}">
     <g:if test="${it.uri}">
-        <a href="${it.uri}" title="Access more information about this term">${it.name}</a>
+        <a href="${it.uri}" title="Access more information about this ${it.datatype} term">${it.name}</a>;
     </g:if>
     <g:else>
-        <span>${it.name}</span>
+        <span>${it.name};</span>
     </g:else>
-</g:elseif>
-<g:elseif test="${it.uri}">
-    <a href="${it.uri}" title="Access more information about this term">${it.uri}</a>
-</g:elseif>
+</g:if>

@@ -214,7 +214,7 @@ class PharmMlTagLib {
     /**
      * Renders model-level annotations on the 'Overview' tab of the model display.
      *
-     * @attr revision REQUIRED the revision for which to display the annotatations.
+     * @attr revision REQUIRED the revision for which to display the annotations.
      */
     def renderGenericAnnotations = { attrs ->
         pharmMlMetadataRenderingService.renderGenericAnnotations(attrs.revision, out)

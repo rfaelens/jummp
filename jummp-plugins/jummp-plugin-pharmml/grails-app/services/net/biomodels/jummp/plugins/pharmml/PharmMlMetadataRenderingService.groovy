@@ -23,13 +23,12 @@ package net.biomodels.jummp.plugins.pharmml
 import grails.gsp.PageRenderer
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
-import net.biomodels.jummp.core.annotation.ElementAnnotationTransportCommand
-import net.biomodels.jummp.core.annotation.QualifierTransportCommand
 import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
 import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.core.IMetadataService
 import org.perf4j.aop.Profiled
+import org.springframework.beans.factory.InitializingBean
 
 /**
  * Simple service for rendering annotations for PharmML models.
@@ -40,7 +39,7 @@ import org.perf4j.aop.Profiled
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 @CompileStatic
-class PharmMlMetadataRenderingService {
+class PharmMlMetadataRenderingService implements InitializingBean {
     /* disable transactional behaviour */
     static transactional = false
     /* dependency injection for the page renderer */
@@ -48,15 +47,24 @@ class PharmMlMetadataRenderingService {
     /* dependency injection for the metadata delegate service */
     IMetadataService metadataDelegateService
     def grailsApplication
+    /* the namespaces for which only the resource reference name is displayed, not its URL */
+    List<String> ignoredNamespaces
 
     @CompileDynamic
     @Profiled(tag = "pharmmlMetadataRenderingService.renderGenericAnnotations")
     void renderGenericAnnotations(RevisionTransportCommand revision, Writer out) {
         Map<String, List<ResourceReferenceTransportCommand>> anno = [:]
+        //ignoredNamespaces = metadataDelegateService.getMetadataNamespaces()
         // this will need to change when we're annotating several model elements.
         revision.annotations*.statement.each { StatementTransportCommand s ->
             String p = s.predicate.accession
             ResourceReferenceTransportCommand o = s.object
+            if (o.uri) {
+                boolean shouldCreateHyperlink = shouldCreateResourceHyperlink(o.uri)
+                if (!shouldCreateHyperlink) {
+                    o.uri = null
+                }
+            }
             if (anno.containsKey(p)) {
                 anno[p] << o
             } else {
@@ -64,6 +72,16 @@ class PharmMlMetadataRenderingService {
             }
         }
         groovyPageRenderer.renderTo(template: "/templates/common/metadata/annotations",
-                model: [annotations: anno], out)
+            model: [annotations: anno], out)
+    }
+
+    private boolean shouldCreateResourceHyperlink(String uri) {
+        // don't create a hyperlink if we find one of these namespaces
+        null == ignoredNamespaces.find { String ns -> uri.startsWith(ns) }
+    }
+
+    @Override
+    void afterPropertiesSet() {
+        ignoredNamespaces = metadataDelegateService.getMetadataNamespaces()
     }
 }

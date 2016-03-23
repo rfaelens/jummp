@@ -328,6 +328,12 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
         }
     }
 
+    @Profiled(tag = "metadataService.getMetadataNamespaces")
+    List<String> getMetadataNamespaces() {
+        return [MetadataService.DEFAULT_DDMORE_WAT_NAMESPACE,
+                MetadataService.DEFAULT_PHARMML_NAMESPACE,
+                MetadataService.DEFAULT_PKPD_NAMESPACE]
+    }
 
     /**
      * Dumb cache of the annotation schema.

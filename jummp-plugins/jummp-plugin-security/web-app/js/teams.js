@@ -121,7 +121,6 @@ function startTeams(teamsUrl, successUrl, existing) {
                 }
             });
     });
-    console.log(existing);
     _.each(existing, function(collab) {
         if (collab.write) {
             collab.read=true;
@@ -134,8 +133,10 @@ function startTeams(teamsUrl, successUrl, existing) {
 function addCollab(e) {
     e.preventDefault();
     var thisCollaborator = {};
-    thisCollaborator.name = selectedItem[2];
+    thisCollaborator.email = selectedItem[0];
     thisCollaborator.userId = selectedItem[1];
+    thisCollaborator.name = selectedItem[2];
+    thisCollaborator.id = selectedItem[3];
     // triggers Team.addMember()
     collaborators.add(thisCollaborator);
 }

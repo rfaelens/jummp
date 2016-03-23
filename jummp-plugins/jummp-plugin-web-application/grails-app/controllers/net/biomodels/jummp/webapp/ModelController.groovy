@@ -850,7 +850,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                 ModelTransportCommand model =
                             flow.workingMemory.get("ModelTC") as ModelTransportCommand
                 bindData(model.publication, params, [exclude: ['authors']])
-                String[] authorList = params.authorFieldTotal.split("!!author!!")
+                String[] authorList = params.authorFieldTotal.split(",")
                 List<PersonTransportCommand> validatedAuthors = new LinkedList<PersonTransportCommand>()
                 authorList.each {
                     if (it) {
@@ -873,8 +873,7 @@ About to submit ${mainFileList.inspect()} and ${additionalsMap.inspect()}."""
                         if (!author) {
                             author = new PersonTransportCommand(userRealName: parts[0],
                                         orcid: orcid != "no_orcid" ? orcid : null,
-                                        institution: institution != "no_institution_provided" ?
-                                                    institution : null)
+                                        institution: institution != "no_institution_provided" ? institution : null)
                             if (!model.publication.authors) {
                                 model.publication.authors=new LinkedList<PersonTransportCommand>()
                             }
