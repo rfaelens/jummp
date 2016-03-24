@@ -190,19 +190,20 @@ class UserService implements IUserService {
         return user.sanitizedUser()
     }
 
-    @PostLogging(LoggingEventType.RETRIEVAL)
     @Profiled(tag="userService.hasRole")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or isAuthenticated()") //used to be: authentication.name==#username
-    boolean hasRole(String username, String role) throws UserNotFoundException {
-        User potentialCurator = User.findByUsername(username)
-        if (!potentialCurator) {
-            throw new UserNotFoundException(username)
+    @PreAuthorize("isAuthenticated()")
+    boolean hasRole(User user, Role role) {
+        UserRole.get(user.id, role.id)
+    }
+
+    @Profiled(tag="userService.isCurator")
+    @PreAuthorize("isAuthenticated()")
+    boolean isCurator(User u) throws RoleNotFoundException {
+        Role curator = Role.findByAuthority('ROLE_CURATOR')
+        if (!curator) {
+            throw new RoleNotFoundException("Authority ROLE_CURATOR is not defined.")
         }
-        Set<Role> roles = potentialCurator.getAuthorities()
-        def isCurator = roles.find {
-            it.authority == role
-        }
-        return isCurator
+        hasRole(u, curator)
     }
 
     @PostLogging(LoggingEventType.RETRIEVAL)

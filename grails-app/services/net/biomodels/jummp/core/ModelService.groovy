@@ -53,7 +53,9 @@ import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.model.Publication
 import net.biomodels.jummp.model.RepositoryFile
 import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.plugins.security.Role
 import net.biomodels.jummp.plugins.security.User
+import net.biomodels.jummp.plugins.security.UserRole
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.tika.detect.DefaultDetector
@@ -1529,7 +1531,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         // and by adding read access to all revisions the user has access to
         aclUtilService.addPermission(model, username, BasePermission.READ)
         Set<Revision> revisions = model.revisions
-        boolean isCurator = userService.hasRole(username, "ROLE_CURATOR")
+        boolean isCurator = userService.isCurator(collaborator)
         if (isCurator) {
             aclUtilService.addPermission(model, username, BasePermission.ADMINISTRATION)
             model.revisions.each { Revision it ->
@@ -1596,7 +1598,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                     else {
                         map.get(userId).write = true
                         //disable editing for curators and for users who have contributed revisions
-                        if (userService.hasRole(principal, "ROLE_CURATOR")) {
+                        if (userService.isCurator(user)) {
                             map.get(userId).disabledEdit = true
                         }
                         getAllRevisions(model).each {
@@ -1699,7 +1701,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @Profiled(tag="modelService.grantWriteAccess")
     public void grantWriteAccess(Model model, User collaborator) {
         aclUtilService.addPermission(model, collaborator.username, BasePermission.WRITE)
-        boolean isCurator = userService.hasRole(collaborator.username, "ROLE_CURATOR")
+        boolean isCurator = userService.isCurator(collaborator)
         if (isCurator) {
             aclUtilService.addPermission(model, collaborator.username, BasePermission.ADMINISTRATION)
             model.revisions.each { Revision it ->
