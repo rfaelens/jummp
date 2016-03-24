@@ -30,6 +30,13 @@ $.jummp.userAdministration.loadUserList = function () {
     $('#userTable').dataTable({
         // TODO: in future it might be interesting to allow filtering
         bFilter: true,
+        columnDefs: [{
+            targets: 2, /* For real name column */
+            width: "12%"
+        },{
+            targets: 5, /* For ORCID Identifier column */
+            width: "12%"
+        }],
         bProcessing: true,
         bServerSide: true,
         bJQueryUI: false,
