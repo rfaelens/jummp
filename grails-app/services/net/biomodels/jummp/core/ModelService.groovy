@@ -1725,7 +1725,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     * @param model The Model for which read access should be revoked
     * @param collaborator The User whose read access should be revoked
     * @return @c true if the right has been revoked, @c false otherwise
-    * @todo Might be better in a CollaborationService?
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
@@ -1771,7 +1770,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     * @param model The Model for which write access should be revoked
     * @param collaborator The User whose write access should be revoked
     * @return @c true if the right has been revoked, @c false otherwise
-    * @todo Might be better in a CollaborationService?
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
