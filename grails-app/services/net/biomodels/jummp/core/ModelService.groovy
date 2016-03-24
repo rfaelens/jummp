@@ -1598,7 +1598,8 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                     else {
                         map.get(userId).write = true
                         //disable editing for curators and for users who have contributed revisions
-                        if (userService.isCurator(user)) {
+                        if (userService.isCurator(user) &&
+                                model.revisions*.owner*.id.contains(user.id)) {
                             map.get(userId).disabledEdit = true
                         }
                         model.revisions.each {
