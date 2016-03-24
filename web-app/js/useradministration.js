@@ -37,6 +37,7 @@ $.jummp.userAdministration.loadUserList = function () {
             targets: 5, /* For ORCID Identifier column */
             width: "12%"
         }],
+        aLengthMenu: [[5, 10, 15, 20, 25, 50, 100, -1], [5, 10, 15, 20, 25, 50, 100, "All"]],
         bProcessing: true,
         bServerSide: true,
         bJQueryUI: false,
