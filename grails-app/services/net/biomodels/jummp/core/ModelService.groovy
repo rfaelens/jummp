@@ -1581,12 +1581,12 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                 String permission = getPermissionString(it.getPermission().getMask())
                 String principal = it.getSid().principal
                 if (permission) {
-                    User user= User.findByUsername(principal)
+                    User user = User.findByUsername(principal)
                     String userRealName = user.person.userRealName
                     int userId = user.id
                     if (!map.containsKey(userId)) {
                         PermissionTransportCommand ptc = new PermissionTransportCommand(
-                            name: userRealName, id: userId)
+                                name: userRealName, id: userId, username: user.username)
                         map.put(userId, ptc)
                     }
                     if (principal == springSecurityService.principal.username) {
