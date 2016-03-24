@@ -32,7 +32,7 @@ $.jummp.userAdministration.loadUserList = function () {
         bFilter: true,
         bProcessing: true,
         bServerSide: true,
-        bJQueryUI: true,
+        bJQueryUI: false,
         sPaginationType: "full_numbers",
         sAjaxSource: 'dataTableSource',
         "fnServerData": function (sSource, aoData, fnCallback) {
