@@ -1601,7 +1601,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                         if (userService.isCurator(user)) {
                             map.get(userId).disabledEdit = true
                         }
-                        getAllRevisions(model).each {
+                        model.revisions.each {
                             if (it.owner.username == principal) {
                                 map.get(userId).disabledEdit = true
                             }
