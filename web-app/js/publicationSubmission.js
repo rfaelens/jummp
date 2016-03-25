@@ -38,13 +38,16 @@ $(document).ready(function () {
     $("#synopsis").width("94%");
     $("#affiliation").width("94%");
     $("#authorList").width("97%");
-    
+
     /* Get the authors from the list box and add them into the array of authors */
     $("#authorList > option").each(function() {
         if (this.value) {
             authors.push(this.value);
         }
     });
+
+    /* Populate authors existing into the hidden author field */
+    $('#authorFieldTotal').val(authors);
 
     $("#authorList").change(function() {
         var value = $(this).val();
