@@ -219,12 +219,17 @@
     </g:javascript>
     <g:javascript src="jummp.js"/>
     <g:javascript src="notification.js"/>
-    
+    <g:javascript src="jquery.cookiebar.js"/>
+    <g:javascript>
+        $(document).ready(function() {
+            $.cookieBar({});
+        });
+    </g:javascript>
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/head" />
     <link rel="stylesheet" href="<g:resource dir="css" file="notification.css"/>" />
     <link rel="stylesheet" href="<g:resource dir="css" file="layout.css"/>" />
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-    
+    <link rel="stylesheet" href="<g:resource dir="css" file="jquery.cookiebar.css"/>" />
     <g:layoutHead/>
 </head>
     <g:render template="/templates/${grailsApplication.config.jummp.branding.style}/bodyTag"/>

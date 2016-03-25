@@ -28,15 +28,9 @@
                 <g:message code="submission.publicationInfoPage.create.title"/>
             </g:else>
         </title>
-        <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'publicationPageStyle.css')}" />
+        <link rel="stylesheet"
+              href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'publicationPageStyle.css')}" />
         <g:javascript contextPath="" src="publicationSubmission.js"/>
-        <g:javascript>
-            $( document ).ready(function() {
-                $("#synopsis").width("94%");
-                $("#affiliation").width("94%");
-                $("#authorList").width("97%");
-            });
-        </g:javascript>
     </head>
     <body>
         <h2>Update Publication Information</h2>
@@ -51,7 +45,8 @@
                                 </label>
                             </td>
                             <td>
-                                <g:textField class="input50" name="title" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.title}"/>
+                                <g:textField class="input50" name="title" size="50"
+                                             value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.title}"/>
                             </td>
                             <td>
                                 <label for="journal">
@@ -59,7 +54,8 @@
                                 </label>
                             </td>
                             <td>
-                                <g:textField class="input50" name="journal" size="50" value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.journal}"/>
+                                <g:textField class="input50" name="journal" size="50"
+                                             value="${(workingMemory.get("ModelTC") as ModelTransportCommand).publication.journal}"/>
                             </td>
                         </tr>
                         <tr>
@@ -74,27 +70,30 @@
                                     <option value="${it.userRealName}<init>${it.orcid ?: "no_orcid"}<init>${it.institution ?: "no_institution_provided"}">${it.userRealName}</option>
                                 </g:each>
                             </select>
-                                <div>
-                                    <ul class="subListForm">
-                                        <li>
-                                            <label style="display:block;margin-left:0px">Name</label>
-                                            <span><input class="input20" size="20" type="text" id="newAuthorName"/></span>
-                                        </li>
-                                        <li>
-                                            <label style="display:block;margin-left:0px">ORCID</label>
-                                            <span>
-                                                <input class="input20" size="20" type="text" id="newAuthorOrcid" title="Enter your ORCID ID. For example, an ORCID profile link is often formed as http://orcid.org/0000-0002-2876-6046, therefore this profile's ORCID ID is 0000-0002-2876-6046"/>
-                                            </span>
-                                        </li>
-                                        <li hidden>
-                                            <label style="display:block;margin-left:0px">Institution</label>
-                                            <span><input class="input20" size="20" type="text" id="newAuthorInstitution"/></span>
-                                        </li>
-                                        <li>
-                                            <a href="#" id="addButton" class="addButton">Add</a>
-                                        </li>
-                                    </ul>
-                                </div>
+                            <div>
+                                <ul class="subListForm">
+                                    <li>
+                                        <label style="display:block;margin-left:0px">Name</label>
+                                        <span><input class="input40" size="40" type="text" id="newAuthorName"/></span>
+                                    </li>
+                                    <li>
+                                        <label style="display:block;margin-left:0px">ORCID</label>
+                                        <span>
+                                            <input class="input40" size="40" type="text" id="newAuthorOrcid"
+                                                   title="Enter your ORCID ID. For example, an ORCID profile link is often formed as http://orcid.org/0000-0002-2876-6046, therefore this profile's ORCID ID is 0000-0002-2876-6046"/>
+                                        </span>
+                                    </li>
+                                    <li hidden>
+                                        <label style="display:block;margin-left:0px">Institution</label>
+                                        <span><input class="input40" size="40" type="text" id="newAuthorInstitution"/></span>
+                                    </li>
+                                    <li>
+                                        <a href="#" id="addButton" class="button">Add</a>
+                                        %{--<a href="#" id="updateButton" class="button">Update</a>--}%
+                                        <a href="#" id="deleteButton" class="button">Delete</a>
+                                    </li>
+                                </ul>
+                            </div>
 
                             </td>
                             <td>
