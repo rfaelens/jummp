@@ -1705,7 +1705,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     *
     * @param model The Model for which write access should be granted
     * @param collaborator The user who should receive write access
-    * @todo Might be better in a CollaborationService?
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
@@ -1849,7 +1848,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     * @li Grant/Revoke read/write access to the @p model
     * @param model The Model for which the ownership should be transferred.
     * @param collaborator The User who becomes the new owner
-    * @todo Might be better in a CollaborationService?
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
@@ -1984,7 +1982,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     * @param model The deleted Model to restore
     * @return @c true, whether the state was restored, @c false otherwise.
     * @see ModelService#deleteModel(Model model)
-    * @todo might belong in an administration service?
     **/
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
