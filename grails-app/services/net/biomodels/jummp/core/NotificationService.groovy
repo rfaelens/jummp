@@ -54,7 +54,6 @@ class NotificationService {
     def mailService
     def springSecurityService
     def messageSource
-    def searchService
 
     Set<User> getUsersFromUsernames(def usernames) {
         return usernames.collect { User.findByUsername(it) }
