@@ -77,12 +77,12 @@
     								<input placeholder="Name, username or email" id="nameSearch" name="name" type="text"/>
     							</div>
     							<div class="formElement">
-									<label for="read">Read</label>
+									<label for="radioReader">Read</label>
 									<input id="radioReader" type="radio" name="read"
                                            checked></input>
 								</div>
 								<div class="formElement">
-									<label for="write">Write</label>
+									<label for="radioWriter">Write</label>
 									<input id="radioWriter" type="radio"
                                            name="write"></input>
 								</div>
@@ -99,11 +99,11 @@
 										</select>
 									</div>
 									<div class="formElement">
-										<label for="teamRead">Read</label>
+										<label for="teamRadioReader">Read</label>
 										<input id="teamRadioReader" type="radio" name="teamRead" checked></input>
 									</div>
 									<div class="formElement">
-										<label for="teamWrite">Write</label>
+										<label for="teamRadioWriter">Write</label>
 										<input id="teamRadioWriter" type="radio"
 											   name="teamWrite"></input>
 									</div>
