@@ -1537,9 +1537,15 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         Set<Revision> revisions = model.revisions
         boolean isCurator = userService.isCurator(collaborator)
         if (isCurator) {
-            aclUtilService.addPermission(model, username, BasePermission.ADMINISTRATION)
+            // check if admin rights have not already been granted to avoid duplication
+            if (!hasAdminPermission(model, username)) {
+                aclUtilService.addPermission(model, username, BasePermission.ADMINISTRATION)
+            }
             model.revisions.each { Revision it ->
-                aclUtilService.addPermission(it, username, BasePermission.ADMINISTRATION)
+                // may have been granted already through grantWriteAccess for instance
+                if (!hasAdminPermission(it, username)) {
+                    aclUtilService.addPermission(it, username, BasePermission.ADMINISTRATION)
+                }
                 aclUtilService.addPermission(it, username, BasePermission.READ)
             }
         } else {
@@ -1705,12 +1711,19 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.grantWriteAccess")
     public void grantWriteAccess(Model model, User collaborator) {
-        aclUtilService.addPermission(model, collaborator.username, BasePermission.WRITE)
+        final String principal = collaborator.username
+        aclUtilService.addPermission(model, principal, BasePermission.WRITE)
         boolean isCurator = userService.isCurator(collaborator)
         if (isCurator) {
-            aclUtilService.addPermission(model, collaborator.username, BasePermission.ADMINISTRATION)
+            // check if admin rights have not already been granted to avoid duplication
+            if (!hasAdminPermission(model, principal)) {
+                aclUtilService.addPermission(model, principal, BasePermission.ADMINISTRATION)
+            }
             model.revisions.each { Revision it ->
-                aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION)
+                // may have been granted already through grantReadAccess for instance
+                if (!hasAdminPermission(it, username)) {
+                    aclUtilService.addPermission(it, username, BasePermission.ADMINISTRATION)
+                }
             }
         }
         def notification = [model: new ModelAdapter(model: model).toCommandObject(),
@@ -1735,35 +1748,57 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.revokeReadAccess")
     public boolean revokeReadAccess(Model model, User collaborator) {
-        if (collaborator.username == springSecurityService.authentication.name) {
+        final String principal = collaborator.username
+        if (principal == springSecurityService.authentication.name) {
             // the user cannot revoke his own rights
             return false
         }
-        // check whether the collaborator is admin of the model
-        Acl acl = aclUtilService.readAcl(model)
-        boolean adminToModel = false
-        acl.entries.each { ace ->
-            if (ace.sid.principal == collaborator.username && ace.permission == BasePermission.ADMINISTRATION) {
-                adminToModel = true
-            }
-        }
-        if (adminToModel) {
-            return false
-        }
-        aclUtilService.deletePermission(model, collaborator.username, BasePermission.READ)
-        aclUtilService.deletePermission(model, collaborator.username, BasePermission.WRITE)
+        boolean isCurator = userService.isCurator(collaborator)
         Set<Revision> revisions = model.revisions
-        for (Revision revision in revisions) {
-            if (aclUtilService.hasPermission(springSecurityService.authentication, revision,
-                        BasePermission.READ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
-                try {
-                    aclUtilService.deletePermission(revision, collaborator.username, BasePermission.READ)
-                } catch(Exception e) {
-                    e.printStackTrace()
+
+        aclUtilService.deletePermission(model, principal, BasePermission.READ)
+        aclUtilService.deletePermission(model, principal, BasePermission.WRITE)
+        if (isCurator) {
+            aclUtilService.deletePermission(model, principal, BasePermission.ADMINISTRATION)
+            revisions.each { Revision r ->
+                aclUtilService.deletePermission(r, principal, BasePermission.ADMINISTRATION)
+                aclUtilService.deletePermission(r, principal, BasePermission.READ)
+            }
+        } else {
+            boolean adminToModel = hasAdminPermission(model, principal)
+            if (adminToModel) {
+                aclUtilService.deletePermission(model, principal, BasePermission.ADMINISTRATION)
+            }
+            final boolean isAdmin = SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')
+            for (Revision revision in revisions) {
+                boolean canRead = aclUtilService.hasPermission(
+                        springSecurityService.authentication, revision, BasePermission.READ)
+                if (canRead || isAdmin) {
+                    try {
+                        aclUtilService.deletePermission(revision, principal, BasePermission.READ)
+                    } catch(Exception e) {
+                        log.error e.message, e
+                        return false
+                    }
                 }
             }
         }
         return true
+    }
+
+    /*
+     * Convenience method for checking if a user has admin privileges on a model or revision.
+     *
+     * @param modelOrRevision the model or revision for which to test the permissions.
+     * @param username the username of the person for which to test the permissions.
+     * @return true if we find a matching ACL entry, false otherwise.
+     */
+    private boolean hasAdminPermission(def modelOrRevision, String username) {
+        Acl acl = aclUtilService.readAcl(modelOrRevision)
+        return null != acl.entries.find { ace ->
+            ace.sid.principal == username &&
+                    ace.permission == BasePermission.ADMINISTRATION
+        }
     }
 
     /**
@@ -1780,22 +1815,22 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.revokeWriteAccess")
     public boolean revokeWriteAccess(Model model, User collaborator) {
-        if (collaborator.username == springSecurityService.authentication.name) {
+        final String principal = collaborator.username
+        if (principal == springSecurityService.authentication.name) {
             // the user cannot revoke his own rights
             return false
         }
-        // check whether the collaborator is admin of the model
-        Acl acl = aclUtilService.readAcl(model)
-        boolean adminToModel = false
-        acl.entries.each { ace ->
-            if (ace.sid.principal == collaborator.username && ace.permission == BasePermission.ADMINISTRATION) {
-                adminToModel = true
+        boolean adminToModel = hasAdminPermission(model, principal)
+        if (adminToModel) {
+            aclUtilService.deletePermission(model, principal, BasePermission.ADMINISTRATION)
+        }
+        aclUtilService.deletePermission(model, principal, BasePermission.WRITE)
+        boolean isCurator = userService.isCurator(collaborator)
+        if (isCurator) {
+            model.revisions.each { Revision r ->
+                aclUtilService.deletePermission(r, principal, BasePermission.ADMINISTRATION)
             }
         }
-        if (adminToModel) {
-            return false
-        }
-        aclUtilService.deletePermission(model, collaborator.username, BasePermission.WRITE)
         return true
     }
 
