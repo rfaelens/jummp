@@ -11,12 +11,8 @@ var Collaborator = Backbone.Model.extend({
 var Collaborators = Backbone.Collection.extend({
     model: Collaborator,
     add: function(newCollab) {
-		try {
-			newCollab.id = encodeURIComponent(newCollab.id);
-		}
-		catch(ignoreException) {
-		}
-     	Backbone.Collection.prototype.add.call(this, newCollab);
+        newCollab.id = newCollab.id;
+        Backbone.Collection.prototype.add.call(this, newCollab);
     }
 
 });
@@ -55,7 +51,6 @@ CollaboratorTable = Backbone.View.extend({
     },
     performSubmission:function() {
         var collabString=JSON.stringify(this.collection);
-        collabString = decodeURIComponent(collabString);
         $(":input").prop('disabled', true);
         $.post(submitURL, { collabMap: collabString }, function(returnedData) {
             if (returnedData.success) {
@@ -81,12 +76,13 @@ CollaboratorTable = Backbone.View.extend({
         var that = this;
         if (selectedItem && selectedItem[2]==objectCreated.name) {
             objectCreated.id = selectedItem[3];
+            objectCreated.username = selectedItem[1];
             collaborators.add(objectCreated);
             this.performSubmission();
         } else {
             $.post(lookupURL, { name: objectCreated.name }, function(returnedData) {
                 if (returnedData.found) {
-                    objectCreated.id=returnedData.username;
+                    objectCreated.id=returnedData.id;
                     collaborators.add(objectCreated);
                     that.performSubmission();
                 } else {
@@ -110,8 +106,9 @@ CollaboratorTable = Backbone.View.extend({
         $.post(teamLookup, { teamID: objectCreated.team }, function(returnedData) {
                 _.each(returnedData, function(teamMember) {
                 		var collaborator = {};
-                		collaborator.id = teamMember.username;
+                    collaborator.id = teamMember.id;
                 		collaborator.name = teamMember.userRealName;
+                    collaborator.username = teamMember.username;
                 		collaborator.read = objectCreated.read;
                 		collaborator.write = objectCreated.write;
                 		collaborator.disabledEdit=false;

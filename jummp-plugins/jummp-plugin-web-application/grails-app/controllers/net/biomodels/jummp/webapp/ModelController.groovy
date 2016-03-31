@@ -289,8 +289,14 @@ class ModelController {
         try {
             rev = modelDelegateService.getRevisionFromParams(params.id, params.revisionId)
             modelDelegateService.publishModelRevision(rev)
-            def notification = [revision:rev, user:getUsername(), perms: modelDelegateService.getPermissionsMap(rev.model.submissionId)]
-            sendMessage("seda:model.publish", notification)
+            def currentUser = springSecurityService.currentUser
+            if (currentUser) {
+                def notification = [
+                    revision: rev,
+                    user: currentUser,
+                    perms: modelDelegateService.getPermissionsMap(rev.model.submissionId)]
+                sendMessage("seda:model.publish", notification)
+            }
 
             redirect(action: "showWithMessage",
                         id: rev.identifier(),
@@ -333,10 +339,14 @@ class ModelController {
     def delete = {
         try {
             boolean deleted = modelDelegateService.deleteModel(params.id)
-            def notification = [model:modelDelegateService.getModel(params.id),
-            					user:getUsername(),
-            					perms: modelDelegateService.getPermissionsMap(params.id)]
-            sendMessage("seda:model.delete", notification)
+            def currentUser = springSecurityService.currentUser
+            if (currentUser) {
+                def notification = [
+                    model: modelDelegateService.getModel(params.id),
+                    user: currentUser,
+                    perms: modelDelegateService.getPermissionsMap(params.id)]
+                sendMessage("seda:model.delete", notification)
+            }
             redirect(action: "showWithMessage", id: params.id,
                         params: [ flashMessage: deleted ?
                                     "Model has been deleted, and moved into archives." :
@@ -394,7 +404,8 @@ class ModelController {
                 for (int i = 0; i < map.length(); i++) {
                     JSONObject perm = map.getJSONObject(i)
                     PermissionTransportCommand ptc = new PermissionTransportCommand(
-                                id: perm.getString("id"),
+                                id: perm.getInt("id"),
+                                username: perm.getString("username"),
                                 name: perm.getString("name"),
                                 read: perm.getBoolean("read"),
                                 write: perm.getBoolean("write"))
@@ -446,13 +457,17 @@ class ModelController {
             on("displayConfirmationPage"){
                 String update = conversation.changesMade.join(". ")
                 String model = conversation.model_id
-                String user = getUsername()
-                updateHistory(session.result_submission, user, "update", "html", update, true)
-                def notification = [model:modelDelegateService.getModel(conversation.model_id),
-                        user:user,
-                        update: conversation.changesMade,
-                        perms: modelDelegateService.getPermissionsMap(conversation.model_id, false)]
-                sendMessage("seda:model.update", notification)
+                def currentUser = springSecurityService.currentUser
+                String username = currentUser?.username ?: 'anonymous'
+                updateHistory(session.result_submission, username, "update", "html", update, true)
+                if (!currentUser) {
+                    def notification = [
+                            model: modelDelegateService.getModel(model),
+                            user: currentUser,
+                            update: conversation.changesMade,
+                            perms : modelDelegateService.getPermissionsMap(model, false)]
+                    sendMessage("seda:model.update", notification)
+                }
             }.to "displayConfirmationPage"
             on("displayErrorPage").to "displayErrorPage"
         }

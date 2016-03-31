@@ -34,8 +34,9 @@ package net.biomodels.jummp.core.model
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
  */
 class PermissionTransportCommand {
-	String id;
     String name
+    String username
+    int id
     boolean read = false
     boolean write = false
     boolean disabledEdit = false
