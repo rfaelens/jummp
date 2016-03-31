@@ -100,6 +100,7 @@ class ModelController {
     * Dependency injection of mailService
     */
     def mailService
+
     /**
      * The list of actions for which we should not automatically create an audit item.
      */
