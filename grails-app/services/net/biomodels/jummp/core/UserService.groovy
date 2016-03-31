@@ -105,6 +105,10 @@ class UserService implements IUserService {
         return null
     }
 
+    Integer getTotalUserCount() {
+        User.count()
+    }
+
     List<User> getUsersByRole(String role) {
         def users =
             UserRole.findAllByRole(Role.findByAuthority(role)).collect {
