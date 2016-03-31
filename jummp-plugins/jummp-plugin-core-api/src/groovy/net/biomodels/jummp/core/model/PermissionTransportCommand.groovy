@@ -33,10 +33,10 @@ package net.biomodels.jummp.core.model
  * @author raza ali <raza.ali@ebi.ac.uk>
  */
 class PermissionTransportCommand {
-	String name;
 	String id;
-	boolean read=false;
-	boolean write=false;
-	boolean disabledEdit=false;
-	boolean show=true;
+    String name
+    boolean read = false
+    boolean write = false
+    boolean disabledEdit = false
+    boolean show = true
 }
