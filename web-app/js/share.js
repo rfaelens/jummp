@@ -62,6 +62,8 @@ CollaboratorTable = Backbone.View.extend({
                 $(":input").prop('disabled', false);
             }
         });
+        // finally, reset the state of the autocompletion box
+        $("#nameSearch").val("");
     },
     create: function(evt) {
         evt.preventDefault();
