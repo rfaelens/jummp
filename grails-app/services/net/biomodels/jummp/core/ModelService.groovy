@@ -50,6 +50,7 @@ import net.biomodels.jummp.core.model.PermissionTransportCommand
 import net.biomodels.jummp.core.model.PublicationTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ValidationState
 import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsFileDetails
