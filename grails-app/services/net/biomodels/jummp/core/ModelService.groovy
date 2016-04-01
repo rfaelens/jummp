@@ -2172,18 +2172,17 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         def stmtsWithQualifier = revision.annotations*.statement.findAll { it.qualifier == qualifier }
         def qualifierXrefs = stmtsWithQualifier.collect { Statement s -> s.object }
         ResourceReference resourceReference = qualifierXrefs.first()
-        boolean orignalModel = true;
+        boolean originalModel = true
         if(resourceReference.name.toLowerCase().equals("n")){
-            orignalModel = false;
+            originalModel = false
         }
-
-        PublishInfo pubinfo = new PublishInfo(orignalModel)
+        PublishInfo pubInfo = new PublishInfo(originalModel)
         revision.repoFiles.each {
-            pubinfo.addToFileSet(it.path,it.description);
+            pubInfo.addToFileSet(it.path,it.description);
         }
 
-        def valid = publishValidator.validatePublish(pubinfo)
-        if(valid == null){
+        def valid = publishValidator.validatePublish(pubInfo)
+        if(!valid) {
             throw new PublishException("Submission did not match any of the scenarios. Please upload all required files")
         }
 
