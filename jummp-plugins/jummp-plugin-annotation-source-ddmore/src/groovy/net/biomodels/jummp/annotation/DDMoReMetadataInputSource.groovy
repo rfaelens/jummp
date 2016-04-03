@@ -85,6 +85,9 @@ class DDMoReMetadataInputSource implements MetadataInputSource {
     Set<SectionContainer> processSections(List<Section> sections, SectionContainer parent = null) {
         def response = new TreeSet<SectionContainer>()
         sections.each { Section section ->
+            if (!section.isEnabled()) {
+                return
+            }
             switch (section.getClass()) {
                 case GenericSection:
                     processSectionProperties(section, parent)
