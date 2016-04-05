@@ -254,7 +254,7 @@ Jummp.buildValueTree = function(item, partialValueTree, isLeaf) {
         thisItem += " selected='selected'";
     }
     if (isLeaf) {
-        thisItem += " class='subvalue'"
+        annotationLabel = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + annotationLabel;
     }
     thisItem += ">" + annotationLabel + "</option>\n";
     partialValueTree += thisItem;
