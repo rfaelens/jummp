@@ -38,12 +38,19 @@ import net.biomodels.jummp.annotationstore.ResourceReference
 import net.biomodels.jummp.annotationstore.Statement
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
-import net.biomodels.jummp.core.adapters.RevisionAdapter
 import net.biomodels.jummp.core.events.LoggingEventType
 import net.biomodels.jummp.core.events.ModelCreatedEvent
 import net.biomodels.jummp.core.events.PostLogging
 import net.biomodels.jummp.core.events.RevisionCreatedEvent
-import net.biomodels.jummp.core.model.*
+import net.biomodels.jummp.core.model.ModelAuditTransportCommand
+import net.biomodels.jummp.core.model.ModelListSorting
+import net.biomodels.jummp.core.model.ModelState
+import net.biomodels.jummp.core.model.ModelTransportCommand
+import net.biomodels.jummp.core.model.PermissionTransportCommand
+import net.biomodels.jummp.core.model.PublicationTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
+import net.biomodels.jummp.core.model.ValidationState
 import net.biomodels.jummp.core.model.identifier.generator.NullModelIdentifierGenerator
 import net.biomodels.jummp.core.vcs.VcsException
 import net.biomodels.jummp.core.vcs.VcsFileDetails
@@ -1529,11 +1536,17 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         // and by adding read access to all revisions the user has access to
         aclUtilService.addPermission(model, username, BasePermission.READ)
         Set<Revision> revisions = model.revisions
-        boolean isCurator = userService.hasRole(username, "ROLE_CURATOR")
+        boolean isCurator = userService.isCurator(collaborator)
         if (isCurator) {
-            aclUtilService.addPermission(model, username, BasePermission.ADMINISTRATION)
+            // check if admin rights have not already been granted to avoid duplication
+            if (!hasAdminPermission(model, username)) {
+                aclUtilService.addPermission(model, username, BasePermission.ADMINISTRATION)
+            }
             model.revisions.each { Revision it ->
-                aclUtilService.addPermission(it, username, BasePermission.ADMINISTRATION)
+                // may have been granted already through grantWriteAccess for instance
+                if (!hasAdminPermission(it, username)) {
+                    aclUtilService.addPermission(it, username, BasePermission.ADMINISTRATION)
+                }
                 aclUtilService.addPermission(it, username, BasePermission.READ)
             }
         } else {
@@ -1546,8 +1559,11 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                 }
             }
         }
-        def notification = [ model: new ModelAdapter(model: model).toCommandObject(), user:
-                getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
+        def notification = [
+                model: new ModelAdapter(model: model).toCommandObject(),
+                user: springSecurityService.currentUser,
+                grantedTo: collaborator,
+                perms: getPermissionsMap(model)]
         sendMessage("seda:model.readAccessGranted", notification)
     }
 
@@ -1579,12 +1595,12 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                 String permission = getPermissionString(it.getPermission().getMask())
                 String principal = it.getSid().principal
                 if (permission) {
-                    User user= User.findByUsername(principal)
+                    User user = User.findByUsername(principal)
                     String userRealName = user.person.userRealName
                     int userId = user.id
                     if (!map.containsKey(userId)) {
                         PermissionTransportCommand ptc = new PermissionTransportCommand(
-                            name: userRealName, id: userId)
+                                name: userRealName, id: userId, username: user.username)
                         map.put(userId, ptc)
                     }
                     if (principal == springSecurityService.principal.username) {
@@ -1596,10 +1612,11 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
                     else {
                         map.get(userId).write = true
                         //disable editing for curators and for users who have contributed revisions
-                        if (userService.hasRole(principal, "ROLE_CURATOR")) {
+                        if (userService.isCurator(user) &&
+                                model.revisions*.owner*.id.contains(user.id)) {
                             map.get(userId).disabledEdit = true
                         }
-                        getAllRevisions(model).each {
+                        model.revisions.each {
                             if (it.owner.username == principal) {
                                 map.get(userId).disabledEdit = true
                             }
@@ -1692,22 +1709,31 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     *
     * @param model The Model for which write access should be granted
     * @param collaborator The user who should receive write access
-    * @todo Might be better in a CollaborationService?
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.grantWriteAccess")
     public void grantWriteAccess(Model model, User collaborator) {
-        aclUtilService.addPermission(model, collaborator.username, BasePermission.WRITE)
-        boolean isCurator = userService.hasRole(collaborator.username, "ROLE_CURATOR")
+        final String principal = collaborator.username
+        aclUtilService.addPermission(model, principal, BasePermission.WRITE)
+        boolean isCurator = userService.isCurator(collaborator)
         if (isCurator) {
-            aclUtilService.addPermission(model, collaborator.username, BasePermission.ADMINISTRATION)
+            // check if admin rights have not already been granted to avoid duplication
+            if (!hasAdminPermission(model, principal)) {
+                aclUtilService.addPermission(model, principal, BasePermission.ADMINISTRATION)
+            }
             model.revisions.each { Revision it ->
-                aclUtilService.addPermission(it, collaborator.username, BasePermission.ADMINISTRATION)
+                // may have been granted already through grantReadAccess for instance
+                if (!hasAdminPermission(it, username)) {
+                    aclUtilService.addPermission(it, username, BasePermission.ADMINISTRATION)
+                }
             }
         }
-        def notification = [model: new ModelAdapter(model: model).toCommandObject(),
-                user: getUsername(), grantedTo: collaborator, perms: getPermissionsMap(model)]
+        def notification = [
+                model: new ModelAdapter(model: model).toCommandObject(),
+                user: springSecurityService.currentUser,
+                grantedTo: collaborator,
+                perms: getPermissionsMap(model)]
         sendMessage("seda:model.writeAccessGranted", notification)
     }
 
@@ -1723,41 +1749,62 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     * @param model The Model for which read access should be revoked
     * @param collaborator The User whose read access should be revoked
     * @return @c true if the right has been revoked, @c false otherwise
-    * @todo Might be better in a CollaborationService?
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.revokeReadAccess")
     public boolean revokeReadAccess(Model model, User collaborator) {
-        if (collaborator.username == springSecurityService.authentication.name) {
+        final String principal = collaborator.username
+        if (principal == springSecurityService.authentication.name) {
             // the user cannot revoke his own rights
             return false
         }
-        // check whether the collaborator is admin of the model
-        Acl acl = aclUtilService.readAcl(model)
-        boolean adminToModel = false
-        acl.entries.each { ace ->
-            if (ace.sid.principal == collaborator.username && ace.permission == BasePermission.ADMINISTRATION) {
-                adminToModel = true
-            }
-        }
-        if (adminToModel) {
-            return false
-        }
-        aclUtilService.deletePermission(model, collaborator.username, BasePermission.READ)
-        aclUtilService.deletePermission(model, collaborator.username, BasePermission.WRITE)
+        boolean isCurator = userService.isCurator(collaborator)
         Set<Revision> revisions = model.revisions
-        for (Revision revision in revisions) {
-            if (aclUtilService.hasPermission(springSecurityService.authentication, revision,
-                        BasePermission.READ) || SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')) {
-                try {
-                    aclUtilService.deletePermission(revision, collaborator.username, BasePermission.READ)
-                } catch(Exception e) {
-                    e.printStackTrace()
+
+        aclUtilService.deletePermission(model, principal, BasePermission.READ)
+        aclUtilService.deletePermission(model, principal, BasePermission.WRITE)
+        if (isCurator) {
+            aclUtilService.deletePermission(model, principal, BasePermission.ADMINISTRATION)
+            revisions.each { Revision r ->
+                aclUtilService.deletePermission(r, principal, BasePermission.ADMINISTRATION)
+                aclUtilService.deletePermission(r, principal, BasePermission.READ)
+            }
+        } else {
+            boolean adminToModel = hasAdminPermission(model, principal)
+            if (adminToModel) {
+                aclUtilService.deletePermission(model, principal, BasePermission.ADMINISTRATION)
+            }
+            final boolean isAdmin = SpringSecurityUtils.ifAnyGranted('ROLE_ADMIN')
+            for (Revision revision in revisions) {
+                boolean canRead = aclUtilService.hasPermission(
+                        springSecurityService.authentication, revision, BasePermission.READ)
+                if (canRead || isAdmin) {
+                    try {
+                        aclUtilService.deletePermission(revision, principal, BasePermission.READ)
+                    } catch(Exception e) {
+                        log.error e.message, e
+                        return false
+                    }
                 }
             }
         }
         return true
+    }
+
+    /*
+     * Convenience method for checking if a user has admin privileges on a model or revision.
+     *
+     * @param modelOrRevision the model or revision for which to test the permissions.
+     * @param username the username of the person for which to test the permissions.
+     * @return true if we find a matching ACL entry, false otherwise.
+     */
+    private boolean hasAdminPermission(def modelOrRevision, String username) {
+        Acl acl = aclUtilService.readAcl(modelOrRevision)
+        return null != acl.entries.find { ace ->
+            ace.sid.principal == username &&
+                    ace.permission == BasePermission.ADMINISTRATION
+        }
     }
 
     /**
@@ -1769,28 +1816,27 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     * @param model The Model for which write access should be revoked
     * @param collaborator The User whose write access should be revoked
     * @return @c true if the right has been revoked, @c false otherwise
-    * @todo Might be better in a CollaborationService?
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.revokeWriteAccess")
     public boolean revokeWriteAccess(Model model, User collaborator) {
-        if (collaborator.username == springSecurityService.authentication.name) {
+        final String principal = collaborator.username
+        if (principal == springSecurityService.authentication.name) {
             // the user cannot revoke his own rights
             return false
         }
-        // check whether the collaborator is admin of the model
-        Acl acl = aclUtilService.readAcl(model)
-        boolean adminToModel = false
-        acl.entries.each { ace ->
-            if (ace.sid.principal == collaborator.username && ace.permission == BasePermission.ADMINISTRATION) {
-                adminToModel = true
+        boolean adminToModel = hasAdminPermission(model, principal)
+        if (adminToModel) {
+            aclUtilService.deletePermission(model, principal, BasePermission.ADMINISTRATION)
+        }
+        aclUtilService.deletePermission(model, principal, BasePermission.WRITE)
+        boolean isCurator = userService.isCurator(collaborator)
+        if (isCurator) {
+            model.revisions.each { Revision r ->
+                aclUtilService.deletePermission(r, principal, BasePermission.ADMINISTRATION)
             }
         }
-        if (adminToModel) {
-            return false
-        }
-        aclUtilService.deletePermission(model, collaborator.username, BasePermission.WRITE)
         return true
     }
 
@@ -1809,7 +1855,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     * @li Grant/Revoke read/write access to the @p model
     * @param model The Model for which the ownership should be transferred.
     * @param collaborator The User who becomes the new owner
-    * @todo Might be better in a CollaborationService?
     **/
     @PreAuthorize("hasPermission(#model, admin) or hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
@@ -1944,7 +1989,6 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     * @param model The deleted Model to restore
     * @return @c true, whether the state was restored, @c false otherwise.
     * @see ModelService#deleteModel(Model model)
-    * @todo might belong in an administration service?
     **/
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostLogging(LoggingEventType.UPDATE)
@@ -2128,18 +2172,17 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         def stmtsWithQualifier = revision.annotations*.statement.findAll { it.qualifier == qualifier }
         def qualifierXrefs = stmtsWithQualifier.collect { Statement s -> s.object }
         ResourceReference resourceReference = qualifierXrefs.first()
-        boolean orignalModel = true;
+        boolean originalModel = true
         if(resourceReference.name.toLowerCase().equals("n")){
-            orignalModel = false;
+            originalModel = false
         }
-
-        PublishInfo pubinfo = new PublishInfo(orignalModel)
+        PublishInfo pubInfo = new PublishInfo(originalModel)
         revision.repoFiles.each {
-            pubinfo.addToFileSet(it.path,it.description);
+            pubInfo.addToFileSet(it.path,it.description);
         }
 
-        def valid = publishValidator.validatePublish(pubinfo)
-        if(valid == null){
+        def valid = publishValidator.validatePublish(pubInfo)
+        if(!valid) {
             throw new PublishException("Submission did not match any of the scenarios. Please upload all required files")
         }
 

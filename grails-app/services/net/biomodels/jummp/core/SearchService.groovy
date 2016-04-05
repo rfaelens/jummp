@@ -200,7 +200,7 @@ class SearchService {
                     nonProxyHosts)
                 argsMap['proxySettings'] = proxySettings.toString()
                 if (IS_INFO_ENABLED) {
-                    logger.info("Proxy settings for the indexer are $proxySettings")
+                    log.info("Proxy settings for the indexer are $proxySettings")
                 }
             } else {
                 argsMap['proxySettings'] = ""

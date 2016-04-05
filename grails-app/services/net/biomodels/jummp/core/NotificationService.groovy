@@ -47,14 +47,14 @@ import org.springframework.security.access.prepost.PreAuthorize
  * Sends notifications to users.
  *
  * @author Raza Ali <raza.ali@ebi.ac.uk>
- * @date 20141015
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @date 20160330
  */
 class NotificationService {
     def grailsApplication
     def mailService
     def springSecurityService
     def messageSource
-    def searchService
 
     Set<User> getUsersFromUsernames(def usernames) {
         return usernames.collect { User.findByUsername(it) }
@@ -75,7 +75,7 @@ class NotificationService {
     }
 
     void updatePreferences(List<NotificationTypePreferences> preferences) {
-        User user = User.findByUsername(preferences.first().user.username)
+        User user = preferences.first().user
         preferences.each { updated ->
             NotificationTypePreferences existing = getPreference(user, updated.notificationType)
             if (existing.sendMail != updated.sendMail || existing.sendNotification != updated.sendNotification) {
@@ -134,7 +134,7 @@ class NotificationService {
         useGenericNotificationStructure("notification.model.readgranted.title",
                 [model.name] as String[],
                 "notification.model.readgranted.body",
-                [model.name, body.user, body.grantedTo.username] as String[],
+                [model.name, body.user.username, body.grantedTo.username] as String[],
                 NotificationType.ACCESS_GRANTED,
                 body.user,
                 getNotificationRecipients(body.perms),
@@ -143,10 +143,10 @@ class NotificationService {
             useGenericNotificationStructure("notification.model.readgrantedTo.title",
                     [model.name] as String[],
                     "notification.model.readgrantedTo.body",
-                    [model.name, body.user] as String[],
+                    [model.name, body.user.username] as String[],
                     NotificationType.ACCESS_GRANTED_TO,
                     body.user,
-                    getUsersFromUsernames([body.grantedTo.username]),
+                    [body.grantedTo] as Set,
                     model)
     }
 
@@ -155,31 +155,31 @@ class NotificationService {
         useGenericNotificationStructure("notification.model.writegranted.title",
                 [model.name] as String[],
                 "notification.model.writegranted.body",
-                [model.name, body.user, body.grantedTo.username] as String[],
+                [model.name, body.user.username, body.grantedTo.username] as String[],
                 NotificationType.ACCESS_GRANTED,
                 body.user,
-                getNotificationRecipients(body.perms) - User.findByUsername(body.grantedTo.username),
+                getNotificationRecipients(body.perms) - [body.grantedTo, body.user],
                 model)
 
             useGenericNotificationStructure("notification.model.writegrantedTo.title",
                     [model.name] as String[],
                     "notification.model.writegrantedTo.body",
-                    [model.name, body.user] as String[],
+                    [model.name, body.user.username] as String[],
                     NotificationType.ACCESS_GRANTED_TO,
                     body.user,
-                    getUsersFromUsernames([body.grantedTo.username]),
+                    [body.grantedTo] as Set,
                     model)
     }
 
     void useGenericNotificationStructure(String notificationTitle,
             String[] titleParams, String notificationBody, String[] bodyParams,
-            NotificationType type, String sender, Set<User> watchers,
+            NotificationType type, User sender, Set<User> watchers,
             ModelTransportCommand model) {
         Notification notification = new Notification()
         notification.title = messageSource.getMessage(notificationTitle, titleParams, null)
         notification.body = messageSource.getMessage(notificationBody, bodyParams, null)
         notification.notificationType = type
-        notification.sender = User.findByUsername(sender)
+        notification.sender = sender
         if (watchers.contains(notification.sender)) {
             watchers.remove(notification.sender)
         }
@@ -228,7 +228,7 @@ class NotificationService {
         useGenericNotificationStructure("notification.model.deleted.title",
                 [model.name] as String[],
                 "notification.model.deleted.body",
-                [model.name, body.user] as String[],
+                [model.name, body.user.username] as String[],
                 NotificationType.DELETED,
                 body.user,
                 getNotificationRecipients(body.perms),
@@ -242,7 +242,7 @@ class NotificationService {
         useGenericNotificationStructure("notification.model.updated.title",
                 [model.name] as String[],
                 "notification.model.updated.body",
-                [model.name, body.user, updates.join(",")] as String[],
+                [model.name, body.user.username, updates.join(",")] as String[],
                 NotificationType.VERSION_CREATED,
                 body.user,
                 getNotificationRecipients(body.perms),

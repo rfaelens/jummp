@@ -12,8 +12,8 @@
  Jummp is distributed in the hope that it will be useful, but WITHOUT ANY
  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
- 
- You should have received a copy of the GNU Affero General Public License along 
+
+ You should have received a copy of the GNU Affero General Public License along
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
 
@@ -34,11 +34,11 @@
         <g:javascript src="handlebars.min.js"/>
         <g:javascript src="backbone-min.js"/>
         <script id="collaborator-list-template" type="text/x-handlebars-template">
-    			
+
         		<div id="currentCollabs">
 				<h2>Collaborators</h2>
     			{{#if hasCollabs}}
-				<table class='table'> 
+				<table class='table'>
     			<thead>
     				<tr>
     					<td class="tableEL bold">Name</td>
@@ -63,7 +63,7 @@
     		 	</div>
     		 </script>
     		 <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}", dir: '/css', file: 'share.css')}" />
-            		 
+
     </head>
     <body>
     		<div id="ui">
@@ -77,12 +77,12 @@
     								<input placeholder="Name, username or email" id="nameSearch" name="name" type="text"/>
     							</div>
     							<div class="formElement">
-									<label for="read">Read</label>
+									<label for="radioReader">Read</label>
 									<input id="radioReader" type="radio" name="read"
                                            checked></input>
 								</div>
 								<div class="formElement">
-									<label for="write">Write</label>
+									<label for="radioWriter">Write</label>
 									<input id="radioWriter" type="radio"
                                            name="write"></input>
 								</div>
@@ -99,11 +99,11 @@
 										</select>
 									</div>
 									<div class="formElement">
-										<label for="teamRead">Read</label>
+										<label for="teamRadioReader">Read</label>
 										<input id="teamRadioReader" type="radio" name="teamRead" checked></input>
 									</div>
 									<div class="formElement">
-										<label for="teamWrite">Write</label>
+										<label for="teamRadioWriter">Write</label>
 										<input id="teamRadioWriter" type="radio"
 											   name="teamWrite"></input>
 									</div>
@@ -137,4 +137,4 @@
 	<content tag="contexthelp">
 		sharing
 	</content>
-    
+
