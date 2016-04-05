@@ -45,6 +45,7 @@ import eu.ddmore.libpharmml.dom.trialdesign.Population
 import eu.ddmore.libpharmml.dom.trialdesign.TrialDesign
 import eu.ddmore.libpharmml.dom.trialdesign.TrialStructure
 import groovy.xml.XmlUtil
+import groovy.xml.QName
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -66,12 +67,28 @@ import org.xml.sax.SAXException
  * @see net.biomodels.jummp.core.IPharmMlService
  * @see net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @author Tung Nguyen <tung.nguyen@ebi.ac.uk>
  */
 class PharmMlService implements FileFormatService {
     private static final Log log = LogFactory.getLog(this)
     private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
     private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
     static transactional = false
+    private static  final Map<String,String> PHARMML_COMMON_TYPES_NAMESPACES =
+        ['0.2.1':'http://www.pharmml.org/2013/03/CommonTypes',
+         '0.3'  :'http://www.pharmml.org/2013/03/CommonTypes',
+         '0.3.1':'http://www.pharmml.org/2013/03/CommonTypes',
+         '0.4'  :'http://www.pharmml.org/2013/03/CommonTypes',
+         '0.4.1':'http://www.pharmml.org/2013/03/CommonTypes',
+         '0.5'  :'http://www.pharmml.org/2013/03/CommonTypes',
+         '0.5.1':'http://www.pharmml.org/2013/03/CommonTypes',
+         '0.6'  :'http://www.pharmml.org/pharmml/0.6/CommonTypes',
+         '0.6.1':'http://www.pharmml.org/pharmml/0.6/CommonTypes',
+         '0.6.2':'http://www.pharmml.org/pharmml/0.6/CommonTypes',
+         '0.7.3':'http://www.pharmml.org/pharmml/0.7/CommonTypes',
+         '0.8'  :'http://www.pharmml.org/pharmml/0.8/CommonTypes',
+         '0.8.1':'http://www.pharmml.org/pharmml/0.8/CommonTypes'
+        ]
 
     @Profiled(tag="pharmMlService.validate")
     public boolean validate(List<File> model, final List<String> errors) {
@@ -179,7 +196,7 @@ class PharmMlService implements FileFormatService {
     @Profiled(tag="pharmMlService.updateName")
     public boolean updateName(RevisionTransportCommand revision, final String NAME) {
         return updatePharmMlElement(revision, "Name",
-                "http://www.pharmml.org/2013/03/CommonTypes", NAME)
+                PHARMML_COMMON_TYPES_NAMESPACES[revision.format.formatVersion], NAME)
     }
 
     /**
@@ -214,7 +231,7 @@ class PharmMlService implements FileFormatService {
     @Profiled(tag = "pharmMlService.updateDescription")
     public boolean updateDescription(RevisionTransportCommand revision, final String DESCRIPTION) {
         return updatePharmMlElement(revision, "Description",
-                "http://www.pharmml.org/2013/03/CommonTypes", DESCRIPTION)
+                PHARMML_COMMON_TYPES_NAMESPACES[revision.format.formatVersion], DESCRIPTION)
     }
 
     @Profiled(tag="pharmMlService.getAllAnnotationURNs")
@@ -428,6 +445,9 @@ class PharmMlService implements FileFormatService {
                 Node item = root.children().find { it.name().getLocalPart() == elem }
                 if (item) {
                     item.setValue(VALUE)
+                    if (item.name().getNamespaceURI() != elemNs) {
+                        item.name = new QName(elemNs, item.name().getLocalPart(),item.name().getPrefix())
+                    }
                 } else {
                     def elemXml = "<ct:$elem xmlns:ct=\"$elemNs\">$VALUE</ct:$elem>"
                     def parsedElem = new XmlParser(false, true).parseText(elemXml)
