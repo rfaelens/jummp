@@ -66,6 +66,11 @@ class TeamController {
     	}
     	def team = new Team(name: name, description: description)
     	team.owner=springSecurityService.getCurrentUser();
+        User currentUser = users.find { it.getId() == team.owner.id }
+        if (!currentUser) {
+            // By default, the owner/creator/current user should be added to the team automatically
+            users.add(team.owner)
+        }
     	if (!team.validate()) {
             render "Error creating team. Team could not be validated."
         }
