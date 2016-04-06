@@ -71,6 +71,11 @@ $(document).ready(function () {
         setHiddenFieldValue()
     });
     $('#deleteButton').click(function() {
+        var author = $('#newAuthorName').val();
+        author += "<init>" + ($('#newAuthorOrcid').val() ? $('#newAuthorOrcid').val() : "no_orcid");
+        author +="<init>" + ($('#newAuthorInstitution').val() ?
+                             $('#newAuthorInstitution').val() : "no_institution_provided");
+        authors.splice($.inArray(author, authors), 1);
         $("#authorList option:selected").remove();
         $('#newAuthorName').val("")
         $('#newAuthorOrcid').val("")
