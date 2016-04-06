@@ -86,8 +86,11 @@
 									<input id="radioWriter" type="radio"
                                            name="write"></input>
 								</div>
+                                <div class="formElement">
+                                    <button id="AddButton">Add</button>
+                                </div>
 							</div>
-						<button id="AddButton">Add</button>
+
 						<g:if test="${teams.size() > 0}">
 							<div id="teamFormElements" class="formElements">
 									<div class="formElement">
@@ -107,9 +110,11 @@
 										<input id="teamRadioWriter" type="radio"
 											   name="teamWrite"></input>
 									</div>
-								</div>
-							<br/>
-							<button id="TeamAddButton" style='margin-left:10px;'>Add</button>
+                                <div class="formElement">
+                                    <button id="TeamAddButton">Add</button>
+                                </div>
+                            </div>
+
 						</g:if>
 					   </form>
 					</div>

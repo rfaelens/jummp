@@ -276,7 +276,7 @@ function main(existing, contURL, submit, autoComp, teamURL) {
     $( "#TeamAddButton" ).click(function(event) {
         collaboratorList.createTeam(event);
     });
-    $("#teamSearch").width($("#nameSearch").width()*0.94);
+    //$("#teamSearch").width($("#nameSearch").width());
 }
 
 function autoComplete(collabs, url) {
