@@ -199,6 +199,9 @@ class SearchService {
                     " -Dhttp.proxyPort=").append(proxyPort).append(" -Dhttp.nonProxyHosts=").append(
                     nonProxyHosts)
                 argsMap['proxySettings'] = proxySettings.toString()
+                if (IS_INFO_ENABLED) {
+                    logger.info("Proxy settings for the indexer are $proxySettings")
+                }
             } else {
                 argsMap['proxySettings'] = ""
             }
