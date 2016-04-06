@@ -6,12 +6,12 @@ function addText() {
         if (orcid.length==0) {
             orcid="no_orcid";
         }
-        var institution = $('#newAuthorInstitution').val()
+        var institution = $('#newAuthorInstitution').val();
         if (institution.length==0) {
             institution="no_institution_provided";
         }
-        var id=fullName+"<init>"+orcid+"<init>"+institution
-        var alreadyPresent=false
+        var id=fullName+"<init>"+orcid+"<init>"+institution;
+        var alreadyPresent=false;
         $("#authorList > option").each(function() {
             if (this.value.toLowerCase() === id.toLowerCase()) {
                 alreadyPresent=true
@@ -25,11 +25,11 @@ function addText() {
             setHiddenFieldValue();
         }
         else {
-            showNotification("An author by that name is already added to the publication.")
+            showNotification("An author by that name is already added to the publication.");
         }
-        $('#newAuthorName').val("")
-        $('#newAuthorOrcid').val("")
-        $('#newAuthorInstitution').val("")
+        $('#newAuthorName').val("");
+        $('#newAuthorOrcid').val("");
+        $('#newAuthorInstitution').val("");
     }
 }
 
@@ -67,20 +67,25 @@ $(document).ready(function () {
         }
     });
     $('#addButton').click(function() {
-        addText()
-        setHiddenFieldValue()
+        addText();
+        setHiddenFieldValue();
     });
     $('#deleteButton').click(function() {
+        var author = $('#newAuthorName').val();
+        author += "<init>" + ($('#newAuthorOrcid').val() ? $('#newAuthorOrcid').val() : "no_orcid");
+        author +="<init>" + ($('#newAuthorInstitution').val() ?
+                             $('#newAuthorInstitution').val() : "no_institution_provided");
+        authors.splice($.inArray(author, authors), 1);
         $("#authorList option:selected").remove();
-        $('#newAuthorName').val("")
-        $('#newAuthorOrcid').val("")
-        $('#newAuthorInstitution').val("")
+        $('#newAuthorName').val("");
+        $('#newAuthorOrcid').val("");
+        $('#newAuthorInstitution').val("");
         $('#authorFieldTotal').val(authors);
     });
 });
 
 function setHiddenFieldValue() {
-    var text=""
+    var text="";
     $('#authorList > option').each(function(i, option) {
         text = text+ $(option).val();
     });
