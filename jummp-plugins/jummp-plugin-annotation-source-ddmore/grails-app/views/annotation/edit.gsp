@@ -40,7 +40,9 @@
     <script id="tab-headings-template" type="text/x-handlebars-template"></script>
     <script id="section-template" type="text/x-handlebars-template">
         <div id="{{this.id}}">
-            <p>{{this.info}}</p>
+            <div class="ui-state-highlight ui-state-cornerall info">
+                <p class="spacedTopBottom"><span class="ui-icon ui-icon-info infoLabel"></span>{{this.info}}</p>
+            </div>
             <div class="properties">
             </div>
         </div>
