@@ -8,14 +8,22 @@
         }
     </script>
 
-    <script id="single-unconstrained-value-template" type="text/x-handlebars-template">
-        {{renderSingleUnconstrainedValue}}
+    <script id="unconstrained-value-template" type="text/x-handlebars-template">
+        {{#each this.items}}
+            <input type="text" size="50" value="{{getLabelForUnconstrainedChoice this}}"/>
+        {{else}}
+            <input type="text" size="50" />
+        {{/each}}
     </script>
     <script id="multiple-unconstrained-value-template" type="text/x-handlebars-template">
         <div>your multiple input fields go here</div>
     </script>
     <script id="single-constrained-value-template" type="text/x-handlebars-template">
-        <div>your radio goes here</div>
+        <form>
+        {{#each this.items}}
+            <input type="radio" value="{{value}}" name="{{getNameForRadioButton this}}" id="{{getRadioButtonId this @index}}" {{#isSelected}}checked='checked'{{/isSelected}}/><label class="inlineLabel" for="{{getRadioButtonId this @index}}">{{value}}</label>
+        {{/each}}
+        </form>
     </script>
     <script id="multiple-constrained-value-template" type="text/x-handlebars-template">
         {{renderMultipleConstrainedValues}}
@@ -75,16 +83,21 @@
             var annotationSections = new AnnotationSections(Jummp.data.objectModel);
             Jummp.annotationSections = annotationSections;
             annotationSections.each(function(section) {
-                var props = section.get('annotationProperties')
+                var props = section.get('annotationProperties');
                 var annoProperties = new AnnotationProperties(props);
                 section.set('annotationProperties', annoProperties);
                 annoProperties.each(function(p) {
                     var vals = p.get('values');
                     var pValues = new Values(vals);
                     pValues.each(function(v) {
+                        v.set('annotationProperty', p);
                         var children = v.get('children');
                         if ( children != undefined) {
-                            v.set('children', new Values(children));
+                            var childValues = new Values(children);
+                            childValues.each(function(child) {
+                                child.set('annotationProperty', p);
+                            });
+                            v.set('children', childValues);
                         }
                     });
                     p.set('values', pValues);
@@ -97,6 +110,9 @@
         Jummp.annoEditor.start();
 </script>
 <g:javascript>
+    /* use jQueryUI to render radio buttons */
+    $("input[type=radio]").buttonset();
+
     /* toolbar button icons */
     $('#saveButton').button({
         icons: {
@@ -126,7 +142,7 @@
             },
             error: function(jqXHR) {
                 console.error("epic fail", jqXHR.responseText);
-                $("#message").removeClass("success").
+                $("#message").removeClass("success");
                 $("#message").removeClass("jummpWarning");
                 $("#message").addClass("failure");
                 $('#message').html("There was an internal error while saving the information provided.");

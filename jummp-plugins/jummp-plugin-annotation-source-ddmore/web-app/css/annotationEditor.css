@@ -69,6 +69,10 @@
     margin: 0px;
 }
 
+.inlineLabel {
+    display: inline;
+}
+
 /* leaves of nested annotation values. */
 .subvalue {
     padding-left: 4em;
