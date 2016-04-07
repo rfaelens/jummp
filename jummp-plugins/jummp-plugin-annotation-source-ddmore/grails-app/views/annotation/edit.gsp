@@ -280,6 +280,8 @@
                 $('#message').html(response.message);
                 if(response.errorReport != null) {
                     $('#report').html(response.errorReport);
+                } else {
+                    $('#report').empty();
                 }
             }
         });
