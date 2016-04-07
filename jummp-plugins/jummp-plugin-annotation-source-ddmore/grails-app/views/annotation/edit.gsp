@@ -134,7 +134,9 @@
                             });
                         });
                         if (false == Jummp.data.foundThisAnnoPropEntry) {
-                            delete Jummp.data.annoPropsMap[prop.get("uri")];
+                            var propUri = prop.get("uri");
+                            delete Jummp.data.annoPropsMap[propUri];
+                            Jummp.removeRdfStatement({subject: 'theSubject', predicate: propUri});
                         }
                         delete Jummp.data.foundThisAnnoPropEntry;
                         break;

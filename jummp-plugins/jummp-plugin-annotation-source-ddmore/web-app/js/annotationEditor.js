@@ -4,7 +4,7 @@ Jummp.removeRdfStatement = function(statementMap) {
     if (undefined == statementMap) return;
     var subject = statementMap.subject || '*';
     var predicate = statementMap.predicate || '*';
-    var object = statementMap.object || [];
+    var object = statementMap.object || '*';
 
     if ('*' == subject) {
         //delete all subjects
@@ -22,10 +22,10 @@ Jummp.removeRdfStatement = function(statementMap) {
         return;
     }
 
-    var myPredicates = Jummp.data.existingAnnotations.subjects[subject];
-    targetPredicate = _.find(myPredicates, function(p) {
-        return p.predicate == predicate;
-    });
+    targetPredicate = _.find(
+            Jummp.data.existingAnnotations.subjects[subject].predicates,
+            function(p) { return p.predicate == predicate; }
+    );
 
     if (!targetPredicate) {
         console.error("Could not find RDF statement with subject ", subject, "and predicate", predicate);
@@ -34,9 +34,10 @@ Jummp.removeRdfStatement = function(statementMap) {
 
     if ('*' == object) {
         //remove the predicate
-        _.reject(myPredicates, function(p) {
-            return p.predicate == predicate;
-        });
+        Jummp.data.existingAnnotations.subjects[subject].predicates = _.reject(
+                Jummp.data.existingAnnotations.subjects[subject].predicates,
+                function(p) { return p.predicate == predicate; }
+        );
         return;
     }
 
@@ -48,13 +49,19 @@ Jummp.removeRdfStatement = function(statementMap) {
         console.error("triple (", subject, predicate, object, ") did not match any existing annotations.");
         return;
     }
-        //delete all objects for the given subject and predicate
-    _.reject(targetPredicate.object, function(o) {
+
+    //delete all objects for the given subject and predicate
+    targetPredicate.object = _.reject(targetPredicate.object, function(o) {
         if( o.object == object) {
-            console.log("rejecting object", o.object);
             return true;
         }
     });
+    // put the updated predicate in Jummp.data
+    Jummp.data.existingAnnotations.subjects[subject].predicate = s_.reject(
+            Jummp.data.existingAnnotations.subjects[subject].predicates,
+            function(p) { return p.predicate == targetPredicate.predicate; }
+    );
+    Jummp.data.existingAnnotations.subjects[subject].predicate.push(targetPredicate);
 };
 
 Jummp.addRdfStatement = function(subject, predicate, object) {
@@ -170,7 +177,7 @@ var ValueContainerView = Mn.ItemView.extend({
     },
 
     multipleConstrainedValueChanged: function() {
-        var uri = this.model.get('uri');
+        var uri = this.options.property.get('uri');
         var selectedOptions = this.$el.find('select option:selected');
         var objects = _.map(selectedOptions, function(option) {
             return Jummp.convertToRdfObject(option.value);
