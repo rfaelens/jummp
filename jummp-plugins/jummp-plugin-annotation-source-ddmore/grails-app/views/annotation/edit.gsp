@@ -176,7 +176,6 @@
             /* remove what's not been visited */
             _.keys(Jummp.data.annoPropsMap).forEach(function(candidate) {
                 if (! _.contains(visitedProps, candidate)) {
-                    console.log("removing stale annotation", candidate);
                     delete Jummp.data.annoPropsMap[candidate];
                     Jummp.removeRdfStatement({subject: 'theSubject', predicate: candidate});
                 }
@@ -209,7 +208,6 @@
                 revision: "${revision.model.publicationId ?: revision.model.submissionId}"
             },
             beforeSend: function() {
-                console.log("Disable Save, Validate and Return to model display page (Back) buttons while saving annotations into database");
                 $("#message").removeClass("success");
                 $("#message").removeClass("failure");
                 $("#message").addClass("jummpWarning");
@@ -224,11 +222,9 @@
                 $("#message").removeClass("jummpWarning");
                 $("#message").addClass("failure");
                 $('#message').html("There was an internal error while saving the updated annotations provided.");
-                console.log("Enable Save, Validate and Return to model display page (Back) buttons - due to errors and let modify");
                 $('#saveButton').removeAttr('disabled');
                 $('#validateButton').removeAttr('disabled');
                 $('#backButton').removeAttr('disabled');
-
             },
             success: function(response) {
                 if ("200" == response.status) {
@@ -241,7 +237,6 @@
                     $("#message").addClass("failure");
                 }
                 $('#message').html(response.message);
-                console.log("Enable Save, Validate and Return to model display page (Back) buttons - success but want to modify");
                 $('#saveButton').removeAttr('disabled');
                 $('#validateButton').removeAttr('disabled');
                 $('#backButton').removeAttr('disabled');
@@ -283,8 +278,9 @@
                     $("#message").addClass("failure");
                 }
                 $('#message').html(response.message);
-                if(response.errorReport!=null)
+                if(response.errorReport != null) {
                     $('#report').html(response.errorReport);
+                }
             }
         });
     });

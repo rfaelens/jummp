@@ -96,7 +96,6 @@ Jummp.addRdfStatement = function(subject, predicate, object) {
         thisPredicate.object = object;
         Jummp.data.existingAnnotations.subjects.theSubject.predicates[predicateIdx] = thisPredicate;
     }
-    console.log("done with this stmt", Jummp.data.existingAnnotations.subjects.theSubject.predicates);
 };
 
 Jummp.convertToRdfObject = function(item) {
@@ -166,7 +165,6 @@ var ValueContainerView = Mn.ItemView.extend({
         var newValue = this.$el.children().get(0).value;
         //  get the qualifier uri
         var uri = this.options.property.get('uri');
-        console.log(uri, newValue);
         var rdfObject;
         if (!newValue) {
             rdfObject = newValue;
@@ -182,14 +180,12 @@ var ValueContainerView = Mn.ItemView.extend({
         var objects = _.map(selectedOptions, function(option) {
             return Jummp.convertToRdfObject(option.value);
         });
-        console.log(uri, objects);
         Jummp.addRdfStatement("theSubject", uri, objects);
     },
 
     singleConstrainedValueChanged: function() {
         var p = this.options.property.get("uri");
         var v = this.$el.find('input[type=radio]:checked')[0].value;
-        console.log("new value for ", p, v);
         Jummp.addRdfStatement("theSubject", p, [Jummp.convertToRdfObject(v)]);
     }
 });
