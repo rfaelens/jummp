@@ -1,5 +1,69 @@
 var Jummp = Jummp || {};
 
+Jummp.removeRdfStatement = function(statementMap) {
+    if (undefined == statementMap) return;
+    var subject = statementMap.subject || '*';
+    var predicate = statementMap.predicate || '*';
+    var object = statementMap.object || '*';
+
+    if ('*' == subject) {
+        //delete all subjects
+        Jummp.data.existingAnnotations.subjects = {};
+        return;
+    }
+    if (!Jummp.data.existingAnnotations.subjects.hasOwnProperty(subject)) {
+        console.error("cannot find statements with subject '", subject, "'. Use '*' if you wish to delete all statements.");
+        return;
+    }
+
+    if ('*' == predicate) {
+        //delete all predicates for the given subject
+        delete Jummp.data.existingAnnotations.subjects[subject];
+        return;
+    }
+
+    targetPredicate = _.find(
+            Jummp.data.existingAnnotations.subjects[subject].predicates,
+            function(p) { return p.predicate == predicate; }
+    );
+
+    if (!targetPredicate) {
+        console.error("Could not find RDF statement with subject ", subject, "and predicate", predicate);
+        return;
+    }
+
+    if ('*' == object) {
+        //remove the predicate
+        Jummp.data.existingAnnotations.subjects[subject].predicates = _.reject(
+                Jummp.data.existingAnnotations.subjects[subject].predicates,
+                function(p) { return p.predicate == predicate; }
+        );
+        return;
+    }
+
+    var targetObjects = _.find(targetPredicate.object, function(o) {
+        return o.object == object;
+    });
+
+    if (!targetObjects) {
+        console.error("triple (", subject, predicate, object, ") did not match any existing annotations.");
+        return;
+    }
+
+    //delete all objects for the given subject and predicate
+    targetPredicate.object = _.reject(targetPredicate.object, function(o) {
+        if( o.object == object) {
+            return true;
+        }
+    });
+    // put the updated predicate in Jummp.data
+    Jummp.data.existingAnnotations.subjects[subject].predicate = s_.reject(
+            Jummp.data.existingAnnotations.subjects[subject].predicates,
+            function(p) { return p.predicate == targetPredicate.predicate; }
+    );
+    Jummp.data.existingAnnotations.subjects[subject].predicate.push(targetPredicate);
+};
+
 Jummp.addRdfStatement = function(subject, predicate, object) {
     if (undefined === Jummp.data.existingAnnotations.subjects.theSubject.predicates) {
         Jummp.data.existingAnnotations.subjects.theSubject.predicates = []
@@ -32,7 +96,6 @@ Jummp.addRdfStatement = function(subject, predicate, object) {
         thisPredicate.object = object;
         Jummp.data.existingAnnotations.subjects.theSubject.predicates[predicateIdx] = thisPredicate;
     }
-    console.log("done with this stmt", Jummp.data.existingAnnotations.subjects.theSubject.predicates);
 };
 
 Jummp.convertToRdfObject = function(item) {
@@ -66,17 +129,13 @@ var AnnotationProperties = Backbone.Collection.extend({ model: AnnotationPropert
 var Value = Backbone.Model.extend({});
 var Values = Backbone.Collection.extend({ model: Value });
 
-// has to work with properties rather than values due to information structure.
 var ValueContainerView = Mn.ItemView.extend({
     getTemplate: function() {
-        var p = this.model;
-        var range = p.get('range').name;
+        var range = this.options.property.get("range").name;
         switch(range) {
             case "SINGLE_UNCONSTRAINED_CHOICE":
-                return "#single-unconstrained-value-template";
             case "MULTIPLE_UNCONSTRAINED_CHOICE":
-                //FIXME return "#multiple-unconstrained-value-template";
-                return "#single-unconstrained-value-template";
+                return "#unconstrained-value-template";
             case "SINGLE_CONSTRAINED_CHOICE":
                 return "#single-constrained-value-template";
             case "MULTIPLE_CONSTRAINED_CHOICE":
@@ -91,20 +150,21 @@ var ValueContainerView = Mn.ItemView.extend({
 
     ui: {
         multipleConstrainedValueOption: "select",
-        singleUnconstrainedValueOption: "input[type=text]"
+        singleUnconstrainedValueOption: "input[type=text]",
+        singleConstrainedValueOption:   "input[type=radio]"
     },
 
     events: {
         "change @ui.multipleConstrainedValueOption": "multipleConstrainedValueChanged",
-        "focusout @ui.singleUnconstrainedValueOption": "singleUnconstrainedValueChanged"
+        "focusout @ui.singleUnconstrainedValueOption": "singleUnconstrainedValueChanged",
+        "change @ui.singleConstrainedValueOption": "singleConstrainedValueChanged",
     },
 
     singleUnconstrainedValueChanged: function() {
         // get the value from the text box
         var newValue = this.$el.children().get(0).value;
         //  get the qualifier uri
-        var uri = this.model.get('uri');
-        console.log(uri, newValue);
+        var uri = this.options.property.get('uri');
         var rdfObject;
         if (!newValue) {
             rdfObject = newValue;
@@ -115,13 +175,18 @@ var ValueContainerView = Mn.ItemView.extend({
     },
 
     multipleConstrainedValueChanged: function() {
-        var uri = this.model.get('uri');
+        var uri = this.options.property.get('uri');
         var selectedOptions = this.$el.find('select option:selected');
         var objects = _.map(selectedOptions, function(option) {
             return Jummp.convertToRdfObject(option.value);
         });
-        console.log(uri, objects);
         Jummp.addRdfStatement("theSubject", uri, objects);
+    },
+
+    singleConstrainedValueChanged: function() {
+        var p = this.options.property.get("uri");
+        var v = this.$el.find('input[type=radio]:checked')[0].value;
+        Jummp.addRdfStatement("theSubject", p, [Jummp.convertToRdfObject(v)]);
     }
 });
 
@@ -131,7 +196,10 @@ var PropertyView = Mn.LayoutView.extend({
         this.addRegion("valueContainerRegion", this.$el.find(".valueContainer"));
     },
     onShow: function() {
-        var view = new ValueContainerView({model: this.model});
+        var view = new ValueContainerView({
+                collection: this.model.get("values"),
+                property: this.model
+        });
         this.valueContainerRegion.show(view);
     }
 });
@@ -206,48 +274,43 @@ $(function() {
     $("#leftContainer").tabs();
 });
 
-Handlebars.registerHelper("renderSingleUnconstrainedValue", function() {
-    var isRequired = Handlebars.escapeExpression(this.isRequired);
-    var values = this.values ? this.values.first() : '';
-    var isReadOnly = this.readOnly ? true : false;
+Handlebars.registerHelper({
+    // formats the value that should appear in the text field of a
+    // SINGLE_UNCONSTRAINED_CHOICE property.
+    getLabelForUnconstrainedChoice: function(item) {
+        return item.value ? item.value : item.uri ? item.uri : "";
+    },
 
-    var result = "<input type='text' size='50'";
-    if (isRequired) {
-        result += " required";
-    }
-    if (isReadOnly) {
-        result += " readonly";
-    }
-    if (values) {
-        var label = values.get('xref').name;
-        if (!label) {
-            label = values.get('xref').uri;
-        }
-        result += "value='" + label + "'";
-    }
-    result += " />";
-    return new Handlebars.SafeString(result);
-});
+    getNameForRadioButton: function(item) {
+        return item.annotationProperty.get("value");
+    },
 
-// builds a select box that allows multiple choice. nested values will appear indented.
-Handlebars.registerHelper("renderMultipleConstrainedValues", function() {
-    var values = this.values;
-    var result = "<select multiple >";
-    values.each(function(value) {
-        result = Jummp.buildValueTree(value, result);
-    });
-    result += "</select>";
-    var escapedResult = new Handlebars.SafeString(result);
-    return escapedResult;
-});
+    getRadioButtonId: function(item, index) {
+        var safePropertyName = item.annotationProperty.get("value").replace(/[^A-Za-z]/g, '');
+        return safePropertyName + "-" + index;
+    },
+
+    // builds a select box that allows multiple choice. nested values will appear indented.
+    renderMultipleConstrainedValues: function() {
+        var values = this.items;
+        var result = "<select multiple >";
+        _.each(values, function(value) {
+            // wrap inside Value so that we are consistent with the representation of child values
+            result = Jummp.buildValueTree(new Value(value), result);
+        });
+        result += "</select>";
+        var escapedResult = new Handlebars.SafeString(result);
+        return escapedResult;
+    }
+})
 
 Jummp.buildValueTree = function(item, partialValueTree, isLeaf) {
     partialValueTree = partialValueTree || "";
     isLeaf = isLeaf || false;
-    var isSelected = item.get('options').selected || false;
-    var optionValue = item.get('uri');
-    var annotationLabel = item.get('value');
-    var subValues = item.get('children') || [];
+    var isSelected = item.get("isSelected") || false;
+    var optionValue = item.get("uri");
+    var annotationLabel = item.get("value");
+    var subValues = item.get("children") || [];
 
     var thisItem = "<option value='" + optionValue + "'";
     if (isSelected) {

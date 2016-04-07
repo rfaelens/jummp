@@ -68,3 +68,7 @@
 .info p {
     margin: 0px;
 }
+
+.inlineLabel {
+    display: inline;
+}

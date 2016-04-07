@@ -9,14 +9,22 @@
         }
     </script>
 
-    <script id="single-unconstrained-value-template" type="text/x-handlebars-template">
-        {{renderSingleUnconstrainedValue}}
+    <script id="unconstrained-value-template" type="text/x-handlebars-template">
+        {{#each this.items}}
+            <input type="text" size="50" value="{{getLabelForUnconstrainedChoice this}}"/>
+        {{else}}
+            <input type="text" size="50" />
+        {{/each}}
     </script>
     <script id="multiple-unconstrained-value-template" type="text/x-handlebars-template">
         <div>your multiple input fields go here</div>
     </script>
     <script id="single-constrained-value-template" type="text/x-handlebars-template">
-        <div>your radio goes here</div>
+        <form>
+        {{#each this.items}}
+            <input type="radio" value="{{value}}" name="{{getNameForRadioButton this}}" id="{{getRadioButtonId this @index}}" {{#isSelected}}checked='checked'{{/isSelected}}/><label class="inlineLabel" for="{{getRadioButtonId this @index}}">{{value}}</label>
+        {{/each}}
+        </form>
     </script>
     <script id="multiple-constrained-value-template" type="text/x-handlebars-template">
         {{renderMultipleConstrainedValues}}
@@ -75,11 +83,24 @@
         Jummp.annoEditor.on("before:start", function(options) {
             var annotationSections = new AnnotationSections(Jummp.data.objectModel);
             Jummp.annotationSections = annotationSections;
-            var setSelectedForList = function(values, s) {
-                var v = values.findWhere({uri: s.uri});
-                if (v != undefined) {
-                    v.get('options').selected = true;
+            var setSelectedForList = function(values, s, prop) {
+                var v;
+                var haveUri = s.uri != undefined;
+                var haveName = s.name != undefined;
+                if (!haveName && !haveUri) return;
+                if (haveUri) {
+                    v = values.findWhere({uri: s.uri});
+                } else {
+                    v = values.findWhere({value: s.name});
                 }
+                if (v != undefined) {
+                    v.set({'isSelected': true});
+                    Jummp.data.foundThisAnnoPropEntry = true;
+                }
+                /*
+                 * not finding a match here isn't a problem because we're dealing
+                 * with one layer of what could be a hierarchy at a time.
+                 */
             }
 
             var bind = function (prop, selection) {
@@ -88,26 +109,43 @@
                     case "SINGLE_UNCONSTRAINED_CHOICE":
                     case "MULTIPLE_UNCONSTRAINED_CHOICE":
                         _.each(selection, function(s) {
-                            prop.get('values').push(new Value({xref: s}));
+                            var newValue = new Value({
+                                isSelected: true,
+                                options: {},
+                                uri: s.uri,
+                                value: s.name,
+                                annotationProperty: prop
+                            });
+                            prop.get('values').push(newValue);
                         });
                         break;
                     case "SINGLE_CONSTRAINED_CHOICE":
                     case "MULTIPLE_CONSTRAINED_CHOICE":
+                        /* flag to ensure that the revision is not annotated with a stale xref for this property. */
+                        Jummp.data.foundThisAnnoPropEntry = false;
                         _.each(selection, function(s) {
                             var values = prop.get('values');
-                            setSelectedForList(values, s);
+                            setSelectedForList(values, s, prop);
                             values.each(function(parent) {
                                 var children = parent.get('children');
                                 if (children != undefined) {
-                                    setSelectedForList(children, s);
+                                    setSelectedForList(children, s, prop);
                                 }
                             });
                         });
+                        if (false == Jummp.data.foundThisAnnoPropEntry) {
+                            var propUri = prop.get("uri");
+                            delete Jummp.data.annoPropsMap[propUri];
+                            Jummp.removeRdfStatement({subject: 'theSubject', predicate: propUri});
+                        }
+                        delete Jummp.data.foundThisAnnoPropEntry;
                         break;
                     default:
                         console.warn("unsupported property range type", propRange);
                 }
             };
+            /* used to clear annotations from the previous revision which no longer match what's available in the view. */
+            var visitedProps = [];
             annotationSections.each(function(section) {
                 var props = section.get('annotationProperties');
                 var annoProperties = new AnnotationProperties(props);
@@ -117,19 +155,30 @@
                     var vals = p.get('values');
                     var pValues = new Values(vals);
                     pValues.each(function(v) {
+                        v.set('annotationProperty', p);
                         var children = v.get('children');
                         if ( children != undefined) {
-                            v.set('children', new Values(children));
+                            var childValues = new Values(children);
+                            childValues.each(function(child) {
+                                child.set('annotationProperty', p);
+                            });
+                            v.set('children', childValues);
                         }
                     });
                     p.set('values', pValues);
-                    var selection = Jummp.data.annoPropsMap[p.get('uri')];
-                    Jummp.selection = selection;
-                    console.log("selection for p ", p.get('uri'), selection);
+                    var selection = Jummp.data.annoPropsMap[uri];
                     if (selection) {
                         bind(p,selection);
                     }
+                    visitedProps.push(uri);
                 });
+            });
+            /* remove what's not been visited */
+            _.keys(Jummp.data.annoPropsMap).forEach(function(candidate) {
+                if (! _.contains(visitedProps, candidate)) {
+                    delete Jummp.data.annoPropsMap[candidate];
+                    Jummp.removeRdfStatement({subject: 'theSubject', predicate: candidate});
+                }
             });
             var sectionTabs = new TabbedLayout({annotationSections: annotationSections});
             Jummp.annoEditor.mainRegion.show(sectionTabs);
@@ -138,6 +187,9 @@
         Jummp.annoEditor.start();
 </script>
 <g:javascript>
+    /* use jQueryUI to render radio buttons */
+    $("input[type=radio]").buttonset();
+
     /* toolbar button icons */
     $('#saveButton').button({
         icons: {
@@ -156,7 +208,6 @@
                 revision: "${revision.model.publicationId ?: revision.model.submissionId}"
             },
             beforeSend: function() {
-                console.log("Disable Save, Validate and Return to model display page (Back) buttons while saving annotations into database");
                 $("#message").removeClass("success");
                 $("#message").removeClass("failure");
                 $("#message").addClass("jummpWarning");
@@ -171,11 +222,9 @@
                 $("#message").removeClass("jummpWarning");
                 $("#message").addClass("failure");
                 $('#message').html("There was an internal error while saving the updated annotations provided.");
-                console.log("Enable Save, Validate and Return to model display page (Back) buttons - due to errors and let modify");
                 $('#saveButton').removeAttr('disabled');
                 $('#validateButton').removeAttr('disabled');
                 $('#backButton').removeAttr('disabled');
-
             },
             success: function(response) {
                 if ("200" == response.status) {
@@ -188,7 +237,6 @@
                     $("#message").addClass("failure");
                 }
                 $('#message').html(response.message);
-                console.log("Enable Save, Validate and Return to model display page (Back) buttons - success but want to modify");
                 $('#saveButton').removeAttr('disabled');
                 $('#validateButton').removeAttr('disabled');
                 $('#backButton').removeAttr('disabled');
@@ -230,8 +278,11 @@
                     $("#message").addClass("failure");
                 }
                 $('#message').html(response.message);
-                if(response.errorReport!=null)
+                if(response.errorReport != null) {
                     $('#report').html(response.errorReport);
+                } else {
+                    $('#report').empty();
+                }
             }
         });
     });
