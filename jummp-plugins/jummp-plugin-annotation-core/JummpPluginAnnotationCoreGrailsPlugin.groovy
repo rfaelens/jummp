@@ -19,6 +19,8 @@
  */
 
 import net.biomodels.jummp.annotation.DefaultMetadataInputSource
+import net.biomodels.jummp.annotation.RDFWriter
+import net.biomodels.jummp.annotation.SBMLWriter
 
 class JummpPluginAnnotationCoreGrailsPlugin {
     // the plugin version
@@ -73,6 +75,8 @@ Brief summary/description of the plugin.
 
     def doWithSpring = {
         metadataInputSource(DefaultMetadataInputSource)
+        rdfMetadataWriter(RDFWriter)
+        sbmlMetadataWriter(SBMLWriter)
     }
 
     def doWithDynamicMethods = { ctx ->
