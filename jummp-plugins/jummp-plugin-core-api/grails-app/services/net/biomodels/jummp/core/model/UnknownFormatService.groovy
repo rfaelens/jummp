@@ -70,7 +70,7 @@ class UnknownFormatService implements FileFormatService {
     }
 
     /**
-     * Extracts the descrition from the @p model.
+     * Extracts the description from the @p model.
      */
     public final String extractDescription(final List<File> model) {
         return ""
