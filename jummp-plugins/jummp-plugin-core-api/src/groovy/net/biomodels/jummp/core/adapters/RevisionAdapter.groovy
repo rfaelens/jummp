@@ -35,15 +35,15 @@ import net.biomodels.jummp.model.Revision
 public class RevisionAdapter extends DomainAdapter {
     Revision revision
 
-
     def modelService = Holders.getGrailsApplication().mainContext.modelService
 
     List<RFTC> getRepositoryFilesForRevision() {
-        List<RFTC> repFiles=new LinkedList<RFTC>()
+        List<RFTC> repFiles = new LinkedList<RFTC>()
         List<File> files = modelService.retrieveModelRepFiles(revision)
         revision.repoFiles.each { rf ->
             File tmpFile = files.find { it.getName() == (new File(rf.path)).getName() }
-            RFTC rftc = new RFTC(
+            if (tmpFile != null) {
+                RFTC rftc = new RFTC(
                     id: rf.id,
                     path: tmpFile.getCanonicalPath(),
                     description: rf.description,
@@ -51,7 +51,8 @@ public class RevisionAdapter extends DomainAdapter {
                     mainFile: rf.mainFile,
                     userSubmitted: rf.userSubmitted,
                     mimeType: rf.mimeType)
-            repFiles.add(rftc)
+                repFiles.add(rftc)
+            }
         }
         return repFiles
     }
