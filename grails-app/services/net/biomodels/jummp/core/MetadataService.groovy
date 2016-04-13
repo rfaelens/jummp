@@ -22,31 +22,24 @@ package net.biomodels.jummp.core
 
 import eu.ddmore.metadata.service.ValidationError
 import eu.ddmore.metadata.service.ValidationErrorStatus
-import eu.ddmore.metadata.service.ValidationException
-import grails.transaction.NotTransactional
 import grails.transaction.Transactional
 import net.biomodels.jummp.annotation.CompositeValueContainer
 import net.biomodels.jummp.annotation.PropertyContainer
 import net.biomodels.jummp.annotation.SectionContainer
 import net.biomodels.jummp.annotation.ValueContainer
+import net.biomodels.jummp.annotationstore.Qualifier
+import net.biomodels.jummp.annotationstore.ResourceReference
+import net.biomodels.jummp.annotationstore.Statement
 import net.biomodels.jummp.core.adapters.DomainAdapter
-import net.biomodels.jummp.annotationstore.*
-import net.biomodels.jummp.core.util.JummpXmlUtils
-import net.biomodels.jummp.model.Revision
+import net.biomodels.jummp.core.annotation.StatementTransportCommand
+import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
+import net.biomodels.jummp.core.model.RevisionTransportCommand
 import net.biomodels.jummp.model.Model
-import net.biomodels.jummp.core.model.*
-import net.biomodels.jummp.core.annotation.*
-import eu.ddmore.metadata.service.MetadataWriterImpl
-import net.biomodels.jummp.plugins.pharmml.AbstractPharmMlHandler
+import net.biomodels.jummp.model.Revision
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.validator.UrlValidator
-import org.apache.jena.riot.RDFFormat
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-import org.hibernate.validator.constraints.impl.URLValidator
 import org.perf4j.aop.Profiled
-import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.acls.domain.BasePermission
 import org.springframework.transaction.annotation.Isolation
 
 /**
