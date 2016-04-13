@@ -42,7 +42,7 @@ class RDFWriter implements MetadataSavingStrategy {
     /**
      * Dependency injection for Grails Application.
      */
-    def grailsApplication = Holders.grailsApplication
+    def grailsApplication
     /**
      * Dependency injection for Model Format Service.
      */
@@ -85,7 +85,7 @@ class RDFWriter implements MetadataSavingStrategy {
 
     @NotTransactional
     private MetadataWriterImpl createMetadataWriter(RevisionTransportCommand revisionTC, List<StatementTransportCommand> statements){
-        def subject = "${grailsApplication.config.grails.serverURL}/model/${revisionTC.model.submissionId}"
+        def subject = "${Holders.grailsApplication.config.grails.serverURL}/model/${revisionTC.model.submissionId}"
         def rdfTypeProperty = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
         def modelOntologyTerm = modelFileFormatService.getModelOntologyTerm(revisionTC)
 
