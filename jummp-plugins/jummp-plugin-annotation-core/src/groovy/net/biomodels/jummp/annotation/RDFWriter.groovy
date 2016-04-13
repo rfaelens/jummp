@@ -23,7 +23,6 @@ package net.biomodels.jummp.annotation
 import eu.ddmore.metadata.service.MetadataWriterImpl
 import grails.transaction.NotTransactional
 import grails.util.Holders
-
 import net.biomodels.jummp.core.MetadataSavingStrategy
 import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
 import net.biomodels.jummp.core.annotation.StatementTransportCommand
@@ -80,7 +79,6 @@ class RDFWriter implements MetadataSavingStrategy {
         } else {
             return files
         }
-
     }
 
     @NotTransactional
@@ -105,5 +103,4 @@ class RDFWriter implements MetadataSavingStrategy {
 
         return metadataWriter
     }
-
 }
