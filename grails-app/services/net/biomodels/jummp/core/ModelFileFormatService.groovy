@@ -287,12 +287,6 @@ class ModelFileFormatService {
         return getControllers().get(format.identifier)
     }
 
-    @Profiled(tag = "modelFileFormatService.getModelOntologyTerm")
-    String getModelOntologyTerm(RevisionTransportCommand revision) {
-        FileFormatService service = serviceForFormat(revision.format)
-        service ? service.getModelOntologyTerm(revision) : "*"
-    }
-
     @Profiled(tag = "modelFileFormatService.doBeforeSavingAnnotations")
     boolean doBeforeSavingAnnotations(File annoFile, RevisionTransportCommand newRevision) {
         FileFormatService service = serviceForFormat(newRevision.format)

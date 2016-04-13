@@ -85,7 +85,7 @@ class RDFWriter implements MetadataSavingStrategy {
     public MetadataWriterImpl createMetadataWriter(RevisionTransportCommand revisionTC, List<StatementTransportCommand> statements){
         def subject = "${Holders.grailsApplication.config.grails.serverURL}/model/${revisionTC.model.submissionId}"
         def rdfTypeProperty = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-        def modelOntologyTerm = modelFileFormatService.getModelOntologyTerm(revisionTC)
+        def modelOntologyTerm = "http://www.pharmml.org/ontology/PHARMMLO_0000001"
 
         def metadataWriter = new MetadataWriterImpl()
         statements.each { StatementTransportCommand statement ->

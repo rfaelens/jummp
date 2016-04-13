@@ -104,7 +104,5 @@ public interface FileFormatService {
      */
     public String getFormatVersion(RevisionTransportCommand revision);
 
-    public String getModelOntologyTerm(RevisionTransportCommand revisionTC);
-
     public boolean doBeforeSavingAnnotations(File annoFile, RevisionTransportCommand newRevision);
 }

@@ -244,11 +244,6 @@ class PharmMlService implements FileFormatService {
         return []
     }
 
-    @Profiled(tag="pharmMlService.getModelOntologyTerm")
-    String getModelOntologyTerm(RevisionTransportCommand revisionTC) {
-        return "http://www.pharmml.org/ontology/PHARMMLO_0000001"
-    }
-
     /**
      * Detects whether the supplied files are in the format supported by this Service
      * @param files a list of files that should be checked
