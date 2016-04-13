@@ -45,7 +45,8 @@
                             <td class="spaced"><g:link action="show" id="${t.id}">${t.name}</g:link></td>
                             <td class="spaced">${t.description}</td>
                             <td class="spaced">${t.owner.person.userRealName}</td>
-                            <td class="spaced"><g:link action="delete" id="${t.id}">Delete</g:link></td>
+                            %{--<td class="spaced"><g:link action="delete" id="${t.id}">Delete</g:link></td>--}%
+                            <td class="spaced">&nbsp;</td>
                         </tr>
                     </g:each>
                 </tbody>
