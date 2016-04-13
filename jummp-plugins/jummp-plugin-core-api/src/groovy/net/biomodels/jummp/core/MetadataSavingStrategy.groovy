@@ -20,6 +20,7 @@
 
 package net.biomodels.jummp.core;
 
+import eu.ddmore.metadata.service.MetadataWriterImpl;
 import groovy.transform.CompileStatic;
 import net.biomodels.jummp.core.annotation.StatementTransportCommand;
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand;
@@ -38,4 +39,7 @@ public interface MetadataSavingStrategy {
     List<RepositoryFileTransportCommand> marshallAnnotations(RevisionTransportCommand revisionTC,
                                                              List<StatementTransportCommand> statementTransportCommands,
                                                              boolean isUpdate);
+    public MetadataWriterImpl createMetadataWriter(RevisionTransportCommand revisionTC,
+                                                   List<StatementTransportCommand> statements);
+
 }
