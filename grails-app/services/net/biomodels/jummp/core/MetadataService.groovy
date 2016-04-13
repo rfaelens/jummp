@@ -206,7 +206,7 @@ class MetadataService {
 
         List<RepositoryFileTransportCommand> files = newRevision.files
         try {
-            files = executeMetadataSavingStrategy(newRevision, statements)
+            files = executeMetadataSavingStrategy(newRevision, statements, isUpdate)
 
             def result = modelService.addValidatedRevision(files, [], newRevision)
             if (!result) {
@@ -220,8 +220,10 @@ class MetadataService {
         }
     }
 
-    List<RevisionTransportCommand> executeMetadataSavingStrategy(RevisionTransportCommand revisionTransportCommand,
-                                                                 List<StatementTransportCommand> statementTransportCommands) {
+    List<RevisionTransportCommand> executeMetadataSavingStrategy(
+                    RevisionTransportCommand revisionTransportCommand,
+                    List<StatementTransportCommand> statementTransportCommands,
+                    boolean isUpdate) {
         String format = revisionTransportCommand.format.identifier
         MetadataSavingStrategy strategy
         if (format.equalsIgnoreCase("PharmML") || format.equalsIgnoreCase("Unknown")) {
@@ -230,7 +232,7 @@ class MetadataService {
             strategy = sbmlMetadataWriter
         }
         assert null != strategy
-        return strategy.marshallAnnotations(revisionTransportCommand, statementTransportCommands)
+        return strategy.marshallAnnotations(revisionTransportCommand, statementTransportCommands, isUpdate)
     }
 
     @Profiled(tag="metadataService.validateModelRevision")
