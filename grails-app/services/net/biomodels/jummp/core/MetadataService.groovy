@@ -243,11 +243,20 @@ class MetadataService {
             throw new IllegalArgumentException("Revision may not be null")
         }
 
-        def pharmMlMetadataWriter = createMetadataWriter(model, statements )
+        String format = revision.format.identifier
+        MetadataSavingStrategy strategy
+        if (format.equalsIgnoreCase("PharmML") || format.equalsIgnoreCase("Unknown")) {
+            strategy = rdfMetadataWriter
+        } else if (format.equals("SBML")) {
+            strategy = sbmlMetadataWriter
+        }
+
+        RevisionTransportCommand revisionTC = DomainAdapter.getAdapter(revision).toCommandObject()
+        def metadataWriter = strategy.createMetadataWriter(revisionTC, statements)
 
         StringBuffer validationReport = new StringBuffer();
 
-        metadataValidator.validate(pharmMlMetadataWriter.model)
+        metadataValidator.validate(metadataWriter.model)
 
         for(ValidationError validationError: metadataValidator.validationHandler.getValidationList()) {
             if (validationError.errorStatus == ValidationErrorStatus.EMPTY) {
