@@ -34,6 +34,7 @@
 
 package net.biomodels.jummp.core
 
+import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.model.ModelFormat
 import net.biomodels.jummp.core.model.FileFormatService
 import net.biomodels.jummp.core.model.ModelFormatTransportCommand
@@ -286,6 +287,22 @@ class ModelFileFormatService {
         return getControllers().get(format.identifier)
     }
 
+    @Profiled(tag = "modelFileFormatService.getModelOntologyTerm")
+    String getModelOntologyTerm(RevisionTransportCommand revision) {
+        FileFormatService service = serviceForFormat(revision.format)
+        service ? service.getModelOntologyTerm(revision) : "*"
+    }
+
+    @Profiled(tag = "modelFileFormatService.doBeforeSavingAnnotations")
+    boolean doBeforeSavingAnnotations(File annoFile, RevisionTransportCommand newRevision) {
+        FileFormatService service = serviceForFormat(newRevision.format)
+        assert service
+        if (service) {
+            return service.doBeforeSavingAnnotations(annoFile, newRevision)
+        } else {
+            return false
+        }
+    }
     /**
      * Helper function to get the proper service for @p format.
      * @param format The ModelFormatTransportCommand/ModelFormat identifier for which the service should be returned.

@@ -23,12 +23,20 @@
 
 
 package net.biomodels.jummp.core.model
+
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.perf4j.aop.Profiled
+
 /**
  * Possibly the most permissive implementation possible of the file format service
  * interface. Everything is a valid unknown format.
  * @author raza
  */
 class UnknownFormatService implements FileFormatService {
+    private static final Log log = LogFactory.getLog(this)
+    private static final boolean IS_INFO_ENABLED = log.isInfoEnabled()
+    private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled()
     /**
      * Validate the @p model.
      * @param model File handle containing the Model to be validated.
@@ -74,6 +82,22 @@ class UnknownFormatService implements FileFormatService {
      */
     public final String extractDescription(final List<File> model) {
         return ""
+    }
+
+    boolean doBeforeSavingAnnotations(File annoFile, RevisionTransportCommand rev) {
+        // TODO: fill essential steps in
+        if (IS_INFO_ENABLED) {
+            log.info("""\
+                Saving metadata ${annoFile.dump()} (Unknown Format) of the model based on\
+                the revision ${rev.id}""")
+        }
+        return true
+    }
+
+    @Profiled(tag="unknownFormatService.getModelOntologyTerm")
+    String getModelOntologyTerm(RevisionTransportCommand revisionTC) {
+        // TODO: replace it by a correct url
+        return "http://www.pharmml.org/ontology/unknown"
     }
 
     /**

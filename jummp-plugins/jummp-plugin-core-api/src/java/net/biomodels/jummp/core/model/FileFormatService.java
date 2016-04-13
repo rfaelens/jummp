@@ -103,4 +103,8 @@ public interface FileFormatService {
      * @return the textual representation of the format's version - e.g. L3V2 for SBML.
      */
     public String getFormatVersion(RevisionTransportCommand revision);
+
+    public String getModelOntologyTerm(RevisionTransportCommand revisionTC);
+
+    public boolean doBeforeSavingAnnotations(File annoFile, RevisionTransportCommand newRevision);
 }

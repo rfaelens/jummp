@@ -78,8 +78,8 @@ class MetadataService {
      * Dependency injection for Model Format Service.
      */
     def modelFileFormatService
-    def pharmMlService
-
+    def rdfMetadataWriter
+    def sbmlMetadataWriter
     def metadataValidator
 
     /**
@@ -211,39 +211,14 @@ class MetadataService {
         RevisionTransportCommand newRevision = DomainAdapter.getAdapter(baseRevision).toCommandObject()
         newRevision.comment = "Updated model annotations."
 
+        List<RepositoryFileTransportCommand> files = newRevision.files
         try {
-            def pharmMlMetadataWriter = createMetadataWriter(model,statements)
-            List<RepositoryFileTransportCommand> files = newRevision.files
-            String annoFilePath
-            File annoFile
-            RepositoryFileTransportCommand rf
-            if (!isUpdate) {
-                String fileBase = System.properties['java.io.tmpdir']
-                String fileName = "${model}.rdf"
-                annoFile = new File(fileBase, fileName)
-                annoFilePath = annoFile.absolutePath
-                rf = new RepositoryFileTransportCommand( path: annoFilePath, description:
-                        "annotation file")
-                files.add rf
-            } else {
-                rf = files.find {
-                    it.path?.endsWith(".rdf")
-                }
-                annoFilePath = rf.path
-                annoFile = new File(annoFilePath)
-            }
-            pharmMlMetadataWriter.writeRDFModel(annoFilePath, RDFFormat.RDFXML)
-
-            boolean preProcessingOK = pharmMlService.doBeforeSavingAnnotations(annoFile, newRevision)
-            if (!preProcessingOK) {
-                log.error """\
-Metadata ${pharmMlMetadataWriter.dump()} based on revision ${baseRevision.id} will not save cleanly."""
-            }
+            files = executeMetadataSavingStrategy(newRevision, statements)
 
             def result = modelService.addValidatedRevision(files, [], newRevision)
             if (!result) {
                 log.error """\
-Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataWriter.dump()}"""
+            Could not update revision ${baseRevision.id} with annotations ${statements.dump()}"""
             }//else{ result.save(flush: true) }
             return result != null
         } catch(Exception e) {
@@ -252,29 +227,18 @@ Could not update revision ${baseRevision.id} with annotations ${pharmMlMetadataW
         }
     }
 
-    @NotTransactional
-    private MetadataWriterImpl createMetadataWriter(String model, List<StatementTransportCommand> statements){
-        def subject = "${grailsApplication.config.grails.serverURL}/model/${model}"
-        def rdfTypeProperty = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-        def pharmmlModelOntologyTerm = "http://www.pharmml.org/ontology/PHARMMLO_0000001"
-
-        def pharmMlMetadataWriter = new MetadataWriterImpl()
-        statements.each { StatementTransportCommand statement ->
-            String predicate = statement.predicate.uri
-            ResourceReferenceTransportCommand xref = statement.object
-            String object = xref.uri ?: xref.name
-            boolean isLiteralTriple = xref.uri ? false : true
-            if (isLiteralTriple) {
-                pharmMlMetadataWriter.generateLiteralTriple(subject, predicate, object)
-            } else {
-                pharmMlMetadataWriter.generateTriple(subject, predicate, object)
-            }
+    List<RevisionTransportCommand> executeMetadataSavingStrategy(RevisionTransportCommand revisionTransportCommand,
+                                                                 List<StatementTransportCommand> statementTransportCommands) {
+        String format = revisionTransportCommand.format.identifier
+        MetadataSavingStrategy strategy
+        if (format.equalsIgnoreCase("PharmML") || format.equalsIgnoreCase("Unknown")) {
+            strategy = rdfMetadataWriter
+        } else if (format.equals("SBML")) {
+            strategy = sbmlMetadataWriter
         }
-        pharmMlMetadataWriter.generateTriple(subject, rdfTypeProperty, pharmmlModelOntologyTerm)
-
-        return pharmMlMetadataWriter
+        assert null != strategy
+        return strategy.marshallAnnotations(revisionTransportCommand, statementTransportCommands)
     }
-
 
     @Profiled(tag="metadataService.validateModelRevision")
     @Transactional

@@ -244,6 +244,11 @@ class PharmMlService implements FileFormatService {
         return []
     }
 
+    @Profiled(tag="pharmMlService.getModelOntologyTerm")
+    String getModelOntologyTerm(RevisionTransportCommand revisionTC) {
+        return "http://www.pharmml.org/ontology/PHARMMLO_0000001"
+    }
+
     /**
      * Detects whether the supplied files are in the format supported by this Service
      * @param files a list of files that should be checked
@@ -401,13 +406,6 @@ class PharmMlService implements FileFormatService {
     }
 
     boolean doBeforeSavingAnnotations(File annoFile, RevisionTransportCommand rev) {
-        String fmt = rev.format.name
-        if ( fmt != 'PharmML') {
-            if (IS_INFO_ENABLED) {
-                log.info("Avoiding to set metadataFile attribute for revision format $fmt")
-            }
-            return true
-        }
         List<File> revisionFiles = AbstractPharmMlHandler.fetchMainFilesFromRevision(rev)
         final File pharmML = AbstractPharmMlHandler.findPharmML(revisionFiles)
         def res = AbstractPharmMlHandler.getResourceFromPharmML(pharmML)
