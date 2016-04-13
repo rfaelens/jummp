@@ -96,8 +96,8 @@ class UnknownFormatService implements FileFormatService {
 
     @Profiled(tag="unknownFormatService.getModelOntologyTerm")
     String getModelOntologyTerm(RevisionTransportCommand revisionTC) {
-        // TODO: replace it by a correct url
-        return "http://www.pharmml.org/ontology/unknown"
+        // TODO: replace it by a correct url. Here we keep it similar to PharmML's one
+        return "http://www.pharmml.org/ontology/PHARMMLO_0000001"
     }
 
     /**
