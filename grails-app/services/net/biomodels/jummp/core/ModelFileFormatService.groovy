@@ -50,11 +50,17 @@ import net.biomodels.jummp.core.adapters.DomainAdapter
  * It does not provide own methods but delegates the calls to the concrete service for
  * the specific ModelFormat.
  *
+ * It is essential to note that this service plays the role of the factory which methods are used
+ * to return a concrete object of the specific ModelFormat. This is determined by using the first
+ * factory method, named 'serviceFormat'.
+ *
  * Additionally the service provides methods to allow a plugin to register a new ModelFormat
  * and to tell the application which service is responsible for a format.
  * @author Martin Gräßlin <m.graesslin@dkfz-heidelberg.de>
  * @author Raza Ali <raza.ali@ebi.ac.uk>
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @author Tung Nguyen <tung.nguyen@ebi.ac.uk>
+ * Last modified date: 14/04/2016
  */
 class ModelFileFormatService {
 
@@ -285,6 +291,21 @@ class ModelFileFormatService {
      */
     String getPluginForFormat(final ModelFormatTransportCommand format) {
         return getControllers().get(format.identifier)
+    }
+
+    /**
+     * Used to select the appropriate method to do postprocessing annotations before saving them into database.
+     * This selection is performed dynamically at run time thank to using Factory Method Pattern 'serviceForFormat'
+     */
+    @Profiled(tag = "modelFileFormatService.doBeforeSavingAnnotations")
+    boolean doBeforeSavingAnnotations(File annoFile, RevisionTransportCommand newRevision) {
+        FileFormatService service = serviceForFormat(newRevision.format)
+        assert service
+        if (service) {
+            return service.doBeforeSavingAnnotations(annoFile, newRevision)
+        } else {
+            return false
+        }
     }
 
     /**
