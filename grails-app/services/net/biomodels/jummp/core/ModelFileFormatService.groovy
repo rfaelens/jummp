@@ -106,16 +106,18 @@ class ModelFileFormatService {
             return ffs.areFilesThisFormat(fileList)
         }
         if (!match) {
-            return DomainAdapter.getAdapter(ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*")).toCommandObject()
+            return DomainAdapter.getAdapter(
+                ModelFormat.findByIdentifierAndFormatVersion("UNKNOWN", "*")).toCommandObject()
         } else {
-        	ModelFormatTransportCommand unknownVersionFormat = DomainAdapter.getAdapter(
-        	                                                       ModelFormat.findByIdentifierAndFormatVersion(match, "*"))
-        	                                                       .toCommandObject()
-        	RevisionTransportCommand rev = new RevisionTransportCommand(files: modelFiles, format: unknownVersionFormat)
+            ModelFormatTransportCommand unknownVersionFormat =
+                    DomainAdapter.getAdapter(ModelFormat.findByIdentifierAndFormatVersion(match, "*"))
+                                                        .toCommandObject()
+            RevisionTransportCommand rev = new RevisionTransportCommand(files: modelFiles,
+                                                                        format: unknownVersionFormat)
             String formatVersion = getFormatVersion(rev)
             ModelFormat knownVersionFormat = ModelFormat.findByIdentifierAndFormatVersion(match, formatVersion);
             if (knownVersionFormat) {
-            	return DomainAdapter.getAdapter(knownVersionFormat).toCommandObject()
+                return DomainAdapter.getAdapter(knownVersionFormat).toCommandObject()
             }
             return unknownVersionFormat
         }
