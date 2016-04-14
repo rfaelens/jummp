@@ -85,12 +85,6 @@ class UnknownFormatService implements FileFormatService {
     }
 
     boolean doBeforeSavingAnnotations(File annoFile, RevisionTransportCommand rev) {
-        // TODO: fill essential steps in
-        if (IS_INFO_ENABLED) {
-            log.info("""\
-                Saving metadata ${annoFile.dump()} (Unknown Format) of the model based on\
-                the revision ${rev.id}""")
-        }
         return true
     }
 
