@@ -287,16 +287,6 @@ class ModelFileFormatService {
         return getControllers().get(format.identifier)
     }
 
-    @Profiled(tag = "modelFileFormatService.doBeforeSavingAnnotations")
-    boolean doBeforeSavingAnnotations(File annoFile, RevisionTransportCommand newRevision) {
-        FileFormatService service = serviceForFormat(newRevision.format)
-        assert service
-        if (service) {
-            return service.doBeforeSavingAnnotations(annoFile, newRevision)
-        } else {
-            return false
-        }
-    }
     /**
      * Helper function to get the proper service for @p format.
      * @param format The ModelFormatTransportCommand/ModelFormat identifier for which the service should be returned.
