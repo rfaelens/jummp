@@ -1057,4 +1057,8 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
         return new SubmodelGenerator().generateSubModel(
                 model, subModelId, metaId, compartmentIds, speciesIds, reactionIds, ruleIds, eventIds)
     }
+
+    boolean doBeforeSavingAnnotations(File annoFile, RevisionTransportCommand rev) {
+        return true
+    }
 }
