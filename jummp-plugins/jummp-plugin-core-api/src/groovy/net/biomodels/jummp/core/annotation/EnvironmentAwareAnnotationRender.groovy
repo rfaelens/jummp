@@ -4,9 +4,9 @@ package net.biomodels.jummp.core.annotation
  * @author Tung
  */
 class EnvironmentAwareAnnotationRender {
-    final String DDMORE_TEMPLATE_NAME = "ddmore.anno"
-    final String BIOMODELS_TEMPLATE_NAME = "biomodels.anno"
-    final String DEFAULT_TEMPLATE_NAME = "default.anno"
+    final String DDMORE_TEMPLATE_NAME = "ddmore/statement"
+    final String BIOMODELS_TEMPLATE_NAME = "biomodels/statement"
+    final String DEFAULT_TEMPLATE_NAME = "default/statement"
 
     def grailsApplication
 
