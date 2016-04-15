@@ -38,8 +38,8 @@ import java.util.List;
 public interface MetadataSavingStrategy {
     List<RepositoryFileTransportCommand> marshallAnnotations(RevisionTransportCommand revisionTC,
                                                              List<StatementTransportCommand> statementTransportCommands,
-                                                             boolean isUpdate);
+                                                             boolean isUpdate)
     public MetadataWriterImpl createMetadataWriter(RevisionTransportCommand revisionTC,
-                                                   List<StatementTransportCommand> statements);
+                                                   List<StatementTransportCommand> statements)
 
 }
