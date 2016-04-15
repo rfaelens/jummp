@@ -17,13 +17,13 @@
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
 
-<table>
-    <g:each in="${annotations}" var="stmt">
-        <tr>
-            <td class='bold'>${stmt.key.accession}:</td>
-            <td>
-                <g:render template="/annotation/default/resourceReference" collection="${stmt.value}"/>
-            </td>
-        </tr>
-    </g:each>
-</table>
+<ddmore:filterHyperlink reference="${it}">
+    <g:if test="${xref.name}">
+        <g:if test="${xref.uri}">
+            <a href="${xref.uri}" title="Access more information about this ${xref.datatype} term">${xref.name}</a>;
+        </g:if>
+        <g:else>
+            <span>${xref.name};</span>
+        </g:else>
+    </g:if>
+</ddmore:filterHyperlink>
