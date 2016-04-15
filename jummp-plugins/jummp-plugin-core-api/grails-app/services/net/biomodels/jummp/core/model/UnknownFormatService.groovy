@@ -24,6 +24,7 @@
 
 package net.biomodels.jummp.core.model
 
+import net.biomodels.jummp.core.annotation.ElementAnnotationTransportCommand
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.perf4j.aop.Profiled
@@ -129,8 +130,14 @@ class UnknownFormatService implements FileFormatService {
     public final boolean areFilesThisFormat(final List<File> files) {
         if (files && !files.isEmpty()) {
             return true
-        } 
+        }
         return false
+    }
+
+
+    List<ElementAnnotationTransportCommand> fetchGenericAnnotations(RevisionTransportCommand rev) {
+        // There can only be model-level annotations for this model format.
+        rev.annotations
     }
 }
 
