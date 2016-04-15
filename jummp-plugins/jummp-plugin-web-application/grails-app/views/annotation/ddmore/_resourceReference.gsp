@@ -1,5 +1,5 @@
 <%--
- Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
+ Copyright (C) 2010-2016 EMBL-European Bioinformatics Institute (EMBL-EBI),
  Deutsches Krebsforschungszentrum (DKFZ)
 
  This file is part of Jummp.
@@ -17,11 +17,13 @@
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
 
-<g:if test="${it.name}">
-    <g:if test="${it.uri}">
-        <a href="${it.uri}" title="Access more information about this ${it.datatype} term">${it.name}</a>;
+<ddmore:filterHyperlink reference="${it}">
+    <g:if test="${xref.name}">
+        <g:if test="${xref.uri}">
+            <a href="${xref.uri}" title="Access more information about this ${xref.datatype} term">${xref.name}</a>;
+        </g:if>
+        <g:else>
+            <span>${xref.name};</span>
+        </g:else>
     </g:if>
-    <g:else>
-        <span>${it.name};</span>
-    </g:else>
-</g:if>
+</ddmore:filterHyperlink>

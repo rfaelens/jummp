@@ -1,5 +1,5 @@
 <%--
- Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
+ Copyright (C) 2010-2016 EMBL-European Bioinformatics Institute (EMBL-EBI),
  Deutsches Krebsforschungszentrum (DKFZ)
 
  This file is part of Jummp.
@@ -18,11 +18,11 @@
 --%>
 
 <table>
-    <g:each in="${annotations}" var="a">
+    <g:each in="${annotations}" var="stmt">
         <tr>
-            <td class='bold'>${a.statement.predicate.accession}:</td>
+            <td class='bold'>${stmt.key.accession}:</td>
             <td>
-                <g:render template="/annotation/resourceReference" collection="${a.statement.object}"/>
+                <g:render template="/annotation/ddmore/resourceReference" collection="${stmt.value}"/>
             </td>
         </tr>
     </g:each>
