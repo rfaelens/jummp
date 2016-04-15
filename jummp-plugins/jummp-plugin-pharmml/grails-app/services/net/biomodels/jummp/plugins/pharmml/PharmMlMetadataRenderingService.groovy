@@ -23,6 +23,7 @@ package net.biomodels.jummp.plugins.pharmml
 import grails.gsp.PageRenderer
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+import net.biomodels.jummp.core.annotation.EnvironmentAwareAnnotationRender
 import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
 import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.RevisionTransportCommand
@@ -47,6 +48,8 @@ class PharmMlMetadataRenderingService implements InitializingBean {
     /* dependency injection for the metadata delegate service */
     IMetadataService metadataDelegateService
     def grailsApplication
+    EnvironmentAwareAnnotationRender annotationRenderingTemplateProvider
+
     /* the namespaces for which only the resource reference name is displayed, not its URL */
     List<String> ignoredNamespaces
 
@@ -71,8 +74,9 @@ class PharmMlMetadataRenderingService implements InitializingBean {
                 anno.put(p, [o])
             }
         }
-        groovyPageRenderer.renderTo(template: "/templates/common/metadata/annotations",
-            model: [annotations: anno], out)
+        String templateName = annotationRenderingTemplateProvider.template
+        String tpl = "/templates/common/metadata/$templateName"
+        groovyPageRenderer.renderTo(template: tpl, model: [annotations: anno], out)
     }
 
     private boolean shouldCreateResourceHyperlink(String uri) {
