@@ -675,26 +675,6 @@ class SbmlService implements FileFormatService, ISbmlService, InitializingBean {
     }
 
     /**
-     * Retrieves model-level annotations for a given revision.
-     *
-     * @param revision the TransportCommand wrapper for the revision for which
-     *      to find annotations.
-     * @return a list of TransportCommand wrappers of Statements associated with
-     *      the model element.
-     */
-    @Profiled(tag = "SbmlService.fetchGenericAnnotations")
-    List<StatementTransportCommand> fetchGenericAnnotations(
-            RevisionTransportCommand revision) {
-        String subject = getMetaId(revision)
-        if (!subject) {
-            return []
-        }
-        List<StatementTransportCommand> statements = metadataDelegateService.
-                findAllStatementsForSubject(revision, subject)
-        return statements
-    }
-
-    /**
      * Returns the SBMLDocument for the @p revision from the cache.
      * If the cache does not contain the SBMLDocument, the model file is
      * retrieved, parsed and inserted into the Cache.
