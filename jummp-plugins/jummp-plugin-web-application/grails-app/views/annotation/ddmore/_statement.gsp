@@ -18,12 +18,12 @@
 --%>
 
 <table>
-<g:each in="${annotations}" var="a">
-    <tr>
-        <td class='bold'>${a.key}:</td>
-        <td>
-            <g:render template="/templates/common/metadata/resourceReference" collection="${a.value}"/>
-        </td>
-    </tr>
-</g:each>
+    <g:each in="${annotations}" var="a">
+        <tr>
+            <td class='bold'>${a.statement.predicate.accession}:</td>
+            <td>
+                <g:render template="/annotation/resourceReference" collection="${a.statement.object}"/>
+            </td>
+        </tr>
+    </g:each>
 </table>

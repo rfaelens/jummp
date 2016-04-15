@@ -16,16 +16,5 @@
  You should have received a copy of the GNU Affero General Public License along
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
+<abbr title="${qualifier.type} for more information please refer to ${qualifier.namespace}">${qualifier.accession}</abbr>
 
-<table>
-    <g:each in="${annotations}" var="a">
-        <tr>
-            <td class='bold'>${a.key}:</td>
-            <td style="color: green">
-                <g:render template="/templates/common/metadata/resourceReference" collection="${a.value}"/>
-            </td>
-
-
-        </tr>
-    </g:each>
-</table>
