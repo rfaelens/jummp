@@ -119,7 +119,7 @@ environments {
     }
 
 }
-jummp.metadata.strategy = "ddmore" // "biomodels" or "default"
+jummp.metadata.strategy = "ddmore" // "ddmore", "biomodels" or "default"
 jummp.app.name=appName
 //branding
 jummp.branding.deployment = "biomodels" //used to select messages,and style if jummp.branding.style is not specified
