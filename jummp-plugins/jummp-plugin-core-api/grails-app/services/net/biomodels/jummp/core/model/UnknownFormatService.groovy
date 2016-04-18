@@ -24,6 +24,7 @@
 
 package net.biomodels.jummp.core.model
 
+import net.biomodels.jummp.core.annotation.ElementAnnotationTransportCommand
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.perf4j.aop.Profiled
@@ -85,12 +86,6 @@ class UnknownFormatService implements FileFormatService {
     }
 
     boolean doBeforeSavingAnnotations(File annoFile, RevisionTransportCommand rev) {
-        // TODO: fill essential steps in
-        if (IS_INFO_ENABLED) {
-            log.info("""\
-                Saving metadata ${annoFile.dump()} (Unknown Format) of the model based on\
-                the revision ${rev.id}""")
-        }
         return true
     }
 
@@ -135,8 +130,14 @@ class UnknownFormatService implements FileFormatService {
     public final boolean areFilesThisFormat(final List<File> files) {
         if (files && !files.isEmpty()) {
             return true
-        } 
+        }
         return false
+    }
+
+
+    List<ElementAnnotationTransportCommand> fetchGenericAnnotations(RevisionTransportCommand rev) {
+        // There can only be model-level annotations for this model format.
+        rev.annotations
     }
 }
 

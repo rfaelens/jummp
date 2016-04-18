@@ -245,4 +245,8 @@ class MdlService implements FileFormatService {
         final String FORMAT = detectMimeType(FILE)
         return ("text/csv" == FORMAT || "text/plain" == FORMAT) && FILE.name.endsWith(".csv")
     }
+
+    boolean doBeforeSavingAnnotations(File annoFile, RevisionTransportCommand rev) {
+        return true
+    }
 }

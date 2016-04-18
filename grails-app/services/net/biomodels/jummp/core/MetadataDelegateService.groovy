@@ -23,6 +23,7 @@ package net.biomodels.jummp.core
 import eu.ddmore.metadata.service.ValidationException
 import net.biomodels.jummp.annotationstore.ResourceReference
 import net.biomodels.jummp.annotationstore.Statement
+import net.biomodels.jummp.core.annotation.QualifierTransportCommand
 import net.biomodels.jummp.core.annotation.ResourceReferenceCategory
 import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
 import net.biomodels.jummp.core.annotation.StatementCategory
@@ -140,5 +141,23 @@ class MetadataDelegateService implements IMetadataService {
     @Profiled(tag = "metadataDelegateService.getMetadataNamespaces")
     List<String> getMetadataNamespaces() {
         metadataService.getMetadataNamespaces()
+    }
+
+
+    Map<QualifierTransportCommand, List<ResourceReferenceTransportCommand>> fetchGenericAnnotations(
+        RevisionTransportCommand rev) {
+        // TODO THIS WILL HAVE TO CHANGE WHEN WE'RE ANNOTATING SUB-ELEMENTS OF THE MODEL
+        List<StatementTransportCommand> statements = rev.annotations*.statement
+        Map result = [:]
+        statements.each { StatementTransportCommand s ->
+            final QualifierTransportCommand qualifier = s.predicate
+            final ResourceReferenceTransportCommand xref = s.object
+            if (result.containsKey(qualifier)) {
+                result[qualifier] << xref
+            } else {
+                result[qualifier] = [xref]
+            }
+        }
+        result
     }
 }

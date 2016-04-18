@@ -538,26 +538,29 @@ class PharmMl0_6AwareRenderer extends AbstractPharmMlRenderer {
             result.append("<p class=\"bold\">Probability Assignment</p>")
             data.listOfProbabilityAssignment.each {
                 StringBuilder strBuider = new StringBuilder()
-                if (it.listOfProbability[0].symbId) {
-                    strBuider.append(oprand(it.listOfProbability[0].symbId))
-                    strBuider.append(op(" := "))
+                if (it.listOfProbability[0] != null) {
+                    if (it.listOfProbability[0].symbId) {
+                        strBuider.append(oprand(it.listOfProbability[0].symbId))
+                        strBuider.append(op(" := "))
+                    }
+                    strBuider.append(op("P"))
+                    convertEquation(it.listOfProbability[0].logicBinop, strBuider)
                 }
-                strBuider.append(op("P"))
-                convertEquation(it.listOfProbability[0].logicBinop, strBuider)
                 result.append(strBuider)
 
                 def temp = ""
-                if (it.assign) {
-                    temp = convertToMathML("",it.assign)
-                } else if (it.assign.equation) {
-                    temp.concat(convertToMathML(it.assign.equation).toString())
-                } else if (it.assign.symbRef) {
-                    temp = it.assign.symbRef.asString()
-                } else {
-                    println "Other case"
+                if (it.assign != null) {
+                    temp = convertToMathML("", it.assign)
+                    if (it.assign.equation) {
+                        temp.concat(convertToMathML(it.assign.equation).toString())
+                    } else if (it.assign.symbRef) {
+                        temp = it.assign.symbRef.asString()
+                    } else {
+                        log.error("Cannot display this equation.")
+                    }
+                    result.append(temp)
+                    result.append("<br/>")
                 }
-                result.append(temp)
-                result.append("<br/>")
             }
         }
         return result.toString()

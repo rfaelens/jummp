@@ -17,11 +17,23 @@
  with Jummp; if not, see <http://www.gnu.org/licenses/agpl-3.0.html>.
 --%>
 
-<g:if test="${it.name}">
-    <g:if test="${it.uri}">
-        <a href="${it.uri}" title="Access more information about this ${it.datatype} term">${it.name}</a>;
-    </g:if>
-    <g:else>
-        <span>${it.name};</span>
-    </g:else>
-</g:if>
+
+<table>
+    <g:each in="${annotations}" var="s">
+        <tr>
+            <td>
+                <g:render template="/annotation/biomodels/qualifier" model="['qualifier': s.key]"/>
+            </td>
+            <g:each in="${s.value}" var = "xref">
+                <td>
+                    <g:render template="/annotation/biomodels/resourceReference"
+                              model="['reference': xref, 'include': ['link']]"/>
+                </td>
+                <td>
+                    <g:render template="/annotation/biomodels/resourceReference"
+                              model="['reference': xref, 'include': ['collectionName']]"/>
+                </td>
+            </g:each>
+        </tr>
+    </g:each>
+</table>
