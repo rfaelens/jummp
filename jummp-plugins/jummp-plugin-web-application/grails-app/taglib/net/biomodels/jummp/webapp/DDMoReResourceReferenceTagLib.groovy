@@ -3,11 +3,8 @@ package net.biomodels.jummp.webapp
 import net.biomodels.jummp.core.annotation.QualifierTransportCommand
 import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
 
-import javax.annotation.Resource
-
 class DDMoReResourceReferenceTagLib {
     static namespace = "ddmore"
-    static defaultEncodeAs = [taglib: 'none']
 
     def metadataDelegateService
 
