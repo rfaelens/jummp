@@ -41,9 +41,9 @@ class TeamService {
     def create() {
 
     }
-    
+
     @Profiled(tag="teamService.getUsersFromTeam")
-    @PreAuthorize("isAuthenticated()") //used to be: authentication.name==#username
+    @PreAuthorize("isAuthenticated()")
     List<String> getUsersFromTeam(Long teamID) {
     	Team team = Team.get(teamID)
     	def usersInTeam = UserTeam.findAllByTeam(team)
