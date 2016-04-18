@@ -21,7 +21,6 @@
 package net.biomodels.jummp.annotation
 
 import eu.ddmore.metadata.service.MetadataWriterImpl
-import grails.transaction.NotTransactional
 import net.biomodels.jummp.core.MetadataSavingStrategy
 import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
 import net.biomodels.jummp.core.annotation.StatementTransportCommand
@@ -80,7 +79,6 @@ class RDFWriter implements MetadataSavingStrategy {
         }
     }
 
-    @NotTransactional
     public MetadataWriterImpl createMetadataWriter(RevisionTransportCommand revisionTC, List<StatementTransportCommand> statements){
         def subject = "${grailsApplication.config.grails.serverURL}/model/${revisionTC.model.submissionId}"
         def rdfTypeProperty = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
