@@ -53,14 +53,29 @@ class TeamService {
     			"userRealName": it.user.person.userRealName
     	]};
     }
-    
+
     @Profiled(tag="teamService.getTeamsForUser")
-    @PreAuthorize("isAuthenticated()") //used to be: authentication.name==#username
+    @PreAuthorize("isAuthenticated()")
     List<Team> getTeamsForUser(User user) {
     	def teamsIveCreated = Team.findAllByOwner(user)
 		def teamsImAMemberOf = UserTeam.findAllByUser(user).collect { it.team }
         def teamsForThisUser = teamsIveCreated.plus(teamsImAMemberOf).unique()
 		return teamsForThisUser
     }
-  
+
+    @Profiled(tag="teamService.delete")
+    @PreAuthorize("isAuthenticated()")
+    boolean deleteTeam(Long id) {
+        Team t = Team.get(id)
+        UserTeam.removeAll(t)
+        List<UserTeam> userTeamList = UserTeam.findAllByTeam(t);
+        if (userTeamList.size() == 0) {
+            t.delete()
+            t = Team.get(id)
+            return t == null
+        } else {
+            return false
+        }
+    }
+
 }

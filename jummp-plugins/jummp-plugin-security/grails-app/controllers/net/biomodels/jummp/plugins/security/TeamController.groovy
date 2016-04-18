@@ -44,7 +44,7 @@ class TeamController {
      * Renders the form to create new teams.
      */
     def create() {
-        render view: "create"
+        render view: "create", model: [teamOwner: springSecurityService.getCurrentUser()]
     }
 
     def save() {
@@ -112,7 +112,26 @@ class TeamController {
     		}
     	}
     }
-    
+
+    def delete(Long id) {
+        if (id <= 0 || id == null) {
+            showStandardErrorMessage()
+        } else {
+            try {
+                log.info("Team existing.")
+                boolean deleted = teamService.deleteTeam(id)
+                if (deleted) {
+                    flash.message = "The team has been deleted successfully."
+                } else {
+                    flash.message = "There is an error to delete the team."
+                }
+            } catch (Exception e) {
+                flash.message = "Cannot delete the team ${id}"
+            }
+            redirect(action: "index")
+        }
+    }
+
     def update(Long id) {
     	if (!id) {
     		showStandardErrorMessage()

@@ -44,37 +44,32 @@
 
                 $("button").click(function (e) {
                     e.preventDefault();
-                    if (e.handled !== true) {
-                        var index = $(this).attr("value");
-                        console.log('ID: ' + $(this).attr("value"));
-                        $('#dialog-confirm').dialog({
-                            buttons: [
-                                {
-                                    id: "Yes",
-                                    text: "Yes",
-                                    click: function () {
-                                        window.Jummp = window.Jummp || {};
-                                        window.Jummp.clicked = $(this);
-                                        $("button").attr("rel", "delete");
-                                        $("button").click();
-                                        console.log('ID here:' + index);
-                                        $.jummp.openPage('${g.createLink(controller: 'team', action: 'delete', id: 'index')}');
-                                        $(this).dialog('close');
-                                    }
-                                },
-                                {
-                                    id: "No",
-                                    text: "No",
-                                    click: function () {
-                                        console.log("Close!");
-                                        $(this).dialog('close');
-                                    }
+                    var thisValue = $(this).attr("value");
+                    $('#dialog-confirm').dialog({
+                        buttons: [
+                            {
+                                id: "Yes",
+                                text: "Yes",
+                                click: function () {
+                                    window.Jummp = window.Jummp || {};
+                                    window.Jummp.clicked = $(this);
+                                    var location = '${g.createLink(controller: 'team', action: 'delete')}';
+                                    location = location.concat("/" + thisValue);
+                                    $.jummp.openPage(location);
+                                    $(this).dialog('close');
                                 }
-                            ]
-                        });
-                        $('#dialog-confirm').dialog('open');
-                        e.handled = false;
-                    }
+                            },
+                            {
+                                id: "No",
+                                text: "No",
+                                click: function () {
+                                    $(this).dialog('close');
+                                }
+                            }
+
+                        ]
+                    });
+                    $('#dialog-confirm').dialog('open');
                     return false;
                 });
             });
@@ -99,8 +94,8 @@
                             <td class="spaced">${t.description}</td>
                             <td class="spaced">${t.owner.person.userRealName}</td>
                             %{--<td class="spaced">&nbsp;</td>--}%
-                            <td class="spaced"><button id="btnDelete${t.id.toString()}" value="${t.id}">
-                                Delete</button></td>
+                            <td class="spaced">
+                                <button id="btnDelete${t.id.toString()}" value="${t.id}">Delete</button></td>
                         </tr>
                     </g:each>
                 </tbody>
