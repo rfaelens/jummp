@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
+ * Copyright (C) 2010-2016 EMBL-European Bioinformatics Institute (EMBL-EBI),
  * Deutsches Krebsforschungszentrum (DKFZ)
  *
  * This file is part of Jummp.
@@ -27,6 +27,7 @@ import net.biomodels.jummp.core.adapters.DomainAdapter
  * @short Controller class for interacting with user teams.
  *
  * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ * @author Tung Nguyen <tung.nguyen@ebi.ac.uk>
  */
 @Secured(["isAuthenticated()"])
 class TeamController {
@@ -44,7 +45,7 @@ class TeamController {
      * Renders the form to create new teams.
      */
     def create() {
-        render view: "create"
+        render view: "create", model: [teamOwner: springSecurityService.getCurrentUser()]
     }
 
     def save() {
@@ -112,7 +113,26 @@ class TeamController {
     		}
     	}
     }
-    
+
+    def delete(Long id) {
+        if (id <= 0 || id == null) {
+            showStandardErrorMessage()
+        } else {
+            try {
+                log.info("Team existing.")
+                boolean deleted = teamService.deleteTeam(id)
+                if (deleted) {
+                    flash.message = "The team has been deleted successfully."
+                } else {
+                    flash.message = "There is an error to delete the team."
+                }
+            } catch (Exception e) {
+                flash.message = "Cannot delete the team ${id}"
+            }
+            redirect(action: "index")
+        }
+    }
+
     def update(Long id) {
     	if (!id) {
     		showStandardErrorMessage()
