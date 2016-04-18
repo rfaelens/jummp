@@ -22,6 +22,8 @@
 <html>
     <head>
         <meta name="layout" content="main"/>
+        <link rel="stylesheet" href="${resource(contextPath: "${grailsApplication.config.grails.serverURL}",
+            dir: '/css/jqueryui/smoothness', file: 'jquery-ui-1.10.3.custom.css')}" />
     </head>
     <body>
         <g:if test="${flash.message}">
@@ -29,7 +31,58 @@
         </g:if>
         <p>If you find yourself repeatedly sharing your models with the same people,
         you should consider grouping them into a team. </p>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("#dialog-confirm").dialog({
+                    modal: true,
+                    resizable: false,
+                    autoOpen: false,
+                    title: "Confirmation",
+                    width: 424,
+                    height: 200
+                });
+
+                $("button").click(function (e) {
+                    e.preventDefault();
+                    if (e.handled !== true) {
+                        var index = $(this).attr("value");
+                        console.log('ID: ' + $(this).attr("value"));
+                        $('#dialog-confirm').dialog({
+                            buttons: [
+                                {
+                                    id: "Yes",
+                                    text: "Yes",
+                                    click: function () {
+                                        window.Jummp = window.Jummp || {};
+                                        window.Jummp.clicked = $(this);
+                                        $("button").attr("rel", "delete");
+                                        $("button").click();
+                                        console.log('ID here:' + index);
+                                        $.jummp.openPage('${g.createLink(controller: 'team', action: 'delete', id: 'index')}');
+                                        $(this).dialog('close');
+                                    }
+                                },
+                                {
+                                    id: "No",
+                                    text: "No",
+                                    click: function () {
+                                        console.log("Close!");
+                                        $(this).dialog('close');
+                                    }
+                                }
+                            ]
+                        });
+                        $('#dialog-confirm').dialog('open');
+                        e.handled = false;
+                    }
+                    return false;
+                });
+            });
+        </script>
         <g:if test="${teams}">
+            <div id="dialog-confirm" title="Confirm Delete" style="display:none;">
+                <p>Are you sure you want to delete this team?</p>
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -45,8 +98,9 @@
                             <td class="spaced"><g:link action="show" id="${t.id}">${t.name}</g:link></td>
                             <td class="spaced">${t.description}</td>
                             <td class="spaced">${t.owner.person.userRealName}</td>
-                            %{--<td class="spaced"><g:link action="delete" id="${t.id}">Delete</g:link></td>--}%
-                            <td class="spaced">&nbsp;</td>
+                            %{--<td class="spaced">&nbsp;</td>--}%
+                            <td class="spaced"><button id="btnDelete${t.id.toString()}" value="${t.id}">
+                                Delete</button></td>
                         </tr>
                     </g:each>
                 </tbody>
