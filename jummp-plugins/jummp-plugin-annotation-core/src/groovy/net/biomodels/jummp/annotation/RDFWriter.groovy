@@ -22,7 +22,6 @@ package net.biomodels.jummp.annotation
 
 import eu.ddmore.metadata.service.MetadataWriterImpl
 import grails.transaction.NotTransactional
-import grails.util.Holders
 import net.biomodels.jummp.core.MetadataSavingStrategy
 import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
 import net.biomodels.jummp.core.annotation.StatementTransportCommand
@@ -45,7 +44,7 @@ class RDFWriter implements MetadataSavingStrategy {
     /**
      * Dependency injection for Model Format Service.
      */
-    def modelFileFormatService = Holders.grailsApplication.mainContext.getBean('modelFileFormatService')
+    def modelFileFormatService
 
     @Override
     List<RepositoryFileTransportCommand> marshallAnnotations(RevisionTransportCommand revisionTC,
@@ -83,7 +82,7 @@ class RDFWriter implements MetadataSavingStrategy {
 
     @NotTransactional
     public MetadataWriterImpl createMetadataWriter(RevisionTransportCommand revisionTC, List<StatementTransportCommand> statements){
-        def subject = "${Holders.grailsApplication.config.grails.serverURL}/model/${revisionTC.model.submissionId}"
+        def subject = "${grailsApplication.config.grails.serverURL}/model/${revisionTC.model.submissionId}"
         def rdfTypeProperty = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
         def modelOntologyTerm = "http://www.pharmml.org/ontology/PHARMMLO_0000001"
 

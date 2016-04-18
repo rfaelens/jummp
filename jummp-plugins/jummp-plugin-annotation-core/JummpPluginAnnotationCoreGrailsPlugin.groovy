@@ -75,7 +75,10 @@ Brief summary/description of the plugin.
 
     def doWithSpring = {
         metadataInputSource(DefaultMetadataInputSource)
-        rdfMetadataWriter(RDFWriter)
+        rdfMetadataWriter(RDFWriter) {
+            grailsApplication = ref("grailsApplication")
+            modelFileFormatService = ref("modelFileFormatService")
+        }
         sbmlMetadataWriter(SBMLWriter)
     }
 
