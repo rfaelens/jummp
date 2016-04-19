@@ -1,10 +1,10 @@
 package net.biomodels.jummp.webapp
 
+import net.biomodels.jummp.core.annotation.QualifierTransportCommand
 import net.biomodels.jummp.core.annotation.ResourceReferenceTransportCommand
 
 class DDMoReResourceReferenceTagLib {
     static namespace = "ddmore"
-    static defaultEncodeAs = [taglib: 'none']
 
     def metadataDelegateService
 
@@ -30,5 +30,23 @@ class DDMoReResourceReferenceTagLib {
             xref.uri = null
         }
         out << body(xref: xref)
+    }
+
+    def coalesceQualifiers = { attrs, body ->
+        def annotations = attrs.annotations
+        if (!annotations) {
+            out << body("mergedAnnotations": [:])
+        }
+        TreeMap<String, List<ResourceReferenceTransportCommand>> result = new TreeMap<>()
+        annotations.each { QualifierTransportCommand q,
+                           List<ResourceReferenceTransportCommand> xrefs ->
+            final String accession = q.accession
+            if (result.containsKey(accession)) {
+                result.get(accession).addAll(xrefs)
+            } else {
+                result.put(accession, xrefs)
+            }
+        }
+        out << body("mergedAnnotations": result)
     }
 }

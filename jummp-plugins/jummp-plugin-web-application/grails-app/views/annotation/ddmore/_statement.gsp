@@ -18,12 +18,14 @@
 --%>
 
 <table>
-    <g:each in="${annotations}" var="stmt">
-        <tr>
-            <td class='bold'>${stmt.key.accession}:</td>
-            <td>
-                <g:render template="/annotation/ddmore/resourceReference" collection="${stmt.value}"/>
-            </td>
-        </tr>
-    </g:each>
+    <ddmore:coalesceQualifiers annotations="${annotations}">
+        <g:each in="${mergedAnnotations}" var="stmt">
+            <tr>
+                <td class='bold'>${stmt.key}:</td>
+                <td>
+                    <g:render template="/annotation/ddmore/resourceReference" collection="${stmt.value}"/>
+                </td>
+            </tr>
+        </g:each>
+    </ddmore:coalesceQualifiers>
 </table>

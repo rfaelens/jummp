@@ -49,8 +49,8 @@
     		 			{{#if this.show}}
 							<tr class='collaborator'>
 								<td class="tableEL">{{this.name}}</td>
-								<td class="tableEL"><input id=checkRead-{{this.id}} data-field="read" data-person={{this.id}} class="updateCollab" type="radio" name="accesstype-{{this.id}}" {{setChecked "read"}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}}></input></td>
-								<td class="tableEL"><input id=checkWrite-{{this.id}} data-field="write" data-person={{this.id}} class="updateCollab" type="radio" name="accesstype-{{this.id}}" {{setChecked "write"}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}}></input></td>
+								<td class="tableEL"><input id=checkRead-{{this.id}} data-field="read" data-person={{this.id}} class="updateCollab" type="radio" name="accesstype-{{this.id}}" {{setChecked "read"}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}}></td>
+								<td class="tableEL"><input id=checkWrite-{{this.id}} data-field="write" data-person={{this.id}} class="updateCollab" type="radio" name="accesstype-{{this.id}}" {{setChecked "write"}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}}></td>
 								<td class="tableEL"><button id=removebutton-{{this.id}} data-name={{this.name}} data-person={{this.id}} {{#if this.disabledEdit}}disabled=true title="This user cannot be modified"{{/if}} class="remove">Remove</button></td>
 							</tr>
 						{{/if}}
@@ -74,17 +74,17 @@
     						<div id="formElements" class="formElements">
     							<div class="formElement">
     								<label for="nameSearch">User</label>
-    								<input placeholder="Name, username or email" id="nameSearch" name="name" type="text"/>
+    								<input placeholder="Name, username or email" id="nameSearch" name="name" type="text">
     							</div>
     							<div class="formElement">
 									<label for="radioReader">Read</label>
 									<input id="radioReader" type="radio" name="read"
-                                           checked></input>
+                                           checked>
 								</div>
 								<div class="formElement">
 									<label for="radioWriter">Write</label>
 									<input id="radioWriter" type="radio"
-                                           name="write"></input>
+                                           name="write">
 								</div>
                                 <div class="formElement">
                                     <button id="AddButton">Add</button>
@@ -103,12 +103,12 @@
 									</div>
 									<div class="formElement">
 										<label for="teamRadioReader">Read</label>
-										<input id="teamRadioReader" type="radio" name="teamRead" checked></input>
+										<input id="teamRadioReader" type="radio" name="teamRead" checked>
 									</div>
 									<div class="formElement">
 										<label for="teamRadioWriter">Write</label>
 										<input id="teamRadioWriter" type="radio"
-											   name="teamWrite"></input>
+											   name="teamWrite">
 									</div>
                                 <div class="formElement">
                                     <button id="TeamAddButton">Add</button>
