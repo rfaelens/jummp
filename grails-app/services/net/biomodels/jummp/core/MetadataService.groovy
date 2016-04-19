@@ -332,6 +332,9 @@ class MetadataService {
 
                     List<ValueContainer> values = p.values
                     values.each { ValueContainer v ->
+                        if (!v.uri) { // ignore xrefs without a URI
+                            return
+                        }
                         def xref = saveOrUpdateResourceReference(v)
                         if (!xref) {
                             result = false
