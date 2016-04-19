@@ -51,13 +51,14 @@ class TeamService {
     @Profiled(tag="teamService.getUsersFromTeam")
     @PreAuthorize("isAuthenticated()")
     List<String> getUsersFromTeam(Long teamID) {
-    	Team team = Team.get(teamID)
-    	def usersInTeam = UserTeam.findAllByTeam(team)
-    	return usersInTeam.collect {[
-    			"email": it.user.email,
-    			"username": it.user.username,
-    			"userRealName": it.user.person.userRealName
-    	]};
+        Team team = Team.get(teamID)
+        def usersInTeam = UserTeam.findAllByTeam(team)
+        return usersInTeam.collect {[
+            "id": it.user.id,
+            "email": it.user.email,
+            "username": it.user.username,
+            "userRealName": it.user.person.userRealName
+        ]};
     }
 
     @Profiled(tag="teamService.getTeamsForUser")
