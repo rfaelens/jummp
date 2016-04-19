@@ -21,7 +21,6 @@
 package net.biomodels.jummp.annotation
 
 import eu.ddmore.metadata.service.MetadataWriterImpl
-import grails.transaction.NotTransactional
 import net.biomodels.jummp.core.MetadataSavingStrategy
 import net.biomodels.jummp.core.annotation.StatementTransportCommand
 import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
@@ -39,7 +38,7 @@ class SBMLWriter implements  MetadataSavingStrategy {
         throws UnsupportedOperationException {
         return null
     }
-    @NotTransactional
+
     public MetadataWriterImpl createMetadataWriter(RevisionTransportCommand revisionTC,
                                                    List<StatementTransportCommand> statements){
         return new MetadataWriterImpl()
