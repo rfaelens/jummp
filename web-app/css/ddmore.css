@@ -21,6 +21,9 @@
 .underlined {
     text-decoration: underline;
 }
+.bold {
+    font-weight: bold;
+}
 /* end custom styles */
 #autocomplete {
     border: 1px solid;
