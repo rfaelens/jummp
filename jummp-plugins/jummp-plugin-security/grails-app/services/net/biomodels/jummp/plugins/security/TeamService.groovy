@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Copyright (C) 2010-2016 EMBL-European Bioinformatics Institute (EMBL-EBI),
 * Deutsches Krebsforschungszentrum (DKFZ)
 *
 * This file is part of Jummp.
@@ -34,6 +34,12 @@ import grails.transaction.Transactional
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.springframework.security.access.prepost.PreAuthorize
+
+/**
+ *
+ * @author Tung Nguyen <tung.nguyen@ebi.ac.uk>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ */
 
 @Transactional
 class TeamService {
