@@ -225,14 +225,22 @@ class MetadataService {
                     List<StatementTransportCommand> statementTransportCommands,
                     boolean isUpdate) {
         String format = revisionTransportCommand.format.identifier
+        MetadataSavingStrategy strategy = createMetadataSavingStrategyForFormat format
+        strategy.marshallAnnotations(revisionTransportCommand, statementTransportCommands, isUpdate)
+    }
+
+    private MetadataSavingStrategy createMetadataSavingStrategyForFormat(String format) {
         MetadataSavingStrategy strategy
-        if (format.equalsIgnoreCase("PharmML") || format.equalsIgnoreCase("Unknown")) {
-            strategy = rdfMetadataWriter
-        } else if (format.equals("SBML")) {
-            strategy = sbmlMetadataWriter
+        switch(format) {
+            case "SBML":
+                strategy = sbmlMetadataWriter
+                break
+            case "PharmML":
+            default:
+                strategy = rdfMetadataWriter
+                break
         }
-        assert null != strategy
-        return strategy.marshallAnnotations(revisionTransportCommand, statementTransportCommands, isUpdate)
+        strategy
     }
 
     @Profiled(tag="metadataService.validateModelRevision")
@@ -244,12 +252,7 @@ class MetadataService {
         }
 
         String format = revision.format.identifier
-        MetadataSavingStrategy strategy
-        if (format.equalsIgnoreCase("PharmML") || format.equalsIgnoreCase("Unknown")) {
-            strategy = rdfMetadataWriter
-        } else if (format.equals("SBML")) {
-            strategy = sbmlMetadataWriter
-        }
+        MetadataSavingStrategy strategy = createMetadataSavingStrategyForFormat format
 
         RevisionTransportCommand revisionTC = DomainAdapter.getAdapter(revision).toCommandObject()
         def metadataWriter = strategy.createMetadataWriter(revisionTC, statements)
