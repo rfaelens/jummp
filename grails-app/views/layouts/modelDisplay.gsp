@@ -394,37 +394,37 @@
                     icons: {
                         primary:"ui-icon-arrowthickstop-1-s"
                     }
-            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
+            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });
             $( "#peer-review" ).button({
                 text:false,
                 icons: {
                     primary:"ui-icon-signal-diag"
                 }
-            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
+            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });
             $( "#update" ).button({
                     text:false,
                     icons: {
                         primary:"ui-icon-refresh"
                     }
-            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
+            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });
             $( "#delete" ).button({
                     text:false,
                     icons: {
                         primary:"ui-icon-trash"
                     }
-            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
+            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });
             $( "#publish" ).button({
                     text:false,
                     icons: {
                         primary:"ui-icon-unlocked"
                     }
-            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
+            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });
             $( "#share" ).button({
                     text:false,
                     icons: {
                         primary:"ui-icon-person"
                     }
-            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });;
+            }).removeClass('ui-corner-all').css({ width: '45px', 'padding-top': '10px', 'padding-bottom': '10px' });
             $("#annotate").button({
                 text: false,
                 icons: {
