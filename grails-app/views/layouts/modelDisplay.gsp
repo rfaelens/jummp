@@ -625,8 +625,6 @@
         </table>
         <g:pageProperty name="page.genericAnnotations"/>
 
-
-
         <span class="bold">Validation Status:</span>
           ${validationLevel}
 
