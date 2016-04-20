@@ -70,9 +70,9 @@
                 <div id="noMains"></div>
                 <fieldset>
                     <legend>
-                        <g:message code="submission.upload.additionalFiles.legend"/>
+                        <jummp:renderAdditionalFilesLegend/>
                     </legend>
-                    <a href="#" id="addFile"><g:message code="submission.upload.additionalFiles.addButton" /></a>
+                    <a href="#" id="addFile"><jummp:renderAdditionalFilesAddButton/></a>
                     <table class='formtable' id="additionalFiles">
                         <tbody>
                             <jummp:displayExistingAdditionalFiles additionals = "${workingMemory['additional_files']}"/>
