@@ -31,6 +31,13 @@ import net.biomodels.jummp.core.model.RepositoryFileTransportCommand
 class JummpTagLib {
     static namespace = "jummp"
 
+    def grailsApplication
+
+    private boolean isDDMoReDeployment() {
+        String deploymentEnvironment = grailsApplication.config.jummp.branding.deployment
+        return deploymentEnvironment.equalsIgnoreCase("ddmore")
+    }
+
     def displayExistingMainFile = { attrs ->
         def result = new StringBuilder()
         if (!attrs.main) {
