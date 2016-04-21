@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Copyright (C) 2010-2016 EMBL-European Bioinformatics Institute (EMBL-EBI),
 * Deutsches Krebsforschungszentrum (DKFZ)
 *
 * This file is part of Jummp.
@@ -35,6 +35,12 @@ import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.perf4j.aop.Profiled
 import org.springframework.security.access.prepost.PreAuthorize
 
+/**
+ *
+ * @author Tung Nguyen <tung.nguyen@ebi.ac.uk>
+ * @author Mihai Glonț <mihai.glont@ebi.ac.uk>
+ */
+
 @Transactional
 class TeamService {
 
@@ -45,13 +51,14 @@ class TeamService {
     @Profiled(tag="teamService.getUsersFromTeam")
     @PreAuthorize("isAuthenticated()")
     List<String> getUsersFromTeam(Long teamID) {
-    	Team team = Team.get(teamID)
-    	def usersInTeam = UserTeam.findAllByTeam(team)
-    	return usersInTeam.collect {[
-    			"email": it.user.email,
-    			"username": it.user.username,
-    			"userRealName": it.user.person.userRealName
-    	]};
+        Team team = Team.get(teamID)
+        def usersInTeam = UserTeam.findAllByTeam(team)
+        return usersInTeam.collect {[
+            "id": it.user.id,
+            "email": it.user.email,
+            "username": it.user.username,
+            "userRealName": it.user.person.userRealName
+        ]};
     }
 
     @Profiled(tag="teamService.getTeamsForUser")
