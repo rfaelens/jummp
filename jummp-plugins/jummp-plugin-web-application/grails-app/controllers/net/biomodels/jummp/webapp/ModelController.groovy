@@ -333,6 +333,10 @@ class ModelController {
                 params: [flashMessage: "Model has been submitted to the curators for publication."])
         } catch (Exception e) {
             log.error(e.message, e)
+            String message = "Sorry, there was a problem. Please try again later."
+            redirect(action: "showWithMessage",
+                id: rev.identifier(),
+                params: [flashMessage: message])
         }
     }
 
