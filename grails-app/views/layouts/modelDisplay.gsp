@@ -380,8 +380,8 @@
             $('#confirm-model-notify').dialog({
                 resizable: false,
                 autoOpen: false,
-                height: 250,
-                width: 500,
+                height: 200,
+                width: 525,
                 modal: true,
                 buttons: {
                     Confirm: function() {
