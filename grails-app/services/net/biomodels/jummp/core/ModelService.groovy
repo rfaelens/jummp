@@ -1802,7 +1802,11 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     private boolean hasAdminPermission(def modelOrRevision, String username) {
         Acl acl = aclUtilService.readAcl(modelOrRevision)
         return null != acl.entries.find { ace ->
-            ace.sid.principal == username &&
+            if (!(ace instanceof PrincipalSid)) {
+                return
+            }
+            def aceAsPrincipalSid = ace.sid as PrincipalSid
+            aceAsPrincipalSid.principal == username &&
                     ace.permission == BasePermission.ADMINISTRATION
         }
     }
