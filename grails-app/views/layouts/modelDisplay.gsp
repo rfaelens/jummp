@@ -536,18 +536,10 @@
                 </g:if>
                 <g:if test="${canUpdate}">
                     <li>
-                    <g:if test="${haveAnnotations}">
                         <button class='toolbutton' id='annotate'
                                 onclick="return $.jummp.openPage('${g.createLink(controller: 'annotation',
                                 action: 'edit',
                                 id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Annotate</button>
-                    </g:if>
-                    <g:else>
-                        <button class='toolbutton' id='annotate'
-                                onclick="return $.jummp.openPage('${g.createLink(controller: 'annotation',
-                                action: 'show',
-                                id: (revision.model.publicationId) ?: (revision.model.submissionId))}')">Annotate</button>
-                    </g:else>
                     </li>
                 </g:if>
                 </ul>
