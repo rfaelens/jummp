@@ -335,7 +335,7 @@ class ModelController {
             log.error(e.message, e)
             String message = "Sorry, there was a problem. Please try again later."
             redirect(action: "showWithMessage",
-                id: rev.identifier(),
+                id: modelDelegateService.getRevisionFromParams(params.id).identifier(),
                 params: [flashMessage: message])
         }
     }
