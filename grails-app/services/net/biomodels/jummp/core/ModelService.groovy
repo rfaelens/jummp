@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2010-2014 EMBL-European Bioinformatics Institute (EMBL-EBI),
+* Copyright (C) 2010-2016 EMBL-European Bioinformatics Institute (EMBL-EBI),
 * Deutsches Krebsforschungszentrum (DKFZ)
 *
 * This file is part of Jummp.
@@ -1803,7 +1803,11 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     private boolean hasAdminPermission(def modelOrRevision, String username) {
         Acl acl = aclUtilService.readAcl(modelOrRevision)
         return null != acl.entries.find { ace ->
-            ace.sid.principal == username &&
+            if (!(ace instanceof PrincipalSid)) {
+                return
+            }
+            def aceAsPrincipalSid = ace.sid as PrincipalSid
+            aceAsPrincipalSid.principal == username &&
                     ace.permission == BasePermission.ADMINISTRATION
         }
     }
