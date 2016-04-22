@@ -30,6 +30,7 @@
 
 package net.biomodels.jummp.core
 
+import eu.ddmore.publish.service.PublishContext
 import eu.ddmore.publish.service.PublishException
 import eu.ddmore.publish.service.PublishInfo
 import grails.transaction.Transactional
@@ -2148,7 +2149,7 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
     @PreAuthorize("hasRole('ROLE_CURATOR') or hasRole('ROLE_ADMIN')") //used to be: (hasRole('ROLE_CURATOR') and hasPermission(#revision, admin))
     @PostLogging(LoggingEventType.UPDATE)
     @Profiled(tag="modelService.publishModelRevision")
-    public void publishModelRevision(Revision revision) {
+    public PublishContext publishModelRevision(Revision revision) {
         if (!SpringSecurityUtils.ifAnyGranted("ROLE_ADMIN")) {
             if (!aclUtilService.hasPermission(springSecurityService.authentication, revision,
                         BasePermission.ADMINISTRATION)) {
@@ -2173,16 +2174,30 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
         def qualifierXrefs = stmtsWithQualifier.collect { Statement s -> s.object }
         ResourceReference resourceReference = qualifierXrefs.first()
         boolean originalModel = true
-        if(resourceReference.name.toLowerCase().equals("n")){
+        if(resourceReference.name.toLowerCase().equals("no")){
             originalModel = false
         }
         PublishInfo pubInfo = new PublishInfo(originalModel)
         revision.repoFiles.each {
-            pubInfo.addToFileSet(it.path,it.description);
+            String description = null;
+            if (it.mainFile) {
+                description = it.revision.description
+            }else {
+                description = it.description
+            }
+            if (description == null || description.empty) {
+                throw new PublishException("Please provide a description for the file: " + it.path)
+            }
+
+            pubInfo.addToFileSet(it.path, description);
         }
 
-        def valid = publishValidator.validatePublish(pubInfo)
-        if(!valid) {
+        if(!pubInfo.validModelAccomodation()){
+            throw new PublishException("Model is not compliance with original publication. Please provide a Model_Accommodations.txt file.")
+        }
+
+        def scenario = publishValidator.validatePublish(pubInfo)
+        if(!scenario) {
             throw new PublishException("Submission did not match any of the scenarios. Please upload all required files")
         }
 
@@ -2197,6 +2212,8 @@ Your submission appears to contain invalid file ${fileName}. Please review it an
             throw new ModelException(
                     "Cannot publish model ${model.submissionId}:${b.errors.allErrors.inspect()}")
         }
+
+        return publishValidator.generatePublishContext(scenario)
     }
 
     /**

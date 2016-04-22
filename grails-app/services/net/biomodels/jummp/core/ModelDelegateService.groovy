@@ -34,7 +34,7 @@
 
 package net.biomodels.jummp.core
 
-import eu.ddmore.metadata.service.ValidationException
+import eu.ddmore.publish.service.PublishContext
 import net.biomodels.jummp.core.adapters.DomainAdapter
 import net.biomodels.jummp.core.adapters.ModelAdapter
 import net.biomodels.jummp.core.model.ModelAuditTransportCommand
@@ -314,8 +314,8 @@ class ModelDelegateService implements IModelService {
         return DomainAdapter.getAdapter(REV).toCommandObject()
     }
 
-    void publishModelRevision(RevisionTransportCommand revision) {
-        modelService.publishModelRevision(Revision.get(revision.id))
+    PublishContext publishModelRevision(RevisionTransportCommand revision) {
+        return modelService.publishModelRevision(Revision.get(revision.id))
     }
 
     void unpublishModelRevision(RevisionTransportCommand revision) {
