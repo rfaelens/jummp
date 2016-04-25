@@ -201,7 +201,7 @@
         $.ajax({
             dataType: "json",
             type: "GET",
-            url: $.jummp.createLink("annotation", "update"),
+            url: $.jummp.createLink("annotation", "save"),
             cache: false,
             data: {
                 annotations: JSON.stringify(Jummp.data.existingAnnotations),
@@ -221,7 +221,7 @@
                 $("#message").removeClass("success");
                 $("#message").removeClass("jummpWarning");
                 $("#message").addClass("failure");
-                $('#message').html("There was an internal error while saving the updated annotations provided.");
+                $('#message').html("There was an internal error while saving the annotations provided.");
                 $('#saveButton').removeAttr('disabled');
                 $('#validateButton').removeAttr('disabled');
                 $('#backButton').removeAttr('disabled');

@@ -200,7 +200,7 @@ class MetadataService {
     boolean saveMetadata(String model, List<StatementTransportCommand> statements) {
         Model theModel = Model.findBySubmissionIdOrPublicationId(model, model)
         Revision baseRevision = modelService.getLatestRevision(theModel, false)
-        boolean isUpdate = revision.annotations?.size() > 0
+        boolean isUpdate = baseRevision.annotations?.size() > 0
         RevisionTransportCommand newRevision = DomainAdapter.getAdapter(baseRevision).toCommandObject()
         newRevision.comment = "Updated model annotations."
 
