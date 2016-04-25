@@ -20,15 +20,17 @@
 
 package net.biomodels.jummp.search
 
+import grails.util.Environment
 import org.apache.camel.builder.RouteBuilder
-import org.springframework.beans.factory.InitializingBean
 
-class IndexingRoute extends RouteBuilder implements InitializingBean {
-    def grailsApplication
+class IndexingRoute extends RouteBuilder {
     final String DEBUG_CFG =
             "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6005"
+    final boolean inDevelopment = Environment.isDevelopmentMode()
     final String JAR_ARGS = '-jar ${body[jarPath]} ${body[jsonPath]}'
-    String CLI_ARGS
+    final String CLI_ARGS = inDevelopment ?
+            new StringBuilder(DEBUG_CFG).append(' ').append(JAR_ARGS).toString() :
+            JAR_ARGS
 
     @Override
     void configure() {
@@ -36,13 +38,5 @@ class IndexingRoute extends RouteBuilder implements InitializingBean {
         from("direct:exec")
         .setHeader("CamelExecCommandArgs", simple(CLI_ARGS))
         .to("exec:java")
-    }
-
-    void afterPropertiesSet() {
-        def config = grailsApplication.config
-        def shouldDebugIndexingProcess = config.jummp.search.index.attachDebugger
-        CLI_ARGS = shouldDebugIndexingProcess ?
-                new StringBuilder(DEBUG_CFG).append(' ').append(JAR_ARGS).toString() :
-                JAR_ARGS
     }
 }
