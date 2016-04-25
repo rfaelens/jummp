@@ -197,10 +197,10 @@ class MetadataService {
     @Profiled(tag = "metadataService.saveMetadata")
     // this cannot work with isolation level REPEATABLE_READS (MySQL default)
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    boolean saveMetadata(String model, List<StatementTransportCommand> statements,
-            boolean isUpdate = false) {
+    boolean saveMetadata(String model, List<StatementTransportCommand> statements) {
         Model theModel = Model.findBySubmissionIdOrPublicationId(model, model)
         Revision baseRevision = modelService.getLatestRevision(theModel, false)
+        boolean isUpdate = baseRevision.annotations?.size() > 0
         RevisionTransportCommand newRevision = DomainAdapter.getAdapter(baseRevision).toCommandObject()
         newRevision.comment = "Updated model annotations."
 

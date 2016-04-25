@@ -36,7 +36,7 @@ class AnnotationController {
     def modelDelegateService
     def metadataDelegateService
 
-    def show() {
+    def edit() {
         if (!params.id) {
             forward controller: "errors", action: "error404"
             return
@@ -54,44 +54,10 @@ class AnnotationController {
         def annotationSections = metadataInputSource.buildObjectModel()
         metadataDelegateService.persistAnnotationSchema annotationSections
         def objectModel = annotationSections as JSON
-        def existingAnnotations = [
-            "subjects": [
-                "theSubject": [:]
-            ]
-        ] as JSON
-        def theModel = [
-            objectModel: objectModel,
-            existingAnnotations: existingAnnotations,
-            revision: revision,
-            modelId: modelId
-        ]
-        render model: theModel, view: 'show'
-    }
-
-    def edit() {
-        if (!params.id) {
-            forward controller: "errors", action: "error404"
-            return
-        }
-
-        def revision = modelDelegateService.getRevisionFromParams(params.id, params.revisionId)
-        def modelId = (revision.model.publicationId) ?: (revision.model.submissionId)
-
-        boolean canUpdate = modelDelegateService.canAddRevision modelId
-        if (!canUpdate) {
-            forward controller: 'errors', action: 'error403'
-            return
-        }
-
-        def annotations = revision.annotations
-        if (annotations?.size() < 1) {
-            forward action: "show", params: [id: params.id, revisionId: params.revisionId]
-        }
-        def annotationSections = metadataInputSource.buildObjectModel()
-        def objectModel = annotationSections as JSON
 
         def annoMap = [:]
         def jsonAnnoList = []
+        def annotations = revision.annotations
         annotations.each { ElementAnnotationTransportCommand anno ->
             def stmt = anno.statement
             def pred = stmt.predicate
@@ -147,9 +113,9 @@ class AnnotationController {
 
         boolean result = metadataDelegateService.saveMetadata(modelId, stmts)
         if (result) {
-            render([status: '200', message: "Information successfully saved."] as JSON)
+            render([status: '200', message: "Annotations successfully saved."] as JSON)
         } else {
-            render([status: '500', message: "Unable to save the information you provided."] as JSON)
+            render([status: '500', message: "Unable to save the annotations you provided."] as JSON)
         }
     }
 
@@ -183,25 +149,6 @@ class AnnotationController {
         else
             render ([status: '500', message: "Unable to validate the annotations you provided."] as JSON)
 
-    }
-
-    def update() {
-        if (!params.revision) {
-            def response = [
-                status: '400',
-                message: 'The request to save model annotations lacked the revision parameter.'
-            ]
-            render(response as JSON)
-            return
-        }
-        List<StatementTransportCommand> stmts = createStatementList()
-        String modelId = params.revision
-        boolean result = metadataDelegateService.updateMetadata(modelId, stmts)
-        if (result) {
-            render([status: '200', message: "Annotations successfully updated."] as JSON)
-        } else {
-            render([status: '500', message: "Unable to save the annotations you provided."] as JSON)
-        }
     }
 
     private List<StatementTransportCommand> createStatementList(){

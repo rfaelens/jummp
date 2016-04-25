@@ -35,7 +35,7 @@
 package net.biomodels.jummp.webapp
 
 import com.wordnik.swagger.annotations.*
-import eu.ddmore.metadata.service.ValidationException
+import eu.ddmore.publish.service.PublishContext
 import eu.ddmore.publish.service.PublishException
 import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
@@ -228,7 +228,6 @@ class ModelController {
             boolean canUpdate = modelDelegateService.canAddRevision(PERENNIAL_ID)
             boolean canDelete = modelDelegateService.canDelete(PERENNIAL_ID)
             boolean canShare = modelDelegateService.canShare(PERENNIAL_ID)
-            boolean haveAnnotations = rev.annotations?.size() > 0
 
             String flashMessage = ""
             if (flash.now["giveMessage"]) {
@@ -245,7 +244,6 @@ class ModelController {
                         canUpdate: canUpdate,
                         canDelete: canDelete,
                         canShare: canShare,
-                        haveAnnotations: haveAnnotations,
                         showPublishOption: showPublishOption,
                         canSubmitForPublication: canSubmitForPublication,
                         validationLevel: rev.getValidationLevelMessage()
@@ -289,7 +287,7 @@ class ModelController {
         RevisionTransportCommand rev
         try {
             rev = modelDelegateService.getRevisionFromParams(params.id, params.revisionId)
-            modelDelegateService.publishModelRevision(rev)
+            PublishContext publishContext = modelDelegateService.publishModelRevision(rev)
             def currentUser = springSecurityService.currentUser
             if (currentUser) {
                 def notification = [
@@ -301,7 +299,7 @@ class ModelController {
 
             redirect(action: "showWithMessage",
                         id: rev.identifier(),
-                        params: [flashMessage: "Model has been published."])
+                        params: [flashMessage: "Model has been published." + publishContext.getMessage()])
         } catch(AccessDeniedException e) {
             log.error(e.message, e)
             forward(controller: "errors", action: "error403")
